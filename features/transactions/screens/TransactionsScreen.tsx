@@ -123,7 +123,9 @@ function addMonths(date: Date, offset: number) {
 }
 
 function monthOffsetFromAnchor(anchor: Date, target: Date) {
-  return (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth());
+  return (
+    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
+  );
 }
 
 function formatMonthLabel(date: Date) {
@@ -171,6 +173,7 @@ export function TransactionsScreen({
   );
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
+  const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const monthPagerAnchorDate = useMemo(() => startOfMonth(new Date()), []);
   const [activeMonthIndex, setActiveMonthIndex] = useState(MONTH_PAGER_CENTER_INDEX);
   const activeMonthIndexRef = useRef(MONTH_PAGER_CENTER_INDEX);
@@ -299,13 +302,6 @@ export function TransactionsScreen({
     [commitOffsetToIndex],
   );
 
-  const handleHorizontalScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      commitOffsetToIndex(event.nativeEvent.contentOffset.x);
-    },
-    [commitOffsetToIndex],
-  );
-
   const handleHorizontalScrollEndDrag = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const velocityX = event.nativeEvent.velocity?.x ?? 0;
@@ -338,16 +334,19 @@ export function TransactionsScreen({
     [pageWidth],
   );
 
-  const scrollToRelativeMonth = useCallback((direction: 1 | -1) => {
-    const nextIndex = clampMonthIndex(activeMonthIndexRef.current + direction);
-    if (nextIndex === activeMonthIndexRef.current) return;
-    activeMonthIndexRef.current = nextIndex;
-    setActiveMonthIndex(nextIndex);
-    horizontalListRef.current?.scrollToIndex({
-      index: nextIndex,
-      animated: true,
-    });
-  }, [clampMonthIndex]);
+  const scrollToRelativeMonth = useCallback(
+    (direction: 1 | -1) => {
+      const nextIndex = clampMonthIndex(activeMonthIndexRef.current + direction);
+      if (nextIndex === activeMonthIndexRef.current) return;
+      activeMonthIndexRef.current = nextIndex;
+      setActiveMonthIndex(nextIndex);
+      horizontalListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+    },
+    [clampMonthIndex],
+  );
 
   const monthSummary = useMemo(() => {
     return monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary();
@@ -605,7 +604,7 @@ export function TransactionsScreen({
       const pageMonthKey = monthKey(monthDate);
       const pageTransactions = monthBuckets.transactionsMap.get(pageMonthKey) ?? EMPTY_TRANSACTIONS;
       return (
-        <View style={{ width: pageWidth }} className="flex-1 bg-background">
+        <View style={monthPageStyle} className="flex-1 bg-background">
           <ActivityTransactionList
             transactions={pageTransactions}
             onTransactionPress={setSelectedTransaction}
@@ -620,7 +619,7 @@ export function TransactionsScreen({
         </View>
       );
     },
-    [getPageScrollToTopRef, monthBuckets.transactionsMap, monthPagerAnchorDate, pageWidth],
+    [getPageScrollToTopRef, monthBuckets.transactionsMap, monthPagerAnchorDate, monthPageStyle],
   );
 
   return (
@@ -660,15 +659,13 @@ export function TransactionsScreen({
           showsHorizontalScrollIndicator={false}
           overScrollMode="never"
           nestedScrollEnabled
-          removeClippedSubviews={false}
           initialNumToRender={5}
           maxToRenderPerBatch={5}
           windowSize={7}
           renderItem={renderMonthPage}
           initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
           getItemLayout={getHorizontalItemLayout}
-          onScroll={handleHorizontalScroll}
-          scrollEventThrottle={16}
+          removeClippedSubviews
           onScrollEndDrag={handleHorizontalScrollEndDrag}
           onMomentumScrollEnd={handleHorizontalMomentumEnd}
           onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}

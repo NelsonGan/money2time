@@ -130,7 +130,9 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
   if (Number.isNaN(date.getTime())) return { dateLabel: dayKey, weekdayLabel: '' };
 
   const dateLabel =
-    year !== currentYear ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date) : DAY_LABEL_FORMATTER.format(date);
+    year !== currentYear
+      ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date)
+      : DAY_LABEL_FORMATTER.format(date);
   const weekdayLabel = WEEKDAY_FORMATTER.format(date);
   const next = { dateLabel, weekdayLabel };
   dayHeaderLabelCache.set(cacheKey, next);
@@ -313,7 +315,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       getItemType={getItemType}
       drawDistance={420}
       maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_DISABLED}
-      removeClippedSubviews={false}
+      removeClippedSubviews
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
