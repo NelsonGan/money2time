@@ -65,8 +65,7 @@ const NumpadKey = React.memo(function NumpadKey({
       : variant === 'operator'
         ? 'bg-primary/20'
         : 'bg-foreground/12';
-  const rippleColor =
-    variant === 'confirm' ? 'rgba(255,255,255,0.28)' : 'rgba(34, 138, 111, 0.2)';
+  const rippleColor = variant === 'confirm' ? 'rgba(255,255,255,0.28)' : 'rgba(34, 138, 111, 0.2)';
 
   const handlePressIn = useCallback(() => {
     pressProgress.value = withTiming(1, {
@@ -143,7 +142,9 @@ export function NumpadPanel({
   compact,
 }: NumpadPanelProps) {
   const themeColors = useThemeColors();
-  const [expression, setExpression] = React.useState(() => sanitizeInitialAmount(initialExpression));
+  const [expression, setExpression] = React.useState(() =>
+    sanitizeInitialAmount(initialExpression),
+  );
   const prevInitialRef = useRef(initialExpression);
   const expressionRef = useRef(expression);
 

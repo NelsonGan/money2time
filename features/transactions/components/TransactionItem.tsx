@@ -55,7 +55,9 @@ function TransactionItemView({
   const hasNote = Boolean(transaction.note);
   let categoryInline: string | null = null;
   if (!isTransfer) {
-    const categoryChild: string = String(transaction.categoryName ?? I18n.t('common.uncategorized'));
+    const categoryChild: string = String(
+      transaction.categoryName ?? I18n.t('common.uncategorized'),
+    );
     const categoryParent: string | null = transaction.categoryParentName
       ? String(transaction.categoryParentName)
       : null;
@@ -64,7 +66,9 @@ function TransactionItemView({
       ? (categoryParent ?? categoryChild)
       : categoryChild;
     const categorySecondary: string | null = hasSubcategory ? categoryChild : null;
-    categoryInline = categorySecondary ? `${categoryPrimary} • ${categorySecondary}` : categoryPrimary;
+    categoryInline = categorySecondary
+      ? `${categoryPrimary} • ${categorySecondary}`
+      : categoryPrimary;
   }
   const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
   const transferLabel =

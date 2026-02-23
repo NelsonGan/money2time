@@ -78,7 +78,7 @@ export function DisplayModeToggle() {
     setIsSwitchingMode(true);
     void triggerHaptic('selection');
 
-    // Let the loading modal paint first, then run the heavy synchronous refresh work.
+    // Let the loading modal paint first, then run the heavy blocking refresh work.
     pendingFrameRef.current = requestAnimationFrame(() => {
       pendingFrameRef.current = null;
       pendingToggleTimerRef.current = setTimeout(() => {

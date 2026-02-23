@@ -622,6 +622,7 @@ export function InsightsScreen({
 
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
+  const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const chartWidth = Math.max(260, width - 76);
   const pieSize = Math.min(240, chartWidth);
   const insightTypeOptions = useMemo(
@@ -1537,7 +1538,7 @@ export function InsightsScreen({
       const pageData = buildPageData(pagePeriodState, selectedInsightType);
 
       return (
-        <View style={{ width: pageWidth }} className="flex-1 bg-background">
+        <View style={insightsPageStyle} className="flex-1 bg-background">
           <ScrollView
             ref={(ref) => {
               getPageScrollRef(item).current = ref;
@@ -1556,7 +1557,7 @@ export function InsightsScreen({
       currentPeriodState,
       effectivePeriodPreset,
       getPageScrollRef,
-      pageWidth,
+      insightsPageStyle,
       selectedInsightType,
       shiftPeriodStateBySteps,
     ],
@@ -2575,7 +2576,7 @@ export function InsightsScreen({
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
             nestedScrollEnabled
-            removeClippedSubviews={false}
+            removeClippedSubviews
             initialNumToRender={5}
             maxToRenderPerBatch={5}
             windowSize={7}
