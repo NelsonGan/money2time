@@ -1,0 +1,148 @@
+import React from 'react';
+import { Pressable, View } from 'react-native';
+
+import { Text } from '~/components/ui/text';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
+
+function withColorAlpha(hex: string, alpha: number) {
+  const value = hex.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
+  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
+}
+
+export interface RankedImpactRow {
+  id: string;
+  rank: number;
+  title: string;
+  subtitle?: string;
+  primaryValue: string;
+  secondaryValue?: string;
+  sharePct: number;
+  emoji?: string;
+  accentColor?: string;
+  onPress?: () => void;
+}
+
+interface RankedImpactChartProps {
+  rows: RankedImpactRow[];
+  accentColor?: string;
+  shareLabel?: string;
+}
+
+export function RankedImpactChart({
+  rows,
+  accentColor,
+  shareLabel = 'Share',
+}: RankedImpactChartProps) {
+  const themeColors = useThemeColors();
+  const activeAccent = accentColor ?? themeColors.primary;
+
+  return (
+    <View className="gap-1.5 mt-0.5">
+      {rows.map((row) => {
+        const rowAccent = row.accentColor ?? activeAccent;
+        const share = Math.max(0, Math.min(100, row.sharePct));
+        const fillWidth = share <= 0 ? 0 : Math.max(2.4, share);
+        const barFill = withColorAlpha(rowAccent, 0.72);
+        const barGlow = withColorAlpha(rowAccent, 0.25);
+        const rowBackground = withColorAlpha(rowAccent, 0.06 + (share / 100) * 0.13);
+        const rowBorder = withColorAlpha(rowAccent, 0.15 + (share / 100) * 0.3);
+        const rankBackground = withColorAlpha(rowAccent, 0.16 + (share / 100) * 0.2);
+        const content = (
+          <>
+            <View className="flex-row items-start justify-between gap-2">
+              <View className="flex-row items-start gap-2 flex-1 min-w-0">
+                <View
+                  className="mt-0.5 h-7 w-7 rounded-full items-center justify-center border"
+                  style={{
+                    backgroundColor: rankBackground,
+                    borderColor: withColorAlpha(rowAccent, 0.35),
+                  }}
+                >
+                  <Text variant="label" style={{ color: rowAccent }}>
+                    {row.rank}
+                  </Text>
+                </View>
+                <View className="flex-1 min-w-0">
+                  <Text variant="caption" numberOfLines={1}>
+                    {row.emoji ? `${row.emoji} ` : ''}
+                    {row.title}
+                  </Text>
+                  {row.subtitle ? (
+                    <Text variant="label" tone="muted" numberOfLines={1}>
+                      {row.subtitle}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+              <View className="items-end pl-1">
+                <Text variant="caption" style={{ color: rowAccent }}>
+                  {row.primaryValue}
+                </Text>
+                {row.secondaryValue ? (
+                  <Text variant="label" tone="muted" className="mt-0.5">
+                    {row.secondaryValue}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+
+            <View className="mt-2">
+              <View className="h-2 rounded-full bg-secondary/70 overflow-hidden">
+                <View
+                  className="h-full rounded-full"
+                  style={{ width: `${fillWidth}%`, backgroundColor: barFill }}
+                >
+                  <View
+                    className="h-full rounded-full"
+                    style={{ width: '100%', backgroundColor: barGlow }}
+                  />
+                </View>
+              </View>
+              <View className="mt-1.5 flex-row items-center justify-between">
+                <Text variant="label" tone="muted">
+                  {shareLabel}
+                </Text>
+                <Text variant="label" style={{ color: rowAccent }}>
+                  {share.toFixed(1)}%
+                </Text>
+              </View>
+            </View>
+          </>
+        );
+
+        if (row.onPress) {
+          return (
+            <Pressable
+              key={row.id}
+              onPress={() => {
+                void triggerHaptic('selection');
+                row.onPress?.();
+              }}
+              className={cn('rounded-2xl border px-3 py-2.5 active:opacity-85')}
+              style={{ backgroundColor: rowBackground, borderColor: rowBorder }}
+            >
+              {content}
+            </Pressable>
+          );
+        }
+
+        return (
+          <View
+            key={row.id}
+            className="rounded-2xl border px-3 py-2.5"
+            style={{ backgroundColor: rowBackground, borderColor: rowBorder }}
+          >
+            {content}
+          </View>
+        );
+      })}
+    </View>
+  );
+}

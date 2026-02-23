@@ -1,0 +1,1 @@
+export { HeroAmountConverter } from './HeroAmountConverter';

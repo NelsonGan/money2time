@@ -1,0 +1,95 @@
+import React, { memo, useCallback } from 'react';
+import { View, Pressable } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { House, Wallet, BarChart2, Settings, Landmark } from 'lucide-react-native';
+
+import { Text } from '~/components/ui/text';
+import { cn } from '~/utils';
+import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { triggerHaptic } from '~/services/haptics';
+import { I18n } from '~/lib/i18n';
+
+export type TabName = 'transactions' | 'account' | 'home' | 'insights' | 'settings';
+
+interface BottomNavProps {
+  activeTab: TabName;
+  onTabChange: (tab: TabName) => void;
+}
+
+const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
+  { name: 'transactions', labelKey: 'nav.activity', icon: Wallet },
+  { name: 'account', labelKey: 'nav.account', icon: Landmark },
+  { name: 'home', labelKey: 'nav.home', icon: House },
+  { name: 'insights', labelKey: 'nav.insights', icon: BarChart2 },
+  { name: 'settings', labelKey: 'nav.settings', icon: Settings },
+];
+
+const NavItem = memo(function NavItem({
+  tab,
+  icon: Icon,
+  label,
+  isActive,
+  onPressTab,
+  tintActive,
+  tintInactive,
+}: {
+  tab: TabName;
+  icon: typeof House;
+  label: string;
+  isActive: boolean;
+  onPressTab: (tab: TabName) => void;
+  tintActive: string;
+  tintInactive: string;
+}) {
+  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
+  const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
+
+  return (
+    <Animated.View style={animatedStyle} className="flex-1">
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        className={cn('items-center gap-1 py-2 rounded-2xl mx-0.5', isActive && 'bg-primary/10')}
+      >
+        <Icon size={18} color={isActive ? tintActive : tintInactive} />
+        <Text variant="label" className={cn(isActive ? 'text-primary' : 'text-muted-foreground')}>
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+});
+
+export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const themeColors = useThemeColors();
+  const handleTabPress = useCallback(
+    (tab: TabName) => {
+      void triggerHaptic('medium');
+      onTabChange(tab);
+    },
+    [onTabChange],
+  );
+
+  return (
+    <View className="px-3 pb-5 pt-2 bg-transparent">
+      <View className="relative rounded-[28px] bg-card/95 border border-border/40 px-1 py-1.5 shadow-soft">
+        <View className="flex-row items-center">
+          {TABS.map((tab) => (
+            <NavItem
+              key={tab.name}
+              tab={tab.name}
+              icon={tab.icon}
+              label={I18n.t(tab.labelKey)}
+              isActive={activeTab === tab.name}
+              tintActive={themeColors.primary}
+              tintInactive={themeColors.textMuted}
+              onPressTab={handleTabPress}
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}

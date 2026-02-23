@@ -1,0 +1,212 @@
+import type {
+  AccountGroup,
+  Account,
+  Category,
+  MonthlyWageSettings,
+  RecurringTransactionRule,
+  ThemeMode,
+  Transaction,
+  UserSettings,
+} from '~/types';
+import type {
+  AccountGroupRow,
+  AccountRow,
+  CategoryRow,
+  MonthlyWageSettingsRow,
+  RecurringRuleRow,
+  SettingsRow,
+  TransactionRow,
+} from '~/lib/db/schema';
+
+function asAccountType(value: string): Account['type'] {
+  switch (value) {
+    case 'cash':
+    case 'bank':
+    case 'wallet':
+    case 'savings':
+    case 'credit':
+    case 'other':
+      return value;
+    default:
+      return 'other';
+  }
+}
+
+function asCategoryType(value: string): Category['type'] {
+  return value === 'income' ? 'income' : 'expense';
+}
+
+function asTransactionType(value: string): Transaction['type'] {
+  switch (value) {
+    case 'income':
+    case 'expense':
+    case 'transfer':
+      return value;
+    default:
+      return 'expense';
+  }
+}
+
+function asRecurrencePattern(value: string): Transaction['recurrencePattern'] {
+  switch (value) {
+    case 'daily':
+    case 'weekly':
+    case 'monthly':
+    case 'yearly':
+    case 'none':
+      return value;
+    default:
+      return 'none';
+  }
+}
+
+function asDisplayMode(value: string): UserSettings['displayMode'] {
+  return value === 'time' ? 'time' : 'money';
+}
+
+function asThemeMode(value: string | null | undefined): ThemeMode {
+  if (value === 'light' || value === 'dark') return value;
+  return 'system';
+}
+
+function asWageType(value: string): MonthlyWageSettings['wageType'] {
+  switch (value) {
+    case 'hourly':
+    case 'monthly':
+    case 'yearly':
+      return value;
+    default:
+      return 'monthly';
+  }
+}
+
+export function toAccount(row: AccountRow): Account {
+  return {
+    id: row.id,
+    name: row.name,
+    sortOrder: row.sortOrder ?? 0,
+    type: asAccountType(row.type),
+    accountGroup: row.accountGroup,
+    creditStatementDay: row.creditStatementDay,
+    creditDueDay: row.creditDueDay,
+    currency: row.currency,
+    icon: row.icon,
+    color: row.color,
+    startingBalance: row.startingBalance,
+    includeInTotals: row.includeInTotals,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toAccountGroup(row: AccountGroupRow): AccountGroup {
+  return {
+    id: row.id,
+    name: row.name,
+    sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    name: row.name,
+    sortOrder: row.sortOrder ?? 0,
+    type: asCategoryType(row.type),
+    parentId: row.parentId,
+    icon: row.icon,
+    color: row.color,
+    isDefault: row.isDefault,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toTransaction(row: TransactionRow): Transaction {
+  return {
+    id: row.id,
+    type: asTransactionType(row.type),
+    amount: row.amount,
+    currency: row.currency,
+    date: row.date,
+    accountId: row.accountId,
+    fromAccountId: row.fromAccountId,
+    toAccountId: row.toAccountId,
+    categoryId: row.categoryId,
+    note: row.note,
+    recurrencePattern: asRecurrencePattern(row.recurrencePattern),
+    recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
+    recurrenceEndDate: row.recurrenceEndDate,
+    recurrenceParentId: row.recurrenceParentId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type === 'income' ? 'income' : row.type === 'transfer' ? 'transfer' : 'expense',
+    amount: row.amount,
+    currency: row.currency,
+    accountId: row.accountId,
+    fromAccountId: row.fromAccountId,
+    toAccountId: row.toAccountId,
+    categoryId: row.categoryId,
+    note: row.note,
+    recurrencePattern:
+      row.recurrencePattern === 'daily'
+        ? 'daily'
+        : row.recurrencePattern === 'weekly'
+          ? 'weekly'
+          : row.recurrencePattern === 'yearly'
+            ? 'yearly'
+            : 'monthly',
+    recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
+    nextRunDate: row.nextRunDate,
+    endDate: row.endDate,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toSettings(row: SettingsRow): UserSettings {
+  return {
+    id: row.id,
+    locale: row.locale,
+    currencySymbol: row.currencySymbol,
+    hourRounding: row.hourRounding,
+    displayMode: asDisplayMode(row.displayMode),
+    themeMode: asThemeMode(row.themeMode),
+    onboardingCompleted: row.onboardingCompleted,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toMonthlyWageSettings(row: MonthlyWageSettingsRow): MonthlyWageSettings {
+  return {
+    id: row.id,
+    month: row.month,
+    wageType: asWageType(row.wageType),
+    wageAmount: row.wageAmount,
+    hoursWorkedPerWeek: row.hoursWorkedPerWeek,
+    workdaysPerWeek: row.workdaysPerWeek,
+    commuteMinutesPerWorkday: row.commuteMinutesPerWorkday,
+    baseHourlyRate: row.baseHourlyRate,
+    trueHourlyRate: row.trueHourlyRate,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
