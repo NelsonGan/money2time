@@ -98,7 +98,7 @@ export function OnboardingValuePropStep({
       </View>
 
       {/* Footer */}
-      <View className="pb-10 pt-4">
+      <View className="pb-12 pt-4">
         <Button
           onPress={() => {
             void triggerHaptic('medium');

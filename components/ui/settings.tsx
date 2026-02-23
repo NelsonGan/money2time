@@ -67,6 +67,7 @@ function HeaderIconButton({
 interface SettingsHeaderProps {
   title: string;
   subtitle?: string;
+  subtitleNode?: React.ReactNode;
   onBack?: () => void;
   onClose?: () => void;
   rightAccessory?: React.ReactNode;
@@ -76,6 +77,7 @@ interface SettingsHeaderProps {
 export function SettingsHeader({
   title,
   subtitle,
+  subtitleNode,
   onBack,
   onClose,
   rightAccessory,
@@ -112,7 +114,9 @@ export function SettingsHeader({
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
           <Text variant="heading">{title}</Text>
-          {subtitle ? (
+          {subtitleNode ? (
+            <View className="mt-1">{subtitleNode}</View>
+          ) : subtitle ? (
             <Text variant="friendly" tone="muted" className="mt-1">
               {subtitle}
             </Text>

@@ -8,14 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -48,7 +41,6 @@ import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { usePressScale } from '~/hooks/usePressScale';
-import { springPresets } from '~/constants/motion';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { TransactionType } from '~/types';
 import { I18n } from '~/lib/i18n';
@@ -322,11 +314,6 @@ export function TransactionEditorScreen({
     [blurNativeInputs, isNativeKeyboardField],
   );
 
-  const amountScale = useSharedValue(1);
-  const amountAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: amountScale.value }],
-  }));
-
   const mapActiveFieldForType = useCallback(
     (field: ActiveField, nextType: TransactionType): ActiveField => {
       if (!field) return null;
@@ -582,6 +569,10 @@ export function TransactionEditorScreen({
     [activateField],
   );
 
+  const handleAmountValueChange = useCallback((val: string) => {
+    setAmount(val);
+  }, []);
+
   const handleAmountConfirm = useCallback(
     (val: string) => {
       setAmount(val);
@@ -700,13 +691,7 @@ export function TransactionEditorScreen({
             currencySymbol={settings.currencySymbol}
             trueHourlyRate={currentMonthWage?.trueHourlyRate ?? 0}
             hourRounding={settings.hourRounding}
-            onValueChange={(val) => {
-              setAmount(val);
-              amountScale.value = withSequence(
-                withSpring(1.04, springPresets.pop),
-                withSpring(1.0, springPresets.settle),
-              );
-            }}
+            onValueChange={handleAmountValueChange}
             onConfirm={handleAmountConfirm}
             compact={windowHeight < 700}
           />
@@ -930,7 +915,7 @@ export function TransactionEditorScreen({
                       {I18n.t('transactions.editor.amount')}
                     </Text>
                   </View>
-                  <Animated.View style={amountAnimatedStyle}>
+                  <View>
                     <Text
                       variant="heading"
                       className={cn(
@@ -943,7 +928,7 @@ export function TransactionEditorScreen({
                     >
                       {amountDisplay}
                     </Text>
-                  </Animated.View>
+                  </View>
                 </View>
                 {nudgeMessage ? (
                   <Text

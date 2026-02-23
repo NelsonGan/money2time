@@ -23,12 +23,8 @@ export const DEFAULT_CURRENCY = 'USD';
 export const DEFAULT_CURRENCY_SYMBOL = '$';
 
 export const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string; icon: string }[] = [
-  { value: 'cash', label: 'Cash', icon: '💵' },
-  { value: 'bank', label: 'Bank', icon: '🏦' },
-  { value: 'wallet', label: 'Wallet', icon: '👛' },
-  { value: 'savings', label: 'Savings', icon: '🪙' },
+  { value: 'debit', label: 'Debit', icon: '🏦' },
   { value: 'credit', label: 'Credit', icon: '💳' },
-  { value: 'other', label: 'Other', icon: '📦' },
 ];
 
 export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
@@ -36,12 +32,12 @@ export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
   'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
 > = {
   name: 'Main Account',
-  type: 'cash',
+  type: 'debit',
   accountGroup: null,
   creditStatementDay: null,
   creditDueDay: null,
   currency: DEFAULT_CURRENCY,
-  icon: '💵',
+  icon: '🏦',
   color: '#22917A',
   startingBalance: 0,
   includeInTotals: true,

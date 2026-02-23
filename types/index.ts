@@ -2,7 +2,7 @@ export type DisplayMode = 'money' | 'time';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 
-export type AccountType = 'cash' | 'bank' | 'wallet' | 'savings' | 'credit' | 'other';
+export type AccountType = 'debit' | 'credit';
 export type TransactionType = 'expense' | 'income' | 'transfer';
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 export type CategoryType = 'expense' | 'income';

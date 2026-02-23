@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Animated as RNAnimated,
+  FlatList,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Pressable,
   ScrollView,
   useWindowDimensions,
@@ -9,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-chart-kit';
-import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Card, CardContent } from '~/components/ui/card';
@@ -89,7 +91,9 @@ const INSIGHTS_CHART_COLORS = [
   '#546E7A', // slate
 ];
 
-const INSIGHTS_PAGER_STYLE = { flex: 1 } as const;
+const INSIGHTS_PAGER_TOTAL_SLOTS = 4801;
+const INSIGHTS_PAGER_CENTER_INDEX = Math.floor(INSIGHTS_PAGER_TOTAL_SLOTS / 2);
+const INSIGHTS_LIST_STYLE = { flex: 1 } as const;
 const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: 18,
   paddingBottom: 110,
@@ -250,6 +254,7 @@ type AnalyticsPageData = InsightBasePageData & {
 };
 
 type InsightPageData = BreakdownPageData | CalendarPageData | TimeCostPageData | AnalyticsPageData;
+type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 
 type InsightsPreferencesSnapshot = {
   version: 1;
@@ -616,6 +621,7 @@ export function InsightsScreen({
   const persistedInsightsPreferencesRef = useRef<string | null>(null);
 
   const { width } = useWindowDimensions();
+  const pageWidth = Math.max(1, width);
   const chartWidth = Math.max(260, width - 76);
   const pieSize = Math.min(240, chartWidth);
   const insightTypeOptions = useMemo(
@@ -628,16 +634,21 @@ export function InsightsScreen({
       })),
     [],
   );
-  const pagerRef = useRef<PagerView>(null);
-  const isTransitioningRef = useRef(false);
-  const pagerPositionRef = useRef(1);
-  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const horizontalListRef = useRef<FlatList<number> | null>(null);
+  const [committedPageIndex, setCommittedPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
+  const committedPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
+  const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
+  const headerPreviewPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
   const pieTouchStartRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
-  const prevScrollRef = useRef<ScrollView>(null);
-  const currentScrollRef = useRef<ScrollView>(null);
-  const nextScrollRef = useRef<ScrollView>(null);
-  const pagerPageStyle = useMemo(() => ({ flex: 1, width: '100%' as const }), []);
+  const pageScrollRefs = useRef(new Map<number, { current: ScrollView | null }>());
+  const getPageScrollRef = useCallback((index: number) => {
+    const existing = pageScrollRefs.current.get(index);
+    if (existing) return existing;
+    const next = { current: null as ScrollView | null };
+    pageScrollRefs.current.set(index, next);
+    return next;
+  }, []);
 
   useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
@@ -655,14 +666,18 @@ export function InsightsScreen({
     setSelectedTransaction(null);
     setSelectedCalendarDayKey(null);
     setIsFilterModalOpen(false);
-    isTransitioningRef.current = false;
-    pagerPositionRef.current = 1;
-    prevScrollRef.current?.scrollTo({ y: 0, animated: false });
-    currentScrollRef.current?.scrollTo({ y: 0, animated: false });
-    nextScrollRef.current?.scrollTo({ y: 0, animated: false });
-    requestAnimationFrame(() => {
-      pagerRef.current?.setPageWithoutAnimation(1);
+    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setCommittedPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+    headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+    pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({
+        index: INSIGHTS_PAGER_CENTER_INDEX,
+        animated: false,
+      });
     });
+    return () => cancelAnimationFrame(frame);
   }, [resetToCurrentMonthToken]);
 
   useEffect(() => {
@@ -778,11 +793,7 @@ export function InsightsScreen({
     hasTimeCostExpenseCategoryExclusionFilter;
 
   const shiftPeriodState = useCallback(
-    (
-      state: { anchorDate: Date; customStart: string; customEnd: string },
-      direction: 1 | -1,
-      preset: PeriodPreset,
-    ) => {
+    (state: PeriodState, direction: 1 | -1, preset: PeriodPreset): PeriodState => {
       if (preset === 'custom') {
         const start = parseDateInput(state.customStart);
         const end = parseDateInput(state.customEnd);
@@ -806,21 +817,22 @@ export function InsightsScreen({
     },
     [],
   );
-
-  const prevState = useMemo(
-    () => shiftPeriodState({ anchorDate, customStart, customEnd }, -1, effectivePeriodPreset),
-    [anchorDate, customEnd, customStart, effectivePeriodPreset, shiftPeriodState],
-  );
-  const nextState = useMemo(
-    () => shiftPeriodState({ anchorDate, customStart, customEnd }, 1, effectivePeriodPreset),
-    [anchorDate, customEnd, customStart, effectivePeriodPreset, shiftPeriodState],
+  const shiftPeriodStateBySteps = useCallback(
+    (state: PeriodState, steps: number, preset: PeriodPreset): PeriodState => {
+      if (steps === 0) return state;
+      let next = state;
+      const direction: 1 | -1 = steps > 0 ? 1 : -1;
+      const stepsCount = Math.abs(steps);
+      for (let index = 0; index < stepsCount; index += 1) {
+        next = shiftPeriodState(next, direction, preset);
+      }
+      return next;
+    },
+    [shiftPeriodState],
   );
 
   const buildPageData = useCallback(
-    (
-      state: { anchorDate: Date; customStart: string; customEnd: string },
-      insightType: InsightType,
-    ): InsightPageData => {
+    (state: PeriodState, insightType: InsightType): InsightPageData => {
       const range = getPeriodRange(
         effectivePeriodPreset,
         state.anchorDate,
@@ -1308,25 +1320,34 @@ export function InsightsScreen({
       settings.hourRounding,
     ],
   );
-
+  const currentPeriodState = useMemo<PeriodState>(
+    () => ({ anchorDate, customStart, customEnd }),
+    [anchorDate, customEnd, customStart],
+  );
   const currentPage = useMemo(
-    () => buildPageData({ anchorDate, customStart, customEnd }, selectedInsightType),
-    [anchorDate, buildPageData, customEnd, customStart, selectedInsightType],
+    () => buildPageData(currentPeriodState, selectedInsightType),
+    [buildPageData, currentPeriodState, selectedInsightType],
   );
-  const prevPage = useMemo(
-    () => buildPageData(prevState, selectedInsightType),
-    [buildPageData, prevState, selectedInsightType],
+  const headerPreviewOffset = headerPreviewPageIndex - committedPageIndex;
+  const headerPreviewPeriodState = useMemo(
+    () => shiftPeriodStateBySteps(currentPeriodState, headerPreviewOffset, effectivePeriodPreset),
+    [currentPeriodState, effectivePeriodPreset, headerPreviewOffset, shiftPeriodStateBySteps],
   );
-  const nextPage = useMemo(
-    () => buildPageData(nextState, selectedInsightType),
-    [buildPageData, nextState, selectedInsightType],
+  const headerPreviewRange = useMemo(
+    () =>
+      getPeriodRange(
+        effectivePeriodPreset,
+        headerPreviewPeriodState.anchorDate,
+        headerPreviewPeriodState.customStart,
+        headerPreviewPeriodState.customEnd,
+      ),
+    [effectivePeriodPreset, headerPreviewPeriodState],
   );
-  const range = currentPage.range;
   const currentCalendarDefaultDayKey =
     currentPage.kind === 'calendar' ? currentPage.defaultSelectedDayKey : '';
   const activePeriodLabel = useMemo(
-    () => periodLabel(effectivePeriodPreset, range),
-    [effectivePeriodPreset, range],
+    () => periodLabel(effectivePeriodPreset, headerPreviewRange),
+    [effectivePeriodPreset, headerPreviewRange],
   );
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
@@ -1374,142 +1395,186 @@ export function InsightsScreen({
     [themeColors, isDark],
   );
 
+  const insightsPagerSlots = useMemo<number[]>(
+    () => Array.from({ length: INSIGHTS_PAGER_TOTAL_SLOTS }, (_, index) => index),
+    [],
+  );
+
+  const clampInsightsPageIndex = useCallback(
+    (index: number) => Math.max(0, Math.min(index, INSIGHTS_PAGER_TOTAL_SLOTS - 1)),
+    [],
+  );
+
   const resetAdjacentPagesToTop = useCallback(() => {
-    prevScrollRef.current?.scrollTo({ y: 0, animated: false });
-    nextScrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []);
+    getPageScrollRef(committedPageIndexRef.current - 1).current?.scrollTo({
+      y: 0,
+      animated: false,
+    });
+    getPageScrollRef(committedPageIndexRef.current + 1).current?.scrollTo({
+      y: 0,
+      animated: false,
+    });
+  }, [getPageScrollRef]);
 
-  const resetAllPagesToTop = useCallback(() => {
-    prevScrollRef.current?.scrollTo({ y: 0, animated: false });
-    currentScrollRef.current?.scrollTo({ y: 0, animated: false });
-    nextScrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({
+        index: committedPageIndexRef.current,
+        animated: false,
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pageWidth]);
 
-  const clearTransitionTimeout = useCallback(() => {
-    if (!transitionTimeoutRef.current) return;
-    clearTimeout(transitionTimeoutRef.current);
-    transitionTimeoutRef.current = null;
-  }, []);
-
-  const completeTransition = useCallback(() => {
-    clearTransitionTimeout();
-    isTransitioningRef.current = false;
-  }, [clearTransitionTimeout]);
-
-  const syncPeriodState = useCallback(
-    (nextState: { anchorDate: Date; customStart: string; customEnd: string }) => {
+  const commitInsightsPageByIndex = useCallback(
+    (nextIndex: number) => {
+      const clampedIndex = clampInsightsPageIndex(nextIndex);
+      const currentIndex = committedPageIndexRef.current;
+      const steps = clampedIndex - currentIndex;
+      if (steps === 0) {
+        headerPreviewPageIndexRef.current = currentIndex;
+        setHeaderPreviewPageIndex(currentIndex);
+        return;
+      }
+      const nextState = shiftPeriodStateBySteps(currentPeriodState, steps, effectivePeriodPreset);
+      committedPageIndexRef.current = clampedIndex;
+      setCommittedPageIndex(clampedIndex);
+      headerPreviewPageIndexRef.current = clampedIndex;
+      setHeaderPreviewPageIndex(clampedIndex);
       setAnchorDate(nextState.anchorDate);
       setCustomStart(nextState.customStart);
       setCustomEnd(nextState.customEnd);
     },
-    [],
+    [clampInsightsPageIndex, currentPeriodState, effectivePeriodPreset, shiftPeriodStateBySteps],
   );
-
-  const shiftWindow = useCallback(
-    (direction: 1 | -1) => {
-      const currentState = { anchorDate, customStart, customEnd };
-      const nextStateForDirection = shiftPeriodState(
-        currentState,
-        direction,
-        effectivePeriodPreset,
-      );
-      resetAllPagesToTop();
-      pagerPositionRef.current = 1;
-      pagerRef.current?.setPageWithoutAnimation(1);
-      syncPeriodState(nextStateForDirection);
-      completeTransition();
-    },
-    [
-      anchorDate,
-      completeTransition,
-      customEnd,
-      customStart,
-      effectivePeriodPreset,
-      resetAllPagesToTop,
-      syncPeriodState,
-      shiftPeriodState,
-    ],
-  );
-
-  const settlePagerWindow = useCallback(() => {
-    const page = pagerPositionRef.current;
-    if (page === 2) {
-      shiftWindow(1);
-      return;
-    }
-    if (page === 0) {
-      shiftWindow(-1);
-      return;
-    }
-    completeTransition();
-  }, [completeTransition, shiftWindow]);
 
   const onMonthStep = useCallback(
     (direction: 1 | -1) => {
-      if (isTransitioningRef.current) return;
-      if (direction === 1) {
-        nextScrollRef.current?.scrollTo({ y: 0, animated: false });
-      } else {
-        prevScrollRef.current?.scrollTo({ y: 0, animated: false });
-      }
-      const pager = pagerRef.current;
-      if (!pager) {
-        const currentState = { anchorDate, customStart, customEnd };
-        const nextStateForDirection = shiftPeriodState(
-          currentState,
-          direction,
-          effectivePeriodPreset,
-        );
-        syncPeriodState(nextStateForDirection);
+      resetAdjacentPagesToTop();
+      const list = horizontalListRef.current;
+      if (!list) {
+        commitInsightsPageByIndex(committedPageIndexRef.current + direction);
         return;
       }
-      isTransitioningRef.current = true;
-      clearTransitionTimeout();
-      transitionTimeoutRef.current = setTimeout(() => {
-        settlePagerWindow();
-      }, 900);
-      pager.setPage(direction === 1 ? 2 : 0);
+      const targetIndex = clampInsightsPageIndex(committedPageIndexRef.current + direction);
+      headerPreviewPageIndexRef.current = targetIndex;
+      setHeaderPreviewPageIndex(targetIndex);
+      list.scrollToIndex({
+        index: targetIndex,
+        animated: true,
+      });
+    },
+    [clampInsightsPageIndex, commitInsightsPageByIndex, resetAdjacentPagesToTop],
+  );
+
+  const finalizeHorizontalShift = useCallback(
+    (offsetX: number) => {
+      const rawIndex = Math.round(offsetX / pageWidth);
+      commitInsightsPageByIndex(rawIndex);
+    },
+    [commitInsightsPageByIndex, pageWidth],
+  );
+
+  const handleHorizontalScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const rawIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
+      const clampedIndex = clampInsightsPageIndex(rawIndex);
+      if (clampedIndex === headerPreviewPageIndexRef.current) return;
+      headerPreviewPageIndexRef.current = clampedIndex;
+      setHeaderPreviewPageIndex(clampedIndex);
+    },
+    [clampInsightsPageIndex, pageWidth],
+  );
+
+  const handleHorizontalScrollBeginDrag = useCallback(() => {
+    resetAdjacentPagesToTop();
+  }, [resetAdjacentPagesToTop]);
+
+  const handleHorizontalScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const velocityX = event.nativeEvent.velocity?.x ?? 0;
+      if (Math.abs(velocityX) > 0.05) return;
+      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+    },
+    [finalizeHorizontalShift],
+  );
+
+  const handleHorizontalMomentumEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+    },
+    [finalizeHorizontalShift],
+  );
+
+  const handleHorizontalScrollToIndexFailed = useCallback(
+    (info: { index: number }) => {
+      const clampedIndex = clampInsightsPageIndex(info.index);
+      horizontalListRef.current?.scrollToOffset({
+        offset: clampedIndex * pageWidth,
+        animated: false,
+      });
+    },
+    [clampInsightsPageIndex, pageWidth],
+  );
+
+  const getHorizontalItemLayout = useCallback(
+    (_: ArrayLike<number> | null | undefined, index: number) => ({
+      length: pageWidth,
+      offset: pageWidth * index,
+      index,
+    }),
+    [pageWidth],
+  );
+
+  const renderInsightsWindowPage = useCallback(
+    ({ item }: { item: number }) => {
+      const pageOffset = item - committedPageIndex;
+      const pagePeriodState = shiftPeriodStateBySteps(
+        currentPeriodState,
+        pageOffset,
+        effectivePeriodPreset,
+      );
+      const pageData = buildPageData(pagePeriodState, selectedInsightType);
+
+      return (
+        <View style={{ width: pageWidth }} className="flex-1 bg-background">
+          <ScrollView
+            ref={(ref) => {
+              getPageScrollRef(item).current = ref;
+            }}
+            className="flex-1"
+            contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
+          >
+            {renderInsightsPane(pageData)}
+          </ScrollView>
+        </View>
+      );
     },
     [
-      anchorDate,
-      clearTransitionTimeout,
-      customEnd,
-      customStart,
+      buildPageData,
+      committedPageIndex,
+      currentPeriodState,
       effectivePeriodPreset,
-      settlePagerWindow,
-      shiftPeriodState,
-      syncPeriodState,
+      getPageScrollRef,
+      pageWidth,
+      selectedInsightType,
+      shiftPeriodStateBySteps,
     ],
   );
 
-  const onPageSelected = useCallback(
-    (event: PagerViewOnPageSelectedEvent) => {
-      const page = event.nativeEvent.position;
-      pagerPositionRef.current = page;
-      if (page === 2) {
-        shiftWindow(1);
-        return;
-      }
-      if (page === 0) {
-        shiftWindow(-1);
-        return;
-      }
-      completeTransition();
-    },
-    [completeTransition, shiftWindow],
-  );
+  const handlePrevMonth = useCallback(() => onMonthStep(-1), [onMonthStep]);
+  const handleNextMonth = useCallback(() => onMonthStep(1), [onMonthStep]);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => pagerRef.current?.setPageWithoutAnimation(1));
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTransitionTimeout();
-    };
-  }, [clearTransitionTimeout]);
+    const currentIndex = committedPageIndexRef.current;
+    headerPreviewPageIndexRef.current = currentIndex;
+    setHeaderPreviewPageIndex(currentIndex);
+  }, [anchorDate, customEnd, customStart, periodPreset, selectedInsightType]);
 
   useEffect(() => {
-    if (hasInsightsFilters) return;
-    setIsFilterModalOpen(false);
+    if (!hasInsightsFilters) {
+      setIsFilterModalOpen(false);
+    }
   }, [hasInsightsFilters]);
 
   useEffect(() => {
@@ -2458,22 +2523,7 @@ export function InsightsScreen({
     },
     [setActiveBreakdownSlice],
   );
-  const handlePrevMonth = useCallback(() => onMonthStep(-1), [onMonthStep]);
-  const handleNextMonth = useCallback(() => onMonthStep(1), [onMonthStep]);
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
-  const handlePagerScrollStateChanged = useCallback(
-    (event: { nativeEvent: { pageScrollState: string } }) => {
-      if (event.nativeEvent.pageScrollState === 'dragging') {
-        completeTransition();
-        resetAdjacentPagesToTop();
-        return;
-      }
-      if (event.nativeEvent.pageScrollState === 'idle') {
-        settlePagerWindow();
-      }
-    },
-    [completeTransition, resetAdjacentPagesToTop, settlePagerWindow],
-  );
   const handleCloseDrilldown = useCallback(() => {
     void triggerHaptic('selection');
     setDrilldownState(null);
@@ -2511,47 +2561,34 @@ export function InsightsScreen({
             </Text>
           </View>
         ) : (
-          <PagerView
-            ref={pagerRef}
-            initialPage={1}
-            offscreenPageLimit={1}
-            style={INSIGHTS_PAGER_STYLE}
-            onPageSelected={onPageSelected}
-            onPageScrollStateChanged={handlePagerScrollStateChanged}
-          >
-            <View key="prev" collapsable={false} style={pagerPageStyle} className="bg-background">
-              <ScrollView
-                ref={prevScrollRef}
-                className="flex-1"
-                contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-              >
-                {renderInsightsPane(prevPage)}
-              </ScrollView>
-            </View>
-            <View
-              key="current"
-              collapsable={false}
-              style={pagerPageStyle}
-              className="bg-background"
-            >
-              <ScrollView
-                ref={currentScrollRef}
-                className="flex-1"
-                contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-              >
-                {renderInsightsPane(currentPage)}
-              </ScrollView>
-            </View>
-            <View key="next" collapsable={false} style={pagerPageStyle} className="bg-background">
-              <ScrollView
-                ref={nextScrollRef}
-                className="flex-1"
-                contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-              >
-                {renderInsightsPane(nextPage)}
-              </ScrollView>
-            </View>
-          </PagerView>
+          <FlatList
+            ref={horizontalListRef}
+            data={insightsPagerSlots}
+            keyExtractor={(item) => String(item)}
+            style={INSIGHTS_LIST_STYLE}
+            horizontal
+            pagingEnabled
+            disableIntervalMomentum
+            bounces={false}
+            directionalLockEnabled
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            overScrollMode="never"
+            nestedScrollEnabled
+            removeClippedSubviews={false}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={7}
+            renderItem={renderInsightsWindowPage}
+            initialScrollIndex={INSIGHTS_PAGER_CENTER_INDEX}
+            getItemLayout={getHorizontalItemLayout}
+            onScroll={handleHorizontalScroll}
+            scrollEventThrottle={16}
+            onScrollBeginDrag={handleHorizontalScrollBeginDrag}
+            onScrollEndDrag={handleHorizontalScrollEndDrag}
+            onMomentumScrollEnd={handleHorizontalMomentumEnd}
+            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+          />
         )}
       </View>
 

@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import {
+  FlatList,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import { Plus } from 'lucide-react-native';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -39,6 +46,9 @@ type SortByValue = (typeof SORT_OPTIONS)[number]['value'];
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 const FILTER_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
 const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
+const MONTH_PAGER_TOTAL_SLOTS = 4801;
+const MONTH_PAGER_CENTER_INDEX = Math.floor(MONTH_PAGER_TOTAL_SLOTS / 2);
+const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 
 interface MonthSummary {
   count: number;
@@ -112,6 +122,10 @@ function addMonths(date: Date, offset: number) {
   return new Date(date.getFullYear(), date.getMonth() + offset, 1);
 }
 
+function monthOffsetFromAnchor(anchor: Date, target: Date) {
+  return (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth());
+}
+
 function formatMonthLabel(date: Date) {
   return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 }
@@ -155,22 +169,28 @@ export function TransactionsScreen({
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
-  const [pageDates, setPageDates] = useState(() => {
-    const center = startOfMonth(new Date());
-    return { prev: addMonths(center, -1), current: center, next: addMonths(center, 1) };
-  });
-  const prevListScrollToTopRef = useRef<(() => void) | null>(null);
-  const currentListScrollToTopRef = useRef<(() => void) | null>(null);
-  const nextListScrollToTopRef = useRef<(() => void) | null>(null);
-  const isTransitioningRef = useRef(false);
-  const pagerRef = useRef<PagerView>(null);
-  const pagerPositionRef = useRef(1);
-  const activeMonthKey = monthKey(pageDates.current);
-  const activeMonthLabel = formatMonthLabel(pageDates.current);
-  const prevMonthDate = pageDates.prev;
-  const nextMonthDate = pageDates.next;
-  const prevMonthKey = monthKey(prevMonthDate);
-  const nextMonthKey = monthKey(nextMonthDate);
+  const { width } = useWindowDimensions();
+  const pageWidth = Math.max(1, width);
+  const monthPagerAnchorDate = useMemo(() => startOfMonth(new Date()), []);
+  const [activeMonthIndex, setActiveMonthIndex] = useState(MONTH_PAGER_CENTER_INDEX);
+  const activeMonthIndexRef = useRef(MONTH_PAGER_CENTER_INDEX);
+  const horizontalListRef = useRef<FlatList<number> | null>(null);
+  const pageScrollToTopRefs = useRef(
+    new Map<number, React.MutableRefObject<(() => void) | null>>(),
+  );
+  const getPageScrollToTopRef = useCallback((index: number) => {
+    const existing = pageScrollToTopRefs.current.get(index);
+    if (existing) return existing;
+    const next = { current: null as (() => void) | null };
+    pageScrollToTopRefs.current.set(index, next);
+    return next;
+  }, []);
+  const activeMonthDate = useMemo(
+    () => addMonths(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
+    [activeMonthIndex, monthPagerAnchorDate],
+  );
+  const activeMonthKey = monthKey(activeMonthDate);
+  const activeMonthLabel = formatMonthLabel(activeMonthDate);
   const monthBuckets = useMemo(() => {
     const transactionsMap = new Map<string, TransactionWithRelations[]>();
     const summaries = new Map<string, MonthSummary>();
@@ -197,101 +217,137 @@ export function TransactionsScreen({
     return { transactionsMap, summaries };
   }, [filteredTransactions, getDisplayValueForTransaction, settings.displayMode]);
 
-  const visibleTransactions = useMemo(
-    () => monthBuckets.transactionsMap.get(activeMonthKey) ?? [],
-    [activeMonthKey, monthBuckets.transactionsMap],
+  const monthPagerSlots = useMemo<number[]>(
+    () => Array.from({ length: MONTH_PAGER_TOTAL_SLOTS }, (_, index) => index),
+    [],
   );
-  const prevTransactions = useMemo(
-    () => monthBuckets.transactionsMap.get(prevMonthKey) ?? [],
-    [monthBuckets.transactionsMap, prevMonthKey],
+
+  const clampMonthIndex = useCallback(
+    (index: number) => Math.max(0, Math.min(index, MONTH_PAGER_TOTAL_SLOTS - 1)),
+    [],
   );
-  const nextTransactions = useMemo(
-    () => monthBuckets.transactionsMap.get(nextMonthKey) ?? [],
-    [monthBuckets.transactionsMap, nextMonthKey],
+
+  const updateActiveMonthIndex = useCallback(
+    (nextIndex: number) => {
+      const clampedIndex = clampMonthIndex(nextIndex);
+      if (clampedIndex === activeMonthIndexRef.current) return;
+      activeMonthIndexRef.current = clampedIndex;
+      setActiveMonthIndex(clampedIndex);
+    },
+    [clampMonthIndex],
   );
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => pagerRef.current?.setPageWithoutAnimation(1));
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({
+        index: activeMonthIndexRef.current,
+        animated: false,
+      });
+    });
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [pageWidth]);
 
   useEffect(() => {
-    pagerRef.current?.setPageWithoutAnimation(1);
-    currentListScrollToTopRef.current?.();
-  }, [scrollToTopToken]);
+    if (scrollToTopToken <= 0) return;
+    const currentIndex = activeMonthIndexRef.current;
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({ index: currentIndex, animated: false });
+      getPageScrollToTopRef(currentIndex).current?.();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [getPageScrollToTopRef, scrollToTopToken]);
 
   useEffect(() => {
     if (!showFilters) setActiveFilterPanel(null);
   }, [showFilters]);
 
-  const resetAdjacentPagesToTop = useCallback(() => {
-    prevListScrollToTopRef.current?.();
-    nextListScrollToTopRef.current?.();
-  }, []);
-
-  const resetAllPagesToTop = useCallback(() => {
-    prevListScrollToTopRef.current?.();
-    currentListScrollToTopRef.current?.();
-    nextListScrollToTopRef.current?.();
-  }, []);
-
   useEffect(() => {
     if (focusMonthToken <= 0) return;
     const target = focusMonthKey ? dateFromMonthKey(focusMonthKey) : startOfMonth(new Date());
     if (!target) return;
-    const centered = startOfMonth(target);
-    setPageDates({
-      prev: addMonths(centered, -1),
-      current: centered,
-      next: addMonths(centered, 1),
+    const targetDate = startOfMonth(target);
+    const targetIndex = clampMonthIndex(
+      MONTH_PAGER_CENTER_INDEX + monthOffsetFromAnchor(monthPagerAnchorDate, targetDate),
+    );
+    activeMonthIndexRef.current = targetIndex;
+    setActiveMonthIndex(targetIndex);
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({ index: targetIndex, animated: false });
+      getPageScrollToTopRef(targetIndex).current?.();
     });
-    pagerPositionRef.current = 1;
-    pagerRef.current?.setPageWithoutAnimation(1);
-    resetAllPagesToTop();
-  }, [focusMonthKey, focusMonthToken, resetAllPagesToTop]);
+    return () => cancelAnimationFrame(frame);
+  }, [
+    clampMonthIndex,
+    focusMonthKey,
+    focusMonthToken,
+    getPageScrollToTopRef,
+    monthPagerAnchorDate,
+  ]);
 
-  const shiftWindow = useCallback(
-    (direction: 1 | -1) => {
-      resetAllPagesToTop();
-      pagerPositionRef.current = 1;
-      pagerRef.current?.setPageWithoutAnimation(1);
-      setPageDates((prev) =>
-        direction === 1
-          ? { prev: prev.current, current: prev.next, next: addMonths(prev.next, 1) }
-          : { prev: addMonths(prev.prev, -1), current: prev.prev, next: prev.current },
-      );
-      isTransitioningRef.current = false;
+  const commitOffsetToIndex = useCallback(
+    (offsetX: number) => {
+      const rawIndex = Math.round(offsetX / pageWidth);
+      updateActiveMonthIndex(rawIndex);
     },
-    [resetAllPagesToTop],
+    [pageWidth, updateActiveMonthIndex],
   );
 
-  const animateToMonth = useCallback((direction: 1 | -1) => {
-    if (isTransitioningRef.current) return;
-    if (direction === 1) {
-      nextListScrollToTopRef.current?.();
-    } else {
-      prevListScrollToTopRef.current?.();
-    }
-    isTransitioningRef.current = true;
-    pagerRef.current?.setPage(direction === 1 ? 2 : 0);
-  }, []);
+  const handleHorizontalMomentumEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      commitOffsetToIndex(event.nativeEvent.contentOffset.x);
+    },
+    [commitOffsetToIndex],
+  );
 
-  const settlePagerWindow = useCallback(() => {
-    const page = pagerPositionRef.current;
-    if (page === 2) {
-      shiftWindow(1);
-      return;
-    }
-    if (page === 0) {
-      shiftWindow(-1);
-      return;
-    }
-    isTransitioningRef.current = false;
-  }, [shiftWindow]);
+  const handleHorizontalScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      commitOffsetToIndex(event.nativeEvent.contentOffset.x);
+    },
+    [commitOffsetToIndex],
+  );
 
-  const onPageSelected = useCallback((event: PagerViewOnPageSelectedEvent) => {
-    pagerPositionRef.current = event.nativeEvent.position;
-  }, []);
+  const handleHorizontalScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const velocityX = event.nativeEvent.velocity?.x ?? 0;
+      if (Math.abs(velocityX) <= 0.05) {
+        commitOffsetToIndex(event.nativeEvent.contentOffset.x);
+      }
+    },
+    [commitOffsetToIndex],
+  );
+
+  const handleHorizontalScrollToIndexFailed = useCallback(
+    (info: { index: number }) => {
+      const clampedIndex = clampMonthIndex(info.index);
+      activeMonthIndexRef.current = clampedIndex;
+      setActiveMonthIndex(clampedIndex);
+      horizontalListRef.current?.scrollToOffset({
+        offset: clampedIndex * pageWidth,
+        animated: false,
+      });
+    },
+    [clampMonthIndex, pageWidth],
+  );
+
+  const getHorizontalItemLayout = useCallback(
+    (_: ArrayLike<number> | null | undefined, index: number) => ({
+      length: pageWidth,
+      offset: pageWidth * index,
+      index,
+    }),
+    [pageWidth],
+  );
+
+  const scrollToRelativeMonth = useCallback((direction: 1 | -1) => {
+    const nextIndex = clampMonthIndex(activeMonthIndexRef.current + direction);
+    if (nextIndex === activeMonthIndexRef.current) return;
+    activeMonthIndexRef.current = nextIndex;
+    setActiveMonthIndex(nextIndex);
+    horizontalListRef.current?.scrollToIndex({
+      index: nextIndex,
+      animated: true,
+    });
+  }, [clampMonthIndex]);
 
   const monthSummary = useMemo(() => {
     return monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary();
@@ -393,8 +449,8 @@ export function TransactionsScreen({
     () => SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
     [],
   );
-  const handlePrevMonth = useCallback(() => animateToMonth(-1), [animateToMonth]);
-  const handleNextMonth = useCallback(() => animateToMonth(1), [animateToMonth]);
+  const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
+  const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
   const handleOpenFilters = useCallback(() => setShowFilters(true), []);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
   const handleCloseTransactionEditor = useCallback(() => setSelectedTransaction(null), []);
@@ -468,19 +524,6 @@ export function TransactionsScreen({
     },
     [setTransactionFilters],
   );
-  const onPageScrollStateChanged = useCallback(
-    (event: { nativeEvent: { pageScrollState: string } }) => {
-      if (event.nativeEvent.pageScrollState === 'dragging') {
-        resetAdjacentPagesToTop();
-        return;
-      }
-      if (event.nativeEvent.pageScrollState === 'idle') {
-        settlePagerWindow();
-      }
-    },
-    [resetAdjacentPagesToTop, settlePagerWindow],
-  );
-
   const renderAllFilterOption = useCallback(
     (label: string, isActive: boolean, onPress: () => void) => (
       <View className="px-5 pb-2">
@@ -556,6 +599,30 @@ export function TransactionsScreen({
     transactionFilters.categoryId,
   ]);
 
+  const renderMonthPage = useCallback(
+    ({ item }: { item: number }) => {
+      const monthDate = addMonths(monthPagerAnchorDate, item - MONTH_PAGER_CENTER_INDEX);
+      const pageMonthKey = monthKey(monthDate);
+      const pageTransactions = monthBuckets.transactionsMap.get(pageMonthKey) ?? EMPTY_TRANSACTIONS;
+      return (
+        <View style={{ width: pageWidth }} className="flex-1 bg-background">
+          <ActivityTransactionList
+            transactions={pageTransactions}
+            onTransactionPress={setSelectedTransaction}
+            emptyTitle={I18n.t('transactions.empty_month_title')}
+            emptyMessage={I18n.t('transactions.empty_month_message')}
+            contentPaddingBottom={110}
+            disableItemAnimations
+            compactItems
+            listKey={pageMonthKey}
+            scrollToTopRef={getPageScrollToTopRef(item)}
+          />
+        </View>
+      );
+    },
+    [getPageScrollToTopRef, monthBuckets.transactionsMap, monthPagerAnchorDate, pageWidth],
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
@@ -579,51 +646,33 @@ export function TransactionsScreen({
       </MonthControlsHeader>
 
       <View className="flex-1 overflow-hidden bg-background">
-        <PagerView
-          ref={pagerRef}
-          initialPage={1}
-          offscreenPageLimit={1}
+        <FlatList
+          ref={horizontalListRef}
+          data={monthPagerSlots}
+          keyExtractor={(item) => String(item)}
           style={FLEX_ONE_STYLE}
-          onPageSelected={onPageSelected}
-          onPageScrollStateChanged={onPageScrollStateChanged}
-        >
-          <View key="prev" style={FLEX_ONE_STYLE} className="bg-background">
-            <ActivityTransactionList
-              transactions={prevTransactions}
-              onTransactionPress={setSelectedTransaction}
-              emptyTitle={I18n.t('transactions.empty_month_title')}
-              emptyMessage={I18n.t('transactions.empty_month_message')}
-              contentPaddingBottom={110}
-              disableItemAnimations
-              compactItems
-              scrollToTopRef={prevListScrollToTopRef}
-            />
-          </View>
-          <View key="current" style={FLEX_ONE_STYLE} className="bg-background">
-            <ActivityTransactionList
-              transactions={visibleTransactions}
-              onTransactionPress={setSelectedTransaction}
-              emptyTitle={I18n.t('transactions.empty_month_title')}
-              emptyMessage={I18n.t('transactions.empty_month_message')}
-              contentPaddingBottom={110}
-              disableItemAnimations
-              compactItems
-              scrollToTopRef={currentListScrollToTopRef}
-            />
-          </View>
-          <View key="next" style={FLEX_ONE_STYLE} className="bg-background">
-            <ActivityTransactionList
-              transactions={nextTransactions}
-              onTransactionPress={setSelectedTransaction}
-              emptyTitle={I18n.t('transactions.empty_month_title')}
-              emptyMessage={I18n.t('transactions.empty_month_message')}
-              contentPaddingBottom={110}
-              disableItemAnimations
-              compactItems
-              scrollToTopRef={nextListScrollToTopRef}
-            />
-          </View>
-        </PagerView>
+          horizontal
+          pagingEnabled
+          disableIntervalMomentum
+          bounces={false}
+          directionalLockEnabled
+          decelerationRate="fast"
+          showsHorizontalScrollIndicator={false}
+          overScrollMode="never"
+          nestedScrollEnabled
+          removeClippedSubviews={false}
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={7}
+          renderItem={renderMonthPage}
+          initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+          getItemLayout={getHorizontalItemLayout}
+          onScroll={handleHorizontalScroll}
+          scrollEventThrottle={16}
+          onScrollEndDrag={handleHorizontalScrollEndDrag}
+          onMomentumScrollEnd={handleHorizontalMomentumEnd}
+          onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+        />
       </View>
 
       {onPressAddTransaction ? (

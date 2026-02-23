@@ -50,35 +50,44 @@ function TransactionItemView({
 }: TransactionItemViewProps) {
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
-  const categoryChild: string = String(transaction.categoryName ?? I18n.t('common.uncategorized'));
-  const categoryParent: string | null = transaction.categoryParentName
-    ? String(transaction.categoryParentName)
-    : null;
-  const hasSubcategory = Boolean(categoryParent && transaction.categoryName);
-  const categoryPrimary: string = hasSubcategory
-    ? (categoryParent ?? categoryChild)
-    : categoryChild;
-  const categorySecondary: string | null = hasSubcategory ? categoryChild : null;
-  const categoryInline = categorySecondary
-    ? `${categoryPrimary} • ${categorySecondary}`
-    : categoryPrimary;
-  const dateLabel = formatRelativeDate(transaction.date);
-  const transferLabel = `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`;
+  const isTimeMode = settings.displayMode === 'time';
 
-  const title = isTransfer ? transaction.note || transferLabel : transaction.note || categoryInline;
+  const hasNote = Boolean(transaction.note);
+  let categoryInline: string | null = null;
+  if (!isTransfer) {
+    const categoryChild: string = String(transaction.categoryName ?? I18n.t('common.uncategorized'));
+    const categoryParent: string | null = transaction.categoryParentName
+      ? String(transaction.categoryParentName)
+      : null;
+    const hasSubcategory = Boolean(categoryParent && transaction.categoryName);
+    const categoryPrimary: string = hasSubcategory
+      ? (categoryParent ?? categoryChild)
+      : categoryChild;
+    const categorySecondary: string | null = hasSubcategory ? categoryChild : null;
+    categoryInline = categorySecondary ? `${categoryPrimary} • ${categorySecondary}` : categoryPrimary;
+  }
+  const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
+  const transferLabel =
+    isTransfer && !hasNote
+      ? `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`
+      : null;
+
+  const title = isTransfer
+    ? transaction.note || transferLabel
+    : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
 
   const subtitle = isTransfer
     ? showDateInSubtitle
-      ? `Transfer · ${dateLabel}`
+      ? `Transfer · ${dateLabel ?? ''}`
       : 'Transfer'
     : showDateInSubtitle
       ? transaction.note
-        ? `${categoryInline} · ${dateLabel}`
+        ? `${categoryInline ?? ''} · ${dateLabel ?? ''}`
         : dateLabel
       : transaction.note
         ? categoryInline
         : null;
-  const rate = getTrueHourlyRateForDate(transaction.date);
+  const rate = isTimeMode && !isTransfer ? getTrueHourlyRateForDate(transaction.date) : 0;
   const categoryEmoji = transaction.categoryIcon ?? undefined;
   const leadingEmoji = isTransfer ? '↔️' : categoryEmoji || (isIncome ? '⬆️' : '⬇️');
 

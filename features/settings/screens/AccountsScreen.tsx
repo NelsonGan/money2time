@@ -42,16 +42,6 @@ interface AccountGroupSection {
   accounts: Account[];
 }
 
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.min(1, Math.max(0, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
-}
-
 function AddAccountSheet({
   visible,
   onClose,
@@ -75,9 +65,9 @@ function AddAccountSheet({
   }) => void;
 }) {
   const [name, setName] = useState('');
-  const [type, setType] = useState<AccountType>('cash');
+  const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
-  const [icon, setIcon] = useState('💵');
+  const [icon, setIcon] = useState('🏦');
   const [color, setColor] = useState<string>('#1F8A6F');
   const [startingBalance, setStartingBalance] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -105,14 +95,14 @@ function AddAccountSheet({
           : (accountGroups.find((group) => group.id === accountGroupId)?.name ?? null),
       creditStatementDay: type === 'credit' ? normalizedStatementDay : null,
       creditDueDay: type === 'credit' ? normalizedDueDay : null,
-      icon: icon || '💵',
+      icon: icon || '🏦',
       color: color || '#1F8A6F',
       startingBalance: Number(startingBalance) || 0,
     });
     setName('');
-    setType('cash');
+    setType('debit');
     setAccountGroupId('none');
-    setIcon('💵');
+    setIcon('🏦');
     setColor('#1F8A6F');
     setStartingBalance('0');
     setCreditStatementDay('25');
@@ -679,9 +669,14 @@ function AccountGroupsSheet({
 interface AccountsScreenProps {
   onBack?: () => void;
   managementOnly?: boolean;
+  resetToRootToken?: number;
 }
 
-export function AccountsScreen({ onBack, managementOnly = false }: AccountsScreenProps = {}) {
+export function AccountsScreen({
+  onBack,
+  managementOnly = false,
+  resetToRootToken = 0,
+}: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const {
     accountGroups,
@@ -726,6 +721,17 @@ export function AccountsScreen({ onBack, managementOnly = false }: AccountsScree
     if (selectedAccount) return;
     setShowEditAccount(false);
   }, [selectedAccount]);
+
+  useEffect(() => {
+    if (resetToRootToken <= 0) return;
+    setSelectedAccountId(null);
+    setShowCreate(false);
+    setShowGroups(false);
+    setShowPayCard(false);
+    setShowEditAccount(false);
+    setIsReorderingAccounts(false);
+    setReorderDraftGroups([]);
+  }, [resetToRootToken]);
 
   const balanceMap = useMemo(() => {
     if (managementOnly) return new Map<string, number>();
@@ -860,10 +866,10 @@ export function AccountsScreen({ onBack, managementOnly = false }: AccountsScree
       cycleTxns.reduce((sum, item) => sum + creditDeltaForAccountTransaction(item, account.id), 0),
     );
     const outstanding = Math.max(0, balance);
-    const accountTypeLabel =
-      ACCOUNT_TYPE_OPTIONS.find((option) => option.value === account.type)?.label ?? account.type;
-    const accountColorBorder = withColorAlpha(account.color, 0.35);
-    const accountColorFill = withColorAlpha(account.color, 0.16);
+    const accountGroupLabel = account.accountGroup?.trim() || String(I18n.t('common.ungrouped'));
+    const includeInTotalsLabel = account.includeInTotals
+      ? I18n.t('accounts.include_option_include')
+      : I18n.t('accounts.include_option_hide');
 
     return (
       <SettingsPageLayout swipeBackHandlers={swipeBackHandlers}>
@@ -882,7 +888,11 @@ export function AccountsScreen({ onBack, managementOnly = false }: AccountsScree
                 className="px-0 pt-5 pb-2"
                 onBack={() => setSelectedAccountId(null)}
                 title={I18n.t('accounts.title')}
-                subtitle={`${account.icon} ${account.name}`}
+                subtitleNode={
+                  <Text variant="friendly" tone="muted" numberOfLines={1}>
+                    {account.name}
+                  </Text>
+                }
                 rightAccessory={
                   <Button
                     size="sm"
@@ -898,56 +908,14 @@ export function AccountsScreen({ onBack, managementOnly = false }: AccountsScree
                 }
               />
 
-              <View className="relative overflow-hidden rounded-[24px] border border-border/35 bg-card px-4 py-4 shadow-soft">
-                <View className="absolute -top-10 -right-8 h-28 w-28 rounded-full bg-primary/12" />
-                <View className="absolute -bottom-12 -left-8 h-24 w-24 rounded-full bg-success/10" />
-
-                <View className="flex-row items-start justify-between gap-3">
-                  <View className="flex-1 flex-row items-center gap-3">
-                    <View
-                      className="h-11 w-11 items-center justify-center rounded-2xl border"
-                      style={{
-                        borderColor: accountColorBorder,
-                        backgroundColor: accountColorFill,
-                      }}
-                    >
-                      <Text className="text-[20px]">{account.icon}</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text variant="caption" className="text-foreground" numberOfLines={1}>
-                        {account.name}
-                      </Text>
-                      {account.accountGroup ? (
-                        <Text variant="label" tone="muted" className="mt-0.5" numberOfLines={1}>
-                          {account.accountGroup}
-                        </Text>
-                      ) : null}
-                    </View>
-                  </View>
-                  <View
-                    className={cn(
-                      'rounded-full border px-2.5 py-1',
-                      account.type === 'credit'
-                        ? 'border-destructive/35 bg-destructive/12'
-                        : 'border-primary/35 bg-primary/10',
-                    )}
-                  >
-                    <Text
-                      variant="label"
-                      className={account.type === 'credit' ? 'text-destructive' : 'text-primary'}
-                    >
-                      {accountTypeLabel}
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="mt-3 rounded-[18px] border border-border/30 bg-background/75 px-3.5 py-3">
+              <View className="gap-1.5 px-1 py-1">
+                <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
                   <Text variant="label" tone="muted">
                     {I18n.t('accounts.balance')}
                   </Text>
                   <Text
-                    className={cn('mt-1', balance >= 0 ? 'text-foreground' : 'text-destructive')}
-                    variant="title"
+                    variant="friendly"
+                    className={balance >= 0 ? 'text-foreground' : 'text-destructive'}
                   >
                     {formatAmount(balance, settings, {
                       showSign: false,
@@ -955,30 +923,24 @@ export function AccountsScreen({ onBack, managementOnly = false }: AccountsScree
                     })}
                   </Text>
                 </View>
-
-                <View className="mt-3 flex-row items-center justify-between">
-                  <View className="rounded-full border border-border/35 bg-background/65 px-2.5 py-1">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.include_in_totals')}
-                    </Text>
-                  </View>
-                  <View
-                    className={cn(
-                      'rounded-full border px-2.5 py-1',
-                      account.includeInTotals
-                        ? 'border-success/35 bg-success/10'
-                        : 'border-border/35 bg-secondary/35',
-                    )}
+                <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('accounts.account_group')}
+                  </Text>
+                  <Text variant="friendly" numberOfLines={1} className="flex-1 text-right">
+                    {accountGroupLabel}
+                  </Text>
+                </View>
+                <View className="flex-row items-center justify-between gap-3 py-2">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('accounts.include_in_totals')}
+                  </Text>
+                  <Text
+                    variant="friendly"
+                    className={account.includeInTotals ? 'text-success' : 'text-muted-foreground'}
                   >
-                    <Text
-                      variant="label"
-                      className={account.includeInTotals ? 'text-success' : 'text-muted-foreground'}
-                    >
-                      {account.includeInTotals
-                        ? I18n.t('accounts.include_option_include')
-                        : I18n.t('accounts.include_option_hide')}
-                    </Text>
-                  </View>
+                    {includeInTotalsLabel}
+                  </Text>
                 </View>
               </View>
 

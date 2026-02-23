@@ -85,7 +85,7 @@ export function OnboardingPreferencesStep({
         </Animated.View>
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-10 pt-4">
+      <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
         <View className="flex-row gap-3">
           <Button
             variant="outline"

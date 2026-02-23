@@ -100,6 +100,7 @@ function AppContent() {
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
+  const [accountsResetToRootToken, setAccountsResetToRootToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
@@ -139,6 +140,9 @@ function AppContent() {
       }
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
+      }
+      if (tab === 'account') {
+        setAccountsResetToRootToken((prev) => prev + 1);
       }
       if (tab === 'settings' && activeTab === 'settings') {
         setSettingsForceScreen(null);
@@ -188,7 +192,7 @@ function AppContent() {
           />
         </MountedTab>
         <MountedTab active={activeTab === 'account'}>
-          <MemoAccountsScreen />
+          <MemoAccountsScreen resetToRootToken={accountsResetToRootToken} />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen
