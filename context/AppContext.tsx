@@ -685,33 +685,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [currentMonthWage?.trueHourlyRate, orderedRateHistory],
   );
 
+  const isTimeDisplayMode = settings?.displayMode === 'time';
+  const hourRounding = settings?.hourRounding ?? 0.25;
   const valueForDisplay = useCallback(
     (amount: number, dateIso: string) => {
-      if (!settings || settings.displayMode !== 'time') {
+      if (!isTimeDisplayMode) {
         return amount;
       }
       const rate = getTrueHourlyRateForDate(dateIso);
-      return amountToHoursByRate(amount, rate, settings.hourRounding);
+      return amountToHoursByRate(amount, rate, hourRounding);
     },
-    [getTrueHourlyRateForDate, settings],
+    [getTrueHourlyRateForDate, hourRounding, isTimeDisplayMode],
   );
 
   const displayValueByTransactionId = useMemo(() => {
+    if (!isTimeDisplayMode) return null;
     const next = new Map<string, number>();
     transactions.forEach((transaction) => {
       next.set(transaction.id, valueForDisplay(transaction.amount, transaction.date));
     });
     return next;
-  }, [transactions, valueForDisplay]);
+  }, [isTimeDisplayMode, transactions, valueForDisplay]);
 
   const getDisplayValueForTransaction = useCallback(
     (transaction: TransactionWithRelations) => {
+      if (!isTimeDisplayMode) return transaction.amount;
       return (
-        displayValueByTransactionId.get(transaction.id) ??
+        displayValueByTransactionId?.get(transaction.id) ??
         valueForDisplay(transaction.amount, transaction.date)
       );
     },
-    [displayValueByTransactionId, valueForDisplay],
+    [displayValueByTransactionId, isTimeDisplayMode, valueForDisplay],
   );
 
   const getCashflowSummary = useCallback(
@@ -829,12 +833,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol],
   );
 
+  const hasSettings = settings !== null;
   const accountBalances = useMemo(() => {
-    if (isLoading || !settings) {
+    if (isLoading || !hasSettings) {
       return [];
     }
     return accountsRepository.getBalances();
-  }, [isLoading, settings]);
+  }, [accounts, hasSettings, isLoading, transactions]);
 
   if (!settings) {
     if (isLoading) {

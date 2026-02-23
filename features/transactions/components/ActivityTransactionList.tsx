@@ -26,6 +26,19 @@ type ActivityRow =
     }
   | { kind: 'item'; id: string; transaction: TransactionWithRelations };
 
+const DAY_LABEL_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+});
+const DAY_LABEL_WITH_YEAR_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+const WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+const dayHeaderLabelCache = new Map<string, { dateLabel: string; weekdayLabel: string }>();
+const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
+
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
@@ -100,6 +113,11 @@ function dayKeyFromIso(isoDate: string) {
 }
 
 function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel: string } {
+  const currentYear = new Date().getFullYear();
+  const cacheKey = `${currentYear}|${dayKey}`;
+  const cached = dayHeaderLabelCache.get(cacheKey);
+  if (cached) return cached;
+
   const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
   const year = Number(yearRaw);
   const month = Number(monthRaw);
@@ -111,20 +129,16 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
   const date = new Date(year, month - 1, day);
   if (Number.isNaN(date.getTime())) return { dateLabel: dayKey, weekdayLabel: '' };
 
-  const currentYear = new Date().getFullYear();
-  const dateLabel = date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: year !== currentYear ? 'numeric' : undefined,
-  });
-  const weekdayLabel = date.toLocaleDateString('en-US', {
-    weekday: 'short',
-  });
+  const dateLabel =
+    year !== currentYear ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date) : DAY_LABEL_FORMATTER.format(date);
+  const weekdayLabel = WEEKDAY_FORMATTER.format(date);
+  const next = { dateLabel, weekdayLabel };
+  dayHeaderLabelCache.set(cacheKey, next);
 
-  return { dateLabel, weekdayLabel };
+  return next;
 }
 
-export function ActivityTransactionList({
+export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
   onTransactionPress,
   emptyTitle,
@@ -150,6 +164,7 @@ export function ActivityTransactionList({
     }),
     [settings.currencySymbol, settings.displayMode, settings.hourRounding],
   );
+  const isTimeMode = transactionDisplaySettings.displayMode === 'time';
 
   const rows = useMemo<ActivityRow[]>(() => {
     const dailyTotals = new Map<string, { income: number; expense: number }>();
@@ -157,10 +172,9 @@ export function ActivityTransactionList({
     transactions.forEach((transaction) => {
       const dayKey = dayKeyFromIso(transaction.date);
       const current = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
-      const displayAmount =
-        settings.displayMode === 'time'
-          ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
+      const displayAmount = isTimeMode
+        ? getDisplayValueForTransaction(transaction)
+        : transaction.amount;
 
       if (transaction.type === 'income') current.income += displayAmount;
       if (transaction.type === 'expense') current.expense += displayAmount;
@@ -190,7 +204,7 @@ export function ActivityTransactionList({
     });
 
     return nextRows;
-  }, [getDisplayValueForTransaction, settings.displayMode, transactions]);
+  }, [getDisplayValueForTransaction, isTimeMode, transactions]);
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -213,7 +227,7 @@ export function ActivityTransactionList({
             weekdayLabel={item.weekdayLabel}
             incomeSubtotal={item.incomeSubtotal}
             expenseSubtotal={item.expenseSubtotal}
-            isTimeMode={transactionDisplaySettings.displayMode === 'time'}
+            isTimeMode={isTimeMode}
             settings={transactionDisplaySettings}
           />
         );
@@ -235,6 +249,7 @@ export function ActivityTransactionList({
       disableItemAnimations,
       compactItems,
       getTrueHourlyRateForDate,
+      isTimeMode,
       onTransactionPress,
       transactionDisplaySettings,
     ],
@@ -297,7 +312,8 @@ export function ActivityTransactionList({
       keyExtractor={keyExtractor}
       getItemType={getItemType}
       drawDistance={420}
-      removeClippedSubviews
+      maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_DISABLED}
+      removeClippedSubviews={false}
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
@@ -306,4 +322,4 @@ export function ActivityTransactionList({
       ListEmptyComponent={listEmpty}
     />
   );
-}
+});

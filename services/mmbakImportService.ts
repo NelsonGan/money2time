@@ -155,11 +155,7 @@ function inferAccountType(
   if (statementDay || dueDay) return 'credit';
   const lower = name.toLowerCase();
   if (lower.includes('credit')) return 'credit';
-  if (lower.includes('cash')) return 'cash';
-  if (lower.includes('wallet') || lower.includes('pay')) return 'wallet';
-  if (lower.includes('savings')) return 'savings';
-  if (lower.includes('bank') || lower.includes('checking') || lower.includes('card')) return 'bank';
-  return 'other';
+  return 'debit';
 }
 
 function inferTxType(row: MMTxRow): { type: CategoryType; amount: number } | null {

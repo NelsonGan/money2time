@@ -20,15 +20,18 @@ import type {
 
 function asAccountType(value: string): Account['type'] {
   switch (value) {
+    case 'debit':
+    case 'credit':
+      return value;
+    // Backward compatibility for old persisted values.
     case 'cash':
     case 'bank':
     case 'wallet':
     case 'savings':
-    case 'credit':
     case 'other':
-      return value;
+      return 'debit';
     default:
-      return 'other';
+      return 'debit';
   }
 }
 
