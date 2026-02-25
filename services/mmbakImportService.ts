@@ -1,5 +1,6 @@
 import { openDatabaseAsync } from 'expo-sqlite';
 
+import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
@@ -13,10 +14,21 @@ interface MMAssetRow {
   uid: string | null;
   name: string | null;
   sortOrder: number | null;
+  groupUid: string | null;
+  groupId: number | null;
   groupName: string | null;
   isDeleted: number | null;
+  isReflect: number | null;
   cardStatementDay: string | null;
   cardDueDay: string | null;
+}
+
+interface MMAssetGroupRow {
+  id: number;
+  uid: string | null;
+  name: string | null;
+  sortOrder: number | null;
+  isDeleted: number | null;
 }
 
 interface MMCategoryRow {
@@ -183,6 +195,10 @@ function inferTxType(row: MMTxRow): { type: CategoryType; amount: number } | nul
   return null;
 }
 
+function includeInTotalsFromReflectFlag(value: number | null | undefined) {
+  return (asNumber(value) ?? 0) === 0;
+}
+
 function buildCategoryKey(type: CategoryType, name: string, parentId: string | null) {
   return `${type}|${name.toLowerCase()}|${parentId ?? 'root'}`;
 }
@@ -278,24 +294,25 @@ export async function importMoneyManagerBackupFromUri(
   const sourceDb = await openDatabaseAsync(fileName, undefined, directory);
 
   try {
-    const [assetRows, categoryRows, txRows, recurringRows] = await Promise.all([
+    const [assetRows, assetGroupRows, categoryRows, txRows, recurringRows] = await Promise.all([
       sourceDb.getAllAsync<MMAssetRow>(
         `SELECT
           a.Z_PK as id,
           a.ZUID as uid,
           a.ZNICNAME as name,
           a.ZORDER as sortOrder,
+          a.ZGROUPUID as groupUid,
+          a.ZGROUP_ID as groupId,
           COALESCE(g_uid.ZASSETGROUPNAME, g_id.ZASSETGROUPNAME) as groupName,
           a.ZISDEL as isDeleted,
+          a.ZISREFLECT as isReflect,
           a.ZCARD_DAYFIN as cardStatementDay,
           a.ZCARD_DAYPAY as cardDueDay
          FROM ZASSET a
          LEFT JOIN ZASSETGROUP g_uid
            ON g_uid.ZUID = a.ZGROUPUID
-          AND COALESCE(g_uid.ZISDEL, 0) = 0
          LEFT JOIN ZASSETGROUP g_id
            ON g_id.Z_PK = a.ZGROUP_ID
-          AND COALESCE(g_id.ZISDEL, 0) = 0
          WHERE
            COALESCE(a.ZISDEL, 0) = 0
            OR EXISTS (
@@ -309,6 +326,15 @@ export async function importMoneyManagerBackupFromUri(
                )
            )`,
       ),
+      sourceDb.getAllAsync<MMAssetGroupRow>(
+        `SELECT
+          Z_PK as id,
+          ZUID as uid,
+          ZASSETGROUPNAME as name,
+          ZORDER as sortOrder,
+          ZISDEL as isDeleted
+         FROM ZASSETGROUP`,
+      ),
       sourceDb.getAllAsync<MMCategoryRow>(
         `SELECT
           Z_PK as id,
@@ -318,7 +344,8 @@ export async function importMoneyManagerBackupFromUri(
           ZORDER as sortOrder,
           ZDOTYPE as doType,
           ZISDEL as isDeleted
-        FROM ZCATEGORY`,
+        FROM ZCATEGORY
+        ORDER BY ZDOTYPE ASC, ZORDER ASC, Z_PK ASC`,
       ),
       sourceDb.getAllAsync<MMTxRow>(
         `SELECT
@@ -407,6 +434,37 @@ export async function importMoneyManagerBackupFromUri(
       if (aDeleted !== bDeleted) return aDeleted - bDeleted;
       return (asNumber(a.sortOrder) ?? a.id) - (asNumber(b.sortOrder) ?? b.id);
     });
+    const referencedGroupSourceKeys = new Set<string>();
+    sortedAssetRows.forEach((row) => {
+      const groupUidKey = normalizeSourceKey(row.groupUid);
+      const groupIdKey = normalizeSourceKey(row.groupId);
+      if (groupUidKey) referencedGroupSourceKeys.add(groupUidKey);
+      if (groupIdKey) referencedGroupSourceKeys.add(groupIdKey);
+    });
+    const assetGroupNameBySourceKey = new Map<string, string>();
+    const sortedAssetGroupRows = [...assetGroupRows].sort((a, b) => {
+      const aDeleted = (asNumber(a.isDeleted) ?? 0) !== 0 ? 1 : 0;
+      const bDeleted = (asNumber(b.isDeleted) ?? 0) !== 0 ? 1 : 0;
+      if (aDeleted !== bDeleted) return aDeleted - bDeleted;
+      const orderDelta = (asNumber(a.sortOrder) ?? a.id) - (asNumber(b.sortOrder) ?? b.id);
+      if (orderDelta !== 0) return orderDelta;
+      return a.id - b.id;
+    });
+    sortedAssetGroupRows.forEach((row) => {
+      const name = normalizeText(row.name);
+      if (!name) return;
+      const uidKey = normalizeSourceKey(row.uid);
+      const idKey = normalizeSourceKey(row.id);
+      const isDeleted = (asNumber(row.isDeleted) ?? 0) !== 0;
+      const isReferenced =
+        (uidKey ? referencedGroupSourceKeys.has(uidKey) : false) ||
+        (idKey ? referencedGroupSourceKeys.has(idKey) : false);
+      if (isDeleted && !isReferenced) return;
+
+      accountGroupsRepository.create(name, asNumber(row.sortOrder) ?? undefined);
+      if (uidKey) assetGroupNameBySourceKey.set(uidKey, name);
+      if (idKey) assetGroupNameBySourceKey.set(idKey, name);
+    });
 
     sortedAssetRows.forEach((row) => {
       const name = normalizeText(row.name);
@@ -425,10 +483,14 @@ export async function importMoneyManagerBackupFromUri(
       const creditStatementDay = parseCardDay(row.cardStatementDay);
       const creditDueDay = parseCardDay(row.cardDueDay);
       const deletedAt = isDeleted ? new Date().toISOString() : null;
+      const groupName =
+        (row.groupUid ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupUid) ?? '') : null) ??
+        (row.groupId ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupId) ?? '') : null) ??
+        (normalizeText(row.groupName) || null);
       const accountId = accountsRepository.create({
         name,
         type: inferAccountType(name, creditStatementDay, creditDueDay),
-        accountGroup: normalizeText(row.groupName) || null,
+        accountGroup: groupName,
         sortOrder: asNumber(row.sortOrder) ?? undefined,
         creditStatementDay,
         creditDueDay,
@@ -436,7 +498,7 @@ export async function importMoneyManagerBackupFromUri(
         icon: '🏦',
         color: '#22917A',
         startingBalance: 0,
-        includeInTotals: true,
+        includeInTotals: includeInTotalsFromReflectFlag(row.isReflect),
         deletedAt,
       });
       summary.accounts += 1;
@@ -541,19 +603,32 @@ export async function importMoneyManagerBackupFromUri(
           isDeleted: boolean;
           sortOrder: number;
         } => !!row,
-      );
+      )
+      .sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'income' ? -1 : 1;
+        const sortDelta = a.sortOrder - b.sortOrder;
+        if (sortDelta !== 0) return sortDelta;
+        return a.id - b.id;
+      })
+      .map((row) => row);
+    let incomeSortIndex = 0;
+    let expenseSortIndex = 0;
+    const mmCategoriesWithImportOrder = mmCategories.map((row) => ({
+      ...row,
+      importSortOrder: row.type === 'income' ? incomeSortIndex++ : expenseSortIndex++,
+    }));
 
-    const mmCategoryByUid = new Map<string, (typeof mmCategories)[number]>();
-    const mmCategoryByIdKey = new Map<string, (typeof mmCategories)[number]>();
-    mmCategories.forEach((row) => {
+    const mmCategoryByUid = new Map<string, (typeof mmCategoriesWithImportOrder)[number]>();
+    const mmCategoryByIdKey = new Map<string, (typeof mmCategoriesWithImportOrder)[number]>();
+    mmCategoriesWithImportOrder.forEach((row) => {
       if (row.sourceKey !== row.idKey) {
         mmCategoryByUid.set(row.sourceKey, row);
       }
       mmCategoryByIdKey.set(row.idKey, row);
     });
 
-    const parentRows = mmCategories.filter((row) => !row.parentSourceKey);
-    const childRows = mmCategories.filter((row) => !!row.parentSourceKey);
+    const parentRows = mmCategoriesWithImportOrder.filter((row) => !row.parentSourceKey);
+    const childRows = mmCategoriesWithImportOrder.filter((row) => !!row.parentSourceKey);
 
     const mapActiveCategoryNames = (
       id: string,
@@ -580,6 +655,7 @@ export async function importMoneyManagerBackupFromUri(
         type: CategoryType;
         isDeleted: boolean;
         sortOrder: number;
+        importSortOrder: number;
       },
       parentId: string | null,
       parentName: string | null,
@@ -615,7 +691,7 @@ export async function importMoneyManagerBackupFromUri(
         icon: randomCategoryEmoji(),
         color,
         isDefault: false,
-        sortOrder: row.sortOrder,
+        sortOrder: row.importSortOrder,
         deletedAt: isInactive ? now : null,
       });
 

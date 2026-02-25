@@ -264,9 +264,15 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
             initialEndDate: editingRule?.endDate,
             initialIsActive: editingRule?.isActive,
             onSubmitRecurring: ({ transaction, recurring }) => {
+              const recurringTxType =
+                transaction.type === 'transfer'
+                  ? 'transfer'
+                  : transaction.type === 'income'
+                    ? 'income'
+                    : 'expense';
               const basePayload = {
                 name: recurring.name,
-                type: transaction.type,
+                type: recurringTxType,
                 amount: transaction.amount,
                 currency: settings.currencySymbol,
                 note: transaction.note ?? null,

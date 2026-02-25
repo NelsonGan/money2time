@@ -20,9 +20,13 @@ interface TransactionItemProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
   onPressTransaction?: (transaction: TransactionWithRelations) => void;
+  onLongPress?: () => void;
+  onLongPressTransaction?: (transaction: TransactionWithRelations) => void;
   disableAnimations?: boolean;
   showDateInSubtitle?: boolean;
   compact?: boolean;
+  selected?: boolean;
+  selectionMode?: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -30,10 +34,13 @@ interface TransactionItemProps {
 interface TransactionItemViewProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
+  onLongPress?: () => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
   showDateInSubtitle: boolean;
   compact: boolean;
+  selected: boolean;
+  selectionMode: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -41,21 +48,32 @@ interface TransactionItemViewProps {
 function TransactionItemView({
   transaction,
   onPress,
+  onLongPress,
   onPressIn,
   onPressOut,
   showDateInSubtitle,
   compact,
+  selected,
+  selectionMode,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
+  const isLegacyAdjustmentTransfer =
+    transaction.type === 'transfer' &&
+    !!transaction.accountId &&
+    !transaction.fromAccountId &&
+    !transaction.toAccountId;
   const isIncome = transaction.type === 'income';
-  const isTransfer = transaction.type === 'transfer';
+  const isTransfer = transaction.type === 'transfer' && !isLegacyAdjustmentTransfer;
+  const isBalanceAdjustment = transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer;
   const isTimeMode = settings.displayMode === 'time';
 
   const hasNote = Boolean(transaction.note);
   let categoryInline: string | null = null;
-  if (!isTransfer) {
-    const categoryChild: string = String(transaction.categoryName ?? I18n.t('common.uncategorized'));
+  if (!isTransfer && !isBalanceAdjustment) {
+    const categoryChild: string = String(
+      transaction.categoryName ?? I18n.t('common.uncategorized'),
+    );
     const categoryParent: string | null = transaction.categoryParentName
       ? String(transaction.categoryParentName)
       : null;
@@ -64,7 +82,9 @@ function TransactionItemView({
       ? (categoryParent ?? categoryChild)
       : categoryChild;
     const categorySecondary: string | null = hasSubcategory ? categoryChild : null;
-    categoryInline = categorySecondary ? `${categoryPrimary} • ${categorySecondary}` : categoryPrimary;
+    categoryInline = categorySecondary
+      ? `${categoryPrimary} • ${categorySecondary}`
+      : categoryPrimary;
   }
   const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
   const transferLabel =
@@ -74,41 +94,86 @@ function TransactionItemView({
 
   const title = isTransfer
     ? transaction.note || transferLabel
-    : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
+    : isBalanceAdjustment
+      ? transaction.note || I18n.t('transactions.filters.adjustment')
+      : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
 
   const subtitle = isTransfer
     ? showDateInSubtitle
       ? `Transfer · ${dateLabel ?? ''}`
       : 'Transfer'
-    : showDateInSubtitle
-      ? transaction.note
-        ? `${categoryInline ?? ''} · ${dateLabel ?? ''}`
-        : dateLabel
-      : transaction.note
-        ? categoryInline
-        : null;
-  const rate = isTimeMode && !isTransfer ? getTrueHourlyRateForDate(transaction.date) : 0;
+    : isBalanceAdjustment
+      ? showDateInSubtitle
+        ? `${I18n.t('transactions.filters.adjustment')} · ${dateLabel ?? ''}`
+        : I18n.t('transactions.filters.adjustment')
+      : showDateInSubtitle
+        ? transaction.note
+          ? `${categoryInline ?? ''} · ${dateLabel ?? ''}`
+          : dateLabel
+        : transaction.note
+          ? categoryInline
+          : null;
+  const rate =
+    isTimeMode && !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
   const categoryEmoji = transaction.categoryIcon ?? undefined;
-  const leadingEmoji = isTransfer ? '↔️' : categoryEmoji || (isIncome ? '⬆️' : '⬇️');
+  const leadingEmoji = isTransfer
+    ? '↔️'
+    : isBalanceAdjustment
+      ? '⚖️'
+      : categoryEmoji || (isIncome ? '⬆️' : '⬇️');
+  const amountToneClass = isTransfer
+    ? 'text-muted-foreground'
+    : isBalanceAdjustment
+      ? transaction.amount > 0
+        ? 'text-success'
+        : transaction.amount < 0
+          ? 'text-destructive'
+          : 'text-muted-foreground'
+      : isIncome
+        ? 'text-success'
+        : 'text-destructive';
 
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
       className={cn(
         'flex-row items-center bg-card border border-border/40 shadow-soft',
+        selectionMode && selected ? 'border-primary/55 bg-primary/12' : null,
         compact
           ? 'gap-2 px-2.5 py-2 rounded-[16px] mb-1'
           : 'gap-2.5 px-3 py-2.5 rounded-[20px] mb-1.5',
       )}
     >
+      {selectionMode ? (
+        <View
+          className={cn(
+            'mr-1 h-5 w-5 rounded-full border items-center justify-center',
+            selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
+          )}
+        >
+          {selected ? (
+            <Text variant="label" className="text-primary">
+              ✓
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+
       <View
         className={cn(
           compact
             ? 'w-8 h-8 rounded-full items-center justify-center'
             : 'w-9 h-9 rounded-full items-center justify-center',
-          isTransfer ? 'bg-secondary' : isIncome ? 'bg-success/12' : 'bg-destructive/10',
+          isTransfer
+            ? 'bg-secondary'
+            : isBalanceAdjustment
+              ? 'bg-primary/12'
+              : isIncome
+                ? 'bg-success/12'
+                : 'bg-destructive/10',
         )}
       >
         <Text className={compact ? 'text-[15px]' : 'text-[16px]'}>{leadingEmoji}</Text>
@@ -142,13 +207,13 @@ function TransactionItemView({
           variant="friendly"
           className={cn(
             compact ? 'text-[13px] leading-[16px]' : 'text-[14px] leading-[18px]',
-            isTransfer ? 'text-muted-foreground' : isIncome ? 'text-success' : 'text-destructive',
+            amountToneClass,
           )}
         >
           {formatAmount(transaction.amount, settings, {
-            showSign: false,
+            showSign: isBalanceAdjustment,
             neutralSign: isTransfer,
-            trueHourlyRate: isTransfer ? 0 : rate,
+            trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
           })}
         </Text>
         <Text variant="caption" tone="muted" className={compact ? '' : 'mt-0.5'} numberOfLines={1}>
@@ -164,8 +229,11 @@ function TransactionItemView({
 function AnimatedTransactionItem({
   transaction,
   onPress,
+  onLongPress,
   showDateInSubtitle,
   compact,
+  selected,
+  selectionMode,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -181,10 +249,13 @@ function AnimatedTransactionItem({
       <TransactionItemView
         transaction={transaction}
         onPress={onPress}
+        onLongPress={onLongPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         showDateInSubtitle={showDateInSubtitle}
         compact={compact}
+        selected={selected}
+        selectionMode={selectionMode}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -195,8 +266,11 @@ function AnimatedTransactionItem({
 function StaticTransactionItem({
   transaction,
   onPress,
+  onLongPress,
   showDateInSubtitle,
   compact,
+  selected,
+  selectionMode,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -204,8 +278,11 @@ function StaticTransactionItem({
     <TransactionItemView
       transaction={transaction}
       onPress={onPress}
+      onLongPress={onLongPress}
       showDateInSubtitle={showDateInSubtitle}
       compact={compact}
+      selected={selected}
+      selectionMode={selectionMode}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
     />
@@ -216,9 +293,13 @@ function TransactionItemComponent({
   transaction,
   onPress,
   onPressTransaction,
+  onLongPress,
+  onLongPressTransaction,
   disableAnimations = false,
   showDateInSubtitle = true,
   compact = false,
+  selected = false,
+  selectionMode = false,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemProps) {
@@ -233,14 +314,28 @@ function TransactionItemComponent({
           onPressTransaction(transaction);
         }
       : undefined;
+  const handleLongPress = onLongPress
+    ? () => {
+        void triggerHaptic('medium');
+        onLongPress();
+      }
+    : onLongPressTransaction
+      ? () => {
+          void triggerHaptic('medium');
+          onLongPressTransaction(transaction);
+        }
+      : undefined;
 
   if (disableAnimations) {
     return (
       <StaticTransactionItem
         transaction={transaction}
         onPress={handlePress}
+        onLongPress={handleLongPress}
         showDateInSubtitle={showDateInSubtitle}
         compact={compact}
+        selected={selected}
+        selectionMode={selectionMode}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -248,14 +343,17 @@ function TransactionItemComponent({
   }
 
   return (
-    <AnimatedTransactionItem
-      transaction={transaction}
-      onPress={handlePress}
-      showDateInSubtitle={showDateInSubtitle}
-      compact={compact}
-      settings={settings}
-      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-    />
+      <AnimatedTransactionItem
+        transaction={transaction}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        showDateInSubtitle={showDateInSubtitle}
+        compact={compact}
+        selected={selected}
+        selectionMode={selectionMode}
+        settings={settings}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+      />
   );
 }
 
@@ -266,9 +364,13 @@ export const TransactionItem = memo(
     prev.transaction.updatedAt === next.transaction.updatedAt &&
     prev.onPress === next.onPress &&
     prev.onPressTransaction === next.onPressTransaction &&
+    prev.onLongPress === next.onLongPress &&
+    prev.onLongPressTransaction === next.onLongPressTransaction &&
     prev.disableAnimations === next.disableAnimations &&
     prev.showDateInSubtitle === next.showDateInSubtitle &&
     prev.compact === next.compact &&
+    prev.selected === next.selected &&
+    prev.selectionMode === next.selectionMode &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
     prev.settings.hourRounding === next.settings.hourRounding &&

@@ -3,7 +3,8 @@ export type ThemeMode = 'system' | 'light' | 'dark';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 
 export type AccountType = 'debit' | 'credit';
-export type TransactionType = 'expense' | 'income' | 'transfer';
+export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
+export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 export type CategoryType = 'expense' | 'income';
 
@@ -116,7 +117,7 @@ export interface TransactionWithRelations extends Transaction {
 export interface RecurringTransactionRule {
   id: string;
   name: string;
-  type: TransactionType;
+  type: RecurringTransactionType;
   amount: number;
   currency: string;
   accountId: string | null;

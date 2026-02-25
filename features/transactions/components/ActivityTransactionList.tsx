@@ -42,6 +42,9 @@ const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
+  onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
+  selectedTransactionIds?: string[];
+  selectionMode?: boolean;
   emptyTitle: string;
   emptyMessage: string;
   listHeaderComponent?: React.ReactNode;
@@ -130,7 +133,9 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
   if (Number.isNaN(date.getTime())) return { dateLabel: dayKey, weekdayLabel: '' };
 
   const dateLabel =
-    year !== currentYear ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date) : DAY_LABEL_FORMATTER.format(date);
+    year !== currentYear
+      ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date)
+      : DAY_LABEL_FORMATTER.format(date);
   const weekdayLabel = WEEKDAY_FORMATTER.format(date);
   const next = { dateLabel, weekdayLabel };
   dayHeaderLabelCache.set(cacheKey, next);
@@ -141,6 +146,9 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
 export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
   onTransactionPress,
+  onTransactionLongPress,
+  selectedTransactionIds = [],
+  selectionMode = false,
   emptyTitle,
   emptyMessage,
   listHeaderComponent,
@@ -165,6 +173,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [settings.currencySymbol, settings.displayMode, settings.hourRounding],
   );
   const isTimeMode = transactionDisplaySettings.displayMode === 'time';
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds),
+    [selectedTransactionIds],
+  );
 
   const rows = useMemo<ActivityRow[]>(() => {
     const dailyTotals = new Map<string, { income: number; expense: number }>();
@@ -237,6 +249,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         <TransactionItem
           transaction={item.transaction}
           onPressTransaction={onTransactionPress}
+          onLongPressTransaction={onTransactionLongPress}
+          selected={selectedTransactionIdSet.has(item.transaction.id)}
+          selectionMode={selectionMode}
           disableAnimations={disableItemAnimations}
           compact={compactItems}
           showDateInSubtitle={false}
@@ -251,6 +266,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       getTrueHourlyRateForDate,
       isTimeMode,
       onTransactionPress,
+      onTransactionLongPress,
+      selectedTransactionIdSet,
+      selectionMode,
       transactionDisplaySettings,
     ],
   );
@@ -309,11 +327,12 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       ref={flashListRef}
       key={listKey}
       data={rows}
+      extraData={selectedTransactionIds}
       keyExtractor={keyExtractor}
       getItemType={getItemType}
       drawDistance={420}
       maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_DISABLED}
-      removeClippedSubviews={false}
+      removeClippedSubviews
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}

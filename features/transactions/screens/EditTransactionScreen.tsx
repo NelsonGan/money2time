@@ -15,6 +15,13 @@ interface EditTransactionScreenProps {
 
 export function EditTransactionScreen({ transaction, onClose }: EditTransactionScreenProps) {
   const { updateTransaction, deleteTransaction } = useApp();
+  const isLegacyBalanceAdjustmentTransfer =
+    transaction.type === 'transfer' &&
+    !!transaction.accountId &&
+    !transaction.fromAccountId &&
+    !transaction.toAccountId;
+  const isBalanceAdjustment =
+    transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer;
 
   const handleDelete = () => {
     Alert.alert(
@@ -43,9 +50,27 @@ export function EditTransactionScreen({ transaction, onClose }: EditTransactionS
       mode="edit"
       onClose={onClose}
       onDelete={handleDelete}
-      onSubmit={(input) => updateTransaction(transaction.id, input)}
+      onSubmit={(input) => {
+        if (isLegacyBalanceAdjustmentTransfer) {
+          updateTransaction(transaction.id, {
+            ...input,
+            type: 'transfer',
+            categoryId: null,
+            fromAccountId: null,
+            toAccountId: null,
+          });
+          return;
+        }
+        updateTransaction(transaction.id, input);
+      }}
+      restrictTypeOptions={isBalanceAdjustment ? ['balance_adjustment'] : undefined}
+      subtitleOverride={
+        isBalanceAdjustment
+          ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')
+          : undefined
+      }
       initialValues={{
-        type: transaction.type,
+        type: isBalanceAdjustment ? 'balance_adjustment' : transaction.type,
         amount: String(transaction.amount),
         date: dayKeyFromIsoLocal(transaction.date),
         accountId: transaction.accountId,

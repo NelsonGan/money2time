@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Animated as RNAnimated,
   FlatList,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -11,12 +13,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PieChart } from 'react-native-chart-kit';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Card, CardContent } from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
+import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { SelectField } from '~/components/ui/select';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -37,6 +40,7 @@ import {
 } from '~/utils/formatters';
 import { cn } from '~/utils';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
@@ -50,6 +54,7 @@ const INSIGHT_TYPES = [
   'calendar_view',
   'time_cost_leaderboard',
   'savings_rate',
+  'asset_history',
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
@@ -63,6 +68,7 @@ const INSIGHT_ICONS: Record<InsightType, string> = {
   calendar_view: '🗓️',
   time_cost_leaderboard: '⏱️',
   savings_rate: '💹',
+  asset_history: '🏦',
 };
 
 const TIME_COST_RANK_ACCENTS = [
@@ -99,6 +105,11 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingBottom: 110,
   paddingTop: 4,
 } as const;
+const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
+const ASSET_HISTORY_CHART_HEIGHT = 226;
+const ASSET_HISTORY_CHART_PADDING_TOP = 16;
+const ASSET_HISTORY_CHART_PADDING_RIGHT = 88;
+const ASSET_HISTORY_VERTICAL_HEIGHT_PERCENTAGE = 0.75;
 
 type InsightFilterConfig = {
   fixedPeriodPreset: PeriodPreset | null;
@@ -111,12 +122,28 @@ const DEFAULT_INSIGHT_FILTER_CONFIG: InsightFilterConfig = {
 };
 
 const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> = {
+  expense_breakdown: {
+    fixedPeriodPreset: null,
+    allowAccountFilter: false,
+  },
+  income_breakdown: {
+    fixedPeriodPreset: null,
+    allowAccountFilter: false,
+  },
   savings_rate: {
+    fixedPeriodPreset: 'year',
+    allowAccountFilter: false,
+  },
+  asset_history: {
     fixedPeriodPreset: 'year',
     allowAccountFilter: false,
   },
   calendar_view: {
     fixedPeriodPreset: 'month',
+    allowAccountFilter: false,
+  },
+  time_cost_leaderboard: {
+    fixedPeriodPreset: null,
     allowAccountFilter: false,
   },
 };
@@ -240,6 +267,13 @@ type InsightAnalyticsSavingsRateMonthRow = {
   expense: number;
   net: number;
   savingsRate: number | null;
+  transactions: TransactionWithRelations[];
+};
+
+type AssetHistoryMonthRow = {
+  monthKey: string;
+  label: string;
+  totalAssets: number;
 };
 
 type AnalyticsPageData = InsightBasePageData & {
@@ -253,8 +287,23 @@ type AnalyticsPageData = InsightBasePageData & {
   savingsRateRows: InsightAnalyticsSavingsRateMonthRow[];
 };
 
-type InsightPageData = BreakdownPageData | CalendarPageData | TimeCostPageData | AnalyticsPageData;
+type AssetHistoryPageData = InsightBasePageData & {
+  kind: 'asset_history';
+  year: number;
+  monthRows: AssetHistoryMonthRow[];
+  includedAccountsCount: number;
+  excludedAccountsCount: number;
+};
+
+type InsightPageData =
+  | BreakdownPageData
+  | CalendarPageData
+  | TimeCostPageData
+  | AnalyticsPageData
+  | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
+type DrilldownTransactionFilter = 'income' | 'expense';
+const DRILLDOWN_TYPE_PAGES: readonly DrilldownTransactionFilter[] = ['income', 'expense'];
 
 type InsightsPreferencesSnapshot = {
   version: 1;
@@ -268,6 +317,7 @@ type InsightsPreferencesSnapshot = {
   excludedSavingsIncomeCategoryIds: string[];
   excludedSavingsExpenseCategoryIds: string[];
   excludedTimeCostExpenseCategoryId: string | null;
+  excludedAssetHistoryAccountIds: string[];
   timeCostViewMode: TimeCostViewMode;
 };
 
@@ -330,6 +380,9 @@ function parseInsightsPreferencesPayload(
     );
     next.excludedSavingsExpenseCategoryIds = toUniqueStringList(
       parsed.excludedSavingsExpenseCategoryIds,
+    );
+    next.excludedAssetHistoryAccountIds = toUniqueStringList(
+      parsed.excludedAssetHistoryAccountIds,
     );
     if (typeof parsed.excludedTimeCostExpenseCategoryId === 'string') {
       const normalized = parsed.excludedTimeCostExpenseCategoryId.trim();
@@ -507,6 +560,48 @@ function withColorAlpha(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
+function trimTrailingZeros(value: string) {
+  if (!value.includes('.')) return value;
+  return value.replace(/\.?0+$/, '');
+}
+
+function formatCompactAxisNumber(value: number) {
+  const absValue = Math.abs(value);
+  if (!Number.isFinite(absValue) || absValue === 0) return '0';
+
+  const units = [
+    { threshold: 1_000_000_000_000, suffix: 'T' },
+    { threshold: 1_000_000_000, suffix: 'B' },
+    { threshold: 1_000_000, suffix: 'M' },
+    { threshold: 1_000, suffix: 'K' },
+  ] as const;
+
+  for (const unit of units) {
+    if (absValue < unit.threshold) continue;
+    const scaled = absValue / unit.threshold;
+    const decimalPlaces = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
+    return `${trimTrailingZeros(scaled.toFixed(decimalPlaces))}${unit.suffix}`;
+  }
+
+  if (absValue >= 100) return Math.round(absValue).toString();
+  if (absValue >= 10) return trimTrailingZeros(absValue.toFixed(1));
+  if (absValue >= 1) return trimTrailingZeros(absValue.toFixed(2));
+
+  const decimals = Math.max(0, 3 - Math.floor(Math.log10(absValue)) - 1);
+  return trimTrailingZeros(absValue.toFixed(Math.min(6, decimals)));
+}
+
+function isLegacyBalanceAdjustmentTransfer(
+  transaction: Pick<TransactionWithRelations, 'type' | 'accountId' | 'fromAccountId' | 'toAccountId'>,
+) {
+  return (
+    transaction.type === 'transfer' &&
+    !!transaction.accountId &&
+    !transaction.fromAccountId &&
+    !transaction.toAccountId
+  );
+}
+
 function pieSliceIdFromTouch(
   point: { x: number; y: number },
   slices: { id: string; amount: number }[],
@@ -532,6 +627,53 @@ function pieSliceIdFromTouch(
     if (normalizedAngle <= cursor) return slice.id;
   }
   return slices[slices.length - 1]?.id ?? null;
+}
+
+function calcChartScaler(values: number[]) {
+  return Math.max(...values) - Math.min(...values) || 1;
+}
+
+function calcChartBaseHeight(values: number[], height: number) {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (min >= 0 && max >= 0) return height;
+  if (min < 0 && max <= 0) return 0;
+  return (height * max) / calcChartScaler(values);
+}
+
+function calcChartHeight(value: number, values: number[], height: number) {
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const scaler = calcChartScaler(values);
+  if (min < 0 && max > 0) return height * (value / scaler);
+  if (min >= 0 && max >= 0) return height * ((value - min) / scaler);
+  return height * ((value - max) / scaler);
+}
+
+function assetHistoryPointX(index: number, width: number, pointCount: number) {
+  const xMax = Math.max(1, pointCount);
+  return ASSET_HISTORY_CHART_PADDING_RIGHT + (index * (width - ASSET_HISTORY_CHART_PADDING_RIGHT)) / xMax;
+}
+
+function assetHistoryNearestPointIndex(locationX: number, width: number, pointCount: number) {
+  if (pointCount <= 1) return 0;
+  let nearestIndex = 0;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < pointCount; index += 1) {
+    const distance = Math.abs(locationX - assetHistoryPointX(index, width, pointCount));
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  }
+  return nearestIndex;
+}
+
+function assetHistoryPointY(value: number, values: number[]) {
+  if (values.length === 0) return ASSET_HISTORY_CHART_PADDING_TOP;
+  const baseHeight = calcChartBaseHeight(values, ASSET_HISTORY_CHART_HEIGHT);
+  const valueHeight = calcChartHeight(value, values, ASSET_HISTORY_CHART_HEIGHT);
+  return ((baseHeight - valueHeight) / 4) * 3 + ASSET_HISTORY_CHART_PADDING_TOP;
 }
 
 function FilterPill({
@@ -563,22 +705,23 @@ function FilterPill({
 
 interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
-  onOpenActivityMonth?: (monthKey: string) => void;
 }
 
 export function InsightsScreen({
   resetToCurrentMonthToken = 0,
-  onOpenActivityMonth,
 }: InsightsScreenProps = {}) {
   const {
     isLoading,
     settings,
     categories,
     accounts,
+    accountGroups,
     queryTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
+    updateTransaction,
+    deleteTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
   } = useApp();
@@ -604,24 +747,39 @@ export function InsightsScreen({
   const [excludedTimeCostExpenseCategoryId, setExcludedTimeCostExpenseCategoryId] = useState<
     string | null
   >(null);
+  const [excludedAssetHistoryAccountIds, setExcludedAssetHistoryAccountIds] = useState<string[]>(
+    [],
+  );
+  const [assetHistoryScrubMonthByYear, setAssetHistoryScrubMonthByYear] = useState<
+    Record<string, string>
+  >({});
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [drilldownState, setDrilldownState] = useState<{
     label: string;
     transactions: TransactionWithRelations[];
-    transactionType?: BreakdownTransactionType;
-    subtitle?: string;
+    showTypeFilter?: boolean;
   } | null>(null);
+  const [drilldownTypeFilter, setDrilldownTypeFilter] =
+    useState<DrilldownTransactionFilter>('expense');
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
+  const [selectedDrilldownTransactionIds, setSelectedDrilldownTransactionIds] = useState<string[]>(
+    [],
+  );
+  const [showDrilldownBulkUpdate, setShowDrilldownBulkUpdate] = useState(false);
+  const [drilldownBulkDate, setDrilldownBulkDate] = useState(() => formatDateInput(new Date()));
+  const [drilldownBulkDateTouched, setDrilldownBulkDateTouched] = useState(false);
+  const [drilldownBulkNote, setDrilldownBulkNote] = useState('');
+  const [drilldownBulkNoteTouched, setDrilldownBulkNoteTouched] = useState(false);
+  const [drilldownHeaderHeight, setDrilldownHeaderHeight] = useState(0);
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
   const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
-  const hasHydratedInsightsPreferencesRef = useRef(false);
-  const persistedInsightsPreferencesRef = useRef<string | null>(null);
 
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
+  const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const chartWidth = Math.max(260, width - 76);
   const pieSize = Math.min(240, chartWidth);
   const insightTypeOptions = useMemo(
@@ -635,6 +793,9 @@ export function InsightsScreen({
     [],
   );
   const horizontalListRef = useRef<FlatList<number> | null>(null);
+  const drilldownPagerRef = useRef<FlatList<DrilldownTransactionFilter> | null>(null);
+  const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);
+  const periodPresetRef = useRef<PeriodPreset>(periodPreset);
   const [committedPageIndex, setCommittedPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
   const committedPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
@@ -651,19 +812,41 @@ export function InsightsScreen({
   }, []);
 
   useEffect(() => {
+    selectedInsightTypeRef.current = selectedInsightType;
+  }, [selectedInsightType]);
+
+  useEffect(() => {
+    periodPresetRef.current = periodPreset;
+  }, [periodPreset]);
+
+  useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const currentInsightType = selectedInsightTypeRef.current;
+    const currentPeriodPreset = periodPresetRef.current;
+    const nextPeriodPreset =
+      getInsightFilterConfig(currentInsightType).fixedPeriodPreset ?? currentPeriodPreset;
 
-    setPeriodPreset('month');
-    setAnchorDate(startOfMonth(now));
-    setCustomStart(formatDateInput(monthStart));
-    setCustomEnd(formatDateInput(monthEnd));
-    setSelectedInsightType('expense_breakdown');
+    if (nextPeriodPreset === 'custom') {
+      setCustomStart(formatDateInput(monthStart));
+      setCustomEnd(formatDateInput(monthEnd));
+      setActiveCustomDateField('start');
+    } else {
+      setAnchorDate(startOfMonth(now));
+    }
     setActiveBreakdownSliceId(null);
     setDrilldownState(null);
+    setDrilldownTypeFilter('expense');
+    setAssetHistoryScrubMonthByYear({});
     setSelectedTransaction(null);
+    setSelectedDrilldownTransactionIds([]);
+    setShowDrilldownBulkUpdate(false);
+    setDrilldownBulkDate(formatDateInput(new Date()));
+    setDrilldownBulkDateTouched(false);
+    setDrilldownBulkNote('');
+    setDrilldownBulkNoteTouched(false);
     setSelectedCalendarDayKey(null);
     setIsFilterModalOpen(false);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -680,37 +863,36 @@ export function InsightsScreen({
     return () => cancelAnimationFrame(frame);
   }, [resetToCurrentMonthToken]);
 
-  useEffect(() => {
-    if (isLoading || hasHydratedInsightsPreferencesRef.current) return;
-    hasHydratedInsightsPreferencesRef.current = true;
-    persistedInsightsPreferencesRef.current = insightsPreferencesJson;
-
-    const saved = parseInsightsPreferencesPayload(insightsPreferencesJson);
-    if (!saved) return;
-
-    if (saved.periodPreset) setPeriodPreset(saved.periodPreset);
-    if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
-    if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
-    if (saved.timeCostViewMode) setTimeCostViewMode(saved.timeCostViewMode);
-    if (saved.selectedAccountIds) setSelectedAccountIds(saved.selectedAccountIds);
-    if (saved.excludedSavingsIncomeCategoryIds) {
-      setExcludedSavingsIncomeCategoryIds(saved.excludedSavingsIncomeCategoryIds);
-    }
-    if (saved.excludedSavingsExpenseCategoryIds) {
-      setExcludedSavingsExpenseCategoryIds(saved.excludedSavingsExpenseCategoryIds);
-    }
-    if (saved.excludedTimeCostExpenseCategoryId) {
-      setExcludedTimeCostExpenseCategoryId(saved.excludedTimeCostExpenseCategoryId);
-    }
-    if (saved.anchorDate) {
-      const parsedAnchorDate = parseDateInput(saved.anchorDate);
-      if (parsedAnchorDate) {
-        setAnchorDate(startOfMonth(parsedAnchorDate));
+  const applyInsightsPreferencesSnapshot = useCallback(
+    (saved: Partial<InsightsPreferencesSnapshot>) => {
+      if (saved.periodPreset) setPeriodPreset(saved.periodPreset);
+      if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
+      if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
+      if (saved.timeCostViewMode) setTimeCostViewMode(saved.timeCostViewMode);
+      if (saved.selectedAccountIds) setSelectedAccountIds(saved.selectedAccountIds);
+      if (saved.excludedSavingsIncomeCategoryIds) {
+        setExcludedSavingsIncomeCategoryIds(saved.excludedSavingsIncomeCategoryIds);
       }
-    }
-    if (saved.customStart) setCustomStart(saved.customStart);
-    if (saved.customEnd) setCustomEnd(saved.customEnd);
-  }, [insightsPreferencesJson, isLoading]);
+      if (saved.excludedSavingsExpenseCategoryIds) {
+        setExcludedSavingsExpenseCategoryIds(saved.excludedSavingsExpenseCategoryIds);
+      }
+      if (saved.excludedAssetHistoryAccountIds) {
+        setExcludedAssetHistoryAccountIds(saved.excludedAssetHistoryAccountIds);
+      }
+      if (saved.excludedTimeCostExpenseCategoryId) {
+        setExcludedTimeCostExpenseCategoryId(saved.excludedTimeCostExpenseCategoryId);
+      }
+      if (saved.anchorDate) {
+        const parsedAnchorDate = parseDateInput(saved.anchorDate);
+        if (parsedAnchorDate) {
+          setAnchorDate(startOfMonth(parsedAnchorDate));
+        }
+      }
+      if (saved.customStart) setCustomStart(saved.customStart);
+      if (saved.customEnd) setCustomEnd(saved.customEnd);
+    },
+    [],
+  );
 
   const insightsPreferencesSnapshot = useMemo<InsightsPreferencesSnapshot>(
     () => ({
@@ -725,6 +907,7 @@ export function InsightsScreen({
       excludedSavingsIncomeCategoryIds,
       excludedSavingsExpenseCategoryIds,
       excludedTimeCostExpenseCategoryId,
+      excludedAssetHistoryAccountIds,
       timeCostViewMode,
     }),
     [
@@ -732,6 +915,7 @@ export function InsightsScreen({
       anchorDate,
       customEnd,
       customStart,
+      excludedAssetHistoryAccountIds,
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
       excludedTimeCostExpenseCategoryId,
@@ -741,19 +925,23 @@ export function InsightsScreen({
       timeCostViewMode,
     ],
   );
-  const serializedInsightsPreferences = useMemo(
-    () => JSON.stringify(insightsPreferencesSnapshot),
-    [insightsPreferencesSnapshot],
-  );
-
-  useEffect(() => {
-    if (isLoading || !hasHydratedInsightsPreferencesRef.current) return;
-    if (persistedInsightsPreferencesRef.current === serializedInsightsPreferences) return;
-    persistedInsightsPreferencesRef.current = serializedInsightsPreferences;
-    updateInsightsPreferencesJson(serializedInsightsPreferences);
-  }, [isLoading, serializedInsightsPreferences, updateInsightsPreferencesJson]);
+  usePersistedJsonSnapshot<
+    InsightsPreferencesSnapshot,
+    Partial<InsightsPreferencesSnapshot>
+  >({
+    isLoading,
+    storedJson: insightsPreferencesJson,
+    snapshot: insightsPreferencesSnapshot,
+    parseStoredJson: parseInsightsPreferencesPayload,
+    applyParsedSnapshot: applyInsightsPreferencesSnapshot,
+    writeStoredJson: updateInsightsPreferencesJson,
+  });
 
   const allTransactions = useMemo(() => queryTransactions(), [queryTransactions]);
+  const transactionById = useMemo(
+    () => new Map(allTransactions.map((transaction) => [transaction.id, transaction])),
+    [allTransactions],
+  );
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -775,6 +963,10 @@ export function InsightsScreen({
     () => new Set(excludedSavingsExpenseCategoryIds),
     [excludedSavingsExpenseCategoryIds],
   );
+  const excludedAssetHistoryAccountSet = useMemo(
+    () => new Set(excludedAssetHistoryAccountIds),
+    [excludedAssetHistoryAccountIds],
+  );
   const excludedTimeCostExpenseCategorySet = useMemo(
     () =>
       excludedTimeCostExpenseCategoryId
@@ -782,15 +974,25 @@ export function InsightsScreen({
         : new Set<string>(),
     [excludedTimeCostExpenseCategoryId],
   );
+  const assetHistoryAccountOptions = useMemo(() => accounts, [accounts]);
+  const includedAssetHistoryAccountIds = useMemo(
+    () =>
+      assetHistoryAccountOptions
+        .filter((account) => !excludedAssetHistoryAccountSet.has(account.id))
+        .map((account) => account.id),
+    [assetHistoryAccountOptions, excludedAssetHistoryAccountSet],
+  );
   const hasPeriodFilter = activeInsightFilterConfig.fixedPeriodPreset === null;
   const hasAccountFilter = activeInsightFilterConfig.allowAccountFilter;
   const hasSavingsCategoryExclusionFilter = selectedInsightType === 'savings_rate';
   const hasTimeCostExpenseCategoryExclusionFilter = selectedInsightType === 'time_cost_leaderboard';
+  const hasAssetHistoryAccountExclusionFilter = selectedInsightType === 'asset_history';
   const hasInsightsFilters =
     hasPeriodFilter ||
     hasAccountFilter ||
     hasSavingsCategoryExclusionFilter ||
-    hasTimeCostExpenseCategoryExclusionFilter;
+    hasTimeCostExpenseCategoryExclusionFilter ||
+    hasAssetHistoryAccountExclusionFilter;
 
   const shiftPeriodState = useCallback(
     (state: PeriodState, direction: 1 | -1, preset: PeriodPreset): PeriodState => {
@@ -850,6 +1052,148 @@ export function InsightsScreen({
             (!!tx.accountId && effectiveSelectedAccountIds.includes(tx.accountId)))
         );
       });
+
+      if (insightType === 'asset_history') {
+        const includedAccounts = assetHistoryAccountOptions.filter(
+          (account) => !excludedAssetHistoryAccountSet.has(account.id),
+        );
+        const excludedAccountsCount = assetHistoryAccountOptions.length - includedAccounts.length;
+        const year = state.anchorDate.getFullYear();
+        const monthRowsSeed: AssetHistoryMonthRow[] = Array.from({ length: 12 }, (_, monthIndex) => {
+          const monthDate = new Date(Date.UTC(year, monthIndex, 1));
+          return {
+            monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+            label: monthDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
+            totalAssets: 0,
+          };
+        });
+
+        if (includedAccounts.length === 0) {
+          return {
+            kind: 'asset_history',
+            year,
+            range,
+            filteredForRange: [],
+            monthRows: monthRowsSeed,
+            includedAccountsCount: 0,
+            excludedAccountsCount,
+          };
+        }
+
+        const accountById = new Map(includedAccounts.map((account) => [account.id, account]));
+        const balancesByAccountId = new Map(
+          includedAccounts.map((account) => [account.id, account.startingBalance]),
+        );
+        const monthlyDeltas = new Map<string, Map<string, number>>();
+        const addAccountDelta = (monthKey: string, accountId: string, delta: number) => {
+          if (!delta) return;
+          let monthDelta = monthlyDeltas.get(monthKey);
+          if (!monthDelta) {
+            monthDelta = new Map<string, number>();
+            monthlyDeltas.set(monthKey, monthDelta);
+          }
+          monthDelta.set(accountId, (monthDelta.get(accountId) ?? 0) + delta);
+        };
+
+        allTransactions.forEach((transaction) => {
+          const monthKey = monthKeyFromIsoLocal(transaction.date);
+          const isLegacyAdjustmentTransfer = isLegacyBalanceAdjustmentTransfer(transaction);
+
+          if (transaction.type === 'income' && transaction.accountId) {
+            const account = accountById.get(transaction.accountId);
+            if (account) {
+              addAccountDelta(
+                monthKey,
+                account.id,
+                account.type === 'credit' ? -transaction.amount : transaction.amount,
+              );
+            }
+          }
+
+          if (transaction.type === 'expense' && transaction.accountId) {
+            const account = accountById.get(transaction.accountId);
+            if (account) {
+              addAccountDelta(
+                monthKey,
+                account.id,
+                account.type === 'credit' ? transaction.amount : -transaction.amount,
+              );
+            }
+          }
+
+          if (transaction.type === 'transfer' && !isLegacyAdjustmentTransfer && transaction.toAccountId) {
+            const account = accountById.get(transaction.toAccountId);
+            if (account) {
+              addAccountDelta(
+                monthKey,
+                account.id,
+                account.type === 'credit' ? -transaction.amount : transaction.amount,
+              );
+            }
+          }
+
+          if (
+            transaction.type === 'transfer' &&
+            !isLegacyAdjustmentTransfer &&
+            transaction.fromAccountId
+          ) {
+            const account = accountById.get(transaction.fromAccountId);
+            if (account) {
+              addAccountDelta(
+                monthKey,
+                account.id,
+                account.type === 'credit' ? transaction.amount : -transaction.amount,
+              );
+            }
+          }
+
+          if (
+            (transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer) &&
+            transaction.accountId
+          ) {
+            const account = accountById.get(transaction.accountId);
+            if (account) {
+              addAccountDelta(monthKey, account.id, transaction.amount);
+            }
+          }
+        });
+
+        const sortedDeltaMonthKeys = Array.from(monthlyDeltas.keys()).sort((a, b) =>
+          a.localeCompare(b),
+        );
+        let deltaMonthIndex = 0;
+        const monthRows = monthRowsSeed.map((seedRow) => {
+          while (
+            deltaMonthIndex < sortedDeltaMonthKeys.length &&
+            (sortedDeltaMonthKeys[deltaMonthIndex] ?? '') <= seedRow.monthKey
+          ) {
+            const deltaMap = monthlyDeltas.get(sortedDeltaMonthKeys[deltaMonthIndex] ?? '');
+            deltaMap?.forEach((delta, accountId) => {
+              balancesByAccountId.set(
+                accountId,
+                (balancesByAccountId.get(accountId) ?? 0) + delta,
+              );
+            });
+            deltaMonthIndex += 1;
+          }
+
+          const totalAssets = Array.from(balancesByAccountId.values()).reduce(
+            (sum, value) => sum + value,
+            0,
+          );
+          return { ...seedRow, totalAssets };
+        });
+
+        return {
+          kind: 'asset_history',
+          year,
+          range,
+          filteredForRange: [],
+          monthRows,
+          includedAccountsCount: includedAccounts.length,
+          excludedAccountsCount,
+        };
+      }
 
       if (insightType === 'calendar_view') {
         const filteredForRange = inRangeTransactions.filter(
@@ -1206,6 +1550,7 @@ export function InsightsScreen({
               expense: 0,
               net: 0,
               savingsRate: null,
+              transactions: [],
             };
           },
         );
@@ -1221,10 +1566,16 @@ export function InsightsScreen({
           } else {
             monthRow.expense += value;
           }
+          monthRow.transactions.push(tx);
         });
         savingsRateRows.forEach((row) => {
           row.net = row.income - row.expense;
           row.savingsRate = row.income > 0 ? row.net / row.income : null;
+          row.transactions.sort((a, b) => {
+            const dateDelta = b.date.localeCompare(a.date);
+            if (dateDelta !== 0) return dateDelta;
+            return b.createdAt.localeCompare(a.createdAt);
+          });
         });
 
         return {
@@ -1307,10 +1658,12 @@ export function InsightsScreen({
     },
     [
       allTransactions,
+      assetHistoryAccountOptions,
       canUseTimeDisplayMode,
       categoryById,
       effectivePeriodPreset,
       effectiveSelectedAccountIds,
+      excludedAssetHistoryAccountSet,
       excludedSavingsExpenseCategorySet,
       excludedSavingsIncomeCategorySet,
       excludedTimeCostExpenseCategorySet,
@@ -1372,6 +1725,20 @@ export function InsightsScreen({
     (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
     [settings],
   );
+  const renderAssetAmount = useCallback(
+    (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
+    [settings],
+  );
+  const formatAssetAxisLabel = useCallback(
+    (rawValue: string) => {
+      const parsedValue = Number.parseFloat(rawValue.replace(/,/g, ''));
+      if (!Number.isFinite(parsedValue)) return rawValue;
+      const compactValue = formatCompactAxisNumber(parsedValue);
+      const currencySymbol = settings.currencySymbol?.trim() ?? '';
+      return currencySymbol ? `${currencySymbol}${compactValue}` : compactValue;
+    },
+    [settings.currencySymbol],
+  );
 
   const chartConfig = useMemo(
     () => ({
@@ -1398,6 +1765,22 @@ export function InsightsScreen({
   const insightsPagerSlots = useMemo<number[]>(
     () => Array.from({ length: INSIGHTS_PAGER_TOTAL_SLOTS }, (_, index) => index),
     [],
+  );
+  const insightsPagerExtraData = useMemo(
+    () => ({
+      selectedInsightType,
+      activeBreakdownSliceId,
+      selectedCalendarDayKey,
+      timeCostViewMode,
+      assetHistoryScrubMonthByYear,
+    }),
+    [
+      activeBreakdownSliceId,
+      assetHistoryScrubMonthByYear,
+      selectedCalendarDayKey,
+      selectedInsightType,
+      timeCostViewMode,
+    ],
   );
 
   const clampInsightsPageIndex = useCallback(
@@ -1526,41 +1909,29 @@ export function InsightsScreen({
     [pageWidth],
   );
 
-  const renderInsightsWindowPage = useCallback(
-    ({ item }: { item: number }) => {
-      const pageOffset = item - committedPageIndex;
-      const pagePeriodState = shiftPeriodStateBySteps(
-        currentPeriodState,
-        pageOffset,
-        effectivePeriodPreset,
-      );
-      const pageData = buildPageData(pagePeriodState, selectedInsightType);
-
-      return (
-        <View style={{ width: pageWidth }} className="flex-1 bg-background">
-          <ScrollView
-            ref={(ref) => {
-              getPageScrollRef(item).current = ref;
-            }}
-            className="flex-1"
-            contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-          >
-            {renderInsightsPane(pageData)}
-          </ScrollView>
-        </View>
-      );
-    },
-    [
-      buildPageData,
-      committedPageIndex,
+  const renderInsightsWindowPage = ({ item }: { item: number }) => {
+    const pageOffset = item - committedPageIndex;
+    const pagePeriodState = shiftPeriodStateBySteps(
       currentPeriodState,
+      pageOffset,
       effectivePeriodPreset,
-      getPageScrollRef,
-      pageWidth,
-      selectedInsightType,
-      shiftPeriodStateBySteps,
-    ],
-  );
+    );
+    const pageData = buildPageData(pagePeriodState, selectedInsightType);
+
+    return (
+      <View style={insightsPageStyle} className="flex-1 bg-background">
+        <ScrollView
+          ref={(ref) => {
+            getPageScrollRef(item).current = ref;
+          }}
+          className="flex-1"
+          contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
+        >
+          {renderInsightsPane(pageData)}
+        </ScrollView>
+      </View>
+    );
+  };
 
   const handlePrevMonth = useCallback(() => onMonthStep(-1), [onMonthStep]);
   const handleNextMonth = useCallback(() => onMonthStep(1), [onMonthStep]);
@@ -1806,10 +2177,9 @@ export function InsightsScreen({
                     onPress={() => {
                       void triggerHaptic('selection');
                       setActiveBreakdownSlice(null, false);
-                      setDrilldownState({
+                      openDrilldown({
                         label: item.name,
                         transactions: pageData.breakdownTransactionsById.get(item.id) ?? [],
-                        transactionType: pageData.transactionType,
                       });
                     }}
                     className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
@@ -2013,9 +2383,8 @@ export function InsightsScreen({
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('selection');
-                      setDrilldownState({
+                      openDrilldown({
                         label: selectedDayLabel,
-                        subtitle: I18n.t('insights.calendar.drilldown_subtitle'),
                         transactions: selectedDayTransactions,
                       });
                     }}
@@ -2126,9 +2495,8 @@ export function InsightsScreen({
           emoji: categoryRow.emoji,
           accentColor,
           onPress: () => {
-            setDrilldownState({
+            openDrilldown({
               label: `${categoryRow.emoji} ${categoryRow.label}`,
-              subtitle: I18n.t('insights.time_cost.drilldown_subtitle'),
               transactions: categoryRow.transactions,
             });
           },
@@ -2202,6 +2570,178 @@ export function InsightsScreen({
             accentColor={TIME_COST_RANK_ACCENTS[0]}
             shareLabel={I18n.t('insights.time_cost.share_label')}
           />
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderAssetHistoryPane = (pageData: AssetHistoryPageData) => {
+    if (pageData.includedAccountsCount === 0) {
+      return (
+        <EmptyState
+          title={I18n.t('insights.analytics.asset_history.empty_no_accounts.title')}
+          message={I18n.t('insights.analytics.asset_history.empty_no_accounts.message')}
+          mascotMood="curious"
+          animateIn={false}
+        />
+      );
+    }
+
+    const monthValues = pageData.monthRows.map((row) => row.totalAssets);
+    const selectedMonthKey = assetHistoryScrubMonthByYear[String(pageData.year)] ?? null;
+    const selectedMonthRow =
+      pageData.monthRows.find((row) => row.monthKey === selectedMonthKey) ??
+      pageData.monthRows[pageData.monthRows.length - 1] ??
+      null;
+    const selectedMonthIndex = selectedMonthRow
+      ? pageData.monthRows.findIndex((row) => row.monthKey === selectedMonthRow.monthKey)
+      : -1;
+    const selectedMonthToneClass =
+      selectedMonthRow && selectedMonthRow.totalAssets >= 0 ? 'text-success' : 'text-destructive';
+    const selectedPointX =
+      selectedMonthIndex >= 0
+        ? assetHistoryPointX(selectedMonthIndex, chartWidth, pageData.monthRows.length)
+        : null;
+    const selectedPointY = selectedMonthRow
+      ? assetHistoryPointY(selectedMonthRow.totalAssets, monthValues)
+      : null;
+    const selectedYearKey = String(pageData.year);
+    const selectAssetHistoryMonth = (monthKey: string) => {
+      if (assetHistoryScrubMonthByYear[selectedYearKey] === monthKey) return;
+      void triggerHaptic('selection');
+      setAssetHistoryScrubMonthByYear((previous) => {
+        if (previous[selectedYearKey] === monthKey) return previous;
+        return { ...previous, [selectedYearKey]: monthKey };
+      });
+    };
+    const selectAssetHistoryMonthFromChartTap = (locationX: number) => {
+      const monthIndex = assetHistoryNearestPointIndex(
+        locationX,
+        chartWidth,
+        pageData.monthRows.length,
+      );
+      const monthKey = pageData.monthRows[monthIndex]?.monthKey;
+      if (!monthKey) return;
+      selectAssetHistoryMonth(monthKey);
+    };
+
+    const chartData = {
+      labels: pageData.monthRows.map((row) => row.label),
+      datasets: [
+        {
+          data: pageData.monthRows.map((row) => row.totalAssets),
+          color: (opacity = 1) => {
+            const r = isDark ? 52 : 31;
+            const g = isDark ? 201 : 138;
+            const b = isDark ? 154 : 111;
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+          },
+          strokeWidth: 2,
+        },
+      ],
+    };
+
+    return (
+      <Card className="mt-2">
+        <CardContent className="py-3 gap-2.5">
+          <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
+            <View className="flex-row items-center justify-between">
+              <Text variant="caption">{I18n.t('insights.analytics.asset_history.summary_title')}</Text>
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.asset_history.account_count', {
+                  count: pageData.includedAccountsCount,
+                })}
+              </Text>
+            </View>
+            {pageData.excludedAccountsCount > 0 ? (
+              <Text variant="label" tone="muted" className="mt-1">
+                {I18n.t('insights.analytics.asset_history.unselected_count', {
+                  count: pageData.excludedAccountsCount,
+                })}
+              </Text>
+            ) : null}
+            {selectedMonthRow ? (
+              <View className="mt-2.5 rounded-xl border border-border/30 bg-card/80 px-2.5 py-2 flex-row items-center justify-between">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.analytics.asset_history.selected')}: {selectedMonthRow.label}
+                </Text>
+                <Text variant="caption" className={cn(selectedMonthToneClass)}>
+                  {renderAssetAmount(selectedMonthRow.totalAssets)}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View className="rounded-2xl border border-border/30 bg-card/90 px-2 py-2.5">
+            <View style={{ width: chartWidth, height: ASSET_HISTORY_CHART_HEIGHT }} className="self-center">
+              <LineChart
+                data={chartData}
+                width={chartWidth}
+                height={ASSET_HISTORY_CHART_HEIGHT}
+                chartConfig={chartConfig}
+                formatYLabel={formatAssetAxisLabel}
+                withDots
+                withShadow={false}
+                withInnerLines
+                withOuterLines={false}
+                withVerticalLines={false}
+                bezier
+                segments={4}
+                style={{ borderRadius: 14, paddingRight: ASSET_HISTORY_CHART_PADDING_RIGHT }}
+              />
+              {selectedPointX !== null && selectedPointY !== null ? (
+                <>
+                  <View
+                    className="absolute bg-primary/35"
+                    pointerEvents="none"
+                    style={{
+                      left: selectedPointX - 0.5,
+                      top: ASSET_HISTORY_CHART_PADDING_TOP,
+                      width: 1,
+                      height: ASSET_HISTORY_CHART_HEIGHT * ASSET_HISTORY_VERTICAL_HEIGHT_PERCENTAGE,
+                    }}
+                  />
+                  <View
+                    className="absolute h-3 w-3 rounded-full border-2 border-primary bg-background"
+                    pointerEvents="none"
+                    style={{ left: selectedPointX - 6, top: selectedPointY - 6 }}
+                  />
+                </>
+              ) : null}
+              <Pressable
+                className="absolute inset-0"
+                delayLongPress={10_000}
+                onPress={(event) => {
+                  selectAssetHistoryMonthFromChartTap(event.nativeEvent.locationX);
+                }}
+              />
+            </View>
+          </View>
+
+          <View className="gap-1">
+            {pageData.monthRows.map((row) => (
+              <Pressable
+                key={row.monthKey}
+                onPress={() => {
+                  selectAssetHistoryMonth(row.monthKey);
+                }}
+                className={cn(
+                  'rounded-xl border px-3 py-2 flex-row items-center justify-between',
+                  selectedMonthRow?.monthKey === row.monthKey
+                    ? 'border-primary/45 bg-primary/10'
+                    : 'border-border/25 bg-card/80',
+                )}
+              >
+                <Text variant="caption">{row.label}</Text>
+                <Text
+                  variant="caption"
+                  className={cn(row.totalAssets >= 0 ? 'text-success' : 'text-destructive')}
+                >
+                  {renderAssetAmount(row.totalAssets)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </CardContent>
       </Card>
     );
@@ -2301,11 +2841,7 @@ export function InsightsScreen({
             </View>
 
             <View className="gap-1.5">
-              <Text variant="caption">
-                {I18n.t('insights.analytics.savings_rate.monthly_title')}
-              </Text>
               {pageData.savingsRateRows.map((row) => {
-                const canOpenActivity = typeof onOpenActivityMonth === 'function';
                 const monthlyRate = row.savingsRate;
                 const monthlyIntensity =
                   monthlyRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(monthlyRate)));
@@ -2328,16 +2864,15 @@ export function InsightsScreen({
                 return (
                   <Pressable
                     key={row.monthKey}
-                    disabled={!canOpenActivity}
                     onPress={() => {
-                      if (!canOpenActivity) return;
                       void triggerHaptic('selection');
-                      onOpenActivityMonth?.(row.monthKey);
+                      openDrilldown({
+                        label: row.label,
+                        transactions: row.transactions,
+                        showTypeFilter: true,
+                      });
                     }}
-                    className={cn(
-                      'rounded-xl border border-border/30 bg-card/90 px-2.5 py-2',
-                      canOpenActivity ? 'active:opacity-85' : '',
-                    )}
+                    className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
                   >
                     <View className="flex-row items-center justify-between">
                       <Text variant="caption">{row.label}</Text>
@@ -2384,6 +2919,9 @@ export function InsightsScreen({
     if (pageData.kind === 'calendar') {
       return renderCalendarPane(pageData);
     }
+    if (pageData.kind === 'asset_history') {
+      return renderAssetHistoryPane(pageData);
+    }
     if (pageData.kind === 'analytics') {
       return renderAnalyticsPane(pageData);
     }
@@ -2404,6 +2942,14 @@ export function InsightsScreen({
       setExcludedTimeCostExpenseCategoryId(null);
     }
   }, [categories, excludedTimeCostExpenseCategoryId]);
+  useEffect(() => {
+    if (excludedAssetHistoryAccountIds.length === 0) return;
+    const validAccountIds = new Set(assetHistoryAccountOptions.map((account) => account.id));
+    setExcludedAssetHistoryAccountIds((previous) => {
+      const next = previous.filter((accountId) => validAccountIds.has(accountId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [assetHistoryAccountOptions, excludedAssetHistoryAccountIds.length]);
   const savingsIncomeCategoryPanel = useMemo(() => {
     const parents = categories
       .filter((category) => category.type === 'income' && !category.parentId)
@@ -2465,15 +3011,18 @@ export function InsightsScreen({
     let count = 0;
     if (hasPeriodFilter && periodPreset !== 'month') count += 1;
     if (hasAccountFilter && selectedAccountIds.length > 0) count += 1;
+    if (hasAssetHistoryAccountExclusionFilter) count += excludedAssetHistoryAccountIds.length;
     if (hasSavingsCategoryExclusionFilter)
       count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
     if (hasTimeCostExpenseCategoryExclusionFilter && excludedTimeCostExpenseCategoryId) count += 1;
     return count;
   }, [
+    excludedAssetHistoryAccountIds.length,
     excludedTimeCostExpenseCategoryId,
     excludedSavingsExpenseCategoryIds.length,
     excludedSavingsIncomeCategoryIds.length,
     hasAccountFilter,
+    hasAssetHistoryAccountExclusionFilter,
     hasSavingsCategoryExclusionFilter,
     hasTimeCostExpenseCategoryExclusionFilter,
     hasInsightsFilters,
@@ -2493,6 +3042,8 @@ export function InsightsScreen({
     setExcludedSavingsIncomeCategoryIds([]);
     setExcludedSavingsExpenseCategoryIds([]);
     setExcludedTimeCostExpenseCategoryId(null);
+    setExcludedAssetHistoryAccountIds([]);
+    setAssetHistoryScrubMonthByYear({});
   }, []);
 
   const handleCustomDateSelect = useCallback(
@@ -2517,18 +3068,278 @@ export function InsightsScreen({
   );
   const handleInsightTypeChange = useCallback(
     (value: string) => {
+      const nextInsightType = value as InsightType;
+      const nextInsightFilterConfig = getInsightFilterConfig(nextInsightType);
+      const nextEffectivePeriodPreset = nextInsightFilterConfig.fixedPeriodPreset ?? periodPreset;
+      const currentPeriodMode =
+        effectivePeriodPreset === 'month'
+          ? 'month'
+          : effectivePeriodPreset === 'year'
+            ? 'year'
+            : 'other';
+      const nextPeriodMode =
+        nextEffectivePeriodPreset === 'month'
+          ? 'month'
+          : nextEffectivePeriodPreset === 'year'
+            ? 'year'
+            : 'other';
+
+      if (
+        (currentPeriodMode === 'year' && nextPeriodMode === 'month') ||
+        (currentPeriodMode === 'month' && nextPeriodMode === 'year')
+      ) {
+        const now = new Date();
+        setAnchorDate(startOfMonth(now));
+      }
+
       setActiveBreakdownSlice(null, false);
       setSelectedCalendarDayKey(null);
-      setSelectedInsightType(value as InsightType);
+      setSelectedInsightType(nextInsightType);
     },
-    [setActiveBreakdownSlice],
+    [effectivePeriodPreset, periodPreset, setActiveBreakdownSlice],
   );
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
+  const isDrilldownSelectionMode = selectedDrilldownTransactionIds.length > 0;
+  const selectedDrilldownTransactionCount = selectedDrilldownTransactionIds.length;
+  const hasDrilldownBulkChanges = drilldownBulkDateTouched || drilldownBulkNoteTouched;
+  const handleDrilldownHeaderLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = Math.ceil(event.nativeEvent.layout.height);
+    setDrilldownHeaderHeight((previous) =>
+      Math.abs(previous - nextHeight) < 1 ? previous : nextHeight,
+    );
+  }, []);
+  const openDrilldown = useCallback(
+    (nextState: {
+      label: string;
+      transactions: TransactionWithRelations[];
+      showTypeFilter?: boolean;
+    }) => {
+      if (nextState.showTypeFilter) {
+        setDrilldownTypeFilter('expense');
+      }
+      setSelectedDrilldownTransactionIds([]);
+      setShowDrilldownBulkUpdate(false);
+      setDrilldownBulkDate(formatDateInput(new Date()));
+      setDrilldownBulkDateTouched(false);
+      setDrilldownBulkNote('');
+      setDrilldownBulkNoteTouched(false);
+      setDrilldownState(nextState);
+    },
+    [],
+  );
   const handleCloseDrilldown = useCallback(() => {
     void triggerHaptic('selection');
     setDrilldownState(null);
+    setDrilldownTypeFilter('expense');
+    setSelectedDrilldownTransactionIds([]);
+    setShowDrilldownBulkUpdate(false);
+    setSelectedTransaction(null);
   }, []);
-  const handleCloseSelectedTransaction = useCallback(() => setSelectedTransaction(null), []);
+  const clearDrilldownSelection = useCallback(() => {
+    void triggerHaptic('selection');
+    setSelectedDrilldownTransactionIds([]);
+  }, []);
+  const toggleDrilldownTransactionSelection = useCallback((transactionId: string) => {
+    setSelectedDrilldownTransactionIds((previous) =>
+      previous.includes(transactionId)
+        ? previous.filter((id) => id !== transactionId)
+        : [...previous, transactionId],
+    );
+  }, []);
+  const handleDrilldownTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isDrilldownSelectionMode) {
+        toggleDrilldownTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedTransaction(transaction);
+    },
+    [isDrilldownSelectionMode, toggleDrilldownTransactionSelection],
+  );
+  const handleDrilldownTransactionLongPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isDrilldownSelectionMode) {
+        toggleDrilldownTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedDrilldownTransactionIds([transaction.id]);
+    },
+    [isDrilldownSelectionMode, toggleDrilldownTransactionSelection],
+  );
+  const handleOpenDrilldownBulkUpdate = useCallback(() => {
+    if (selectedDrilldownTransactionCount === 0) return;
+    setDrilldownBulkDate(formatDateInput(new Date()));
+    setDrilldownBulkDateTouched(false);
+    setDrilldownBulkNote('');
+    setDrilldownBulkNoteTouched(false);
+    setShowDrilldownBulkUpdate(true);
+  }, [selectedDrilldownTransactionCount]);
+  const handleCloseDrilldownBulkUpdate = useCallback(() => {
+    setShowDrilldownBulkUpdate(false);
+  }, []);
+  const handleApplyDrilldownBulkUpdate = useCallback(() => {
+    if (selectedDrilldownTransactionIds.length === 0) return;
+    if (!hasDrilldownBulkChanges) return;
+
+    const updates: { date?: string; note?: string | null } = {};
+    if (drilldownBulkDateTouched) updates.date = drilldownBulkDate;
+    if (drilldownBulkNoteTouched) {
+      const normalizedNote = drilldownBulkNote.trim();
+      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
+    }
+    if (Object.keys(updates).length === 0) return;
+
+    selectedDrilldownTransactionIds.forEach((transactionId) => {
+      updateTransaction(transactionId, updates);
+    });
+    setShowDrilldownBulkUpdate(false);
+    setSelectedDrilldownTransactionIds([]);
+  }, [
+    drilldownBulkDate,
+    drilldownBulkDateTouched,
+    drilldownBulkNote,
+    drilldownBulkNoteTouched,
+    hasDrilldownBulkChanges,
+    selectedDrilldownTransactionIds,
+    updateTransaction,
+  ]);
+  const handleDeleteSelectedDrilldownTransactions = useCallback(() => {
+    if (selectedDrilldownTransactionIds.length === 0) return;
+    const idsToDelete = [...selectedDrilldownTransactionIds];
+    Alert.alert(
+      I18n.t('transactions.selection.delete_title'),
+      I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            idsToDelete.forEach((transactionId) => {
+              deleteTransaction(transactionId);
+            });
+            setShowDrilldownBulkUpdate(false);
+            setSelectedDrilldownTransactionIds([]);
+          },
+        },
+      ],
+    );
+  }, [deleteTransaction, selectedDrilldownTransactionIds]);
+  const resolvedDrilldownTransactions = useMemo(() => {
+    if (!drilldownState) return [];
+    return drilldownState.transactions
+      .map((transaction) => transactionById.get(transaction.id))
+      .filter((transaction): transaction is TransactionWithRelations => Boolean(transaction));
+  }, [drilldownState, transactionById]);
+  const drilldownIncomeTransactions = useMemo(
+    () =>
+      resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
+    [resolvedDrilldownTransactions],
+  );
+  const drilldownExpenseTransactions = useMemo(
+    () =>
+      resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
+    [resolvedDrilldownTransactions],
+  );
+  const drilldownPagerExtraData = useMemo(
+    () => ({
+      drilldownTypeFilter,
+      incomeTransactions: drilldownIncomeTransactions,
+      expenseTransactions: drilldownExpenseTransactions,
+      pageWidth,
+      selectedTransactionIds: selectedDrilldownTransactionIds,
+    }),
+    [
+      drilldownExpenseTransactions,
+      drilldownIncomeTransactions,
+      drilldownTypeFilter,
+      pageWidth,
+      selectedDrilldownTransactionIds,
+    ],
+  );
+  const getDrilldownPagerItemLayout = useCallback(
+    (_: ArrayLike<DrilldownTransactionFilter> | null | undefined, index: number) => ({
+      length: pageWidth,
+      offset: pageWidth * index,
+      index,
+    }),
+    [pageWidth],
+  );
+  const handleDrilldownPagerMomentumEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const rawIndex = event.nativeEvent.contentOffset.x / pageWidth;
+      const index = Math.max(0, Math.min(DRILLDOWN_TYPE_PAGES.length - 1, Math.round(rawIndex)));
+      const type = DRILLDOWN_TYPE_PAGES[index] ?? 'expense';
+      if (type !== drilldownTypeFilter) {
+        setDrilldownTypeFilter(type);
+      }
+    },
+    [drilldownTypeFilter, pageWidth],
+  );
+  const handleDrilldownPagerScrollToIndexFailed = useCallback(
+    (info: { index: number }) => {
+      const index = Math.max(0, Math.min(DRILLDOWN_TYPE_PAGES.length - 1, info.index));
+      drilldownPagerRef.current?.scrollToOffset({ offset: index * pageWidth, animated: false });
+    },
+    [pageWidth],
+  );
+  const renderDrilldownPagerPage = useCallback(
+    ({ item }: { item: DrilldownTransactionFilter }) => {
+      const transactions =
+        item === 'income' ? drilldownIncomeTransactions : drilldownExpenseTransactions;
+      return (
+        <View style={{ width: pageWidth, flex: 1 }}>
+          <ActivityTransactionList
+            transactions={transactions}
+            onTransactionPress={handleDrilldownTransactionPress}
+            onTransactionLongPress={handleDrilldownTransactionLongPress}
+            selectedTransactionIds={selectedDrilldownTransactionIds}
+            selectionMode={isDrilldownSelectionMode}
+            emptyTitle={I18n.t('insights.empty_category.title')}
+            emptyMessage={I18n.t('insights.empty_category.message')}
+            contentPaddingBottom={30}
+            compactItems
+            listKey={`drilldown-${item}`}
+          />
+        </View>
+      );
+    },
+    [
+      drilldownExpenseTransactions,
+      drilldownIncomeTransactions,
+      handleDrilldownTransactionLongPress,
+      handleDrilldownTransactionPress,
+      isDrilldownSelectionMode,
+      pageWidth,
+      selectedDrilldownTransactionIds,
+    ],
+  );
+
+  useEffect(() => {
+    if (!isDrilldownSelectionMode) {
+      setShowDrilldownBulkUpdate(false);
+      return;
+    }
+    setSelectedTransaction(null);
+  }, [isDrilldownSelectionMode]);
+
+  useEffect(() => {
+    if (selectedDrilldownTransactionIds.length === 0) return;
+    const availableIds = new Set(resolvedDrilldownTransactions.map((transaction) => transaction.id));
+    setSelectedDrilldownTransactionIds((previous) => {
+      const next = previous.filter((id) => availableIds.has(id));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [resolvedDrilldownTransactions, selectedDrilldownTransactionIds.length]);
+
+  useEffect(() => {
+    if (!drilldownState?.showTypeFilter) return;
+    const targetIndex = drilldownTypeFilter === 'income' ? 0 : 1;
+    const frame = requestAnimationFrame(() => {
+      drilldownPagerRef.current?.scrollToIndex({ index: targetIndex, animated: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [drilldownState?.showTypeFilter, drilldownTypeFilter, pageWidth]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -2564,6 +3375,7 @@ export function InsightsScreen({
           <FlatList
             ref={horizontalListRef}
             data={insightsPagerSlots}
+            extraData={insightsPagerExtraData}
             keyExtractor={(item) => String(item)}
             style={INSIGHTS_LIST_STYLE}
             horizontal
@@ -2575,7 +3387,7 @@ export function InsightsScreen({
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
             nestedScrollEnabled
-            removeClippedSubviews={false}
+            removeClippedSubviews
             initialNumToRender={5}
             maxToRenderPerBatch={5}
             windowSize={7}
@@ -2596,54 +3408,252 @@ export function InsightsScreen({
         visible={!!drilldownState}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setDrilldownState(null)}
+        onRequestClose={handleCloseDrilldown}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View className="px-5 pt-5 pb-3 flex-row items-center justify-between">
-            <View>
-              <Text variant="subheading">
-                {drilldownState?.label ?? I18n.t('insights.category_fallback')}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {drilldownState?.subtitle ??
-                  (drilldownState?.transactionType === 'income'
-                    ? I18n.t('insights.drilldown_subtitle_income')
-                    : I18n.t('insights.drilldown_subtitle'))}
-              </Text>
-            </View>
-            <Pressable
-              onPress={handleCloseDrilldown}
-              className="px-3 py-2 rounded-full bg-secondary"
-            >
-              <Text variant="caption" tone="muted">
-                {I18n.t('common.done')}
-              </Text>
-            </Pressable>
-          </View>
+          {selectedTransaction ? (
+            <EditTransactionScreen
+              transaction={selectedTransaction}
+              onClose={() => setSelectedTransaction(null)}
+            />
+          ) : showDrilldownBulkUpdate ? (
+            <>
+              <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+                <View className="flex-1 pr-3">
+                  <Text variant="subheading">
+                    {I18n.t('transactions.selection.update_title', {
+                      count: selectedDrilldownTransactionCount,
+                    })}
+                  </Text>
+                  <Text variant="friendly" tone="muted">
+                    {I18n.t('transactions.selection.update_subtitle')}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-2">
+                  <Pressable
+                    onPress={handleCloseDrilldownBulkUpdate}
+                    className="px-3 py-2 rounded-full bg-secondary/70"
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.cancel')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleApplyDrilldownBulkUpdate}
+                    disabled={!hasDrilldownBulkChanges}
+                    className={cn(
+                      'px-3 py-2 rounded-full',
+                      hasDrilldownBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        hasDrilldownBulkChanges ? 'text-white' : 'text-muted-foreground',
+                      )}
+                    >
+                      {I18n.t('common.save')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
 
-          <ActivityTransactionList
-            transactions={drilldownState?.transactions ?? []}
-            onTransactionPress={setSelectedTransaction}
-            emptyTitle={I18n.t('insights.empty_category.title')}
-            emptyMessage={I18n.t('insights.empty_category.message')}
-            contentPaddingBottom={30}
-            compactItems
-          />
+              <ScrollView className="flex-1" contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}>
+                <View className="gap-2.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.editor.date')}
+                  </Text>
+                  <View
+                    className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                    style={{ height: 360 }}
+                  >
+                    <DatePanel
+                      value={drilldownBulkDate}
+                      onSelect={(value) => {
+                        setDrilldownBulkDate(value);
+                        setDrilldownBulkDateTouched(true);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                <View className="gap-2.5">
+                  <Input
+                    label={I18n.t('transaction_detail.note')}
+                    placeholder={I18n.t('transactions.editor.optional')}
+                    value={drilldownBulkNote}
+                    onChangeText={(value) => {
+                      setDrilldownBulkNote(value);
+                      setDrilldownBulkNoteTouched(true);
+                    }}
+                  />
+                </View>
+              </ScrollView>
+            </>
+          ) : (
+            <>
+              {isDrilldownSelectionMode ? (
+                <View
+                  className="bg-background pb-2 pt-2"
+                  style={drilldownHeaderHeight > 0 ? { minHeight: drilldownHeaderHeight } : undefined}
+                >
+                  <View className="px-5 pt-2">
+                    <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+                      <Pressable
+                        onPress={clearDrilldownSelection}
+                        className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                      >
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('common.cancel')}
+                        </Text>
+                      </Pressable>
+
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('transactions.selection.selected_count', {
+                          count: selectedDrilldownTransactionCount,
+                        })}
+                      </Text>
+
+                      <View className="flex-row items-center gap-2">
+                        <Pressable
+                          onPress={handleOpenDrilldownBulkUpdate}
+                          className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                        >
+                          <Text variant="caption" className="text-primary">
+                            {I18n.t('transactions.selection.update')}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={handleDeleteSelectedDrilldownTransactions}
+                          className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                        >
+                          <Text variant="caption" className="text-destructive">
+                            {I18n.t('common.delete')}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                <View
+                  className="px-5 pt-5 pb-3 flex-row items-center justify-between"
+                  onLayout={handleDrilldownHeaderLayout}
+                >
+                  <View>
+                    <Text variant="subheading">
+                      {drilldownState?.label ?? I18n.t('insights.category_fallback')}
+                    </Text>
+                    <Text variant="friendly" tone="muted">
+                      {I18n.t('insights.drilldown_subtitle')}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={handleCloseDrilldown}
+                    className="px-3 py-2 rounded-full bg-secondary"
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.done')}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {drilldownState?.showTypeFilter ? (
+                <>
+                  <View className="px-5 pb-2">
+                    <View className="rounded-2xl border border-border/35 bg-card/90 px-3 py-2.5">
+                      <View className="flex-row items-center justify-between gap-2">
+                        <View className="flex-1">
+                          <Text
+                            variant="label"
+                            className={cn(
+                              drilldownTypeFilter === 'income'
+                                ? 'text-success'
+                                : 'text-success/55',
+                            )}
+                          >
+                            {I18n.t('insights.calendar.income')}
+                          </Text>
+                          <Text variant="caption" tone="muted" className="mt-0.5">
+                            {I18n.t('insights.calendar.transactions')}: {drilldownIncomeTransactions.length}
+                          </Text>
+                        </View>
+                        <View className="items-center px-2">
+                          <Text variant="label" tone="muted">
+                            {I18n.t('insights.drilldown_swipe_hint')}
+                          </Text>
+                        </View>
+                        <View className="flex-1 items-end">
+                          <Text
+                            variant="label"
+                            className={cn(
+                              drilldownTypeFilter === 'expense'
+                                ? 'text-destructive'
+                                : 'text-destructive/55',
+                            )}
+                          >
+                            {I18n.t('insights.calendar.expense')}
+                          </Text>
+                          <Text variant="caption" tone="muted" className="mt-0.5">
+                            {I18n.t('insights.calendar.transactions')}: {drilldownExpenseTransactions.length}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="mt-2 flex-row items-center gap-1.5">
+                        <View
+                          className={cn(
+                            'h-1.5 flex-1 rounded-full',
+                            drilldownTypeFilter === 'income' ? 'bg-success/60' : 'bg-secondary',
+                          )}
+                        />
+                        <View
+                          className={cn(
+                            'h-1.5 flex-1 rounded-full',
+                            drilldownTypeFilter === 'expense'
+                              ? 'bg-destructive/60'
+                              : 'bg-secondary',
+                          )}
+                        />
+                      </View>
+                    </View>
+                  </View>
+
+                  <FlatList
+                    ref={drilldownPagerRef}
+                    data={DRILLDOWN_TYPE_PAGES}
+                    extraData={drilldownPagerExtraData}
+                    keyExtractor={(item) => item}
+                    renderItem={renderDrilldownPagerPage}
+                    horizontal
+                    pagingEnabled
+                    bounces={false}
+                    overScrollMode="never"
+                    directionalLockEnabled
+                    decelerationRate="fast"
+                    showsHorizontalScrollIndicator={false}
+                    getItemLayout={getDrilldownPagerItemLayout}
+                    onMomentumScrollEnd={handleDrilldownPagerMomentumEnd}
+                    onScrollToIndexFailed={handleDrilldownPagerScrollToIndexFailed}
+                    style={INSIGHTS_LIST_STYLE}
+                  />
+                </>
+              ) : (
+                <ActivityTransactionList
+                  transactions={resolvedDrilldownTransactions}
+                  onTransactionPress={handleDrilldownTransactionPress}
+                  onTransactionLongPress={handleDrilldownTransactionLongPress}
+                  selectedTransactionIds={selectedDrilldownTransactionIds}
+                  selectionMode={isDrilldownSelectionMode}
+                  emptyTitle={I18n.t('insights.empty_category.title')}
+                  emptyMessage={I18n.t('insights.empty_category.message')}
+                  contentPaddingBottom={30}
+                  compactItems
+                />
+              )}
+            </>
+          )}
         </SafeAreaView>
-      </ThemeModal>
-
-      <ThemeModal
-        visible={!!selectedTransaction}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseSelectedTransaction}
-      >
-        {selectedTransaction ? (
-          <EditTransactionScreen
-            transaction={selectedTransaction}
-            onClose={() => setSelectedTransaction(null)}
-          />
-        ) : null}
       </ThemeModal>
 
       <ThemeModal
@@ -2796,6 +3806,43 @@ export function InsightsScreen({
                     />
                   ))}
                 </ScrollView>
+              </View>
+            ) : null}
+
+            {hasAssetHistoryAccountExclusionFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <View className="flex-1 pr-2">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.asset_history_accounts')}
+                    </Text>
+                    <Text variant="label" tone="muted" className="mt-1">
+                      {I18n.t('insights.filters.include_accounts')}
+                    </Text>
+                  </View>
+                  <FilterPill
+                    label={I18n.t('insights.filters.all_selected')}
+                    active={includedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length}
+                    onPress={() => setExcludedAssetHistoryAccountIds([])}
+                  />
+                </View>
+                <View
+                  className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                  style={{ height: 236 }}
+                >
+                  <AccountPanel
+                    accounts={assetHistoryAccountOptions}
+                    accountGroups={accountGroups}
+                    selectedIds={includedAssetHistoryAccountIds}
+                    onToggleSelect={(accountId) =>
+                      setExcludedAssetHistoryAccountIds((previous) =>
+                        previous.includes(accountId)
+                          ? previous.filter((id) => id !== accountId)
+                          : [...previous, accountId],
+                      )
+                    }
+                  />
+                </View>
               </View>
             ) : null}
 
