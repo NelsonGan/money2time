@@ -56,36 +56,26 @@ function MountedTab({ active, children }: { active: boolean; children: React.Rea
   );
 }
 
-/**
- * Computes the resolved theme, applies side-effects (NativeWind + RN Appearance),
- * and wraps children in ThemeProvider so all descendants get the resolved value.
- */
 function ThemeGate({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const { setColorScheme } = useColorScheme();
-  const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(() =>
-    Appearance.getColorScheme() === 'dark' ? 'dark' : 'light',
+  const themeMode = settings?.themeMode ?? 'system';
+  const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(
+    () => Appearance.getColorScheme() ?? 'light',
   );
 
   useEffect(() => {
-    const listener = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemScheme(colorScheme === 'dark' ? 'dark' : 'light');
+    const sub = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemScheme(colorScheme ?? 'light');
     });
-    return () => listener.remove();
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {
-    if (settings.themeMode === 'system') {
-      Appearance.setColorScheme(null);
-      setSystemScheme(Appearance.getColorScheme() === 'dark' ? 'dark' : 'light');
-    } else {
-      Appearance.setColorScheme(settings.themeMode);
-    }
-    setColorScheme(settings.themeMode === 'system' ? 'system' : settings.themeMode);
-  }, [settings.themeMode, setColorScheme]);
+    setColorScheme(themeMode === 'system' ? 'system' : themeMode);
+  }, [themeMode, setColorScheme]);
 
-  const resolved: 'light' | 'dark' =
-    settings.themeMode === 'system' ? systemScheme : settings.themeMode;
+  const resolved: 'light' | 'dark' = themeMode === 'system' ? systemScheme : themeMode;
 
   return <ThemeProvider value={resolved}>{children}</ThemeProvider>;
 }
@@ -96,11 +86,14 @@ function AppContent() {
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
   const [activeTab, setActiveTab] = useState<MainTab>('home');
+  const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
+  const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToRootToken, setAccountsResetToRootToken] = useState(0);
+  const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
@@ -125,6 +118,9 @@ function AppContent() {
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
+      if (tab === 'home' && activeTab === 'home') {
+        setHomeScrollTopToken((prev) => prev + 1);
+      }
       if (tab === 'transactions' && activeTab === 'transactions') {
         jumpTransactionsToMonth(monthKeyFromDateLocal(new Date()));
         setTransactionsScrollTopToken((prev) => prev + 1);
@@ -132,12 +128,16 @@ function AppContent() {
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
       }
-      if (tab === 'account') {
+      if (tab === 'account' && activeTab === 'account') {
+        setAccountsScrollTopToken((prev) => prev + 1);
+      }
+      if (tab === 'account' && activeTab !== 'account') {
         setAccountsResetToRootToken((prev) => prev + 1);
       }
       if (tab === 'settings' && activeTab === 'settings') {
         setSettingsForceScreen(null);
         setSettingsResetToken((prev) => prev + 1);
+        setSettingsScrollTopToken((prev) => prev + 1);
       }
       setActiveTab(tab);
     },
@@ -172,7 +172,7 @@ function AppContent() {
 
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'home'}>
-          <MemoHomeScreen />
+          <MemoHomeScreen scrollToTopToken={homeScrollTopToken} />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
           <MemoTransactionsScreen
@@ -183,7 +183,10 @@ function AppContent() {
           />
         </MountedTab>
         <MountedTab active={activeTab === 'account'}>
-          <MemoAccountsScreen resetToRootToken={accountsResetToRootToken} />
+          <MemoAccountsScreen
+            resetToRootToken={accountsResetToRootToken}
+            scrollToTopToken={accountsScrollTopToken}
+          />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen resetToCurrentMonthToken={insightsResetToMonthToken} />
@@ -191,6 +194,7 @@ function AppContent() {
         <MountedTab active={activeTab === 'settings'}>
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
+            scrollToTopToken={settingsScrollTopToken}
             forceScreen={settingsForceScreen}
             forceScreenToken={settingsForceScreenToken}
           />

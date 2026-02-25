@@ -79,6 +79,18 @@ export function monthKeyFromDateIso(dateIso: string): string {
   return monthKeyFromIsoLocal(dateIso);
 }
 
+export function normalizeMonthKey(month: string): string {
+  const trimmed = month.trim();
+  const match = trimmed.match(/^(\d{4})-(\d{1,2})$/);
+  if (!match) return trimmed;
+
+  const year = match[1];
+  const monthValue = Number(match[2]);
+  if (!Number.isFinite(monthValue)) return trimmed;
+  if (monthValue < 1 || monthValue > 12) return trimmed;
+  return `${year}-${String(monthValue).padStart(2, '0')}`;
+}
+
 export function amountToHoursByRate(
   amount: number,
   trueHourlyRate: number,
@@ -127,7 +139,10 @@ export function formatAmount(
   const amountSign = amount > 0 ? '+' : amount < 0 ? '-' : '';
   const sign = showSign ? (neutralSign ? '' : amountSign) : amount < 0 ? '-' : '';
 
-  if (settings.displayMode === 'time' && trueHourlyRate > 0) {
+  if (settings.displayMode === 'time') {
+    if (trueHourlyRate <= 0) {
+      return `${sign}${formatCurrency(Math.abs(amount), settings.currencySymbol)}`;
+    }
     return `${sign}${formatHours(Math.abs(amountToHours(amount, settings, trueHourlyRate)))}`;
   }
 

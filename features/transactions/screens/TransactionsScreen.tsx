@@ -48,6 +48,8 @@ type SortByValue = (typeof SORT_OPTIONS)[number]['value'];
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 const FILTER_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
 const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
+const FILTER_SELECTION_PANEL_CLASS =
+  'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
 const MONTH_PAGER_TOTAL_SLOTS = 4801;
 const MONTH_PAGER_CENTER_INDEX = Math.floor(MONTH_PAGER_TOTAL_SLOTS / 2);
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
@@ -872,7 +874,7 @@ export function TransactionsScreen({
                 />
               </View>
               <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                className={FILTER_SELECTION_PANEL_CLASS}
                 style={{ height: 236 }}
               >
                 <AccountPanel
@@ -897,7 +899,7 @@ export function TransactionsScreen({
                 />
               </View>
               <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                className={FILTER_SELECTION_PANEL_CLASS}
                 style={{ height: 236 }}
               >
                 <CategoryPanel

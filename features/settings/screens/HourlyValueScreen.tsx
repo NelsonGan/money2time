@@ -20,7 +20,7 @@ import type { MonthlyWageSettings } from '~/types';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { monthKeyFromDateLocal } from '~/utils/formatters';
+import { monthKeyFromDateLocal, normalizeMonthKey } from '~/utils/formatters';
 import { I18n } from '~/lib/i18n';
 import { useThemeColors } from '~/hooks/useThemeColors';
 
@@ -44,18 +44,6 @@ const MONTH_OPTIONS = [
 ];
 
 type EffectiveRateMode = 'exact' | 'before-earliest' | 'between' | 'after-latest' | 'fallback';
-
-function normalizeMonthKey(month: string) {
-  const trimmed = month.trim();
-  const match = trimmed.match(/^(\d{4})-(\d{1,2})$/);
-  if (!match) return trimmed;
-
-  const year = match[1];
-  const monthValue = Number(match[2]);
-  if (!Number.isFinite(monthValue)) return trimmed;
-  if (monthValue < 1 || monthValue > 12) return trimmed;
-  return `${year}-${String(monthValue).padStart(2, '0')}`;
-}
 
 function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, MonthlyWageSettings>();
