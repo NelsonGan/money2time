@@ -4,23 +4,16 @@ import { getDb } from '~/lib/db/client';
 import { monthlyWageSettingsTable } from '~/lib/db/schema';
 import type { MonthlyWageSettings, WageConfig } from '~/types';
 import { newId, nowIso } from '~/utils/id';
-import { computeHourlyRates, monthKeyFromDateIso, monthKeyFromDateLocal } from '~/utils/formatters';
+import {
+  computeHourlyRates,
+  monthKeyFromDateIso,
+  monthKeyFromDateLocal,
+  normalizeMonthKey,
+} from '~/utils/formatters';
 import { toMonthlyWageSettings } from './mappers';
 
 function getCurrentMonthKey(date = new Date()) {
   return monthKeyFromDateLocal(date);
-}
-
-function normalizeMonthKey(month: string) {
-  const trimmed = month.trim();
-  const match = trimmed.match(/^(\d{4})-(\d{1,2})$/);
-  if (!match) return trimmed;
-
-  const year = match[1];
-  const monthValue = Number(match[2]);
-  if (!Number.isFinite(monthValue)) return trimmed;
-  if (monthValue < 1 || monthValue > 12) return trimmed;
-  return `${year}-${String(monthValue).padStart(2, '0')}`;
 }
 
 function monthKeyVariants(month: string) {

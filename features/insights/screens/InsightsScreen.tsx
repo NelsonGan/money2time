@@ -105,6 +105,8 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingBottom: 110,
   paddingTop: 4,
 } as const;
+const FILTER_SELECTION_PANEL_CLASS =
+  'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
 const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
 const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_TOP = 16;
@@ -381,9 +383,9 @@ function parseInsightsPreferencesPayload(
     next.excludedSavingsExpenseCategoryIds = toUniqueStringList(
       parsed.excludedSavingsExpenseCategoryIds,
     );
-    next.excludedAssetHistoryAccountIds = toUniqueStringList(
-      parsed.excludedAssetHistoryAccountIds,
-    );
+    if (Object.prototype.hasOwnProperty.call(parsed, 'excludedAssetHistoryAccountIds')) {
+      next.excludedAssetHistoryAccountIds = toUniqueStringList(parsed.excludedAssetHistoryAccountIds);
+    }
     if (typeof parsed.excludedTimeCostExpenseCategoryId === 'string') {
       const normalized = parsed.excludedTimeCostExpenseCategoryId.trim();
       if (normalized) {
@@ -748,7 +750,7 @@ export function InsightsScreen({
     string | null
   >(null);
   const [excludedAssetHistoryAccountIds, setExcludedAssetHistoryAccountIds] = useState<string[]>(
-    [],
+    () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
   );
   const [assetHistoryScrubMonthByYear, setAssetHistoryScrubMonthByYear] = useState<
     Record<string, string>
@@ -803,6 +805,7 @@ export function InsightsScreen({
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
   const pieTouchStartRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const pageScrollRefs = useRef(new Map<number, { current: ScrollView | null }>());
+  const hasHydratedAssetHistoryExclusionsRef = useRef(false);
   const getPageScrollRef = useCallback((index: number) => {
     const existing = pageScrollRefs.current.get(index);
     if (existing) return existing;
@@ -877,6 +880,7 @@ export function InsightsScreen({
         setExcludedSavingsExpenseCategoryIds(saved.excludedSavingsExpenseCategoryIds);
       }
       if (saved.excludedAssetHistoryAccountIds) {
+        hasHydratedAssetHistoryExclusionsRef.current = true;
         setExcludedAssetHistoryAccountIds(saved.excludedAssetHistoryAccountIds);
       }
       if (saved.excludedTimeCostExpenseCategoryId) {
@@ -936,6 +940,15 @@ export function InsightsScreen({
     applyParsedSnapshot: applyInsightsPreferencesSnapshot,
     writeStoredJson: updateInsightsPreferencesJson,
   });
+  const defaultHiddenAssetHistoryAccountIds = useMemo(
+    () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
+    [accounts],
+  );
+  useEffect(() => {
+    if (isLoading || hasHydratedAssetHistoryExclusionsRef.current) return;
+    setExcludedAssetHistoryAccountIds(defaultHiddenAssetHistoryAccountIds);
+    hasHydratedAssetHistoryExclusionsRef.current = true;
+  }, [defaultHiddenAssetHistoryAccountIds, isLoading]);
 
   const allTransactions = useMemo(() => queryTransactions(), [queryTransactions]);
   const transactionById = useMemo(
@@ -3042,9 +3055,9 @@ export function InsightsScreen({
     setExcludedSavingsIncomeCategoryIds([]);
     setExcludedSavingsExpenseCategoryIds([]);
     setExcludedTimeCostExpenseCategoryId(null);
-    setExcludedAssetHistoryAccountIds([]);
+    setExcludedAssetHistoryAccountIds(defaultHiddenAssetHistoryAccountIds);
     setAssetHistoryScrubMonthByYear({});
-  }, []);
+  }, [defaultHiddenAssetHistoryAccountIds]);
 
   const handleCustomDateSelect = useCallback(
     (field: 'start' | 'end', value: string) => {
@@ -3827,7 +3840,7 @@ export function InsightsScreen({
                   />
                 </View>
                 <View
-                  className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                  className={FILTER_SELECTION_PANEL_CLASS}
                   style={{ height: 236 }}
                 >
                   <AccountPanel
@@ -3864,7 +3877,7 @@ export function InsightsScreen({
                   />
                 </View>
                 <View
-                  className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                  className={FILTER_SELECTION_PANEL_CLASS}
                   style={{ height: 236 }}
                 >
                   <CategoryPanel
@@ -3895,7 +3908,7 @@ export function InsightsScreen({
                     />
                   </View>
                   <View
-                    className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                    className={FILTER_SELECTION_PANEL_CLASS}
                     style={{ height: 236 }}
                   >
                     <CategoryPanel
@@ -3925,7 +3938,7 @@ export function InsightsScreen({
                     />
                   </View>
                   <View
-                    className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                    className={FILTER_SELECTION_PANEL_CLASS}
                     style={{ height: 236 }}
                   >
                     <CategoryPanel

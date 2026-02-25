@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, inArray, isNull, lte, or, sql, asc } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, categoriesTable, transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
@@ -10,7 +10,22 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 import { newId, nowIso } from '~/utils/id';
-import { toTransaction } from './mappers';
+import { toAccount, toCategory, toTransaction } from './mappers';
+
+type RelationRow = {
+  txId: string;
+  accountId: string | null;
+  accountName: string | null;
+  fromAccountId: string | null;
+  fromAccountName: string | null;
+  toAccountId: string | null;
+  toAccountName: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  categoryParentId: string | null;
+  parentCategoryName: string | null;
+};
 
 export interface CreateTransactionInput {
   type: TransactionType;
@@ -59,51 +74,64 @@ function buildSort(sortBy: TransactionFilters['sortBy']) {
 
 function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
   if (transactions.length === 0) return [];
-  const db = getDb();
-  const accountIds = Array.from(
-    new Set(
-      transactions.flatMap(
-        (t) => [t.accountId, t.fromAccountId, t.toAccountId].filter(Boolean) as string[],
-      ),
-    ),
-  );
-  const categoryIds = Array.from(
-    new Set(transactions.map((t) => t.categoryId).filter(Boolean) as string[]),
+
+  const txIds = transactions.map((t) => t.id);
+  const sqlite = getSQLite();
+
+  const rows = sqlite.getAllSync<{
+    txId: string;
+    accountId: string | null;
+    accountName: string | null;
+    fromAccountId: string | null;
+    fromAccountName: string | null;
+    toAccountId: string | null;
+    toAccountName: string | null;
+    categoryId: string | null;
+    categoryName: string | null;
+    categoryIcon: string | null;
+    categoryParentId: string | null;
+    parentCategoryName: string | null;
+  }>(
+    `
+    SELECT 
+      t.id as txId,
+      t.account_id as accountId,
+      a.name as accountName,
+      t.from_account_id as fromAccountId,
+      fa.name as fromAccountName,
+      t.to_account_id as toAccountId,
+      ta.name as toAccountName,
+      t.category_id as categoryId,
+      c.name as categoryName,
+      c.icon as categoryIcon,
+      c.parent_id as categoryParentId,
+      p.name as parentCategoryName
+    FROM transactions t
+    LEFT JOIN accounts a ON a.id = t.account_id AND a.deleted_at IS NULL
+    LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
+    LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
+    LEFT JOIN categories c ON c.id = t.category_id AND c.deleted_at IS NULL
+    LEFT JOIN categories p ON p.id = c.parent_id AND p.deleted_at IS NULL
+    WHERE t.id IN (${txIds.map(() => '?').join(',')})
+  `,
+    txIds,
   );
 
-  const accounts = accountIds.length
-    ? db.select().from(accountsTable).where(inArray(accountsTable.id, accountIds)).all()
-    : [];
-  const primaryCategories = categoryIds.length
-    ? db.select().from(categoriesTable).where(inArray(categoriesTable.id, categoryIds)).all()
-    : [];
-  const parentCategoryIds = Array.from(
-    new Set(primaryCategories.map((category) => category.parentId).filter(Boolean) as string[]),
-  );
-  const parentCategories = parentCategoryIds.length
-    ? db.select().from(categoriesTable).where(inArray(categoriesTable.id, parentCategoryIds)).all()
-    : [];
-  const categories = [...primaryCategories, ...parentCategories];
-
-  const accountMap = new Map(accounts.map((a) => [a.id, a.name]));
-  const categoryMap = new Map(categories.map((c) => [c.id, c]));
+  const relationMap = new Map<string, RelationRow>();
+  rows.forEach((r: RelationRow) => {
+    relationMap.set(r.txId, r);
+  });
 
   return transactions.map((transaction) => {
-    const category = transaction.categoryId ? categoryMap.get(transaction.categoryId) : undefined;
-    const parent = category?.parentId ? categoryMap.get(category.parentId) : undefined;
-
+    const rel = relationMap.get(transaction.id);
     return {
       ...transaction,
-      accountName: transaction.accountId ? (accountMap.get(transaction.accountId) ?? null) : null,
-      fromAccountName: transaction.fromAccountId
-        ? (accountMap.get(transaction.fromAccountId) ?? null)
-        : null,
-      toAccountName: transaction.toAccountId
-        ? (accountMap.get(transaction.toAccountId) ?? null)
-        : null,
-      categoryName: category?.name ?? null,
-      categoryParentName: parent?.name ?? null,
-      categoryIcon: category?.icon ?? null,
+      accountName: rel?.accountName ?? null,
+      fromAccountName: rel?.fromAccountName ?? null,
+      toAccountName: rel?.toAccountName ?? null,
+      categoryName: rel?.categoryName ?? null,
+      categoryParentName: rel?.parentCategoryName ?? null,
+      categoryIcon: rel?.categoryIcon ?? null,
     };
   });
 }

@@ -21,12 +21,14 @@ type ScreenName = SettingsScreenName;
 
 interface SettingsStackProps {
   resetToRootToken?: number;
+  scrollToTopToken?: number;
   forceScreen?: SettingsScreenName | null;
   forceScreenToken?: number;
 }
 
 export function SettingsStack({
   resetToRootToken = 0,
+  scrollToTopToken = 0,
   forceScreen = null,
   forceScreenToken = 0,
 }: SettingsStackProps) {
@@ -57,6 +59,7 @@ export function SettingsStack({
     default:
       return (
         <SettingsScreen
+          scrollToTopToken={scrollToTopToken}
           onOpenDisplay={() => setScreen('DisplaySettings')}
           onOpenHourlyValue={() => setScreen('HourlyValue')}
           onOpenAccounts={() => setScreen('Accounts')}

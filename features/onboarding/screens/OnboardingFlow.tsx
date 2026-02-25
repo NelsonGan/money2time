@@ -101,7 +101,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         }
       : {
           ...DEFAULT_WAGE_CONFIG,
-          wageType: 'hourly' as const,
         };
 
   // --- Handlers ---
@@ -160,49 +159,54 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }, [isImporting, importMoneyManagerBackup]);
 
   const handleCreateMinimalDefaults = useCallback(() => {
-    const existing = new Set(
-      categories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
-    );
-    const minimal = [
-      ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-      ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-    ];
-    let createdCategories = 0;
+    try {
+      const existing = new Set(
+        categories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
+      );
+      const minimal = [
+        ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+        ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+      ];
+      let createdCategories = 0;
 
-    minimal.forEach((item) => {
-      const key = `${item.type}:${item.name.trim().toLowerCase()}`;
-      if (existing.has(key)) return;
-      createCategory(item);
-      existing.add(key);
-      createdCategories += 1;
-    });
-
-    let accountId = accounts[0]?.id ?? null;
-    if (!accountId) {
-      accountId = createAccount({
-        ...DEFAULT_ACCOUNT_TEMPLATE,
-        currency: DEFAULT_CURRENCY,
+      minimal.forEach((item) => {
+        const key = `${item.type}:${item.name.trim().toLowerCase()}`;
+        if (existing.has(key)) return;
+        createCategory(item);
+        existing.add(key);
+        createdCategories += 1;
       });
-    }
 
-    let createdSampleTransaction = false;
-    if (transactionCount === 0 && accountId) {
-      createTransaction({
-        type: 'expense',
-        amount: 12,
-        currency: settings.currencySymbol,
-        date: new Date().toISOString(),
-        accountId,
-        categoryId: null,
-        note: I18n.t('onboarding.flow.sample_transaction_note'),
-      });
-      createdSampleTransaction = true;
-    }
+      let accountId = accounts[0]?.id ?? null;
+      if (!accountId) {
+        accountId = createAccount({
+          ...DEFAULT_ACCOUNT_TEMPLATE,
+          currency: DEFAULT_CURRENCY,
+        });
+      }
 
-    if (createdCategories > 0 || createdSampleTransaction || accountCount === 0) {
-      void triggerHaptic('success');
-    } else {
-      void triggerHaptic('selection');
+      let createdSampleTransaction = false;
+      if (transactionCount === 0 && accountId) {
+        createTransaction({
+          type: 'expense',
+          amount: 12,
+          currency: settings.currencySymbol,
+          date: new Date().toISOString(),
+          accountId,
+          categoryId: null,
+          note: I18n.t('onboarding.flow.sample_transaction_note'),
+        });
+        createdSampleTransaction = true;
+      }
+
+      if (createdCategories > 0 || createdSampleTransaction || accountCount === 0) {
+        void triggerHaptic('success');
+      } else {
+        void triggerHaptic('selection');
+      }
+    } catch (error) {
+      void triggerHaptic('error');
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [
     accountCount,

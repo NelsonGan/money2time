@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -123,8 +123,13 @@ function SummaryMetric({
   );
 }
 
-export function HomeScreen() {
+interface HomeScreenProps {
+  scrollToTopToken?: number;
+}
+
+export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const {
     transactions,
     recurringRules,
@@ -238,9 +243,18 @@ export function HomeScreen() {
     : 0;
   const estimatorWorkdays = estimatorHours / 8;
 
+  useEffect(() => {
+    if (scrollToTopToken <= 0) return;
+    const frame = requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [scrollToTopToken]);
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >

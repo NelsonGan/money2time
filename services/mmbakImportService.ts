@@ -161,12 +161,20 @@ function parseCardDay(value: string | null | undefined): number | null {
 
 function inferAccountType(
   name: string,
+  groupName: string | null,
   statementDay: number | null,
   dueDay: number | null,
 ): AccountType {
-  if (statementDay || dueDay) return 'credit';
   const lower = name.toLowerCase();
   if (lower.includes('credit')) return 'credit';
+  const lowerGroup = (groupName ?? '').toLowerCase();
+  if (lowerGroup.includes('credit')) return 'credit';
+
+  if (statementDay || dueDay) {
+    const isDefaultCyclePlaceholder = statementDay === 1 && dueDay === 1;
+    if (!isDefaultCyclePlaceholder) return 'credit';
+  }
+
   return 'debit';
 }
 
@@ -484,17 +492,22 @@ export async function importMoneyManagerBackupFromUri(
       const creditDueDay = parseCardDay(row.cardDueDay);
       const deletedAt = isDeleted ? new Date().toISOString() : null;
       const groupName =
-        (row.groupUid ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupUid) ?? '') : null) ??
-        (row.groupId ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupId) ?? '') : null) ??
+        (row.groupUid
+          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupUid) ?? '')
+          : null) ??
+        (row.groupId
+          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupId) ?? '')
+          : null) ??
         (normalizeText(row.groupName) || null);
+      const type = inferAccountType(name, groupName, creditStatementDay, creditDueDay);
       const accountId = accountsRepository.create({
         name,
-        type: inferAccountType(name, creditStatementDay, creditDueDay),
+        type,
         accountGroup: groupName,
         sortOrder: asNumber(row.sortOrder) ?? undefined,
-        creditStatementDay,
-        creditDueDay,
-        currency: 'USD',
+        creditStatementDay: type === 'credit' ? creditStatementDay : null,
+        creditDueDay: type === 'credit' ? creditDueDay : null,
+        currency: currencySymbol,
         icon: '🏦',
         color: '#22917A',
         startingBalance: 0,
@@ -533,9 +546,9 @@ export async function importMoneyManagerBackupFromUri(
         name: fallbackSourceKey
           ? `${fallbackName} (${fallbackSourceKey.slice(0, 4)})`
           : fallbackName,
-        type: inferAccountType(fallbackName, null, null),
+        type: inferAccountType(fallbackName, null, null, null),
         accountGroup: null,
-        currency: 'USD',
+        currency: currencySymbol,
         icon: '🏦',
         color: '#22917A',
         startingBalance: 0,
