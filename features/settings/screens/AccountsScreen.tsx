@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -52,6 +52,10 @@ interface EditAccountSaveInput {
   includeInTotals: boolean;
   targetBalance: number;
 }
+
+type AccountListRow =
+  | { kind: 'group'; id: string; label: string }
+  | { kind: 'account'; id: string; accountId: string };
 
 const ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP = 104;
 const ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT = 58;
@@ -809,12 +813,14 @@ interface AccountsScreenProps {
   onBack?: () => void;
   managementOnly?: boolean;
   resetToRootToken?: number;
+  scrollToTopToken?: number;
 }
 
 export function AccountsScreen({
   onBack,
   managementOnly = false,
   resetToRootToken = 0,
+  scrollToTopToken = 0,
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const {
@@ -855,6 +861,9 @@ export function AccountsScreen({
   const [selectionOverlayTop, setSelectionOverlayTop] = useState(ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP);
   const [isReorderingAccounts, setIsReorderingAccounts] = useState(false);
   const [reorderDraftGroups, setReorderDraftGroups] = useState<AccountGroupSection[]>([]);
+  const reorderListRef = useRef<FlatList<AccountGroupSection> | null>(null);
+  const accountsListRef = useRef<FlatList<AccountListRow> | null>(null);
+  const detailScrollToTopRef = useRef<(() => void) | null>(null);
   const swipeBackHandlers = useEdgeSwipeBack(
     selectedAccountId ? () => setSelectedAccountId(null) : onBack,
   );
@@ -914,6 +923,28 @@ export function AccountsScreen({
     setIsReorderingAccounts(false);
     setReorderDraftGroups([]);
   }, [resetToRootToken]);
+
+  useEffect(() => {
+    if (scrollToTopToken <= 0) return;
+    const frame = requestAnimationFrame(() => {
+      if (!managementOnly && selectedAccountId && selectedAccount) {
+        detailScrollToTopRef.current?.();
+        return;
+      }
+      if (isReorderingAccounts) {
+        reorderListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        return;
+      }
+      accountsListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [
+    isReorderingAccounts,
+    managementOnly,
+    scrollToTopToken,
+    selectedAccount,
+    selectedAccountId,
+  ]);
 
   const balanceMap = useMemo(() => {
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
@@ -989,10 +1020,7 @@ export function AccountsScreen({
   }, [accounts]);
 
   const groupedAccounts = useMemo(() => {
-    const rows: (
-      | { kind: 'group'; id: string; label: string }
-      | { kind: 'account'; id: string; accountId: string }
-    )[] = [];
+    const rows: AccountListRow[] = [];
     accountGroupSections.forEach((section) => {
       rows.push({ kind: 'group', id: section.id, label: section.label });
       section.accounts.forEach((account) => {
@@ -1245,6 +1273,7 @@ export function AccountsScreen({
             contentPaddingTop={0}
             disableItemAnimations
             compactItems
+            scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
               <View className="pb-2 gap-2">
                 <SettingsHeader
@@ -1570,6 +1599,7 @@ export function AccountsScreen({
     >
       {isReorderingAccounts ? (
         <FlatList
+          ref={reorderListRef}
           data={reorderDraftGroups}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{
@@ -1668,6 +1698,7 @@ export function AccountsScreen({
         />
       ) : (
         <FlatList
+          ref={accountsListRef}
           data={groupedAccounts}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{

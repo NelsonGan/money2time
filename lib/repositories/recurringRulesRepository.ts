@@ -143,7 +143,7 @@ class RecurringRulesRepository {
       .run();
   }
 
-  runDueTransactions(todayIso: string = nowIso()) {
+  runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10) {
     const db = getDb();
     const dueRules = db
       .select()
@@ -155,8 +155,12 @@ class RecurringRulesRepository {
           lte(recurringRulesTable.nextRunDate, todayIso),
         ),
       )
+      .orderBy(recurringRulesTable.nextRunDate)
+      .limit(maxRules)
       .all()
       .map(toRecurringRule);
+
+    if (dueRules.length === 0) return;
 
     dueRules.forEach((rule) => {
       let cursor = rule.nextRunDate;
