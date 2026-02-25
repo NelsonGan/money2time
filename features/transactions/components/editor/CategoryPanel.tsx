@@ -90,6 +90,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
     <ScrollView
       className="flex-1 px-4 pt-2"
       showsVerticalScrollIndicator={false}
+      bounces={false}
+      alwaysBounceVertical={false}
+      overScrollMode="never"
       contentContainerStyle={{ paddingBottom: 16 }}
     >
       <View className="flex-row flex-wrap gap-2">

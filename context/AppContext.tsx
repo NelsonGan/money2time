@@ -45,7 +45,7 @@ import {
   type UserSettings,
   type WageConfig,
 } from '~/types';
-import { amountToHoursByRate, monthKeyFromDateIso } from '~/utils/formatters';
+import { amountToHoursByRate, monthKeyFromDateIso, normalizeMonthKey } from '~/utils/formatters';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import { I18n, setAppLocale } from '~/lib/i18n';
 
@@ -174,18 +174,6 @@ const fallbackStyles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-function normalizeMonthKey(month: string): string {
-  const trimmed = month.trim();
-  const match = trimmed.match(/^(\d{4})-(\d{1,2})$/);
-  if (!match) return trimmed;
-
-  const year = match[1];
-  const monthValue = Number(match[2]);
-  if (!Number.isFinite(monthValue)) return trimmed;
-  if (monthValue < 1 || monthValue > 12) return trimmed;
-  return `${year}-${String(monthValue).padStart(2, '0')}`;
-}
 
 function buildNormalizedRateHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, { month: string; rate: number; updatedAt: string }>();

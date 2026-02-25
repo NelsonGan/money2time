@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -16,6 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.nelsongan.money2time",
       "infoPlist": {
+        "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -26,14 +27,13 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.nelsongan.money2time"
+      "package": "com.nelsongan.money2time",
+      "label": "Money2Time"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-localization"
-    ],
+    "plugins": ["expo-localization"],
     "extra": {
       "eas": {
         "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"

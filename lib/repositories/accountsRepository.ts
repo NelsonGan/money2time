@@ -1,7 +1,7 @@
-import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, or, sql, sum } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
-import { accountsTable, transactionsTable } from '~/lib/db/schema';
+import { getDb, getSQLite } from '~/lib/db/client';
+import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { Account, AccountBalance } from '~/types';
 import { newId, nowIso } from '~/utils/id';
 import { toAccount } from './mappers';
@@ -82,22 +82,51 @@ class AccountsRepository {
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();
+
     db.update(accountsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
+      .run();
+
+    db.update(transactionsTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          or(
+            eq(transactionsTable.accountId, id),
+            eq(transactionsTable.fromAccountId, id),
+            eq(transactionsTable.toAccountId, id),
+          ),
+        ),
+      )
+      .run();
+
+    db.update(recurringRulesTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(
+        and(
+          isNull(recurringRulesTable.deletedAt),
+          or(
+            eq(recurringRulesTable.accountId, id),
+            eq(recurringRulesTable.fromAccountId, id),
+            eq(recurringRulesTable.toAccountId, id),
+          ),
+        ),
+      )
       .run();
   }
 
   reorder(ids: string[]) {
     if (ids.length === 0) return;
-    const db = getDb();
+    const sqlite = getSQLite();
     const now = nowIso();
-    ids.forEach((id, index) => {
-      db.update(accountsTable)
-        .set({ sortOrder: index, updatedAt: now })
-        .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
-        .run();
-    });
+
+    const cases = ids.map((id, index) => `WHEN '${id}' THEN ${index}`).join(' ');
+    const placeholders = ids.map((id) => `'${id}'`).join(',');
+    sqlite.execSync(
+      `UPDATE accounts SET sort_order = CASE id ${cases} END, updated_at = '${now}' WHERE id IN (${placeholders})`,
+    );
   }
 
   getBalances(): AccountBalance[] {
@@ -106,76 +135,121 @@ class AccountsRepository {
     if (accounts.length === 0) return [];
 
     const accountIds = accounts.map((account) => account.id);
-    const txns = db
-      .select()
+
+    const incomeByAccount = db
+      .select({
+        accountId: transactionsTable.accountId,
+        total: sum(transactionsTable.amount),
+      })
       .from(transactionsTable)
       .where(
         and(
           isNull(transactionsTable.deletedAt),
-          or(
-            inArray(transactionsTable.accountId, accountIds),
-            inArray(transactionsTable.fromAccountId, accountIds),
-            inArray(transactionsTable.toAccountId, accountIds),
-          ),
+          eq(transactionsTable.type, 'income'),
+          inArray(transactionsTable.accountId, accountIds),
         ),
       )
+      .groupBy(transactionsTable.accountId)
       .all();
 
-    const aggregates = new Map<string, Omit<AccountBalance, 'accountId'> & { adjustments: number }>();
-    accounts.forEach((account) => {
-      aggregates.set(account.id, {
-        balance: account.startingBalance,
-        income: 0,
-        expense: 0,
-        transfersIn: 0,
-        transfersOut: 0,
-        adjustments: 0,
-      });
+    const expenseByAccount = db
+      .select({
+        accountId: transactionsTable.accountId,
+        total: sum(transactionsTable.amount),
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          eq(transactionsTable.type, 'expense'),
+          inArray(transactionsTable.accountId, accountIds),
+        ),
+      )
+      .groupBy(transactionsTable.accountId)
+      .all();
+
+    const transfersInByAccount = db
+      .select({
+        accountId: transactionsTable.toAccountId,
+        total: sum(transactionsTable.amount),
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          eq(transactionsTable.type, 'transfer'),
+          inArray(transactionsTable.toAccountId, accountIds),
+        ),
+      )
+      .groupBy(transactionsTable.toAccountId)
+      .all();
+
+    const transfersOutByAccount = db
+      .select({
+        accountId: transactionsTable.fromAccountId,
+        total: sum(transactionsTable.amount),
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          eq(transactionsTable.type, 'transfer'),
+          inArray(transactionsTable.fromAccountId, accountIds),
+        ),
+      )
+      .groupBy(transactionsTable.fromAccountId)
+      .all();
+
+    const legacyAdjustments = db
+      .select({
+        accountId: transactionsTable.accountId,
+        total: sum(transactionsTable.amount),
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          eq(transactionsTable.type, 'balance_adjustment'),
+          inArray(transactionsTable.accountId, accountIds),
+        ),
+      )
+      .groupBy(transactionsTable.accountId)
+      .all();
+
+    const balanceAdjustmentsByAccount = new Map<string, number>();
+    legacyAdjustments.forEach((row) => {
+      if (row.accountId) {
+        const current = Number(row.total) || 0;
+        balanceAdjustmentsByAccount.set(row.accountId, current);
+      }
     });
 
-    txns.forEach((transaction) => {
-      const isLegacyBalanceAdjustmentTransfer =
-        transaction.type === 'transfer' &&
-        !!transaction.accountId &&
-        !transaction.fromAccountId &&
-        !transaction.toAccountId;
+    const incomeMap = new Map<string, number>();
+    incomeByAccount.forEach((row) => {
+      if (row.accountId) incomeMap.set(row.accountId, Number(row.total) || 0);
+    });
 
-      if (transaction.type === 'income' && transaction.accountId) {
-        const current = aggregates.get(transaction.accountId);
-        if (current) current.income += transaction.amount;
-      }
-      if (transaction.type === 'expense' && transaction.accountId) {
-        const current = aggregates.get(transaction.accountId);
-        if (current) current.expense += transaction.amount;
-      }
-      if (transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer && transaction.toAccountId) {
-        const current = aggregates.get(transaction.toAccountId);
-        if (current) current.transfersIn += transaction.amount;
-      }
-      if (
-        transaction.type === 'transfer' &&
-        !isLegacyBalanceAdjustmentTransfer &&
-        transaction.fromAccountId
-      ) {
-        const current = aggregates.get(transaction.fromAccountId);
-        if (current) current.transfersOut += transaction.amount;
-      }
-      if (
-        (transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer) &&
-        transaction.accountId
-      ) {
-        const current = aggregates.get(transaction.accountId);
-        if (current) current.adjustments += transaction.amount;
-      }
+    const expenseMap = new Map<string, number>();
+    expenseByAccount.forEach((row) => {
+      if (row.accountId) expenseMap.set(row.accountId, Number(row.total) || 0);
+    });
+
+    const transfersInMap = new Map<string, number>();
+    transfersInByAccount.forEach((row) => {
+      if (row.accountId) transfersInMap.set(row.accountId, Number(row.total) || 0);
+    });
+
+    const transfersOutMap = new Map<string, number>();
+    transfersOutByAccount.forEach((row) => {
+      if (row.accountId) transfersOutMap.set(row.accountId, Number(row.total) || 0);
     });
 
     return accounts.map((account) => {
-      const aggregate = aggregates.get(account.id);
-      const income = aggregate?.income ?? 0;
-      const expense = aggregate?.expense ?? 0;
-      const transfersIn = aggregate?.transfersIn ?? 0;
-      const transfersOut = aggregate?.transfersOut ?? 0;
-      const adjustments = aggregate?.adjustments ?? 0;
+      const income = incomeMap.get(account.id) ?? 0;
+      const expense = expenseMap.get(account.id) ?? 0;
+      const transfersIn = transfersInMap.get(account.id) ?? 0;
+      const transfersOut = transfersOutMap.get(account.id) ?? 0;
+      const adjustments = balanceAdjustmentsByAccount.get(account.id) ?? 0;
       const balance =
         account.type === 'credit'
           ? account.startingBalance + expense + transfersOut - income - transfersIn + adjustments

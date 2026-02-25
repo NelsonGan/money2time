@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import {
@@ -13,6 +13,7 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 
 interface SettingsScreenProps {
+  scrollToTopToken?: number;
   onOpenDisplay: () => void;
   onOpenHourlyValue: () => void;
   onOpenAccounts: () => void;
@@ -21,6 +22,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({
+  scrollToTopToken = 0,
   onOpenDisplay,
   onOpenHourlyValue,
   onOpenAccounts,
@@ -28,12 +30,22 @@ export function SettingsScreen({
   onOpenRecurring,
 }: SettingsScreenProps) {
   const { settings, monthlyWages, updateSettings } = useApp();
+  const scrollViewRef = useRef<ScrollView | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
+
+  useEffect(() => {
+    if (scrollToTopToken <= 0) return;
+    const frame = requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [scrollToTopToken]);
 
   return (
     <SettingsPageLayout>
       <ScrollView
+        ref={scrollViewRef}
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
