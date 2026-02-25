@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.money2time"
+      "bundleIdentifier": "com.nelsongan.money2time",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,11 +26,18 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.money2time"
+      "package": "com.nelsongan.money2time"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-localization"]
+    "plugins": [
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"
+      }
+    }
   }
 }

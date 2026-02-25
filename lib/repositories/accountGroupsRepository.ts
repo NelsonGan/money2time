@@ -18,7 +18,7 @@ class AccountGroupsRepository {
       .map(toAccountGroup);
   }
 
-  create(name: string): string | null {
+  create(name: string, sortOrder?: number): string | null {
     const normalized = name.trim();
     if (!normalized) return null;
     const db = getDb();
@@ -42,11 +42,14 @@ class AccountGroupsRepository {
 
     const id = newId();
     const now = nowIso();
+    const parsedSortOrder =
+      sortOrder !== undefined && Number.isFinite(sortOrder) ? Math.trunc(sortOrder) : null;
+
     db.insert(accountGroupsTable)
       .values({
         id,
         name: normalized,
-        sortOrder: (maxSort?.maxSort ?? -1) + 1,
+        sortOrder: parsedSortOrder ?? (maxSort?.maxSort ?? -1) + 1,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -109,6 +112,18 @@ class AccountGroupsRepository {
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
       .run();
+  }
+
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+    const db = getDb();
+    const now = nowIso();
+    ids.forEach((id, index) => {
+      db.update(accountGroupsTable)
+        .set({ sortOrder: index, updatedAt: now })
+        .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+        .run();
+    });
   }
 
   ensureFromActiveAccounts() {

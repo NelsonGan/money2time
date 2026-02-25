@@ -121,7 +121,7 @@ class AccountsRepository {
       )
       .all();
 
-    const aggregates = new Map<string, Omit<AccountBalance, 'accountId'>>();
+    const aggregates = new Map<string, Omit<AccountBalance, 'accountId'> & { adjustments: number }>();
     accounts.forEach((account) => {
       aggregates.set(account.id, {
         balance: account.startingBalance,
@@ -129,10 +129,17 @@ class AccountsRepository {
         expense: 0,
         transfersIn: 0,
         transfersOut: 0,
+        adjustments: 0,
       });
     });
 
     txns.forEach((transaction) => {
+      const isLegacyBalanceAdjustmentTransfer =
+        transaction.type === 'transfer' &&
+        !!transaction.accountId &&
+        !transaction.fromAccountId &&
+        !transaction.toAccountId;
+
       if (transaction.type === 'income' && transaction.accountId) {
         const current = aggregates.get(transaction.accountId);
         if (current) current.income += transaction.amount;
@@ -141,13 +148,24 @@ class AccountsRepository {
         const current = aggregates.get(transaction.accountId);
         if (current) current.expense += transaction.amount;
       }
-      if (transaction.type === 'transfer' && transaction.toAccountId) {
+      if (transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer && transaction.toAccountId) {
         const current = aggregates.get(transaction.toAccountId);
         if (current) current.transfersIn += transaction.amount;
       }
-      if (transaction.type === 'transfer' && transaction.fromAccountId) {
+      if (
+        transaction.type === 'transfer' &&
+        !isLegacyBalanceAdjustmentTransfer &&
+        transaction.fromAccountId
+      ) {
         const current = aggregates.get(transaction.fromAccountId);
         if (current) current.transfersOut += transaction.amount;
+      }
+      if (
+        (transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer) &&
+        transaction.accountId
+      ) {
+        const current = aggregates.get(transaction.accountId);
+        if (current) current.adjustments += transaction.amount;
       }
     });
 
@@ -157,10 +175,11 @@ class AccountsRepository {
       const expense = aggregate?.expense ?? 0;
       const transfersIn = aggregate?.transfersIn ?? 0;
       const transfersOut = aggregate?.transfersOut ?? 0;
+      const adjustments = aggregate?.adjustments ?? 0;
       const balance =
         account.type === 'credit'
-          ? account.startingBalance + expense + transfersOut - income - transfersIn
-          : account.startingBalance + income + transfersIn - expense - transfersOut;
+          ? account.startingBalance + expense + transfersOut - income - transfersIn + adjustments
+          : account.startingBalance + income + transfersIn - expense - transfersOut + adjustments;
 
       return {
         accountId: account.id,

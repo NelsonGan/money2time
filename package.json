@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "expo": "~54.0.33",
+    "expo-dev-client": "~6.0.20",
     "expo-document-picker": "~14.0.7",
     "expo-haptics": "^15.0.8",
     "expo-image": "~3.0.11",

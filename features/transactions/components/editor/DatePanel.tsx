@@ -1,9 +1,11 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  Animated,
   PanResponder,
   Pressable,
   ScrollView,
   View,
+  type LayoutChangeEvent,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from 'react-native';
@@ -20,6 +22,8 @@ const YEAR_EDGE_BUFFER = 8;
 const YEAR_EXTEND_COUNT = 24;
 const CALENDAR_SWIPE_DISTANCE = 40;
 const CALENDAR_SWIPE_START = 10;
+const CALENDAR_SWIPE_COMMIT_RATIO = 0.22;
+const CALENDAR_SWIPE_VELOCITY_THRESHOLD = 0.75;
 
 interface DatePanelProps {
   value: string;
@@ -99,43 +103,119 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
     const idx = yearRail.findIndex((y) => y === calendarMonth.getFullYear());
     return Math.max(0, idx) * YEAR_CHIP_WIDTH;
   });
-  const calendarSwipeHandledRef = useRef(false);
+  const [calendarViewportWidth, setCalendarViewportWidth] = useState(0);
+  const calendarSwipeTranslateX = useRef(new Animated.Value(0)).current;
+  const isCalendarSwipeAnimatingRef = useRef(false);
 
   const recentDays = useMemo(getRecentDays, []);
-  const calendarCells = useMemo(() => monthGrid(calendarMonth), [calendarMonth]);
+  const previousMonth = useMemo(
+    () => new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1),
+    [calendarMonth],
+  );
+  const nextMonth = useMemo(
+    () => new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1),
+    [calendarMonth],
+  );
+  const previousMonthCells = useMemo(() => monthGrid(previousMonth), [previousMonth]);
+  const currentMonthCells = useMemo(() => monthGrid(calendarMonth), [calendarMonth]);
+  const nextMonthCells = useMemo(() => monthGrid(nextMonth), [nextMonth]);
 
-  const shiftCalendarMonth = useCallback((direction: -1 | 1) => {
-    void triggerHaptic('selection');
+  const shiftCalendarMonth = useCallback((direction: -1 | 1, withHaptic = true) => {
+    if (withHaptic) {
+      void triggerHaptic('selection');
+    }
     setCalendarMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
   }, []);
+
+  const resetCalendarSwipe = useCallback(() => {
+    isCalendarSwipeAnimatingRef.current = true;
+    Animated.spring(calendarSwipeTranslateX, {
+      toValue: 0,
+      useNativeDriver: true,
+      speed: 26,
+      bounciness: 4,
+    }).start(() => {
+      isCalendarSwipeAnimatingRef.current = false;
+    });
+  }, [calendarSwipeTranslateX]);
+
+  const completeCalendarSwipe = useCallback(
+    (direction: -1 | 1) => {
+      if (calendarViewportWidth <= 0) {
+        shiftCalendarMonth(direction);
+        calendarSwipeTranslateX.setValue(0);
+        return;
+      }
+      isCalendarSwipeAnimatingRef.current = true;
+      const targetX = direction === 1 ? -calendarViewportWidth : calendarViewportWidth;
+      Animated.timing(calendarSwipeTranslateX, {
+        toValue: targetX,
+        duration: 180,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        calendarSwipeTranslateX.setValue(0);
+        if (!finished) {
+          isCalendarSwipeAnimatingRef.current = false;
+          return;
+        }
+        shiftCalendarMonth(direction);
+        isCalendarSwipeAnimatingRef.current = false;
+      });
+    },
+    [calendarSwipeTranslateX, calendarViewportWidth, shiftCalendarMonth],
+  );
+
+  const handleCalendarViewportLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const nextWidth = Math.max(1, Math.round(event.nativeEvent.layout.width));
+      setCalendarViewportWidth((previous) => (previous === nextWidth ? previous : nextWidth));
+    },
+    [],
+  );
 
   const calendarPanResponder = useMemo(
     () =>
       PanResponder.create({
         onMoveShouldSetPanResponder: (_, gestureState) =>
+          !isCalendarSwipeAnimatingRef.current &&
           Math.abs(gestureState.dx) > CALENDAR_SWIPE_START &&
           Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
         onPanResponderGrant: () => {
-          calendarSwipeHandledRef.current = false;
+          calendarSwipeTranslateX.stopAnimation();
         },
         onPanResponderMove: (_, gestureState) => {
-          if (calendarSwipeHandledRef.current) return;
-          if (gestureState.dx <= -CALENDAR_SWIPE_DISTANCE) {
-            calendarSwipeHandledRef.current = true;
-            shiftCalendarMonth(1);
-          } else if (gestureState.dx >= CALENDAR_SWIPE_DISTANCE) {
-            calendarSwipeHandledRef.current = true;
-            shiftCalendarMonth(-1);
-          }
+          if (isCalendarSwipeAnimatingRef.current) return;
+          const maxOffset = calendarViewportWidth > 0 ? calendarViewportWidth : 120;
+          const clampedDx = Math.max(-maxOffset, Math.min(maxOffset, gestureState.dx));
+          calendarSwipeTranslateX.setValue(clampedDx);
         },
-        onPanResponderRelease: () => {
-          calendarSwipeHandledRef.current = false;
+        onPanResponderRelease: (_, gestureState) => {
+          if (isCalendarSwipeAnimatingRef.current) return;
+          const threshold = Math.max(
+            CALENDAR_SWIPE_DISTANCE,
+            calendarViewportWidth * CALENDAR_SWIPE_COMMIT_RATIO,
+          );
+          if (
+            gestureState.dx <= -threshold ||
+            gestureState.vx <= -CALENDAR_SWIPE_VELOCITY_THRESHOLD
+          ) {
+            completeCalendarSwipe(1);
+            return;
+          }
+          if (
+            gestureState.dx >= threshold ||
+            gestureState.vx >= CALENDAR_SWIPE_VELOCITY_THRESHOLD
+          ) {
+            completeCalendarSwipe(-1);
+            return;
+          }
+          resetCalendarSwipe();
         },
         onPanResponderTerminate: () => {
-          calendarSwipeHandledRef.current = false;
+          resetCalendarSwipe();
         },
       }),
-    [shiftCalendarMonth],
+    [calendarSwipeTranslateX, calendarViewportWidth, completeCalendarSwipe, resetCalendarSwipe],
   );
 
   const handleYearRailScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -163,6 +243,59 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
       setYearRail((prev) => [...prev, ...append]);
     }
   };
+  const calendarPageWidth = Math.max(1, calendarViewportWidth);
+  const renderCalendarPage = useCallback(
+    (
+      cells: {
+        iso: string;
+        day: number;
+        inMonth: boolean;
+      }[],
+      pageKey: string,
+    ) => (
+      <View
+        key={pageKey}
+        style={{ width: calendarPageWidth }}
+        className="flex-row flex-wrap justify-between gap-y-1.5"
+      >
+        {cells.map((cell) => {
+          const isSelected = cell.iso === value;
+          return (
+            <Pressable
+              key={`${pageKey}-${cell.iso}`}
+              onPress={() => {
+                void triggerHaptic('selection');
+                onSelect(cell.iso);
+              }}
+              className={cn(
+                'w-[14%] h-[38px] rounded-xl border items-center justify-center',
+                isSelected
+                  ? 'bg-primary/15 border-primary/55'
+                  : cell.inMonth
+                    ? 'bg-card border-border/30'
+                    : 'bg-secondary/40 border-border/20',
+              )}
+            >
+              <Text
+                variant="label"
+                className={cn(
+                  isSelected
+                    ? 'text-primary'
+                    : cell.inMonth
+                      ? 'text-foreground'
+                      : 'text-muted-foreground',
+                )}
+                style={{ fontSize: 12 }}
+              >
+                {cell.day}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    ),
+    [calendarPageWidth, onSelect, value],
+  );
 
   return (
     <ScrollView
@@ -294,43 +427,21 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
 
       {/* Calendar grid */}
       <View
-        className="flex-row flex-wrap justify-between gap-y-1.5"
+        onLayout={handleCalendarViewportLayout}
+        className="overflow-hidden"
         {...calendarPanResponder.panHandlers}
       >
-        {calendarCells.map((cell) => {
-          const isSelected = cell.iso === value;
-          return (
-            <Pressable
-              key={cell.iso}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onSelect(cell.iso);
-              }}
-              className={cn(
-                'w-[14%] h-[38px] rounded-xl border items-center justify-center',
-                isSelected
-                  ? 'bg-primary/15 border-primary/55'
-                  : cell.inMonth
-                    ? 'bg-card border-border/30'
-                    : 'bg-secondary/40 border-border/20',
-              )}
-            >
-              <Text
-                variant="label"
-                className={cn(
-                  isSelected
-                    ? 'text-primary'
-                    : cell.inMonth
-                      ? 'text-foreground'
-                      : 'text-muted-foreground',
-                )}
-                style={{ fontSize: 12 }}
-              >
-                {cell.day}
-              </Text>
-            </Pressable>
-          );
-        })}
+        <Animated.View
+          className="flex-row"
+          style={{
+            width: calendarPageWidth * 3,
+            transform: [{ translateX: -calendarPageWidth }, { translateX: calendarSwipeTranslateX }],
+          }}
+        >
+          {renderCalendarPage(previousMonthCells, 'prev')}
+          {renderCalendarPage(currentMonthCells, 'current')}
+          {renderCalendarPage(nextMonthCells, 'next')}
+        </Animated.View>
       </View>
     </ScrollView>
   );
