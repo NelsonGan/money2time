@@ -44,6 +44,7 @@ function asTransactionType(value: string): Transaction['type'] {
     case 'income':
     case 'expense':
     case 'transfer':
+    case 'balance_adjustment':
       return value;
     default:
       return 'expense';

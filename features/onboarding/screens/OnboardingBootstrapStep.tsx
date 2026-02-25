@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Check } from 'lucide-react-native';
 
@@ -148,7 +149,7 @@ export function OnboardingBootstrapStep({
                   <View className="w-11 h-11 rounded-2xl border border-border/30 bg-white items-center justify-center mt-0.5 overflow-hidden">
                     <Image
                       source={MONEY_MANAGER_REALBYTE_LOGO}
-                      resizeMode="contain"
+                      contentFit="contain"
                       style={{ width: 32, height: 32 }}
                     />
                   </View>
