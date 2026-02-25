@@ -67,6 +67,7 @@ interface AppContextValue extends AppState {
   deleteAccount: (id: string) => void;
   reorderAccounts: (ids: string[]) => void;
   createAccountGroup: (name: string) => void;
+  reorderAccountGroups: (ids: string[]) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
   createRecurringRule: (input: CreateRecurringRuleInput) => void;
@@ -248,7 +249,20 @@ function applyTransactionFilters(
   const searchTerm = filters.search.trim().toLowerCase();
 
   const filtered = transactions.filter((transaction) => {
-    if (filters.type !== 'all' && transaction.type !== filters.type) return false;
+    const isLegacyBalanceAdjustmentTransfer =
+      transaction.type === 'transfer' &&
+      !!transaction.accountId &&
+      !transaction.fromAccountId &&
+      !transaction.toAccountId;
+    const matchesType =
+      filters.type === 'all'
+        ? true
+        : filters.type === 'balance_adjustment'
+          ? transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer
+          : filters.type === 'transfer'
+            ? transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer
+            : transaction.type === filters.type;
+    if (!matchesType) return false;
 
     if (filters.dateRange) {
       if (transaction.date < filters.dateRange.start) return false;
@@ -437,6 +451,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (name: string) => {
       runMutation(() => {
         accountGroupsRepository.create(name);
+      });
+    },
+    [runMutation],
+  );
+
+  const reorderAccountGroups = useCallback(
+    (ids: string[]) => {
+      runMutation(() => {
+        accountGroupsRepository.reorder(ids);
       });
     },
     [runMutation],
@@ -838,88 +861,75 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isLoading || !hasSettings) {
       return [];
     }
+    if (accounts.length === 0 && transactions.length === 0) {
+      return [];
+    }
     return accountsRepository.getBalances();
   }, [accounts, hasSettings, isLoading, transactions]);
 
-  if (!settings) {
-    if (isLoading) {
-      return null;
-    }
-
-    return (
-      <View style={fallbackStyles.errorRoot}>
-        <View style={fallbackStyles.errorCard}>
-          <Text style={fallbackStyles.errorTitle}>{I18n.t('errors.data_load_failed_title')}</Text>
-          <Text style={fallbackStyles.errorMessage}>
-            {loadError ?? I18n.t('errors.data_load_failed')}
-          </Text>
-          <Pressable onPress={retryLoad} style={fallbackStyles.retryButton}>
-            <Text style={fallbackStyles.retryLabel}>{I18n.t('common.retry')}</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
-
-  const value = useMemo<AppContextValue>(
-    () => ({
-      isLoading,
-      settings,
-      currentMonthWage,
-      monthlyWages,
-      accountGroups,
-      recurringRules,
-      accounts,
-      categories,
-      transactions,
-      filteredTransactions,
-      activeAccountFilter,
-      accountBalances,
-      transactionFilters,
-      setActiveAccountFilter,
-      setTransactionFilters,
-      resetTransactionFilters,
-      refreshAll,
-      createAccount,
-      updateAccount,
-      deleteAccount,
-      reorderAccounts,
-      createAccountGroup,
-      renameAccountGroup,
-      deleteAccountGroup,
-      createRecurringRule,
-      updateRecurringRule,
-      deleteRecurringRule,
-      createCategory,
-      updateCategory,
-      deleteCategory,
-      reorderCategories,
-      createTransaction,
-      updateTransaction,
-      deleteTransaction,
-      updateSettings,
-      updateWageConfig,
-      updateWageConfigForMonth,
-      deleteWageConfigForMonth,
-      toggleDisplayMode,
-      canUseTimeDisplayMode,
-      getAccountById,
-      getCategoryById,
-      getTransactionsByAccount,
-      queryTransactions,
-      getCashflowSummary,
-      getExpenseBreakdownByCategory,
-      getExpenseBreakdownBySubcategory,
-      getIncomeBreakdown,
-      getTransfersBetweenAccounts,
-      getTrueHourlyRateForDate,
-      getDisplayValueForTransaction,
-      resetTransactionsOnly,
-      resetAllData,
-      importMoneyManagerBackup,
-      insightsPreferencesJson,
-      updateInsightsPreferencesJson,
-    }),
+  const value = useMemo<AppContextValue | null>(
+    () =>
+      settings
+        ? {
+            isLoading,
+            settings,
+            currentMonthWage,
+            monthlyWages,
+            accountGroups,
+            recurringRules,
+            accounts,
+            categories,
+            transactions,
+            filteredTransactions,
+            activeAccountFilter,
+            accountBalances,
+            transactionFilters,
+            setActiveAccountFilter,
+            setTransactionFilters,
+            resetTransactionFilters,
+            refreshAll,
+            createAccount,
+            updateAccount,
+            deleteAccount,
+            reorderAccounts,
+            createAccountGroup,
+            reorderAccountGroups,
+            renameAccountGroup,
+            deleteAccountGroup,
+            createRecurringRule,
+            updateRecurringRule,
+            deleteRecurringRule,
+            createCategory,
+            updateCategory,
+            deleteCategory,
+            reorderCategories,
+            createTransaction,
+            updateTransaction,
+            deleteTransaction,
+            updateSettings,
+            updateWageConfig,
+            updateWageConfigForMonth,
+            deleteWageConfigForMonth,
+            toggleDisplayMode,
+            canUseTimeDisplayMode,
+            getAccountById,
+            getCategoryById,
+            getTransactionsByAccount,
+            queryTransactions,
+            getCashflowSummary,
+            getExpenseBreakdownByCategory,
+            getExpenseBreakdownBySubcategory,
+            getIncomeBreakdown,
+            getTransfersBetweenAccounts,
+            getTrueHourlyRateForDate,
+            getDisplayValueForTransaction,
+            resetTransactionsOnly,
+            resetAllData,
+            importMoneyManagerBackup,
+            insightsPreferencesJson,
+            updateInsightsPreferencesJson,
+          }
+        : null,
     [
       isLoading,
       settings,
@@ -943,6 +953,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteAccount,
       reorderAccounts,
       createAccountGroup,
+      reorderAccountGroups,
       renameAccountGroup,
       deleteAccountGroup,
       createRecurringRule,
@@ -979,6 +990,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateInsightsPreferencesJson,
     ],
   );
+
+  if (!settings) {
+    if (isLoading) {
+      return null;
+    }
+
+    return (
+      <View style={fallbackStyles.errorRoot}>
+        <View style={fallbackStyles.errorCard}>
+          <Text style={fallbackStyles.errorTitle}>{I18n.t('errors.data_load_failed_title')}</Text>
+          <Text style={fallbackStyles.errorMessage}>
+            {loadError ?? I18n.t('errors.data_load_failed')}
+          </Text>
+          <Pressable onPress={retryLoad} style={fallbackStyles.retryButton}>
+            <Text style={fallbackStyles.retryLabel}>{I18n.t('common.retry')}</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  if (!value) {
+    return null;
+  }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

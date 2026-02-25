@@ -19,6 +19,7 @@ import {
   Hash,
   Power,
   Repeat,
+  Trash2,
   Timer,
   Type,
   X,
@@ -86,6 +87,13 @@ const TYPE_CARDS: {
     value: 'transfer',
     label: I18n.t('transactions.filters.moved'),
     emoji: '↔️',
+    bgClass: 'bg-primary/10',
+    borderClass: 'border-primary/50',
+  },
+  {
+    value: 'balance_adjustment',
+    label: I18n.t('transactions.filters.adjustment'),
+    emoji: '⚖️',
     bgClass: 'bg-primary/10',
     borderClass: 'border-primary/50',
   },
@@ -321,6 +329,11 @@ export function TransactionEditorScreen({
         if (field === 'account' || field === 'category') return 'fromAccount';
         return field;
       }
+      if (nextType === 'balance_adjustment') {
+        if (field === 'fromAccount' || field === 'toAccount' || field === 'category') return 'account';
+        if (field === 'note' || field === 'date') return 'amount';
+        return field;
+      }
       if (field === 'fromAccount' || field === 'toAccount') return 'account';
       return field;
     },
@@ -328,15 +341,30 @@ export function TransactionEditorScreen({
   );
 
   const availableTypeCards = useMemo(
-    () =>
-      restrictTypeOptions && restrictTypeOptions.length > 0
-        ? TYPE_CARDS.filter((item) => restrictTypeOptions.includes(item.value))
-        : TYPE_CARDS,
+    () => {
+      const allowedTypes: TransactionType[] =
+        restrictTypeOptions && restrictTypeOptions.length > 0
+          ? restrictTypeOptions
+          : ['expense', 'income', 'transfer'];
+      return TYPE_CARDS.filter((item) => allowedTypes.includes(item.value));
+    },
     [restrictTypeOptions],
   );
+  const isTransferType = type === 'transfer';
+  const isBalanceAdjustmentType = type === 'balance_adjustment';
+  const showTypeSelector = availableTypeCards.length > 1;
+
+  useEffect(() => {
+    if (availableTypeCards.some((item) => item.value === type)) return;
+    const fallbackType = availableTypeCards[0]?.value ?? 'expense';
+    setType(fallbackType);
+  }, [availableTypeCards, type]);
 
   const typedCategories = useMemo(
-    () => categories.filter((category) => category.type === type),
+    () =>
+      type === 'expense' || type === 'income'
+        ? categories.filter((category) => category.type === type)
+        : [],
     [categories, type],
   );
   const topLevelCategories = useMemo(
@@ -419,10 +447,15 @@ export function TransactionEditorScreen({
   }, [amount, settings.currencySymbol]);
 
   const amountTone = useMemo(() => {
+    if (isBalanceAdjustmentType) {
+      const numericAmount = Number(amount);
+      if (!Number.isFinite(numericAmount) || numericAmount === 0) return 'default' as const;
+      return numericAmount > 0 ? ('success' as const) : ('error' as const);
+    }
     if (type === 'expense') return 'error' as const;
     if (type === 'income') return 'success' as const;
     return 'default' as const;
-  }, [type]);
+  }, [amount, isBalanceAdjustmentType, type]);
 
   const handleSubmit = () => {
     setError(null);
@@ -438,7 +471,25 @@ export function TransactionEditorScreen({
     const txDate = toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString();
 
     try {
-      if (type === 'transfer') {
+      if (isBalanceAdjustmentType) {
+        if (!accountId) {
+          setError(I18n.t('transactions.editor.error.complete_required'));
+          setFieldErrors({ account: I18n.t('transactions.editor.error.required') });
+          activateField('account');
+          return;
+        }
+        onSubmit({
+          type,
+          amount: numericAmount,
+          currency: settings.currencySymbol,
+          date: txDate,
+          accountId,
+          categoryId: null,
+          fromAccountId: null,
+          toAccountId: null,
+          note: note.trim() || null,
+        });
+      } else if (isTransferType) {
         if (recurringOptions) {
           const transferErrors: typeof fieldErrors = {};
           if (!fromAccountId)
@@ -576,17 +627,21 @@ export function TransactionEditorScreen({
   const handleAmountConfirm = useCallback(
     (val: string) => {
       setAmount(val);
-      activateField(type === 'transfer' ? 'fromAccount' : 'account');
+      activateField(isTransferType ? 'fromAccount' : 'account');
     },
-    [activateField, type],
+    [activateField, isTransferType],
   );
 
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
       setAccountId(nextAccountId);
+      if (isBalanceAdjustmentType) {
+        activateField('amount');
+        return;
+      }
       activateField('category');
     },
-    [activateField],
+    [activateField, isBalanceAdjustmentType],
   );
 
   const handleFromAccountSelect = useCallback(
@@ -835,14 +890,17 @@ export function TransactionEditorScreen({
           </View>
         </View>
         {mode === 'edit' && onDelete ? (
-          <View className="items-end gap-1.5">
+          <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={onDelete}
+              accessibilityRole="button"
+              accessibilityLabel={deleteLabel}
+              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/12"
+            >
+              <Trash2 size={14} color={themeColors.coral} />
+            </Pressable>
             <Button size="sm" className="h-8 px-3" onPress={handleSubmit}>
               <Text variant="caption">{submitLabel}</Text>
-            </Button>
-            <Button size="sm" variant="ghost" className="h-8 px-3" onPress={onDelete}>
-              <Text variant="caption" tone="error">
-                {deleteLabel}
-              </Text>
             </Button>
           </View>
         ) : (
@@ -860,43 +918,49 @@ export function TransactionEditorScreen({
           keyboardShouldPersistTaps="handled"
         >
           {/* Type selector pills */}
-          <View className="flex-row gap-2 mb-3">
-            {availableTypeCards.map((item) => (
-              <TypePill
-                key={item.value}
-                item={item}
-                selected={type === item.value}
-                onPress={() => setType(item.value)}
-              />
-            ))}
-          </View>
+          {showTypeSelector ? (
+            <View className="flex-row gap-2 mb-3">
+              {availableTypeCards.map((item) => (
+                <TypePill
+                  key={item.value}
+                  item={item}
+                  selected={type === item.value}
+                  onPress={() => setType(item.value)}
+                />
+              ))}
+            </View>
+          ) : null}
 
           {/* Summary rows */}
           <View className="rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            {/* Date row */}
-            <View>
-              <SummaryRow
-                label={I18n.t('transactions.editor.date')}
-                value={formatDateDisplay(date)}
-                isActive={activeField === 'date'}
-                onPress={() => activateField('date')}
-                rightElement={null}
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                      <Calendar size={13} color={themeColors.textMuted} />
+            {!isBalanceAdjustmentType ? (
+              <>
+                {/* Date row */}
+                <View>
+                  <SummaryRow
+                    label={I18n.t('transactions.editor.date')}
+                    value={formatDateDisplay(date)}
+                    isActive={activeField === 'date'}
+                    onPress={() => activateField('date')}
+                    rightElement={null}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-2">
+                        <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                          <Calendar size={13} color={themeColors.textMuted} />
+                        </View>
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('transactions.editor.date')}
+                        </Text>
+                      </View>
+                      <Text variant="body">{formatDateDisplay(date)}</Text>
                     </View>
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.editor.date')}
-                    </Text>
-                  </View>
-                  <Text variant="body">{formatDateDisplay(date)}</Text>
+                  </SummaryRow>
                 </View>
-              </SummaryRow>
-            </View>
 
-            <View className="h-[1px] bg-border/15 mx-4" />
+                <View className="h-[1px] bg-border/15 mx-4" />
+              </>
+            ) : null}
 
             {/* Amount row */}
             <View>
@@ -946,7 +1010,7 @@ export function TransactionEditorScreen({
             <View className="h-[1px] bg-border/15 mx-4" />
 
             {/* Account row(s) */}
-            {type === 'transfer' ? (
+            {isTransferType ? (
               <>
                 <View>
                   <SummaryRow
@@ -1059,8 +1123,8 @@ export function TransactionEditorScreen({
               </View>
             )}
 
-            {/* Category row (hidden for transfers) */}
-            {type !== 'transfer' ? (
+            {/* Category row (hidden for transfers and balance adjustments) */}
+            {!isTransferType && !isBalanceAdjustmentType ? (
               <>
                 <View className="h-[1px] bg-border/15 mx-4" />
                 <View>
@@ -1103,47 +1167,51 @@ export function TransactionEditorScreen({
               </>
             ) : null}
 
-            <View className="h-[1px] bg-border/15 mx-4" />
+            {!isBalanceAdjustmentType ? (
+              <>
+                <View className="h-[1px] bg-border/15 mx-4" />
 
-            {/* Note row */}
-            <View>
-              <SummaryRow
-                label={I18n.t('transaction_detail.note')}
-                isActive={activeField === 'note'}
-                onPress={focusNoteField}
-                rightElement={<View style={{ width: 14 }} />}
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                      <FileText size={13} color={themeColors.textMuted} />
+                {/* Note row */}
+                <View>
+                  <SummaryRow
+                    label={I18n.t('transaction_detail.note')}
+                    isActive={activeField === 'note'}
+                    onPress={focusNoteField}
+                    rightElement={<View style={{ width: 14 }} />}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-2">
+                        <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                          <FileText size={13} color={themeColors.textMuted} />
+                        </View>
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('transaction_detail.note')}
+                        </Text>
+                      </View>
+                      <View className="max-w-[66%] min-w-[40%]">
+                        <TextInput
+                          ref={noteInputRef}
+                          value={note}
+                          onChangeText={handleNoteChange}
+                          placeholder={I18n.t('transactions.editor.optional')}
+                          placeholderTextColor={themeColors.textMuted}
+                          selectTextOnFocus={shouldSelectAutoNoteOnFocus}
+                          returnKeyType="done"
+                          onFocus={() => setActiveField('note')}
+                          onBlur={() => setActiveField((prev) => (prev === 'note' ? null : prev))}
+                          style={{
+                            color: themeColors.text,
+                            fontSize: 14,
+                            textAlign: 'right',
+                            paddingVertical: 0,
+                          }}
+                        />
+                      </View>
                     </View>
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transaction_detail.note')}
-                    </Text>
-                  </View>
-                  <View className="max-w-[66%] min-w-[40%]">
-                    <TextInput
-                      ref={noteInputRef}
-                      value={note}
-                      onChangeText={handleNoteChange}
-                      placeholder={I18n.t('transactions.editor.optional')}
-                      placeholderTextColor={themeColors.textMuted}
-                      selectTextOnFocus={shouldSelectAutoNoteOnFocus}
-                      returnKeyType="done"
-                      onFocus={() => setActiveField('note')}
-                      onBlur={() => setActiveField((prev) => (prev === 'note' ? null : prev))}
-                      style={{
-                        color: themeColors.text,
-                        fontSize: 14,
-                        textAlign: 'right',
-                        paddingVertical: 0,
-                      }}
-                    />
-                  </View>
+                  </SummaryRow>
                 </View>
-              </SummaryRow>
-            </View>
+              </>
+            ) : null}
           </View>
 
           {/* Recurring options (traditional form inputs, secondary) */}

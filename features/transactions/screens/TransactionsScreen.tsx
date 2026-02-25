@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   FlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -19,20 +20,21 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
-import { AccountPanel, CategoryPanel } from '~/features/transactions/components/editor';
+import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { EditTransactionScreen } from './EditTransactionScreen';
 import { useApp } from '~/context/AppContext';
-import { formatAmount, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
+import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { I18n } from '~/lib/i18n';
 
-const TYPE_FILTERS: { label: string; value: 'all' | TransactionType; emoji: string }[] = [
-  { label: I18n.t('transactions.filters.all'), value: 'all', emoji: '📋' },
-  { label: I18n.t('transactions.filters.spent'), value: 'expense', emoji: '💸' },
-  { label: I18n.t('transactions.filters.earned'), value: 'income', emoji: '💰' },
-  { label: I18n.t('transactions.filters.moved'), value: 'transfer', emoji: '↔️' },
+const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
+  { label: I18n.t('transactions.filters.all'), value: 'all' },
+  { label: I18n.t('transactions.filters.spent'), value: 'expense' },
+  { label: I18n.t('transactions.filters.earned'), value: 'income' },
+  { label: I18n.t('transactions.filters.moved'), value: 'transfer' },
+  { label: I18n.t('transactions.filters.adjustment'), value: 'balance_adjustment' },
 ];
 
 const SORT_OPTIONS = [
@@ -60,15 +62,13 @@ function emptyMonthSummary(): MonthSummary {
   return { count: 0, income: 0, expense: 0 };
 }
 
-const FilterChip = React.memo(function FilterChip({
+const FilterPill = React.memo(function FilterPill({
   label,
-  emoji,
   value,
   selected,
   onSelect,
 }: {
   label: string;
-  emoji: string;
   value: 'all' | TransactionType;
   selected: boolean;
   onSelect: (value: 'all' | TransactionType) => void;
@@ -82,12 +82,11 @@ const FilterChip = React.memo(function FilterChip({
     <Pressable
       onPress={handlePress}
       className={cn(
-        'rounded-full border px-4 py-2.5 flex-row items-center gap-1.5 active:opacity-85',
+        'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
         selected ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
       )}
     >
-      <Text className="text-[13px]">{emoji}</Text>
-      <Text variant="caption" className={cn(selected ? 'text-primary' : 'text-muted-foreground')}>
+      <Text variant="label" className={cn(selected ? 'text-primary' : 'text-muted-foreground')}>
         {label}
       </Text>
     </Pressable>
@@ -139,15 +138,6 @@ interface TransactionsScreenProps {
   onPressAddTransaction?: () => void;
 }
 
-type FilterPanelKey = 'account' | 'category';
-
-interface FilterPanelOption {
-  key: FilterPanelKey;
-  label: string;
-  selectedLabel: string;
-  hasSelection: boolean;
-}
-
 export function TransactionsScreen({
   scrollToTopToken = 0,
   focusMonthKey = null,
@@ -160,6 +150,8 @@ export function TransactionsScreen({
     transactionFilters,
     setTransactionFilters,
     resetTransactionFilters,
+    updateTransaction,
+    deleteTransaction,
     accounts,
     accountGroups,
     categories,
@@ -167,10 +159,15 @@ export function TransactionsScreen({
   } = useApp();
 
   const [showFilters, setShowFilters] = useState(false);
-  const [activeFilterPanel, setActiveFilterPanel] = useState<FilterPanelKey | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
+  const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkNote, setBulkNote] = useState('');
+  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -194,6 +191,9 @@ export function TransactionsScreen({
   );
   const activeMonthKey = monthKey(activeMonthDate);
   const activeMonthLabel = formatMonthLabel(activeMonthDate);
+  const isSelectionMode = selectedTransactionIds.length > 0;
+  const selectedTransactionCount = selectedTransactionIds.length;
+  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const monthBuckets = useMemo(() => {
     const transactionsMap = new Map<string, TransactionWithRelations[]>();
     const summaries = new Map<string, MonthSummary>();
@@ -219,6 +219,23 @@ export function TransactionsScreen({
 
     return { transactionsMap, summaries };
   }, [filteredTransactions, getDisplayValueForTransaction, settings.displayMode]);
+
+  useEffect(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const availableIds = new Set(filteredTransactions.map((transaction) => transaction.id));
+    setSelectedTransactionIds((previous) => {
+      const next = previous.filter((id) => availableIds.has(id));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [filteredTransactions, selectedTransactionIds.length]);
+
+  useEffect(() => {
+    if (isSelectionMode) {
+      setSelectedTransaction(null);
+      return;
+    }
+    setShowBulkUpdate(false);
+  }, [isSelectionMode]);
 
   const monthPagerSlots = useMemo<number[]>(
     () => Array.from({ length: MONTH_PAGER_TOTAL_SLOTS }, (_, index) => index),
@@ -259,10 +276,6 @@ export function TransactionsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [getPageScrollToTopRef, scrollToTopToken]);
-
-  useEffect(() => {
-    if (!showFilters) setActiveFilterPanel(null);
-  }, [showFilters]);
 
   useEffect(() => {
     if (focusMonthToken <= 0) return;
@@ -379,10 +392,6 @@ export function TransactionsScreen({
     transactionFilters.type,
   ]);
 
-  const categoryById = useMemo(
-    () => new Map(categories.map((category) => [category.id, category])),
-    [categories],
-  );
   const categoryPanelParents = useMemo(
     () =>
       categories
@@ -402,48 +411,6 @@ export function TransactionsScreen({
       });
     return grouped;
   }, [categories]);
-  const selectedAccountLabel = useMemo(() => {
-    if (!transactionFilters.accountId) return I18n.t('transactions.filters.all_accounts');
-    return (
-      accounts.find((account) => account.id === transactionFilters.accountId)?.name ??
-      I18n.t('transactions.filters.all_accounts')
-    );
-  }, [accounts, transactionFilters.accountId]);
-  const selectedCategoryLabel = useMemo(() => {
-    if (!transactionFilters.categoryId) return I18n.t('transactions.filters.all_categories');
-    const selectedCategory = categoryById.get(transactionFilters.categoryId);
-    if (!selectedCategory) return I18n.t('transactions.filters.all_categories');
-    if (!selectedCategory.parentId) return selectedCategory.name;
-    const parent = categoryById.get(selectedCategory.parentId);
-    return parent ? `${parent.name} / ${selectedCategory.name}` : selectedCategory.name;
-  }, [categoryById, transactionFilters.categoryId]);
-  const filterPanelOptions = useMemo<FilterPanelOption[]>(
-    () => [
-      {
-        key: 'account',
-        label: I18n.t('transactions.filters.account'),
-        selectedLabel: selectedAccountLabel,
-        hasSelection: transactionFilters.accountId !== null,
-      },
-      {
-        key: 'category',
-        label: I18n.t('transactions.filters.category'),
-        selectedLabel: selectedCategoryLabel,
-        hasSelection: transactionFilters.categoryId !== null,
-      },
-    ],
-    [
-      selectedAccountLabel,
-      selectedCategoryLabel,
-      transactionFilters.accountId,
-      transactionFilters.categoryId,
-    ],
-  );
-  const activePanelTitle = useMemo(() => {
-    if (!activeFilterPanel) return I18n.t('transactions.filters.title');
-    const option = filterPanelOptions.find((item) => item.key === activeFilterPanel);
-    return option?.label ?? I18n.t('transactions.filters.title');
-  }, [activeFilterPanel, filterPanelOptions]);
   const sortOptions = useMemo(
     () => SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
     [],
@@ -453,45 +420,123 @@ export function TransactionsScreen({
   const handleOpenFilters = useCallback(() => setShowFilters(true), []);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
   const handleCloseTransactionEditor = useCallback(() => setSelectedTransaction(null), []);
+  const clearSelection = useCallback(() => {
+    void triggerHaptic('selection');
+    setSelectedTransactionIds([]);
+  }, []);
+  const toggleTransactionSelection = useCallback((transactionId: string) => {
+    setSelectedTransactionIds((previous) =>
+      previous.includes(transactionId)
+        ? previous.filter((id) => id !== transactionId)
+        : [...previous, transactionId],
+    );
+  }, []);
+  const handleTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedTransaction(transaction);
+    },
+    [isSelectionMode, toggleTransactionSelection],
+  );
+  const handleTransactionLongPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedTransactionIds([transaction.id]);
+    },
+    [isSelectionMode, toggleTransactionSelection],
+  );
+  const handleOpenBulkUpdate = useCallback(() => {
+    if (selectedTransactionCount === 0) return;
+    setBulkDate(formatDateInput(new Date()));
+    setBulkDateTouched(false);
+    setBulkNote('');
+    setBulkNoteTouched(false);
+    setShowBulkUpdate(true);
+  }, [selectedTransactionCount]);
+  const handleCloseBulkUpdate = useCallback(() => {
+    setShowBulkUpdate(false);
+  }, []);
+  const handleApplyBulkUpdate = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    if (!hasBulkChanges) return;
+
+    const updates: { date?: string; note?: string | null } = {};
+    if (bulkDateTouched) updates.date = bulkDate;
+    if (bulkNoteTouched) {
+      const normalizedNote = bulkNote.trim();
+      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
+    }
+    if (Object.keys(updates).length === 0) return;
+
+    selectedTransactionIds.forEach((transactionId) => {
+      updateTransaction(transactionId, updates);
+    });
+    setShowBulkUpdate(false);
+    setSelectedTransactionIds([]);
+  }, [
+    bulkDate,
+    bulkDateTouched,
+    bulkNote,
+    bulkNoteTouched,
+    hasBulkChanges,
+    selectedTransactionIds,
+    updateTransaction,
+  ]);
+  const handleDeleteSelectedTransactions = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const idsToDelete = [...selectedTransactionIds];
+    Alert.alert(
+      I18n.t('transactions.selection.delete_title'),
+      I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            idsToDelete.forEach((transactionId) => {
+              deleteTransaction(transactionId);
+            });
+            setShowBulkUpdate(false);
+            setSelectedTransactionIds([]);
+          },
+        },
+      ],
+    );
+  }, [deleteTransaction, selectedTransactionIds]);
   const handleResetFilters = useCallback(() => {
     void triggerHaptic('selection');
     resetTransactionFilters();
   }, [resetTransactionFilters]);
   const handleDoneFilters = useCallback(() => {
     void triggerHaptic('selection');
-    if (activeFilterPanel !== null) {
-      setActiveFilterPanel(null);
-      return;
-    }
     setShowFilters(false);
-  }, [activeFilterPanel]);
-  const handleOpenFilterPanel = useCallback((panelKey: FilterPanelKey) => {
-    void triggerHaptic('selection');
-    setActiveFilterPanel(panelKey);
   }, []);
   const handleSelectAccountFilter = useCallback(
     (accountId: string) => {
       setTransactionFilters({ accountId });
-      setActiveFilterPanel(null);
     },
     [setTransactionFilters],
   );
   const handleSelectCategoryFilter = useCallback(
     (categoryId: string) => {
       setTransactionFilters({ categoryId });
-      setActiveFilterPanel(null);
     },
     [setTransactionFilters],
   );
   const handleResetAccountFilter = useCallback(() => {
     void triggerHaptic('selection');
     setTransactionFilters({ accountId: null });
-    setActiveFilterPanel(null);
   }, [setTransactionFilters]);
   const handleResetCategoryFilter = useCallback(() => {
     void triggerHaptic('selection');
     setTransactionFilters({ categoryId: null });
-    setActiveFilterPanel(null);
   }, [setTransactionFilters]);
   const handleSearchChange = useCallback(
     (text: string) => {
@@ -523,80 +568,6 @@ export function TransactionsScreen({
     },
     [setTransactionFilters],
   );
-  const renderAllFilterOption = useCallback(
-    (label: string, isActive: boolean, onPress: () => void) => (
-      <View className="px-5 pb-2">
-        <Pressable
-          onPress={onPress}
-          className={cn(
-            'rounded-xl border px-3 py-2.5',
-            isActive ? 'border-primary/45 bg-primary/10' : 'border-border/30 bg-card',
-          )}
-        >
-          <Text
-            variant="caption"
-            className={cn(isActive ? 'text-primary' : 'text-muted-foreground')}
-          >
-            {label}
-          </Text>
-        </Pressable>
-      </View>
-    ),
-    [],
-  );
-
-  const renderActiveFilterPanel = useCallback(() => {
-    if (activeFilterPanel === 'account') {
-      return (
-        <View className="flex-1">
-          {renderAllFilterOption(
-            I18n.t('transactions.filters.all_accounts'),
-            transactionFilters.accountId === null,
-            handleResetAccountFilter,
-          )}
-          <AccountPanel
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedId={transactionFilters.accountId}
-            onSelect={handleSelectAccountFilter}
-          />
-        </View>
-      );
-    }
-
-    if (activeFilterPanel === 'category') {
-      return (
-        <View className="flex-1">
-          {renderAllFilterOption(
-            I18n.t('transactions.filters.all_categories'),
-            transactionFilters.categoryId === null,
-            handleResetCategoryFilter,
-          )}
-          <CategoryPanel
-            parents={categoryPanelParents}
-            childByParent={categoryPanelChildren}
-            selectedCategoryId={transactionFilters.categoryId}
-            onSelect={handleSelectCategoryFilter}
-          />
-        </View>
-      );
-    }
-
-    return null;
-  }, [
-    activeFilterPanel,
-    accounts,
-    accountGroups,
-    categoryPanelChildren,
-    categoryPanelParents,
-    handleResetAccountFilter,
-    handleResetCategoryFilter,
-    handleSelectAccountFilter,
-    handleSelectCategoryFilter,
-    renderAllFilterOption,
-    transactionFilters.accountId,
-    transactionFilters.categoryId,
-  ]);
 
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
@@ -607,7 +578,10 @@ export function TransactionsScreen({
         <View style={monthPageStyle} className="flex-1 bg-background">
           <ActivityTransactionList
             transactions={pageTransactions}
-            onTransactionPress={setSelectedTransaction}
+            onTransactionPress={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
             emptyTitle={I18n.t('transactions.empty_month_title')}
             emptyMessage={I18n.t('transactions.empty_month_message')}
             contentPaddingBottom={110}
@@ -619,21 +593,69 @@ export function TransactionsScreen({
         </View>
       );
     },
-    [getPageScrollToTopRef, monthBuckets.transactionsMap, monthPagerAnchorDate, monthPageStyle],
+    [
+      getPageScrollToTopRef,
+      handleTransactionLongPress,
+      handleTransactionPress,
+      isSelectionMode,
+      monthBuckets.transactionsMap,
+      monthPagerAnchorDate,
+      monthPageStyle,
+      selectedTransactionIds,
+    ],
   );
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
-        title={I18n.t('transactions.title')}
+        title={isSelectionMode ? undefined : I18n.t('transactions.title')}
+        titleNode={
+          isSelectionMode ? (
+            <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+              <Pressable
+                onPress={clearSelection}
+                className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.cancel')}
+                </Text>
+              </Pressable>
+
+              <Text variant="caption" className="text-foreground">
+                {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
+              </Text>
+
+              <View className="flex-row items-center gap-2">
+                <Pressable
+                  onPress={handleOpenBulkUpdate}
+                  className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                >
+                  <Text variant="caption" className="text-primary">
+                    {I18n.t('transactions.selection.update')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleDeleteSelectedTransactions}
+                  className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                >
+                  <Text variant="caption" className="text-destructive">
+                    {I18n.t('common.delete')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : undefined
+        }
         monthLabel={activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
         actions={
-          <View className="flex-row items-center gap-2">
-            <DisplayModeToggle />
-            <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
-          </View>
+          isSelectionMode ? undefined : (
+            <View className="flex-row items-center gap-2">
+              <DisplayModeToggle />
+              <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+            </View>
+          )
         }
       >
         <View>
@@ -672,7 +694,7 @@ export function TransactionsScreen({
         />
       </View>
 
-      {onPressAddTransaction ? (
+      {onPressAddTransaction && !isSelectionMode ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
@@ -701,6 +723,80 @@ export function TransactionsScreen({
       </ThemeModal>
 
       <ThemeModal
+        visible={showBulkUpdate}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseBulkUpdate}
+      >
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+            <View className="flex-1 pr-3">
+              <Text variant="subheading">
+                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
+              </Text>
+              <Text variant="friendly" tone="muted">
+                {I18n.t('transactions.selection.update_subtitle')}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={handleCloseBulkUpdate}
+                className="px-3 py-2 rounded-full bg-secondary/70"
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.cancel')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleApplyBulkUpdate}
+                disabled={!hasBulkChanges}
+                className={cn(
+                  'px-3 py-2 rounded-full',
+                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+                )}
+              >
+                <Text variant="caption" className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}>
+                  {I18n.t('common.save')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.editor.date')}
+              </Text>
+              <View
+                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                style={{ height: 360 }}
+              >
+                <DatePanel
+                  value={bulkDate}
+                  onSelect={(value) => {
+                    setBulkDate(value);
+                    setBulkDateTouched(true);
+                  }}
+                />
+              </View>
+            </View>
+
+            <View className="gap-2.5">
+              <Input
+                label={I18n.t('transaction_detail.note')}
+                placeholder={I18n.t('transactions.editor.optional')}
+                value={bulkNote}
+                onChangeText={(value) => {
+                  setBulkNote(value);
+                  setBulkNoteTouched(true);
+                }}
+              />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </ThemeModal>
+
+      <ThemeModal
         visible={showFilters}
         animationType="slide"
         presentationStyle="pageSheet"
@@ -709,24 +805,20 @@ export function TransactionsScreen({
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
           <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
             <View>
-              <Text variant="subheading">{activePanelTitle}</Text>
-              {activeFilterPanel === null ? (
-                <Text variant="friendly" tone="muted">
-                  {I18n.t('transactions.filters.subtitle')}
-                </Text>
-              ) : null}
+              <Text variant="subheading">{I18n.t('transactions.filters.title')}</Text>
+              <Text variant="friendly" tone="muted">
+                {I18n.t('transactions.filters.subtitle')}
+              </Text>
             </View>
             <View className="flex-row items-center gap-2">
-              {activeFilterPanel === null ? (
-                <Pressable
-                  onPress={handleResetFilters}
-                  className="px-3 py-2 rounded-full bg-secondary/70"
-                >
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('common.reset')}
-                  </Text>
-                </Pressable>
-              ) : null}
+              <Pressable
+                onPress={handleResetFilters}
+                className="px-3 py-2 rounded-full bg-secondary/70"
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.reset')}
+                </Text>
+              </Pressable>
               <Pressable
                 onPress={handleDoneFilters}
                 className="px-3 py-2 rounded-full bg-secondary"
@@ -738,63 +830,86 @@ export function TransactionsScreen({
             </View>
           </View>
 
-          {activeFilterPanel ? (
-            renderActiveFilterPanel()
-          ) : (
-            <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
-              <Input
-                label={I18n.t('transactions.filters.search')}
-                placeholder={I18n.t('transactions.filters.search_placeholder')}
-                value={transactionFilters.search}
-                onChangeText={handleSearchChange}
-              />
+          <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
+            <Input
+              label={I18n.t('transactions.filters.search')}
+              placeholder={I18n.t('transactions.filters.search_placeholder')}
+              value={transactionFilters.search}
+              onChangeText={handleSearchChange}
+            />
 
-              <View className="gap-2">
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.filters.type')}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
+              >
+                {TYPE_FILTERS.map((item) => (
+                  <FilterPill
+                    key={item.value}
+                    label={item.label}
+                    value={item.value}
+                    selected={transactionFilters.type === item.value}
+                    onSelect={handleTypeChange}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+
+            <View className="gap-2.5">
+              <View className="flex-row items-center justify-between gap-3">
                 <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.filters.type')}
+                  {I18n.t('transactions.filters.account')}
                 </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
-                >
-                  {TYPE_FILTERS.map((item) => (
-                    <FilterChip
-                      key={item.value}
-                      label={item.label}
-                      emoji={item.emoji}
-                      value={item.value}
-                      selected={transactionFilters.type === item.value}
-                      onSelect={handleTypeChange}
-                    />
-                  ))}
-                </ScrollView>
+                <FilterPill
+                  label={I18n.t('transactions.filters.all_accounts')}
+                  value="all"
+                  selected={transactionFilters.accountId === null}
+                  onSelect={handleResetAccountFilter}
+                />
               </View>
+              <View
+                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                style={{ height: 236 }}
+              >
+                <AccountPanel
+                  accounts={accounts}
+                  accountGroups={accountGroups}
+                  selectedId={transactionFilters.accountId}
+                  onSelect={handleSelectAccountFilter}
+                />
+              </View>
+            </View>
 
-              {filterPanelOptions.map((option) => (
-                <View key={option.key} className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {option.label}
-                  </Text>
-                  <Pressable
-                    onPress={() => handleOpenFilterPanel(option.key)}
-                    className={cn(
-                      'h-[54px] rounded-3xl border border-border/40 bg-card/95 px-4 flex-row items-center',
-                    )}
-                  >
-                    <Text
-                      numberOfLines={1}
-                      className={cn(
-                        'flex-1',
-                        option.hasSelection ? 'text-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {option.selectedLabel}
-                    </Text>
-                  </Pressable>
-                </View>
-              ))}
+            <View className="gap-2.5">
+              <View className="flex-row items-center justify-between gap-3">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.filters.category')}
+                </Text>
+                <FilterPill
+                  label={I18n.t('transactions.filters.all_categories')}
+                  value="all"
+                  selected={transactionFilters.categoryId === null}
+                  onSelect={handleResetCategoryFilter}
+                />
+              </View>
+              <View
+                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                style={{ height: 236 }}
+              >
+                <CategoryPanel
+                  parents={categoryPanelParents}
+                  childByParent={categoryPanelChildren}
+                  selectedCategoryId={transactionFilters.categoryId}
+                  onSelect={handleSelectCategoryFilter}
+                />
+              </View>
+            </View>
 
+            <View className="gap-2.5">
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <Input
@@ -821,15 +936,15 @@ export function TransactionsScreen({
                   />
                 </View>
               </View>
+            </View>
 
-              <SelectField
-                label={I18n.t('transactions.filters.sort')}
-                value={transactionFilters.sortBy}
-                onChange={handleSortChange}
-                options={sortOptions}
-              />
-            </ScrollView>
-          )}
+            <SelectField
+              label={I18n.t('transactions.filters.sort')}
+              value={transactionFilters.sortBy}
+              onChange={handleSortChange}
+              options={sortOptions}
+            />
+          </ScrollView>
         </SafeAreaView>
       </ThemeModal>
     </SafeAreaView>

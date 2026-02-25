@@ -7,21 +7,35 @@ import { cn } from '~/utils';
 import type { Account, AccountGroup } from '~/types';
 import { I18n } from '~/lib/i18n';
 
-interface AccountPanelProps {
+interface AccountPanelBaseProps {
   accounts: Account[];
   accountGroups: AccountGroup[];
-  selectedId: string | null;
   disabledId?: string | null;
-  onSelect: (accountId: string) => void;
 }
 
-export function AccountPanel({
-  accounts,
-  accountGroups,
-  selectedId,
-  disabledId,
-  onSelect,
-}: AccountPanelProps) {
+interface AccountPanelSingleSelectProps extends AccountPanelBaseProps {
+  selectedId: string | null;
+  onSelect: (accountId: string) => void;
+  selectedIds?: never;
+  onToggleSelect?: never;
+}
+
+interface AccountPanelMultiSelectProps extends AccountPanelBaseProps {
+  selectedIds: string[];
+  onToggleSelect: (accountId: string) => void;
+  selectedId?: never;
+  onSelect?: never;
+}
+
+type AccountPanelProps = AccountPanelSingleSelectProps | AccountPanelMultiSelectProps;
+
+export function AccountPanel(props: AccountPanelProps) {
+  const { accounts, accountGroups, disabledId } = props;
+  const isMultiSelect = 'selectedIds' in props;
+  const selectedId = isMultiSelect ? null : props.selectedId;
+  const selectedIds = isMultiSelect ? props.selectedIds : null;
+  const selectedIdSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
+
   const grouped = useMemo(() => {
     // account.accountGroup stores the group NAME, not ID
     const groupNames = new Set(accountGroups.map((g) => g.name));
@@ -81,7 +95,9 @@ export function AccountPanel({
             ) : null}
             <View className="flex-row flex-wrap gap-2">
               {group.accounts.map((account) => {
-                const isSelected = selectedId === account.id;
+                const isSelected = isMultiSelect
+                  ? selectedIdSet.has(account.id)
+                  : selectedId === account.id;
                 const isDisabled = disabledId === account.id;
 
                 return (
@@ -90,7 +106,11 @@ export function AccountPanel({
                       onPress={() => {
                         if (isDisabled) return;
                         void triggerHaptic('selection');
-                        onSelect(account.id);
+                        if (isMultiSelect) {
+                          props.onToggleSelect?.(account.id);
+                          return;
+                        }
+                        props.onSelect?.(account.id);
                       }}
                       className={cn(
                         'rounded-xl border px-2.5 py-2.5 flex-row items-center justify-center',

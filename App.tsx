@@ -119,15 +119,6 @@ function AppContent() {
     setTransactionsFocusMonthToken((prev) => prev + 1);
   }, []);
 
-  const openActivityForMonth = useCallback(
-    (monthKey: string) => {
-      jumpTransactionsToMonth(monthKey);
-      setTransactionsScrollTopToken((prev) => prev + 1);
-      setActiveTab('transactions');
-    },
-    [jumpTransactionsToMonth],
-  );
-
   const openAddTransaction = useCallback(() => {
     setShowAddModal(true);
   }, []);
@@ -195,10 +186,7 @@ function AppContent() {
           <MemoAccountsScreen resetToRootToken={accountsResetToRootToken} />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'}>
-          <MemoInsightsScreen
-            resetToCurrentMonthToken={insightsResetToMonthToken}
-            onOpenActivityMonth={openActivityForMonth}
-          />
+          <MemoInsightsScreen resetToCurrentMonthToken={insightsResetToMonthToken} />
         </MountedTab>
         <MountedTab active={activeTab === 'settings'}>
           <MemoSettingsStack
