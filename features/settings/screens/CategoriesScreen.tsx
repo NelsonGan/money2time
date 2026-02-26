@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
@@ -57,7 +57,7 @@ function CategoryEditor({
   const [color, setColor] = useState(initial?.color ?? CATEGORY_COLORS[0]);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setName(initial?.name ?? '');
     setIcon(initial?.icon ?? DEFAULT_CATEGORY_EMOJIS[0]);
     setColor(initial?.color ?? CATEGORY_COLORS[0]);
@@ -208,14 +208,12 @@ function CategoryEditor({
   );
 }
 
-// Module-level callbacks for Row — avoids hooks/closures inside renderItem
 let _onEdit: ((item: Category) => void) | null = null;
 let _onDelete: ((item: Category) => void) | null = null;
 let _onNavigate: ((item: Category) => void) | null = null;
 let _themeColors: { surface: string; surfaceMuted: string; textMuted: string; coral: string; text: string } | null = null;
 let _hasChildren: ((id: string) => boolean) | null = null;
 
-// IMPORTANT: Only inline `style` props inside renderItem — className/NativeWind causes freezes
 function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
   const tc = _themeColors!;
   const hasKids = _hasChildren?.(item.id) ?? false;
@@ -386,7 +384,6 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     }
   }, [selectedParentId, topLevel]);
 
-  // Set module-level callbacks
   _themeColors = themeColors;
   _hasChildren = (id: string) => (childrenByParent.get(id)?.length ?? 0) > 0;
   _onEdit = (item: Category) => {
@@ -402,11 +399,9 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     setSelectedParentId(item.id);
   };
 
-  // Subcategory view
   if (selectedParent) {
     return (
       <SettingsPageLayout>
-        {/* Header OUTSIDE the DraggableFlatList */}
         <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
           <SettingsHeader
             className="px-0 pt-5 pb-1"
@@ -478,10 +473,8 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     );
   }
 
-  // Top-level view
   return (
     <SettingsPageLayout>
-      {/* Header OUTSIDE the DraggableFlatList */}
       <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
         <SettingsHeader
           className="px-0 pt-5 pb-1"

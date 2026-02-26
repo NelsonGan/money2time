@@ -1684,7 +1684,6 @@ export function AccountsScreen({
 
   return (
     <SettingsPageLayout>
-      {/* Shared header for both tabs — prevents layout shift when switching */}
       {managementOnly ? (
         <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
           <SettingsHeader

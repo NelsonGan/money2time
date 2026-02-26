@@ -142,5 +142,4 @@ export const spacing = {
   listBottom: 24,
 } as const;
 
-/** Standard bottom padding for scrollable lists to clear the static nav bar. */
 export const LIST_BOTTOM_PADDING = spacing.listBottom;
