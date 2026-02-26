@@ -120,6 +120,10 @@ interface AppContextValue extends AppState {
   getTrueHourlyRateForDate: (dateIso: string) => number;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
 
+  reorderAccounts: (orderedIds: string[]) => void;
+  reorderAccountGroups: (orderedIds: string[]) => void;
+  reorderCategories: (orderedIds: string[]) => void;
+
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
@@ -353,6 +357,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }
+  }, []);
+
+  const reorderAccounts = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setAccounts((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+  }, []);
+
+  const reorderAccountGroups = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setAccountGroups((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+  }, []);
+
+  const reorderCategories = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setCategories((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
   }, []);
 
   useEffect(() => {
@@ -940,6 +959,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createAccountGroup,
             renameAccountGroup,
             deleteAccountGroup,
+            reorderAccounts,
+            reorderAccountGroups,
+            reorderCategories,
             createRecurringRule,
             updateRecurringRule,
             deleteRecurringRule,
@@ -997,6 +1019,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createAccountGroup,
       renameAccountGroup,
       deleteAccountGroup,
+      reorderAccounts,
+      reorderAccountGroups,
+      reorderCategories,
       createRecurringRule,
       updateRecurringRule,
       deleteRecurringRule,

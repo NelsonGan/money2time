@@ -1,21 +1,12 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+
+import { getSQLite } from '~/lib/db/client';
+import { nowIso } from '~/utils/id';
 
 type TableName = 'categories' | 'accounts' | 'account_groups';
 
-interface PersistQueueItem {
-  table: TableName;
-  orderedIds: string[];
-}
-
-let globalPersistTimeoutId: ReturnType<typeof setTimeout> | null = null;
-let globalPersistQueue: PersistQueueItem | null = null;
-let globalIsPersisting = false;
-
-async function executePersist(table: TableName, orderedIds: string[]): Promise<void> {
+function executePersist(table: TableName, orderedIds: string[]): void {
   if (orderedIds.length === 0) return;
-
-  const { getSQLite } = await import('~/lib/db/client');
-  const { nowIso } = await import('~/utils/id');
 
   const sqlite = getSQLite();
   const now = nowIso();
@@ -29,38 +20,13 @@ async function executePersist(table: TableName, orderedIds: string[]): Promise<v
   );
 }
 
-async function flushPersistQueue(): Promise<void> {
-  if (globalIsPersisting || !globalPersistQueue) return;
-
-  globalIsPersisting = true;
-  const item = globalPersistQueue;
-  globalPersistQueue = null;
-
-  try {
-    await executePersist(item.table, item.orderedIds);
-  } catch (error) {
-    console.error(`[persistOrder] Failed to save order for ${item.table}:`, error);
-  } finally {
-    globalIsPersisting = false;
-
-    if (globalPersistQueue) globalPersistTimeoutId = setTimeout(() => void flushPersistQueue(), 100);
-  }
-}
-
-export function useDebouncedPersistence(debounceMs: number = 500) {
-  const debounceMsRef = useRef(debounceMs);
-  debounceMsRef.current = debounceMs;
-
+export function useDebouncedPersistence(_debounceMs: number = 0) {
   const persistOrder = useCallback((table: TableName, orderedIds: string[]) => {
-    globalPersistQueue = { table, orderedIds };
-
-    if (globalPersistTimeoutId) {
-      clearTimeout(globalPersistTimeoutId);
+    try {
+      executePersist(table, orderedIds);
+    } catch (error) {
+      console.error(`[persistOrder] Failed to save order for ${table}:`, error);
     }
-
-    globalPersistTimeoutId = setTimeout(() => {
-      void flushPersistQueue();
-    }, debounceMsRef.current);
   }, []);
 
   return { persistOrder };

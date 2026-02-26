@@ -330,7 +330,7 @@ interface CategoriesScreenProps {
 }
 
 export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
-  const { categories, createCategory, updateCategory, deleteCategory } = useApp();
+  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } = useApp();
   const { persistOrder } = useDebouncedPersistence(500);
   const themeColors = useThemeColors();
   const [type, setType] = useState<CategoryType>('expense');
@@ -374,6 +374,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     didDragRef.current = false;
     setLocalTopLevel(topLevel);
     setLocalSubcategories(subcategoriesFromContext);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab change only; topLevel/subcategories derive from type
   }, [type]);
   useEffect(() => {
     if (didDragRef.current) { didDragRef.current = false; return; }
@@ -440,6 +441,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
             didDragRef.current = true;
             setLocalSubcategories(data);
             persistOrder('categories', data.map((i) => i.id));
+            reorderCategories(data.map((i) => i.id));
           }}
           onPlaceholderIndexChange={() => void triggerHaptic('selection')}
           autoscrollThreshold={80}
@@ -521,6 +523,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
           didDragRef.current = true;
           setLocalTopLevel(data);
           persistOrder('categories', data.map((i) => i.id));
+          reorderCategories(data.map((i) => i.id));
         }}
         onPlaceholderIndexChange={() => void triggerHaptic('selection')}
         autoscrollThreshold={80}
