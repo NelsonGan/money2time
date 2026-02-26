@@ -65,9 +65,7 @@ interface AppContextValue extends AppState {
     input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteAccount: (id: string) => void;
-  reorderAccounts: (ids: string[]) => void;
   createAccountGroup: (name: string) => void;
-  reorderAccountGroups: (ids: string[]) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
   createRecurringRule: (input: CreateRecurringRuleInput) => void;
@@ -80,7 +78,6 @@ interface AppContextValue extends AppState {
     updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteCategory: (id: string) => void;
-  reorderCategories: (ids: string[]) => void;
 
   createTransaction: (input: CreateTransactionInput) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -426,27 +423,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
-  const reorderAccountsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const reorderAccounts = useCallback(
-    (ids: string[]) => {
-      const indexMap = new Map(ids.map((id, i) => [id, i]));
-      setAccounts((prev) =>
-        [...prev].sort(
-          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
-        ),
-      );
-      if (reorderAccountsTimer.current) clearTimeout(reorderAccountsTimer.current);
-      reorderAccountsTimer.current = setTimeout(() => {
-        try {
-          accountsRepository.reorder(ids);
-        } catch {
-          // Background save — silent failure
-        }
-      }, 300);
-    },
-    [],
-  );
-
   const createAccountGroup = useCallback(
     (name: string) => {
       runMutation(() => {
@@ -454,27 +430,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [runMutation],
-  );
-
-  const reorderAccountGroupsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const reorderAccountGroups = useCallback(
-    (ids: string[]) => {
-      const indexMap = new Map(ids.map((id, i) => [id, i]));
-      setAccountGroups((prev) =>
-        [...prev].sort(
-          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
-        ),
-      );
-      if (reorderAccountGroupsTimer.current) clearTimeout(reorderAccountGroupsTimer.current);
-      reorderAccountGroupsTimer.current = setTimeout(() => {
-        try {
-          accountGroupsRepository.reorder(ids);
-        } catch {
-          // Background save — silent failure
-        }
-      }, 300);
-    },
-    [],
   );
 
   const renameAccountGroup = useCallback(
@@ -550,27 +505,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [runMutation],
-  );
-
-  const reorderCategoriesTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const reorderCategories = useCallback(
-    (ids: string[]) => {
-      const indexMap = new Map(ids.map((id, i) => [id, i]));
-      setCategories((prev) =>
-        [...prev].sort(
-          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
-        ),
-      );
-      if (reorderCategoriesTimer.current) clearTimeout(reorderCategoriesTimer.current);
-      reorderCategoriesTimer.current = setTimeout(() => {
-        try {
-          categoriesRepository.reorder(ids);
-        } catch {
-          // Background save — silent failure
-        }
-      }, 300);
-    },
-    [],
   );
 
   const createTransaction = useCallback(
@@ -915,9 +849,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createAccount,
             updateAccount,
             deleteAccount,
-            reorderAccounts,
             createAccountGroup,
-            reorderAccountGroups,
             renameAccountGroup,
             deleteAccountGroup,
             createRecurringRule,
@@ -926,7 +858,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createCategory,
             updateCategory,
             deleteCategory,
-            reorderCategories,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -975,9 +906,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createAccount,
       updateAccount,
       deleteAccount,
-      reorderAccounts,
       createAccountGroup,
-      reorderAccountGroups,
       renameAccountGroup,
       deleteAccountGroup,
       createRecurringRule,
@@ -986,7 +915,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createCategory,
       updateCategory,
       deleteCategory,
-      reorderCategories,
       createTransaction,
       updateTransaction,
       deleteTransaction,

@@ -38,7 +38,6 @@ async function flushPersistQueue(): Promise<void> {
 
   try {
     await executePersist(item.table, item.orderedIds);
-    // saved successfully
   } catch (error) {
     console.error(`[persistOrder] Failed to save order for ${item.table}:`, error);
   } finally {
@@ -65,24 +64,4 @@ export function useDebouncedPersistence(debounceMs: number = 500) {
   }, []);
 
   return { persistOrder };
-}
-
-export function useDragReorder<T extends { id: string }>(
-  items: T[],
-  setItems: (items: T[]) => void,
-  table: TableName,
-  debounceMs: number = 500,
-) {
-  const { persistOrder } = useDebouncedPersistence(debounceMs);
-
-  const handleDragEnd = useCallback(
-    (newItems: T[]) => {
-      setItems(newItems);
-      const orderedIds = newItems.map((item) => item.id);
-      persistOrder(table, orderedIds);
-    },
-    [setItems, table, persistOrder],
-  );
-
-  return { handleDragEnd };
 }

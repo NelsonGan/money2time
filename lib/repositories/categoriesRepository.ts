@@ -1,6 +1,6 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 
-import { getDb, getSQLite } from '~/lib/db/client';
+import { getDb } from '~/lib/db/client';
 import { categoriesTable } from '~/lib/db/schema';
 import type { Category } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -97,19 +97,6 @@ class CategoriesRepository {
       .run();
   }
 
-  reorder(ids: string[]) {
-    if (ids.length === 0) return;
-    setImmediate(() => {
-      const sqlite = getSQLite();
-      const now = nowIso();
-
-      const cases = ids.map((id, index) => `WHEN '${id}' THEN ${index}`).join(' ');
-      const placeholders = ids.map((id) => `'${id}'`).join(',');
-      sqlite.execSync(
-        `UPDATE categories SET sort_order = CASE id ${cases} END, updated_at = '${now}' WHERE id IN (${placeholders})`,
-      );
-    });
-  }
 }
 
 export const categoriesRepository = new CategoriesRepository();
