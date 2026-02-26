@@ -3,7 +3,11 @@ import { Alert, FlatList, Pressable, ScrollView, View, type LayoutChangeEvent } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
+import DraggableFlatList, {
+  NestableDraggableFlatList,
+  NestableScrollContainer,
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Text } from '~/components/ui/text';
@@ -696,24 +700,12 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
   );
 }
 
-type AccountMgmtItem =
-  | { kind: 'header'; id: string; label: string }
-  | { kind: 'account'; id: string; account: Account; sectionId: string };
+interface AccountMgmtAccountItem { id: string; account: Account }
 
-function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMgmtItem>) {
+function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMgmtAccountItem>) {
   const tc = _acctThemeColors!;
-
-  if (item.kind === 'header') {
-    return (
-      <View style={{ paddingLeft: 4, paddingRight: 12, paddingTop: 6, paddingBottom: 4 }}>
-        <Text style={{ fontSize: 11, color: tc.textMuted }}>{item.label}</Text>
-      </View>
-    );
-  }
-
   const account = item.account;
   const isCredit = account.type === 'credit';
-  const groupLabel = account.accountGroup?.trim() || String(I18n.t('common.ungrouped'));
 
   return (
     <View style={{ paddingBottom: 4 }}>
@@ -744,9 +736,6 @@ function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMg
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 13, color: tc.text }} numberOfLines={1}>
               {account.name}
-            </Text>
-            <Text style={{ fontSize: 11, color: tc.textMuted, marginTop: 1 }} numberOfLines={1}>
-              {groupLabel}
             </Text>
           </View>
           {isCredit && (
@@ -1307,17 +1296,7 @@ export function AccountsScreen({
   }, []);
   const creditLabel = String(I18n.t('accounts.credit'));
 
-  const accountMgmtData = useMemo<AccountMgmtItem[]>(() => {
-    return localAccountGroupSections.flatMap((section) => [
-      { kind: 'header' as const, id: `header-${section.id}`, label: section.label },
-      ...section.accounts.map((acc) => ({
-        kind: 'account' as const,
-        id: acc.id,
-        account: acc,
-        sectionId: section.id,
-      })),
-    ]);
-  }, [localAccountGroupSections]);
+
 
   if (!managementOnly && selectedAccountId && selectedAccount) {
     const account = selectedAccount;
@@ -1690,16 +1669,25 @@ export function AccountsScreen({
             className="px-0 pt-5 pb-1"
             onBack={onBack}
             title={I18n.t('accounts.title')}
+            subtitle={
+              isManagementGroupsView
+                ? I18n.t('accounts.manage_groups_subtitle')
+                : I18n.t('accounts.manage_accounts_subtitle')
+            }
             rightAccessory={
-              isManagementGroupsView ? (
-                <Button size="icon" onPress={startCreateGroup}>
-                  <Plus size={18} color="#fff" />
-                </Button>
-              ) : (
-                <Button size="icon" onPress={() => setShowCreate(true)}>
-                  <Plus size={18} color="#fff" />
-                </Button>
-              )
+              <Button
+                size="icon"
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  if (isManagementGroupsView) {
+                    startCreateGroup();
+                  } else {
+                    setShowCreate(true);
+                  }
+                }}
+              >
+                <Plus size={18} color="#fff" />
+              </Button>
             }
           />
           <SegmentedToggle
@@ -1780,49 +1768,42 @@ export function AccountsScreen({
           )}
         </>
       ) : managementOnly ? (
-          <View style={{ flex: 1 }}>
-          <DraggableFlatList
-            data={accountMgmtData}
-            keyExtractor={(item) => item.id}
-            renderItem={AccountMgmtRowItem}
-            animationConfig={SNAP_CONFIG}
-            onDragBegin={() => void triggerHaptic('medium')}
-            onPlaceholderIndexChange={() => void triggerHaptic('selection')}
-            autoscrollThreshold={80}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+          <NestableScrollContainer
+            style={{ flex: 1 }}
             contentContainerStyle={{
               paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
               paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
             }}
-            onDragEnd={({ data: newData }: { data: AccountMgmtItem[] }) => {
-              void triggerHaptic('light');
-              const newSections: AccountGroupSection[] = [];
-              let currentSection: AccountGroupSection | null = null;
-
-              for (const item of newData) {
-                if (item.kind === 'header') {
-                  if (currentSection) newSections.push(currentSection);
-                  currentSection = {
-                    id: item.id.replace('header-', ''),
-                    label: item.label,
-                    accounts: [],
-                  };
-                } else if (currentSection && item.kind === 'account') {
-                  currentSection.accounts.push(item.account);
-                }
-              }
-              if (currentSection) newSections.push(currentSection);
-
-              didDragRef.current = true;
-              setLocalAccountGroupSections(newSections);
-              const allIds = newData
-                .filter((i): i is AccountMgmtItem & { kind: 'account' } => i.kind === 'account')
-                .map((i) => i.account.id);
-              persistOrder('accounts', allIds);
-            }}
-          />
-          </View>
+            showsVerticalScrollIndicator={false}
+          >
+            {localAccountGroupSections.map((section, sectionIndex) => (
+              <View key={section.id}>
+                <View style={{ paddingLeft: 4, paddingRight: 12, paddingTop: sectionIndex === 0 ? 6 : 12, paddingBottom: 4 }}>
+                  <Text style={{ fontSize: 11, color: themeColors.textMuted }}>{section.label}</Text>
+                </View>
+                <NestableDraggableFlatList
+                  data={section.accounts.map((acc) => ({ id: acc.id, account: acc }))}
+                  keyExtractor={(item) => item.id}
+                  renderItem={AccountMgmtRowItem}
+                  animationConfig={SNAP_CONFIG}
+                  onDragBegin={() => void triggerHaptic('medium')}
+                  onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+                  onDragEnd={({ data: newData }: { data: AccountMgmtAccountItem[] }) => {
+                    void triggerHaptic('light');
+                    const updatedSections = localAccountGroupSections.map((s) =>
+                      s.id === section.id
+                        ? { ...s, accounts: newData.map((item) => item.account) }
+                        : s,
+                    );
+                    didDragRef.current = true;
+                    setLocalAccountGroupSections(updatedSections);
+                    const allIds = updatedSections.flatMap((s) => s.accounts.map((a) => a.id));
+                    persistOrder('accounts', allIds);
+                  }}
+                />
+              </View>
+            ))}
+          </NestableScrollContainer>
       ) : (
         <FlatList
           ref={accountsListRef}
