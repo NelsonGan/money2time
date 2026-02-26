@@ -147,6 +147,7 @@ export function NumpadPanel({
   );
   const prevInitialRef = useRef(initialExpression);
   const expressionRef = useRef(expression);
+  const pristineRef = useRef(initialExpression.length > 0);
 
   useEffect(() => {
     expressionRef.current = expression;
@@ -160,6 +161,7 @@ export function NumpadPanel({
     if (sanitized === expressionRef.current) return;
     expressionRef.current = sanitized;
     setExpression(sanitized);
+    pristineRef.current = sanitized.length > 0;
   }, [initialExpression]);
 
   const displayExpression = expression || '0';
@@ -171,8 +173,17 @@ export function NumpadPanel({
 
   const handleKeyPress = useCallback(
     (key: KeyValue) => {
-      const currentExpression = expressionRef.current;
+      let currentExpression = expressionRef.current;
       let nextExpression = currentExpression;
+
+      // When the amount is pre-filled and user hasn't typed yet,
+      // digits/decimal replace the value; operators append to it.
+      if (pristineRef.current) {
+        pristineRef.current = false;
+        if ((key >= '0' && key <= '9') || key === '.') {
+          currentExpression = '';
+        }
+      }
 
       if (key >= '0' && key <= '9') {
         nextExpression = appendDigit(currentExpression, key);

@@ -746,7 +746,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     categories,
     accounts,
     accountGroups,
-    queryTransactions,
+    transactions: allTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
@@ -978,7 +978,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     hasHydratedAssetHistoryExclusionsRef.current = true;
   }, [defaultHiddenAssetHistoryAccountIds, isLoading]);
 
-  const allTransactions = useMemo(() => queryTransactions(), [queryTransactions]);
   const transactionById = useMemo(
     () => new Map(allTransactions.map((transaction) => [transaction.id, transaction])),
     [allTransactions],
@@ -2564,9 +2563,18 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
           emoji: categoryRow.emoji,
           accentColor,
           onPress: () => {
+            const targetCategoryId = categoryRow.id;
             openDrilldown({
               label: `${categoryRow.emoji} ${categoryRow.label}`,
               transactions: categoryRow.transactions,
+              scopeMatcher: (transaction) => {
+                if (transaction.type !== 'expense') return false;
+                const cat = transaction.categoryId
+                  ? categoryById.get(transaction.categoryId)
+                  : null;
+                const rootId = cat?.parentId ?? transaction.categoryId ?? null;
+                return rootId === targetCategoryId || transaction.categoryId === targetCategoryId;
+              },
             });
           },
         };
