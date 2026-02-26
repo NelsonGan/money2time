@@ -746,7 +746,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     categories,
     accounts,
     accountGroups,
-    transactions,
     queryTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
