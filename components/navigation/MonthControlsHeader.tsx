@@ -37,7 +37,7 @@ export function MonthControlsHeader({
   return (
     <View className="bg-background pb-2 pt-1">
       <View className="px-5 pt-2 gap-3">
-        <View className="flex-row items-center justify-between gap-3">
+        <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
           <View className="flex-1">
             {titleNode ? (
               titleNode
