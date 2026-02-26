@@ -18,6 +18,7 @@ import {
   SettingsSection,
 } from '~/components/ui/settings';
 import { SegmentedToggle } from '~/components/ui/toggle';
+import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { useApp } from '~/context/AppContext';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import type { Category, CategoryType } from '~/types';
@@ -394,10 +395,12 @@ export function CategoriesScreen({
 
   const [localTopLevel, setLocalTopLevel] = useState(topLevel);
   const [localSubcategories, setLocalSubcategories] = useState(subcategoriesFromContext);
+  const [isReordering, setIsReordering] = useState(false);
   const didDragRef = useRef(false);
 
   useEffect(() => {
     didDragRef.current = false;
+    setIsReordering(false);
     setLocalTopLevel(topLevel);
     setLocalSubcategories(subcategoriesFromContext);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab change only; topLevel/subcategories derive from type
@@ -419,6 +422,9 @@ export function CategoriesScreen({
     }
     setSelectedParentId(null);
   }, [activeParentId, onBack, parentId, topLevel]);
+  useEffect(() => {
+    setIsReordering(false);
+  }, [activeParentId]);
 
   _themeColors = themeColors;
   _iconById = new Map(typeCategories.map((category) => [category.id, category.icon]));
@@ -448,15 +454,101 @@ export function CategoriesScreen({
     setSelectedParentId(null);
   };
 
+  const edgeSwipeBackHandler = useMemo(() => {
+    if (selectedParent) return handleSubcategoryBack;
+    return onBack;
+  }, [handleSubcategoryBack, onBack, selectedParent]);
+
   if (selectedParent) {
     return (
+      <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
+        <SettingsPageLayout>
+          <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+            <SettingsHeader
+              className="px-0 pt-5 pb-1"
+              onBack={handleSubcategoryBack}
+              title={selectedParent.name}
+              subtitle={I18n.t('categories.subcategories')}
+              rightAccessory={
+                <Button
+                  size="icon"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setCreateOpen(true);
+                  }}
+                >
+                  <Plus size={18} color="#fff" />
+                </Button>
+              }
+            />
+            <View style={{ height: 8 }} />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <DraggableFlatList
+              data={localSubcategories}
+              keyExtractor={(item) => item.id}
+              renderItem={SubcategoryRow}
+              animationConfig={SNAP_CONFIG}
+              onDragBegin={() => {
+                setIsReordering(true);
+                void triggerHaptic('medium');
+              }}
+              onDragEnd={({ data }) => {
+                setIsReordering(false);
+                void triggerHaptic('light');
+                didDragRef.current = true;
+                setLocalSubcategories(data);
+                persistOrder('categories', data.map((i) => i.id));
+                reorderCategories(data.map((i) => i.id));
+              }}
+              onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+              autoscrollThreshold={80}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+                paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+              }}
+            />
+          </View>
+
+          <CategoryEditor
+            visible={createOpen}
+            mode="create"
+            topLevel={topLevel}
+            initial={{ parentId: activeParentId, type }}
+            onClose={() => setCreateOpen(false)}
+            onSubmit={(input) => {
+              createCategory({ ...input, type, isDefault: false });
+              setCreateOpen(false);
+            }}
+          />
+          <CategoryEditor
+            visible={!!editing}
+            mode="edit"
+            topLevel={topLevel}
+            initial={editing ?? undefined}
+            onClose={() => setEditing(null)}
+            onSubmit={(input) => {
+              if (!editing) return;
+              updateCategory(editing.id, input);
+              setEditing(null);
+            }}
+          />
+        </SettingsPageLayout>
+      </EdgeSwipeBackContainer>
+    );
+  }
+
+  return (
+    <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
       <SettingsPageLayout>
         <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
           <SettingsHeader
             className="px-0 pt-5 pb-1"
-            onBack={handleSubcategoryBack}
-            title={selectedParent.name}
-            subtitle={I18n.t('categories.subcategories')}
+            onBack={onBack}
+            title={I18n.t('settings.categories')}
+            subtitle={I18n.t('settings.categories_subtitle')}
             rightAccessory={
               <Button
                 size="icon"
@@ -469,38 +561,50 @@ export function CategoriesScreen({
               </Button>
             }
           />
+          <SegmentedToggle
+            value={type}
+            onChange={(v) => setType(v as CategoryType)}
+            options={[
+              { value: 'expense', label: I18n.t('categories.expense') },
+              { value: 'income', label: I18n.t('categories.income') },
+            ]}
+          />
           <View style={{ height: 8 }} />
         </View>
 
         <View style={{ flex: 1 }}>
-        <DraggableFlatList
-          data={localSubcategories}
-          keyExtractor={(item) => item.id}
-          renderItem={SubcategoryRow}
-          animationConfig={SNAP_CONFIG}
-          onDragBegin={() => void triggerHaptic('medium')}
-          onDragEnd={({ data }) => {
-            void triggerHaptic('light');
-            didDragRef.current = true;
-            setLocalSubcategories(data);
-            persistOrder('categories', data.map((i) => i.id));
-            reorderCategories(data.map((i) => i.id));
-          }}
-          onPlaceholderIndexChange={() => void triggerHaptic('selection')}
-          autoscrollThreshold={80}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
-        />
+          <DraggableFlatList
+            data={localTopLevel}
+            keyExtractor={(item) => item.id}
+            renderItem={TopLevelRow}
+            animationConfig={SNAP_CONFIG}
+            onDragBegin={() => {
+              setIsReordering(true);
+              void triggerHaptic('medium');
+            }}
+            onDragEnd={({ data }) => {
+              setIsReordering(false);
+              void triggerHaptic('light');
+              didDragRef.current = true;
+              setLocalTopLevel(data);
+              persistOrder('categories', data.map((i) => i.id));
+              reorderCategories(data.map((i) => i.id));
+            }}
+            onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+            autoscrollThreshold={80}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+              paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+            }}
+          />
         </View>
 
         <CategoryEditor
           visible={createOpen}
           mode="create"
           topLevel={topLevel}
-          initial={{ parentId: activeParentId, type }}
+          initial={{ type }}
           onClose={() => setCreateOpen(false)}
           onSubmit={(input) => {
             createCategory({ ...input, type, isDefault: false });
@@ -520,87 +624,6 @@ export function CategoriesScreen({
           }}
         />
       </SettingsPageLayout>
-    );
-  }
-
-  return (
-    <SettingsPageLayout>
-      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
-        <SettingsHeader
-          className="px-0 pt-5 pb-1"
-          onBack={onBack}
-          title={I18n.t('settings.categories')}
-          subtitle={I18n.t('settings.categories_subtitle')}
-          rightAccessory={
-            <Button
-              size="icon"
-              onPress={() => {
-                void triggerHaptic('selection');
-                setCreateOpen(true);
-              }}
-            >
-              <Plus size={18} color="#fff" />
-            </Button>
-          }
-        />
-        <SegmentedToggle
-          value={type}
-          onChange={(v) => setType(v as CategoryType)}
-          options={[
-            { value: 'expense', label: I18n.t('categories.expense') },
-            { value: 'income', label: I18n.t('categories.income') },
-          ]}
-        />
-        <View style={{ height: 8 }} />
-      </View>
-
-      <View style={{ flex: 1 }}>
-      <DraggableFlatList
-        data={localTopLevel}
-        keyExtractor={(item) => item.id}
-        renderItem={TopLevelRow}
-        animationConfig={SNAP_CONFIG}
-        onDragBegin={() => void triggerHaptic('medium')}
-        onDragEnd={({ data }) => {
-          void triggerHaptic('light');
-          didDragRef.current = true;
-          setLocalTopLevel(data);
-          persistOrder('categories', data.map((i) => i.id));
-          reorderCategories(data.map((i) => i.id));
-        }}
-        onPlaceholderIndexChange={() => void triggerHaptic('selection')}
-        autoscrollThreshold={80}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-        }}
-      />
-      </View>
-
-      <CategoryEditor
-        visible={createOpen}
-        mode="create"
-        topLevel={topLevel}
-        initial={{ type }}
-        onClose={() => setCreateOpen(false)}
-        onSubmit={(input) => {
-          createCategory({ ...input, type, isDefault: false });
-          setCreateOpen(false);
-        }}
-      />
-      <CategoryEditor
-        visible={!!editing}
-        mode="edit"
-        topLevel={topLevel}
-        initial={editing ?? undefined}
-        onClose={() => setEditing(null)}
-        onSubmit={(input) => {
-          if (!editing) return;
-          updateCategory(editing.id, input);
-          setEditing(null);
-        }}
-      />
-    </SettingsPageLayout>
+    </EdgeSwipeBackContainer>
   );
 }

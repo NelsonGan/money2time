@@ -35,6 +35,7 @@ import { I18n } from '~/lib/i18n';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
+import { SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS } from '~/navigation/swipeBackHaptics';
 
 import type { TransactionWithRelations } from '~/types';
 
@@ -438,7 +439,10 @@ function AppContent() {
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <NavigationContainer>
-        <RootStack.Navigator screenOptions={SHARED_NATIVE_STACK_OPTIONS}>
+        <RootStack.Navigator
+          screenOptions={SHARED_NATIVE_STACK_OPTIONS}
+          screenListeners={SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS}
+        >
           <RootStack.Screen name="Main" component={MainShellScreen} />
           <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
