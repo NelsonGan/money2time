@@ -139,5 +139,7 @@ export const spacing = {
   xl: 24,
   screenHorizontal: 20,
   formBottom: 24,
-  listBottom: 110,
+  listBottom: 24,
 } as const;
+
+export const LIST_BOTTOM_PADDING = spacing.listBottom;

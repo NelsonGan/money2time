@@ -114,18 +114,6 @@ class AccountGroupsRepository {
       .run();
   }
 
-  reorder(ids: string[]) {
-    if (ids.length === 0) return;
-    const db = getDb();
-    const now = nowIso();
-    ids.forEach((id, index) => {
-      db.update(accountGroupsTable)
-        .set({ sortOrder: index, updatedAt: now })
-        .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
-        .run();
-    });
-  }
-
   ensureFromActiveAccounts() {
     const names = getSQLite().getAllSync<{ name: string }>(
       `SELECT DISTINCT TRIM(account_group) as name

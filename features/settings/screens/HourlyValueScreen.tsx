@@ -142,7 +142,7 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(() =>
     String(new Date().getMonth() + 1).padStart(2, '0'),
   );
-  const swipeBackHandlers = useEdgeSwipeBack(onClose);
+  const swipeBackGesture = useEdgeSwipeBack(onClose);
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
   const selectedWageMonth = normalizeMonthKey(`${selectedYear}-${selectedMonth}`);
@@ -245,7 +245,7 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
   };
 
   return (
-    <SettingsPageLayout swipeBackHandlers={swipeBackHandlers}>
+    <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{

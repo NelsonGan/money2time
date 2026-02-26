@@ -23,6 +23,7 @@ import {
   formatHours,
 } from '~/utils/formatters';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 
 const GREETINGS: Record<string, string> = {
@@ -255,7 +256,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
       >
         {/* Greeting */}

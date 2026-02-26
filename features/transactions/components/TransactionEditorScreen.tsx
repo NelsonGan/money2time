@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  InteractionManager,
   Keyboard,
   Pressable,
   ScrollView,
@@ -240,17 +241,19 @@ export function TransactionEditorScreen({
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
 
-  const [type, setType] = useState<TransactionType>(initialValues?.type ?? 'expense');
+  const initialType = initialValues?.type ?? 'expense';
+  const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(
-    initialValues?.accountId ?? accounts[0]?.id ?? null,
+    initialValues?.accountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(
-    initialValues?.fromAccountId ?? accounts[0]?.id ?? null,
+    initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [toAccountId, setToAccountId] = useState<string | null>(
-    initialValues?.toAccountId ?? accounts[1]?.id ?? accounts[0]?.id ?? null,
+    initialValues?.toAccountId ??
+      (mode === 'create' ? null : ((accounts[1]?.id ?? accounts[0]?.id) ?? null)),
   );
   const [categoryId, setCategoryId] = useState<string | null>(initialValues?.categoryId ?? null);
   const [note, setNote] = useState(initialValues?.note ?? '');
@@ -288,7 +291,6 @@ export function TransactionEditorScreen({
     >
   >({});
   const [error, setError] = useState<string | null>(null);
-  const previousTypeRef = useRef<TransactionType>(type);
   const autoNoteFromCategoryRef = useRef<string | null>(null);
   const noteInputRef = useRef<TextInput>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
@@ -354,11 +356,57 @@ export function TransactionEditorScreen({
   const isBalanceAdjustmentType = type === 'balance_adjustment';
   const showTypeSelector = availableTypeCards.length > 1;
 
+  const handleTypeChange = useCallback(
+    (nextType: TransactionType) => {
+      if (nextType === type) return;
+      const previousType = type;
+
+      setType(nextType);
+      setCategoryId(null);
+      autoNoteFromCategoryRef.current = null;
+      setActiveField((current) => mapActiveFieldForType(current, nextType));
+
+      if (nextType === 'transfer') {
+        if (previousType === 'income' || previousType === 'expense') {
+          setFromAccountId(accountId);
+          setToAccountId(null);
+          setAccountId(null);
+        } else if (mode === 'create') {
+          setAccountId(null);
+          setFromAccountId(null);
+          setToAccountId(null);
+        }
+      } else if (previousType === 'transfer') {
+        setAccountId(fromAccountId);
+        setFromAccountId(null);
+        setToAccountId(null);
+      }
+
+      setFieldErrors((previous) => {
+        if (
+          !previous.account &&
+          !previous.from_account &&
+          !previous.to_account &&
+          !previous.category
+        ) {
+          return previous;
+        }
+        const next = { ...previous };
+        delete next.account;
+        delete next.from_account;
+        delete next.to_account;
+        delete next.category;
+        return next;
+      });
+    },
+    [accountId, fromAccountId, mapActiveFieldForType, mode, type],
+  );
+
   useEffect(() => {
     if (availableTypeCards.some((item) => item.value === type)) return;
     const fallbackType = availableTypeCards[0]?.value ?? 'expense';
-    setType(fallbackType);
-  }, [availableTypeCards, type]);
+    handleTypeChange(fallbackType);
+  }, [availableTypeCards, handleTypeChange, type]);
 
   const typedCategories = useMemo(
     () =>
@@ -428,15 +476,6 @@ export function TransactionEditorScreen({
   }, [toAccountId, accounts]);
 
   useEffect(() => {
-    if (previousTypeRef.current !== type) {
-      setCategoryId(null);
-      autoNoteFromCategoryRef.current = null;
-      setActiveField((current) => mapActiveFieldForType(current, type));
-      previousTypeRef.current = type;
-    }
-  }, [mapActiveFieldForType, type]);
-
-  useEffect(() => {
     Keyboard.dismiss();
   }, []);
 
@@ -458,8 +497,6 @@ export function TransactionEditorScreen({
   }, [amount, isBalanceAdjustmentType, type]);
 
   const handleSubmit = () => {
-    setError(null);
-    setFieldErrors({});
     const numericAmount = Number(amount);
     const amountDraft = amount.trim();
     if (!amountDraft || !Number.isFinite(numericAmount)) {
@@ -471,6 +508,10 @@ export function TransactionEditorScreen({
     const txDate = toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString();
 
     try {
+      // Build the submission payload; validate per type.
+      let submitPayload: CreateTransactionInput | null = null;
+      let recurringSubmit: (() => void) | null = null;
+
       if (isBalanceAdjustmentType) {
         if (!accountId) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -478,7 +519,7 @@ export function TransactionEditorScreen({
           activateField('account');
           return;
         }
-        onSubmit({
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -488,31 +529,26 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: note.trim() || null,
-        });
+        };
       } else if (isTransferType) {
-        if (recurringOptions) {
-          const transferErrors: typeof fieldErrors = {};
-          if (!fromAccountId)
-            transferErrors.from_account = I18n.t('transactions.editor.error.required');
-          if (!toAccountId)
-            transferErrors.to_account = I18n.t('transactions.editor.error.required');
-          if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
-            transferErrors.to_account = I18n.t(
-              'transactions.editor.error.must_be_different_account',
-            );
-          }
-          if (Object.keys(transferErrors).length > 0) {
-            setError(I18n.t('transactions.editor.error.complete_required'));
-            setFieldErrors(transferErrors);
-            if (transferErrors.from_account) activateField('fromAccount');
-            else if (transferErrors.to_account) activateField('toAccount');
-            return;
-          }
-        } else if (!fromAccountId || !toAccountId || fromAccountId === toAccountId) {
-          setError(I18n.t('transactions.editor.error.pick_two_different_accounts'));
+        const transferErrors: typeof fieldErrors = {};
+        if (!fromAccountId)
+          transferErrors.from_account = I18n.t('transactions.editor.error.required');
+        if (!toAccountId)
+          transferErrors.to_account = I18n.t('transactions.editor.error.required');
+        if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
+          transferErrors.to_account = I18n.t(
+            'transactions.editor.error.must_be_different_account',
+          );
+        }
+        if (Object.keys(transferErrors).length > 0) {
+          setError(I18n.t('transactions.editor.error.complete_required'));
+          setFieldErrors(transferErrors);
+          if (transferErrors.from_account) activateField('fromAccount');
+          else if (transferErrors.to_account) activateField('toAccount');
           return;
         }
-        onSubmit({
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -522,7 +558,7 @@ export function TransactionEditorScreen({
           accountId: null,
           categoryId: null,
           note: note.trim() || null,
-        });
+        };
       } else {
         const baseErrors: typeof fieldErrors = {};
         if (!accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
@@ -534,7 +570,7 @@ export function TransactionEditorScreen({
           else if (baseErrors.category) activateField('category');
           return;
         }
-        const payload: CreateTransactionInput = {
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -561,23 +597,34 @@ export function TransactionEditorScreen({
             setFieldErrors({ end_date: I18n.t('transactions.editor.error.required') });
             return;
           }
-          recurringOptions.onSubmitRecurring({
-            transaction: payload,
-            recurring: {
-              name: normalizedName,
-              pattern: recurrencePattern,
-              interval,
-              endDate: endDateIso,
-              isActive: recurrenceIsActive,
-            },
-          });
-        } else {
-          onSubmit(payload);
+          const capturedPayload = submitPayload;
+          recurringSubmit = () => {
+            recurringOptions.onSubmitRecurring({
+              transaction: capturedPayload,
+              recurring: {
+                name: normalizedName,
+                pattern: recurrencePattern,
+                interval,
+                endDate: endDateIso,
+                isActive: recurrenceIsActive,
+              },
+            });
+          };
+          submitPayload = null; // handled by recurringSubmit
         }
       }
 
+      // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
       onClose();
+
+      const deferredSubmit = submitPayload
+        ? () => onSubmit(submitPayload)
+        : recurringSubmit;
+
+      if (deferredSubmit) {
+        InteractionManager.runAfterInteractions(deferredSubmit);
+      }
     } catch (submitError) {
       setError(getErrorMessage(submitError, I18n.t('errors.generic_operation_failed')));
     }
@@ -925,7 +972,7 @@ export function TransactionEditorScreen({
                   key={item.value}
                   item={item}
                   selected={type === item.value}
-                  onPress={() => setType(item.value)}
+                  onPress={() => handleTypeChange(item.value)}
                 />
               ))}
             </View>

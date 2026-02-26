@@ -6,11 +6,12 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  type TextInput,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
+import { Plus, Search, X } from 'lucide-react-native';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Text } from '~/components/ui/text';
@@ -27,7 +28,9 @@ import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
+import { useThemeColors } from '~/hooks/useThemeColors';
 
 const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
   { label: I18n.t('transactions.filters.all'), value: 'all' },
@@ -146,6 +149,7 @@ export function TransactionsScreen({
   focusMonthToken = 0,
   onPressAddTransaction,
 }: TransactionsScreenProps) {
+  const themeColors = useThemeColors();
   const {
     filteredTransactions,
     settings,
@@ -161,15 +165,19 @@ export function TransactionsScreen({
   } = useApp();
 
   const [showFilters, setShowFilters] = useState(false);
+  const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
+  const lastSelectedTransactionRef = useRef<TransactionWithRelations | null>(null);
+  if (selectedTransaction) lastSelectedTransactionRef.current = selectedTransaction;
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
+  const searchInputRef = useRef<TextInput | null>(null);
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -234,6 +242,7 @@ export function TransactionsScreen({
   useEffect(() => {
     if (isSelectionMode) {
       setSelectedTransaction(null);
+      setIsSearchBoxOpen(false);
       return;
     }
     setShowBulkUpdate(false);
@@ -377,7 +386,6 @@ export function TransactionsScreen({
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (transactionFilters.type !== 'all') count += 1;
-    if (transactionFilters.search.trim().length > 0) count += 1;
     if (transactionFilters.accountId) count += 1;
     if (transactionFilters.categoryId) count += 1;
     if (transactionFilters.minAmount !== null) count += 1;
@@ -389,10 +397,10 @@ export function TransactionsScreen({
     transactionFilters.categoryId,
     transactionFilters.maxAmount,
     transactionFilters.minAmount,
-    transactionFilters.search,
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
+  const hasActiveSearch = transactionFilters.search.trim().length > 0;
 
   const categoryPanelParents = useMemo(
     () =>
@@ -419,7 +427,20 @@ export function TransactionsScreen({
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
-  const handleOpenFilters = useCallback(() => setShowFilters(true), []);
+  const handleOpenSearch = useCallback(() => {
+    setIsSearchBoxOpen(true);
+    requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+  }, []);
+  const handleCloseSearch = useCallback(() => {
+    searchInputRef.current?.blur();
+    setIsSearchBoxOpen(false);
+  }, []);
+  const handleOpenFilters = useCallback(() => {
+    setIsSearchBoxOpen(false);
+    setShowFilters(true);
+  }, []);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
   const handleCloseTransactionEditor = useCallback(() => setSelectedTransaction(null), []);
   const clearSelection = useCallback(() => {
@@ -586,7 +607,7 @@ export function TransactionsScreen({
             selectionMode={isSelectionMode}
             emptyTitle={I18n.t('transactions.empty_month_title')}
             emptyMessage={I18n.t('transactions.empty_month_message')}
-            contentPaddingBottom={110}
+            contentPaddingBottom={LIST_BOTTOM_PADDING}
             disableItemAnimations
             compactItems
             listKey={pageMonthKey}
@@ -613,10 +634,13 @@ export function TransactionsScreen({
         title={isSelectionMode ? undefined : I18n.t('transactions.title')}
         titleNode={
           isSelectionMode ? (
-            <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+            <View
+              className="rounded-full bg-card border border-border/40 px-3 flex-row items-center justify-between gap-2"
+              style={{ height: 40 }}
+            >
               <Pressable
                 onPress={clearSelection}
-                className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                className="rounded-full bg-secondary/70 px-3 py-1 active:opacity-85"
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.cancel')}
@@ -627,10 +651,10 @@ export function TransactionsScreen({
                 {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
               </Text>
 
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-1.5">
                 <Pressable
                   onPress={handleOpenBulkUpdate}
-                  className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                  className="rounded-full bg-primary/12 border border-primary/35 px-2.5 py-1 active:opacity-85"
                 >
                   <Text variant="caption" className="text-primary">
                     {I18n.t('transactions.selection.update')}
@@ -638,7 +662,7 @@ export function TransactionsScreen({
                 </Pressable>
                 <Pressable
                   onPress={handleDeleteSelectedTransactions}
-                  className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                  className="rounded-full bg-destructive/10 border border-destructive/35 px-2.5 py-1 active:opacity-85"
                 >
                   <Text variant="caption" className="text-destructive">
                     {I18n.t('common.delete')}
@@ -656,11 +680,50 @@ export function TransactionsScreen({
             <View className="flex-row items-center gap-2">
               <DisplayModeToggle />
               <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.filters.search')}
+                onPress={handleOpenSearch}
+                className={cn(
+                  'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+                  isSearchBoxOpen || hasActiveSearch
+                    ? 'border-primary/45 bg-primary/10'
+                    : 'border-border/40 bg-card',
+                )}
+              >
+                <Search
+                  size={15}
+                  color={
+                    isSearchBoxOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted
+                  }
+                />
+              </Pressable>
             </View>
           )
         }
       >
-        <View>
+        <View className="gap-2">
+          {isSearchBoxOpen ? (
+            <View className="flex-row items-center gap-2">
+              <Input
+                ref={searchInputRef}
+                containerClassName="flex-1"
+                placeholder={I18n.t('transactions.filters.search_placeholder')}
+                value={transactionFilters.search}
+                onChangeText={handleSearchChange}
+                returnKeyType="search"
+                leftIcon={<Search size={16} color={themeColors.textMuted} />}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.close')}
+                onPress={handleCloseSearch}
+                className="h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card active:opacity-85"
+              >
+                <X size={14} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+          ) : null}
           <InOutHeader
             incomeValue={formatSummaryValue(monthSummary.income)}
             expenseValue={formatSummaryValue(monthSummary.expense)}
@@ -716,9 +779,9 @@ export function TransactionsScreen({
         presentationStyle="pageSheet"
         onRequestClose={handleCloseTransactionEditor}
       >
-        {selectedTransaction ? (
+        {(selectedTransaction || lastSelectedTransactionRef.current) ? (
           <EditTransactionScreen
-            transaction={selectedTransaction}
+            transaction={(selectedTransaction ?? lastSelectedTransactionRef.current)!}
             onClose={handleCloseTransactionEditor}
           />
         ) : null}
@@ -833,13 +896,6 @@ export function TransactionsScreen({
           </View>
 
           <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
-            <Input
-              label={I18n.t('transactions.filters.search')}
-              placeholder={I18n.t('transactions.filters.search_placeholder')}
-              value={transactionFilters.search}
-              onChangeText={handleSearchChange}
-            />
-
             <View className="gap-2.5">
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.filters.type')}

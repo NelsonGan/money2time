@@ -7,6 +7,7 @@ import { Card, CardContent } from '~/components/ui/card';
 import { SelectField } from '~/components/ui/select';
 import { Text } from '~/components/ui/text';
 import { triggerHaptic } from '~/services/haptics';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
@@ -44,10 +45,11 @@ export function OnboardingPreferencesStep({
     : 'en';
   const currentCurrencyCode =
     MAJOR_CURRENCIES.find((item) => item.symbol === currencySymbol)?.code ?? 'USD';
-  const swipeBackHandlers = useEdgeSwipeBack(onBack);
+  const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   return (
-    <View {...swipeBackHandlers} className="flex-1">
+    <GestureDetector gesture={swipeBackGesture}>
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
@@ -109,5 +111,6 @@ export function OnboardingPreferencesStep({
         </View>
       </View>
     </View>
+    </GestureDetector>
   );
 }

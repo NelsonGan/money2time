@@ -442,14 +442,20 @@ export async function importMoneyManagerBackupFromUri(
       if (aDeleted !== bDeleted) return aDeleted - bDeleted;
       return (asNumber(a.sortOrder) ?? a.id) - (asNumber(b.sortOrder) ?? b.id);
     });
-    const referencedGroupSourceKeys = new Set<string>();
+    const referencedGroupUids = new Set<string>();
+    const referencedGroupIds = new Set<string>();
     sortedAssetRows.forEach((row) => {
+      if ((asNumber(row.isDeleted) ?? 0) !== 0) return;
       const groupUidKey = normalizeSourceKey(row.groupUid);
       const groupIdKey = normalizeSourceKey(row.groupId);
-      if (groupUidKey) referencedGroupSourceKeys.add(groupUidKey);
-      if (groupIdKey) referencedGroupSourceKeys.add(groupIdKey);
+      if (groupUidKey) {
+        referencedGroupUids.add(groupUidKey);
+      } else if (groupIdKey) {
+        referencedGroupIds.add(groupIdKey);
+      }
     });
-    const assetGroupNameBySourceKey = new Map<string, string>();
+    const assetGroupNameByUid = new Map<string, string>();
+    const assetGroupNameById = new Map<string, string>();
     const sortedAssetGroupRows = [...assetGroupRows].sort((a, b) => {
       const aDeleted = (asNumber(a.isDeleted) ?? 0) !== 0 ? 1 : 0;
       const bDeleted = (asNumber(b.isDeleted) ?? 0) !== 0 ? 1 : 0;
@@ -465,13 +471,13 @@ export async function importMoneyManagerBackupFromUri(
       const idKey = normalizeSourceKey(row.id);
       const isDeleted = (asNumber(row.isDeleted) ?? 0) !== 0;
       const isReferenced =
-        (uidKey ? referencedGroupSourceKeys.has(uidKey) : false) ||
-        (idKey ? referencedGroupSourceKeys.has(idKey) : false);
+        (uidKey ? referencedGroupUids.has(uidKey) : false) ||
+        (idKey ? referencedGroupIds.has(idKey) : false);
       if (isDeleted && !isReferenced) return;
 
       accountGroupsRepository.create(name, asNumber(row.sortOrder) ?? undefined);
-      if (uidKey) assetGroupNameBySourceKey.set(uidKey, name);
-      if (idKey) assetGroupNameBySourceKey.set(idKey, name);
+      if (uidKey) assetGroupNameByUid.set(uidKey, name);
+      if (idKey) assetGroupNameById.set(idKey, name);
     });
 
     sortedAssetRows.forEach((row) => {
@@ -493,10 +499,10 @@ export async function importMoneyManagerBackupFromUri(
       const deletedAt = isDeleted ? new Date().toISOString() : null;
       const groupName =
         (row.groupUid
-          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupUid) ?? '')
+          ? assetGroupNameByUid.get(normalizeSourceKey(row.groupUid) ?? '')
           : null) ??
         (row.groupId
-          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupId) ?? '')
+          ? assetGroupNameById.get(normalizeSourceKey(row.groupId) ?? '')
           : null) ??
         (normalizeText(row.groupName) || null);
       const type = inferAccountType(name, groupName, creditStatementDay, creditDueDay);
@@ -573,6 +579,8 @@ export async function importMoneyManagerBackupFromUri(
         category.id,
       ]),
     );
+    const existingCategoryById = new Map(existingCategories.map((category) => [category.id, category]));
+    const categoryIconById = new Map(existingCategories.map((category) => [category.id, category.icon]));
 
     const categoryIdByUid = new Map<string, string>();
     const categoryIdByIdKey = new Map<string, string>();
@@ -682,6 +690,9 @@ export async function importMoneyManagerBackupFromUri(
           categoryIdByUid.set(row.sourceKey, existing);
         }
         categoryIdByIdKey.set(row.idKey, existing);
+        const existingIcon =
+          existingCategoryById.get(existing)?.icon ?? categoryIconById.get(existing) ?? randomCategoryEmoji();
+        categoryIconById.set(existing, existingIcon);
         categoryMetaById.set(existing, {
           parentId,
           type: row.type,
@@ -697,11 +708,12 @@ export async function importMoneyManagerBackupFromUri(
           (existingCategoryKeyToId.size + summary.categories) % CATEGORY_COLORS.length
         ];
       const now = new Date().toISOString();
+      const defaultIcon = parentId ? (categoryIconById.get(parentId) ?? randomCategoryEmoji()) : randomCategoryEmoji();
       const id = categoriesRepository.create({
         name: row.name,
         type: row.type,
         parentId,
-        icon: randomCategoryEmoji(),
+        icon: defaultIcon,
         color,
         isDefault: false,
         sortOrder: row.importSortOrder,
@@ -715,6 +727,7 @@ export async function importMoneyManagerBackupFromUri(
         categoryIdByUid.set(row.sourceKey, id);
       }
       categoryIdByIdKey.set(row.idKey, id);
+      categoryIconById.set(id, defaultIcon);
       categoryMetaById.set(id, { parentId, type: row.type, name: row.name, isDeleted: isInactive });
       if (!isInactive) {
         mapActiveCategoryNames(id, row.type, row.name, parentName);

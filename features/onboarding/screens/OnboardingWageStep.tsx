@@ -7,6 +7,7 @@ import { Card, CardContent } from '~/components/ui/card';
 import { Text } from '~/components/ui/text';
 import { Mascot } from '~/components/feedback/Mascot';
 import { triggerHaptic } from '~/services/haptics';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import type { MonthlyWageSettings, UserSettings } from '~/types';
 import { I18n } from '~/lib/i18n';
@@ -28,7 +29,7 @@ export function OnboardingWageStep({
   onContinue,
   onOpenWageCalculator,
 }: OnboardingWageStepProps) {
-  const swipeBackHandlers = useEdgeSwipeBack(onBack);
+  const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const handleDoLater = () => {
     void triggerHaptic('selection');
@@ -43,7 +44,8 @@ export function OnboardingWageStep({
 
   if (wageIsSet) {
     return (
-      <View {...swipeBackHandlers} className="flex-1">
+      <GestureDetector gesture={swipeBackGesture}>
+      <View className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
@@ -127,12 +129,14 @@ export function OnboardingWageStep({
           </View>
         </View>
       </View>
+      </GestureDetector>
     );
   }
 
   // Wage NOT set
   return (
-    <View {...swipeBackHandlers} className="flex-1">
+    <GestureDetector gesture={swipeBackGesture}>
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
@@ -222,5 +226,6 @@ export function OnboardingWageStep({
         </View>
       </View>
     </View>
+    </GestureDetector>
   );
 }
