@@ -8,6 +8,7 @@ import { Text } from '~/components/ui/text';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import { useApp } from '~/context/AppContext';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 
 type TransactionDisplaySettings = Pick<
@@ -53,6 +54,7 @@ interface ActivityTransactionListProps {
   contentPaddingTop?: number;
   listKey?: string;
   disableItemAnimations?: boolean;
+  disableScrollBounce?: boolean;
   compactItems?: boolean;
   disableVirtualization?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
@@ -152,11 +154,12 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   emptyTitle,
   emptyMessage,
   listHeaderComponent,
-  contentPaddingBottom = 110,
+  contentPaddingBottom = LIST_BOTTOM_PADDING,
   contentPaddingHorizontal = 18,
   contentPaddingTop = 4,
   listKey,
   disableItemAnimations = false,
+  disableScrollBounce = false,
   compactItems = false,
   disableVirtualization = false,
   scrollToTopRef,
@@ -310,6 +313,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     return (
       <ScrollView
         ref={scrollViewRef}
+        bounces={!disableScrollBounce}
+        overScrollMode={disableScrollBounce ? 'never' : 'auto'}
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
@@ -333,6 +338,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       drawDistance={420}
       maintainVisibleContentPosition={MAINTAIN_VISIBLE_CONTENT_DISABLED}
       removeClippedSubviews
+      bounces={!disableScrollBounce}
+      overScrollMode={disableScrollBounce ? 'never' : 'auto'}
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}

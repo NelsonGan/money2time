@@ -1,11 +1,12 @@
 import React from 'react';
-import { Pressable, View, type GestureResponderHandlers, type ViewProps } from 'react-native';
+import { Pressable, View, type ViewProps } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';
-import { spacing } from '~/constants/designSystem';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { I18n } from '~/lib/i18n';
@@ -13,31 +14,36 @@ import { cn } from '~/utils';
 
 export const SETTINGS_HORIZONTAL_PADDING = spacing.screenHorizontal;
 export const SETTINGS_FORM_BOTTOM_PADDING = spacing.formBottom;
-export const SETTINGS_LIST_BOTTOM_PADDING = spacing.listBottom;
+export const SETTINGS_LIST_BOTTOM_PADDING = LIST_BOTTOM_PADDING;
 
 interface SettingsPageLayoutProps extends ViewProps {
   children: React.ReactNode;
-  swipeBackHandlers?: GestureResponderHandlers;
+  swipeBackGesture?: GestureType;
   actionBar?: React.ReactNode;
   edges?: Edge[];
 }
 
 export function SettingsPageLayout({
   children,
-  swipeBackHandlers,
+  swipeBackGesture,
   actionBar,
   edges = ['top'],
   className,
   ...props
 }: SettingsPageLayoutProps) {
-  return (
+  const content = (
     <SafeAreaView className="flex-1 bg-background" edges={edges}>
-      <View {...swipeBackHandlers} className={cn('flex-1', className)} {...props}>
+      <View className={cn('flex-1', className)} {...props}>
         {children}
         {actionBar}
       </View>
     </SafeAreaView>
   );
+
+  if (swipeBackGesture) {
+    return <GestureDetector gesture={swipeBackGesture}>{content}</GestureDetector>;
+  }
+  return content;
 }
 
 function HeaderIconButton({

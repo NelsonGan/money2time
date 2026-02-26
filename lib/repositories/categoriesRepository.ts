@@ -99,14 +99,16 @@ class CategoriesRepository {
 
   reorder(ids: string[]) {
     if (ids.length === 0) return;
-    const sqlite = getSQLite();
-    const now = nowIso();
+    setImmediate(() => {
+      const sqlite = getSQLite();
+      const now = nowIso();
 
-    const cases = ids.map((id, index) => `WHEN '${id}' THEN ${index}`).join(' ');
-    const placeholders = ids.map((id) => `'${id}'`).join(',');
-    sqlite.execSync(
-      `UPDATE categories SET sort_order = CASE id ${cases} END, updated_at = '${now}' WHERE id IN (${placeholders})`,
-    );
+      const cases = ids.map((id, index) => `WHEN '${id}' THEN ${index}`).join(' ');
+      const placeholders = ids.map((id) => `'${id}'`).join(',');
+      sqlite.execSync(
+        `UPDATE categories SET sort_order = CASE id ${cases} END, updated_at = '${now}' WHERE id IN (${placeholders})`,
+      );
+    });
   }
 }
 

@@ -1,23 +1,34 @@
-import { useMemo } from 'react';
-import { PanResponder } from 'react-native';
+import { useRef, useMemo, useCallback } from 'react';
+import { Gesture } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 import { triggerHaptic } from '~/services/haptics';
 
 export function useEdgeSwipeBack(onBack?: () => void) {
-  return useMemo(() => {
-    if (!onBack) return {};
+  const startXRef = useRef(0);
 
-    const responder = PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) =>
-        gestureState.x0 <= 24 && gestureState.dx > 10 && Math.abs(gestureState.dy) < 12,
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > 70 && Math.abs(gestureState.dy) < 40) {
-          void triggerHaptic('selection');
-          onBack();
-        }
-      },
-    });
-
-    return responder.panHandlers;
+  const handleBack = useCallback(() => {
+    void triggerHaptic('selection');
+    onBack?.();
   }, [onBack]);
+
+  return useMemo(() => {
+    if (!onBack) {
+      return Gesture.Pan().enabled(false);
+    }
+
+    return Gesture.Pan()
+      .activeOffsetX([15, Infinity])
+      .failOffsetY([-30, 30])
+      .onBegin((e) => {
+        'worklet';
+        startXRef.current = e.absoluteX;
+      })
+      .onEnd((e, success) => {
+        'worklet';
+        if (success && startXRef.current <= 30 && e.translationX > 70) {
+          runOnJS(handleBack)();
+        }
+      });
+  }, [onBack, handleBack]);
 }

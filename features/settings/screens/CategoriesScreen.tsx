@@ -1,14 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { GripVertical, Plus } from 'lucide-react-native';
+import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Text } from '~/components/ui/text';
 import { Input } from '~/components/ui/input';
-import { Card, CardContent } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -17,6 +15,7 @@ import {
   SettingsActionBar,
   SettingsHeader,
   SettingsPageLayout,
+  SettingsSection,
 } from '~/components/ui/settings';
 import { SegmentedToggle } from '~/components/ui/toggle';
 import { useApp } from '~/context/AppContext';
@@ -25,8 +24,17 @@ import type { Category, CategoryType } from '~/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { I18n } from '~/lib/i18n';
+import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
+
+const SNAP_CONFIG = {
+  damping: 100,
+  stiffness: 800,
+  mass: 0.2,
+  overshootClamping: true,
+  restDisplacementThreshold: 0.01,
+  restSpeedThreshold: 0.01,
+};
 
 function CategoryEditor({
   visible,
@@ -43,6 +51,7 @@ function CategoryEditor({
   onClose: () => void;
   onSubmit: (input: { name: string; icon: string; color: string; parentId: string | null }) => void;
 }) {
+  const themeColors = useThemeColors();
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initial?.icon ?? DEFAULT_CATEGORY_EMOJIS[0]);
   const [color, setColor] = useState(initial?.color ?? CATEGORY_COLORS[0]);
@@ -54,142 +63,267 @@ function CategoryEditor({
     setColor(initial?.color ?? CATEGORY_COLORS[0]);
     setParentId(initial?.parentId ?? null);
   }, [initial, visible]);
+
   const canSave = name.trim().length > 0;
 
   return (
     <ThemeModal
       visible={visible}
-      transparent
       animationType="slide"
-      presentationStyle="overFullScreen"
+      presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end" pointerEvents="box-none">
-        <Pressable className="absolute inset-0 bg-black/20" onPress={onClose} />
-        <SafeAreaView
-          className="rounded-t-[28px] border-t border-border/40 bg-background"
-          edges={['bottom']}
+      <SafeAreaView className="flex-1 bg-background">
+        <SettingsHeader
+          className="px-5 pt-5 pb-2"
+          title={
+            mode === 'create'
+              ? I18n.t('categories.new_category')
+              : I18n.t('categories.edit_category')
+          }
+          onClose={onClose}
+        />
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          <View className="items-center pt-3">
-            <View className="h-1.5 w-11 rounded-full bg-border/70" />
-          </View>
-          <SettingsHeader
-            className="px-5 pt-3 pb-2"
-            title={
-              mode === 'create'
-                ? I18n.t('categories.new_category')
-                : I18n.t('categories.edit_category')
-            }
-            onClose={onClose}
-          />
-
-          <ScrollView
-            className="max-h-[620px]"
-            contentContainerStyle={{
-              paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-              paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="gap-4">
-              <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
-                </View>
+          <View className="gap-4">
+            <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
+            <View className="flex-row gap-2">
+              <View className="flex-1">
+                <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
               </View>
-
-              <View>
-                <Text variant="label" tone="muted" className="mb-2">
-                  {I18n.t('categories.emoji')}
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
-                    <Pressable
-                      key={emoji}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setIcon(emoji);
-                      }}
-                      className={cn(
-                        'h-11 w-11 rounded-full border items-center justify-center',
-                        icon === emoji
-                          ? 'bg-primary/15 border-primary/50'
-                          : 'bg-card border-border/40',
-                      )}
-                    >
-                      <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-
-              <View>
-                <Text variant="label" tone="muted" className="mb-2">
-                  {I18n.t('categories.parent_optional')}
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
+            </View>
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('categories.emoji')}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
                   <Pressable
+                    key={emoji}
                     onPress={() => {
                       void triggerHaptic('selection');
-                      setParentId(null);
+                      setIcon(emoji);
+                    }}
+                    className={cn(
+                      'h-11 w-11 rounded-full border items-center justify-center',
+                      icon === emoji
+                        ? 'bg-primary/15 border-primary/50'
+                        : 'bg-card border-border/40',
+                    )}
+                  >
+                    <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('categories.parent_optional')}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setParentId(null);
+                  }}
+                  className={cn(
+                    'px-4 py-2.5 rounded-full border',
+                    !parentId ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
+                  )}
+                >
+                  <Text
+                    variant="caption"
+                    className={cn(!parentId ? 'text-primary' : 'text-muted-foreground')}
+                  >
+                    {I18n.t('categories.none')}
+                  </Text>
+                </Pressable>
+                {topLevel.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setParentId(item.id);
+                      if (mode === 'create') {
+                        setIcon(item.icon || DEFAULT_CATEGORY_EMOJIS[0]);
+                      }
                     }}
                     className={cn(
                       'px-4 py-2.5 rounded-full border',
-                      !parentId ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
+                      parentId === item.id
+                        ? 'bg-primary/15 border-primary/50'
+                        : 'bg-card border-border/40',
                     )}
                   >
                     <Text
                       variant="caption"
-                      className={cn(!parentId ? 'text-primary' : 'text-muted-foreground')}
-                    >
-                      {I18n.t('categories.none')}
-                    </Text>
-                  </Pressable>
-                  {topLevel.map((item) => (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setParentId(item.id);
-                      }}
                       className={cn(
-                        'px-4 py-2.5 rounded-full border',
-                        parentId === item.id
-                          ? 'bg-primary/15 border-primary/50'
-                          : 'bg-card border-border/40',
+                        parentId === item.id ? 'text-primary' : 'text-muted-foreground',
                       )}
                     >
-                      <Text
-                        variant="caption"
-                        className={cn(
-                          parentId === item.id ? 'text-primary' : 'text-muted-foreground',
-                        )}
-                      >
-                        {item.name}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
+                      {item.name}
+                    </Text>
+                  </Pressable>
+                ))}
               </View>
             </View>
-          </ScrollView>
-          <SettingsActionBar
-            onCancel={onClose}
-            onSave={() => {
-              if (!canSave) return;
-              onSubmit({
-                name: name.trim(),
-                icon: icon || DEFAULT_CATEGORY_EMOJIS[0],
-                color: color || CATEGORY_COLORS[0],
-                parentId,
-              });
-            }}
-            saveDisabled={!canSave}
-          />
-        </SafeAreaView>
-      </View>
+
+            {mode === 'edit' ? (
+              <SettingsSection className="mt-2" title={I18n.t('settings.danger_zone')} danger>
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('warning');
+                    onClose();
+                  }}
+                  className="self-start rounded-full border border-destructive/30 bg-destructive/8 px-3 py-2"
+                >
+                  <Text variant="caption" style={{ color: themeColors.coral }}>
+                    {I18n.t('common.delete')}
+                  </Text>
+                </Pressable>
+              </SettingsSection>
+            ) : null}
+          </View>
+        </ScrollView>
+        <SettingsActionBar
+          onCancel={onClose}
+          onSave={() => {
+            if (!canSave) return;
+            onSubmit({
+              name: name.trim(),
+              icon: icon || DEFAULT_CATEGORY_EMOJIS[0],
+              color: color || CATEGORY_COLORS[0],
+              parentId,
+            });
+          }}
+          saveDisabled={!canSave}
+        />
+      </SafeAreaView>
     </ThemeModal>
+  );
+}
+
+// Module-level callbacks for Row — avoids hooks/closures inside renderItem
+let _onEdit: ((item: Category) => void) | null = null;
+let _onDelete: ((item: Category) => void) | null = null;
+let _onNavigate: ((item: Category) => void) | null = null;
+let _themeColors: { surface: string; surfaceMuted: string; textMuted: string; coral: string; text: string } | null = null;
+let _hasChildren: ((id: string) => boolean) | null = null;
+
+// IMPORTANT: Only inline `style` props inside renderItem — className/NativeWind causes freezes
+function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
+  const tc = _themeColors!;
+  const hasKids = _hasChildren?.(item.id) ?? false;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingLeft: 10,
+        paddingRight: 6,
+        marginBottom: 4,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
+        backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+        gap: 6,
+        opacity: isActive ? 0.9 : 1,
+      }}
+    >
+      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: item.color || '#ddd', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 12 }}>{item.icon}</Text>
+      </View>
+      <Pressable
+        onPress={() => hasKids ? _onNavigate?.(item) : undefined}
+        disabled={isActive || !hasKids}
+        style={{ flex: 1 }}
+      >
+        <Text style={{ fontSize: 13, color: tc.text }}>{item.name}</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => _onEdit?.(item)}
+        disabled={isActive}
+        hitSlop={4}
+        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Pencil size={11} color={tc.textMuted} />
+      </Pressable>
+      <Pressable
+        onPress={() => _onDelete?.(item)}
+        disabled={isActive}
+        hitSlop={4}
+        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Trash2 size={11} color={tc.coral} />
+      </Pressable>
+      <Pressable
+        onLongPress={drag}
+        delayLongPress={100}
+        disabled={isActive}
+        hitSlop={8}
+        style={{ padding: 6, marginRight: -2 }}
+      >
+        <GripVertical size={16} color={tc.textMuted} />
+      </Pressable>
+    </View>
+  );
+}
+
+function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
+  const tc = _themeColors!;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingLeft: 10,
+        paddingRight: 6,
+        marginBottom: 4,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
+        backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+        gap: 6,
+        opacity: isActive ? 0.9 : 1,
+      }}
+    >
+      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: item.color || '#ddd', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 12 }}>{item.icon}</Text>
+      </View>
+      <Text style={{ flex: 1, fontSize: 13, color: tc.text }}>{item.name}</Text>
+      <Pressable
+        onPress={() => _onEdit?.(item)}
+        disabled={isActive}
+        hitSlop={4}
+        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Pencil size={11} color={tc.textMuted} />
+      </Pressable>
+      <Pressable
+        onPress={() => _onDelete?.(item)}
+        disabled={isActive}
+        hitSlop={4}
+        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Trash2 size={11} color={tc.coral} />
+      </Pressable>
+      <Pressable
+        onLongPress={drag}
+        delayLongPress={100}
+        disabled={isActive}
+        hitSlop={8}
+        style={{ padding: 6, marginRight: -2 }}
+      >
+        <GripVertical size={16} color={tc.textMuted} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -198,347 +332,223 @@ interface CategoriesScreenProps {
 }
 
 export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
+  const { categories, createCategory, updateCategory, deleteCategory } = useApp();
+  const { persistOrder } = useDebouncedPersistence(500);
   const themeColors = useThemeColors();
-  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
-    useApp();
-  const swipeBackHandlers = useEdgeSwipeBack(onBack);
-
   const [type, setType] = useState<CategoryType>('expense');
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
-  const [isReordering, setIsReordering] = useState(false);
-  const [reorderTopLevelIds, setReorderTopLevelIds] = useState<string[]>([]);
-  const [reorderChildrenByParent, setReorderChildrenByParent] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [reorderScope, setReorderScope] = useState<string>('__top__');
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
   const typeCategories = useMemo(
     () => categories.filter((category) => category.type === type),
     [categories, type],
   );
-
   const topLevel = useMemo(
     () => typeCategories.filter((category) => !category.parentId),
     [typeCategories],
   );
   const childrenByParent = useMemo(() => {
-    const map = new Map<string, typeof typeCategories>();
+    const map = new Map<string, Category[]>();
     typeCategories
       .filter((item) => !!item.parentId)
       .forEach((item) => {
         const key = item.parentId as string;
-        if (!map.has(key)) {
-          map.set(key, []);
-        }
-        map.get(key)?.push(item);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(item);
       });
     return map;
   }, [typeCategories]);
 
-  const resetReorderState = useCallback(() => {
-    const nextTopLevelIds = topLevel.map((item) => item.id);
-    const nextChildrenByParent: Record<string, string[]> = {};
-    topLevel.forEach((parent) => {
-      nextChildrenByParent[parent.id] = (childrenByParent.get(parent.id) ?? []).map(
-        (child) => child.id,
-      );
-    });
-    setReorderTopLevelIds(nextTopLevelIds);
-    setReorderChildrenByParent(nextChildrenByParent);
-    setReorderScope('__top__');
-  }, [childrenByParent, topLevel]);
+  const selectedParent = selectedParentId
+    ? (topLevel.find((c) => c.id === selectedParentId) ?? null)
+    : null;
+  const subcategoriesFromContext = useMemo(
+    () => (selectedParentId ? (childrenByParent.get(selectedParentId) ?? []) : []),
+    [childrenByParent, selectedParentId],
+  );
 
-  const startReorder = () => {
-    resetReorderState();
-    setIsReordering(true);
-  };
+  const [localTopLevel, setLocalTopLevel] = useState(topLevel);
+  const [localSubcategories, setLocalSubcategories] = useState(subcategoriesFromContext);
+  const didDragRef = useRef(false);
 
   useEffect(() => {
-    if (!isReordering) return;
-    resetReorderState();
-  }, [isReordering, resetReorderState]);
-
-  const categoryById = useMemo(
-    () => new Map(typeCategories.map((item) => [item.id, item])),
-    [typeCategories],
-  );
-  const reorderScopeItems = useMemo(() => {
-    if (reorderScope === '__top__') {
-      return reorderTopLevelIds
-        .map((id) => categoryById.get(id))
-        .filter((item): item is Category => !!item);
+    if (didDragRef.current) { didDragRef.current = false; return; }
+    setLocalTopLevel(topLevel);
+  }, [topLevel]);
+  useEffect(() => {
+    if (didDragRef.current) { didDragRef.current = false; return; }
+    setLocalSubcategories(subcategoriesFromContext);
+  }, [subcategoriesFromContext]);
+  useEffect(() => {
+    if (selectedParentId && !topLevel.find((c) => c.id === selectedParentId)) {
+      setSelectedParentId(null);
     }
-    return (reorderChildrenByParent[reorderScope] ?? [])
-      .map((id) => categoryById.get(id))
-      .filter((item): item is Category => !!item);
-  }, [categoryById, reorderChildrenByParent, reorderScope, reorderTopLevelIds]);
+  }, [selectedParentId, topLevel]);
 
-  const reorderScopeOptions = useMemo(() => {
-    return [
-      { value: '__top__', label: 'Top-level' },
-      ...topLevel
-        .filter((parent) => (childrenByParent.get(parent.id)?.length ?? 0) > 0)
-        .map((parent) => ({ value: parent.id, label: parent.name })),
-    ];
-  }, [childrenByParent, topLevel]);
-
-  const saveReorder = () => {
-    let nextAllIds = categories.map((item) => item.id);
-    const applyGroup = (orderedIds: string[]) => {
-      if (orderedIds.length === 0) return;
-      const groupSet = new Set(orderedIds);
-      const positions = nextAllIds
-        .map((id, index) => (groupSet.has(id) ? index : -1))
-        .filter((index) => index >= 0);
-      positions.forEach((position, index) => {
-        nextAllIds[position] = orderedIds[index]!;
-      });
-    };
-
-    applyGroup(reorderTopLevelIds);
-    Object.values(reorderChildrenByParent).forEach((orderedIds) => applyGroup(orderedIds));
-    reorderCategories(nextAllIds);
-    setIsReordering(false);
+  // Set module-level callbacks
+  _themeColors = themeColors;
+  _hasChildren = (id: string) => (childrenByParent.get(id)?.length ?? 0) > 0;
+  _onEdit = (item: Category) => {
+    void triggerHaptic('selection');
+    setEditing(item);
+  };
+  _onDelete = (item: Category) => {
+    void triggerHaptic('warning');
+    deleteCategory(item.id);
+  };
+  _onNavigate = (item: Category) => {
+    void triggerHaptic('selection');
+    setSelectedParentId(item.id);
   };
 
-  return (
-    <SettingsPageLayout
-      swipeBackHandlers={swipeBackHandlers}
-      actionBar={
-        isReordering ? (
-          <SettingsActionBar onCancel={() => setIsReordering(false)} onSave={saveReorder} />
-        ) : undefined
-      }
-    >
-      {isReordering ? (
-        <DraggableFlatList
-          data={reorderScopeItems}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-          }}
-          activationDistance={12}
-          autoscrollThreshold={80}
-          autoscrollSpeed={180}
-          onDragEnd={({ data }) => {
-            const nextIds = data.map((item) => item.id);
-            if (reorderScope === '__top__') {
-              setReorderTopLevelIds(nextIds);
-              return;
-            }
-            setReorderChildrenByParent((prev) => ({ ...prev, [reorderScope]: nextIds }));
-          }}
-          ListHeaderComponent={
-            <View className="pb-3 gap-4">
-              <SettingsHeader
-                className="px-0 pt-5 pb-1"
-                onBack={onBack}
-                title={I18n.t('categories.reorder_title')}
-                subtitle={I18n.t('categories.reorder_subtitle')}
-              />
-
-              <SegmentedToggle
-                options={[
-                  { value: 'expense', label: I18n.t('nav.expense') },
-                  { value: 'income', label: I18n.t('nav.income') },
-                ]}
-                value={type}
-                onChange={(val) => setType(val as CategoryType)}
-              />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8, paddingRight: 12 }}
+  // Subcategory view
+  if (selectedParent) {
+    return (
+      <SettingsPageLayout>
+        {/* Header OUTSIDE the DraggableFlatList */}
+        <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+          <SettingsHeader
+            className="px-0 pt-5 pb-1"
+            onBack={() => setSelectedParentId(null)}
+            title={selectedParent.name}
+            subtitle={I18n.t('categories.subcategories')}
+            rightAccessory={
+              <Button
+                size="icon"
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setCreateOpen(true);
+                }}
               >
-                {reorderScopeOptions.map((option) => (
-                  <Pressable
-                    key={option.value}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setReorderScope(option.value);
-                    }}
-                    className={cn(
-                      'px-3.5 py-2 rounded-full border',
-                      reorderScope === option.value
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/35',
-                    )}
-                  >
-                    <Text
-                      variant="label"
-                      className={cn(
-                        reorderScope === option.value ? 'text-primary' : 'text-muted-foreground',
-                      )}
-                    >
-                      {option.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          }
-          renderItem={({ item, drag, isActive }: RenderItemParams<Category>) => (
-            <Pressable
-              onLongPress={() => {
-                void triggerHaptic('medium');
-                drag();
-              }}
-              disabled={isActive}
-              className="mb-2.5"
-            >
-              <Card className={isActive ? 'opacity-85' : undefined}>
-                <CardContent className="py-3.5 flex-row items-center gap-3">
-                  <GripVertical size={16} color={themeColors.textMuted} />
-                  <Text style={{ fontSize: 18 }}>{item.icon}</Text>
-                  <Text variant="caption" className="flex-1">
-                    {item.name}
-                  </Text>
-                </CardContent>
-              </Card>
-            </Pressable>
-          )}
-        />
-      ) : (
-        <FlatList
-          data={topLevel}
+                <Plus size={18} color="#fff" />
+              </Button>
+            }
+          />
+          <View style={{ height: 8 }} />
+        </View>
+
+        <View style={{ flex: 1 }}>
+        <DraggableFlatList
+          data={localSubcategories}
           keyExtractor={(item) => item.id}
+          renderItem={SubcategoryRow}
+          animationConfig={SNAP_CONFIG}
+          onDragBegin={() => void triggerHaptic('medium')}
+          onDragEnd={({ data }) => {
+            void triggerHaptic('light');
+            didDragRef.current = true;
+            setLocalSubcategories(data);
+            persistOrder('categories', data.map((i) => i.id));
+          }}
+          onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+          autoscrollThreshold={80}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
             paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
           }}
-          ListHeaderComponent={
-            <View className="pb-3 gap-4">
-              <SettingsHeader
-                className="px-0 pt-5 pb-1"
-                onBack={onBack}
-                title={I18n.t('categories.title')}
-                subtitle={I18n.t('categories.subtitle')}
-                rightAccessory={
-                  <View className="flex-row items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onPress={startReorder}
-                      className="h-9 px-3"
-                    >
-                      <Text>{I18n.t('categories.reorder')}</Text>
-                    </Button>
-                    <Button size="icon" onPress={() => setCreateOpen(true)}>
-                      <Plus size={18} color="#fff" />
-                    </Button>
-                  </View>
-                }
-              />
+        />
+        </View>
 
-              <SegmentedToggle
-                options={[
-                  { value: 'expense', label: I18n.t('nav.expense') },
-                  { value: 'income', label: I18n.t('nav.income') },
-                ]}
-                value={type}
-                onChange={(val) => setType(val as CategoryType)}
-              />
-            </View>
-          }
-          renderItem={({ item, index }) => {
-            const children = childrenByParent.get(item.id) ?? [];
-
-            return (
-              <Animated.View entering={FadeIn.delay(index * 50).duration(300)}>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setEditing(item);
-                  }}
-                  className="mb-2.5"
-                >
-                  <Card>
-                    <CardContent className="py-4 gap-2.5">
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-3">
-                          <View className="w-10 h-10 rounded-full bg-primary/8 items-center justify-center">
-                            <Text style={{ fontSize: 18 }}>{item.icon}</Text>
-                          </View>
-                          <View>
-                            <Text variant="caption" className="text-foreground">
-                              {item.name}
-                            </Text>
-                            <Text variant="label" tone="muted" className="mt-0.5">
-                              {I18n.t('categories.subcategories_count', { count: children.length })}
-                            </Text>
-                          </View>
-                        </View>
-                        {!item.isDefault ? (
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('warning');
-                              deleteCategory(item.id);
-                            }}
-                            className="px-3 py-1.5"
-                          >
-                            <Text variant="caption" style={{ color: themeColors.coral }}>
-                              {I18n.t('common.delete')}
-                            </Text>
-                          </Pressable>
-                        ) : null}
-                      </View>
-
-                      {children.length > 0 ? (
-                        <View className="pt-2 border-t border-border/30 gap-2">
-                          {children.map((child) => (
-                            <View
-                              key={child.id}
-                              className="flex-row items-center justify-between pl-2"
-                            >
-                              <View className="flex-row items-center gap-2">
-                                <Text style={{ fontSize: 14 }}>{child.icon}</Text>
-                                <Text variant="caption" tone="muted">
-                                  {child.name}
-                                </Text>
-                              </View>
-                              {!child.isDefault ? (
-                                <Pressable
-                                  onPress={() => {
-                                    void triggerHaptic('warning');
-                                    deleteCategory(child.id);
-                                  }}
-                                  className="px-2 py-1"
-                                >
-                                  <Text variant="label" style={{ color: themeColors.coral }}>
-                                    {I18n.t('common.delete')}
-                                  </Text>
-                                </Pressable>
-                              ) : null}
-                            </View>
-                          ))}
-                        </View>
-                      ) : null}
-                    </CardContent>
-                  </Card>
-                </Pressable>
-              </Animated.View>
-            );
+        <CategoryEditor
+          visible={createOpen}
+          mode="create"
+          topLevel={topLevel}
+          initial={{ parentId: selectedParentId, type }}
+          onClose={() => setCreateOpen(false)}
+          onSubmit={(input) => {
+            createCategory({ ...input, type, isDefault: false });
+            setCreateOpen(false);
           }}
         />
-      )}
+        <CategoryEditor
+          visible={!!editing}
+          mode="edit"
+          topLevel={topLevel}
+          initial={editing ?? undefined}
+          onClose={() => setEditing(null)}
+          onSubmit={(input) => {
+            if (!editing) return;
+            updateCategory(editing.id, input);
+            setEditing(null);
+          }}
+        />
+      </SettingsPageLayout>
+    );
+  }
+
+  // Top-level view
+  return (
+    <SettingsPageLayout>
+      {/* Header OUTSIDE the DraggableFlatList */}
+      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <SettingsHeader
+          className="px-0 pt-5 pb-1"
+          onBack={onBack}
+          title={I18n.t('settings.categories')}
+          subtitle={I18n.t('settings.categories_subtitle')}
+          rightAccessory={
+            <Button
+              size="icon"
+              onPress={() => {
+                void triggerHaptic('selection');
+                setCreateOpen(true);
+              }}
+            >
+              <Plus size={18} color="#fff" />
+            </Button>
+          }
+        />
+        <SegmentedToggle
+          value={type}
+          onChange={(v) => setType(v as CategoryType)}
+          options={[
+            { value: 'expense', label: I18n.t('categories.expense') },
+            { value: 'income', label: I18n.t('categories.income') },
+          ]}
+        />
+        <View style={{ height: 8 }} />
+      </View>
+
+      <View style={{ flex: 1 }}>
+      <DraggableFlatList
+        data={localTopLevel}
+        keyExtractor={(item) => item.id}
+        renderItem={TopLevelRow}
+        animationConfig={SNAP_CONFIG}
+        onDragBegin={() => void triggerHaptic('medium')}
+        onDragEnd={({ data }) => {
+          void triggerHaptic('light');
+          didDragRef.current = true;
+          setLocalTopLevel(data);
+          persistOrder('categories', data.map((i) => i.id));
+        }}
+        onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+        autoscrollThreshold={80}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+        }}
+      />
+      </View>
 
       <CategoryEditor
         visible={createOpen}
         mode="create"
         topLevel={topLevel}
+        initial={{ type }}
         onClose={() => setCreateOpen(false)}
         onSubmit={(input) => {
           createCategory({ ...input, type, isDefault: false });
           setCreateOpen(false);
         }}
       />
-
       <CategoryEditor
         visible={!!editing}
         mode="edit"
-        topLevel={topLevel.filter((item) => item.id !== editing?.id)}
+        topLevel={topLevel}
         initial={editing ?? undefined}
         onClose={() => setEditing(null)}
         onSubmit={(input) => {
