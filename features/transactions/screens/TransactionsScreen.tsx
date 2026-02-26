@@ -169,6 +169,8 @@ export function TransactionsScreen({
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
+  const lastSelectedTransactionRef = useRef<TransactionWithRelations | null>(null);
+  if (selectedTransaction) lastSelectedTransactionRef.current = selectedTransaction;
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
@@ -777,9 +779,9 @@ export function TransactionsScreen({
         presentationStyle="pageSheet"
         onRequestClose={handleCloseTransactionEditor}
       >
-        {selectedTransaction ? (
+        {(selectedTransaction || lastSelectedTransactionRef.current) ? (
           <EditTransactionScreen
-            transaction={selectedTransaction}
+            transaction={(selectedTransaction ?? lastSelectedTransactionRef.current)!}
             onClose={handleCloseTransactionEditor}
           />
         ) : null}

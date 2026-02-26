@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  InteractionManager,
   Keyboard,
   Pressable,
   ScrollView,
@@ -496,8 +497,6 @@ export function TransactionEditorScreen({
   }, [amount, isBalanceAdjustmentType, type]);
 
   const handleSubmit = () => {
-    setError(null);
-    setFieldErrors({});
     const numericAmount = Number(amount);
     const amountDraft = amount.trim();
     if (!amountDraft || !Number.isFinite(numericAmount)) {
@@ -509,6 +508,10 @@ export function TransactionEditorScreen({
     const txDate = toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString();
 
     try {
+      // Build the submission payload; validate per type.
+      let submitPayload: CreateTransactionInput | null = null;
+      let recurringSubmit: (() => void) | null = null;
+
       if (isBalanceAdjustmentType) {
         if (!accountId) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -516,7 +519,7 @@ export function TransactionEditorScreen({
           activateField('account');
           return;
         }
-        onSubmit({
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -526,46 +529,26 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: note.trim() || null,
-        });
+        };
       } else if (isTransferType) {
-        if (recurringOptions) {
-          const transferErrors: typeof fieldErrors = {};
-          if (!fromAccountId)
-            transferErrors.from_account = I18n.t('transactions.editor.error.required');
-          if (!toAccountId)
-            transferErrors.to_account = I18n.t('transactions.editor.error.required');
-          if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
-            transferErrors.to_account = I18n.t(
-              'transactions.editor.error.must_be_different_account',
-            );
-          }
-          if (Object.keys(transferErrors).length > 0) {
-            setError(I18n.t('transactions.editor.error.complete_required'));
-            setFieldErrors(transferErrors);
-            if (transferErrors.from_account) activateField('fromAccount');
-            else if (transferErrors.to_account) activateField('toAccount');
-            return;
-          }
-        } else {
-          const transferErrors: typeof fieldErrors = {};
-          if (!fromAccountId)
-            transferErrors.from_account = I18n.t('transactions.editor.error.required');
-          if (!toAccountId)
-            transferErrors.to_account = I18n.t('transactions.editor.error.required');
-          if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
-            transferErrors.to_account = I18n.t(
-              'transactions.editor.error.must_be_different_account',
-            );
-          }
-          if (Object.keys(transferErrors).length > 0) {
-            setError(I18n.t('transactions.editor.error.complete_required'));
-            setFieldErrors(transferErrors);
-            if (transferErrors.from_account) activateField('fromAccount');
-            else if (transferErrors.to_account) activateField('toAccount');
-            return;
-          }
+        const transferErrors: typeof fieldErrors = {};
+        if (!fromAccountId)
+          transferErrors.from_account = I18n.t('transactions.editor.error.required');
+        if (!toAccountId)
+          transferErrors.to_account = I18n.t('transactions.editor.error.required');
+        if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
+          transferErrors.to_account = I18n.t(
+            'transactions.editor.error.must_be_different_account',
+          );
         }
-        onSubmit({
+        if (Object.keys(transferErrors).length > 0) {
+          setError(I18n.t('transactions.editor.error.complete_required'));
+          setFieldErrors(transferErrors);
+          if (transferErrors.from_account) activateField('fromAccount');
+          else if (transferErrors.to_account) activateField('toAccount');
+          return;
+        }
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -575,7 +558,7 @@ export function TransactionEditorScreen({
           accountId: null,
           categoryId: null,
           note: note.trim() || null,
-        });
+        };
       } else {
         const baseErrors: typeof fieldErrors = {};
         if (!accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
@@ -587,7 +570,7 @@ export function TransactionEditorScreen({
           else if (baseErrors.category) activateField('category');
           return;
         }
-        const payload: CreateTransactionInput = {
+        submitPayload = {
           type,
           amount: numericAmount,
           currency: settings.currencySymbol,
@@ -614,23 +597,34 @@ export function TransactionEditorScreen({
             setFieldErrors({ end_date: I18n.t('transactions.editor.error.required') });
             return;
           }
-          recurringOptions.onSubmitRecurring({
-            transaction: payload,
-            recurring: {
-              name: normalizedName,
-              pattern: recurrencePattern,
-              interval,
-              endDate: endDateIso,
-              isActive: recurrenceIsActive,
-            },
-          });
-        } else {
-          onSubmit(payload);
+          const capturedPayload = submitPayload;
+          recurringSubmit = () => {
+            recurringOptions.onSubmitRecurring({
+              transaction: capturedPayload,
+              recurring: {
+                name: normalizedName,
+                pattern: recurrencePattern,
+                interval,
+                endDate: endDateIso,
+                isActive: recurrenceIsActive,
+              },
+            });
+          };
+          submitPayload = null; // handled by recurringSubmit
         }
       }
 
+      // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
       onClose();
+
+      const deferredSubmit = submitPayload
+        ? () => onSubmit(submitPayload)
+        : recurringSubmit;
+
+      if (deferredSubmit) {
+        InteractionManager.runAfterInteractions(deferredSubmit);
+      }
     } catch (submitError) {
       setError(getErrorMessage(submitError, I18n.t('errors.generic_operation_failed')));
     }
