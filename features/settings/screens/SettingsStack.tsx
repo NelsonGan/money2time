@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StackActions } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -18,6 +18,7 @@ import {
   DISABLE_BACK_GESTURE_STACK_OPTIONS,
   SHARED_NATIVE_STACK_OPTIONS,
 } from '~/navigation/stackOptions';
+import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import type { WageConfig } from '~/types';
 
 export type SettingsStackParamList = {
@@ -93,17 +94,31 @@ export function SettingsStack({
   onOpenRecurringEditor,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<NativeStackNavigationProp<SettingsStackParamList> | null>(null);
+  const suppressClosingHapticUntilRef = useRef(0);
+  const suppressProgrammaticClosingHaptics = useCallback((durationMs = 600) => {
+    suppressClosingHapticUntilRef.current = Date.now() + durationMs;
+  }, []);
+  const screenListeners = useMemo(
+    () =>
+      createNativeStackSwipeHapticListeners({
+        skipRouteNames: ['Accounts', 'Categories', 'CategoriesSubcategories'],
+        shouldSuppress: () => Date.now() < suppressClosingHapticUntilRef.current,
+      }),
+    [suppressProgrammaticClosingHaptics],
+  );
 
   useEffect(() => {
     if (resetToRootToken <= 0) return;
+    suppressProgrammaticClosingHaptics();
     stackNavigationRef.current?.dispatch(StackActions.popToTop());
-  }, [resetToRootToken]);
+  }, [resetToRootToken, suppressProgrammaticClosingHaptics]);
 
   useEffect(() => {
     if (!forceScreen) return;
     const navigation = stackNavigationRef.current;
     if (!navigation) return;
 
+    suppressProgrammaticClosingHaptics();
     navigation.dispatch(StackActions.popToTop());
     if (forceScreen === 'SettingsHome') return;
 
@@ -112,10 +127,14 @@ export function SettingsStack({
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [forceScreen, forceScreenToken]);
+  }, [forceScreen, forceScreenToken, suppressProgrammaticClosingHaptics]);
 
   return (
-    <Stack.Navigator initialRouteName="SettingsHome" screenOptions={SHARED_NATIVE_STACK_OPTIONS}>
+    <Stack.Navigator
+      initialRouteName="SettingsHome"
+      screenOptions={SHARED_NATIVE_STACK_OPTIONS}
+      screenListeners={screenListeners}
+    >
       <Stack.Screen name="SettingsHome">
         {(props) => {
           stackNavigationRef.current = props.navigation;
@@ -153,7 +172,7 @@ export function SettingsStack({
           return <AccountsScreen onBack={() => props.navigation.goBack()} managementOnly />;
         }}
       </Stack.Screen>
-      <Stack.Screen name="Categories">
+      <Stack.Screen name="Categories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
@@ -166,7 +185,7 @@ export function SettingsStack({
           );
         }}
       </Stack.Screen>
-      <Stack.Screen name="CategoriesSubcategories">
+      <Stack.Screen name="CategoriesSubcategories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (

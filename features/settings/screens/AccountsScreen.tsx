@@ -28,6 +28,7 @@ import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { EditTransactionScreen } from '~/features/transactions/screens';
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { useApp } from '~/context/AppContext';
 import {
   ACCOUNT_TYPE_OPTIONS,
@@ -158,150 +159,135 @@ function AddAccountSheet({
   return (
     <ThemeModal
       visible={visible}
-      transparent
       animationType="slide"
-      presentationStyle="overFullScreen"
+      presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end" pointerEvents="box-none">
-        <Pressable className="absolute inset-0 bg-black/20" onPress={onClose} />
-        <SafeAreaView
-          className="rounded-t-[28px] border-t border-border/40 bg-background"
-          edges={['bottom']}
+      <SafeAreaView className="flex-1 bg-background">
+        <SettingsHeader
+          className="px-5 pt-5 pb-2"
+          title={I18n.t('accounts.new_account')}
+          onClose={onClose}
+        />
+
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          <View className="items-center pt-3">
-            <View className="h-1.5 w-11 rounded-full bg-border/70" />
-          </View>
-          <SettingsHeader
-            className="px-5 pt-3 pb-2"
-            title={I18n.t('accounts.new_account')}
-            onClose={onClose}
-          />
-
-          <ScrollView
-            className="max-h-[620px]"
-            contentContainerStyle={{
-              paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-              paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="gap-4">
-              <Input
-                label={I18n.t('accounts.account_name')}
-                value={name}
-                onChangeText={setName}
-                placeholder={I18n.t('accounts.account_name_placeholder')}
-              />
-              <View className="gap-2">
-                <SelectField
-                  label={I18n.t('accounts.account_group')}
-                  value={accountGroupId}
-                  onChange={setAccountGroupId}
-                  options={[
-                    { value: 'none', label: I18n.t('common.ungrouped') },
-                    ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
-                  ]}
-                />
-              </View>
-              <View>
-                <Text variant="label" tone="muted" className="mb-2">
-                  {I18n.t('accounts.type')}
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {ACCOUNT_TYPE_OPTIONS.map((item) => (
-                    <Pressable
-                      key={item.value}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setType(item.value);
-                        setIcon(item.icon);
-                      }}
-                      className={cn(
-                        'px-4 py-2.5 rounded-full border',
-                        type === item.value
-                          ? 'bg-primary/15 border-primary/50'
-                          : 'bg-card border-border/40',
-                      )}
-                    >
-                      <Text
-                        variant="caption"
-                        className={cn(
-                          type === item.value ? 'text-primary' : 'text-muted-foreground',
-                        )}
-                      >
-                        {item.icon} {item.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-
-              {type === 'credit' ? (
-                <View className="flex-row gap-2">
-                  <View className="flex-1">
-                    <Input
-                      label={I18n.t('accounts.statement_day')}
-                      variant="numeric"
-                      value={creditStatementDay}
-                      onChangeText={setCreditStatementDay}
-                      placeholder="25"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Input
-                      label={I18n.t('accounts.due_day')}
-                      variant="numeric"
-                      value={creditDueDay}
-                      onChangeText={setCreditDueDay}
-                      placeholder="1"
-                    />
-                  </View>
-                </View>
-              ) : null}
-
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
-                </View>
-              </View>
-
-              <View>
-                <Text variant="label" tone="muted" className="mb-2">
-                  {I18n.t('categories.emoji')}
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
-                    <Pressable
-                      key={emoji}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setIcon(emoji);
-                      }}
-                      className={cn(
-                        'h-11 w-11 rounded-full border items-center justify-center',
-                        icon === emoji
-                          ? 'bg-primary/15 border-primary/50'
-                          : 'bg-card border-border/40',
-                      )}
-                    >
-                      <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-              <Input
-                label={I18n.t('accounts.starting_balance')}
-                variant="currency"
-                currencySymbol={currencySymbol}
-                value={startingBalance}
-                onChangeText={setStartingBalance}
+          <View className="gap-4">
+            <Input
+              label={I18n.t('accounts.account_name')}
+              value={name}
+              onChangeText={setName}
+              placeholder={I18n.t('accounts.account_name_placeholder')}
+            />
+            <View className="gap-2">
+              <SelectField
+                label={I18n.t('accounts.account_group')}
+                value={accountGroupId}
+                onChange={setAccountGroupId}
+                options={[
+                  { value: 'none', label: I18n.t('common.ungrouped') },
+                  ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
+                ]}
               />
             </View>
-          </ScrollView>
-          <SettingsActionBar onCancel={onClose} onSave={handleCreate} saveDisabled={!canSave} />
-        </SafeAreaView>
-      </View>
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('accounts.type')}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {ACCOUNT_TYPE_OPTIONS.map((item) => (
+                  <Pressable
+                    key={item.value}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setType(item.value);
+                      setIcon(item.icon);
+                    }}
+                    className={cn(
+                      'px-4 py-2.5 rounded-full border',
+                      type === item.value
+                        ? 'bg-primary/15 border-primary/50'
+                        : 'bg-card border-border/40',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(type === item.value ? 'text-primary' : 'text-muted-foreground')}
+                    >
+                      {item.icon} {item.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {type === 'credit' ? (
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Input
+                    label={I18n.t('accounts.statement_day')}
+                    variant="numeric"
+                    value={creditStatementDay}
+                    onChangeText={setCreditStatementDay}
+                    placeholder="25"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Input
+                    label={I18n.t('accounts.due_day')}
+                    variant="numeric"
+                    value={creditDueDay}
+                    onChangeText={setCreditDueDay}
+                    placeholder="1"
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            <View className="flex-row gap-2">
+              <View className="flex-1">
+                <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
+              </View>
+            </View>
+
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('categories.emoji')}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
+                  <Pressable
+                    key={emoji}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setIcon(emoji);
+                    }}
+                    className={cn(
+                      'h-11 w-11 rounded-full border items-center justify-center',
+                      icon === emoji ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
+                    )}
+                  >
+                    <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            <Input
+              label={I18n.t('accounts.starting_balance')}
+              variant="currency"
+              currencySymbol={currencySymbol}
+              value={startingBalance}
+              onChangeText={setStartingBalance}
+            />
+          </View>
+        </ScrollView>
+        <SettingsActionBar onCancel={onClose} onSave={handleCreate} saveDisabled={!canSave} />
+      </SafeAreaView>
     </ThemeModal>
   );
 }
@@ -844,6 +830,7 @@ export function AccountsScreen({
   const [selectionOverlayTop, setSelectionOverlayTop] = useState(
     ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP,
   );
+  const [isReordering, setIsReordering] = useState(false);
   const accountsListRef = useRef<FlatList<AccountListRow> | null>(null);
   const detailScrollToTopRef = useRef<(() => void) | null>(null);
   const didDragRef = useRef(false);
@@ -863,6 +850,17 @@ export function AccountsScreen({
   const selectedAccount = activeAccountId
     ? (accounts.find((item) => item.id === activeAccountId) ?? null)
     : null;
+  const edgeSwipeBackHandler = useCallback(() => {
+    if (selectedTransaction) {
+      setSelectedTransaction(null);
+      return;
+    }
+    if (!managementOnly && activeAccountId && selectedAccount) {
+      closeSelectedAccount();
+      return;
+    }
+    onBack?.();
+  }, [activeAccountId, closeSelectedAccount, managementOnly, onBack, selectedAccount, selectedTransaction]);
   const selectedAccountTransactions = useMemo(
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
@@ -911,6 +909,7 @@ export function AccountsScreen({
   );
 
   const handleManagementViewChange = useCallback((nextView: AccountManagementView) => {
+    setIsReordering(false);
     setManagementView(nextView);
     setShowGroupComposer(false);
     setNewGroupName('');
@@ -966,6 +965,9 @@ export function AccountsScreen({
     }
     setShowBulkUpdate(false);
   }, [isSelectionMode]);
+  useEffect(() => {
+    setIsReordering(false);
+  }, [activeAccountId, managementOnly, selectedTransaction]);
 
   useEffect(() => {
     if (resetToRootToken <= 0) return;
@@ -1362,10 +1364,12 @@ export function AccountsScreen({
 
   if (selectedTransaction) {
     return (
-      <EditTransactionScreen
-        transaction={selectedTransaction}
-        onClose={() => setSelectedTransaction(null)}
-      />
+      <EdgeSwipeBackContainer onBack={edgeSwipeBackHandler}>
+        <EditTransactionScreen
+          transaction={selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+        />
+      </EdgeSwipeBackContainer>
     );
   }
 
@@ -1394,8 +1398,9 @@ export function AccountsScreen({
       : I18n.t('accounts.include_option_hide');
 
     return (
-      <SettingsPageLayout>
-        <View className="flex-1">
+      <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
+        <SettingsPageLayout>
+          <View className="flex-1">
           <ActivityTransactionList
             transactions={txns}
             onTransactionPress={handleTransactionPress}
@@ -1576,7 +1581,7 @@ export function AccountsScreen({
             </View>
           ) : null}
         </View>
-        <EditAccountSheet
+          <EditAccountSheet
           visible={showEditAccount}
           account={account}
           currentBalance={balance}
@@ -1597,7 +1602,7 @@ export function AccountsScreen({
             closeSelectedAccount();
           }}
         />
-        <PayCreditCardSheet
+          <PayCreditCardSheet
           visible={showPayCard}
           onClose={() => setShowPayCard(false)}
           fromAccounts={payFromAccounts}
@@ -1616,7 +1621,7 @@ export function AccountsScreen({
             setShowPayCard(false);
           }}
         />
-        <ThemeModal
+          <ThemeModal
           visible={showBulkUpdate}
           animationType="slide"
           presentationStyle="pageSheet"
@@ -1701,7 +1706,8 @@ export function AccountsScreen({
             </ScrollView>
           </SafeAreaView>
         </ThemeModal>
-      </SettingsPageLayout>
+        </SettingsPageLayout>
+      </EdgeSwipeBackContainer>
     );
   }
 
@@ -1719,7 +1725,8 @@ export function AccountsScreen({
   _acctCreditLabel = creditLabel;
 
   return (
-    <SettingsPageLayout>
+    <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
+      <SettingsPageLayout>
       {managementOnly ? (
         <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
           <SettingsHeader
@@ -1799,8 +1806,12 @@ export function AccountsScreen({
               renderItem={GroupRowItem}
               extraData={`${editingGroupId}-${editingGroupName}`}
               animationConfig={SNAP_CONFIG}
-              onDragBegin={() => void triggerHaptic('medium')}
+              onDragBegin={() => {
+                setIsReordering(true);
+                void triggerHaptic('medium');
+              }}
               onDragEnd={({ data }: { data: AccountGroup[] }) => {
+                setIsReordering(false);
                 void triggerHaptic('light');
                 didDragRef.current = true;
                 setLocalAccountGroups(data);
@@ -1840,9 +1851,13 @@ export function AccountsScreen({
                   keyExtractor={(item) => item.id}
                   renderItem={AccountMgmtRowItem}
                   animationConfig={SNAP_CONFIG}
-                  onDragBegin={() => void triggerHaptic('medium')}
+                  onDragBegin={() => {
+                    setIsReordering(true);
+                    void triggerHaptic('medium');
+                  }}
                   onPlaceholderIndexChange={() => void triggerHaptic('selection')}
                   onDragEnd={({ data: newData }: { data: AccountMgmtAccountItem[] }) => {
+                    setIsReordering(false);
                     void triggerHaptic('light');
                     const updatedSections = localAccountGroupSections.map((s) =>
                       s.id === section.id
@@ -1989,7 +2004,7 @@ export function AccountsScreen({
         />
       ) : null}
 
-      <AddAccountSheet
+        <AddAccountSheet
         visible={showCreate}
         onClose={() => setShowCreate(false)}
         accountGroups={accountGroups}
@@ -2003,6 +2018,7 @@ export function AccountsScreen({
           setShowCreate(false);
         }}
       />
-    </SettingsPageLayout>
+      </SettingsPageLayout>
+    </EdgeSwipeBackContainer>
   );
 }
