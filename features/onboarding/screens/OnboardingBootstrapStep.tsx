@@ -11,6 +11,7 @@ import { Text } from '~/components/ui/text';
 import { Mascot } from '~/components/feedback/Mascot';
 import { triggerHaptic } from '~/services/haptics';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { cn } from '~/utils';
 import type { MMImportSummary } from '~/services/mmbakImportService';
@@ -72,7 +73,7 @@ export function OnboardingBootstrapStep({
     Boolean,
   ).length;
   const canFinishFresh = hasAccount;
-  const swipeBackHandlers = useEdgeSwipeBack(onBack);
+  const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const handleContinue = () => {
     void triggerHaptic('medium');
@@ -108,7 +109,8 @@ export function OnboardingBootstrapStep({
   // === CHOOSE VIEW ===
   if (view === 'choose') {
     return (
-      <View {...swipeBackHandlers} className="flex-1">
+      <GestureDetector gesture={swipeBackGesture}>
+      <View className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
@@ -235,13 +237,15 @@ export function OnboardingBootstrapStep({
           </View>
         </ThemeModal>
       </View>
+      </GestureDetector>
     );
   }
 
   // === IMPORT RESULT VIEW ===
   if (view === 'import-result' && importResult) {
     return (
-      <View {...swipeBackHandlers} className="flex-1">
+      <GestureDetector gesture={swipeBackGesture}>
+      <View className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
@@ -332,12 +336,14 @@ export function OnboardingBootstrapStep({
           </View>
         </View>
       </View>
+      </GestureDetector>
     );
   }
 
   // === FRESH CHECKLIST VIEW ===
   return (
-    <View {...swipeBackHandlers} className="flex-1">
+    <GestureDetector gesture={swipeBackGesture}>
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 160 }}
@@ -508,6 +514,7 @@ export function OnboardingBootstrapStep({
         )}
       </View>
     </View>
+    </GestureDetector>
   );
 }
 

@@ -237,7 +237,7 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
     [openCreate],
   );
 
-  const swipeBackHandlers = useEdgeSwipeBack(showEditor ? undefined : onBack);
+  const swipeBackGesture = useEdgeSwipeBack(showEditor ? undefined : onBack);
 
   return (
     <>
@@ -323,7 +323,7 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
           }
         />
       </ThemeModal>
-      <SettingsPageLayout swipeBackHandlers={swipeBackHandlers}>
+      <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
         <FlatList
           data={allRules}
           keyExtractor={keyExtractor}

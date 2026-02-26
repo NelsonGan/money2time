@@ -444,6 +444,9 @@ export async function importMoneyManagerBackupFromUri(
     });
     const referencedGroupSourceKeys = new Set<string>();
     sortedAssetRows.forEach((row) => {
+      // Only active (non-deleted) accounts reference their group; deleted accounts
+      // should not force a deleted group to be imported.
+      if ((asNumber(row.isDeleted) ?? 0) !== 0) return;
       const groupUidKey = normalizeSourceKey(row.groupUid);
       const groupIdKey = normalizeSourceKey(row.groupId);
       if (groupUidKey) referencedGroupSourceKeys.add(groupUidKey);
@@ -573,6 +576,8 @@ export async function importMoneyManagerBackupFromUri(
         category.id,
       ]),
     );
+    const existingCategoryById = new Map(existingCategories.map((category) => [category.id, category]));
+    const categoryIconById = new Map(existingCategories.map((category) => [category.id, category.icon]));
 
     const categoryIdByUid = new Map<string, string>();
     const categoryIdByIdKey = new Map<string, string>();
@@ -682,6 +687,9 @@ export async function importMoneyManagerBackupFromUri(
           categoryIdByUid.set(row.sourceKey, existing);
         }
         categoryIdByIdKey.set(row.idKey, existing);
+        const existingIcon =
+          existingCategoryById.get(existing)?.icon ?? categoryIconById.get(existing) ?? randomCategoryEmoji();
+        categoryIconById.set(existing, existingIcon);
         categoryMetaById.set(existing, {
           parentId,
           type: row.type,
@@ -697,11 +705,12 @@ export async function importMoneyManagerBackupFromUri(
           (existingCategoryKeyToId.size + summary.categories) % CATEGORY_COLORS.length
         ];
       const now = new Date().toISOString();
+      const defaultIcon = parentId ? (categoryIconById.get(parentId) ?? randomCategoryEmoji()) : randomCategoryEmoji();
       const id = categoriesRepository.create({
         name: row.name,
         type: row.type,
         parentId,
-        icon: randomCategoryEmoji(),
+        icon: defaultIcon,
         color,
         isDefault: false,
         sortOrder: row.importSortOrder,
@@ -715,6 +724,7 @@ export async function importMoneyManagerBackupFromUri(
         categoryIdByUid.set(row.sourceKey, id);
       }
       categoryIdByIdKey.set(row.idKey, id);
+      categoryIconById.set(id, defaultIcon);
       categoryMetaById.set(id, { parentId, type: row.type, name: row.name, isDeleted: isInactive });
       if (!isInactive) {
         mapActiveCategoryNames(id, row.type, row.name, parentName);

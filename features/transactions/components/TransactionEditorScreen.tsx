@@ -240,17 +240,19 @@ export function TransactionEditorScreen({
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
 
-  const [type, setType] = useState<TransactionType>(initialValues?.type ?? 'expense');
+  const initialType = initialValues?.type ?? 'expense';
+  const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(
-    initialValues?.accountId ?? accounts[0]?.id ?? null,
+    initialValues?.accountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(
-    initialValues?.fromAccountId ?? accounts[0]?.id ?? null,
+    initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [toAccountId, setToAccountId] = useState<string | null>(
-    initialValues?.toAccountId ?? accounts[1]?.id ?? accounts[0]?.id ?? null,
+    initialValues?.toAccountId ??
+      (mode === 'create' ? null : ((accounts[1]?.id ?? accounts[0]?.id) ?? null)),
   );
   const [categoryId, setCategoryId] = useState<string | null>(initialValues?.categoryId ?? null);
   const [note, setNote] = useState(initialValues?.note ?? '');
@@ -429,12 +431,45 @@ export function TransactionEditorScreen({
 
   useEffect(() => {
     if (previousTypeRef.current !== type) {
+      const previousType = previousTypeRef.current;
+      const previousAccountId = accountId;
       setCategoryId(null);
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, type));
+      if (type === 'transfer') {
+        if (previousType === 'income' || previousType === 'expense') {
+          setFromAccountId(previousAccountId ?? null);
+          setToAccountId(null);
+          setAccountId(null);
+        } else if (mode === 'create') {
+          setAccountId(null);
+          setFromAccountId(null);
+          setToAccountId(null);
+        }
+      } else if (previousType === 'transfer') {
+        setAccountId((current) => current ?? fromAccountId);
+        setFromAccountId(null);
+        setToAccountId(null);
+      }
+      setFieldErrors((previous) => {
+        if (
+          !previous.account &&
+          !previous.from_account &&
+          !previous.to_account &&
+          !previous.category
+        ) {
+          return previous;
+        }
+        const next = { ...previous };
+        delete next.account;
+        delete next.from_account;
+        delete next.to_account;
+        delete next.category;
+        return next;
+      });
       previousTypeRef.current = type;
     }
-  }, [mapActiveFieldForType, type]);
+  }, [accountId, fromAccountId, mapActiveFieldForType, mode, type]);
 
   useEffect(() => {
     Keyboard.dismiss();

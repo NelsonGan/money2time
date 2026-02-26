@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { getDb, initializeDatabase } from '~/lib/db/client';
@@ -426,13 +426,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const reorderAccountsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reorderAccounts = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        accountsRepository.reorder(ids);
-      });
+      const indexMap = new Map(ids.map((id, i) => [id, i]));
+      setAccounts((prev) =>
+        [...prev].sort(
+          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
+        ),
+      );
+      if (reorderAccountsTimer.current) clearTimeout(reorderAccountsTimer.current);
+      reorderAccountsTimer.current = setTimeout(() => {
+        try {
+          accountsRepository.reorder(ids);
+        } catch {
+          // Background save — silent failure
+        }
+      }, 300);
     },
-    [runMutation],
+    [],
   );
 
   const createAccountGroup = useCallback(
@@ -444,13 +456,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const reorderAccountGroupsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reorderAccountGroups = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        accountGroupsRepository.reorder(ids);
-      });
+      const indexMap = new Map(ids.map((id, i) => [id, i]));
+      setAccountGroups((prev) =>
+        [...prev].sort(
+          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
+        ),
+      );
+      if (reorderAccountGroupsTimer.current) clearTimeout(reorderAccountGroupsTimer.current);
+      reorderAccountGroupsTimer.current = setTimeout(() => {
+        try {
+          accountGroupsRepository.reorder(ids);
+        } catch {
+          // Background save — silent failure
+        }
+      }, 300);
     },
-    [runMutation],
+    [],
   );
 
   const renameAccountGroup = useCallback(
@@ -528,13 +552,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const reorderCategoriesTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reorderCategories = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        categoriesRepository.reorder(ids);
-      });
+      const indexMap = new Map(ids.map((id, i) => [id, i]));
+      setCategories((prev) =>
+        [...prev].sort(
+          (a, b) => (indexMap.get(a.id) ?? Infinity) - (indexMap.get(b.id) ?? Infinity),
+        ),
+      );
+      if (reorderCategoriesTimer.current) clearTimeout(reorderCategoriesTimer.current);
+      reorderCategoriesTimer.current = setTimeout(() => {
+        try {
+          categoriesRepository.reorder(ids);
+        } catch {
+          // Background save — silent failure
+        }
+      }, 300);
     },
-    [runMutation],
+    [],
   );
 
   const createTransaction = useCallback(
