@@ -15,7 +15,6 @@ import { Text } from '~/components/ui/text';
 import { Mascot } from '~/components/feedback/Mascot';
 import { computeHourlyRates, formatCurrency } from '~/utils/formatters';
 import { triggerHaptic } from '~/services/haptics';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { cn } from '~/utils';
 import type { WageConfig, WageType, UserSettings } from '~/types';
 import { I18n } from '~/lib/i18n';
@@ -90,10 +89,9 @@ export function WageCalculatorFlowScreen({
   const stepMeta = STEP_META[step - 1];
   const headerYear = monthLabel.slice(0, 4);
   const handleBack = step === 1 ? onCancel : back;
-  const swipeBackGesture = useEdgeSwipeBack(handleBack);
 
   return (
-    <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
+    <SettingsPageLayout>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{

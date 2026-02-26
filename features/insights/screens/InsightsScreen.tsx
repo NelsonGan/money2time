@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Animated as RNAnimated,
   FlatList,
-  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -14,12 +12,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart, PieChart } from 'react-native-chart-kit';
-import { ChevronsLeftRight } from 'lucide-react-native';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Card, CardContent } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
-import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { SelectField } from '~/components/ui/select';
@@ -27,7 +22,6 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui/text';
-import { EditTransactionScreen } from '~/features/transactions/screens';
 import { useApp } from '~/context/AppContext';
 import {
   amountToHoursByRate,
@@ -44,9 +38,10 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, TransactionWithRelations } from '~/types';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
+import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
 const PERIOD_TABS = ['week', 'month', 'year', 'custom'] as const;
 type PeriodPreset = (typeof PERIOD_TABS)[number];
@@ -63,7 +58,6 @@ type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_b
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
 type TimeCostViewMode = 'category' | 'transaction';
-type EditableTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 type DrilldownScopeMatcher = (transaction: TransactionWithRelations) => boolean;
 
 const INSIGHT_ICONS: Record<InsightType, string> = {
@@ -111,13 +105,6 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
 } as const;
 const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
-const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
-const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: 8 } as const;
-const DRILLDOWN_BULK_TYPE_OPTIONS: { value: EditableTransactionType; label: string }[] = [
-  { value: 'expense', label: I18n.t('transactions.filters.spent') },
-  { value: 'income', label: I18n.t('transactions.filters.earned') },
-  { value: 'transfer', label: I18n.t('transactions.filters.moved') },
-];
 const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_TOP = 16;
 const ASSET_HISTORY_CHART_PADDING_RIGHT = 88;
@@ -203,8 +190,7 @@ type CalendarDayCell = {
   transactionCount: number;
   isOutsideRange: boolean;
   isFuture: boolean;
-  tone: 'income' | 'expense' | 'neutral';
-  intensity: number;
+  expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
 };
 
 type CalendarSpacerCell = {
@@ -314,8 +300,6 @@ type InsightPageData =
   | AnalyticsPageData
   | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
-type DrilldownTransactionFilter = 'income' | 'expense';
-const DRILLDOWN_TYPE_PAGES: readonly DrilldownTransactionFilter[] = ['income', 'expense'];
 
 type InsightsPreferencesSnapshot = {
   version: 1;
@@ -737,9 +721,15 @@ function FilterPill({
 
 interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
+  onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
+  onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
-export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenProps = {}) {
+export function InsightsScreen({
+  resetToCurrentMonthToken = 0,
+  onOpenDrilldown,
+  onOpenTransaction,
+}: InsightsScreenProps) {
   const {
     isLoading,
     settings,
@@ -750,8 +740,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
-    updateTransaction,
-    deleteTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
   } = useApp();
@@ -784,27 +772,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     Record<string, string>
   >({});
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [drilldownState, setDrilldownState] = useState<{
-    label: string;
-    transactions: TransactionWithRelations[];
-    showTypeFilter?: boolean;
-    scopeMatcher?: DrilldownScopeMatcher;
-  } | null>(null);
-  const [drilldownTypeFilter, setDrilldownTypeFilter] =
-    useState<DrilldownTransactionFilter>('expense');
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
-    null,
-  );
-  const [selectedDrilldownTransactionIds, setSelectedDrilldownTransactionIds] = useState<string[]>(
-    [],
-  );
-  const [showDrilldownBulkUpdate, setShowDrilldownBulkUpdate] = useState(false);
-  const [drilldownBulkDate, setDrilldownBulkDate] = useState(() => formatDateInput(new Date()));
-  const [drilldownBulkDateTouched, setDrilldownBulkDateTouched] = useState(false);
-  const [drilldownBulkType, setDrilldownBulkType] = useState<EditableTransactionType | null>(null);
-  const [drilldownBulkNote, setDrilldownBulkNote] = useState('');
-  const [drilldownBulkNoteTouched, setDrilldownBulkNoteTouched] = useState(false);
-  const [drilldownHeaderHeight, setDrilldownHeaderHeight] = useState(0);
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
   const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
@@ -825,7 +792,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     [],
   );
   const horizontalListRef = useRef<FlatList<number> | null>(null);
-  const drilldownPagerRef = useRef<FlatList<DrilldownTransactionFilter> | null>(null);
   const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);
   const periodPresetRef = useRef<PeriodPreset>(periodPreset);
   const [committedPageIndex, setCommittedPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
@@ -870,17 +836,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       setAnchorDate(startOfMonth(now));
     }
     setActiveBreakdownSliceId(null);
-    setDrilldownState(null);
-    setDrilldownTypeFilter('expense');
     setAssetHistoryScrubMonthByYear({});
-    setSelectedTransaction(null);
-    setSelectedDrilldownTransactionIds([]);
-    setShowDrilldownBulkUpdate(false);
-    setDrilldownBulkDate(formatDateInput(new Date()));
-    setDrilldownBulkDateTouched(false);
-    setDrilldownBulkType(null);
-    setDrilldownBulkNote('');
-    setDrilldownBulkNoteTouched(false);
     setSelectedCalendarDayKey(null);
     setIsFilterModalOpen(false);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -978,10 +934,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     hasHydratedAssetHistoryExclusionsRef.current = true;
   }, [defaultHiddenAssetHistoryAccountIds, isLoading]);
 
-  const transactionById = useMemo(
-    () => new Map(allTransactions.map((transaction) => [transaction.id, transaction])),
-    [allTransactions],
-  );
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -1244,11 +1196,8 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       }
 
       if (insightType === 'calendar_view') {
-        const filteredForRange = inRangeTransactions.filter(
-          (tx) => tx.type === 'income' || tx.type === 'expense',
-        );
+        const filteredForRange = inRangeTransactions.filter((tx) => tx.type === 'expense');
         const dailyTotalsByDayKey = new Map<string, CalendarDayAggregate>();
-        let totalIncome = 0;
         let totalExpense = 0;
 
         filteredForRange.forEach((tx) => {
@@ -1262,13 +1211,8 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
             net: 0,
             transactions: [],
           };
-          if (tx.type === 'income') {
-            current.income += value;
-            totalIncome += value;
-          } else {
-            current.expense += value;
-            totalExpense += value;
-          }
+          current.expense += value;
+          totalExpense += value;
           current.net = current.income - current.expense;
           current.transactions.push(tx);
           dailyTotalsByDayKey.set(dayKey, current);
@@ -1285,11 +1229,13 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
         const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
         const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
         const todayDayKey = dayKeyFromDateLocal(new Date());
-        let maxDailyMagnitude = 0;
+        let minDailyExpense = Number.POSITIVE_INFINITY;
+        let maxDailyExpense = 0;
         dailyTotalsByDayKey.forEach((entry, dayKey) => {
           if (dayKey < rangeStartDayKey || dayKey > rangeEndDayKey) return;
-          const magnitude = Math.max(entry.income, entry.expense, Math.abs(entry.net));
-          if (magnitude > maxDailyMagnitude) maxDailyMagnitude = magnitude;
+          if (entry.expense <= 0) return;
+          if (entry.expense < minDailyExpense) minDailyExpense = entry.expense;
+          if (entry.expense > maxDailyExpense) maxDailyExpense = entry.expense;
         });
 
         const monthSections: CalendarMonthSection[] = [];
@@ -1318,17 +1264,21 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
               const income = totals?.income ?? 0;
               const expense = totals?.expense ?? 0;
               const net = totals?.net ?? 0;
-              const magnitude = Math.max(income, expense, Math.abs(net));
               const isOutsideRange = dayKey < rangeStartDayKey || dayKey > rangeEndDayKey;
               const isFuture = dayKey > todayDayKey;
-              const tone =
-                income === 0 && expense === 0
-                  ? 'neutral'
-                  : net > 0
-                    ? 'income'
-                    : net < 0
-                      ? 'expense'
-                      : 'neutral';
+              const hasExpense = expense > 0 && !isOutsideRange;
+              const hasRange = Number.isFinite(minDailyExpense) && maxDailyExpense > 0;
+              const hasSpread = hasRange && maxDailyExpense > minDailyExpense;
+              let expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5 = 0;
+              if (hasExpense) {
+                if (!hasSpread) {
+                  expenseDotTier = 3;
+                } else {
+                  const normalized = (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
+                  const quantized = Math.round(normalized * 4) + 1;
+                  expenseDotTier = Math.min(5, Math.max(1, quantized)) as 1 | 2 | 3 | 4 | 5;
+                }
+              }
 
               if (!isOutsideRange) activeDayCount += 1;
               cells.push({
@@ -1342,8 +1292,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                 transactionCount: totals?.transactions.length ?? 0,
                 isOutsideRange,
                 isFuture,
-                tone,
-                intensity: maxDailyMagnitude > 0 ? magnitude / maxDailyMagnitude : 0,
+                expenseDotTier,
               });
             }
 
@@ -1386,9 +1335,9 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
           rangeStartDayKey,
           rangeEndDayKey,
           defaultSelectedDayKey,
-          totalIncome,
+          totalIncome: 0,
           totalExpense,
-          totalNet: totalIncome - totalExpense,
+          totalNet: -totalExpense,
         };
       }
 
@@ -2356,24 +2305,23 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                     const isSelected = cell.dayKey === selectedDayKey;
                     const hasActivity = cell.transactionCount > 0;
                     const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
-                    const baseIntensity = Math.max(0, Math.min(1, cell.intensity));
-                    const toneColor =
-                      cell.tone === 'income'
-                        ? themeColors.success
-                        : cell.tone === 'expense'
-                          ? themeColors.error
-                          : themeColors.primary;
+                    const baseIntensity =
+                      cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
+                    const toneColor = themeColors.error;
+                    const dotSizeByTier = [3, 4, 5, 6, 7] as const;
+                    const dotSize =
+                      cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
                     const bgColor = isSelected
                       ? withColorAlpha(themeColors.primary, 0.24)
                       : hasActivity
-                        ? withColorAlpha(toneColor, 0.12 + baseIntensity * 0.45)
+                        ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
                         : cell.isFuture
                           ? withColorAlpha(themeColors.sky, 0.08)
                           : withColorAlpha(themeColors.surfaceMuted, 0.6);
                     const borderColor = isSelected
                       ? withColorAlpha(themeColors.primary, 0.9)
                       : hasActivity
-                        ? withColorAlpha(toneColor, 0.22 + baseIntensity * 0.45)
+                        ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
                         : withColorAlpha(themeColors.textMuted, 0.18);
 
                     return (
@@ -2402,20 +2350,20 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                           className={cn(
                             isSelected
                               ? 'text-primary font-bold'
-                              : cell.tone === 'income'
-                                ? 'text-success'
-                                : cell.tone === 'expense'
-                                  ? 'text-destructive'
-                                  : 'text-muted-foreground',
+                              : hasActivity
+                                ? 'text-destructive'
+                                : 'text-muted-foreground',
                           )}
                         >
                           {cell.dayNumber}
                         </Text>
-                        {hasActivity ? (
+                        {hasActivity && dotSize > 0 ? (
                           <View
-                            className="absolute bottom-1 h-1.5 w-1.5 rounded-full"
+                            className="absolute bottom-1 rounded-full"
                             style={{
-                              backgroundColor: isSelected ? themeColors.primary : toneColor,
+                              width: dotSize,
+                              height: dotSize,
+                              backgroundColor: toneColor,
                             }}
                           />
                         ) : null}
@@ -2452,7 +2400,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                         label: selectedDayLabel,
                         transactions: selectedDayTransactions,
                         scopeMatcher: (transaction) =>
-                          (transaction.type === 'income' || transaction.type === 'expense') &&
+                          transaction.type === 'expense' &&
                           dayKeyFromIsoLocal(transaction.date) === targetDayKey,
                       });
                     }}
@@ -2470,32 +2418,10 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
               <View className="mt-2 flex-row items-center gap-3">
                 <View className="flex-1">
                   <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.income')}
-                  </Text>
-                  <Text variant="caption" className="text-success mt-0.5">
-                    {renderValue(selectedDayData.income)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.expense')}
                   </Text>
                   <Text variant="caption" className="text-destructive mt-0.5">
                     {renderValue(selectedDayData.expense)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.net')}
-                  </Text>
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      'mt-0.5',
-                      selectedDayData.net >= 0 ? 'text-success' : 'text-destructive',
-                    )}
-                  >
-                    {renderSignedValue(selectedDayData.net)}
                   </Text>
                 </View>
               </View>
@@ -2591,7 +2517,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
         sharePct: transactionRow.sharePct,
         accentColor,
         onPress: () => {
-          setSelectedTransaction(transactionRow.transaction);
+          onOpenTransaction(transactionRow.transaction);
         },
       };
     });
@@ -3209,16 +3135,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     [effectivePeriodPreset, periodPreset, setActiveBreakdownSlice],
   );
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
-  const isDrilldownSelectionMode = selectedDrilldownTransactionIds.length > 0;
-  const selectedDrilldownTransactionCount = selectedDrilldownTransactionIds.length;
-  const hasDrilldownBulkChanges =
-    drilldownBulkDateTouched || drilldownBulkNoteTouched || drilldownBulkType !== null;
-  const handleDrilldownHeaderLayout = useCallback((event: LayoutChangeEvent) => {
-    const nextHeight = Math.ceil(event.nativeEvent.layout.height);
-    setDrilldownHeaderHeight((previous) =>
-      Math.abs(previous - nextHeight) < 1 ? previous : nextHeight,
-    );
-  }, []);
   const openDrilldown = useCallback(
     (nextState: {
       label: string;
@@ -3226,280 +3142,17 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       showTypeFilter?: boolean;
       scopeMatcher?: DrilldownScopeMatcher;
     }) => {
-      if (nextState.showTypeFilter) {
-        setDrilldownTypeFilter('expense');
-      }
-      setSelectedDrilldownTransactionIds([]);
-      setShowDrilldownBulkUpdate(false);
-      setDrilldownBulkDate(formatDateInput(new Date()));
-      setDrilldownBulkDateTouched(false);
-      setDrilldownBulkType(null);
-      setDrilldownBulkNote('');
-      setDrilldownBulkNoteTouched(false);
-      setDrilldownState(nextState);
+      const sourceTransactions = nextState.scopeMatcher
+        ? nextState.transactions.filter((transaction) => nextState.scopeMatcher?.(transaction))
+        : nextState.transactions;
+      onOpenDrilldown({
+        label: nextState.label,
+        transactionIds: sourceTransactions.map((transaction) => transaction.id),
+        showTypeFilter: nextState.showTypeFilter,
+      });
     },
-    [],
+    [onOpenDrilldown],
   );
-  const handleCloseDrilldown = useCallback(() => {
-    void triggerHaptic('selection');
-    setDrilldownState(null);
-    setDrilldownTypeFilter('expense');
-    setSelectedDrilldownTransactionIds([]);
-    setShowDrilldownBulkUpdate(false);
-    setDrilldownBulkType(null);
-    setSelectedTransaction(null);
-  }, []);
-  const clearDrilldownSelection = useCallback(() => {
-    void triggerHaptic('selection');
-    setSelectedDrilldownTransactionIds([]);
-  }, []);
-  const toggleDrilldownTransactionSelection = useCallback((transactionId: string) => {
-    setSelectedDrilldownTransactionIds((previous) =>
-      previous.includes(transactionId)
-        ? previous.filter((id) => id !== transactionId)
-        : [...previous, transactionId],
-    );
-  }, []);
-  const handleDrilldownTransactionPress = useCallback(
-    (transaction: TransactionWithRelations) => {
-      if (isDrilldownSelectionMode) {
-        toggleDrilldownTransactionSelection(transaction.id);
-        return;
-      }
-      setSelectedTransaction(transaction);
-    },
-    [isDrilldownSelectionMode, toggleDrilldownTransactionSelection],
-  );
-  const handleDrilldownTransactionLongPress = useCallback(
-    (transaction: TransactionWithRelations) => {
-      if (isDrilldownSelectionMode) {
-        toggleDrilldownTransactionSelection(transaction.id);
-        return;
-      }
-      setSelectedDrilldownTransactionIds([transaction.id]);
-    },
-    [isDrilldownSelectionMode, toggleDrilldownTransactionSelection],
-  );
-  const handleOpenDrilldownBulkUpdate = useCallback(() => {
-    if (selectedDrilldownTransactionCount === 0) return;
-    setDrilldownBulkDate(formatDateInput(new Date()));
-    setDrilldownBulkDateTouched(false);
-    setDrilldownBulkType(null);
-    setDrilldownBulkNote('');
-    setDrilldownBulkNoteTouched(false);
-    setShowDrilldownBulkUpdate(true);
-  }, [selectedDrilldownTransactionCount]);
-  const handleCloseDrilldownBulkUpdate = useCallback(() => {
-    setShowDrilldownBulkUpdate(false);
-  }, []);
-  const handleApplyDrilldownBulkUpdate = useCallback(() => {
-    if (selectedDrilldownTransactionIds.length === 0) return;
-    if (!hasDrilldownBulkChanges) return;
-
-    const baseUpdates: { date?: string; note?: string | null } = {};
-    if (drilldownBulkDateTouched) baseUpdates.date = drilldownBulkDate;
-    if (drilldownBulkNoteTouched) {
-      const normalizedNote = drilldownBulkNote.trim();
-      baseUpdates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-
-    let appliedCount = 0;
-
-    selectedDrilldownTransactionIds.forEach((transactionId) => {
-      const existing = transactionById.get(transactionId);
-      const updates: {
-        date?: string;
-        note?: string | null;
-        type?: EditableTransactionType;
-        accountId?: string | null;
-        categoryId?: string | null;
-        fromAccountId?: string | null;
-        toAccountId?: string | null;
-      } = { ...baseUpdates };
-
-      if (drilldownBulkType === 'transfer') {
-        // Preserve source account when converting non-transfer entries to transfer,
-        // and force destination account to empty so the user can pick it later.
-        if (existing?.type === 'income' || existing?.type === 'expense') {
-          if (!existing.accountId) return;
-          updates.type = 'transfer';
-          updates.accountId = null;
-          updates.categoryId = null;
-          updates.fromAccountId = existing.accountId;
-          updates.toAccountId = null;
-        } else {
-          updates.type = 'transfer';
-          updates.accountId = null;
-          updates.categoryId = null;
-        }
-      } else if (drilldownBulkType) {
-        updates.type = drilldownBulkType;
-        updates.categoryId = null;
-        updates.fromAccountId = null;
-        updates.toAccountId = null;
-      }
-
-      if (Object.keys(updates).length === 0) return;
-      updateTransaction(transactionId, updates);
-      appliedCount += 1;
-    });
-
-    if (appliedCount === 0) return;
-
-    setShowDrilldownBulkUpdate(false);
-    setSelectedDrilldownTransactionIds([]);
-  }, [
-    drilldownBulkDate,
-    drilldownBulkDateTouched,
-    drilldownBulkNote,
-    drilldownBulkNoteTouched,
-    drilldownBulkType,
-    hasDrilldownBulkChanges,
-    selectedDrilldownTransactionIds,
-    transactionById,
-    updateTransaction,
-  ]);
-  const handleDeleteSelectedDrilldownTransactions = useCallback(() => {
-    if (selectedDrilldownTransactionIds.length === 0) return;
-    const idsToDelete = [...selectedDrilldownTransactionIds];
-    Alert.alert(
-      I18n.t('transactions.selection.delete_title'),
-      I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            idsToDelete.forEach((transactionId) => {
-              deleteTransaction(transactionId);
-            });
-            setShowDrilldownBulkUpdate(false);
-            setSelectedDrilldownTransactionIds([]);
-          },
-        },
-      ],
-    );
-  }, [deleteTransaction, selectedDrilldownTransactionIds]);
-  const resolvedDrilldownTransactions = useMemo(() => {
-    if (!drilldownState) return [];
-    const transactions = drilldownState.transactions
-      .map((transaction) => transactionById.get(transaction.id))
-      .filter((transaction): transaction is TransactionWithRelations => Boolean(transaction));
-    if (!drilldownState.scopeMatcher) return transactions;
-    return transactions.filter((transaction) => drilldownState.scopeMatcher?.(transaction));
-  }, [drilldownState, transactionById]);
-  const drilldownIncomeTransactions = useMemo(
-    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
-    [resolvedDrilldownTransactions],
-  );
-  const drilldownExpenseTransactions = useMemo(
-    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
-    [resolvedDrilldownTransactions],
-  );
-  const drilldownPagerExtraData = useMemo(
-    () => ({
-      drilldownTypeFilter,
-      incomeTransactions: drilldownIncomeTransactions,
-      expenseTransactions: drilldownExpenseTransactions,
-      pageWidth,
-      selectedTransactionIds: selectedDrilldownTransactionIds,
-    }),
-    [
-      drilldownExpenseTransactions,
-      drilldownIncomeTransactions,
-      drilldownTypeFilter,
-      pageWidth,
-      selectedDrilldownTransactionIds,
-    ],
-  );
-  const getDrilldownPagerItemLayout = useCallback(
-    (_: ArrayLike<DrilldownTransactionFilter> | null | undefined, index: number) => ({
-      length: pageWidth,
-      offset: pageWidth * index,
-      index,
-    }),
-    [pageWidth],
-  );
-  const handleDrilldownPagerMomentumEnd = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const rawIndex = event.nativeEvent.contentOffset.x / pageWidth;
-      const index = Math.max(0, Math.min(DRILLDOWN_TYPE_PAGES.length - 1, Math.round(rawIndex)));
-      const type = DRILLDOWN_TYPE_PAGES[index] ?? 'expense';
-      if (type !== drilldownTypeFilter) {
-        setDrilldownTypeFilter(type);
-      }
-    },
-    [drilldownTypeFilter, pageWidth],
-  );
-  const handleDrilldownPagerScrollToIndexFailed = useCallback(
-    (info: { index: number }) => {
-      const index = Math.max(0, Math.min(DRILLDOWN_TYPE_PAGES.length - 1, info.index));
-      drilldownPagerRef.current?.scrollToOffset({ offset: index * pageWidth, animated: false });
-    },
-    [pageWidth],
-  );
-  const renderDrilldownPagerPage = useCallback(
-    ({ item }: { item: DrilldownTransactionFilter }) => {
-      const transactions =
-        item === 'income' ? drilldownIncomeTransactions : drilldownExpenseTransactions;
-      return (
-        <View style={{ width: pageWidth, flex: 1 }}>
-          <ActivityTransactionList
-            transactions={transactions}
-            onTransactionPress={handleDrilldownTransactionPress}
-            onTransactionLongPress={handleDrilldownTransactionLongPress}
-            selectedTransactionIds={selectedDrilldownTransactionIds}
-            selectionMode={isDrilldownSelectionMode}
-            emptyTitle={I18n.t('insights.empty_category.title')}
-            emptyMessage={I18n.t('insights.empty_category.message')}
-            contentPaddingBottom={30}
-            disableItemAnimations
-            disableScrollBounce
-            compactItems
-            listKey={`drilldown-${item}`}
-          />
-        </View>
-      );
-    },
-    [
-      drilldownExpenseTransactions,
-      drilldownIncomeTransactions,
-      handleDrilldownTransactionLongPress,
-      handleDrilldownTransactionPress,
-      isDrilldownSelectionMode,
-      pageWidth,
-      selectedDrilldownTransactionIds,
-    ],
-  );
-
-  useEffect(() => {
-    if (!isDrilldownSelectionMode) {
-      setShowDrilldownBulkUpdate(false);
-      return;
-    }
-    setSelectedTransaction(null);
-  }, [isDrilldownSelectionMode]);
-
-  useEffect(() => {
-    if (selectedDrilldownTransactionIds.length === 0) return;
-    const availableIds = new Set(
-      resolvedDrilldownTransactions.map((transaction) => transaction.id),
-    );
-    setSelectedDrilldownTransactionIds((previous) => {
-      const next = previous.filter((id) => availableIds.has(id));
-      return next.length === previous.length ? previous : next;
-    });
-  }, [resolvedDrilldownTransactions, selectedDrilldownTransactionIds.length]);
-
-  useEffect(() => {
-    if (!drilldownState?.showTypeFilter) return;
-    const targetIndex = drilldownTypeFilter === 'income' ? 0 : 1;
-    const frame = requestAnimationFrame(() => {
-      drilldownPagerRef.current?.scrollToIndex({ index: targetIndex, animated: false });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [drilldownState?.showTypeFilter, drilldownTypeFilter, pageWidth]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -3563,327 +3216,6 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
           />
         )}
       </View>
-
-      <ThemeModal
-        visible={!!drilldownState}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseDrilldown}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          {selectedTransaction ? (
-            <EditTransactionScreen
-              transaction={selectedTransaction}
-              onClose={() => setSelectedTransaction(null)}
-            />
-          ) : showDrilldownBulkUpdate ? (
-            <>
-              <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
-                <View className="flex-1 pr-3">
-                  <Text variant="subheading">
-                    {I18n.t('transactions.selection.update_title', {
-                      count: selectedDrilldownTransactionCount,
-                    })}
-                  </Text>
-                  <Text variant="friendly" tone="muted">
-                    {I18n.t('transactions.selection.update_subtitle')}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <Pressable
-                    onPress={handleCloseDrilldownBulkUpdate}
-                    className="px-3 py-2 rounded-full bg-secondary/70"
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={handleApplyDrilldownBulkUpdate}
-                    disabled={!hasDrilldownBulkChanges}
-                    className={cn(
-                      'px-3 py-2 rounded-full',
-                      hasDrilldownBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                    )}
-                  >
-                    <Text
-                      variant="caption"
-                      className={cn(
-                        hasDrilldownBulkChanges ? 'text-white' : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t('common.save')}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              <ScrollView
-                className="flex-1"
-                contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}
-              >
-                <View className="gap-2.5">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.filters.type')}
-                  </Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={DRILLDOWN_BULK_TYPE_PILLS_STYLE}
-                  >
-                    {DRILLDOWN_BULK_TYPE_OPTIONS.map((option) => (
-                      <FilterPill
-                        key={option.value}
-                        label={option.label}
-                        active={drilldownBulkType === option.value}
-                        onPress={() =>
-                          setDrilldownBulkType((current) =>
-                            current === option.value ? null : option.value,
-                          )
-                        }
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-
-                <View className="gap-2.5">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.editor.date')}
-                  </Text>
-                  <View
-                    className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                    style={{ height: 360 }}
-                  >
-                    <DatePanel
-                      value={drilldownBulkDate}
-                      onSelect={(value) => {
-                        setDrilldownBulkDate(value);
-                        setDrilldownBulkDateTouched(true);
-                      }}
-                    />
-                  </View>
-                </View>
-
-                <View className="gap-2.5">
-                  <Input
-                    label={I18n.t('transaction_detail.note')}
-                    placeholder={I18n.t('transactions.editor.optional')}
-                    value={drilldownBulkNote}
-                    onChangeText={(value) => {
-                      setDrilldownBulkNote(value);
-                      setDrilldownBulkNoteTouched(true);
-                    }}
-                  />
-                </View>
-              </ScrollView>
-            </>
-          ) : (
-            <>
-              {isDrilldownSelectionMode ? (
-                <View
-                  className="bg-background pb-2 pt-2"
-                  style={
-                    drilldownHeaderHeight > 0 ? { minHeight: drilldownHeaderHeight } : undefined
-                  }
-                >
-                  <View className="px-5 pt-2">
-                    <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
-                      <Pressable
-                        onPress={clearDrilldownSelection}
-                        className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                      >
-                        <Text variant="caption" tone="muted">
-                          {I18n.t('common.cancel')}
-                        </Text>
-                      </Pressable>
-
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedDrilldownTransactionCount,
-                        })}
-                      </Text>
-
-                      <View className="flex-row items-center gap-2">
-                        <Pressable
-                          onPress={handleOpenDrilldownBulkUpdate}
-                          className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
-                        >
-                          <Text variant="caption" className="text-primary">
-                            {I18n.t('transactions.selection.update')}
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={handleDeleteSelectedDrilldownTransactions}
-                          className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
-                        >
-                          <Text variant="caption" className="text-destructive">
-                            {I18n.t('common.delete')}
-                          </Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  className="px-5 pt-5 pb-3 flex-row items-center justify-between"
-                  onLayout={handleDrilldownHeaderLayout}
-                >
-                  <View>
-                    <Text variant="subheading">
-                      {drilldownState?.label ?? I18n.t('insights.category_fallback')}
-                    </Text>
-                    <Text variant="friendly" tone="muted">
-                      {I18n.t('insights.drilldown_subtitle')}
-                    </Text>
-                  </View>
-                  <Pressable
-                    onPress={handleCloseDrilldown}
-                    className="px-3 py-2 rounded-full bg-secondary"
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.done')}
-                    </Text>
-                  </Pressable>
-                </View>
-              )}
-
-              {drilldownState?.showTypeFilter ? (
-                <>
-                  <View className="px-5 pb-2">
-                    <View className="rounded-2xl border border-border/35 bg-card/90 px-3 py-2.5">
-                      <View className="flex-row items-center justify-between gap-2">
-                        <Pressable
-                          onPress={() => {
-                            if (drilldownTypeFilter === 'income') return;
-                            void triggerHaptic('selection');
-                            setDrilldownTypeFilter('income');
-                          }}
-                          className={cn(
-                            'flex-1 rounded-xl px-2.5 py-2 active:opacity-85',
-                            drilldownTypeFilter === 'income'
-                              ? 'border border-success/35 bg-success/10'
-                              : 'border border-transparent',
-                          )}
-                        >
-                          <Text
-                            variant="label"
-                            className={cn(
-                              drilldownTypeFilter === 'income' ? 'text-success' : 'text-success/55',
-                            )}
-                          >
-                            {I18n.t('insights.calendar.income')}
-                          </Text>
-                          <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}:{' '}
-                            {drilldownIncomeTransactions.length}
-                          </Text>
-                        </Pressable>
-                        <View className="items-center px-1">
-                          <View className="rounded-full border border-border/45 bg-background/90 px-2 py-1 flex-row items-center gap-1">
-                            <View
-                              className={cn(
-                                'h-1.5 w-1.5 rounded-full',
-                                drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-border/70',
-                              )}
-                            />
-                            <ChevronsLeftRight size={12} color={themeColors.textMuted} />
-                            <View
-                              className={cn(
-                                'h-1.5 w-1.5 rounded-full',
-                                drilldownTypeFilter === 'expense'
-                                  ? 'bg-destructive'
-                                  : 'bg-border/70',
-                              )}
-                            />
-                          </View>
-                        </View>
-                        <Pressable
-                          onPress={() => {
-                            if (drilldownTypeFilter === 'expense') return;
-                            void triggerHaptic('selection');
-                            setDrilldownTypeFilter('expense');
-                          }}
-                          className={cn(
-                            'flex-1 items-end rounded-xl px-2.5 py-2 active:opacity-85',
-                            drilldownTypeFilter === 'expense'
-                              ? 'border border-destructive/35 bg-destructive/8'
-                              : 'border border-transparent',
-                          )}
-                        >
-                          <Text
-                            variant="label"
-                            className={cn(
-                              drilldownTypeFilter === 'expense'
-                                ? 'text-destructive'
-                                : 'text-destructive/55',
-                            )}
-                          >
-                            {I18n.t('insights.calendar.expense')}
-                          </Text>
-                          <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}:{' '}
-                            {drilldownExpenseTransactions.length}
-                          </Text>
-                        </Pressable>
-                      </View>
-                      <View className="mt-2 flex-row items-center gap-1.5">
-                        <View
-                          className={cn(
-                            'h-1.5 flex-1 rounded-full',
-                            drilldownTypeFilter === 'income' ? 'bg-success/60' : 'bg-secondary',
-                          )}
-                        />
-                        <View
-                          className={cn(
-                            'h-1.5 flex-1 rounded-full',
-                            drilldownTypeFilter === 'expense'
-                              ? 'bg-destructive/60'
-                              : 'bg-secondary',
-                          )}
-                        />
-                      </View>
-                    </View>
-                  </View>
-
-                  <FlatList
-                    ref={drilldownPagerRef}
-                    data={DRILLDOWN_TYPE_PAGES}
-                    extraData={drilldownPagerExtraData}
-                    keyExtractor={(item) => item}
-                    renderItem={renderDrilldownPagerPage}
-                    horizontal
-                    pagingEnabled
-                    bounces={false}
-                    overScrollMode="never"
-                    directionalLockEnabled
-                    decelerationRate="fast"
-                    showsHorizontalScrollIndicator={false}
-                    getItemLayout={getDrilldownPagerItemLayout}
-                    onMomentumScrollEnd={handleDrilldownPagerMomentumEnd}
-                    onScrollToIndexFailed={handleDrilldownPagerScrollToIndexFailed}
-                    style={INSIGHTS_LIST_STYLE}
-                  />
-                </>
-              ) : (
-                <ActivityTransactionList
-                  transactions={resolvedDrilldownTransactions}
-                  onTransactionPress={handleDrilldownTransactionPress}
-                  onTransactionLongPress={handleDrilldownTransactionLongPress}
-                  selectedTransactionIds={selectedDrilldownTransactionIds}
-                  selectionMode={isDrilldownSelectionMode}
-                  emptyTitle={I18n.t('insights.empty_category.title')}
-                  emptyMessage={I18n.t('insights.empty_category.message')}
-                  contentPaddingBottom={30}
-                  disableItemAnimations
-                  disableScrollBounce
-                  compactItems
-                />
-              )}
-            </>
-          )}
-        </SafeAreaView>
-      </ThemeModal>
 
       <ThemeModal
         visible={hasInsightsFilters && isFilterModalOpen}

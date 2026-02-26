@@ -15,7 +15,6 @@ import { Text } from '~/components/ui/text';
 import { useApp } from '~/context/AppContext';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { triggerHaptic } from '~/services/haptics';
 import { I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import type { ThemeMode } from '~/types';
@@ -134,15 +133,20 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     onBack();
   };
 
-  const swipeBackGesture = useEdgeSwipeBack(handleCancel);
-
   return (
     <SettingsPageLayout
-      swipeBackGesture={swipeBackGesture}
       actionBar={
         <SettingsActionBar onCancel={handleCancel} onSave={handleSave} saveDisabled={!canSave} />
       }
     >
+      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <SettingsHeader
+          className="px-0 pt-5 pb-3"
+          onBack={handleCancel}
+          title={I18n.t('settings.display')}
+          subtitle={I18n.t('settings.display_subtitle')}
+        />
+      </View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -150,12 +154,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
           paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
         }}
       >
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={handleCancel}
-          title={I18n.t('settings.display')}
-          subtitle={I18n.t('settings.display_subtitle')}
-        />
         <View>
           <Card>
             <CardContent className="py-5 gap-3.5">

@@ -34,7 +34,6 @@ export const categoriesTable = sqliteTable('categories', {
   type: text('type').notNull(),
   parentId: text('parent_id'),
   icon: text('icon').notNull(),
-  color: text('color').notNull(),
   isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

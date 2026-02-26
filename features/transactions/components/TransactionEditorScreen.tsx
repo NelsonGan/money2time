@@ -14,6 +14,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Calendar,
+  ChevronLeft,
   Clock,
   CreditCard,
   FileText,
@@ -23,7 +24,6 @@ import {
   Trash2,
   Timer,
   Type,
-  X,
 } from 'lucide-react-native';
 
 import { Text } from '~/components/ui/text';
@@ -41,6 +41,7 @@ import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/fo
 import { getErrorMessage } from '~/utils/errorHandling';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { usePressScale } from '~/hooks/usePressScale';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -434,13 +435,13 @@ export function TransactionEditorScreen({
   const categoryPreview = useMemo(() => {
     if (!categoryId) return null;
     const parent = topLevelCategories.find((item) => item.id === categoryId);
-    if (parent) return { icon: parent.icon, name: parent.name };
+    if (parent) return { icon: resolveCategoryIcon(parent.icon), name: parent.name };
     for (const [parentId, children] of childCategoriesByParent.entries()) {
       const found = children.find((child) => child.id === categoryId);
       if (!found) continue;
       const parentNode = topLevelCategories.find((item) => item.id === parentId);
       return {
-        icon: found.icon,
+        icon: resolveCategoryIcon(found.icon, parentNode?.icon ?? null),
         name: parentNode ? `${parentNode.name} / ${found.name}` : found.name,
       };
     }
@@ -635,14 +636,11 @@ export function TransactionEditorScreen({
     (mode === 'create'
       ? I18n.t('transactions.editor.title_create')
       : I18n.t('transactions.editor.title_edit'));
-  const subtitle =
-    subtitleOverride ??
-    (mode === 'create'
-      ? I18n.t('transactions.editor.subtitle_create')
-      : I18n.t('transactions.editor.subtitle_edit'));
+  const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
   const summaryFlex = windowHeight < 700 ? 0.38 : 0.44;
   const isRecurringEditor = Boolean(recurringOptions);
+  const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'endDate', 'status'];
   const showToolZone =
     activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
@@ -770,7 +768,12 @@ export function TransactionEditorScreen({
   };
 
   const categoryPanelParents = useMemo(
-    () => topLevelCategories.map((item) => ({ id: item.id, name: item.name, icon: item.icon })),
+    () =>
+      topLevelCategories.map((item) => ({
+        id: item.id,
+        name: item.name,
+        icon: resolveCategoryIcon(item.icon),
+      })),
     [topLevelCategories],
   );
   const categoryPanelChildren = useMemo(
@@ -778,10 +781,17 @@ export function TransactionEditorScreen({
       new Map(
         Array.from(childCategoriesByParent.entries()).map(([key, items]) => [
           key,
-          items.map((item) => ({ id: item.id, name: item.name, icon: item.icon })),
+          items.map((item) => {
+            const parentNode = topLevelCategories.find((parent) => parent.id === key);
+            return {
+              id: item.id,
+              name: item.name,
+              icon: resolveCategoryIcon(item.icon, parentNode?.icon ?? null),
+            };
+          }),
         ]),
       ),
-    [childCategoriesByParent],
+    [childCategoriesByParent, topLevelCategories],
   );
 
   const renderToolPanel = () => {
@@ -921,19 +931,23 @@ export function TransactionEditorScreen({
       <View className="px-5 pt-4 pb-2 flex-row items-start justify-between">
         <View className="flex-row items-center gap-3">
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.back')}
             onPress={() => {
               void triggerHaptic('selection');
               onClose();
             }}
             className="w-8 h-8 rounded-full bg-secondary items-center justify-center"
           >
-            <X size={13} color={themeColors.textSoft} />
+            <ChevronLeft size={14} color={themeColors.textSoft} />
           </Pressable>
           <View>
             <Text variant="subheading">{title}</Text>
-            <Text variant="caption" tone="muted">
-              {subtitle}
-            </Text>
+            {showSubtitle ? (
+              <Text variant="caption" tone="muted">
+                {subtitle}
+              </Text>
+            ) : null}
           </View>
         </View>
         {mode === 'edit' && onDelete ? (
@@ -942,17 +956,17 @@ export function TransactionEditorScreen({
               onPress={onDelete}
               accessibilityRole="button"
               accessibilityLabel={deleteLabel}
-              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/12"
+              className="h-10 w-10 items-center justify-center rounded-full bg-destructive/12"
             >
               <Trash2 size={14} color={themeColors.coral} />
             </Pressable>
-            <Button size="sm" className="h-8 px-3" onPress={handleSubmit}>
-              <Text variant="caption">{submitLabel}</Text>
+            <Button size="sm" onPress={handleSubmit}>
+              <Text>{submitLabel}</Text>
             </Button>
           </View>
         ) : (
-          <Button size="sm" className="h-8 px-3" onPress={handleSubmit}>
-            <Text variant="caption">{submitLabel}</Text>
+          <Button size="sm" onPress={handleSubmit}>
+            <Text>{submitLabel}</Text>
           </Button>
         )}
       </View>
@@ -966,7 +980,7 @@ export function TransactionEditorScreen({
         >
           {/* Type selector pills */}
           {showTypeSelector ? (
-            <View className="flex-row gap-2 mb-3">
+            <View className="flex-row gap-2 mt-2 mb-3">
               {availableTypeCards.map((item) => (
                 <TypePill
                   key={item.value}

@@ -22,10 +22,10 @@ import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
-import { EditTransactionScreen } from './EditTransactionScreen';
 import { useApp } from '~/context/AppContext';
 import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
@@ -141,6 +141,7 @@ interface TransactionsScreenProps {
   focusMonthKey?: string | null;
   focusMonthToken?: number;
   onPressAddTransaction?: () => void;
+  onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
 export function TransactionsScreen({
@@ -148,6 +149,7 @@ export function TransactionsScreen({
   focusMonthKey = null,
   focusMonthToken = 0,
   onPressAddTransaction,
+  onOpenTransaction,
 }: TransactionsScreenProps) {
   const themeColors = useThemeColors();
   const {
@@ -166,18 +168,15 @@ export function TransactionsScreen({
 
   const [showFilters, setShowFilters] = useState(false);
   const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
-    null,
-  );
-  const lastSelectedTransactionRef = useRef<TransactionWithRelations | null>(null);
-  if (selectedTransaction) lastSelectedTransactionRef.current = selectedTransaction;
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
+  const hasActiveSearch = transactionFilters.search.trim().length > 0;
   const searchInputRef = useRef<TextInput | null>(null);
+  const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -241,7 +240,6 @@ export function TransactionsScreen({
 
   useEffect(() => {
     if (isSelectionMode) {
-      setSelectedTransaction(null);
       setIsSearchBoxOpen(false);
       return;
     }
@@ -280,13 +278,17 @@ export function TransactionsScreen({
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
-    const currentIndex = activeMonthIndexRef.current;
     const frame = requestAnimationFrame(() => {
+      if (hasActiveSearch) {
+        searchResultsScrollToTopRef.current?.();
+        return;
+      }
+      const currentIndex = activeMonthIndexRef.current;
       horizontalListRef.current?.scrollToIndex({ index: currentIndex, animated: false });
       getPageScrollToTopRef(currentIndex).current?.();
     });
     return () => cancelAnimationFrame(frame);
-  }, [getPageScrollToTopRef, scrollToTopToken]);
+  }, [getPageScrollToTopRef, hasActiveSearch, scrollToTopToken]);
 
   useEffect(() => {
     if (focusMonthToken <= 0) return;
@@ -373,8 +375,28 @@ export function TransactionsScreen({
   );
 
   const monthSummary = useMemo(() => {
+    if (hasActiveSearch) {
+      const summary = emptyMonthSummary();
+      filteredTransactions.forEach((transaction) => {
+        summary.count += 1;
+        const value =
+          settings.displayMode === 'time'
+            ? getDisplayValueForTransaction(transaction)
+            : transaction.amount;
+        if (transaction.type === 'income') summary.income += value;
+        if (transaction.type === 'expense') summary.expense += value;
+      });
+      return summary;
+    }
     return monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary();
-  }, [activeMonthKey, monthBuckets.summaries]);
+  }, [
+    activeMonthKey,
+    filteredTransactions,
+    getDisplayValueForTransaction,
+    hasActiveSearch,
+    monthBuckets.summaries,
+    settings.displayMode,
+  ]);
   const formatSummaryValue = useCallback(
     (value: number) =>
       settings.displayMode === 'time'
@@ -400,23 +422,32 @@ export function TransactionsScreen({
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const hasActiveSearch = transactionFilters.search.trim().length > 0;
-
   const categoryPanelParents = useMemo(
-    () =>
-      categories
-        .filter((category) => !category.parentId)
-        .map((category) => ({ id: category.id, name: category.name, icon: category.icon })),
+    () => {
+      const parents = categories.filter((category) => !category.parentId);
+      return parents.map((category) => ({
+        id: category.id,
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon),
+      }));
+    },
     [categories],
   );
   const categoryPanelChildren = useMemo(() => {
+    const parentIconById = new Map(
+      categories.filter((category) => !category.parentId).map((category) => [category.id, category.icon]),
+    );
     const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
     categories
       .filter((category) => !!category.parentId)
       .forEach((category) => {
         const parentId = category.parentId as string;
         const list = grouped.get(parentId) ?? [];
-        list.push({ id: category.id, name: category.name, icon: category.icon });
+        list.push({
+          id: category.id,
+          name: category.name,
+          icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
+        });
         grouped.set(parentId, list);
       });
     return grouped;
@@ -428,21 +459,25 @@ export function TransactionsScreen({
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
   const handleOpenSearch = useCallback(() => {
+    void triggerHaptic('light');
     setIsSearchBoxOpen(true);
     requestAnimationFrame(() => {
       searchInputRef.current?.focus();
     });
   }, []);
   const handleCloseSearch = useCallback(() => {
+    void triggerHaptic('light');
+    if (transactionFilters.search.length > 0) {
+      setTransactionFilters({ search: '' });
+    }
     searchInputRef.current?.blur();
     setIsSearchBoxOpen(false);
-  }, []);
+  }, [setTransactionFilters, transactionFilters.search]);
   const handleOpenFilters = useCallback(() => {
     setIsSearchBoxOpen(false);
     setShowFilters(true);
   }, []);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
-  const handleCloseTransactionEditor = useCallback(() => setSelectedTransaction(null), []);
   const clearSelection = useCallback(() => {
     void triggerHaptic('selection');
     setSelectedTransactionIds([]);
@@ -460,9 +495,9 @@ export function TransactionsScreen({
         toggleTransactionSelection(transaction.id);
         return;
       }
-      setSelectedTransaction(transaction);
+      onOpenTransaction(transaction);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -500,6 +535,7 @@ export function TransactionsScreen({
     selectedTransactionIds.forEach((transactionId) => {
       updateTransaction(transactionId, updates);
     });
+    void triggerHaptic('success');
     setShowBulkUpdate(false);
     setSelectedTransactionIds([]);
   }, [
@@ -672,7 +708,7 @@ export function TransactionsScreen({
             </View>
           ) : undefined
         }
-        monthLabel={activeMonthLabel}
+        monthLabel={hasActiveSearch ? I18n.t('transactions.filters.search') : activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
         actions={
@@ -732,31 +768,48 @@ export function TransactionsScreen({
       </MonthControlsHeader>
 
       <View className="flex-1 overflow-hidden bg-background">
-        <FlatList
-          ref={horizontalListRef}
-          data={monthPagerSlots}
-          keyExtractor={(item) => String(item)}
-          style={FLEX_ONE_STYLE}
-          horizontal
-          pagingEnabled
-          disableIntervalMomentum
-          bounces={false}
-          directionalLockEnabled
-          decelerationRate="fast"
-          showsHorizontalScrollIndicator={false}
-          overScrollMode="never"
-          nestedScrollEnabled
-          initialNumToRender={5}
-          maxToRenderPerBatch={5}
-          windowSize={7}
-          renderItem={renderMonthPage}
-          initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-          getItemLayout={getHorizontalItemLayout}
-          removeClippedSubviews
-          onScrollEndDrag={handleHorizontalScrollEndDrag}
-          onMomentumScrollEnd={handleHorizontalMomentumEnd}
-          onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-        />
+        {hasActiveSearch ? (
+          <ActivityTransactionList
+            transactions={filteredTransactions}
+            onTransactionPress={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            emptyTitle={I18n.t('transactions.empty_search_title')}
+            emptyMessage={I18n.t('transactions.empty_search_message')}
+            contentPaddingBottom={LIST_BOTTOM_PADDING}
+            disableItemAnimations
+            compactItems
+            listKey={`search-${transactionFilters.search.trim().toLowerCase()}`}
+            scrollToTopRef={searchResultsScrollToTopRef}
+          />
+        ) : (
+          <FlatList
+            ref={horizontalListRef}
+            data={monthPagerSlots}
+            keyExtractor={(item) => String(item)}
+            style={FLEX_ONE_STYLE}
+            horizontal
+            pagingEnabled
+            disableIntervalMomentum
+            bounces={false}
+            directionalLockEnabled
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            overScrollMode="never"
+            nestedScrollEnabled
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={7}
+            renderItem={renderMonthPage}
+            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+            getItemLayout={getHorizontalItemLayout}
+            removeClippedSubviews
+            onScrollEndDrag={handleHorizontalScrollEndDrag}
+            onMomentumScrollEnd={handleHorizontalMomentumEnd}
+            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+          />
+        )}
       </View>
 
       {onPressAddTransaction && !isSelectionMode ? (
@@ -772,20 +825,6 @@ export function TransactionsScreen({
           <Plus size={24} color="#FFFFFF" />
         </Pressable>
       ) : null}
-
-      <ThemeModal
-        visible={!!selectedTransaction}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseTransactionEditor}
-      >
-        {(selectedTransaction || lastSelectedTransactionRef.current) ? (
-          <EditTransactionScreen
-            transaction={(selectedTransaction ?? lastSelectedTransactionRef.current)!}
-            onClose={handleCloseTransactionEditor}
-          />
-        ) : null}
-      </ThemeModal>
 
       <ThemeModal
         visible={showBulkUpdate}
