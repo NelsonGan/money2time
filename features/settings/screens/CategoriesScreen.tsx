@@ -371,6 +371,11 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
   const didDragRef = useRef(false);
 
   useEffect(() => {
+    didDragRef.current = false;
+    setLocalTopLevel(topLevel);
+    setLocalSubcategories(subcategoriesFromContext);
+  }, [type]);
+  useEffect(() => {
     if (didDragRef.current) { didDragRef.current = false; return; }
     setLocalTopLevel(topLevel);
   }, [topLevel]);
