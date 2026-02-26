@@ -632,10 +632,13 @@ export function TransactionsScreen({
         title={isSelectionMode ? undefined : I18n.t('transactions.title')}
         titleNode={
           isSelectionMode ? (
-            <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+            <View
+              className="rounded-full bg-card border border-border/40 px-3 flex-row items-center justify-between gap-2"
+              style={{ height: 40 }}
+            >
               <Pressable
                 onPress={clearSelection}
-                className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                className="rounded-full bg-secondary/70 px-3 py-1 active:opacity-85"
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.cancel')}
@@ -646,10 +649,10 @@ export function TransactionsScreen({
                 {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
               </Text>
 
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-1.5">
                 <Pressable
                   onPress={handleOpenBulkUpdate}
-                  className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                  className="rounded-full bg-primary/12 border border-primary/35 px-2.5 py-1 active:opacity-85"
                 >
                   <Text variant="caption" className="text-primary">
                     {I18n.t('transactions.selection.update')}
@@ -657,7 +660,7 @@ export function TransactionsScreen({
                 </Pressable>
                 <Pressable
                   onPress={handleDeleteSelectedTransactions}
-                  className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                  className="rounded-full bg-destructive/10 border border-destructive/35 px-2.5 py-1 active:opacity-85"
                 >
                   <Text variant="caption" className="text-destructive">
                     {I18n.t('common.delete')}
