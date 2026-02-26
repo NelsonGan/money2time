@@ -21,7 +21,6 @@ import {
 } from '~/features/settings/screens';
 import { AddTransactionScreen, TransactionsScreen } from '~/features/transactions/screens';
 import { Mascot } from '~/components/feedback/Mascot';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
@@ -97,7 +96,7 @@ function AppContent() {
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddPage, setShowAddPage] = useState(false);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -113,7 +112,7 @@ function AppContent() {
   }, []);
 
   const openAddTransaction = useCallback(() => {
-    setShowAddModal(true);
+    setShowAddPage(true);
   }, []);
 
   const handleTabChange = useCallback(
@@ -201,16 +200,15 @@ function AppContent() {
         </MountedTab>
       </View>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      {showAddPage ? (
+        <View style={[StyleSheet.absoluteFillObject, { zIndex: 20 }]}>
+          <View className="flex-1 bg-background" style={themeStyle}>
+            <AddTransactionScreen onClose={() => setShowAddPage(false)} />
+          </View>
+        </View>
+      ) : null}
 
-      <ThemeModal
-        visible={showAddModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <AddTransactionScreen onClose={() => setShowAddModal(false)} />
-      </ThemeModal>
+      {!showAddPage ? <BottomNav activeTab={activeTab} onTabChange={handleTabChange} /> : null}
     </View>
   );
 }

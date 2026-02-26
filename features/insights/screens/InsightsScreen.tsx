@@ -3509,6 +3509,15 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     return () => cancelAnimationFrame(frame);
   }, [drilldownState?.showTypeFilter, drilldownTypeFilter, pageWidth]);
 
+  if (selectedTransaction) {
+    return (
+      <EditTransactionScreen
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+      />
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
@@ -3579,12 +3588,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
         onRequestClose={handleCloseDrilldown}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          {selectedTransaction ? (
-            <EditTransactionScreen
-              transaction={selectedTransaction}
-              onClose={() => setSelectedTransaction(null)}
-            />
-          ) : showDrilldownBulkUpdate ? (
+          {showDrilldownBulkUpdate ? (
             <>
               <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
                 <View className="flex-1 pr-3">

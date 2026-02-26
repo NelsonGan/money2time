@@ -170,8 +170,6 @@ export function TransactionsScreen({
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
-  const lastSelectedTransactionRef = useRef<TransactionWithRelations | null>(null);
-  if (selectedTransaction) lastSelectedTransactionRef.current = selectedTransaction;
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
@@ -670,6 +668,15 @@ export function TransactionsScreen({
     ],
   );
 
+  if (selectedTransaction) {
+    return (
+      <EditTransactionScreen
+        transaction={selectedTransaction}
+        onClose={handleCloseTransactionEditor}
+      />
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
@@ -831,20 +838,6 @@ export function TransactionsScreen({
           <Plus size={24} color="#FFFFFF" />
         </Pressable>
       ) : null}
-
-      <ThemeModal
-        visible={!!selectedTransaction}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseTransactionEditor}
-      >
-        {(selectedTransaction || lastSelectedTransactionRef.current) ? (
-          <EditTransactionScreen
-            transaction={(selectedTransaction ?? lastSelectedTransactionRef.current)!}
-            onClose={handleCloseTransactionEditor}
-          />
-        ) : null}
-      </ThemeModal>
 
       <ThemeModal
         visible={showBulkUpdate}

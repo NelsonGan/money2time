@@ -244,11 +244,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
   );
 
   return (
-    <ScrollView
-      className="flex-1 px-4 pt-2"
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 16 }}
-    >
+    <View className="flex-1 px-4 pt-2 pb-4">
       {/* Quick date chips */}
       <View className="flex-row items-center justify-between mb-3 gap-1.5">
         {recentDays.map((day) => {
@@ -375,6 +371,6 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
       <View className="overflow-hidden" {...calendarPanResponder.panHandlers}>
         {renderCalendarPage(currentMonthCells, 'current')}
       </View>
-    </ScrollView>
+    </View>
   );
 }
