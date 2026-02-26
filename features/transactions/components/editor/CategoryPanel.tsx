@@ -30,6 +30,15 @@ interface CategoryPanelMultiSelectProps extends CategoryPanelBaseProps {
 
 type CategoryPanelProps = CategoryPanelSingleSelectProps | CategoryPanelMultiSelectProps;
 const EMPTY_SELECTED_CATEGORY_IDS: string[] = [];
+const COLS = 3;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+}
 
 export function CategoryPanel(props: CategoryPanelProps) {
   const { parents, childByParent } = props;
@@ -86,6 +95,8 @@ export function CategoryPanel(props: CategoryPanelProps) {
     selectedCategorySet,
   ]);
 
+  const parentRows = useMemo(() => chunk(parents, COLS), [parents]);
+
   return (
     <ScrollView
       className="flex-1 px-4 pt-2"
@@ -95,89 +106,135 @@ export function CategoryPanel(props: CategoryPanelProps) {
       overScrollMode="never"
       contentContainerStyle={{ paddingBottom: 16 }}
     >
-      <View className="flex-row flex-wrap gap-2">
-        {parents.map((parent) => {
-          const children = childByParent.get(parent.id) ?? [];
-          const hasSelectedChild = children.some((child) => selectedCategorySet.has(child.id));
-          const isParentSelected = selectedCategorySet.has(parent.id);
-          const isSelected = isParentSelected || hasSelectedChild;
-          const isExpanded = expandedParentId === parent.id;
+      <View className="gap-3">
+        {parentRows.map((row, rowIndex) => {
+          const expandedInRow = expandedParentId
+            ? row.find((p) => p.id === expandedParentId)
+            : null;
+          const expandedChildren = expandedInRow
+            ? (childByParent.get(expandedInRow.id) ?? [])
+            : [];
+          const childRows = expandedChildren.length > 0 ? chunk(expandedChildren, COLS) : [];
 
           return (
-            <View key={parent.id} className="w-[48%]">
+            <React.Fragment key={rowIndex}>
               {/* Parent row */}
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  if (children.length > 0) {
-                    setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
-                    return;
-                  }
-                  handleSelection(parent.id);
-                }}
-                className={cn(
-                  'rounded-xl border px-3 py-2.5 flex-row items-center',
-                  isSelected ? 'bg-primary/10 border-primary/45' : 'bg-card border-border/30',
-                  isExpanded && !isSelected && 'border-border/45',
-                )}
-              >
-                <Text className="text-[16px] mr-2">{parent.icon}</Text>
-                <Text
-                  variant="caption"
-                  numberOfLines={1}
-                  className={cn('flex-1', isSelected ? 'text-primary' : 'text-foreground')}
-                >
-                  {parent.name}
-                </Text>
-                {isParentSelected && !hasSelectedChild ? (
-                  <Check size={14} color={themeColors.primary} />
-                ) : children.length > 0 ? (
-                  <ChevronDown
-                    size={13}
-                    color={isSelected ? themeColors.primary : themeColors.textMuted}
-                    style={{ transform: [{ rotate: isExpanded ? '180deg' : '0deg' }] }}
-                  />
-                ) : null}
-              </Pressable>
+              <View className="flex-row gap-2">
+                {row.map((parent) => {
+                  const children = childByParent.get(parent.id) ?? [];
+                  const hasSelectedChild = children.some((child) =>
+                    selectedCategorySet.has(child.id),
+                  );
+                  const isParentSelected = selectedCategorySet.has(parent.id);
+                  const isSelected = isParentSelected || hasSelectedChild;
+                  const isExpanded = expandedParentId === parent.id;
 
-              {/* Subcategories directly below parent */}
-              {isExpanded && children.length > 0 ? (
-                <View className="mt-1.5 mb-1 flex-row flex-wrap gap-2">
-                  {children.map((child) => {
+                  return (
+                    <View key={parent.id} className="flex-1">
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          if (children.length > 0) {
+                            setExpandedParentId((prev) =>
+                              prev === parent.id ? null : parent.id,
+                            );
+                            return;
+                          }
+                          handleSelection(parent.id);
+                        }}
+                        className={cn(
+                          'rounded-xl border px-2.5 py-2.5 flex-row items-center',
+                          isSelected
+                            ? 'bg-primary/10 border-primary/45'
+                            : isExpanded
+                              ? 'bg-primary/5 border-primary/30'
+                              : 'bg-card border-border/30',
+                        )}
+                      >
+                        <Text className="text-[15px] mr-1.5">{parent.icon}</Text>
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className={cn(
+                            'flex-1',
+                            isSelected || isExpanded
+                              ? 'text-primary'
+                              : 'text-foreground',
+                          )}
+                        >
+                          {parent.name}
+                        </Text>
+                        {isParentSelected && !hasSelectedChild ? (
+                          <Check size={14} color={themeColors.primary} />
+                        ) : children.length > 0 ? (
+                          <ChevronDown
+                            size={13}
+                            color={
+                              isSelected || isExpanded
+                                ? themeColors.primary
+                                : themeColors.textMuted
+                            }
+                            style={{
+                              transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
+                            }}
+                          />
+                        ) : null}
+                      </Pressable>
+                    </View>
+                  );
+                })}
+                {row.length < COLS &&
+                  Array.from({ length: COLS - row.length }, (_, i) => (
+                    <View key={`pad-${i}`} className="flex-1" />
+                  ))}
+              </View>
+
+              {/* Expanded children - full width below row */}
+              {childRows.map((childRow, childRowIndex) => (
+                <View key={`children-${childRowIndex}`} className="flex-row gap-2">
+                  {childRow.map((child) => {
                     const isChildSelected = selectedCategorySet.has(child.id);
                     return (
-                      <View key={child.id} className="w-full">
+                      <View key={child.id} className="flex-1">
                         <Pressable
                           onPress={() => {
                             void triggerHaptic('selection');
                             handleSelection(child.id);
                           }}
                           className={cn(
-                            'rounded-xl border px-3 py-2 flex-row items-center',
+                            'rounded-xl border px-2.5 py-2 flex-row items-center',
                             isChildSelected
                               ? 'bg-primary/10 border-primary/40'
-                              : 'bg-card/60 border-border/25',
+                              : 'bg-secondary/50 border-border/20',
                           )}
                         >
-                          <Text className="text-[13px] mr-2">{child.icon}</Text>
+                          <Text className="text-[13px] mr-1.5">{child.icon}</Text>
                           <Text
                             variant="label"
                             numberOfLines={1}
                             className={cn(
                               'flex-1',
-                              isChildSelected ? 'text-primary' : 'text-muted-foreground',
+                              isChildSelected
+                                ? 'text-primary'
+                                : 'text-muted-foreground',
                             )}
                           >
                             {child.name}
                           </Text>
-                          {isChildSelected ? <Check size={12} color={themeColors.primary} /> : null}
+                          {isChildSelected ? (
+                            <Check size={12} color={themeColors.primary} />
+                          ) : null}
                         </Pressable>
                       </View>
                     );
                   })}
+                  {childRow.length < COLS &&
+                    Array.from({ length: COLS - childRow.length }, (_, i) => (
+                      <View key={`cpad-${i}`} className="flex-1" />
+                    ))}
                 </View>
-              ) : null}
-            </View>
+              ))}
+            </React.Fragment>
           );
         })}
       </View>
