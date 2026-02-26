@@ -787,6 +787,8 @@ export function AccountsScreen({
     deleteAccountGroup,
     deleteTransaction,
     getTransactionsByAccount,
+    reorderAccounts,
+    reorderAccountGroups,
     renameAccountGroup,
     updateAccount,
     updateTransaction,
@@ -1009,25 +1011,40 @@ export function AccountsScreen({
     return next;
   }, [accounts, balanceMap, managementOnly, transactions]);
   const accountGroupSections = useMemo<AccountGroupSection[]>(() => {
-    const sections: AccountGroupSection[] = [];
-    const byLabel = new Map<string, AccountGroupSection>();
+    const groupNames = new Set(accountGroups.map((g) => g.name));
+    const buckets = new Map<string, Account[]>();
     accounts.forEach((account) => {
-      const label = account.accountGroup?.trim() || String(I18n.t('common.ungrouped'));
-      const existing = byLabel.get(label);
-      if (existing) {
-        existing.accounts.push(account);
-        return;
-      }
-      const next: AccountGroupSection = {
-        id: `group-${sections.length}-${label}`,
-        label,
-        accounts: [account],
-      };
-      byLabel.set(label, next);
-      sections.push(next);
+      const key = account.accountGroup?.trim() || '__ungrouped__';
+      const list = buckets.get(key) ?? [];
+      list.push(account);
+      buckets.set(key, list);
     });
+
+    const sections: AccountGroupSection[] = [];
+    // Named groups in accountGroups sort order
+    for (const group of accountGroups) {
+      const list = buckets.get(group.name);
+      if (list && list.length > 0) {
+        sections.push({ id: group.id, label: group.name, accounts: list });
+      }
+    }
+    // Unknown group names (not in accountGroups)
+    for (const [key, list] of buckets) {
+      if (key === '__ungrouped__') continue;
+      if (groupNames.has(key)) continue;
+      sections.push({ id: `group-${key}`, label: key, accounts: list });
+    }
+    // Ungrouped last
+    const ungrouped = buckets.get('__ungrouped__');
+    if (ungrouped && ungrouped.length > 0) {
+      sections.push({
+        id: 'group-ungrouped',
+        label: String(I18n.t('common.ungrouped')),
+        accounts: ungrouped,
+      });
+    }
     return sections;
-  }, [accounts]);
+  }, [accounts, accountGroups]);
   const accountCountByGroupName = useMemo(() => {
     const counts = new Map<string, number>();
     accounts.forEach((account) => {
@@ -1749,6 +1766,7 @@ export function AccountsScreen({
                 setLocalAccountGroups(data);
                 const ids = data.map((g) => g.id);
                 persistOrder('account_groups', ids);
+                reorderAccountGroups(ids);
               }}
               onPlaceholderIndexChange={() => void triggerHaptic('selection')}
               autoscrollThreshold={80}
@@ -1795,6 +1813,7 @@ export function AccountsScreen({
                     setLocalAccountGroupSections(updatedSections);
                     const allIds = updatedSections.flatMap((s) => s.accounts.map((a) => a.id));
                     persistOrder('accounts', allIds);
+                    reorderAccounts(allIds);
                   }}
                 />
               </View>
