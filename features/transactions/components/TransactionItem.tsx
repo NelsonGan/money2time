@@ -99,7 +99,7 @@ function TransactionItemView({
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
       : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
-  const joinSubtitleParts = (...parts: Array<string | null | undefined>) =>
+  const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
     parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
   const subtitle = isTransfer

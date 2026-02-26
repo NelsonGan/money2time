@@ -13,7 +13,7 @@ import {
   monthKeyFromDateLocal,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
-import { accountsTable, categoriesTable, monthlyWageSettingsTable, settingsTable } from './schema';
+import { categoriesTable, monthlyWageSettingsTable, settingsTable } from './schema';
 import { getDeviceLocale } from '~/lib/i18n';
 
 const DB_NAME = 'money2time.db';
