@@ -21,7 +21,41 @@ interface HeroAmountConverterProps {
   hasRate: boolean;
   hours: number;
   workdays: number;
+  workdaysPerWeek: number;
   onChangeAmount: (value: string) => void;
+}
+
+function formatCount(value: number) {
+  return Number(value.toFixed(2));
+}
+
+function formatWorkDuration(workdays: number, workdaysPerWeek: number) {
+  const safeWorkdaysPerWeek = Math.max(1, Math.round(workdaysPerWeek));
+  const normalizedDays = Math.max(0, Number(workdays.toFixed(2)));
+  const dayKey =
+    Math.abs(normalizedDays - 1) < 0.005
+      ? 'home.converter.workday_unit_one'
+      : 'home.converter.workday_unit_other';
+
+  if (normalizedDays <= safeWorkdaysPerWeek) {
+    return I18n.t(dayKey, { count: formatCount(normalizedDays) });
+  }
+
+  const weeks = Math.floor(normalizedDays / safeWorkdaysPerWeek);
+  const remainingDays = Number((normalizedDays - weeks * safeWorkdaysPerWeek).toFixed(2));
+  const weekKey = weeks === 1 ? 'home.converter.workweek_unit_one' : 'home.converter.workweek_unit_other';
+  const weekLabel = I18n.t(weekKey, { count: formatCount(weeks) });
+
+  if (remainingDays <= 0.01) {
+    return weekLabel;
+  }
+
+  const remainingDayKey =
+    Math.abs(remainingDays - 1) < 0.005
+      ? 'home.converter.workday_unit_one'
+      : 'home.converter.workday_unit_other';
+  const dayLabel = I18n.t(remainingDayKey, { count: formatCount(remainingDays) });
+  return `${weekLabel} ${dayLabel}`;
 }
 
 function normalizeInput(raw: string) {
@@ -55,6 +89,7 @@ export function HeroAmountConverter({
   hasRate,
   hours,
   workdays,
+  workdaysPerWeek,
   onChangeAmount,
 }: HeroAmountConverterProps) {
   const inputRef = useRef<TextInput>(null);
@@ -69,6 +104,10 @@ export function HeroAmountConverter({
   const exactHoursLabel = useMemo(
     () => I18n.t('home.converter.exact_hours', { value: hours.toFixed(2) }),
     [hours],
+  );
+  const workDurationLabel = useMemo(
+    () => formatWorkDuration(workdays, workdaysPerWeek),
+    [workdays, workdaysPerWeek],
   );
 
   const focusStyle = useAnimatedStyle(() => ({
@@ -135,7 +174,7 @@ export function HeroAmountConverter({
                 <Text variant="label" tone="muted" className="mt-1">
                   {I18n.t('home.converter.workday_equivalent', {
                     exact: exactHoursLabel,
-                    days: workdays.toFixed(2),
+                    duration: workDurationLabel,
                   })}
                 </Text>
               </Animated.View>

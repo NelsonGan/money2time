@@ -123,7 +123,6 @@ export function toCategory(row: CategoryRow): Category {
     type: asCategoryType(row.type),
     parentId: row.parentId,
     icon: row.icon,
-    color: row.color,
     isDefault: row.isDefault,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

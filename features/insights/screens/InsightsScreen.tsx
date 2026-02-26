@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart, PieChart } from 'react-native-chart-kit';
-import { ChevronsLeftRight } from 'lucide-react-native';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Card, CardContent } from '~/components/ui/card';
@@ -203,8 +202,7 @@ type CalendarDayCell = {
   transactionCount: number;
   isOutsideRange: boolean;
   isFuture: boolean;
-  tone: 'income' | 'expense' | 'neutral';
-  intensity: number;
+  expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
 };
 
 type CalendarSpacerCell = {
@@ -315,6 +313,7 @@ type InsightPageData =
   | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 type DrilldownTransactionFilter = 'income' | 'expense';
+type DrilldownSortOption = 'default' | 'largest_value';
 const DRILLDOWN_TYPE_PAGES: readonly DrilldownTransactionFilter[] = ['income', 'expense'];
 
 type InsightsPreferencesSnapshot = {
@@ -792,6 +791,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
   } | null>(null);
   const [drilldownTypeFilter, setDrilldownTypeFilter] =
     useState<DrilldownTransactionFilter>('expense');
+  const [drilldownSortOption, setDrilldownSortOption] = useState<DrilldownSortOption>('default');
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
@@ -1244,11 +1244,8 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       }
 
       if (insightType === 'calendar_view') {
-        const filteredForRange = inRangeTransactions.filter(
-          (tx) => tx.type === 'income' || tx.type === 'expense',
-        );
+        const filteredForRange = inRangeTransactions.filter((tx) => tx.type === 'expense');
         const dailyTotalsByDayKey = new Map<string, CalendarDayAggregate>();
-        let totalIncome = 0;
         let totalExpense = 0;
 
         filteredForRange.forEach((tx) => {
@@ -1262,13 +1259,8 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
             net: 0,
             transactions: [],
           };
-          if (tx.type === 'income') {
-            current.income += value;
-            totalIncome += value;
-          } else {
-            current.expense += value;
-            totalExpense += value;
-          }
+          current.expense += value;
+          totalExpense += value;
           current.net = current.income - current.expense;
           current.transactions.push(tx);
           dailyTotalsByDayKey.set(dayKey, current);
@@ -1285,11 +1277,13 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
         const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
         const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
         const todayDayKey = dayKeyFromDateLocal(new Date());
-        let maxDailyMagnitude = 0;
+        let minDailyExpense = Number.POSITIVE_INFINITY;
+        let maxDailyExpense = 0;
         dailyTotalsByDayKey.forEach((entry, dayKey) => {
           if (dayKey < rangeStartDayKey || dayKey > rangeEndDayKey) return;
-          const magnitude = Math.max(entry.income, entry.expense, Math.abs(entry.net));
-          if (magnitude > maxDailyMagnitude) maxDailyMagnitude = magnitude;
+          if (entry.expense <= 0) return;
+          if (entry.expense < minDailyExpense) minDailyExpense = entry.expense;
+          if (entry.expense > maxDailyExpense) maxDailyExpense = entry.expense;
         });
 
         const monthSections: CalendarMonthSection[] = [];
@@ -1318,17 +1312,21 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
               const income = totals?.income ?? 0;
               const expense = totals?.expense ?? 0;
               const net = totals?.net ?? 0;
-              const magnitude = Math.max(income, expense, Math.abs(net));
               const isOutsideRange = dayKey < rangeStartDayKey || dayKey > rangeEndDayKey;
               const isFuture = dayKey > todayDayKey;
-              const tone =
-                income === 0 && expense === 0
-                  ? 'neutral'
-                  : net > 0
-                    ? 'income'
-                    : net < 0
-                      ? 'expense'
-                      : 'neutral';
+              const hasExpense = expense > 0 && !isOutsideRange;
+              const hasRange = Number.isFinite(minDailyExpense) && maxDailyExpense > 0;
+              const hasSpread = hasRange && maxDailyExpense > minDailyExpense;
+              let expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5 = 0;
+              if (hasExpense) {
+                if (!hasSpread) {
+                  expenseDotTier = 3;
+                } else {
+                  const normalized = (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
+                  const quantized = Math.round(normalized * 4) + 1;
+                  expenseDotTier = Math.min(5, Math.max(1, quantized)) as 1 | 2 | 3 | 4 | 5;
+                }
+              }
 
               if (!isOutsideRange) activeDayCount += 1;
               cells.push({
@@ -1342,8 +1340,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                 transactionCount: totals?.transactions.length ?? 0,
                 isOutsideRange,
                 isFuture,
-                tone,
-                intensity: maxDailyMagnitude > 0 ? magnitude / maxDailyMagnitude : 0,
+                expenseDotTier,
               });
             }
 
@@ -1386,9 +1383,9 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
           rangeStartDayKey,
           rangeEndDayKey,
           defaultSelectedDayKey,
-          totalIncome,
+          totalIncome: 0,
           totalExpense,
-          totalNet: totalIncome - totalExpense,
+          totalNet: -totalExpense,
         };
       }
 
@@ -2356,24 +2353,23 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                     const isSelected = cell.dayKey === selectedDayKey;
                     const hasActivity = cell.transactionCount > 0;
                     const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
-                    const baseIntensity = Math.max(0, Math.min(1, cell.intensity));
-                    const toneColor =
-                      cell.tone === 'income'
-                        ? themeColors.success
-                        : cell.tone === 'expense'
-                          ? themeColors.error
-                          : themeColors.primary;
+                    const baseIntensity =
+                      cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
+                    const toneColor = themeColors.error;
+                    const dotSizeByTier = [3, 4, 5, 6, 7] as const;
+                    const dotSize =
+                      cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
                     const bgColor = isSelected
                       ? withColorAlpha(themeColors.primary, 0.24)
                       : hasActivity
-                        ? withColorAlpha(toneColor, 0.12 + baseIntensity * 0.45)
+                        ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
                         : cell.isFuture
                           ? withColorAlpha(themeColors.sky, 0.08)
                           : withColorAlpha(themeColors.surfaceMuted, 0.6);
                     const borderColor = isSelected
                       ? withColorAlpha(themeColors.primary, 0.9)
                       : hasActivity
-                        ? withColorAlpha(toneColor, 0.22 + baseIntensity * 0.45)
+                        ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
                         : withColorAlpha(themeColors.textMuted, 0.18);
 
                     return (
@@ -2402,20 +2398,20 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                           className={cn(
                             isSelected
                               ? 'text-primary font-bold'
-                              : cell.tone === 'income'
-                                ? 'text-success'
-                                : cell.tone === 'expense'
-                                  ? 'text-destructive'
-                                  : 'text-muted-foreground',
+                              : hasActivity
+                                ? 'text-destructive'
+                                : 'text-muted-foreground',
                           )}
                         >
                           {cell.dayNumber}
                         </Text>
-                        {hasActivity ? (
+                        {hasActivity && dotSize > 0 ? (
                           <View
-                            className="absolute bottom-1 h-1.5 w-1.5 rounded-full"
+                            className="absolute bottom-1 rounded-full"
                             style={{
-                              backgroundColor: isSelected ? themeColors.primary : toneColor,
+                              width: dotSize,
+                              height: dotSize,
+                              backgroundColor: toneColor,
                             }}
                           />
                         ) : null}
@@ -2452,7 +2448,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                         label: selectedDayLabel,
                         transactions: selectedDayTransactions,
                         scopeMatcher: (transaction) =>
-                          (transaction.type === 'income' || transaction.type === 'expense') &&
+                          transaction.type === 'expense' &&
                           dayKeyFromIsoLocal(transaction.date) === targetDayKey,
                       });
                     }}
@@ -2470,32 +2466,10 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
               <View className="mt-2 flex-row items-center gap-3">
                 <View className="flex-1">
                   <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.income')}
-                  </Text>
-                  <Text variant="caption" className="text-success mt-0.5">
-                    {renderValue(selectedDayData.income)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.expense')}
                   </Text>
                   <Text variant="caption" className="text-destructive mt-0.5">
                     {renderValue(selectedDayData.expense)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.net')}
-                  </Text>
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      'mt-0.5',
-                      selectedDayData.net >= 0 ? 'text-success' : 'text-destructive',
-                    )}
-                  >
-                    {renderSignedValue(selectedDayData.net)}
                   </Text>
                 </View>
               </View>
@@ -3229,6 +3203,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       if (nextState.showTypeFilter) {
         setDrilldownTypeFilter('expense');
       }
+      setDrilldownSortOption('default');
       setSelectedDrilldownTransactionIds([]);
       setShowDrilldownBulkUpdate(false);
       setDrilldownBulkDate(formatDateInput(new Date()));
@@ -3244,6 +3219,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     void triggerHaptic('selection');
     setDrilldownState(null);
     setDrilldownTypeFilter('expense');
+    setDrilldownSortOption('default');
     setSelectedDrilldownTransactionIds([]);
     setShowDrilldownBulkUpdate(false);
     setDrilldownBulkType(null);
@@ -3381,7 +3357,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       ],
     );
   }, [deleteTransaction, selectedDrilldownTransactionIds]);
-  const resolvedDrilldownTransactions = useMemo(() => {
+  const baseResolvedDrilldownTransactions = useMemo(() => {
     if (!drilldownState) return [];
     const transactions = drilldownState.transactions
       .map((transaction) => transactionById.get(transaction.id))
@@ -3389,14 +3365,42 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
     if (!drilldownState.scopeMatcher) return transactions;
     return transactions.filter((transaction) => drilldownState.scopeMatcher?.(transaction));
   }, [drilldownState, transactionById]);
+  const sortDrilldownTransactions = useCallback(
+    (transactions: TransactionWithRelations[]) => {
+      if (drilldownSortOption !== 'largest_value') return transactions;
+      const sorted = [...transactions];
+      sorted.sort((a, b) => {
+        const aValue = settings.displayMode === 'time' ? getDisplayValueForTransaction(a) : a.amount;
+        const bValue = settings.displayMode === 'time' ? getDisplayValueForTransaction(b) : b.amount;
+        const amountDelta = Math.abs(bValue) - Math.abs(aValue);
+        if (amountDelta !== 0) return amountDelta;
+        const dateDelta = b.date.localeCompare(a.date);
+        if (dateDelta !== 0) return dateDelta;
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+      return sorted;
+    },
+    [drilldownSortOption, getDisplayValueForTransaction, settings.displayMode],
+  );
+  const resolvedDrilldownTransactions = useMemo(
+    () => sortDrilldownTransactions(baseResolvedDrilldownTransactions),
+    [baseResolvedDrilldownTransactions, sortDrilldownTransactions],
+  );
   const drilldownIncomeTransactions = useMemo(
-    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
-    [resolvedDrilldownTransactions],
+    () =>
+      sortDrilldownTransactions(
+        baseResolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
+      ),
+    [baseResolvedDrilldownTransactions, sortDrilldownTransactions],
   );
   const drilldownExpenseTransactions = useMemo(
-    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
-    [resolvedDrilldownTransactions],
+    () =>
+      sortDrilldownTransactions(
+        baseResolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
+      ),
+    [baseResolvedDrilldownTransactions, sortDrilldownTransactions],
   );
+  const shouldGroupDrilldownByDate = drilldownSortOption !== 'largest_value';
   const drilldownPagerExtraData = useMemo(
     () => ({
       drilldownTypeFilter,
@@ -3404,6 +3408,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       expenseTransactions: drilldownExpenseTransactions,
       pageWidth,
       selectedTransactionIds: selectedDrilldownTransactionIds,
+      shouldGroupDrilldownByDate,
     }),
     [
       drilldownExpenseTransactions,
@@ -3411,6 +3416,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       drilldownTypeFilter,
       pageWidth,
       selectedDrilldownTransactionIds,
+      shouldGroupDrilldownByDate,
     ],
   );
   const getDrilldownPagerItemLayout = useCallback(
@@ -3457,6 +3463,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
             disableItemAnimations
             disableScrollBounce
             compactItems
+            groupByDate={shouldGroupDrilldownByDate}
             listKey={`drilldown-${item}`}
           />
         </View>
@@ -3470,6 +3477,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
       isDrilldownSelectionMode,
       pageWidth,
       selectedDrilldownTransactionIds,
+      shouldGroupDrilldownByDate,
     ],
   );
 
@@ -3747,12 +3755,35 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                   </Pressable>
                 </View>
               )}
+              {!isDrilldownSelectionMode ? (
+                <View className="px-5 pb-2">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 8, alignItems: 'center', paddingRight: 8 }}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.filters.sort')}
+                    </Text>
+                    <FilterPill
+                      label={I18n.t('transactions.sort.newest')}
+                      active={drilldownSortOption === 'default'}
+                      onPress={() => setDrilldownSortOption('default')}
+                    />
+                    <FilterPill
+                      label={I18n.t('transactions.sort.high')}
+                      active={drilldownSortOption === 'largest_value'}
+                      onPress={() => setDrilldownSortOption('largest_value')}
+                    />
+                  </ScrollView>
+                </View>
+              ) : null}
 
               {drilldownState?.showTypeFilter ? (
                 <>
                   <View className="px-5 pb-2">
-                    <View className="rounded-2xl border border-border/35 bg-card/90 px-3 py-2.5">
-                      <View className="flex-row items-center justify-between gap-2">
+                    <View className="rounded-2xl border border-border/35 bg-card/90 p-1.5">
+                      <View className="flex-row items-center gap-1.5">
                         <Pressable
                           onPress={() => {
                             if (drilldownTypeFilter === 'income') return;
@@ -3760,44 +3791,20 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                             setDrilldownTypeFilter('income');
                           }}
                           className={cn(
-                            'flex-1 rounded-xl px-2.5 py-2 active:opacity-85',
+                            'flex-1 rounded-xl px-3 py-2.5 active:opacity-85',
                             drilldownTypeFilter === 'income'
-                              ? 'border border-success/35 bg-success/10'
-                              : 'border border-transparent',
+                              ? 'border border-success/35 bg-success/12'
+                              : 'border border-transparent bg-transparent',
                           )}
                         >
-                          <Text
-                            variant="label"
-                            className={cn(
-                              drilldownTypeFilter === 'income' ? 'text-success' : 'text-success/55',
-                            )}
-                          >
+                          <Text variant="label" className="text-success">
                             {I18n.t('insights.calendar.income')}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}:{' '}
-                            {drilldownIncomeTransactions.length}
+                            {drilldownIncomeTransactions.length}{' '}
+                            {I18n.t('insights.calendar.transactions')}
                           </Text>
                         </Pressable>
-                        <View className="items-center px-1">
-                          <View className="rounded-full border border-border/45 bg-background/90 px-2 py-1 flex-row items-center gap-1">
-                            <View
-                              className={cn(
-                                'h-1.5 w-1.5 rounded-full',
-                                drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-border/70',
-                              )}
-                            />
-                            <ChevronsLeftRight size={12} color={themeColors.textMuted} />
-                            <View
-                              className={cn(
-                                'h-1.5 w-1.5 rounded-full',
-                                drilldownTypeFilter === 'expense'
-                                  ? 'bg-destructive'
-                                  : 'bg-border/70',
-                              )}
-                            />
-                          </View>
-                        </View>
                         <Pressable
                           onPress={() => {
                             if (drilldownTypeFilter === 'expense') return;
@@ -3805,43 +3812,20 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                             setDrilldownTypeFilter('expense');
                           }}
                           className={cn(
-                            'flex-1 items-end rounded-xl px-2.5 py-2 active:opacity-85',
+                            'flex-1 rounded-xl px-3 py-2.5 active:opacity-85',
                             drilldownTypeFilter === 'expense'
-                              ? 'border border-destructive/35 bg-destructive/8'
-                              : 'border border-transparent',
+                              ? 'border border-destructive/35 bg-destructive/10'
+                              : 'border border-transparent bg-transparent',
                           )}
                         >
-                          <Text
-                            variant="label"
-                            className={cn(
-                              drilldownTypeFilter === 'expense'
-                                ? 'text-destructive'
-                                : 'text-destructive/55',
-                            )}
-                          >
+                          <Text variant="label" className="text-destructive">
                             {I18n.t('insights.calendar.expense')}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}:{' '}
-                            {drilldownExpenseTransactions.length}
+                            {drilldownExpenseTransactions.length}{' '}
+                            {I18n.t('insights.calendar.transactions')}
                           </Text>
                         </Pressable>
-                      </View>
-                      <View className="mt-2 flex-row items-center gap-1.5">
-                        <View
-                          className={cn(
-                            'h-1.5 flex-1 rounded-full',
-                            drilldownTypeFilter === 'income' ? 'bg-success/60' : 'bg-secondary',
-                          )}
-                        />
-                        <View
-                          className={cn(
-                            'h-1.5 flex-1 rounded-full',
-                            drilldownTypeFilter === 'expense'
-                              ? 'bg-destructive/60'
-                              : 'bg-secondary',
-                          )}
-                        />
                       </View>
                     </View>
                   </View>
@@ -3878,6 +3862,7 @@ export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenP
                   disableItemAnimations
                   disableScrollBounce
                   compactItems
+                  groupByDate={shouldGroupDrilldownByDate}
                 />
               )}
             </>

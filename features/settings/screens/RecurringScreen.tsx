@@ -205,24 +205,6 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
       themeColors.textMuted,
     ],
   );
-  const listHeader = useMemo(
-    () => (
-      <View className="pb-3">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t('recurring.title')}
-          subtitle={I18n.t('recurring.subtitle')}
-          rightAccessory={
-            <Button size="icon" onPress={openCreate}>
-              <Plus size={18} color="#fff" />
-            </Button>
-          }
-        />
-      </View>
-    ),
-    [onBack, openCreate],
-  );
   const listEmpty = useMemo(
     () => (
       <Card>
@@ -324,6 +306,19 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
         />
       </ThemeModal>
       <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
+        <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+          <SettingsHeader
+            className="px-0 pt-5 pb-3"
+            onBack={onBack}
+            title={I18n.t('recurring.title')}
+            subtitle={I18n.t('recurring.subtitle')}
+            rightAccessory={
+              <Button size="icon" onPress={openCreate}>
+                <Plus size={18} color="#fff" />
+              </Button>
+            }
+          />
+        </View>
         <FlatList
           data={allRules}
           keyExtractor={keyExtractor}
@@ -331,7 +326,6 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
             paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
             paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
           }}
-          ListHeaderComponent={listHeader}
           ListEmptyComponent={listEmpty}
           renderItem={renderRule}
           initialNumToRender={10}

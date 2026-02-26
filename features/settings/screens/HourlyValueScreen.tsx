@@ -246,6 +246,14 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
 
   return (
     <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
+      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <SettingsHeader
+          className="px-0 pt-5 pb-3"
+          onBack={onClose}
+          title={I18n.t('settings.hourly_value')}
+          subtitle={I18n.t('settings.manage_formulas')}
+        />
+      </View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -253,13 +261,6 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
           paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
         }}
       >
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onClose}
-          title={I18n.t('settings.hourly_value')}
-          subtitle={I18n.t('settings.manage_formulas')}
-        />
-
         <Card>
           <CardContent className="py-5 gap-4">
             <Text variant="label" tone="muted">

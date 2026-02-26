@@ -12,7 +12,6 @@ interface CreateCategoryInput {
   type: Category['type'];
   parentId: string | null;
   icon: string;
-  color: string;
   isDefault?: boolean;
   deletedAt?: string | null;
 }
@@ -64,7 +63,6 @@ class CategoriesRepository {
         type: input.type,
         parentId: input.parentId,
         icon: input.icon,
-        color: input.color,
         isDefault: input.isDefault ?? false,
         createdAt: now,
         updatedAt: now,

@@ -243,6 +243,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
     ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding)
     : 0;
   const estimatorWorkdays = estimatorHours / 8;
+  const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -277,6 +278,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
             hasRate={hasHourlyRate}
             hours={estimatorHours}
             workdays={estimatorWorkdays}
+            workdaysPerWeek={estimatorWorkdaysPerWeek}
             onChangeAmount={setEstimatorAmount}
           />
         </Animated.View>
@@ -360,7 +362,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
                     >
                       <View
                         className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
-                        style={{ backgroundColor: (category?.color ?? themeColors.primary) + '18' }}
+                        style={{ backgroundColor: themeColors.primary + '18' }}
                       >
                         <Text style={{ fontSize: 18 }}>{category?.icon ?? '🔄'}</Text>
                       </View>
