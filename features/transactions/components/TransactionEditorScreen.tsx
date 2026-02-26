@@ -41,6 +41,7 @@ import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/fo
 import { getErrorMessage } from '~/utils/errorHandling';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { usePressScale } from '~/hooks/usePressScale';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -434,13 +435,13 @@ export function TransactionEditorScreen({
   const categoryPreview = useMemo(() => {
     if (!categoryId) return null;
     const parent = topLevelCategories.find((item) => item.id === categoryId);
-    if (parent) return { icon: parent.icon, name: parent.name };
+    if (parent) return { icon: resolveCategoryIcon(parent.icon), name: parent.name };
     for (const [parentId, children] of childCategoriesByParent.entries()) {
       const found = children.find((child) => child.id === categoryId);
       if (!found) continue;
       const parentNode = topLevelCategories.find((item) => item.id === parentId);
       return {
-        icon: found.icon,
+        icon: resolveCategoryIcon(found.icon, parentNode?.icon ?? null),
         name: parentNode ? `${parentNode.name} / ${found.name}` : found.name,
       };
     }
@@ -770,7 +771,12 @@ export function TransactionEditorScreen({
   };
 
   const categoryPanelParents = useMemo(
-    () => topLevelCategories.map((item) => ({ id: item.id, name: item.name, icon: item.icon })),
+    () =>
+      topLevelCategories.map((item) => ({
+        id: item.id,
+        name: item.name,
+        icon: resolveCategoryIcon(item.icon),
+      })),
     [topLevelCategories],
   );
   const categoryPanelChildren = useMemo(
@@ -778,10 +784,17 @@ export function TransactionEditorScreen({
       new Map(
         Array.from(childCategoriesByParent.entries()).map(([key, items]) => [
           key,
-          items.map((item) => ({ id: item.id, name: item.name, icon: item.icon })),
+          items.map((item) => {
+            const parentNode = topLevelCategories.find((parent) => parent.id === key);
+            return {
+              id: item.id,
+              name: item.name,
+              icon: resolveCategoryIcon(item.icon, parentNode?.icon ?? null),
+            };
+          }),
         ]),
       ),
-    [childCategoriesByParent],
+    [childCategoriesByParent, topLevelCategories],
   );
 
   const renderToolPanel = () => {

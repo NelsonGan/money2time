@@ -19,13 +19,14 @@ import {
 } from '~/components/ui/settings';
 import { SegmentedToggle } from '~/components/ui/toggle';
 import { useApp } from '~/context/AppContext';
-import { CATEGORY_COLORS, DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
+import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import type { Category, CategoryType } from '~/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
 import { I18n } from '~/lib/i18n';
 import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 
 const SNAP_CONFIG = {
   damping: 100,
@@ -49,22 +50,22 @@ function CategoryEditor({
   topLevel: Category[];
   initial?: Partial<Category>;
   onClose: () => void;
-  onSubmit: (input: { name: string; icon: string; color: string; parentId: string | null }) => void;
+  onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
 }) {
   const themeColors = useThemeColors();
+  const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
   const [name, setName] = useState(initial?.name ?? '');
-  const [icon, setIcon] = useState(initial?.icon ?? DEFAULT_CATEGORY_EMOJIS[0]);
-  const [color, setColor] = useState(initial?.color ?? CATEGORY_COLORS[0]);
+  const [icon, setIcon] = useState(initialIcon);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
 
   useEffect(() => {
     setName(initial?.name ?? '');
-    setIcon(initial?.icon ?? DEFAULT_CATEGORY_EMOJIS[0]);
-    setColor(initial?.color ?? CATEGORY_COLORS[0]);
+    setIcon(initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]));
     setParentId(initial?.parentId ?? null);
   }, [initial, visible]);
 
   const canSave = name.trim().length > 0;
+  const isSubcategory = parentId !== null;
 
   return (
     <ThemeModal
@@ -92,16 +93,34 @@ function CategoryEditor({
         >
           <View className="gap-4">
             <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
-              </View>
-            </View>
             <View>
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('categories.emoji')}
               </Text>
               <View className="flex-row flex-wrap gap-2">
+                {isSubcategory ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setIcon('');
+                    }}
+                    className={cn(
+                      'h-11 px-3 rounded-full border items-center justify-center',
+                      icon.trim().length === 0
+                        ? 'bg-primary/15 border-primary/50'
+                        : 'bg-card border-border/40',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
+                      )}
+                    >
+                      {I18n.t('categories.none')}
+                    </Text>
+                  </Pressable>
+                ) : null}
                 {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
                   <Pressable
                     key={emoji}
@@ -149,9 +168,6 @@ function CategoryEditor({
                     onPress={() => {
                       void triggerHaptic('selection');
                       setParentId(item.id);
-                      if (mode === 'create') {
-                        setIcon(item.icon || DEFAULT_CATEGORY_EMOJIS[0]);
-                      }
                     }}
                     className={cn(
                       'px-4 py-2.5 rounded-full border',
@@ -194,10 +210,10 @@ function CategoryEditor({
           onCancel={onClose}
           onSave={() => {
             if (!canSave) return;
+            const normalizedIcon = icon.trim();
             onSubmit({
               name: name.trim(),
-              icon: icon || DEFAULT_CATEGORY_EMOJIS[0],
-              color: color || CATEGORY_COLORS[0],
+              icon: parentId ? normalizedIcon : normalizedIcon || DEFAULT_CATEGORY_EMOJIS[0],
               parentId,
             });
           }}
@@ -213,6 +229,7 @@ let _onDelete: ((item: Category) => void) | null = null;
 let _onNavigate: ((item: Category) => void) | null = null;
 let _themeColors: { surface: string; surfaceMuted: string; textMuted: string; coral: string; text: string } | null = null;
 let _hasChildren: ((id: string) => boolean) | null = null;
+let _iconById: Map<string, string> | null = null;
 
 function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
   const tc = _themeColors!;
@@ -234,8 +251,8 @@ function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
         opacity: isActive ? 0.9 : 1,
       }}
     >
-      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: item.color || '#ddd', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontSize: 12 }}>{item.icon}</Text>
+      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 12 }}>{resolveCategoryIcon(item.icon)}</Text>
       </View>
       <Pressable
         onPress={() => hasKids ? _onNavigate?.(item) : undefined}
@@ -275,6 +292,8 @@ function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
 
 function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
   const tc = _themeColors!;
+  const parentIcon = item.parentId ? (_iconById?.get(item.parentId) ?? null) : null;
+  const displayIcon = resolveCategoryIcon(item.icon, parentIcon);
   return (
     <View
       style={{
@@ -292,8 +311,8 @@ function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
         opacity: isActive ? 0.9 : 1,
       }}
     >
-      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: item.color || '#ddd', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontSize: 12 }}>{item.icon}</Text>
+      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 12 }}>{displayIcon}</Text>
       </View>
       <Text style={{ flex: 1, fontSize: 13, color: tc.text }}>{item.name}</Text>
       <Pressable
@@ -391,6 +410,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
   }, [selectedParentId, topLevel]);
 
   _themeColors = themeColors;
+  _iconById = new Map(typeCategories.map((category) => [category.id, category.icon]));
   _hasChildren = (id: string) => (childrenByParent.get(id)?.length ?? 0) > 0;
   _onEdit = (item: Category) => {
     void triggerHaptic('selection');

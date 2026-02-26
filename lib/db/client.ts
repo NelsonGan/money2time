@@ -17,7 +17,7 @@ import { accountsTable, categoriesTable, monthlyWageSettingsTable, settingsTable
 import { getDeviceLocale } from '~/lib/i18n';
 
 const DB_NAME = 'money2time.db';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 let sqlite: SQLiteDatabase | null = null;
 let initialized = false;
@@ -60,7 +60,6 @@ function migrateV1(db: SQLiteDatabase) {
       type TEXT NOT NULL,
       parent_id TEXT,
       icon TEXT NOT NULL,
-      color TEXT NOT NULL,
       is_default INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
@@ -197,12 +196,77 @@ function migrateV1(db: SQLiteDatabase) {
   `);
 }
 
+function migrateV2(db: SQLiteDatabase) {
+  const categoryColumns = db.getAllSync<{ name: string }>(`PRAGMA table_info(categories)`);
+  const hasColorColumn = categoryColumns.some((column) => column.name === 'color');
+  if (!hasColorColumn) return;
+
+  db.execSync(`
+    PRAGMA foreign_keys = OFF;
+    BEGIN TRANSACTION;
+    DROP TABLE IF EXISTS categories_v2;
+
+    CREATE TABLE categories_v2 (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      type TEXT NOT NULL,
+      parent_id TEXT,
+      icon TEXT NOT NULL,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    INSERT INTO categories_v2 (
+      id,
+      name,
+      sort_order,
+      type,
+      parent_id,
+      icon,
+      is_default,
+      created_at,
+      updated_at,
+      deleted_at
+    )
+    SELECT
+      id,
+      name,
+      sort_order,
+      type,
+      parent_id,
+      icon,
+      is_default,
+      created_at,
+      updated_at,
+      deleted_at
+    FROM categories;
+
+    DROP TABLE categories;
+    ALTER TABLE categories_v2 RENAME TO categories;
+
+    CREATE INDEX IF NOT EXISTS idx_categories_type ON categories(type);
+    CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id);
+    CREATE INDEX IF NOT EXISTS idx_categories_active_type_sort_name
+      ON categories(type, sort_order, name)
+      WHERE deleted_at IS NULL;
+
+    COMMIT;
+    PRAGMA foreign_keys = ON;
+  `);
+}
+
 function runMigrations(db: SQLiteDatabase) {
   const row = db.getFirstSync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = row?.user_version ?? 0;
 
   if (currentVersion < 1) {
     migrateV1(db);
+  }
+  if (currentVersion < 2) {
+    migrateV2(db);
   }
 
   db.execSync(`PRAGMA user_version = ${SCHEMA_VERSION}`);
@@ -329,7 +393,6 @@ function ensureDefaultCategories() {
         type: category.type,
         parentId: category.parentId,
         icon: category.icon,
-        color: category.color,
         isDefault: true,
         createdAt: now,
         updatedAt: now,

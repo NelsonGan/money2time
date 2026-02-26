@@ -30,6 +30,7 @@ import {
 } from '~/services/mmbakImportService';
 import { newId, nowIso } from '~/utils/id';
 import { DEFAULT_TRANSACTION_FILTERS } from '~/constants/appDefaults';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   type AccountGroup,
   type Account,
@@ -544,7 +545,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const cat = categories.find((c) => c.id === id);
         if (!cat) return { name: null, icon: null, parentName: null };
         const parent = cat.parentId ? categories.find((c) => c.id === cat.parentId) : null;
-        return { name: cat.name, icon: cat.icon, parentName: parent?.name ?? null };
+        return {
+          name: cat.name,
+          icon: resolveCategoryIcon(cat.icon, parent?.icon ?? null),
+          parentName: parent?.name ?? null,
+        };
       };
       const catInfo = findCategory(input.categoryId);
       return {
@@ -739,9 +744,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [categories],
   );
 
-  const getTransactionsByAccount = useCallback((accountId: string) => {
-    return transactionsRepository.listByAccount(accountId);
-  }, []);
+  const getTransactionsByAccount = useCallback(
+    (accountId: string) => {
+      const filtered = transactions.filter(
+        (transaction) =>
+          transaction.accountId === accountId ||
+          transaction.fromAccountId === accountId ||
+          transaction.toAccountId === accountId,
+      );
+      return [...filtered].sort((a, b) => {
+        const dateDelta = b.date.localeCompare(a.date);
+        if (dateDelta !== 0) return dateDelta;
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+    },
+    [transactions],
+  );
 
   const queryTransactions = useCallback((filters: Partial<TransactionFilters> = {}) => {
     return transactionsRepository.list(filters);

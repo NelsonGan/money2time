@@ -70,6 +70,7 @@ function TransactionItemView({
 
   const hasNote = Boolean(transaction.note);
   let categoryInline: string | null = null;
+  let categoryPrimaryLabel: string | null = null;
   if (!isTransfer && !isBalanceAdjustment) {
     const categoryChild: string = String(
       transaction.categoryName ?? I18n.t('common.uncategorized'),
@@ -81,6 +82,7 @@ function TransactionItemView({
     const categoryPrimary: string = hasSubcategory
       ? (categoryParent ?? categoryChild)
       : categoryChild;
+    categoryPrimaryLabel = categoryPrimary;
     const categorySecondary: string | null = hasSubcategory ? categoryChild : null;
     categoryInline = categorySecondary
       ? `${categoryPrimary} • ${categorySecondary}`
@@ -97,18 +99,20 @@ function TransactionItemView({
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
       : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
+  const joinSubtitleParts = (...parts: Array<string | null | undefined>) =>
+    parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
   const subtitle = isTransfer
     ? showDateInSubtitle
-      ? `Transfer · ${dateLabel ?? ''}`
+      ? joinSubtitleParts(dateLabel, 'Transfer')
       : 'Transfer'
     : isBalanceAdjustment
       ? showDateInSubtitle
-        ? `${I18n.t('transactions.filters.adjustment')} · ${dateLabel ?? ''}`
+        ? joinSubtitleParts(dateLabel, I18n.t('transactions.filters.adjustment'))
         : I18n.t('transactions.filters.adjustment')
       : showDateInSubtitle
         ? transaction.note
-          ? `${categoryInline ?? ''} · ${dateLabel ?? ''}`
+          ? joinSubtitleParts(dateLabel, categoryPrimaryLabel ?? categoryInline)
           : dateLabel
         : transaction.note
           ? categoryInline

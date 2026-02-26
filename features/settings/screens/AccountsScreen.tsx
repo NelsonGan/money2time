@@ -25,7 +25,7 @@ import {
 import { SelectField } from '~/components/ui/select';
 import { SegmentedToggle } from '~/components/ui/toggle';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { EditTransactionScreen } from '~/features/transactions/screens';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { useApp } from '~/context/AppContext';
@@ -538,20 +538,33 @@ function PayCreditCardSheet({
   visible,
   onClose,
   onSubmit,
-  fromOptions,
+  fromAccounts,
+  accountGroups,
   currencySymbol,
 }: {
   visible: boolean;
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
-  fromOptions: { value: string; label: string }[];
+  fromAccounts: Account[];
+  accountGroups: AccountGroup[];
   currencySymbol: string;
 }) {
-  const [fromAccountId, setFromAccountId] = useState<string | null>(fromOptions[0]?.value ?? null);
+  const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState(I18n.t('accounts.credit_payment_note'));
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (fromAccounts.length === 0) {
+      setFromAccountId(null);
+      return;
+    }
+    if (!fromAccountId || !fromAccounts.some((account) => account.id === fromAccountId)) {
+      setFromAccountId(fromAccounts[0].id);
+    }
+  }, [fromAccountId, fromAccounts, visible]);
 
   const handleSave = () => {
     if (!canSave || !fromAccountId) return;
@@ -579,12 +592,22 @@ function PayCreditCardSheet({
           }}
         >
           <View className="gap-4">
-            <SelectField
-              label={I18n.t('accounts.pay_from')}
-              value={fromAccountId}
-              onChange={setFromAccountId}
-              options={fromOptions}
-            />
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('accounts.pay_from')}
+              </Text>
+              <View
+                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                style={{ height: 236 }}
+              >
+                <AccountPanel
+                  accounts={fromAccounts}
+                  accountGroups={accountGroups}
+                  selectedId={fromAccountId}
+                  onSelect={setFromAccountId}
+                />
+              </View>
+            </View>
             <Input
               label={I18n.t('transactions.editor.amount')}
               variant="currency"
@@ -1320,9 +1343,7 @@ export function AccountsScreen({
 
     const balance = balanceMap.get(account.id) ?? account.startingBalance;
     const txns = selectedAccountTransactions;
-    const payFromOptions = accounts
-      .filter((item) => item.id !== account.id && item.type !== 'credit')
-      .map((item) => ({ value: item.id, label: `${item.icon} ${item.name}` }));
+    const payFromAccounts = accounts.filter((item) => item.id !== account.id && item.type !== 'credit');
     const now = new Date();
     const statementDay = account.creditStatementDay ?? null;
     const dueDay = account.creditDueDay ?? null;
@@ -1548,7 +1569,8 @@ export function AccountsScreen({
         <PayCreditCardSheet
           visible={showPayCard}
           onClose={() => setShowPayCard(false)}
-          fromOptions={payFromOptions}
+          fromAccounts={payFromAccounts}
+          accountGroups={accountGroups}
           currencySymbol={settings.currencySymbol}
           onSubmit={({ fromAccountId, amount, note }) => {
             createTransaction({
