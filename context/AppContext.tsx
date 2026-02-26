@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { getDb, initializeDatabase } from '~/lib/db/client';
 import {
@@ -28,6 +28,7 @@ import {
   importMoneyManagerBackupFromUri,
   type MMImportSummary,
 } from '~/services/mmbakImportService';
+import { newId, nowIso } from '~/utils/id';
 import { DEFAULT_TRANSACTION_FILTERS } from '~/constants/appDefaults';
 import {
   type AccountGroup,
@@ -65,9 +66,7 @@ interface AppContextValue extends AppState {
     input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteAccount: (id: string) => void;
-  reorderAccounts: (ids: string[]) => void;
   createAccountGroup: (name: string) => void;
-  reorderAccountGroups: (ids: string[]) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
   createRecurringRule: (input: CreateRecurringRuleInput) => void;
@@ -80,7 +79,6 @@ interface AppContextValue extends AppState {
     updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteCategory: (id: string) => void;
-  reorderCategories: (ids: string[]) => void;
 
   createTransaction: (input: CreateTransactionInput) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -121,6 +119,10 @@ interface AppContextValue extends AppState {
   ) => TransactionWithRelations[];
   getTrueHourlyRateForDate: (dateIso: string) => number;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
+
+  reorderAccounts: (orderedIds: string[]) => void;
+  reorderAccountGroups: (orderedIds: string[]) => void;
+  reorderCategories: (orderedIds: string[]) => void;
 
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
@@ -349,6 +351,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const refreshTransactions = useCallback(() => {
+    try {
+      setTransactions(transactionsRepository.list());
+    } catch (error) {
+      setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
+    }
+  }, []);
+
+  const reorderAccounts = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setAccounts((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+  }, []);
+
+  const reorderAccountGroups = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setAccountGroups((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+  }, []);
+
+  const reorderCategories = useCallback((orderedIds: string[]) => {
+    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
+    setCategories((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+  }, []);
+
   useEffect(() => {
     setIsLoading(true);
     try {
@@ -426,28 +451,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
-  const reorderAccounts = useCallback(
-    (ids: string[]) => {
-      runMutation(() => {
-        accountsRepository.reorder(ids);
-      });
-    },
-    [runMutation],
-  );
-
   const createAccountGroup = useCallback(
     (name: string) => {
       runMutation(() => {
         accountGroupsRepository.create(name);
-      });
-    },
-    [runMutation],
-  );
-
-  const reorderAccountGroups = useCallback(
-    (ids: string[]) => {
-      runMutation(() => {
-        accountGroupsRepository.reorder(ids);
       });
     },
     [runMutation],
@@ -528,40 +535,110 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
-  const reorderCategories = useCallback(
-    (ids: string[]) => {
-      runMutation(() => {
-        categoriesRepository.reorder(ids);
-      });
+  const resolveRelationNames = useCallback(
+    (input: Partial<CreateTransactionInput>) => {
+      const findAccount = (id?: string | null) =>
+        id ? accounts.find((a) => a.id === id)?.name ?? null : null;
+      const findCategory = (id?: string | null) => {
+        if (!id) return { name: null, icon: null, parentName: null };
+        const cat = categories.find((c) => c.id === id);
+        if (!cat) return { name: null, icon: null, parentName: null };
+        const parent = cat.parentId ? categories.find((c) => c.id === cat.parentId) : null;
+        return { name: cat.name, icon: cat.icon, parentName: parent?.name ?? null };
+      };
+      const catInfo = findCategory(input.categoryId);
+      return {
+        accountName: findAccount(input.accountId),
+        fromAccountName: findAccount(input.fromAccountId),
+        toAccountName: findAccount(input.toAccountId),
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        categoryParentName: catInfo.parentName,
+      };
     },
-    [runMutation],
+    [accounts, categories],
   );
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput) => {
-      runMutation(() => {
-        transactionsRepository.create(input);
+      const id = newId();
+      const now = nowIso();
+      const optimistic: TransactionWithRelations = {
+        id,
+        type: input.type,
+        amount: input.amount,
+        currency: input.currency,
+        date: input.date,
+        accountId: input.accountId ?? null,
+        fromAccountId: input.fromAccountId ?? null,
+        toAccountId: input.toAccountId ?? null,
+        categoryId: input.categoryId ?? null,
+        note: input.note ?? null,
+        recurrencePattern: 'none',
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        recurrenceParentId: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        ...resolveRelationNames(input),
+      };
+      setTransactions((prev) => [optimistic, ...prev]);
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          transactionsRepository.createWithId(id, input);
+        } catch {
+          // rollback on failure
+        }
+        refreshTransactions();
       });
     },
-    [runMutation],
+    [refreshTransactions, resolveRelationNames],
   );
 
   const updateTransaction = useCallback(
     (id: string, input: Partial<CreateTransactionInput>) => {
-      runMutation(() => {
-        transactionsRepository.update(id, input);
+      const relations = resolveRelationNames(input);
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          if (tx.id !== id) return tx;
+          const updated = { ...tx, ...input, updatedAt: nowIso() };
+          if ('accountId' in input) updated.accountName = relations.accountName;
+          if ('fromAccountId' in input) updated.fromAccountName = relations.fromAccountName;
+          if ('toAccountId' in input) updated.toAccountName = relations.toAccountName;
+          if ('categoryId' in input) {
+            updated.categoryName = relations.categoryName;
+            updated.categoryIcon = relations.categoryIcon;
+            updated.categoryParentName = relations.categoryParentName;
+          }
+          return updated;
+        }),
+      );
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          transactionsRepository.update(id, input);
+        } catch {
+          // rollback on failure
+        }
+        refreshTransactions();
       });
     },
-    [runMutation],
+    [refreshTransactions, resolveRelationNames],
   );
 
   const deleteTransaction = useCallback(
     (id: string) => {
-      runMutation(() => {
-        transactionsRepository.softDelete(id);
+      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          transactionsRepository.softDelete(id);
+        } catch {
+          // rollback on failure
+        }
+        refreshTransactions();
       });
     },
-    [runMutation],
+    [refreshTransactions],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -879,18 +956,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createAccount,
             updateAccount,
             deleteAccount,
-            reorderAccounts,
             createAccountGroup,
-            reorderAccountGroups,
             renameAccountGroup,
             deleteAccountGroup,
+            reorderAccounts,
+            reorderAccountGroups,
+            reorderCategories,
             createRecurringRule,
             updateRecurringRule,
             deleteRecurringRule,
             createCategory,
             updateCategory,
             deleteCategory,
-            reorderCategories,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -939,18 +1016,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createAccount,
       updateAccount,
       deleteAccount,
-      reorderAccounts,
       createAccountGroup,
-      reorderAccountGroups,
       renameAccountGroup,
       deleteAccountGroup,
+      reorderAccounts,
+      reorderAccountGroups,
+      reorderCategories,
       createRecurringRule,
       updateRecurringRule,
       deleteRecurringRule,
       createCategory,
       updateCategory,
       deleteCategory,
-      reorderCategories,
       createTransaction,
       updateTransaction,
       deleteTransaction,

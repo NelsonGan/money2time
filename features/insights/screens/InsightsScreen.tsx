@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart, PieChart } from 'react-native-chart-kit';
+import { ChevronsLeftRight } from 'lucide-react-native';
 
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { Card, CardContent } from '~/components/ui/card';
@@ -43,7 +44,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionWithRelations } from '~/types';
+import type { Category, TransactionType, TransactionWithRelations } from '~/types';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 
 const PERIOD_TABS = ['week', 'month', 'year', 'custom'] as const;
@@ -61,6 +63,8 @@ type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_b
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
 type TimeCostViewMode = 'category' | 'transaction';
+type EditableTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
+type DrilldownScopeMatcher = (transaction: TransactionWithRelations) => boolean;
 
 const INSIGHT_ICONS: Record<InsightType, string> = {
   expense_breakdown: '📉',
@@ -102,12 +106,18 @@ const INSIGHTS_PAGER_CENTER_INDEX = Math.floor(INSIGHTS_PAGER_TOTAL_SLOTS / 2);
 const INSIGHTS_LIST_STYLE = { flex: 1 } as const;
 const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: 18,
-  paddingBottom: 110,
+  paddingBottom: LIST_BOTTOM_PADDING,
   paddingTop: 4,
 } as const;
 const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
 const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
+const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: 8 } as const;
+const DRILLDOWN_BULK_TYPE_OPTIONS: { value: EditableTransactionType; label: string }[] = [
+  { value: 'expense', label: I18n.t('transactions.filters.spent') },
+  { value: 'income', label: I18n.t('transactions.filters.earned') },
+  { value: 'transfer', label: I18n.t('transactions.filters.moved') },
+];
 const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_TOP = 16;
 const ASSET_HISTORY_CHART_PADDING_RIGHT = 88;
@@ -384,7 +394,9 @@ function parseInsightsPreferencesPayload(
       parsed.excludedSavingsExpenseCategoryIds,
     );
     if (Object.prototype.hasOwnProperty.call(parsed, 'excludedAssetHistoryAccountIds')) {
-      next.excludedAssetHistoryAccountIds = toUniqueStringList(parsed.excludedAssetHistoryAccountIds);
+      next.excludedAssetHistoryAccountIds = toUniqueStringList(
+        parsed.excludedAssetHistoryAccountIds,
+      );
     }
     if (typeof parsed.excludedTimeCostExpenseCategoryId === 'string') {
       const normalized = parsed.excludedTimeCostExpenseCategoryId.trim();
@@ -594,7 +606,10 @@ function formatCompactAxisNumber(value: number) {
 }
 
 function isLegacyBalanceAdjustmentTransfer(
-  transaction: Pick<TransactionWithRelations, 'type' | 'accountId' | 'fromAccountId' | 'toAccountId'>,
+  transaction: Pick<
+    TransactionWithRelations,
+    'type' | 'accountId' | 'fromAccountId' | 'toAccountId'
+  >,
 ) {
   return (
     transaction.type === 'transfer' &&
@@ -602,6 +617,19 @@ function isLegacyBalanceAdjustmentTransfer(
     !transaction.fromAccountId &&
     !transaction.toAccountId
   );
+}
+
+function resolveBreakdownRootId(
+  transaction: Pick<TransactionWithRelations, 'categoryId' | 'categoryName' | 'categoryParentName'>,
+  categoryById: Map<string, Category>,
+) {
+  const category = transaction.categoryId ? categoryById.get(transaction.categoryId) : null;
+  const root = category?.parentId ? categoryById.get(category.parentId) : category;
+  const fallbackRootLabel = transaction.categoryParentName ?? transaction.categoryName ?? null;
+  const fallbackRootKey = fallbackRootLabel
+    ? `legacy-root:${fallbackRootLabel.toLowerCase()}`
+    : null;
+  return root?.id ?? fallbackRootKey ?? 'uncategorized';
 }
 
 function pieSliceIdFromTouch(
@@ -654,7 +682,9 @@ function calcChartHeight(value: number, values: number[], height: number) {
 
 function assetHistoryPointX(index: number, width: number, pointCount: number) {
   const xMax = Math.max(1, pointCount);
-  return ASSET_HISTORY_CHART_PADDING_RIGHT + (index * (width - ASSET_HISTORY_CHART_PADDING_RIGHT)) / xMax;
+  return (
+    ASSET_HISTORY_CHART_PADDING_RIGHT + (index * (width - ASSET_HISTORY_CHART_PADDING_RIGHT)) / xMax
+  );
 }
 
 function assetHistoryNearestPointIndex(locationX: number, width: number, pointCount: number) {
@@ -709,16 +739,14 @@ interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
 }
 
-export function InsightsScreen({
-  resetToCurrentMonthToken = 0,
-}: InsightsScreenProps = {}) {
+export function InsightsScreen({ resetToCurrentMonthToken = 0 }: InsightsScreenProps = {}) {
   const {
     isLoading,
     settings,
     categories,
     accounts,
     accountGroups,
-    queryTransactions,
+    transactions: allTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
@@ -760,6 +788,7 @@ export function InsightsScreen({
     label: string;
     transactions: TransactionWithRelations[];
     showTypeFilter?: boolean;
+    scopeMatcher?: DrilldownScopeMatcher;
   } | null>(null);
   const [drilldownTypeFilter, setDrilldownTypeFilter] =
     useState<DrilldownTransactionFilter>('expense');
@@ -772,6 +801,7 @@ export function InsightsScreen({
   const [showDrilldownBulkUpdate, setShowDrilldownBulkUpdate] = useState(false);
   const [drilldownBulkDate, setDrilldownBulkDate] = useState(() => formatDateInput(new Date()));
   const [drilldownBulkDateTouched, setDrilldownBulkDateTouched] = useState(false);
+  const [drilldownBulkType, setDrilldownBulkType] = useState<EditableTransactionType | null>(null);
   const [drilldownBulkNote, setDrilldownBulkNote] = useState('');
   const [drilldownBulkNoteTouched, setDrilldownBulkNoteTouched] = useState(false);
   const [drilldownHeaderHeight, setDrilldownHeaderHeight] = useState(0);
@@ -848,6 +878,7 @@ export function InsightsScreen({
     setShowDrilldownBulkUpdate(false);
     setDrilldownBulkDate(formatDateInput(new Date()));
     setDrilldownBulkDateTouched(false);
+    setDrilldownBulkType(null);
     setDrilldownBulkNote('');
     setDrilldownBulkNoteTouched(false);
     setSelectedCalendarDayKey(null);
@@ -929,10 +960,7 @@ export function InsightsScreen({
       timeCostViewMode,
     ],
   );
-  usePersistedJsonSnapshot<
-    InsightsPreferencesSnapshot,
-    Partial<InsightsPreferencesSnapshot>
-  >({
+  usePersistedJsonSnapshot<InsightsPreferencesSnapshot, Partial<InsightsPreferencesSnapshot>>({
     isLoading,
     storedJson: insightsPreferencesJson,
     snapshot: insightsPreferencesSnapshot,
@@ -950,7 +978,6 @@ export function InsightsScreen({
     hasHydratedAssetHistoryExclusionsRef.current = true;
   }, [defaultHiddenAssetHistoryAccountIds, isLoading]);
 
-  const allTransactions = useMemo(() => queryTransactions(), [queryTransactions]);
   const transactionById = useMemo(
     () => new Map(allTransactions.map((transaction) => [transaction.id, transaction])),
     [allTransactions],
@@ -967,6 +994,10 @@ export function InsightsScreen({
   const effectiveSelectedAccountIds = useMemo(
     () => (activeInsightFilterConfig.allowAccountFilter ? selectedAccountIds : []),
     [activeInsightFilterConfig.allowAccountFilter, selectedAccountIds],
+  );
+  const effectiveSelectedAccountIdSet = useMemo(
+    () => new Set(effectiveSelectedAccountIds),
+    [effectiveSelectedAccountIds],
   );
   const excludedSavingsIncomeCategorySet = useMemo(
     () => new Set(excludedSavingsIncomeCategoryIds),
@@ -1072,14 +1103,17 @@ export function InsightsScreen({
         );
         const excludedAccountsCount = assetHistoryAccountOptions.length - includedAccounts.length;
         const year = state.anchorDate.getFullYear();
-        const monthRowsSeed: AssetHistoryMonthRow[] = Array.from({ length: 12 }, (_, monthIndex) => {
-          const monthDate = new Date(Date.UTC(year, monthIndex, 1));
-          return {
-            monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
-            label: monthDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
-            totalAssets: 0,
-          };
-        });
+        const monthRowsSeed: AssetHistoryMonthRow[] = Array.from(
+          { length: 12 },
+          (_, monthIndex) => {
+            const monthDate = new Date(Date.UTC(year, monthIndex, 1));
+            return {
+              monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+              label: monthDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
+              totalAssets: 0,
+            };
+          },
+        );
 
         if (includedAccounts.length === 0) {
           return {
@@ -1134,7 +1168,11 @@ export function InsightsScreen({
             }
           }
 
-          if (transaction.type === 'transfer' && !isLegacyAdjustmentTransfer && transaction.toAccountId) {
+          if (
+            transaction.type === 'transfer' &&
+            !isLegacyAdjustmentTransfer &&
+            transaction.toAccountId
+          ) {
             const account = accountById.get(transaction.toAccountId);
             if (account) {
               addAccountDelta(
@@ -1182,10 +1220,7 @@ export function InsightsScreen({
           ) {
             const deltaMap = monthlyDeltas.get(sortedDeltaMonthKeys[deltaMonthIndex] ?? '');
             deltaMap?.forEach((delta, accountId) => {
-              balancesByAccountId.set(
-                accountId,
-                (balancesByAccountId.get(accountId) ?? 0) + delta,
-              );
+              balancesByAccountId.set(accountId, (balancesByAccountId.get(accountId) ?? 0) + delta);
             });
             deltaMonthIndex += 1;
           }
@@ -1629,13 +1664,10 @@ export function InsightsScreen({
       >();
       const breakdownTransactionsById = new Map<string, TransactionWithRelations[]>();
       filteredForRange.forEach((tx) => {
+        const id = resolveBreakdownRootId(tx, categoryById);
         const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
         const root = category?.parentId ? categoryById.get(category.parentId) : category;
         const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
-        const fallbackRootKey = fallbackRootLabel
-          ? `legacy-root:${fallbackRootLabel.toLowerCase()}`
-          : null;
-        const id = root?.id ?? fallbackRootKey ?? 'uncategorized';
         const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
         const emoji = root?.icon ?? tx.categoryIcon ?? '•';
         const value =
@@ -2190,9 +2222,28 @@ export function InsightsScreen({
                     onPress={() => {
                       void triggerHaptic('selection');
                       setActiveBreakdownSlice(null, false);
+                      const targetBreakdownId = item.id;
+                      const targetType = pageData.transactionType;
+                      const rangeStart = pageData.range.start;
+                      const rangeEnd = pageData.range.end;
                       openDrilldown({
                         label: item.name,
                         transactions: pageData.breakdownTransactionsById.get(item.id) ?? [],
+                        scopeMatcher: (transaction) => {
+                          if (transaction.type !== targetType) return false;
+                          if (transaction.date < rangeStart || transaction.date > rangeEnd) {
+                            return false;
+                          }
+                          if (effectiveSelectedAccountIdSet.size > 0) {
+                            const accountId = transaction.accountId;
+                            if (!accountId || !effectiveSelectedAccountIdSet.has(accountId)) {
+                              return false;
+                            }
+                          }
+                          return (
+                            resolveBreakdownRootId(transaction, categoryById) === targetBreakdownId
+                          );
+                        },
                       });
                     }}
                     className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
@@ -2396,9 +2447,13 @@ export function InsightsScreen({
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('selection');
+                      const targetDayKey = selectedDayKey;
                       openDrilldown({
                         label: selectedDayLabel,
                         transactions: selectedDayTransactions,
+                        scopeMatcher: (transaction) =>
+                          (transaction.type === 'income' || transaction.type === 'expense') &&
+                          dayKeyFromIsoLocal(transaction.date) === targetDayKey,
                       });
                     }}
                     className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1.5 active:opacity-85"
@@ -2508,9 +2563,18 @@ export function InsightsScreen({
           emoji: categoryRow.emoji,
           accentColor,
           onPress: () => {
+            const targetCategoryId = categoryRow.id;
             openDrilldown({
               label: `${categoryRow.emoji} ${categoryRow.label}`,
               transactions: categoryRow.transactions,
+              scopeMatcher: (transaction) => {
+                if (transaction.type !== 'expense') return false;
+                const cat = transaction.categoryId
+                  ? categoryById.get(transaction.categoryId)
+                  : null;
+                const rootId = cat?.parentId ?? transaction.categoryId ?? null;
+                return rootId === targetCategoryId || transaction.categoryId === targetCategoryId;
+              },
             });
           },
         };
@@ -2659,7 +2723,9 @@ export function InsightsScreen({
         <CardContent className="py-3 gap-2.5">
           <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
             <View className="flex-row items-center justify-between">
-              <Text variant="caption">{I18n.t('insights.analytics.asset_history.summary_title')}</Text>
+              <Text variant="caption">
+                {I18n.t('insights.analytics.asset_history.summary_title')}
+              </Text>
               <Text variant="label" tone="muted">
                 {I18n.t('insights.analytics.asset_history.account_count', {
                   count: pageData.includedAccountsCount,
@@ -2686,7 +2752,10 @@ export function InsightsScreen({
           </View>
 
           <View className="rounded-2xl border border-border/30 bg-card/90 px-2 py-2.5">
-            <View style={{ width: chartWidth, height: ASSET_HISTORY_CHART_HEIGHT }} className="self-center">
+            <View
+              style={{ width: chartWidth, height: ASSET_HISTORY_CHART_HEIGHT }}
+              className="self-center"
+            >
               <LineChart
                 data={chartData}
                 width={chartWidth}
@@ -2879,10 +2948,38 @@ export function InsightsScreen({
                     key={row.monthKey}
                     onPress={() => {
                       void triggerHaptic('selection');
+                      const targetMonthKey = row.monthKey;
+                      const rangeStart = pageData.range.start;
+                      const rangeEnd = pageData.range.end;
                       openDrilldown({
                         label: row.label,
                         transactions: row.transactions,
                         showTypeFilter: true,
+                        scopeMatcher: (transaction) => {
+                          if (transaction.type !== 'income' && transaction.type !== 'expense') {
+                            return false;
+                          }
+                          if (transaction.date < rangeStart || transaction.date > rangeEnd) {
+                            return false;
+                          }
+                          if (monthKeyFromIsoLocal(transaction.date) !== targetMonthKey) {
+                            return false;
+                          }
+                          const categoryId = transaction.categoryId;
+                          if (!categoryId) return true;
+                          const category = categoryById.get(categoryId);
+                          const rootCategoryId = category?.parentId ?? categoryId;
+                          if (transaction.type === 'income') {
+                            return (
+                              !excludedSavingsIncomeCategorySet.has(categoryId) &&
+                              !excludedSavingsIncomeCategorySet.has(rootCategoryId)
+                            );
+                          }
+                          return (
+                            !excludedSavingsExpenseCategorySet.has(categoryId) &&
+                            !excludedSavingsExpenseCategorySet.has(rootCategoryId)
+                          );
+                        },
                       });
                     }}
                     className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
@@ -3114,7 +3211,8 @@ export function InsightsScreen({
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
   const isDrilldownSelectionMode = selectedDrilldownTransactionIds.length > 0;
   const selectedDrilldownTransactionCount = selectedDrilldownTransactionIds.length;
-  const hasDrilldownBulkChanges = drilldownBulkDateTouched || drilldownBulkNoteTouched;
+  const hasDrilldownBulkChanges =
+    drilldownBulkDateTouched || drilldownBulkNoteTouched || drilldownBulkType !== null;
   const handleDrilldownHeaderLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = Math.ceil(event.nativeEvent.layout.height);
     setDrilldownHeaderHeight((previous) =>
@@ -3126,6 +3224,7 @@ export function InsightsScreen({
       label: string;
       transactions: TransactionWithRelations[];
       showTypeFilter?: boolean;
+      scopeMatcher?: DrilldownScopeMatcher;
     }) => {
       if (nextState.showTypeFilter) {
         setDrilldownTypeFilter('expense');
@@ -3134,6 +3233,7 @@ export function InsightsScreen({
       setShowDrilldownBulkUpdate(false);
       setDrilldownBulkDate(formatDateInput(new Date()));
       setDrilldownBulkDateTouched(false);
+      setDrilldownBulkType(null);
       setDrilldownBulkNote('');
       setDrilldownBulkNoteTouched(false);
       setDrilldownState(nextState);
@@ -3146,6 +3246,7 @@ export function InsightsScreen({
     setDrilldownTypeFilter('expense');
     setSelectedDrilldownTransactionIds([]);
     setShowDrilldownBulkUpdate(false);
+    setDrilldownBulkType(null);
     setSelectedTransaction(null);
   }, []);
   const clearDrilldownSelection = useCallback(() => {
@@ -3183,6 +3284,7 @@ export function InsightsScreen({
     if (selectedDrilldownTransactionCount === 0) return;
     setDrilldownBulkDate(formatDateInput(new Date()));
     setDrilldownBulkDateTouched(false);
+    setDrilldownBulkType(null);
     setDrilldownBulkNote('');
     setDrilldownBulkNoteTouched(false);
     setShowDrilldownBulkUpdate(true);
@@ -3194,17 +3296,56 @@ export function InsightsScreen({
     if (selectedDrilldownTransactionIds.length === 0) return;
     if (!hasDrilldownBulkChanges) return;
 
-    const updates: { date?: string; note?: string | null } = {};
-    if (drilldownBulkDateTouched) updates.date = drilldownBulkDate;
+    const baseUpdates: { date?: string; note?: string | null } = {};
+    if (drilldownBulkDateTouched) baseUpdates.date = drilldownBulkDate;
     if (drilldownBulkNoteTouched) {
       const normalizedNote = drilldownBulkNote.trim();
-      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
+      baseUpdates.note = normalizedNote.length > 0 ? normalizedNote : null;
     }
-    if (Object.keys(updates).length === 0) return;
+
+    let appliedCount = 0;
 
     selectedDrilldownTransactionIds.forEach((transactionId) => {
+      const existing = transactionById.get(transactionId);
+      const updates: {
+        date?: string;
+        note?: string | null;
+        type?: EditableTransactionType;
+        accountId?: string | null;
+        categoryId?: string | null;
+        fromAccountId?: string | null;
+        toAccountId?: string | null;
+      } = { ...baseUpdates };
+
+      if (drilldownBulkType === 'transfer') {
+        // Preserve source account when converting non-transfer entries to transfer,
+        // and force destination account to empty so the user can pick it later.
+        if (existing?.type === 'income' || existing?.type === 'expense') {
+          if (!existing.accountId) return;
+          updates.type = 'transfer';
+          updates.accountId = null;
+          updates.categoryId = null;
+          updates.fromAccountId = existing.accountId;
+          updates.toAccountId = null;
+        } else {
+          updates.type = 'transfer';
+          updates.accountId = null;
+          updates.categoryId = null;
+        }
+      } else if (drilldownBulkType) {
+        updates.type = drilldownBulkType;
+        updates.categoryId = null;
+        updates.fromAccountId = null;
+        updates.toAccountId = null;
+      }
+
+      if (Object.keys(updates).length === 0) return;
       updateTransaction(transactionId, updates);
+      appliedCount += 1;
     });
+
+    if (appliedCount === 0) return;
+
     setShowDrilldownBulkUpdate(false);
     setSelectedDrilldownTransactionIds([]);
   }, [
@@ -3212,8 +3353,10 @@ export function InsightsScreen({
     drilldownBulkDateTouched,
     drilldownBulkNote,
     drilldownBulkNoteTouched,
+    drilldownBulkType,
     hasDrilldownBulkChanges,
     selectedDrilldownTransactionIds,
+    transactionById,
     updateTransaction,
   ]);
   const handleDeleteSelectedDrilldownTransactions = useCallback(() => {
@@ -3240,18 +3383,18 @@ export function InsightsScreen({
   }, [deleteTransaction, selectedDrilldownTransactionIds]);
   const resolvedDrilldownTransactions = useMemo(() => {
     if (!drilldownState) return [];
-    return drilldownState.transactions
+    const transactions = drilldownState.transactions
       .map((transaction) => transactionById.get(transaction.id))
       .filter((transaction): transaction is TransactionWithRelations => Boolean(transaction));
+    if (!drilldownState.scopeMatcher) return transactions;
+    return transactions.filter((transaction) => drilldownState.scopeMatcher?.(transaction));
   }, [drilldownState, transactionById]);
   const drilldownIncomeTransactions = useMemo(
-    () =>
-      resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
+    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'income'),
     [resolvedDrilldownTransactions],
   );
   const drilldownExpenseTransactions = useMemo(
-    () =>
-      resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
+    () => resolvedDrilldownTransactions.filter((transaction) => transaction.type === 'expense'),
     [resolvedDrilldownTransactions],
   );
   const drilldownPagerExtraData = useMemo(
@@ -3311,6 +3454,8 @@ export function InsightsScreen({
             emptyTitle={I18n.t('insights.empty_category.title')}
             emptyMessage={I18n.t('insights.empty_category.message')}
             contentPaddingBottom={30}
+            disableItemAnimations
+            disableScrollBounce
             compactItems
             listKey={`drilldown-${item}`}
           />
@@ -3338,7 +3483,9 @@ export function InsightsScreen({
 
   useEffect(() => {
     if (selectedDrilldownTransactionIds.length === 0) return;
-    const availableIds = new Set(resolvedDrilldownTransactions.map((transaction) => transaction.id));
+    const availableIds = new Set(
+      resolvedDrilldownTransactions.map((transaction) => transaction.id),
+    );
     setSelectedDrilldownTransactionIds((previous) => {
       const next = previous.filter((id) => availableIds.has(id));
       return next.length === previous.length ? previous : next;
@@ -3471,7 +3618,34 @@ export function InsightsScreen({
                 </View>
               </View>
 
-              <ScrollView className="flex-1" contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}>
+              <ScrollView
+                className="flex-1"
+                contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}
+              >
+                <View className="gap-2.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.filters.type')}
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={DRILLDOWN_BULK_TYPE_PILLS_STYLE}
+                  >
+                    {DRILLDOWN_BULK_TYPE_OPTIONS.map((option) => (
+                      <FilterPill
+                        key={option.value}
+                        label={option.label}
+                        active={drilldownBulkType === option.value}
+                        onPress={() =>
+                          setDrilldownBulkType((current) =>
+                            current === option.value ? null : option.value,
+                          )
+                        }
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+
                 <View className="gap-2.5">
                   <Text variant="caption" tone="muted">
                     {I18n.t('transactions.editor.date')}
@@ -3508,7 +3682,9 @@ export function InsightsScreen({
               {isDrilldownSelectionMode ? (
                 <View
                   className="bg-background pb-2 pt-2"
-                  style={drilldownHeaderHeight > 0 ? { minHeight: drilldownHeaderHeight } : undefined}
+                  style={
+                    drilldownHeaderHeight > 0 ? { minHeight: drilldownHeaderHeight } : undefined
+                  }
                 >
                   <View className="px-5 pt-2">
                     <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
@@ -3577,27 +3753,64 @@ export function InsightsScreen({
                   <View className="px-5 pb-2">
                     <View className="rounded-2xl border border-border/35 bg-card/90 px-3 py-2.5">
                       <View className="flex-row items-center justify-between gap-2">
-                        <View className="flex-1">
+                        <Pressable
+                          onPress={() => {
+                            if (drilldownTypeFilter === 'income') return;
+                            void triggerHaptic('selection');
+                            setDrilldownTypeFilter('income');
+                          }}
+                          className={cn(
+                            'flex-1 rounded-xl px-2.5 py-2 active:opacity-85',
+                            drilldownTypeFilter === 'income'
+                              ? 'border border-success/35 bg-success/10'
+                              : 'border border-transparent',
+                          )}
+                        >
                           <Text
                             variant="label"
                             className={cn(
-                              drilldownTypeFilter === 'income'
-                                ? 'text-success'
-                                : 'text-success/55',
+                              drilldownTypeFilter === 'income' ? 'text-success' : 'text-success/55',
                             )}
                           >
                             {I18n.t('insights.calendar.income')}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}: {drilldownIncomeTransactions.length}
+                            {I18n.t('insights.calendar.transactions')}:{' '}
+                            {drilldownIncomeTransactions.length}
                           </Text>
+                        </Pressable>
+                        <View className="items-center px-1">
+                          <View className="rounded-full border border-border/45 bg-background/90 px-2 py-1 flex-row items-center gap-1">
+                            <View
+                              className={cn(
+                                'h-1.5 w-1.5 rounded-full',
+                                drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-border/70',
+                              )}
+                            />
+                            <ChevronsLeftRight size={12} color={themeColors.textMuted} />
+                            <View
+                              className={cn(
+                                'h-1.5 w-1.5 rounded-full',
+                                drilldownTypeFilter === 'expense'
+                                  ? 'bg-destructive'
+                                  : 'bg-border/70',
+                              )}
+                            />
+                          </View>
                         </View>
-                        <View className="items-center px-2">
-                          <Text variant="label" tone="muted">
-                            {I18n.t('insights.drilldown_swipe_hint')}
-                          </Text>
-                        </View>
-                        <View className="flex-1 items-end">
+                        <Pressable
+                          onPress={() => {
+                            if (drilldownTypeFilter === 'expense') return;
+                            void triggerHaptic('selection');
+                            setDrilldownTypeFilter('expense');
+                          }}
+                          className={cn(
+                            'flex-1 items-end rounded-xl px-2.5 py-2 active:opacity-85',
+                            drilldownTypeFilter === 'expense'
+                              ? 'border border-destructive/35 bg-destructive/8'
+                              : 'border border-transparent',
+                          )}
+                        >
                           <Text
                             variant="label"
                             className={cn(
@@ -3609,9 +3822,10 @@ export function InsightsScreen({
                             {I18n.t('insights.calendar.expense')}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5">
-                            {I18n.t('insights.calendar.transactions')}: {drilldownExpenseTransactions.length}
+                            {I18n.t('insights.calendar.transactions')}:{' '}
+                            {drilldownExpenseTransactions.length}
                           </Text>
-                        </View>
+                        </Pressable>
                       </View>
                       <View className="mt-2 flex-row items-center gap-1.5">
                         <View
@@ -3661,6 +3875,8 @@ export function InsightsScreen({
                   emptyTitle={I18n.t('insights.empty_category.title')}
                   emptyMessage={I18n.t('insights.empty_category.message')}
                   contentPaddingBottom={30}
+                  disableItemAnimations
+                  disableScrollBounce
                   compactItems
                 />
               )}
@@ -3835,14 +4051,13 @@ export function InsightsScreen({
                   </View>
                   <FilterPill
                     label={I18n.t('insights.filters.all_selected')}
-                    active={includedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length}
+                    active={
+                      includedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
+                    }
                     onPress={() => setExcludedAssetHistoryAccountIds([])}
                   />
                 </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={{ height: 236 }}
-                >
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                   <AccountPanel
                     accounts={assetHistoryAccountOptions}
                     accountGroups={accountGroups}
@@ -3876,10 +4091,7 @@ export function InsightsScreen({
                     onPress={() => setExcludedTimeCostExpenseCategoryId(null)}
                   />
                 </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={{ height: 236 }}
-                >
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                   <CategoryPanel
                     parents={savingsExpenseCategoryPanel.parents}
                     childByParent={savingsExpenseCategoryPanel.childByParent}
@@ -3907,10 +4119,7 @@ export function InsightsScreen({
                       onPress={() => setExcludedSavingsIncomeCategoryIds([])}
                     />
                   </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={{ height: 236 }}
-                  >
+                  <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                     <CategoryPanel
                       parents={savingsIncomeCategoryPanel.parents}
                       childByParent={savingsIncomeCategoryPanel.childByParent}
@@ -3937,10 +4146,7 @@ export function InsightsScreen({
                       onPress={() => setExcludedSavingsExpenseCategoryIds([])}
                     />
                   </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={{ height: 236 }}
-                  >
+                  <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                     <CategoryPanel
                       parents={savingsExpenseCategoryPanel.parents}
                       childByParent={savingsExpenseCategoryPanel.childByParent}

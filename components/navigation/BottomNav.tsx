@@ -73,22 +73,20 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   );
 
   return (
-    <View className="px-3 pb-5 pt-2 bg-transparent">
-      <View className="relative rounded-[28px] bg-card/95 border border-border/40 px-1 py-1.5 shadow-soft">
-        <View className="flex-row items-center">
-          {TABS.map((tab) => (
-            <NavItem
-              key={tab.name}
-              tab={tab.name}
-              icon={tab.icon}
-              label={I18n.t(tab.labelKey)}
-              isActive={activeTab === tab.name}
-              tintActive={themeColors.primary}
-              tintInactive={themeColors.textMuted}
-              onPressTab={handleTabPress}
-            />
-          ))}
-        </View>
+    <View className="bg-card border-t border-border/40 pb-7">
+      <View className="flex-row items-center px-1 py-1.5">
+        {TABS.map((tab) => (
+          <NavItem
+            key={tab.name}
+            tab={tab.name}
+            icon={tab.icon}
+            label={I18n.t(tab.labelKey)}
+            isActive={activeTab === tab.name}
+            tintActive={themeColors.primary}
+            tintInactive={themeColors.textMuted}
+            onPressTab={handleTabPress}
+          />
+        ))}
       </View>
     </View>
   );

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -89,10 +90,10 @@ export function WageCalculatorFlowScreen({
   const stepMeta = STEP_META[step - 1];
   const headerYear = monthLabel.slice(0, 4);
   const handleBack = step === 1 ? onCancel : back;
-  const swipeBackHandlers = useEdgeSwipeBack(handleBack);
+  const swipeBackGesture = useEdgeSwipeBack(handleBack);
 
   return (
-    <SettingsPageLayout swipeBackHandlers={swipeBackHandlers}>
+    <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -265,27 +266,29 @@ export function WageCalculatorFlowScreen({
         ) : null}
       </ScrollView>
 
-      <View className="flex-row gap-2.5 border-t border-border/40 bg-background px-5 py-4">
-        <Button variant="outline" className="flex-1" onPress={handleBack}>
-          <Text>{step === 1 ? I18n.t('common.cancel') : I18n.t('common.back')}</Text>
-        </Button>
-        {step < 5 ? (
-          <Button className="flex-1" onPress={next} disabled={!canContinue}>
-            <Text>{I18n.t('wage.next')}</Text>
+      <SafeAreaView edges={['bottom']} className="border-t border-border/40 bg-background">
+        <View className="flex-row gap-2.5 px-5 pb-3 pt-3">
+          <Button variant="outline" className="flex-1" onPress={handleBack}>
+            <Text>{step === 1 ? I18n.t('common.cancel') : I18n.t('common.back')}</Text>
           </Button>
-        ) : (
-          <Button
-            className="flex-1"
-            haptic="success"
-            onPress={() => {
-              void triggerHaptic('success');
-              onComplete(config);
-            }}
-          >
-            <Text>{I18n.t('wage.save_for_month', { month: monthLabel })}</Text>
-          </Button>
-        )}
-      </View>
+          {step < 5 ? (
+            <Button className="flex-1" onPress={next} disabled={!canContinue}>
+              <Text>{I18n.t('wage.next')}</Text>
+            </Button>
+          ) : (
+            <Button
+              className="flex-1"
+              haptic="success"
+              onPress={() => {
+                void triggerHaptic('success');
+                onComplete(config);
+              }}
+            >
+              <Text>{I18n.t('wage.save_for_month', { month: monthLabel })}</Text>
+            </Button>
+          )}
+        </View>
+      </SafeAreaView>
     </SettingsPageLayout>
   );
 }

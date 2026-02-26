@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
@@ -6,7 +6,6 @@ import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
-
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;

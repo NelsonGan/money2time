@@ -134,11 +134,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     onBack();
   };
 
-  const swipeBackHandlers = useEdgeSwipeBack(handleCancel);
+  const swipeBackGesture = useEdgeSwipeBack(handleCancel);
 
   return (
     <SettingsPageLayout
-      swipeBackHandlers={swipeBackHandlers}
+      swipeBackGesture={swipeBackGesture}
       actionBar={
         <SettingsActionBar onCancel={handleCancel} onSave={handleSave} saveDisabled={!canSave} />
       }
