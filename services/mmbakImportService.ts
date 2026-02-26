@@ -442,17 +442,20 @@ export async function importMoneyManagerBackupFromUri(
       if (aDeleted !== bDeleted) return aDeleted - bDeleted;
       return (asNumber(a.sortOrder) ?? a.id) - (asNumber(b.sortOrder) ?? b.id);
     });
-    const referencedGroupSourceKeys = new Set<string>();
+    const referencedGroupUids = new Set<string>();
+    const referencedGroupIds = new Set<string>();
     sortedAssetRows.forEach((row) => {
-      // Only active (non-deleted) accounts reference their group; deleted accounts
-      // should not force a deleted group to be imported.
       if ((asNumber(row.isDeleted) ?? 0) !== 0) return;
       const groupUidKey = normalizeSourceKey(row.groupUid);
       const groupIdKey = normalizeSourceKey(row.groupId);
-      if (groupUidKey) referencedGroupSourceKeys.add(groupUidKey);
-      if (groupIdKey) referencedGroupSourceKeys.add(groupIdKey);
+      if (groupUidKey) {
+        referencedGroupUids.add(groupUidKey);
+      } else if (groupIdKey) {
+        referencedGroupIds.add(groupIdKey);
+      }
     });
-    const assetGroupNameBySourceKey = new Map<string, string>();
+    const assetGroupNameByUid = new Map<string, string>();
+    const assetGroupNameById = new Map<string, string>();
     const sortedAssetGroupRows = [...assetGroupRows].sort((a, b) => {
       const aDeleted = (asNumber(a.isDeleted) ?? 0) !== 0 ? 1 : 0;
       const bDeleted = (asNumber(b.isDeleted) ?? 0) !== 0 ? 1 : 0;
@@ -468,13 +471,13 @@ export async function importMoneyManagerBackupFromUri(
       const idKey = normalizeSourceKey(row.id);
       const isDeleted = (asNumber(row.isDeleted) ?? 0) !== 0;
       const isReferenced =
-        (uidKey ? referencedGroupSourceKeys.has(uidKey) : false) ||
-        (idKey ? referencedGroupSourceKeys.has(idKey) : false);
+        (uidKey ? referencedGroupUids.has(uidKey) : false) ||
+        (idKey ? referencedGroupIds.has(idKey) : false);
       if (isDeleted && !isReferenced) return;
 
       accountGroupsRepository.create(name, asNumber(row.sortOrder) ?? undefined);
-      if (uidKey) assetGroupNameBySourceKey.set(uidKey, name);
-      if (idKey) assetGroupNameBySourceKey.set(idKey, name);
+      if (uidKey) assetGroupNameByUid.set(uidKey, name);
+      if (idKey) assetGroupNameById.set(idKey, name);
     });
 
     sortedAssetRows.forEach((row) => {
@@ -496,10 +499,10 @@ export async function importMoneyManagerBackupFromUri(
       const deletedAt = isDeleted ? new Date().toISOString() : null;
       const groupName =
         (row.groupUid
-          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupUid) ?? '')
+          ? assetGroupNameByUid.get(normalizeSourceKey(row.groupUid) ?? '')
           : null) ??
         (row.groupId
-          ? assetGroupNameBySourceKey.get(normalizeSourceKey(row.groupId) ?? '')
+          ? assetGroupNameById.get(normalizeSourceKey(row.groupId) ?? '')
           : null) ??
         (normalizeText(row.groupName) || null);
       const type = inferAccountType(name, groupName, creditStatementDay, creditDueDay);
