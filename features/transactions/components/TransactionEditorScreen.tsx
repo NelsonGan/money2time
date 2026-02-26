@@ -290,7 +290,6 @@ export function TransactionEditorScreen({
     >
   >({});
   const [error, setError] = useState<string | null>(null);
-  const previousTypeRef = useRef<TransactionType>(type);
   const autoNoteFromCategoryRef = useRef<string | null>(null);
   const noteInputRef = useRef<TextInput>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
@@ -356,11 +355,57 @@ export function TransactionEditorScreen({
   const isBalanceAdjustmentType = type === 'balance_adjustment';
   const showTypeSelector = availableTypeCards.length > 1;
 
+  const handleTypeChange = useCallback(
+    (nextType: TransactionType) => {
+      if (nextType === type) return;
+      const previousType = type;
+
+      setType(nextType);
+      setCategoryId(null);
+      autoNoteFromCategoryRef.current = null;
+      setActiveField((current) => mapActiveFieldForType(current, nextType));
+
+      if (nextType === 'transfer') {
+        if (previousType === 'income' || previousType === 'expense') {
+          setFromAccountId(accountId);
+          setToAccountId(null);
+          setAccountId(null);
+        } else if (mode === 'create') {
+          setAccountId(null);
+          setFromAccountId(null);
+          setToAccountId(null);
+        }
+      } else if (previousType === 'transfer') {
+        setAccountId(fromAccountId);
+        setFromAccountId(null);
+        setToAccountId(null);
+      }
+
+      setFieldErrors((previous) => {
+        if (
+          !previous.account &&
+          !previous.from_account &&
+          !previous.to_account &&
+          !previous.category
+        ) {
+          return previous;
+        }
+        const next = { ...previous };
+        delete next.account;
+        delete next.from_account;
+        delete next.to_account;
+        delete next.category;
+        return next;
+      });
+    },
+    [accountId, fromAccountId, mapActiveFieldForType, mode, type],
+  );
+
   useEffect(() => {
     if (availableTypeCards.some((item) => item.value === type)) return;
     const fallbackType = availableTypeCards[0]?.value ?? 'expense';
-    setType(fallbackType);
-  }, [availableTypeCards, type]);
+    handleTypeChange(fallbackType);
+  }, [availableTypeCards, handleTypeChange, type]);
 
   const typedCategories = useMemo(
     () =>
@@ -428,48 +473,6 @@ export function TransactionEditorScreen({
     if (!toAccountId) return null;
     return accounts.find((a) => a.id === toAccountId)?.name ?? null;
   }, [toAccountId, accounts]);
-
-  useEffect(() => {
-    if (previousTypeRef.current !== type) {
-      const previousType = previousTypeRef.current;
-      const previousAccountId = accountId;
-      setCategoryId(null);
-      autoNoteFromCategoryRef.current = null;
-      setActiveField((current) => mapActiveFieldForType(current, type));
-      if (type === 'transfer') {
-        if (previousType === 'income' || previousType === 'expense') {
-          setFromAccountId(previousAccountId ?? null);
-          setToAccountId(null);
-          setAccountId(null);
-        } else if (mode === 'create') {
-          setAccountId(null);
-          setFromAccountId(null);
-          setToAccountId(null);
-        }
-      } else if (previousType === 'transfer') {
-        setAccountId((current) => current ?? fromAccountId);
-        setFromAccountId(null);
-        setToAccountId(null);
-      }
-      setFieldErrors((previous) => {
-        if (
-          !previous.account &&
-          !previous.from_account &&
-          !previous.to_account &&
-          !previous.category
-        ) {
-          return previous;
-        }
-        const next = { ...previous };
-        delete next.account;
-        delete next.from_account;
-        delete next.to_account;
-        delete next.category;
-        return next;
-      });
-      previousTypeRef.current = type;
-    }
-  }, [accountId, fromAccountId, mapActiveFieldForType, mode, type]);
 
   useEffect(() => {
     Keyboard.dismiss();
@@ -960,7 +963,7 @@ export function TransactionEditorScreen({
                   key={item.value}
                   item={item}
                   selected={type === item.value}
-                  onPress={() => setType(item.value)}
+                  onPress={() => handleTypeChange(item.value)}
                 />
               ))}
             </View>
