@@ -229,6 +229,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return <CategoriesScreen onBack={() => setSubRoute('main')} />;
   }
 
+  if (showAddTransaction) {
+    return <AddTransactionScreen onClose={() => setShowAddTransaction(false)} />;
+  }
+
   // --- Step progress indicator ---
 
   const renderProgressDots = () => (
@@ -366,15 +370,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         />
       </ThemeModal>
 
-      {/* Add Transaction Modal */}
-      <ThemeModal
-        visible={showAddTransaction}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddTransaction(false)}
-      >
-        <AddTransactionScreen onClose={() => setShowAddTransaction(false)} />
-      </ThemeModal>
     </SafeAreaView>
   );
 }

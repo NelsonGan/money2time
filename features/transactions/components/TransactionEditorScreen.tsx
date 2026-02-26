@@ -14,6 +14,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Calendar,
+  ChevronLeft,
   Clock,
   CreditCard,
   FileText,
@@ -23,7 +24,6 @@ import {
   Trash2,
   Timer,
   Type,
-  X,
 } from 'lucide-react-native';
 
 import { Text } from '~/components/ui/text';
@@ -934,13 +934,15 @@ export function TransactionEditorScreen({
       <View className="px-5 pt-4 pb-2 flex-row items-start justify-between">
         <View className="flex-row items-center gap-3">
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.back')}
             onPress={() => {
               void triggerHaptic('selection');
               onClose();
             }}
             className="w-8 h-8 rounded-full bg-secondary items-center justify-center"
           >
-            <X size={13} color={themeColors.textSoft} />
+            <ChevronLeft size={14} color={themeColors.textSoft} />
           </Pressable>
           <View>
             <Text variant="subheading">{title}</Text>

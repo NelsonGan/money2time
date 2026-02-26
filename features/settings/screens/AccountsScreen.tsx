@@ -1336,7 +1336,14 @@ export function AccountsScreen({
   }, []);
   const creditLabel = String(I18n.t('accounts.credit'));
 
-
+  if (selectedTransaction) {
+    return (
+      <EditTransactionScreen
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+      />
+    );
+  }
 
   if (!managementOnly && selectedAccountId && selectedAccount) {
     const account = selectedAccount;
@@ -1585,19 +1592,6 @@ export function AccountsScreen({
             setShowPayCard(false);
           }}
         />
-        <ThemeModal
-          visible={!!selectedTransaction}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={() => setSelectedTransaction(null)}
-        >
-          {selectedTransaction ? (
-            <EditTransactionScreen
-              transaction={selectedTransaction}
-              onClose={() => setSelectedTransaction(null)}
-            />
-          ) : null}
-        </ThemeModal>
         <ThemeModal
           visible={showBulkUpdate}
           animationType="slide"
