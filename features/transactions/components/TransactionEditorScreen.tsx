@@ -546,9 +546,24 @@ export function TransactionEditorScreen({
             else if (transferErrors.to_account) activateField('toAccount');
             return;
           }
-        } else if (!fromAccountId || !toAccountId || fromAccountId === toAccountId) {
-          setError(I18n.t('transactions.editor.error.pick_two_different_accounts'));
-          return;
+        } else {
+          const transferErrors: typeof fieldErrors = {};
+          if (!fromAccountId)
+            transferErrors.from_account = I18n.t('transactions.editor.error.required');
+          if (!toAccountId)
+            transferErrors.to_account = I18n.t('transactions.editor.error.required');
+          if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
+            transferErrors.to_account = I18n.t(
+              'transactions.editor.error.must_be_different_account',
+            );
+          }
+          if (Object.keys(transferErrors).length > 0) {
+            setError(I18n.t('transactions.editor.error.complete_required'));
+            setFieldErrors(transferErrors);
+            if (transferErrors.from_account) activateField('fromAccount');
+            else if (transferErrors.to_account) activateField('toAccount');
+            return;
+          }
         }
         onSubmit({
           type,

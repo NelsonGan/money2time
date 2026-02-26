@@ -51,16 +51,18 @@ export function SummaryRow({
     pressed.value = withTiming(0, { duration: 150 });
   };
 
-  const activeBg = themeColors.primarySoft;
-  const primaryColor = themeColors.primary;
+  const isError = valueTone === 'error';
+  const highlightBg = isError ? themeColors.errorSoft : themeColors.primarySoft;
+  const highlightBorder = isError ? themeColors.error : themeColors.primary;
+  const chevronActive = isError ? themeColors.error : themeColors.primary;
 
   const activeStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       active.value + pressed.value * 0.3,
       [0, 0.3, 1],
-      ['transparent', activeBg, activeBg],
+      ['transparent', highlightBg, highlightBg],
     ),
-    borderLeftColor: interpolateColor(active.value, [0, 1], ['transparent', primaryColor]),
+    borderLeftColor: interpolateColor(active.value, [0, 1], ['transparent', highlightBorder]),
     transform: [{ translateX: pressed.value * 1.5 }],
   }));
 
@@ -108,7 +110,7 @@ export function SummaryRow({
         {rightElement ?? (
           <ChevronRight
             size={14}
-            color={isActive ? themeColors.primary : themeColors.textMuted}
+            color={isActive ? chevronActive : themeColors.textMuted}
             className="ml-2"
           />
         )}

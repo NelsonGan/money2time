@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, inArray, isNull, lte, or, sql, asc } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
-import { accountsTable, categoriesTable, transactionsTable } from '~/lib/db/schema';
+import { transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
   Transaction,
@@ -10,7 +10,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 import { newId, nowIso } from '~/utils/id';
-import { toAccount, toCategory, toTransaction } from './mappers';
+import { toTransaction } from './mappers';
 
 type RelationRow = {
   txId: string;
@@ -195,8 +195,13 @@ class TransactionsRepository {
   }
 
   create(input: CreateTransactionInput): string {
-    const db = getDb();
     const id = newId();
+    this.createWithId(id, input);
+    return id;
+  }
+
+  createWithId(id: string, input: CreateTransactionInput) {
+    const db = getDb();
     const now = nowIso();
 
     db.insert(transactionsTable)
@@ -220,8 +225,6 @@ class TransactionsRepository {
         deletedAt: null,
       })
       .run();
-
-    return id;
   }
 
   update(id: string, updates: Partial<CreateTransactionInput>) {
