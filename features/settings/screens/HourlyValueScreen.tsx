@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Trash2 } from 'lucide-react-native';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { Text } from '~/components/ui/text';
 import { Card, CardContent } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
@@ -13,19 +12,18 @@ import {
   SettingsHeader,
   SettingsPageLayout,
 } from '~/components/ui/settings';
-import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 import { useApp } from '~/context/AppContext';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
-import type { MonthlyWageSettings } from '~/types';
+import type { MonthlyWageSettings, WageConfig } from '~/types';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { monthKeyFromDateLocal, normalizeMonthKey } from '~/utils/formatters';
 import { I18n } from '~/lib/i18n';
 import { useThemeColors } from '~/hooks/useThemeColors';
 
 interface HourlyValueScreenProps {
   onClose: () => void;
+  onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
 }
 
 const MONTH_OPTIONS = [
@@ -128,21 +126,18 @@ function getEffectiveRateInfo(
   };
 }
 
-export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
+export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
   const {
     settings,
     currentMonthWage,
     monthlyWages,
-    updateWageConfigForMonth,
     deleteWageConfigForMonth,
   } = useApp();
   const themeColors = useThemeColors();
-  const [showWageCalculator, setShowWageCalculator] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(() => String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>(() =>
     String(new Date().getMonth() + 1).padStart(2, '0'),
   );
-  const swipeBackGesture = useEdgeSwipeBack(onClose);
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
   const selectedWageMonth = normalizeMonthKey(`${selectedYear}-${selectedMonth}`);
@@ -245,7 +240,7 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
   };
 
   return (
-    <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
+    <SettingsPageLayout>
       <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
@@ -303,7 +298,10 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
             <Button
               onPress={() => {
                 void triggerHaptic('selection');
-                setShowWageCalculator(true);
+                onOpenWageCalculator({
+                  monthKey: selectedWageMonth,
+                  initialConfig: prefillConfig,
+                });
               }}
             >
               <Text>{ctaLabel}</Text>
@@ -426,23 +424,6 @@ export function HourlyValueScreen({ onClose }: HourlyValueScreenProps) {
         </Card>
       </ScrollView>
 
-      <ThemeModal
-        visible={showWageCalculator}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowWageCalculator(false)}
-      >
-        <WageCalculatorFlowScreen
-          initialConfig={prefillConfig}
-          settings={settings}
-          monthLabel={selectedWageMonth}
-          onCancel={() => setShowWageCalculator(false)}
-          onComplete={(config) => {
-            updateWageConfigForMonth(selectedWageMonth, config);
-            setShowWageCalculator(false);
-          }}
-        />
-      </ThemeModal>
     </SettingsPageLayout>
   );
 }

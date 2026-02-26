@@ -44,7 +44,6 @@ import { formatAmount, formatDateInput } from '~/utils/formatters';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 import { triggerHaptic } from '~/services/haptics';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { I18n } from '~/lib/i18n';
 
 import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
@@ -786,6 +785,9 @@ interface AccountsScreenProps {
   managementOnly?: boolean;
   resetToRootToken?: number;
   scrollToTopToken?: number;
+  accountId?: string | null;
+  onOpenAccount?: (accountId: string) => void;
+  onOpenTransaction?: (transaction: TransactionWithRelations) => void;
 }
 
 export function AccountsScreen({
@@ -793,6 +795,9 @@ export function AccountsScreen({
   managementOnly = false,
   resetToRootToken = 0,
   scrollToTopToken = 0,
+  accountId = null,
+  onOpenAccount,
+  onOpenTransaction,
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const { persistOrder } = useDebouncedPersistence(500);
@@ -817,7 +822,7 @@ export function AccountsScreen({
     updateTransaction,
   } = useApp();
 
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
   const [hideAccountBalances, setHideAccountBalances] = useState(false);
   const [managementView, setManagementView] = useState<AccountManagementView>('accounts');
   const [showCreate, setShowCreate] = useState(false);
@@ -846,16 +851,21 @@ export function AccountsScreen({
   const [localAccountGroupSections, setLocalAccountGroupSections] = useState<AccountGroupSection[]>(
     [],
   );
-  const swipeBackGesture = useEdgeSwipeBack(
-    selectedAccountId ? () => setSelectedAccountId(null) : onBack,
-  );
+  const activeAccountId = accountId ?? selectedAccountId;
+  const closeSelectedAccount = useCallback(() => {
+    if (accountId && onBack) {
+      onBack();
+      return;
+    }
+    setSelectedAccountId(null);
+  }, [accountId, onBack]);
 
-  const selectedAccount = selectedAccountId
-    ? (accounts.find((item) => item.id === selectedAccountId) ?? null)
+  const selectedAccount = activeAccountId
+    ? (accounts.find((item) => item.id === activeAccountId) ?? null)
     : null;
   const selectedAccountTransactions = useMemo(
-    () => (selectedAccountId ? getTransactionsByAccount(selectedAccountId) : []),
-    [getTransactionsByAccount, selectedAccountId],
+    () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
+    [activeAccountId, getTransactionsByAccount],
   );
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
@@ -909,10 +919,20 @@ export function AccountsScreen({
   }, []);
 
   useEffect(() => {
-    if (selectedAccountId && !selectedAccount) {
+    if (accountId !== null) {
+      setSelectedAccountId(accountId);
+    }
+  }, [accountId]);
+
+  useEffect(() => {
+    if (activeAccountId && !selectedAccount) {
+      if (accountId && onBack) {
+        onBack();
+        return;
+      }
       setSelectedAccountId(null);
     }
-  }, [selectedAccountId, selectedAccount]);
+  }, [accountId, activeAccountId, onBack, selectedAccount]);
 
   useEffect(() => {
     if (selectedAccount) return;
@@ -923,18 +943,18 @@ export function AccountsScreen({
     setSelectedTransaction(null);
     setSelectedTransactionIds([]);
     setShowBulkUpdate(false);
-  }, [selectedAccountId]);
+  }, [activeAccountId]);
 
   useEffect(() => {
-    if (managementOnly || !selectedAccountId || selectedTransactionIds.length === 0) return;
+    if (managementOnly || !activeAccountId || selectedTransactionIds.length === 0) return;
     const availableIds = new Set(selectedAccountTransactions.map((transaction) => transaction.id));
     setSelectedTransactionIds((previous) => {
       const next = previous.filter((id) => availableIds.has(id));
       return next.length === previous.length ? previous : next;
     });
   }, [
+    activeAccountId,
     managementOnly,
-    selectedAccountId,
     selectedAccountTransactions,
     selectedTransactionIds.length,
   ]);
@@ -949,7 +969,7 @@ export function AccountsScreen({
 
   useEffect(() => {
     if (resetToRootToken <= 0) return;
-    setSelectedAccountId(null);
+    setSelectedAccountId(accountId ?? null);
     setManagementView('accounts');
     setShowCreate(false);
     setShowGroupComposer(false);
@@ -958,12 +978,12 @@ export function AccountsScreen({
     setEditingGroupName('');
     setShowPayCard(false);
     setShowEditAccount(false);
-  }, [resetToRootToken]);
+  }, [accountId, resetToRootToken]);
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
     const frame = requestAnimationFrame(() => {
-      if (!managementOnly && selectedAccountId && selectedAccount) {
+      if (!managementOnly && activeAccountId && selectedAccount) {
         detailScrollToTopRef.current?.();
         return;
       }
@@ -977,8 +997,8 @@ export function AccountsScreen({
     isManagementGroupsView,
     managementOnly,
     scrollToTopToken,
+    activeAccountId,
     selectedAccount,
-    selectedAccountId,
   ]);
 
   const balanceMap = useMemo(() => {
@@ -1169,9 +1189,13 @@ export function AccountsScreen({
         toggleTransactionSelection(transaction.id);
         return;
       }
+      if (onOpenTransaction) {
+        onOpenTransaction(transaction);
+        return;
+      }
       setSelectedTransaction(transaction);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -1345,7 +1369,7 @@ export function AccountsScreen({
     );
   }
 
-  if (!managementOnly && selectedAccountId && selectedAccount) {
+  if (!managementOnly && activeAccountId && selectedAccount) {
     const account = selectedAccount;
 
     const balance = balanceMap.get(account.id) ?? account.startingBalance;
@@ -1370,7 +1394,7 @@ export function AccountsScreen({
       : I18n.t('accounts.include_option_hide');
 
     return (
-      <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
+      <SettingsPageLayout>
         <View className="flex-1">
           <ActivityTransactionList
             transactions={txns}
@@ -1390,7 +1414,7 @@ export function AccountsScreen({
               <View className="pb-2 gap-2">
                 <SettingsHeader
                   className="px-0 pt-5 pb-2"
-                  onBack={() => setSelectedAccountId(null)}
+                  onBack={closeSelectedAccount}
                   title={I18n.t('accounts.title')}
                   subtitleNode={
                     <Text variant="friendly" tone="muted" numberOfLines={1}>
@@ -1570,7 +1594,7 @@ export function AccountsScreen({
           onDelete={() => {
             deleteAccount(account.id);
             setShowEditAccount(false);
-            setSelectedAccountId(null);
+            closeSelectedAccount();
           }}
         />
         <PayCreditCardSheet
@@ -1893,6 +1917,10 @@ export function AccountsScreen({
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
+                    if (onOpenAccount) {
+                      onOpenAccount(account.id);
+                      return;
+                    }
                     setSelectedAccountId(account.id);
                   }}
                   className={cn(

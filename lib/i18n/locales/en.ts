@@ -266,8 +266,8 @@ const en = {
       enter: 'Enter',
     },
     editor: {
-      title_create: 'What happened?',
-      title_edit: 'Edit transaction',
+      title_create: 'Add',
+      title_edit: 'Update',
       subtitle_create: 'Quick and clean entry',
       subtitle_edit: 'Update details',
       subtitle_edit_balance_adjustment: 'Update amount and affected account',
