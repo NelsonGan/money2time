@@ -43,7 +43,7 @@ export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
   includeInTotals: true,
 };
 
-export const CATEGORY_COLORS = ['#22917A', '#F6B750', '#4F87D9', '#F37D57', '#6E8EEA', '#4BA8A1'];
+export const CATEGORY_ICON_PLACEHOLDER = '🏷️';
 export const DEFAULT_CATEGORY_EMOJIS = [
   '🍔',
   '🛒',
@@ -111,34 +111,31 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
 type OnboardingCategorySeed = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 
 export const ONBOARDING_MINIMAL_EXPENSE_CATEGORIES: OnboardingCategorySeed[] = [
-  { name: 'Food', type: 'expense', parentId: null, icon: '🍔', color: '#F37D57', isDefault: true },
+  { name: 'Food', type: 'expense', parentId: null, icon: '🍔', isDefault: true },
   {
     name: 'Transport',
     type: 'expense',
     parentId: null,
     icon: '🚗',
-    color: '#4F87D9',
     isDefault: true,
   },
-  { name: 'Bills', type: 'expense', parentId: null, icon: '📄', color: '#6E8EEA', isDefault: true },
+  { name: 'Bills', type: 'expense', parentId: null, icon: '📄', isDefault: true },
   {
     name: 'Shopping',
     type: 'expense',
     parentId: null,
     icon: '🛍️',
-    color: '#8EA2B8',
     isDefault: true,
   },
 ];
 
 export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
-  { name: 'Salary', type: 'income', parentId: null, icon: '💰', color: '#22917A', isDefault: true },
+  { name: 'Salary', type: 'income', parentId: null, icon: '💰', isDefault: true },
   {
     name: 'Other Income',
     type: 'income',
     parentId: null,
     icon: '💼',
-    color: '#4F87D9',
     isDefault: true,
   },
 ];

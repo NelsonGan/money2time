@@ -5,7 +5,7 @@ import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
-import { CATEGORY_COLORS, DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
+import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import type { AccountType, CategoryType } from '~/types';
 import { I18n } from '~/lib/i18n';
 
@@ -703,18 +703,13 @@ export async function importMoneyManagerBackupFromUri(
         return;
       }
 
-      const color =
-        CATEGORY_COLORS[
-          (existingCategoryKeyToId.size + summary.categories) % CATEGORY_COLORS.length
-        ];
       const now = new Date().toISOString();
-      const defaultIcon = parentId ? (categoryIconById.get(parentId) ?? randomCategoryEmoji()) : randomCategoryEmoji();
+      const defaultIcon = parentId ? '' : randomCategoryEmoji();
       const id = categoriesRepository.create({
         name: row.name,
         type: row.type,
         parentId,
         icon: defaultIcon,
-        color,
         isDefault: false,
         sortOrder: row.importSortOrder,
         deletedAt: isInactive ? now : null,

@@ -2,6 +2,7 @@ import { and, desc, eq, gte, inArray, isNull, lte, or, sql, asc } from 'drizzle-
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
+import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import type {
   CashflowSummary,
   Transaction,
@@ -103,7 +104,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       ta.name as toAccountName,
       t.category_id as categoryId,
       c.name as categoryName,
-      c.icon as categoryIcon,
+      COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), ''), '${CATEGORY_ICON_PLACEHOLDER}') as categoryIcon,
       c.parent_id as categoryParentId,
       p.name as parentCategoryName
     FROM transactions t

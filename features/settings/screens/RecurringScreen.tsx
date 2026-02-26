@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
@@ -11,18 +11,16 @@ import {
   SettingsPageLayout,
 } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import { triggerHaptic } from '~/services/haptics';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import type { RecurringTransactionRule } from '~/types';
 import { I18n } from '~/lib/i18n';
 
 interface RecurringScreenProps {
   onBack: () => void;
+  onOpenEditor: (ruleId?: string) => void;
 }
 
 interface RecurringRuleCardProps {
@@ -151,30 +149,18 @@ const RecurringRuleCard = memo(
     prev.onDelete === next.onDelete,
 );
 
-export function RecurringScreen({ onBack }: RecurringScreenProps) {
+export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) {
   const themeColors = useThemeColors();
-  const {
-    settings,
-    recurringRules,
-    createRecurringRule,
-    updateRecurringRule,
-    deleteRecurringRule,
-  } = useApp();
-
-  const [editingRule, setEditingRule] = useState<RecurringTransactionRule | null>(null);
-  const [showEditor, setShowEditor] = useState(false);
+  const { settings, recurringRules, deleteRecurringRule } = useApp();
   const allRules = recurringRules;
 
   const openCreate = useCallback(() => {
-    setEditingRule(null);
-    setShowEditor(true);
-  }, []);
+    onOpenEditor();
+  }, [onOpenEditor]);
 
   const openEdit = useCallback((rule: RecurringTransactionRule) => {
-    setEditingRule(rule);
-    setShowEditor(true);
-  }, []);
-  const closeEditor = useCallback(() => setShowEditor(false), []);
+    onOpenEditor(rule.id);
+  }, [onOpenEditor]);
   const handleDeleteRule = useCallback(
     (id: string) => {
       deleteRecurringRule(id);
@@ -205,24 +191,6 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
       themeColors.textMuted,
     ],
   );
-  const listHeader = useMemo(
-    () => (
-      <View className="pb-3">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t('recurring.title')}
-          subtitle={I18n.t('recurring.subtitle')}
-          rightAccessory={
-            <Button size="icon" onPress={openCreate}>
-              <Plus size={18} color="#fff" />
-            </Button>
-          }
-        />
-      </View>
-    ),
-    [onBack, openCreate],
-  );
   const listEmpty = useMemo(
     () => (
       <Card>
@@ -237,109 +205,35 @@ export function RecurringScreen({ onBack }: RecurringScreenProps) {
     [openCreate],
   );
 
-  const swipeBackGesture = useEdgeSwipeBack(showEditor ? undefined : onBack);
-
   return (
-    <>
-      <ThemeModal
-        visible={showEditor}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={closeEditor}
-      >
-        <TransactionEditorScreen
-          mode={editingRule ? 'edit' : 'create'}
-          onClose={closeEditor}
-          onSubmit={() => {}}
-          onDelete={undefined}
-          deleteLabel={undefined}
-          titleOverride={editingRule ? I18n.t('recurring.edit_rule') : I18n.t('recurring.new_rule')}
-          subtitleOverride={I18n.t('recurring.same_flow')}
-          submitLabelOverride={I18n.t('recurring.save_rule')}
-          restrictTypeOptions={['expense', 'income', 'transfer']}
-          recurringOptions={{
-            initialName: editingRule?.name,
-            initialPattern: editingRule?.recurrencePattern,
-            initialInterval: editingRule?.recurrenceInterval,
-            initialEndDate: editingRule?.endDate,
-            initialIsActive: editingRule?.isActive,
-            onSubmitRecurring: ({ transaction, recurring }) => {
-              const recurringTxType =
-                transaction.type === 'transfer'
-                  ? 'transfer'
-                  : transaction.type === 'income'
-                    ? 'income'
-                    : 'expense';
-              const basePayload = {
-                name: recurring.name,
-                type: recurringTxType,
-                amount: transaction.amount,
-                currency: settings.currencySymbol,
-                note: transaction.note ?? null,
-                recurrencePattern: recurring.pattern,
-                recurrenceInterval: recurring.interval,
-                nextRunDate: transaction.date,
-                endDate: recurring.endDate,
-                isActive: recurring.isActive,
-              } as const;
-              const payload =
-                transaction.type === 'transfer'
-                  ? {
-                      ...basePayload,
-                      fromAccountId: transaction.fromAccountId ?? null,
-                      toAccountId: transaction.toAccountId ?? null,
-                      accountId: null,
-                      categoryId: null,
-                    }
-                  : {
-                      ...basePayload,
-                      accountId: transaction.accountId ?? null,
-                      categoryId: transaction.categoryId ?? null,
-                      fromAccountId: null,
-                      toAccountId: null,
-                    };
-
-              if (editingRule) {
-                updateRecurringRule(editingRule.id, payload);
-              } else {
-                createRecurringRule(payload);
-              }
-              closeEditor();
-            },
-          }}
-          initialValues={
-            editingRule
-              ? {
-                  type: editingRule.type,
-                  amount: String(editingRule.amount),
-                  date: dayKeyFromIsoLocal(editingRule.nextRunDate),
-                  accountId: editingRule.accountId,
-                  fromAccountId: editingRule.fromAccountId,
-                  toAccountId: editingRule.toAccountId,
-                  categoryId: editingRule.categoryId,
-                  note: editingRule.note ?? '',
-                }
-              : undefined
+    <SettingsPageLayout>
+      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <SettingsHeader
+          className="px-0 pt-5 pb-3"
+          onBack={onBack}
+          title={I18n.t('recurring.title')}
+          subtitle={I18n.t('recurring.subtitle')}
+          rightAccessory={
+            <Button size="icon" onPress={openCreate}>
+              <Plus size={18} color="#fff" />
+            </Button>
           }
         />
-      </ThemeModal>
-      <SettingsPageLayout swipeBackGesture={swipeBackGesture}>
-        <FlatList
-          data={allRules}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={listEmpty}
-          renderItem={renderRule}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={7}
-          removeClippedSubviews
-        />
-      </SettingsPageLayout>
-    </>
+      </View>
+      <FlatList
+        data={allRules}
+        keyExtractor={keyExtractor}
+        contentContainerStyle={{
+          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+        }}
+        ListEmptyComponent={listEmpty}
+        renderItem={renderRule}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={7}
+        removeClippedSubviews
+      />
+    </SettingsPageLayout>
   );
 }

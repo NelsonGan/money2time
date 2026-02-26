@@ -78,7 +78,6 @@ export interface Category {
   type: CategoryType;
   parentId: string | null;
   icon: string;
-  color: string;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;

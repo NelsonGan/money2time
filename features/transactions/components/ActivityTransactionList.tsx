@@ -57,6 +57,7 @@ interface ActivityTransactionListProps {
   disableScrollBounce?: boolean;
   compactItems?: boolean;
   disableVirtualization?: boolean;
+  groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
 }
 
@@ -162,6 +163,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   disableScrollBounce = false,
   compactItems = false,
   disableVirtualization = false,
+  groupByDate = true,
   scrollToTopRef,
 }: ActivityTransactionListProps) {
   const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
@@ -182,6 +184,14 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   );
 
   const rows = useMemo<ActivityRow[]>(() => {
+    if (!groupByDate) {
+      return transactions.map((transaction) => ({
+        kind: 'item',
+        id: transaction.id,
+        transaction,
+      }));
+    }
+
     const dailyTotals = new Map<string, { income: number; expense: number }>();
 
     transactions.forEach((transaction) => {
@@ -219,7 +229,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     });
 
     return nextRows;
-  }, [getDisplayValueForTransaction, isTimeMode, transactions]);
+  }, [getDisplayValueForTransaction, groupByDate, isTimeMode, transactions]);
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -257,7 +267,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           selectionMode={selectionMode}
           disableAnimations={disableItemAnimations}
           compact={compactItems}
-          showDateInSubtitle={false}
+          showDateInSubtitle={!groupByDate}
           settings={transactionDisplaySettings}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         />
@@ -267,6 +277,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       disableItemAnimations,
       compactItems,
       getTrueHourlyRateForDate,
+      groupByDate,
       isTimeMode,
       onTransactionPress,
       onTransactionLongPress,
