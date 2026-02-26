@@ -636,14 +636,11 @@ export function TransactionEditorScreen({
     (mode === 'create'
       ? I18n.t('transactions.editor.title_create')
       : I18n.t('transactions.editor.title_edit'));
-  const subtitle =
-    subtitleOverride ??
-    (mode === 'create'
-      ? I18n.t('transactions.editor.subtitle_create')
-      : I18n.t('transactions.editor.subtitle_edit'));
+  const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
   const summaryFlex = windowHeight < 700 ? 0.38 : 0.44;
   const isRecurringEditor = Boolean(recurringOptions);
+  const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'endDate', 'status'];
   const showToolZone =
     activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
@@ -946,9 +943,11 @@ export function TransactionEditorScreen({
           </Pressable>
           <View>
             <Text variant="subheading">{title}</Text>
-            <Text variant="caption" tone="muted">
-              {subtitle}
-            </Text>
+            {showSubtitle ? (
+              <Text variant="caption" tone="muted">
+                {subtitle}
+              </Text>
+            ) : null}
           </View>
         </View>
         {mode === 'edit' && onDelete ? (
@@ -957,17 +956,17 @@ export function TransactionEditorScreen({
               onPress={onDelete}
               accessibilityRole="button"
               accessibilityLabel={deleteLabel}
-              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/12"
+              className="h-10 w-10 items-center justify-center rounded-full bg-destructive/12"
             >
               <Trash2 size={14} color={themeColors.coral} />
             </Pressable>
-            <Button size="sm" className="h-8 px-3" onPress={handleSubmit}>
-              <Text variant="caption">{submitLabel}</Text>
+            <Button size="sm" onPress={handleSubmit}>
+              <Text>{submitLabel}</Text>
             </Button>
           </View>
         ) : (
-          <Button size="sm" className="h-8 px-3" onPress={handleSubmit}>
-            <Text variant="caption">{submitLabel}</Text>
+          <Button size="sm" onPress={handleSubmit}>
+            <Text>{submitLabel}</Text>
           </Button>
         )}
       </View>
@@ -981,7 +980,7 @@ export function TransactionEditorScreen({
         >
           {/* Type selector pills */}
           {showTypeSelector ? (
-            <View className="flex-row gap-2 mb-3">
+            <View className="flex-row gap-2 mt-2 mb-3">
               {availableTypeCards.map((item) => (
                 <TypePill
                   key={item.value}

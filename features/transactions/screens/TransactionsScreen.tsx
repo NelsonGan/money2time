@@ -22,7 +22,6 @@ import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
-import { EditTransactionScreen } from './EditTransactionScreen';
 import { useApp } from '~/context/AppContext';
 import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { cn } from '~/utils';
@@ -142,6 +141,7 @@ interface TransactionsScreenProps {
   focusMonthKey?: string | null;
   focusMonthToken?: number;
   onPressAddTransaction?: () => void;
+  onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
 export function TransactionsScreen({
@@ -149,6 +149,7 @@ export function TransactionsScreen({
   focusMonthKey = null,
   focusMonthToken = 0,
   onPressAddTransaction,
+  onOpenTransaction,
 }: TransactionsScreenProps) {
   const themeColors = useThemeColors();
   const {
@@ -167,9 +168,6 @@ export function TransactionsScreen({
 
   const [showFilters, setShowFilters] = useState(false);
   const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
-    null,
-  );
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
@@ -242,7 +240,6 @@ export function TransactionsScreen({
 
   useEffect(() => {
     if (isSelectionMode) {
-      setSelectedTransaction(null);
       setIsSearchBoxOpen(false);
       return;
     }
@@ -481,7 +478,6 @@ export function TransactionsScreen({
     setShowFilters(true);
   }, []);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
-  const handleCloseTransactionEditor = useCallback(() => setSelectedTransaction(null), []);
   const clearSelection = useCallback(() => {
     void triggerHaptic('selection');
     setSelectedTransactionIds([]);
@@ -499,9 +495,9 @@ export function TransactionsScreen({
         toggleTransactionSelection(transaction.id);
         return;
       }
-      setSelectedTransaction(transaction);
+      onOpenTransaction(transaction);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -667,15 +663,6 @@ export function TransactionsScreen({
       selectedTransactionIds,
     ],
   );
-
-  if (selectedTransaction) {
-    return (
-      <EditTransactionScreen
-        transaction={selectedTransaction}
-        onClose={handleCloseTransactionEditor}
-      />
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>

@@ -1,34 +1,56 @@
 import './global.css';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import {
+  createNativeStackNavigator,
+  type NativeStackNavigationProp,
+  type NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { HomeScreen } from '~/features/home/screens';
-import { InsightsScreen } from '~/features/insights/screens';
+import { InsightsDrilldownScreen, InsightsScreen, type InsightsDrilldownPayload } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
   AccountsScreen,
   SettingsStack,
   type SettingsScreenName,
 } from '~/features/settings/screens';
-import { AddTransactionScreen, TransactionsScreen } from '~/features/transactions/screens';
+import { TransactionEditorScreen } from '~/features/transactions/components';
+import { AddTransactionScreen, EditTransactionScreen, TransactionsScreen } from '~/features/transactions/screens';
 import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
-import { monthKeyFromDateLocal } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
+import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
+
+import type { TransactionWithRelations } from '~/types';
 
 type MainTab = TabName;
+
+type RootStackParamList = {
+  Main: undefined;
+  AddTransaction: undefined;
+  EditTransaction: { transactionId: string };
+  AccountDetail: { accountId: string };
+  InsightsDrilldown: InsightsDrilldownPayload;
+  RecurringEditor: { ruleId?: string } | undefined;
+};
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
+
 const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
@@ -79,11 +101,8 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   return <ThemeProvider value={resolved}>{children}</ThemeProvider>;
 }
 
-function AppContent() {
-  const { isLoading, settings, updateSettings } = useApp();
-  const resolvedTheme = useResolvedTheme();
-  const themeColors = useThemeColors();
-  const themeStyle = useThemeVars();
+function MainShellScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
@@ -96,7 +115,6 @@ function AppContent() {
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
-  const [showAddPage, setShowAddPage] = useState(false);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -112,8 +130,38 @@ function AppContent() {
   }, []);
 
   const openAddTransaction = useCallback(() => {
-    setShowAddPage(true);
-  }, []);
+    navigation.navigate('AddTransaction');
+  }, [navigation]);
+
+  const openTransactionEditor = useCallback(
+    (transaction: TransactionWithRelations) => {
+      navigation.navigate('EditTransaction', { transactionId: transaction.id });
+    },
+    [navigation],
+  );
+  const openAccountDetail = useCallback(
+    (accountId: string) => {
+      navigation.navigate('AccountDetail', { accountId });
+    },
+    [navigation],
+  );
+  const openInsightsDrilldown = useCallback(
+    (payload: InsightsDrilldownPayload) => {
+      navigation.navigate('InsightsDrilldown', payload);
+    },
+    [navigation],
+  );
+
+  const openRecurringEditor = useCallback(
+    (ruleId?: string) => {
+      if (ruleId) {
+        navigation.navigate('RecurringEditor', { ruleId });
+        return;
+      }
+      navigation.navigate('RecurringEditor');
+    },
+    [navigation],
+  );
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
@@ -133,15 +181,236 @@ function AppContent() {
       if (tab === 'account' && activeTab !== 'account') {
         setAccountsResetToRootToken((prev) => prev + 1);
       }
-      if (tab === 'settings' && activeTab === 'settings') {
+      if (tab === 'settings') {
         setSettingsForceScreen(null);
         setSettingsResetToken((prev) => prev + 1);
-        setSettingsScrollTopToken((prev) => prev + 1);
+        if (activeTab === 'settings') {
+          setSettingsScrollTopToken((prev) => prev + 1);
+        }
       }
       setActiveTab(tab);
     },
     [activeTab, jumpTransactionsToMonth],
   );
+
+  return (
+    <View className="flex-1 bg-background">
+      <View style={styles.flex}>
+        <MountedTab active={activeTab === 'home'}>
+          <MemoHomeScreen scrollToTopToken={homeScrollTopToken} />
+        </MountedTab>
+        <MountedTab active={activeTab === 'transactions'}>
+          <MemoTransactionsScreen
+            scrollToTopToken={transactionsScrollTopToken}
+            focusMonthKey={transactionsFocusMonthKey}
+            focusMonthToken={transactionsFocusMonthToken}
+            onPressAddTransaction={openAddTransaction}
+            onOpenTransaction={openTransactionEditor}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'account'}>
+          <MemoAccountsScreen
+            resetToRootToken={accountsResetToRootToken}
+            scrollToTopToken={accountsScrollTopToken}
+            onOpenAccount={openAccountDetail}
+            onOpenTransaction={openTransactionEditor}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'insights'}>
+          <MemoInsightsScreen
+            resetToCurrentMonthToken={insightsResetToMonthToken}
+            onOpenDrilldown={openInsightsDrilldown}
+            onOpenTransaction={openTransactionEditor}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'settings'}>
+          <MemoSettingsStack
+            resetToRootToken={settingsResetToken}
+            scrollToTopToken={settingsScrollTopToken}
+            forceScreen={settingsForceScreen}
+            forceScreenToken={settingsForceScreenToken}
+            onOpenRecurringEditor={openRecurringEditor}
+          />
+        </MountedTab>
+      </View>
+
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+    </View>
+  );
+}
+
+function AddTransactionRouteScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'AddTransaction'>) {
+  return <AddTransactionScreen onClose={() => navigation.goBack()} />;
+}
+
+function EditTransactionRouteScreen({
+  route,
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'EditTransaction'>) {
+  const { transactions } = useApp();
+  const transaction = useMemo(
+    () => transactions.find((item) => item.id === route.params.transactionId) ?? null,
+    [route.params.transactionId, transactions],
+  );
+
+  useEffect(() => {
+    if (transaction) return;
+    navigation.goBack();
+  }, [navigation, transaction]);
+
+  if (!transaction) {
+    return <View className="flex-1 bg-background" />;
+  }
+
+  return (
+    <EditTransactionScreen
+      transaction={transaction}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
+function AccountDetailRouteScreen({
+  route,
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'AccountDetail'>) {
+  return (
+    <AccountsScreen
+      onBack={() => navigation.goBack()}
+      accountId={route.params.accountId}
+      onOpenTransaction={(transaction) =>
+        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+      }
+    />
+  );
+}
+
+function InsightsDrilldownRouteScreen({
+  route,
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'InsightsDrilldown'>) {
+  return (
+    <InsightsDrilldownScreen
+      payload={route.params}
+      onBack={() => navigation.goBack()}
+      onOpenTransaction={(transaction) =>
+        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+      }
+    />
+  );
+}
+
+function RecurringEditorRouteScreen({
+  route,
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'RecurringEditor'>) {
+  const {
+    settings,
+    recurringRules,
+    createRecurringRule,
+    updateRecurringRule,
+  } = useApp();
+  const ruleId = route.params?.ruleId ?? null;
+  const editingRule = useMemo(
+    () => (ruleId ? recurringRules.find((rule) => rule.id === ruleId) ?? null : null),
+    [recurringRules, ruleId],
+  );
+
+  useEffect(() => {
+    if (!ruleId || editingRule) return;
+    navigation.goBack();
+  }, [editingRule, navigation, ruleId]);
+
+  if (ruleId && !editingRule) {
+    return <View className="flex-1 bg-background" />;
+  }
+
+  return (
+    <TransactionEditorScreen
+      mode={editingRule ? 'edit' : 'create'}
+      onClose={() => navigation.goBack()}
+      onSubmit={() => {}}
+      onDelete={undefined}
+      deleteLabel={undefined}
+      titleOverride={editingRule ? I18n.t('recurring.edit_rule') : I18n.t('recurring.new_rule')}
+      subtitleOverride={I18n.t('recurring.same_flow')}
+      submitLabelOverride={I18n.t('recurring.save_rule')}
+      restrictTypeOptions={['expense', 'income', 'transfer']}
+      recurringOptions={{
+        initialName: editingRule?.name,
+        initialPattern: editingRule?.recurrencePattern,
+        initialInterval: editingRule?.recurrenceInterval,
+        initialEndDate: editingRule?.endDate,
+        initialIsActive: editingRule?.isActive,
+        onSubmitRecurring: ({ transaction, recurring }) => {
+          const recurringTxType =
+            transaction.type === 'transfer'
+              ? 'transfer'
+              : transaction.type === 'income'
+                ? 'income'
+                : 'expense';
+          const basePayload = {
+            name: recurring.name,
+            type: recurringTxType,
+            amount: transaction.amount,
+            currency: settings.currencySymbol,
+            note: transaction.note ?? null,
+            recurrencePattern: recurring.pattern,
+            recurrenceInterval: recurring.interval,
+            nextRunDate: transaction.date,
+            endDate: recurring.endDate,
+            isActive: recurring.isActive,
+          } as const;
+          const payload =
+            transaction.type === 'transfer'
+              ? {
+                  ...basePayload,
+                  fromAccountId: transaction.fromAccountId ?? null,
+                  toAccountId: transaction.toAccountId ?? null,
+                  accountId: null,
+                  categoryId: null,
+                }
+              : {
+                  ...basePayload,
+                  accountId: transaction.accountId ?? null,
+                  categoryId: transaction.categoryId ?? null,
+                  fromAccountId: null,
+                  toAccountId: null,
+                };
+
+          if (editingRule) {
+            updateRecurringRule(editingRule.id, payload);
+          } else {
+            createRecurringRule(payload);
+          }
+          navigation.goBack();
+        },
+      }}
+      initialValues={
+        editingRule
+          ? {
+              type: editingRule.type,
+              amount: String(editingRule.amount),
+              date: dayKeyFromIsoLocal(editingRule.nextRunDate),
+              accountId: editingRule.accountId,
+              fromAccountId: editingRule.fromAccountId,
+              toAccountId: editingRule.toAccountId,
+              categoryId: editingRule.categoryId,
+              note: editingRule.note ?? '',
+            }
+          : undefined
+      }
+    />
+  );
+}
+
+function AppContent() {
+  const { isLoading, settings, updateSettings } = useApp();
+  const resolvedTheme = useResolvedTheme();
+  const themeColors = useThemeColors();
+  const themeStyle = useThemeVars();
 
   if (isLoading) {
     return (
@@ -168,47 +437,16 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-
-      <View style={styles.flex}>
-        <MountedTab active={activeTab === 'home'}>
-          <MemoHomeScreen scrollToTopToken={homeScrollTopToken} />
-        </MountedTab>
-        <MountedTab active={activeTab === 'transactions'}>
-          <MemoTransactionsScreen
-            scrollToTopToken={transactionsScrollTopToken}
-            focusMonthKey={transactionsFocusMonthKey}
-            focusMonthToken={transactionsFocusMonthToken}
-            onPressAddTransaction={openAddTransaction}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'account'}>
-          <MemoAccountsScreen
-            resetToRootToken={accountsResetToRootToken}
-            scrollToTopToken={accountsScrollTopToken}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'insights'}>
-          <MemoInsightsScreen resetToCurrentMonthToken={insightsResetToMonthToken} />
-        </MountedTab>
-        <MountedTab active={activeTab === 'settings'}>
-          <MemoSettingsStack
-            resetToRootToken={settingsResetToken}
-            scrollToTopToken={settingsScrollTopToken}
-            forceScreen={settingsForceScreen}
-            forceScreenToken={settingsForceScreenToken}
-          />
-        </MountedTab>
-      </View>
-
-      {showAddPage ? (
-        <View style={[StyleSheet.absoluteFillObject, { zIndex: 20 }]}>
-          <View className="flex-1 bg-background" style={themeStyle}>
-            <AddTransactionScreen onClose={() => setShowAddPage(false)} />
-          </View>
-        </View>
-      ) : null}
-
-      {!showAddPage ? <BottomNav activeTab={activeTab} onTabChange={handleTabChange} /> : null}
+      <NavigationContainer>
+        <RootStack.Navigator screenOptions={SHARED_NATIVE_STACK_OPTIONS}>
+          <RootStack.Screen name="Main" component={MainShellScreen} />
+          <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
+          <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
+          <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
+          <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
+          <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
+        </RootStack.Navigator>
+      </NavigationContainer>
     </View>
   );
 }

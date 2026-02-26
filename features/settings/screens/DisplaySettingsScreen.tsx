@@ -15,7 +15,6 @@ import { Text } from '~/components/ui/text';
 import { useApp } from '~/context/AppContext';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { triggerHaptic } from '~/services/haptics';
 import { I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import type { ThemeMode } from '~/types';
@@ -134,11 +133,8 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     onBack();
   };
 
-  const swipeBackGesture = useEdgeSwipeBack(handleCancel);
-
   return (
     <SettingsPageLayout
-      swipeBackGesture={swipeBackGesture}
       actionBar={
         <SettingsActionBar onCancel={handleCancel} onSave={handleSave} saveDisabled={!canSave} />
       }

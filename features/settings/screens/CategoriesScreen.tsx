@@ -346,9 +346,15 @@ function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
 
 interface CategoriesScreenProps {
   onBack?: () => void;
+  parentId?: string | null;
+  onOpenParent?: (parentId: string) => void;
 }
 
-export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
+export function CategoriesScreen({
+  onBack,
+  parentId = null,
+  onOpenParent,
+}: CategoriesScreenProps = {}) {
   const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } = useApp();
   const { persistOrder } = useDebouncedPersistence(500);
   const themeColors = useThemeColors();
@@ -356,6 +362,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+  const activeParentId = parentId ?? selectedParentId;
 
   const typeCategories = useMemo(
     () => categories.filter((category) => category.type === type),
@@ -377,12 +384,12 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     return map;
   }, [typeCategories]);
 
-  const selectedParent = selectedParentId
-    ? (topLevel.find((c) => c.id === selectedParentId) ?? null)
+  const selectedParent = activeParentId
+    ? (topLevel.find((c) => c.id === activeParentId) ?? null)
     : null;
   const subcategoriesFromContext = useMemo(
-    () => (selectedParentId ? (childrenByParent.get(selectedParentId) ?? []) : []),
-    [childrenByParent, selectedParentId],
+    () => (activeParentId ? (childrenByParent.get(activeParentId) ?? []) : []),
+    [activeParentId, childrenByParent],
   );
 
   const [localTopLevel, setLocalTopLevel] = useState(topLevel);
@@ -404,10 +411,14 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
     setLocalSubcategories(subcategoriesFromContext);
   }, [subcategoriesFromContext]);
   useEffect(() => {
-    if (selectedParentId && !topLevel.find((c) => c.id === selectedParentId)) {
-      setSelectedParentId(null);
+    if (!activeParentId) return;
+    if (topLevel.find((category) => category.id === activeParentId)) return;
+    if (parentId) {
+      onBack?.();
+      return;
     }
-  }, [selectedParentId, topLevel]);
+    setSelectedParentId(null);
+  }, [activeParentId, onBack, parentId, topLevel]);
 
   _themeColors = themeColors;
   _iconById = new Map(typeCategories.map((category) => [category.id, category.icon]));
@@ -422,7 +433,19 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
   };
   _onNavigate = (item: Category) => {
     void triggerHaptic('selection');
+    if (onOpenParent) {
+      onOpenParent(item.id);
+      return;
+    }
     setSelectedParentId(item.id);
+  };
+
+  const handleSubcategoryBack = () => {
+    if (parentId) {
+      onBack?.();
+      return;
+    }
+    setSelectedParentId(null);
   };
 
   if (selectedParent) {
@@ -431,7 +454,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
         <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
           <SettingsHeader
             className="px-0 pt-5 pb-1"
-            onBack={() => setSelectedParentId(null)}
+            onBack={handleSubcategoryBack}
             title={selectedParent.name}
             subtitle={I18n.t('categories.subcategories')}
             rightAccessory={
@@ -477,7 +500,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps = {}) {
           visible={createOpen}
           mode="create"
           topLevel={topLevel}
-          initial={{ parentId: selectedParentId, type }}
+          initial={{ parentId: activeParentId, type }}
           onClose={() => setCreateOpen(false)}
           onSubmit={(input) => {
             createCategory({ ...input, type, isDefault: false });

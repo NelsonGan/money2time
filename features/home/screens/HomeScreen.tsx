@@ -25,6 +25,7 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 
 const GREETINGS: Record<string, string> = {
   morning: I18n.t('home.greeting.morning'),
@@ -350,6 +351,12 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
             <Card variant="default" className="p-0 overflow-hidden">
               {recurringInsights.map((rule, index) => {
                 const category = rule.categoryId ? categoryById.get(rule.categoryId) : undefined;
+                const parentCategory = category?.parentId
+                  ? categoryById.get(category.parentId)
+                  : undefined;
+                const categoryIcon = category
+                  ? resolveCategoryIcon(category.icon, parentCategory?.icon ?? null)
+                  : '🔄';
                 const isLast = index === recurringInsights.length - 1;
                 return (
                   <Animated.View
@@ -364,7 +371,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
                         className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
                         style={{ backgroundColor: themeColors.primary + '18' }}
                       >
-                        <Text style={{ fontSize: 18 }}>{category?.icon ?? '🔄'}</Text>
+                        <Text style={{ fontSize: 18 }}>{categoryIcon}</Text>
                       </View>
                       <View className="flex-1 mr-2">
                         <Text variant="bodyStrong" numberOfLines={1}>
