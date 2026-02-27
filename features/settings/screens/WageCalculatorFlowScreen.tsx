@@ -2,22 +2,23 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
+import { Mascot } from '~/components/feedback/Mascot';
 import {
+  Button,
+  Card,
+  CardContent,
+  Input,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-} from '~/components/ui/settings';
-import { Text } from '~/components/ui/text';
-import { Mascot } from '~/components/feedback/Mascot';
-import { computeHourlyRates, formatCurrency } from '~/utils/formatters';
-import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
-import type { WageConfig, WageType, UserSettings } from '~/types';
+  Text,
+} from '~/components/ui';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { UserSettings, WageConfig, WageType } from '~/types';
+import { cn } from '~/utils';
+import { computeHourlyRates, formatCurrency } from '~/utils/formatters';
 
 interface WageCalculatorFlowScreenProps {
   initialConfig: WageConfig;
