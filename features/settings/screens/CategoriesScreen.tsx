@@ -1,14 +1,14 @@
+import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
-import { Input } from '~/components/ui/input';
-import { Button } from '~/components/ui/button';
+import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
+  Button,
+  Input,
+  SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -16,17 +16,17 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   SettingsSection,
-} from '~/components/ui/settings';
-import { SegmentedToggle } from '~/components/ui/toggle';
-import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
-import { useApp } from '~/context/AppContext';
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
-import type { Category, CategoryType } from '~/types';
-import { useThemeColors } from '~/hooks/useThemeColors';
-import { cn } from '~/utils';
-import { triggerHaptic } from '~/services/haptics';
-import { I18n } from '~/lib/i18n';
+import { useApp } from '~/context/AppContext';
 import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { Category, CategoryType } from '~/types';
+import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 
 const SNAP_CONFIG = {

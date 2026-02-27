@@ -1,22 +1,23 @@
+import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
-import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
 import {
+  Button,
+  Card,
+  CardContent,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-} from '~/components/ui/settings';
-import { Text } from '~/components/ui/text';
+  Text,
+} from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { RecurringTransactionRule } from '~/types';
-import { I18n } from '~/lib/i18n';
+import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 
 interface RecurringScreenProps {
   onBack: () => void;

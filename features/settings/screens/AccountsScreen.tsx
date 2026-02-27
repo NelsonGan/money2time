@@ -1,19 +1,21 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, FlatList, type LayoutChangeEvent, Pressable, ScrollView, View } from 'react-native';
 import DraggableFlatList, {
   NestableDraggableFlatList,
   NestableScrollContainer,
   type RenderItemParams,
 } from 'react-native-draggable-flatlist';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
-import { Input } from '~/components/ui/input';
-import { Button } from '~/components/ui/button';
+import { EmptyState } from '~/components/feedback/EmptyState';
+import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
+  Button,
+  Input,
+  SegmentedToggle,
+  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -21,33 +23,30 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   SettingsSection,
-} from '~/components/ui/settings';
-import { SelectField } from '~/components/ui/select';
-import { SegmentedToggle } from '~/components/ui/toggle';
-import { ActivityTransactionList } from '~/features/transactions/components';
-import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
-import { EditTransactionScreen } from '~/features/transactions/screens';
-import { EmptyState } from '~/components/feedback/EmptyState';
-import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
-import { useApp } from '~/context/AppContext';
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import {
   ACCOUNT_TYPE_OPTIONS,
   DEFAULT_CATEGORY_EMOJIS,
   DEFAULT_CURRENCY,
 } from '~/constants/appDefaults';
+import { useApp } from '~/context/AppContext';
+import { ActivityTransactionList } from '~/features/transactions/components';
+import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
+import { EditTransactionScreen } from '~/features/transactions/screens';
+import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import {
   type Account,
   type AccountGroup,
   type AccountType,
   type TransactionWithRelations,
 } from '~/types';
-import { formatAmount, formatDateInput } from '~/utils/formatters';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
-import { triggerHaptic } from '~/services/haptics';
-import { I18n } from '~/lib/i18n';
-
-import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
+import { formatAmount, formatDateInput } from '~/utils/formatters';
 
 const SNAP_CONFIG = {
   damping: 100,
