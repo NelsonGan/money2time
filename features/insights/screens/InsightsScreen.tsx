@@ -3414,6 +3414,7 @@ export function InsightsScreen({
             optionsLayout="list"
             sheetTitle={I18n.t('insights.insight_type')}
             onChange={handleInsightTypeChange}
+            fullHeight
           />
         }
         monthLabel={activePeriodLabel}
@@ -3445,6 +3446,7 @@ export function InsightsScreen({
             horizontal
             pagingEnabled
             disableIntervalMomentum
+            scrollEnabled={selectedInsightType !== 'income_rate_history'}
             bounces={false}
             directionalLockEnabled
             decelerationRate="fast"

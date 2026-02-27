@@ -40,6 +40,7 @@ interface SelectFieldProps {
   onChange: (value: string) => void;
   helperText?: string;
   error?: string;
+  fullHeight?: boolean;
 }
 
 export function SelectField({
@@ -55,6 +56,7 @@ export function SelectField({
   onChange,
   helperText,
   error,
+  fullHeight = false,
 }: SelectFieldProps) {
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
@@ -214,7 +216,7 @@ export function SelectField({
             className="rounded-t-[28px] border-t border-border/40 bg-background px-5 pt-3 pb-7"
             style={{
               transform: [{ translateY }],
-              maxHeight: Math.max(320, Math.min(windowHeight * 0.74, 620)),
+              maxHeight: fullHeight ? windowHeight : Math.max(320, Math.min(windowHeight * 0.74, 620)),
             }}
             onLayout={(event) => {
               const next = event.nativeEvent.layout.height;
@@ -240,7 +242,7 @@ export function SelectField({
               contentContainerStyle={{ paddingBottom: 26 }}
             >
               <View
-                className={cn(optionsLayout === 'list' ? 'gap-2.5' : 'flex-row flex-wrap gap-2')}
+                className={cn(optionsLayout === 'list' ? 'gap-1.5' : 'flex-row flex-wrap gap-2')}
               >
                 {options.map((option) => {
                   const isSelected = option.value === value;
@@ -254,7 +256,7 @@ export function SelectField({
                       }}
                       className={cn(
                         optionsLayout === 'list'
-                          ? 'w-full min-h-[74px] rounded-2xl border px-4 py-3 flex-row items-center gap-3'
+                          ? 'w-full min-h-[52px] rounded-2xl border px-3 py-2 flex-row items-center gap-3'
                           : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
                         isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
                       )}
@@ -264,7 +266,7 @@ export function SelectField({
                           {option.icon ? (
                             <View
                               className={cn(
-                                'h-10 w-10 rounded-xl items-center justify-center border',
+                                'h-8 w-8 rounded-lg items-center justify-center border',
                                 isSelected
                                   ? 'bg-primary/15 border-primary/35'
                                   : 'bg-secondary/45 border-border/35',
@@ -274,16 +276,11 @@ export function SelectField({
                             </View>
                           ) : null}
                           <View className="flex-1">
-                            <Text variant="caption" numberOfLines={2} className="pr-2">
+                            <Text variant="caption" numberOfLines={1} className="pr-2">
                               {option.label}
                             </Text>
                             {option.description ? (
-                              <Text
-                                variant="label"
-                                tone="muted"
-                                numberOfLines={2}
-                                className="mt-1 pr-2"
-                              >
+                              <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5 pr-2">
                                 {option.description}
                               </Text>
                             ) : null}

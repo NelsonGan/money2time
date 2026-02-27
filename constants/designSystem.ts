@@ -8,6 +8,8 @@ export interface ColorPalette {
   accent: string;
   accentSoft: string;
   background: string;
+  card: string;
+  border: string;
   surface: string;
   surfaceMuted: string;
   text: string;
@@ -33,6 +35,8 @@ export const colors: ColorPalette = {
   accent: '#F6B750',
   accentSoft: '#FDF0D8',
   background: '#FAF7F0',
+  card: '#FEFDFB',
+  border: '#E4DFD1',
   surface: '#FFFEFB',
   surfaceMuted: '#F3EEE3',
   text: '#1A2E2A',
@@ -58,6 +62,8 @@ export const darkColors: ColorPalette = {
   accent: '#E8AD4A',
   accentSoft: '#2E2518',
   background: '#121A24',
+  card: '#1A1F28',
+  border: '#3C4353',
   surface: '#1A2330',
   surfaceMuted: '#1E2A36',
   text: '#E8EDF2',
