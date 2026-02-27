@@ -1,10 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StackActions } from '@react-navigation/native';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+
+import { useApp } from '~/context/AppContext';
 import {
-  createNativeStackNavigator,
-  type NativeStackNavigationProp,
-  type NativeStackScreenProps,
-} from '@react-navigation/native-stack';
+  type SettingsScreenName,
+  type SettingsStackNavigationProp,
+  SettingsStackNavigator,
+  type SettingsStackRouteProps,
+} from '~/navigation/settingsStack';
+import {
+  DISABLE_BACK_GESTURE_STACK_OPTIONS,
+  SHARED_NATIVE_STACK_OPTIONS,
+} from '~/navigation/stackOptions';
+import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 
 import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
@@ -13,29 +21,6 @@ import { HourlyValueScreen } from './HourlyValueScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
-import { useApp } from '~/context/AppContext';
-import {
-  DISABLE_BACK_GESTURE_STACK_OPTIONS,
-  SHARED_NATIVE_STACK_OPTIONS,
-} from '~/navigation/stackOptions';
-import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import type { WageConfig } from '~/types';
-
-export type SettingsStackParamList = {
-  SettingsHome: undefined;
-  DisplaySettings: undefined;
-  HourlyValue: undefined;
-  WageCalculator: { monthKey: string; initialConfig: WageConfig };
-  Accounts: undefined;
-  Categories: undefined;
-  CategoriesSubcategories: { parentId: string };
-  Recurring: undefined;
-};
-
-export type SettingsScreenName = Exclude<
-  keyof SettingsStackParamList,
-  'CategoriesSubcategories' | 'WageCalculator'
->;
 
 interface SettingsStackProps {
   resetToRootToken?: number;
@@ -45,12 +30,10 @@ interface SettingsStackProps {
   onOpenRecurringEditor: (ruleId?: string) => void;
 }
 
-const Stack = createNativeStackNavigator<SettingsStackParamList>();
-
 function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
-}: NativeStackScreenProps<SettingsStackParamList, 'SettingsHome'> & {
+}: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
 }) {
   return (
@@ -65,10 +48,7 @@ function SettingsHomeRoute({
   );
 }
 
-function WageCalculatorRoute({
-  route,
-  navigation,
-}: NativeStackScreenProps<SettingsStackParamList, 'WageCalculator'>) {
+function WageCalculatorRoute({ route, navigation }: SettingsStackRouteProps<'WageCalculator'>) {
   const { settings, updateWageConfigForMonth } = useApp();
   const { monthKey, initialConfig } = route.params;
 
@@ -93,7 +73,7 @@ export function SettingsStack({
   forceScreenToken = 0,
   onOpenRecurringEditor,
 }: SettingsStackProps) {
-  const stackNavigationRef = useRef<NativeStackNavigationProp<SettingsStackParamList> | null>(null);
+  const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
   const suppressClosingHapticUntilRef = useRef(0);
   const suppressProgrammaticClosingHaptics = useCallback((durationMs = 600) => {
     suppressClosingHapticUntilRef.current = Date.now() + durationMs;
@@ -136,24 +116,24 @@ export function SettingsStack({
   }, [forceScreen, forceScreenToken, suppressProgrammaticClosingHaptics]);
 
   return (
-    <Stack.Navigator
+    <SettingsStackNavigator.Navigator
       initialRouteName="SettingsHome"
       screenOptions={SHARED_NATIVE_STACK_OPTIONS}
       screenListeners={screenListeners}
     >
-      <Stack.Screen name="SettingsHome">
+      <SettingsStackNavigator.Screen name="SettingsHome">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <SettingsHomeRoute {...props} scrollToTopToken={scrollToTopToken} />;
         }}
-      </Stack.Screen>
-      <Stack.Screen name="DisplaySettings">
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="DisplaySettings">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <DisplaySettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
-      </Stack.Screen>
-      <Stack.Screen name="HourlyValue">
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="HourlyValue">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
@@ -165,20 +145,20 @@ export function SettingsStack({
             />
           );
         }}
-      </Stack.Screen>
-      <Stack.Screen name="WageCalculator">
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="WageCalculator">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <WageCalculatorRoute {...props} />;
         }}
-      </Stack.Screen>
-      <Stack.Screen name="Accounts" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Accounts" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AccountsScreen onBack={() => props.navigation.goBack()} managementOnly />;
         }}
-      </Stack.Screen>
-      <Stack.Screen name="Categories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Categories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
@@ -190,8 +170,11 @@ export function SettingsStack({
             />
           );
         }}
-      </Stack.Screen>
-      <Stack.Screen name="CategoriesSubcategories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen
+        name="CategoriesSubcategories"
+        options={DISABLE_BACK_GESTURE_STACK_OPTIONS}
+      >
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
@@ -201,8 +184,8 @@ export function SettingsStack({
             />
           );
         }}
-      </Stack.Screen>
-      <Stack.Screen name="Recurring">
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Recurring">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
@@ -212,7 +195,7 @@ export function SettingsStack({
             />
           );
         }}
-      </Stack.Screen>
-    </Stack.Navigator>
+      </SettingsStackNavigator.Screen>
+    </SettingsStackNavigator.Navigator>
   );
 }
