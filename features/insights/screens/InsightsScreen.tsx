@@ -36,6 +36,7 @@ import {
   formatDateInput,
   formatHours,
   monthKeyFromIsoLocal,
+  normalizeMonthKey,
   toRange,
 } from '~/utils/formatters';
 
@@ -50,6 +51,7 @@ const INSIGHT_TYPES = [
   'time_cost_leaderboard',
   'savings_rate',
   'asset_history',
+  'income_rate_history',
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
@@ -65,6 +67,7 @@ const INSIGHT_ICONS: Record<InsightType, string> = {
   time_cost_leaderboard: '⏱️',
   savings_rate: '💹',
   asset_history: '🏦',
+  income_rate_history: '💰',
 };
 
 const TIME_COST_RANK_ACCENTS = [
@@ -107,6 +110,10 @@ const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_TOP = 16;
 const ASSET_HISTORY_CHART_PADDING_RIGHT = 88;
 const ASSET_HISTORY_VERTICAL_HEIGHT_PERCENTAGE = 0.75;
+const INCOME_RATE_CHART_HEIGHT = 200;
+const INCOME_RATE_CHART_PADDING_TOP = 16;
+const INCOME_RATE_CHART_PADDING_RIGHT = 88;
+const INCOME_RATE_CHART_VERTICAL_HEIGHT_PCT = 0.75;
 
 type InsightFilterConfig = {
   fixedPeriodPreset: PeriodPreset | null;
@@ -133,6 +140,10 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   },
   asset_history: {
     fixedPeriodPreset: 'year',
+    allowAccountFilter: false,
+  },
+  income_rate_history: {
+    fixedPeriodPreset: null,
     allowAccountFilter: false,
   },
   calendar_view: {
@@ -291,12 +302,23 @@ type AssetHistoryPageData = InsightBasePageData & {
   excludedAccountsCount: number;
 };
 
+type IncomeRatePoint = {
+  label: string;
+  rate: number;
+};
+
+type IncomeRateHistoryPageData = InsightBasePageData & {
+  kind: 'income_rate_history';
+  points: IncomeRatePoint[];
+};
+
 type InsightPageData =
   | BreakdownPageData
   | CalendarPageData
   | TimeCostPageData
   | AnalyticsPageData
-  | AssetHistoryPageData;
+  | AssetHistoryPageData
+  | IncomeRateHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 
 type InsightsPreferencesSnapshot = {
@@ -690,6 +712,13 @@ function assetHistoryPointY(value: number, values: number[]) {
   return ((baseHeight - valueHeight) / 4) * 3 + ASSET_HISTORY_CHART_PADDING_TOP;
 }
 
+function incomeRatePointY(value: number, values: number[]) {
+  if (values.length === 0) return INCOME_RATE_CHART_PADDING_TOP;
+  const baseHeight = calcChartBaseHeight(values, INCOME_RATE_CHART_HEIGHT);
+  const valueHeight = calcChartHeight(value, values, INCOME_RATE_CHART_HEIGHT);
+  return ((baseHeight - valueHeight) / 4) * 3 + INCOME_RATE_CHART_PADDING_TOP;
+}
+
 function FilterPill({
   label,
   active,
@@ -743,6 +772,7 @@ export function InsightsScreen({
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
     simpleWalletId,
+    monthlyWages,
   } = useApp();
 
   const allTransactions = useMemo(() => {
@@ -782,6 +812,9 @@ export function InsightsScreen({
   const [assetHistoryScrubMonthByYear, setAssetHistoryScrubMonthByYear] = useState<
     Record<string, string>
   >({});
+  const [selectedIncomeRatePointIndex, setSelectedIncomeRatePointIndex] = useState<number | null>(
+    null,
+  );
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
@@ -860,6 +893,7 @@ export function InsightsScreen({
     setActiveBreakdownSliceId(null);
     setAssetHistoryScrubMonthByYear({});
     setSelectedCalendarDayKey(null);
+    setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setCommittedPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
@@ -1215,6 +1249,28 @@ export function InsightsScreen({
           includedAccountsCount: includedAccounts.length,
           excludedAccountsCount,
         };
+      }
+
+      if (insightType === 'income_rate_history') {
+        // Deduplicate and sort wage entries ascending
+        const byMonth = new Map<string, { rate: number; updatedAt: string }>();
+        monthlyWages.forEach((item) => {
+          const key = normalizeMonthKey(item.month);
+          const existing = byMonth.get(key);
+          if (!existing || item.updatedAt > existing.updatedAt) {
+            byMonth.set(key, { rate: item.trueHourlyRate, updatedAt: item.updatedAt });
+          }
+        });
+        const rateHistory = Array.from(byMonth.entries())
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([month, { rate }]) => ({ month, rate }));
+
+        const points: IncomeRatePoint[] = rateHistory.map((e) => ({
+          label: `${parseInt(e.month.slice(5, 7), 10)}/${e.month.slice(2, 4)}`,
+          rate: e.rate,
+        }));
+
+        return { kind: 'income_rate_history', range, filteredForRange: [], points };
       }
 
       if (insightType === 'calendar_view') {
@@ -1686,6 +1742,7 @@ export function InsightsScreen({
       excludedTimeCostExpenseCategorySet,
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
+      monthlyWages,
       settings.displayMode,
       settings.hourRounding,
     ],
@@ -1790,11 +1847,13 @@ export function InsightsScreen({
       selectedCalendarDayKey,
       timeCostViewMode,
       assetHistoryScrubMonthByYear,
+      selectedIncomeRatePointIndex,
     }),
     [
       activeBreakdownSliceId,
       assetHistoryScrubMonthByYear,
       selectedCalendarDayKey,
+      selectedIncomeRatePointIndex,
       selectedInsightType,
       timeCostViewMode,
     ],
@@ -2789,6 +2848,151 @@ export function InsightsScreen({
     );
   };
 
+  const renderIncomeRateHistoryPane = (pageData: IncomeRateHistoryPageData) => {
+    if (pageData.points.length < 2) {
+      return (
+        <EmptyState
+          title={I18n.t('insights.analytics.income_rate_history.no_data_title')}
+          message={I18n.t('insights.analytics.income_rate_history.no_data_message')}
+          mascotMood="curious"
+          animateIn={false}
+        />
+      );
+    }
+
+    const rates = pageData.points.map((p) => p.rate);
+    const selectedIndex =
+      selectedIncomeRatePointIndex !== null &&
+      selectedIncomeRatePointIndex < pageData.points.length
+        ? selectedIncomeRatePointIndex
+        : null;
+    const selectedPoint = selectedIndex !== null ? pageData.points[selectedIndex] : null;
+
+    const pointX =
+      selectedIndex !== null
+        ? assetHistoryPointX(selectedIndex, chartWidth, pageData.points.length)
+        : null;
+    const pointY =
+      selectedIndex !== null && selectedPoint !== null
+        ? incomeRatePointY(selectedPoint.rate, rates)
+        : null;
+
+    const selectPoint = (index: number) => {
+      if (selectedIncomeRatePointIndex === index) return;
+      void triggerHaptic('selection');
+      setSelectedIncomeRatePointIndex(index);
+    };
+    const selectFromChartTap = (locationX: number) => {
+      const index = assetHistoryNearestPointIndex(locationX, chartWidth, pageData.points.length);
+      selectPoint(index);
+    };
+
+    const chartData = {
+      labels: pageData.points.map((p) => p.label),
+      datasets: [{ data: rates }],
+    };
+
+    return (
+      <Card className="mt-2">
+        <CardContent className="py-3 gap-2.5">
+          <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
+            <Text variant="caption">
+              {I18n.t('insights.analytics.income_rate_history.true_hourly_rate')}
+            </Text>
+            {selectedPoint ? (
+              <Text variant="heading" className="mt-1 text-primary">
+                {settings.currencySymbol}{selectedPoint.rate.toFixed(2)}/hr
+              </Text>
+            ) : (
+              <Text variant="heading" className="mt-1 text-primary">
+                {settings.currencySymbol}{(rates[rates.length - 1] ?? 0).toFixed(2)}/hr
+              </Text>
+            )}
+            {selectedPoint ? (
+              <Text variant="label" tone="muted" className="mt-1">
+                {selectedPoint.label}
+              </Text>
+            ) : (
+              <Text variant="label" tone="muted" className="mt-1">
+                {I18n.t('insights.analytics.income_rate_history.scrub_hint')}
+              </Text>
+            )}
+          </View>
+
+          <View className="rounded-2xl border border-border/30 bg-card/90 px-2 py-2.5">
+            <View
+              style={{ width: chartWidth, height: INCOME_RATE_CHART_HEIGHT }}
+              className="self-center"
+            >
+              <LineChart
+                data={chartData}
+                width={chartWidth}
+                height={INCOME_RATE_CHART_HEIGHT}
+                chartConfig={chartConfig}
+                formatYLabel={(val) =>
+                  `${settings.currencySymbol}${Number(val).toFixed(0)}`
+                }
+                withDots={false}
+                withShadow={false}
+                withInnerLines
+                withOuterLines={false}
+                withVerticalLines={false}
+                segments={4}
+                style={{ borderRadius: 14, paddingRight: INCOME_RATE_CHART_PADDING_RIGHT }}
+              />
+              {pointX !== null && pointY !== null ? (
+                <>
+                  <View
+                    className="absolute bg-primary/35"
+                    pointerEvents="none"
+                    style={{
+                      left: pointX - 0.5,
+                      top: INCOME_RATE_CHART_PADDING_TOP,
+                      width: 1,
+                      height: INCOME_RATE_CHART_HEIGHT * INCOME_RATE_CHART_VERTICAL_HEIGHT_PCT,
+                    }}
+                  />
+                  <View
+                    className="absolute h-3 w-3 rounded-full border-2 border-primary bg-background"
+                    pointerEvents="none"
+                    style={{ left: pointX - 6, top: pointY - 6 }}
+                  />
+                </>
+              ) : null}
+              <Pressable
+                className="absolute inset-0"
+                delayLongPress={10_000}
+                onPress={(event) => {
+                  selectFromChartTap(event.nativeEvent.locationX);
+                }}
+              />
+            </View>
+          </View>
+
+          <View className="gap-1">
+            {pageData.points.map((point, index) => (
+              <Pressable
+                key={point.label}
+                onPress={() => selectPoint(index)}
+                className={cn(
+                  'rounded-xl border px-3 py-2 flex-row items-center justify-between',
+                  selectedIndex === index
+                    ? 'border-primary/45 bg-primary/10'
+                    : 'border-border/25 bg-card/80',
+                )}
+              >
+                <Text variant="caption">{point.label}</Text>
+                <Text variant="caption" className="text-primary">
+                  {settings.currencySymbol}{point.rate.toFixed(2)}/hr
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderAnalyticsPane = (pageData: AnalyticsPageData) => {
     if (pageData.insightType === 'savings_rate') {
       const savingsRate =
@@ -2992,6 +3196,9 @@ export function InsightsScreen({
     if (pageData.kind === 'asset_history') {
       return renderAssetHistoryPane(pageData);
     }
+    if (pageData.kind === 'income_rate_history') {
+      return renderIncomeRateHistoryPane(pageData);
+    }
     if (pageData.kind === 'analytics') {
       return renderAnalyticsPane(pageData);
     }
@@ -3164,6 +3371,7 @@ export function InsightsScreen({
 
       setActiveBreakdownSlice(null, false);
       setSelectedCalendarDayKey(null);
+      setSelectedIncomeRatePointIndex(null);
       setSelectedInsightType(nextInsightType);
     },
     [effectivePeriodPreset, periodPreset, setActiveBreakdownSlice],
@@ -3211,6 +3419,7 @@ export function InsightsScreen({
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
+        hideNavigation={selectedInsightType === 'income_rate_history'}
         actions={
           hasInsightsFilters ? (
             <FilterIconButton onPress={handleOpenFiltersModal} count={insightsFilterCount} />
