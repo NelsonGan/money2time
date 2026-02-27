@@ -17,7 +17,8 @@ import { categoriesTable, monthlyWageSettingsTable, settingsTable } from './sche
 import { getDeviceLocale } from '~/lib/i18n';
 
 const DB_NAME = 'money2time.db';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
+export const SIMPLE_WALLET_NAME = 'Simple Wallet';
 
 let sqlite: SQLiteDatabase | null = null;
 let initialized = false;
@@ -258,6 +259,12 @@ function migrateV2(db: SQLiteDatabase) {
   `);
 }
 
+function migrateV3(db: SQLiteDatabase) {
+  const cols = db.getAllSync<{ name: string }>(`PRAGMA table_info(settings)`);
+  if (cols.some((c) => c.name === 'user_mode')) return;
+  db.execSync(`ALTER TABLE settings ADD COLUMN user_mode TEXT NOT NULL DEFAULT 'power'`);
+}
+
 function runMigrations(db: SQLiteDatabase) {
   const row = db.getFirstSync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = row?.user_version ?? 0;
@@ -267,6 +274,9 @@ function runMigrations(db: SQLiteDatabase) {
   }
   if (currentVersion < 2) {
     migrateV2(db);
+  }
+  if (currentVersion < 3) {
+    migrateV3(db);
   }
 
   db.execSync(`PRAGMA user_version = ${SCHEMA_VERSION}`);

@@ -99,6 +99,7 @@ export const settingsTable = sqliteTable('settings', {
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),
+  userMode: text('user_mode').notNull().default('power'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

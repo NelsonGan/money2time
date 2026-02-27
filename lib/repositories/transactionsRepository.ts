@@ -248,6 +248,24 @@ class TransactionsRepository {
       .run();
   }
 
+  softDeleteByAccountId(accountId: string) {
+    const db = getDb();
+    const now = nowIso();
+    db.update(transactionsTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          or(
+            eq(transactionsTable.accountId, accountId),
+            eq(transactionsTable.fromAccountId, accountId),
+            eq(transactionsTable.toAccountId, accountId),
+          ),
+        ),
+      )
+      .run();
+  }
+
   getCashflowSummary(range: { start: string; end: string }): CashflowSummary {
     const db = getDb();
     const rows = db

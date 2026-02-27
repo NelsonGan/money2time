@@ -139,7 +139,29 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
     settings,
     currentMonthWage,
     getDisplayValueForTransaction,
+    isSimpleMode,
+    simpleWalletId,
   } = useApp();
+
+  const walletTransactions = useMemo(() => {
+    if (!isSimpleMode || !simpleWalletId) return transactions;
+    return transactions.filter(
+      (tx) =>
+        tx.accountId === simpleWalletId ||
+        tx.fromAccountId === simpleWalletId ||
+        tx.toAccountId === simpleWalletId,
+    );
+  }, [transactions, isSimpleMode, simpleWalletId]);
+
+  const walletRecurringRules = useMemo(() => {
+    if (!isSimpleMode || !simpleWalletId) return recurringRules;
+    return recurringRules.filter(
+      (rule) =>
+        rule.accountId === simpleWalletId ||
+        rule.fromAccountId === simpleWalletId ||
+        rule.toAccountId === simpleWalletId,
+    );
+  }, [recurringRules, isSimpleMode, simpleWalletId]);
 
   const todayIso = dayKeyFromDateLocal(new Date());
   const thirtyDaysAgo = new Date();
@@ -151,7 +173,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
   const [estimatorAmount, setEstimatorAmount] = useState('');
 
   const windowStats = useMemo(() => {
-    const windowTxns = transactions.filter((tx) => {
+    const windowTxns = walletTransactions.filter((tx) => {
       const day = dayKeyFromIsoLocal(tx.date);
       return day >= windowStartIso && day <= todayIso;
     });
@@ -165,7 +187,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
     });
 
     return { income, expense, count: windowTxns.length };
-  }, [getDisplayValueForTransaction, transactions, todayIso, windowStartIso]);
+  }, [getDisplayValueForTransaction, walletTransactions, todayIso, windowStartIso]);
 
   const recurringInsights = useMemo(() => {
     const monthlyFactor = (
@@ -186,7 +208,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
       }
     };
 
-    return recurringRules
+    return walletRecurringRules
       .filter((rule) => rule.type === 'expense')
       .map((rule) => {
         const factor = monthlyFactor(rule.recurrencePattern, rule.recurrenceInterval);
@@ -203,7 +225,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
         if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
         return Math.abs(b.monthlyAmount) - Math.abs(a.monthlyAmount);
       });
-  }, [hasHourlyRate, rate, recurringRules, settings.hourRounding]);
+  }, [hasHourlyRate, rate, walletRecurringRules, settings.hourRounding]);
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],

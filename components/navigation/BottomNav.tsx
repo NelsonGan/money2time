@@ -15,6 +15,7 @@ export type TabName = 'transactions' | 'account' | 'home' | 'insights' | 'settin
 interface BottomNavProps {
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
+  hideTabs?: TabName[];
 }
 
 const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
@@ -62,7 +63,7 @@ const NavItem = memo(function NavItem({
   );
 });
 
-export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) {
   const themeColors = useThemeColors();
   const handleTabPress = useCallback(
     (tab: TabName) => {
@@ -72,10 +73,12 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     [onTabChange],
   );
 
+  const visibleTabs = hideTabs?.length ? TABS.filter((t) => !hideTabs.includes(t.name)) : TABS;
+
   return (
     <View className="bg-card border-t border-border/40 pb-7">
       <View className="flex-row items-center px-1 py-1.5">
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <NavItem
             key={tab.name}
             tab={tab.name}

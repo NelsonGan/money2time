@@ -7,10 +7,12 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   SettingsRowItem,
+  SettingsSection,
 } from '~/components/ui/settings';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface SettingsScreenProps {
   scrollToTopToken?: number;
@@ -29,7 +31,16 @@ export function SettingsScreen({
   onOpenCategories,
   onOpenRecurring,
 }: SettingsScreenProps) {
-  const { settings, monthlyWages, updateSettings } = useApp();
+  const {
+    settings,
+    monthlyWages,
+    updateSettings,
+    isSimpleMode,
+    simpleWalletId,
+    switchToSimpleMode,
+    switchToPowerMode,
+    deleteSimpleWalletAndTransactions,
+  } = useApp();
   const scrollViewRef = useRef<ScrollView | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
@@ -62,6 +73,7 @@ export function SettingsScreen({
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(200).duration(400)}>
+          {/* General settings */}
           <View className="mt-2 gap-2.5">
             <SettingsRowItem
               emoji="🎨"
@@ -81,12 +93,14 @@ export function SettingsScreen({
               }
               onPress={onOpenHourlyValue}
             />
-            <SettingsRowItem
-              emoji="🏦"
-              label={I18n.t('settings.accounts')}
-              subtitle={I18n.t('settings.accounts_subtitle')}
-              onPress={onOpenAccounts}
-            />
+            {!isSimpleMode && (
+              <SettingsRowItem
+                emoji="🏦"
+                label={I18n.t('settings.accounts')}
+                subtitle={I18n.t('settings.accounts_subtitle')}
+                onPress={onOpenAccounts}
+              />
+            )}
             <SettingsRowItem
               emoji="📂"
               label={I18n.t('settings.categories')}
@@ -116,6 +130,69 @@ export function SettingsScreen({
               }}
             />
           </View>
+
+          {/* Experience mode section */}
+          <SettingsSection title={I18n.t('settings.section_experience')}>
+            <SettingsRowItem
+              emoji="✨"
+              label={I18n.t('settings.user_mode')}
+              subtitle={
+                isSimpleMode
+                  ? I18n.t('settings.user_mode_subtitle_simple')
+                  : I18n.t('settings.user_mode_subtitle_power')
+              }
+              onPress={() => {
+                void triggerHaptic('selection');
+                if (isSimpleMode) {
+                  Alert.alert(
+                    I18n.t('settings.switch_to_power_title'),
+                    I18n.t('settings.switch_to_power_message'),
+                    [
+                      { text: I18n.t('common.cancel'), style: 'cancel' },
+                      {
+                        text: I18n.t('settings.user_mode_power'),
+                        onPress: () => switchToPowerMode(),
+                      },
+                    ],
+                  );
+                } else {
+                  Alert.alert(
+                    I18n.t('settings.switch_to_simple_title'),
+                    I18n.t('settings.switch_to_simple_message'),
+                    [
+                      { text: I18n.t('common.cancel'), style: 'cancel' },
+                      {
+                        text: I18n.t('settings.user_mode_simple'),
+                        onPress: () => switchToSimpleMode(),
+                      },
+                    ],
+                  );
+                }
+              }}
+            />
+            {!isSimpleMode && simpleWalletId !== null && (
+              <SettingsRowItem
+                emoji="🗑️"
+                label={I18n.t('settings.remove_simple_wallet')}
+                subtitle={I18n.t('settings.remove_simple_wallet_subtitle')}
+                onPress={() => {
+                  void triggerHaptic('warning');
+                  Alert.alert(
+                    I18n.t('settings.remove_simple_wallet_title'),
+                    I18n.t('settings.remove_simple_wallet_message'),
+                    [
+                      { text: I18n.t('common.cancel'), style: 'cancel' },
+                      {
+                        text: I18n.t('settings.remove'),
+                        style: 'destructive',
+                        onPress: () => deleteSimpleWalletAndTransactions(),
+                      },
+                    ],
+                  );
+                }}
+              />
+            )}
+          </SettingsSection>
         </Animated.View>
       </ScrollView>
     </SettingsPageLayout>

@@ -35,6 +35,7 @@ class SettingsRepository {
         | 'displayMode'
         | 'themeMode'
         | 'onboardingCompleted'
+        | 'userMode'
       >
     >,
   ) {
@@ -75,6 +76,7 @@ class SettingsRepository {
         themeMode: 'system',
         insightsPrefsJson: null,
         onboardingCompleted: false,
+        userMode: 'power',
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

@@ -104,13 +104,17 @@ export function SettingsStack({
         skipRouteNames: ['Accounts', 'Categories', 'CategoriesSubcategories'],
         shouldSuppress: () => Date.now() < suppressClosingHapticUntilRef.current,
       }),
-    [suppressProgrammaticClosingHaptics],
+    [],
   );
 
   useEffect(() => {
     if (resetToRootToken <= 0) return;
+    const nav = stackNavigationRef.current;
+    if (!nav) return;
     suppressProgrammaticClosingHaptics();
-    stackNavigationRef.current?.dispatch(StackActions.popToTop());
+    if (nav.canGoBack()) {
+      nav.dispatch(StackActions.popToTop());
+    }
   }, [resetToRootToken, suppressProgrammaticClosingHaptics]);
 
   useEffect(() => {
@@ -119,7 +123,9 @@ export function SettingsStack({
     if (!navigation) return;
 
     suppressProgrammaticClosingHaptics();
-    navigation.dispatch(StackActions.popToTop());
+    if (navigation.canGoBack()) {
+      navigation.dispatch(StackActions.popToTop());
+    }
     if (forceScreen === 'SettingsHome') return;
 
     const frame = requestAnimationFrame(() => {
@@ -178,9 +184,7 @@ export function SettingsStack({
           return (
             <CategoriesScreen
               onBack={() => props.navigation.goBack()}
-              onOpenParent={(parentId) =>
-                props.navigation.navigate('CategoriesSubcategories', { parentId })
-              }
+              onOpenParent={(parentId) => props.navigation.navigate('CategoriesSubcategories', { parentId })}
             />
           );
         }}
