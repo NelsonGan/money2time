@@ -29,6 +29,7 @@ import {
   type BootstrapChoice,
   type BootstrapView,
 } from './OnboardingBootstrapStep';
+import { OnboardingModeStep } from './OnboardingModeStep';
 
 import {
   AccountsScreen,
@@ -37,7 +38,7 @@ import {
 } from '~/features/settings/screens';
 import { AddTransactionScreen } from '~/features/transactions/screens';
 
-type OnboardingStep = 1 | 2 | 3 | 4;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 type SubRoute = 'main' | 'accounts' | 'categories';
 
 interface OnboardingFlowProps {
@@ -57,9 +58,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     createCategory,
     createAccount,
     createTransaction,
+    switchToSimpleMode,
   } = useApp();
 
   const [step, setStep] = useState<OnboardingStep>(1);
+  const [isSimpleUser, setIsSimpleUser] = useState(false);
   const [subRoute, setSubRoute] = useState<SubRoute>('main');
   const [showWageCalculator, setShowWageCalculator] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -67,8 +70,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
-  const visualStep = step === 4 && bootstrapView !== 'choose' ? 5 : step;
-  const totalVisualSteps = 5;
+  const visualStep = step;
+  const totalVisualSteps = isSimpleUser ? 4 : 5;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -321,8 +324,27 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       {step === 4 && (
         <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
-          <OnboardingBootstrapStep
+          <OnboardingModeStep
             onBack={() => setStep(3)}
+            onSelectSimple={() => {
+              void triggerHaptic('selection');
+              setIsSimpleUser(true);
+              switchToSimpleMode();
+              onComplete();
+            }}
+            onSelectPower={() => {
+              void triggerHaptic('selection');
+              setIsSimpleUser(false);
+              setStep(5);
+            }}
+          />
+        </Animated.View>
+      )}
+
+      {step === 5 && (
+        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+          <OnboardingBootstrapStep
+            onBack={() => setStep(4)}
             onImport={() => {
               void handleImport();
             }}

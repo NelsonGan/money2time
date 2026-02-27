@@ -723,12 +723,14 @@ interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  isSimpleMode?: boolean;
 }
 
 export function InsightsScreen({
   resetToCurrentMonthToken = 0,
   onOpenDrilldown,
   onOpenTransaction,
+  isSimpleMode = false,
 }: InsightsScreenProps) {
   const {
     isLoading,
@@ -736,13 +738,24 @@ export function InsightsScreen({
     categories,
     accounts,
     accountGroups,
-    transactions: allTransactions,
+    transactions: rawTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
+    simpleWalletId,
   } = useApp();
+
+  const allTransactions = useMemo(() => {
+    if (!isSimpleMode || !simpleWalletId) return rawTransactions;
+    return rawTransactions.filter(
+      (tx) =>
+        tx.accountId === simpleWalletId ||
+        tx.fromAccountId === simpleWalletId ||
+        tx.toAccountId === simpleWalletId,
+    );
+  }, [rawTransactions, isSimpleMode, simpleWalletId]);
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
 
@@ -781,16 +794,27 @@ export function InsightsScreen({
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const chartWidth = Math.max(260, width - 76);
   const pieSize = Math.min(240, chartWidth);
+  const visibleInsightTypes = isSimpleMode
+    ? INSIGHT_TYPES.filter((t) => t !== 'asset_history')
+    : INSIGHT_TYPES;
+
   const insightTypeOptions = useMemo(
     () =>
-      INSIGHT_TYPES.map((type) => ({
+      visibleInsightTypes.map((type) => ({
         value: type,
         label: String(I18n.t(`insights.${type}`)),
         description: String(I18n.t(`insights.${type}_description`)),
         icon: INSIGHT_ICONS[type],
       })),
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSimpleMode],
   );
+
+  useEffect(() => {
+    if (isSimpleMode && selectedInsightType === 'asset_history') {
+      setSelectedInsightType('expense_breakdown');
+    }
+  }, [isSimpleMode, selectedInsightType]);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);
   const periodPresetRef = useRef<PeriodPreset>(periodPreset);
