@@ -198,9 +198,9 @@ export function HeroAmountConverter({
           <Button
             size="sm"
             variant="outline"
+            bouncy={false}
             onPress={(event) => {
               event.stopPropagation();
-              void triggerHaptic('light');
               onChangeAmount('');
               inputRef.current?.focus();
             }}

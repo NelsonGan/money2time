@@ -279,7 +279,6 @@ export function WageCalculatorFlowScreen({
               className="flex-1"
               haptic="success"
               onPress={() => {
-                void triggerHaptic('success');
                 onComplete(config);
               }}
             >
