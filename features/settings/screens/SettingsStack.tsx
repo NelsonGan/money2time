@@ -9,7 +9,6 @@ import {
   type SettingsStackRouteProps,
 } from '~/navigation/settingsStack';
 import {
-  DISABLE_BACK_GESTURE_STACK_OPTIONS,
   SHARED_NATIVE_STACK_OPTIONS,
 } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
@@ -81,7 +80,6 @@ export function SettingsStack({
   const screenListeners = useMemo(
     () =>
       createNativeStackSwipeHapticListeners({
-        skipRouteNames: ['Accounts', 'Categories', 'CategoriesSubcategories'],
         shouldSuppress: () => Date.now() < suppressClosingHapticUntilRef.current,
       }),
     [],
@@ -152,18 +150,25 @@ export function SettingsStack({
           return <WageCalculatorRoute {...props} />;
         }}
       </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="Accounts" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
+      <SettingsStackNavigator.Screen name="Accounts">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <AccountsScreen onBack={() => props.navigation.goBack()} managementOnly />;
+          return (
+            <AccountsScreen
+              onBack={() => props.navigation.goBack()}
+              managementOnly
+              useNativeBackGesture
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="Categories" options={DISABLE_BACK_GESTURE_STACK_OPTIONS}>
+      <SettingsStackNavigator.Screen name="Categories">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
             <CategoriesScreen
               onBack={() => props.navigation.goBack()}
+              useNativeBackGesture
               onOpenParent={(parentId) =>
                 props.navigation.navigate('CategoriesSubcategories', { parentId })
               }
@@ -171,15 +176,13 @@ export function SettingsStack({
           );
         }}
       </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen
-        name="CategoriesSubcategories"
-        options={DISABLE_BACK_GESTURE_STACK_OPTIONS}
-      >
+      <SettingsStackNavigator.Screen name="CategoriesSubcategories">
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return (
             <CategoriesScreen
               onBack={() => props.navigation.goBack()}
+              useNativeBackGesture
               parentId={props.route.params.parentId}
             />
           );

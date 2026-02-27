@@ -299,6 +299,7 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
     <AccountsScreen
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
+      useNativeBackGesture
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
@@ -317,6 +318,7 @@ function InsightsDrilldownRouteScreen({
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
+      onOpenSubcategoryDrilldown={(payload) => navigation.push('InsightsDrilldown', payload)}
     />
   );
 }

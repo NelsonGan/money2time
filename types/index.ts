@@ -146,6 +146,8 @@ export interface TransactionFilters {
   dateRange: DateRange | null;
   accountId: string | null;
   type: TransactionType | 'all';
+  incomeCategoryId: string | null;
+  expenseCategoryId: string | null;
   categoryId: string | null;
   minAmount: number | null;
   maxAmount: number | null;

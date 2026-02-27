@@ -1,11 +1,7 @@
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, type LayoutChangeEvent, Pressable, ScrollView, View } from 'react-native';
-import DraggableFlatList, {
-  NestableDraggableFlatList,
-  NestableScrollContainer,
-  type RenderItemParams,
-} from 'react-native-draggable-flatlist';
+import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -80,6 +76,8 @@ type AccountManagementView = 'accounts' | 'groups';
 const ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP = 104;
 const ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT = 58;
 const MASKED_BALANCE_VALUE = '••••';
+const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
+const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
 
 function toBalanceInputValue(value: number) {
   if (!Number.isFinite(value)) return '0';
@@ -809,6 +807,7 @@ interface AccountsScreenProps {
   accountId?: string | null;
   onOpenAccount?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
+  useNativeBackGesture?: boolean;
 }
 
 export function AccountsScreen({
@@ -819,6 +818,7 @@ export function AccountsScreen({
   accountId = null,
   onOpenAccount,
   onOpenTransaction,
+  useNativeBackGesture = false,
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const { persistOrder } = useDebouncedPersistence(500);
@@ -868,7 +868,8 @@ export function AccountsScreen({
   const [isReordering, setIsReordering] = useState(false);
   const accountsListRef = useRef<FlatList<AccountListRow> | null>(null);
   const detailScrollToTopRef = useRef<(() => void) | null>(null);
-  const didDragRef = useRef(false);
+  const skipNextAccountGroupsSyncRef = useRef(false);
+  const skipNextAccountSectionsSyncRef = useRef(false);
   const [localAccountGroups, setLocalAccountGroups] = useState<AccountGroup[]>(() => accountGroups);
   const [localAccountGroupSections, setLocalAccountGroupSections] = useState<AccountGroupSection[]>(
     [],
@@ -903,6 +904,13 @@ export function AccountsScreen({
     selectedAccount,
     selectedTransaction,
   ]);
+  const withBackGesture = useCallback(
+    (children: React.ReactNode) => {
+      if (useNativeBackGesture) return <>{children}</>;
+      return <EdgeSwipeBackContainer onBack={edgeSwipeBackHandler}>{children}</EdgeSwipeBackContainer>;
+    },
+    [edgeSwipeBackHandler, useNativeBackGesture],
+  );
   const selectedAccountTransactions = useMemo(
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
@@ -1146,20 +1154,22 @@ export function AccountsScreen({
     [accounts],
   );
   useEffect(() => {
-    if (didDragRef.current) {
-      didDragRef.current = false;
+    if (isReordering) return;
+    if (skipNextAccountGroupsSyncRef.current) {
+      skipNextAccountGroupsSyncRef.current = false;
       return;
     }
     setLocalAccountGroups(accountGroups);
-  }, [accountGroups]);
+  }, [accountGroups, isReordering]);
 
   useEffect(() => {
-    if (didDragRef.current) {
-      didDragRef.current = false;
+    if (isReordering) return;
+    if (skipNextAccountSectionsSyncRef.current) {
+      skipNextAccountSectionsSyncRef.current = false;
       return;
     }
     setLocalAccountGroupSections(accountGroupSections);
-  }, [accountGroupSections]);
+  }, [accountGroupSections, isReordering]);
 
   const canCreateGroup = newGroupName.trim().length > 0;
   const startCreateGroup = useCallback(() => {
@@ -1400,13 +1410,11 @@ export function AccountsScreen({
   const creditLabel = String(I18n.t('accounts.credit'));
 
   if (selectedTransaction) {
-    return (
-      <EdgeSwipeBackContainer onBack={edgeSwipeBackHandler}>
-        <EditTransactionScreen
-          transaction={selectedTransaction}
-          onClose={() => setSelectedTransaction(null)}
-        />
-      </EdgeSwipeBackContainer>
+    return withBackGesture(
+      <EditTransactionScreen
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+      />,
     );
   }
 
@@ -1436,9 +1444,8 @@ export function AccountsScreen({
       ? I18n.t('accounts.include_option_include')
       : I18n.t('accounts.include_option_hide');
 
-    return (
-      <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
-        <SettingsPageLayout>
+    return withBackGesture(
+      <SettingsPageLayout>
           <View className="flex-1">
             <ActivityTransactionList
               transactions={txns}
@@ -1747,8 +1754,7 @@ export function AccountsScreen({
               </ScrollView>
             </SafeAreaView>
           </ThemeModal>
-        </SettingsPageLayout>
-      </EdgeSwipeBackContainer>
+      </SettingsPageLayout>,
     );
   }
 
@@ -1765,9 +1771,8 @@ export function AccountsScreen({
   _acctOnAccountPress = handleAccountManagementPress;
   _acctCreditLabel = creditLabel;
 
-  return (
-    <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
-      <SettingsPageLayout>
+  return withBackGesture(
+    <SettingsPageLayout>
         {managementOnly ? (
           <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
             <SettingsHeader
@@ -1846,21 +1851,25 @@ export function AccountsScreen({
                   keyExtractor={(item: AccountGroup) => item.id}
                   renderItem={GroupRowItem}
                   extraData={`${editingGroupId}-${editingGroupName}`}
+                  dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
+                  activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
                   animationConfig={SNAP_CONFIG}
                   onDragBegin={() => {
                     setIsReordering(true);
                     void triggerHaptic('medium');
                   }}
+                  onRelease={() => {
+                    setIsReordering(false);
+                  }}
                   onDragEnd={({ data }: { data: AccountGroup[] }) => {
                     setIsReordering(false);
                     void triggerHaptic('light');
-                    didDragRef.current = true;
+                    skipNextAccountGroupsSyncRef.current = true;
                     setLocalAccountGroups(data);
                     const ids = data.map((g) => g.id);
                     persistOrder('account_groups', ids);
                     reorderAccountGroups(ids);
                   }}
-                  onPlaceholderIndexChange={() => void triggerHaptic('selection')}
                   autoscrollThreshold={80}
                   showsVerticalScrollIndicator={false}
                   keyboardShouldPersistTaps="handled"
@@ -1874,7 +1883,7 @@ export function AccountsScreen({
             )}
           </>
         ) : managementOnly ? (
-          <NestableScrollContainer
+          <ScrollView
             style={{ flex: 1 }}
             contentContainerStyle={{
               paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
@@ -1896,16 +1905,22 @@ export function AccountsScreen({
                     {section.label}
                   </Text>
                 </View>
-                <NestableDraggableFlatList
+                <DraggableFlatList
                   data={section.accounts.map((acc) => ({ id: acc.id, account: acc }))}
                   keyExtractor={(item) => item.id}
                   renderItem={AccountMgmtRowItem}
+                  dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
+                  activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
                   animationConfig={SNAP_CONFIG}
+                  scrollEnabled={false}
+                  showsVerticalScrollIndicator={false}
                   onDragBegin={() => {
                     setIsReordering(true);
                     void triggerHaptic('medium');
                   }}
-                  onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+                  onRelease={() => {
+                    setIsReordering(false);
+                  }}
                   onDragEnd={({ data: newData }: { data: AccountMgmtAccountItem[] }) => {
                     setIsReordering(false);
                     void triggerHaptic('light');
@@ -1914,7 +1929,7 @@ export function AccountsScreen({
                         ? { ...s, accounts: newData.map((item) => item.account) }
                         : s,
                     );
-                    didDragRef.current = true;
+                    skipNextAccountSectionsSyncRef.current = true;
                     setLocalAccountGroupSections(updatedSections);
                     const allIds = updatedSections.flatMap((s) => s.accounts.map((a) => a.id));
                     persistOrder('accounts', allIds);
@@ -1923,7 +1938,7 @@ export function AccountsScreen({
                 />
               </View>
             ))}
-          </NestableScrollContainer>
+          </ScrollView>
         ) : (
           <FlatList
             ref={accountsListRef}
@@ -2069,7 +2084,6 @@ export function AccountsScreen({
             setShowCreate(false);
           }}
         />
-      </SettingsPageLayout>
-    </EdgeSwipeBackContainer>
+    </SettingsPageLayout>,
   );
 }

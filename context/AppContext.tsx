@@ -1,6 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import {
+  DEFAULT_TRANSACTION_FILTERS,
+  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+} from '~/constants/appDefaults';
 import { getDb, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import {
   accountGroupsTable,
@@ -11,34 +16,28 @@ import {
   settingsTable,
   transactionsTable,
 } from '~/lib/db/schema';
-import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { I18n, setAppLocale } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
+import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
+import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
-  recurringRulesRepository,
   type CreateRecurringRuleInput,
+  recurringRulesRepository,
 } from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import {
-  transactionsRepository,
   type CreateTransactionInput,
+  transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
-import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
   importMoneyManagerBackupFromUri,
   type MMImportSummary,
 } from '~/services/mmbakImportService';
-import { newId, nowIso } from '~/utils/id';
 import {
-  DEFAULT_TRANSACTION_FILTERS,
-  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-} from '~/constants/appDefaults';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import {
-  type AccountGroup,
   type Account,
   type AccountBalance,
+  type AccountGroup,
   type AppState,
   type BreakdownItem,
   type CashflowSummary,
@@ -51,9 +50,10 @@ import {
   type UserSettings,
   type WageConfig,
 } from '~/types';
-import { amountToHoursByRate, monthKeyFromDateIso, normalizeMonthKey } from '~/utils/formatters';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
-import { I18n, setAppLocale } from '~/lib/i18n';
+import { amountToHoursByRate, monthKeyFromDateIso, normalizeMonthKey } from '~/utils/formatters';
+import { newId, nowIso } from '~/utils/id';
 
 interface AppContextValue extends AppState {
   filteredTransactions: TransactionWithRelations[];
@@ -279,7 +279,21 @@ function applyTransactionFilters(
       if (!matchesAccount) return false;
     }
 
-    if (filters.categoryId && transaction.categoryId !== filters.categoryId) return false;
+    if (transaction.type === 'income' && filters.incomeCategoryId) {
+      if (transaction.categoryId !== filters.incomeCategoryId) return false;
+    }
+    if (transaction.type === 'expense' && filters.expenseCategoryId) {
+      if (transaction.categoryId !== filters.expenseCategoryId) return false;
+    }
+    if (
+      !filters.incomeCategoryId &&
+      !filters.expenseCategoryId &&
+      filters.categoryId &&
+      (transaction.type === 'income' || transaction.type === 'expense') &&
+      transaction.categoryId !== filters.categoryId
+    ) {
+      return false;
+    }
     if (filters.minAmount !== null && transaction.amount < filters.minAmount) return false;
     if (filters.maxAmount !== null && transaction.amount > filters.maxAmount) return false;
 

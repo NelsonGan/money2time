@@ -250,6 +250,8 @@ const en = {
       type: 'Type',
       account: 'Account',
       category: 'Category',
+      income_category: 'Income category',
+      expense_category: 'Expense category',
       min: 'Min',
       max: 'Max',
       sort: 'Sort',
@@ -260,6 +262,8 @@ const en = {
       adjustment: 'Adjustment',
       all_accounts: 'All accounts',
       all_categories: 'All categories',
+      all_income_categories: 'All income categories',
+      all_expense_categories: 'All expense categories',
     },
     selection: {
       selected_count: '{{count}} selected',

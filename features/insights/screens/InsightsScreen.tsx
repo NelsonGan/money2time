@@ -2199,9 +2199,14 @@ export function InsightsScreen({
                       const targetType = pageData.transactionType;
                       const rangeStart = pageData.range.start;
                       const rangeEnd = pageData.range.end;
+                      const rootCategory = categoryById.get(item.id) ?? null;
                       openDrilldown({
                         label: item.name,
                         transactions: pageData.breakdownTransactionsById.get(item.id) ?? [],
+                        categoryRootId: rootCategory?.id,
+                        categoryRootLabel: rootCategory?.name ?? item.name,
+                        categoryRootEmoji: rootCategory?.icon ?? item.emoji,
+                        categoryRootColor: item.color,
                         scopeMatcher: (transaction) => {
                           if (transaction.type !== targetType) return false;
                           if (transaction.date < rangeStart || transaction.date > rangeEnd) {
@@ -2514,9 +2519,14 @@ export function InsightsScreen({
           accentColor,
           onPress: () => {
             const targetCategoryId = categoryRow.id;
+            const rootCategory = categoryById.get(targetCategoryId) ?? null;
             openDrilldown({
               label: `${categoryRow.emoji} ${categoryRow.label}`,
               transactions: categoryRow.transactions,
+              categoryRootId: rootCategory?.id,
+              categoryRootLabel: rootCategory?.name ?? categoryRow.label,
+              categoryRootEmoji: rootCategory?.icon ?? categoryRow.emoji,
+              categoryRootColor: accentColor,
               scopeMatcher: (transaction) => {
                 if (transaction.type !== 'expense') return false;
                 const cat = transaction.categoryId
@@ -3165,6 +3175,10 @@ export function InsightsScreen({
       transactions: TransactionWithRelations[];
       showTypeFilter?: boolean;
       scopeMatcher?: DrilldownScopeMatcher;
+      categoryRootId?: string;
+      categoryRootLabel?: string;
+      categoryRootEmoji?: string;
+      categoryRootColor?: string;
     }) => {
       const sourceTransactions = nextState.scopeMatcher
         ? nextState.transactions.filter((transaction) => nextState.scopeMatcher?.(transaction))
@@ -3173,6 +3187,10 @@ export function InsightsScreen({
         label: nextState.label,
         transactionIds: sourceTransactions.map((transaction) => transaction.id),
         showTypeFilter: nextState.showTypeFilter ?? false,
+        categoryRootId: nextState.categoryRootId,
+        categoryRootLabel: nextState.categoryRootLabel,
+        categoryRootEmoji: nextState.categoryRootEmoji,
+        categoryRootColor: nextState.categoryRootColor,
       });
     },
     [onOpenDrilldown],
@@ -3451,6 +3469,7 @@ export function InsightsScreen({
                   <CategoryPanel
                     parents={savingsExpenseCategoryPanel.parents}
                     childByParent={savingsExpenseCategoryPanel.childByParent}
+                    allowParentSelection
                     selectedCategoryId={excludedTimeCostExpenseCategoryId}
                     onSelect={(categoryId) => setExcludedTimeCostExpenseCategoryId(categoryId)}
                   />
@@ -3479,6 +3498,7 @@ export function InsightsScreen({
                     <CategoryPanel
                       parents={savingsIncomeCategoryPanel.parents}
                       childByParent={savingsIncomeCategoryPanel.childByParent}
+                      allowParentSelection
                       selectedCategoryIds={excludedSavingsIncomeCategoryIds}
                       onToggleSelect={(categoryId) =>
                         setExcludedSavingsIncomeCategoryIds((prev) =>
@@ -3506,6 +3526,7 @@ export function InsightsScreen({
                     <CategoryPanel
                       parents={savingsExpenseCategoryPanel.parents}
                       childByParent={savingsExpenseCategoryPanel.childByParent}
+                      allowParentSelection
                       selectedCategoryIds={excludedSavingsExpenseCategoryIds}
                       onToggleSelect={(categoryId) =>
                         setExcludedSavingsExpenseCategoryIds((prev) =>
