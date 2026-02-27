@@ -8,12 +8,12 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
-import { formatHours } from '~/utils/formatters';
+import { Text } from '~/components/ui/text';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { I18n } from '~/lib/i18n';
+import { formatHours } from '~/utils/formatters';
 
 interface HeroAmountConverterProps {
   amount: string;
@@ -199,7 +199,8 @@ export function HeroAmountConverter({
           <Button
             size="sm"
             variant="outline"
-            onPress={() => {
+            onPress={(event) => {
+              event.stopPropagation();
               void triggerHaptic('light');
               onChangeAmount('');
               inputRef.current?.focus();
