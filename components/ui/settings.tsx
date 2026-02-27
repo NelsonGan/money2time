@@ -4,13 +4,14 @@ import { Pressable, View, type ViewProps } from 'react-native';
 import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '~/components/ui/button';
-import { Text } from '~/components/ui/text';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+
+import { Button } from './button';
+import { Text } from './text';
 
 export const SETTINGS_HORIZONTAL_PADDING = spacing.screenHorizontal;
 export const SETTINGS_FORM_BOTTOM_PADDING = spacing.formBottom;
