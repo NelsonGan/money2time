@@ -94,7 +94,6 @@ class CategoriesRepository {
       )
       .run();
   }
-
 }
 
 export const categoriesRepository = new CategoriesRepository();

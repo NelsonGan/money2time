@@ -1,15 +1,15 @@
+import type { FlashListRef } from '@shopify/flash-list';
+import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import type { FlashListRef } from '@shopify/flash-list';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Text } from '~/components/ui/text';
-import { TransactionItem } from '~/features/transactions/components/TransactionItem';
-import { useApp } from '~/context/AppContext';
-import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
+import { Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
+import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import type { TransactionWithRelations, UserSettings } from '~/types';
+import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
 type TransactionDisplaySettings = Pick<
   UserSettings,

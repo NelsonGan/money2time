@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
-import { View, Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
-import type { TransactionWithRelations, UserSettings } from '~/types';
-import { formatAmount, formatRelativeDate } from '~/utils/formatters';
-import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
+import { Text } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { TransactionWithRelations, UserSettings } from '~/types';
+import { cn } from '~/utils';
+import { formatAmount, formatRelativeDate } from '~/utils/formatters';
 
 type TransactionDisplaySettings = Pick<
   UserSettings,
@@ -65,7 +65,8 @@ function TransactionItemView({
     !transaction.toAccountId;
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer' && !isLegacyAdjustmentTransfer;
-  const isBalanceAdjustment = transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer;
+  const isBalanceAdjustment =
+    transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer;
   const isTimeMode = settings.displayMode === 'time';
 
   const hasNote = Boolean(transaction.note);
@@ -118,7 +119,9 @@ function TransactionItemView({
           ? categoryInline
           : null;
   const rate =
-    isTimeMode && !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
+    isTimeMode && !isTransfer && !isBalanceAdjustment
+      ? getTrueHourlyRateForDate(transaction.date)
+      : 0;
   const categoryEmoji = transaction.categoryIcon ?? undefined;
   const leadingEmoji = isTransfer
     ? '↔️'
@@ -347,17 +350,17 @@ function TransactionItemComponent({
   }
 
   return (
-      <AnimatedTransactionItem
-        transaction={transaction}
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        showDateInSubtitle={showDateInSubtitle}
-        compact={compact}
-        selected={selected}
-        selectionMode={selectionMode}
-        settings={settings}
-        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-      />
+    <AnimatedTransactionItem
+      transaction={transaction}
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      showDateInSubtitle={showDateInSubtitle}
+      compact={compact}
+      selected={selected}
+      selectionMode={selectionMode}
+      settings={settings}
+      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+    />
   );
 }
 

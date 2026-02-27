@@ -1,12 +1,10 @@
+import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import * as DocumentPicker from 'expo-document-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
-import { useApp } from '~/context/AppContext';
+import { Text, ThemeModal } from '~/components/ui';
 import {
   DEFAULT_ACCOUNT_TEMPLATE,
   DEFAULT_CURRENCY,
@@ -14,29 +12,29 @@ import {
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
-import { type WageConfig } from '~/types';
-import { triggerHaptic } from '~/services/haptics';
-import { getErrorMessage } from '~/utils/errorHandling';
-import type { MMImportSummary } from '~/services/mmbakImportService';
-import { monthKeyFromDateLocal } from '~/utils/formatters';
-import { I18n, setAppLocale } from '~/lib/i18n';
-
-import { OnboardingValuePropStep } from './OnboardingValuePropStep';
-import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
-import { OnboardingWageStep } from './OnboardingWageStep';
-import {
-  OnboardingBootstrapStep,
-  type BootstrapChoice,
-  type BootstrapView,
-} from './OnboardingBootstrapStep';
-import { OnboardingModeStep } from './OnboardingModeStep';
-
+import { useApp } from '~/context/AppContext';
 import {
   AccountsScreen,
   CategoriesScreen,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { AddTransactionScreen } from '~/features/transactions/screens';
+import { I18n, setAppLocale } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { MMImportSummary } from '~/services/mmbakImportService';
+import { type WageConfig } from '~/types';
+import { getErrorMessage } from '~/utils/errorHandling';
+import { monthKeyFromDateLocal } from '~/utils/formatters';
+
+import {
+  type BootstrapChoice,
+  type BootstrapView,
+  OnboardingBootstrapStep,
+} from './OnboardingBootstrapStep';
+import { OnboardingModeStep } from './OnboardingModeStep';
+import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
+import { OnboardingValuePropStep } from './OnboardingValuePropStep';
+import { OnboardingWageStep } from './OnboardingWageStep';
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 type SubRoute = 'main' | 'accounts' | 'categories';
@@ -391,7 +389,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           }}
         />
       </ThemeModal>
-
     </SafeAreaView>
   );
 }

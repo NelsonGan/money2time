@@ -1,15 +1,3 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  InteractionManager,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -21,13 +9,25 @@ import {
   Hash,
   Power,
   Repeat,
-  Trash2,
   Timer,
+  Trash2,
   Type,
 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  InteractionManager,
+  Keyboard,
+  Pressable,
+  ScrollView,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
+import { Button, Text } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import {
   AccountPanel,
   CategoryPanel,
@@ -36,17 +36,16 @@ import {
   SummaryRow,
 } from '~/features/transactions/components/editor';
 import { formatMoney } from '~/features/transactions/components/editor/calculatorEngine';
-import { useApp } from '~/context/AppContext';
-import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
-import { getErrorMessage } from '~/utils/errorHandling';
+import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
+import type { TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { useThemeColors } from '~/hooks/useThemeColors';
-import { usePressScale } from '~/hooks/usePressScale';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import type { TransactionType } from '~/types';
-import { I18n } from '~/lib/i18n';
+import { getErrorMessage } from '~/utils/errorHandling';
+import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
 
 type ActiveField =
   | 'amount'
@@ -253,14 +252,16 @@ export function TransactionEditorScreen({
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(
-    initialValues?.accountId ?? (initialAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null))),
+    initialValues?.accountId ??
+      initialAccountId ??
+      (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
   );
   const [toAccountId, setToAccountId] = useState<string | null>(
     initialValues?.toAccountId ??
-      (mode === 'create' ? null : ((accounts[1]?.id ?? accounts[0]?.id) ?? null)),
+      (mode === 'create' ? null : (accounts[1]?.id ?? accounts[0]?.id ?? null)),
   );
   const [categoryId, setCategoryId] = useState<string | null>(initialValues?.categoryId ?? null);
   const [note, setNote] = useState(initialValues?.note ?? '');
@@ -339,7 +340,8 @@ export function TransactionEditorScreen({
         return field;
       }
       if (nextType === 'balance_adjustment') {
-        if (field === 'fromAccount' || field === 'toAccount' || field === 'category') return 'account';
+        if (field === 'fromAccount' || field === 'toAccount' || field === 'category')
+          return 'account';
         if (field === 'note' || field === 'date') return 'amount';
         return field;
       }
@@ -349,16 +351,13 @@ export function TransactionEditorScreen({
     [],
   );
 
-  const availableTypeCards = useMemo(
-    () => {
-      const allowedTypes: TransactionType[] =
-        restrictTypeOptions && restrictTypeOptions.length > 0
-          ? restrictTypeOptions
-          : ['expense', 'income', 'transfer'];
-      return TYPE_CARDS.filter((item) => allowedTypes.includes(item.value));
-    },
-    [restrictTypeOptions],
-  );
+  const availableTypeCards = useMemo(() => {
+    const allowedTypes: TransactionType[] =
+      restrictTypeOptions && restrictTypeOptions.length > 0
+        ? restrictTypeOptions
+        : ['expense', 'income', 'transfer'];
+    return TYPE_CARDS.filter((item) => allowedTypes.includes(item.value));
+  }, [restrictTypeOptions]);
   const isTransferType = type === 'transfer';
   const isBalanceAdjustmentType = type === 'balance_adjustment';
   const showTypeSelector = availableTypeCards.length > 1;
@@ -542,12 +541,9 @@ export function TransactionEditorScreen({
         const transferErrors: typeof fieldErrors = {};
         if (!fromAccountId)
           transferErrors.from_account = I18n.t('transactions.editor.error.required');
-        if (!toAccountId)
-          transferErrors.to_account = I18n.t('transactions.editor.error.required');
+        if (!toAccountId) transferErrors.to_account = I18n.t('transactions.editor.error.required');
         if (fromAccountId && toAccountId && fromAccountId === toAccountId) {
-          transferErrors.to_account = I18n.t(
-            'transactions.editor.error.must_be_different_account',
-          );
+          transferErrors.to_account = I18n.t('transactions.editor.error.must_be_different_account');
         }
         if (Object.keys(transferErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -569,7 +565,8 @@ export function TransactionEditorScreen({
         };
       } else {
         const baseErrors: typeof fieldErrors = {};
-        if (!hideAccountSelector && !accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
+        if (!hideAccountSelector && !accountId)
+          baseErrors.account = I18n.t('transactions.editor.error.required');
         if (!categoryId) baseErrors.category = I18n.t('transactions.editor.error.required');
         if (Object.keys(baseErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -626,9 +623,7 @@ export function TransactionEditorScreen({
       void triggerHaptic('success');
       onClose();
 
-      const deferredSubmit = submitPayload
-        ? () => onSubmit(submitPayload)
-        : recurringSubmit;
+      const deferredSubmit = submitPayload ? () => onSubmit(submitPayload) : recurringSubmit;
 
       if (deferredSubmit) {
         InteractionManager.runAfterInteractions(deferredSubmit);
@@ -1082,14 +1077,93 @@ export function TransactionEditorScreen({
             {!hideAccountSelector && <View className="h-[1px] bg-border/15 mx-4" />}
 
             {/* Account row(s) */}
-            {!hideAccountSelector && (isTransferType ? (
-              <>
+            {!hideAccountSelector &&
+              (isTransferType ? (
+                <>
+                  <View>
+                    <SummaryRow
+                      label={I18n.t('transactions.editor.from')}
+                      isActive={activeField === 'fromAccount'}
+                      onPress={() => activateField('fromAccount')}
+                      valueTone={fieldErrors.from_account ? 'error' : 'default'}
+                      rightElement={null}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                          <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                            <CreditCard size={13} color={themeColors.textMuted} />
+                          </View>
+                          <Text variant="caption" tone="muted">
+                            {I18n.t('transactions.editor.from')}
+                          </Text>
+                        </View>
+                        <Text
+                          variant="body"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          className={cn(
+                            'max-w-[58%] text-right',
+                            fromAccountName ? '' : 'text-muted-foreground/60',
+                          )}
+                        >
+                          {fromAccountName ?? I18n.t('transactions.editor.choose_account')}
+                        </Text>
+                      </View>
+                    </SummaryRow>
+                  </View>
+                  <View className="px-4 py-1">
+                    <View className="flex-row items-center">
+                      <View className="h-[1px] flex-1 bg-border/15" />
+                      <Pressable
+                        onPress={handleSwapTransferAccounts}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
+                        className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
+                      >
+                        <ArrowLeftRight size={14} color={themeColors.primary} />
+                      </Pressable>
+                      <View className="h-[1px] flex-1 bg-border/15" />
+                    </View>
+                  </View>
+                  <View>
+                    <SummaryRow
+                      label={I18n.t('transactions.editor.to')}
+                      isActive={activeField === 'toAccount'}
+                      onPress={() => activateField('toAccount')}
+                      valueTone={fieldErrors.to_account ? 'error' : 'default'}
+                      rightElement={null}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                          <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                            <ArrowRight size={13} color={themeColors.textMuted} />
+                          </View>
+                          <Text variant="caption" tone="muted">
+                            {I18n.t('transactions.editor.to')}
+                          </Text>
+                        </View>
+                        <Text
+                          variant="body"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          className={cn(
+                            'max-w-[58%] text-right',
+                            toAccountName ? '' : 'text-muted-foreground/60',
+                          )}
+                        >
+                          {toAccountName ?? I18n.t('transactions.editor.choose_account')}
+                        </Text>
+                      </View>
+                    </SummaryRow>
+                  </View>
+                </>
+              ) : (
                 <View>
                   <SummaryRow
-                    label={I18n.t('transactions.editor.from')}
-                    isActive={activeField === 'fromAccount'}
-                    onPress={() => activateField('fromAccount')}
-                    valueTone={fieldErrors.from_account ? 'error' : 'default'}
+                    label={I18n.t('transactions.editor.account')}
+                    isActive={activeField === 'account'}
+                    onPress={() => activateField('account')}
+                    valueTone={fieldErrors.account ? 'error' : 'default'}
                     rightElement={null}
                   >
                     <View className="flex-row items-center justify-between">
@@ -1098,7 +1172,7 @@ export function TransactionEditorScreen({
                           <CreditCard size={13} color={themeColors.textMuted} />
                         </View>
                         <Text variant="caption" tone="muted">
-                          {I18n.t('transactions.editor.from')}
+                          {I18n.t('transactions.editor.account')}
                         </Text>
                       </View>
                       <Text
@@ -1107,93 +1181,15 @@ export function TransactionEditorScreen({
                         ellipsizeMode="tail"
                         className={cn(
                           'max-w-[58%] text-right',
-                          fromAccountName ? '' : 'text-muted-foreground/60',
+                          accountName ? '' : 'text-muted-foreground/60',
                         )}
                       >
-                        {fromAccountName ?? I18n.t('transactions.editor.choose_account')}
+                        {accountName ?? I18n.t('transactions.editor.choose_account')}
                       </Text>
                     </View>
                   </SummaryRow>
                 </View>
-                <View className="px-4 py-1">
-                  <View className="flex-row items-center">
-                    <View className="h-[1px] flex-1 bg-border/15" />
-                    <Pressable
-                      onPress={handleSwapTransferAccounts}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
-                      className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
-                    >
-                      <ArrowLeftRight size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <View className="h-[1px] flex-1 bg-border/15" />
-                  </View>
-                </View>
-                <View>
-                  <SummaryRow
-                    label={I18n.t('transactions.editor.to')}
-                    isActive={activeField === 'toAccount'}
-                    onPress={() => activateField('toAccount')}
-                    valueTone={fieldErrors.to_account ? 'error' : 'default'}
-                    rightElement={null}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                        <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                          <ArrowRight size={13} color={themeColors.textMuted} />
-                        </View>
-                        <Text variant="caption" tone="muted">
-                          {I18n.t('transactions.editor.to')}
-                        </Text>
-                      </View>
-                      <Text
-                        variant="body"
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                        className={cn(
-                          'max-w-[58%] text-right',
-                          toAccountName ? '' : 'text-muted-foreground/60',
-                        )}
-                      >
-                        {toAccountName ?? I18n.t('transactions.editor.choose_account')}
-                      </Text>
-                    </View>
-                  </SummaryRow>
-                </View>
-              </>
-            ) : (
-              <View>
-                <SummaryRow
-                  label={I18n.t('transactions.editor.account')}
-                  isActive={activeField === 'account'}
-                  onPress={() => activateField('account')}
-                  valueTone={fieldErrors.account ? 'error' : 'default'}
-                  rightElement={null}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                      <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                        <CreditCard size={13} color={themeColors.textMuted} />
-                      </View>
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('transactions.editor.account')}
-                      </Text>
-                    </View>
-                    <Text
-                      variant="body"
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                      className={cn(
-                        'max-w-[58%] text-right',
-                        accountName ? '' : 'text-muted-foreground/60',
-                      )}
-                    >
-                      {accountName ?? I18n.t('transactions.editor.choose_account')}
-                    </Text>
-                  </View>
-                </SummaryRow>
-              </View>
-            ))}
+              ))}
 
             {/* Category row (hidden for transfers and balance adjustments) */}
             {!isTransferType && !isBalanceAdjustmentType ? (

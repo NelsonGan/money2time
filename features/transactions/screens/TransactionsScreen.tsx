@@ -1,3 +1,4 @@
+import { Plus, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -7,30 +8,31 @@ import {
   Pressable,
   ScrollView,
   type TextInput,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Search, X } from 'lucide-react-native';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
-import { Input } from '~/components/ui/input';
-import { SelectField } from '~/components/ui/select';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
+import { InOutHeader } from '~/components/navigation/InOutHeader';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { Input, SelectField, Text, ThemeModal } from '~/components/ui';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
-import { useApp } from '~/context/AppContext';
-import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
-import { cn } from '~/utils';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { I18n } from '~/lib/i18n';
-import { useThemeColors } from '~/hooks/useThemeColors';
+import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import {
+  formatAmount,
+  formatDateInput,
+  formatHours,
+  monthKeyFromIsoLocal,
+} from '~/utils/formatters';
 
 const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
   { label: I18n.t('transactions.filters.all'), value: 'all' },
@@ -359,6 +361,7 @@ export function TransactionsScreen({
     }),
     [pageWidth],
   );
+  const monthPagerKeyExtractor = useCallback((item: number) => String(item), []);
 
   const scrollToRelativeMonth = useCallback(
     (direction: 1 | -1) => {
@@ -422,20 +425,19 @@ export function TransactionsScreen({
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const categoryPanelParents = useMemo(
-    () => {
-      const parents = categories.filter((category) => !category.parentId);
-      return parents.map((category) => ({
-        id: category.id,
-        name: category.name,
-        icon: resolveCategoryIcon(category.icon),
-      }));
-    },
-    [categories],
-  );
+  const categoryPanelParents = useMemo(() => {
+    const parents = categories.filter((category) => !category.parentId);
+    return parents.map((category) => ({
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon),
+    }));
+  }, [categories]);
   const categoryPanelChildren = useMemo(() => {
     const parentIconById = new Map(
-      categories.filter((category) => !category.parentId).map((category) => [category.id, category.icon]),
+      categories
+        .filter((category) => !category.parentId)
+        .map((category) => [category.id, category.icon]),
     );
     const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
     categories
@@ -684,7 +686,9 @@ export function TransactionsScreen({
               </Pressable>
 
               <Text variant="caption" className="text-foreground">
-                {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
+                {I18n.t('transactions.selection.selected_count', {
+                  count: selectedTransactionCount,
+                })}
               </Text>
 
               <View className="flex-row items-center gap-1.5">
@@ -787,7 +791,7 @@ export function TransactionsScreen({
           <FlatList
             ref={horizontalListRef}
             data={monthPagerSlots}
-            keyExtractor={(item) => String(item)}
+            keyExtractor={monthPagerKeyExtractor}
             style={FLEX_ONE_STYLE}
             horizontal
             pagingEnabled
@@ -859,7 +863,10 @@ export function TransactionsScreen({
                   hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
                 )}
               >
-                <Text variant="caption" className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}>
+                <Text
+                  variant="caption"
+                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
+                >
                   {I18n.t('common.save')}
                 </Text>
               </Pressable>
@@ -968,10 +975,7 @@ export function TransactionsScreen({
                   onSelect={handleResetAccountFilter}
                 />
               </View>
-              <View
-                className={FILTER_SELECTION_PANEL_CLASS}
-                style={{ height: 236 }}
-              >
+              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                 <AccountPanel
                   accounts={accounts}
                   accountGroups={accountGroups}
@@ -993,10 +997,7 @@ export function TransactionsScreen({
                   onSelect={handleResetCategoryFilter}
                 />
               </View>
-              <View
-                className={FILTER_SELECTION_PANEL_CLASS}
-                style={{ height: 236 }}
-              >
+              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                 <CategoryPanel
                   parents={categoryPanelParents}
                   childByParent={categoryPanelChildren}

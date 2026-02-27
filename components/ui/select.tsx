@@ -1,20 +1,21 @@
+import { Check, ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Animated as RNAnimated,
   PanResponder,
   Pressable,
   ScrollView,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native';
-import { ChevronDown, Check } from 'lucide-react-native';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
-import { triggerHaptic } from '~/services/haptics';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { cn } from '~/utils';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
+
+import { Text } from './text';
+import { ThemeModal } from './theme-modal';
 
 const SHEET_HEIGHT = 460;
 const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;

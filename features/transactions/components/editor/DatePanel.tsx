@@ -1,19 +1,19 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   PanResponder,
   Pressable,
   ScrollView,
   View,
-  type NativeSyntheticEvent,
-  type NativeScrollEvent,
 } from 'react-native';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { I18n } from '~/lib/i18n';
 
 const YEAR_CHIP_WIDTH = 86;
 const YEAR_EDGE_BUFFER = 8;

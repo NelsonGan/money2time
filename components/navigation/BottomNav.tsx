@@ -1,14 +1,14 @@
+import { BarChart2, House, Landmark, Settings, Wallet } from 'lucide-react-native';
 import React, { memo, useCallback } from 'react';
-import { View, Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { House, Wallet, BarChart2, Settings, Landmark } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
-import { cn } from '~/utils';
+import { Text } from '~/components/ui';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { triggerHaptic } from '~/services/haptics';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 
 export type TabName = 'transactions' | 'account' | 'home' | 'insights' | 'settings';
 
