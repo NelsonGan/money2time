@@ -1,8 +1,8 @@
+import { Check, ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Check, ChevronDown } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';

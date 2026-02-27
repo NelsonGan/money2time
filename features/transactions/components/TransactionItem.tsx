@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
-import { View, Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
-import type { TransactionWithRelations, UserSettings } from '~/types';
-import { formatAmount, formatRelativeDate } from '~/utils/formatters';
-import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
+import { Text } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { TransactionWithRelations, UserSettings } from '~/types';
+import { cn } from '~/utils';
+import { formatAmount, formatRelativeDate } from '~/utils/formatters';
 
 type TransactionDisplaySettings = Pick<
   UserSettings,

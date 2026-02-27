@@ -1,17 +1,16 @@
+import { Clock, DollarSign } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { DollarSign, Clock } from 'lucide-react-native';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { useApp } from '~/context/AppContext';
-import { Text } from '~/components/ui/text';
-import { cn } from '~/utils';
-import { triggerHaptic } from '~/services/haptics';
+import { Text, ThemeModal } from '~/components/ui';
 import { springPresets } from '~/constants/motion';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import { requestOpenHourlyValueSetup } from '~/services/hourlyValueNavigation';
+import { cn } from '~/utils';
 
 export function DisplayModeToggle() {
   const { settings, toggleDisplayMode, canUseTimeDisplayMode } = useApp();

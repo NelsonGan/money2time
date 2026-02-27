@@ -1,6 +1,6 @@
+import { Delete } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Pressable, View } from 'react-native';
-import { Delete } from 'lucide-react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,19 +9,20 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
-import { amountToHoursByRate, formatHours } from '~/utils/formatters';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { I18n } from '~/lib/i18n';
+import { amountToHoursByRate, formatHours } from '~/utils/formatters';
+
 import {
+  appendDecimal,
+  appendDigit,
+  appendOperator,
   evaluateExpression,
   formatMoney,
   sanitizeInitialAmount,
-  appendDigit,
-  appendDecimal,
-  appendOperator,
 } from './calculatorEngine';
 
 type Operator = '+' | '-' | '×' | '÷';

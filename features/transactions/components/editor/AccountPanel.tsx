@@ -1,13 +1,13 @@
+import { ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { ChevronDown } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
-import type { Account, AccountGroup } from '~/types';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { Account, AccountGroup } from '~/types';
+import { cn } from '~/utils';
 
 interface AccountPanelBaseProps {
   accounts: Account[];

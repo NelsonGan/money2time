@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -6,12 +7,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { ChevronRight } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { triggerHaptic } from '~/services/haptics';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface SummaryRowProps {
   icon?: string;
