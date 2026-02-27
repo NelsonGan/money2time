@@ -3,7 +3,7 @@ import React, { memo, useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
