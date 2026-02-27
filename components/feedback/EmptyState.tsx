@@ -2,8 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Text } from '~/components/ui/text';
+import { Button, Text } from '~/components/ui';
 
 import { Mascot } from './Mascot';
 

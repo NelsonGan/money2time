@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { getErrorMessage } from '~/utils/errorHandling';
 

@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';

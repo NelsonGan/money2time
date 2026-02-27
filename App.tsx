@@ -11,7 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
-import { Text } from '~/components/ui/text';
+import { Text } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { HomeScreen } from '~/features/home/screens';
