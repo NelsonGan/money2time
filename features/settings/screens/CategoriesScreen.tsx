@@ -1,5 +1,5 @@
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -505,13 +505,13 @@ export function CategoriesScreen({
     setSelectedParentId(item.id);
   };
 
-  const handleSubcategoryBack = () => {
+  const handleSubcategoryBack = useCallback(() => {
     if (parentId) {
       onBack?.();
       return;
     }
     setSelectedParentId(null);
-  };
+  }, [onBack, parentId]);
 
   const edgeSwipeBackHandler = useMemo(() => {
     if (selectedParent) return handleSubcategoryBack;
