@@ -8,8 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Text } from '~/components/ui/text';
+import { Button, Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';

@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, View, type GestureResponderEvent } from 'react-native';
+import { Alert, type GestureResponderEvent, Pressable, ScrollView, View } from 'react-native';
 
-import { Input } from '~/components/ui/input';
-import { Text } from '~/components/ui/text';
 import {
+  Input,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-} from '~/components/ui/settings';
+  Text,
+} from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { DatePanel } from '~/features/transactions/components/editor';
-import { useApp } from '~/context/AppContext';
-import { formatDateInput } from '~/utils/formatters';
-import { cn } from '~/utils';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
-import { I18n } from '~/lib/i18n';
+import { cn } from '~/utils';
+import { formatDateInput } from '~/utils/formatters';
 
 type DrilldownSortOption = 'default' | 'largest_value';
 type DrilldownTransactionFilter = 'income' | 'expense';
