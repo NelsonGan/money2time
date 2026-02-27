@@ -412,36 +412,48 @@ export function TransactionsScreen({
     let count = 0;
     if (transactionFilters.type !== 'all') count += 1;
     if (transactionFilters.accountId) count += 1;
-    if (transactionFilters.categoryId) count += 1;
+    if (
+      (transactionFilters.type === 'all' || transactionFilters.type === 'income') &&
+      transactionFilters.incomeCategoryId
+    ) {
+      count += 1;
+    }
+    if (
+      (transactionFilters.type === 'all' || transactionFilters.type === 'expense') &&
+      transactionFilters.expenseCategoryId
+    ) {
+      count += 1;
+    }
     if (transactionFilters.minAmount !== null) count += 1;
     if (transactionFilters.maxAmount !== null) count += 1;
     if (transactionFilters.sortBy !== 'date_desc') count += 1;
     return count;
   }, [
     transactionFilters.accountId,
-    transactionFilters.categoryId,
+    transactionFilters.expenseCategoryId,
+    transactionFilters.incomeCategoryId,
     transactionFilters.maxAmount,
     transactionFilters.minAmount,
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const categoryPanelParents = useMemo(() => {
-    const parents = categories.filter((category) => !category.parentId);
+  const incomeCategoryPanel = useMemo(() => {
+    const parents = categories.filter((category) => category.type === 'income' && !category.parentId);
     return parents.map((category) => ({
       id: category.id,
       name: category.name,
       icon: resolveCategoryIcon(category.icon),
     }));
   }, [categories]);
-  const categoryPanelChildren = useMemo(() => {
+  const incomeCategoryPanelChildren = useMemo(() => {
     const parentIconById = new Map(
       categories
-        .filter((category) => !category.parentId)
+        .filter((category) => category.type === 'income' && !category.parentId)
         .map((category) => [category.id, category.icon]),
     );
     const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
     categories
-      .filter((category) => !!category.parentId)
+      .filter((category) => category.type === 'income' && !!category.parentId)
       .forEach((category) => {
         const parentId = category.parentId as string;
         const list = grouped.get(parentId) ?? [];
@@ -454,6 +466,39 @@ export function TransactionsScreen({
       });
     return grouped;
   }, [categories]);
+  const expenseCategoryPanel = useMemo(() => {
+    const parents = categories.filter((category) => category.type === 'expense' && !category.parentId);
+    return parents.map((category) => ({
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon),
+    }));
+  }, [categories]);
+  const expenseCategoryPanelChildren = useMemo(() => {
+    const parentIconById = new Map(
+      categories
+        .filter((category) => category.type === 'expense' && !category.parentId)
+        .map((category) => [category.id, category.icon]),
+    );
+    const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
+    categories
+      .filter((category) => category.type === 'expense' && !!category.parentId)
+      .forEach((category) => {
+        const parentId = category.parentId as string;
+        const list = grouped.get(parentId) ?? [];
+        list.push({
+          id: category.id,
+          name: category.name,
+          icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
+        });
+        grouped.set(parentId, list);
+      });
+    return grouped;
+  }, [categories]);
+  const shouldShowIncomeCategoryFilter =
+    transactionFilters.type === 'all' || transactionFilters.type === 'income';
+  const shouldShowExpenseCategoryFilter =
+    transactionFilters.type === 'all' || transactionFilters.type === 'expense';
   const sortOptions = useMemo(
     () => SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
     [],
@@ -585,9 +630,15 @@ export function TransactionsScreen({
     },
     [setTransactionFilters],
   );
-  const handleSelectCategoryFilter = useCallback(
+  const handleSelectIncomeCategoryFilter = useCallback(
     (categoryId: string) => {
-      setTransactionFilters({ categoryId });
+      setTransactionFilters({ incomeCategoryId: categoryId, categoryId: null });
+    },
+    [setTransactionFilters],
+  );
+  const handleSelectExpenseCategoryFilter = useCallback(
+    (categoryId: string) => {
+      setTransactionFilters({ expenseCategoryId: categoryId, categoryId: null });
     },
     [setTransactionFilters],
   );
@@ -595,9 +646,13 @@ export function TransactionsScreen({
     void triggerHaptic('selection');
     setTransactionFilters({ accountId: null });
   }, [setTransactionFilters]);
-  const handleResetCategoryFilter = useCallback(() => {
+  const handleResetIncomeCategoryFilter = useCallback(() => {
     void triggerHaptic('selection');
-    setTransactionFilters({ categoryId: null });
+    setTransactionFilters({ incomeCategoryId: null, categoryId: null });
+  }, [setTransactionFilters]);
+  const handleResetExpenseCategoryFilter = useCallback(() => {
+    void triggerHaptic('selection');
+    setTransactionFilters({ expenseCategoryId: null, categoryId: null });
   }, [setTransactionFilters]);
   const handleSearchChange = useCallback(
     (text: string) => {
@@ -607,7 +662,7 @@ export function TransactionsScreen({
   );
   const handleTypeChange = useCallback(
     (type: TransactionType | 'all') => {
-      setTransactionFilters({ type });
+      setTransactionFilters({ type, categoryId: null });
     },
     [setTransactionFilters],
   );
@@ -985,27 +1040,55 @@ export function TransactionsScreen({
               </View>
             </View>
 
-            <View className="gap-2.5">
-              <View className="flex-row items-center justify-between gap-3">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.filters.category')}
-                </Text>
-                <FilterPill
-                  label={I18n.t('transactions.filters.all_categories')}
-                  value="all"
-                  selected={transactionFilters.categoryId === null}
-                  onSelect={handleResetCategoryFilter}
-                />
+            {shouldShowIncomeCategoryFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.filters.income_category')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('transactions.filters.all_income_categories')}
+                    value="all"
+                    selected={transactionFilters.incomeCategoryId === null}
+                    onSelect={handleResetIncomeCategoryFilter}
+                  />
+                </View>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                  <CategoryPanel
+                    parents={incomeCategoryPanel}
+                    childByParent={incomeCategoryPanelChildren}
+                    allowParentSelection
+                    selectedCategoryId={transactionFilters.incomeCategoryId}
+                    onSelect={handleSelectIncomeCategoryFilter}
+                  />
+                </View>
               </View>
-              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
-                <CategoryPanel
-                  parents={categoryPanelParents}
-                  childByParent={categoryPanelChildren}
-                  selectedCategoryId={transactionFilters.categoryId}
-                  onSelect={handleSelectCategoryFilter}
-                />
+            ) : null}
+
+            {shouldShowExpenseCategoryFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.filters.expense_category')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('transactions.filters.all_expense_categories')}
+                    value="all"
+                    selected={transactionFilters.expenseCategoryId === null}
+                    onSelect={handleResetExpenseCategoryFilter}
+                  />
+                </View>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                  <CategoryPanel
+                    parents={expenseCategoryPanel}
+                    childByParent={expenseCategoryPanelChildren}
+                    allowParentSelection
+                    selectedCategoryId={transactionFilters.expenseCategoryId}
+                    onSelect={handleSelectExpenseCategoryFilter}
+                  />
+                </View>
               </View>
-            </View>
+            ) : null}
 
             <View className="gap-2.5">
               <View className="flex-row gap-2">

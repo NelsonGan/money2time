@@ -770,6 +770,13 @@ export function TransactionEditorScreen({
         });
       }
     }
+
+    const isSelectedParent = topLevelCategories.some((item) => item.id === nextCategoryId);
+    const selectedParentHasChildren = (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
+    if (mode === 'create' && isSelectedParent && selectedParentHasChildren) {
+      return;
+    }
+
     focusNoteField();
   };
 
@@ -850,6 +857,7 @@ export function TransactionEditorScreen({
           <CategoryPanel
             parents={categoryPanelParents}
             childByParent={categoryPanelChildren}
+            allowParentSelection
             selectedCategoryId={categoryId}
             onSelect={handleCategorySelect}
           />
