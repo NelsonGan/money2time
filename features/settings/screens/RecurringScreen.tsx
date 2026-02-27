@@ -203,20 +203,6 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
       themeColors.textMuted,
     ],
   );
-  const listEmpty = useMemo(
-    () => (
-      <Card>
-        <CardContent className="py-6 items-center">
-          <Text variant="caption">{I18n.t('recurring.empty_title')}</Text>
-          <Button className="mt-3" onPress={openCreate}>
-            <Text>{I18n.t('recurring.create_commitment')}</Text>
-          </Button>
-        </CardContent>
-      </Card>
-    ),
-    [openCreate],
-  );
-
   return (
     <SettingsPageLayout>
       <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
@@ -239,7 +225,6 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
           paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
           paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
         }}
-        ListEmptyComponent={listEmpty}
         renderItem={renderRule}
         initialNumToRender={10}
         maxToRenderPerBatch={10}

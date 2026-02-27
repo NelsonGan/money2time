@@ -1479,7 +1479,6 @@ export function AccountsScreen({
                           variant="secondary"
                           className="h-8 px-3"
                           onPress={() => {
-                            void triggerHaptic('selection');
                             setShowEditAccount(true);
                           }}
                         >
@@ -1784,7 +1783,6 @@ export function AccountsScreen({
                 <Button
                   size="icon"
                   onPress={() => {
-                    void triggerHaptic('selection');
                     if (isManagementGroupsView) {
                       startCreateGroup();
                     } else {

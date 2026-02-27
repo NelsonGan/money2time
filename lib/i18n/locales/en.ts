@@ -8,6 +8,7 @@ const en = {
     reset: 'Reset',
     retry: 'Retry',
     delete: 'Delete',
+    edit: 'Edit',
     continue: 'Continue',
     setup: 'Set up',
     not_now: 'Not now',
@@ -377,6 +378,9 @@ const en = {
     asset_history: 'Asset history',
     asset_history_description:
       'Track your total assets across the year and review monthly balance trend.',
+    income_rate_history: 'Income rate history',
+    income_rate_history_description:
+      'See how your true hourly rate has changed over time across your full transaction history.',
     total_expense: 'Total expense',
     total_income: 'Total income',
     no_positive_slices: 'No positive expense slices for this period.',
@@ -449,6 +453,12 @@ const en = {
         exclusions_active: 'Excluding {{count}} categories from calculation.',
         goal_hint: '20%+ is typically considered a healthy savings pace.',
       },
+      income_rate_history: {
+        scrub_hint: 'Tap chart to inspect a point',
+        true_hourly_rate: 'True hourly rate',
+        no_data_title: 'Not enough income rate data',
+        no_data_message: 'Add at least 2 income rate entries to see your rate history chart.',
+      },
     },
     empty: {
       title: 'No transaction data yet',
@@ -501,7 +511,7 @@ const en = {
     management: 'Management',
     hourly_value: 'Hourly value',
     hourly_value_latest: '{{value}} latest',
-    manage_formulas: 'Manage formulas and history',
+    manage_formulas: 'Only add an entry when your income changes — no need to update every month.',
     accounts: 'Accounts',
     accounts_subtitle: 'Create, edit, and organize',
     categories: 'Categories',
@@ -571,6 +581,11 @@ const en = {
     hourly_delete_title: 'Delete monthly hourly value?',
     hourly_delete_message:
       'Delete the rate for {{month}}? Months that depend on it will fall back to the prior available month.',
+    hourly_add_title: 'Add income rate',
+    hourly_add_confirm: 'Start',
+    hourly_month_exists_title: '{{month}} already exists',
+    hourly_month_exists_message: 'This month already has an income rate. Edit it instead?',
+    hourly_income_chart_title: 'Income rate history',
     formula: 'Formula',
     formula_line_1: 'Base hourly rate is derived from your wage type (hourly/monthly/yearly).',
     formula_line_2:

@@ -19,6 +19,7 @@ export function MonthControlsHeader({
   actions,
   summary,
   children,
+  hideNavigation = false,
 }: {
   title?: string;
   titleNode?: React.ReactNode;
@@ -31,6 +32,7 @@ export function MonthControlsHeader({
   actions?: React.ReactNode;
   summary?: React.ReactNode;
   children?: React.ReactNode;
+  hideNavigation?: boolean;
 }) {
   const themeColors = useThemeColors();
 
@@ -55,44 +57,46 @@ export function MonthControlsHeader({
           {actions ? <View className="flex-row items-center gap-2">{actions}</View> : null}
         </View>
 
-        <View className="rounded-[28px] bg-card border border-border/40 px-2 py-2">
-          <View className="flex-row items-center justify-between">
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onPrevMonth();
-              }}
-              className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
-            >
-              <ChevronLeft size={18} color={themeColors.textSoft} />
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                if (!onMonthPress) return;
-                void triggerHaptic('selection');
-                onMonthPress();
-              }}
-              disabled={!onMonthPress}
-              className={cn(
-                'flex-1 items-center px-2',
-                onMonthPress ? 'active:opacity-80' : undefined,
-              )}
-            >
-              <Text variant="subheading" className="text-foreground">
-                {monthLabel}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onNextMonth();
-              }}
-              className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
-            >
-              <ChevronRight size={18} color={themeColors.textSoft} />
-            </Pressable>
+        {!hideNavigation ? (
+          <View className="rounded-[28px] bg-card border border-border/40 px-2 py-2">
+            <View className="flex-row items-center justify-between">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onPrevMonth();
+                }}
+                className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
+              >
+                <ChevronLeft size={18} color={themeColors.textSoft} />
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  if (!onMonthPress) return;
+                  void triggerHaptic('selection');
+                  onMonthPress();
+                }}
+                disabled={!onMonthPress}
+                className={cn(
+                  'flex-1 items-center px-2',
+                  onMonthPress ? 'active:opacity-80' : undefined,
+                )}
+              >
+                <Text variant="subheading" className="text-foreground">
+                  {monthLabel}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onNextMonth();
+                }}
+                className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
+              >
+                <ChevronRight size={18} color={themeColors.textSoft} />
+              </Pressable>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {summary ? <View className="flex-row flex-wrap gap-2">{summary}</View> : null}
 
