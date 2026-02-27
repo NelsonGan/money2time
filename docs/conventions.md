@@ -48,6 +48,8 @@ Rules:
 ## Component patterns
 
 - Prefer named exports for components.
+- Import shared UI primitives from `~/components/ui` (barrel) rather than
+  deep module paths.
 - Type props with interfaces.
 - Keep presentational components pure; push data mutations into context/services.
 - Memoize selectively (`React.memo`, `useMemo`, `useCallback`) only for
@@ -82,6 +84,7 @@ Rules:
 ## Navigation rules
 
 - Root stack route types live in `navigation/rootStack.ts`.
+- Settings stack route types live in `navigation/settingsStack.ts`.
 - Shared native stack options live in `navigation/stackOptions.ts`.
 - Shared swipe/back haptics listeners live in `navigation/swipeBackHaptics.ts`.
 - Route params must be typed; avoid untyped stringly navigation payloads.
