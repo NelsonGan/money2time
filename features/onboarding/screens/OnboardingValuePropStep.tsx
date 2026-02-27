@@ -2,11 +2,9 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { Text } from '~/components/ui/text';
-import { triggerHaptic } from '~/services/haptics';
+import { Button, Card, CardContent, Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface OnboardingValuePropStepProps {
   currencySymbol: string;

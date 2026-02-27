@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Text } from '~/components/ui/text';
+import { Button, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { triggerHaptic } from '~/services/haptics';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface OnboardingModeStepProps {
   onBack: () => void;

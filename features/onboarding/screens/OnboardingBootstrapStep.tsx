@@ -1,21 +1,18 @@
+import { Image } from 'expo-image';
+import { Check } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
-import { Image } from 'expo-image';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Check } from 'lucide-react-native';
-
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { Text } from '~/components/ui/text';
-import { Mascot } from '~/components/feedback/Mascot';
-import { triggerHaptic } from '~/services/haptics';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { GestureDetector } from 'react-native-gesture-handler';
+import Animated, { FadeIn } from 'react-native-reanimated';
+
+import { Mascot } from '~/components/feedback/Mascot';
+import { Button, Card, CardContent, Text, ThemeModal } from '~/components/ui';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { cn } from '~/utils';
-import type { MMImportSummary } from '~/services/mmbakImportService';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { MMImportSummary } from '~/services/mmbakImportService';
+import { cn } from '~/utils';
 
 export type BootstrapChoice = 'import' | 'fresh';
 export type BootstrapView = 'choose' | 'import-result' | 'fresh-checklist';

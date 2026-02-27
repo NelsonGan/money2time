@@ -1,16 +1,13 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { SelectField } from '~/components/ui/select';
-import { Text } from '~/components/ui/text';
-import { triggerHaptic } from '~/services/haptics';
-import { GestureDetector } from 'react-native-gesture-handler';
+import { Button, Card, CardContent, SelectField, Text } from '~/components/ui';
+import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
-import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { triggerHaptic } from '~/services/haptics';
 
 interface OnboardingPreferencesStepProps {
   locale: string;
