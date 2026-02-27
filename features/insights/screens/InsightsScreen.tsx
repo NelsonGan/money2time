@@ -3172,7 +3172,7 @@ export function InsightsScreen({
       onOpenDrilldown({
         label: nextState.label,
         transactionIds: sourceTransactions.map((transaction) => transaction.id),
-        showTypeFilter: nextState.showTypeFilter,
+        showTypeFilter: nextState.showTypeFilter ?? false,
       });
     },
     [onOpenDrilldown],
