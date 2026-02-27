@@ -3,10 +3,11 @@ import type { LayoutChangeEvent } from 'react-native';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
 import { springPresets } from '~/constants/motion';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+
+import { Text } from './text';
 
 interface ToggleOption<T extends string> {
   value: T;

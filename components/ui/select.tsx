@@ -9,12 +9,13 @@ import {
   View,
 } from 'react-native';
 
-import { Text } from '~/components/ui/text';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+
+import { Text } from './text';
+import { ThemeModal } from './theme-modal';
 
 const SHEET_HEIGHT = 460;
 const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;
