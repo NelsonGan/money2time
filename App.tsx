@@ -39,7 +39,7 @@ import {
   type RootStackRouteProps,
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
-import { SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS } from '~/navigation/swipeBackHaptics';
+import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
@@ -437,6 +437,7 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
+  const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
 
   if (isLoading) {
     return (
@@ -466,7 +467,7 @@ function AppContent() {
       <NavigationContainer>
         <RootStack.Navigator
           screenOptions={SHARED_NATIVE_STACK_OPTIONS}
-          screenListeners={SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS}
+          screenListeners={rootScreenListeners}
         >
           <RootStack.Screen name="Main" component={MainShellScreen} />
           <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
