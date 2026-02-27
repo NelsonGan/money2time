@@ -1,22 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
-import { Card, CardContent } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
-import { SelectField } from '~/components/ui/select';
 import {
+  Card,
+  CardContent,
+  Input,
+  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsActionBar,
   SettingsHeader,
   SettingsPageLayout,
-} from '~/components/ui/settings';
-import { Text } from '~/components/ui/text';
-import { useApp } from '~/context/AppContext';
+  Text,
+} from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { triggerHaptic } from '~/services/haptics';
 import { I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import type { ThemeMode } from '~/types';
 
 interface DisplaySettingsScreenProps {

@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect } from 'react';
-import { Pressable, View } from 'react-native';
 import type { LayoutChangeEvent } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
-import { cn } from '~/utils';
-import { triggerHaptic } from '~/services/haptics';
 import { springPresets } from '~/constants/motion';
+import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
+
+import { Text } from './text';
 
 interface ToggleOption<T extends string> {
   value: T;
@@ -27,7 +28,11 @@ export function SegmentedToggle<T extends string>({
   onChange,
   className,
 }: SegmentedToggleProps<T>) {
-  const activeIndex = options.findIndex((opt) => opt.value === value);
+  const safeOptionCount = Math.max(options.length, 1);
+  const activeIndex = Math.max(
+    0,
+    options.findIndex((opt) => opt.value === value),
+  );
   const segmentWidth = useSharedValue(0);
   const indicatorX = useSharedValue(0);
 
@@ -40,11 +45,11 @@ export function SegmentedToggle<T extends string>({
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {
       const totalWidth = event.nativeEvent.layout.width - 12; // subtract padding
-      const width = totalWidth / options.length;
+      const width = totalWidth / safeOptionCount;
       segmentWidth.value = width;
       indicatorX.value = activeIndex * width;
     },
-    [activeIndex, indicatorX, options.length, segmentWidth],
+    [activeIndex, indicatorX, safeOptionCount, segmentWidth],
   );
 
   const indicatorStyle = useAnimatedStyle(() => ({

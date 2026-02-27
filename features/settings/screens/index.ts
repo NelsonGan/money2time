@@ -5,5 +5,5 @@ export { HourlyValueScreen } from './HourlyValueScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
-export type { SettingsScreenName, SettingsStackParamList } from './SettingsStack';
 export { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
+export type { SettingsScreenName, SettingsStackParamList } from '~/navigation/settingsStack';

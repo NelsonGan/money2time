@@ -1,9 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+
+import { Button, Text } from '~/components/ui';
+
 import { Mascot } from './Mascot';
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
 
 interface EmptyStateProps {
   title: string;

@@ -8,12 +8,11 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
-import { formatHours } from '~/utils/formatters';
+import { Button, Text } from '~/components/ui';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { I18n } from '~/lib/i18n';
+import { formatHours } from '~/utils/formatters';
 
 interface HeroAmountConverterProps {
   amount: string;
@@ -43,7 +42,8 @@ function formatWorkDuration(workdays: number, workdaysPerWeek: number) {
 
   const weeks = Math.floor(normalizedDays / safeWorkdaysPerWeek);
   const remainingDays = Number((normalizedDays - weeks * safeWorkdaysPerWeek).toFixed(2));
-  const weekKey = weeks === 1 ? 'home.converter.workweek_unit_one' : 'home.converter.workweek_unit_other';
+  const weekKey =
+    weeks === 1 ? 'home.converter.workweek_unit_one' : 'home.converter.workweek_unit_other';
   const weekLabel = I18n.t(weekKey, { count: formatCount(weeks) });
 
   if (remainingDays <= 0.01) {
@@ -198,7 +198,8 @@ export function HeroAmountConverter({
           <Button
             size="sm"
             variant="outline"
-            onPress={() => {
+            onPress={(event) => {
+              event.stopPropagation();
               void triggerHaptic('light');
               onChangeAmount('');
               inputRef.current?.focus();

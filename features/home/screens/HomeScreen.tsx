@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -8,13 +7,17 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text } from '~/components/ui/text';
-import { Card } from '~/components/ui/card';
-import { DisplayModeToggle } from '~/features/transactions/components';
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { HeroAmountConverter } from '~/features/home/components';
+import { Card, Text } from '~/components/ui';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { HeroAmountConverter } from '~/features/home/components';
+import { DisplayModeToggle } from '~/features/transactions/components';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -22,10 +25,6 @@ import {
   formatAmount,
   formatHours,
 } from '~/utils/formatters';
-import { useThemeColors } from '~/hooks/useThemeColors';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { I18n } from '~/lib/i18n';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
 
 const GREETINGS: Record<string, string> = {
   morning: I18n.t('home.greeting.morning'),
@@ -282,6 +281,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
         ref={scrollViewRef}
         contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Greeting */}
         <View className="px-5 pt-5 pb-2 flex-row items-start justify-between">

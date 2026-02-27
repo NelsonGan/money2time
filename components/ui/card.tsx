@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { View } from 'react-native';
 import type { ViewProps } from 'react-native';
+import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { cn } from '~/utils';
+
 import { usePressScale } from '~/hooks/usePressScale';
+import { cn } from '~/utils';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { Text } from '~/components/ui/text';
-import { cn } from '~/utils';
+import { Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
+import { cn } from '~/utils';
 
 interface FlowMetricCardProps {
   label: string;

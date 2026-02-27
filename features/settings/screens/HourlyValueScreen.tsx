@@ -1,25 +1,26 @@
+import { Trash2 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { Trash2 } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
-import { Card, CardContent } from '~/components/ui/card';
-import { Button } from '~/components/ui/button';
-import { SelectField } from '~/components/ui/select';
 import {
+  Button,
+  Card,
+  CardContent,
+  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-} from '~/components/ui/settings';
-import { useApp } from '~/context/AppContext';
+  Text,
+} from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
+import { useApp } from '~/context/AppContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, WageConfig } from '~/types';
 import { cn } from '~/utils';
-import { triggerHaptic } from '~/services/haptics';
 import { monthKeyFromDateLocal, normalizeMonthKey } from '~/utils/formatters';
-import { I18n } from '~/lib/i18n';
-import { useThemeColors } from '~/hooks/useThemeColors';
 
 interface HourlyValueScreenProps {
   onClose: () => void;
@@ -127,12 +128,7 @@ function getEffectiveRateInfo(
 }
 
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
-  const {
-    settings,
-    currentMonthWage,
-    monthlyWages,
-    deleteWageConfigForMonth,
-  } = useApp();
+  const { settings, currentMonthWage, monthlyWages, deleteWageConfigForMonth } = useApp();
   const themeColors = useThemeColors();
   const [selectedYear, setSelectedYear] = useState<string>(() => String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>(() =>
@@ -423,7 +419,6 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           </CardContent>
         </Card>
       </ScrollView>
-
     </SettingsPageLayout>
   );
 }

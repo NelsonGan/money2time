@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, type ModalProps, View } from 'react-native';
+
 import { useThemeVars } from '~/hooks/useThemeVars';
 
 /**

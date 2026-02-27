@@ -581,13 +581,15 @@ const en = {
     user_mode_subtitle_simple: 'Currently: Simple — tap to switch to Power',
     user_mode_subtitle_power: 'Currently: Power — tap to switch to Simple',
     switch_to_simple_title: 'Switch to Simple Mode?',
-    switch_to_simple_message: 'The Simple Wallet and default categories will be created. Your existing data is unchanged.',
+    switch_to_simple_message:
+      'The Simple Wallet and default categories will be created. Your existing data is unchanged.',
     switch_to_power_title: 'Switch to Power Mode?',
     switch_to_power_message: 'All your accounts and features will be restored.',
     remove_simple_wallet: 'Remove Simple Wallet',
     remove_simple_wallet_subtitle: 'Delete Simple Wallet and all its transactions',
     remove_simple_wallet_title: 'Remove Simple Wallet?',
-    remove_simple_wallet_message: 'This will permanently delete the Simple Wallet and all transactions linked to it.',
+    remove_simple_wallet_message:
+      'This will permanently delete the Simple Wallet and all transactions linked to it.',
     remove: 'Remove',
   },
   recurring: {

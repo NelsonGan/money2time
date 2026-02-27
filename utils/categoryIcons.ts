@@ -13,4 +13,3 @@ export function resolveCategoryIcon(
 ): string {
   return normalizeIcon(icon) ?? normalizeIcon(parentIcon) ?? fallbackIcon;
 }
-

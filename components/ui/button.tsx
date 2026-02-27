@@ -2,9 +2,11 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { cn } from '~/utils';
+
 import { usePressScale } from '~/hooks/usePressScale';
-import { triggerHaptic, type HapticKind } from '~/services/haptics';
+import { type HapticKind, triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
+
 import { TextClassContext } from './text';
 
 const buttonVariants = cva(

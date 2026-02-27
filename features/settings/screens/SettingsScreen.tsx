@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -8,9 +9,9 @@ import {
   SettingsPageLayout,
   SettingsRowItem,
   SettingsSection,
-} from '~/components/ui/settings';
-import { DisplayModeToggle } from '~/features/transactions/components';
+} from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { DisplayModeToggle } from '~/features/transactions/components';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 

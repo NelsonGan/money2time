@@ -498,12 +498,8 @@ export async function importMoneyManagerBackupFromUri(
       const creditDueDay = parseCardDay(row.cardDueDay);
       const deletedAt = isDeleted ? new Date().toISOString() : null;
       const groupName =
-        (row.groupUid
-          ? assetGroupNameByUid.get(normalizeSourceKey(row.groupUid) ?? '')
-          : null) ??
-        (row.groupId
-          ? assetGroupNameById.get(normalizeSourceKey(row.groupId) ?? '')
-          : null) ??
+        (row.groupUid ? assetGroupNameByUid.get(normalizeSourceKey(row.groupUid) ?? '') : null) ??
+        (row.groupId ? assetGroupNameById.get(normalizeSourceKey(row.groupId) ?? '') : null) ??
         (normalizeText(row.groupName) || null);
       const type = inferAccountType(name, groupName, creditStatementDay, creditDueDay);
       const accountId = accountsRepository.create({
@@ -579,8 +575,12 @@ export async function importMoneyManagerBackupFromUri(
         category.id,
       ]),
     );
-    const existingCategoryById = new Map(existingCategories.map((category) => [category.id, category]));
-    const categoryIconById = new Map(existingCategories.map((category) => [category.id, category.icon]));
+    const existingCategoryById = new Map(
+      existingCategories.map((category) => [category.id, category]),
+    );
+    const categoryIconById = new Map(
+      existingCategories.map((category) => [category.id, category.icon]),
+    );
 
     const categoryIdByUid = new Map<string, string>();
     const categoryIdByIdKey = new Map<string, string>();
@@ -691,7 +691,9 @@ export async function importMoneyManagerBackupFromUri(
         }
         categoryIdByIdKey.set(row.idKey, existing);
         const existingIcon =
-          existingCategoryById.get(existing)?.icon ?? categoryIconById.get(existing) ?? randomCategoryEmoji();
+          existingCategoryById.get(existing)?.icon ??
+          categoryIconById.get(existing) ??
+          randomCategoryEmoji();
         categoryIconById.set(existing, existingIcon);
         categoryMetaById.set(existing, {
           parentId,
