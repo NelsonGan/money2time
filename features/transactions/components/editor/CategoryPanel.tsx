@@ -16,6 +16,7 @@ interface CategoryOption {
 interface CategoryPanelBaseProps {
   parents: CategoryOption[];
   childByParent: Map<string, CategoryOption[]>;
+  allowParentSelection?: boolean;
 }
 
 interface CategoryPanelSingleSelectProps extends CategoryPanelBaseProps {
@@ -41,7 +42,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 export function CategoryPanel(props: CategoryPanelProps) {
-  const { parents, childByParent } = props;
+  const { parents, childByParent, allowParentSelection = false } = props;
   const themeColors = useThemeColors();
   const [expandedParentId, setExpandedParentId] = useState<string | null>(null);
   const isMultiSelect = 'selectedCategoryIds' in props;
@@ -134,6 +135,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           void triggerHaptic('selection');
                           if (children.length > 0) {
                             setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
+                            if (allowParentSelection) {
+                              handleSelection(parent.id);
+                            }
                             return;
                           }
                           handleSelection(parent.id);
@@ -158,7 +162,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                         >
                           {parent.name}
                         </Text>
-                        {isParentSelected && !hasSelectedChild ? (
+                        {isParentSelected && !hasSelectedChild && !(allowParentSelection && children.length > 0) ? (
                           <Check size={14} color={themeColors.primary} />
                         ) : children.length > 0 ? (
                           <ChevronDown

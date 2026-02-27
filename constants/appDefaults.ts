@@ -13,6 +13,8 @@ export const DEFAULT_TRANSACTION_FILTERS: TransactionFilters = {
   dateRange: null,
   accountId: null,
   type: 'all',
+  incomeCategoryId: null,
+  expenseCategoryId: null,
   categoryId: null,
   minAmount: null,
   maxAmount: null,
