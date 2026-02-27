@@ -184,7 +184,9 @@ export function SettingsStack({
           return (
             <CategoriesScreen
               onBack={() => props.navigation.goBack()}
-              onOpenParent={(parentId) => props.navigation.navigate('CategoriesSubcategories', { parentId })}
+              onOpenParent={(parentId) =>
+                props.navigation.navigate('CategoriesSubcategories', { parentId })
+              }
             />
           );
         }}

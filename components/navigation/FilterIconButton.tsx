@@ -1,6 +1,6 @@
+import { SlidersHorizontal } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
-import { SlidersHorizontal } from 'lucide-react-native';
 
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';

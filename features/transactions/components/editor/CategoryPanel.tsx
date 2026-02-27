@@ -111,9 +111,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
           const expandedInRow = expandedParentId
             ? row.find((p) => p.id === expandedParentId)
             : null;
-          const expandedChildren = expandedInRow
-            ? (childByParent.get(expandedInRow.id) ?? [])
-            : [];
+          const expandedChildren = expandedInRow ? (childByParent.get(expandedInRow.id) ?? []) : [];
           const childRows = expandedChildren.length > 0 ? chunk(expandedChildren, COLS) : [];
 
           return (
@@ -135,9 +133,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                         onPress={() => {
                           void triggerHaptic('selection');
                           if (children.length > 0) {
-                            setExpandedParentId((prev) =>
-                              prev === parent.id ? null : parent.id,
-                            );
+                            setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
                             return;
                           }
                           handleSelection(parent.id);
@@ -157,9 +153,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           numberOfLines={1}
                           className={cn(
                             'flex-1',
-                            isSelected || isExpanded
-                              ? 'text-primary'
-                              : 'text-foreground',
+                            isSelected || isExpanded ? 'text-primary' : 'text-foreground',
                           )}
                         >
                           {parent.name}
@@ -170,9 +164,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           <ChevronDown
                             size={13}
                             color={
-                              isSelected || isExpanded
-                                ? themeColors.primary
-                                : themeColors.textMuted
+                              isSelected || isExpanded ? themeColors.primary : themeColors.textMuted
                             }
                             style={{
                               transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
@@ -214,16 +206,12 @@ export function CategoryPanel(props: CategoryPanelProps) {
                             numberOfLines={1}
                             className={cn(
                               'flex-1',
-                              isChildSelected
-                                ? 'text-primary'
-                                : 'text-muted-foreground',
+                              isChildSelected ? 'text-primary' : 'text-muted-foreground',
                             )}
                           >
                             {child.name}
                           </Text>
-                          {isChildSelected ? (
-                            <Check size={12} color={themeColors.primary} />
-                          ) : null}
+                          {isChildSelected ? <Check size={12} color={themeColors.primary} /> : null}
                         </Pressable>
                       </View>
                     );

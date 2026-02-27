@@ -14,7 +14,11 @@ interface OnboardingModeStepProps {
   onSelectPower: () => void;
 }
 
-export function OnboardingModeStep({ onBack, onSelectSimple, onSelectPower }: OnboardingModeStepProps) {
+export function OnboardingModeStep({
+  onBack,
+  onSelectSimple,
+  onSelectPower,
+}: OnboardingModeStepProps) {
   const themeColors = useThemeColors();
   const [selected, setSelected] = useState<'simple' | 'power' | null>(null);
 
@@ -52,8 +56,10 @@ export function OnboardingModeStep({ onBack, onSelectSimple, onSelectPower }: On
             style={{
               borderRadius: 16,
               borderWidth: selected === 'simple' ? 2 : 1,
-              borderColor: selected === 'simple' ? themeColors.primary : themeColors.textMuted + '30',
-              backgroundColor: selected === 'simple' ? themeColors.primarySoft : themeColors.surface,
+              borderColor:
+                selected === 'simple' ? themeColors.primary : themeColors.textMuted + '30',
+              backgroundColor:
+                selected === 'simple' ? themeColors.primarySoft : themeColors.surface,
             }}
           >
             <View style={{ paddingVertical: 20, paddingHorizontal: 20 }}>
@@ -75,7 +81,8 @@ export function OnboardingModeStep({ onBack, onSelectSimple, onSelectPower }: On
             style={{
               borderRadius: 16,
               borderWidth: selected === 'power' ? 2 : 1,
-              borderColor: selected === 'power' ? themeColors.primary : themeColors.textMuted + '30',
+              borderColor:
+                selected === 'power' ? themeColors.primary : themeColors.textMuted + '30',
               backgroundColor: selected === 'power' ? themeColors.primarySoft : themeColors.surface,
             }}
           >
@@ -104,11 +111,7 @@ export function OnboardingModeStep({ onBack, onSelectSimple, onSelectPower }: On
           >
             <Text>{I18n.t('common.back')}</Text>
           </Button>
-          <Button
-            className="flex-[2]"
-            disabled={!selected}
-            onPress={handleContinue}
-          >
+          <Button className="flex-[2]" disabled={!selected} onPress={handleContinue}>
             <Text>{I18n.t('common.continue')}</Text>
           </Button>
         </View>

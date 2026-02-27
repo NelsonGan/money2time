@@ -228,7 +228,13 @@ function CategoryEditor({
 let _onEdit: ((item: Category) => void) | null = null;
 let _onDelete: ((item: Category) => void) | null = null;
 let _onNavigate: ((item: Category) => void) | null = null;
-let _themeColors: { surface: string; surfaceMuted: string; textMuted: string; coral: string; text: string } | null = null;
+let _themeColors: {
+  surface: string;
+  surfaceMuted: string;
+  textMuted: string;
+  coral: string;
+  text: string;
+} | null = null;
 let _hasChildren: ((id: string) => boolean) | null = null;
 let _iconById: Map<string, string> | null = null;
 
@@ -252,11 +258,20 @@ function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
         opacity: isActive ? 0.9 : 1,
       }}
     >
-      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 12,
+          backgroundColor: 'rgba(0,0,0,0.06)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Text style={{ fontSize: 12 }}>{resolveCategoryIcon(item.icon)}</Text>
       </View>
       <Pressable
-        onPress={() => hasKids ? _onNavigate?.(item) : undefined}
+        onPress={() => (hasKids ? _onNavigate?.(item) : undefined)}
         disabled={isActive || !hasKids}
         style={{ flex: 1 }}
       >
@@ -266,7 +281,14 @@ function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
         onPress={() => _onEdit?.(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 13,
+          backgroundColor: 'rgba(0,0,0,0.05)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Pencil size={11} color={tc.textMuted} />
       </Pressable>
@@ -274,7 +296,14 @@ function TopLevelRow({ item, drag, isActive }: RenderItemParams<Category>) {
         onPress={() => _onDelete?.(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 13,
+          backgroundColor: 'rgba(255,0,0,0.06)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Trash2 size={11} color={tc.coral} />
       </Pressable>
@@ -312,7 +341,16 @@ function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
         opacity: isActive ? 0.9 : 1,
       }}
     >
-      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 12,
+          backgroundColor: 'rgba(0,0,0,0.06)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Text style={{ fontSize: 12 }}>{displayIcon}</Text>
       </View>
       <Text style={{ flex: 1, fontSize: 13, color: tc.text }}>{item.name}</Text>
@@ -320,7 +358,14 @@ function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
         onPress={() => _onEdit?.(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 13,
+          backgroundColor: 'rgba(0,0,0,0.05)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Pencil size={11} color={tc.textMuted} />
       </Pressable>
@@ -328,7 +373,14 @@ function SubcategoryRow({ item, drag, isActive }: RenderItemParams<Category>) {
         onPress={() => _onDelete?.(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 13,
+          backgroundColor: 'rgba(255,0,0,0.06)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Trash2 size={11} color={tc.coral} />
       </Pressable>
@@ -356,7 +408,8 @@ export function CategoriesScreen({
   parentId = null,
   onOpenParent,
 }: CategoriesScreenProps = {}) {
-  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } = useApp();
+  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
+    useApp();
   const { persistOrder } = useDebouncedPersistence(500);
   const themeColors = useThemeColors();
   const [type, setType] = useState<CategoryType>('expense');
@@ -406,11 +459,17 @@ export function CategoriesScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab change only; topLevel/subcategories derive from type
   }, [type]);
   useEffect(() => {
-    if (didDragRef.current) { didDragRef.current = false; return; }
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
     setLocalTopLevel(topLevel);
   }, [topLevel]);
   useEffect(() => {
-    if (didDragRef.current) { didDragRef.current = false; return; }
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
     setLocalSubcategories(subcategoriesFromContext);
   }, [subcategoriesFromContext]);
   useEffect(() => {
@@ -499,7 +558,10 @@ export function CategoriesScreen({
                 void triggerHaptic('light');
                 didDragRef.current = true;
                 setLocalSubcategories(data);
-                persistOrder('categories', data.map((i) => i.id));
+                persistOrder(
+                  'categories',
+                  data.map((i) => i.id),
+                );
                 reorderCategories(data.map((i) => i.id));
               }}
               onPlaceholderIndexChange={() => void triggerHaptic('selection')}
@@ -587,7 +649,10 @@ export function CategoriesScreen({
               void triggerHaptic('light');
               didDragRef.current = true;
               setLocalTopLevel(data);
-              persistOrder('categories', data.map((i) => i.id));
+              persistOrder(
+                'categories',
+                data.map((i) => i.id),
+              );
               reorderCategories(data.map((i) => i.id));
             }}
             onPlaceholderIndexChange={() => void triggerHaptic('selection')}

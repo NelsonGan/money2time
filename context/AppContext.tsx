@@ -373,17 +373,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const reorderAccounts = useCallback((orderedIds: string[]) => {
     const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setAccounts((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+    setAccounts((prev) =>
+      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
+    );
   }, []);
 
   const reorderAccountGroups = useCallback((orderedIds: string[]) => {
     const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setAccountGroups((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+    setAccountGroups((prev) =>
+      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
+    );
   }, []);
 
   const reorderCategories = useCallback((orderedIds: string[]) => {
     const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setCategories((prev) => [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)));
+    setCategories((prev) =>
+      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
+    );
   }, []);
 
   useEffect(() => {
@@ -550,7 +556,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const resolveRelationNames = useCallback(
     (input: Partial<CreateTransactionInput>) => {
       const findAccount = (id?: string | null) =>
-        id ? accounts.find((a) => a.id === id)?.name ?? null : null;
+        id ? (accounts.find((a) => a.id === id)?.name ?? null) : null;
       const findCategory = (id?: string | null) => {
         if (!id) return { name: null, icon: null, parentName: null };
         const cat = categories.find((c) => c.id === id);
@@ -968,7 +974,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const switchToSimpleMode = useCallback(() => {
     runMutation(() => {
       // Create Simple Wallet if missing
-      let walletId = accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
+      let walletId =
+        accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
       if (!walletId) {
         const currentSettings = settingsRepository.get();
         accountsRepository.create({
@@ -1011,7 +1018,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [runMutation]);
 
   const deleteSimpleWalletAndTransactions = useCallback(() => {
-    const walletId = accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
+    const walletId =
+      accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
     if (!walletId) return;
     runMutation(() => {
       transactionsRepository.softDeleteByAccountId(walletId);

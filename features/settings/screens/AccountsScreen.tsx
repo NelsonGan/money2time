@@ -269,7 +269,9 @@ function AddAccountSheet({
                     }}
                     className={cn(
                       'h-11 w-11 rounded-full border items-center justify-center',
-                      icon === emoji ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
+                      icon === emoji
+                        ? 'bg-primary/15 border-primary/50'
+                        : 'bg-card border-border/40',
                     )}
                   >
                     <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
@@ -616,7 +618,15 @@ function PayCreditCardSheet({
 }
 
 // Module-level callbacks for Row — avoids hooks/closures inside renderItem
-let _acctThemeColors: { surface: string; surfaceMuted: string; textMuted: string; coral: string; text: string; error: string; errorSoft: string } | null = null;
+let _acctThemeColors: {
+  surface: string;
+  surfaceMuted: string;
+  textMuted: string;
+  coral: string;
+  text: string;
+  error: string;
+  errorSoft: string;
+} | null = null;
 let _acctEditingGroupId: string | null = null;
 let _acctEditingGroupName: string = '';
 let _acctOnEditingNameChange: ((v: string) => void) | null = null;
@@ -659,7 +669,12 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
               <Button size="sm" className="flex-1" onPress={() => _acctOnSaveGroup?.(item.id)}>
                 <Text>{I18n.t('common.save')}</Text>
               </Button>
-              <Button size="sm" variant="secondary" className="flex-1" onPress={() => _acctOnCancelEditGroup?.()}>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="flex-1"
+                onPress={() => _acctOnCancelEditGroup?.()}
+              >
                 <Text>{I18n.t('common.cancel')}</Text>
               </Button>
             </View>
@@ -678,7 +693,14 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnStartEditGroup?.(item);
               }}
               hitSlop={4}
-              style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' }}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 13,
+                backgroundColor: 'rgba(0,0,0,0.05)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
               <Pencil size={11} color={tc.textMuted} />
             </Pressable>
@@ -688,7 +710,14 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnDeleteGroup?.(item);
               }}
               hitSlop={4}
-              style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 13,
+                backgroundColor: 'rgba(255,0,0,0.06)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
               <Trash2 size={11} color={tc.coral} />
             </Pressable>
@@ -708,7 +737,10 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
   );
 }
 
-interface AccountMgmtAccountItem { id: string; account: Account }
+interface AccountMgmtAccountItem {
+  id: string;
+  account: Account;
+}
 
 function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMgmtAccountItem>) {
   const tc = _acctThemeColors!;
@@ -722,11 +754,19 @@ function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMg
           borderRadius: 14,
           borderWidth: 1,
           borderColor: isCredit
-            ? (isActive ? tc.coral : 'rgba(255,0,0,0.12)')
-            : (isActive ? tc.textMuted : 'rgba(0,0,0,0.08)'),
+            ? isActive
+              ? tc.coral
+              : 'rgba(255,0,0,0.12)'
+            : isActive
+              ? tc.textMuted
+              : 'rgba(0,0,0,0.08)',
           backgroundColor: isCredit
-            ? (isActive ? tc.errorSoft : 'rgba(255,0,0,0.03)')
-            : (isActive ? tc.surfaceMuted : tc.surface),
+            ? isActive
+              ? tc.errorSoft
+              : 'rgba(255,0,0,0.03)'
+            : isActive
+              ? tc.surfaceMuted
+              : tc.surface,
           paddingLeft: 10,
           paddingRight: 6,
           paddingVertical: 8,
@@ -746,11 +786,7 @@ function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMg
               {account.name}
             </Text>
           </View>
-          {isCredit && (
-            <Text style={{ fontSize: 11, color: tc.error }}>
-              {_acctCreditLabel}
-            </Text>
-          )}
+          {isCredit && <Text style={{ fontSize: 11, color: tc.error }}>{_acctCreditLabel}</Text>}
         </Pressable>
         <Pressable
           onLongPress={drag}
@@ -860,7 +896,14 @@ export function AccountsScreen({
       return;
     }
     onBack?.();
-  }, [activeAccountId, closeSelectedAccount, managementOnly, onBack, selectedAccount, selectedTransaction]);
+  }, [
+    activeAccountId,
+    closeSelectedAccount,
+    managementOnly,
+    onBack,
+    selectedAccount,
+    selectedTransaction,
+  ]);
   const selectedAccountTransactions = useMemo(
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
@@ -951,12 +994,7 @@ export function AccountsScreen({
       const next = previous.filter((id) => availableIds.has(id));
       return next.length === previous.length ? previous : next;
     });
-  }, [
-    activeAccountId,
-    managementOnly,
-    selectedAccountTransactions,
-    selectedTransactionIds.length,
-  ]);
+  }, [activeAccountId, managementOnly, selectedAccountTransactions, selectedTransactionIds.length]);
 
   useEffect(() => {
     if (isSelectionMode) {
@@ -995,13 +1033,7 @@ export function AccountsScreen({
       accountsListRef.current?.scrollToOffset({ offset: 0, animated: false });
     });
     return () => cancelAnimationFrame(frame);
-  }, [
-    isManagementGroupsView,
-    managementOnly,
-    scrollToTopToken,
-    activeAccountId,
-    selectedAccount,
-  ]);
+  }, [isManagementGroupsView, managementOnly, scrollToTopToken, activeAccountId, selectedAccount]);
 
   const balanceMap = useMemo(() => {
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
@@ -1115,12 +1147,18 @@ export function AccountsScreen({
     [accounts],
   );
   useEffect(() => {
-    if (didDragRef.current) { didDragRef.current = false; return; }
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
     setLocalAccountGroups(accountGroups);
   }, [accountGroups]);
 
   useEffect(() => {
-    if (didDragRef.current) { didDragRef.current = false; return; }
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
     setLocalAccountGroupSections(accountGroupSections);
   }, [accountGroupSections]);
 
@@ -1378,7 +1416,9 @@ export function AccountsScreen({
 
     const balance = balanceMap.get(account.id) ?? account.startingBalance;
     const txns = selectedAccountTransactions;
-    const payFromAccounts = accounts.filter((item) => item.id !== account.id && item.type !== 'credit');
+    const payFromAccounts = accounts.filter(
+      (item) => item.id !== account.id && item.type !== 'credit',
+    );
     const now = new Date();
     const statementDay = account.creditStatementDay ?? null;
     const dueDay = account.creditDueDay ?? null;
@@ -1401,311 +1441,313 @@ export function AccountsScreen({
       <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
         <SettingsPageLayout>
           <View className="flex-1">
-          <ActivityTransactionList
-            transactions={txns}
-            onTransactionPress={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('accounts.empty_transactions_title')}
-            emptyMessage={I18n.t('accounts.empty_transactions_message')}
-            contentPaddingBottom={SETTINGS_FORM_BOTTOM_PADDING}
-            contentPaddingHorizontal={SETTINGS_HORIZONTAL_PADDING}
-            contentPaddingTop={0}
-            disableItemAnimations
-            compactItems
-            scrollToTopRef={detailScrollToTopRef}
-            listHeaderComponent={
-              <View className="pb-2 gap-2">
-                <SettingsHeader
-                  className="px-0 pt-5 pb-2"
-                  onBack={closeSelectedAccount}
-                  title={I18n.t('accounts.title')}
-                  subtitleNode={
-                    <Text variant="friendly" tone="muted" numberOfLines={1}>
-                      {account.name}
-                    </Text>
-                  }
-                  rightAccessory={
-                    isSelectionMode ? undefined : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="h-8 px-3"
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setShowEditAccount(true);
-                        }}
-                      >
-                        <Text>{I18n.t('accounts.edit_account')}</Text>
-                      </Button>
-                    )
-                  }
-                />
-
-                {isSelectionMode ? (
-                  <View
-                    onLayout={handleSelectionOverlayPlaceholderLayout}
-                    style={{ height: ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT }}
+            <ActivityTransactionList
+              transactions={txns}
+              onTransactionPress={handleTransactionPress}
+              onTransactionLongPress={handleTransactionLongPress}
+              selectedTransactionIds={selectedTransactionIds}
+              selectionMode={isSelectionMode}
+              emptyTitle={I18n.t('accounts.empty_transactions_title')}
+              emptyMessage={I18n.t('accounts.empty_transactions_message')}
+              contentPaddingBottom={SETTINGS_FORM_BOTTOM_PADDING}
+              contentPaddingHorizontal={SETTINGS_HORIZONTAL_PADDING}
+              contentPaddingTop={0}
+              disableItemAnimations
+              compactItems
+              scrollToTopRef={detailScrollToTopRef}
+              listHeaderComponent={
+                <View className="pb-2 gap-2">
+                  <SettingsHeader
+                    className="px-0 pt-5 pb-2"
+                    onBack={closeSelectedAccount}
+                    title={I18n.t('accounts.title')}
+                    subtitleNode={
+                      <Text variant="friendly" tone="muted" numberOfLines={1}>
+                        {account.name}
+                      </Text>
+                    }
+                    rightAccessory={
+                      isSelectionMode ? undefined : (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 px-3"
+                          onPress={() => {
+                            void triggerHaptic('selection');
+                            setShowEditAccount(true);
+                          }}
+                        >
+                          <Text>{I18n.t('accounts.edit_account')}</Text>
+                        </Button>
+                      )
+                    }
                   />
-                ) : null}
 
-                <View className="gap-1.5 px-1 py-1">
-                  <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.balance')}
-                    </Text>
-                    <Text
-                      variant="friendly"
-                      className={balance >= 0 ? 'text-foreground' : 'text-destructive'}
-                    >
-                      {formatVisibleBalance(balance)}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.account_group')}
-                    </Text>
-                    <Text variant="friendly" numberOfLines={1} className="flex-1 text-right">
-                      {accountGroupLabel}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center justify-between gap-3 py-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.include_in_totals')}
-                    </Text>
-                    <Text
-                      variant="friendly"
-                      className={account.includeInTotals ? 'text-success' : 'text-muted-foreground'}
-                    >
-                      {includeInTotalsLabel}
-                    </Text>
-                  </View>
-                </View>
+                  {isSelectionMode ? (
+                    <View
+                      onLayout={handleSelectionOverlayPlaceholderLayout}
+                      style={{ height: ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT }}
+                    />
+                  ) : null}
 
-                {account.type === 'credit' ? (
-                  <View className="gap-2.5">
-                    <View className="rounded-[18px] border border-border/35 bg-card px-4 py-3">
+                  <View className="gap-1.5 px-1 py-1">
+                    <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
                       <Text variant="label" tone="muted">
-                        {I18n.t('accounts.billing')}
+                        {I18n.t('accounts.balance')}
                       </Text>
-                      <Text variant="caption" className="mt-1">
-                        {I18n.t('accounts.statement_due', {
-                          statementDay: statementDay ?? '-',
-                          dueDay: dueDay ?? '-',
-                        })}
+                      <Text
+                        variant="friendly"
+                        className={balance >= 0 ? 'text-foreground' : 'text-destructive'}
+                      >
+                        {formatVisibleBalance(balance)}
                       </Text>
-                      <Text variant="label" tone="muted" className="mt-1.5">
-                        {I18n.t('accounts.next_due', {
-                          date: nextDue
-                            ? nextDue.toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                              })
-                            : '-',
-                        })}
+                    </View>
+                    <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
+                      <Text variant="label" tone="muted">
+                        {I18n.t('accounts.account_group')}
                       </Text>
-                      <View className="mt-2.5 flex-row items-center gap-2">
-                        <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
-                          <Text variant="label" tone="muted">
-                            {I18n.t('accounts.payable')}
-                          </Text>
-                          <Text variant="caption" className="mt-0.5 text-destructive">
-                            {formatVisibleBalance(cyclePayable)}
-                          </Text>
-                        </View>
-                        <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
-                          <Text variant="label" tone="muted">
-                            {I18n.t('accounts.outstanding')}
-                          </Text>
-                          <Text variant="caption" className="mt-0.5 text-destructive">
-                            {formatVisibleBalance(outstanding)}
-                          </Text>
+                      <Text variant="friendly" numberOfLines={1} className="flex-1 text-right">
+                        {accountGroupLabel}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center justify-between gap-3 py-2">
+                      <Text variant="label" tone="muted">
+                        {I18n.t('accounts.include_in_totals')}
+                      </Text>
+                      <Text
+                        variant="friendly"
+                        className={
+                          account.includeInTotals ? 'text-success' : 'text-muted-foreground'
+                        }
+                      >
+                        {includeInTotalsLabel}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {account.type === 'credit' ? (
+                    <View className="gap-2.5">
+                      <View className="rounded-[18px] border border-border/35 bg-card px-4 py-3">
+                        <Text variant="label" tone="muted">
+                          {I18n.t('accounts.billing')}
+                        </Text>
+                        <Text variant="caption" className="mt-1">
+                          {I18n.t('accounts.statement_due', {
+                            statementDay: statementDay ?? '-',
+                            dueDay: dueDay ?? '-',
+                          })}
+                        </Text>
+                        <Text variant="label" tone="muted" className="mt-1.5">
+                          {I18n.t('accounts.next_due', {
+                            date: nextDue
+                              ? nextDue.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : '-',
+                          })}
+                        </Text>
+                        <View className="mt-2.5 flex-row items-center gap-2">
+                          <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
+                            <Text variant="label" tone="muted">
+                              {I18n.t('accounts.payable')}
+                            </Text>
+                            <Text variant="caption" className="mt-0.5 text-destructive">
+                              {formatVisibleBalance(cyclePayable)}
+                            </Text>
+                          </View>
+                          <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
+                            <Text variant="label" tone="muted">
+                              {I18n.t('accounts.outstanding')}
+                            </Text>
+                            <Text variant="caption" className="mt-0.5 text-destructive">
+                              {formatVisibleBalance(outstanding)}
+                            </Text>
+                          </View>
                         </View>
                       </View>
+                      <Button variant="secondary" onPress={() => setShowPayCard(true)}>
+                        <Text>{I18n.t('accounts.pay_this_card')}</Text>
+                      </Button>
                     </View>
-                    <Button variant="secondary" onPress={() => setShowPayCard(true)}>
-                      <Text>{I18n.t('accounts.pay_this_card')}</Text>
-                    </Button>
+                  ) : null}
+
+                  <Text variant="subheading">{I18n.t('nav.activity')}</Text>
+                </View>
+              }
+            />
+
+            {isSelectionMode ? (
+              <View
+                pointerEvents="box-none"
+                className="absolute inset-x-0 z-20"
+                style={{ top: selectionOverlayTop }}
+              >
+                <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+                  <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+                    <Pressable
+                      onPress={clearSelection}
+                      className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    >
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('common.cancel')}
+                      </Text>
+                    </Pressable>
+
+                    <Text variant="caption" className="text-foreground">
+                      {I18n.t('transactions.selection.selected_count', {
+                        count: selectedTransactionCount,
+                      })}
+                    </Text>
+
+                    <View className="flex-row items-center gap-2">
+                      <Pressable
+                        onPress={handleOpenBulkUpdate}
+                        className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                      >
+                        <Text variant="caption" className="text-primary">
+                          {I18n.t('transactions.selection.update')}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={handleDeleteSelectedTransactions}
+                        className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                      >
+                        <Text variant="caption" className="text-destructive">
+                          {I18n.t('common.delete')}
+                        </Text>
+                      </Pressable>
+                    </View>
                   </View>
-                ) : null}
-
-                <Text variant="subheading">{I18n.t('nav.activity')}</Text>
+                </View>
               </View>
+            ) : null}
+          </View>
+          <EditAccountSheet
+            visible={showEditAccount}
+            account={account}
+            currentBalance={balance}
+            currencySymbol={settings.currencySymbol}
+            accountGroups={accountGroups}
+            onClose={() => setShowEditAccount(false)}
+            onSave={(updates) =>
+              applyAccountSave({
+                account,
+                currentBalance: balance,
+                updates,
+                onComplete: () => setShowEditAccount(false),
+              })
             }
+            onDelete={() => {
+              deleteAccount(account.id);
+              setShowEditAccount(false);
+              closeSelectedAccount();
+            }}
           />
-
-          {isSelectionMode ? (
-            <View
-              pointerEvents="box-none"
-              className="absolute inset-x-0 z-20"
-              style={{ top: selectionOverlayTop }}
-            >
-              <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
-                <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+          <PayCreditCardSheet
+            visible={showPayCard}
+            onClose={() => setShowPayCard(false)}
+            fromAccounts={payFromAccounts}
+            accountGroups={accountGroups}
+            currencySymbol={settings.currencySymbol}
+            onSubmit={({ fromAccountId, amount, note }) => {
+              createTransaction({
+                type: 'transfer',
+                amount,
+                currency: settings.currencySymbol,
+                date: new Date().toISOString(),
+                fromAccountId,
+                toAccountId: account.id,
+                note,
+              });
+              setShowPayCard(false);
+            }}
+          />
+          <ThemeModal
+            visible={showBulkUpdate}
+            animationType="slide"
+            presentationStyle="pageSheet"
+            onRequestClose={handleCloseBulkUpdate}
+          >
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+              <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+                <View className="flex-1 pr-3">
+                  <Text variant="subheading">
+                    {I18n.t('transactions.selection.update_title', {
+                      count: selectedTransactionCount,
+                    })}
+                  </Text>
+                  <Text variant="friendly" tone="muted">
+                    {I18n.t('transactions.selection.update_subtitle')}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-2">
                   <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    onPress={handleCloseBulkUpdate}
+                    className="px-3 py-2 rounded-full bg-secondary/70"
                   >
                     <Text variant="caption" tone="muted">
                       {I18n.t('common.cancel')}
                     </Text>
                   </Pressable>
-
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('transactions.selection.selected_count', {
-                      count: selectedTransactionCount,
-                    })}
-                  </Text>
-
-                  <View className="flex-row items-center gap-2">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                  <Pressable
+                    onPress={handleApplyBulkUpdate}
+                    disabled={!hasBulkChanges}
+                    className={cn(
+                      'px-3 py-2 rounded-full',
+                      hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
                     >
-                      <Text variant="caption" className="text-primary">
-                        {I18n.t('transactions.selection.update')}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
-                    >
-                      <Text variant="caption" className="text-destructive">
-                        {I18n.t('common.delete')}
-                      </Text>
-                    </Pressable>
-                  </View>
+                      {I18n.t('common.save')}
+                    </Text>
+                  </Pressable>
                 </View>
               </View>
-            </View>
-          ) : null}
-        </View>
-          <EditAccountSheet
-          visible={showEditAccount}
-          account={account}
-          currentBalance={balance}
-          currencySymbol={settings.currencySymbol}
-          accountGroups={accountGroups}
-          onClose={() => setShowEditAccount(false)}
-          onSave={(updates) =>
-            applyAccountSave({
-              account,
-              currentBalance: balance,
-              updates,
-              onComplete: () => setShowEditAccount(false),
-            })
-          }
-          onDelete={() => {
-            deleteAccount(account.id);
-            setShowEditAccount(false);
-            closeSelectedAccount();
-          }}
-        />
-          <PayCreditCardSheet
-          visible={showPayCard}
-          onClose={() => setShowPayCard(false)}
-          fromAccounts={payFromAccounts}
-          accountGroups={accountGroups}
-          currencySymbol={settings.currencySymbol}
-          onSubmit={({ fromAccountId, amount, note }) => {
-            createTransaction({
-              type: 'transfer',
-              amount,
-              currency: settings.currencySymbol,
-              date: new Date().toISOString(),
-              fromAccountId,
-              toAccountId: account.id,
-              note,
-            });
-            setShowPayCard(false);
-          }}
-        />
-          <ThemeModal
-          visible={showBulkUpdate}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={handleCloseBulkUpdate}
-        >
-          <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-            <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
-              <View className="flex-1 pr-3">
-                <Text variant="subheading">
-                  {I18n.t('transactions.selection.update_title', {
-                    count: selectedTransactionCount,
-                  })}
-                </Text>
-                <Text variant="friendly" tone="muted">
-                  {I18n.t('transactions.selection.update_subtitle')}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-2">
-                <Pressable
-                  onPress={handleCloseBulkUpdate}
-                  className="px-3 py-2 rounded-full bg-secondary/70"
-                >
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('common.cancel')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={handleApplyBulkUpdate}
-                  disabled={!hasBulkChanges}
-                  className={cn(
-                    'px-3 py-2 rounded-full',
-                    hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                  )}
-                >
-                  <Text
-                    variant="caption"
-                    className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
-                  >
-                    {I18n.t('common.save')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
 
-            <ScrollView
-              className="flex-1"
-              contentContainerStyle={{
-                padding: 20,
-                paddingBottom: 34,
-                gap: 14,
-              }}
-            >
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.date')}
-                </Text>
-                <View
-                  className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                  style={{ height: 360 }}
-                >
-                  <DatePanel
-                    value={bulkDate}
-                    onSelect={(value) => {
-                      setBulkDate(value);
-                      setBulkDateTouched(true);
+              <ScrollView
+                className="flex-1"
+                contentContainerStyle={{
+                  padding: 20,
+                  paddingBottom: 34,
+                  gap: 14,
+                }}
+              >
+                <View className="gap-2.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.editor.date')}
+                  </Text>
+                  <View
+                    className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                    style={{ height: 360 }}
+                  >
+                    <DatePanel
+                      value={bulkDate}
+                      onSelect={(value) => {
+                        setBulkDate(value);
+                        setBulkDateTouched(true);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                <View className="gap-2.5">
+                  <Input
+                    label={I18n.t('transaction_detail.note')}
+                    placeholder={I18n.t('transactions.editor.optional')}
+                    value={bulkNote}
+                    onChangeText={(value) => {
+                      setBulkNote(value);
+                      setBulkNoteTouched(true);
                     }}
                   />
                 </View>
-              </View>
-
-              <View className="gap-2.5">
-                <Input
-                  label={I18n.t('transaction_detail.note')}
-                  placeholder={I18n.t('transactions.editor.optional')}
-                  value={bulkNote}
-                  onChangeText={(value) => {
-                    setBulkNote(value);
-                    setBulkNoteTouched(true);
-                  }}
-                />
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </ThemeModal>
+              </ScrollView>
+            </SafeAreaView>
+          </ThemeModal>
         </SettingsPageLayout>
       </EdgeSwipeBackContainer>
     );
@@ -1727,112 +1769,112 @@ export function AccountsScreen({
   return (
     <EdgeSwipeBackContainer onBack={isReordering ? undefined : edgeSwipeBackHandler}>
       <SettingsPageLayout>
-      {managementOnly ? (
-        <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
-          <SettingsHeader
-            className="px-0 pt-5 pb-1"
-            onBack={onBack}
-            title={I18n.t('accounts.title')}
-            subtitle={I18n.t('accounts.manage_accounts_subtitle')}
-            rightAccessory={
-              <Button
-                size="icon"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  if (isManagementGroupsView) {
-                    startCreateGroup();
-                  } else {
-                    setShowCreate(true);
-                  }
-                }}
-              >
-                <Plus size={18} color="#fff" />
-              </Button>
-            }
-          />
-          <SegmentedToggle
-            value={managementView}
-            onChange={handleManagementViewChange}
-            options={[
-              { value: 'accounts', label: I18n.t('accounts.title') },
-              { value: 'groups', label: I18n.t('accounts.groups') },
-            ]}
-          />
-          {isManagementGroupsView && showGroupComposer ? (
-            <View className="rounded-2xl border border-border/35 bg-card p-3 gap-2.5 mt-2">
-              <Input
-                label={I18n.t('accounts.create_group')}
-                value={newGroupName}
-                onChangeText={setNewGroupName}
-                placeholder={I18n.t('accounts.create_group_placeholder')}
-              />
-              <View className="flex-row items-center gap-2">
+        {managementOnly ? (
+          <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+            <SettingsHeader
+              className="px-0 pt-5 pb-1"
+              onBack={onBack}
+              title={I18n.t('accounts.title')}
+              subtitle={I18n.t('accounts.manage_accounts_subtitle')}
+              rightAccessory={
                 <Button
-                  size="sm"
-                  className="flex-1"
-                  onPress={handleCreateGroup}
-                  disabled={!canCreateGroup}
+                  size="icon"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    if (isManagementGroupsView) {
+                      startCreateGroup();
+                    } else {
+                      setShowCreate(true);
+                    }
+                  }}
                 >
-                  <Text>{I18n.t('accounts.create_group')}</Text>
+                  <Plus size={18} color="#fff" />
                 </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="flex-1"
-                  onPress={cancelCreateGroup}
-                >
-                  <Text>{I18n.t('common.cancel')}</Text>
-                </Button>
+              }
+            />
+            <SegmentedToggle
+              value={managementView}
+              onChange={handleManagementViewChange}
+              options={[
+                { value: 'accounts', label: I18n.t('accounts.title') },
+                { value: 'groups', label: I18n.t('accounts.groups') },
+              ]}
+            />
+            {isManagementGroupsView && showGroupComposer ? (
+              <View className="rounded-2xl border border-border/35 bg-card p-3 gap-2.5 mt-2">
+                <Input
+                  label={I18n.t('accounts.create_group')}
+                  value={newGroupName}
+                  onChangeText={setNewGroupName}
+                  placeholder={I18n.t('accounts.create_group_placeholder')}
+                />
+                <View className="flex-row items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onPress={handleCreateGroup}
+                    disabled={!canCreateGroup}
+                  >
+                    <Text>{I18n.t('accounts.create_group')}</Text>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="flex-1"
+                    onPress={cancelCreateGroup}
+                  >
+                    <Text>{I18n.t('common.cancel')}</Text>
+                  </Button>
+                </View>
               </View>
-            </View>
-          ) : null}
-          <View style={{ height: 8 }} />
-        </View>
-      ) : null}
+            ) : null}
+            <View style={{ height: 8 }} />
+          </View>
+        ) : null}
 
-      {isManagementGroupsView ? (
-        <>
-          {localAccountGroups.length === 0 ? (
-            <EmptyState
-              title={I18n.t('accounts.empty_groups_title')}
-              message={I18n.t('accounts.empty_groups_message')}
-              mascotMood="curious"
-            />
-          ) : (
-            <View style={{ flex: 1 }}>
-            <DraggableFlatList
-              data={localAccountGroups}
-              keyExtractor={(item: AccountGroup) => item.id}
-              renderItem={GroupRowItem}
-              extraData={`${editingGroupId}-${editingGroupName}`}
-              animationConfig={SNAP_CONFIG}
-              onDragBegin={() => {
-                setIsReordering(true);
-                void triggerHaptic('medium');
-              }}
-              onDragEnd={({ data }: { data: AccountGroup[] }) => {
-                setIsReordering(false);
-                void triggerHaptic('light');
-                didDragRef.current = true;
-                setLocalAccountGroups(data);
-                const ids = data.map((g) => g.id);
-                persistOrder('account_groups', ids);
-                reorderAccountGroups(ids);
-              }}
-              onPlaceholderIndexChange={() => void triggerHaptic('selection')}
-              autoscrollThreshold={80}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{
-                paddingTop: 6,
-                paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-                paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-              }}
-            />
-            </View>
-          )}
-        </>
-      ) : managementOnly ? (
+        {isManagementGroupsView ? (
+          <>
+            {localAccountGroups.length === 0 ? (
+              <EmptyState
+                title={I18n.t('accounts.empty_groups_title')}
+                message={I18n.t('accounts.empty_groups_message')}
+                mascotMood="curious"
+              />
+            ) : (
+              <View style={{ flex: 1 }}>
+                <DraggableFlatList
+                  data={localAccountGroups}
+                  keyExtractor={(item: AccountGroup) => item.id}
+                  renderItem={GroupRowItem}
+                  extraData={`${editingGroupId}-${editingGroupName}`}
+                  animationConfig={SNAP_CONFIG}
+                  onDragBegin={() => {
+                    setIsReordering(true);
+                    void triggerHaptic('medium');
+                  }}
+                  onDragEnd={({ data }: { data: AccountGroup[] }) => {
+                    setIsReordering(false);
+                    void triggerHaptic('light');
+                    didDragRef.current = true;
+                    setLocalAccountGroups(data);
+                    const ids = data.map((g) => g.id);
+                    persistOrder('account_groups', ids);
+                    reorderAccountGroups(ids);
+                  }}
+                  onPlaceholderIndexChange={() => void triggerHaptic('selection')}
+                  autoscrollThreshold={80}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{
+                    paddingTop: 6,
+                    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+                    paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+                  }}
+                />
+              </View>
+            )}
+          </>
+        ) : managementOnly ? (
           <NestableScrollContainer
             style={{ flex: 1 }}
             contentContainerStyle={{
@@ -1843,8 +1885,17 @@ export function AccountsScreen({
           >
             {localAccountGroupSections.map((section, sectionIndex) => (
               <View key={section.id}>
-                <View style={{ paddingLeft: 4, paddingRight: 12, paddingTop: sectionIndex === 0 ? 6 : 12, paddingBottom: 4 }}>
-                  <Text style={{ fontSize: 11, color: themeColors.textMuted }}>{section.label}</Text>
+                <View
+                  style={{
+                    paddingLeft: 4,
+                    paddingRight: 12,
+                    paddingTop: sectionIndex === 0 ? 6 : 12,
+                    paddingBottom: 4,
+                  }}
+                >
+                  <Text style={{ fontSize: 11, color: themeColors.textMuted }}>
+                    {section.label}
+                  </Text>
                 </View>
                 <NestableDraggableFlatList
                   data={section.accounts.map((acc) => ({ id: acc.id, account: acc }))}
@@ -1874,150 +1925,151 @@ export function AccountsScreen({
               </View>
             ))}
           </NestableScrollContainer>
-      ) : (
-        <FlatList
-          ref={accountsListRef}
-          data={groupedAccounts}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
-          ListHeaderComponent={
-            <View className="pb-2 gap-2">
-              <SettingsHeader
-                className="px-0 pt-5 pb-1"
-                onBack={onBack}
-                title={I18n.t('accounts.title')}
-                subtitle={I18n.t('accounts.manage_balances')}
-                rightAccessory={renderBalanceToggleButton()}
-              />
-            </View>
-          }
-          renderItem={({ item, index }) => {
-            if (item.kind === 'group') {
-              return (
-                <View
-                  className={cn(
-                    'pl-1 pr-3 pb-1 flex-row items-center justify-between',
-                    index === 0 ? 'pt-1.5' : 'pt-5',
-                  )}
-                >
-                  <Text variant="label" tone="muted">
-                    {item.label}
-                  </Text>
-                  {index === 0 ? (
-                    <Text
-                      variant="caption"
-                      className={total >= 0 ? 'text-success' : 'text-destructive'}
-                    >
-                      {formatVisibleBalance(total)}
-                    </Text>
-                  ) : null}
-                </View>
-              );
+        ) : (
+          <FlatList
+            ref={accountsListRef}
+            data={groupedAccounts}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{
+              paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+              paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+            }}
+            ListHeaderComponent={
+              <View className="pb-2 gap-2">
+                <SettingsHeader
+                  className="px-0 pt-5 pb-1"
+                  onBack={onBack}
+                  title={I18n.t('accounts.title')}
+                  subtitle={I18n.t('accounts.manage_balances')}
+                  rightAccessory={renderBalanceToggleButton()}
+                />
+              </View>
             }
-            const account = accountById.get(item.accountId);
-            if (!account) return null;
-            const balance = balanceMap.get(account.id) ?? account.startingBalance;
-            const creditSummary =
-              account.type === 'credit'
-                ? (creditSummaryByAccountId.get(account.id) ?? {
-                    payable: 0,
-                    outstanding: Math.max(0, balance),
-                  })
-                : null;
-            return (
-              <Animated.View entering={FadeIn.duration(220)}>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    if (onOpenAccount) {
-                      onOpenAccount(account.id);
-                      return;
-                    }
-                    setSelectedAccountId(account.id);
-                  }}
-                  className={cn(
-                    'mb-1 rounded-2xl border px-3 py-2.5 flex-row items-center gap-2',
-                    account.type === 'credit'
-                      ? 'border-destructive/30 bg-destructive/7'
-                      : 'border-border/35 bg-card',
-                  )}
-                >
-                  <View className="flex-1">
-                    <Text variant="caption" className="text-foreground" numberOfLines={1}>
-                      {account.name}
+            renderItem={({ item, index }) => {
+              if (item.kind === 'group') {
+                return (
+                  <View
+                    className={cn(
+                      'pl-1 pr-3 pb-1 flex-row items-center justify-between',
+                      index === 0 ? 'pt-1.5' : 'pt-5',
+                    )}
+                  >
+                    <Text variant="label" tone="muted">
+                      {item.label}
                     </Text>
-                  </View>
-                  {account.type === 'credit' && creditSummary ? (
-                    <View className="items-end">
-                      <Text variant="label" className="text-destructive">
-                        {I18n.t('accounts.pay')} {formatVisibleBalance(creditSummary.payable)}
+                    {index === 0 ? (
+                      <Text
+                        variant="caption"
+                        className={total >= 0 ? 'text-success' : 'text-destructive'}
+                      >
+                        {formatVisibleBalance(total)}
                       </Text>
-                      <Text variant="label" tone="muted">
-                        {I18n.t('accounts.out')} {formatVisibleBalance(creditSummary.outstanding)}
+                    ) : null}
+                  </View>
+                );
+              }
+              const account = accountById.get(item.accountId);
+              if (!account) return null;
+              const balance = balanceMap.get(account.id) ?? account.startingBalance;
+              const creditSummary =
+                account.type === 'credit'
+                  ? (creditSummaryByAccountId.get(account.id) ?? {
+                      payable: 0,
+                      outstanding: Math.max(0, balance),
+                    })
+                  : null;
+              return (
+                <Animated.View entering={FadeIn.duration(220)}>
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      if (onOpenAccount) {
+                        onOpenAccount(account.id);
+                        return;
+                      }
+                      setSelectedAccountId(account.id);
+                    }}
+                    className={cn(
+                      'mb-1 rounded-2xl border px-3 py-2.5 flex-row items-center gap-2',
+                      account.type === 'credit'
+                        ? 'border-destructive/30 bg-destructive/7'
+                        : 'border-border/35 bg-card',
+                    )}
+                  >
+                    <View className="flex-1">
+                      <Text variant="caption" className="text-foreground" numberOfLines={1}>
+                        {account.name}
                       </Text>
                     </View>
-                  ) : (
-                    <Text
-                      variant="caption"
-                      className={balance >= 0 ? 'text-success' : 'text-destructive'}
-                    >
-                      {formatVisibleBalance(balance)}
-                    </Text>
-                  )}
-                </Pressable>
-              </Animated.View>
-            );
-          }}
-        />
-      )}
+                    {account.type === 'credit' && creditSummary ? (
+                      <View className="items-end">
+                        <Text variant="label" className="text-destructive">
+                          {I18n.t('accounts.pay')} {formatVisibleBalance(creditSummary.payable)}
+                        </Text>
+                        <Text variant="label" tone="muted">
+                          {I18n.t('accounts.out')} {formatVisibleBalance(creditSummary.outstanding)}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text
+                        variant="caption"
+                        className={balance >= 0 ? 'text-success' : 'text-destructive'}
+                      >
+                        {formatVisibleBalance(balance)}
+                      </Text>
+                    )}
+                  </Pressable>
+                </Animated.View>
+              );
+            }}
+          />
+        )}
 
-      {managementOnly && selectedAccount ? (
-        <EditAccountSheet
-          visible={showEditAccount}
-          account={selectedAccount}
-          currentBalance={balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance}
-          currencySymbol={settings.currencySymbol}
-          accountGroups={accountGroups}
-          onClose={() => {
-            setShowEditAccount(false);
-            setSelectedAccountId(null);
-          }}
-          onSave={(updates) => {
-            applyAccountSave({
-              account: selectedAccount,
-              currentBalance: balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance,
-              updates,
-              onComplete: () => {
-                setShowEditAccount(false);
-                setSelectedAccountId(null);
-              },
-            });
-          }}
-          onDelete={() => {
-            deleteAccount(selectedAccount.id);
-            setShowEditAccount(false);
-            setSelectedAccountId(null);
-          }}
-        />
-      ) : null}
+        {managementOnly && selectedAccount ? (
+          <EditAccountSheet
+            visible={showEditAccount}
+            account={selectedAccount}
+            currentBalance={balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance}
+            currencySymbol={settings.currencySymbol}
+            accountGroups={accountGroups}
+            onClose={() => {
+              setShowEditAccount(false);
+              setSelectedAccountId(null);
+            }}
+            onSave={(updates) => {
+              applyAccountSave({
+                account: selectedAccount,
+                currentBalance:
+                  balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance,
+                updates,
+                onComplete: () => {
+                  setShowEditAccount(false);
+                  setSelectedAccountId(null);
+                },
+              });
+            }}
+            onDelete={() => {
+              deleteAccount(selectedAccount.id);
+              setShowEditAccount(false);
+              setSelectedAccountId(null);
+            }}
+          />
+        ) : null}
 
         <AddAccountSheet
-        visible={showCreate}
-        onClose={() => setShowCreate(false)}
-        accountGroups={accountGroups}
-        currencySymbol={settings.currencySymbol}
-        onCreate={(input) => {
-          createAccount({
-            ...input,
-            currency: DEFAULT_CURRENCY,
-            includeInTotals: true,
-          });
-          setShowCreate(false);
-        }}
-      />
+          visible={showCreate}
+          onClose={() => setShowCreate(false)}
+          accountGroups={accountGroups}
+          currencySymbol={settings.currencySymbol}
+          onCreate={(input) => {
+            createAccount({
+              ...input,
+              currency: DEFAULT_CURRENCY,
+              includeInTotals: true,
+            });
+            setShowCreate(false);
+          }}
+        />
       </SettingsPageLayout>
     </EdgeSwipeBackContainer>
   );

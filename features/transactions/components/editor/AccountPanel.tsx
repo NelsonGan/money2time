@@ -109,9 +109,7 @@ export function AccountPanel(props: AccountPanelProps) {
   useEffect(() => {
     const target = isMultiSelect ? (selectedIds?.[0] ?? null) : selectedId;
     if (!target) return;
-    const ownerGroup = grouped.find((g) =>
-      g.accounts.some((a) => a.id === target),
-    );
+    const ownerGroup = grouped.find((g) => g.accounts.some((a) => a.id === target));
     if (ownerGroup) setExpandedGroupKey(ownerGroup.key);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -202,9 +200,7 @@ export function AccountPanel(props: AccountPanelProps) {
               {/* Group tiles row */}
               <View className="flex-row gap-2">
                 {row.map((group) => {
-                  const hasSelectedAccount = group.accounts.some((a) =>
-                    isAccountSelected(a.id),
-                  );
+                  const hasSelectedAccount = group.accounts.some((a) => isAccountSelected(a.id));
                   const isExpanded = expandedGroupKey === group.key;
 
                   return (
@@ -212,9 +208,7 @@ export function AccountPanel(props: AccountPanelProps) {
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('selection');
-                          setExpandedGroupKey((prev) =>
-                            prev === group.key ? null : group.key,
-                          );
+                          setExpandedGroupKey((prev) => (prev === group.key ? null : group.key));
                         }}
                         className={cn(
                           'rounded-xl border px-2.5 py-2.5 flex-row items-center',
@@ -230,9 +224,7 @@ export function AccountPanel(props: AccountPanelProps) {
                           numberOfLines={1}
                           className={cn(
                             'flex-1',
-                            hasSelectedAccount || isExpanded
-                              ? 'text-primary'
-                              : 'text-foreground',
+                            hasSelectedAccount || isExpanded ? 'text-primary' : 'text-foreground',
                           )}
                         >
                           {group.label}

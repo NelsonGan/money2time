@@ -391,7 +391,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           }}
         />
       </ThemeModal>
-
     </SafeAreaView>
   );
 }

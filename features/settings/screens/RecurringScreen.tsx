@@ -166,9 +166,12 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
     onOpenEditor();
   }, [onOpenEditor]);
 
-  const openEdit = useCallback((rule: RecurringTransactionRule) => {
-    onOpenEditor(rule.id);
-  }, [onOpenEditor]);
+  const openEdit = useCallback(
+    (rule: RecurringTransactionRule) => {
+      onOpenEditor(rule.id);
+    },
+    [onOpenEditor],
+  );
   const handleDeleteRule = useCallback(
     (id: string) => {
       deleteRecurringRule(id);

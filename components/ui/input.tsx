@@ -1,8 +1,10 @@
 import * as React from 'react';
-import { TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
-import { cn } from '~/utils';
+import { TextInput, View } from 'react-native';
+
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { cn } from '~/utils';
+
 import { Text } from './text';
 
 interface InputProps extends TextInputProps {
