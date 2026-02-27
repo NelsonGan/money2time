@@ -1,6 +1,7 @@
 export type DisplayMode = 'money' | 'time';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
+export type UserMode = 'power' | 'simple';
 
 export type AccountType = 'debit' | 'credit';
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
@@ -39,6 +40,7 @@ export interface UserSettings {
   displayMode: DisplayMode;
   themeMode: ThemeMode;
   onboardingCompleted: boolean;
+  userMode: UserMode;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

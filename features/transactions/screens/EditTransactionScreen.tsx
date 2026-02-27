@@ -11,9 +11,11 @@ import { I18n } from '~/lib/i18n';
 interface EditTransactionScreenProps {
   transaction: TransactionWithRelations;
   onClose: () => void;
+  isSimpleMode?: boolean;
+  simpleWalletId?: string | null;
 }
 
-export function EditTransactionScreen({ transaction, onClose }: EditTransactionScreenProps) {
+export function EditTransactionScreen({ transaction, onClose, isSimpleMode, simpleWalletId }: EditTransactionScreenProps) {
   const { updateTransaction, deleteTransaction } = useApp();
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&
@@ -50,6 +52,8 @@ export function EditTransactionScreen({ transaction, onClose }: EditTransactionS
       mode="edit"
       onClose={onClose}
       onDelete={handleDelete}
+      hideAccountSelector={isSimpleMode && !isBalanceAdjustment}
+      initialAccountId={isSimpleMode && simpleWalletId ? simpleWalletId : undefined}
       onSubmit={(input) => {
         if (isLegacyBalanceAdjustmentTransfer) {
           updateTransaction(transaction.id, {
@@ -63,7 +67,13 @@ export function EditTransactionScreen({ transaction, onClose }: EditTransactionS
         }
         updateTransaction(transaction.id, input);
       }}
-      restrictTypeOptions={isBalanceAdjustment ? ['balance_adjustment'] : undefined}
+      restrictTypeOptions={
+        isBalanceAdjustment
+          ? ['balance_adjustment']
+          : isSimpleMode
+            ? ['expense', 'income']
+            : undefined
+      }
       subtitleOverride={
         isBalanceAdjustment
           ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')

@@ -6,6 +6,7 @@ import type {
   RecurringTransactionRule,
   ThemeMode,
   Transaction,
+  UserMode,
   UserSettings,
 } from '~/types';
 import type {
@@ -71,6 +72,10 @@ function asDisplayMode(value: string): UserSettings['displayMode'] {
 function asThemeMode(value: string | null | undefined): ThemeMode {
   if (value === 'light' || value === 'dark') return value;
   return 'system';
+}
+
+function asUserMode(value: string | null | undefined): UserMode {
+  return value === 'simple' ? 'simple' : 'power';
 }
 
 function asWageType(value: string): MonthlyWageSettings['wageType'] {
@@ -191,6 +196,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     displayMode: asDisplayMode(row.displayMode),
     themeMode: asThemeMode(row.themeMode),
     onboardingCompleted: row.onboardingCompleted,
+    userMode: asUserMode(row.userMode),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
