@@ -1,17 +1,17 @@
-import { Trash2 } from 'lucide-react-native';
+import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Pressable, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   Button,
-  Card,
-  CardContent,
   SelectField,
-  SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
+  SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  ThemeModal,
 } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
@@ -19,7 +19,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, WageConfig } from '~/types';
-import { cn } from '~/utils';
 import { monthKeyFromDateLocal, normalizeMonthKey } from '~/utils/formatters';
 
 interface HourlyValueScreenProps {
@@ -42,11 +41,8 @@ const MONTH_OPTIONS = [
   { value: '12', label: 'December' },
 ];
 
-type EffectiveRateMode = 'exact' | 'before-earliest' | 'between' | 'after-latest' | 'fallback';
-
 function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, MonthlyWageSettings>();
-
   history.forEach((item) => {
     const normalizedMonth = normalizeMonthKey(item.month);
     const normalizedItem =
@@ -56,7 +52,6 @@ function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
       byMonth.set(normalizedMonth, normalizedItem);
     }
   });
-
   return Array.from(byMonth.values());
 }
 
@@ -69,158 +64,56 @@ function formatMonthLabel(monthKey: string) {
   return `${monthLabel} ${year}`;
 }
 
-function getEffectiveRateInfo(
-  history: MonthlyWageSettings[],
-  targetMonth: string,
-  fallback: MonthlyWageSettings | null,
-): {
-  effectiveWage: MonthlyWageSettings | null;
-  sourceMonth: string | null;
-  hasExactMatch: boolean;
-  mode: EffectiveRateMode;
-} {
-  const normalizedTarget = normalizeMonthKey(targetMonth);
-
-  if (history.length === 0) {
-    return {
-      effectiveWage: fallback,
-      sourceMonth: fallback?.month ?? null,
-      hasExactMatch: false,
-      mode: 'fallback',
-    };
-  }
-
-  const ordered = [...history].sort((a, b) => a.month.localeCompare(b.month));
-  const exactMatch = ordered.find((item) => item.month === normalizedTarget) ?? null;
-  const earliest = ordered[0];
-  const latest = ordered[ordered.length - 1];
-
-  let source = earliest ?? null;
-  for (let index = 0; index < ordered.length; index += 1) {
-    const entry = ordered[index];
-    if (!entry) continue;
-    if (entry.month > normalizedTarget) break;
-    source = entry;
-  }
-
-  if (exactMatch) {
-    return {
-      effectiveWage: exactMatch,
-      sourceMonth: exactMatch.month,
-      hasExactMatch: true,
-      mode: 'exact',
-    };
-  }
-
-  const mode: EffectiveRateMode =
-    normalizedTarget < (earliest?.month ?? '')
-      ? 'before-earliest'
-      : normalizedTarget > (latest?.month ?? '')
-        ? 'after-latest'
-        : 'between';
-
-  return {
-    effectiveWage: source ?? fallback,
-    sourceMonth: source?.month ?? fallback?.month ?? null,
-    hasExactMatch: false,
-    mode,
-  };
-}
-
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
-  const { settings, currentMonthWage, monthlyWages, deleteWageConfigForMonth } = useApp();
+  const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
   const themeColors = useThemeColors();
-  const [selectedYear, setSelectedYear] = useState<string>(() => String(new Date().getFullYear()));
-  const [selectedMonth, setSelectedMonth] = useState<string>(() =>
-    String(new Date().getMonth() + 1).padStart(2, '0'),
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
+  const [pickerMonth, setPickerMonth] = useState(
+    () => String(new Date().getMonth() + 1).padStart(2, '0'),
   );
 
-  const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
-  const selectedWageMonth = normalizeMonthKey(`${selectedYear}-${selectedMonth}`);
-  const selectedMonthLabel = useMemo(
-    () => formatMonthLabel(selectedWageMonth),
-    [selectedWageMonth],
+  const currentMonthKey = useMemo(() => monthKeyFromDateLocal(new Date()), []);
+
+  const normalizedHistory = useMemo(
+    () => normalizeAndDedupeHistory(monthlyWages),
+    [monthlyWages],
   );
 
-  const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
+  const historyDesc = useMemo(
+    () => [...normalizedHistory].sort((a, b) => b.month.localeCompare(a.month)),
+    [normalizedHistory],
+  );
 
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const fromRange = Array.from({ length: 9 }, (_, i) => String(currentYear - 5 + i));
     const fromData = Array.from(new Set(normalizedHistory.map((item) => item.month.slice(0, 4))));
-    return Array.from(new Set([...fromRange, ...fromData, selectedYear])).sort(
+    return Array.from(new Set([...fromRange, ...fromData, pickerYear])).sort(
       (a, b) => Number(b) - Number(a),
     );
-  }, [normalizedHistory, selectedYear]);
+  }, [normalizedHistory, pickerYear]);
 
-  const historyAsc = useMemo(
-    () => [...normalizedHistory].sort((a, b) => a.month.localeCompare(b.month)),
-    [normalizedHistory],
-  );
-  const historyForDisplay = useMemo(
-    () => [...normalizedHistory].sort((a, b) => b.month.localeCompare(a.month)),
-    [normalizedHistory],
-  );
+  const handleEditEntry = (item: MonthlyWageSettings) => {
+    void triggerHaptic('selection');
+    onOpenWageCalculator({
+      monthKey: item.month,
+      initialConfig: {
+        wageType: item.wageType,
+        wageAmount: item.wageAmount,
+        hoursWorkedPerWeek: item.hoursWorkedPerWeek,
+        workdaysPerWeek: item.workdaysPerWeek,
+        commuteMinutesPerWorkday: item.commuteMinutesPerWorkday,
+      },
+    });
+  };
 
-  const effectiveRateInfo = useMemo(
-    () => getEffectiveRateInfo(historyAsc, selectedWageMonth, currentMonthWage),
-    [currentMonthWage, historyAsc, selectedWageMonth],
-  );
-
-  const targetWage = effectiveRateInfo.effectiveWage;
-  const sourceMonth = effectiveRateInfo.sourceMonth;
-  const sourceMonthLabel = useMemo(
-    () => (sourceMonth ? formatMonthLabel(sourceMonth) : selectedMonthLabel),
-    [selectedMonthLabel, sourceMonth],
-  );
-
-  const effectiveReason = useMemo(() => {
-    switch (effectiveRateInfo.mode) {
-      case 'exact':
-        return I18n.t('settings.hourly_effective_reason_exact', { month: selectedMonthLabel });
-      case 'before-earliest':
-        return I18n.t('settings.hourly_effective_reason_before_earliest', {
-          month: selectedMonthLabel,
-          sourceMonth: sourceMonthLabel,
-        });
-      case 'after-latest':
-        return I18n.t('settings.hourly_effective_reason_after_latest', {
-          month: selectedMonthLabel,
-          sourceMonth: sourceMonthLabel,
-        });
-      case 'between':
-        return I18n.t('settings.hourly_effective_reason_between', {
-          month: selectedMonthLabel,
-          sourceMonth: sourceMonthLabel,
-        });
-      case 'fallback':
-      default:
-        return I18n.t('settings.hourly_effective_reason_fallback');
-    }
-  }, [effectiveRateInfo.mode, selectedMonthLabel, sourceMonthLabel]);
-
-  const prefillConfig = targetWage
-    ? {
-        wageType: targetWage.wageType,
-        wageAmount: targetWage.wageAmount,
-        hoursWorkedPerWeek: targetWage.hoursWorkedPerWeek,
-        workdaysPerWeek: targetWage.workdaysPerWeek,
-        commuteMinutesPerWorkday: targetWage.commuteMinutesPerWorkday,
-      }
-    : DEFAULT_WAGE_CONFIG;
-
-  const ctaLabel = effectiveRateInfo.hasExactMatch
-    ? I18n.t('settings.hourly_cta_update', { month: selectedMonthLabel })
-    : I18n.t('settings.hourly_cta_add', { month: selectedMonthLabel });
-
-  const confirmDeleteMonth = (month: string) => {
-    const normalizedMonth = normalizeMonthKey(month);
-    if (normalizedMonth === currentMonth) return;
-
+  const handleDeleteEntry = (item: MonthlyWageSettings) => {
     void triggerHaptic('warning');
     Alert.alert(
       I18n.t('settings.hourly_delete_title'),
-      I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(normalizedMonth) }),
+      I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month) }),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -228,11 +121,35 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           style: 'destructive',
           onPress: () => {
             void triggerHaptic('warning');
-            deleteWageConfigForMonth(normalizedMonth);
+            deleteWageConfigForMonth(item.month);
           },
         },
       ],
     );
+  };
+
+  const handleAddConfirm = () => {
+    const monthKey = normalizeMonthKey(`${pickerYear}-${pickerMonth}`);
+    const existing = normalizedHistory.find((item) => item.month === monthKey);
+    if (existing) {
+      Alert.alert(
+        I18n.t('settings.hourly_month_exists_title', { month: formatMonthLabel(monthKey) }),
+        I18n.t('settings.hourly_month_exists_message'),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.edit'),
+            onPress: () => {
+              setShowAddModal(false);
+              handleEditEntry(existing);
+            },
+          },
+        ],
+      );
+      return;
+    }
+    setShowAddModal(false);
+    onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
   };
 
   return (
@@ -243,221 +160,122 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           onBack={onClose}
           title={I18n.t('settings.hourly_value')}
           subtitle={I18n.t('settings.manage_formulas')}
+          rightAccessory={
+            <Button
+              size="icon"
+              onPress={() => {
+                void triggerHaptic('selection');
+                setShowAddModal(true);
+              }}
+            >
+              <Plus size={18} color="#fff" />
+            </Button>
+          }
         />
       </View>
-      <ScrollView
-        className="flex-1"
+
+      <FlatList
+        data={historyDesc}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{
           paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
         }}
-      >
-        <Card>
-          <CardContent className="py-5 gap-4">
-            <Text variant="label" tone="muted">
-              {I18n.t('settings.hourly_selected_month_title')}
+        renderItem={({ item }) => {
+          const isCurrentMonth = item.month === currentMonthKey;
+          return (
+            <View
+              className={`flex-row items-center gap-2.5 mb-2 rounded-2xl border px-3.5 py-3 ${
+                isCurrentMonth
+                  ? 'border-success/35 bg-success/8'
+                  : 'border-border/35 bg-card'
+              }`}
+            >
+              <View className="flex-1 gap-0.5">
+                <Text variant="caption">{formatMonthLabel(item.month)}</Text>
+                {isCurrentMonth ? (
+                  <Text variant="label" className="text-success">
+                    {I18n.t('settings.hourly_badge_current')}
+                  </Text>
+                ) : null}
+                <Text variant="subheading" className="text-primary mt-1">
+                  {settings.currencySymbol}
+                  {item.trueHourlyRate.toFixed(2)}/hr
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => handleEditEntry(item)}
+                className="h-9 w-9 rounded-full items-center justify-center border border-border/40 bg-secondary"
+              >
+                <Pencil size={14} color={themeColors.textMuted} />
+              </Pressable>
+              <Pressable
+                onPress={() => handleDeleteEntry(item)}
+                className="h-9 w-9 rounded-full items-center justify-center border border-destructive/20 bg-destructive/10"
+              >
+                <Trash2 size={14} color={themeColors.coral} />
+              </Pressable>
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <View className="items-center py-12">
+            <Text variant="friendly" tone="muted">
+              {I18n.t('settings.hourly_history_empty')}
             </Text>
+          </View>
+        }
+      />
 
+      <ThemeModal
+        visible={showAddModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+            <Text variant="subheading">{I18n.t('settings.hourly_add_title')}</Text>
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setShowAddModal(false);
+              }}
+              className="px-3 py-2 rounded-full bg-secondary"
+            >
+              <Text variant="caption" tone="muted">
+                {I18n.t('common.cancel')}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View className="px-5 gap-3">
             <View className="flex-row gap-2.5">
               <View className="flex-1">
                 <SelectField
                   label={I18n.t('settings.year')}
-                  value={selectedYear}
-                  onChange={setSelectedYear}
+                  value={pickerYear}
+                  onChange={setPickerYear}
                   options={yearOptions.map((year) => ({ value: year, label: year }))}
                 />
               </View>
               <View className="flex-1">
                 <SelectField
                   label={I18n.t('settings.month')}
-                  value={selectedMonth}
-                  onChange={setSelectedMonth}
+                  value={pickerMonth}
+                  onChange={setPickerMonth}
                   options={MONTH_OPTIONS}
                 />
               </View>
             </View>
-
-            <View className="rounded-[20px] border border-border/35 bg-secondary/35 px-4 py-3">
-              <Text variant="label" tone="muted">
-                {I18n.t('settings.hourly_selected_month')}
-              </Text>
-              <Text variant="subheading" className="mt-1">
-                {selectedMonthLabel}
-              </Text>
-              {selectedWageMonth === currentMonth ? (
-                <Text variant="caption" tone="muted" className="mt-1">
-                  {I18n.t('settings.hourly_selected_month_current_note')}
-                </Text>
-              ) : null}
+            <View className="mt-4">
+              <Button onPress={handleAddConfirm}>
+                <Text>{I18n.t('settings.hourly_add_confirm')}</Text>
+              </Button>
             </View>
-
-            <Button
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenWageCalculator({
-                  monthKey: selectedWageMonth,
-                  initialConfig: prefillConfig,
-                });
-              }}
-            >
-              <Text>{ctaLabel}</Text>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-4">
-          <CardContent className="py-5 gap-3">
-            <Text variant="label" tone="muted">
-              {I18n.t('settings.hourly_effective_panel_title')}
-            </Text>
-            <Text variant="subheading" className="text-primary">
-              {settings.currencySymbol}
-              {(targetWage?.trueHourlyRate ?? 0).toFixed(2)}/hr
-            </Text>
-            <View className="rounded-[18px] border border-primary/20 bg-primary/8 px-4 py-3 gap-2">
-              <EffectiveRateRow
-                label={I18n.t('settings.hourly_effective_source_month')}
-                value={sourceMonthLabel}
-              />
-              <Text variant="caption" tone="muted">
-                {effectiveReason}
-              </Text>
-              <Text variant="label" tone="muted">
-                {I18n.t('settings.hourly_rule_short')}
-              </Text>
-            </View>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-4">
-          <CardContent className="py-5 gap-2.5">
-            <Text variant="label" tone="muted">
-              {I18n.t('settings.history')}
-            </Text>
-
-            {historyForDisplay.length === 0 ? (
-              <Text variant="friendly" tone="muted">
-                {I18n.t('settings.hourly_history_empty')}
-              </Text>
-            ) : null}
-
-            {historyForDisplay.map((item) => {
-              const isSelectedMonth = item.month === selectedWageMonth;
-              const isCurrentMonth = item.month === currentMonth;
-              const isSourceMonth = item.month === sourceMonth;
-
-              const cardClassName = cn(
-                'rounded-[20px] border px-4 py-3 gap-3',
-                isSelectedMonth
-                  ? 'border-primary/40 bg-primary/10'
-                  : isSourceMonth
-                    ? 'border-accent/45 bg-accent/12'
-                    : isCurrentMonth
-                      ? 'border-success/35 bg-success/10'
-                      : 'border-border/35 bg-secondary/35',
-              );
-
-              return (
-                <View key={item.id} className={cardClassName}>
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setSelectedYear(item.month.slice(0, 4));
-                      setSelectedMonth(item.month.slice(5, 7));
-                    }}
-                    className="flex-row items-start justify-between gap-3"
-                  >
-                    <View className="flex-1 gap-1.5">
-                      <Text variant="caption">{formatMonthLabel(item.month)}</Text>
-                      <View className="flex-row flex-wrap gap-1.5 pt-1">
-                        {isSelectedMonth ? (
-                          <HistoryBadge
-                            label={I18n.t('settings.hourly_badge_selected')}
-                            tone="primary"
-                          />
-                        ) : null}
-                        {isCurrentMonth ? (
-                          <HistoryBadge
-                            label={I18n.t('settings.hourly_badge_current')}
-                            tone="success"
-                          />
-                        ) : null}
-                        {isSourceMonth ? (
-                          <HistoryBadge
-                            label={I18n.t('settings.hourly_badge_source')}
-                            tone="accent"
-                          />
-                        ) : null}
-                      </View>
-                    </View>
-                    <Text variant="subheading" className="text-primary">
-                      {settings.currencySymbol}
-                      {item.trueHourlyRate.toFixed(2)}/hr
-                    </Text>
-                  </Pressable>
-
-                  {isCurrentMonth ? (
-                    <Text variant="label" tone="muted">
-                      {I18n.t('settings.hourly_current_month_locked')}
-                    </Text>
-                  ) : (
-                    <View className="items-end">
-                      <Pressable
-                        onPress={() => confirmDeleteMonth(item.month)}
-                        className="flex-row items-center gap-1.5 rounded-full border border-destructive/20 bg-destructive/10 px-3 py-1.5"
-                      >
-                        <Trash2 size={13} color={themeColors.coral} />
-                        <Text variant="label" tone="error">
-                          {I18n.t('common.delete')}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </ScrollView>
+          </View>
+        </SafeAreaView>
+      </ThemeModal>
     </SettingsPageLayout>
-  );
-}
-
-function EffectiveRateRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-row items-center justify-between gap-3">
-      <Text variant="label" tone="muted">
-        {label}
-      </Text>
-      <Text variant="caption" className="text-foreground text-right flex-1">
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-function HistoryBadge({ label, tone }: { label: string; tone: 'primary' | 'success' | 'accent' }) {
-  const style =
-    tone === 'primary'
-      ? 'border-primary/30 bg-primary/15'
-      : tone === 'success'
-        ? 'border-success/30 bg-success/15'
-        : 'border-accent/35 bg-accent/20';
-
-  return (
-    <View className={cn('rounded-full border px-2 py-1', style)}>
-      <Text
-        variant="label"
-        className={cn(
-          tone === 'primary'
-            ? 'text-primary'
-            : tone === 'success'
-              ? 'text-success'
-              : 'text-accent-foreground',
-        )}
-      >
-        {label}
-      </Text>
-    </View>
   );
 }

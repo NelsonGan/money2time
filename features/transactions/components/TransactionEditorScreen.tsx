@@ -974,12 +974,12 @@ export function TransactionEditorScreen({
             >
               <Trash2 size={14} color={themeColors.coral} />
             </Pressable>
-            <Button size="sm" onPress={handleSubmit}>
+            <Button size="sm" haptic="none" onPress={handleSubmit}>
               <Text>{submitLabel}</Text>
             </Button>
           </View>
         ) : (
-          <Button size="sm" onPress={handleSubmit}>
+          <Button size="sm" haptic="none" onPress={handleSubmit}>
             <Text>{submitLabel}</Text>
           </Button>
         )}
