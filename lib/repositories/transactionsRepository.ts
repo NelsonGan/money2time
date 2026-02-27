@@ -1,8 +1,8 @@
-import { and, desc, eq, gte, inArray, isNull, lte, or, sql, asc } from 'drizzle-orm';
+import { and, asc,desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
+import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
-import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import type {
   CashflowSummary,
   Transaction,
@@ -11,6 +11,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 import { newId, nowIso } from '~/utils/id';
+
 import { toTransaction } from './mappers';
 
 type RelationRow = {
@@ -45,6 +46,8 @@ const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   dateRange: null,
   accountId: null,
   type: 'all',
+  incomeCategoryId: null,
+  expenseCategoryId: null,
   categoryId: null,
   minAmount: null,
   maxAmount: null,
