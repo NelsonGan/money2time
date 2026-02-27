@@ -15,7 +15,12 @@ interface EditTransactionScreenProps {
   simpleWalletId?: string | null;
 }
 
-export function EditTransactionScreen({ transaction, onClose, isSimpleMode, simpleWalletId }: EditTransactionScreenProps) {
+export function EditTransactionScreen({
+  transaction,
+  onClose,
+  isSimpleMode,
+  simpleWalletId,
+}: EditTransactionScreenProps) {
   const { updateTransaction, deleteTransaction } = useApp();
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&

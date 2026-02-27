@@ -6,12 +6,13 @@ import Animated, {
   cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withSequence,
   withTiming,
-  withDelay,
 } from 'react-native-reanimated';
-import Svg, { Circle, Path, G, Ellipse } from 'react-native-svg';
+import Svg, { Circle, Ellipse, G, Path } from 'react-native-svg';
+
 import { useThemeColors } from '~/hooks/useThemeColors';
 
 type MascotMood = 'happy' | 'excited' | 'thinking' | 'sleepy' | 'proud' | 'curious';

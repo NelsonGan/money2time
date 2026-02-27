@@ -1,6 +1,7 @@
 // https://docs.expo.dev/guides/using-eslint/
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
+const simpleImportSort = require('eslint-plugin-simple-import-sort');
 
 module.exports = defineConfig([
   expoConfig,
@@ -9,9 +10,14 @@ module.exports = defineConfig([
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
     rules: {
       'react-hooks/exhaustive-deps': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-shadow': 'off',
+      '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -20,6 +26,8 @@ module.exports = defineConfig([
         'error',
         { prefer: 'type-imports', disallowTypeAnnotations: false },
       ],
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
       'no-restricted-imports': [
         'error',
         {

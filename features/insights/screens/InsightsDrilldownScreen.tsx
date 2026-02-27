@@ -74,8 +74,13 @@ export function InsightsDrilldownScreen({
   onBack,
   onOpenTransaction,
 }: InsightsDrilldownScreenProps) {
-  const { transactions, settings, updateTransaction, deleteTransaction, getDisplayValueForTransaction } =
-    useApp();
+  const {
+    transactions,
+    settings,
+    updateTransaction,
+    deleteTransaction,
+    getDisplayValueForTransaction,
+  } = useApp();
   const [drilldownTypeFilter, setDrilldownTypeFilter] =
     useState<DrilldownTransactionFilter>('expense');
   const [drilldownSortOption, setDrilldownSortOption] = useState<DrilldownSortOption>('default');
@@ -105,8 +110,10 @@ export function InsightsDrilldownScreen({
       if (drilldownSortOption !== 'largest_value') return items;
       const sorted = [...items];
       sorted.sort((a, b) => {
-        const aValue = settings.displayMode === 'time' ? getDisplayValueForTransaction(a) : a.amount;
-        const bValue = settings.displayMode === 'time' ? getDisplayValueForTransaction(b) : b.amount;
+        const aValue =
+          settings.displayMode === 'time' ? getDisplayValueForTransaction(a) : a.amount;
+        const bValue =
+          settings.displayMode === 'time' ? getDisplayValueForTransaction(b) : b.amount;
         const amountDelta = Math.abs(bValue) - Math.abs(aValue);
         if (amountDelta !== 0) return amountDelta;
         const dateDelta = b.date.localeCompare(a.date);
@@ -127,11 +134,15 @@ export function InsightsDrilldownScreen({
     [payload.transactionIds, sortTransactions, transactionById],
   );
   const incomeTransactions = useMemo(
-    () => sortTransactions(resolvedTransactions.filter((transaction) => transaction.type === 'income')),
+    () =>
+      sortTransactions(resolvedTransactions.filter((transaction) => transaction.type === 'income')),
     [resolvedTransactions, sortTransactions],
   );
   const expenseTransactions = useMemo(
-    () => sortTransactions(resolvedTransactions.filter((transaction) => transaction.type === 'expense')),
+    () =>
+      sortTransactions(
+        resolvedTransactions.filter((transaction) => transaction.type === 'expense'),
+      ),
     [resolvedTransactions, sortTransactions],
   );
   const displayedTransactions =
@@ -340,7 +351,10 @@ export function InsightsDrilldownScreen({
               <Pressable
                 onPress={handleApplyBulkUpdate}
                 disabled={!hasBulkChanges}
-                className={cn('px-3 py-2 rounded-full', hasBulkChanges ? 'bg-primary' : 'bg-secondary/70')}
+                className={cn(
+                  'px-3 py-2 rounded-full',
+                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+                )}
               >
                 <Text
                   variant="caption"
@@ -352,7 +366,10 @@ export function InsightsDrilldownScreen({
             </View>
           </View>
 
-          <ScrollView className="flex-1" contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}
+          >
             <View className="gap-2.5">
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.filters.type')}
@@ -422,7 +439,9 @@ export function InsightsDrilldownScreen({
                   </Pressable>
 
                   <Text variant="caption" className="text-foreground">
-                    {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
+                    {I18n.t('transactions.selection.selected_count', {
+                      count: selectedTransactionCount,
+                    })}
                   </Text>
 
                   <View className="flex-row items-center gap-2">

@@ -18,7 +18,11 @@ import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { HomeScreen } from '~/features/home/screens';
-import { InsightsDrilldownScreen, InsightsScreen, type InsightsDrilldownPayload } from '~/features/insights/screens';
+import {
+  InsightsDrilldownScreen,
+  InsightsScreen,
+  type InsightsDrilldownPayload,
+} from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
   AccountsScreen,
@@ -26,7 +30,12 @@ import {
   type SettingsScreenName,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
-import { AddTransactionScreen, EditTransactionScreen, SimpleActivityScreen, TransactionsScreen } from '~/features/transactions/screens';
+import {
+  AddTransactionScreen,
+  EditTransactionScreen,
+  SimpleActivityScreen,
+  TransactionsScreen,
+} from '~/features/transactions/screens';
 import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -349,7 +358,7 @@ function RecurringEditorRouteScreen({
   } = useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
-    () => (ruleId ? recurringRules.find((rule) => rule.id === ruleId) ?? null : null),
+    () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
     [recurringRules, ruleId],
   );
 
@@ -401,7 +410,7 @@ function RecurringEditorRouteScreen({
           } as const;
           const effectiveAccountId = isSimpleMode
             ? (simpleWalletId ?? transaction.accountId ?? null)
-            : transaction.accountId ?? null;
+            : (transaction.accountId ?? null);
           const payload =
             transaction.type === 'transfer' && !isSimpleMode
               ? {

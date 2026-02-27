@@ -1298,7 +1298,8 @@ export function InsightsScreen({
                 if (!hasSpread) {
                   expenseDotTier = 3;
                 } else {
-                  const normalized = (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
+                  const normalized =
+                    (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
                   const quantized = Math.round(normalized * 4) + 1;
                   expenseDotTier = Math.min(5, Math.max(1, quantized)) as 1 | 2 | 3 | 4 | 5;
                 }

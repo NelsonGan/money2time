@@ -23,7 +23,12 @@ import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { useApp } from '~/context/AppContext';
-import { formatAmount, formatDateInput, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
+import {
+  formatAmount,
+  formatDateInput,
+  formatHours,
+  monthKeyFromIsoLocal,
+} from '~/utils/formatters';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { triggerHaptic } from '~/services/haptics';
@@ -422,20 +427,19 @@ export function TransactionsScreen({
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const categoryPanelParents = useMemo(
-    () => {
-      const parents = categories.filter((category) => !category.parentId);
-      return parents.map((category) => ({
-        id: category.id,
-        name: category.name,
-        icon: resolveCategoryIcon(category.icon),
-      }));
-    },
-    [categories],
-  );
+  const categoryPanelParents = useMemo(() => {
+    const parents = categories.filter((category) => !category.parentId);
+    return parents.map((category) => ({
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon),
+    }));
+  }, [categories]);
   const categoryPanelChildren = useMemo(() => {
     const parentIconById = new Map(
-      categories.filter((category) => !category.parentId).map((category) => [category.id, category.icon]),
+      categories
+        .filter((category) => !category.parentId)
+        .map((category) => [category.id, category.icon]),
     );
     const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
     categories
@@ -684,7 +688,9 @@ export function TransactionsScreen({
               </Pressable>
 
               <Text variant="caption" className="text-foreground">
-                {I18n.t('transactions.selection.selected_count', { count: selectedTransactionCount })}
+                {I18n.t('transactions.selection.selected_count', {
+                  count: selectedTransactionCount,
+                })}
               </Text>
 
               <View className="flex-row items-center gap-1.5">
@@ -859,7 +865,10 @@ export function TransactionsScreen({
                   hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
                 )}
               >
-                <Text variant="caption" className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}>
+                <Text
+                  variant="caption"
+                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
+                >
                   {I18n.t('common.save')}
                 </Text>
               </Pressable>
@@ -968,10 +977,7 @@ export function TransactionsScreen({
                   onSelect={handleResetAccountFilter}
                 />
               </View>
-              <View
-                className={FILTER_SELECTION_PANEL_CLASS}
-                style={{ height: 236 }}
-              >
+              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                 <AccountPanel
                   accounts={accounts}
                   accountGroups={accountGroups}
@@ -993,10 +999,7 @@ export function TransactionsScreen({
                   onSelect={handleResetCategoryFilter}
                 />
               </View>
-              <View
-                className={FILTER_SELECTION_PANEL_CLASS}
-                style={{ height: 236 }}
-              >
+              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                 <CategoryPanel
                   parents={categoryPanelParents}
                   childByParent={categoryPanelChildren}

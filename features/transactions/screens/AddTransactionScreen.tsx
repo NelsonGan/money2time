@@ -9,7 +9,11 @@ interface AddTransactionScreenProps {
   simpleWalletId?: string | null;
 }
 
-export function AddTransactionScreen({ onClose, isSimpleMode, simpleWalletId }: AddTransactionScreenProps) {
+export function AddTransactionScreen({
+  onClose,
+  isSimpleMode,
+  simpleWalletId,
+}: AddTransactionScreenProps) {
   const { createTransaction } = useApp();
 
   return (

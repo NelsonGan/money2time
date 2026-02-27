@@ -134,7 +134,9 @@ export function SimpleActivityScreen({
   const [activeMonthIndex, setActiveMonthIndex] = useState(MONTH_PAGER_CENTER_INDEX);
   const activeMonthIndexRef = useRef(MONTH_PAGER_CENTER_INDEX);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
-  const pageScrollToTopRefs = useRef(new Map<number, React.MutableRefObject<(() => void) | null>>());
+  const pageScrollToTopRefs = useRef(
+    new Map<number, React.MutableRefObject<(() => void) | null>>(),
+  );
 
   const getPageScrollToTopRef = useCallback((index: number) => {
     const existing = pageScrollToTopRefs.current.get(index);
@@ -260,7 +262,13 @@ export function SimpleActivityScreen({
       getPageScrollToTopRef(targetIndex).current?.();
     });
     return () => cancelAnimationFrame(frame);
-  }, [clampMonthIndex, focusMonthKey, focusMonthToken, getPageScrollToTopRef, monthPagerAnchorDate]);
+  }, [
+    clampMonthIndex,
+    focusMonthKey,
+    focusMonthToken,
+    getPageScrollToTopRef,
+    monthPagerAnchorDate,
+  ]);
 
   const commitOffsetToIndex = useCallback(
     (offsetX: number) => {

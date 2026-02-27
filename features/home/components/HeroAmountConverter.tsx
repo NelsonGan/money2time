@@ -43,7 +43,8 @@ function formatWorkDuration(workdays: number, workdaysPerWeek: number) {
 
   const weeks = Math.floor(normalizedDays / safeWorkdaysPerWeek);
   const remainingDays = Number((normalizedDays - weeks * safeWorkdaysPerWeek).toFixed(2));
-  const weekKey = weeks === 1 ? 'home.converter.workweek_unit_one' : 'home.converter.workweek_unit_other';
+  const weekKey =
+    weeks === 1 ? 'home.converter.workweek_unit_one' : 'home.converter.workweek_unit_other';
   const weekLabel = I18n.t(weekKey, { count: formatCount(weeks) });
 
   if (remainingDays <= 0.01) {

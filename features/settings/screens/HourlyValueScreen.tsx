@@ -127,12 +127,7 @@ function getEffectiveRateInfo(
 }
 
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
-  const {
-    settings,
-    currentMonthWage,
-    monthlyWages,
-    deleteWageConfigForMonth,
-  } = useApp();
+  const { settings, currentMonthWage, monthlyWages, deleteWageConfigForMonth } = useApp();
   const themeColors = useThemeColors();
   const [selectedYear, setSelectedYear] = useState<string>(() => String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>(() =>
@@ -423,7 +418,6 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           </CardContent>
         </Card>
       </ScrollView>
-
     </SettingsPageLayout>
   );
 }
