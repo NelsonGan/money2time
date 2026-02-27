@@ -10,19 +10,27 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart, PieChart } from 'react-native-chart-kit';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Card, CardContent } from '~/components/ui/card';
-import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
-import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
-import { SelectField } from '~/components/ui/select';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { FilterIconButton } from '~/components/navigation/FilterIconButton';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { Card, CardContent } from '~/components/ui/card';
+import { SelectField } from '~/components/ui/select';
 import { Text } from '~/components/ui/text';
+import { ThemeModal } from '~/components/ui/theme-modal';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme } from '~/context/ThemeContext';
+import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
+import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { Category, TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -33,14 +41,7 @@ import {
   monthKeyFromIsoLocal,
   toRange,
 } from '~/utils/formatters';
-import { cn } from '~/utils';
-import { useThemeColors } from '~/hooks/useThemeColors';
-import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
-import { useResolvedTheme } from '~/context/ThemeContext';
-import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionWithRelations } from '~/types';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { I18n } from '~/lib/i18n';
+
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
 const PERIOD_TABS = ['week', 'month', 'year', 'custom'] as const;
@@ -1927,6 +1928,7 @@ export function InsightsScreen({
     }),
     [pageWidth],
   );
+  const insightsPagerKeyExtractor = useCallback((item: number) => String(item), []);
 
   const renderInsightsWindowPage = ({ item }: { item: number }) => {
     const pageOffset = item - committedPageIndex;
@@ -3214,7 +3216,7 @@ export function InsightsScreen({
             ref={horizontalListRef}
             data={insightsPagerSlots}
             extraData={insightsPagerExtraData}
-            keyExtractor={(item) => String(item)}
+            keyExtractor={insightsPagerKeyExtractor}
             style={INSIGHTS_LIST_STYLE}
             horizontal
             pagingEnabled

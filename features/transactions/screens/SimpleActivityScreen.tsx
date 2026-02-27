@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
@@ -5,23 +6,22 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
 
-import { Text } from '~/components/ui/text';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
-import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { Text } from '~/components/ui/text';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { formatAmount, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
-import { cn } from '~/utils';
+import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { I18n } from '~/lib/i18n';
+import { cn } from '~/utils';
+import { formatAmount, formatHours, monthKeyFromIsoLocal } from '~/utils/formatters';
 
 const SIMPLE_TYPE_FILTERS: { label: string; value: 'all' | 'expense' | 'income' }[] = [
   { label: I18n.t('transactions.filters.all'), value: 'all' },
@@ -316,6 +316,7 @@ export function SimpleActivityScreen({
     }),
     [pageWidth],
   );
+  const monthPagerKeyExtractor = useCallback((item: number) => String(item), []);
 
   const scrollToRelativeMonth = useCallback(
     (direction: 1 | -1) => {
@@ -397,7 +398,7 @@ export function SimpleActivityScreen({
         <FlatList
           ref={horizontalListRef}
           data={monthPagerSlots}
-          keyExtractor={(item) => String(item)}
+          keyExtractor={monthPagerKeyExtractor}
           style={FLEX_ONE_STYLE}
           horizontal
           pagingEnabled

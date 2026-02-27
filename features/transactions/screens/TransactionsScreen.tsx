@@ -1,3 +1,4 @@
+import { Plus, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -7,35 +8,34 @@ import {
   Pressable,
   ScrollView,
   type TextInput,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Search, X } from 'lucide-react-native';
 
-import { ThemeModal } from '~/components/ui/theme-modal';
-import { Text } from '~/components/ui/text';
+import { FilterIconButton } from '~/components/navigation/FilterIconButton';
+import { InOutHeader } from '~/components/navigation/InOutHeader';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Input } from '~/components/ui/input';
 import { SelectField } from '~/components/ui/select';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { InOutHeader } from '~/components/navigation/InOutHeader';
-import { FilterIconButton } from '~/components/navigation/FilterIconButton';
+import { Text } from '~/components/ui/text';
+import { ThemeModal } from '~/components/ui/theme-modal';
+import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
-import { useApp } from '~/context/AppContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { TransactionType, TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   formatAmount,
   formatDateInput,
   formatHours,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
-import { cn } from '~/utils';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { triggerHaptic } from '~/services/haptics';
-import type { TransactionType, TransactionWithRelations } from '~/types';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { I18n } from '~/lib/i18n';
-import { useThemeColors } from '~/hooks/useThemeColors';
 
 const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
   { label: I18n.t('transactions.filters.all'), value: 'all' },
@@ -364,6 +364,7 @@ export function TransactionsScreen({
     }),
     [pageWidth],
   );
+  const monthPagerKeyExtractor = useCallback((item: number) => String(item), []);
 
   const scrollToRelativeMonth = useCallback(
     (direction: 1 | -1) => {
@@ -793,7 +794,7 @@ export function TransactionsScreen({
           <FlatList
             ref={horizontalListRef}
             data={monthPagerSlots}
-            keyExtractor={(item) => String(item)}
+            keyExtractor={monthPagerKeyExtractor}
             style={FLEX_ONE_STYLE}
             horizontal
             pagingEnabled
