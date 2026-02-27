@@ -1,15 +1,3 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  InteractionManager,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -21,13 +9,25 @@ import {
   Hash,
   Power,
   Repeat,
-  Trash2,
   Timer,
+  Trash2,
   Type,
 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  InteractionManager,
+  Keyboard,
+  Pressable,
+  ScrollView,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
+import { Button, Text } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import {
   AccountPanel,
   CategoryPanel,
@@ -36,17 +36,16 @@ import {
   SummaryRow,
 } from '~/features/transactions/components/editor';
 import { formatMoney } from '~/features/transactions/components/editor/calculatorEngine';
-import { useApp } from '~/context/AppContext';
-import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
-import { getErrorMessage } from '~/utils/errorHandling';
+import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
+import type { TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { useThemeColors } from '~/hooks/useThemeColors';
-import { usePressScale } from '~/hooks/usePressScale';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import type { TransactionType } from '~/types';
-import { I18n } from '~/lib/i18n';
+import { getErrorMessage } from '~/utils/errorHandling';
+import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
 
 type ActiveField =
   | 'amount'
