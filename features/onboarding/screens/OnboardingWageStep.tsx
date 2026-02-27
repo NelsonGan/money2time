@@ -1,16 +1,14 @@
 import React from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { Text } from '~/components/ui/text';
 import { Mascot } from '~/components/feedback/Mascot';
-import { triggerHaptic } from '~/services/haptics';
-import { GestureDetector } from 'react-native-gesture-handler';
+import { Button, Card, CardContent, Text } from '~/components/ui';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import type { MonthlyWageSettings, UserSettings } from '~/types';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+import type { MonthlyWageSettings, UserSettings } from '~/types';
 
 interface OnboardingWageStepProps {
   settings: UserSettings;
