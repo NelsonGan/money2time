@@ -1,33 +1,26 @@
 import './global.css';
 
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useColorScheme } from 'nativewind';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import {
-  createNativeStackNavigator,
-  type NativeStackNavigationProp,
-  type NativeStackScreenProps,
-} from '@react-navigation/native-stack';
 
+import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
+import { Mascot } from '~/components/feedback/Mascot';
+import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
+import { Text } from '~/components/ui/text';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
-import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
-import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { HomeScreen } from '~/features/home/screens';
-import {
-  InsightsDrilldownScreen,
-  InsightsScreen,
-  type InsightsDrilldownPayload,
-} from '~/features/insights/screens';
+import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
   AccountsScreen,
-  SettingsStack,
   type SettingsScreenName,
+  SettingsStack,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import {
@@ -36,30 +29,22 @@ import {
   SimpleActivityScreen,
   TransactionsScreen,
 } from '~/features/transactions/screens';
-import { Mascot } from '~/components/feedback/Mascot';
-import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
-import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
-import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
+import {
+  type RootMainNavigationProp,
+  RootStack,
+  type RootStackParamList,
+  type RootStackRouteProps,
+} from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS } from '~/navigation/swipeBackHaptics';
-
+import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import type { TransactionWithRelations } from '~/types';
+import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
 
 type MainTab = TabName;
-
-type RootStackParamList = {
-  Main: undefined;
-  AddTransaction: undefined;
-  EditTransaction: { transactionId: string };
-  AccountDetail: { accountId: string };
-  InsightsDrilldown: InsightsDrilldownPayload;
-  RecurringEditor: { ruleId?: string } | undefined;
-};
-
-const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
@@ -113,7 +98,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 }
 
 function MainShellScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
+  const navigation = useNavigation<RootMainNavigationProp>();
   const { isSimpleMode } = useApp();
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
@@ -164,7 +149,7 @@ function MainShellScreen() {
     [navigation],
   );
   const openInsightsDrilldown = useCallback(
-    (payload: InsightsDrilldownPayload) => {
+    (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
     },
     [navigation],
@@ -272,9 +257,7 @@ function MainShellScreen() {
   );
 }
 
-function AddTransactionRouteScreen({
-  navigation,
-}: NativeStackScreenProps<RootStackParamList, 'AddTransaction'>) {
+function AddTransactionRouteScreen({ navigation }: RootStackRouteProps<'AddTransaction'>) {
   const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <AddTransactionScreen
@@ -285,10 +268,7 @@ function AddTransactionRouteScreen({
   );
 }
 
-function EditTransactionRouteScreen({
-  route,
-  navigation,
-}: NativeStackScreenProps<RootStackParamList, 'EditTransaction'>) {
+function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'EditTransaction'>) {
   const { transactions, isSimpleMode, simpleWalletId } = useApp();
   const transaction = useMemo(
     () => transactions.find((item) => item.id === route.params.transactionId) ?? null,
@@ -314,10 +294,7 @@ function EditTransactionRouteScreen({
   );
 }
 
-function AccountDetailRouteScreen({
-  route,
-  navigation,
-}: NativeStackScreenProps<RootStackParamList, 'AccountDetail'>) {
+function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'AccountDetail'>) {
   return (
     <AccountsScreen
       onBack={() => navigation.goBack()}
@@ -332,7 +309,7 @@ function AccountDetailRouteScreen({
 function InsightsDrilldownRouteScreen({
   route,
   navigation,
-}: NativeStackScreenProps<RootStackParamList, 'InsightsDrilldown'>) {
+}: RootStackRouteProps<'InsightsDrilldown'>) {
   return (
     <InsightsDrilldownScreen
       payload={route.params}
@@ -344,10 +321,7 @@ function InsightsDrilldownRouteScreen({
   );
 }
 
-function RecurringEditorRouteScreen({
-  route,
-  navigation,
-}: NativeStackScreenProps<RootStackParamList, 'RecurringEditor'>) {
+function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'RecurringEditor'>) {
   const {
     settings,
     recurringRules,
