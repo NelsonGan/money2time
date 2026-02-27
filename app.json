@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Mo",
+    "name": "Money2Time",
     "slug": "money2time",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -26,9 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.nelsongan.money2time",
-      "label": "Money2Time"
+      "package": "com.nelsongan.money2time"
     },
     "web": {
       "favicon": "./assets/favicon.png"
