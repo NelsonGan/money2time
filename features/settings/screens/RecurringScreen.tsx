@@ -151,8 +151,16 @@ const RecurringRuleCard = memo(
 
 export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) {
   const themeColors = useThemeColors();
-  const { settings, recurringRules, deleteRecurringRule } = useApp();
-  const allRules = recurringRules;
+  const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
+  const allRules = useMemo(() => {
+    if (!isSimpleMode || !simpleWalletId) return recurringRules;
+    return recurringRules.filter(
+      (rule) =>
+        rule.accountId === simpleWalletId ||
+        rule.fromAccountId === simpleWalletId ||
+        rule.toAccountId === simpleWalletId,
+    );
+  }, [isSimpleMode, simpleWalletId, recurringRules]);
 
   const openCreate = useCallback(() => {
     onOpenEditor();

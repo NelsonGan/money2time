@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { getDb, initializeDatabase } from '~/lib/db/client';
+import { getDb, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import {
   accountGroupsTable,
   accountsTable,
@@ -29,7 +29,11 @@ import {
   type MMImportSummary,
 } from '~/services/mmbakImportService';
 import { newId, nowIso } from '~/utils/id';
-import { DEFAULT_TRANSACTION_FILTERS } from '~/constants/appDefaults';
+import {
+  DEFAULT_TRANSACTION_FILTERS,
+  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+} from '~/constants/appDefaults';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   type AccountGroup,
@@ -95,6 +99,7 @@ interface AppContextValue extends AppState {
         | 'displayMode'
         | 'themeMode'
         | 'onboardingCompleted'
+        | 'userMode'
       >
     >,
   ) => void;
@@ -130,6 +135,12 @@ interface AppContextValue extends AppState {
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
+
+  isSimpleMode: boolean;
+  simpleWalletId: string | null;
+  switchToSimpleMode: () => void;
+  switchToPowerMode: () => void;
+  deleteSimpleWalletAndTransactions: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -664,6 +675,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'displayMode'
           | 'themeMode'
           | 'onboardingCompleted'
+          | 'userMode'
         >
       >,
     ) => {
@@ -824,9 +836,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [displayValueByTransactionId, isTimeDisplayMode, valueForDisplay],
   );
 
+  const isSimpleMode = settings?.userMode === 'simple';
+
+  const simpleWalletId = useMemo(
+    () => accounts.find((a) => a.name === SIMPLE_WALLET_NAME && !a.deletedAt)?.id ?? null,
+    [accounts],
+  );
+
   const getCashflowSummary = useCallback(
     (range: DateRange): CashflowSummary => {
-      const txns = transactionsRepository.list({ dateRange: range });
+      const txns = transactionsRepository.list({
+        dateRange: range,
+        accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+      });
 
       const income = txns
         .filter((transaction) => transaction.type === 'income')
@@ -843,12 +865,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       return { income, expense };
     },
-    [valueForDisplay],
+    [valueForDisplay, isSimpleMode, simpleWalletId],
   );
 
   const buildBreakdown = useCallback(
     (range: DateRange, type: 'income' | 'expense', groupByRoot: boolean): BreakdownItem[] => {
-      const txns = transactionsRepository.list({ type, dateRange: range });
+      const txns = transactionsRepository.list({
+        type,
+        dateRange: range,
+        accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+      });
 
       const categoryMap = new Map(categories.map((category) => [category.id, category]));
       const totals = new Map<string, { amount: number; parentLabel?: string; label: string }>();
@@ -876,7 +902,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .map(([id, value]) => ({ id, ...value }))
         .sort((a, b) => b.amount - a.amount);
     },
-    [categories, valueForDisplay],
+    [categories, valueForDisplay, isSimpleMode, simpleWalletId],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
@@ -938,6 +964,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [refreshAll, settings?.currencySymbol],
   );
+
+  const switchToSimpleMode = useCallback(() => {
+    runMutation(() => {
+      // Create Simple Wallet if missing
+      let walletId = accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
+      if (!walletId) {
+        const currentSettings = settingsRepository.get();
+        accountsRepository.create({
+          name: SIMPLE_WALLET_NAME,
+          type: 'debit',
+          icon: '👛',
+          color: '#22917A',
+          startingBalance: 0,
+          accountGroup: null,
+          creditStatementDay: null,
+          creditDueDay: null,
+          currency: currentSettings.currencySymbol,
+          includeInTotals: true,
+          sortOrder: 0,
+        });
+      }
+      // Ensure default categories exist
+      const existingCategories = categoriesRepository.list();
+      const existing = new Set(
+        existingCategories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
+      );
+      const minimal = [
+        ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+        ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+      ];
+      minimal.forEach((item) => {
+        const key = `${item.type}:${item.name.trim().toLowerCase()}`;
+        if (existing.has(key)) return;
+        categoriesRepository.create(item);
+        existing.add(key);
+      });
+      settingsRepository.updateSettings({ userMode: 'simple' });
+    });
+  }, [runMutation]);
+
+  const switchToPowerMode = useCallback(() => {
+    runMutation(() => {
+      settingsRepository.updateSettings({ userMode: 'power' });
+    });
+  }, [runMutation]);
+
+  const deleteSimpleWalletAndTransactions = useCallback(() => {
+    const walletId = accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
+    if (!walletId) return;
+    runMutation(() => {
+      transactionsRepository.softDeleteByAccountId(walletId);
+      accountsRepository.softDelete(walletId);
+    });
+  }, [runMutation]);
 
   const hasSettings = settings !== null;
   const accountBalances = useMemo(() => {
@@ -1011,6 +1091,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             importMoneyManagerBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
+            isSimpleMode,
+            simpleWalletId,
+            switchToSimpleMode,
+            switchToPowerMode,
+            deleteSimpleWalletAndTransactions,
           }
         : null,
     [
@@ -1071,6 +1156,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       importMoneyManagerBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
+      isSimpleMode,
+      simpleWalletId,
+      switchToSimpleMode,
+      switchToPowerMode,
+      deleteSimpleWalletAndTransactions,
     ],
   );
 

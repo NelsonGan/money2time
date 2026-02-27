@@ -123,6 +123,9 @@ interface TransactionEditorScreenProps {
   submitLabelOverride?: string;
   deleteLabel?: string;
   restrictTypeOptions?: TransactionType[];
+  hideAccountSelector?: boolean;
+  hideSubcategories?: boolean;
+  initialAccountId?: string;
   recurringOptions?: {
     initialName?: string;
     initialPattern?: 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -236,6 +239,9 @@ export function TransactionEditorScreen({
   submitLabelOverride,
   deleteLabel = I18n.t('transactions.editor.delete_transaction'),
   restrictTypeOptions,
+  hideAccountSelector = false,
+  hideSubcategories = false,
+  initialAccountId,
   recurringOptions,
 }: TransactionEditorScreenProps) {
   const { accounts, accountGroups, categories, settings, currentMonthWage } = useApp();
@@ -247,7 +253,7 @@ export function TransactionEditorScreen({
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(
-    initialValues?.accountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
+    initialValues?.accountId ?? (initialAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null))),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
@@ -421,6 +427,7 @@ export function TransactionEditorScreen({
     [typedCategories],
   );
   const childCategoriesByParent = useMemo(() => {
+    if (hideSubcategories) return new Map<string, typeof typedCategories>();
     const map = new Map<string, typeof typedCategories>();
     typedCategories
       .filter((item) => !!item.parentId)
@@ -430,7 +437,7 @@ export function TransactionEditorScreen({
         map.get(key)?.push(item);
       });
     return map;
-  }, [typedCategories]);
+  }, [hideSubcategories, typedCategories]);
 
   const categoryPreview = useMemo(() => {
     if (!categoryId) return null;
@@ -562,7 +569,7 @@ export function TransactionEditorScreen({
         };
       } else {
         const baseErrors: typeof fieldErrors = {};
-        if (!accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
+        if (!hideAccountSelector && !accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
         if (!categoryId) baseErrors.category = I18n.t('transactions.editor.error.required');
         if (Object.keys(baseErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -672,9 +679,13 @@ export function TransactionEditorScreen({
   const handleAmountConfirm = useCallback(
     (val: string) => {
       setAmount(val);
-      activateField(isTransferType ? 'fromAccount' : 'account');
+      if (hideAccountSelector) {
+        activateField('category');
+      } else {
+        activateField(isTransferType ? 'fromAccount' : 'account');
+      }
     },
-    [activateField, isTransferType],
+    [activateField, hideAccountSelector, isTransferType],
   );
 
   const handleAccountSelect = useCallback(
@@ -1068,10 +1079,10 @@ export function TransactionEditorScreen({
               </SummaryRow>
             </View>
 
-            <View className="h-[1px] bg-border/15 mx-4" />
+            {!hideAccountSelector && <View className="h-[1px] bg-border/15 mx-4" />}
 
             {/* Account row(s) */}
-            {isTransferType ? (
+            {!hideAccountSelector && (isTransferType ? (
               <>
                 <View>
                   <SummaryRow
@@ -1182,7 +1193,7 @@ export function TransactionEditorScreen({
                   </View>
                 </SummaryRow>
               </View>
-            )}
+            ))}
 
             {/* Category row (hidden for transfers and balance adjustments) */}
             {!isTransferType && !isBalanceAdjustmentType ? (

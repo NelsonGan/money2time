@@ -26,7 +26,7 @@ import {
   type SettingsScreenName,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
-import { AddTransactionScreen, EditTransactionScreen, TransactionsScreen } from '~/features/transactions/screens';
+import { AddTransactionScreen, EditTransactionScreen, SimpleActivityScreen, TransactionsScreen } from '~/features/transactions/screens';
 import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -54,6 +54,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
+const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoAccountsScreen = React.memo(AccountsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
@@ -104,6 +105,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 
 function MainShellScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
+  const { isSimpleMode } = useApp();
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
@@ -116,6 +118,12 @@ function MainShellScreen() {
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
+
+  useEffect(() => {
+    if (isSimpleMode && activeTab === 'account') {
+      setActiveTab('home');
+    }
+  }, [isSimpleMode, activeTab]);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -201,13 +209,23 @@ function MainShellScreen() {
           <MemoHomeScreen scrollToTopToken={homeScrollTopToken} />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
-          <MemoTransactionsScreen
-            scrollToTopToken={transactionsScrollTopToken}
-            focusMonthKey={transactionsFocusMonthKey}
-            focusMonthToken={transactionsFocusMonthToken}
-            onPressAddTransaction={openAddTransaction}
-            onOpenTransaction={openTransactionEditor}
-          />
+          {isSimpleMode ? (
+            <MemoSimpleActivityScreen
+              scrollToTopToken={transactionsScrollTopToken}
+              focusMonthKey={transactionsFocusMonthKey}
+              focusMonthToken={transactionsFocusMonthToken}
+              onPressAddTransaction={openAddTransaction}
+              onOpenTransaction={openTransactionEditor}
+            />
+          ) : (
+            <MemoTransactionsScreen
+              scrollToTopToken={transactionsScrollTopToken}
+              focusMonthKey={transactionsFocusMonthKey}
+              focusMonthToken={transactionsFocusMonthToken}
+              onPressAddTransaction={openAddTransaction}
+              onOpenTransaction={openTransactionEditor}
+            />
+          )}
         </MountedTab>
         <MountedTab active={activeTab === 'account'}>
           <MemoAccountsScreen
@@ -222,6 +240,7 @@ function MainShellScreen() {
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
+            isSimpleMode={isSimpleMode}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'settings'}>
@@ -235,7 +254,11 @@ function MainShellScreen() {
         </MountedTab>
       </View>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        hideTabs={isSimpleMode ? ['account'] : []}
+      />
     </View>
   );
 }
@@ -243,14 +266,21 @@ function MainShellScreen() {
 function AddTransactionRouteScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'AddTransaction'>) {
-  return <AddTransactionScreen onClose={() => navigation.goBack()} />;
+  const { isSimpleMode, simpleWalletId } = useApp();
+  return (
+    <AddTransactionScreen
+      onClose={() => navigation.goBack()}
+      isSimpleMode={isSimpleMode}
+      simpleWalletId={simpleWalletId}
+    />
+  );
 }
 
 function EditTransactionRouteScreen({
   route,
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'EditTransaction'>) {
-  const { transactions } = useApp();
+  const { transactions, isSimpleMode, simpleWalletId } = useApp();
   const transaction = useMemo(
     () => transactions.find((item) => item.id === route.params.transactionId) ?? null,
     [route.params.transactionId, transactions],
@@ -269,6 +299,8 @@ function EditTransactionRouteScreen({
     <EditTransactionScreen
       transaction={transaction}
       onClose={() => navigation.goBack()}
+      isSimpleMode={isSimpleMode}
+      simpleWalletId={simpleWalletId}
     />
   );
 }
@@ -312,6 +344,8 @@ function RecurringEditorRouteScreen({
     recurringRules,
     createRecurringRule,
     updateRecurringRule,
+    isSimpleMode,
+    simpleWalletId,
   } = useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
@@ -338,7 +372,8 @@ function RecurringEditorRouteScreen({
       titleOverride={editingRule ? I18n.t('recurring.edit_rule') : I18n.t('recurring.new_rule')}
       subtitleOverride={I18n.t('recurring.same_flow')}
       submitLabelOverride={I18n.t('recurring.save_rule')}
-      restrictTypeOptions={['expense', 'income', 'transfer']}
+      restrictTypeOptions={isSimpleMode ? ['expense', 'income'] : ['expense', 'income', 'transfer']}
+      hideAccountSelector={isSimpleMode}
       recurringOptions={{
         initialName: editingRule?.name,
         initialPattern: editingRule?.recurrencePattern,
@@ -364,8 +399,11 @@ function RecurringEditorRouteScreen({
             endDate: recurring.endDate,
             isActive: recurring.isActive,
           } as const;
+          const effectiveAccountId = isSimpleMode
+            ? (simpleWalletId ?? transaction.accountId ?? null)
+            : transaction.accountId ?? null;
           const payload =
-            transaction.type === 'transfer'
+            transaction.type === 'transfer' && !isSimpleMode
               ? {
                   ...basePayload,
                   fromAccountId: transaction.fromAccountId ?? null,
@@ -375,7 +413,7 @@ function RecurringEditorRouteScreen({
                 }
               : {
                   ...basePayload,
-                  accountId: transaction.accountId ?? null,
+                  accountId: effectiveAccountId,
                   categoryId: transaction.categoryId ?? null,
                   fromAccountId: null,
                   toAccountId: null,
@@ -395,13 +433,15 @@ function RecurringEditorRouteScreen({
               type: editingRule.type,
               amount: String(editingRule.amount),
               date: dayKeyFromIsoLocal(editingRule.nextRunDate),
-              accountId: editingRule.accountId,
+              accountId: isSimpleMode && simpleWalletId ? simpleWalletId : editingRule.accountId,
               fromAccountId: editingRule.fromAccountId,
               toAccountId: editingRule.toAccountId,
               categoryId: editingRule.categoryId,
               note: editingRule.note ?? '',
             }
-          : undefined
+          : isSimpleMode && simpleWalletId
+            ? { accountId: simpleWalletId }
+            : undefined
       }
     />
   );
