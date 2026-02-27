@@ -1,5 +1,6 @@
+import { Plus } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -17,6 +18,7 @@ import { HeroAmountConverter } from '~/features/home/components';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   amountToHoursByRate,
@@ -126,9 +128,10 @@ function SummaryMetric({
 
 interface HomeScreenProps {
   scrollToTopToken?: number;
+  onPressAddTransaction?: () => void;
 }
 
-export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
+export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const {
@@ -353,7 +356,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
         </Animated.View>
 
         {/* Recurring Commitments */}
-        <Animated.View entering={FadeIn.delay(320).duration(400)} className="mt-7 px-5">
+        {walletRecurringRules.length > 0 ? <Animated.View entering={FadeIn.delay(320).duration(400)} className="mt-7 px-5">
           {/* Section header with summary pill */}
           <View className="flex-row items-center justify-between mb-3">
             <Text variant="subheading">{I18n.t('home.recurring.title')}</Text>
@@ -433,8 +436,22 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
               mascotMood="curious"
             />
           )}
-        </Animated.View>
+        </Animated.View> : null}
       </ScrollView>
+
+      {onPressAddTransaction ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+          onPress={() => {
+            void triggerHaptic('medium');
+            onPressAddTransaction();
+          }}
+          className="absolute right-5 bottom-6 h-14 w-14 rounded-full bg-primary items-center justify-center border border-primary/45 shadow-soft"
+        >
+          <Plus size={24} color="#FFFFFF" />
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }

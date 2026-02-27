@@ -200,7 +200,10 @@ function MainShellScreen() {
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'home'}>
-          <MemoHomeScreen scrollToTopToken={homeScrollTopToken} />
+          <MemoHomeScreen
+            scrollToTopToken={homeScrollTopToken}
+            onPressAddTransaction={isSimpleMode ? undefined : openAddTransaction}
+          />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
           {isSimpleMode ? (
@@ -208,7 +211,6 @@ function MainShellScreen() {
               scrollToTopToken={transactionsScrollTopToken}
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
-              onPressAddTransaction={openAddTransaction}
               onOpenTransaction={openTransactionEditor}
             />
           ) : (
@@ -252,6 +254,7 @@ function MainShellScreen() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         hideTabs={isSimpleMode ? ['account'] : []}
+        onPressAdd={isSimpleMode ? openAddTransaction : undefined}
       />
     </View>
   );
@@ -340,7 +343,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 
   useEffect(() => {
     if (!ruleId || editingRule) return;
-    navigation.goBack();
+    if (navigation.canGoBack()) navigation.goBack();
   }, [editingRule, navigation, ruleId]);
 
   if (ruleId && !editingRule) {
@@ -350,7 +353,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
   return (
     <TransactionEditorScreen
       mode={editingRule ? 'edit' : 'create'}
-      onClose={() => navigation.goBack()}
+      onClose={() => { if (navigation.canGoBack()) navigation.goBack(); }}
       onSubmit={() => {}}
       onDelete={undefined}
       deleteLabel={undefined}
