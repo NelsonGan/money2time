@@ -281,6 +281,7 @@ export function HomeScreen({ scrollToTopToken = 0 }: HomeScreenProps = {}) {
         ref={scrollViewRef}
         contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Greeting */}
         <View className="px-5 pt-5 pb-2 flex-row items-start justify-between">
