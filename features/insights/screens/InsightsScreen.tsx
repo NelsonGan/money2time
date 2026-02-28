@@ -21,6 +21,7 @@ import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -3414,6 +3415,7 @@ export function InsightsScreen({
             optionsLayout="list"
             sheetTitle={I18n.t('insights.insight_type')}
             onChange={handleInsightTypeChange}
+            fullHeight
           />
         }
         monthLabel={activePeriodLabel}
@@ -3421,9 +3423,12 @@ export function InsightsScreen({
         onNextMonth={handleNextMonth}
         hideNavigation={selectedInsightType === 'income_rate_history'}
         actions={
-          hasInsightsFilters ? (
-            <FilterIconButton onPress={handleOpenFiltersModal} count={insightsFilterCount} />
-          ) : null
+          <View className="flex-row items-center gap-2">
+            <DisplayModeToggle />
+            {hasInsightsFilters && (
+              <FilterIconButton onPress={handleOpenFiltersModal} count={insightsFilterCount} />
+            )}
+          </View>
         }
       />
 
@@ -3445,6 +3450,7 @@ export function InsightsScreen({
             horizontal
             pagingEnabled
             disableIntervalMomentum
+            scrollEnabled={selectedInsightType !== 'income_rate_history'}
             bounces={false}
             directionalLockEnabled
             decelerationRate="fast"
