@@ -319,8 +319,8 @@ function applyTransactionFilters(
     case 'date_desc':
     default:
       sorted.sort((a, b) => {
-        const dateDelta = b.date.localeCompare(a.date);
-        if (dateDelta !== 0) return dateDelta;
+        const dayDelta = b.date.slice(0, 10).localeCompare(a.date.slice(0, 10));
+        if (dayDelta !== 0) return dayDelta;
         return b.createdAt.localeCompare(a.createdAt);
       });
       break;
@@ -785,8 +785,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           transaction.toAccountId === accountId,
       );
       return [...filtered].sort((a, b) => {
-        const dateDelta = b.date.localeCompare(a.date);
-        if (dateDelta !== 0) return dateDelta;
+        const dayDelta = b.date.slice(0, 10).localeCompare(a.date.slice(0, 10));
+        if (dayDelta !== 0) return dayDelta;
         return b.createdAt.localeCompare(a.createdAt);
       });
     },

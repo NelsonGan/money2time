@@ -50,7 +50,6 @@ const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
 const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
-const MemoAccountsScreen = React.memo(AccountsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 
 const styles = StyleSheet.create({
@@ -106,18 +105,10 @@ function MainShellScreen() {
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
-  const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
-  const [accountsResetToRootToken, setAccountsResetToRootToken] = useState(0);
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
   const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
-
-  useEffect(() => {
-    if (isSimpleMode && activeTab === 'account') {
-      setActiveTab('home');
-    }
-  }, [isSimpleMode, activeTab]);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -178,12 +169,6 @@ function MainShellScreen() {
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
       }
-      if (tab === 'account' && activeTab === 'account') {
-        setAccountsScrollTopToken((prev) => prev + 1);
-      }
-      if (tab === 'account' && activeTab !== 'account') {
-        setAccountsResetToRootToken((prev) => prev + 1);
-      }
       if (tab === 'settings') {
         setSettingsForceScreen(null);
         setSettingsResetToken((prev) => prev + 1);
@@ -202,7 +187,8 @@ function MainShellScreen() {
         <MountedTab active={activeTab === 'home'}>
           <MemoHomeScreen
             scrollToTopToken={homeScrollTopToken}
-            onPressAddTransaction={isSimpleMode ? undefined : openAddTransaction}
+            onOpenAccount={openAccountDetail}
+            onOpenTransaction={openTransactionEditor}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
@@ -218,18 +204,9 @@ function MainShellScreen() {
               scrollToTopToken={transactionsScrollTopToken}
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
-              onPressAddTransaction={openAddTransaction}
               onOpenTransaction={openTransactionEditor}
             />
           )}
-        </MountedTab>
-        <MountedTab active={activeTab === 'account'}>
-          <MemoAccountsScreen
-            resetToRootToken={accountsResetToRootToken}
-            scrollToTopToken={accountsScrollTopToken}
-            onOpenAccount={openAccountDetail}
-            onOpenTransaction={openTransactionEditor}
-          />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen
@@ -253,8 +230,7 @@ function MainShellScreen() {
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        hideTabs={isSimpleMode ? ['account'] : []}
-        onPressAdd={isSimpleMode ? openAddTransaction : undefined}
+        onPressAdd={openAddTransaction}
       />
     </View>
   );

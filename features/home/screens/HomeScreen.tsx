@@ -1,6 +1,12 @@
-import { Plus } from 'lucide-react-native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -15,30 +21,20 @@ import { Card, Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { HeroAmountConverter } from '~/features/home/components';
+import { AccountsScreen } from '~/features/settings/screens';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import {
-  amountToHoursByRate,
-  dayKeyFromDateLocal,
-  dayKeyFromIsoLocal,
-  formatAmount,
-  formatHours,
-} from '~/utils/formatters';
+import { amountToHoursByRate, formatAmount, formatHours } from '~/utils/formatters';
 
 const GREETINGS: Record<string, string> = {
   morning: I18n.t('home.greeting.morning'),
   afternoon: I18n.t('home.greeting.afternoon'),
   evening: I18n.t('home.greeting.evening'),
-};
-
-const WINDOW_MESSAGES = {
-  noSpend: [I18n.t('home.window_message.no_spend_1'), I18n.t('home.window_message.no_spend_2')],
-  low: [I18n.t('home.window_message.low_1'), I18n.t('home.window_message.low_2')],
-  moderate: [I18n.t('home.window_message.moderate_1'), I18n.t('home.window_message.moderate_2')],
-  high: [I18n.t('home.window_message.high_1'), I18n.t('home.window_message.high_2')],
 };
 
 function formatCadence(pattern: string, interval: number): string {
@@ -70,18 +66,6 @@ function getTimeOfDay(): string {
   return 'evening';
 }
 
-function getWindowMessage(hoursSpent: number): string {
-  let bucket: keyof typeof WINDOW_MESSAGES;
-  if (hoursSpent <= 0) bucket = 'noSpend';
-  else if (hoursSpent < 1) bucket = 'low';
-  else if (hoursSpent < 20) bucket = 'moderate';
-  else bucket = 'high';
-
-  const messages = WINDOW_MESSAGES[bucket];
-  const dayIndex = new Date().getDate() % messages.length;
-  return messages[dayIndex];
-}
-
 function BlinkingDot({ color }: { color: string }) {
   const opacity = useSharedValue(1);
 
@@ -101,59 +85,130 @@ function BlinkingDot({ color }: { color: string }) {
   return <Animated.View style={style} />;
 }
 
-function SummaryMetric({
-  label,
-  value,
-  variant,
+// Underline-style tab bar
+function HomeTabs({
+  tabs,
+  activeIndex,
+  onTabChange,
 }: {
-  label: string;
-  value: string;
-  variant: 'success' | 'destructive';
+  tabs: string[];
+  activeIndex: number;
+  onTabChange: (index: number) => void;
 }) {
-  const valueToneClass = {
-    success: 'text-success',
-    destructive: 'text-destructive',
-  };
+  const themeColors = useThemeColors();
+  const [barWidth, setBarWidth] = useState(0);
+  const tabWidth = barWidth > 0 ? barWidth / tabs.length : 0;
+  const indicatorX = useSharedValue(0);
+
+  useEffect(() => {
+    if (tabWidth <= 0) return;
+    indicatorX.value = withTiming(activeIndex * tabWidth, { duration: 220 });
+  }, [activeIndex, tabWidth, indicatorX]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: indicatorX.value }],
+    width: tabWidth,
+  }));
+
   return (
-    <View className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5">
-      <Text variant="label" tone="muted">
-        {label}
-      </Text>
-      <Text variant="bodyStrong" className={`mt-1 ${valueToneClass[variant]}`}>
-        {value}
-      </Text>
+    <View
+      className="border-b border-border/30"
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+    >
+      <View className="flex-row">
+        {tabs.map((label, index) => (
+          <Pressable
+            key={label}
+            onPress={() => {
+              void triggerHaptic('selection');
+              onTabChange(index);
+            }}
+            className="flex-1 py-3 items-center active:opacity-70"
+          >
+            <Text
+              variant="bodyStrong"
+              className={cn(activeIndex === index ? 'text-foreground' : 'text-muted-foreground')}
+            >
+              {label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <Animated.View
+        style={[
+          indicatorStyle,
+          {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            height: 2,
+            backgroundColor: themeColors.primary,
+            borderRadius: 1,
+          },
+        ]}
+      />
     </View>
   );
 }
 
 interface HomeScreenProps {
   scrollToTopToken?: number;
-  onPressAddTransaction?: () => void;
+  onOpenAccount?: (accountId: string) => void;
+  onOpenTransaction?: (transaction: TransactionWithRelations) => void;
 }
 
-export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: HomeScreenProps = {}) {
+export function HomeScreen({
+  scrollToTopToken = 0,
+  onOpenAccount,
+  onOpenTransaction,
+}: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const pagerRef = useRef<ScrollView | null>(null);
+  const { width: screenWidth } = useWindowDimensions();
   const {
-    transactions,
     recurringRules,
     categories,
     settings,
     currentMonthWage,
-    getDisplayValueForTransaction,
     isSimpleMode,
     simpleWalletId,
   } = useApp();
 
-  const walletTransactions = useMemo(() => {
-    if (!isSimpleMode || !simpleWalletId) return transactions;
-    return transactions.filter(
-      (tx) =>
-        tx.accountId === simpleWalletId ||
-        tx.fromAccountId === simpleWalletId ||
-        tx.toAccountId === simpleWalletId,
-    );
-  }, [transactions, isSimpleMode, simpleWalletId]);
+  const [activeHomeTabIndex, setActiveHomeTabIndex] = useState(0);
+  const [estimatorAmount, setEstimatorAmount] = useState('');
+
+  // Reset to overview if on accounts tab when entering simple mode
+  useEffect(() => {
+    if (isSimpleMode && activeHomeTabIndex === 2) {
+      setActiveHomeTabIndex(0);
+      pagerRef.current?.scrollTo({ x: 0, animated: false });
+    }
+  }, [isSimpleMode, activeHomeTabIndex]);
+
+  const homeTabs = useMemo(() => {
+    const base = [I18n.t('nav.home'), I18n.t('home.recurring.tab')];
+    if (!isSimpleMode) base.push(I18n.t('nav.account'));
+    return base;
+  }, [isSimpleMode]);
+
+  const switchTab = useCallback(
+    (index: number) => {
+      void triggerHaptic('selection');
+      setActiveHomeTabIndex(index);
+      pagerRef.current?.scrollTo({ x: index * screenWidth, animated: true });
+    },
+    [screenWidth],
+  );
+
+  const handlePagerScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const x = e.nativeEvent.contentOffset.x;
+      setActiveHomeTabIndex(Math.round(x / screenWidth));
+    },
+    [screenWidth],
+  );
+
 
   const walletRecurringRules = useMemo(() => {
     if (!isSimpleMode || !simpleWalletId) return recurringRules;
@@ -165,31 +220,9 @@ export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: Home
     );
   }, [recurringRules, isSimpleMode, simpleWalletId]);
 
-  const todayIso = dayKeyFromDateLocal(new Date());
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
-  const windowStartIso = dayKeyFromDateLocal(thirtyDaysAgo);
   const rate = currentMonthWage?.trueHourlyRate ?? 0;
   const hasHourlyRate = rate > 0;
   const isTimeMode = settings.displayMode === 'time';
-  const [estimatorAmount, setEstimatorAmount] = useState('');
-
-  const windowStats = useMemo(() => {
-    const windowTxns = walletTransactions.filter((tx) => {
-      const day = dayKeyFromIsoLocal(tx.date);
-      return day >= windowStartIso && day <= todayIso;
-    });
-    let income = 0;
-    let expense = 0;
-
-    windowTxns.forEach((tx) => {
-      const hoursValue = getDisplayValueForTransaction(tx);
-      if (tx.type === 'income') income += hoursValue;
-      if (tx.type === 'expense') expense += hoursValue;
-    });
-
-    return { income, expense, count: windowTxns.length };
-  }, [getDisplayValueForTransaction, walletTransactions, todayIso, windowStartIso]);
 
   const recurringInsights = useMemo(() => {
     const monthlyFactor = (
@@ -228,6 +261,7 @@ export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: Home
         return Math.abs(b.monthlyAmount) - Math.abs(a.monthlyAmount);
       });
   }, [hasHourlyRate, rate, walletRecurringRules, settings.hourRounding]);
+
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -247,28 +281,14 @@ export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: Home
     [activeRecurringInsights],
   );
 
-  const avgDailySpend = windowStats.expense / 30;
-  const spentHoursForMessaging = isTimeMode
-    ? windowStats.expense
-    : hasHourlyRate
-      ? amountToHoursByRate(windowStats.expense, rate, settings.hourRounding)
-      : 0;
-
-  const greeting = GREETINGS[getTimeOfDay()];
-  const windowMessage = hasHourlyRate
-    ? getWindowMessage(spentHoursForMessaging)
-    : I18n.t('home.window_message.no_rate');
-
-  const formatSignedValue = (val: number, isIncome: boolean) => {
-    if (isTimeMode) return `${val > 0 ? '+' : val < 0 ? '-' : ''}${formatHours(Math.abs(val))}`;
-    return formatAmount(val, settings, { showSign: true, isIncome });
-  };
   const estimatorNumeric = Number(estimatorAmount) || 0;
   const estimatorHours = hasHourlyRate
     ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding)
     : 0;
   const estimatorWorkdays = estimatorHours / 8;
   const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
+
+  const greeting = GREETINGS[getTimeOfDay()];
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -278,180 +298,156 @@ export function HomeScreen({ scrollToTopToken = 0, onPressAddTransaction }: Home
     return () => cancelAnimationFrame(frame);
   }, [scrollToTopToken]);
 
-  return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Greeting */}
-        <View className="px-5 pt-5 pb-2 flex-row items-start justify-between">
-          <View className="flex-1 pr-3">
-            <Text variant="heading">{greeting}</Text>
-            <Text variant="friendly" tone="muted" className="mt-1">
-              {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
-            </Text>
-          </View>
-          <DisplayModeToggle />
+  // ── Overview page ──────────────────────────────────────────────────────────
+  const overviewContent = (
+    <ScrollView
+      ref={scrollViewRef}
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      nestedScrollEnabled
+    >
+      <View className="px-5 pt-5 pb-2 flex-row items-start justify-between">
+        <View className="flex-1 pr-3">
+          <Text variant="heading">{greeting}</Text>
+          <Text variant="friendly" tone="muted" className="mt-1">
+            {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
+          </Text>
         </View>
+        <DisplayModeToggle />
+      </View>
 
-        <Animated.View entering={FadeIn.delay(80).duration(400)}>
-          <HeroAmountConverter
-            amount={estimatorAmount}
-            currencySymbol={settings.currencySymbol}
-            hasRate={hasHourlyRate}
-            hours={estimatorHours}
-            workdays={estimatorWorkdays}
-            workdaysPerWeek={estimatorWorkdaysPerWeek}
-            onChangeAmount={setEstimatorAmount}
-          />
-        </Animated.View>
+      <Animated.View entering={FadeIn.delay(80).duration(400)}>
+        <HeroAmountConverter
+          amount={estimatorAmount}
+          currencySymbol={settings.currencySymbol}
+          hasRate={hasHourlyRate}
+          hours={estimatorHours}
+          workdays={estimatorWorkdays}
+          workdaysPerWeek={estimatorWorkdaysPerWeek}
+          onChangeAmount={setEstimatorAmount}
+        />
+      </Animated.View>
+    </ScrollView>
+  );
 
-        {/* Hero Card */}
-        <Animated.View entering={FadeIn.duration(500).springify()} className="mx-5 mt-3">
-          <Card variant="default" className="px-4 py-4">
-            <Text variant="label" tone="muted">
-              {I18n.t('home.last_30_days_spent')}
-            </Text>
-            <Text variant="hero" className="mt-1">
+  // ── Recurring page ─────────────────────────────────────────────────────────
+  const recurringContent = (
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: LIST_BOTTOM_PADDING }}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
+    >
+      <View className="flex-row items-center justify-between mt-5 mb-3">
+        <Text variant="subheading">{I18n.t('home.recurring.title')}</Text>
+        {activeRecurringInsights.length > 0 && (
+          <View className="bg-destructive/10 rounded-full px-3 py-1">
+            <Text variant="caption" className="text-destructive">
               {isTimeMode
-                ? formatHours(Math.abs(windowStats.expense))
-                : formatAmount(windowStats.expense, settings, { showSign: false })}
+                ? formatHours(recurringTotalMonthlyHours)
+                : formatAmount(recurringTotalMonthlyAmount, settings, { showSign: false })}
+              {I18n.t('home.recurring.per_month')}
             </Text>
-            {windowStats.expense > 0 ? (
-              <Text variant="caption" tone="muted" className="mt-1">
-                {isTimeMode
-                  ? I18n.t('home.avg_per_day_transactions', {
-                      value: formatHours(avgDailySpend),
-                      count: windowStats.count,
-                    })
-                  : I18n.t('home.avg_per_day_transactions', {
-                      value: formatAmount(avgDailySpend, settings, { showSign: false }),
-                      count: windowStats.count,
-                    })}
-              </Text>
-            ) : null}
-
-            <View className="mt-3 flex-row gap-2">
-              <SummaryMetric
-                label={I18n.t('transactions.filters.earned')}
-                value={formatSignedValue(windowStats.income, true)}
-                variant="success"
-              />
-              <SummaryMetric
-                label={I18n.t('transactions.filters.spent')}
-                value={formatSignedValue(windowStats.expense, false)}
-                variant="destructive"
-              />
-            </View>
-
-            <View className="mt-3 rounded-xl bg-secondary/55 px-3 py-2.5">
-              <Text variant="label" tone="muted">
-                {windowMessage}
-              </Text>
-            </View>
-          </Card>
-        </Animated.View>
-
-        {/* Recurring Commitments */}
-        {walletRecurringRules.length > 0 ? <Animated.View entering={FadeIn.delay(320).duration(400)} className="mt-7 px-5">
-          {/* Section header with summary pill */}
-          <View className="flex-row items-center justify-between mb-3">
-            <Text variant="subheading">{I18n.t('home.recurring.title')}</Text>
-            {activeRecurringInsights.length > 0 && (
-              <View className="bg-destructive/10 rounded-full px-3 py-1">
-                <Text variant="caption" className="text-destructive">
-                  {isTimeMode
-                    ? formatHours(recurringTotalMonthlyHours)
-                    : formatAmount(recurringTotalMonthlyAmount, settings, { showSign: false })}
-                  {I18n.t('home.recurring.per_month')}
-                </Text>
-              </View>
-            )}
           </View>
+        )}
+      </View>
 
-          {recurringInsights.length > 0 ? (
-            <Card variant="default" className="p-0 overflow-hidden">
-              {recurringInsights.map((rule, index) => {
-                const category = rule.categoryId ? categoryById.get(rule.categoryId) : undefined;
-                const parentCategory = category?.parentId
-                  ? categoryById.get(category.parentId)
-                  : undefined;
-                const categoryIcon = category
-                  ? resolveCategoryIcon(category.icon, parentCategory?.icon ?? null)
-                  : '🔄';
-                const isLast = index === recurringInsights.length - 1;
-                return (
-                  <Animated.View
-                    key={rule.id}
-                    entering={FadeIn.delay(380 + index * 60).duration(350)}
+      {recurringInsights.length > 0 ? (
+        <Card variant="default" className="p-0 overflow-hidden">
+          {recurringInsights.map((rule, index) => {
+            const category = rule.categoryId ? categoryById.get(rule.categoryId) : undefined;
+            const parentCategory = category?.parentId
+              ? categoryById.get(category.parentId)
+              : undefined;
+            const categoryIcon = category
+              ? resolveCategoryIcon(category.icon, parentCategory?.icon ?? null)
+              : '🔄';
+            const isLast = index === recurringInsights.length - 1;
+            return (
+              <Animated.View
+                key={rule.id}
+                entering={FadeIn.delay(index * 60).duration(350)}
+              >
+                <View
+                  className={`flex-row items-center px-4 py-3 ${!isLast ? 'border-b border-border/15' : ''}`}
+                  style={!rule.isActive ? { opacity: 0.45 } : undefined}
+                >
+                  <View
+                    className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
+                    style={{ backgroundColor: themeColors.primary + '18' }}
                   >
-                    <View
-                      className={`flex-row items-center px-4 py-3 ${!isLast ? 'border-b border-border/15' : ''}`}
-                      style={!rule.isActive ? { opacity: 0.45 } : undefined}
-                    >
-                      <View
-                        className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
-                        style={{ backgroundColor: themeColors.primary + '18' }}
-                      >
-                        <Text style={{ fontSize: 18 }}>{categoryIcon}</Text>
-                      </View>
-                      <View className="flex-1 mr-2">
-                        <Text variant="bodyStrong" numberOfLines={1}>
-                          {rule.name}
-                        </Text>
-                        <View className="flex-row items-center mt-0.5">
-                          {rule.isActive ? (
-                            <BlinkingDot color={themeColors.success} />
-                          ) : (
-                            <View
-                              className="w-1.5 h-1.5 rounded-full mr-1.5"
-                              style={{ backgroundColor: themeColors.textMuted }}
-                            />
-                          )}
-                          <Text variant="label" tone="muted">
-                            {formatCadence(rule.recurrencePattern, rule.recurrenceInterval)}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text
-                        variant="caption"
-                        className={rule.isActive ? 'text-destructive' : 'text-muted-foreground'}
-                      >
-                        {isTimeMode
-                          ? formatHours(rule.monthlyHours)
-                          : formatAmount(rule.monthlyAmount, settings, { showSign: false })}
+                    <Text style={{ fontSize: 18 }}>{categoryIcon}</Text>
+                  </View>
+                  <View className="flex-1 mr-2">
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {rule.name}
+                    </Text>
+                    <View className="flex-row items-center mt-0.5">
+                      {rule.isActive ? (
+                        <BlinkingDot color={themeColors.success} />
+                      ) : (
+                        <View
+                          className="w-1.5 h-1.5 rounded-full mr-1.5"
+                          style={{ backgroundColor: themeColors.textMuted }}
+                        />
+                      )}
+                      <Text variant="label" tone="muted">
+                        {formatCadence(rule.recurrencePattern, rule.recurrenceInterval)}
                       </Text>
                     </View>
-                  </Animated.View>
-                );
-              })}
-            </Card>
-          ) : (
-            <EmptyState
-              title={I18n.t('home.recurring.none_title')}
-              message={I18n.t('home.recurring.none_message')}
-              mascotMood="curious"
-            />
-          )}
-        </Animated.View> : null}
-      </ScrollView>
+                  </View>
+                  <Text
+                    variant="caption"
+                    className={rule.isActive ? 'text-destructive' : 'text-muted-foreground'}
+                  >
+                    {isTimeMode
+                      ? formatHours(rule.monthlyHours)
+                      : formatAmount(rule.monthlyAmount, settings, { showSign: false })}
+                  </Text>
+                </View>
+              </Animated.View>
+            );
+          })}
+        </Card>
+      ) : (
+        <EmptyState
+          title={I18n.t('home.recurring.none_title')}
+          message={I18n.t('home.recurring.none_message')}
+          mascotMood="curious"
+        />
+      )}
+    </ScrollView>
+  );
 
-      {onPressAddTransaction ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-          onPress={() => {
-            void triggerHaptic('medium');
-            onPressAddTransaction();
-          }}
-          className="absolute right-5 bottom-6 h-14 w-14 rounded-full bg-primary items-center justify-center border border-primary/45 shadow-soft"
-        >
-          <Plus size={24} color="#FFFFFF" />
-        </Pressable>
-      ) : null}
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <HomeTabs tabs={homeTabs} activeIndex={activeHomeTabIndex} onTabChange={switchTab} />
+
+      <ScrollView
+        ref={pagerRef}
+        horizontal
+        pagingEnabled
+        directionalLockEnabled
+        bounces={false}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handlePagerScrollEnd}
+        decelerationRate="fast"
+        style={{ flex: 1 }}
+      >
+        <View style={{ width: screenWidth, flex: 1 }}>{overviewContent}</View>
+        <View style={{ width: screenWidth, flex: 1 }}>{recurringContent}</View>
+        {!isSimpleMode && (
+          <View style={{ width: screenWidth, flex: 1 }}>
+            <AccountsScreen
+              safeAreaEdges={[]}
+              onOpenAccount={onOpenAccount}
+              onOpenTransaction={onOpenTransaction}
+            />
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

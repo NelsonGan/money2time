@@ -1,4 +1,4 @@
-import { BarChart2, House, Landmark, Plus, Settings, Wallet } from 'lucide-react-native';
+import { BarChart2, House, Plus, Settings, Wallet } from 'lucide-react-native';
 import React, { memo, useCallback } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -12,7 +12,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-export type TabName = 'transactions' | 'account' | 'home' | 'insights' | 'settings';
+export type TabName = 'transactions' | 'home' | 'insights' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabName;
@@ -23,7 +23,6 @@ interface BottomNavProps {
 
 const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
   { name: 'transactions', labelKey: 'nav.activity', icon: Wallet },
-  { name: 'account', labelKey: 'nav.account', icon: Landmark },
   { name: 'home', labelKey: 'nav.home', icon: House },
   { name: 'insights', labelKey: 'nav.insights', icon: BarChart2 },
   { name: 'settings', labelKey: 'nav.settings', icon: Settings },
