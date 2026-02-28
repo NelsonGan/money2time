@@ -72,7 +72,7 @@ function buildSort(sortBy: TransactionFilters['sortBy']) {
     case 'amount_asc':
       return [asc(transactionsTable.amount)];
     default:
-      return [desc(transactionsTable.date), desc(transactionsTable.createdAt)];
+      return [sql`substr(${transactionsTable.date}, 1, 10) desc`, desc(transactionsTable.createdAt)];
   }
 }
 
@@ -318,7 +318,7 @@ class TransactionsRepository {
           end ? lte(transactionsTable.date, end) : undefined,
         ),
       )
-      .orderBy(desc(transactionsTable.date), desc(transactionsTable.createdAt))
+      .orderBy(sql`substr(${transactionsTable.date}, 1, 10) desc`, desc(transactionsTable.createdAt))
       .all()
       .map(toTransaction);
 

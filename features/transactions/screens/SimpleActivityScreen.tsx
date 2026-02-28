@@ -114,7 +114,7 @@ interface SimpleActivityScreenProps {
   scrollToTopToken?: number;
   focusMonthKey?: string | null;
   focusMonthToken?: number;
-  onPressAddTransaction: () => void;
+  onPressAddTransaction?: () => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
@@ -422,17 +422,19 @@ export function SimpleActivityScreen({
         />
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-        onPress={() => {
-          void triggerHaptic('medium');
-          onPressAddTransaction();
-        }}
-        className="absolute right-5 bottom-6 h-14 w-14 rounded-full bg-primary items-center justify-center border border-primary/45 shadow-soft"
-      >
-        <Plus size={24} color="#FFFFFF" />
-      </Pressable>
+      {onPressAddTransaction ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+          onPress={() => {
+            void triggerHaptic('medium');
+            onPressAddTransaction();
+          }}
+          className="absolute right-5 bottom-6 h-14 w-14 rounded-full bg-primary items-center justify-center border border-primary/45 shadow-soft"
+        >
+          <Plus size={24} color="#FFFFFF" />
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }

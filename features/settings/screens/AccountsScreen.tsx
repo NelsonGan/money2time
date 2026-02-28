@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, FlatList, type LayoutChangeEvent, Pressable, ScrollView, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -808,6 +808,7 @@ interface AccountsScreenProps {
   onOpenAccount?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   useNativeBackGesture?: boolean;
+  safeAreaEdges?: Edge[];
 }
 
 export function AccountsScreen({
@@ -819,6 +820,7 @@ export function AccountsScreen({
   onOpenAccount,
   onOpenTransaction,
   useNativeBackGesture = false,
+  safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const { persistOrder } = useDebouncedPersistence(500);
@@ -1445,7 +1447,7 @@ export function AccountsScreen({
       : I18n.t('accounts.include_option_hide');
 
     return withBackGesture(
-      <SettingsPageLayout>
+      <SettingsPageLayout edges={safeAreaEdges}>
           <View className="flex-1">
             <ActivityTransactionList
               transactions={txns}
@@ -1771,7 +1773,7 @@ export function AccountsScreen({
   _acctCreditLabel = creditLabel;
 
   return withBackGesture(
-    <SettingsPageLayout>
+    <SettingsPageLayout edges={safeAreaEdges}>
         {managementOnly ? (
           <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
             <SettingsHeader
