@@ -216,7 +216,7 @@ export function SelectField({
             className="rounded-t-[28px] border-t border-border/40 bg-background px-5 pt-3 pb-7"
             style={{
               transform: [{ translateY }],
-              maxHeight: fullHeight ? windowHeight : Math.max(320, Math.min(windowHeight * 0.74, 620)),
+              maxHeight: fullHeight ? windowHeight * 0.92 : Math.max(320, Math.min(windowHeight * 0.74, 620)),
             }}
             onLayout={(event) => {
               const next = event.nativeEvent.layout.height;
@@ -256,7 +256,7 @@ export function SelectField({
                       }}
                       className={cn(
                         optionsLayout === 'list'
-                          ? 'w-full min-h-[52px] rounded-2xl border px-3 py-2 flex-row items-center gap-3'
+                          ? 'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row items-start gap-3'
                           : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
                         isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
                       )}
@@ -276,16 +276,20 @@ export function SelectField({
                             </View>
                           ) : null}
                           <View className="flex-1">
-                            <Text variant="caption" numberOfLines={1} className="pr-2">
+                            <Text variant="caption" className="pr-2">
                               {option.label}
                             </Text>
                             {option.description ? (
-                              <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5 pr-2">
+                              <Text variant="label" tone="muted" className="mt-0.5 pr-2">
                                 {option.description}
                               </Text>
                             ) : null}
                           </View>
-                          {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
+                          {isSelected ? (
+                            <View className="pt-0.5">
+                              <Check size={16} color={themeColors.primary} />
+                            </View>
+                          ) : null}
                         </>
                       ) : (
                         <>

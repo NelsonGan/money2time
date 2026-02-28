@@ -80,6 +80,8 @@ const en = {
     },
     converter: {
       title: 'Money to Hours',
+      description: 'Enter a price to see how many hours of work it costs',
+      tap_hint: 'Tap to enter an amount',
       of_work: '≈ {{value}} of work',
       exact_hours: '{{value}} hours',
       workday_equivalent: '{{exact}} · about {{duration}}',
@@ -99,6 +101,7 @@ const en = {
       monthly_outflow: '{{value}} monthly outflow',
       no_active: 'No active recurring commitments',
       paused: 'Paused',
+      tab: 'Recurring',
       per_month: '/mo',
       more: '+{{count}} more',
       none_title: 'No recurring commitments yet',
