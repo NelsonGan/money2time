@@ -162,7 +162,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
                         >
                           {parent.name}
                         </Text>
-                        {isParentSelected && !hasSelectedChild && !(allowParentSelection && children.length > 0) ? (
+                        {isParentSelected &&
+                        !hasSelectedChild &&
+                        !(allowParentSelection && children.length > 0) ? (
                           <Check size={14} color={themeColors.primary} />
                         ) : children.length > 0 ? (
                           <ChevronDown

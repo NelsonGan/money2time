@@ -1,6 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Alert, FlatList, type ListRenderItem,Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -40,6 +40,10 @@ const MONTH_OPTIONS = [
   { value: '11', label: 'November' },
   { value: '12', label: 'December' },
 ];
+const HISTORY_LIST_CONTENT_STYLE = {
+  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+} as const;
 
 function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, MonthlyWageSettings>();
@@ -70,16 +74,13 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
-  const [pickerMonth, setPickerMonth] = useState(
-    () => String(new Date().getMonth() + 1).padStart(2, '0'),
+  const [pickerMonth, setPickerMonth] = useState(() =>
+    String(new Date().getMonth() + 1).padStart(2, '0'),
   );
 
   const currentMonthKey = useMemo(() => monthKeyFromDateLocal(new Date()), []);
 
-  const normalizedHistory = useMemo(
-    () => normalizeAndDedupeHistory(monthlyWages),
-    [monthlyWages],
-  );
+  const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
 
   const historyDesc = useMemo(
     () => [...normalizedHistory].sort((a, b) => b.month.localeCompare(a.month)),
@@ -95,40 +96,46 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     );
   }, [normalizedHistory, pickerYear]);
 
-  const handleEditEntry = (item: MonthlyWageSettings) => {
-    void triggerHaptic('selection');
-    onOpenWageCalculator({
-      monthKey: item.month,
-      initialConfig: {
-        wageType: item.wageType,
-        wageAmount: item.wageAmount,
-        hoursWorkedPerWeek: item.hoursWorkedPerWeek,
-        workdaysPerWeek: item.workdaysPerWeek,
-        commuteMinutesPerWorkday: item.commuteMinutesPerWorkday,
-      },
-    });
-  };
-
-  const handleDeleteEntry = (item: MonthlyWageSettings) => {
-    void triggerHaptic('warning');
-    Alert.alert(
-      I18n.t('settings.hourly_delete_title'),
-      I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month) }),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            void triggerHaptic('warning');
-            deleteWageConfigForMonth(item.month);
-          },
+  const handleEditEntry = useCallback(
+    (item: MonthlyWageSettings) => {
+      void triggerHaptic('selection');
+      onOpenWageCalculator({
+        monthKey: item.month,
+        initialConfig: {
+          wageType: item.wageType,
+          wageAmount: item.wageAmount,
+          hoursWorkedPerWeek: item.hoursWorkedPerWeek,
+          workdaysPerWeek: item.workdaysPerWeek,
+          commuteMinutesPerWorkday: item.commuteMinutesPerWorkday,
         },
-      ],
-    );
-  };
+      });
+    },
+    [onOpenWageCalculator],
+  );
 
-  const handleAddConfirm = () => {
+  const handleDeleteEntry = useCallback(
+    (item: MonthlyWageSettings) => {
+      void triggerHaptic('warning');
+      Alert.alert(
+        I18n.t('settings.hourly_delete_title'),
+        I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month) }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.delete'),
+            style: 'destructive',
+            onPress: () => {
+              void triggerHaptic('warning');
+              deleteWageConfigForMonth(item.month);
+            },
+          },
+        ],
+      );
+    },
+    [deleteWageConfigForMonth],
+  );
+
+  const handleAddConfirm = useCallback(() => {
     const monthKey = normalizeMonthKey(`${pickerYear}-${pickerMonth}`);
     const existing = normalizedHistory.find((item) => item.month === monthKey);
     if (existing) {
@@ -150,7 +157,55 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     }
     setShowAddModal(false);
     onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
-  };
+  }, [handleEditEntry, normalizedHistory, onOpenWageCalculator, pickerMonth, pickerYear]);
+
+  const keyExtractor = useCallback((item: MonthlyWageSettings) => item.id, []);
+
+  const renderHistoryItem = useCallback<ListRenderItem<MonthlyWageSettings>>(
+    ({ item }) => {
+      const isCurrentMonth = item.month === currentMonthKey;
+      return (
+        <View
+          className={`flex-row items-center gap-2.5 mb-2 rounded-2xl border px-3.5 py-3 ${
+            isCurrentMonth ? 'border-success/35 bg-success/8' : 'border-border/35 bg-card'
+          }`}
+        >
+          <View className="flex-1 gap-0.5">
+            <Text variant="caption">{formatMonthLabel(item.month)}</Text>
+            {isCurrentMonth ? (
+              <Text variant="label" className="text-success">
+                {I18n.t('settings.hourly_badge_current')}
+              </Text>
+            ) : null}
+            <Text variant="subheading" className="text-primary mt-1">
+              {settings.currencySymbol}
+              {item.trueHourlyRate.toFixed(2)}/hr
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => handleEditEntry(item)}
+            className="h-9 w-9 rounded-full items-center justify-center border border-border/40 bg-secondary"
+          >
+            <Pencil size={14} color={themeColors.textMuted} />
+          </Pressable>
+          <Pressable
+            onPress={() => handleDeleteEntry(item)}
+            className="h-9 w-9 rounded-full items-center justify-center border border-destructive/20 bg-destructive/10"
+          >
+            <Trash2 size={14} color={themeColors.coral} />
+          </Pressable>
+        </View>
+      );
+    },
+    [
+      currentMonthKey,
+      handleDeleteEntry,
+      handleEditEntry,
+      settings.currencySymbol,
+      themeColors.coral,
+      themeColors.textMuted,
+    ],
+  );
 
   return (
     <SettingsPageLayout>
@@ -176,48 +231,9 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
 
       <FlatList
         data={historyDesc}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-        }}
-        renderItem={({ item }) => {
-          const isCurrentMonth = item.month === currentMonthKey;
-          return (
-            <View
-              className={`flex-row items-center gap-2.5 mb-2 rounded-2xl border px-3.5 py-3 ${
-                isCurrentMonth
-                  ? 'border-success/35 bg-success/8'
-                  : 'border-border/35 bg-card'
-              }`}
-            >
-              <View className="flex-1 gap-0.5">
-                <Text variant="caption">{formatMonthLabel(item.month)}</Text>
-                {isCurrentMonth ? (
-                  <Text variant="label" className="text-success">
-                    {I18n.t('settings.hourly_badge_current')}
-                  </Text>
-                ) : null}
-                <Text variant="subheading" className="text-primary mt-1">
-                  {settings.currencySymbol}
-                  {item.trueHourlyRate.toFixed(2)}/hr
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => handleEditEntry(item)}
-                className="h-9 w-9 rounded-full items-center justify-center border border-border/40 bg-secondary"
-              >
-                <Pencil size={14} color={themeColors.textMuted} />
-              </Pressable>
-              <Pressable
-                onPress={() => handleDeleteEntry(item)}
-                className="h-9 w-9 rounded-full items-center justify-center border border-destructive/20 bg-destructive/10"
-              >
-                <Trash2 size={14} color={themeColors.coral} />
-              </Pressable>
-            </View>
-          );
-        }}
+        keyExtractor={keyExtractor}
+        contentContainerStyle={HISTORY_LIST_CONTENT_STYLE}
+        renderItem={renderHistoryItem}
         ListEmptyComponent={
           <View className="items-center py-12">
             <Text variant="friendly" tone="muted">

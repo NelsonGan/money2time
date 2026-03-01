@@ -1,3 +1,4 @@
+import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
@@ -17,7 +18,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Card, Text } from '~/components/ui';
+import { Button, Card, Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { HeroAmountConverter } from '~/features/home/components';
@@ -30,6 +31,7 @@ import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { amountToHoursByRate, formatAmount, formatHours } from '~/utils/formatters';
+import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
 
 const GREETINGS: Record<string, string> = {
   morning: I18n.t('home.greeting.morning'),
@@ -155,41 +157,39 @@ interface HomeScreenProps {
   scrollToTopToken?: number;
   onOpenAccount?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
+  onOpenSettingsScreen?: (screen: 'Accounts' | 'Recurring') => void;
 }
 
 export function HomeScreen({
   scrollToTopToken = 0,
   onOpenAccount,
   onOpenTransaction,
+  onOpenSettingsScreen,
 }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const pagerRef = useRef<ScrollView | null>(null);
   const { width: screenWidth } = useWindowDimensions();
-  const {
-    recurringRules,
-    categories,
-    settings,
-    currentMonthWage,
-    isSimpleMode,
-    simpleWalletId,
-  } = useApp();
+  const { recurringRules, categories, settings, currentMonthWage, isSimpleMode, simpleWalletId } =
+    useApp();
 
-  const [activeHomeTabIndex, setActiveHomeTabIndex] = useState(0);
+  // Power mode: Accounts(0), Home(1), Recurring(2) — default center (1)
+  // Simple mode: Home(0), Recurring(1) — default (0)
+  const defaultTabIndex = isSimpleMode ? 0 : 1;
+  const [activeHomeTabIndex, setActiveHomeTabIndex] = useState(defaultTabIndex);
   const [estimatorAmount, setEstimatorAmount] = useState('');
 
-  // Reset to overview if on accounts tab when entering simple mode
+  // Reset to home if on out-of-range tab when entering simple mode
   useEffect(() => {
-    if (isSimpleMode && activeHomeTabIndex === 2) {
+    if (isSimpleMode && activeHomeTabIndex > 1) {
       setActiveHomeTabIndex(0);
       pagerRef.current?.scrollTo({ x: 0, animated: false });
     }
   }, [isSimpleMode, activeHomeTabIndex]);
 
   const homeTabs = useMemo(() => {
-    const base = [I18n.t('nav.home'), I18n.t('home.recurring.tab')];
-    if (!isSimpleMode) base.push(I18n.t('nav.account'));
-    return base;
+    if (isSimpleMode) return [I18n.t('nav.home'), I18n.t('home.recurring.tab')];
+    return [I18n.t('nav.account'), I18n.t('nav.home'), I18n.t('home.recurring.tab')];
   }, [isSimpleMode]);
 
   const switchTab = useCallback(
@@ -209,15 +209,9 @@ export function HomeScreen({
     [screenWidth],
   );
 
-
   const walletRecurringRules = useMemo(() => {
-    if (!isSimpleMode || !simpleWalletId) return recurringRules;
-    return recurringRules.filter(
-      (rule) =>
-        rule.accountId === simpleWalletId ||
-        rule.fromAccountId === simpleWalletId ||
-        rule.toAccountId === simpleWalletId,
-    );
+    if (!isSimpleMode) return recurringRules;
+    return filterRecurringRulesByWallet(recurringRules, simpleWalletId);
   }, [recurringRules, isSimpleMode, simpleWalletId]);
 
   const rate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -266,21 +260,6 @@ export function HomeScreen({
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
   );
-
-  const activeRecurringInsights = useMemo(
-    () => recurringInsights.filter((item) => item.isActive),
-    [recurringInsights],
-  );
-
-  const recurringTotalMonthlyAmount = useMemo(
-    () => activeRecurringInsights.reduce((sum, item) => sum + item.monthlyAmount, 0),
-    [activeRecurringInsights],
-  );
-  const recurringTotalMonthlyHours = useMemo(
-    () => activeRecurringInsights.reduce((sum, item) => sum + item.monthlyHours, 0),
-    [activeRecurringInsights],
-  );
-
   const estimatorNumeric = Number(estimatorAmount) || 0;
   const estimatorHours = hasHourlyRate
     ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding)
@@ -340,17 +319,22 @@ export function HomeScreen({
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled
     >
-      <View className="flex-row items-center justify-between mt-5 mb-3">
-        <Text variant="subheading">{I18n.t('home.recurring.title')}</Text>
-        {activeRecurringInsights.length > 0 && (
-          <View className="bg-destructive/10 rounded-full px-3 py-1">
-            <Text variant="caption" className="text-destructive">
-              {isTimeMode
-                ? formatHours(recurringTotalMonthlyHours)
-                : formatAmount(recurringTotalMonthlyAmount, settings, { showSign: false })}
-              {I18n.t('home.recurring.per_month')}
-            </Text>
-          </View>
+      <View className="flex-row items-start justify-between mt-5 mb-3 gap-3">
+        <View className="flex-1">
+          <Text variant="heading">{I18n.t('home.recurring.title')}</Text>
+        </View>
+        {onOpenSettingsScreen && (
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-10 w-10 rounded-full"
+            onPress={() => {
+              void triggerHaptic('selection');
+              onOpenSettingsScreen('Recurring');
+            }}
+          >
+            <Settings size={18} color={themeColors.textMuted} />
+          </Button>
         )}
       </View>
 
@@ -366,10 +350,7 @@ export function HomeScreen({
               : '🔄';
             const isLast = index === recurringInsights.length - 1;
             return (
-              <Animated.View
-                key={rule.id}
-                entering={FadeIn.delay(index * 60).duration(350)}
-              >
+              <Animated.View key={rule.id} entering={FadeIn.delay(index * 60).duration(350)}>
                 <View
                   className={`flex-row items-center px-4 py-3 ${!isLast ? 'border-b border-border/15' : ''}`}
                   style={!rule.isActive ? { opacity: 0.45 } : undefined}
@@ -435,18 +416,22 @@ export function HomeScreen({
         onMomentumScrollEnd={handlePagerScrollEnd}
         decelerationRate="fast"
         style={{ flex: 1 }}
+        contentOffset={{ x: defaultTabIndex * screenWidth, y: 0 }}
       >
-        <View style={{ width: screenWidth, flex: 1 }}>{overviewContent}</View>
-        <View style={{ width: screenWidth, flex: 1 }}>{recurringContent}</View>
         {!isSimpleMode && (
           <View style={{ width: screenWidth, flex: 1 }}>
             <AccountsScreen
               safeAreaEdges={[]}
               onOpenAccount={onOpenAccount}
               onOpenTransaction={onOpenTransaction}
+              onOpenSettings={
+                onOpenSettingsScreen ? () => onOpenSettingsScreen('Accounts') : undefined
+              }
             />
           </View>
         )}
+        <View style={{ width: screenWidth, flex: 1 }}>{overviewContent}</View>
+        <View style={{ width: screenWidth, flex: 1 }}>{recurringContent}</View>
       </ScrollView>
     </SafeAreaView>
   );

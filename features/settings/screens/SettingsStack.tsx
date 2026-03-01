@@ -8,9 +8,7 @@ import {
   SettingsStackNavigator,
   type SettingsStackRouteProps,
 } from '~/navigation/settingsStack';
-import {
-  SHARED_NATIVE_STACK_OPTIONS,
-} from '~/navigation/stackOptions';
+import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 
 import { AccountsScreen } from './AccountsScreen';

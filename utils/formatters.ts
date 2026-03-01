@@ -1,7 +1,8 @@
 import { getLocales } from 'expo-localization';
+
 import { DEFAULT_CURRENCY_SYMBOL, MAJOR_CURRENCIES } from '~/constants/appDefaults';
-import type { DateRange, UserSettings, WageConfig } from '~/types';
 import { I18n } from '~/lib/i18n';
+import type { DateRange, UserSettings, WageConfig } from '~/types';
 
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode' | 'hourRounding'>;
 
@@ -89,6 +90,36 @@ export function normalizeMonthKey(month: string): string {
   if (!Number.isFinite(monthValue)) return trimmed;
   if (monthValue < 1 || monthValue > 12) return trimmed;
   return `${year}-${String(monthValue).padStart(2, '0')}`;
+}
+
+export function startOfMonthDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+export function addMonthsAtMonthStart(date: Date, offset: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + offset, 1);
+}
+
+export function monthOffsetFromAnchorDate(anchor: Date, target: Date): number {
+  return (
+    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
+  );
+}
+
+export function parseMonthKey(month: string): Date | null {
+  const normalizedMonth = normalizeMonthKey(month);
+  const match = normalizedMonth.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const monthValue = Number(match[2]);
+  if (!Number.isInteger(year) || !Number.isInteger(monthValue)) return null;
+  if (monthValue < 1 || monthValue > 12) return null;
+  return new Date(year, monthValue - 1, 1);
+}
+
+export function formatMonthYearLabel(date: Date, locale = 'en-GB'): string {
+  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 export function amountToHoursByRate(

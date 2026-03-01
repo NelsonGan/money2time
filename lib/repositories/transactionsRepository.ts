@@ -1,4 +1,4 @@
-import { and, asc,desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import { getDb, getSQLite } from '~/lib/db/client';
@@ -72,7 +72,10 @@ function buildSort(sortBy: TransactionFilters['sortBy']) {
     case 'amount_asc':
       return [asc(transactionsTable.amount)];
     default:
-      return [sql`substr(${transactionsTable.date}, 1, 10) desc`, desc(transactionsTable.createdAt)];
+      return [
+        sql`substr(${transactionsTable.date}, 1, 10) desc`,
+        desc(transactionsTable.createdAt),
+      ];
   }
 }
 
@@ -318,7 +321,10 @@ class TransactionsRepository {
           end ? lte(transactionsTable.date, end) : undefined,
         ),
       )
-      .orderBy(sql`substr(${transactionsTable.date}, 1, 10) desc`, desc(transactionsTable.createdAt))
+      .orderBy(
+        sql`substr(${transactionsTable.date}, 1, 10) desc`,
+        desc(transactionsTable.createdAt),
+      )
       .all()
       .map(toTransaction);
 
