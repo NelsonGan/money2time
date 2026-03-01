@@ -41,12 +41,14 @@ interface NumpadPanelProps {
 const NumpadKey = React.memo(function NumpadKey({
   value,
   onPress,
+  onLongPress,
   variant = 'default',
   icon,
   className,
 }: {
   value: KeyValue;
   onPress: (key: KeyValue) => void;
+  onLongPress?: () => void;
   variant?: 'default' | 'operator' | 'utility' | 'confirm';
   icon?: React.ReactNode;
   className?: string;
@@ -99,6 +101,7 @@ const NumpadKey = React.memo(function NumpadKey({
       <Animated.View style={pressAnimatedStyle}>
         <Pressable
           onPressIn={handlePressIn}
+          onLongPress={onLongPress}
           onPressOut={handlePressOut}
           unstable_pressDelay={0}
           android_disableSound
@@ -214,6 +217,9 @@ export function NumpadPanel({
   );
 
   const keyHeight = compact ? 'h-[48px]' : 'h-[56px]';
+  const handleDeleteLongPress = useCallback(() => {
+    handleKeyPress('C');
+  }, [handleKeyPress]);
 
   return (
     <View className="flex-1 px-4 pt-2 pb-2">
@@ -239,6 +245,7 @@ export function NumpadPanel({
             value="del"
             variant="utility"
             onPress={handleKeyPress}
+            onLongPress={handleDeleteLongPress}
             icon={<Delete size={16} color={themeColors.textMuted} />}
             className={keyHeight}
           />

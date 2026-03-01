@@ -17,11 +17,6 @@ export type SettingsStackParamList = {
   Recurring: undefined;
 };
 
-export type SettingsScreenName = Exclude<
-  keyof SettingsStackParamList,
-  'CategoriesSubcategories' | 'WageCalculator'
->;
-
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
 export type SettingsStackRouteProps<RouteName extends keyof SettingsStackParamList> =
   NativeStackScreenProps<SettingsStackParamList, RouteName>;

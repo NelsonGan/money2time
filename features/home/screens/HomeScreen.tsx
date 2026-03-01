@@ -287,14 +287,11 @@ export function HomeScreen({
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
     >
-      <View className="px-5 pt-5 pb-2 flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          <Text variant="heading">{greeting}</Text>
-          <Text variant="friendly" tone="muted" className="mt-1">
-            {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
-          </Text>
-        </View>
-        <DisplayModeToggle />
+      <View className="px-5 pt-5 pb-2">
+        <Text variant="heading">{greeting}</Text>
+        <Text variant="friendly" tone="muted" className="mt-1">
+          {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
+        </Text>
       </View>
 
       <Animated.View entering={FadeIn.delay(80).duration(400)}>
@@ -404,6 +401,10 @@ export function HomeScreen({
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
+        <Text variant="subheading">{I18n.t('app.name')}</Text>
+        <DisplayModeToggle />
+      </View>
       <HomeTabs tabs={homeTabs} activeIndex={activeHomeTabIndex} onTabChange={switchTab} />
 
       <ScrollView
