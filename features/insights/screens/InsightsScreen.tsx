@@ -582,13 +582,13 @@ function getPeriodRange(
   return toRange(start, end);
 }
 
-function periodLabel(preset: PeriodPreset, range: { start: string; end: string }) {
+function periodLabel(preset: PeriodPreset, range: { start: string; end: string }, locale: string) {
   const start = new Date(range.start);
   const end = new Date(range.end);
   if (preset === 'month')
-    return start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  if (preset === 'year') return start.toLocaleDateString('en-US', { year: 'numeric' });
-  return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    return start.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+  if (preset === 'year') return start.toLocaleDateString(locale, { year: 'numeric' });
+  return `${start.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
 }
 
 function rangeLengthDays(range: { start: string; end: string }) {
@@ -600,7 +600,15 @@ function rangeLengthDays(range: { start: string; end: string }) {
   );
 }
 
-const CALENDAR_WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+function getCalendarWeekdayLabels(locale: string) {
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+  const monday = new Date(Date.UTC(2024, 0, 1)); // Monday
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(monday);
+    date.setUTCDate(monday.getUTCDate() + index);
+    return formatter.format(date);
+  });
+}
 
 function dayKeyToUtcDate(dayKey: string): Date | null {
   const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
@@ -625,10 +633,10 @@ function monthStartUtcDateFromMonthKey(monthKey: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function monthLabelFromMonthKey(monthKey: string) {
+function monthLabelFromMonthKey(monthKey: string, locale: string) {
   const monthStart = monthStartUtcDateFromMonthKey(monthKey);
   if (!monthStart) return monthKey;
-  return monthStart.toLocaleDateString('en-US', {
+  return monthStart.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
     timeZone: 'UTC',
@@ -648,10 +656,10 @@ function monthKeyFromUtcDate(date: Date) {
   return `${year}-${month}`;
 }
 
-function formatCalendarDate(dayKey: string) {
+function formatCalendarDate(dayKey: string, locale: string) {
   const dayDate = dayKeyToUtcDate(dayKey);
   if (!dayDate) return dayKey;
-  return dayDate.toLocaleDateString('en-US', {
+  return dayDate.toLocaleDateString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -1365,6 +1373,7 @@ export function InsightsScreen({
   }, [rawTransactions, isSimpleMode, simpleWalletId]);
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('month');
   const [anchorDate, setAnchorDate] = useState(() => startOfMonthDate(new Date()));
@@ -1454,8 +1463,11 @@ export function InsightsScreen({
         description: String(I18n.t(`insights.${type}_description`)),
         icon: INSIGHT_ICONS[type],
       })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isSimpleMode],
+    [visibleInsightTypes],
+  );
+  const calendarWeekdayLabels = useMemo(
+    () => getCalendarWeekdayLabels(activeLocale),
+    [activeLocale],
   );
 
   useEffect(() => {
@@ -1751,7 +1763,10 @@ export function InsightsScreen({
             const monthDate = new Date(Date.UTC(year, monthIndex, 1));
             return {
               monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
-              label: monthDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
+              label: monthDate.toLocaleDateString(activeLocale, {
+                month: 'short',
+                timeZone: 'UTC',
+              }),
               totalAssets: 0,
             };
           },
@@ -1976,7 +1991,7 @@ export function InsightsScreen({
           const cursor = new Date(firstMonthDate);
           while (monthKeyFromUtcDate(cursor) <= endMonthKey) {
             const monthKey = monthKeyFromUtcDate(cursor);
-            const monthLabel = monthLabelFromMonthKey(monthKey);
+            const monthLabel = monthLabelFromMonthKey(monthKey, activeLocale);
             const daysInMonth = new Date(
               Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 0),
             ).getUTCDate();
@@ -2268,7 +2283,7 @@ export function InsightsScreen({
           { length: 12 },
           (_, monthIndex) => {
             const monthDate = new Date(Date.UTC(savingsYear, monthIndex, 1));
-            const monthLabel = monthDate.toLocaleDateString('en-US', {
+            const monthLabel = monthDate.toLocaleDateString(activeLocale, {
               month: 'short',
               timeZone: 'UTC',
             });
@@ -2396,6 +2411,7 @@ export function InsightsScreen({
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       monthlyWages,
+      activeLocale,
       settings.displayMode,
       settings.hourRounding,
     ],
@@ -2450,8 +2466,8 @@ export function InsightsScreen({
   const currentCalendarDefaultDayKey =
     currentPage.kind === 'calendar' ? currentPage.defaultSelectedDayKey : '';
   const activePeriodLabel = useMemo(
-    () => periodLabel(effectivePeriodPreset, headerPreviewRange),
-    [effectivePeriodPreset, headerPreviewRange],
+    () => periodLabel(effectivePeriodPreset, headerPreviewRange, activeLocale),
+    [activeLocale, effectivePeriodPreset, headerPreviewRange],
   );
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
@@ -2474,7 +2490,8 @@ export function InsightsScreen({
     [settings],
   );
   const formatAxisCurrencyValue = useCallback(
-    (value: number) => formatCompactCurrency(Math.abs(value), settings.currencySymbol),
+    (value: number) =>
+      `${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`,
     [settings.currencySymbol],
   );
 
@@ -3049,7 +3066,7 @@ export function InsightsScreen({
       transactions: [],
     };
     const selectedDayTransactions = selectedDayData.transactions;
-    const selectedDayLabel = formatCalendarDate(selectedDayKey);
+    const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
     const isFutureDay = selectedDayKey > todayDayKey;
     const dayCellGap = 6;
     const dayCellSize = Math.max(34, Math.floor((chartWidth - dayCellGap * 6 - 4) / 7));
@@ -3072,7 +3089,7 @@ export function InsightsScreen({
                 </Text>
 
                 <View className="flex-row mb-1.5">
-                  {CALENDAR_WEEKDAY_LABELS.map((weekday) => (
+                  {calendarWeekdayLabels.map((weekday) => (
                     <View
                       key={`${month.monthKey}-${weekday}`}
                       style={{ width: dayCellSize }}
@@ -3511,7 +3528,7 @@ export function InsightsScreen({
         : fallbackIndex;
     const selectedPoint = pageData.points[selectedIndex] ?? null;
     const selectedRate = rates[selectedIndex] ?? rates[fallbackIndex] ?? 0;
-    const selectedRateDisplay = selectedRate.toLocaleString('en-US', {
+    const selectedRateDisplay = selectedRate.toLocaleString(activeLocale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });

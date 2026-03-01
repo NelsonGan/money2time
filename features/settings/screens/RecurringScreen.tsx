@@ -31,6 +31,7 @@ interface RecurringRuleCardProps {
   rule: RecurringTransactionRule;
   onEdit: (rule: RecurringTransactionRule) => void;
   onDelete: (id: string) => void;
+  localeKey: string;
   textMutedColor: string;
   dangerColor: string;
   currencySymbol: string;
@@ -43,6 +44,7 @@ const RecurringRuleCard = memo(
     rule,
     onEdit,
     onDelete,
+    localeKey,
     textMutedColor,
     dangerColor,
     currencySymbol,
@@ -55,7 +57,7 @@ const RecurringRuleCard = memo(
           interval: rule.recurrenceInterval,
           pattern: rule.recurrencePattern,
         }),
-      [rule.recurrenceInterval, rule.recurrencePattern],
+      [localeKey, rule.recurrenceInterval, rule.recurrencePattern],
     );
     const nextRunLabel = dayKeyFromIsoLocal(rule.nextRunDate);
     const formatSettings = useMemo(
@@ -144,6 +146,7 @@ const RecurringRuleCard = memo(
   (prev, next) =>
     prev.rule.id === next.rule.id &&
     prev.rule.updatedAt === next.rule.updatedAt &&
+    prev.localeKey === next.localeKey &&
     prev.textMutedColor === next.textMutedColor &&
     prev.dangerColor === next.dangerColor &&
     prev.currencySymbol === next.currencySymbol &&
@@ -160,6 +163,7 @@ export function RecurringScreen({
 }: RecurringScreenProps) {
   const themeColors = useThemeColors();
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const allRules = useMemo(() => {
     if (!isSimpleMode) return recurringRules;
     return filterRecurringRulesByWallet(recurringRules, simpleWalletId);
@@ -188,6 +192,7 @@ export function RecurringScreen({
         rule={item}
         onEdit={openEdit}
         onDelete={handleDeleteRule}
+        localeKey={activeLocale}
         textMutedColor={themeColors.textMuted}
         dangerColor={themeColors.coral}
         currencySymbol={settings.currencySymbol}
@@ -198,6 +203,7 @@ export function RecurringScreen({
     [
       handleDeleteRule,
       openEdit,
+      activeLocale,
       settings.currencySymbol,
       settings.displayMode,
       settings.hourRounding,

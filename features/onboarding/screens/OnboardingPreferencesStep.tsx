@@ -6,42 +6,34 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Button, Card, CardContent, SelectField, Text } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
+import { getLocaleLabel, I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 interface OnboardingPreferencesStepProps {
   locale: string;
+  currencyCode: string;
   currencySymbol: string;
   onLocaleChange: (locale: string) => void;
-  onCurrencySymbolChange: (symbol: string) => void;
+  onCurrencyChange: (currency: { code: string; symbol: string }) => void;
   onBack: () => void;
   onContinue: () => void;
 }
 
-const LOCALE_LABELS: Record<string, string> = {
-  en: 'English',
-  es: 'Español',
-  fr: 'Français',
-  de: 'Deutsch',
-  pt: 'Português',
-  ja: '日本語',
-  ko: '한국어',
-  zh: '中文',
-};
-
 export function OnboardingPreferencesStep({
   locale,
+  currencyCode,
   currencySymbol,
   onLocaleChange,
-  onCurrencySymbolChange,
+  onCurrencyChange,
   onBack,
   onContinue,
 }: OnboardingPreferencesStepProps) {
   const selectedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
     ? locale
     : 'en';
-  const currentCurrencyCode =
-    MAJOR_CURRENCIES.find((item) => item.symbol === currencySymbol)?.code ?? 'USD';
+  const currentCurrencyCode = MAJOR_CURRENCIES.some((item) => item.code === currencyCode)
+    ? currencyCode
+    : (MAJOR_CURRENCIES.find((item) => item.symbol === currencySymbol)?.code ?? 'USD');
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   return (
@@ -60,7 +52,7 @@ export function OnboardingPreferencesStep({
                   value={selectedLocale}
                   options={SUPPORTED_LOCALES.map((item) => ({
                     value: item,
-                    label: `${LOCALE_LABELS[item] ?? item} (${item})`,
+                    label: `${getLocaleLabel(item)} (${item})`,
                   }))}
                   onChange={(value) => onLocaleChange(value)}
                 />
@@ -73,7 +65,7 @@ export function OnboardingPreferencesStep({
                   }))}
                   onChange={(value) => {
                     const found = MAJOR_CURRENCIES.find((item) => item.code === value);
-                    if (found) onCurrencySymbolChange(found.symbol);
+                    if (found) onCurrencyChange({ code: found.code, symbol: found.symbol });
                   }}
                 />
                 <Text variant="label" tone="muted">

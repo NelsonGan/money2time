@@ -191,6 +191,7 @@ export function toSettings(row: SettingsRow): UserSettings {
   return {
     id: row.id,
     locale: row.locale,
+    currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
     hourRounding: row.hourRounding,
     displayMode: asDisplayMode(row.displayMode),

@@ -35,6 +35,7 @@ export interface MonthlyWageSettings {
 export interface UserSettings {
   id: string;
   locale: string;
+  currencyCode: string;
   currencySymbol: string;
   hourRounding: number;
   displayMode: DisplayMode;

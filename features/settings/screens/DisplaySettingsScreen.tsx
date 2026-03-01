@@ -16,17 +16,13 @@ import {
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
+import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeMode } from '~/types';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
 }
-
-const LOCALE_LABELS: Record<string, string> = {
-  en: 'English',
-};
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const themeColors = useThemeColors();
@@ -36,7 +32,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     () =>
       SUPPORTED_LOCALES.map((item) => ({
         value: item,
-        label: `${LOCALE_LABELS[item] ?? item} (${item})`,
+        label: `${getLocaleLabel(item)} (${item})`,
       })),
     [],
   );
@@ -52,6 +48,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   );
 
   const selectedMajorCurrency = useMemo(
+    () => MAJOR_CURRENCIES.find((item) => item.code === settings.currencyCode),
+    [settings.currencyCode],
+  );
+  const fallbackMajorCurrency = useMemo(
     () => MAJOR_CURRENCIES.find((item) => item.symbol === settings.currencySymbol),
     [settings.currencySymbol],
   );
@@ -65,7 +65,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   )
     ? settings.locale
     : 'en';
-  const currentCurrencySelection = selectedMajorCurrency?.code ?? '__custom__';
+  const currentCurrencySelection =
+    settings.currencyCode === '__custom__'
+      ? '__custom__'
+      : (selectedMajorCurrency?.code ?? fallbackMajorCurrency?.code ?? '__custom__');
 
   const [selectedLocale, setSelectedLocale] = useState(currentLocaleSelection);
   const [selectedCurrency, setSelectedCurrency] = useState(currentCurrencySelection);
@@ -96,8 +99,13 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       settings.currencySymbol
     );
   }, [selectedCurrency, trimmedCustomCurrency, settings.currencySymbol]);
+  const nextCurrencyCode = useMemo(() => {
+    if (selectedCurrency === '__custom__') return '__custom__';
+    return MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency)?.code ?? settings.currencyCode;
+  }, [selectedCurrency, settings.currencyCode]);
   const hasChanges =
     selectedLocale !== currentLocaleSelection ||
+    nextCurrencyCode !== settings.currencyCode ||
     nextCurrencySymbol !== settings.currencySymbol ||
     selectedTheme !== settings.themeMode;
   const canSave =
@@ -125,8 +133,25 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       setAppLocale(selectedLocale);
       updateSettings({ locale: selectedLocale });
     }
-    if (nextCurrencySymbol && nextCurrencySymbol !== settings.currencySymbol) {
-      updateSettings({ currencySymbol: nextCurrencySymbol });
+    if (selectedCurrency === '__custom__') {
+      if (
+        trimmedCustomCurrency &&
+        (trimmedCustomCurrency !== settings.currencySymbol || settings.currencyCode !== '__custom__')
+      ) {
+        updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedCustomCurrency });
+      }
+    } else {
+      const nextMajorCurrency = MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency);
+      if (
+        nextMajorCurrency &&
+        (nextMajorCurrency.code !== settings.currencyCode ||
+          nextMajorCurrency.symbol !== settings.currencySymbol)
+      ) {
+        updateSettings({
+          currencyCode: nextMajorCurrency.code,
+          currencySymbol: nextMajorCurrency.symbol,
+        });
+      }
     }
     if (selectedTheme !== settings.themeMode) {
       updateSettings({ themeMode: selectedTheme });
