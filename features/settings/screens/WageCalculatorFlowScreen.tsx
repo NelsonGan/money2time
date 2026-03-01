@@ -18,7 +18,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { UserSettings, WageConfig, WageType } from '~/types';
 import { cn } from '~/utils';
-import { computeHourlyRates, formatCurrency } from '~/utils/formatters';
+import { computeHourlyRates, formatCurrency, parseMonthKey } from '~/utils/formatters';
 
 interface WageCalculatorFlowScreenProps {
   initialConfig: WageConfig;
@@ -28,19 +28,23 @@ interface WageCalculatorFlowScreenProps {
   onComplete: (config: WageConfig) => void;
 }
 
-const STEP_META = [
-  { emoji: '💰', title: I18n.t('wage.step_1_title'), subtitle: I18n.t('wage.step_1_subtitle') },
-  { emoji: '📅', title: I18n.t('wage.step_2_title'), subtitle: I18n.t('wage.step_2_subtitle') },
-  { emoji: '🚗', title: I18n.t('wage.step_3_title'), subtitle: I18n.t('wage.step_3_subtitle') },
-  { emoji: '🧮', title: I18n.t('wage.step_4_title'), subtitle: I18n.t('wage.step_4_subtitle') },
-  { emoji: '✨', title: I18n.t('wage.step_5_title'), subtitle: I18n.t('wage.step_5_subtitle') },
-];
+function sanitizeNonNegativeDecimalInput(raw: string): string {
+  const normalized = raw.replace(',', '.');
+  const cleaned = normalized.replace(/[^0-9.]/g, '');
+  if (cleaned.length === 0) return '';
 
-const WAGE_TYPE_LABELS: Record<WageType, string> = {
-  hourly: I18n.t('wage.type.hourly'),
-  monthly: I18n.t('wage.type.monthly'),
-  yearly: I18n.t('wage.type.yearly'),
-};
+  const firstDotIndex = cleaned.indexOf('.');
+  if (firstDotIndex < 0) return cleaned;
+
+  const integerPart = cleaned.slice(0, firstDotIndex);
+  const decimalPart = cleaned.slice(firstDotIndex + 1).replace(/\./g, '');
+  return `${integerPart}.${decimalPart}`;
+}
+
+function toNonNegativeNumber(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return value;
+}
 
 export function WageCalculatorFlowScreen({
   initialConfig,
@@ -49,15 +53,21 @@ export function WageCalculatorFlowScreen({
   onCancel,
   onComplete,
 }: WageCalculatorFlowScreenProps) {
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [step, setStep] = useState(1);
   const [wageType, setWageType] = useState<WageType>(initialConfig.wageType);
-  const [wageAmount, setWageAmount] = useState(String(initialConfig.wageAmount || ''));
+  const [wageAmount, setWageAmount] = useState(() => {
+    const value = toNonNegativeNumber(initialConfig.wageAmount);
+    return value > 0 ? String(value) : '';
+  });
   const [hoursWorkedPerWeek, setHoursWorkedPerWeek] = useState(
-    String(initialConfig.hoursWorkedPerWeek),
+    String(toNonNegativeNumber(initialConfig.hoursWorkedPerWeek)),
   );
-  const [workdaysPerWeek, setWorkdaysPerWeek] = useState(String(initialConfig.workdaysPerWeek));
+  const [workdaysPerWeek, setWorkdaysPerWeek] = useState(
+    String(toNonNegativeNumber(initialConfig.workdaysPerWeek)),
+  );
   const [commuteMinutesPerWorkday, setCommuteMinutesPerWorkday] = useState(
-    String(initialConfig.commuteMinutesPerWorkday),
+    String(toNonNegativeNumber(initialConfig.commuteMinutesPerWorkday)),
   );
 
   const config = useMemo<WageConfig>(
@@ -72,6 +82,24 @@ export function WageCalculatorFlowScreen({
   );
 
   const metrics = useMemo(() => computeHourlyRates(config), [config]);
+  const stepMetaList = useMemo(
+    () => [
+      { emoji: '💰', title: I18n.t('wage.step_1_title'), subtitle: I18n.t('wage.step_1_subtitle') },
+      { emoji: '📅', title: I18n.t('wage.step_2_title'), subtitle: I18n.t('wage.step_2_subtitle') },
+      { emoji: '🚗', title: I18n.t('wage.step_3_title'), subtitle: I18n.t('wage.step_3_subtitle') },
+      { emoji: '🧮', title: I18n.t('wage.step_4_title'), subtitle: I18n.t('wage.step_4_subtitle') },
+      { emoji: '✨', title: I18n.t('wage.step_5_title'), subtitle: I18n.t('wage.step_5_subtitle') },
+    ],
+    [],
+  );
+  const wageTypeLabels = useMemo<Record<WageType, string>>(
+    () => ({
+      hourly: I18n.t('wage.type.hourly'),
+      monthly: I18n.t('wage.type.monthly'),
+      yearly: I18n.t('wage.type.yearly'),
+    }),
+    [],
+  );
 
   const canContinue =
     (step === 1 && config.wageAmount > 0) ||
@@ -87,8 +115,16 @@ export function WageCalculatorFlowScreen({
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const stepMeta = STEP_META[step - 1];
-  const headerYear = monthLabel.slice(0, 4);
+  const stepMeta = stepMetaList[step - 1];
+  const parsedMonthDate = useMemo(() => parseMonthKey(monthLabel), [monthLabel]);
+  const headerYear = parsedMonthDate ? String(parsedMonthDate.getFullYear()) : monthLabel.slice(0, 4);
+  const localizedMonthLabel = useMemo(() => {
+    if (!parsedMonthDate) return monthLabel;
+    return parsedMonthDate.toLocaleDateString(activeLocale, {
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [activeLocale, monthLabel, parsedMonthDate]);
   const handleBack = step === 1 ? onCancel : back;
 
   return (
@@ -152,7 +188,7 @@ export function WageCalculatorFlowScreen({
                           wageType === value ? 'text-primary-foreground' : 'text-foreground'
                         }
                       >
-                        {WAGE_TYPE_LABELS[value]}
+                        {wageTypeLabels[value]}
                       </Text>
                     </Pressable>
                   ))}
@@ -162,7 +198,7 @@ export function WageCalculatorFlowScreen({
                   variant="currency"
                   currencySymbol={settings.currencySymbol}
                   value={wageAmount}
-                  onChangeText={setWageAmount}
+                  onChangeText={(value) => setWageAmount(sanitizeNonNegativeDecimalInput(value))}
                   placeholder="0"
                   helperText={I18n.t('wage.after_tax_helper')}
                 />
@@ -179,7 +215,9 @@ export function WageCalculatorFlowScreen({
                   label={I18n.t('wage.hours_per_week')}
                   variant="numeric"
                   value={hoursWorkedPerWeek}
-                  onChangeText={setHoursWorkedPerWeek}
+                  onChangeText={(value) =>
+                    setHoursWorkedPerWeek(sanitizeNonNegativeDecimalInput(value))
+                  }
                   selectTextOnFocus={hoursWorkedPerWeek === '0'}
                   placeholder="40"
                 />
@@ -187,7 +225,9 @@ export function WageCalculatorFlowScreen({
                   label={I18n.t('wage.workdays_per_week')}
                   variant="numeric"
                   value={workdaysPerWeek}
-                  onChangeText={setWorkdaysPerWeek}
+                  onChangeText={(value) =>
+                    setWorkdaysPerWeek(sanitizeNonNegativeDecimalInput(value))
+                  }
                   placeholder="5"
                 />
               </CardContent>
@@ -203,7 +243,9 @@ export function WageCalculatorFlowScreen({
                   label={I18n.t('wage.commute_minutes')}
                   variant="numeric"
                   value={commuteMinutesPerWorkday}
-                  onChangeText={setCommuteMinutesPerWorkday}
+                  onChangeText={(value) =>
+                    setCommuteMinutesPerWorkday(sanitizeNonNegativeDecimalInput(value))
+                  }
                   selectTextOnFocus={commuteMinutesPerWorkday === '0'}
                   placeholder="0"
                 />
@@ -283,7 +325,7 @@ export function WageCalculatorFlowScreen({
                 onComplete(config);
               }}
             >
-              <Text>{I18n.t('wage.save_for_month', { month: monthLabel })}</Text>
+              <Text>{I18n.t('wage.save_for_month', { month: localizedMonthLabel })}</Text>
             </Button>
           )}
         </View>

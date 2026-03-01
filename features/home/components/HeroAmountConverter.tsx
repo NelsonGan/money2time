@@ -128,15 +128,25 @@ const NUM_ROWS = [
 ] as const;
 const INPUT_PROGRESS_SPRING = { damping: 18, stiffness: 180 } as const;
 const NUMPAD_ROW_STYLE = { flexDirection: 'row', gap: 1 } as const;
-const HERO_ROLLING_TEXT_STYLE = {
-  fontSize: 44,
-  lineHeight: 50,
-  fontWeight: '800' as const,
-};
+const HERO_MAX_FONT_SIZE = 44;
+const HERO_MIN_FONT_SIZE = 24;
+const HERO_BASE_CHAR_COUNT = 8;
+const HERO_FONT_SHRINK_PER_CHAR = 2.5;
+const HERO_LINE_HEIGHT_RATIO = 1.14;
+const HERO_MAX_INPUT_VALUE = 1_000_000_000_000;
 const HERO_ROLLING_NUMBER_SPIN_CONFIG = {
   duration: 160,
   easing: Easing.out(Easing.cubic),
 } as const;
+
+function getAmountCharacterCount(amountLabel: string) {
+  const withoutGrouping = amountLabel.replace(/,/g, '');
+  return Math.max(1, withoutGrouping.length);
+}
+
+function isHeroAmountWithinLimit(value: string) {
+  return parseHeroNumericAmount(value) <= HERO_MAX_INPUT_VALUE;
+}
 
 export function HeroAmountConverter({
   amount,
@@ -152,6 +162,35 @@ export function HeroAmountConverter({
 
   const amountNumberLabel = useMemo(() => formatHeroNumericAmount(amount), [amount]);
   const amountNumericValue = useMemo(() => parseHeroNumericAmount(amount), [amount]);
+  const amountCharacterCount = useMemo(
+    () => getAmountCharacterCount(amountNumberLabel),
+    [amountNumberLabel],
+  );
+  const amountFontSize = useMemo(() => {
+    const overflowChars = Math.max(0, amountCharacterCount - HERO_BASE_CHAR_COUNT);
+    return Math.max(HERO_MIN_FONT_SIZE, HERO_MAX_FONT_SIZE - overflowChars * HERO_FONT_SHRINK_PER_CHAR);
+  }, [amountCharacterCount]);
+  const amountLineHeight = useMemo(
+    () => Math.round(amountFontSize * HERO_LINE_HEIGHT_RATIO),
+    [amountFontSize],
+  );
+  const currencyFontSize = useMemo(
+    () => Math.max(HERO_MIN_FONT_SIZE - 2, Math.round(amountFontSize * 0.82)),
+    [amountFontSize],
+  );
+  const rollingTextStyle = useMemo(
+    () => ({
+      fontSize: amountFontSize,
+      lineHeight: amountLineHeight,
+      fontWeight: '800' as const,
+      color: themeColors.text,
+    }),
+    [amountFontSize, amountLineHeight, themeColors.text],
+  );
+  const rollingGlyphStyle = useMemo(
+    () => ({ color: themeColors.text }),
+    [themeColors.text],
+  );
   const hoursLabel = useMemo(() => formatHours(hours), [hours]);
   const exactHoursLabel = useMemo(
     () => I18n.t('home.converter.exact_hours', { value: hours.toFixed(2) }),
@@ -188,6 +227,7 @@ export function HeroAmountConverter({
       if (key === '.') {
         if (amount.includes('.')) return;
         const next = amount === '' ? '0.' : amount + '.';
+        if (!isHeroAmountWithinLimit(next)) return;
         onChangeAmount(next);
         activateInputProgress();
         return;
@@ -198,6 +238,7 @@ export function HeroAmountConverter({
       if (dotIdx !== -1 && amount.length - dotIdx > 2) return; // max 2 decimal places
 
       const next = amount === '0' ? key : amount + key;
+      if (!isHeroAmountWithinLimit(next)) return;
       onChangeAmount(next);
       activateInputProgress();
     },
@@ -212,36 +253,47 @@ export function HeroAmountConverter({
         <View className="absolute -top-10 -right-8 h-28 w-28 rounded-full bg-primary/12" />
 
         {/* Header */}
-        <Text variant="bodyStrong">{I18n.t('home.converter.title')}</Text>
-        <Text variant="label" tone="muted" className="mt-0.5 mb-3">
-          {I18n.t('home.converter.description')}
-        </Text>
-
-        {/* Amount display */}
-        <View className="min-h-[56px] flex-row items-center justify-between">
-          <View className="flex-row items-end">
-            <Text
-              style={{ fontSize: 44, lineHeight: 50, fontWeight: '800' }}
-              className="text-foreground"
-            >
-              {currencySymbol}
+        <View className="mb-3 flex-row items-start justify-between gap-3">
+          <View className="min-w-0 flex-1">
+            <Text variant="bodyStrong">{I18n.t('home.converter.title')}</Text>
+            <Text variant="label" tone="muted" className="mt-0.5">
+              {I18n.t('home.converter.description')}
             </Text>
-            <AnimatedRollingNumber
-              value={amountNumericValue}
-              formattedText={amountNumberLabel}
-              containerStyle={{ marginLeft: 6 }}
-              textStyle={[HERO_ROLLING_TEXT_STYLE, { color: themeColors.text }]}
-              numberStyle={{ color: themeColors.text }}
-              commaStyle={{ color: themeColors.text }}
-              dotStyle={{ color: themeColors.text }}
-              signStyle={{ color: themeColors.text }}
-              compactNotationStyle={{ color: themeColors.text }}
-              spinningAnimationConfig={HERO_ROLLING_NUMBER_SPIN_CONFIG}
-            />
           </View>
           <Button size="sm" variant="outline" bouncy={false} onPress={handleClearAmount}>
             <Text variant="caption">{I18n.t('home.converter.clear')}</Text>
           </Button>
+        </View>
+
+        {/* Amount display */}
+        <View className="min-h-[56px]">
+          <View className="min-w-0 flex-row items-end overflow-hidden">
+            <Text
+              style={{ fontSize: currencyFontSize, lineHeight: amountLineHeight, fontWeight: '800' }}
+              className="shrink-0 text-foreground"
+            >
+              {currencySymbol}
+            </Text>
+            <View className="ml-1 min-w-0 flex-1 overflow-hidden">
+              <AnimatedRollingNumber
+                value={amountNumericValue}
+                formattedText={amountNumberLabel}
+                containerStyle={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-end',
+                }}
+                textStyle={rollingTextStyle}
+                numberStyle={rollingGlyphStyle}
+                commaStyle={rollingGlyphStyle}
+                dotStyle={rollingGlyphStyle}
+                signStyle={rollingGlyphStyle}
+                compactNotationStyle={rollingGlyphStyle}
+                spinningAnimationConfig={HERO_ROLLING_NUMBER_SPIN_CONFIG}
+              />
+            </View>
+          </View>
         </View>
 
         {/* Hours result */}

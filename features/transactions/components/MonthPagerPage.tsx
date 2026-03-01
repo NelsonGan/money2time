@@ -14,6 +14,7 @@ interface MonthPagerPageProps {
   item: number;
   monthPagerAnchorDate: Date;
   centerIndex: number;
+  localeKey: string;
   monthPageStyle: StyleProp<ViewStyle>;
   monthTransactionsMap: Map<string, TransactionWithRelations[]>;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
@@ -29,6 +30,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   item,
   monthPagerAnchorDate,
   centerIndex,
+  localeKey,
   monthPageStyle,
   monthTransactionsMap,
   onTransactionPress,
@@ -57,7 +59,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         contentPaddingBottom={LIST_BOTTOM_PADDING}
         disableItemAnimations
         compactItems
-        listKey={pageMonthKey}
+        listKey={`${pageMonthKey}-${localeKey}`}
         scrollToTopRef={getScrollToTopRef(item)}
       />
     </View>

@@ -52,7 +52,12 @@ import {
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
-import { amountToHoursByRate, monthKeyFromDateIso, normalizeMonthKey } from '~/utils/formatters';
+import {
+  amountToHoursByRate,
+  monthKeyFromDateIso,
+  monthKeyFromDateLocal,
+  normalizeMonthKey,
+} from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 
 interface AppContextValue extends AppState {
@@ -94,6 +99,7 @@ interface AppContextValue extends AppState {
       Pick<
         UserSettings,
         | 'locale'
+        | 'currencyCode'
         | 'currencySymbol'
         | 'hourRounding'
         | 'displayMode'
@@ -350,8 +356,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       initializeDatabase();
 
-      const ensuredCurrentWage = monthlyWageRepository.ensureCurrentMonthRecord();
       const allWages = monthlyWageRepository.list();
+      const currentMonthKey = monthKeyFromDateLocal(new Date());
+      const effectiveCurrentWage =
+        allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
+        allWages[0] ??
+        null;
       const nextSettings = settingsRepository.get();
       const nextInsightsPreferencesJson = settingsRepository.getInsightsPreferencesJson();
       accountGroupsRepository.ensureFromActiveAccounts();
@@ -362,7 +372,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextCategories = categoriesRepository.list();
       const nextTransactions = transactionsRepository.list();
 
-      setCurrentMonthWage(ensuredCurrentWage);
+      setCurrentMonthWage(effectiveCurrentWage);
       setMonthlyWages(allWages);
       setSettings(nextSettings);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
@@ -690,6 +700,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         Pick<
           UserSettings,
           | 'locale'
+          | 'currencyCode'
           | 'currencySymbol'
           | 'hourRounding'
           | 'displayMode'

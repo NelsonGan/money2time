@@ -3,13 +3,14 @@ import { and, desc, eq, isNull, ne, or } from 'drizzle-orm';
 import { getDb } from '~/lib/db/client';
 import { monthlyWageSettingsTable } from '~/lib/db/schema';
 import type { MonthlyWageSettings, WageConfig } from '~/types';
-import { newId, nowIso } from '~/utils/id';
 import {
   computeHourlyRates,
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   normalizeMonthKey,
 } from '~/utils/formatters';
+import { newId, nowIso } from '~/utils/id';
+
 import { toMonthlyWageSettings } from './mappers';
 
 function getCurrentMonthKey(date = new Date()) {
@@ -36,6 +37,21 @@ function buildMonthCondition(month: string) {
   }
 
   return eq(monthlyWageSettingsTable.month, variants[0] ?? '');
+}
+
+function toNonNegative(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return value;
+}
+
+function sanitizeWageConfig(config: WageConfig): WageConfig {
+  return {
+    wageType: config.wageType,
+    wageAmount: toNonNegative(config.wageAmount),
+    hoursWorkedPerWeek: toNonNegative(config.hoursWorkedPerWeek),
+    workdaysPerWeek: toNonNegative(config.workdaysPerWeek),
+    commuteMinutesPerWorkday: toNonNegative(config.commuteMinutesPerWorkday),
+  };
 }
 
 function normalizeAndDedupe(rows: MonthlyWageSettings[]) {
@@ -84,27 +100,6 @@ class MonthlyWageRepository {
       : { ...mapped, month: normalizeMonthKey(mapped.month) };
   }
 
-  getMostRecent(): MonthlyWageSettings | null {
-    return this.list()[0] ?? null;
-  }
-
-  ensureCurrentMonthRecord() {
-    const month = getCurrentMonthKey();
-    const existing = this.getByMonth(month);
-    if (existing) return existing;
-
-    const mostRecent = this.getMostRecent();
-    const fallback: WageConfig = {
-      wageType: mostRecent?.wageType ?? 'monthly',
-      wageAmount: mostRecent?.wageAmount ?? 0,
-      hoursWorkedPerWeek: mostRecent?.hoursWorkedPerWeek ?? 40,
-      workdaysPerWeek: mostRecent?.workdaysPerWeek ?? 5,
-      commuteMinutesPerWorkday: mostRecent?.commuteMinutesPerWorkday ?? 0,
-    };
-
-    return this.saveForCurrentMonth(fallback);
-  }
-
   saveForCurrentMonth(config: WageConfig): MonthlyWageSettings {
     return this.saveForMonth(getCurrentMonthKey(), config);
   }
@@ -114,17 +109,18 @@ class MonthlyWageRepository {
     const db = getDb();
     const now = nowIso();
     const existing = this.getByMonth(normalizedMonth);
-    const rates = computeHourlyRates(config);
+    const sanitizedConfig = sanitizeWageConfig(config);
+    const rates = computeHourlyRates(sanitizedConfig);
 
     if (existing) {
       db.update(monthlyWageSettingsTable)
         .set({
           month: normalizedMonth,
-          wageType: config.wageType,
-          wageAmount: config.wageAmount,
-          hoursWorkedPerWeek: config.hoursWorkedPerWeek,
-          workdaysPerWeek: config.workdaysPerWeek,
-          commuteMinutesPerWorkday: config.commuteMinutesPerWorkday,
+          wageType: sanitizedConfig.wageType,
+          wageAmount: sanitizedConfig.wageAmount,
+          hoursWorkedPerWeek: sanitizedConfig.hoursWorkedPerWeek,
+          workdaysPerWeek: sanitizedConfig.workdaysPerWeek,
+          commuteMinutesPerWorkday: sanitizedConfig.commuteMinutesPerWorkday,
           baseHourlyRate: rates.baseHourlyRate,
           trueHourlyRate: rates.trueHourlyRate,
           updatedAt: now,
@@ -154,11 +150,11 @@ class MonthlyWageRepository {
       .values({
         id: newId(),
         month: normalizedMonth,
-        wageType: config.wageType,
-        wageAmount: config.wageAmount,
-        hoursWorkedPerWeek: config.hoursWorkedPerWeek,
-        workdaysPerWeek: config.workdaysPerWeek,
-        commuteMinutesPerWorkday: config.commuteMinutesPerWorkday,
+        wageType: sanitizedConfig.wageType,
+        wageAmount: sanitizedConfig.wageAmount,
+        hoursWorkedPerWeek: sanitizedConfig.hoursWorkedPerWeek,
+        workdaysPerWeek: sanitizedConfig.workdaysPerWeek,
+        commuteMinutesPerWorkday: sanitizedConfig.commuteMinutesPerWorkday,
         baseHourlyRate: rates.baseHourlyRate,
         trueHourlyRate: rates.trueHourlyRate,
         createdAt: now,
@@ -210,10 +206,6 @@ class MonthlyWageRepository {
 
   softDeleteByMonth(month: string) {
     const normalizedMonth = normalizeMonthKey(month);
-    if (normalizedMonth === getCurrentMonthKey()) {
-      return;
-    }
-
     const db = getDb();
     const now = nowIso();
     db.update(monthlyWageSettingsTable)
