@@ -334,13 +334,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-2">
           <OnboardingPreferencesStep
             locale={settings.locale}
+            currencyCode={settings.currencyCode}
             currencySymbol={settings.currencySymbol}
             onLocaleChange={(locale) => {
               setAppLocale(locale);
               updateSettings({ locale });
             }}
-            onCurrencySymbolChange={(currencySymbol) => {
-              updateSettings({ currencySymbol });
+            onCurrencyChange={({ code, symbol }) => {
+              updateSettings({ currencyCode: code, currencySymbol: symbol });
             }}
             onBack={() => setStep(1)}
             onContinue={() => setStep(3)}

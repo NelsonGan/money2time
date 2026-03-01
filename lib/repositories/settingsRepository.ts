@@ -3,6 +3,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { getDb } from '~/lib/db/client';
 import { settingsTable } from '~/lib/db/schema';
 import type { UserSettings } from '~/types';
+import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 import { toSettings } from './mappers';
 import { getDeviceLocale } from '~/lib/i18n';
@@ -30,6 +31,7 @@ class SettingsRepository {
       Pick<
         UserSettings,
         | 'locale'
+        | 'currencyCode'
         | 'currencySymbol'
         | 'hourRounding'
         | 'displayMode'
@@ -67,10 +69,13 @@ class SettingsRepository {
   reset() {
     const db = getDb();
     const now = nowIso();
+    const localeCurrencyCode = getLocaleCurrencyCode();
+    const localeCurrencySymbol = getLocaleCurrencySymbol();
     db.update(settingsTable)
       .set({
         locale: getDeviceLocale(),
-        currencySymbol: '$',
+        currencyCode: localeCurrencyCode,
+        currencySymbol: localeCurrencySymbol,
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',

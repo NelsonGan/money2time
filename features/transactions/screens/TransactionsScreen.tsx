@@ -54,21 +54,8 @@ import {
   summarizeTransactions,
 } from '~/utils/transactions';
 
-const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
-  { label: I18n.t('transactions.filters.all'), value: 'all' },
-  { label: I18n.t('transactions.filters.spent'), value: 'expense' },
-  { label: I18n.t('transactions.filters.earned'), value: 'income' },
-  { label: I18n.t('transactions.filters.moved'), value: 'transfer' },
-  { label: I18n.t('transactions.filters.adjustment'), value: 'balance_adjustment' },
-];
-
-const SORT_OPTIONS = [
-  { label: I18n.t('transactions.sort.newest'), value: 'date_desc' },
-  { label: I18n.t('transactions.sort.oldest'), value: 'date_asc' },
-  { label: I18n.t('transactions.sort.high'), value: 'amount_desc' },
-  { label: I18n.t('transactions.sort.low'), value: 'amount_asc' },
-] as const;
-type SortByValue = (typeof SORT_OPTIONS)[number]['value'];
+const SORT_OPTION_VALUES = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const;
+type SortByValue = (typeof SORT_OPTION_VALUES)[number];
 
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 const FILTER_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
@@ -115,7 +102,7 @@ function buildCategoryPanelData(categories: Category[], type: CategoryType): Cat
 }
 
 function isSortByValue(value: string): value is SortByValue {
-  return SORT_OPTIONS.some((option) => option.value === value);
+  return SORT_OPTION_VALUES.includes(value as SortByValue);
 }
 
 interface TransactionsScreenProps {
@@ -145,6 +132,7 @@ export function TransactionsScreen({
     categories,
     getDisplayValueForTransaction,
   } = useApp();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [showFilters, setShowFilters] = useState(false);
   const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
@@ -304,8 +292,24 @@ export function TransactionsScreen({
     transactionFilters.type === 'all' || transactionFilters.type === 'income';
   const shouldShowExpenseCategoryFilter =
     transactionFilters.type === 'all' || transactionFilters.type === 'expense';
+  const typeFilters = useMemo(
+    () =>
+      [
+        { label: I18n.t('transactions.filters.all'), value: 'all' },
+        { label: I18n.t('transactions.filters.spent'), value: 'expense' },
+        { label: I18n.t('transactions.filters.earned'), value: 'income' },
+        { label: I18n.t('transactions.filters.moved'), value: 'transfer' },
+        { label: I18n.t('transactions.filters.adjustment'), value: 'balance_adjustment' },
+      ] satisfies Array<{ label: string; value: 'all' | TransactionType }>,
+    [],
+  );
   const sortOptions = useMemo(
-    () => SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
+    () => [
+      { value: 'date_desc', label: I18n.t('transactions.sort.newest') },
+      { value: 'date_asc', label: I18n.t('transactions.sort.oldest') },
+      { value: 'amount_desc', label: I18n.t('transactions.sort.high') },
+      { value: 'amount_asc', label: I18n.t('transactions.sort.low') },
+    ],
     [],
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
@@ -498,6 +502,7 @@ export function TransactionsScreen({
           item={item}
           monthPagerAnchorDate={monthPagerAnchorDate}
           centerIndex={MONTH_PAGER_CENTER_INDEX}
+          localeKey={activeLocale}
           monthPageStyle={monthPageStyle}
           monthTransactionsMap={monthBuckets.transactionsMap}
           onTransactionPress={handleTransactionPress}
@@ -512,6 +517,7 @@ export function TransactionsScreen({
       getPageScrollToTopRef,
       handleTransactionLongPress,
       handleTransactionPress,
+      activeLocale,
       isSelectionMode,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
@@ -779,7 +785,7 @@ export function TransactionsScreen({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
               >
-                {TYPE_FILTERS.map((item) => (
+                {typeFilters.map((item) => (
                   <TypeFilterPill
                     key={item.value}
                     label={item.label}

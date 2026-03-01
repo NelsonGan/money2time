@@ -1,94 +1,23 @@
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 import {
-  DEFAULT_WAGE_CONFIG,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
-import {
-  computeHourlyRates,
-  getLocaleCurrencySymbol,
-  monthKeyFromDateLocal,
-} from '~/utils/formatters';
-import { newId, nowIso } from '~/utils/id';
-import type { WageType } from '~/types';
-import { runMigrations } from './migrations';
-import { categoriesTable, monthlyWageSettingsTable, settingsTable } from './schema';
 import { getDeviceLocale } from '~/lib/i18n';
+import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
+import { newId, nowIso } from '~/utils/id';
+
+import { runMigrations } from './migrations';
+import { categoriesTable, settingsTable } from './schema';
 
 const DB_NAME = 'money2time.db';
 export const SIMPLE_WALLET_NAME = 'Simple Wallet';
 
 let sqlite: SQLiteDatabase | null = null;
 let initialized = false;
-
-function currentMonth() {
-  return monthKeyFromDateLocal(new Date());
-}
-
-function asWageType(value: string | null | undefined): WageType {
-  if (value === 'hourly' || value === 'monthly' || value === 'yearly') {
-    return value;
-  }
-  return DEFAULT_WAGE_CONFIG.wageType;
-}
-
-function seedOrCarryForwardMonthlyWage() {
-  const db = getDb();
-  const month = currentMonth();
-  const now = nowIso();
-
-  const existingCurrent = db
-    .select()
-    .from(monthlyWageSettingsTable)
-    .where(
-      and(eq(monthlyWageSettingsTable.month, month), isNull(monthlyWageSettingsTable.deletedAt)),
-    )
-    .get();
-  if (existingCurrent) return;
-
-  const mostRecent = db
-    .select({
-      wageType: monthlyWageSettingsTable.wageType,
-      wageAmount: monthlyWageSettingsTable.wageAmount,
-      hoursWorkedPerWeek: monthlyWageSettingsTable.hoursWorkedPerWeek,
-      workdaysPerWeek: monthlyWageSettingsTable.workdaysPerWeek,
-      commuteMinutesPerWorkday: monthlyWageSettingsTable.commuteMinutesPerWorkday,
-    })
-    .from(monthlyWageSettingsTable)
-    .where(isNull(monthlyWageSettingsTable.deletedAt))
-    .orderBy(desc(monthlyWageSettingsTable.month))
-    .get();
-
-  const config = {
-    wageType: asWageType(mostRecent?.wageType),
-    wageAmount: mostRecent?.wageAmount ?? DEFAULT_WAGE_CONFIG.wageAmount,
-    hoursWorkedPerWeek: mostRecent?.hoursWorkedPerWeek ?? DEFAULT_WAGE_CONFIG.hoursWorkedPerWeek,
-    workdaysPerWeek: mostRecent?.workdaysPerWeek ?? DEFAULT_WAGE_CONFIG.workdaysPerWeek,
-    commuteMinutesPerWorkday:
-      mostRecent?.commuteMinutesPerWorkday ?? DEFAULT_WAGE_CONFIG.commuteMinutesPerWorkday,
-  } as const;
-
-  const rates = computeHourlyRates(config);
-  db.insert(monthlyWageSettingsTable)
-    .values({
-      id: newId(),
-      month,
-      wageType: config.wageType,
-      wageAmount: config.wageAmount,
-      hoursWorkedPerWeek: config.hoursWorkedPerWeek,
-      workdaysPerWeek: config.workdaysPerWeek,
-      commuteMinutesPerWorkday: config.commuteMinutesPerWorkday,
-      baseHourlyRate: rates.baseHourlyRate,
-      trueHourlyRate: rates.trueHourlyRate,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    })
-    .run();
-}
 
 function ensureCoreData() {
   const db = getDb();
@@ -101,11 +30,14 @@ function ensureCoreData() {
     .get();
 
   if (!settingsRow) {
+    const localeCurrencyCode = getLocaleCurrencyCode();
+    const localeCurrencySymbol = getLocaleCurrencySymbol();
     db.insert(settingsTable)
       .values({
         id: 'primary',
         locale: getDeviceLocale(),
-        currencySymbol: getLocaleCurrencySymbol(),
+        currencyCode: localeCurrencyCode,
+        currencySymbol: localeCurrencySymbol,
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
@@ -118,7 +50,6 @@ function ensureCoreData() {
       .run();
   }
 
-  seedOrCarryForwardMonthlyWage();
   ensureDefaultCategories();
 }
 

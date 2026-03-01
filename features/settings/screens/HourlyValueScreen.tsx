@@ -26,20 +26,6 @@ interface HourlyValueScreenProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
 }
 
-const MONTH_OPTIONS = [
-  { value: '01', label: 'January' },
-  { value: '02', label: 'February' },
-  { value: '03', label: 'March' },
-  { value: '04', label: 'April' },
-  { value: '05', label: 'May' },
-  { value: '06', label: 'June' },
-  { value: '07', label: 'July' },
-  { value: '08', label: 'August' },
-  { value: '09', label: 'September' },
-  { value: '10', label: 'October' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'December' },
-];
 const HISTORY_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
@@ -59,18 +45,32 @@ function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
   return Array.from(byMonth.values());
 }
 
-function formatMonthLabel(monthKey: string) {
+function buildMonthOptions(locale: string) {
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'long' });
+  return Array.from({ length: 12 }, (_, index) => {
+    const value = String(index + 1).padStart(2, '0');
+    const label = formatter.format(new Date(2024, index, 1));
+    return { value, label };
+  });
+}
+
+function formatMonthLabel(monthKey: string, locale: string) {
   const normalizedMonth = normalizeMonthKey(monthKey);
-  const year = normalizedMonth.slice(0, 4);
-  const month = normalizedMonth.slice(5, 7);
-  const monthLabel = MONTH_OPTIONS.find((item) => item.value === month)?.label;
-  if (!monthLabel) return normalizedMonth;
-  return `${monthLabel} ${year}`;
+  const [yearRaw, monthRaw] = normalizedMonth.split('-');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  if (!Number.isInteger(year) || !Number.isInteger(month)) return normalizedMonth;
+  if (month < 1 || month > 12) return normalizedMonth;
+  return new Date(year, month - 1, 1).toLocaleDateString(locale, {
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
   const themeColors = useThemeColors();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
@@ -79,6 +79,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
   );
 
   const currentMonthKey = useMemo(() => monthKeyFromDateLocal(new Date()), []);
+  const monthOptions = useMemo(() => buildMonthOptions(activeLocale), [activeLocale]);
 
   const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
 
@@ -118,7 +119,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('settings.hourly_delete_title'),
-        I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month) }),
+        I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month, activeLocale) }),
         [
           { text: I18n.t('common.cancel'), style: 'cancel' },
           {
@@ -132,7 +133,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
         ],
       );
     },
-    [deleteWageConfigForMonth],
+    [activeLocale, deleteWageConfigForMonth],
   );
 
   const handleAddConfirm = useCallback(() => {
@@ -140,7 +141,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     const existing = normalizedHistory.find((item) => item.month === monthKey);
     if (existing) {
       Alert.alert(
-        I18n.t('settings.hourly_month_exists_title', { month: formatMonthLabel(monthKey) }),
+        I18n.t('settings.hourly_month_exists_title', { month: formatMonthLabel(monthKey, activeLocale) }),
         I18n.t('settings.hourly_month_exists_message'),
         [
           { text: I18n.t('common.cancel'), style: 'cancel' },
@@ -157,7 +158,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     }
     setShowAddModal(false);
     onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
-  }, [handleEditEntry, normalizedHistory, onOpenWageCalculator, pickerMonth, pickerYear]);
+  }, [activeLocale, handleEditEntry, normalizedHistory, onOpenWageCalculator, pickerMonth, pickerYear]);
 
   const keyExtractor = useCallback((item: MonthlyWageSettings) => item.id, []);
 
@@ -171,7 +172,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           }`}
         >
           <View className="flex-1 gap-0.5">
-            <Text variant="caption">{formatMonthLabel(item.month)}</Text>
+            <Text variant="caption">{formatMonthLabel(item.month, activeLocale)}</Text>
             {isCurrentMonth ? (
               <Text variant="label" className="text-success">
                 {I18n.t('settings.hourly_badge_current')}
@@ -201,6 +202,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
       currentMonthKey,
       handleDeleteEntry,
       handleEditEntry,
+      activeLocale,
       settings.currencySymbol,
       themeColors.coral,
       themeColors.textMuted,
@@ -280,7 +282,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
                   label={I18n.t('settings.month')}
                   value={pickerMonth}
                   onChange={setPickerMonth}
-                  options={MONTH_OPTIONS}
+                  options={monthOptions}
                 />
               </View>
             </View>
