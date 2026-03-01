@@ -6,4 +6,4 @@ export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
 export { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
-export type { SettingsScreenName, SettingsStackParamList } from '~/navigation/settingsStack';
+export type { SettingsStackParamList } from '~/navigation/settingsStack';

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
 import {
-  type SettingsScreenName,
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
   type SettingsStackRouteProps,
@@ -22,8 +21,6 @@ import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 interface SettingsStackProps {
   resetToRootToken?: number;
   scrollToTopToken?: number;
-  forceScreen?: SettingsScreenName | null;
-  forceScreenToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
 }
 
@@ -66,8 +63,6 @@ function WageCalculatorRoute({ route, navigation }: SettingsStackRouteProps<'Wag
 export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
-  forceScreen = null,
-  forceScreenToken = 0,
   onOpenRecurringEditor,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
@@ -92,24 +87,6 @@ export function SettingsStack({
       nav.dispatch(StackActions.popToTop());
     }
   }, [resetToRootToken, suppressProgrammaticClosingHaptics]);
-
-  useEffect(() => {
-    if (!forceScreen) return;
-    const navigation = stackNavigationRef.current;
-    if (!navigation) return;
-
-    suppressProgrammaticClosingHaptics();
-    if (navigation.canGoBack()) {
-      navigation.dispatch(StackActions.popToTop());
-    }
-    if (forceScreen === 'SettingsHome') return;
-
-    const frame = requestAnimationFrame(() => {
-      navigation.navigate(forceScreen);
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [forceScreen, forceScreenToken, suppressProgrammaticClosingHaptics]);
 
   return (
     <SettingsStackNavigator.Navigator
@@ -193,6 +170,7 @@ export function SettingsStack({
             <RecurringScreen
               onBack={() => props.navigation.goBack()}
               onOpenEditor={onOpenRecurringEditor}
+              useNativeBackGesture
             />
           );
         }}

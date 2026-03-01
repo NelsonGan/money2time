@@ -2,6 +2,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
+import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   Button,
   Card,
@@ -23,6 +24,7 @@ import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
 interface RecurringScreenProps {
   onBack: () => void;
   onOpenEditor: (ruleId?: string) => void;
+  useNativeBackGesture?: boolean;
 }
 
 interface RecurringRuleCardProps {
@@ -151,7 +153,11 @@ const RecurringRuleCard = memo(
     prev.onDelete === next.onDelete,
 );
 
-export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) {
+export function RecurringScreen({
+  onBack,
+  onOpenEditor,
+  useNativeBackGesture = false,
+}: RecurringScreenProps) {
   const themeColors = useThemeColors();
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
   const allRules = useMemo(() => {
@@ -199,7 +205,7 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
       themeColors.textMuted,
     ],
   );
-  return (
+  const content = (
     <SettingsPageLayout>
       <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
         <SettingsHeader
@@ -229,4 +235,7 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
       />
     </SettingsPageLayout>
   );
+
+  if (useNativeBackGesture) return content;
+  return <EdgeSwipeBackContainer onBack={onBack}>{content}</EdgeSwipeBackContainer>;
 }
