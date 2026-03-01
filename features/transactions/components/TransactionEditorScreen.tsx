@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   InteractionManager,
   Keyboard,
+  type LayoutChangeEvent,
   Pressable,
   ScrollView,
   TextInput,
@@ -26,7 +27,7 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, Text } from '~/components/ui';
+import { Button, SegmentedToggle, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
   AccountPanel,
@@ -62,6 +63,21 @@ type ActiveField =
   | 'endDate'
   | 'status'
   | null;
+
+type NonNullActiveField = Exclude<ActiveField, null>;
+type RecurrenceStatusValue = 'active' | 'paused';
+
+const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
+  'amount',
+  'date',
+  'account',
+  'fromAccount',
+  'toAccount',
+  'category',
+  'repeat',
+  'ends',
+  'endDate',
+];
 
 const TYPE_CARDS: {
   value: TransactionType;
@@ -282,6 +298,7 @@ export function TransactionEditorScreen({
   const [recurrenceIsActive, setRecurrenceIsActive] = useState(
     recurringOptions?.initialIsActive ?? true,
   );
+  const recurrenceStatusValue: RecurrenceStatusValue = recurrenceIsActive ? 'active' : 'paused';
 
   const [activeField, setActiveField] = useState<ActiveField>('amount');
   const [fieldErrors, setFieldErrors] = useState<
@@ -300,10 +317,11 @@ export function TransactionEditorScreen({
   >({});
   const [error, setError] = useState<string | null>(null);
   const autoNoteFromCategoryRef = useRef<string | null>(null);
+  const editorScrollRef = useRef<ScrollView>(null);
+  const fieldOffsetsRef = useRef<Partial<Record<NonNullActiveField, number>>>({});
   const noteInputRef = useRef<TextInput>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
   const recurrenceIntervalRef = useRef<TextInput>(null);
-  const recurrenceEndDateRef = useRef<TextInput>(null);
   const patternLabels: Record<string, string> = {
     daily: I18n.t('transactions.editor.daily'),
     weekly: I18n.t('transactions.editor.weekly'),
@@ -314,11 +332,9 @@ export function TransactionEditorScreen({
     noteInputRef.current?.blur();
     recurrenceNameRef.current?.blur();
     recurrenceIntervalRef.current?.blur();
-    recurrenceEndDateRef.current?.blur();
   }, []);
   const isNativeKeyboardField = useCallback(
-    (field: ActiveField) =>
-      field === 'note' || field === 'ruleName' || field === 'interval' || field === 'endDate',
+    (field: ActiveField) => field === 'note' || field === 'ruleName' || field === 'interval',
     [],
   );
   const activateField = useCallback(
@@ -646,10 +662,40 @@ export function TransactionEditorScreen({
   const summaryFlex = windowHeight < 700 ? 0.38 : 0.44;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
-  const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'endDate', 'status'];
+  const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
   const showToolZone =
     activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
-  const summaryBottomPadding = isRecurringEditor ? 196 : showToolZone ? 92 : 16;
+  const recurringToolZonePadding =
+    isRecurringEditor && showToolZone ? Math.max(520, Math.round(windowHeight * 0.62)) : 0;
+  const summaryBottomPadding = isRecurringEditor
+    ? showToolZone
+      ? recurringToolZonePadding
+      : 196
+    : showToolZone
+      ? 92
+      : 16;
+
+  const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
+    const y = fieldOffsetsRef.current[field];
+    if (typeof y !== 'number') return;
+
+    const targetY = Math.max(0, y - 24);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        editorScrollRef.current?.scrollTo({ y: targetY, animated: true });
+      });
+    });
+  }, []);
+
+  const registerFieldLayout = useCallback(
+    (field: NonNullActiveField) => (event: LayoutChangeEvent) => {
+      fieldOffsetsRef.current[field] = event.nativeEvent.layout.y;
+      if (activeField === field && showToolZone && TOOL_ZONE_FIELDS.includes(field)) {
+        scrollFieldIntoView(field);
+      }
+    },
+    [activeField, scrollFieldIntoView, showToolZone],
+  );
 
   useEffect(() => {
     if (!activeField || isNativeKeyboardField(activeField)) return;
@@ -657,10 +703,47 @@ export function TransactionEditorScreen({
     Keyboard.dismiss();
   }, [activeField, blurNativeInputs, isNativeKeyboardField]);
 
+  useEffect(() => {
+    if (!activeField || !showToolZone) return;
+    if (!TOOL_ZONE_FIELDS.includes(activeField)) return;
+    scrollFieldIntoView(activeField);
+  }, [activeField, scrollFieldIntoView, showToolZone]);
+
   const focusNoteField = useCallback(() => {
     activateField('note');
     requestAnimationFrame(() => noteInputRef.current?.focus());
   }, [activateField]);
+
+  const focusRecurrenceIntervalField = useCallback(() => {
+    activateField('interval');
+    requestAnimationFrame(() => recurrenceIntervalRef.current?.focus());
+  }, [activateField]);
+
+  const focusRecurrenceEndDateField = useCallback(() => {
+    activateField('endDate');
+  }, [activateField]);
+
+  const handleRecurrenceEndDateSelect = useCallback(
+    (nextDate: string) => {
+      setRecurrenceEndDate(nextDate);
+      activateField('status');
+    },
+    [activateField],
+  );
+  const handleRecurrenceStatusChange = useCallback(
+    (nextStatus: RecurrenceStatusValue) => {
+      setRecurrenceIsActive(nextStatus === 'active');
+      activateField('status');
+    },
+    [activateField],
+  );
+  const recurrenceStatusOptions = useMemo(
+    () => [
+      { value: 'active' as const, label: I18n.t('transactions.editor.active') },
+      { value: 'paused' as const, label: I18n.t('transactions.editor.paused') },
+    ],
+    [],
+  );
 
   const handleDateSelect = useCallback(
     (nextDate: string) => {
@@ -879,6 +962,7 @@ export function TransactionEditorScreen({
                   onPress={() => {
                     void triggerHaptic('selection');
                     setRecurrencePattern(p);
+                    focusRecurrenceIntervalField();
                   }}
                   className={cn(
                     'w-[48%] rounded-2xl border px-3.5 py-3.5',
@@ -915,9 +999,11 @@ export function TransactionEditorScreen({
                     if (opt.value === 'never') {
                       setRecurrenceEndMode('never');
                       setRecurrenceEndDate('');
+                      activateField('status');
                     } else {
                       setRecurrenceEndMode('on_date');
                       if (!recurrenceEndDate) setRecurrenceEndDate(date);
+                      focusRecurrenceEndDateField();
                     }
                   }}
                   className={cn(
@@ -938,6 +1024,10 @@ export function TransactionEditorScreen({
               ))}
             </View>
           </View>
+        );
+      case 'endDate':
+        return (
+          <DatePanel value={recurrenceEndDate || date} onSelect={handleRecurrenceEndDateSelect} />
         );
       default:
         return null;
@@ -991,6 +1081,7 @@ export function TransactionEditorScreen({
 
       <View style={{ flex: showToolZone ? summaryFlex : 1 }}>
         <ScrollView
+          ref={editorScrollRef}
           className="flex-1"
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: summaryBottomPadding }}
           showsVerticalScrollIndicator={false}
@@ -1015,7 +1106,7 @@ export function TransactionEditorScreen({
             {!isBalanceAdjustmentType ? (
               <>
                 {/* Date row */}
-                <View>
+                <View onLayout={registerFieldLayout('date')}>
                   <SummaryRow
                     label={I18n.t('transactions.editor.date')}
                     value={formatDateDisplay(date)}
@@ -1042,7 +1133,7 @@ export function TransactionEditorScreen({
             ) : null}
 
             {/* Amount row */}
-            <View>
+            <View onLayout={registerFieldLayout('amount')}>
               <SummaryRow
                 label={I18n.t('transactions.editor.amount')}
                 isActive={activeField === 'amount'}
@@ -1091,7 +1182,7 @@ export function TransactionEditorScreen({
             {/* Account row(s) */}
             {hideAccountSelector ? null : isTransferType ? (
               <>
-                <View>
+                <View onLayout={registerFieldLayout('fromAccount')}>
                   <SummaryRow
                     label={I18n.t('transactions.editor.from')}
                     isActive={activeField === 'fromAccount'}
@@ -1136,7 +1227,7 @@ export function TransactionEditorScreen({
                     <View className="h-[1px] flex-1 bg-border/15" />
                   </View>
                 </View>
-                <View>
+                <View onLayout={registerFieldLayout('toAccount')}>
                   <SummaryRow
                     label={I18n.t('transactions.editor.to')}
                     isActive={activeField === 'toAccount'}
@@ -1169,7 +1260,7 @@ export function TransactionEditorScreen({
                 </View>
               </>
             ) : (
-              <View>
+              <View onLayout={registerFieldLayout('account')}>
                 <SummaryRow
                   label={I18n.t('transactions.editor.account')}
                   isActive={activeField === 'account'}
@@ -1206,7 +1297,7 @@ export function TransactionEditorScreen({
             {!isTransferType && !isBalanceAdjustmentType ? (
               <>
                 <View className="h-[1px] bg-border/15 mx-4" />
-                <View>
+                <View onLayout={registerFieldLayout('category')}>
                   <SummaryRow
                     label={I18n.t('transactions.editor.category')}
                     isActive={activeField === 'category'}
@@ -1347,7 +1438,7 @@ export function TransactionEditorScreen({
               <View className="h-[1px] bg-border/15 mx-4" />
 
               {/* Repeat pattern */}
-              <View>
+              <View onLayout={registerFieldLayout('repeat')}>
                 <SummaryRow
                   label={I18n.t('transactions.editor.repeat')}
                   isActive={activeField === 'repeat'}
@@ -1416,7 +1507,7 @@ export function TransactionEditorScreen({
               <View className="h-[1px] bg-border/15 mx-4" />
 
               {/* Ends */}
-              <View>
+              <View onLayout={registerFieldLayout('ends')}>
                 <SummaryRow
                   label={I18n.t('transactions.editor.ends')}
                   isActive={activeField === 'ends'}
@@ -1444,18 +1535,18 @@ export function TransactionEditorScreen({
               {recurrenceEndMode === 'on_date' ? (
                 <>
                   <View className="h-[1px] bg-border/15 mx-4" />
-                  <View>
+                  <View onLayout={registerFieldLayout('endDate')}>
                     <SummaryRow
                       label={I18n.t('transactions.editor.end_date')}
                       isActive={activeField === 'endDate'}
+                      valueTone={fieldErrors.end_date ? 'error' : 'default'}
                       onPress={() => {
                         activateField('endDate');
-                        requestAnimationFrame(() => recurrenceEndDateRef.current?.focus());
                       }}
-                      rightElement={<View style={{ width: 14 }} />}
+                      rightElement={null}
                     >
                       <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-2">
+                        <View className="flex-row items-center gap-2 flex-1 min-w-0">
                           <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
                             <Calendar size={13} color={themeColors.textMuted} />
                           </View>
@@ -1463,26 +1554,20 @@ export function TransactionEditorScreen({
                             {I18n.t('transactions.editor.end_date')}
                           </Text>
                         </View>
-                        <View className="min-w-[30%]">
-                          <TextInput
-                            ref={recurrenceEndDateRef}
-                            value={recurrenceEndDate}
-                            onChangeText={setRecurrenceEndDate}
-                            placeholder="YYYY-MM-DD"
-                            placeholderTextColor={themeColors.textMuted}
-                            returnKeyType="done"
-                            onFocus={() => setActiveField('endDate')}
-                            onBlur={() =>
-                              setActiveField((prev) => (prev === 'endDate' ? null : prev))
-                            }
-                            style={{
-                              color: fieldErrors.end_date ? themeColors.coral : themeColors.text,
-                              fontSize: 14,
-                              textAlign: 'right',
-                              paddingVertical: 0,
-                            }}
-                          />
-                        </View>
+                        <Text
+                          variant="body"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          className={cn(
+                            'max-w-[58%] text-right',
+                            recurrenceEndDate ? '' : 'text-muted-foreground/60',
+                            fieldErrors.end_date ? 'text-destructive' : '',
+                          )}
+                        >
+                          {recurrenceEndDate
+                            ? formatDateDisplay(recurrenceEndDate)
+                            : I18n.t('transactions.editor.on_date')}
+                        </Text>
                       </View>
                     </SummaryRow>
                   </View>
@@ -1498,8 +1583,6 @@ export function TransactionEditorScreen({
                   isActive={activeField === 'status'}
                   onPress={() => {
                     activateField('status');
-                    setRecurrenceIsActive((prev) => !prev);
-                    void triggerHaptic('selection');
                   }}
                   rightElement={null}
                 >
@@ -1512,14 +1595,13 @@ export function TransactionEditorScreen({
                         {I18n.t('transactions.editor.status')}
                       </Text>
                     </View>
-                    <Text
-                      variant="body"
-                      className={recurrenceIsActive ? 'text-success' : 'text-muted-foreground'}
-                    >
-                      {recurrenceIsActive
-                        ? I18n.t('transactions.editor.active')
-                        : I18n.t('transactions.editor.paused')}
-                    </Text>
+                    <SegmentedToggle
+                      value={recurrenceStatusValue}
+                      onChange={handleRecurrenceStatusChange}
+                      options={recurrenceStatusOptions}
+                      size="compact"
+                      className="w-[138px]"
+                    />
                   </View>
                 </SummaryRow>
               </View>

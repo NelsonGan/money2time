@@ -107,12 +107,14 @@ export function SummaryRow({
             </View>
           )}
         </View>
-        {rightElement ?? (
+        {rightElement === undefined ? (
           <ChevronRight
             size={14}
             color={isActive ? chevronActive : themeColors.textMuted}
             className="ml-2"
           />
+        ) : (
+          rightElement
         )}
       </Pressable>
     </Animated.View>
