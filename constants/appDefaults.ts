@@ -111,33 +111,83 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
 ];
 
 type OnboardingCategorySeed = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+type OnboardingAccountSeed = Omit<
+  Account,
+  'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'currency'
+>;
 
 export const ONBOARDING_MINIMAL_EXPENSE_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Food', type: 'expense', parentId: null, icon: '🍔', isDefault: true },
-  {
-    name: 'Transport',
-    type: 'expense',
-    parentId: null,
-    icon: '🚗',
-    isDefault: true,
-  },
-  { name: 'Bills', type: 'expense', parentId: null, icon: '📄', isDefault: true },
-  {
-    name: 'Shopping',
-    type: 'expense',
-    parentId: null,
-    icon: '🛍️',
-    isDefault: true,
-  },
+  { name: 'Groceries', type: 'expense', parentId: null, icon: '🛒', isDefault: true },
+  { name: 'Transport', type: 'expense', parentId: null, icon: '🚗', isDefault: true },
+  { name: 'Housing', type: 'expense', parentId: null, icon: '🏠', isDefault: true },
+  { name: 'Bills', type: 'expense', parentId: null, icon: '💡', isDefault: true },
+  { name: 'Healthcare', type: 'expense', parentId: null, icon: '💊', isDefault: true },
+  { name: 'Shopping', type: 'expense', parentId: null, icon: '🛍️', isDefault: true },
+  { name: 'Entertainment', type: 'expense', parentId: null, icon: '🎬', isDefault: true },
+  { name: 'Education', type: 'expense', parentId: null, icon: '📚', isDefault: true },
 ];
 
 export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Salary', type: 'income', parentId: null, icon: '💰', isDefault: true },
+  { name: 'Freelance', type: 'income', parentId: null, icon: '💼', isDefault: true },
+  { name: 'Other Income', type: 'income', parentId: null, icon: '🎁', isDefault: true },
+];
+
+export const ONBOARDING_POWER_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [
   {
-    name: 'Other Income',
-    type: 'income',
-    parentId: null,
-    icon: '💼',
-    isDefault: true,
+    name: 'Cash Wallet',
+    type: 'debit',
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    icon: '👛',
+    color: '#3AA88B',
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Checking Account',
+    type: 'debit',
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    icon: '🏦',
+    color: '#2B8A78',
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Savings Account',
+    type: 'debit',
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    icon: '💰',
+    color: '#4C9D6E',
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Credit Card',
+    type: 'credit',
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    icon: '💳',
+    color: '#7A8793',
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Digital Wallet',
+    type: 'debit',
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    icon: '📱',
+    color: '#4F7EA8',
+    startingBalance: 0,
+    includeInTotals: true,
   },
 ];

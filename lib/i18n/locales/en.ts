@@ -193,7 +193,7 @@ const en = {
       complete_of_total: '{{count}} of {{total}} complete',
       quick_start_title: 'Need a quick start?',
       quick_start_subtitle:
-        'Create one account, minimal categories, and one sample transaction in one tap.',
+        'Create 5 starter accounts, essential categories, and one sample transaction in one tap.',
       create_minimal_setup: 'Create Minimal Setup',
       accounts_item_title: 'Accounts',
       accounts_item_description:
@@ -604,7 +604,7 @@ const en = {
     user_mode_subtitle_power: 'Currently: Power — tap to switch to Simple',
     switch_to_simple_title: 'Switch to Simple Mode?',
     switch_to_simple_message:
-      'The Simple Wallet and default categories will be created. Your existing data is unchanged.',
+      'A Simple Wallet will be created if missing. Your existing data is unchanged.',
     switch_to_power_title: 'Switch to Power Mode?',
     switch_to_power_message: 'All your accounts and features will be restored.',
     remove_simple_wallet: 'Remove Simple Wallet',

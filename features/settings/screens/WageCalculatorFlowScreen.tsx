@@ -204,6 +204,7 @@ export function WageCalculatorFlowScreen({
                   variant="numeric"
                   value={commuteMinutesPerWorkday}
                   onChangeText={setCommuteMinutesPerWorkday}
+                  selectTextOnFocus={commuteMinutesPerWorkday === '0'}
                   placeholder="0"
                 />
                 <View className="rounded-[18px] bg-accent/12 border border-accent/20 px-4 py-3">
