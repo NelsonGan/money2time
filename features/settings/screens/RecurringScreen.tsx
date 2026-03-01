@@ -18,6 +18,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { RecurringTransactionRule } from '~/types';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
+import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
 
 interface RecurringScreenProps {
   onBack: () => void;
@@ -154,13 +155,8 @@ export function RecurringScreen({ onBack, onOpenEditor }: RecurringScreenProps) 
   const themeColors = useThemeColors();
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
   const allRules = useMemo(() => {
-    if (!isSimpleMode || !simpleWalletId) return recurringRules;
-    return recurringRules.filter(
-      (rule) =>
-        rule.accountId === simpleWalletId ||
-        rule.fromAccountId === simpleWalletId ||
-        rule.toAccountId === simpleWalletId,
-    );
+    if (!isSimpleMode) return recurringRules;
+    return filterRecurringRulesByWallet(recurringRules, simpleWalletId);
   }, [isSimpleMode, simpleWalletId, recurringRules]);
 
   const openCreate = useCallback(() => {

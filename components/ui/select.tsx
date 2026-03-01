@@ -216,7 +216,9 @@ export function SelectField({
             className="rounded-t-[28px] border-t border-border/40 bg-background px-5 pt-3 pb-7"
             style={{
               transform: [{ translateY }],
-              maxHeight: fullHeight ? windowHeight * 0.92 : Math.max(320, Math.min(windowHeight * 0.74, 620)),
+              maxHeight: fullHeight
+                ? windowHeight * 0.92
+                : Math.max(320, Math.min(windowHeight * 0.74, 620)),
             }}
             onLayout={(event) => {
               const next = event.nativeEvent.layout.height;

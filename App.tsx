@@ -146,6 +146,12 @@ function MainShellScreen() {
     [navigation],
   );
 
+  const openSettingsScreen = useCallback((screen: SettingsScreenName) => {
+    setSettingsForceScreen(screen);
+    setSettingsForceScreenToken((prev) => prev + 1);
+    setActiveTab('settings');
+  }, []);
+
   const openRecurringEditor = useCallback(
     (ruleId?: string) => {
       if (ruleId) {
@@ -189,6 +195,7 @@ function MainShellScreen() {
             scrollToTopToken={homeScrollTopToken}
             onOpenAccount={openAccountDetail}
             onOpenTransaction={openTransactionEditor}
+            onOpenSettingsScreen={openSettingsScreen}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
@@ -329,7 +336,9 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
   return (
     <TransactionEditorScreen
       mode={editingRule ? 'edit' : 'create'}
-      onClose={() => { if (navigation.canGoBack()) navigation.goBack(); }}
+      onClose={() => {
+        if (navigation.canGoBack()) navigation.goBack();
+      }}
       onSubmit={() => {}}
       onDelete={undefined}
       deleteLabel={undefined}

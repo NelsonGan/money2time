@@ -40,6 +40,10 @@ const SNAP_CONFIG = {
 const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
 const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
 
+function isCategoryType(value: string): value is CategoryType {
+  return value === 'expense' || value === 'income';
+}
+
 function CategoryEditor({
   visible,
   mode,
@@ -281,11 +285,7 @@ function TopLevelRow({
       >
         <Text style={{ fontSize: 12 }}>{resolveCategoryIcon(item.icon)}</Text>
       </View>
-      <Pressable
-        onPress={() => onNavigate(item)}
-        disabled={isActive}
-        style={{ flex: 1 }}
-      >
+      <Pressable onPress={() => onNavigate(item)} disabled={isActive} style={{ flex: 1 }}>
         <View style={{ gap: 2 }}>
           <Text style={{ fontSize: 13, color: tc.text }} numberOfLines={1}>
             {item.name}
@@ -464,13 +464,16 @@ export function CategoriesScreen({
   );
   const childrenByParent = useMemo(() => {
     const map = new Map<string, Category[]>();
-    typeCategories
-      .filter((item) => !!item.parentId)
-      .forEach((item) => {
-        const key = item.parentId as string;
-        if (!map.has(key)) map.set(key, []);
-        map.get(key)!.push(item);
-      });
+    typeCategories.forEach((item) => {
+      const parentCategoryId = item.parentId;
+      if (!parentCategoryId) return;
+      const existing = map.get(parentCategoryId);
+      if (existing) {
+        existing.push(item);
+      } else {
+        map.set(parentCategoryId, [item]);
+      }
+    });
     return map;
   }, [typeCategories]);
 
@@ -703,9 +706,7 @@ export function CategoriesScreen({
     );
     if (useNativeBackGesture) return content;
     return (
-      <EdgeSwipeBackContainer onBack={handleSubcategoryBack}>
-        {content}
-      </EdgeSwipeBackContainer>
+      <EdgeSwipeBackContainer onBack={handleSubcategoryBack}>{content}</EdgeSwipeBackContainer>
     );
   }
 
@@ -731,7 +732,10 @@ export function CategoriesScreen({
         />
         <SegmentedToggle
           value={type}
-          onChange={(v) => setType(v as CategoryType)}
+          onChange={(value) => {
+            if (!isCategoryType(value)) return;
+            setType(value);
+          }}
           options={[
             { value: 'expense', label: I18n.t('categories.expense') },
             { value: 'income', label: I18n.t('categories.income') },
@@ -801,9 +805,5 @@ export function CategoriesScreen({
     </SettingsPageLayout>
   );
   if (useNativeBackGesture) return content;
-  return (
-    <EdgeSwipeBackContainer onBack={edgeSwipeBackHandler}>
-      {content}
-    </EdgeSwipeBackContainer>
-  );
+  return <EdgeSwipeBackContainer onBack={edgeSwipeBackHandler}>{content}</EdgeSwipeBackContainer>;
 }
