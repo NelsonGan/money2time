@@ -19,8 +19,10 @@ import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/scr
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
   AccountsScreen,
-  type SettingsScreenName,
+  HourlyValueScreen,
+  RecurringScreen,
   SettingsStack,
+  WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import {
@@ -107,16 +109,12 @@ function MainShellScreen() {
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
-  const [settingsForceScreen, setSettingsForceScreen] = useState<SettingsScreenName | null>(null);
-  const [settingsForceScreenToken, setSettingsForceScreenToken] = useState(0);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
-      setSettingsForceScreen('HourlyValue');
-      setSettingsForceScreenToken((prev) => prev + 1);
-      setActiveTab('settings');
+      navigation.navigate('SettingsHourlyValue');
     });
-  }, []);
+  }, [navigation]);
 
   const jumpTransactionsToMonth = useCallback((monthKey: string) => {
     setTransactionsFocusMonthKey(monthKey);
@@ -146,11 +144,16 @@ function MainShellScreen() {
     [navigation],
   );
 
-  const openSettingsScreen = useCallback((screen: SettingsScreenName) => {
-    setSettingsForceScreen(screen);
-    setSettingsForceScreenToken((prev) => prev + 1);
-    setActiveTab('settings');
-  }, []);
+  const openSettingsScreen = useCallback(
+    (screen: 'Accounts' | 'Recurring') => {
+      if (screen === 'Recurring') {
+        navigation.navigate('SettingsRecurring');
+        return;
+      }
+      navigation.navigate('SettingsAccounts');
+    },
+    [navigation],
+  );
 
   const openRecurringEditor = useCallback(
     (ruleId?: string) => {
@@ -176,7 +179,6 @@ function MainShellScreen() {
         setInsightsResetToMonthToken((prev) => prev + 1);
       }
       if (tab === 'settings') {
-        setSettingsForceScreen(null);
         setSettingsResetToken((prev) => prev + 1);
         if (activeTab === 'settings') {
           setSettingsScrollTopToken((prev) => prev + 1);
@@ -227,8 +229,6 @@ function MainShellScreen() {
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
-            forceScreen={settingsForceScreen}
-            forceScreenToken={settingsForceScreenToken}
             onOpenRecurringEditor={openRecurringEditor}
           />
         </MountedTab>
@@ -289,6 +289,60 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
+    />
+  );
+}
+
+function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
+  return <AccountsScreen onBack={() => navigation.goBack()} managementOnly useNativeBackGesture />;
+}
+
+function SettingsRecurringRouteScreen({ navigation }: RootStackRouteProps<'SettingsRecurring'>) {
+  return (
+    <RecurringScreen
+      onBack={() => navigation.goBack()}
+      onOpenEditor={(ruleId) => {
+        if (ruleId) {
+          navigation.navigate('RecurringEditor', { ruleId });
+          return;
+        }
+        navigation.navigate('RecurringEditor');
+      }}
+      useNativeBackGesture
+    />
+  );
+}
+
+function SettingsHourlyValueRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsHourlyValue'>) {
+  return (
+    <HourlyValueScreen
+      onClose={() => navigation.goBack()}
+      onOpenWageCalculator={({ monthKey, initialConfig }) =>
+        navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
+      }
+    />
+  );
+}
+
+function SettingsWageCalculatorRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'SettingsWageCalculator'>) {
+  const { settings, updateWageConfigForMonth } = useApp();
+  const { monthKey, initialConfig } = route.params;
+
+  return (
+    <WageCalculatorFlowScreen
+      initialConfig={initialConfig}
+      settings={settings}
+      monthLabel={monthKey}
+      onCancel={() => navigation.goBack()}
+      onComplete={(config) => {
+        updateWageConfigForMonth(monthKey, config);
+        navigation.goBack();
+      }}
     />
   );
 }
@@ -397,7 +451,6 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
           } else {
             createRecurringRule(payload);
           }
-          navigation.goBack();
         },
       }}
       initialValues={
@@ -461,6 +514,13 @@ function AppContent() {
           <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
           <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
+          <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
+          <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
+          <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
+          <RootStack.Screen
+            name="SettingsWageCalculator"
+            component={SettingsWageCalculatorRouteScreen}
+          />
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
         </RootStack.Navigator>

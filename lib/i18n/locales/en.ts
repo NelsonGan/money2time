@@ -26,6 +26,7 @@ const en = {
     switching_to_money: 'Switching to money mode...',
   },
   app: {
+    name: 'Money2Time',
     loading_world: 'Loading your time world...',
   },
   nav: {
@@ -434,15 +435,8 @@ const en = {
     },
     analytics: {
       asset_history: {
-        summary_title: 'Asset history snapshot',
-        account_count: '{{count}} accounts tracked',
-        excluded_count: '{{count}} accounts excluded',
-        unselected_count: '{{count}} accounts unselected',
-        selected: 'Selected',
-        scrub_hint: 'Tap the chart or a month below to highlight',
+        summary_title: 'Net asset trend',
         latest: 'Latest',
-        high: 'High',
-        low: 'Low',
         empty_no_accounts: {
           title: 'No accounts selected',
           message: 'Include at least one account in filters to chart asset history.',
@@ -457,8 +451,7 @@ const en = {
         goal_hint: '20%+ is typically considered a healthy savings pace.',
       },
       income_rate_history: {
-        scrub_hint: 'Tap chart to inspect a point',
-        true_hourly_rate: 'True hourly rate',
+        rate_title: 'Income rate',
         no_data_title: 'Not enough income rate data',
         no_data_message: 'Add at least 2 income rate entries to see your rate history chart.',
       },

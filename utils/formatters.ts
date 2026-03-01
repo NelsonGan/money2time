@@ -144,6 +144,41 @@ export function formatCurrency(amount: number, currencySymbol = '$'): string {
   return `${currencySymbol}${Math.abs(amount).toFixed(2)}`;
 }
 
+function trimTrailingZeros(value: string) {
+  if (!value.includes('.')) return value;
+  return value.replace(/\.?0+$/, '');
+}
+
+export function formatCompactNumber(value: number): string {
+  const absValue = Math.abs(value);
+  if (!Number.isFinite(absValue) || absValue === 0) return '0';
+
+  const units = [
+    { threshold: 1_000_000_000_000, suffix: 'T' },
+    { threshold: 1_000_000_000, suffix: 'B' },
+    { threshold: 1_000_000, suffix: 'M' },
+    { threshold: 1_000, suffix: 'K' },
+  ] as const;
+
+  for (const unit of units) {
+    if (absValue < unit.threshold) continue;
+    const scaled = absValue / unit.threshold;
+    const decimalPlaces = scaled >= 100 ? 0 : 1;
+    return `${trimTrailingZeros(scaled.toFixed(decimalPlaces))}${unit.suffix}`;
+  }
+
+  if (absValue >= 100) return Math.round(absValue).toString();
+  if (absValue >= 10) return trimTrailingZeros(absValue.toFixed(1));
+  if (absValue >= 1) return trimTrailingZeros(absValue.toFixed(2));
+
+  const decimals = Math.max(0, 3 - Math.floor(Math.log10(absValue)) - 1);
+  return trimTrailingZeros(absValue.toFixed(Math.min(6, decimals)));
+}
+
+export function formatCompactCurrency(amount: number, currencySymbol = '$'): string {
+  return `${currencySymbol}${formatCompactNumber(amount)}`;
+}
+
 export function formatHours(hours: number): string {
   const absHours = Math.abs(hours);
   if (absHours < 0.01) return '0m';
