@@ -1,4 +1,4 @@
-import { type MutableRefObject, type RefObject,useEffect } from 'react';
+import { type MutableRefObject, type RefObject, useEffect } from 'react';
 import type { FlatList } from 'react-native';
 
 type ScrollToTopHandler = (() => void) | null;

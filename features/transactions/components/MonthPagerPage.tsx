@@ -1,4 +1,4 @@
-import React, { memo, type MutableRefObject,useMemo } from 'react';
+import React, { memo, type MutableRefObject, useMemo } from 'react';
 import { type StyleProp, View, type ViewStyle } from 'react-native';
 
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';

@@ -138,7 +138,7 @@ interface AppContextValue extends AppState {
 
   isSimpleMode: boolean;
   simpleWalletId: string | null;
-  switchToSimpleMode: () => void;
+  switchToSimpleMode: (seedDefaults?: boolean) => void;
   switchToPowerMode: () => void;
   deleteSimpleWalletAndTransactions: () => void;
 }
@@ -985,45 +985,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol],
   );
 
-  const switchToSimpleMode = useCallback(() => {
-    runMutation(() => {
-      // Create Simple Wallet if missing
-      let walletId =
-        accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
-      if (!walletId) {
-        const currentSettings = settingsRepository.get();
-        accountsRepository.create({
-          name: SIMPLE_WALLET_NAME,
-          type: 'debit',
-          icon: '👛',
-          color: '#22917A',
-          startingBalance: 0,
-          accountGroup: null,
-          creditStatementDay: null,
-          creditDueDay: null,
-          currency: currentSettings.currencySymbol,
-          includeInTotals: true,
-          sortOrder: 0,
-        });
-      }
-      // Ensure default categories exist
-      const existingCategories = categoriesRepository.list();
-      const existing = new Set(
-        existingCategories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
-      );
-      const minimal = [
-        ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-        ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-      ];
-      minimal.forEach((item) => {
-        const key = `${item.type}:${item.name.trim().toLowerCase()}`;
-        if (existing.has(key)) return;
-        categoriesRepository.create(item);
-        existing.add(key);
+  const switchToSimpleMode = useCallback(
+    (seedDefaults = false) => {
+      runMutation(() => {
+        // Create Simple Wallet if missing
+        let walletId =
+          accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
+        if (!walletId) {
+          const currentSettings = settingsRepository.get();
+          accountsRepository.create({
+            name: SIMPLE_WALLET_NAME,
+            type: 'debit',
+            icon: '👛',
+            color: '#22917A',
+            startingBalance: 0,
+            accountGroup: null,
+            creditStatementDay: null,
+            creditDueDay: null,
+            currency: currentSettings.currencySymbol,
+            includeInTotals: true,
+            sortOrder: 0,
+          });
+        }
+        if (seedDefaults) {
+          const existingCategories = categoriesRepository.list();
+          const existing = new Set(
+            existingCategories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
+          );
+          const minimal = [
+            ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+            ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+          ];
+          minimal.forEach((item) => {
+            const key = `${item.type}:${item.name.trim().toLowerCase()}`;
+            if (existing.has(key)) return;
+            categoriesRepository.create(item);
+            existing.add(key);
+          });
+        }
+        settingsRepository.updateSettings({ userMode: 'simple' });
       });
-      settingsRepository.updateSettings({ userMode: 'simple' });
-    });
-  }, [runMutation]);
+    },
+    [runMutation],
+  );
 
   const switchToPowerMode = useCallback(() => {
     runMutation(() => {
