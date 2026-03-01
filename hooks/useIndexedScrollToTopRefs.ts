@@ -1,4 +1,4 @@
-import { type MutableRefObject,useCallback, useRef } from 'react';
+import { type MutableRefObject, useCallback, useRef } from 'react';
 
 type ScrollToTopHandler = (() => void) | null;
 

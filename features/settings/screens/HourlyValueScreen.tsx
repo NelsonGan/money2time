@@ -1,6 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, type ListRenderItem,Pressable, View } from 'react-native';
+import { Alert, FlatList, type ListRenderItem, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
