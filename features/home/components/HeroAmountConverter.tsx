@@ -84,7 +84,7 @@ function NumKey({
   onPress: () => void;
   dimmed?: boolean;
 }) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.88 });
+  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
 
   return (
     <Animated.View style={[animatedStyle, { flex: 1 }]}>
@@ -92,12 +92,11 @@ function NumKey({
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        className="h-12 items-center justify-center rounded-2xl bg-secondary/50 mx-0.5 active:bg-secondary"
+        className="h-14 items-center justify-center bg-card active:bg-secondary/60"
       >
         {children ?? (
           <Text
-            variant="bodyStrong"
-            style={{ opacity: dimmed ? 0.4 : 1 }}
+            style={{ fontSize: 18, fontWeight: '600', opacity: dimmed ? 0.35 : 1 }}
             className="text-foreground"
           >
             {label}
@@ -114,6 +113,8 @@ const NUM_ROWS = [
   ['7', '8', '9'],
   ['.', '0', 'backspace'],
 ] as const;
+const INPUT_PROGRESS_SPRING = { damping: 18, stiffness: 180 } as const;
+const NUMPAD_ROW_STYLE = { flexDirection: 'row', gap: 1 } as const;
 
 export function HeroAmountConverter({
   amount,
@@ -140,6 +141,10 @@ export function HeroAmountConverter({
     () => formatWorkDuration(workdays, workdaysPerWeek),
     [workdays, workdaysPerWeek],
   );
+  const activateInputProgress = useCallback(() => {
+    if (inputProgress.value !== 0) return;
+    inputProgress.value = withSpring(1, INPUT_PROGRESS_SPRING);
+  }, [inputProgress]);
 
   const cardStyle = useAnimatedStyle(() => ({
     shadowOpacity: 0.08 + inputProgress.value * 0.14,
@@ -160,7 +165,7 @@ export function HeroAmountConverter({
         if (amount.includes('.')) return;
         const next = amount === '' ? '0.' : amount + '.';
         onChangeAmount(next);
-        if (inputProgress.value === 0) inputProgress.value = withSpring(1, { damping: 18, stiffness: 180 });
+        activateInputProgress();
         return;
       }
 
@@ -170,9 +175,9 @@ export function HeroAmountConverter({
 
       const next = amount === '0' ? key : amount + key;
       onChangeAmount(next);
-      if (inputProgress.value === 0) inputProgress.value = withSpring(1, { damping: 18, stiffness: 180 });
+      activateInputProgress();
     },
-    [amount, onChangeAmount, inputProgress],
+    [activateInputProgress, amount, onChangeAmount],
   );
 
   const hasDot = amount.includes('.');
@@ -181,7 +186,6 @@ export function HeroAmountConverter({
     <Animated.View style={cardStyle} className="mx-5 mt-4">
       <View className="relative overflow-hidden rounded-[28px] border border-border/35 px-5 pt-5 pb-4 bg-card">
         <View className="absolute -top-10 -right-8 h-28 w-28 rounded-full bg-primary/12" />
-        <View className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-success/10" />
 
         {/* Header */}
         <Text variant="bodyStrong">{I18n.t('home.converter.title')}</Text>
@@ -203,18 +207,13 @@ export function HeroAmountConverter({
               {amountLabel}
             </Text>
           </Animated.View>
-          <Button
-            size="sm"
-            variant="outline"
-            bouncy={false}
-            onPress={() => onChangeAmount('')}
-          >
+          <Button size="sm" variant="outline" bouncy={false} onPress={() => onChangeAmount('')}>
             <Text variant="caption">{I18n.t('home.converter.clear')}</Text>
           </Button>
         </View>
 
         {/* Hours result */}
-        <View className="mt-3 mb-4 rounded-[18px] border border-primary/20 bg-primary/8 px-4 py-3">
+        <View className="mt-3 mb-3 rounded-[18px] border border-primary/20 bg-primary/8 px-4 py-3">
           {hasRate ? (
             <>
               <Animated.View
@@ -251,10 +250,18 @@ export function HeroAmountConverter({
           )}
         </View>
 
-        {/* Numpad */}
-        <View className="gap-1.5">
+        {/* Numpad — flush to card edges */}
+        <View
+          className="-mx-5 -mb-4"
+          style={{
+            gap: 1,
+            backgroundColor: themeColors.border,
+            borderTopWidth: 0.5,
+            borderTopColor: themeColors.border,
+          }}
+        >
           {NUM_ROWS.map((row, rowIndex) => (
-            <View key={rowIndex} className="flex-row gap-1.5">
+            <View key={rowIndex} style={NUMPAD_ROW_STYLE}>
               {row.map((key) => {
                 if (key === 'backspace') {
                   return (
@@ -265,17 +272,10 @@ export function HeroAmountConverter({
                 }
                 if (key === '.') {
                   return (
-                    <NumKey
-                      key="."
-                      label="."
-                      dimmed={hasDot}
-                      onPress={() => handleKey('.')}
-                    />
+                    <NumKey key="." label="." dimmed={hasDot} onPress={() => handleKey('.')} />
                   );
                 }
-                return (
-                  <NumKey key={key} label={key} onPress={() => handleKey(key)} />
-                );
+                return <NumKey key={key} label={key} onPress={() => handleKey(key)} />;
               })}
             </View>
           ))}

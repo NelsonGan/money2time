@@ -1,6 +1,14 @@
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, BackHandler, type GestureResponderEvent, Pressable, ScrollView, View } from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  type GestureResponderEvent,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
 
 import {
   Input,
@@ -13,6 +21,7 @@ import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { DatePanel } from '~/features/transactions/components/editor';
 import { I18n } from '~/lib/i18n';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
@@ -105,7 +114,7 @@ export function InsightsDrilldownScreen({
   onOpenTransaction,
   onOpenSubcategoryDrilldown,
 }: InsightsDrilldownScreenProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     categories,
     transactions,
@@ -135,9 +144,10 @@ export function InsightsDrilldownScreen({
     () => new Map(transactions.map((transaction) => [transaction.id, transaction])),
     [transactions],
   );
-  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [
-    categories,
-  ]);
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
   const rootCategoryId = payload.categoryRootId ?? null;
   const rootCategory = useMemo(
     () => (rootCategoryId ? (categoryById.get(rootCategoryId) ?? null) : null),
@@ -231,10 +241,12 @@ export function InsightsDrilldownScreen({
 
     resolvedTransactions.forEach((transaction) => {
       const value =
-        settings.displayMode === 'time' ? getDisplayValueForTransaction(transaction) : transaction.amount;
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(transaction)
+          : transaction.amount;
       const categoryId = transaction.categoryId ?? null;
       const transactionCategory = transaction.categoryId
-        ? categoryById.get(transaction.categoryId) ?? null
+        ? (categoryById.get(transaction.categoryId) ?? null)
         : null;
 
       if (categoryId && rootChildCategoryIdSet.has(categoryId)) {
@@ -250,13 +262,7 @@ export function InsightsDrilldownScreen({
       }
 
       if (categoryId === rootCategoryId || transactionCategory?.id === rootCategoryId) {
-        addRow(
-          DRILLDOWN_DIRECT_PARENT_ROW_ID,
-          parentLabel,
-          parentEmoji,
-          transaction,
-          value,
-        );
+        addRow(DRILLDOWN_DIRECT_PARENT_ROW_ID, parentLabel, parentEmoji, transaction, value);
         return;
       }
 
@@ -317,11 +323,13 @@ export function InsightsDrilldownScreen({
     [resolvedTransactions, shouldShowSubcategoryList],
   );
   const incomeTransactions = useMemo(
-    () => sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'income')),
+    () =>
+      sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'income')),
     [scopedTransactions, sortTransactions],
   );
   const expenseTransactions = useMemo(
-    () => sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'expense')),
+    () =>
+      sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'expense')),
     [scopedTransactions, sortTransactions],
   );
   const displayedTransactions =
@@ -408,12 +416,9 @@ export function InsightsDrilldownScreen({
   }, [handleInterceptBack]);
   const shouldInterceptRouteBack = showBulkUpdate || isSelectionMode;
   useEffect(() => {
-    const navigationWithOptions = navigation as {
-      setOptions?: (options: { gestureEnabled?: boolean }) => void;
-    };
-    navigationWithOptions.setOptions?.({ gestureEnabled: !shouldInterceptRouteBack });
+    navigation.setOptions({ gestureEnabled: !shouldInterceptRouteBack });
     return () => {
-      navigationWithOptions.setOptions?.({ gestureEnabled: true });
+      navigation.setOptions({ gestureEnabled: true });
     };
   }, [navigation, shouldInterceptRouteBack]);
   useEffect(() => {
@@ -810,7 +815,11 @@ export function InsightsDrilldownScreen({
                             </Text>
                             <View
                               className="rounded-full px-1.5 py-0.5"
-                              style={percentBadgeColor ? { backgroundColor: percentBadgeColor } : undefined}
+                              style={
+                                percentBadgeColor
+                                  ? { backgroundColor: percentBadgeColor }
+                                  : undefined
+                              }
                             >
                               <Text variant="label" className="text-foreground">
                                 {row.sharePct.toFixed(1)}%
