@@ -6,11 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text, ThemeModal } from '~/components/ui';
 import {
-  DEFAULT_ACCOUNT_TEMPLATE,
   DEFAULT_CURRENCY,
   DEFAULT_WAGE_CONFIG,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+  ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
 import {
@@ -38,6 +38,14 @@ import { OnboardingWageStep } from './OnboardingWageStep';
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 type SubRoute = 'main' | 'accounts' | 'categories';
+
+function categorySeedKey(type: 'expense' | 'income', name: string) {
+  return `${type}:${name.trim().toLowerCase()}`;
+}
+
+function nameSeedKey(name: string) {
+  return name.trim().toLowerCase();
+}
 
 interface OnboardingFlowProps {
   onComplete: () => void;
@@ -83,10 +91,39 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     [categories],
   );
   const transactionCount = transactions.length;
+  const existingCategorySeedKeys = useMemo(
+    () => new Set(categories.map((item) => categorySeedKey(item.type, item.name))),
+    [categories],
+  );
+  const existingAccountNameKeys = useMemo(
+    () => new Set(accounts.map((item) => nameSeedKey(item.name))),
+    [accounts],
+  );
+  const missingMinimalExpenseCategoryCount = useMemo(
+    () =>
+      ONBOARDING_MINIMAL_EXPENSE_CATEGORIES.filter(
+        (item) => !existingCategorySeedKeys.has(categorySeedKey(item.type, item.name)),
+      ).length,
+    [existingCategorySeedKeys],
+  );
+  const missingMinimalIncomeCategoryCount = useMemo(
+    () =>
+      ONBOARDING_MINIMAL_INCOME_CATEGORIES.filter(
+        (item) => !existingCategorySeedKeys.has(categorySeedKey(item.type, item.name)),
+      ).length,
+    [existingCategorySeedKeys],
+  );
+  const missingMinimalPowerAccountCount = useMemo(
+    () =>
+      ONBOARDING_POWER_MINIMAL_ACCOUNTS.filter(
+        (item) => !existingAccountNameKeys.has(nameSeedKey(item.name)),
+      ).length,
+    [existingAccountNameKeys],
+  );
   const canCreateMinimalDefaults =
-    accountCount === 0 ||
-    expenseCategoryCount === 0 ||
-    incomeCategoryCount === 0 ||
+    missingMinimalPowerAccountCount > 0 ||
+    missingMinimalExpenseCategoryCount > 0 ||
+    missingMinimalIncomeCategoryCount > 0 ||
     transactionCount === 0;
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
@@ -161,9 +198,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const handleCreateMinimalDefaults = useCallback(() => {
     try {
-      const existing = new Set(
-        categories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
-      );
+      const existing = new Set(categories.map((item) => categorySeedKey(item.type, item.name)));
       const minimal = [
         ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
         ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
@@ -171,36 +206,46 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       let createdCategories = 0;
 
       minimal.forEach((item) => {
-        const key = `${item.type}:${item.name.trim().toLowerCase()}`;
+        const key = categorySeedKey(item.type, item.name);
         if (existing.has(key)) return;
         createCategory(item);
         existing.add(key);
         createdCategories += 1;
       });
 
-      let accountId = accounts[0]?.id ?? null;
-      if (!accountId) {
-        accountId = createAccount({
-          ...DEFAULT_ACCOUNT_TEMPLATE,
-          currency: DEFAULT_CURRENCY,
+      const existingAccountNames = new Set(accounts.map((item) => nameSeedKey(item.name)));
+      const preferredCurrency = accounts[0]?.currency ?? DEFAULT_CURRENCY;
+      let accountIdForSample = accounts[0]?.id ?? null;
+      let createdAccounts = 0;
+      ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((item) => {
+        const key = nameSeedKey(item.name);
+        if (existingAccountNames.has(key)) return;
+        const accountId = createAccount({
+          ...item,
+          currency: preferredCurrency,
         });
-      }
+        existingAccountNames.add(key);
+        createdAccounts += 1;
+        if (!accountIdForSample) {
+          accountIdForSample = accountId;
+        }
+      });
 
       let createdSampleTransaction = false;
-      if (transactionCount === 0 && accountId) {
+      if (transactionCount === 0 && accountIdForSample) {
         createTransaction({
           type: 'expense',
           amount: 12,
           currency: settings.currencySymbol,
           date: new Date().toISOString(),
-          accountId,
+          accountId: accountIdForSample,
           categoryId: null,
           note: I18n.t('onboarding.flow.sample_transaction_note'),
         });
         createdSampleTransaction = true;
       }
 
-      if (createdCategories > 0 || createdSampleTransaction || accountCount === 0) {
+      if (createdCategories > 0 || createdAccounts > 0 || createdSampleTransaction) {
         void triggerHaptic('success');
       } else {
         void triggerHaptic('selection');
@@ -210,7 +255,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [
-    accountCount,
     accounts,
     categories,
     createAccount,
@@ -327,7 +371,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             onSelectSimple={() => {
               void triggerHaptic('selection');
               setIsSimpleUser(true);
-              switchToSimpleMode();
+              switchToSimpleMode(true);
               onComplete();
             }}
             onSelectPower={() => {

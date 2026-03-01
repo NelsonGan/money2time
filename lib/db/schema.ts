@@ -83,13 +83,6 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
 
 export const settingsTable = sqliteTable('settings', {
   id: text('id').primaryKey(),
-  // Legacy v1 columns kept for backward-compatible inserts on existing installs.
-  wageType: text('wage_type').notNull(),
-  wageAmount: real('wage_amount').notNull().default(0),
-  hoursPerWeek: real('hours_per_week').notNull().default(40),
-  workdaysPerWeek: integer('workdays_per_week').notNull().default(5),
-  commuteMinutesPerDay: integer('commute_minutes_per_day').notNull().default(0),
-  trueHourlyRate: real('true_hourly_rate').notNull().default(0),
   locale: text('locale').notNull().default('en'),
   currencySymbol: text('currency_symbol').notNull().default('$'),
   hourRounding: real('hour_rounding').notNull().default(0.1),
