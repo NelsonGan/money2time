@@ -66,6 +66,13 @@ type ActiveField =
 
 type NonNullActiveField = Exclude<ActiveField, null>;
 type RecurrenceStatusValue = 'active' | 'paused';
+type TypeCardOption = {
+  value: TransactionType;
+  label: string;
+  emoji: string;
+  bgClass: string;
+  borderClass: string;
+};
 
 const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
   'amount',
@@ -77,43 +84,6 @@ const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
   'repeat',
   'ends',
   'endDate',
-];
-
-const TYPE_CARDS: {
-  value: TransactionType;
-  label: string;
-  emoji: string;
-  bgClass: string;
-  borderClass: string;
-}[] = [
-  {
-    value: 'expense',
-    label: I18n.t('transactions.filters.spent'),
-    emoji: '💸',
-    bgClass: 'bg-destructive/8',
-    borderClass: 'border-destructive/50',
-  },
-  {
-    value: 'income',
-    label: I18n.t('transactions.filters.earned'),
-    emoji: '💰',
-    bgClass: 'bg-success/10',
-    borderClass: 'border-success/50',
-  },
-  {
-    value: 'transfer',
-    label: I18n.t('transactions.filters.moved'),
-    emoji: '↔️',
-    bgClass: 'bg-primary/10',
-    borderClass: 'border-primary/50',
-  },
-  {
-    value: 'balance_adjustment',
-    label: I18n.t('transactions.filters.adjustment'),
-    emoji: '⚖️',
-    bgClass: 'bg-primary/10',
-    borderClass: 'border-primary/50',
-  },
 ];
 
 interface TransactionEditorInitialValues {
@@ -200,7 +170,7 @@ function TypePill({
   selected,
   onPress,
 }: {
-  item: (typeof TYPE_CARDS)[0];
+  item: TypeCardOption;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -231,12 +201,12 @@ function TypePill({
   );
 }
 
-function formatDateDisplay(dateStr: string) {
+function formatDateDisplay(dateStr: string, locale: string) {
   const parsed = new Date(`${dateStr}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateStr;
 
   const now = new Date();
-  return parsed.toLocaleDateString('en-US', {
+  return parsed.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: parsed.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
@@ -262,6 +232,7 @@ export function TransactionEditorScreen({
   const { accounts, accountGroups, categories, settings, currentMonthWage } = useApp();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const initialType = initialValues?.type ?? 'expense';
   const [type, setType] = useState<TransactionType>(initialType);
@@ -368,11 +339,41 @@ export function TransactionEditorScreen({
   );
 
   const availableTypeCards = useMemo(() => {
+    const typeCards: TypeCardOption[] = [
+      {
+        value: 'expense',
+        label: I18n.t('transactions.filters.spent'),
+        emoji: '💸',
+        bgClass: 'bg-destructive/8',
+        borderClass: 'border-destructive/50',
+      },
+      {
+        value: 'income',
+        label: I18n.t('transactions.filters.earned'),
+        emoji: '💰',
+        bgClass: 'bg-success/10',
+        borderClass: 'border-success/50',
+      },
+      {
+        value: 'transfer',
+        label: I18n.t('transactions.filters.moved'),
+        emoji: '↔️',
+        bgClass: 'bg-primary/10',
+        borderClass: 'border-primary/50',
+      },
+      {
+        value: 'balance_adjustment',
+        label: I18n.t('transactions.filters.adjustment'),
+        emoji: '⚖️',
+        bgClass: 'bg-primary/10',
+        borderClass: 'border-primary/50',
+      },
+    ];
     const allowedTypes: TransactionType[] =
       restrictTypeOptions && restrictTypeOptions.length > 0
         ? restrictTypeOptions
         : ['expense', 'income', 'transfer'];
-    return TYPE_CARDS.filter((item) => allowedTypes.includes(item.value));
+    return typeCards.filter((item) => allowedTypes.includes(item.value));
   }, [restrictTypeOptions]);
   const isTransferType = type === 'transfer';
   const isBalanceAdjustmentType = type === 'balance_adjustment';
@@ -1109,7 +1110,7 @@ export function TransactionEditorScreen({
                 <View onLayout={registerFieldLayout('date')}>
                   <SummaryRow
                     label={I18n.t('transactions.editor.date')}
-                    value={formatDateDisplay(date)}
+                    value={formatDateDisplay(date, activeLocale)}
                     isActive={activeField === 'date'}
                     onPress={() => activateField('date')}
                     rightElement={null}
@@ -1123,7 +1124,7 @@ export function TransactionEditorScreen({
                           {I18n.t('transactions.editor.date')}
                         </Text>
                       </View>
-                      <Text variant="body">{formatDateDisplay(date)}</Text>
+                      <Text variant="body">{formatDateDisplay(date, activeLocale)}</Text>
                     </View>
                   </SummaryRow>
                 </View>
@@ -1565,7 +1566,7 @@ export function TransactionEditorScreen({
                           )}
                         >
                           {recurrenceEndDate
-                            ? formatDateDisplay(recurrenceEndDate)
+                            ? formatDateDisplay(recurrenceEndDate, activeLocale)
                             : I18n.t('transactions.editor.on_date')}
                         </Text>
                       </View>

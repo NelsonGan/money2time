@@ -478,6 +478,7 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
+  const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
 
   if (isLoading) {
@@ -505,7 +506,7 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <NavigationContainer>
+      <NavigationContainer key={`locale:${navigationLocaleKey}`}>
         <RootStack.Navigator
           screenOptions={SHARED_NATIVE_STACK_OPTIONS}
           screenListeners={rootScreenListeners}

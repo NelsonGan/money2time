@@ -36,11 +36,6 @@ const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, ga
 const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: 8 } as const;
 const DRILLDOWN_DIRECT_PARENT_ROW_ID = '__direct-parent__';
 const EMPTY_DRILLDOWN_TRANSACTIONS: TransactionWithRelations[] = [];
-const DRILLDOWN_BULK_TYPE_OPTIONS: { value: EditableTransactionType; label: string }[] = [
-  { value: 'expense', label: I18n.t('transactions.filters.spent') },
-  { value: 'income', label: I18n.t('transactions.filters.earned') },
-  { value: 'transfer', label: I18n.t('transactions.filters.moved') },
-];
 const TYPE_FILTER_TAP_MAX_DRIFT = 8;
 
 interface DrilldownSubcategoryRow {
@@ -174,6 +169,15 @@ export function InsightsDrilldownScreen({
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched || bulkType !== null;
+  const drilldownBulkTypeOptions = useMemo(
+    () =>
+      [
+        { value: 'expense', label: I18n.t('transactions.filters.spent') },
+        { value: 'income', label: I18n.t('transactions.filters.earned') },
+        { value: 'transfer', label: I18n.t('transactions.filters.moved') },
+      ] satisfies Array<{ value: EditableTransactionType; label: string }>,
+    [],
+  );
 
   const sortTransactions = useCallback(
     (items: TransactionWithRelations[]) => {
@@ -652,7 +656,7 @@ export function InsightsDrilldownScreen({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={DRILLDOWN_BULK_TYPE_PILLS_STYLE}
               >
-                {DRILLDOWN_BULK_TYPE_OPTIONS.map((option) => (
+                {drilldownBulkTypeOptions.map((option) => (
                   <FilterPill
                     key={option.value}
                     label={option.label}

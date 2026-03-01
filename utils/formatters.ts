@@ -1,6 +1,6 @@
 import { getLocales } from 'expo-localization';
 
-import { DEFAULT_CURRENCY_SYMBOL, MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL, MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
@@ -250,21 +250,31 @@ export function toRange(start: Date, end: Date): DateRange {
 }
 
 /**
- * Detect the user's currency symbol from their device locale.
- * Falls back to DEFAULT_CURRENCY_SYMBOL ('$') if locale cannot be determined.
+ * Detect the user's currency code from their device locale.
+ * Falls back to DEFAULT_CURRENCY ('USD') if locale cannot be determined.
  */
-export function getLocaleCurrencySymbol(): string {
+export function getLocaleCurrencyCode(): string {
   try {
     const locales = getLocales();
     const currencyCode = locales[0]?.currencyCode;
-    if (currencyCode) {
-      const match = MAJOR_CURRENCIES.find(
-        (c: (typeof MAJOR_CURRENCIES)[number]) => c.code === currencyCode,
-      );
-      if (match) return match.symbol;
+    if (
+      currencyCode &&
+      MAJOR_CURRENCIES.some((currency) => currency.code === currencyCode.toUpperCase())
+    ) {
+      return currencyCode.toUpperCase();
     }
   } catch {
     // Localization unavailable (e.g. web fallback)
   }
-  return DEFAULT_CURRENCY_SYMBOL;
+  return DEFAULT_CURRENCY;
+}
+
+/**
+ * Detect the user's currency symbol from their device locale.
+ * Falls back to DEFAULT_CURRENCY_SYMBOL ('$') if locale cannot be determined.
+ */
+export function getLocaleCurrencySymbol(): string {
+  const localeCurrencyCode = getLocaleCurrencyCode();
+  const match = MAJOR_CURRENCIES.find((currency) => currency.code === localeCurrencyCode);
+  return match?.symbol ?? DEFAULT_CURRENCY_SYMBOL;
 }

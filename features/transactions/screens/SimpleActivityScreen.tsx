@@ -35,12 +35,6 @@ import {
   filterTransactionsByWallet,
 } from '~/utils/transactions';
 
-const SIMPLE_TYPE_FILTERS: { label: string; value: 'all' | 'expense' | 'income' }[] = [
-  { label: I18n.t('transactions.filters.all'), value: 'all' },
-  { label: I18n.t('transactions.filters.spent'), value: 'expense' },
-  { label: I18n.t('transactions.filters.earned'), value: 'income' },
-];
-
 const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 
@@ -58,6 +52,7 @@ export function SimpleActivityScreen({
   onOpenTransaction,
 }: SimpleActivityScreenProps) {
   const { transactions, settings, simpleWalletId, getDisplayValueForTransaction } = useApp();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
@@ -115,6 +110,15 @@ export function SimpleActivityScreen({
     () => monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary(),
     [activeMonthKey, monthBuckets.summaries],
   );
+  const typeFilters = useMemo(
+    () =>
+      [
+        { label: I18n.t('transactions.filters.all'), value: 'all' },
+        { label: I18n.t('transactions.filters.spent'), value: 'expense' },
+        { label: I18n.t('transactions.filters.earned'), value: 'income' },
+      ] satisfies Array<{ label: string; value: 'all' | 'expense' | 'income' }>,
+    [],
+  );
 
   const formatSummaryValue = useCallback(
     (value: number) =>
@@ -149,6 +153,7 @@ export function SimpleActivityScreen({
           item={item}
           monthPagerAnchorDate={monthPagerAnchorDate}
           centerIndex={MONTH_PAGER_CENTER_INDEX}
+          localeKey={activeLocale}
           monthPageStyle={monthPageStyle}
           monthTransactionsMap={monthBuckets.transactionsMap}
           onTransactionPress={onOpenTransaction}
@@ -158,6 +163,7 @@ export function SimpleActivityScreen({
     },
     [
       getPageScrollToTopRef,
+      activeLocale,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
       monthPageStyle,
@@ -186,7 +192,7 @@ export function SimpleActivityScreen({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
           >
-            {SIMPLE_TYPE_FILTERS.map((item) => (
+            {typeFilters.map((item) => (
               <TypeFilterPill
                 key={item.value}
                 label={item.label}

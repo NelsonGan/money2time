@@ -33,12 +33,6 @@ import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { amountToHoursByRate, formatAmount, formatHours } from '~/utils/formatters';
 import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
 
-const GREETINGS: Record<string, string> = {
-  morning: I18n.t('home.greeting.morning'),
-  afternoon: I18n.t('home.greeting.afternoon'),
-  evening: I18n.t('home.greeting.evening'),
-};
-
 function formatCadence(pattern: string, interval: number): string {
   if (interval === 1) {
     const labels: Record<string, string> = {
@@ -267,7 +261,12 @@ export function HomeScreen({
   const estimatorWorkdays = estimatorHours / 8;
   const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
 
-  const greeting = GREETINGS[getTimeOfDay()];
+  const greeting = useMemo(() => {
+    const timeOfDay = getTimeOfDay();
+    if (timeOfDay === 'morning') return I18n.t('home.greeting.morning');
+    if (timeOfDay === 'afternoon') return I18n.t('home.greeting.afternoon');
+    return I18n.t('home.greeting.evening');
+  }, [settings.locale]);
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
