@@ -1,0 +1,15 @@
+export const MONTH_PAGER_LIST_CONFIG = {
+  horizontal: true,
+  pagingEnabled: true,
+  disableIntervalMomentum: true,
+  bounces: false,
+  directionalLockEnabled: true,
+  decelerationRate: 'fast',
+  showsHorizontalScrollIndicator: false,
+  overScrollMode: 'never',
+  nestedScrollEnabled: true,
+  initialNumToRender: 5,
+  maxToRenderPerBatch: 5,
+  windowSize: 7,
+  removeClippedSubviews: true,
+} as const;

@@ -428,13 +428,16 @@ export function TransactionEditorScreen({
   const childCategoriesByParent = useMemo(() => {
     if (hideSubcategories) return new Map<string, typeof typedCategories>();
     const map = new Map<string, typeof typedCategories>();
-    typedCategories
-      .filter((item) => !!item.parentId)
-      .forEach((item) => {
-        const key = item.parentId as string;
-        if (!map.has(key)) map.set(key, []);
-        map.get(key)?.push(item);
-      });
+    typedCategories.forEach((item) => {
+      const parentId = item.parentId;
+      if (!parentId) return;
+      const existing = map.get(parentId);
+      if (existing) {
+        existing.push(item);
+      } else {
+        map.set(parentId, [item]);
+      }
+    });
     return map;
   }, [hideSubcategories, typedCategories]);
 
@@ -772,7 +775,8 @@ export function TransactionEditorScreen({
     }
 
     const isSelectedParent = topLevelCategories.some((item) => item.id === nextCategoryId);
-    const selectedParentHasChildren = (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
+    const selectedParentHasChildren =
+      (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
     if (mode === 'create' && isSelectedParent && selectedParentHasChildren) {
       return;
     }
@@ -1082,96 +1086,17 @@ export function TransactionEditorScreen({
               </SummaryRow>
             </View>
 
-            {!hideAccountSelector && <View className="h-[1px] bg-border/15 mx-4" />}
+            {hideAccountSelector ? null : <View className="h-[1px] bg-border/15 mx-4" />}
 
             {/* Account row(s) */}
-            {!hideAccountSelector &&
-              (isTransferType ? (
-                <>
-                  <View>
-                    <SummaryRow
-                      label={I18n.t('transactions.editor.from')}
-                      isActive={activeField === 'fromAccount'}
-                      onPress={() => activateField('fromAccount')}
-                      valueTone={fieldErrors.from_account ? 'error' : 'default'}
-                      rightElement={null}
-                    >
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                          <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                            <CreditCard size={13} color={themeColors.textMuted} />
-                          </View>
-                          <Text variant="caption" tone="muted">
-                            {I18n.t('transactions.editor.from')}
-                          </Text>
-                        </View>
-                        <Text
-                          variant="body"
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className={cn(
-                            'max-w-[58%] text-right',
-                            fromAccountName ? '' : 'text-muted-foreground/60',
-                          )}
-                        >
-                          {fromAccountName ?? I18n.t('transactions.editor.choose_account')}
-                        </Text>
-                      </View>
-                    </SummaryRow>
-                  </View>
-                  <View className="px-4 py-1">
-                    <View className="flex-row items-center">
-                      <View className="h-[1px] flex-1 bg-border/15" />
-                      <Pressable
-                        onPress={handleSwapTransferAccounts}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
-                        className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
-                      >
-                        <ArrowLeftRight size={14} color={themeColors.primary} />
-                      </Pressable>
-                      <View className="h-[1px] flex-1 bg-border/15" />
-                    </View>
-                  </View>
-                  <View>
-                    <SummaryRow
-                      label={I18n.t('transactions.editor.to')}
-                      isActive={activeField === 'toAccount'}
-                      onPress={() => activateField('toAccount')}
-                      valueTone={fieldErrors.to_account ? 'error' : 'default'}
-                      rightElement={null}
-                    >
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                          <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                            <ArrowRight size={13} color={themeColors.textMuted} />
-                          </View>
-                          <Text variant="caption" tone="muted">
-                            {I18n.t('transactions.editor.to')}
-                          </Text>
-                        </View>
-                        <Text
-                          variant="body"
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className={cn(
-                            'max-w-[58%] text-right',
-                            toAccountName ? '' : 'text-muted-foreground/60',
-                          )}
-                        >
-                          {toAccountName ?? I18n.t('transactions.editor.choose_account')}
-                        </Text>
-                      </View>
-                    </SummaryRow>
-                  </View>
-                </>
-              ) : (
+            {hideAccountSelector ? null : isTransferType ? (
+              <>
                 <View>
                   <SummaryRow
-                    label={I18n.t('transactions.editor.account')}
-                    isActive={activeField === 'account'}
-                    onPress={() => activateField('account')}
-                    valueTone={fieldErrors.account ? 'error' : 'default'}
+                    label={I18n.t('transactions.editor.from')}
+                    isActive={activeField === 'fromAccount'}
+                    onPress={() => activateField('fromAccount')}
+                    valueTone={fieldErrors.from_account ? 'error' : 'default'}
                     rightElement={null}
                   >
                     <View className="flex-row items-center justify-between">
@@ -1180,7 +1105,7 @@ export function TransactionEditorScreen({
                           <CreditCard size={13} color={themeColors.textMuted} />
                         </View>
                         <Text variant="caption" tone="muted">
-                          {I18n.t('transactions.editor.account')}
+                          {I18n.t('transactions.editor.from')}
                         </Text>
                       </View>
                       <Text
@@ -1189,15 +1114,93 @@ export function TransactionEditorScreen({
                         ellipsizeMode="tail"
                         className={cn(
                           'max-w-[58%] text-right',
-                          accountName ? '' : 'text-muted-foreground/60',
+                          fromAccountName ? '' : 'text-muted-foreground/60',
                         )}
                       >
-                        {accountName ?? I18n.t('transactions.editor.choose_account')}
+                        {fromAccountName ?? I18n.t('transactions.editor.choose_account')}
                       </Text>
                     </View>
                   </SummaryRow>
                 </View>
-              ))}
+                <View className="px-4 py-1">
+                  <View className="flex-row items-center">
+                    <View className="h-[1px] flex-1 bg-border/15" />
+                    <Pressable
+                      onPress={handleSwapTransferAccounts}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
+                      className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
+                    >
+                      <ArrowLeftRight size={14} color={themeColors.primary} />
+                    </Pressable>
+                    <View className="h-[1px] flex-1 bg-border/15" />
+                  </View>
+                </View>
+                <View>
+                  <SummaryRow
+                    label={I18n.t('transactions.editor.to')}
+                    isActive={activeField === 'toAccount'}
+                    onPress={() => activateField('toAccount')}
+                    valueTone={fieldErrors.to_account ? 'error' : 'default'}
+                    rightElement={null}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                        <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                          <ArrowRight size={13} color={themeColors.textMuted} />
+                        </View>
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('transactions.editor.to')}
+                        </Text>
+                      </View>
+                      <Text
+                        variant="body"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        className={cn(
+                          'max-w-[58%] text-right',
+                          toAccountName ? '' : 'text-muted-foreground/60',
+                        )}
+                      >
+                        {toAccountName ?? I18n.t('transactions.editor.choose_account')}
+                      </Text>
+                    </View>
+                  </SummaryRow>
+                </View>
+              </>
+            ) : (
+              <View>
+                <SummaryRow
+                  label={I18n.t('transactions.editor.account')}
+                  isActive={activeField === 'account'}
+                  onPress={() => activateField('account')}
+                  valueTone={fieldErrors.account ? 'error' : 'default'}
+                  rightElement={null}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                      <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                        <CreditCard size={13} color={themeColors.textMuted} />
+                      </View>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('transactions.editor.account')}
+                      </Text>
+                    </View>
+                    <Text
+                      variant="body"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      className={cn(
+                        'max-w-[58%] text-right',
+                        accountName ? '' : 'text-muted-foreground/60',
+                      )}
+                    >
+                      {accountName ?? I18n.t('transactions.editor.choose_account')}
+                    </Text>
+                  </View>
+                </SummaryRow>
+              </View>
+            )}
 
             {/* Category row (hidden for transfers and balance adjustments) */}
             {!isTransferType && !isBalanceAdjustmentType ? (

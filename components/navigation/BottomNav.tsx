@@ -22,8 +22,8 @@ interface BottomNavProps {
 }
 
 const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
-  { name: 'transactions', labelKey: 'nav.activity', icon: Wallet },
   { name: 'home', labelKey: 'nav.home', icon: House },
+  { name: 'transactions', labelKey: 'nav.activity', icon: Wallet },
   { name: 'insights', labelKey: 'nav.insights', icon: BarChart2 },
   { name: 'settings', labelKey: 'nav.settings', icon: Settings },
 ];

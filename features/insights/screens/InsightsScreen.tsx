@@ -18,6 +18,7 @@ import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
@@ -27,7 +28,7 @@ import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionWithRelations } from '~/types';
+import type { Category, CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import {
   amountToHoursByRate,
@@ -38,8 +39,10 @@ import {
   formatHours,
   monthKeyFromIsoLocal,
   normalizeMonthKey,
+  startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
@@ -97,8 +100,8 @@ const INSIGHTS_CHART_COLORS = [
   '#546E7A', // slate
 ];
 
-const INSIGHTS_PAGER_TOTAL_SLOTS = 4801;
-const INSIGHTS_PAGER_CENTER_INDEX = Math.floor(INSIGHTS_PAGER_TOTAL_SLOTS / 2);
+const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
+const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
 const INSIGHTS_LIST_STYLE = { flex: 1 } as const;
 const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: 18,
@@ -161,6 +164,18 @@ function getInsightFilterConfig(insightType: InsightType): InsightFilterConfig {
   return INSIGHT_FILTER_CONFIG[insightType] ?? DEFAULT_INSIGHT_FILTER_CONFIG;
 }
 
+function isInsightType(value: string): value is InsightType {
+  return INSIGHT_TYPES.some((insightType) => insightType === value);
+}
+
+function isPeriodPreset(value: string): value is PeriodPreset {
+  return PERIOD_TABS.some((preset) => preset === value);
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 type InsightCategoryRow = {
   id: string;
   label: string;
@@ -202,6 +217,15 @@ type CalendarDayCell = {
   isFuture: boolean;
   expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
 };
+
+function clampCalendarExpenseDotTier(tier: number): 1 | 2 | 3 | 4 | 5 {
+  if (tier <= 1) return 1;
+  if (tier >= 5) return 5;
+  if (tier < 2.5) return 2;
+  if (tier < 3.5) return 3;
+  if (tier < 4.5) return 4;
+  return 5;
+}
 
 type CalendarSpacerCell = {
   kind: 'spacer';
@@ -277,6 +301,47 @@ type InsightAnalyticsSavingsRateMonthRow = {
   savingsRate: number | null;
   transactions: TransactionWithRelations[];
 };
+
+interface InsightsCategoryPanelItem {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+interface InsightsCategoryPanelData {
+  parents: InsightsCategoryPanelItem[];
+  childByParent: Map<string, InsightsCategoryPanelItem[]>;
+}
+
+function buildInsightsCategoryPanelData(
+  categories: Category[],
+  categoryType: CategoryType,
+): InsightsCategoryPanelData {
+  const parentCategories = categories.filter(
+    (category) => category.type === categoryType && category.parentId === null,
+  );
+  const parentIds = new Set(parentCategories.map((parent) => parent.id));
+  const parents = parentCategories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    icon: category.icon || '•',
+  }));
+  const childByParent = new Map<string, InsightsCategoryPanelItem[]>();
+
+  categories.forEach((category) => {
+    const parentId = category.parentId;
+    if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
+    const existing = childByParent.get(parentId);
+    const child = { id: category.id, name: category.name, icon: category.icon || '•' };
+    if (existing) {
+      existing.push(child);
+    } else {
+      childByParent.set(parentId, [child]);
+    }
+  });
+
+  return { parents, childByParent };
+}
 
 type AssetHistoryMonthRow = {
   monthKey: string;
@@ -359,21 +424,18 @@ function parseInsightsPreferencesPayload(
 ): Partial<InsightsPreferencesSnapshot> | null {
   if (!rawValue) return null;
   try {
-    const parsed = JSON.parse(rawValue) as Record<string, unknown>;
-    if (!parsed || typeof parsed !== 'object') return null;
+    const parsed: unknown = JSON.parse(rawValue);
+    if (!isObjectRecord(parsed)) return null;
 
     const next: Partial<InsightsPreferencesSnapshot> = {};
     if (
       typeof parsed.selectedInsightType === 'string' &&
-      INSIGHT_TYPES.includes(parsed.selectedInsightType as InsightType)
+      isInsightType(parsed.selectedInsightType)
     ) {
-      next.selectedInsightType = parsed.selectedInsightType as InsightType;
+      next.selectedInsightType = parsed.selectedInsightType;
     }
-    if (
-      typeof parsed.periodPreset === 'string' &&
-      PERIOD_TABS.includes(parsed.periodPreset as PeriodPreset)
-    ) {
-      next.periodPreset = parsed.periodPreset as PeriodPreset;
+    if (typeof parsed.periodPreset === 'string' && isPeriodPreset(parsed.periodPreset)) {
+      next.periodPreset = parsed.periodPreset;
     }
     if (typeof parsed.anchorDate === 'string' && parseDateInput(parsed.anchorDate)) {
       next.anchorDate = parsed.anchorDate;
@@ -440,10 +502,6 @@ function parseDateInput(dateText: string): Date | null {
   if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day)
     return null;
   return parsed;
-}
-
-function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 function addPeriod(date: Date, preset: PeriodPreset, direction: 1 | -1) {
@@ -777,19 +835,14 @@ export function InsightsScreen({
   } = useApp();
 
   const allTransactions = useMemo(() => {
-    if (!isSimpleMode || !simpleWalletId) return rawTransactions;
-    return rawTransactions.filter(
-      (tx) =>
-        tx.accountId === simpleWalletId ||
-        tx.fromAccountId === simpleWalletId ||
-        tx.toAccountId === simpleWalletId,
-    );
+    if (!isSimpleMode) return rawTransactions;
+    return filterTransactionsByWallet(rawTransactions, simpleWalletId);
   }, [rawTransactions, isSimpleMode, simpleWalletId]);
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
 
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('month');
-  const [anchorDate, setAnchorDate] = useState(() => startOfMonth(new Date()));
+  const [anchorDate, setAnchorDate] = useState(() => startOfMonthDate(new Date()));
   const [customStart, setCustomStart] = useState(() =>
     formatDateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
   );
@@ -861,7 +914,7 @@ export function InsightsScreen({
   const getPageScrollRef = useCallback((index: number) => {
     const existing = pageScrollRefs.current.get(index);
     if (existing) return existing;
-    const next = { current: null as ScrollView | null };
+    const next: { current: ScrollView | null } = { current: null };
     pageScrollRefs.current.set(index, next);
     return next;
   }, []);
@@ -889,7 +942,7 @@ export function InsightsScreen({
       setCustomEnd(formatDateInput(monthEnd));
       setActiveCustomDateField('start');
     } else {
-      setAnchorDate(startOfMonth(now));
+      setAnchorDate(startOfMonthDate(now));
     }
     setActiveBreakdownSliceId(null);
     setAssetHistoryScrubMonthByYear({});
@@ -933,7 +986,7 @@ export function InsightsScreen({
       if (saved.anchorDate) {
         const parsedAnchorDate = parseDateInput(saved.anchorDate);
         if (parsedAnchorDate) {
-          setAnchorDate(startOfMonth(parsedAnchorDate));
+          setAnchorDate(startOfMonthDate(parsedAnchorDate));
         }
       }
       if (saved.customStart) setCustomStart(saved.customStart);
@@ -1356,7 +1409,7 @@ export function InsightsScreen({
                   const normalized =
                     (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
                   const quantized = Math.round(normalized * 4) + 1;
-                  expenseDotTier = Math.min(5, Math.max(1, quantized)) as 1 | 2 | 3 | 4 | 5;
+                  expenseDotTier = clampCalendarExpenseDotTier(quantized);
                 }
               }
 
@@ -2558,63 +2611,66 @@ export function InsightsScreen({
       );
     }
 
-    const rows = timeCostViewMode === 'category' ? pageData.categoryRows : pageData.transactionRows;
     const viewSummaryLabel =
       timeCostViewMode === 'category'
         ? I18n.t('insights.time_cost.summary_top_categories')
         : I18n.t('insights.time_cost.summary_top_transactions');
-    const impactRows: RankedImpactRow[] = rows.map((row, index) => {
-      const accentColor = TIME_COST_RANK_ACCENTS[index % TIME_COST_RANK_ACCENTS.length];
-      if (timeCostViewMode === 'category') {
-        const categoryRow = row as TimeCostCategoryRow;
-        return {
-          id: categoryRow.id,
-          rank: index + 1,
-          title: categoryRow.label,
-          subtitle: I18n.t('insights.time_cost.transaction_count', { count: categoryRow.count }),
-          primaryValue: formatHours(categoryRow.hours),
-          secondaryValue: renderMoneyAmount(categoryRow.amount),
-          sharePct: categoryRow.sharePct,
-          emoji: categoryRow.emoji,
-          accentColor,
-          onPress: () => {
-            const targetCategoryId = categoryRow.id;
-            const rootCategory = categoryById.get(targetCategoryId) ?? null;
-            openDrilldown({
-              label: `${categoryRow.emoji} ${categoryRow.label}`,
-              transactions: categoryRow.transactions,
-              categoryRootId: rootCategory?.id,
-              categoryRootLabel: rootCategory?.name ?? categoryRow.label,
-              categoryRootEmoji: rootCategory?.icon ?? categoryRow.emoji,
-              categoryRootColor: accentColor,
-              scopeMatcher: (transaction) => {
-                if (transaction.type !== 'expense') return false;
-                const cat = transaction.categoryId
-                  ? categoryById.get(transaction.categoryId)
-                  : null;
-                const rootId = cat?.parentId ?? transaction.categoryId ?? null;
-                return rootId === targetCategoryId || transaction.categoryId === targetCategoryId;
+    const impactRows: RankedImpactRow[] =
+      timeCostViewMode === 'category'
+        ? pageData.categoryRows.map((categoryRow, index) => {
+            const accentColor = TIME_COST_RANK_ACCENTS[index % TIME_COST_RANK_ACCENTS.length];
+            return {
+              id: categoryRow.id,
+              rank: index + 1,
+              title: categoryRow.label,
+              subtitle: I18n.t('insights.time_cost.transaction_count', {
+                count: categoryRow.count,
+              }),
+              primaryValue: formatHours(categoryRow.hours),
+              secondaryValue: renderMoneyAmount(categoryRow.amount),
+              sharePct: categoryRow.sharePct,
+              emoji: categoryRow.emoji,
+              accentColor,
+              onPress: () => {
+                const targetCategoryId = categoryRow.id;
+                const rootCategory = categoryById.get(targetCategoryId) ?? null;
+                openDrilldown({
+                  label: `${categoryRow.emoji} ${categoryRow.label}`,
+                  transactions: categoryRow.transactions,
+                  categoryRootId: rootCategory?.id,
+                  categoryRootLabel: rootCategory?.name ?? categoryRow.label,
+                  categoryRootEmoji: rootCategory?.icon ?? categoryRow.emoji,
+                  categoryRootColor: accentColor,
+                  scopeMatcher: (transaction) => {
+                    if (transaction.type !== 'expense') return false;
+                    const cat = transaction.categoryId
+                      ? categoryById.get(transaction.categoryId)
+                      : null;
+                    const rootId = cat?.parentId ?? transaction.categoryId ?? null;
+                    return (
+                      rootId === targetCategoryId || transaction.categoryId === targetCategoryId
+                    );
+                  },
+                });
               },
-            });
-          },
-        };
-      }
-
-      const transactionRow = row as TimeCostTransactionRow;
-      return {
-        id: transactionRow.id,
-        rank: index + 1,
-        title: transactionRow.label,
-        subtitle: transactionRow.subtitle,
-        primaryValue: formatHours(transactionRow.hours),
-        secondaryValue: renderMoneyAmount(transactionRow.amount),
-        sharePct: transactionRow.sharePct,
-        accentColor,
-        onPress: () => {
-          onOpenTransaction(transactionRow.transaction);
-        },
-      };
-    });
+            };
+          })
+        : pageData.transactionRows.map((transactionRow, index) => {
+            const accentColor = TIME_COST_RANK_ACCENTS[index % TIME_COST_RANK_ACCENTS.length];
+            return {
+              id: transactionRow.id,
+              rank: index + 1,
+              title: transactionRow.label,
+              subtitle: transactionRow.subtitle,
+              primaryValue: formatHours(transactionRow.hours),
+              secondaryValue: renderMoneyAmount(transactionRow.amount),
+              sharePct: transactionRow.sharePct,
+              accentColor,
+              onPress: () => {
+                onOpenTransaction(transactionRow.transaction);
+              },
+            };
+          });
 
     return (
       <Card className="mt-2">
@@ -2863,8 +2919,7 @@ export function InsightsScreen({
 
     const rates = pageData.points.map((p) => p.rate);
     const selectedIndex =
-      selectedIncomeRatePointIndex !== null &&
-      selectedIncomeRatePointIndex < pageData.points.length
+      selectedIncomeRatePointIndex !== null && selectedIncomeRatePointIndex < pageData.points.length
         ? selectedIncomeRatePointIndex
         : null;
     const selectedPoint = selectedIndex !== null ? pageData.points[selectedIndex] : null;
@@ -2902,11 +2957,13 @@ export function InsightsScreen({
             </Text>
             {selectedPoint ? (
               <Text variant="heading" className="mt-1 text-primary">
-                {settings.currencySymbol}{selectedPoint.rate.toFixed(2)}/hr
+                {settings.currencySymbol}
+                {selectedPoint.rate.toFixed(2)}/hr
               </Text>
             ) : (
               <Text variant="heading" className="mt-1 text-primary">
-                {settings.currencySymbol}{(rates[rates.length - 1] ?? 0).toFixed(2)}/hr
+                {settings.currencySymbol}
+                {(rates[rates.length - 1] ?? 0).toFixed(2)}/hr
               </Text>
             )}
             {selectedPoint ? (
@@ -2930,9 +2987,7 @@ export function InsightsScreen({
                 width={chartWidth}
                 height={INCOME_RATE_CHART_HEIGHT}
                 chartConfig={chartConfig}
-                formatYLabel={(val) =>
-                  `${settings.currencySymbol}${Number(val).toFixed(0)}`
-                }
+                formatYLabel={(val) => `${settings.currencySymbol}${Number(val).toFixed(0)}`}
                 withDots={false}
                 withShadow={false}
                 withInnerLines
@@ -2984,7 +3039,8 @@ export function InsightsScreen({
               >
                 <Text variant="caption">{point.label}</Text>
                 <Text variant="caption" className="text-primary">
-                  {settings.currencySymbol}{point.rate.toFixed(2)}/hr
+                  {settings.currencySymbol}
+                  {point.rate.toFixed(2)}/hr
                 </Text>
               </Pressable>
             ))}
@@ -3228,62 +3284,14 @@ export function InsightsScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [assetHistoryAccountOptions, excludedAssetHistoryAccountIds.length]);
-  const savingsIncomeCategoryPanel = useMemo(() => {
-    const parents = categories
-      .filter((category) => category.type === 'income' && !category.parentId)
-      .map((category) => ({
-        id: category.id,
-        name: category.name,
-        icon: category.icon || '•',
-      }));
-    const parentIds = new Set(parents.map((parent) => parent.id));
-    const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
-
-    categories
-      .filter(
-        (category) =>
-          category.type === 'income' && !!category.parentId && parentIds.has(category.parentId),
-      )
-      .forEach((category) => {
-        const parentId = category.parentId as string;
-        if (!childByParent.has(parentId)) childByParent.set(parentId, []);
-        childByParent.get(parentId)?.push({
-          id: category.id,
-          name: category.name,
-          icon: category.icon || '•',
-        });
-      });
-
-    return { parents, childByParent };
-  }, [categories]);
-  const savingsExpenseCategoryPanel = useMemo(() => {
-    const parents = categories
-      .filter((category) => category.type === 'expense' && !category.parentId)
-      .map((category) => ({
-        id: category.id,
-        name: category.name,
-        icon: category.icon || '•',
-      }));
-    const parentIds = new Set(parents.map((parent) => parent.id));
-    const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
-
-    categories
-      .filter(
-        (category) =>
-          category.type === 'expense' && !!category.parentId && parentIds.has(category.parentId),
-      )
-      .forEach((category) => {
-        const parentId = category.parentId as string;
-        if (!childByParent.has(parentId)) childByParent.set(parentId, []);
-        childByParent.get(parentId)?.push({
-          id: category.id,
-          name: category.name,
-          icon: category.icon || '•',
-        });
-      });
-
-    return { parents, childByParent };
-  }, [categories]);
+  const savingsIncomeCategoryPanel = useMemo(
+    () => buildInsightsCategoryPanelData(categories, 'income'),
+    [categories],
+  );
+  const savingsExpenseCategoryPanel = useMemo(
+    () => buildInsightsCategoryPanelData(categories, 'expense'),
+    [categories],
+  );
   const insightsFilterCount = useMemo(() => {
     if (!hasInsightsFilters) return 0;
     let count = 0;
@@ -3312,7 +3320,7 @@ export function InsightsScreen({
   const resetInsightsFilters = useCallback(() => {
     const now = new Date();
     setPeriodPreset('month');
-    setAnchorDate(startOfMonth(now));
+    setAnchorDate(startOfMonthDate(now));
     setCustomStart(formatDateInput(new Date(now.getFullYear(), now.getMonth(), 1)));
     setCustomEnd(formatDateInput(now));
     setActiveCustomDateField('start');
@@ -3346,7 +3354,8 @@ export function InsightsScreen({
   );
   const handleInsightTypeChange = useCallback(
     (value: string) => {
-      const nextInsightType = value as InsightType;
+      if (!isInsightType(value)) return;
+      const nextInsightType = value;
       const nextInsightFilterConfig = getInsightFilterConfig(nextInsightType);
       const nextEffectivePeriodPreset = nextInsightFilterConfig.fixedPeriodPreset ?? periodPreset;
       const currentPeriodMode =
@@ -3367,7 +3376,7 @@ export function InsightsScreen({
         (currentPeriodMode === 'month' && nextPeriodMode === 'year')
       ) {
         const now = new Date();
-        setAnchorDate(startOfMonth(now));
+        setAnchorDate(startOfMonthDate(now));
       }
 
       setActiveBreakdownSlice(null, false);

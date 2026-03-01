@@ -1,10 +1,8 @@
-import { Plus, Search, X } from 'lucide-react-native';
+import { Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
   Pressable,
   ScrollView,
   type TextInput,
@@ -19,20 +17,42 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import { Input, SelectField, Text, ThemeModal } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
+import {
+  ActivityTransactionList,
+  DisplayModeToggle,
+  MonthPagerPage,
+  TypeFilterPill,
+} from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
+import {
+  MONTH_PAGER_CENTER_INDEX,
+  MONTH_PAGER_TOTAL_SLOTS,
+} from '~/features/transactions/constants/monthPager';
+import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { useFocusMonthNavigation } from '~/hooks/useFocusMonthNavigation';
+import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
+import { useMonthPager } from '~/hooks/useMonthPager';
+import { useScrollToTopTokenNavigation } from '~/hooks/useScrollToTopTokenNavigation';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, CategoryType, TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
+  addMonthsAtMonthStart,
   formatAmount,
   formatDateInput,
   formatHours,
-  monthKeyFromIsoLocal,
+  formatMonthYearLabel,
+  monthKeyFromDateLocal,
+  startOfMonthDate,
 } from '~/utils/formatters';
+import {
+  bucketTransactionsByMonth,
+  emptyMonthSummary,
+  summarizeTransactions,
+} from '~/utils/transactions';
 
 const TYPE_FILTERS: { label: string; value: 'all' | TransactionType }[] = [
   { label: I18n.t('transactions.filters.all'), value: 'all' },
@@ -55,94 +75,53 @@ const FILTER_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } 
 const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
 const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
-const MONTH_PAGER_TOTAL_SLOTS = 4801;
-const MONTH_PAGER_CENTER_INDEX = Math.floor(MONTH_PAGER_TOTAL_SLOTS / 2);
-const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 
-interface MonthSummary {
-  count: number;
-  income: number;
-  expense: number;
+interface CategoryPanelItem {
+  id: string;
+  name: string;
+  icon: string;
 }
 
-function emptyMonthSummary(): MonthSummary {
-  return { count: 0, income: 0, expense: 0 };
+interface CategoryPanelData {
+  parents: CategoryPanelItem[];
+  childrenByParent: Map<string, CategoryPanelItem[]>;
 }
 
-const FilterPill = React.memo(function FilterPill({
-  label,
-  value,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  value: 'all' | TransactionType;
-  selected: boolean;
-  onSelect: (value: 'all' | TransactionType) => void;
-}) {
-  const handlePress = useCallback(() => {
-    void triggerHaptic('selection');
-    onSelect(value);
-  }, [onSelect, value]);
-
-  return (
-    <Pressable
-      onPress={handlePress}
-      className={cn(
-        'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
-        selected ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
-      )}
-    >
-      <Text variant="label" className={cn(selected ? 'text-primary' : 'text-muted-foreground')}>
-        {label}
-      </Text>
-    </Pressable>
+function buildCategoryPanelData(categories: Category[], type: CategoryType): CategoryPanelData {
+  const parentCategories = categories.filter(
+    (category) => category.type === type && category.parentId === null,
   );
-});
+  const parentIconById = new Map(parentCategories.map((category) => [category.id, category.icon]));
+  const parents = parentCategories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    icon: resolveCategoryIcon(category.icon),
+  }));
+  const childrenByParent = new Map<string, CategoryPanelItem[]>();
 
-function monthKeyFromIso(isoDate: string) {
-  return monthKeyFromIsoLocal(isoDate);
+  categories.forEach((category) => {
+    if (category.type !== type || category.parentId === null) return;
+    const parentId = category.parentId;
+    const list = childrenByParent.get(parentId) ?? [];
+    list.push({
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
+    });
+    childrenByParent.set(parentId, list);
+  });
+
+  return { parents, childrenByParent };
 }
 
-function monthKey(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  return `${year}-${month}`;
-}
-
-function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function dateFromMonthKey(month: string): Date | null {
-  const match = month.trim().match(/^(\d{4})-(\d{1,2})$/);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const monthValue = Number(match[2]);
-  if (!Number.isInteger(year) || !Number.isInteger(monthValue)) return null;
-  if (monthValue < 1 || monthValue > 12) return null;
-  return new Date(year, monthValue - 1, 1);
-}
-
-function addMonths(date: Date, offset: number) {
-  return new Date(date.getFullYear(), date.getMonth() + offset, 1);
-}
-
-function monthOffsetFromAnchor(anchor: Date, target: Date) {
-  return (
-    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
-  );
-}
-
-function formatMonthLabel(date: Date) {
-  return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+function isSortByValue(value: string): value is SortByValue {
+  return SORT_OPTIONS.some((option) => option.value === value);
 }
 
 interface TransactionsScreenProps {
   scrollToTopToken?: number;
   focusMonthKey?: string | null;
   focusMonthToken?: number;
-  onPressAddTransaction?: () => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
@@ -150,7 +129,6 @@ export function TransactionsScreen({
   scrollToTopToken = 0,
   focusMonthKey = null,
   focusMonthToken = 0,
-  onPressAddTransaction,
   onOpenTransaction,
 }: TransactionsScreenProps) {
   const themeColors = useThemeColors();
@@ -182,54 +160,46 @@ export function TransactionsScreen({
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const monthPagerAnchorDate = useMemo(() => startOfMonth(new Date()), []);
-  const [activeMonthIndex, setActiveMonthIndex] = useState(MONTH_PAGER_CENTER_INDEX);
-  const activeMonthIndexRef = useRef(MONTH_PAGER_CENTER_INDEX);
+  const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
-  const pageScrollToTopRefs = useRef(
-    new Map<number, React.MutableRefObject<(() => void) | null>>(),
-  );
-  const getPageScrollToTopRef = useCallback((index: number) => {
-    const existing = pageScrollToTopRefs.current.get(index);
-    if (existing) return existing;
-    const next = { current: null as (() => void) | null };
-    pageScrollToTopRefs.current.set(index, next);
-    return next;
-  }, []);
+  const {
+    activeIndex: activeMonthIndex,
+    activeIndexRef: activeMonthIndexRef,
+    slots: monthPagerSlots,
+    clampIndex: clampMonthIndex,
+    setActiveIndex: setActiveMonthIndex,
+    handleMomentumEnd: handleHorizontalMomentumEnd,
+    handleScrollEndDrag: handleHorizontalScrollEndDrag,
+    handleScrollToIndexFailed: handleHorizontalScrollToIndexFailed,
+    getItemLayout: getHorizontalItemLayout,
+    keyExtractor: monthPagerKeyExtractor,
+    scrollToRelative: scrollToRelativeMonth,
+  } = useMonthPager({
+    listRef: horizontalListRef,
+    pageWidth,
+    totalSlots: MONTH_PAGER_TOTAL_SLOTS,
+    initialIndex: MONTH_PAGER_CENTER_INDEX,
+  });
+  const getPageScrollToTopRef = useIndexedScrollToTopRefs();
   const activeMonthDate = useMemo(
-    () => addMonths(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
+    () => addMonthsAtMonthStart(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
     [activeMonthIndex, monthPagerAnchorDate],
   );
-  const activeMonthKey = monthKey(activeMonthDate);
-  const activeMonthLabel = formatMonthLabel(activeMonthDate);
+  const activeMonthKey = monthKeyFromDateLocal(activeMonthDate);
+  const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
+  const resolveTransactionValue = useCallback(
+    (transaction: TransactionWithRelations) =>
+      settings.displayMode === 'time'
+        ? getDisplayValueForTransaction(transaction)
+        : transaction.amount,
+    [getDisplayValueForTransaction, settings.displayMode],
+  );
   const monthBuckets = useMemo(() => {
-    const transactionsMap = new Map<string, TransactionWithRelations[]>();
-    const summaries = new Map<string, MonthSummary>();
-    filteredTransactions.forEach((transaction) => {
-      const key = monthKeyFromIso(transaction.date);
-      const list = transactionsMap.get(key);
-      if (list) {
-        list.push(transaction);
-      } else {
-        transactionsMap.set(key, [transaction]);
-      }
-
-      const summary = summaries.get(key) ?? emptyMonthSummary();
-      summary.count += 1;
-      const value =
-        settings.displayMode === 'time'
-          ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
-      if (transaction.type === 'income') summary.income += value;
-      if (transaction.type === 'expense') summary.expense += value;
-      summaries.set(key, summary);
-    });
-
-    return { transactionsMap, summaries };
-  }, [filteredTransactions, getDisplayValueForTransaction, settings.displayMode]);
+    return bucketTransactionsByMonth(filteredTransactions, resolveTransactionValue);
+  }, [filteredTransactions, resolveTransactionValue]);
 
   useEffect(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -248,157 +218,42 @@ export function TransactionsScreen({
     setShowBulkUpdate(false);
   }, [isSelectionMode]);
 
-  const monthPagerSlots = useMemo<number[]>(
-    () => Array.from({ length: MONTH_PAGER_TOTAL_SLOTS }, (_, index) => index),
-    [],
-  );
+  const handleSearchScrollToTop = useCallback(() => {
+    if (!hasActiveSearch) return false;
+    searchResultsScrollToTopRef.current?.();
+    return true;
+  }, [hasActiveSearch]);
 
-  const clampMonthIndex = useCallback(
-    (index: number) => Math.max(0, Math.min(index, MONTH_PAGER_TOTAL_SLOTS - 1)),
-    [],
-  );
+  useScrollToTopTokenNavigation({
+    scrollToTopToken,
+    activeIndexRef: activeMonthIndexRef,
+    listRef: horizontalListRef,
+    getScrollToTopRef: getPageScrollToTopRef,
+    onBeforePageScroll: handleSearchScrollToTop,
+  });
 
-  const updateActiveMonthIndex = useCallback(
-    (nextIndex: number) => {
-      const clampedIndex = clampMonthIndex(nextIndex);
-      if (clampedIndex === activeMonthIndexRef.current) return;
-      activeMonthIndexRef.current = clampedIndex;
-      setActiveMonthIndex(clampedIndex);
-    },
-    [clampMonthIndex],
-  );
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      horizontalListRef.current?.scrollToIndex({
-        index: activeMonthIndexRef.current,
-        animated: false,
-      });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [pageWidth]);
-
-  useEffect(() => {
-    if (scrollToTopToken <= 0) return;
-    const frame = requestAnimationFrame(() => {
-      if (hasActiveSearch) {
-        searchResultsScrollToTopRef.current?.();
-        return;
-      }
-      const currentIndex = activeMonthIndexRef.current;
-      horizontalListRef.current?.scrollToIndex({ index: currentIndex, animated: false });
-      getPageScrollToTopRef(currentIndex).current?.();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [getPageScrollToTopRef, hasActiveSearch, scrollToTopToken]);
-
-  useEffect(() => {
-    if (focusMonthToken <= 0) return;
-    const target = focusMonthKey ? dateFromMonthKey(focusMonthKey) : startOfMonth(new Date());
-    if (!target) return;
-    const targetDate = startOfMonth(target);
-    const targetIndex = clampMonthIndex(
-      MONTH_PAGER_CENTER_INDEX + monthOffsetFromAnchor(monthPagerAnchorDate, targetDate),
-    );
-    activeMonthIndexRef.current = targetIndex;
-    setActiveMonthIndex(targetIndex);
-    const frame = requestAnimationFrame(() => {
-      horizontalListRef.current?.scrollToIndex({ index: targetIndex, animated: false });
-      getPageScrollToTopRef(targetIndex).current?.();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [
-    clampMonthIndex,
-    focusMonthKey,
+  useFocusMonthNavigation({
     focusMonthToken,
-    getPageScrollToTopRef,
+    focusMonthKey,
     monthPagerAnchorDate,
-  ]);
-
-  const commitOffsetToIndex = useCallback(
-    (offsetX: number) => {
-      const rawIndex = Math.round(offsetX / pageWidth);
-      updateActiveMonthIndex(rawIndex);
-    },
-    [pageWidth, updateActiveMonthIndex],
-  );
-
-  const handleHorizontalMomentumEnd = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      commitOffsetToIndex(event.nativeEvent.contentOffset.x);
-    },
-    [commitOffsetToIndex],
-  );
-
-  const handleHorizontalScrollEndDrag = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const velocityX = event.nativeEvent.velocity?.x ?? 0;
-      if (Math.abs(velocityX) <= 0.05) {
-        commitOffsetToIndex(event.nativeEvent.contentOffset.x);
-      }
-    },
-    [commitOffsetToIndex],
-  );
-
-  const handleHorizontalScrollToIndexFailed = useCallback(
-    (info: { index: number }) => {
-      const clampedIndex = clampMonthIndex(info.index);
-      activeMonthIndexRef.current = clampedIndex;
-      setActiveMonthIndex(clampedIndex);
-      horizontalListRef.current?.scrollToOffset({
-        offset: clampedIndex * pageWidth,
-        animated: false,
-      });
-    },
-    [clampMonthIndex, pageWidth],
-  );
-
-  const getHorizontalItemLayout = useCallback(
-    (_: ArrayLike<number> | null | undefined, index: number) => ({
-      length: pageWidth,
-      offset: pageWidth * index,
-      index,
-    }),
-    [pageWidth],
-  );
-  const monthPagerKeyExtractor = useCallback((item: number) => String(item), []);
-
-  const scrollToRelativeMonth = useCallback(
-    (direction: 1 | -1) => {
-      const nextIndex = clampMonthIndex(activeMonthIndexRef.current + direction);
-      if (nextIndex === activeMonthIndexRef.current) return;
-      activeMonthIndexRef.current = nextIndex;
-      setActiveMonthIndex(nextIndex);
-      horizontalListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
-      });
-    },
-    [clampMonthIndex],
-  );
+    centerIndex: MONTH_PAGER_CENTER_INDEX,
+    clampIndex: clampMonthIndex,
+    setActiveIndex: setActiveMonthIndex,
+    listRef: horizontalListRef,
+    getScrollToTopRef: getPageScrollToTopRef,
+  });
 
   const monthSummary = useMemo(() => {
     if (hasActiveSearch) {
-      const summary = emptyMonthSummary();
-      filteredTransactions.forEach((transaction) => {
-        summary.count += 1;
-        const value =
-          settings.displayMode === 'time'
-            ? getDisplayValueForTransaction(transaction)
-            : transaction.amount;
-        if (transaction.type === 'income') summary.income += value;
-        if (transaction.type === 'expense') summary.expense += value;
-      });
-      return summary;
+      return summarizeTransactions(filteredTransactions, resolveTransactionValue);
     }
     return monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary();
   }, [
     activeMonthKey,
     filteredTransactions,
-    getDisplayValueForTransaction,
     hasActiveSearch,
     monthBuckets.summaries,
-    settings.displayMode,
+    resolveTransactionValue,
   ]);
   const formatSummaryValue = useCallback(
     (value: number) =>
@@ -437,64 +292,14 @@ export function TransactionsScreen({
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const incomeCategoryPanel = useMemo(() => {
-    const parents = categories.filter((category) => category.type === 'income' && !category.parentId);
-    return parents.map((category) => ({
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon),
-    }));
-  }, [categories]);
-  const incomeCategoryPanelChildren = useMemo(() => {
-    const parentIconById = new Map(
-      categories
-        .filter((category) => category.type === 'income' && !category.parentId)
-        .map((category) => [category.id, category.icon]),
-    );
-    const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
-    categories
-      .filter((category) => category.type === 'income' && !!category.parentId)
-      .forEach((category) => {
-        const parentId = category.parentId as string;
-        const list = grouped.get(parentId) ?? [];
-        list.push({
-          id: category.id,
-          name: category.name,
-          icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-        });
-        grouped.set(parentId, list);
-      });
-    return grouped;
-  }, [categories]);
-  const expenseCategoryPanel = useMemo(() => {
-    const parents = categories.filter((category) => category.type === 'expense' && !category.parentId);
-    return parents.map((category) => ({
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon),
-    }));
-  }, [categories]);
-  const expenseCategoryPanelChildren = useMemo(() => {
-    const parentIconById = new Map(
-      categories
-        .filter((category) => category.type === 'expense' && !category.parentId)
-        .map((category) => [category.id, category.icon]),
-    );
-    const grouped = new Map<string, { id: string; name: string; icon: string }[]>();
-    categories
-      .filter((category) => category.type === 'expense' && !!category.parentId)
-      .forEach((category) => {
-        const parentId = category.parentId as string;
-        const list = grouped.get(parentId) ?? [];
-        list.push({
-          id: category.id,
-          name: category.name,
-          icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-        });
-        grouped.set(parentId, list);
-      });
-    return grouped;
-  }, [categories]);
+  const incomeCategoryPanelData = useMemo(
+    () => buildCategoryPanelData(categories, 'income'),
+    [categories],
+  );
+  const expenseCategoryPanelData = useMemo(
+    () => buildCategoryPanelData(categories, 'expense'),
+    [categories],
+  );
   const shouldShowIncomeCategoryFilter =
     transactionFilters.type === 'all' || transactionFilters.type === 'income';
   const shouldShowExpenseCategoryFilter =
@@ -680,33 +485,27 @@ export function TransactionsScreen({
   );
   const handleSortChange = useCallback(
     (value: string) => {
-      setTransactionFilters({ sortBy: value as SortByValue });
+      if (!isSortByValue(value)) return;
+      setTransactionFilters({ sortBy: value });
     },
     [setTransactionFilters],
   );
 
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
-      const monthDate = addMonths(monthPagerAnchorDate, item - MONTH_PAGER_CENTER_INDEX);
-      const pageMonthKey = monthKey(monthDate);
-      const pageTransactions = monthBuckets.transactionsMap.get(pageMonthKey) ?? EMPTY_TRANSACTIONS;
       return (
-        <View style={monthPageStyle} className="flex-1 bg-background">
-          <ActivityTransactionList
-            transactions={pageTransactions}
-            onTransactionPress={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('transactions.empty_month_title')}
-            emptyMessage={I18n.t('transactions.empty_month_message')}
-            contentPaddingBottom={LIST_BOTTOM_PADDING}
-            disableItemAnimations
-            compactItems
-            listKey={pageMonthKey}
-            scrollToTopRef={getPageScrollToTopRef(item)}
-          />
-        </View>
+        <MonthPagerPage
+          item={item}
+          monthPagerAnchorDate={monthPagerAnchorDate}
+          centerIndex={MONTH_PAGER_CENTER_INDEX}
+          monthPageStyle={monthPageStyle}
+          monthTransactionsMap={monthBuckets.transactionsMap}
+          onTransactionPress={handleTransactionPress}
+          onTransactionLongPress={handleTransactionLongPress}
+          selectedTransactionIds={selectedTransactionIds}
+          selectionMode={isSelectionMode}
+          getScrollToTopRef={getPageScrollToTopRef}
+        />
       );
     },
     [
@@ -848,42 +647,16 @@ export function TransactionsScreen({
             data={monthPagerSlots}
             keyExtractor={monthPagerKeyExtractor}
             style={FLEX_ONE_STYLE}
-            horizontal
-            pagingEnabled
-            disableIntervalMomentum
-            bounces={false}
-            directionalLockEnabled
-            decelerationRate="fast"
-            showsHorizontalScrollIndicator={false}
-            overScrollMode="never"
-            nestedScrollEnabled
-            initialNumToRender={5}
-            maxToRenderPerBatch={5}
-            windowSize={7}
+            {...MONTH_PAGER_LIST_CONFIG}
             renderItem={renderMonthPage}
             initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
             getItemLayout={getHorizontalItemLayout}
-            removeClippedSubviews
             onScrollEndDrag={handleHorizontalScrollEndDrag}
             onMomentumScrollEnd={handleHorizontalMomentumEnd}
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
           />
         )}
       </View>
-
-      {onPressAddTransaction && !isSelectionMode ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-          onPress={() => {
-            void triggerHaptic('medium');
-            onPressAddTransaction();
-          }}
-          className="absolute right-5 bottom-6 h-14 w-14 rounded-full bg-primary items-center justify-center border border-primary/45 shadow-soft"
-        >
-          <Plus size={24} color="#FFFFFF" />
-        </Pressable>
-      ) : null}
 
       <ThemeModal
         visible={showBulkUpdate}
@@ -1007,7 +780,7 @@ export function TransactionsScreen({
                 contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
               >
                 {TYPE_FILTERS.map((item) => (
-                  <FilterPill
+                  <TypeFilterPill
                     key={item.value}
                     label={item.label}
                     value={item.value}
@@ -1023,7 +796,7 @@ export function TransactionsScreen({
                 <Text variant="caption" tone="muted">
                   {I18n.t('transactions.filters.account')}
                 </Text>
-                <FilterPill
+                <TypeFilterPill
                   label={I18n.t('transactions.filters.all_accounts')}
                   value="all"
                   selected={transactionFilters.accountId === null}
@@ -1046,7 +819,7 @@ export function TransactionsScreen({
                   <Text variant="caption" tone="muted">
                     {I18n.t('transactions.filters.income_category')}
                   </Text>
-                  <FilterPill
+                  <TypeFilterPill
                     label={I18n.t('transactions.filters.all_income_categories')}
                     value="all"
                     selected={transactionFilters.incomeCategoryId === null}
@@ -1055,8 +828,8 @@ export function TransactionsScreen({
                 </View>
                 <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                   <CategoryPanel
-                    parents={incomeCategoryPanel}
-                    childByParent={incomeCategoryPanelChildren}
+                    parents={incomeCategoryPanelData.parents}
+                    childByParent={incomeCategoryPanelData.childrenByParent}
                     allowParentSelection
                     selectedCategoryId={transactionFilters.incomeCategoryId}
                     onSelect={handleSelectIncomeCategoryFilter}
@@ -1071,7 +844,7 @@ export function TransactionsScreen({
                   <Text variant="caption" tone="muted">
                     {I18n.t('transactions.filters.expense_category')}
                   </Text>
-                  <FilterPill
+                  <TypeFilterPill
                     label={I18n.t('transactions.filters.all_expense_categories')}
                     value="all"
                     selected={transactionFilters.expenseCategoryId === null}
@@ -1080,8 +853,8 @@ export function TransactionsScreen({
                 </View>
                 <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
                   <CategoryPanel
-                    parents={expenseCategoryPanel}
-                    childByParent={expenseCategoryPanelChildren}
+                    parents={expenseCategoryPanelData.parents}
+                    childByParent={expenseCategoryPanelData.childrenByParent}
                     allowParentSelection
                     selectedCategoryId={transactionFilters.expenseCategoryId}
                     onSelect={handleSelectExpenseCategoryFilter}
