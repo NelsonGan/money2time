@@ -1,10 +1,15 @@
 import React from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Card, CardContent, Text } from '~/components/ui';
+import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import {
+  ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  ONBOARDING_HORIZONTAL_PADDING,
+} from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -18,6 +23,13 @@ interface OnboardingWageStepProps {
   onContinue: () => void;
   onOpenWageCalculator: () => void;
 }
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  },
+});
 
 export function OnboardingWageStep({
   settings,
@@ -46,7 +58,7 @@ export function OnboardingWageStep({
         <View className="flex-1">
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
+            contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
             {/* Mascot */}
@@ -102,30 +114,17 @@ export function OnboardingWageStep({
             </Animated.View>
           </ScrollView>
 
-          {/* Sticky footer */}
-          <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-            <View className="flex-row gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onBack();
-                }}
-              >
-                <Text>{I18n.t('common.back')}</Text>
-              </Button>
-              <Button
-                className="flex-[2]"
-                onPress={() => {
-                  void triggerHaptic('medium');
-                  onContinue();
-                }}
-              >
-                <Text>{I18n.t('common.continue')}</Text>
-              </Button>
-            </View>
-          </View>
+          <OnboardingActionBar
+            onBack={() => {
+              void triggerHaptic('selection');
+              onBack();
+            }}
+            onPrimary={() => {
+              void triggerHaptic('medium');
+              onContinue();
+            }}
+            primaryLabel={I18n.t('common.continue')}
+          />
         </View>
       </GestureDetector>
     );
@@ -137,7 +136,7 @@ export function OnboardingWageStep({
       <View className="flex-1">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
+          contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
           {/* Mascot */}
@@ -198,31 +197,18 @@ export function OnboardingWageStep({
           </Animated.View>
         </ScrollView>
 
-        {/* Sticky footer */}
-        <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-          <View className="flex-row gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onPress={() => {
-                void triggerHaptic('selection');
-                onBack();
-              }}
-            >
-              <Text>{I18n.t('common.back')}</Text>
-            </Button>
-            <Button
-              className="flex-[2]"
-              disabled={!wageIsSet}
-              onPress={() => {
-                void triggerHaptic('medium');
-                onContinue();
-              }}
-            >
-              <Text>{I18n.t('common.continue')}</Text>
-            </Button>
-          </View>
-        </View>
+        <OnboardingActionBar
+          onBack={() => {
+            void triggerHaptic('selection');
+            onBack();
+          }}
+          onPrimary={() => {
+            void triggerHaptic('medium');
+            onContinue();
+          }}
+          primaryLabel={I18n.t('common.continue')}
+          primaryDisabled={!wageIsSet}
+        />
       </View>
     </GestureDetector>
   );

@@ -1,6 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { memo, useCallback, useMemo } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
@@ -109,13 +109,19 @@ const RecurringRuleCard = memo(
             <View className="flex-row items-center gap-2">
               <Pressable
                 onPress={handleEdit}
-                className="h-9 w-9 items-center justify-center rounded-full bg-secondary/55"
+                style={styles.cardActionIcon}
+                className="bg-secondary/55"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.edit')}
               >
                 <Pencil size={14} color={textMutedColor} />
               </Pressable>
               <Pressable
                 onPress={handleDelete}
-                className="h-9 w-9 items-center justify-center rounded-full bg-destructive/12"
+                style={styles.cardActionIcon}
+                className="bg-destructive/12"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.delete')}
               >
                 <Trash2 size={14} color={dangerColor} />
               </Pressable>
@@ -213,7 +219,7 @@ export function RecurringScreen({
   );
   const content = (
     <SettingsPageLayout>
-      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+      <View style={styles.headerWrap}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
           onBack={onBack}
@@ -229,10 +235,7 @@ export function RecurringScreen({
       <FlatList
         data={allRules}
         keyExtractor={keyExtractor}
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-        }}
+        contentContainerStyle={styles.listContent}
         renderItem={renderRule}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
@@ -245,3 +248,20 @@ export function RecurringScreen({
   if (useNativeBackGesture) return content;
   return <EdgeSwipeBackContainer onBack={onBack}>{content}</EdgeSwipeBackContainer>;
 }
+
+const styles = StyleSheet.create({
+  headerWrap: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  listContent: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+    paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+  },
+  cardActionIcon: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

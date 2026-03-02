@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import {
@@ -10,6 +10,7 @@ import {
   SettingsRowItem,
   SettingsSection,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { I18n } from '~/lib/i18n';
@@ -59,10 +60,7 @@ export function SettingsScreen({
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-        }}
+        contentContainerStyle={styles.scrollContent}
       >
         <Animated.View entering={FadeIn.duration(400)}>
           <SettingsHeader
@@ -75,7 +73,7 @@ export function SettingsScreen({
 
         <Animated.View entering={FadeIn.delay(200).duration(400)}>
           {/* General settings */}
-          <View className="mt-2 gap-2.5">
+          <View style={styles.rowsGroup}>
             <SettingsRowItem
               emoji="🎨"
               label={I18n.t('settings.display')}
@@ -199,3 +197,14 @@ export function SettingsScreen({
     </SettingsPageLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+    paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  rowsGroup: {
+    marginTop: spacing.xs,
+    gap: spacing.sm,
+  },
+});

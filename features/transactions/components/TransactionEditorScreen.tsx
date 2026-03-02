@@ -20,6 +20,7 @@ import {
   type LayoutChangeEvent,
   Pressable,
   ScrollView,
+  StyleSheet,
   TextInput,
   useWindowDimensions,
   View,
@@ -85,6 +86,23 @@ const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
   'ends',
   'endDate',
 ];
+
+const styles = StyleSheet.create({
+  summaryContainer: {
+    paddingHorizontal: 16,
+  },
+  nudgeLabel: {
+    fontSize: 11,
+  },
+  trailingSpacer: {
+    width: 14,
+  },
+  inlineSummaryInput: {
+    fontSize: 14,
+    textAlign: 'right',
+    paddingVertical: 0,
+  },
+});
 
 interface TransactionEditorInitialValues {
   type: TransactionType;
@@ -526,6 +544,12 @@ export function TransactionEditorScreen({
   const handleSubmit = () => {
     const numericAmount = Number(amount);
     const amountDraft = amount.trim();
+    const normalizedNote = note.trim();
+    const fallbackDefaultNote =
+      mode === 'create'
+        ? autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || ''
+        : '';
+    const resolvedNote = normalizedNote.length > 0 ? normalizedNote : fallbackDefaultNote || null;
     if (!amountDraft || !Number.isFinite(numericAmount)) {
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
       activateField('amount');
@@ -555,7 +579,7 @@ export function TransactionEditorScreen({
           categoryId: null,
           fromAccountId: null,
           toAccountId: null,
-          note: note.trim() || null,
+          note: resolvedNote,
         };
       } else if (isTransferType) {
         const transferErrors: typeof fieldErrors = {};
@@ -581,7 +605,7 @@ export function TransactionEditorScreen({
           toAccountId,
           accountId: null,
           categoryId: null,
-          note: note.trim() || null,
+          note: resolvedNote,
         };
       } else {
         const baseErrors: typeof fieldErrors = {};
@@ -604,7 +628,7 @@ export function TransactionEditorScreen({
           categoryId,
           fromAccountId: null,
           toAccountId: null,
-          note: note.trim() || null,
+          note: resolvedNote,
         };
         if (recurringOptions) {
           const normalizedName = recurrenceName.trim();
@@ -675,6 +699,15 @@ export function TransactionEditorScreen({
     : showToolZone
       ? 92
       : 16;
+  const summaryContainerStyle = useMemo(
+    () => ({ flex: showToolZone ? summaryFlex : 1 }),
+    [showToolZone, summaryFlex],
+  );
+  const scrollContentStyle = useMemo(
+    () => [styles.summaryContainer, { paddingBottom: summaryBottomPadding }],
+    [summaryBottomPadding],
+  );
+  const toolZoneContainerStyle = useMemo(() => ({ flex: 1 - summaryFlex }), [summaryFlex]);
 
   const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
     const y = fieldOffsetsRef.current[field];
@@ -828,34 +861,12 @@ export function TransactionEditorScreen({
 
   const handleNoteChange = useCallback((nextNote: string) => {
     setNote(nextNote);
-    if (!autoNoteFromCategoryRef.current) return;
-    if (nextNote.trim() !== autoNoteFromCategoryRef.current) {
-      autoNoteFromCategoryRef.current = null;
-    }
   }, []);
-
-  const shouldSelectAutoNoteOnFocus =
-    autoNoteFromCategoryRef.current !== null && note.trim() === autoNoteFromCategoryRef.current;
 
   const handleCategorySelect = (nextCategoryId: string) => {
     setCategoryId(nextCategoryId);
     if (mode === 'create') {
-      const nextDefaultNote = categoryNoteLabel(nextCategoryId);
-      if (nextDefaultNote) {
-        setNote((previous) => {
-          const previousTrimmed = previous.trim();
-          const canAutofill =
-            previousTrimmed.length === 0 ||
-            (autoNoteFromCategoryRef.current !== null &&
-              previousTrimmed === autoNoteFromCategoryRef.current);
-          if (!canAutofill) {
-            autoNoteFromCategoryRef.current = null;
-            return previous;
-          }
-          autoNoteFromCategoryRef.current = nextDefaultNote;
-          return nextDefaultNote;
-        });
-      }
+      autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
     }
 
     const isSelectedParent = topLevelCategories.some((item) => item.id === nextCategoryId);
@@ -1080,28 +1091,29 @@ export function TransactionEditorScreen({
         )}
       </View>
 
-      <View style={{ flex: showToolZone ? summaryFlex : 1 }}>
+      {showTypeSelector ? (
+        <View className="px-4 pb-2">
+          <View className="flex-row gap-2 mt-1">
+            {availableTypeCards.map((item) => (
+              <TypePill
+                key={item.value}
+                item={item}
+                selected={type === item.value}
+                onPress={() => handleTypeChange(item.value)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      <View style={summaryContainerStyle}>
         <ScrollView
           ref={editorScrollRef}
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: summaryBottomPadding }}
+          contentContainerStyle={scrollContentStyle}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Type selector pills */}
-          {showTypeSelector ? (
-            <View className="flex-row gap-2 mt-2 mb-3">
-              {availableTypeCards.map((item) => (
-                <TypePill
-                  key={item.value}
-                  item={item}
-                  selected={type === item.value}
-                  onPress={() => handleTypeChange(item.value)}
-                />
-              ))}
-            </View>
-          ) : null}
-
           {/* Summary rows */}
           <View className="rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
             {!isBalanceAdjustmentType ? (
@@ -1170,7 +1182,7 @@ export function TransactionEditorScreen({
                     variant="label"
                     tone="muted"
                     className="text-right mt-0.5"
-                    style={{ fontSize: 11 }}
+                    style={styles.nudgeLabel}
                   >
                     {nudgeMessage}
                   </Text>
@@ -1348,7 +1360,7 @@ export function TransactionEditorScreen({
                     label={I18n.t('transaction_detail.note')}
                     isActive={activeField === 'note'}
                     onPress={focusNoteField}
-                    rightElement={<View style={{ width: 14 }} />}
+                    rightElement={<View style={styles.trailingSpacer} />}
                   >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-row items-center gap-2">
@@ -1366,16 +1378,10 @@ export function TransactionEditorScreen({
                           onChangeText={handleNoteChange}
                           placeholder={I18n.t('transactions.editor.optional')}
                           placeholderTextColor={themeColors.textMuted}
-                          selectTextOnFocus={shouldSelectAutoNoteOnFocus}
                           returnKeyType="done"
                           onFocus={() => setActiveField('note')}
                           onBlur={() => setActiveField((prev) => (prev === 'note' ? null : prev))}
-                          style={{
-                            color: themeColors.text,
-                            fontSize: 14,
-                            textAlign: 'right',
-                            paddingVertical: 0,
-                          }}
+                          style={[styles.inlineSummaryInput, { color: themeColors.text }]}
                         />
                       </View>
                     </View>
@@ -1397,7 +1403,7 @@ export function TransactionEditorScreen({
                     activateField('ruleName');
                     requestAnimationFrame(() => recurrenceNameRef.current?.focus());
                   }}
-                  rightElement={<View style={{ width: 14 }} />}
+                  rightElement={<View style={styles.trailingSpacer} />}
                 >
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center gap-2">
@@ -1424,12 +1430,7 @@ export function TransactionEditorScreen({
                         returnKeyType="done"
                         onFocus={() => setActiveField('ruleName')}
                         onBlur={() => setActiveField((prev) => (prev === 'ruleName' ? null : prev))}
-                        style={{
-                          color: themeColors.text,
-                          fontSize: 14,
-                          textAlign: 'right',
-                          paddingVertical: 0,
-                        }}
+                        style={[styles.inlineSummaryInput, { color: themeColors.text }]}
                       />
                     </View>
                   </View>
@@ -1471,7 +1472,7 @@ export function TransactionEditorScreen({
                     activateField('interval');
                     requestAnimationFrame(() => recurrenceIntervalRef.current?.focus());
                   }}
-                  rightElement={<View style={{ width: 14 }} />}
+                  rightElement={<View style={styles.trailingSpacer} />}
                 >
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center gap-2">
@@ -1493,12 +1494,7 @@ export function TransactionEditorScreen({
                         returnKeyType="done"
                         onFocus={() => setActiveField('interval')}
                         onBlur={() => setActiveField((prev) => (prev === 'interval' ? null : prev))}
-                        style={{
-                          color: themeColors.text,
-                          fontSize: 14,
-                          textAlign: 'right',
-                          paddingVertical: 0,
-                        }}
+                        style={[styles.inlineSummaryInput, { color: themeColors.text }]}
                       />
                     </View>
                   </View>
@@ -1622,7 +1618,7 @@ export function TransactionEditorScreen({
 
       {showToolZone ? (
         <View
-          style={{ flex: 1 - summaryFlex }}
+          style={toolZoneContainerStyle}
           className="border-t-2 border-border/50 bg-secondary/30"
         >
           <View className="items-center pt-1.5 pb-1">

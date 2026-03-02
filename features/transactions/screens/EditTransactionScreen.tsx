@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useApp } from '~/context/AppContext';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
-import type { TransactionWithRelations } from '~/types';
+import type { TransactionType, TransactionWithRelations } from '~/types';
 import { I18n } from '~/lib/i18n';
 
 interface EditTransactionScreenProps {
@@ -29,8 +29,18 @@ export function EditTransactionScreen({
     !transaction.toAccountId;
   const isBalanceAdjustment =
     transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer;
+  const initialAccountId = isSimpleMode && simpleWalletId ? simpleWalletId : undefined;
+  const restrictedTypes = useMemo<TransactionType[] | undefined>(
+    () =>
+      isBalanceAdjustment
+        ? ['balance_adjustment']
+        : isSimpleMode
+          ? ['expense', 'income']
+          : undefined,
+    [isBalanceAdjustment, isSimpleMode],
+  );
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     Alert.alert(
       I18n.t('transactions.editor.delete_transaction'),
       I18n.t('transactions.editor.delete_confirm'),
@@ -50,7 +60,23 @@ export function EditTransactionScreen({
         },
       ],
     );
-  };
+  }, [deleteTransaction, onClose, transaction.id]);
+  const handleSubmit = useCallback(
+    (input: Parameters<typeof updateTransaction>[1]) => {
+      if (isLegacyBalanceAdjustmentTransfer) {
+        updateTransaction(transaction.id, {
+          ...input,
+          type: 'transfer',
+          categoryId: null,
+          fromAccountId: null,
+          toAccountId: null,
+        });
+        return;
+      }
+      updateTransaction(transaction.id, input);
+    },
+    [isLegacyBalanceAdjustmentTransfer, transaction.id, updateTransaction],
+  );
 
   return (
     <TransactionEditorScreen
@@ -58,27 +84,9 @@ export function EditTransactionScreen({
       onClose={onClose}
       onDelete={handleDelete}
       hideAccountSelector={isSimpleMode && !isBalanceAdjustment}
-      initialAccountId={isSimpleMode && simpleWalletId ? simpleWalletId : undefined}
-      onSubmit={(input) => {
-        if (isLegacyBalanceAdjustmentTransfer) {
-          updateTransaction(transaction.id, {
-            ...input,
-            type: 'transfer',
-            categoryId: null,
-            fromAccountId: null,
-            toAccountId: null,
-          });
-          return;
-        }
-        updateTransaction(transaction.id, input);
-      }}
-      restrictTypeOptions={
-        isBalanceAdjustment
-          ? ['balance_adjustment']
-          : isSimpleMode
-            ? ['expense', 'income']
-            : undefined
-      }
+      initialAccountId={initialAccountId}
+      onSubmit={handleSubmit}
+      restrictTypeOptions={restrictedTypes}
       subtitleOverride={
         isBalanceAdjustment
           ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')

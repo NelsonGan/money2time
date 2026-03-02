@@ -1,17 +1,39 @@
 import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button, Text } from '~/components/ui';
+import { Text } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
+import { ONBOARDING_HORIZONTAL_PADDING } from '~/features/onboarding/constants/layout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 
 interface OnboardingModeStepProps {
   onBack: () => void;
   onSelectSimple: () => void;
   onSelectPower: () => void;
 }
+
+const styles = StyleSheet.create({
+  optionCard: {
+    borderRadius: 16,
+  },
+  optionBody: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+  },
+  optionEmoji: {
+    fontSize: 28,
+    lineHeight: 36,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingTop: spacing.xl,
+  },
+});
 
 export function OnboardingModeStep({
   onBack,
@@ -30,7 +52,7 @@ export function OnboardingModeStep({
 
   return (
     <View className="flex-1">
-      <View className="flex-1 px-6 pt-6">
+      <View style={styles.contentContainer}>
         <Animated.View entering={FadeIn.delay(100).duration(400)}>
           <Text variant="label" tone="muted" className="text-center uppercase tracking-wider">
             {I18n.t('onboarding.mode.step_label')}
@@ -52,17 +74,22 @@ export function OnboardingModeStep({
               void triggerHaptic('selection');
               setSelected('simple');
             }}
-            style={{
-              borderRadius: 16,
-              borderWidth: selected === 'simple' ? 2 : 1,
-              borderColor:
-                selected === 'simple' ? themeColors.primary : themeColors.textMuted + '30',
-              backgroundColor:
-                selected === 'simple' ? themeColors.primarySoft : themeColors.surface,
-            }}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('onboarding.mode.simple_title')}
+            accessibilityState={{ selected: selected === 'simple' }}
+            style={[
+              styles.optionCard,
+              {
+                borderWidth: selected === 'simple' ? 2 : 1,
+                borderColor:
+                  selected === 'simple' ? themeColors.primary : `${themeColors.textMuted}30`,
+                backgroundColor:
+                  selected === 'simple' ? themeColors.primarySoft : themeColors.surface,
+              },
+            ]}
           >
-            <View style={{ paddingVertical: 20, paddingHorizontal: 20 }}>
-              <Text style={{ fontSize: 28, lineHeight: 36 }}>✨</Text>
+            <View style={styles.optionBody}>
+              <Text style={styles.optionEmoji}>✨</Text>
               <Text variant="heading" className="text-foreground mt-2">
                 {I18n.t('onboarding.mode.simple_title')}
               </Text>
@@ -77,16 +104,22 @@ export function OnboardingModeStep({
               void triggerHaptic('selection');
               setSelected('power');
             }}
-            style={{
-              borderRadius: 16,
-              borderWidth: selected === 'power' ? 2 : 1,
-              borderColor:
-                selected === 'power' ? themeColors.primary : themeColors.textMuted + '30',
-              backgroundColor: selected === 'power' ? themeColors.primarySoft : themeColors.surface,
-            }}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('onboarding.mode.power_title')}
+            accessibilityState={{ selected: selected === 'power' }}
+            style={[
+              styles.optionCard,
+              {
+                borderWidth: selected === 'power' ? 2 : 1,
+                borderColor:
+                  selected === 'power' ? themeColors.primary : `${themeColors.textMuted}30`,
+                backgroundColor:
+                  selected === 'power' ? themeColors.primarySoft : themeColors.surface,
+              },
+            ]}
           >
-            <View style={{ paddingVertical: 20, paddingHorizontal: 20 }}>
-              <Text style={{ fontSize: 28, lineHeight: 36 }}>⚡️</Text>
+            <View style={styles.optionBody}>
+              <Text style={styles.optionEmoji}>⚡️</Text>
               <Text variant="heading" className="text-foreground mt-2">
                 {I18n.t('onboarding.mode.power_title')}
               </Text>
@@ -98,23 +131,15 @@ export function OnboardingModeStep({
         </Animated.View>
       </View>
 
-      <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-        <View className="flex-row gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onPress={() => {
-              void triggerHaptic('selection');
-              onBack();
-            }}
-          >
-            <Text>{I18n.t('common.back')}</Text>
-          </Button>
-          <Button className="flex-[2]" disabled={!selected} onPress={handleContinue}>
-            <Text>{I18n.t('common.continue')}</Text>
-          </Button>
-        </View>
-      </View>
+      <OnboardingActionBar
+        onBack={() => {
+          void triggerHaptic('selection');
+          onBack();
+        }}
+        onPrimary={handleContinue}
+        primaryLabel={I18n.t('common.continue')}
+        primaryDisabled={!selected}
+      />
     </View>
   );
 }

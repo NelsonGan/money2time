@@ -6,6 +6,7 @@ import {
   PanResponder,
   Pressable,
   ScrollView,
+  StyleSheet,
   View,
 } from 'react-native';
 
@@ -24,6 +25,19 @@ const CALENDAR_SWIPE_VELOCITY_THRESHOLD = 0.22;
 const CALENDAR_SWIPE_MIN_FLING_DISTANCE = 8;
 const CALENDAR_SWIPE_INTENT_RATIO = 1.4;
 const CALENDAR_SWIPE_MAX_VERTICAL_DRIFT = 22;
+const YEAR_RAIL_CONTENT_STYLE = { paddingRight: 8 } as const;
+
+const styles = StyleSheet.create({
+  calendarDayNumber: {
+    fontSize: 12,
+  },
+  quickDateLabel: {
+    fontSize: 10,
+  },
+  weekdayLabel: {
+    fontSize: 10,
+  },
+});
 
 interface DatePanelProps {
   value: string;
@@ -107,6 +121,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
 
   const recentDays = useMemo(getRecentDays, []);
   const currentMonthCells = useMemo(() => monthGrid(calendarMonth), [calendarMonth]);
+  const yearRailOffsetValue = useMemo(() => ({ x: yearRailOffset, y: 0 }), [yearRailOffset]);
 
   const shiftCalendarMonth = useCallback((direction: -1 | 1, withHaptic = true) => {
     if (withHaptic) {
@@ -231,7 +246,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
                       ? 'text-foreground'
                       : 'text-muted-foreground',
                 )}
-                style={{ fontSize: 12 }}
+                style={styles.calendarDayNumber}
               >
                 {cell.day}
               </Text>
@@ -270,7 +285,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
               <Text
                 variant="label"
                 className={cn(isSelected ? 'text-primary' : 'text-muted-foreground')}
-                style={{ fontSize: 10 }}
+                style={styles.quickDateLabel}
               >
                 {day.label}
               </Text>
@@ -316,12 +331,12 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
         <View className="mb-2 rounded-2xl border border-border/35 bg-card px-2 py-2">
           <ScrollView
             horizontal
-            contentOffset={{ x: yearRailOffset, y: 0 }}
+            contentOffset={yearRailOffsetValue}
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={handleYearRailScrollEnd}
             snapToInterval={YEAR_CHIP_WIDTH}
             decelerationRate="fast"
-            contentContainerStyle={{ paddingRight: 8 }}
+            contentContainerStyle={YEAR_RAIL_CONTENT_STYLE}
           >
             {yearRail.map((year) => {
               const isSelected = calendarMonth.getFullYear() === year;
@@ -360,7 +375,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
             variant="label"
             tone="muted"
             className="w-[14%] text-center"
-            style={{ fontSize: 10 }}
+            style={styles.weekdayLabel}
           >
             {d}
           </Text>
