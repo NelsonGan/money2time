@@ -1,10 +1,11 @@
-import { Search, X } from 'lucide-react-native';
+import { Pencil, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
   Pressable,
   ScrollView,
+  StyleSheet,
   type TextInput,
   useWindowDimensions,
   View,
@@ -15,7 +16,7 @@ import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Input, SelectField, Text, ThemeModal } from '~/components/ui';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   ActivityTransactionList,
@@ -58,10 +59,16 @@ const SORT_OPTION_VALUES = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'
 type SortByValue = (typeof SORT_OPTION_VALUES)[number];
 
 const FLEX_ONE_STYLE = { flex: 1 } as const;
-const FILTER_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
-const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
+const FILTER_SCROLL_CONTENT_STYLE = {
+  padding: spacing.md,
+  paddingBottom: spacing.xl + spacing.xs,
+  gap: spacing.sm,
+} as const;
+const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
 const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
+const SELECTION_PANEL_HEIGHT = 236;
+const BULK_DATE_PANEL_HEIGHT = 360;
 
 interface CategoryPanelItem {
   id: string;
@@ -110,6 +117,7 @@ interface TransactionsScreenProps {
   focusMonthKey?: string | null;
   focusMonthToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
 
 export function TransactionsScreen({
@@ -117,6 +125,7 @@ export function TransactionsScreen({
   focusMonthKey = null,
   focusMonthToken = 0,
   onOpenTransaction,
+  onSelectionModeChange,
 }: TransactionsScreenProps) {
   const themeColors = useThemeColors();
   const {
@@ -177,6 +186,38 @@ export function TransactionsScreen({
   const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds),
+    [selectedTransactionIds],
+  );
+  const selectedTransactionTotal = useMemo(
+    () =>
+      filteredTransactions.reduce(
+        (sum, transaction) =>
+          selectedTransactionIdSet.has(transaction.id) ? sum + transaction.amount : sum,
+        0,
+      ),
+    [filteredTransactions, selectedTransactionIdSet],
+  );
+  const selectedTransactionTotalLabel = useMemo(
+    () =>
+      formatAmount(
+        Math.abs(selectedTransactionTotal),
+        {
+          currencySymbol: settings.currencySymbol,
+          displayMode: 'money',
+          hourRounding: settings.hourRounding,
+        },
+        { showSign: false, trueHourlyRate: 0 },
+      ),
+    [selectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
+  );
+  const selectedTransactionTotalToneClass =
+    selectedTransactionTotal > 0
+      ? 'text-success'
+      : selectedTransactionTotal < 0
+        ? 'text-destructive'
+        : 'text-muted-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const resolveTransactionValue = useCallback(
     (transaction: TransactionWithRelations) =>
@@ -205,6 +246,13 @@ export function TransactionsScreen({
     }
     setShowBulkUpdate(false);
   }, [isSelectionMode]);
+
+  useEffect(() => {
+    onSelectionModeChange?.(isSelectionMode);
+    return () => {
+      onSelectionModeChange?.(false);
+    };
+  }, [isSelectionMode, onSelectionModeChange]);
 
   const handleSearchScrollToTop = useCallback(() => {
     if (!hasActiveSearch) return false;
@@ -529,49 +577,7 @@ export function TransactionsScreen({
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
-        title={isSelectionMode ? undefined : I18n.t('transactions.title')}
-        titleNode={
-          isSelectionMode ? (
-            <View
-              className="rounded-full bg-card border border-border/40 px-3 flex-row items-center justify-between gap-2"
-              style={{ height: 40 }}
-            >
-              <Pressable
-                onPress={clearSelection}
-                className="rounded-full bg-secondary/70 px-3 py-1 active:opacity-85"
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-
-              <Text variant="caption" className="text-foreground">
-                {I18n.t('transactions.selection.selected_count', {
-                  count: selectedTransactionCount,
-                })}
-              </Text>
-
-              <View className="flex-row items-center gap-1.5">
-                <Pressable
-                  onPress={handleOpenBulkUpdate}
-                  className="rounded-full bg-primary/12 border border-primary/35 px-2.5 py-1 active:opacity-85"
-                >
-                  <Text variant="caption" className="text-primary">
-                    {I18n.t('transactions.selection.update')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={handleDeleteSelectedTransactions}
-                  className="rounded-full bg-destructive/10 border border-destructive/35 px-2.5 py-1 active:opacity-85"
-                >
-                  <Text variant="caption" className="text-destructive">
-                    {I18n.t('common.delete')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : undefined
-        }
+        title={I18n.t('transactions.title')}
         monthLabel={hasActiveSearch ? I18n.t('transactions.filters.search') : activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
@@ -624,10 +630,63 @@ export function TransactionsScreen({
               </Pressable>
             </View>
           ) : null}
-          <InOutHeader
-            incomeValue={formatSummaryValue(monthSummary.income)}
-            expenseValue={formatSummaryValue(monthSummary.expense)}
-          />
+          <View style={styles.summarySlot}>
+            {isSelectionMode ? (
+              <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+                <Pressable
+                  onPress={clearSelection}
+                  className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.cancel')}
+                >
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('common.cancel')}
+                  </Text>
+                </Pressable>
+
+                <View className="flex-1 items-center px-1">
+                  <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                    <Text variant="caption" className="text-foreground">
+                      {I18n.t('transactions.selection.selected_count', {
+                        count: selectedTransactionCount,
+                      })}
+                    </Text>
+                    <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                      <Text variant="label" className={selectedTransactionTotalToneClass}>
+                        {selectedTransactionTotalLabel}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View className="flex-row items-center gap-1.5">
+                  <Pressable
+                    onPress={handleOpenBulkUpdate}
+                    className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('transactions.selection.update')}
+                    hitSlop={8}
+                  >
+                    <Pencil size={14} color={themeColors.primary} />
+                  </Pressable>
+                  <Pressable
+                    onPress={handleDeleteSelectedTransactions}
+                    className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.delete')}
+                    hitSlop={8}
+                  >
+                    <Trash2 size={14} color={themeColors.coral} />
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <InOutHeader
+                incomeValue={formatSummaryValue(monthSummary.income)}
+                expenseValue={formatSummaryValue(monthSummary.expense)}
+              />
+            )}
+          </View>
         </View>
       </MonthControlsHeader>
 
@@ -671,7 +730,7 @@ export function TransactionsScreen({
         onRequestClose={handleCloseBulkUpdate}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+          <View style={styles.modalHeaderRow}>
             <View className="flex-1 pr-3">
               <Text variant="subheading">
                 {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
@@ -684,6 +743,8 @@ export function TransactionsScreen({
               <Pressable
                 onPress={handleCloseBulkUpdate}
                 className="px-3 py-2 rounded-full bg-secondary/70"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.cancel')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.cancel')}
@@ -696,6 +757,9 @@ export function TransactionsScreen({
                   'px-3 py-2 rounded-full',
                   hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
                 )}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.save')}
+                accessibilityState={{ disabled: !hasBulkChanges }}
               >
                 <Text
                   variant="caption"
@@ -714,7 +778,7 @@ export function TransactionsScreen({
               </Text>
               <View
                 className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={{ height: 360 }}
+                style={styles.bulkDatePanel}
               >
                 <DatePanel
                   value={bulkDate}
@@ -748,7 +812,7 @@ export function TransactionsScreen({
         onRequestClose={handleCloseFilters}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+          <View style={styles.modalHeaderRow}>
             <View>
               <Text variant="subheading">{I18n.t('transactions.filters.title')}</Text>
               <Text variant="friendly" tone="muted">
@@ -759,6 +823,8 @@ export function TransactionsScreen({
               <Pressable
                 onPress={handleResetFilters}
                 className="px-3 py-2 rounded-full bg-secondary/70"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.reset')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.reset')}
@@ -767,6 +833,8 @@ export function TransactionsScreen({
               <Pressable
                 onPress={handleDoneFilters}
                 className="px-3 py-2 rounded-full bg-secondary"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.done')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.done')}
@@ -809,7 +877,7 @@ export function TransactionsScreen({
                   onSelect={handleResetAccountFilter}
                 />
               </View>
-              <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+              <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
                 <AccountPanel
                   accounts={accounts}
                   accountGroups={accountGroups}
@@ -832,7 +900,7 @@ export function TransactionsScreen({
                     onSelect={handleResetIncomeCategoryFilter}
                   />
                 </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
                   <CategoryPanel
                     parents={incomeCategoryPanelData.parents}
                     childByParent={incomeCategoryPanelData.childrenByParent}
@@ -857,7 +925,7 @@ export function TransactionsScreen({
                     onSelect={handleResetExpenseCategoryFilter}
                   />
                 </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
                   <CategoryPanel
                     parents={expenseCategoryPanelData.parents}
                     childByParent={expenseCategoryPanelData.childrenByParent}
@@ -910,3 +978,24 @@ export function TransactionsScreen({
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  summarySlot: {
+    minHeight: 56,
+    justifyContent: 'center',
+  },
+  modalHeaderRow: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.xl + spacing.xs,
+    paddingBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectionPanel: {
+    height: SELECTION_PANEL_HEIGHT,
+  },
+  bulkDatePanel: {
+    height: BULK_DATE_PANEL_HEIGHT,
+  },
+});

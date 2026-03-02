@@ -32,7 +32,7 @@ const en = {
   nav: {
     home: 'Home',
     activity: 'Activity',
-    account: 'Account',
+    account: 'Accounts',
     insights: 'Insights',
     settings: 'Settings',
     income: 'Income',
@@ -102,7 +102,7 @@ const en = {
       monthly_outflow: '{{value}} monthly outflow',
       no_active: 'No active recurring commitments',
       paused: 'Paused',
-      tab: 'Recurring',
+      tab: 'Recurrings',
       per_month: '/mo',
       more: '+{{count}} more',
       none_title: 'No recurring commitments yet',
@@ -272,6 +272,7 @@ const en = {
     },
     selection: {
       selected_count: '{{count}} selected',
+      selected_total: 'Total {{amount}}',
       update: 'Update',
       update_title: 'Update {{count}} transactions',
       update_subtitle: 'Apply changes to all selected transactions.',
@@ -447,6 +448,7 @@ const en = {
         no_income_title: 'No income in this period',
         no_income_short: 'No income',
         no_income_message: 'Add income transactions in this period to calculate savings rate.',
+        saved_per_year: '{{value}} saved this year',
         exclusions_active: 'Excluding {{count}} categories from calculation.',
         goal_hint: '20%+ is typically considered a healthy savings pace.',
       },

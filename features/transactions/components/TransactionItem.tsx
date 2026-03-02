@@ -148,7 +148,7 @@ function TransactionItemView({
       onPressOut={onPressOut}
       className={cn(
         'flex-row items-center bg-card border border-border/40 shadow-soft',
-        selectionMode && selected ? 'border-primary/55 bg-primary/12' : null,
+        selectionMode && selected ? 'border-primary/55 bg-primary/20' : null,
         compact
           ? 'gap-2 px-2.5 py-2 rounded-[16px] mb-1'
           : 'gap-2.5 px-3 py-2.5 rounded-[20px] mb-1.5',
@@ -171,16 +171,9 @@ function TransactionItemView({
 
       <View
         className={cn(
-          compact
-            ? 'w-8 h-8 rounded-full items-center justify-center'
-            : 'w-9 h-9 rounded-full items-center justify-center',
-          isTransfer
-            ? 'bg-secondary'
-            : isBalanceAdjustment
-              ? 'bg-primary/12'
-              : isIncome
-                ? 'bg-success/12'
-                : 'bg-destructive/10',
+          compact ? 'w-8 h-8 items-center justify-center' : 'w-9 h-9 items-center justify-center',
+          isTransfer || isBalanceAdjustment ? 'rounded-full' : null,
+          isTransfer ? 'bg-secondary' : isBalanceAdjustment ? 'bg-primary/12' : null,
         )}
       >
         <Text className={compact ? 'text-[15px]' : 'text-[16px]'}>{leadingEmoji}</Text>

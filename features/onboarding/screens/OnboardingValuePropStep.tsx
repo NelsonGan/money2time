@@ -1,8 +1,10 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, CardContent, Text } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -12,6 +14,24 @@ interface OnboardingValuePropStepProps {
   onSkip: () => void;
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: spacing.screenHorizontal,
+    justifyContent: 'space-between',
+  },
+  contentArea: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  footer: {
+    paddingTop: spacing.sm,
+  },
+  modeIcon: {
+    fontSize: 18,
+  },
+});
+
 export function OnboardingValuePropStep({
   currencySymbol,
   onGetStarted,
@@ -20,9 +40,9 @@ export function OnboardingValuePropStep({
   const sym = currencySymbol;
 
   return (
-    <View className="flex-1 px-6 justify-between">
+    <View style={styles.container}>
       {/* Content area */}
-      <View className="flex-1 justify-center">
+      <View style={styles.contentArea}>
         {/* Overline + Hero */}
         <Animated.View entering={FadeIn.delay(100).duration(400)}>
           <Text variant="label" tone="muted" className="text-center uppercase tracking-wider">
@@ -65,7 +85,7 @@ export function OnboardingValuePropStep({
           <Card variant="soft" className="border border-border/30">
             <CardContent className="py-3.5 flex-row items-center gap-3">
               <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                <Text style={{ fontSize: 18 }}>💵</Text>
+                <Text style={styles.modeIcon}>💵</Text>
               </View>
               <View className="flex-1">
                 <Text variant="caption" className="text-foreground">
@@ -80,7 +100,7 @@ export function OnboardingValuePropStep({
           <Card variant="soft" className="border border-border/30">
             <CardContent className="py-3.5 flex-row items-center gap-3">
               <View className="w-10 h-10 rounded-full bg-accent/15 items-center justify-center">
-                <Text style={{ fontSize: 18 }}>⏱️</Text>
+                <Text style={styles.modeIcon}>⏱️</Text>
               </View>
               <View className="flex-1">
                 <Text variant="caption" className="text-foreground">
@@ -96,7 +116,7 @@ export function OnboardingValuePropStep({
       </View>
 
       {/* Footer */}
-      <View className="pb-12 pt-4">
+      <SafeAreaView edges={['bottom']} style={styles.footer}>
         <Button
           onPress={() => {
             void triggerHaptic('medium');
@@ -118,7 +138,7 @@ export function OnboardingValuePropStep({
             {I18n.t('onboarding.value_prop.skip_setup')}
           </Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }

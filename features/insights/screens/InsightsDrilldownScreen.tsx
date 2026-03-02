@@ -1,14 +1,8 @@
+import { Pencil, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  BackHandler,
-  type GestureResponderEvent,
-  Pressable,
-  ScrollView,
-  View,
-} from 'react-native';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Input,
@@ -17,9 +11,11 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { DatePanel } from '~/features/transactions/components/editor';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
@@ -32,11 +28,35 @@ type DrilldownSortOption = 'default' | 'largest_value';
 type DrilldownTransactionFilter = 'income' | 'expense';
 type EditableTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 
-const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = { padding: 20, paddingBottom: 34, gap: 14 } as const;
-const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: 8 } as const;
+const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = {
+  padding: spacing.screenHorizontal,
+  paddingBottom: spacing.listBottom + spacing.xs,
+  gap: spacing.sm,
+} as const;
+const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: spacing.xs } as const;
 const DRILLDOWN_DIRECT_PARENT_ROW_ID = '__direct-parent__';
 const EMPTY_DRILLDOWN_TRANSACTIONS: TransactionWithRelations[] = [];
-const TYPE_FILTER_TAP_MAX_DRIFT = 8;
+
+const styles = StyleSheet.create({
+  bulkDatePanelContainer: {
+    height: 360,
+  },
+  headerContainer: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  selectionOverlay: {
+    position: 'absolute',
+    top: spacing.xs,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+  },
+  sortControlsContent: {
+    gap: spacing.xs,
+    alignItems: 'center',
+    paddingRight: spacing.xs,
+  },
+});
 
 interface DrilldownSubcategoryRow {
   id: string;
@@ -73,6 +93,9 @@ function FilterPill({
         void triggerHaptic('selection');
         onPress();
       }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: active }}
       className={cn(
         'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
         active ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
@@ -110,6 +133,7 @@ export function InsightsDrilldownScreen({
   onOpenSubcategoryDrilldown,
 }: InsightsDrilldownScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const themeColors = useThemeColors();
   const {
     categories,
     transactions,
@@ -129,11 +153,6 @@ export function InsightsDrilldownScreen({
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const drilldownScrollToTopRef = useRef<(() => void) | null>(null);
-  const typeFilterTouchRef = useRef<{
-    type: DrilldownTransactionFilter;
-    pageX: number;
-    pageY: number;
-  } | null>(null);
 
   const transactionById = useMemo(
     () => new Map(transactions.map((transaction) => [transaction.id, transaction])),
@@ -342,6 +361,41 @@ export function InsightsDrilldownScreen({
       : payload.showTypeFilter
         ? expenseTransactions
         : scopedTransactions;
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds),
+    [selectedTransactionIds],
+  );
+  const selectedTransactionTotal = useMemo(
+    () =>
+      displayedTransactions.reduce((sum, transaction) => {
+        if (!selectedTransactionIdSet.has(transaction.id)) return sum;
+        return (
+          sum +
+          (settings.displayMode === 'time'
+            ? getDisplayValueForTransaction(transaction)
+            : transaction.amount)
+        );
+      }, 0),
+    [
+      displayedTransactions,
+      getDisplayValueForTransaction,
+      selectedTransactionIdSet,
+      settings.displayMode,
+    ],
+  );
+  const selectedTransactionTotalLabel = useMemo(
+    () =>
+      settings.displayMode === 'time'
+        ? formatHours(Math.abs(selectedTransactionTotal))
+        : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false }),
+    [selectedTransactionTotal, settings],
+  );
+  const selectedTransactionTotalToneClass =
+    selectedTransactionTotal > 0
+      ? 'text-success'
+      : selectedTransactionTotal < 0
+        ? 'text-destructive'
+        : 'text-muted-foreground';
   const shouldGroupByDate = drilldownSortOption !== 'largest_value';
   const handleSortOptionChange = useCallback(
     (nextOption: DrilldownSortOption) => {
@@ -373,27 +427,9 @@ export function InsightsDrilldownScreen({
         : formatAmount(value, settings, { showSign: false }),
     [settings],
   );
-  const handleTypeFilterPressIn = useCallback(
-    (type: DrilldownTransactionFilter, event: GestureResponderEvent) => {
-      typeFilterTouchRef.current = {
-        type,
-        pageX: event.nativeEvent.pageX,
-        pageY: event.nativeEvent.pageY,
-      };
-    },
-    [],
-  );
-  const handleTypeFilterPressOut = useCallback(
-    (type: DrilldownTransactionFilter, event: GestureResponderEvent) => {
-      const touchStart = typeFilterTouchRef.current;
-      typeFilterTouchRef.current = null;
-      if (!touchStart || touchStart.type !== type) return;
-
-      const movedX = Math.abs(event.nativeEvent.pageX - touchStart.pageX);
-      const movedY = Math.abs(event.nativeEvent.pageY - touchStart.pageY);
-      if (movedX > TYPE_FILTER_TAP_MAX_DRIFT || movedY > TYPE_FILTER_TAP_MAX_DRIFT) return;
+  const handleTypeFilterChange = useCallback(
+    (type: DrilldownTransactionFilter) => {
       if (drilldownTypeFilter === type) return;
-
       void triggerHaptic('selection');
       setDrilldownTypeFilter(type);
     },
@@ -620,6 +656,8 @@ export function InsightsDrilldownScreen({
               <Pressable
                 onPress={handleCloseBulkUpdate}
                 className="px-3 py-2 rounded-full bg-secondary/70"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.cancel')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.cancel')}
@@ -632,6 +670,9 @@ export function InsightsDrilldownScreen({
                   'px-3 py-2 rounded-full',
                   hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
                 )}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.save')}
+                accessibilityState={{ disabled: !hasBulkChanges }}
               >
                 <Text
                   variant="caption"
@@ -675,7 +716,7 @@ export function InsightsDrilldownScreen({
               </Text>
               <View
                 className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={{ height: 360 }}
+                style={styles.bulkDatePanelContainer}
               >
                 <DatePanel
                   value={bulkDate}
@@ -702,62 +743,75 @@ export function InsightsDrilldownScreen({
         </>
       ) : (
         <>
-          <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
-            {isSelectionMode ? (
-              <View className="px-0 pt-5 pb-3">
-                <View className="mb-3 rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+          <View style={styles.headerContainer}>
+            <SettingsHeader
+              className="px-0 pt-5 pb-3"
+              onBack={handleHeaderBack}
+              title={headerTitle}
+            />
+          </View>
+
+          {isSelectionMode ? (
+            <View pointerEvents="box-none" style={styles.selectionOverlay}>
+              <View style={styles.headerContainer}>
+                <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
                   <Pressable
                     onPress={clearSelection}
                     className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.cancel')}
                   >
                     <Text variant="caption" tone="muted">
                       {I18n.t('common.cancel')}
                     </Text>
                   </Pressable>
 
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('transactions.selection.selected_count', {
-                      count: selectedTransactionCount,
-                    })}
-                  </Text>
+                  <View className="flex-1 items-center px-1">
+                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('transactions.selection.selected_count', {
+                          count: selectedTransactionCount,
+                        })}
+                      </Text>
+                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                        <Text variant="label" className={selectedTransactionTotalToneClass}>
+                          {selectedTransactionTotalLabel}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
 
                   <View className="flex-row items-center gap-2">
                     <Pressable
                       onPress={handleOpenBulkUpdate}
-                      className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
+                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.selection.update')}
+                      hitSlop={8}
                     >
-                      <Text variant="caption" className="text-primary">
-                        {I18n.t('transactions.selection.update')}
-                      </Text>
+                      <Pencil size={14} color={themeColors.primary} />
                     </Pressable>
                     <Pressable
                       onPress={handleDeleteSelectedTransactions}
-                      className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
+                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.delete')}
+                      hitSlop={8}
                     >
-                      <Text variant="caption" className="text-destructive">
-                        {I18n.t('common.delete')}
-                      </Text>
+                      <Trash2 size={14} color={themeColors.coral} />
                     </Pressable>
                   </View>
                 </View>
-
-                <Text variant="heading">{headerTitle}</Text>
               </View>
-            ) : (
-              <SettingsHeader
-                className="px-0 pt-5 pb-3"
-                onBack={handleHeaderBack}
-                title={headerTitle}
-              />
-            )}
-          </View>
+            </View>
+          ) : null}
 
           {shouldShowSortControls ? (
             <View className="px-5 pb-2">
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8, alignItems: 'center', paddingRight: 8 }}
+                contentContainerStyle={styles.sortControlsContent}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('transactions.filters.sort')}
@@ -798,6 +852,11 @@ export function InsightsDrilldownScreen({
                       key={row.id}
                       onPress={() => handleSelectSubcategory(row)}
                       disabled={isSelectionMode || !onOpenSubcategoryDrilldown}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${row.emoji} ${row.label}`}
+                      accessibilityState={{
+                        disabled: isSelectionMode || !onOpenSubcategoryDrilldown,
+                      }}
                       className={cn(
                         'rounded-xl border px-3 py-2.5 active:opacity-85',
                         'border-border/35 bg-card/90',
@@ -844,41 +903,55 @@ export function InsightsDrilldownScreen({
 
           {shouldShowTypeFilter ? (
             <View className="px-5 pb-2">
-              <View className="rounded-2xl border border-border/35 bg-card/90 p-1.5">
-                <View className="flex-row items-center gap-1.5">
+              <View className="border-b border-border/35">
+                <View className="flex-row items-center">
                   <Pressable
-                    onPressIn={(event) => handleTypeFilterPressIn('income', event)}
-                    onPressOut={(event) => handleTypeFilterPressOut('income', event)}
-                    className={cn(
-                      'flex-1 rounded-xl px-3 py-2.5 active:opacity-85',
-                      drilldownTypeFilter === 'income'
-                        ? 'border border-success/35 bg-success/12'
-                        : 'border border-transparent bg-transparent',
-                    )}
+                    onPress={() => handleTypeFilterChange('income')}
+                    accessibilityRole="tab"
+                    accessibilityLabel={I18n.t('insights.calendar.income')}
+                    accessibilityState={{ selected: drilldownTypeFilter === 'income' }}
+                    className="flex-1 items-center py-2.5 active:opacity-85"
                   >
-                    <Text variant="label" className="text-success">
+                    <Text
+                      variant="bodyStrong"
+                      className={cn(
+                        drilldownTypeFilter === 'income'
+                          ? 'text-foreground'
+                          : 'text-muted-foreground',
+                      )}
+                    >
                       {I18n.t('insights.calendar.income')}
                     </Text>
-                    <Text variant="caption" tone="muted" className="mt-0.5">
-                      {incomeTransactions.length} {I18n.t('insights.calendar.transactions')}
-                    </Text>
+                    <View
+                      className={cn(
+                        'mt-1 h-0.5 w-10 rounded-full',
+                        drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-transparent',
+                      )}
+                    />
                   </Pressable>
                   <Pressable
-                    onPressIn={(event) => handleTypeFilterPressIn('expense', event)}
-                    onPressOut={(event) => handleTypeFilterPressOut('expense', event)}
-                    className={cn(
-                      'flex-1 rounded-xl px-3 py-2.5 active:opacity-85',
-                      drilldownTypeFilter === 'expense'
-                        ? 'border border-destructive/35 bg-destructive/10'
-                        : 'border border-transparent bg-transparent',
-                    )}
+                    onPress={() => handleTypeFilterChange('expense')}
+                    accessibilityRole="tab"
+                    accessibilityLabel={I18n.t('insights.calendar.expense')}
+                    accessibilityState={{ selected: drilldownTypeFilter === 'expense' }}
+                    className="flex-1 items-center py-2.5 active:opacity-85"
                   >
-                    <Text variant="label" className="text-destructive">
+                    <Text
+                      variant="bodyStrong"
+                      className={cn(
+                        drilldownTypeFilter === 'expense'
+                          ? 'text-foreground'
+                          : 'text-muted-foreground',
+                      )}
+                    >
                       {I18n.t('insights.calendar.expense')}
                     </Text>
-                    <Text variant="caption" tone="muted" className="mt-0.5">
-                      {expenseTransactions.length} {I18n.t('insights.calendar.transactions')}
-                    </Text>
+                    <View
+                      className={cn(
+                        'mt-1 h-0.5 w-10 rounded-full',
+                        drilldownTypeFilter === 'expense' ? 'bg-destructive' : 'bg-transparent',
+                      )}
+                    />
                   </Pressable>
                 </View>
               </View>

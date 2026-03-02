@@ -1,6 +1,6 @@
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,6 +20,7 @@ import {
   ThemeModal,
 } from '~/components/ui';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -39,6 +40,79 @@ const SNAP_CONFIG = {
 };
 const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
 const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
+const CATEGORY_EDITOR_SCROLL_CONTENT_STYLE = {
+  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+} as const;
+const CATEGORY_LIST_CONTENT_STYLE = {
+  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+} as const;
+
+const styles = StyleSheet.create({
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    paddingLeft: spacing.sm,
+    paddingRight: spacing.xs,
+    marginBottom: spacing.xxs,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: spacing.xs,
+  },
+  rowContainerActive: {
+    opacity: 0.9,
+  },
+  rowIconContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowIconText: {
+    fontSize: 12,
+  },
+  rowPrimaryPressable: {
+    flex: 1,
+  },
+  rowTextStack: {
+    gap: spacing.xxs,
+  },
+  rowTitle: {
+    fontSize: 13,
+  },
+  rowSubtitle: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+  rowActionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowDragButton: {
+    minWidth: 40,
+    minHeight: 40,
+    padding: spacing.xs,
+    marginRight: -2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerContainer: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  headerSpacer: {
+    height: spacing.xs,
+  },
+  listContainer: {
+    flex: 1,
+  },
+});
 
 function isCategoryType(value: string): value is CategoryType {
   return value === 'expense' || value === 'income';
@@ -59,7 +133,6 @@ function CategoryEditor({
   onClose: () => void;
   onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
 }) {
-  const themeColors = useThemeColors();
   const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
@@ -92,10 +165,7 @@ function CategoryEditor({
           onClose={onClose}
         />
         <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-          }}
+          contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}
           showsVerticalScrollIndicator={false}
         >
           <View className="gap-4">
@@ -111,6 +181,9 @@ function CategoryEditor({
                       void triggerHaptic('selection');
                       setIcon('');
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('categories.none')}
+                    accessibilityState={{ selected: icon.trim().length === 0 }}
                     className={cn(
                       'h-11 px-3 rounded-full border items-center justify-center',
                       icon.trim().length === 0
@@ -135,6 +208,9 @@ function CategoryEditor({
                       void triggerHaptic('selection');
                       setIcon(emoji);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
+                    accessibilityState={{ selected: icon === emoji }}
                     className={cn(
                       'h-11 w-11 rounded-full border items-center justify-center',
                       icon === emoji
@@ -157,6 +233,9 @@ function CategoryEditor({
                     void triggerHaptic('selection');
                     setParentId(null);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('categories.none')}
+                  accessibilityState={{ selected: !parentId }}
                   className={cn(
                     'px-4 py-2.5 rounded-full border',
                     !parentId ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
@@ -176,6 +255,9 @@ function CategoryEditor({
                       void triggerHaptic('selection');
                       setParentId(item.id);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.name}
+                    accessibilityState={{ selected: parentId === item.id }}
                     className={cn(
                       'px-4 py-2.5 rounded-full border',
                       parentId === item.id
@@ -203,9 +285,11 @@ function CategoryEditor({
                     void triggerHaptic('warning');
                     onClose();
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.delete')}
                   className="self-start rounded-full border border-destructive/30 bg-destructive/8 px-3 py-2"
                 >
-                  <Text variant="caption" style={{ color: themeColors.coral }}>
+                  <Text variant="caption" className="text-destructive">
                     {I18n.t('common.delete')}
                   </Text>
                 </Pressable>
@@ -258,40 +342,31 @@ function TopLevelRow({
   const tc = themeColors;
   return (
     <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingLeft: 10,
-        paddingRight: 6,
-        marginBottom: 4,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-        backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
-        gap: 6,
-        opacity: isActive ? 0.9 : 1,
-      }}
+      style={[
+        styles.rowContainer,
+        isActive ? styles.rowContainerActive : null,
+        {
+          borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
+          backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+        },
+      ]}
     >
-      <View
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: 'rgba(0,0,0,0.06)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text style={{ fontSize: 12 }}>{resolveCategoryIcon(item.icon)}</Text>
+      <View style={styles.rowIconContainer}>
+        <Text style={styles.rowIconText}>{resolveCategoryIcon(item.icon)}</Text>
       </View>
-      <Pressable onPress={() => onNavigate(item)} disabled={isActive} style={{ flex: 1 }}>
-        <View style={{ gap: 2 }}>
-          <Text style={{ fontSize: 13, color: tc.text }} numberOfLines={1}>
+      <Pressable
+        onPress={() => onNavigate(item)}
+        disabled={isActive}
+        style={styles.rowPrimaryPressable}
+        accessibilityRole="button"
+        accessibilityLabel={item.name}
+      >
+        <View style={styles.rowTextStack}>
+          <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>
             {item.name}
           </Text>
           <Text
-            style={{ fontSize: 11, color: tc.textMuted }}
+            style={[styles.rowSubtitle, { color: tc.textMuted }]}
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -303,14 +378,9 @@ function TopLevelRow({
         onPress={() => onEdit(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: 13,
-          backgroundColor: 'rgba(0,0,0,0.05)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.edit')}
       >
         <Pencil size={11} color={tc.textMuted} />
       </Pressable>
@@ -318,14 +388,9 @@ function TopLevelRow({
         onPress={() => onDelete(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: 13,
-          backgroundColor: 'rgba(255,0,0,0.06)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.delete')}
       >
         <Trash2 size={11} color={tc.coral} />
       </Pressable>
@@ -334,7 +399,9 @@ function TopLevelRow({
         delayLongPress={100}
         disabled={isActive}
         hitSlop={8}
-        style={{ padding: 6, marginRight: -2 }}
+        style={styles.rowDragButton}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('categories.reorder')}
       >
         <GripVertical size={16} color={tc.textMuted} />
       </Pressable>
@@ -360,46 +427,28 @@ function SubcategoryRow({
   const displayIcon = resolveCategoryIcon(item.icon, parentIcon);
   return (
     <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingLeft: 10,
-        paddingRight: 6,
-        marginBottom: 4,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-        backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
-        gap: 6,
-        opacity: isActive ? 0.9 : 1,
-      }}
+      style={[
+        styles.rowContainer,
+        isActive ? styles.rowContainerActive : null,
+        {
+          borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
+          backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+        },
+      ]}
     >
-      <View
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: 'rgba(0,0,0,0.06)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text style={{ fontSize: 12 }}>{displayIcon}</Text>
+      <View style={styles.rowIconContainer}>
+        <Text style={styles.rowIconText}>{displayIcon}</Text>
       </View>
-      <Text style={{ flex: 1, fontSize: 13, color: tc.text }}>{item.name}</Text>
+      <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>
+        {item.name}
+      </Text>
       <Pressable
         onPress={() => onEdit(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: 13,
-          backgroundColor: 'rgba(0,0,0,0.05)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.edit')}
       >
         <Pencil size={11} color={tc.textMuted} />
       </Pressable>
@@ -407,14 +456,9 @@ function SubcategoryRow({
         onPress={() => onDelete(item)}
         disabled={isActive}
         hitSlop={4}
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: 13,
-          backgroundColor: 'rgba(255,0,0,0.06)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.delete')}
       >
         <Trash2 size={11} color={tc.coral} />
       </Pressable>
@@ -423,7 +467,9 @@ function SubcategoryRow({
         delayLongPress={100}
         disabled={isActive}
         hitSlop={8}
-        style={{ padding: 6, marginRight: -2 }}
+        style={styles.rowDragButton}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('categories.reorder')}
       >
         <GripVertical size={16} color={tc.textMuted} />
       </Pressable>
@@ -624,7 +670,7 @@ export function CategoriesScreen({
   if (selectedParent) {
     const content = (
       <SettingsPageLayout>
-        <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <View style={styles.headerContainer}>
           <SettingsHeader
             className="px-0 pt-5 pb-1"
             onBack={handleSubcategoryBack}
@@ -641,10 +687,10 @@ export function CategoriesScreen({
               </Button>
             }
           />
-          <View style={{ height: 8 }} />
+          <View style={styles.headerSpacer} />
         </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={styles.listContainer}>
           <DraggableFlatList
             data={localSubcategories}
             keyExtractor={(item) => item.id}
@@ -672,10 +718,7 @@ export function CategoriesScreen({
             }}
             autoscrollThreshold={80}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-              paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-            }}
+            contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
           />
         </View>
 
@@ -712,7 +755,7 @@ export function CategoriesScreen({
 
   const content = (
     <SettingsPageLayout>
-      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+      <View style={styles.headerContainer}>
         <SettingsHeader
           className="px-0 pt-5 pb-1"
           onBack={onBack}
@@ -741,10 +784,10 @@ export function CategoriesScreen({
             { value: 'income', label: I18n.t('categories.income') },
           ]}
         />
-        <View style={{ height: 8 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
-      <View style={{ flex: 1 }}>
+      <View style={styles.listContainer}>
         <DraggableFlatList
           data={localTopLevel}
           keyExtractor={(item) => item.id}
@@ -772,10 +815,7 @@ export function CategoriesScreen({
           }}
           autoscrollThreshold={80}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
+          contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
         />
       </View>
 

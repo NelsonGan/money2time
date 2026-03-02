@@ -1,6 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, type ListRenderItem, Pressable, View } from 'react-native';
+import { Alert, FlatList, type ListRenderItem, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -14,6 +14,7 @@ import {
   ThemeModal,
 } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -30,6 +31,48 @@ const HISTORY_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
 } as const;
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  listEmptyContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl * 2,
+  },
+  rowActionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addSheetHeader: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.xl + spacing.xs,
+    paddingBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  addSheetCancelButton: {
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 999,
+  },
+  addSheetContent: {
+    paddingHorizontal: spacing.screenHorizontal,
+    gap: spacing.sm,
+  },
+  addSheetPickerRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  addSheetConfirmRow: {
+    marginTop: spacing.md,
+  },
+});
 
 function normalizeAndDedupeHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, MonthlyWageSettings>();
@@ -119,7 +162,9 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('settings.hourly_delete_title'),
-        I18n.t('settings.hourly_delete_message', { month: formatMonthLabel(item.month, activeLocale) }),
+        I18n.t('settings.hourly_delete_message', {
+          month: formatMonthLabel(item.month, activeLocale),
+        }),
         [
           { text: I18n.t('common.cancel'), style: 'cancel' },
           {
@@ -141,7 +186,9 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     const existing = normalizedHistory.find((item) => item.month === monthKey);
     if (existing) {
       Alert.alert(
-        I18n.t('settings.hourly_month_exists_title', { month: formatMonthLabel(monthKey, activeLocale) }),
+        I18n.t('settings.hourly_month_exists_title', {
+          month: formatMonthLabel(monthKey, activeLocale),
+        }),
         I18n.t('settings.hourly_month_exists_message'),
         [
           { text: I18n.t('common.cancel'), style: 'cancel' },
@@ -158,7 +205,14 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     }
     setShowAddModal(false);
     onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
-  }, [activeLocale, handleEditEntry, normalizedHistory, onOpenWageCalculator, pickerMonth, pickerYear]);
+  }, [
+    activeLocale,
+    handleEditEntry,
+    normalizedHistory,
+    onOpenWageCalculator,
+    pickerMonth,
+    pickerYear,
+  ]);
 
   const keyExtractor = useCallback((item: MonthlyWageSettings) => item.id, []);
 
@@ -186,12 +240,20 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           <Pressable
             onPress={() => handleEditEntry(item)}
             className="h-9 w-9 rounded-full items-center justify-center border border-border/40 bg-secondary"
+            style={styles.rowActionButton}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.edit')}
+            hitSlop={8}
           >
             <Pencil size={14} color={themeColors.textMuted} />
           </Pressable>
           <Pressable
             onPress={() => handleDeleteEntry(item)}
             className="h-9 w-9 rounded-full items-center justify-center border border-destructive/20 bg-destructive/10"
+            style={styles.rowActionButton}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.delete')}
+            hitSlop={8}
           >
             <Trash2 size={14} color={themeColors.coral} />
           </Pressable>
@@ -211,7 +273,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
 
   return (
     <SettingsPageLayout>
-      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+      <View style={styles.headerContainer}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
           onBack={onClose}
@@ -237,7 +299,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
         contentContainerStyle={HISTORY_LIST_CONTENT_STYLE}
         renderItem={renderHistoryItem}
         ListEmptyComponent={
-          <View className="items-center py-12">
+          <View style={styles.listEmptyContainer}>
             <Text variant="friendly" tone="muted">
               {I18n.t('settings.hourly_history_empty')}
             </Text>
@@ -252,14 +314,17 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
         onRequestClose={() => setShowAddModal(false)}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+          <View style={styles.addSheetHeader}>
             <Text variant="subheading">{I18n.t('settings.hourly_add_title')}</Text>
             <Pressable
               onPress={() => {
                 void triggerHaptic('selection');
                 setShowAddModal(false);
               }}
-              className="px-3 py-2 rounded-full bg-secondary"
+              className="bg-secondary"
+              style={styles.addSheetCancelButton}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.cancel')}
             >
               <Text variant="caption" tone="muted">
                 {I18n.t('common.cancel')}
@@ -267,8 +332,8 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
             </Pressable>
           </View>
 
-          <View className="px-5 gap-3">
-            <View className="flex-row gap-2.5">
+          <View style={styles.addSheetContent}>
+            <View style={styles.addSheetPickerRow}>
               <View className="flex-1">
                 <SelectField
                   label={I18n.t('settings.year')}
@@ -286,7 +351,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
                 />
               </View>
             </View>
-            <View className="mt-4">
+            <View style={styles.addSheetConfirmRow}>
               <Button onPress={handleAddConfirm}>
                 <Text>{I18n.t('settings.hourly_add_confirm')}</Text>
               </Button>

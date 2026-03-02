@@ -5,6 +5,7 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -19,7 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Button, Card, Text } from '~/components/ui';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { HeroAmountConverter } from '~/features/home/components';
 import { AccountsScreen } from '~/features/settings/screens';
@@ -81,6 +82,75 @@ function BlinkingDot({ color }: { color: string }) {
   return <Animated.View style={style} />;
 }
 
+interface RecurringDisplayRow {
+  id: string;
+  name: string;
+  isActive: boolean;
+  cadenceLabel: string;
+  categoryIcon: string;
+  valueLabel: string;
+}
+
+function RecurringRuleRow({
+  item,
+  isLast,
+  themeColors,
+}: {
+  item: RecurringDisplayRow;
+  isLast: boolean;
+  themeColors: { primary: string; success: string; textMuted: string; border: string };
+}) {
+  const iconBackgroundStyle = useMemo(
+    () => ({ backgroundColor: `${themeColors.primary}18` }),
+    [themeColors.primary],
+  );
+  const dividerStyle = useMemo(
+    () => ({ borderBottomColor: themeColors.border }),
+    [themeColors.border],
+  );
+  const inactiveDotStyle = useMemo(
+    () => ({ backgroundColor: themeColors.textMuted }),
+    [themeColors.textMuted],
+  );
+
+  return (
+    <View
+      style={[
+        styles.recurringRow,
+        !isLast ? styles.recurringRowDivider : null,
+        !isLast ? dividerStyle : null,
+        !item.isActive ? styles.recurringRowInactive : null,
+      ]}
+    >
+      <View style={[styles.recurringIconWrap, iconBackgroundStyle]}>
+        <Text style={styles.recurringIconText}>{item.categoryIcon}</Text>
+      </View>
+      <View style={styles.recurringTextWrap}>
+        <Text variant="bodyStrong" numberOfLines={1}>
+          {item.name}
+        </Text>
+        <View style={styles.recurringCadenceRow}>
+          {item.isActive ? (
+            <BlinkingDot color={themeColors.success} />
+          ) : (
+            <View style={[styles.recurringStaticDot, inactiveDotStyle]} />
+          )}
+          <Text variant="label" tone="muted">
+            {item.cadenceLabel}
+          </Text>
+        </View>
+      </View>
+      <Text
+        variant="caption"
+        className={item.isActive ? 'text-destructive' : 'text-muted-foreground'}
+        numberOfLines={1}
+      >
+        {item.valueLabel}
+      </Text>
+    </View>
+  );
+}
+
 // Underline-style tab bar
 function HomeTabs({
   tabs,
@@ -95,6 +165,14 @@ function HomeTabs({
   const [barWidth, setBarWidth] = useState(0);
   const tabWidth = barWidth > 0 ? barWidth / tabs.length : 0;
   const indicatorX = useSharedValue(0);
+  const tabsBorderStyle = useMemo(
+    () => ({ borderBottomColor: themeColors.border }),
+    [themeColors.border],
+  );
+  const indicatorColorStyle = useMemo(
+    () => ({ backgroundColor: themeColors.primary }),
+    [themeColors.primary],
+  );
 
   useEffect(() => {
     if (tabWidth <= 0) return;
@@ -108,18 +186,22 @@ function HomeTabs({
 
   return (
     <View
-      className="border-b border-border/30"
+      style={[styles.tabsContainer, tabsBorderStyle]}
       onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
     >
-      <View className="flex-row">
+      <View style={styles.tabsRow}>
         {tabs.map((label, index) => (
           <Pressable
             key={label}
+            accessibilityRole="tab"
+            accessibilityLabel={label}
+            accessibilityState={{ selected: activeIndex === index }}
             onPress={() => {
               void triggerHaptic('selection');
               onTabChange(index);
             }}
-            className="flex-1 py-3 items-center active:opacity-70"
+            style={styles.tabPressable}
+            className="active:opacity-70"
           >
             <Text
               variant="bodyStrong"
@@ -130,19 +212,7 @@ function HomeTabs({
           </Pressable>
         ))}
       </View>
-      <Animated.View
-        style={[
-          indicatorStyle,
-          {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            height: 2,
-            backgroundColor: themeColors.primary,
-            borderRadius: 1,
-          },
-        ]}
-      />
+      <Animated.View style={[styles.tabIndicator, indicatorStyle, indicatorColorStyle]} />
     </View>
   );
 }
@@ -188,7 +258,6 @@ export function HomeScreen({
 
   const switchTab = useCallback(
     (index: number) => {
-      void triggerHaptic('selection');
       setActiveHomeTabIndex(index);
       pagerRef.current?.scrollTo({ x: index * screenWidth, animated: true });
     },
@@ -254,12 +323,39 @@ export function HomeScreen({
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
   );
-  const estimatorNumeric = Number(estimatorAmount) || 0;
-  const estimatorHours = hasHourlyRate
-    ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding)
-    : 0;
-  const estimatorWorkdays = estimatorHours / 8;
+  const estimatorNumeric = useMemo(() => Number(estimatorAmount) || 0, [estimatorAmount]);
+  const estimatorHours = useMemo(
+    () => (hasHourlyRate ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding) : 0),
+    [estimatorNumeric, hasHourlyRate, rate, settings.hourRounding],
+  );
+  const estimatorWorkdays = useMemo(() => estimatorHours / 8, [estimatorHours]);
   const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
+  const recurringRows = useMemo<RecurringDisplayRow[]>(
+    () =>
+      recurringInsights.map((rule) => {
+        const category = rule.categoryId ? categoryById.get(rule.categoryId) : undefined;
+        const parentCategory = category?.parentId ? categoryById.get(category.parentId) : undefined;
+        const categoryIcon = category
+          ? resolveCategoryIcon(category.icon, parentCategory?.icon ?? null)
+          : '🔄';
+        return {
+          id: rule.id,
+          name: rule.name,
+          isActive: rule.isActive,
+          cadenceLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
+          categoryIcon,
+          valueLabel: isTimeMode
+            ? formatHours(rule.monthlyHours)
+            : formatAmount(rule.monthlyAmount, settings, { showSign: false }),
+        };
+      }),
+    [categoryById, isTimeMode, recurringInsights, settings],
+  );
+  const pagerPageStyle = useMemo(() => [styles.pagerPage, { width: screenWidth }], [screenWidth]);
+  const initialPagerOffset = useMemo(
+    () => ({ x: defaultTabIndex * screenWidth, y: 0 }),
+    [defaultTabIndex, screenWidth],
+  );
 
   const greeting = useMemo(() => {
     const timeOfDay = getTimeOfDay();
@@ -280,13 +376,13 @@ export function HomeScreen({
   const overviewContent = (
     <ScrollView
       ref={scrollViewRef}
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: LIST_BOTTOM_PADDING }}
+      style={styles.tabScroll}
+      contentContainerStyle={styles.tabScrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
     >
-      <View className="px-5 pt-5 pb-2">
+      <View style={styles.greetingSection}>
         <Text variant="heading">{greeting}</Text>
         <Text variant="friendly" tone="muted" className="mt-1">
           {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
@@ -310,20 +406,22 @@ export function HomeScreen({
   // ── Recurring page ─────────────────────────────────────────────────────────
   const recurringContent = (
     <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: LIST_BOTTOM_PADDING }}
+      style={styles.tabScroll}
+      contentContainerStyle={styles.recurringContentContainer}
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled
     >
-      <View className="flex-row items-start justify-between mt-5 mb-3 gap-3">
-        <View className="flex-1">
+      <View style={styles.recurringHeader}>
+        <View style={styles.recurringHeaderTitleWrap}>
           <Text variant="heading">{I18n.t('home.recurring.title')}</Text>
         </View>
         {onOpenSettingsScreen && (
           <Button
             size="icon"
             variant="secondary"
-            className="h-10 w-10 rounded-full"
+            style={styles.recurringSettingsButton}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('home.recurring.tab')}
             onPress={() => {
               void triggerHaptic('selection');
               onOpenSettingsScreen('Recurring');
@@ -334,56 +432,13 @@ export function HomeScreen({
         )}
       </View>
 
-      {recurringInsights.length > 0 ? (
-        <Card variant="default" className="p-0 overflow-hidden">
-          {recurringInsights.map((rule, index) => {
-            const category = rule.categoryId ? categoryById.get(rule.categoryId) : undefined;
-            const parentCategory = category?.parentId
-              ? categoryById.get(category.parentId)
-              : undefined;
-            const categoryIcon = category
-              ? resolveCategoryIcon(category.icon, parentCategory?.icon ?? null)
-              : '🔄';
-            const isLast = index === recurringInsights.length - 1;
+      {recurringRows.length > 0 ? (
+        <Card variant="default" style={styles.recurringCard}>
+          {recurringRows.map((item, index) => {
+            const isLast = index === recurringRows.length - 1;
             return (
-              <Animated.View key={rule.id} entering={FadeIn.delay(index * 60).duration(350)}>
-                <View
-                  className={`flex-row items-center px-4 py-3 ${!isLast ? 'border-b border-border/15' : ''}`}
-                  style={!rule.isActive ? { opacity: 0.45 } : undefined}
-                >
-                  <View
-                    className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
-                    style={{ backgroundColor: themeColors.primary + '18' }}
-                  >
-                    <Text style={{ fontSize: 18 }}>{categoryIcon}</Text>
-                  </View>
-                  <View className="flex-1 mr-2">
-                    <Text variant="bodyStrong" numberOfLines={1}>
-                      {rule.name}
-                    </Text>
-                    <View className="flex-row items-center mt-0.5">
-                      {rule.isActive ? (
-                        <BlinkingDot color={themeColors.success} />
-                      ) : (
-                        <View
-                          className="w-1.5 h-1.5 rounded-full mr-1.5"
-                          style={{ backgroundColor: themeColors.textMuted }}
-                        />
-                      )}
-                      <Text variant="label" tone="muted">
-                        {formatCadence(rule.recurrencePattern, rule.recurrenceInterval)}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
-                    variant="caption"
-                    className={rule.isActive ? 'text-destructive' : 'text-muted-foreground'}
-                  >
-                    {isTimeMode
-                      ? formatHours(rule.monthlyHours)
-                      : formatAmount(rule.monthlyAmount, settings, { showSign: false })}
-                  </Text>
-                </View>
+              <Animated.View key={item.id} entering={FadeIn.delay(index * 60).duration(350)}>
+                <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
               </Animated.View>
             );
           })}
@@ -399,9 +454,9 @@ export function HomeScreen({
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
-        <Text variant="subheading">{I18n.t('app.name')}</Text>
+    <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
+      <View style={styles.headerRow}>
+        <Text variant="heading">{I18n.t('app.name')}</Text>
         <DisplayModeToggle />
       </View>
       <HomeTabs tabs={homeTabs} activeIndex={activeHomeTabIndex} onTabChange={switchTab} />
@@ -415,11 +470,11 @@ export function HomeScreen({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handlePagerScrollEnd}
         decelerationRate="fast"
-        style={{ flex: 1 }}
-        contentOffset={{ x: defaultTabIndex * screenWidth, y: 0 }}
+        style={styles.pagerScroll}
+        contentOffset={initialPagerOffset}
       >
         {!isSimpleMode && (
-          <View style={{ width: screenWidth, flex: 1 }}>
+          <View style={pagerPageStyle}>
             <AccountsScreen
               safeAreaEdges={[]}
               onOpenAccount={onOpenAccount}
@@ -430,9 +485,122 @@ export function HomeScreen({
             />
           </View>
         )}
-        <View style={{ width: screenWidth, flex: 1 }}>{overviewContent}</View>
-        <View style={{ width: screenWidth, flex: 1 }}>{recurringContent}</View>
+        <View style={pagerPageStyle}>{overviewContent}</View>
+        <View style={pagerPageStyle}>{recurringContent}</View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerRow: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tabsContainer: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+  },
+  tabPressable: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    paddingVertical: spacing.xs,
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    height: 2,
+    borderRadius: 1,
+  },
+  pagerScroll: {
+    flex: 1,
+  },
+  pagerPage: {
+    flex: 1,
+  },
+  tabScroll: {
+    flex: 1,
+  },
+  tabScrollContent: {
+    paddingBottom: LIST_BOTTOM_PADDING,
+  },
+  greetingSection: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xs,
+  },
+  recurringContentContainer: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingBottom: LIST_BOTTOM_PADDING,
+  },
+  recurringHeader: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  recurringHeaderTitleWrap: {
+    flex: 1,
+  },
+  recurringSettingsButton: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+  },
+  recurringCard: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  recurringRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  recurringRowDivider: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  recurringRowInactive: {
+    opacity: 0.45,
+  },
+  recurringIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  recurringIconText: {
+    fontSize: 18,
+  },
+  recurringTextWrap: {
+    flex: 1,
+    marginRight: spacing.xs,
+  },
+  recurringCadenceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  recurringStaticDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+});

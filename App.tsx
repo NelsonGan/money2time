@@ -102,6 +102,7 @@ function MainShellScreen() {
   const navigation = useNavigation<RootMainNavigationProp>();
   const { isSimpleMode } = useApp();
   const [activeTab, setActiveTab] = useState<MainTab>('home');
+  const [isTransactionsSelectionMode, setIsTransactionsSelectionMode] = useState(false);
   const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
@@ -166,6 +167,8 @@ function MainShellScreen() {
     [navigation],
   );
 
+  const shouldHideBottomNav = activeTab === 'transactions' && isTransactionsSelectionMode;
+
   const handleTabChange = useCallback(
     (tab: TabName) => {
       if (tab === 'home' && activeTab === 'home') {
@@ -214,6 +217,7 @@ function MainShellScreen() {
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              onSelectionModeChange={setIsTransactionsSelectionMode}
             />
           )}
         </MountedTab>
@@ -234,11 +238,13 @@ function MainShellScreen() {
         </MountedTab>
       </View>
 
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onPressAdd={openAddTransaction}
-      />
+      {!shouldHideBottomNav ? (
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onPressAdd={openAddTransaction}
+        />
+      ) : null}
     </View>
   );
 }
