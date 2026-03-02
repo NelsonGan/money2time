@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -14,8 +14,8 @@ import {
   Text,
 } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeMode } from '~/types';
@@ -25,7 +25,6 @@ interface DisplaySettingsScreenProps {
 }
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
-  const themeColors = useThemeColors();
   const { settings, updateSettings, resetAllData, resetTransactionsOnly } = useApp();
 
   const languageOptions = useMemo(
@@ -101,7 +100,9 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   }, [selectedCurrency, trimmedCustomCurrency, settings.currencySymbol]);
   const nextCurrencyCode = useMemo(() => {
     if (selectedCurrency === '__custom__') return '__custom__';
-    return MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency)?.code ?? settings.currencyCode;
+    return (
+      MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency)?.code ?? settings.currencyCode
+    );
   }, [selectedCurrency, settings.currencyCode]);
   const hasChanges =
     selectedLocale !== currentLocaleSelection ||
@@ -136,7 +137,8 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     if (selectedCurrency === '__custom__') {
       if (
         trimmedCustomCurrency &&
-        (trimmedCustomCurrency !== settings.currencySymbol || settings.currencyCode !== '__custom__')
+        (trimmedCustomCurrency !== settings.currencySymbol ||
+          settings.currencyCode !== '__custom__')
       ) {
         updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedCustomCurrency });
       }
@@ -165,7 +167,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
         <SettingsActionBar onCancel={handleCancel} onSave={handleSave} saveDisabled={!canSave} />
       }
     >
-      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+      <View style={styles.headerWrap}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
           onBack={handleCancel}
@@ -173,13 +175,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
           subtitle={I18n.t('settings.display_subtitle')}
         />
       </View>
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-        }}
-      >
+      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
         <View>
           <Card>
             <CardContent className="py-5 gap-3.5">
@@ -220,7 +216,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
           </Card>
         </View>
 
-        <View className="mt-8 gap-2.5">
+        <View style={styles.dangerSection}>
           <Text variant="caption" tone="muted" className="px-1">
             {I18n.t('settings.danger_description')}
           </Text>
@@ -240,7 +236,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 ],
               );
             }}
-            className="rounded-[22px] border border-border/35 bg-secondary/45 px-5 py-3.5 items-center"
+            style={styles.secondaryDangerAction}
+            className="border border-border/35 bg-secondary/45"
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('settings.reset_transactions_only')}
           >
             <Text variant="caption" tone="muted">
               {I18n.t('settings.reset_transactions_only')}
@@ -262,9 +261,12 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 ],
               );
             }}
-            className="rounded-[22px] border border-coral/30 bg-coral/8 px-5 py-3.5 items-center"
+            style={styles.primaryDangerAction}
+            className="border border-coral/30 bg-coral/8"
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('settings.reset_all_data')}
           >
-            <Text variant="caption" style={{ color: themeColors.coral }}>
+            <Text variant="caption" className="text-destructive">
               {I18n.t('settings.reset_all_data')}
             </Text>
           </Pressable>
@@ -273,3 +275,33 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     </SettingsPageLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  headerWrap: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  scrollContent: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+    paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  dangerSection: {
+    marginTop: spacing.xl + spacing.xs,
+    gap: spacing.sm,
+  },
+  secondaryDangerAction: {
+    borderRadius: 22,
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingVertical: spacing.sm,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryDangerAction: {
+    borderRadius: 22,
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingVertical: spacing.sm,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

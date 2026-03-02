@@ -115,8 +115,7 @@ const zh = {
     value_prop: {
       welcome: '欢迎使用 money2time',
       title: '把金钱看成\n它消耗的时间。',
-      body:
-        '你花的每一块钱，都是真实时间换来的。应用会把支出换算成小时和分钟——帮你做更尊重时间的决定。',
+      body: '你花的每一块钱，都是真实时间换来的。应用会把支出换算成小时和分钟——帮你做更尊重时间的决定。',
       example: '示例',
       example_work: '= 1小时 40分 的工作',
       example_rate: '基于 {{symbol}}15/小时 的真实时薪',
@@ -165,8 +164,7 @@ const zh = {
     },
     bootstrap: {
       skip_title: '跳过设置？',
-      skip_message:
-        '你还没有创建账户。可以稍后在设置里创建，但在完成前有些功能无法使用。',
+      skip_message: '你还没有创建账户。可以稍后在设置里创建，但在完成前有些功能无法使用。',
       continue_setup: '继续设置',
       skip_anyway: '仍然跳过',
       choose_title: '先把数据准备好',
@@ -266,6 +264,7 @@ const zh = {
     },
     selection: {
       selected_count: '已选 {{count}} 项',
+      selected_total: '总额 {{amount}}',
       update: '更新',
       update_title: '更新 {{count}} 笔交易',
       update_subtitle: '对所有选中项应用更改。',
@@ -434,6 +433,7 @@ const zh = {
         no_income_title: '该周期无收入',
         no_income_short: '无收入',
         no_income_message: '在该周期添加收入交易后才能计算储蓄率。',
+        saved_per_year: '本年已储蓄 {{value}}',
         exclusions_active: '已排除 {{count}} 个分类。',
         goal_hint: '一般认为 20%+ 是健康的储蓄节奏。',
       },
@@ -537,8 +537,7 @@ const zh = {
     hourly_effective_status_inherited: '继承自历史',
     hourly_effective_source_month: '使用的来源月份',
     hourly_effective_reason_exact: '与 {{month}} 精确匹配。',
-    hourly_effective_reason_before_earliest:
-      '{{month}} 早于第一条记录，因此使用 {{sourceMonth}}。',
+    hourly_effective_reason_before_earliest: '{{month}} 早于第一条记录，因此使用 {{sourceMonth}}。',
     hourly_effective_reason_between: '未找到精确月份，因此使用 {{sourceMonth}}。',
     hourly_effective_reason_after_latest:
       '{{month}} 晚于最新记录，因此使用最新的 {{sourceMonth}}。',
@@ -557,8 +556,7 @@ const zh = {
     hourly_current_month_locked: '当前月记录为必填，无法删除。',
     hourly_history_empty: '还没有小时价值历史。',
     hourly_delete_title: '删除该月小时价值？',
-    hourly_delete_message:
-      '删除 {{month}} 的时薪？依赖它的月份会回退到之前可用月份。',
+    hourly_delete_message: '删除 {{month}} 的时薪？依赖它的月份会回退到之前可用月份。',
     hourly_add_title: '添加收入时薪',
     hourly_add_confirm: '开始',
     hourly_month_exists_title: '{{month}} 已存在',

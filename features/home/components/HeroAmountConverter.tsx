@@ -1,6 +1,6 @@
 import { Delete } from 'lucide-react-native';
-import React, { useCallback, useMemo } from 'react';
-import { Pressable, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import Animated, {
   Easing,
@@ -8,11 +8,12 @@ import Animated, {
   FadeOutUp,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { Button, Text } from '~/components/ui';
-import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -82,8 +83,8 @@ function parseHeroNumericAmount(value: string) {
   return parsed;
 }
 
-// Individual numpad key with press-scale animation
-function NumKey({
+// Individual numpad key with tap animation and flash feedback
+const NumKey = React.memo(function NumKey({
   label,
   onPress,
   onLongPress,
@@ -96,29 +97,70 @@ function NumKey({
   onLongPress?: () => void;
   dimmed?: boolean;
 }) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
+  const pressProgress = useSharedValue(0);
+  const tapFlash = useSharedValue(0);
+  const pressAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 - pressProgress.value * 0.08 }],
+  }));
+  const tapFlashStyle = useAnimatedStyle(() => ({
+    opacity: tapFlash.value,
+  }));
+
+  const handlePressIn = useCallback(() => {
+    pressProgress.value = withTiming(1, {
+      duration: 70,
+      easing: Easing.out(Easing.quad),
+    });
+    tapFlash.value = withSequence(
+      withTiming(0.22, {
+        duration: 45,
+        easing: Easing.out(Easing.quad),
+      }),
+      withTiming(0, {
+        duration: 150,
+        easing: Easing.in(Easing.quad),
+      }),
+    );
+  }, [pressProgress, tapFlash]);
+
+  const handlePressOut = useCallback(() => {
+    pressProgress.value = withTiming(0, {
+      duration: 120,
+      easing: Easing.out(Easing.quad),
+    });
+  }, [pressProgress]);
 
   return (
-    <Animated.View style={[animatedStyle, { flex: 1 }]}>
-      <Pressable
-        onPress={onPress}
-        onLongPress={onLongPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        className="h-14 items-center justify-center bg-card active:bg-secondary/60"
-      >
-        {children ?? (
-          <Text
-            style={{ fontSize: 18, fontWeight: '600', opacity: dimmed ? 0.35 : 1 }}
-            className="text-foreground"
-          >
-            {label}
-          </Text>
-        )}
-      </Pressable>
-    </Animated.View>
+    <View className="flex-1">
+      <Animated.View style={pressAnimatedStyle}>
+        <Pressable
+          onPress={onPress}
+          onLongPress={onLongPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          unstable_pressDelay={0}
+          android_disableSound
+          android_ripple={{ color: 'rgba(34, 138, 111, 0.2)', borderless: false }}
+          className="relative h-14 items-center justify-center bg-card overflow-hidden"
+        >
+          {children ?? (
+            <Text
+              style={[styles.numKeyLabel, dimmed ? styles.numKeyLabelDimmed : null]}
+              className="text-foreground"
+            >
+              {label}
+            </Text>
+          )}
+          <Animated.View
+            pointerEvents="none"
+            className="absolute inset-0 bg-foreground/10"
+            style={tapFlashStyle}
+          />
+        </Pressable>
+      </Animated.View>
+    </View>
   );
-}
+});
 
 const NUM_ROWS = [
   ['1', '2', '3'],
@@ -138,6 +180,29 @@ const HERO_ROLLING_NUMBER_SPIN_CONFIG = {
   duration: 160,
   easing: Easing.out(Easing.cubic),
 } as const;
+const HERO_ROLLING_NUMBER_CONTAINER_STYLE = {
+  width: '100%',
+  maxWidth: '100%',
+  alignItems: 'flex-start',
+  justifyContent: 'flex-end',
+} as const;
+
+const styles = StyleSheet.create({
+  numKeyLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  numKeyLabelDimmed: {
+    opacity: 0.35,
+  },
+  currencyText: {
+    fontWeight: '800',
+  },
+  numPadContainer: {
+    gap: 1,
+    borderTopWidth: 0.5,
+  },
+});
 
 function getAmountCharacterCount(amountLabel: string) {
   const withoutGrouping = amountLabel.replace(/,/g, '');
@@ -159,6 +224,11 @@ export function HeroAmountConverter({
 }: HeroAmountConverterProps) {
   const themeColors = useThemeColors();
   const inputProgress = useSharedValue(0);
+  const amountRef = useRef(amount);
+
+  useEffect(() => {
+    amountRef.current = amount;
+  }, [amount]);
 
   const amountNumberLabel = useMemo(() => formatHeroNumericAmount(amount), [amount]);
   const amountNumericValue = useMemo(() => parseHeroNumericAmount(amount), [amount]);
@@ -168,7 +238,10 @@ export function HeroAmountConverter({
   );
   const amountFontSize = useMemo(() => {
     const overflowChars = Math.max(0, amountCharacterCount - HERO_BASE_CHAR_COUNT);
-    return Math.max(HERO_MIN_FONT_SIZE, HERO_MAX_FONT_SIZE - overflowChars * HERO_FONT_SHRINK_PER_CHAR);
+    return Math.max(
+      HERO_MIN_FONT_SIZE,
+      HERO_MAX_FONT_SIZE - overflowChars * HERO_FONT_SHRINK_PER_CHAR,
+    );
   }, [amountCharacterCount]);
   const amountLineHeight = useMemo(
     () => Math.round(amountFontSize * HERO_LINE_HEIGHT_RATIO),
@@ -187,9 +260,23 @@ export function HeroAmountConverter({
     }),
     [amountFontSize, amountLineHeight, themeColors.text],
   );
-  const rollingGlyphStyle = useMemo(
-    () => ({ color: themeColors.text }),
-    [themeColors.text],
+  const rollingGlyphStyle = useMemo(() => ({ color: themeColors.text }), [themeColors.text]);
+  const currencyTextStyle = useMemo(
+    () => [
+      styles.currencyText,
+      {
+        fontSize: currencyFontSize,
+        lineHeight: amountLineHeight,
+      },
+    ],
+    [amountLineHeight, currencyFontSize],
+  );
+  const numPadContainerStyle = useMemo(
+    () => [
+      styles.numPadContainer,
+      { backgroundColor: themeColors.border, borderTopColor: themeColors.border },
+    ],
+    [themeColors.border],
   );
   const hoursLabel = useMemo(() => formatHours(hours), [hours]);
   const exactHoursLabel = useMemo(
@@ -216,17 +303,18 @@ export function HeroAmountConverter({
 
   const handleKey = useCallback(
     (key: string) => {
+      const currentAmount = amountRef.current;
       void triggerHaptic('selection');
 
       if (key === 'backspace') {
-        const next = amount.slice(0, -1);
+        const next = currentAmount.slice(0, -1);
         onChangeAmount(next);
         return;
       }
 
       if (key === '.') {
-        if (amount.includes('.')) return;
-        const next = amount === '' ? '0.' : amount + '.';
+        if (currentAmount.includes('.')) return;
+        const next = currentAmount === '' ? '0.' : currentAmount + '.';
         if (!isHeroAmountWithinLimit(next)) return;
         onChangeAmount(next);
         activateInputProgress();
@@ -234,15 +322,32 @@ export function HeroAmountConverter({
       }
 
       // Digit key
-      const dotIdx = amount.indexOf('.');
-      if (dotIdx !== -1 && amount.length - dotIdx > 2) return; // max 2 decimal places
+      const dotIdx = currentAmount.indexOf('.');
+      if (dotIdx !== -1 && currentAmount.length - dotIdx > 2) return; // max 2 decimal places
 
-      const next = amount === '0' ? key : amount + key;
+      const next = currentAmount === '0' ? key : currentAmount + key;
       if (!isHeroAmountWithinLimit(next)) return;
       onChangeAmount(next);
       activateInputProgress();
     },
-    [activateInputProgress, amount, onChangeAmount],
+    [activateInputProgress, onChangeAmount],
+  );
+  const keyPressHandlers = useMemo<Record<string, () => void>>(
+    () => ({
+      '0': () => handleKey('0'),
+      '1': () => handleKey('1'),
+      '2': () => handleKey('2'),
+      '3': () => handleKey('3'),
+      '4': () => handleKey('4'),
+      '5': () => handleKey('5'),
+      '6': () => handleKey('6'),
+      '7': () => handleKey('7'),
+      '8': () => handleKey('8'),
+      '9': () => handleKey('9'),
+      '.': () => handleKey('.'),
+      backspace: () => handleKey('backspace'),
+    }),
+    [handleKey],
   );
 
   const hasDot = amount.includes('.');
@@ -268,22 +373,14 @@ export function HeroAmountConverter({
         {/* Amount display */}
         <View className="min-h-[56px]">
           <View className="min-w-0 flex-row items-end overflow-hidden">
-            <Text
-              style={{ fontSize: currencyFontSize, lineHeight: amountLineHeight, fontWeight: '800' }}
-              className="shrink-0 text-foreground"
-            >
+            <Text style={currencyTextStyle} className="shrink-0 text-foreground">
               {currencySymbol}
             </Text>
             <View className="ml-1 min-w-0 flex-1 overflow-hidden">
               <AnimatedRollingNumber
                 value={amountNumericValue}
                 formattedText={amountNumberLabel}
-                containerStyle={{
-                  width: '100%',
-                  maxWidth: '100%',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-end',
-                }}
+                containerStyle={HERO_ROLLING_NUMBER_CONTAINER_STYLE}
                 textStyle={rollingTextStyle}
                 numberStyle={rollingGlyphStyle}
                 commaStyle={rollingGlyphStyle}
@@ -335,15 +432,7 @@ export function HeroAmountConverter({
         </View>
 
         {/* Numpad — flush to card edges */}
-        <View
-          className="-mx-5 -mb-4"
-          style={{
-            gap: 1,
-            backgroundColor: themeColors.border,
-            borderTopWidth: 0.5,
-            borderTopColor: themeColors.border,
-          }}
-        >
+        <View className="-mx-5 -mb-4" style={numPadContainerStyle}>
           {NUM_ROWS.map((row, rowIndex) => (
             <View key={rowIndex} style={NUMPAD_ROW_STYLE}>
               {row.map((key) => {
@@ -351,7 +440,7 @@ export function HeroAmountConverter({
                   return (
                     <NumKey
                       key="backspace"
-                      onPress={() => handleKey('backspace')}
+                      onPress={keyPressHandlers.backspace}
                       onLongPress={handleClearAmount}
                     >
                       <Delete size={18} color={themeColors.text} />
@@ -360,10 +449,10 @@ export function HeroAmountConverter({
                 }
                 if (key === '.') {
                   return (
-                    <NumKey key="." label="." dimmed={hasDot} onPress={() => handleKey('.')} />
+                    <NumKey key="." label="." dimmed={hasDot} onPress={keyPressHandlers['.']} />
                   );
                 }
-                return <NumKey key={key} label={key} onPress={() => handleKey(key)} />;
+                return <NumKey key={key} label={key} onPress={keyPressHandlers[key]} />;
               })}
             </View>
           ))}

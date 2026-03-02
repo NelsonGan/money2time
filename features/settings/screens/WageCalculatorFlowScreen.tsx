@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -14,6 +14,7 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { UserSettings, WageConfig, WageType } from '~/types';
@@ -27,6 +28,41 @@ interface WageCalculatorFlowScreenProps {
   onCancel: () => void;
   onComplete: (config: WageConfig) => void;
 }
+
+const WAGE_FLOW_STEPS = [1, 2, 3, 4, 5] as const;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+    paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  headerSection: {
+    marginBottom: spacing.lg,
+  },
+  stepBadgeRow: {
+    marginTop: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.xxs,
+  },
+  stepEmoji: {
+    fontSize: 24,
+  },
+  progressRow: {
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+  },
+});
 
 function sanitizeNonNegativeDecimalInput(raw: string): string {
   const normalized = raw.replace(',', '.');
@@ -117,7 +153,9 @@ export function WageCalculatorFlowScreen({
 
   const stepMeta = stepMetaList[step - 1];
   const parsedMonthDate = useMemo(() => parseMonthKey(monthLabel), [monthLabel]);
-  const headerYear = parsedMonthDate ? String(parsedMonthDate.getFullYear()) : monthLabel.slice(0, 4);
+  const headerYear = parsedMonthDate
+    ? String(parsedMonthDate.getFullYear())
+    : monthLabel.slice(0, 4);
   const localizedMonthLabel = useMemo(() => {
     if (!parsedMonthDate) return monthLabel;
     return parsedMonthDate.toLocaleDateString(activeLocale, {
@@ -129,29 +167,23 @@ export function WageCalculatorFlowScreen({
 
   return (
     <SettingsPageLayout>
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-          paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-        }}
-      >
-        <View className="mb-5">
+      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+        <View style={styles.headerSection}>
           <SettingsHeader
             className="px-0 pt-5 pb-2"
             onBack={handleBack}
             title={stepMeta.title}
             subtitle={stepMeta.subtitle}
           />
-          <View className="mt-1 flex-row items-center gap-2 px-1">
-            <Text style={{ fontSize: 24 }}>{stepMeta.emoji}</Text>
+          <View style={styles.stepBadgeRow}>
+            <Text style={styles.stepEmoji}>{stepMeta.emoji}</Text>
             <Text variant="label" tone="muted" className="uppercase tracking-widest">
               {I18n.t('wage.header_step', { year: headerYear, step })}
             </Text>
           </View>
 
-          <View className="mt-4 flex-row items-center gap-1.5">
-            {[1, 2, 3, 4, 5].map((index) => (
+          <View style={styles.progressRow}>
+            {WAGE_FLOW_STEPS.map((index) => (
               <View key={index} className="flex-row items-center">
                 <View
                   className={`h-2.5 w-2.5 rounded-full ${step >= index ? 'bg-primary' : 'bg-secondary'}`}
@@ -176,8 +208,10 @@ export function WageCalculatorFlowScreen({
                         void triggerHaptic('selection');
                         setWageType(value);
                       }}
+                      accessibilityRole="button"
+                      accessibilityLabel={wageTypeLabels[value]}
                       className={cn(
-                        'flex-1 h-10 rounded-2xl border items-center justify-center',
+                        'flex-1 h-11 rounded-2xl border items-center justify-center',
                         wageType === value
                           ? 'bg-primary border-primary/60'
                           : 'bg-card border-border/60',
@@ -309,7 +343,7 @@ export function WageCalculatorFlowScreen({
       </ScrollView>
 
       <SafeAreaView edges={['bottom']} className="border-t border-border/40 bg-background">
-        <View className="flex-row gap-2.5 px-5 pb-3 pt-3">
+        <View style={styles.footerActions}>
           <Button variant="outline" className="flex-1" onPress={handleBack}>
             <Text>{step === 1 ? I18n.t('common.cancel') : I18n.t('common.back')}</Text>
           </Button>

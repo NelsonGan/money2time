@@ -7,6 +7,7 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -27,7 +28,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal } from '~/components/ui';
-import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -118,9 +119,9 @@ const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
 const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
 const INSIGHTS_LIST_STYLE = { flex: 1 } as const;
 const INSIGHTS_SCROLL_CONTENT_STYLE = {
-  paddingHorizontal: 18,
+  paddingHorizontal: spacing.screenHorizontal,
   paddingBottom: LIST_BOTTOM_PADDING,
-  paddingTop: 4,
+  paddingTop: spacing.xxs,
 } as const;
 const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
@@ -140,6 +141,7 @@ const CHART_DOTS_REVEAL_DELAY_MS = 220;
 const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
 const DEFAULT_HOURS_PER_WEEK = 40;
+const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
   lineHeight: 30,
@@ -149,6 +151,134 @@ const INSIGHTS_ROLLING_NUMBER_SPIN_CONFIG = {
   duration: 90,
   easing: Easing.out(Easing.cubic),
 } as const;
+const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
+  padding: spacing.screenHorizontal,
+  paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
+  gap: spacing.sm,
+} as const;
+
+const styles = StyleSheet.create({
+  absoluteOverlay: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  },
+  chartSizeCenter: {
+    alignSelf: 'center',
+  },
+  graphPointDot: {
+    position: 'absolute',
+    width: GRAPH_POINT_DOT_RADIUS * 2,
+    height: GRAPH_POINT_DOT_RADIUS * 2,
+    borderRadius: GRAPH_POINT_DOT_RADIUS,
+    borderWidth: 1.5,
+  },
+  graphYAxisRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 2,
+  },
+  graphYAxisDot: {
+    position: 'absolute',
+    top: 0,
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+  },
+  graphYAxisLabelContainer: {
+    position: 'absolute',
+    right: 0,
+  },
+  graphYAxisLabel: {
+    textAlign: 'right',
+  },
+  chartSkeletonFill: {
+    position: 'absolute',
+    left: GRAPH_HORIZONTAL_PADDING,
+    top: GRAPH_VERTICAL_PADDING,
+    borderRadius: 14,
+    backgroundColor: 'rgba(148, 163, 184, 0.22)',
+  },
+  pieFrame: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pieLabel: {
+    position: 'absolute',
+  },
+  breakdownPercentBadge: {
+    borderRadius: 999,
+  },
+  calendarWeekdayCell: {
+    alignItems: 'center',
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDayCell: {
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarActivityDot: {
+    position: 'absolute',
+    bottom: 4,
+    borderRadius: 999,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  savingsRateHealthyMarker: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+  },
+  insightsFilterModalHeader: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.xl + spacing.xs,
+    paddingBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  insightsFilterActionButton: {
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 999,
+  },
+  insightsFilterPillsContent: {
+    gap: spacing.xs,
+  },
+  insightsFilterDatePanel: {
+    height: 360,
+  },
+  insightsFilterSelectionPanel: {
+    height: 236,
+  },
+  incomeRateUnitPickerSheet: {
+    marginHorizontal: spacing.screenHorizontal,
+    marginBottom: spacing.xl + spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+});
+
+function buildSizeStyle(width: number, height: number) {
+  return { width, height };
+}
+
+function buildWidthStyle(width: number | `${number}%`) {
+  return { width };
+}
+
+function buildLeftStyle(left: number | `${number}%`) {
+  return { left };
+}
 
 type InsightFilterConfig = {
   fixedPeriodPreset: PeriodPreset | null;
@@ -940,22 +1070,20 @@ const GraphPointDots = React.memo(function GraphPointDots({
   return (
     <View
       pointerEvents="none"
-      style={{ position: 'absolute', left: 0, top: 0, width: chartWidth, height: chartHeight }}
+      style={[styles.absoluteOverlay, buildSizeStyle(chartWidth, chartHeight)]}
     >
       {points.map((point, index) => (
         <View
           key={`dot-${index}`}
-          style={{
-            position: 'absolute',
-            left: point.x - GRAPH_POINT_DOT_RADIUS,
-            top: point.y - GRAPH_POINT_DOT_RADIUS,
-            width: GRAPH_POINT_DOT_RADIUS * 2,
-            height: GRAPH_POINT_DOT_RADIUS * 2,
-            borderRadius: GRAPH_POINT_DOT_RADIUS,
-            borderWidth: 1.5,
-            borderColor: strokeColor,
-            backgroundColor: fillColor,
-          }}
+          style={[
+            styles.graphPointDot,
+            {
+              left: point.x - GRAPH_POINT_DOT_RADIUS,
+              top: point.y - GRAPH_POINT_DOT_RADIUS,
+              borderColor: strokeColor,
+              backgroundColor: fillColor,
+            },
+          ]}
         />
       ))}
     </View>
@@ -1006,27 +1134,16 @@ const GraphYAxisGrid = React.memo(function GraphYAxisGrid({
     <>
       <View
         pointerEvents="none"
-        style={{ position: 'absolute', left: 0, top: 0, width: chartWidth, height: chartHeight }}
+        style={[styles.absoluteOverlay, buildSizeStyle(chartWidth, chartHeight)]}
       >
         {resolvedTicks.map(({ lineTop }, index) => (
-          <View
-            key={`grid-${index}`}
-            style={{ position: 'absolute', left: 0, right: 0, top: lineTop - 1, height: 2 }}
-          >
+          <View key={`grid-${index}`} style={[styles.graphYAxisRow, { top: lineTop - 1 }]}>
             {Array.from({ length: gridDotCount }, (_, dotIndex) => {
               const left = (dotIndex * Math.max(0, chartWidth - 2)) / Math.max(1, gridDotCount - 1);
               return (
                 <View
                   key={`grid-${index}-dot-${dotIndex}`}
-                  style={{
-                    position: 'absolute',
-                    left,
-                    top: 0,
-                    width: 2,
-                    height: 2,
-                    borderRadius: 1,
-                    backgroundColor: lineColor,
-                  }}
+                  style={[styles.graphYAxisDot, { left, backgroundColor: lineColor }]}
                 />
               );
             })}
@@ -1036,26 +1153,25 @@ const GraphYAxisGrid = React.memo(function GraphYAxisGrid({
 
       <View
         pointerEvents="none"
-        style={{
-          position: 'absolute',
-          left: chartWidth,
-          top: 0,
-          width: labelWidth,
-          height: chartHeight,
-        }}
+        style={[
+          styles.absoluteOverlay,
+          { left: chartWidth, width: labelWidth, height: chartHeight },
+        ]}
       >
         {resolvedTicks.map(({ labelTop }, index) => {
           return (
-            <View key={`label-${index}`} style={{ position: 'absolute', right: 0, top: labelTop }}>
+            <View
+              key={`label-${index}`}
+              style={[styles.graphYAxisLabelContainer, { top: labelTop }]}
+            >
               <Text
                 variant="label"
                 tone="muted"
                 numberOfLines={1}
-                style={{
-                  textAlign: 'right',
-                  fontSize: yAxisLabelFontSize,
-                  lineHeight: yAxisLabelLineHeight,
-                }}
+                style={[
+                  styles.graphYAxisLabel,
+                  { fontSize: yAxisLabelFontSize, lineHeight: yAxisLabelLineHeight },
+                ]}
               >
                 {tickLabels[index]}
               </Text>
@@ -1101,25 +1217,20 @@ const ChartLoadingSkeleton = React.memo(function ChartLoadingSkeleton({
   return (
     <RNAnimated.View
       pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: chartWidth,
-        height: chartHeight,
-        opacity: pulseOpacity,
-      }}
+      style={[
+        styles.absoluteOverlay,
+        buildSizeStyle(chartWidth, chartHeight),
+        { opacity: pulseOpacity },
+      ]}
     >
       <View
-        style={{
-          position: 'absolute',
-          left: GRAPH_HORIZONTAL_PADDING,
-          top: GRAPH_VERTICAL_PADDING,
-          width: Math.max(0, chartWidth - GRAPH_HORIZONTAL_PADDING * 2),
-          height: Math.max(0, chartHeight - GRAPH_VERTICAL_PADDING * 2),
-          borderRadius: 14,
-          backgroundColor: 'rgba(148, 163, 184, 0.22)',
-        }}
+        style={[
+          styles.chartSkeletonFill,
+          buildSizeStyle(
+            Math.max(0, chartWidth - GRAPH_HORIZONTAL_PADDING * 2),
+            Math.max(0, chartHeight - GRAPH_VERTICAL_PADDING * 2),
+          ),
+        ]}
       />
     </RNAnimated.View>
   );
@@ -1180,7 +1291,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   const { isChartReady, showDots } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
   return (
-    <View style={{ width: chartWidth, height: ASSET_HISTORY_CHART_HEIGHT }}>
+    <View style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
       {isChartReady ? (
         <>
           <LineGraph
@@ -1201,7 +1312,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
             onPointSelected={handlePointSelected}
             onGestureStart={onGestureStart}
             onGestureEnd={onGestureEnd}
-            style={{ width: chartWidth, height: ASSET_HISTORY_CHART_HEIGHT }}
+            style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}
           />
           {showDots ? (
             <GraphPointDots
@@ -1271,7 +1382,7 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   const { isChartReady, showDots } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
   return (
-    <View style={{ width: chartWidth, height: INCOME_RATE_CHART_HEIGHT }}>
+    <View style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}>
       {isChartReady ? (
         <>
           <LineGraph
@@ -1292,7 +1403,7 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
             onPointSelected={handlePointSelected}
             onGestureStart={onGestureStart}
             onGestureEnd={onGestureEnd}
-            style={{ width: chartWidth, height: INCOME_RATE_CHART_HEIGHT }}
+            style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}
           />
           {showDots ? (
             <GraphPointDots
@@ -1326,6 +1437,9 @@ function FilterPill({
         void triggerHaptic('selection');
         onPress();
       }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: active }}
       className={cn(
         'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
         active ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
@@ -2845,14 +2959,8 @@ export function InsightsScreen({
           <>
             <View className="items-center py-0.5">
               {pagePieData.length > 0 ? (
-                <View
-                  style={{ width: pieFrameSize, height: pieFrameSize }}
-                  className="items-center justify-center"
-                >
-                  <View
-                    style={{ width: pieSize, height: pieSize }}
-                    className="items-center justify-center"
-                  >
+                <View style={[styles.pieFrame, buildSizeStyle(pieFrameSize, pieFrameSize)]}>
+                  <View style={[styles.pieFrame, buildSizeStyle(pieSize, pieSize)]}>
                     <PieChart
                       data={interactivePieData}
                       width={pieSize}
@@ -2869,7 +2977,7 @@ export function InsightsScreen({
                   {pagePieLabels.map((label) => (
                     <View
                       key={label.id}
-                      style={{ position: 'absolute', left: label.x + 16, top: label.y + 16 }}
+                      style={[styles.pieLabel, { left: label.x + 16, top: label.y + 16 }]}
                       className={cn(
                         'px-2 py-1 rounded-full bg-card border',
                         activeSlice && activeSlice.id !== label.id
@@ -3003,6 +3111,8 @@ export function InsightsScreen({
                         },
                       });
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${item.emoji} ${item.name}`}
                     className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
                     style={[
                       { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
@@ -3020,7 +3130,10 @@ export function InsightsScreen({
                         </Text>
                         <View
                           className="rounded-full px-1.5 py-0.5"
-                          style={{ backgroundColor: percentBadgeColor }}
+                          style={[
+                            styles.breakdownPercentBadge,
+                            { backgroundColor: percentBadgeColor },
+                          ]}
                         >
                           <Text variant="label" className="text-foreground">
                             {item.pct.toFixed(1)}%
@@ -3074,6 +3187,10 @@ export function InsightsScreen({
       inputRange: [0.68, 1],
       outputRange: [0.985, 1],
     });
+    const dayDetailAnimatedStyle = {
+      opacity: calendarDetailAnimRef.current,
+      transform: [{ scale: dayDetailScale }],
+    };
 
     return (
       <Card className="mt-2">
@@ -3092,8 +3209,7 @@ export function InsightsScreen({
                   {calendarWeekdayLabels.map((weekday) => (
                     <View
                       key={`${month.monthKey}-${weekday}`}
-                      style={{ width: dayCellSize }}
-                      className="items-center"
+                      style={[styles.calendarWeekdayCell, buildWidthStyle(dayCellSize)]}
                     >
                       <Text variant="label" tone="muted">
                         {weekday}
@@ -3102,11 +3218,11 @@ export function InsightsScreen({
                   ))}
                 </View>
 
-                <View className="flex-row flex-wrap" style={{ gap: dayCellGap }}>
+                <View style={[styles.calendarGrid, { gap: dayCellGap }]}>
                   {month.cells.map((cell) => {
                     if (cell.kind === 'spacer') {
                       return (
-                        <View key={cell.id} style={{ width: dayCellSize, height: dayCellSize }} />
+                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
                       );
                     }
 
@@ -3141,17 +3257,23 @@ export function InsightsScreen({
                           void triggerHaptic('selection');
                           setSelectedCalendarDayKey(cell.dayKey);
                         }}
+                        accessibilityRole="button"
+                        accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
+                        accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
                         className={cn(
                           'rounded-xl items-center justify-center border active:opacity-85',
                         )}
-                        style={{
-                          width: dayCellSize,
-                          height: dayCellSize,
-                          backgroundColor: bgColor,
-                          borderColor,
-                          borderWidth: isSelected ? 2 : 1,
-                          opacity: inactiveOpacity,
-                        }}
+                        style={[
+                          styles.calendarDayCell,
+                          {
+                            width: dayCellSize,
+                            height: dayCellSize,
+                            backgroundColor: bgColor,
+                            borderColor,
+                            borderWidth: isSelected ? 2 : 1,
+                            opacity: inactiveOpacity,
+                          },
+                        ]}
                       >
                         <Text
                           variant="caption"
@@ -3167,12 +3289,10 @@ export function InsightsScreen({
                         </Text>
                         {hasActivity && dotSize > 0 ? (
                           <View
-                            className="absolute bottom-1 rounded-full"
-                            style={{
-                              width: dotSize,
-                              height: dotSize,
-                              backgroundColor: toneColor,
-                            }}
+                            style={[
+                              styles.calendarActivityDot,
+                              { width: dotSize, height: dotSize, backgroundColor: toneColor },
+                            ]}
                           />
                         ) : null}
                       </Pressable>
@@ -3183,12 +3303,7 @@ export function InsightsScreen({
             ))}
           </View>
 
-          <RNAnimated.View
-            style={{
-              opacity: calendarDetailAnimRef.current,
-              transform: [{ scale: dayDetailScale }],
-            }}
-          >
+          <RNAnimated.View style={dayDetailAnimatedStyle}>
             <View className="rounded-2xl border border-border/35 bg-secondary/20 px-3.5 py-2.5">
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-2">
@@ -3212,6 +3327,10 @@ export function InsightsScreen({
                           dayKeyFromIsoLocal(transaction.date) === targetDayKey,
                       });
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('insights.calendar.view_all', {
+                      count: selectedDayTransactions.length,
+                    })}
                     className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1.5 active:opacity-85"
                   >
                     <Text variant="label" className="text-primary">
@@ -3422,6 +3541,7 @@ export function InsightsScreen({
     const selectedYearKey = String(pageData.year);
     const selectedAssetToneColor =
       selectedAssetValue >= 0 ? themeColors.success : themeColors.error;
+    const selectedAssetToneStyle = { color: selectedAssetToneColor };
     const selectedAssetCurrencyPrefix = `${selectedAssetValue < 0 ? '-' : ''}${settings.currencySymbol}`;
     const selectAssetHistoryMonth = (monthKey: string) => {
       if (assetHistoryScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
@@ -3440,8 +3560,10 @@ export function InsightsScreen({
       <View className="mt-2 gap-2.5">
         <View style={lineChartSectionStyle} className="py-1">
           <View
-            style={{ width: lineChartWidth, height: ASSET_HISTORY_CHART_HEIGHT }}
-            className="self-center"
+            style={[
+              styles.chartSizeCenter,
+              buildSizeStyle(lineChartWidth, ASSET_HISTORY_CHART_HEIGHT),
+            ]}
             onTouchStart={lockChartScrub}
             onTouchEnd={unlockChartScrub}
             onTouchCancel={unlockChartScrub}
@@ -3481,7 +3603,7 @@ export function InsightsScreen({
               </View>
 
               <View className="mt-1 flex-row items-center">
-                <Text variant="heading" style={{ color: selectedAssetToneColor }}>
+                <Text variant="heading" style={selectedAssetToneStyle}>
                   {selectedAssetCurrencyPrefix}
                 </Text>
                 <ScrubRollingNumber
@@ -3547,8 +3669,10 @@ export function InsightsScreen({
       <View className="mt-2 gap-2.5">
         <View style={lineChartSectionStyle} className="py-1">
           <View
-            style={{ width: lineChartWidth, height: INCOME_RATE_CHART_HEIGHT }}
-            className="self-center"
+            style={[
+              styles.chartSizeCenter,
+              buildSizeStyle(lineChartWidth, INCOME_RATE_CHART_HEIGHT),
+            ]}
             onTouchStart={lockChartScrub}
             onTouchEnd={unlockChartScrub}
             onTouchCancel={unlockChartScrub}
@@ -3603,6 +3727,8 @@ export function InsightsScreen({
                   setIsIncomeRateUnitPickerOpen(true);
                 }}
                 hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('insights.analytics.income_rate_history.rate_title')}
                 className="ml-1 flex-row items-center active:opacity-80"
               >
                 <Text variant="heading" className="text-primary">
@@ -3646,19 +3772,49 @@ export function InsightsScreen({
         savingsRate === null
           ? I18n.t('insights.analytics.savings_rate.no_income_short')
           : `${(savingsRate * 100).toFixed(1)}%`;
+      const yearlySavedAmount = Math.abs(pageData.totalNet);
+      const yearlySavedAmountClass =
+        pageData.totalNet > 0
+          ? 'text-success'
+          : pageData.totalNet < 0
+            ? 'text-destructive'
+            : 'text-muted-foreground';
+      const yearlySavedBadgeClass =
+        pageData.totalNet > 0
+          ? 'border-success/30 bg-success/10'
+          : pageData.totalNet < 0
+            ? 'border-destructive/30 bg-destructive/10'
+            : 'border-border/35 bg-secondary/20';
+      const healthyMarkerLeft = `${Math.round(HEALTHY_SAVINGS_RATE_THRESHOLD * 100)}%` as const;
+      const healthyMarkerColor = withColorAlpha(themeColors.text, isDark ? 0.75 : 0.5);
 
       return (
         <Card className="mt-2">
           <CardContent className="py-3 gap-2.5">
             <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
               <Text variant="caption">{I18n.t('insights.analytics.savings_rate.title')}</Text>
-              <Text variant="heading" className={cn('mt-1', toneClass)}>
-                {formattedSavingsRate}
-              </Text>
+              <View className="mt-1 flex-row flex-wrap items-center gap-2">
+                <Text variant="heading" className={toneClass}>
+                  {formattedSavingsRate}
+                </Text>
+                <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
+                  <Text variant="label" className={cn(yearlySavedAmountClass)}>
+                    {renderCompactValue(yearlySavedAmount)}
+                  </Text>
+                </View>
+              </View>
               <View className="mt-2 h-3 rounded-full bg-secondary overflow-hidden">
                 <View
                   className={cn('h-full rounded-full', rateBarClass)}
-                  style={{ width: `${Math.round(normalized * 100)}%` }}
+                  style={[styles.progressFill, buildWidthStyle(`${Math.round(normalized * 100)}%`)]}
+                />
+                <View
+                  pointerEvents="none"
+                  style={[
+                    styles.savingsRateHealthyMarker,
+                    buildLeftStyle(healthyMarkerLeft),
+                    { backgroundColor: healthyMarkerColor },
+                  ]}
                 />
               </View>
               <Text variant="label" tone="muted" className="mt-2">
@@ -3789,6 +3945,8 @@ export function InsightsScreen({
                         },
                       });
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={row.label}
                     className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
                   >
                     <View className="flex-row items-center justify-between">
@@ -3812,7 +3970,10 @@ export function InsightsScreen({
                     <View className="mt-1.5 h-1.5 rounded-full bg-secondary overflow-hidden">
                       <View
                         className={cn('h-full rounded-full', monthlyBarClass)}
-                        style={{ width: `${Math.round(monthlyIntensity * 100)}%` }}
+                        style={[
+                          styles.progressFill,
+                          buildWidthStyle(`${Math.round(monthlyIntensity * 100)}%`),
+                        ]}
                       />
                     </View>
                     <View className="mt-2 flex-row items-center justify-between gap-2">
@@ -4086,7 +4247,7 @@ export function InsightsScreen({
         onRequestClose={() => setIsFilterModalOpen(false)}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
+          <View style={styles.insightsFilterModalHeader}>
             <View>
               <Text variant="subheading">{I18n.t('insights.filters.title')}</Text>
               <Text variant="friendly" tone="muted">
@@ -4099,7 +4260,10 @@ export function InsightsScreen({
                   void triggerHaptic('selection');
                   resetInsightsFilters();
                 }}
-                className="px-3 py-2 rounded-full bg-secondary/70"
+                className="bg-secondary/70"
+                style={styles.insightsFilterActionButton}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.reset')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.reset')}
@@ -4110,7 +4274,10 @@ export function InsightsScreen({
                   void triggerHaptic('selection');
                   setIsFilterModalOpen(false);
                 }}
-                className="px-3 py-2 rounded-full bg-secondary"
+                className="bg-secondary"
+                style={styles.insightsFilterActionButton}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.done')}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.done')}
@@ -4121,7 +4288,7 @@ export function InsightsScreen({
 
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ padding: 20, paddingBottom: 34, gap: 14 }}
+            contentContainerStyle={INSIGHTS_FILTER_MODAL_CONTENT_STYLE}
           >
             {hasPeriodFilter ? (
               <View className="gap-2.5">
@@ -4131,7 +4298,7 @@ export function InsightsScreen({
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 6 }}
+                  contentContainerStyle={styles.insightsFilterPillsContent}
                 >
                   {PERIOD_TABS.map((tab) => (
                     <FilterPill
@@ -4153,6 +4320,9 @@ export function InsightsScreen({
                           void triggerHaptic('selection');
                           setActiveCustomDateField('start');
                         }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('insights.filters.start')}
+                        accessibilityState={{ selected: activeCustomDateField === 'start' }}
                         className={cn(
                           'flex-1 rounded-xl border px-3 py-2.5',
                           activeCustomDateField === 'start'
@@ -4172,6 +4342,9 @@ export function InsightsScreen({
                           void triggerHaptic('selection');
                           setActiveCustomDateField('end');
                         }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('insights.filters.end')}
+                        accessibilityState={{ selected: activeCustomDateField === 'end' }}
                         className={cn(
                           'flex-1 rounded-xl border px-3 py-2.5',
                           activeCustomDateField === 'end'
@@ -4189,7 +4362,7 @@ export function InsightsScreen({
                     </View>
                     <View
                       className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                      style={{ height: 360 }}
+                      style={styles.insightsFilterDatePanel}
                     >
                       <DatePanel
                         value={activeCustomDateField === 'start' ? customStart : customEnd}
@@ -4209,7 +4382,7 @@ export function InsightsScreen({
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 6 }}
+                  contentContainerStyle={styles.insightsFilterPillsContent}
                 >
                   <FilterPill
                     label={I18n.t('insights.filters.all_accounts')}
@@ -4251,7 +4424,10 @@ export function InsightsScreen({
                     onPress={() => setExcludedAssetHistoryAccountIds([])}
                   />
                 </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                <View
+                  className={FILTER_SELECTION_PANEL_CLASS}
+                  style={styles.insightsFilterSelectionPanel}
+                >
                   <AccountPanel
                     accounts={assetHistoryAccountOptions}
                     accountGroups={accountGroups}
@@ -4285,7 +4461,10 @@ export function InsightsScreen({
                     onPress={() => setExcludedTimeCostExpenseCategoryId(null)}
                   />
                 </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                <View
+                  className={FILTER_SELECTION_PANEL_CLASS}
+                  style={styles.insightsFilterSelectionPanel}
+                >
                   <CategoryPanel
                     parents={savingsExpenseCategoryPanel.parents}
                     childByParent={savingsExpenseCategoryPanel.childByParent}
@@ -4314,7 +4493,10 @@ export function InsightsScreen({
                       onPress={() => setExcludedSavingsIncomeCategoryIds([])}
                     />
                   </View>
-                  <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                  <View
+                    className={FILTER_SELECTION_PANEL_CLASS}
+                    style={styles.insightsFilterSelectionPanel}
+                  >
                     <CategoryPanel
                       parents={savingsIncomeCategoryPanel.parents}
                       childByParent={savingsIncomeCategoryPanel.childByParent}
@@ -4342,7 +4524,10 @@ export function InsightsScreen({
                       onPress={() => setExcludedSavingsExpenseCategoryIds([])}
                     />
                   </View>
-                  <View className={FILTER_SELECTION_PANEL_CLASS} style={{ height: 236 }}>
+                  <View
+                    className={FILTER_SELECTION_PANEL_CLASS}
+                    style={styles.insightsFilterSelectionPanel}
+                  >
                     <CategoryPanel
                       parents={savingsExpenseCategoryPanel.parents}
                       childByParent={savingsExpenseCategoryPanel.childByParent}
@@ -4375,8 +4560,13 @@ export function InsightsScreen({
           <Pressable
             className="absolute inset-0 bg-black/20"
             onPress={() => setIsIncomeRateUnitPickerOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.close')}
           />
-          <View className="mx-5 mb-8 rounded-[24px] border border-border/45 bg-background px-4 py-4">
+          <View
+            style={styles.incomeRateUnitPickerSheet}
+            className="rounded-[24px] border border-border/45 bg-background"
+          >
             <View className="pb-2">
               <Text variant="subheading">
                 {I18n.t('insights.analytics.income_rate_history.rate_title')}
@@ -4393,6 +4583,9 @@ export function InsightsScreen({
                       setIncomeRateDisplayUnit(option.value);
                       setIsIncomeRateUnitPickerOpen(false);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={option.label}
+                    accessibilityState={{ selected: isSelected }}
                     className={cn(
                       'rounded-2xl border px-3.5 py-3',
                       isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
