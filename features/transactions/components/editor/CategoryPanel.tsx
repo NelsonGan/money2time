@@ -1,6 +1,6 @@
 import { Check, ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -32,6 +32,16 @@ interface CategoryPanelMultiSelectProps extends CategoryPanelBaseProps {
 type CategoryPanelProps = CategoryPanelSingleSelectProps | CategoryPanelMultiSelectProps;
 const EMPTY_SELECTED_CATEGORY_IDS: string[] = [];
 const COLS = 3;
+const CATEGORY_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
+
+const styles = StyleSheet.create({
+  chevronCollapsed: {
+    transform: [{ rotate: '0deg' }],
+  },
+  chevronExpanded: {
+    transform: [{ rotate: '180deg' }],
+  },
+});
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const result: T[][] = [];
@@ -105,7 +115,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
       bounces={false}
       alwaysBounceVertical={false}
       overScrollMode="never"
-      contentContainerStyle={{ paddingBottom: 16 }}
+      contentContainerStyle={CATEGORY_PANEL_CONTENT_STYLE}
     >
       <View className="gap-3">
         {parentRows.map((row, rowIndex) => {
@@ -172,9 +182,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                             color={
                               isSelected || isExpanded ? themeColors.primary : themeColors.textMuted
                             }
-                            style={{
-                              transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
-                            }}
+                            style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                           />
                         ) : null}
                       </Pressable>

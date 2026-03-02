@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -32,6 +32,19 @@ interface AccountPanelMultiSelectProps extends AccountPanelBaseProps {
 type AccountPanelProps = AccountPanelSingleSelectProps | AccountPanelMultiSelectProps;
 
 const COLS = 3;
+const ACCOUNT_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
+
+const styles = StyleSheet.create({
+  disabledAccount: {
+    opacity: 0.4,
+  },
+  chevronCollapsed: {
+    transform: [{ rotate: '0deg' }],
+  },
+  chevronExpanded: {
+    transform: [{ rotate: '180deg' }],
+  },
+});
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const result: T[][] = [];
@@ -124,7 +137,7 @@ export function AccountPanel(props: AccountPanelProps) {
       <ScrollView
         className="flex-1 px-4 pt-2"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 16 }}
+        contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
       >
         <View className="gap-3">
           {accountRows.map((row, rowIndex) => (
@@ -147,7 +160,7 @@ export function AccountPanel(props: AccountPanelProps) {
                             ? 'bg-secondary/40 border-border/20'
                             : 'bg-card border-border/30',
                       )}
-                      style={isDisabled ? { opacity: 0.4 } : undefined}
+                      style={isDisabled ? styles.disabledAccount : undefined}
                     >
                       <Text
                         variant="label"
@@ -185,7 +198,7 @@ export function AccountPanel(props: AccountPanelProps) {
     <ScrollView
       className="flex-1 px-4 pt-2"
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 16 }}
+      contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
     >
       <View className="gap-2">
         {groupRows.map((row, rowIndex) => {
@@ -236,9 +249,7 @@ export function AccountPanel(props: AccountPanelProps) {
                               ? themeColors.primary
                               : themeColors.textMuted
                           }
-                          style={{
-                            transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
-                          }}
+                          style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                         />
                       </Pressable>
                     </View>
@@ -271,7 +282,7 @@ export function AccountPanel(props: AccountPanelProps) {
                                 ? 'bg-secondary/40 border-border/20'
                                 : 'bg-secondary/50 border-border/20',
                           )}
-                          style={isDisabled ? { opacity: 0.4 } : undefined}
+                          style={isDisabled ? styles.disabledAccount : undefined}
                         >
                           <Text
                             variant="label"

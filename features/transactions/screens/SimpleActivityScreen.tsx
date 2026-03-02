@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, ScrollView, useWindowDimensions, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   DisplayModeToggle,
@@ -35,7 +36,7 @@ import {
   filterTransactionsByWallet,
 } from '~/utils/transactions';
 
-const FILTER_CHIPS_CONTENT_STYLE = { gap: 8, paddingRight: 12 } as const;
+const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 
 interface SimpleActivityScreenProps {
@@ -174,7 +175,7 @@ export function SimpleActivityScreen({
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
       <MonthControlsHeader
         title={I18n.t('transactions.title')}
         monthLabel={activeMonthLabel}
@@ -205,7 +206,7 @@ export function SimpleActivityScreen({
         </View>
       </MonthControlsHeader>
 
-      <View className="flex-1 overflow-hidden bg-background">
+      <View style={styles.listContainer} className="bg-background">
         <FlatList
           ref={horizontalListRef}
           data={monthPagerSlots}
@@ -223,3 +224,13 @@ export function SimpleActivityScreen({
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  listContainer: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+});

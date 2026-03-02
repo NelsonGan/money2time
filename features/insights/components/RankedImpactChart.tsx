@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -35,6 +35,27 @@ interface RankedImpactChartProps {
   shareLabel?: string;
 }
 
+const styles = StyleSheet.create({
+  rankBadge: {
+    marginTop: 2,
+    height: 28,
+    width: 28,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  progressGlow: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+  },
+});
+
 export function RankedImpactChart({
   rows,
   accentColor,
@@ -54,18 +75,22 @@ export function RankedImpactChart({
         const rowBackground = withColorAlpha(rowAccent, 0.06 + (share / 100) * 0.13);
         const rowBorder = withColorAlpha(rowAccent, 0.15 + (share / 100) * 0.3);
         const rankBackground = withColorAlpha(rowAccent, 0.16 + (share / 100) * 0.2);
+        const rowStyle = { backgroundColor: rowBackground, borderColor: rowBorder };
+        const accentTextStyle = { color: rowAccent };
         const content = (
           <>
             <View className="flex-row items-start justify-between gap-2">
               <View className="flex-row items-start gap-2 flex-1 min-w-0">
                 <View
-                  className="mt-0.5 h-7 w-7 rounded-full items-center justify-center border"
-                  style={{
-                    backgroundColor: rankBackground,
-                    borderColor: withColorAlpha(rowAccent, 0.35),
-                  }}
+                  style={[
+                    styles.rankBadge,
+                    {
+                      backgroundColor: rankBackground,
+                      borderColor: withColorAlpha(rowAccent, 0.35),
+                    },
+                  ]}
                 >
-                  <Text variant="label" style={{ color: rowAccent }}>
+                  <Text variant="label" style={accentTextStyle}>
                     {row.rank}
                   </Text>
                 </View>
@@ -82,7 +107,7 @@ export function RankedImpactChart({
                 </View>
               </View>
               <View className="items-end pl-1">
-                <Text variant="caption" style={{ color: rowAccent }}>
+                <Text variant="caption" style={accentTextStyle}>
                   {row.primaryValue}
                 </Text>
                 {row.secondaryValue ? (
@@ -96,20 +121,19 @@ export function RankedImpactChart({
             <View className="mt-2">
               <View className="h-2 rounded-full bg-secondary/70 overflow-hidden">
                 <View
-                  className="h-full rounded-full"
-                  style={{ width: `${fillWidth}%`, backgroundColor: barFill }}
+                  style={[
+                    styles.progressFill,
+                    { width: `${fillWidth}%`, backgroundColor: barFill },
+                  ]}
                 >
-                  <View
-                    className="h-full rounded-full"
-                    style={{ width: '100%', backgroundColor: barGlow }}
-                  />
+                  <View style={[styles.progressGlow, { backgroundColor: barGlow }]} />
                 </View>
               </View>
               <View className="mt-1.5 flex-row items-center justify-between">
                 <Text variant="label" tone="muted">
                   {shareLabel}
                 </Text>
-                <Text variant="label" style={{ color: rowAccent }}>
+                <Text variant="label" style={accentTextStyle}>
                   {share.toFixed(1)}%
                 </Text>
               </View>
@@ -126,7 +150,7 @@ export function RankedImpactChart({
                 row.onPress?.();
               }}
               className={cn('rounded-2xl border px-3 py-2.5 active:opacity-85')}
-              style={{ backgroundColor: rowBackground, borderColor: rowBorder }}
+              style={rowStyle}
             >
               {content}
             </Pressable>
@@ -134,11 +158,7 @@ export function RankedImpactChart({
         }
 
         return (
-          <View
-            key={row.id}
-            className="rounded-2xl border px-3 py-2.5"
-            style={{ backgroundColor: rowBackground, borderColor: rowBorder }}
-          >
+          <View key={row.id} className="rounded-2xl border px-3 py-2.5" style={rowStyle}>
             {content}
           </View>
         );

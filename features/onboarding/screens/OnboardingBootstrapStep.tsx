@@ -1,12 +1,18 @@
 import { Image } from 'expo-image';
 import { Check } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Card, CardContent, Text, ThemeModal } from '~/components/ui';
+import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import {
+  ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  ONBOARDING_CHECKLIST_ACTION_BAR_RESERVED_SPACE,
+  ONBOARDING_HORIZONTAL_PADDING,
+} from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -17,6 +23,30 @@ import { cn } from '~/utils';
 export type BootstrapChoice = 'import' | 'fresh';
 export type BootstrapView = 'choose' | 'import-result' | 'fresh-checklist';
 const MONEY_MANAGER_REALBYTE_LOGO = require('../../../assets/brands/money-manager-realbyte-logo.png');
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  },
+  checklistContentContainer: {
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingBottom: ONBOARDING_CHECKLIST_ACTION_BAR_RESERVED_SPACE,
+  },
+  importBrandLogo: {
+    width: 32,
+    height: 32,
+  },
+  freshOptionEmoji: {
+    fontSize: 20,
+  },
+  checklistEmoji: {
+    fontSize: 16,
+  },
+  requiredBadgeText: {
+    fontSize: 10,
+  },
+});
 
 interface OnboardingBootstrapStepProps {
   onBack: () => void;
@@ -110,7 +140,7 @@ export function OnboardingBootstrapStep({
         <View className="flex-1">
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
+            contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
             <Animated.View entering={FadeIn.duration(500)} className="items-center mt-8">
@@ -136,6 +166,7 @@ export function OnboardingBootstrapStep({
                   onChoiceChange('import');
                 }}
                 accessibilityRole="button"
+                accessibilityLabel={I18n.t('onboarding.bootstrap.import_option_title')}
                 accessibilityState={{ selected: choice === 'import' }}
               >
                 <Card
@@ -149,7 +180,7 @@ export function OnboardingBootstrapStep({
                       <Image
                         source={MONEY_MANAGER_REALBYTE_LOGO}
                         contentFit="contain"
-                        style={{ width: 32, height: 32 }}
+                        style={styles.importBrandLogo}
                       />
                     </View>
                     <View className="flex-1">
@@ -174,6 +205,7 @@ export function OnboardingBootstrapStep({
                   onChoiceChange('fresh');
                 }}
                 accessibilityRole="button"
+                accessibilityLabel={I18n.t('onboarding.bootstrap.fresh_option_title')}
                 accessibilityState={{ selected: choice === 'fresh' }}
               >
                 <Card
@@ -184,7 +216,7 @@ export function OnboardingBootstrapStep({
                 >
                   <CardContent className="py-5 flex-row items-start gap-3.5">
                     <View className="w-11 h-11 rounded-full bg-accent/15 items-center justify-center mt-0.5">
-                      <Text style={{ fontSize: 20 }}>✨</Text>
+                      <Text style={styles.freshOptionEmoji}>✨</Text>
                     </View>
                     <View className="flex-1">
                       <Text variant="subheading" className="text-foreground">
@@ -200,24 +232,15 @@ export function OnboardingBootstrapStep({
             </Animated.View>
           </ScrollView>
 
-          {/* Sticky footer */}
-          <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-            <View className="flex-row gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onBack();
-                }}
-              >
-                <Text>{I18n.t('common.back')}</Text>
-              </Button>
-              <Button className="flex-[2]" disabled={!choice} onPress={handleContinue}>
-                <Text>{I18n.t('common.continue')}</Text>
-              </Button>
-            </View>
-          </View>
+          <OnboardingActionBar
+            onBack={() => {
+              void triggerHaptic('selection');
+              onBack();
+            }}
+            onPrimary={handleContinue}
+            primaryLabel={I18n.t('common.continue')}
+            primaryDisabled={!choice}
+          />
 
           {/* Import loading modal */}
           <ThemeModal visible={isImporting} transparent animationType="fade">
@@ -245,7 +268,7 @@ export function OnboardingBootstrapStep({
         <View className="flex-1">
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
+            contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
             <Animated.View entering={FadeIn.duration(500)} className="items-center mt-8">
@@ -308,30 +331,17 @@ export function OnboardingBootstrapStep({
             </Animated.View>
           </ScrollView>
 
-          {/* Sticky footer */}
-          <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-            <View className="flex-row gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onViewChange('choose');
-                }}
-              >
-                <Text>{I18n.t('common.back')}</Text>
-              </Button>
-              <Button
-                className="flex-[2]"
-                onPress={() => {
-                  void triggerHaptic('success');
-                  onFinish();
-                }}
-              >
-                <Text>{I18n.t('onboarding.bootstrap.finish_setup')}</Text>
-              </Button>
-            </View>
-          </View>
+          <OnboardingActionBar
+            onBack={() => {
+              void triggerHaptic('selection');
+              onViewChange('choose');
+            }}
+            onPrimary={() => {
+              void triggerHaptic('success');
+              onFinish();
+            }}
+            primaryLabel={I18n.t('onboarding.bootstrap.finish_setup')}
+          />
         </View>
       </GestureDetector>
     );
@@ -343,7 +353,7 @@ export function OnboardingBootstrapStep({
       <View className="flex-1">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 160 }}
+          contentContainerStyle={styles.checklistContentContainer}
           showsVerticalScrollIndicator={false}
         >
           <Animated.View entering={FadeIn.duration(400)} className="mt-6">
@@ -473,43 +483,32 @@ export function OnboardingBootstrapStep({
           </View>
         </ScrollView>
 
-        {/* Sticky footer */}
-        <View className="absolute bottom-0 left-0 right-0 bg-background/95 border-t border-border/20 px-6 pb-12 pt-4">
-          <View className="flex-row gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onPress={() => {
-                void triggerHaptic('selection');
-                onViewChange('choose');
-              }}
-            >
-              <Text>{I18n.t('common.back')}</Text>
-            </Button>
-            <Button
-              className="flex-[2]"
-              disabled={!canFinishFresh}
-              onPress={() => {
-                void triggerHaptic('success');
-                onFinish();
-              }}
-            >
-              <Text>{I18n.t('onboarding.bootstrap.finish_setup')}</Text>
-            </Button>
-          </View>
-          {!canFinishFresh && (
-            <Pressable
-              onPress={handleSkipFresh}
-              className="mt-3 items-center py-2"
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('onboarding.bootstrap.skip_requirements_a11y')}
-            >
-              <Text variant="caption" tone="muted">
-                {I18n.t('onboarding.bootstrap.skip_for_now')}
-              </Text>
-            </Pressable>
-          )}
-        </View>
+        <OnboardingActionBar
+          onBack={() => {
+            void triggerHaptic('selection');
+            onViewChange('choose');
+          }}
+          onPrimary={() => {
+            void triggerHaptic('success');
+            onFinish();
+          }}
+          primaryLabel={I18n.t('onboarding.bootstrap.finish_setup')}
+          primaryDisabled={!canFinishFresh}
+          extraContent={
+            !canFinishFresh ? (
+              <Pressable
+                onPress={handleSkipFresh}
+                className="items-center py-2"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('onboarding.bootstrap.skip_requirements_a11y')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('onboarding.bootstrap.skip_for_now')}
+                </Text>
+              </Pressable>
+            ) : null
+          }
+        />
       </View>
     </GestureDetector>
   );
@@ -561,7 +560,7 @@ function ChecklistItem({
             {isComplete ? (
               <Check size={16} color={themeColors.success} strokeWidth={3} />
             ) : (
-              <Text style={{ fontSize: 16 }}>{emoji}</Text>
+              <Text style={styles.checklistEmoji}>{emoji}</Text>
             )}
           </View>
 
@@ -583,7 +582,7 @@ function ChecklistItem({
                   </Text>
                   {required && (
                     <View className="rounded-full bg-primary/10 px-2 py-0.5">
-                      <Text variant="label" tone="primary" style={{ fontSize: 10 }}>
+                      <Text variant="label" tone="primary" style={styles.requiredBadgeText}>
                         {I18n.t('onboarding.bootstrap.required_badge')}
                       </Text>
                     </View>

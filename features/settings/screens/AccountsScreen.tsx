@@ -1,6 +1,6 @@
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Settings, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, type LayoutChangeEvent, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +27,7 @@ import {
   DEFAULT_CATEGORY_EMOJIS,
   DEFAULT_CURRENCY,
 } from '~/constants/appDefaults';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
@@ -78,11 +79,127 @@ type AccountListRow =
   | { kind: 'account'; id: string; accountId: string };
 type AccountManagementView = 'accounts' | 'groups';
 
-const ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP = 104;
-const ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT = 58;
+const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
+  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+} as const;
+const ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE = {
+  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+} as const;
+const ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE = {
+  paddingTop: 6,
+  ...ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE,
+} as const;
+const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
+  padding: SETTINGS_HORIZONTAL_PADDING,
+  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING + spacing.xs,
+  gap: spacing.sm,
+} as const;
+const ACCOUNT_PANEL_HEIGHT = 236;
+const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
 const MASKED_BALANCE_VALUE = '••••';
 const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
 const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
+
+const styles = StyleSheet.create({
+  rowContainer: {
+    paddingBottom: spacing.xxs,
+  },
+  rowCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingLeft: spacing.sm,
+    paddingRight: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  rowCardActive: {
+    opacity: 0.95,
+  },
+  rowDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  rowTitleWrap: {
+    flex: 1,
+  },
+  rowTitle: {
+    fontSize: 13,
+  },
+  rowSubtitle: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+  rowActionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowDragButton: {
+    minWidth: 40,
+    minHeight: 40,
+    padding: spacing.xs,
+    marginRight: -2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowEditModeStack: {
+    gap: spacing.xs,
+    paddingRight: spacing.xxs,
+  },
+  rowEditModeActions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  accountRowPressable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  accountCreditBadge: {
+    fontSize: 11,
+  },
+  headerContainer: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  selectionOverlay: {
+    position: 'absolute',
+    top: spacing.xs,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+  },
+  headerSpacer: {
+    height: spacing.xs,
+  },
+  flexContainer: {
+    flex: 1,
+  },
+  groupedSectionHeader: {
+    paddingLeft: spacing.xxs,
+    paddingRight: spacing.sm,
+    paddingBottom: spacing.xxs,
+  },
+  groupedSectionHeaderFirst: {
+    paddingTop: 6,
+  },
+  groupedSectionHeaderRest: {
+    paddingTop: spacing.sm,
+  },
+  groupedSectionLabel: {
+    fontSize: 11,
+  },
+  bulkDatePanel: {
+    height: ACCOUNT_BULK_DATE_PANEL_HEIGHT,
+  },
+  accountPanel: {
+    height: ACCOUNT_PANEL_HEIGHT,
+  },
+});
 
 function toBalanceInputValue(value: number) {
   if (!Number.isFinite(value)) return '0';
@@ -173,10 +290,7 @@ function AddAccountSheet({
         />
 
         <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-          }}
+          contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
           showsVerticalScrollIndicator={false}
         >
           <View className="gap-4">
@@ -210,6 +324,9 @@ function AddAccountSheet({
                       setType(item.value);
                       setIcon(item.icon);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.label}
+                    accessibilityState={{ selected: type === item.value }}
                     className={cn(
                       'px-4 py-2.5 rounded-full border',
                       type === item.value
@@ -269,6 +386,9 @@ function AddAccountSheet({
                       void triggerHaptic('selection');
                       setIcon(emoji);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
+                    accessibilityState={{ selected: icon === emoji }}
                     className={cn(
                       'h-11 w-11 rounded-full border items-center justify-center',
                       icon === emoji
@@ -315,7 +435,6 @@ function EditAccountSheet({
   onSave: (updates: EditAccountSaveInput) => void;
   onDelete: () => void;
 }) {
-  const themeColors = useThemeColors();
   const [name, setName] = useState(account.name);
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
   const [includeInTotals, setIncludeInTotals] = useState(account.includeInTotals);
@@ -381,12 +500,7 @@ function EditAccountSheet({
           title={I18n.t('accounts.edit_account')}
           onClose={onClose}
         />
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-          }}
-        >
+        <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <Input
               label={I18n.t('accounts.account_name')}
@@ -457,9 +571,11 @@ function EditAccountSheet({
                 void triggerHaptic('warning');
                 onDelete();
               }}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('accounts.delete_account')}
               className="self-start rounded-full border border-destructive/30 bg-destructive/8 px-3 py-2"
             >
-              <Text variant="caption" style={{ color: themeColors.coral }}>
+              <Text variant="caption" className="text-destructive">
                 {I18n.t('accounts.delete_account')}
               </Text>
             </Pressable>
@@ -513,6 +629,16 @@ function creditDeltaForAccountTransaction(
   return 0;
 }
 
+function isCreditPaymentTransaction(
+  tx: {
+    type: 'expense' | 'income' | 'transfer' | 'balance_adjustment';
+    toAccountId?: string | null;
+  },
+  creditAccountId: string,
+) {
+  return tx.type === 'transfer' && tx.toAccountId === creditAccountId;
+}
+
 function computeCreditCycleSummary(
   account: Account,
   txns: TransactionWithRelations[],
@@ -527,11 +653,17 @@ function computeCreditCycleSummary(
     now,
   ).toISOString();
   const currentCycleTxns = txns.filter((tx) => tx.date >= currentCycleStartIso);
-  const outstanding = Math.max(
+  const outstandingFromCycle = Math.max(
     0,
-    currentCycleTxns.reduce((sum, tx) => sum + creditDeltaForAccountTransaction(tx, account.id), 0),
+    currentCycleTxns.reduce((sum, tx) => {
+      // Credit-card payments should settle statement payable first.
+      if (isCreditPaymentTransaction(tx, account.id)) return sum;
+      return sum + creditDeltaForAccountTransaction(tx, account.id);
+    }, 0),
   );
-  return { outstanding, payable: Math.max(0, balance - outstanding) };
+  const cappedBalance = Math.max(0, balance);
+  const outstanding = Math.min(outstandingFromCycle, cappedBalance);
+  return { outstanding, payable: Math.max(0, cappedBalance - outstanding) };
 }
 
 function defaultCreditSummary(balance: number): CreditSummary {
@@ -605,12 +737,7 @@ function PayCreditCardSheet({
           title={I18n.t('accounts.pay_credit_card')}
           onClose={onClose}
         />
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-          }}
-        >
+        <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <View className="gap-2.5">
               <Text variant="caption" tone="muted">
@@ -618,7 +745,7 @@ function PayCreditCardSheet({
               </Text>
               <View
                 className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={{ height: 236 }}
+                style={styles.accountPanel}
               >
                 <AccountPanel
                   accounts={fromAccounts}
@@ -678,27 +805,25 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
   const groupAccountCount = _acctAccountCountByGroupName.get(item.name.trim()) ?? 0;
 
   return (
-    <View style={{ paddingBottom: 4 }}>
+    <View style={styles.rowContainer}>
       <View
-        style={{
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-          backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
-          paddingLeft: 10,
-          paddingRight: 6,
-          paddingVertical: 8,
-          opacity: isActive ? 0.95 : 1,
-        }}
+        style={[
+          styles.rowCard,
+          isActive ? styles.rowCardActive : null,
+          {
+            borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
+            backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+          },
+        ]}
       >
         {isEditing ? (
-          <View style={{ gap: 8, paddingRight: 4 }}>
+          <View style={styles.rowEditModeStack}>
             <Input
               value={_acctEditingGroupName}
               onChangeText={_acctOnEditingNameChange ?? (() => {})}
               placeholder={I18n.t('accounts.group_name')}
             />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={styles.rowEditModeActions}>
               <Button size="sm" className="flex-1" onPress={() => _acctOnSaveGroup?.(item.id)}>
                 <Text>{I18n.t('common.save')}</Text>
               </Button>
@@ -713,10 +838,10 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
             </View>
           </View>
         ) : (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 13, color: tc.text }}>{item.name}</Text>
-              <Text style={{ fontSize: 11, color: tc.textMuted, marginTop: 1 }}>
+          <View style={styles.rowDisplay}>
+            <View style={styles.rowTitleWrap}>
+              <Text style={[styles.rowTitle, { color: tc.text }]}>{item.name}</Text>
+              <Text style={[styles.rowSubtitle, { color: tc.textMuted }]}>
                 {I18n.t('accounts.group_accounts_count', { count: groupAccountCount })}
               </Text>
             </View>
@@ -726,14 +851,9 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnStartEditGroup?.(item);
               }}
               hitSlop={4}
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 13,
-                backgroundColor: 'rgba(0,0,0,0.05)',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.edit')}
             >
               <Pencil size={11} color={tc.textMuted} />
             </Pressable>
@@ -743,14 +863,9 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnDeleteGroup?.(item);
               }}
               hitSlop={4}
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 13,
-                backgroundColor: 'rgba(255,0,0,0.06)',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.delete')}
             >
               <Trash2 size={11} color={tc.coral} />
             </Pressable>
@@ -759,7 +874,9 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
               delayLongPress={100}
               disabled={isActive}
               hitSlop={8}
-              style={{ padding: 6, marginRight: -2 }}
+              style={styles.rowDragButton}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('accounts.reorder_groups')}
             >
               <GripVertical size={16} color={tc.textMuted} />
             </Pressable>
@@ -781,46 +898,44 @@ function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMg
   const isCredit = account.type === 'credit';
 
   return (
-    <View style={{ paddingBottom: 4 }}>
+    <View style={styles.rowContainer}>
       <View
-        style={{
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: isCredit
-            ? isActive
-              ? tc.coral
-              : 'rgba(255,0,0,0.12)'
-            : isActive
-              ? tc.textMuted
-              : 'rgba(0,0,0,0.08)',
-          backgroundColor: isCredit
-            ? isActive
-              ? tc.errorSoft
-              : 'rgba(255,0,0,0.03)'
-            : isActive
-              ? tc.surfaceMuted
-              : tc.surface,
-          paddingLeft: 10,
-          paddingRight: 6,
-          paddingVertical: 8,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 6,
-          opacity: isActive ? 0.9 : 1,
-        }}
+        style={[
+          styles.rowCard,
+          isActive ? styles.rowCardActive : null,
+          styles.rowDisplay,
+          {
+            borderColor: isCredit
+              ? isActive
+                ? tc.coral
+                : 'rgba(255,0,0,0.12)'
+              : isActive
+                ? tc.textMuted
+                : 'rgba(0,0,0,0.08)',
+            backgroundColor: isCredit
+              ? isActive
+                ? tc.errorSoft
+                : 'rgba(255,0,0,0.03)'
+              : isActive
+                ? tc.surfaceMuted
+                : tc.surface,
+          },
+        ]}
       >
         <Pressable
           onPress={() => _acctOnAccountPress?.(account)}
           disabled={isActive}
-          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+          style={styles.accountRowPressable}
+          accessibilityRole="button"
+          accessibilityLabel={account.name}
         >
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 13, color: tc.text }} numberOfLines={1}>
+          <View style={styles.rowTitleWrap}>
+            <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>
               {account.name}
             </Text>
           </View>
           {isCredit ? (
-            <Text style={{ fontSize: 11, color: tc.error }}>{_acctCreditLabel}</Text>
+            <Text style={[styles.accountCreditBadge, { color: tc.error }]}>{_acctCreditLabel}</Text>
           ) : null}
         </Pressable>
         <Pressable
@@ -828,7 +943,9 @@ function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMg
           delayLongPress={100}
           disabled={isActive}
           hitSlop={8}
-          style={{ padding: 6, marginRight: -2 }}
+          style={styles.rowDragButton}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('accounts.reorder_accounts')}
         >
           <GripVertical size={16} color={tc.textMuted} />
         </Pressable>
@@ -904,9 +1021,6 @@ export function AccountsScreen({
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
-  const [selectionOverlayTop, setSelectionOverlayTop] = useState(
-    ACCOUNT_SELECTION_OVERLAY_FALLBACK_TOP,
-  );
   const [isReordering, setIsReordering] = useState(false);
   const accountsListRef = useRef<FlatList<AccountListRow> | null>(null);
   const detailScrollToTopRef = useRef<(() => void) | null>(null);
@@ -959,8 +1073,40 @@ export function AccountsScreen({
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
   );
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds),
+    [selectedTransactionIds],
+  );
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
+  const selectedTransactionTotal = useMemo(
+    () =>
+      selectedAccountTransactions.reduce(
+        (sum, transaction) =>
+          selectedTransactionIdSet.has(transaction.id) ? sum + transaction.amount : sum,
+        0,
+      ),
+    [selectedAccountTransactions, selectedTransactionIdSet],
+  );
+  const selectedTransactionTotalLabel = useMemo(
+    () =>
+      formatAmount(
+        Math.abs(selectedTransactionTotal),
+        {
+          currencySymbol: settings.currencySymbol,
+          displayMode: 'money',
+          hourRounding: settings.hourRounding,
+        },
+        { showSign: false, trueHourlyRate: 0 },
+      ),
+    [selectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
+  );
+  const selectedTransactionTotalToneClass =
+    selectedTransactionTotal > 0
+      ? 'text-success'
+      : selectedTransactionTotal < 0
+        ? 'text-destructive'
+        : 'text-muted-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const isManagementGroupsView = managementOnly && managementView === 'groups';
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -1092,12 +1238,12 @@ export function AccountsScreen({
 
   const total = useMemo(() => {
     if (managementOnly) return 0;
-    return accounts.reduce(
-      (sum, account) =>
-        sum +
-        (account.includeInTotals ? (balanceMap.get(account.id) ?? account.startingBalance) : 0),
-      0,
-    );
+    return accounts.reduce((sum, account) => {
+      if (!account.includeInTotals) return sum;
+      const balance = balanceMap.get(account.id) ?? account.startingBalance;
+      const signedBalance = account.type === 'credit' ? -balance : balance;
+      return sum + signedBalance;
+    }, 0);
   }, [accounts, balanceMap, managementOnly]);
   const creditSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, CreditSummary>();
@@ -1348,12 +1494,6 @@ export function AccountsScreen({
       ],
     );
   }, [deleteTransaction, selectedTransactionIds]);
-  const handleSelectionOverlayPlaceholderLayout = useCallback((event: LayoutChangeEvent) => {
-    const nextTop = Math.max(0, Math.round(event.nativeEvent.layout.y));
-    setSelectionOverlayTop((previousTop) =>
-      Math.abs(previousTop - nextTop) < 1 ? previousTop : nextTop,
-    );
-  }, []);
   const applyAccountSave = useCallback(
     ({
       account,
@@ -1477,6 +1617,87 @@ export function AccountsScreen({
     return withBackGesture(
       <SettingsPageLayout edges={safeAreaEdges}>
         <View className="flex-1">
+          <View style={styles.headerContainer}>
+            <SettingsHeader
+              className="px-0 pt-5 pb-2"
+              onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
+              title={I18n.t('accounts.title')}
+              subtitleNode={
+                <Text variant="friendly" tone="muted" numberOfLines={1}>
+                  {account.name}
+                </Text>
+              }
+              rightAccessory={
+                !isSelectionMode ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="h-8 px-3"
+                    onPress={() => {
+                      setShowEditAccount(true);
+                    }}
+                  >
+                    <Text>{I18n.t('accounts.edit_account')}</Text>
+                  </Button>
+                ) : null
+              }
+            />
+          </View>
+          {isSelectionMode ? (
+            <View pointerEvents="box-none" style={styles.selectionOverlay}>
+              <View style={styles.headerContainer}>
+                <View className="rounded-2xl bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
+                  <Pressable
+                    onPress={clearSelection}
+                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.cancel')}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.cancel')}
+                    </Text>
+                  </Pressable>
+
+                  <View className="flex-1 items-center px-1">
+                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('transactions.selection.selected_count', {
+                          count: selectedTransactionCount,
+                        })}
+                      </Text>
+                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                        <Text variant="label" className={selectedTransactionTotalToneClass}>
+                          {selectedTransactionTotalLabel}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View className="flex-row items-center gap-2">
+                    <Pressable
+                      onPress={handleOpenBulkUpdate}
+                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.selection.update')}
+                      hitSlop={8}
+                    >
+                      <Pencil size={14} color={themeColors.primary} />
+                    </Pressable>
+                    <Pressable
+                      onPress={handleDeleteSelectedTransactions}
+                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.delete')}
+                      hitSlop={8}
+                    >
+                      <Trash2 size={14} color={themeColors.coral} />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+          ) : null}
+
           <ActivityTransactionList
             transactions={txns}
             onTransactionPress={handleTransactionPress}
@@ -1493,38 +1714,6 @@ export function AccountsScreen({
             scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
               <View className="pb-2 gap-2">
-                <SettingsHeader
-                  className="px-0 pt-5 pb-2"
-                  onBack={closeSelectedAccount}
-                  title={I18n.t('accounts.title')}
-                  subtitleNode={
-                    <Text variant="friendly" tone="muted" numberOfLines={1}>
-                      {account.name}
-                    </Text>
-                  }
-                  rightAccessory={
-                    isSelectionMode ? undefined : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="h-8 px-3"
-                        onPress={() => {
-                          setShowEditAccount(true);
-                        }}
-                      >
-                        <Text>{I18n.t('accounts.edit_account')}</Text>
-                      </Button>
-                    )
-                  }
-                />
-
-                {isSelectionMode ? (
-                  <View
-                    onLayout={handleSelectionOverlayPlaceholderLayout}
-                    style={{ height: ACCOUNT_SELECTION_OVERLAY_PLACEHOLDER_HEIGHT }}
-                  />
-                ) : null}
-
                 <View className="gap-1.5 px-1 py-1">
                   <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
                     <Text variant="label" tone="muted">
@@ -1604,57 +1793,9 @@ export function AccountsScreen({
                     </Button>
                   </View>
                 ) : null}
-
-                <Text variant="subheading">{I18n.t('nav.activity')}</Text>
               </View>
             }
           />
-
-          {isSelectionMode ? (
-            <View
-              pointerEvents="box-none"
-              className="absolute inset-x-0 z-20"
-              style={{ top: selectionOverlayTop }}
-            >
-              <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
-                <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
-                  </Pressable>
-
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('transactions.selection.selected_count', {
-                      count: selectedTransactionCount,
-                    })}
-                  </Text>
-
-                  <View className="flex-row items-center gap-2">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="rounded-full bg-primary/12 border border-primary/35 px-3 py-1.5 active:opacity-85"
-                    >
-                      <Text variant="caption" className="text-primary">
-                        {I18n.t('transactions.selection.update')}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="rounded-full bg-destructive/10 border border-destructive/35 px-3 py-1.5 active:opacity-85"
-                    >
-                      <Text variant="caption" className="text-destructive">
-                        {I18n.t('common.delete')}
-                      </Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </View>
-            </View>
-          ) : null}
         </View>
         <EditAccountSheet
           visible={showEditAccount}
@@ -1719,6 +1860,8 @@ export function AccountsScreen({
                 <Pressable
                   onPress={handleCloseBulkUpdate}
                   className="px-3 py-2 rounded-full bg-secondary/70"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.cancel')}
                 >
                   <Text variant="caption" tone="muted">
                     {I18n.t('common.cancel')}
@@ -1731,6 +1874,9 @@ export function AccountsScreen({
                     'px-3 py-2 rounded-full',
                     hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
                   )}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.save')}
+                  accessibilityState={{ disabled: !hasBulkChanges }}
                 >
                   <Text
                     variant="caption"
@@ -1744,11 +1890,7 @@ export function AccountsScreen({
 
             <ScrollView
               className="flex-1"
-              contentContainerStyle={{
-                padding: 20,
-                paddingBottom: 34,
-                gap: 14,
-              }}
+              contentContainerStyle={ACCOUNT_BULK_SCROLL_CONTENT_STYLE}
             >
               <View className="gap-2.5">
                 <Text variant="caption" tone="muted">
@@ -1756,7 +1898,7 @@ export function AccountsScreen({
                 </Text>
                 <View
                   className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                  style={{ height: 360 }}
+                  style={styles.bulkDatePanel}
                 >
                   <DatePanel
                     value={bulkDate}
@@ -1802,7 +1944,7 @@ export function AccountsScreen({
   return withBackGesture(
     <SettingsPageLayout edges={safeAreaEdges}>
       {managementOnly ? (
-        <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
+        <View style={styles.headerContainer}>
           <SettingsHeader
             className="px-0 pt-5 pb-1"
             onBack={onBack}
@@ -1859,7 +2001,7 @@ export function AccountsScreen({
               </View>
             </View>
           ) : null}
-          <View style={{ height: 8 }} />
+          <View style={styles.headerSpacer} />
         </View>
       ) : null}
 
@@ -1872,7 +2014,7 @@ export function AccountsScreen({
               mascotMood="curious"
             />
           ) : (
-            <View style={{ flex: 1 }}>
+            <View style={styles.flexContainer}>
               <DraggableFlatList
                 data={localAccountGroups}
                 keyExtractor={(item: AccountGroup) => item.id}
@@ -1900,35 +2042,30 @@ export function AccountsScreen({
                 autoscrollThreshold={80}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{
-                  paddingTop: 6,
-                  paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-                  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-                }}
+                contentContainerStyle={ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE}
               />
             </View>
           )}
         </>
       ) : managementOnly ? (
         <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
+          style={styles.flexContainer}
+          contentContainerStyle={ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE}
           showsVerticalScrollIndicator={false}
         >
           {localAccountGroupSections.map((section, sectionIndex) => (
             <View key={section.id}>
               <View
-                style={{
-                  paddingLeft: 4,
-                  paddingRight: 12,
-                  paddingTop: sectionIndex === 0 ? 6 : 12,
-                  paddingBottom: 4,
-                }}
+                style={[
+                  styles.groupedSectionHeader,
+                  sectionIndex === 0
+                    ? styles.groupedSectionHeaderFirst
+                    : styles.groupedSectionHeaderRest,
+                ]}
               >
-                <Text style={{ fontSize: 11, color: themeColors.textMuted }}>{section.label}</Text>
+                <Text style={[styles.groupedSectionLabel, { color: themeColors.textMuted }]}>
+                  {section.label}
+                </Text>
               </View>
               <DraggableFlatList
                 data={section.accounts.map((acc) => ({ id: acc.id, account: acc }))}
@@ -1969,10 +2106,7 @@ export function AccountsScreen({
           ref={accountsListRef}
           data={groupedAccounts}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-            paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-          }}
+          contentContainerStyle={ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE}
           ListHeaderComponent={
             <View className="pb-2 gap-2">
               <SettingsHeader
@@ -2042,6 +2176,8 @@ export function AccountsScreen({
                     }
                     setSelectedAccountId(account.id);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${I18n.t('nav.account')}: ${account.name}`}
                   className={cn(
                     'mb-1 rounded-2xl border px-3 py-2.5 flex-row items-center gap-2',
                     account.type === 'credit'
