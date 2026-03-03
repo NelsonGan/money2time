@@ -246,7 +246,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   insightsFilterActionButton: {
-    minHeight: 44,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: 999,
@@ -4085,9 +4084,9 @@ export function InsightsScreen({
     setExcludedSavingsIncomeCategoryIds([]);
     setExcludedSavingsExpenseCategoryIds([]);
     setExcludedTimeCostExpenseCategoryId(null);
-    setExcludedAssetHistoryAccountIds(defaultHiddenAssetHistoryAccountIds);
+    setExcludedAssetHistoryAccountIds([]);
     setAssetHistoryScrubMonthByYear({});
-  }, [defaultHiddenAssetHistoryAccountIds]);
+  }, []);
 
   const handleCustomDateSelect = useCallback(
     (field: 'start' | 'end', value: string) => {
@@ -4431,6 +4430,7 @@ export function InsightsScreen({
                   <AccountPanel
                     accounts={assetHistoryAccountOptions}
                     accountGroups={accountGroups}
+                    disableGrouping
                     selectedIds={includedAssetHistoryAccountIds}
                     onToggleSelect={(accountId) =>
                       setExcludedAssetHistoryAccountIds((previous) =>
@@ -4456,7 +4456,7 @@ export function InsightsScreen({
                     </Text>
                   </View>
                   <FilterPill
-                    label={I18n.t('insights.filters.none')}
+                    label={I18n.t('common.clear')}
                     active={excludedTimeCostExpenseCategoryId === null}
                     onPress={() => setExcludedTimeCostExpenseCategoryId(null)}
                   />
@@ -4468,7 +4468,6 @@ export function InsightsScreen({
                   <CategoryPanel
                     parents={savingsExpenseCategoryPanel.parents}
                     childByParent={savingsExpenseCategoryPanel.childByParent}
-                    allowParentSelection
                     selectedCategoryId={excludedTimeCostExpenseCategoryId}
                     onSelect={(categoryId) => setExcludedTimeCostExpenseCategoryId(categoryId)}
                   />
@@ -4488,7 +4487,7 @@ export function InsightsScreen({
                       {I18n.t('insights.filters.exclude_income_categories')}
                     </Text>
                     <FilterPill
-                      label={I18n.t('insights.filters.none')}
+                      label={I18n.t('common.clear')}
                       active={excludedSavingsIncomeCategoryIds.length === 0}
                       onPress={() => setExcludedSavingsIncomeCategoryIds([])}
                     />
@@ -4500,7 +4499,6 @@ export function InsightsScreen({
                     <CategoryPanel
                       parents={savingsIncomeCategoryPanel.parents}
                       childByParent={savingsIncomeCategoryPanel.childByParent}
-                      allowParentSelection
                       selectedCategoryIds={excludedSavingsIncomeCategoryIds}
                       onToggleSelect={(categoryId) =>
                         setExcludedSavingsIncomeCategoryIds((prev) =>
@@ -4519,7 +4517,7 @@ export function InsightsScreen({
                       {I18n.t('insights.filters.exclude_expense_categories')}
                     </Text>
                     <FilterPill
-                      label={I18n.t('insights.filters.none')}
+                      label={I18n.t('common.clear')}
                       active={excludedSavingsExpenseCategoryIds.length === 0}
                       onPress={() => setExcludedSavingsExpenseCategoryIds([])}
                     />
@@ -4531,7 +4529,6 @@ export function InsightsScreen({
                     <CategoryPanel
                       parents={savingsExpenseCategoryPanel.parents}
                       childByParent={savingsExpenseCategoryPanel.childByParent}
-                      allowParentSelection
                       selectedCategoryIds={excludedSavingsExpenseCategoryIds}
                       onToggleSelect={(categoryId) =>
                         setExcludedSavingsExpenseCategoryIds((prev) =>
