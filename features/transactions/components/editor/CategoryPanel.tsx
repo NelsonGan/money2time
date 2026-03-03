@@ -41,6 +41,14 @@ const styles = StyleSheet.create({
   chevronExpanded: {
     transform: [{ rotate: '180deg' }],
   },
+  parentSelectedBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
 });
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -72,19 +80,12 @@ export function CategoryPanel(props: CategoryPanelProps) {
     }
     props.onSelect(categoryId);
   };
+  const handleToggleExpanded = (parentId: string) => {
+    setExpandedParentId((previous) => (previous === parentId ? null : parentId));
+  };
 
   useEffect(() => {
-    if (isMultiSelect) {
-      if (selectedCategoryIds.length === 0) return;
-      const selectedParent = parents.find((parent) => {
-        if (selectedCategorySet.has(parent.id)) return true;
-        return (childByParent.get(parent.id) ?? []).some((child) =>
-          selectedCategorySet.has(child.id),
-        );
-      });
-      if (selectedParent) setExpandedParentId(selectedParent.id);
-      return;
-    }
+    if (isMultiSelect) return;
 
     if (!selectedCategoryId) return;
     const selectedParent = parents.find((parent) => parent.id === selectedCategoryId);
@@ -97,14 +98,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
       (childByParent.get(p.id) ?? []).some((child) => child.id === selectedCategoryId),
     );
     if (ownerParent) setExpandedParentId(ownerParent.id);
-  }, [
-    childByParent,
-    isMultiSelect,
-    parents,
-    selectedCategoryId,
-    selectedCategoryIds,
-    selectedCategorySet,
-  ]);
+  }, [childByParent, isMultiSelect, parents, selectedCategoryId]);
 
   const parentRows = useMemo(() => chunk(parents, COLS), [parents]);
 
@@ -131,57 +125,107 @@ export function CategoryPanel(props: CategoryPanelProps) {
               <View className="flex-row gap-2">
                 {row.map((parent) => {
                   const children = childByParent.get(parent.id) ?? [];
-                  const hasSelectedChild = children.some((child) =>
-                    selectedCategorySet.has(child.id),
+                  const selectedChildCount = children.reduce(
+                    (count, child) => (selectedCategorySet.has(child.id) ? count + 1 : count),
+                    0,
                   );
+                  const hasSelectedChild = selectedChildCount > 0;
                   const isParentSelected = selectedCategorySet.has(parent.id);
-                  const isSelected = isParentSelected || hasSelectedChild;
+                  const parentSelectionState = isParentSelected
+                    ? 'full'
+                    : hasSelectedChild
+                      ? 'partial'
+                      : 'none';
                   const isExpanded = expandedParentId === parent.id;
+                  const isSelected = parentSelectionState !== 'none';
+                  const hasChildren = children.length > 0;
 
                   return (
                     <View key={parent.id} className="flex-1">
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('selection');
-                          if (children.length > 0) {
-                            setExpandedParentId((prev) => (prev === parent.id ? null : parent.id));
+                          if (hasChildren) {
                             if (allowParentSelection) {
                               handleSelection(parent.id);
+                              setExpandedParentId(parent.id);
+                            } else {
+                              handleToggleExpanded(parent.id);
                             }
                             return;
                           }
                           handleSelection(parent.id);
+                          setExpandedParentId(null);
                         }}
                         className={cn(
                           'rounded-xl border px-2.5 py-2.5 flex-row items-center',
-                          isSelected
-                            ? 'bg-primary/10 border-primary/45'
-                            : isExpanded
-                              ? 'bg-primary/5 border-primary/30'
+                          parentSelectionState === 'full'
+                            ? 'bg-primary/16 border-primary/65'
+                            : parentSelectionState === 'partial'
+                              ? 'bg-primary/8 border-primary/45'
                               : 'bg-card border-border/30',
                         )}
+                        accessibilityRole="button"
+                        accessibilityState={{
+                          selected: parentSelectionState !== 'none',
+                          expanded: hasChildren ? isExpanded : undefined,
+                        }}
                       >
                         <Text className="text-[15px] mr-1.5">{parent.icon}</Text>
                         <Text
                           variant="caption"
                           numberOfLines={1}
-                          className={cn(
-                            'flex-1',
-                            isSelected || isExpanded ? 'text-primary' : 'text-foreground',
-                          )}
+                          className={cn('flex-1', isSelected ? 'text-primary' : 'text-foreground')}
                         >
                           {parent.name}
                         </Text>
-                        {isParentSelected &&
-                        !hasSelectedChild &&
-                        !(allowParentSelection && children.length > 0) ? (
+
+                        {allowParentSelection && hasChildren ? (
+                          <View className="ml-0.5 flex-row items-center gap-1">
+                            {parentSelectionState === 'full' ? (
+                              <View
+                                style={styles.parentSelectedBadge}
+                                className="bg-primary border border-primary/60"
+                              >
+                                <Check size={10} color="#FFFFFF" />
+                              </View>
+                            ) : parentSelectionState === 'partial' ? (
+                              <View
+                                style={styles.parentSelectedBadge}
+                                className="bg-primary/14 border border-primary/35"
+                              >
+                                <Text variant="label" className="text-primary text-[10px]">
+                                  {selectedChildCount}
+                                </Text>
+                              </View>
+                            ) : null}
+
+                            <Pressable
+                              onPress={(event) => {
+                                event.stopPropagation();
+                                void triggerHaptic('selection');
+                                handleToggleExpanded(parent.id);
+                              }}
+                              hitSlop={6}
+                              accessibilityRole="button"
+                              accessibilityState={{ expanded: isExpanded }}
+                              className="rounded-full p-0.5"
+                            >
+                              <ChevronDown
+                                size={13}
+                                color={isSelected ? themeColors.primary : themeColors.textMuted}
+                                style={
+                                  isExpanded ? styles.chevronExpanded : styles.chevronCollapsed
+                                }
+                              />
+                            </Pressable>
+                          </View>
+                        ) : isParentSelected && !hasSelectedChild ? (
                           <Check size={14} color={themeColors.primary} />
-                        ) : children.length > 0 ? (
+                        ) : hasChildren ? (
                           <ChevronDown
                             size={13}
-                            color={
-                              isSelected || isExpanded ? themeColors.primary : themeColors.textMuted
-                            }
+                            color={isSelected ? themeColors.primary : themeColors.textMuted}
                             style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                           />
                         ) : null}
@@ -210,8 +254,8 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           className={cn(
                             'rounded-xl border px-2.5 py-2 flex-row items-center',
                             isChildSelected
-                              ? 'bg-primary/10 border-primary/40'
-                              : 'bg-secondary/50 border-border/20',
+                              ? 'bg-primary/14 border-primary/55'
+                              : 'bg-secondary/45 border-border/20',
                           )}
                         >
                           <Text className="text-[13px] mr-1.5">{child.icon}</Text>

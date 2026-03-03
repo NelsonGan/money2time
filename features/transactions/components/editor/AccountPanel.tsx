@@ -13,6 +13,7 @@ interface AccountPanelBaseProps {
   accounts: Account[];
   accountGroups: AccountGroup[];
   disabledId?: string | null;
+  disableGrouping?: boolean;
 }
 
 interface AccountPanelSingleSelectProps extends AccountPanelBaseProps {
@@ -61,7 +62,7 @@ interface GroupSection {
 }
 
 export function AccountPanel(props: AccountPanelProps) {
-  const { accounts, accountGroups, disabledId } = props;
+  const { accounts, accountGroups, disabledId, disableGrouping = false } = props;
   const themeColors = useThemeColors();
   const isMultiSelect = 'selectedIds' in props;
   const selectedId = isMultiSelect ? null : props.selectedId;
@@ -126,8 +127,8 @@ export function AccountPanel(props: AccountPanelProps) {
     if (ownerGroup) setExpandedGroupKey(ownerGroup.key);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // If only one group, show accounts directly (no group tiles)
-  const showGroupTiles = grouped.length > 1;
+  // If grouping is disabled or only one group, show accounts directly.
+  const showGroupTiles = !disableGrouping && grouped.length > 1;
 
   if (!showGroupTiles) {
     const allAccounts = grouped.length === 1 ? grouped[0].accounts : accounts;
