@@ -6,6 +6,7 @@ const zh = {
     save: '保存',
     cancel: '取消',
     reset: '重置',
+    clear: '清空',
     retry: '重试',
     delete: '删除',
     edit: '编辑',
