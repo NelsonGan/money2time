@@ -6,6 +6,7 @@ const en = {
     save: 'Save',
     cancel: 'Cancel',
     reset: 'Reset',
+    clear: 'Clear',
     retry: 'Retry',
     delete: 'Delete',
     edit: 'Edit',
