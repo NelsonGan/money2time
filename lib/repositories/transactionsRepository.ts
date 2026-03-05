@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import { getDb, getSQLite } from '~/lib/db/client';
@@ -54,6 +54,15 @@ const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   maxAmount: null,
   sortBy: 'date_desc',
 };
+const inClausePlaceholdersByCount = new Map<number, string>();
+
+function getInClausePlaceholders(count: number): string {
+  const cached = inClausePlaceholdersByCount.get(count);
+  if (cached) return cached;
+  const placeholders = Array.from({ length: count }, () => '?').join(',');
+  inClausePlaceholdersByCount.set(count, placeholders);
+  return placeholders;
+}
 
 function normalizeTransactionFilters(
   filters: Partial<TransactionFilters> = {},
@@ -64,27 +73,15 @@ function normalizeTransactionFilters(
   };
 }
 
-function buildSort(sortBy: TransactionFilters['sortBy']) {
-  switch (sortBy) {
-    case 'date_asc':
-      return [sql`substr(${transactionsTable.date}, 1, 10) asc`, asc(transactionsTable.updatedAt)];
-    case 'amount_desc':
-      return [desc(transactionsTable.amount)];
-    case 'amount_asc':
-      return [asc(transactionsTable.amount)];
-    default:
-      return [
-        sql`substr(${transactionsTable.date}, 1, 10) desc`,
-        desc(transactionsTable.updatedAt),
-      ];
-  }
-}
-
 function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
   if (transactions.length === 0) return [];
 
-  const txIds = transactions.map((t) => t.id);
+  const txIds: string[] = [];
+  transactions.forEach((transaction) => {
+    txIds.push(transaction.id);
+  });
   const sqlite = getSQLite();
+  const inClausePlaceholders = getInClausePlaceholders(txIds.length);
 
   const rows = sqlite.getAllSync<{
     txId: string;
@@ -120,19 +117,24 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
     LEFT JOIN categories c ON c.id = t.category_id AND c.deleted_at IS NULL
     LEFT JOIN categories p ON p.id = c.parent_id AND p.deleted_at IS NULL
-    WHERE t.id IN (${txIds.map(() => '?').join(',')})
+    WHERE t.id IN (${inClausePlaceholders})
   `,
     txIds,
   );
 
   const relationMap = new Map<string, RelationRow>();
-  rows.forEach((r: RelationRow) => {
-    relationMap.set(r.txId, r);
-  });
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index];
+    if (!row) continue;
+    relationMap.set(row.txId, row);
+  }
 
-  return transactions.map((transaction) => {
+  const withRelations: TransactionWithRelations[] = [];
+  for (let index = 0; index < transactions.length; index += 1) {
+    const transaction = transactions[index];
+    if (!transaction) continue;
     const rel = relationMap.get(transaction.id);
-    return {
+    withRelations.push({
       ...transaction,
       accountName: rel?.accountName ?? null,
       fromAccountName: rel?.fromAccountName ?? null,
@@ -140,8 +142,9 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       categoryName: rel?.categoryName ?? null,
       categoryParentName: rel?.parentCategoryName ?? null,
       categoryIcon: rel?.categoryIcon ?? null,
-    };
-  });
+    });
+  }
+  return withRelations;
 }
 
 class TransactionsRepository {
@@ -179,7 +182,6 @@ class TransactionsRepository {
       .select()
       .from(transactionsTable)
       .where(and(...predicates))
-      .orderBy(...buildSort(normalized.sortBy))
       .all()
       .map(toTransaction);
     const orderedRows = sortTransactions(rows, normalized.sortBy);
@@ -246,12 +248,49 @@ class TransactionsRepository {
       .run();
   }
 
+  updateMany(updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>) {
+    if (updates.length === 0) return;
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      for (let index = 0; index < updates.length; index += 1) {
+        const update = updates[index];
+        if (!update) continue;
+        const { id, input } = update;
+        db.update(transactionsTable)
+          .set({
+            ...input,
+            updatedAt: now,
+          })
+          .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
+          .run();
+      }
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();
     db.update(transactionsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
+      .run();
+  }
+
+  softDeleteMany(ids: string[]) {
+    if (ids.length === 0) return;
+    const db = getDb();
+    const now = nowIso();
+    db.update(transactionsTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(and(isNull(transactionsTable.deletedAt), inArray(transactionsTable.id, ids)))
       .run();
   }
 
@@ -321,10 +360,6 @@ class TransactionsRepository {
           start ? gte(transactionsTable.date, start) : undefined,
           end ? lte(transactionsTable.date, end) : undefined,
         ),
-      )
-      .orderBy(
-        sql`substr(${transactionsTable.date}, 1, 10) desc`,
-        desc(transactionsTable.updatedAt),
       )
       .all()
       .map(toTransaction);

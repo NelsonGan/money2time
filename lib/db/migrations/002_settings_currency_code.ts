@@ -27,9 +27,9 @@ function inferCurrencyCodeFromSymbol(symbol: string, locale: string): string {
     '£': 'GBP',
     '₹': 'INR',
     '₩': 'KRW',
-    'HK$': 'HKD',
-    'S$': 'SGD',
-    'NT$': 'TWD',
+    HK$: 'HKD',
+    S$: 'SGD',
+    NT$: 'TWD',
     '฿': 'THB',
     RM: 'MYR',
     Rp: 'IDR',
@@ -37,12 +37,12 @@ function inferCurrencyCodeFromSymbol(symbol: string, locale: string): string {
     '₫': 'VND',
     '₨': 'PKR',
     '৳': 'BDT',
-    'C$': 'CAD',
-    'A$': 'AUD',
-    'NZ$': 'NZD',
+    C$: 'CAD',
+    A$: 'AUD',
+    NZ$: 'NZD',
     CHF: 'CHF',
-    'MX$': 'MXN',
-    'R$': 'BRL',
+    MX$: 'MXN',
+    R$: 'BRL',
     R: 'ZAR',
     AED: 'AED',
   };
@@ -58,9 +58,7 @@ export const migration002SettingsCurrencyCode: DbMigration = {
     const hasCurrencyCode = columns.some((column) => column.name === 'currency_code');
 
     if (!hasCurrencyCode) {
-      db.execSync(
-        "ALTER TABLE settings ADD COLUMN currency_code TEXT NOT NULL DEFAULT 'USD';",
-      );
+      db.execSync("ALTER TABLE settings ADD COLUMN currency_code TEXT NOT NULL DEFAULT 'USD';");
     }
 
     const rows = db.getAllSync<{ id: string; locale: string; currency_symbol: string }>(

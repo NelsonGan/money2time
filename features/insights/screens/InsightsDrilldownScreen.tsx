@@ -19,7 +19,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { formatAmount, formatDateInput, formatHours } from '~/utils/formatters';
@@ -138,9 +138,10 @@ export function InsightsDrilldownScreen({
     categories,
     transactions,
     settings,
-    updateTransaction,
-    deleteTransaction,
+    updateTransactionsBulk,
+    deleteTransactionsBulk,
     getDisplayValueForTransaction,
+    getTrueHourlyRateForDate,
   } = useApp();
   const [drilldownTypeFilter, setDrilldownTypeFilter] =
     useState<DrilldownTransactionFilter>('expense');
@@ -153,11 +154,15 @@ export function InsightsDrilldownScreen({
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const drilldownScrollToTopRef = useRef<(() => void) | null>(null);
-
-  const transactionById = useMemo(
-    () => new Map(transactions.map((transaction) => [transaction.id, transaction])),
-    [transactions],
+  const transactionDisplaySettings = useMemo(
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+      hourRounding: settings.hourRounding,
+    }),
+    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
   );
+
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -167,23 +172,29 @@ export function InsightsDrilldownScreen({
     () => (rootCategoryId ? (categoryById.get(rootCategoryId) ?? null) : null),
     [categoryById, rootCategoryId],
   );
-  const rootChildCategories = useMemo(
-    () =>
-      rootCategoryId
-        ? categories
-            .filter((category) => category.parentId === rootCategoryId)
-            .sort((a, b) => {
-              const orderDelta = (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
-              if (orderDelta !== 0) return orderDelta;
-              return a.name.localeCompare(b.name);
-            })
-        : [],
-    [categories, rootCategoryId],
-  );
-  const rootChildCategoryIdSet = useMemo(
-    () => new Set(rootChildCategories.map((category) => category.id)),
-    [rootChildCategories],
-  );
+  const { rootChildCategories, rootChildCategoryIdSet } = useMemo(() => {
+    if (!rootCategoryId) {
+      return {
+        rootChildCategories: [] as Category[],
+        rootChildCategoryIdSet: new Set<string>(),
+      };
+    }
+
+    const children: Category[] = [];
+    const childIds = new Set<string>();
+    categories.forEach((category) => {
+      if (category.parentId !== rootCategoryId) return;
+      children.push(category);
+      childIds.add(category.id);
+    });
+    children.sort((a, b) => {
+      const orderDelta = (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      if (orderDelta !== 0) return orderDelta;
+      return a.name.localeCompare(b.name);
+    });
+
+    return { rootChildCategories: children, rootChildCategoryIdSet: childIds };
+  }, [categories, rootCategoryId]);
   const hasRootChildCategories = rootChildCategories.length > 0;
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
@@ -200,13 +211,18 @@ export function InsightsDrilldownScreen({
 
   const sortTransactions = useCallback(
     (items: TransactionWithRelations[]) => {
-      if (drilldownSortOption !== 'largest_value') return items;
+      if (drilldownSortOption !== 'largest_value' || items.length < 2) return items;
+      const valueById = new Map<string, number>();
+      items.forEach((item) => {
+        valueById.set(
+          item.id,
+          settings.displayMode === 'time' ? getDisplayValueForTransaction(item) : item.amount,
+        );
+      });
       const sorted = [...items];
       sorted.sort((a, b) => {
-        const aValue =
-          settings.displayMode === 'time' ? getDisplayValueForTransaction(a) : a.amount;
-        const bValue =
-          settings.displayMode === 'time' ? getDisplayValueForTransaction(b) : b.amount;
+        const aValue = valueById.get(a.id) ?? 0;
+        const bValue = valueById.get(b.id) ?? 0;
         const amountDelta = Math.abs(bValue) - Math.abs(aValue);
         if (amountDelta !== 0) return amountDelta;
         const dateDelta = b.date.localeCompare(a.date);
@@ -217,15 +233,26 @@ export function InsightsDrilldownScreen({
     },
     [drilldownSortOption, getDisplayValueForTransaction, settings.displayMode],
   );
-  const resolvedTransactions = useMemo(
-    () =>
-      sortTransactions(
-        payload.transactionIds
-          .map((id) => transactionById.get(id))
-          .filter((transaction): transaction is TransactionWithRelations => Boolean(transaction)),
-      ),
-    [payload.transactionIds, sortTransactions, transactionById],
-  );
+  const { resolvedTransactions, payloadTransactionById } = useMemo(() => {
+    const requestedTransactionIds = new Set(payload.transactionIds);
+    const nextTransactionById = new Map<string, TransactionWithRelations>();
+    transactions.forEach((transaction) => {
+      if (!requestedTransactionIds.has(transaction.id)) return;
+      nextTransactionById.set(transaction.id, transaction);
+    });
+
+    const resolved: TransactionWithRelations[] = [];
+    payload.transactionIds.forEach((id) => {
+      const transaction = nextTransactionById.get(id);
+      if (transaction) {
+        resolved.push(transaction);
+      }
+    });
+    return {
+      resolvedTransactions: sortTransactions(resolved),
+      payloadTransactionById: nextTransactionById,
+    };
+  }, [payload.transactionIds, sortTransactions, transactions]);
   const subcategoryRows = useMemo<DrilldownSubcategoryRow[]>(() => {
     if (!rootCategoryId || !hasRootChildCategories) return [];
 
@@ -345,44 +372,37 @@ export function InsightsDrilldownScreen({
     () => (shouldShowSubcategoryList ? EMPTY_DRILLDOWN_TRANSACTIONS : resolvedTransactions),
     [resolvedTransactions, shouldShowSubcategoryList],
   );
-  const incomeTransactions = useMemo(
-    () =>
-      sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'income')),
-    [scopedTransactions, sortTransactions],
-  );
-  const expenseTransactions = useMemo(
-    () =>
-      sortTransactions(scopedTransactions.filter((transaction) => transaction.type === 'expense')),
-    [scopedTransactions, sortTransactions],
-  );
-  const displayedTransactions =
-    payload.showTypeFilter && drilldownTypeFilter === 'income'
-      ? incomeTransactions
-      : payload.showTypeFilter
-        ? expenseTransactions
-        : scopedTransactions;
-  const selectedTransactionIdSet = useMemo(
-    () => new Set(selectedTransactionIds),
-    [selectedTransactionIds],
-  );
-  const selectedTransactionTotal = useMemo(
-    () =>
-      displayedTransactions.reduce((sum, transaction) => {
-        if (!selectedTransactionIdSet.has(transaction.id)) return sum;
-        return (
-          sum +
-          (settings.displayMode === 'time'
-            ? getDisplayValueForTransaction(transaction)
-            : transaction.amount)
-        );
-      }, 0),
-    [
-      displayedTransactions,
-      getDisplayValueForTransaction,
-      selectedTransactionIdSet,
-      settings.displayMode,
-    ],
-  );
+  const displayedTransactions = useMemo(() => {
+    if (!payload.showTypeFilter) return scopedTransactions;
+
+    const targetType = drilldownTypeFilter === 'income' ? 'income' : 'expense';
+    const filtered: TransactionWithRelations[] = [];
+    scopedTransactions.forEach((transaction) => {
+      if (transaction.type === targetType) {
+        filtered.push(transaction);
+      }
+    });
+    return sortTransactions(filtered);
+  }, [drilldownTypeFilter, payload.showTypeFilter, scopedTransactions, sortTransactions]);
+  const selectedTransactionTotal = useMemo(() => {
+    if (selectedTransactionIds.length === 0) return 0;
+
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let total = 0;
+    displayedTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      total +=
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(transaction)
+          : transaction.amount;
+    });
+    return total;
+  }, [
+    displayedTransactions,
+    getDisplayValueForTransaction,
+    selectedTransactionIds,
+    settings.displayMode,
+  ]);
   const selectedTransactionTotalLabel = useMemo(
     () =>
       settings.displayMode === 'time'
@@ -472,11 +492,14 @@ export function InsightsDrilldownScreen({
     };
   }, [handleInterceptBack, shouldInterceptRouteBack]);
   const toggleSelection = useCallback((transactionId: string) => {
-    setSelectedTransactionIds((previous) =>
-      previous.includes(transactionId)
-        ? previous.filter((id) => id !== transactionId)
-        : [...previous, transactionId],
-    );
+    setSelectedTransactionIds((previous) => {
+      const index = previous.indexOf(transactionId);
+      if (index === -1) return [...previous, transactionId];
+      if (previous.length === 1) return [];
+      const next = [...previous];
+      next.splice(index, 1);
+      return next;
+    });
   }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -521,10 +544,21 @@ export function InsightsDrilldownScreen({
       baseUpdates.note = normalizedNote.length > 0 ? normalizedNote : null;
     }
 
-    let appliedCount = 0;
+    const updatesById: Array<{
+      id: string;
+      input: {
+        date?: string;
+        note?: string | null;
+        type?: EditableTransactionType;
+        accountId?: string | null;
+        categoryId?: string | null;
+        fromAccountId?: string | null;
+        toAccountId?: string | null;
+      };
+    }> = [];
 
     selectedTransactionIds.forEach((transactionId) => {
-      const existing = transactionById.get(transactionId);
+      const existing = payloadTransactionById.get(transactionId);
       const updates: {
         date?: string;
         note?: string | null;
@@ -556,11 +590,12 @@ export function InsightsDrilldownScreen({
       }
 
       if (Object.keys(updates).length === 0) return;
-      updateTransaction(transactionId, updates);
-      appliedCount += 1;
+      updatesById.push({ id: transactionId, input: updates });
     });
 
-    if (appliedCount === 0) return;
+    if (updatesById.length === 0) return;
+
+    updateTransactionsBulk(updatesById);
 
     setShowBulkUpdate(false);
     setSelectedTransactionIds([]);
@@ -572,8 +607,8 @@ export function InsightsDrilldownScreen({
     bulkType,
     hasBulkChanges,
     selectedTransactionIds,
-    transactionById,
-    updateTransaction,
+    payloadTransactionById,
+    updateTransactionsBulk,
   ]);
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -587,16 +622,14 @@ export function InsightsDrilldownScreen({
           text: I18n.t('common.delete'),
           style: 'destructive',
           onPress: () => {
-            idsToDelete.forEach((transactionId) => {
-              deleteTransaction(transactionId);
-            });
+            deleteTransactionsBulk(idsToDelete);
             setShowBulkUpdate(false);
             setSelectedTransactionIds([]);
           },
         },
       ],
     );
-  }, [deleteTransaction, selectedTransactionIds]);
+  }, [deleteTransactionsBulk, selectedTransactionIds]);
 
   useEffect(() => {
     if (!isSelectionMode) {
@@ -961,6 +994,9 @@ export function InsightsDrilldownScreen({
           {shouldShowTransactions ? (
             <ActivityTransactionList
               transactions={displayedTransactions}
+              displaySettings={transactionDisplaySettings}
+              getDisplayValueForTransaction={getDisplayValueForTransaction}
+              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
               onTransactionPress={handleTransactionPress}
               onTransactionLongPress={handleTransactionLongPress}
               selectedTransactionIds={selectedTransactionIds}

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -155,16 +156,19 @@ function RecurringRuleRow({
 function HomeTabs({
   tabs,
   activeIndex,
+  pagerOffsetX,
+  pagerWidth,
   onTabChange,
 }: {
   tabs: string[];
   activeIndex: number;
+  pagerOffsetX: SharedValue<number>;
+  pagerWidth: number;
   onTabChange: (index: number) => void;
 }) {
   const themeColors = useThemeColors();
   const [barWidth, setBarWidth] = useState(0);
   const tabWidth = barWidth > 0 ? barWidth / tabs.length : 0;
-  const indicatorX = useSharedValue(0);
   const tabsBorderStyle = useMemo(
     () => ({ borderBottomColor: themeColors.border }),
     [themeColors.border],
@@ -174,13 +178,18 @@ function HomeTabs({
     [themeColors.primary],
   );
 
-  useEffect(() => {
-    if (tabWidth <= 0) return;
-    indicatorX.value = withTiming(activeIndex * tabWidth, { duration: 220 });
-  }, [activeIndex, tabWidth, indicatorX]);
-
   const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: indicatorX.value }],
+    transform: [
+      {
+        translateX:
+          tabWidth > 0 && pagerWidth > 0
+            ? Math.max(
+                0,
+                Math.min((pagerOffsetX.value / pagerWidth) * tabWidth, tabWidth * (tabs.length - 1)),
+              )
+            : activeIndex * tabWidth,
+      },
+    ],
     width: tabWidth,
   }));
 
@@ -241,15 +250,17 @@ export function HomeScreen({
   // Simple mode: Home(0), Recurring(1) — default (0)
   const defaultTabIndex = isSimpleMode ? 0 : 1;
   const [activeHomeTabIndex, setActiveHomeTabIndex] = useState(defaultTabIndex);
+  const pagerOffsetX = useSharedValue(defaultTabIndex * screenWidth);
   const [estimatorAmount, setEstimatorAmount] = useState('');
 
   // Reset to home if on out-of-range tab when entering simple mode
   useEffect(() => {
     if (isSimpleMode && activeHomeTabIndex > 1) {
       setActiveHomeTabIndex(0);
+      pagerOffsetX.value = 0;
       pagerRef.current?.scrollTo({ x: 0, animated: false });
     }
-  }, [isSimpleMode, activeHomeTabIndex]);
+  }, [activeHomeTabIndex, isSimpleMode, pagerOffsetX]);
 
   const homeTabs = useMemo(() => {
     if (isSimpleMode) return [I18n.t('nav.home'), I18n.t('home.recurring.tab')];
@@ -267,9 +278,20 @@ export function HomeScreen({
   const handlePagerScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const x = e.nativeEvent.contentOffset.x;
+      pagerOffsetX.value = x;
       setActiveHomeTabIndex(Math.round(x / screenWidth));
     },
-    [screenWidth],
+    [pagerOffsetX, screenWidth],
+  );
+
+  const handlePagerScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const x = e.nativeEvent.contentOffset.x;
+      pagerOffsetX.value = x;
+      const nextIndex = Math.round(x / screenWidth);
+      setActiveHomeTabIndex((prev) => (prev === nextIndex ? prev : nextIndex));
+    },
+    [pagerOffsetX, screenWidth],
   );
 
   const walletRecurringRules = useMemo(() => {
@@ -300,23 +322,26 @@ export function HomeScreen({
       }
     };
 
-    return walletRecurringRules
-      .filter((rule) => rule.type === 'expense')
-      .map((rule) => {
-        const factor = monthlyFactor(rule.recurrencePattern, rule.recurrenceInterval);
-        const monthlyAmount = rule.amount * factor;
-        return {
-          ...rule,
-          monthlyAmount,
-          monthlyHours: hasHourlyRate
-            ? amountToHoursByRate(monthlyAmount, rate, settings.hourRounding)
-            : 0,
-        };
-      })
-      .sort((a, b) => {
-        if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-        return Math.abs(b.monthlyAmount) - Math.abs(a.monthlyAmount);
+    const next: Array<
+      (typeof walletRecurringRules)[number] & { monthlyAmount: number; monthlyHours: number }
+    > = [];
+    walletRecurringRules.forEach((rule) => {
+      if (rule.type !== 'expense') return;
+      const factor = monthlyFactor(rule.recurrencePattern, rule.recurrenceInterval);
+      const monthlyAmount = rule.amount * factor;
+      next.push({
+        ...rule,
+        monthlyAmount,
+        monthlyHours: hasHourlyRate
+          ? amountToHoursByRate(monthlyAmount, rate, settings.hourRounding)
+          : 0,
       });
+    });
+    next.sort((a, b) => {
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+      return Math.abs(b.monthlyAmount) - Math.abs(a.monthlyAmount);
+    });
+    return next;
   }, [hasHourlyRate, rate, walletRecurringRules, settings.hourRounding]);
 
   const categoryById = useMemo(
@@ -459,7 +484,13 @@ export function HomeScreen({
         <Text variant="heading">{I18n.t('app.name')}</Text>
         <DisplayModeToggle />
       </View>
-      <HomeTabs tabs={homeTabs} activeIndex={activeHomeTabIndex} onTabChange={switchTab} />
+      <HomeTabs
+        tabs={homeTabs}
+        activeIndex={activeHomeTabIndex}
+        pagerOffsetX={pagerOffsetX}
+        pagerWidth={screenWidth}
+        onTabChange={switchTab}
+      />
 
       <ScrollView
         ref={pagerRef}
@@ -468,6 +499,8 @@ export function HomeScreen({
         directionalLockEnabled
         bounces={false}
         showsHorizontalScrollIndicator={false}
+        onScroll={handlePagerScroll}
+        scrollEventThrottle={16}
         onMomentumScrollEnd={handlePagerScrollEnd}
         decelerationRate="fast"
         style={styles.pagerScroll}

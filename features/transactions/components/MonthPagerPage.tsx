@@ -6,7 +6,10 @@ import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations } from '~/types';
 import { addMonthsAtMonthStart, monthKeyFromDateLocal } from '~/utils/formatters';
 
-import { ActivityTransactionList } from './ActivityTransactionList';
+import {
+  ActivityTransactionList,
+  type TransactionDisplaySettings,
+} from './ActivityTransactionList';
 
 type ScrollToTopHandler = (() => void) | null;
 
@@ -17,6 +20,9 @@ interface MonthPagerPageProps {
   localeKey: string;
   monthPageStyle: StyleProp<ViewStyle>;
   monthTransactionsMap: Map<string, TransactionWithRelations[]>;
+  displaySettings: TransactionDisplaySettings;
+  getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
+  getTrueHourlyRateForDate: (dateIso: string) => number;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
@@ -33,6 +39,9 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   localeKey,
   monthPageStyle,
   monthTransactionsMap,
+  displaySettings,
+  getDisplayValueForTransaction,
+  getTrueHourlyRateForDate,
   onTransactionPress,
   onTransactionLongPress,
   selectedTransactionIds = [],
@@ -50,6 +59,9 @@ export const MonthPagerPage = memo(function MonthPagerPage({
     <View style={monthPageStyle} className="flex-1 bg-background">
       <ActivityTransactionList
         transactions={pageTransactions}
+        displaySettings={displaySettings}
+        getDisplayValueForTransaction={getDisplayValueForTransaction}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         onTransactionPress={onTransactionPress}
         onTransactionLongPress={onTransactionLongPress}
         selectedTransactionIds={selectedTransactionIds}
