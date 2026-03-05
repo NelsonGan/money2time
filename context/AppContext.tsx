@@ -59,6 +59,7 @@ import {
   normalizeMonthKey,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
+import { sortTransactions } from '~/utils/transactionSorting';
 
 interface AppContextValue extends AppState {
   filteredTransactions: TransactionWithRelations[];
@@ -311,28 +312,7 @@ function applyTransactionFilters(
     return true;
   });
 
-  const sorted = [...filtered];
-  switch (filters.sortBy) {
-    case 'date_asc':
-      sorted.sort((a, b) => a.date.localeCompare(b.date));
-      break;
-    case 'amount_desc':
-      sorted.sort((a, b) => b.amount - a.amount);
-      break;
-    case 'amount_asc':
-      sorted.sort((a, b) => a.amount - b.amount);
-      break;
-    case 'date_desc':
-    default:
-      sorted.sort((a, b) => {
-        const dayDelta = b.date.slice(0, 10).localeCompare(a.date.slice(0, 10));
-        if (dayDelta !== 0) return dayDelta;
-        return b.createdAt.localeCompare(a.createdAt);
-      });
-      break;
-  }
-
-  return sorted;
+  return sortTransactions(filtered, filters.sortBy);
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -795,11 +775,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           transaction.fromAccountId === accountId ||
           transaction.toAccountId === accountId,
       );
-      return [...filtered].sort((a, b) => {
-        const dayDelta = b.date.slice(0, 10).localeCompare(a.date.slice(0, 10));
-        if (dayDelta !== 0) return dayDelta;
-        return b.createdAt.localeCompare(a.createdAt);
-      });
+      return sortTransactions(filtered, 'date_desc');
     },
     [transactions],
   );
