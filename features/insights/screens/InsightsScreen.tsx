@@ -13,13 +13,6 @@ import {
 } from 'react-native';
 import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
-import {
-  createGraphPath,
-  getGraphPathRange,
-  getPointsInRange,
-  getXInRange,
-} from 'react-native-graph/src/CreateGraphPath';
-import { getYForX } from 'react-native-graph/src/GetYForX';
 import { PieChart } from 'react-native-chart-kit';
 import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -133,11 +126,9 @@ const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
 const GRAPH_HORIZONTAL_PADDING = 8;
 const GRAPH_VERTICAL_PADDING = 14;
-const GRAPH_POINT_DOT_RADIUS = 3;
 const Y_AXIS_LABEL_BASE_FONT_SIZE = 11;
 const Y_AXIS_LABEL_MIN_FONT_SIZE = 9;
 const CHART_SKELETON_READY_DELAY_MS = 180;
-const CHART_DOTS_REVEAL_DELAY_MS = 220;
 const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
 const DEFAULT_HOURS_PER_WEEK = 40;
@@ -165,13 +156,6 @@ const styles = StyleSheet.create({
   },
   chartSizeCenter: {
     alignSelf: 'center',
-  },
-  graphPointDot: {
-    position: 'absolute',
-    width: GRAPH_POINT_DOT_RADIUS * 2,
-    height: GRAPH_POINT_DOT_RADIUS * 2,
-    borderRadius: GRAPH_POINT_DOT_RADIUS,
-    borderWidth: 1.5,
   },
   graphYAxisRow: {
     position: 'absolute',
@@ -908,11 +892,6 @@ type GraphAxisTick = {
   top: number;
 };
 
-type GraphPointCoordinate = {
-  x: number;
-  y: number;
-};
-
 type GraphLineRange = {
   x?: { min: Date; max: Date };
   y?: { min: number; max: number };
@@ -955,42 +934,6 @@ function resolveFlatGraphRange(points: GraphPoint[]): GraphLineRange | undefined
   return { y: { min: centerValue - offset, max: centerValue + offset } };
 }
 
-function buildGraphPointCoordinates(
-  points: GraphPoint[],
-  chartWidth: number,
-  chartHeight: number,
-  range?: GraphLineRange,
-): GraphPointCoordinate[] {
-  if (points.length === 0 || chartWidth <= 0 || chartHeight <= 0) return [];
-  const safeWidth = Math.max(1, Math.round(chartWidth));
-  const safeHeight = Math.max(1, Math.round(chartHeight));
-  const pathRange = getGraphPathRange(points, range);
-  const pointsInRange = getPointsInRange(points, pathRange);
-  const drawingWidth = Math.max(1, safeWidth - GRAPH_HORIZONTAL_PADDING * 2);
-  const path = createGraphPath({
-    pointsInRange,
-    range: pathRange,
-    horizontalPadding: GRAPH_HORIZONTAL_PADDING,
-    verticalPadding: GRAPH_VERTICAL_PADDING,
-    canvasHeight: safeHeight,
-    canvasWidth: safeWidth,
-  });
-  const commands = path.toCmds();
-
-  return pointsInRange.map((point) => {
-    const x = getXInRange(drawingWidth, point.date, pathRange.x) + GRAPH_HORIZONTAL_PADDING;
-    const y = getYForX(commands, x);
-    const fallbackY = safeHeight / 2;
-    return {
-      x: Math.max(GRAPH_HORIZONTAL_PADDING, Math.min(safeWidth - GRAPH_HORIZONTAL_PADDING, x)),
-      y: Math.max(
-        GRAPH_VERTICAL_PADDING,
-        Math.min(safeHeight - GRAPH_VERTICAL_PADDING, y ?? fallbackY),
-      ),
-    };
-  });
-}
-
 function buildGraphDatasetSignature(points: GraphPoint[]) {
   if (points.length === 0) return 'empty';
   return points.map((point) => `${point.date.getTime()}:${point.value.toFixed(4)}`).join('|');
@@ -998,27 +941,22 @@ function buildGraphDatasetSignature(points: GraphPoint[]) {
 
 function useDeferredChartVisibility(datasetSignature: string, chartWidth: number) {
   const [isChartReady, setIsChartReady] = useState(false);
-  const [showDots, setShowDots] = useState(false);
 
   useEffect(() => {
     setIsChartReady(false);
-    setShowDots(false);
     let readyTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    let dotsTimeoutId: ReturnType<typeof setTimeout> | null = null;
     const frameId = requestAnimationFrame(() => {
       readyTimeoutId = setTimeout(() => {
         setIsChartReady(true);
-        dotsTimeoutId = setTimeout(() => setShowDots(true), CHART_DOTS_REVEAL_DELAY_MS);
       }, CHART_SKELETON_READY_DELAY_MS);
     });
     return () => {
       cancelAnimationFrame(frameId);
       if (readyTimeoutId) clearTimeout(readyTimeoutId);
-      if (dotsTimeoutId) clearTimeout(dotsTimeoutId);
     };
   }, [chartWidth, datasetSignature]);
 
-  return { isChartReady, showDots };
+  return { isChartReady };
 }
 
 function ScrubRollingNumber({
@@ -1051,43 +989,6 @@ function ScrubRollingNumber({
     </View>
   );
 }
-
-const GraphPointDots = React.memo(function GraphPointDots({
-  points,
-  chartWidth,
-  chartHeight,
-  strokeColor,
-  fillColor,
-}: {
-  points: GraphPointCoordinate[];
-  chartWidth: number;
-  chartHeight: number;
-  strokeColor: string;
-  fillColor: string;
-}) {
-  if (points.length === 0) return null;
-  return (
-    <View
-      pointerEvents="none"
-      style={[styles.absoluteOverlay, buildSizeStyle(chartWidth, chartHeight)]}
-    >
-      {points.map((point, index) => (
-        <View
-          key={`dot-${index}`}
-          style={[
-            styles.graphPointDot,
-            {
-              left: point.x - GRAPH_POINT_DOT_RADIUS,
-              top: point.y - GRAPH_POINT_DOT_RADIUS,
-              borderColor: strokeColor,
-              backgroundColor: fillColor,
-            },
-          ]}
-        />
-      ))}
-    </View>
-  );
-});
 
 const GraphYAxisGrid = React.memo(function GraphYAxisGrid({
   ticks,
@@ -1239,7 +1140,6 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   monthRows,
   chartWidth,
   primaryColor,
-  surfaceColor,
   onSelectMonthKey,
   onGestureStart,
   onGestureEnd,
@@ -1247,7 +1147,6 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   monthRows: AssetHistoryMonthRow[];
   chartWidth: number;
   primaryColor: string;
-  surfaceColor: string;
   onSelectMonthKey: (monthKey: string) => void;
   onGestureStart: () => void;
   onGestureEnd: () => void;
@@ -1261,11 +1160,6 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
     [monthRows],
   );
   const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const dotCoordinates = useMemo(
-    () =>
-      buildGraphPointCoordinates(graphPoints, chartWidth, ASSET_HISTORY_CHART_HEIGHT, graphRange),
-    [graphPoints, chartWidth, graphRange],
-  );
   const graphDatasetSignature = useMemo(
     () => buildGraphDatasetSignature(graphPoints),
     [graphPoints],
@@ -1287,7 +1181,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
     },
     [monthKeyByTime, onSelectMonthKey],
   );
-  const { isChartReady, showDots } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
+  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
   return (
     <View style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
@@ -1313,15 +1207,6 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
             onGestureEnd={onGestureEnd}
             style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}
           />
-          {showDots ? (
-            <GraphPointDots
-              points={dotCoordinates}
-              chartWidth={chartWidth}
-              chartHeight={ASSET_HISTORY_CHART_HEIGHT}
-              strokeColor={withColorAlpha(primaryColor, 0.9)}
-              fillColor={surfaceColor}
-            />
-          ) : null}
         </>
       ) : (
         <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={ASSET_HISTORY_CHART_HEIGHT} />
@@ -1335,7 +1220,6 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   rates,
   chartWidth,
   primaryColor,
-  surfaceColor,
   onSelectPointIndex,
   onGestureStart,
   onGestureEnd,
@@ -1344,7 +1228,6 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   rates: number[];
   chartWidth: number;
   primaryColor: string;
-  surfaceColor: string;
   onSelectPointIndex: (index: number) => void;
   onGestureStart: () => void;
   onGestureEnd: () => void;
@@ -1358,10 +1241,6 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
     [points, rates],
   );
   const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const dotCoordinates = useMemo(
-    () => buildGraphPointCoordinates(graphPoints, chartWidth, INCOME_RATE_CHART_HEIGHT, graphRange),
-    [graphPoints, chartWidth, graphRange],
-  );
   const graphDatasetSignature = useMemo(
     () => buildGraphDatasetSignature(graphPoints),
     [graphPoints],
@@ -1378,7 +1257,7 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
     },
     [indexByTime, onSelectPointIndex],
   );
-  const { isChartReady, showDots } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
+  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
   return (
     <View style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}>
@@ -1404,15 +1283,6 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
             onGestureEnd={onGestureEnd}
             style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}
           />
-          {showDots ? (
-            <GraphPointDots
-              points={dotCoordinates}
-              chartWidth={chartWidth}
-              chartHeight={INCOME_RATE_CHART_HEIGHT}
-              strokeColor={withColorAlpha(primaryColor, 0.9)}
-              fillColor={surfaceColor}
-            />
-          ) : null}
         </>
       ) : (
         <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={INCOME_RATE_CHART_HEIGHT} />
@@ -2607,6 +2477,13 @@ export function InsightsScreen({
       `${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`,
     [settings.currencySymbol],
   );
+  const formatAxisAssetValue = useCallback(
+    (value: number) =>
+      settings.displayMode === 'time'
+        ? `${value < 0 ? '-' : ''}${formatHours(Math.abs(value))}`
+        : formatAxisCurrencyValue(value),
+    [formatAxisCurrencyValue, settings.displayMode],
+  );
 
   const chartConfig = useMemo(
     () => ({
@@ -3079,7 +2956,6 @@ export function InsightsScreen({
                   <Pressable
                     key={item.id}
                     onPress={() => {
-                      void triggerHaptic('selection');
                       setActiveBreakdownSlice(null, false);
                       const targetBreakdownId = item.id;
                       const targetType = pageData.transactionType;
@@ -3093,6 +2969,7 @@ export function InsightsScreen({
                         categoryRootLabel: rootCategory?.name ?? item.name,
                         categoryRootEmoji: rootCategory?.icon ?? item.emoji,
                         categoryRootColor: item.color,
+                        triggerSelectionHaptic: true,
                         scopeMatcher: (transaction) => {
                           if (transaction.type !== targetType) return false;
                           if (transaction.date < rangeStart || transaction.date > rangeEnd) {
@@ -3316,11 +3193,11 @@ export function InsightsScreen({
                 {selectedDayTransactions.length > 0 ? (
                   <Pressable
                     onPress={() => {
-                      void triggerHaptic('selection');
                       const targetDayKey = selectedDayKey;
                       openDrilldown({
                         label: selectedDayLabel,
                         transactions: selectedDayTransactions,
+                        triggerSelectionHaptic: true,
                         scopeMatcher: (transaction) =>
                           transaction.type === 'expense' &&
                           dayKeyFromIsoLocal(transaction.date) === targetDayKey,
@@ -3524,11 +3401,21 @@ export function InsightsScreen({
       );
     }
 
-    const monthValues = pageData.monthRows.map((row) => row.totalAssets);
+    const assetDisplayRows =
+      settings.displayMode === 'time'
+        ? pageData.monthRows.map((row) => {
+            const rate = getTrueHourlyRateForDate(`${row.monthKey}-15T12:00:00`);
+            return {
+              ...row,
+              totalAssets: amountToHoursByRate(row.totalAssets, rate, settings.hourRounding),
+            };
+          })
+        : pageData.monthRows;
+    const monthValues = assetDisplayRows.map((row) => row.totalAssets);
     const selectedMonthKey = assetHistoryScrubMonthByYear[String(pageData.year)] ?? null;
     const selectedMonthRow =
-      pageData.monthRows.find((row) => row.monthKey === selectedMonthKey) ??
-      pageData.monthRows[pageData.monthRows.length - 1] ??
+      assetDisplayRows.find((row) => row.monthKey === selectedMonthKey) ??
+      assetDisplayRows[assetDisplayRows.length - 1] ??
       null;
     const assetGraphWidth = Math.max(140, lineChartWidth - ASSET_HISTORY_CHART_PADDING_RIGHT);
     const assetAxisTicks = buildGraphAxisTicks(monthValues, ASSET_HISTORY_CHART_HEIGHT);
@@ -3541,7 +3428,9 @@ export function InsightsScreen({
     const selectedAssetToneColor =
       selectedAssetValue >= 0 ? themeColors.success : themeColors.error;
     const selectedAssetToneStyle = { color: selectedAssetToneColor };
-    const selectedAssetCurrencyPrefix = `${selectedAssetValue < 0 ? '-' : ''}${settings.currencySymbol}`;
+    const selectedAssetSign = selectedAssetValue < 0 ? '-' : '';
+    const selectedAssetCurrencyPrefix = `${selectedAssetSign}${settings.currencySymbol}`;
+    const selectedAssetHoursLabel = `${selectedAssetSign}${formatHours(selectedAssetAbsoluteValue)}`;
     const selectAssetHistoryMonth = (monthKey: string) => {
       if (assetHistoryScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
       triggerScrubHaptic();
@@ -3573,13 +3462,12 @@ export function InsightsScreen({
               chartHeight={ASSET_HISTORY_CHART_HEIGHT}
               labelWidth={ASSET_HISTORY_CHART_PADDING_RIGHT}
               lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisCurrencyValue}
+              formatTick={formatAxisAssetValue}
             />
             <AssetHistoryLineChart
-              monthRows={pageData.monthRows}
+              monthRows={assetDisplayRows}
               chartWidth={assetGraphWidth}
               primaryColor={themeColors.primary}
-              surfaceColor={themeColors.background}
               onSelectMonthKey={selectAssetHistoryMonth}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
@@ -3602,16 +3490,24 @@ export function InsightsScreen({
               </View>
 
               <View className="mt-1 flex-row items-center">
-                <Text variant="heading" style={selectedAssetToneStyle}>
-                  {selectedAssetCurrencyPrefix}
-                </Text>
-                <ScrubRollingNumber
-                  value={selectedAssetAbsoluteValue}
-                  formattedText={selectedAssetDisplayValue}
-                  color={selectedAssetToneColor}
-                  resetKey={`asset-${selectedYearKey}`}
-                  containerClassName="ml-1"
-                />
+                {settings.displayMode === 'time' ? (
+                  <Text variant="heading" style={selectedAssetToneStyle}>
+                    {selectedAssetHoursLabel}
+                  </Text>
+                ) : (
+                  <>
+                    <Text variant="heading" style={selectedAssetToneStyle}>
+                      {selectedAssetCurrencyPrefix}
+                    </Text>
+                    <ScrubRollingNumber
+                      value={selectedAssetAbsoluteValue}
+                      formattedText={selectedAssetDisplayValue}
+                      color={selectedAssetToneColor}
+                      resetKey={`asset-${selectedYearKey}`}
+                      containerClassName="ml-1"
+                    />
+                  </>
+                )}
               </View>
             </View>
           </CardContent>
@@ -3689,7 +3585,6 @@ export function InsightsScreen({
               rates={rates}
               chartWidth={incomeGraphWidth}
               primaryColor={themeColors.primary}
-              surfaceColor={themeColors.background}
               onSelectPointIndex={selectPoint}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
@@ -3909,7 +3804,6 @@ export function InsightsScreen({
                   <Pressable
                     key={row.monthKey}
                     onPress={() => {
-                      void triggerHaptic('selection');
                       const targetMonthKey = row.monthKey;
                       const rangeStart = pageData.range.start;
                       const rangeEnd = pageData.range.end;
@@ -3917,6 +3811,7 @@ export function InsightsScreen({
                         label: row.label,
                         transactions: row.transactions,
                         showTypeFilter: true,
+                        triggerSelectionHaptic: true,
                         scopeMatcher: (transaction) => {
                           if (transaction.type !== 'income' && transaction.type !== 'expense') {
                             return false;
@@ -4153,10 +4048,14 @@ export function InsightsScreen({
       categoryRootLabel?: string;
       categoryRootEmoji?: string;
       categoryRootColor?: string;
+      triggerSelectionHaptic?: boolean;
     }) => {
       const sourceTransactions = nextState.scopeMatcher
         ? nextState.transactions.filter((transaction) => nextState.scopeMatcher?.(transaction))
         : nextState.transactions;
+      if (nextState.triggerSelectionHaptic) {
+        void triggerHaptic('selection');
+      }
       onOpenDrilldown({
         label: nextState.label,
         transactionIds: sourceTransactions.map((transaction) => transaction.id),
