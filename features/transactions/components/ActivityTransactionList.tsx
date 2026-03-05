@@ -6,12 +6,11 @@ import { ScrollView, View } from 'react-native';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
-type TransactionDisplaySettings = Pick<
+export type TransactionDisplaySettings = Pick<
   UserSettings,
   'currencySymbol' | 'displayMode' | 'hourRounding'
 >;
@@ -42,6 +41,9 @@ const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
 
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
+  displaySettings: TransactionDisplaySettings;
+  getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
+  getTrueHourlyRateForDate: (dateIso: string) => number;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
@@ -148,6 +150,9 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
 
 export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
+  displaySettings,
+  getDisplayValueForTransaction,
+  getTrueHourlyRateForDate,
   onTransactionPress,
   onTransactionLongPress,
   selectedTransactionIds = [],
@@ -166,18 +171,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   groupByDate = true,
   scrollToTopRef,
 }: ActivityTransactionListProps) {
-  const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const transactionDisplaySettings = useMemo<TransactionDisplaySettings>(
-    () => ({
-      currencySymbol: settings.currencySymbol,
-      displayMode: settings.displayMode,
-      hourRounding: settings.hourRounding,
-    }),
-    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
-  );
-  const isTimeMode = transactionDisplaySettings.displayMode === 'time';
+  const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
     [selectedTransactionIds],
@@ -193,39 +189,52 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     }
 
     const dailyTotals = new Map<string, { income: number; expense: number }>();
-
-    transactions.forEach((transaction) => {
-      const dayKey = dayKeyFromIso(transaction.date);
-      const current = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
-      const displayAmount = isTimeMode
-        ? getDisplayValueForTransaction(transaction)
-        : transaction.amount;
-
-      if (transaction.type === 'income') current.income += displayAmount;
-      if (transaction.type === 'expense') current.expense += displayAmount;
-
-      dailyTotals.set(dayKey, current);
-    });
-
+    const headerRowsByDay = new Map<string, Array<Extract<ActivityRow, { kind: 'header' }>>>();
     const nextRows: ActivityRow[] = [];
     let currentHeaderDay: string | null = null;
 
     transactions.forEach((transaction) => {
       const dayKey = dayKeyFromIso(transaction.date);
+      const dayTotals = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
+      if (transaction.type === 'income') {
+        const value = isTimeMode ? getDisplayValueForTransaction(transaction) : transaction.amount;
+        dayTotals.income += value;
+      }
+      if (transaction.type === 'expense') {
+        const value = isTimeMode ? getDisplayValueForTransaction(transaction) : transaction.amount;
+        dayTotals.expense += value;
+      }
+      dailyTotals.set(dayKey, dayTotals);
+
       if (dayKey !== currentHeaderDay) {
         currentHeaderDay = dayKey;
-        const totals = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
         const { dateLabel, weekdayLabel } = formatDayHeaderParts(dayKey);
-        nextRows.push({
+        const headerRow: Extract<ActivityRow, { kind: 'header' }> = {
           kind: 'header',
           id: `header-${dayKey}`,
           dateLabel,
           weekdayLabel,
-          incomeSubtotal: totals.income,
-          expenseSubtotal: totals.expense,
-        });
+          incomeSubtotal: 0,
+          expenseSubtotal: 0,
+        };
+        const dayHeaders = headerRowsByDay.get(dayKey);
+        if (dayHeaders) {
+          dayHeaders.push(headerRow);
+        } else {
+          headerRowsByDay.set(dayKey, [headerRow]);
+        }
+        nextRows.push(headerRow);
       }
       nextRows.push({ kind: 'item', id: transaction.id, transaction });
+    });
+
+    headerRowsByDay.forEach((headerRows, dayKey) => {
+      const totals = dailyTotals.get(dayKey);
+      if (!totals) return;
+      headerRows.forEach((headerRow) => {
+        headerRow.incomeSubtotal = totals.income;
+        headerRow.expenseSubtotal = totals.expense;
+      });
     });
 
     return nextRows;
@@ -253,7 +262,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             incomeSubtotal={item.incomeSubtotal}
             expenseSubtotal={item.expenseSubtotal}
             isTimeMode={isTimeMode}
-            settings={transactionDisplaySettings}
+            settings={displaySettings}
           />
         );
       }
@@ -268,7 +277,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           disableAnimations={disableItemAnimations}
           compact={compactItems}
           showDateInSubtitle={!groupByDate}
-          settings={transactionDisplaySettings}
+          settings={displaySettings}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         />
       );
@@ -283,7 +292,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionLongPress,
       selectedTransactionIdSet,
       selectionMode,
-      transactionDisplaySettings,
+      displaySettings,
     ],
   );
   const renderListItem = useCallback(

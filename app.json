@@ -4,15 +4,16 @@
     "slug": "money2time",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/money2time-base.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/money2time-base.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "icon": "./assets/ios/AppIcon~ios-marketing.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.nelsongan.money2time",
       "infoPlist": {
@@ -21,15 +22,17 @@
       }
     },
     "android": {
+      "icon": "./assets/android/play_store_512.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "monochromeImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.nelsongan.money2time"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/android/play_store_512.png"
     },
     "plugins": ["expo-localization"],
     "extra": {

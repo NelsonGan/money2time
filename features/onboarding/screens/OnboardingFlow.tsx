@@ -82,44 +82,63 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
   const accountCount = accounts.length;
-  const expenseCategoryCount = useMemo(
-    () => categories.filter((c) => c.type === 'expense').length,
-    [categories],
-  );
-  const incomeCategoryCount = useMemo(
-    () => categories.filter((c) => c.type === 'income').length,
-    [categories],
-  );
+  const { expenseCategoryCount, incomeCategoryCount, existingCategorySeedKeys } = useMemo(() => {
+    let expenseCount = 0;
+    let incomeCount = 0;
+    const categorySeedKeys = new Set<string>();
+
+    categories.forEach((category) => {
+      categorySeedKeys.add(categorySeedKey(category.type, category.name));
+      if (category.type === 'expense') {
+        expenseCount += 1;
+      } else if (category.type === 'income') {
+        incomeCount += 1;
+      }
+    });
+
+    return {
+      expenseCategoryCount: expenseCount,
+      incomeCategoryCount: incomeCount,
+      existingCategorySeedKeys: categorySeedKeys,
+    };
+  }, [categories]);
   const transactionCount = transactions.length;
-  const existingCategorySeedKeys = useMemo(
-    () => new Set(categories.map((item) => categorySeedKey(item.type, item.name))),
-    [categories],
-  );
-  const existingAccountNameKeys = useMemo(
-    () => new Set(accounts.map((item) => nameSeedKey(item.name))),
-    [accounts],
-  );
-  const missingMinimalExpenseCategoryCount = useMemo(
-    () =>
-      ONBOARDING_MINIMAL_EXPENSE_CATEGORIES.filter(
-        (item) => !existingCategorySeedKeys.has(categorySeedKey(item.type, item.name)),
-      ).length,
-    [existingCategorySeedKeys],
-  );
-  const missingMinimalIncomeCategoryCount = useMemo(
-    () =>
-      ONBOARDING_MINIMAL_INCOME_CATEGORIES.filter(
-        (item) => !existingCategorySeedKeys.has(categorySeedKey(item.type, item.name)),
-      ).length,
-    [existingCategorySeedKeys],
-  );
-  const missingMinimalPowerAccountCount = useMemo(
-    () =>
-      ONBOARDING_POWER_MINIMAL_ACCOUNTS.filter(
-        (item) => !existingAccountNameKeys.has(nameSeedKey(item.name)),
-      ).length,
-    [existingAccountNameKeys],
-  );
+  const existingAccountNameKeys = useMemo(() => {
+    const accountNameKeys = new Set<string>();
+    accounts.forEach((account) => {
+      accountNameKeys.add(nameSeedKey(account.name));
+    });
+    return accountNameKeys;
+  }, [accounts]);
+  const { missingMinimalExpenseCategoryCount, missingMinimalIncomeCategoryCount } = useMemo(() => {
+    let missingExpenseCount = 0;
+    let missingIncomeCount = 0;
+
+    ONBOARDING_MINIMAL_EXPENSE_CATEGORIES.forEach((item) => {
+      if (!existingCategorySeedKeys.has(categorySeedKey(item.type, item.name))) {
+        missingExpenseCount += 1;
+      }
+    });
+    ONBOARDING_MINIMAL_INCOME_CATEGORIES.forEach((item) => {
+      if (!existingCategorySeedKeys.has(categorySeedKey(item.type, item.name))) {
+        missingIncomeCount += 1;
+      }
+    });
+
+    return {
+      missingMinimalExpenseCategoryCount: missingExpenseCount,
+      missingMinimalIncomeCategoryCount: missingIncomeCount,
+    };
+  }, [existingCategorySeedKeys]);
+  const missingMinimalPowerAccountCount = useMemo(() => {
+    let missingCount = 0;
+    ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((item) => {
+      if (!existingAccountNameKeys.has(nameSeedKey(item.name))) {
+        missingCount += 1;
+      }
+    });
+    return missingCount;
+  }, [existingAccountNameKeys]);
   const canCreateMinimalDefaults =
     missingMinimalPowerAccountCount > 0 ||
     missingMinimalExpenseCategoryCount > 0 ||

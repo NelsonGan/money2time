@@ -43,7 +43,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
-import { formatAmount, formatDateInput } from '~/utils/formatters';
+import { formatAmount, formatDateInput, normalizeMoneyAmount } from '~/utils/formatters';
 
 const SNAP_CONFIG = {
   damping: 100,
@@ -228,6 +228,10 @@ function toBalanceInputValue(value: number) {
   return String(rounded);
 }
 
+function isNegativeForDisplay(value: number) {
+  return normalizeMoneyAmount(value) < 0;
+}
+
 function AddAccountSheet({
   visible,
   onClose,
@@ -258,6 +262,17 @@ function AddAccountSheet({
   const [startingBalance, setStartingBalance] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+  const accountGroupNameById = useMemo(
+    () => new Map(accountGroups.map((group) => [group.id, group.name])),
+    [accountGroups],
+  );
+  const accountGroupOptions = useMemo(
+    () => [
+      { value: 'none', label: I18n.t('common.ungrouped') },
+      ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
+    ],
+    [accountGroups],
+  );
   const canSave = name.trim().length > 0;
 
   const handleCreate = () => {
@@ -276,9 +291,7 @@ function AddAccountSheet({
       name: name.trim(),
       type,
       accountGroup:
-        accountGroupId === 'none'
-          ? null
-          : (accountGroups.find((group) => group.id === accountGroupId)?.name ?? null),
+        accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: type === 'credit' ? normalizedStatementDay : null,
       creditDueDay: type === 'credit' ? normalizedDueDay : null,
       icon: icon || '🏦',
@@ -325,10 +338,7 @@ function AddAccountSheet({
                 label={I18n.t('accounts.account_group')}
                 value={accountGroupId}
                 onChange={setAccountGroupId}
-                options={[
-                  { value: 'none', label: I18n.t('common.ungrouped') },
-                  ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
-                ]}
+                options={accountGroupOptions}
               />
             </View>
             <View>
@@ -463,18 +473,33 @@ function EditAccountSheet({
     String(account.creditStatementDay ?? '25'),
   );
   const [creditDueDay, setCreditDueDay] = useState(String(account.creditDueDay ?? '1'));
+  const accountGroupNameById = useMemo(
+    () => new Map(accountGroups.map((group) => [group.id, group.name])),
+    [accountGroups],
+  );
+  const accountGroupIdByName = useMemo(
+    () => new Map(accountGroups.map((group) => [group.name, group.id])),
+    [accountGroups],
+  );
+  const accountGroupOptions = useMemo(
+    () => [
+      { value: 'none', label: I18n.t('common.ungrouped') },
+      ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
+    ],
+    [accountGroups],
+  );
 
   useEffect(() => {
     setName(account.name);
     const matchedGroupId = account.accountGroup
-      ? (accountGroups.find((group) => group.name === account.accountGroup)?.id ?? 'none')
+      ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
       : 'none';
     setAccountGroupId(matchedGroupId);
     setIncludeInTotals(account.includeInTotals);
     setBalanceInput(toBalanceInputValue(currentBalance));
     setCreditStatementDay(String(account.creditStatementDay ?? '25'));
     setCreditDueDay(String(account.creditDueDay ?? '1'));
-  }, [account, accountGroups, currentBalance, visible]);
+  }, [account, accountGroupIdByName, currentBalance, visible]);
 
   const normalizedName = name.trim();
   const parsedTargetBalance = Number(balanceInput);
@@ -497,9 +522,7 @@ function EditAccountSheet({
     onSave({
       name: normalizedName,
       accountGroup:
-        accountGroupId === 'none'
-          ? null
-          : (accountGroups.find((group) => group.id === accountGroupId)?.name ?? null),
+        accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: account.type === 'credit' ? normalizedStatementDay : null,
       creditDueDay: account.type === 'credit' ? normalizedDueDay : null,
       includeInTotals,
@@ -540,10 +563,7 @@ function EditAccountSheet({
               label={I18n.t('accounts.account_group')}
               value={accountGroupId}
               onChange={setAccountGroupId}
-              options={[
-                { value: 'none', label: I18n.t('common.ungrouped') },
-                ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
-              ]}
+              options={accountGroupOptions}
             />
             <View className="gap-2">
               <Text variant="label" tone="muted">
@@ -672,15 +692,14 @@ function computeCreditCycleSummary(
     account.creditStatementDay,
     now,
   ).toISOString();
-  const currentCycleTxns = txns.filter((tx) => tx.date >= currentCycleStartIso);
-  const outstandingFromCycle = Math.max(
-    0,
-    currentCycleTxns.reduce((sum, tx) => {
-      // Credit-card payments should settle statement payable first.
-      if (isCreditPaymentTransaction(tx, account.id)) return sum;
-      return sum + creditDeltaForAccountTransaction(tx, account.id);
-    }, 0),
-  );
+  let cycleDelta = 0;
+  txns.forEach((tx) => {
+    if (tx.date < currentCycleStartIso) return;
+    // Credit-card payments should settle statement payable first.
+    if (isCreditPaymentTransaction(tx, account.id)) return;
+    cycleDelta += creditDeltaForAccountTransaction(tx, account.id);
+  });
+  const outstandingFromCycle = Math.max(0, cycleDelta);
   const cappedBalance = Math.max(0, balance);
   const outstanding = Math.min(outstandingFromCycle, cappedBalance);
   return { outstanding, payable: Math.max(0, cappedBalance - outstanding) };
@@ -1014,13 +1033,15 @@ export function AccountsScreen({
     createTransaction,
     deleteAccount,
     deleteAccountGroup,
-    deleteTransaction,
+    deleteTransactionsBulk,
+    getDisplayValueForTransaction,
+    getTrueHourlyRateForDate,
     getTransactionsByAccount,
     reorderAccounts,
     reorderAccountGroups,
     renameAccountGroup,
     updateAccount,
-    updateTransaction,
+    updateTransactionsBulk,
   } = useApp();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
@@ -1052,7 +1073,19 @@ export function AccountsScreen({
   const [localAccountGroupSections, setLocalAccountGroupSections] = useState<AccountGroupSection[]>(
     [],
   );
+  const transactionDisplaySettings = useMemo(
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+      hourRounding: settings.hourRounding,
+    }),
+    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+  );
   const activeAccountId = accountId ?? selectedAccountId;
+  const accountById = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account])),
+    [accounts],
+  );
   const closeSelectedAccount = useCallback(() => {
     if (accountId && onBack) {
       onBack();
@@ -1061,9 +1094,7 @@ export function AccountsScreen({
     setSelectedAccountId(null);
   }, [accountId, onBack]);
 
-  const selectedAccount = activeAccountId
-    ? (accounts.find((item) => item.id === activeAccountId) ?? null)
-    : null;
+  const selectedAccount = activeAccountId ? (accountById.get(activeAccountId) ?? null) : null;
   const edgeSwipeBackHandler = useCallback(() => {
     if (addTransactionAccountId) {
       setAddTransactionAccountId(null);
@@ -1100,25 +1131,26 @@ export function AccountsScreen({
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
   );
-  const selectedTransactionIdSet = useMemo(
-    () => new Set(selectedTransactionIds),
-    [selectedTransactionIds],
-  );
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
-  const selectedTransactionTotal = useMemo(
-    () =>
-      selectedAccountTransactions.reduce(
-        (sum, transaction) =>
-          selectedTransactionIdSet.has(transaction.id) ? sum + transaction.amount : sum,
-        0,
-      ),
-    [selectedAccountTransactions, selectedTransactionIdSet],
+  const selectedTransactionTotal = useMemo(() => {
+    if (selectedTransactionIds.length === 0) return 0;
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let total = 0;
+    selectedAccountTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      total += transaction.amount;
+    });
+    return total;
+  }, [selectedAccountTransactions, selectedTransactionIds]);
+  const normalizedSelectedTransactionTotal = useMemo(
+    () => normalizeMoneyAmount(selectedTransactionTotal),
+    [selectedTransactionTotal],
   );
   const selectedTransactionTotalLabel = useMemo(
     () =>
       formatAmount(
-        Math.abs(selectedTransactionTotal),
+        Math.abs(normalizedSelectedTransactionTotal),
         {
           currencySymbol: settings.currencySymbol,
           displayMode: 'money',
@@ -1126,12 +1158,12 @@ export function AccountsScreen({
         },
         { showSign: false, trueHourlyRate: 0 },
       ),
-    [selectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
+    [normalizedSelectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
   );
   const selectedTransactionTotalToneClass =
-    selectedTransactionTotal > 0
+    normalizedSelectedTransactionTotal > 0
       ? 'text-success'
-      : selectedTransactionTotal < 0
+      : normalizedSelectedTransactionTotal < 0
         ? 'text-destructive'
         : 'text-muted-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
@@ -1148,7 +1180,7 @@ export function AccountsScreen({
   const formatVisibleBalance = useCallback(
     (amount: number) => {
       if (hideAccountBalances) return MASKED_BALANCE_VALUE;
-      return formatAmount(amount, settings, {
+      return formatAmount(normalizeMoneyAmount(amount), settings, {
         showSign: false,
         trueHourlyRate,
       });
@@ -1265,12 +1297,13 @@ export function AccountsScreen({
 
   const total = useMemo(() => {
     if (managementOnly) return 0;
-    return accounts.reduce((sum, account) => {
-      if (!account.includeInTotals) return sum;
+    const sum = accounts.reduce((runningTotal, account) => {
+      if (!account.includeInTotals) return runningTotal;
       const balance = balanceMap.get(account.id) ?? account.startingBalance;
       const signedBalance = account.type === 'credit' ? -balance : balance;
-      return sum + signedBalance;
+      return runningTotal + signedBalance;
     }, 0);
+    return normalizeMoneyAmount(sum);
   }, [accounts, balanceMap, managementOnly]);
   const creditSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, CreditSummary>();
@@ -1278,36 +1311,36 @@ export function AccountsScreen({
     if (creditAccounts.length === 0) return new Map<string, CreditSummary>();
 
     const now = new Date();
-    const creditIdSet = new Set(creditAccounts.map((account) => account.id));
-    const txByCreditId = new Map<string, typeof transactions>();
-    creditAccounts.forEach((account) => txByCreditId.set(account.id, []));
-
-    transactions.forEach((tx) => {
-      const touched = new Set<string>();
-      if (tx.accountId && creditIdSet.has(tx.accountId)) touched.add(tx.accountId);
-      if (tx.fromAccountId && creditIdSet.has(tx.fromAccountId)) touched.add(tx.fromAccountId);
-      if (tx.toAccountId && creditIdSet.has(tx.toAccountId)) touched.add(tx.toAccountId);
-      touched.forEach((creditId) => {
-        txByCreditId.get(creditId)?.push(tx);
-      });
-    });
-
     const next = new Map<string, CreditSummary>();
     creditAccounts.forEach((account) => {
-      const accountTxns = txByCreditId.get(account.id) ?? [];
+      const accountTxns = getTransactionsByAccount(account.id);
       const balance = balanceMap.get(account.id) ?? account.startingBalance;
       next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
     });
     return next;
-  }, [accounts, balanceMap, managementOnly, transactions]);
-  const accountGroupSections = useMemo<AccountGroupSection[]>(() => {
-    const groupNames = new Set(accountGroups.map((g) => g.name));
+  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly]);
+  const { accountGroupSections, accountCountByGroupName, groupedAccounts } = useMemo(() => {
+    const groupNames = new Set<string>();
+    accountGroups.forEach((group) => {
+      groupNames.add(group.name);
+    });
+
     const buckets = new Map<string, Account[]>();
+    const counts = new Map<string, number>();
+
     accounts.forEach((account) => {
-      const key = account.accountGroup?.trim() || '__ungrouped__';
-      const list = buckets.get(key) ?? [];
-      list.push(account);
-      buckets.set(key, list);
+      const groupName = account.accountGroup?.trim() ?? '';
+      if (groupName) {
+        counts.set(groupName, (counts.get(groupName) ?? 0) + 1);
+      }
+
+      const bucketKey = groupName || '__ungrouped__';
+      const bucket = buckets.get(bucketKey);
+      if (bucket) {
+        bucket.push(account);
+      } else {
+        buckets.set(bucketKey, [account]);
+      }
     });
 
     const sections: AccountGroupSection[] = [];
@@ -1320,8 +1353,7 @@ export function AccountsScreen({
     }
     // Unknown group names (not in accountGroups)
     for (const [key, list] of buckets) {
-      if (key === '__ungrouped__') continue;
-      if (groupNames.has(key)) continue;
+      if (key === '__ungrouped__' || groupNames.has(key)) continue;
       sections.push({ id: `group-${key}`, label: key, accounts: list });
     }
     // Ungrouped last
@@ -1333,32 +1365,21 @@ export function AccountsScreen({
         accounts: ungrouped,
       });
     }
-    return sections;
-  }, [accounts, accountGroups]);
-  const accountCountByGroupName = useMemo(() => {
-    const counts = new Map<string, number>();
-    accounts.forEach((account) => {
-      const key = account.accountGroup?.trim() ?? '';
-      if (!key) return;
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    });
-    return counts;
-  }, [accounts]);
 
-  const groupedAccounts = useMemo(() => {
     const rows: AccountListRow[] = [];
-    accountGroupSections.forEach((section) => {
+    sections.forEach((section) => {
       rows.push({ kind: 'group', id: section.id, label: section.label });
       section.accounts.forEach((account) => {
         rows.push({ kind: 'account', id: `a-${account.id}`, accountId: account.id });
       });
     });
-    return rows;
-  }, [accountGroupSections]);
-  const accountById = useMemo(
-    () => new Map(accounts.map((account) => [account.id, account])),
-    [accounts],
-  );
+
+    return {
+      accountGroupSections: sections,
+      accountCountByGroupName: counts,
+      groupedAccounts: rows,
+    };
+  }, [accounts, accountGroups]);
   useEffect(() => {
     if (isReordering) return;
     if (skipNextAccountGroupsSyncRef.current) {
@@ -1432,11 +1453,14 @@ export function AccountsScreen({
     setSelectedTransactionIds([]);
   }, []);
   const toggleTransactionSelection = useCallback((transactionId: string) => {
-    setSelectedTransactionIds((previous) =>
-      previous.includes(transactionId)
-        ? previous.filter((id) => id !== transactionId)
-        : [...previous, transactionId],
-    );
+    setSelectedTransactionIds((previous) => {
+      const index = previous.indexOf(transactionId);
+      if (index === -1) return [...previous, transactionId];
+      if (previous.length === 1) return [];
+      const next = [...previous];
+      next.splice(index, 1);
+      return next;
+    });
   }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -1485,9 +1509,9 @@ export function AccountsScreen({
     }
     if (Object.keys(updates).length === 0) return;
 
-    selectedTransactionIds.forEach((transactionId) => {
-      updateTransaction(transactionId, updates);
-    });
+    updateTransactionsBulk(
+      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
+    );
     setShowBulkUpdate(false);
     setSelectedTransactionIds([]);
   }, [
@@ -1497,7 +1521,7 @@ export function AccountsScreen({
     bulkNoteTouched,
     hasBulkChanges,
     selectedTransactionIds,
-    updateTransaction,
+    updateTransactionsBulk,
   ]);
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -1511,16 +1535,14 @@ export function AccountsScreen({
           text: I18n.t('common.delete'),
           style: 'destructive',
           onPress: () => {
-            idsToDelete.forEach((transactionId) => {
-              deleteTransaction(transactionId);
-            });
+            deleteTransactionsBulk(idsToDelete);
             setShowBulkUpdate(false);
             setSelectedTransactionIds([]);
           },
         },
       ],
     );
-  }, [deleteTransaction, selectedTransactionIds]);
+  }, [deleteTransactionsBulk, selectedTransactionIds]);
   const applyAccountSave = useCallback(
     ({
       account,
@@ -1634,6 +1656,7 @@ export function AccountsScreen({
     const account = selectedAccount;
 
     const balance = balanceMap.get(account.id) ?? account.startingBalance;
+    const normalizedBalance = normalizeMoneyAmount(balance);
     const txns = selectedAccountTransactions;
     const payFromAccounts = accounts.filter(
       (item) => item.id !== account.id && item.type !== 'credit',
@@ -1739,6 +1762,9 @@ export function AccountsScreen({
 
           <ActivityTransactionList
             transactions={txns}
+            displaySettings={transactionDisplaySettings}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
             selectedTransactionIds={selectedTransactionIds}
@@ -1760,9 +1786,9 @@ export function AccountsScreen({
                     </Text>
                     <Text
                       variant="friendly"
-                      className={balance >= 0 ? 'text-foreground' : 'text-destructive'}
+                      className={isNegativeForDisplay(normalizedBalance) ? 'text-destructive' : 'text-foreground'}
                     >
-                      {formatVisibleBalance(balance)}
+                      {formatVisibleBalance(normalizedBalance)}
                     </Text>
                   </View>
                   <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
@@ -2221,6 +2247,7 @@ export function AccountsScreen({
             const account = accountById.get(item.accountId);
             if (!account) return null;
             const balance = balanceMap.get(account.id) ?? account.startingBalance;
+            const normalizedBalance = normalizeMoneyAmount(balance);
             const creditSummary =
               account.type === 'credit'
                 ? (creditSummaryByAccountId.get(account.id) ?? defaultCreditSummary(balance))
@@ -2262,9 +2289,9 @@ export function AccountsScreen({
                   ) : (
                     <Text
                       variant="caption"
-                      className={balance >= 0 ? 'text-success' : 'text-destructive'}
+                      className={isNegativeForDisplay(normalizedBalance) ? 'text-destructive' : 'text-success'}
                     >
-                      {formatVisibleBalance(balance)}
+                      {formatVisibleBalance(normalizedBalance)}
                     </Text>
                   )}
                 </Pressable>
