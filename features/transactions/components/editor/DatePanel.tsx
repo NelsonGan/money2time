@@ -26,6 +26,9 @@ const CALENDAR_SWIPE_MIN_FLING_DISTANCE = 8;
 const CALENDAR_SWIPE_INTENT_RATIO = 1.4;
 const CALENDAR_SWIPE_MAX_VERTICAL_DRIFT = 22;
 const YEAR_RAIL_CONTENT_STYLE = { paddingRight: 8 } as const;
+const SHORT_WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat('en-US', { month: 'long' });
+const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 const styles = StyleSheet.create({
   calendarDayNumber: {
@@ -59,9 +62,10 @@ function parseDateInput(input: string) {
 
 function getRecentDays() {
   const days = [];
+  const today = new Date();
   for (let i = 0; i < 5; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
     days.push({
       date: toDateInput(d),
       label:
@@ -69,7 +73,7 @@ function getRecentDays() {
           ? I18n.t('common.today')
           : i === 1
             ? I18n.t('transactions.editor.yest_short')
-            : d.toLocaleDateString('en-US', { weekday: 'short' }),
+            : SHORT_WEEKDAY_FORMATTER.format(d),
       dayNum: d.getDate(),
     });
   }
@@ -303,9 +307,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
           <ChevronLeft size={14} color={themeColors.textSoft} />
         </Pressable>
         <View className="flex-row items-center gap-2">
-          <Text variant="caption">
-            {calendarMonth.toLocaleDateString('en-US', { month: 'long' })}
-          </Text>
+          <Text variant="caption">{MONTH_LABEL_FORMATTER.format(calendarMonth)}</Text>
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
@@ -369,7 +371,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
 
       {/* Weekday headers */}
       <View className="flex-row justify-between pb-1.5 px-0.5">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, idx) => (
+        {WEEKDAY_LABELS.map((d, idx) => (
           <Text
             key={`wd-${idx}`}
             variant="label"

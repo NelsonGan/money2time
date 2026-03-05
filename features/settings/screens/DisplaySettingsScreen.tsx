@@ -45,14 +45,26 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     ],
     [],
   );
+  const currencyByCode = useMemo(
+    () => new Map(MAJOR_CURRENCIES.map((item) => [item.code, item])),
+    [],
+  );
+  const currencyBySymbol = useMemo(() => {
+    const bySymbol = new Map<string, (typeof MAJOR_CURRENCIES)[number]>();
+    MAJOR_CURRENCIES.forEach((item) => {
+      if (bySymbol.has(item.symbol)) return;
+      bySymbol.set(item.symbol, item);
+    });
+    return bySymbol;
+  }, []);
 
   const selectedMajorCurrency = useMemo(
-    () => MAJOR_CURRENCIES.find((item) => item.code === settings.currencyCode),
-    [settings.currencyCode],
+    () => currencyByCode.get(settings.currencyCode),
+    [currencyByCode, settings.currencyCode],
   );
   const fallbackMajorCurrency = useMemo(
-    () => MAJOR_CURRENCIES.find((item) => item.symbol === settings.currencySymbol),
-    [settings.currencySymbol],
+    () => currencyBySymbol.get(settings.currencySymbol),
+    [currencyBySymbol, settings.currencySymbol],
   );
   const themeOptions = [
     { value: 'system' as const, label: I18n.t('settings.theme_system') },
@@ -93,17 +105,12 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const trimmedCustomCurrency = customCurrency.trim();
   const nextCurrencySymbol = useMemo(() => {
     if (selectedCurrency === '__custom__') return trimmedCustomCurrency;
-    return (
-      MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency)?.symbol ??
-      settings.currencySymbol
-    );
-  }, [selectedCurrency, trimmedCustomCurrency, settings.currencySymbol]);
+    return currencyByCode.get(selectedCurrency)?.symbol ?? settings.currencySymbol;
+  }, [currencyByCode, selectedCurrency, trimmedCustomCurrency, settings.currencySymbol]);
   const nextCurrencyCode = useMemo(() => {
     if (selectedCurrency === '__custom__') return '__custom__';
-    return (
-      MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency)?.code ?? settings.currencyCode
-    );
-  }, [selectedCurrency, settings.currencyCode]);
+    return currencyByCode.get(selectedCurrency)?.code ?? settings.currencyCode;
+  }, [currencyByCode, selectedCurrency, settings.currencyCode]);
   const hasChanges =
     selectedLocale !== currentLocaleSelection ||
     nextCurrencyCode !== settings.currencyCode ||
@@ -143,7 +150,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
         updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedCustomCurrency });
       }
     } else {
-      const nextMajorCurrency = MAJOR_CURRENCIES.find((item) => item.code === selectedCurrency);
+      const nextMajorCurrency = currencyByCode.get(selectedCurrency);
       if (
         nextMajorCurrency &&
         (nextMajorCurrency.code !== settings.currencyCode ||

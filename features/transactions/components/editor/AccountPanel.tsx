@@ -31,6 +31,7 @@ interface AccountPanelMultiSelectProps extends AccountPanelBaseProps {
 }
 
 type AccountPanelProps = AccountPanelSingleSelectProps | AccountPanelMultiSelectProps;
+const EMPTY_ACCOUNTS: Account[] = [];
 
 const COLS = 3;
 const ACCOUNT_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
@@ -106,6 +107,38 @@ export function AccountPanel(props: AccountPanelProps) {
 
     return sections;
   }, [accounts, accountGroups]);
+  const ownerGroupKeyByAccountId = useMemo(() => {
+    const ownerByAccountId = new Map<string, string>();
+    grouped.forEach((group) => {
+      group.accounts.forEach((account) => {
+        ownerByAccountId.set(account.id, group.key);
+      });
+    });
+    return ownerByAccountId;
+  }, [grouped]);
+  const selectedAccountCountByGroupKey = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (isMultiSelect) {
+      if (selectedIdSet.size === 0) return counts;
+      grouped.forEach((group) => {
+        let selectedCount = 0;
+        group.accounts.forEach((account) => {
+          if (selectedIdSet.has(account.id)) selectedCount += 1;
+        });
+        if (selectedCount > 0) {
+          counts.set(group.key, selectedCount);
+        }
+      });
+      return counts;
+    }
+
+    if (!selectedId) return counts;
+    const ownerGroupKey = ownerGroupKeyByAccountId.get(selectedId);
+    if (ownerGroupKey) {
+      counts.set(ownerGroupKey, 1);
+    }
+    return counts;
+  }, [grouped, isMultiSelect, ownerGroupKeyByAccountId, selectedId, selectedIdSet]);
 
   const isAccountSelected = (accountId: string) =>
     isMultiSelect ? selectedIdSet.has(accountId) : selectedId === accountId;
@@ -123,9 +156,9 @@ export function AccountPanel(props: AccountPanelProps) {
   useEffect(() => {
     const target = isMultiSelect ? (selectedIds?.[0] ?? null) : selectedId;
     if (!target) return;
-    const ownerGroup = grouped.find((g) => g.accounts.some((a) => a.id === target));
-    if (ownerGroup) setExpandedGroupKey(ownerGroup.key);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const ownerGroupKey = ownerGroupKeyByAccountId.get(target);
+    if (ownerGroupKey) setExpandedGroupKey(ownerGroupKey);
+  }, [isMultiSelect, ownerGroupKeyByAccountId, selectedId, selectedIds]);
 
   // If grouping is disabled or only one group, show accounts directly.
   const showGroupTiles = !disableGrouping && grouped.length > 1;
@@ -193,7 +226,7 @@ export function AccountPanel(props: AccountPanelProps) {
   }
 
   // Multiple groups: show group tiles with expand/collapse
-  const groupRows = chunk(grouped, COLS);
+  const groupRows = useMemo(() => chunk(grouped, COLS), [grouped]);
 
   return (
     <ScrollView
@@ -206,7 +239,7 @@ export function AccountPanel(props: AccountPanelProps) {
           const expandedInRow = expandedGroupKey
             ? row.find((g) => g.key === expandedGroupKey)
             : null;
-          const expandedAccounts = expandedInRow ? expandedInRow.accounts : [];
+          const expandedAccounts = expandedInRow ? expandedInRow.accounts : EMPTY_ACCOUNTS;
           const accountRows = expandedAccounts.length > 0 ? chunk(expandedAccounts, COLS) : [];
 
           return (
@@ -214,7 +247,8 @@ export function AccountPanel(props: AccountPanelProps) {
               {/* Group tiles row */}
               <View className="flex-row gap-2">
                 {row.map((group) => {
-                  const hasSelectedAccount = group.accounts.some((a) => isAccountSelected(a.id));
+                  const hasSelectedAccount =
+                    (selectedAccountCountByGroupKey.get(group.key) ?? 0) > 0;
                   const isExpanded = expandedGroupKey === group.key;
 
                   return (

@@ -94,6 +94,10 @@ interface AppContextValue extends AppState {
   createTransaction: (input: CreateTransactionInput) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
   deleteTransaction: (id: string) => void;
+  updateTransactionsBulk: (
+    updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>,
+  ) => void;
+  deleteTransactionsBulk: (ids: string[]) => void;
 
   updateSettings: (
     updates: Partial<
@@ -151,6 +155,7 @@ interface AppContextValue extends AppState {
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
+const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 
 const fallbackStyles = StyleSheet.create({
   errorRoot: {
@@ -254,64 +259,109 @@ function purgeTransactionsOnly() {
 function applyTransactionFilters(
   transactions: TransactionWithRelations[],
   filters: TransactionFilters,
+  noteSearchTextById?: Map<string, string>,
 ): TransactionWithRelations[] {
   const searchTerm = filters.search.trim().toLowerCase();
+  const dateRange = filters.dateRange;
+  const dateRangeStart = dateRange?.start;
+  const dateRangeEnd = dateRange?.end;
+  const minAmount = filters.minAmount;
+  const maxAmount = filters.maxAmount;
+  const hasDateRange = filters.dateRange !== null;
+  const hasAccountFilter = filters.accountId !== null;
+  const hasIncomeCategoryFilter = filters.incomeCategoryId !== null;
+  const hasExpenseCategoryFilter = filters.expenseCategoryId !== null;
+  const hasCategoryFilter = filters.categoryId !== null;
+  const hasMinAmount = filters.minAmount !== null;
+  const hasMaxAmount = filters.maxAmount !== null;
+  const hasTypeFilter = filters.type !== 'all';
+  const requiresLegacyTransferTypeCheck =
+    filters.type === 'transfer' || filters.type === 'balance_adjustment';
+  const hasSearchFilter = searchTerm.length > 0;
+  const hasAnyFilter =
+    hasDateRange ||
+    hasAccountFilter ||
+    hasIncomeCategoryFilter ||
+    hasExpenseCategoryFilter ||
+    hasCategoryFilter ||
+    hasMinAmount ||
+    hasMaxAmount ||
+    hasTypeFilter ||
+    hasSearchFilter;
 
-  const filtered = transactions.filter((transaction) => {
+  if (!hasAnyFilter) {
+    return filters.sortBy === 'date_desc'
+      ? transactions
+      : sortTransactions(transactions, filters.sortBy);
+  }
+
+  const filtered: TransactionWithRelations[] = [];
+  const noteCache = noteSearchTextById;
+
+  for (let index = 0; index < transactions.length; index += 1) {
+    const transaction = transactions[index];
     const isLegacyBalanceAdjustmentTransfer =
-      transaction.type === 'transfer' &&
-      !!transaction.accountId &&
-      !transaction.fromAccountId &&
-      !transaction.toAccountId;
-    const matchesType =
-      filters.type === 'all'
-        ? true
-        : filters.type === 'balance_adjustment'
-          ? transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer
-          : filters.type === 'transfer'
-            ? transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer
-            : transaction.type === filters.type;
-    if (!matchesType) return false;
+      hasTypeFilter && requiresLegacyTransferTypeCheck
+        ? transaction.type === 'transfer' &&
+          !!transaction.accountId &&
+          !transaction.fromAccountId &&
+          !transaction.toAccountId
+        : false;
+    const matchesType = !hasTypeFilter
+      ? true
+      : filters.type === 'balance_adjustment'
+        ? transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer
+        : filters.type === 'transfer'
+          ? transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer
+          : transaction.type === filters.type;
+    if (!matchesType) continue;
 
-    if (filters.dateRange) {
-      if (transaction.date < filters.dateRange.start) return false;
-      if (transaction.date > filters.dateRange.end) return false;
+    if (hasDateRange) {
+      if (
+        (dateRangeStart && transaction.date < dateRangeStart) ||
+        (dateRangeEnd && transaction.date > dateRangeEnd)
+      ) {
+        continue;
+      }
     }
 
-    if (filters.accountId) {
+    if (hasAccountFilter) {
       const matchesAccount =
         transaction.accountId === filters.accountId ||
         transaction.fromAccountId === filters.accountId ||
         transaction.toAccountId === filters.accountId;
-      if (!matchesAccount) return false;
+      if (!matchesAccount) continue;
     }
 
-    if (transaction.type === 'income' && filters.incomeCategoryId) {
-      if (transaction.categoryId !== filters.incomeCategoryId) return false;
+    if (transaction.type === 'income' && hasIncomeCategoryFilter) {
+      if (transaction.categoryId !== filters.incomeCategoryId) continue;
     }
-    if (transaction.type === 'expense' && filters.expenseCategoryId) {
-      if (transaction.categoryId !== filters.expenseCategoryId) return false;
+    if (transaction.type === 'expense' && hasExpenseCategoryFilter) {
+      if (transaction.categoryId !== filters.expenseCategoryId) continue;
     }
     if (
-      !filters.incomeCategoryId &&
-      !filters.expenseCategoryId &&
-      filters.categoryId &&
+      !hasIncomeCategoryFilter &&
+      !hasExpenseCategoryFilter &&
+      hasCategoryFilter &&
       (transaction.type === 'income' || transaction.type === 'expense') &&
       transaction.categoryId !== filters.categoryId
     ) {
-      return false;
+      continue;
     }
-    if (filters.minAmount !== null && transaction.amount < filters.minAmount) return false;
-    if (filters.maxAmount !== null && transaction.amount > filters.maxAmount) return false;
+    if (hasMinAmount && minAmount !== null && transaction.amount < minAmount) continue;
+    if (hasMaxAmount && maxAmount !== null && transaction.amount > maxAmount) continue;
 
-    if (searchTerm.length > 0) {
-      const note = (transaction.note ?? '').toLowerCase();
-      if (!note.includes(searchTerm)) return false;
+    if (hasSearchFilter) {
+      const note = noteCache?.get(transaction.id) ?? (transaction.note ?? '').toLowerCase();
+      if (!note.includes(searchTerm)) continue;
     }
 
-    return true;
-  });
+    filtered.push(transaction);
+  }
 
+  if (filters.sortBy === 'date_desc') {
+    return filtered;
+  }
   return sortTransactions(filtered, filters.sortBy);
 }
 
@@ -426,10 +476,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     () => buildEffectiveFilters(transactionFilters, activeAccountFilter),
     [activeAccountFilter, transactionFilters],
   );
+  const hasSearchFilter = effectiveFilters.search.trim().length > 0;
+  const noteSearchTextByTransactionId = useMemo(() => {
+    if (!hasSearchFilter) return undefined;
+    return new Map(
+      transactions.map((transaction) => [transaction.id, (transaction.note ?? '').toLowerCase()]),
+    );
+  }, [hasSearchFilter, transactions]);
 
   const filteredTransactions = useMemo(
-    () => applyTransactionFilters(transactions, effectiveFilters),
-    [effectiveFilters, transactions],
+    () => applyTransactionFilters(transactions, effectiveFilters, noteSearchTextByTransactionId),
+    [effectiveFilters, noteSearchTextByTransactionId, transactions],
   );
 
   const runMutation = useCallback(
@@ -557,19 +614,82 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const accountNameById = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account.name])),
+    [accounts],
+  );
+  const accountByIdMap = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account])),
+    [accounts],
+  );
+  const categoryByIdMap = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
+  const transactionsByAccountId = useMemo(() => {
+    const byAccountId = new Map<string, TransactionWithRelations[]>();
+
+    transactions.forEach((transaction) => {
+      const accountId = transaction.accountId;
+      const fromAccountId = transaction.fromAccountId;
+      const toAccountId = transaction.toAccountId;
+      if (accountId) {
+        const existing = byAccountId.get(accountId);
+        if (existing) {
+          existing.push(transaction);
+        } else {
+          byAccountId.set(accountId, [transaction]);
+        }
+      }
+      if (fromAccountId && fromAccountId !== accountId) {
+        const existing = byAccountId.get(fromAccountId);
+        if (existing) {
+          existing.push(transaction);
+        } else {
+          byAccountId.set(fromAccountId, [transaction]);
+        }
+      }
+      if (toAccountId && toAccountId !== accountId && toAccountId !== fromAccountId) {
+        const existing = byAccountId.get(toAccountId);
+        if (existing) {
+          existing.push(transaction);
+        } else {
+          byAccountId.set(toAccountId, [transaction]);
+        }
+      }
+    });
+
+    return byAccountId;
+  }, [transactions]);
+  const categoryRelationInfoById = useMemo(() => {
+    const relationInfoById = new Map<
+      string,
+      { name: string; icon: string; parentName: string | null }
+    >();
+
+    categories.forEach((category) => {
+      const parent = category.parentId ? categoryByIdMap.get(category.parentId) : null;
+      relationInfoById.set(category.id, {
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon, parent?.icon ?? null),
+        parentName: parent?.name ?? null,
+      });
+    });
+
+    return relationInfoById;
+  }, [categories, categoryByIdMap]);
+
   const resolveRelationNames = useCallback(
     (input: Partial<CreateTransactionInput>) => {
-      const findAccount = (id?: string | null) =>
-        id ? (accounts.find((a) => a.id === id)?.name ?? null) : null;
+      const findAccount = (id?: string | null) => (id ? (accountNameById.get(id) ?? null) : null);
       const findCategory = (id?: string | null) => {
         if (!id) return { name: null, icon: null, parentName: null };
-        const cat = categories.find((c) => c.id === id);
-        if (!cat) return { name: null, icon: null, parentName: null };
-        const parent = cat.parentId ? categories.find((c) => c.id === cat.parentId) : null;
+        const relationInfo = categoryRelationInfoById.get(id);
+        if (!relationInfo) return { name: null, icon: null, parentName: null };
         return {
-          name: cat.name,
-          icon: resolveCategoryIcon(cat.icon, parent?.icon ?? null),
-          parentName: parent?.name ?? null,
+          name: relationInfo.name,
+          icon: relationInfo.icon,
+          parentName: relationInfo.parentName,
         };
       };
       const catInfo = findCategory(input.categoryId);
@@ -582,7 +702,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryParentName: catInfo.parentName,
       };
     },
-    [accounts, categories],
+    [accountNameById, categoryRelationInfoById],
   );
 
   const createTransaction = useCallback(
@@ -622,17 +742,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshTransactions, resolveRelationNames],
   );
 
-  const updateTransaction = useCallback(
-    (id: string, input: Partial<CreateTransactionInput>) => {
-      const relations = resolveRelationNames(input);
+  const updateTransactionsBulk = useCallback(
+    (updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>) => {
+      if (updates.length === 0) return;
+      const normalizedUpdates: Array<{ id: string; input: Partial<CreateTransactionInput> }> = [];
+      const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
+      const inputById = new Map<string, Partial<CreateTransactionInput>>();
+      updates.forEach(({ id, input }) => {
+        if (id.trim().length === 0) return;
+        if (Object.keys(input).length === 0) return;
+        normalizedUpdates.push({ id, input });
+        const hasRelationChange =
+          'accountId' in input ||
+          'fromAccountId' in input ||
+          'toAccountId' in input ||
+          'categoryId' in input;
+        if (hasRelationChange) {
+          relationById.set(id, resolveRelationNames(input));
+        }
+        inputById.set(id, input);
+      });
+      if (normalizedUpdates.length === 0) return;
+
+      const nextUpdatedAt = nowIso();
       setTransactions((prev) =>
         prev.map((tx) => {
-          if (tx.id !== id) return tx;
-          const updated = { ...tx, ...input, updatedAt: nowIso() };
-          if ('accountId' in input) updated.accountName = relations.accountName;
-          if ('fromAccountId' in input) updated.fromAccountName = relations.fromAccountName;
-          if ('toAccountId' in input) updated.toAccountName = relations.toAccountName;
-          if ('categoryId' in input) {
+          const input = inputById.get(tx.id);
+          if (!input) return tx;
+          const relations = relationById.get(tx.id);
+          const updated = { ...tx, ...input, updatedAt: nextUpdatedAt };
+          if ('accountId' in input && relations) updated.accountName = relations.accountName;
+          if ('fromAccountId' in input && relations) {
+            updated.fromAccountName = relations.fromAccountName;
+          }
+          if ('toAccountId' in input && relations) updated.toAccountName = relations.toAccountName;
+          if ('categoryId' in input && relations) {
             updated.categoryName = relations.categoryName;
             updated.categoryIcon = relations.categoryIcon;
             updated.categoryParentName = relations.categoryParentName;
@@ -642,7 +786,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       InteractionManager.runAfterInteractions(() => {
         try {
-          transactionsRepository.update(id, input);
+          transactionsRepository.updateMany(normalizedUpdates);
         } catch {
           // rollback on failure
         }
@@ -652,12 +796,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshTransactions, resolveRelationNames],
   );
 
-  const deleteTransaction = useCallback(
-    (id: string) => {
-      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+  const deleteTransactionsBulk = useCallback(
+    (ids: string[]) => {
+      if (ids.length === 0) return;
+      const seenIds = new Set<string>();
+      const uniqueIds: string[] = [];
+      ids.forEach((id) => {
+        if (id.trim().length === 0) return;
+        if (seenIds.has(id)) return;
+        seenIds.add(id);
+        uniqueIds.push(id);
+      });
+      if (uniqueIds.length === 0) return;
+
+      const idSet = new Set(uniqueIds);
+      setTransactions((prev) => prev.filter((tx) => !idSet.has(tx.id)));
       InteractionManager.runAfterInteractions(() => {
         try {
-          transactionsRepository.softDelete(id);
+          transactionsRepository.softDeleteMany(uniqueIds);
         } catch {
           // rollback on failure
         }
@@ -665,6 +821,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [refreshTransactions],
+  );
+
+  const updateTransaction = useCallback(
+    (id: string, input: Partial<CreateTransactionInput>) => {
+      updateTransactionsBulk([{ id, input }]);
+    },
+    [updateTransactionsBulk],
+  );
+
+  const deleteTransaction = useCallback(
+    (id: string) => {
+      deleteTransactionsBulk([id]);
+    },
+    [deleteTransactionsBulk],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -761,23 +931,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     refreshAll();
   }, [canUseTimeDisplayMode, refreshAll, settings?.displayMode]);
 
-  const getAccountById = useCallback((id: string) => accounts.find((a) => a.id === id), [accounts]);
-  const getCategoryById = useCallback(
-    (id: string) => categories.find((c) => c.id === id),
-    [categories],
-  );
+  const getAccountById = useCallback((id: string) => accountByIdMap.get(id), [accountByIdMap]);
+  const getCategoryById = useCallback((id: string) => categoryByIdMap.get(id), [categoryByIdMap]);
 
   const getTransactionsByAccount = useCallback(
-    (accountId: string) => {
-      const filtered = transactions.filter(
-        (transaction) =>
-          transaction.accountId === accountId ||
-          transaction.fromAccountId === accountId ||
-          transaction.toAccountId === accountId,
-      );
-      return sortTransactions(filtered, 'date_desc');
-    },
-    [transactions],
+    (accountId: string) => transactionsByAccountId.get(accountId) ?? EMPTY_ACCOUNT_TRANSACTIONS,
+    [transactionsByAccountId],
   );
 
   const queryTransactions = useCallback((filters: Partial<TransactionFilters> = {}) => {
@@ -789,25 +948,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [monthlyWages],
   );
 
+  const getHourlyRateForMonth = useMemo(() => {
+    const fallbackRate = currentMonthWage?.trueHourlyRate ?? 0;
+    if (orderedRateHistory.length === 0) {
+      return (_month: string) => fallbackRate;
+    }
+
+    const monthKeys = orderedRateHistory.map((entry) => entry.month);
+    const rates = orderedRateHistory.map((entry) => entry.rate);
+    const cachedRatesByMonth = new Map<string, number>();
+
+    return (targetMonth: string) => {
+      const cachedRate = cachedRatesByMonth.get(targetMonth);
+      if (cachedRate !== undefined) {
+        return cachedRate;
+      }
+
+      let left = 0;
+      let right = monthKeys.length - 1;
+      let resolvedIndex = -1;
+      while (left <= right) {
+        const middle = (left + right) >> 1;
+        const middleMonth = monthKeys[middle] ?? '';
+        if (middleMonth <= targetMonth) {
+          resolvedIndex = middle;
+          left = middle + 1;
+        } else {
+          right = middle - 1;
+        }
+      }
+
+      const resolvedRate =
+        resolvedIndex >= 0 ? (rates[resolvedIndex] ?? fallbackRate) : (rates[0] ?? fallbackRate);
+      cachedRatesByMonth.set(targetMonth, resolvedRate);
+      return resolvedRate;
+    };
+  }, [currentMonthWage?.trueHourlyRate, orderedRateHistory]);
+
   const getTrueHourlyRateForDate = useCallback(
     (dateIso: string) => {
-      if (orderedRateHistory.length === 0) {
-        return currentMonthWage?.trueHourlyRate ?? 0;
-      }
-
       const targetMonth = normalizeMonthKey(monthKeyFromDateIso(dateIso));
-      let selectedRate = orderedRateHistory[0]?.rate ?? 0;
-
-      for (let index = 0; index < orderedRateHistory.length; index += 1) {
-        const entry = orderedRateHistory[index];
-        if (!entry) continue;
-        if (entry.month > targetMonth) break;
-        selectedRate = entry.rate;
-      }
-
-      return selectedRate;
+      return getHourlyRateForMonth(targetMonth);
     },
-    [currentMonthWage?.trueHourlyRate, orderedRateHistory],
+    [getHourlyRateForMonth],
   );
 
   const isTimeDisplayMode = settings?.displayMode === 'time';
@@ -817,20 +1000,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!isTimeDisplayMode) {
         return amount;
       }
-      const rate = getTrueHourlyRateForDate(dateIso);
+      const targetMonth = normalizeMonthKey(monthKeyFromDateIso(dateIso));
+      const rate = getHourlyRateForMonth(targetMonth);
       return amountToHoursByRate(amount, rate, hourRounding);
     },
-    [getTrueHourlyRateForDate, hourRounding, isTimeDisplayMode],
+    [getHourlyRateForMonth, hourRounding, isTimeDisplayMode],
   );
 
   const displayValueByTransactionId = useMemo(() => {
     if (!isTimeDisplayMode) return null;
     const next = new Map<string, number>();
+    const hourlyRateByMonth = new Map<string, number>();
     transactions.forEach((transaction) => {
-      next.set(transaction.id, valueForDisplay(transaction.amount, transaction.date));
+      const monthKey = normalizeMonthKey(monthKeyFromDateIso(transaction.date));
+      let rate = hourlyRateByMonth.get(monthKey);
+      if (rate === undefined) {
+        rate = getHourlyRateForMonth(monthKey);
+        hourlyRateByMonth.set(monthKey, rate);
+      }
+      next.set(transaction.id, amountToHoursByRate(transaction.amount, rate, hourRounding));
     });
     return next;
-  }, [isTimeDisplayMode, transactions, valueForDisplay]);
+  }, [getHourlyRateForMonth, hourRounding, isTimeDisplayMode, transactions]);
 
   const getDisplayValueForTransaction = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -845,10 +1036,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const isSimpleMode = settings?.userMode === 'simple';
 
-  const simpleWalletId = useMemo(
-    () => accounts.find((a) => a.name === SIMPLE_WALLET_NAME && !a.deletedAt)?.id ?? null,
-    [accounts],
-  );
+  const simpleWalletId = useMemo(() => {
+    for (let index = 0; index < accounts.length; index += 1) {
+      const account = accounts[index];
+      if (!account) continue;
+      if (account.name === SIMPLE_WALLET_NAME && !account.deletedAt) {
+        return account.id;
+      }
+    }
+    return null;
+  }, [accounts]);
 
   const getCashflowSummary = useCallback(
     (range: DateRange): CashflowSummary => {
@@ -857,18 +1054,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
       });
 
-      const income = txns
-        .filter((transaction) => transaction.type === 'income')
-        .reduce(
-          (sum, transaction) => sum + valueForDisplay(transaction.amount, transaction.date),
-          0,
-        );
-      const expense = txns
-        .filter((transaction) => transaction.type === 'expense')
-        .reduce(
-          (sum, transaction) => sum + valueForDisplay(transaction.amount, transaction.date),
-          0,
-        );
+      let income = 0;
+      let expense = 0;
+      txns.forEach((transaction) => {
+        const value = valueForDisplay(transaction.amount, transaction.date);
+        if (transaction.type === 'income') {
+          income += value;
+        } else if (transaction.type === 'expense') {
+          expense += value;
+        }
+      });
 
       return { income, expense };
     },
@@ -883,14 +1078,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
       });
 
-      const categoryMap = new Map(categories.map((category) => [category.id, category]));
       const totals = new Map<string, { amount: number; parentLabel?: string; label: string }>();
 
       txns.forEach((transaction) => {
         if (!transaction.categoryId) return;
-        const cat = categoryMap.get(transaction.categoryId);
+        const cat = categoryByIdMap.get(transaction.categoryId);
         if (!cat) return;
-        const root = cat.parentId ? categoryMap.get(cat.parentId) : cat;
+        const root = cat.parentId ? categoryByIdMap.get(cat.parentId) : cat;
         const id = groupByRoot ? (root?.id ?? cat.id) : cat.id;
         const current = totals.get(id);
         const inc = valueForDisplay(transaction.amount, transaction.date);
@@ -901,7 +1095,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parentLabel: groupByRoot ? undefined : root?.name,
           });
         } else {
-          totals.set(id, { ...current, amount: current.amount + inc });
+          current.amount += inc;
         }
       });
 
@@ -909,7 +1103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .map(([id, value]) => ({ id, ...value }))
         .sort((a, b) => b.amount - a.amount);
     },
-    [categories, valueForDisplay, isSimpleMode, simpleWalletId],
+    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
@@ -1082,6 +1276,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createTransaction,
             updateTransaction,
             deleteTransaction,
+            updateTransactionsBulk,
+            deleteTransactionsBulk,
             updateSettings,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -1147,6 +1343,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createTransaction,
       updateTransaction,
       deleteTransaction,
+      updateTransactionsBulk,
+      deleteTransactionsBulk,
       updateSettings,
       updateWageConfig,
       updateWageConfigForMonth,

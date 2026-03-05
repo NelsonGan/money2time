@@ -11,5 +11,11 @@ export function filterRecurringRulesByWallet(
   walletId: string | null | undefined,
 ): RecurringTransactionRule[] {
   if (!walletId) return rules;
-  return rules.filter((rule) => ruleBelongsToWallet(rule, walletId));
+  const filteredRules: RecurringTransactionRule[] = [];
+  rules.forEach((rule) => {
+    if (ruleBelongsToWallet(rule, walletId)) {
+      filteredRules.push(rule);
+    }
+  });
+  return filteredRules;
 }

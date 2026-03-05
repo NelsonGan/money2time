@@ -33,8 +33,9 @@ function compareUpdatedAtAsc(a: SortableTransaction, b: SortableTransaction): nu
 export function compareTransactionsByDateDesc(
   a: SortableTransaction,
   b: SortableTransaction,
+  resolveDayKey: (dateIso: string) => string = dayKeyFromIsoLocal,
 ): number {
-  const dayDelta = dayKeyFromIsoLocal(b.date).localeCompare(dayKeyFromIsoLocal(a.date));
+  const dayDelta = resolveDayKey(b.date).localeCompare(resolveDayKey(a.date));
   if (dayDelta !== 0) return dayDelta;
   return compareUpdatedAtDesc(a, b);
 }
@@ -42,8 +43,9 @@ export function compareTransactionsByDateDesc(
 export function compareTransactionsByDateAsc(
   a: SortableTransaction,
   b: SortableTransaction,
+  resolveDayKey: (dateIso: string) => string = dayKeyFromIsoLocal,
 ): number {
-  const dayDelta = dayKeyFromIsoLocal(a.date).localeCompare(dayKeyFromIsoLocal(b.date));
+  const dayDelta = resolveDayKey(a.date).localeCompare(resolveDayKey(b.date));
   if (dayDelta !== 0) return dayDelta;
   return compareUpdatedAtAsc(a, b);
 }
@@ -52,30 +54,50 @@ export function sortTransactions<T extends SortableTransaction>(
   transactions: readonly T[],
   sortBy: TransactionFilters['sortBy'],
 ): T[] {
-  const sorted = [...transactions];
-  switch (sortBy) {
-    case 'date_asc':
-      sorted.sort(compareTransactionsByDateAsc);
-      break;
-    case 'amount_desc':
-      sorted.sort((a, b) => {
-        const amountDelta = b.amount - a.amount;
-        if (amountDelta !== 0) return amountDelta;
-        return compareTransactionsByDateDesc(a, b);
-      });
-      break;
-    case 'amount_asc':
-      sorted.sort((a, b) => {
-        const amountDelta = a.amount - b.amount;
-        if (amountDelta !== 0) return amountDelta;
-        return compareTransactionsByDateAsc(a, b);
-      });
-      break;
-    case 'date_desc':
-    default:
-      sorted.sort(compareTransactionsByDateDesc);
-      break;
+  if (transactions.length < 2) {
+    return transactions as T[];
   }
 
-  return sorted;
+  const dayKeyByDate = new Map<string, string>();
+  const resolveDayKey = (dateIso: string) => {
+    const cached = dayKeyByDate.get(dateIso);
+    if (cached !== undefined) return cached;
+    const next = dayKeyFromIsoLocal(dateIso);
+    dayKeyByDate.set(dateIso, next);
+    return next;
+  };
+  const compareByDateDesc = (a: T, b: T) => compareTransactionsByDateDesc(a, b, resolveDayKey);
+  const compareByDateAsc = (a: T, b: T) => compareTransactionsByDateAsc(a, b, resolveDayKey);
+  const ensureSorted = (comparator: (a: T, b: T) => number): T[] => {
+    for (let index = 1; index < transactions.length; index += 1) {
+      const previous = transactions[index - 1];
+      const current = transactions[index];
+      if (!previous || !current) continue;
+      if (comparator(previous, current) > 0) {
+        const sorted = [...transactions];
+        sorted.sort(comparator);
+        return sorted;
+      }
+    }
+    return transactions as T[];
+  };
+  switch (sortBy) {
+    case 'date_asc':
+      return ensureSorted(compareByDateAsc);
+    case 'amount_desc':
+      return ensureSorted((a, b) => {
+        const amountDelta = b.amount - a.amount;
+        if (amountDelta !== 0) return amountDelta;
+        return compareByDateDesc(a, b);
+      });
+    case 'amount_asc':
+      return ensureSorted((a, b) => {
+        const amountDelta = a.amount - b.amount;
+        if (amountDelta !== 0) return amountDelta;
+        return compareByDateAsc(a, b);
+      });
+    case 'date_desc':
+    default:
+      return ensureSorted(compareByDateDesc);
+  }
 }

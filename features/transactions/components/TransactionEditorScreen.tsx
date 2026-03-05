@@ -43,7 +43,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionType } from '~/types';
+import type { Category, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -449,48 +449,74 @@ export function TransactionEditorScreen({
     handleTypeChange(fallbackType);
   }, [availableTypeCards, handleTypeChange, type]);
 
-  const typedCategories = useMemo(
-    () =>
-      type === 'expense' || type === 'income'
-        ? categories.filter((category) => category.type === type)
-        : [],
-    [categories, type],
-  );
-  const topLevelCategories = useMemo(
-    () => typedCategories.filter((category) => !category.parentId),
-    [typedCategories],
-  );
-  const childCategoriesByParent = useMemo(() => {
-    if (hideSubcategories) return new Map<string, typeof typedCategories>();
-    const map = new Map<string, typeof typedCategories>();
-    typedCategories.forEach((item) => {
-      const parentId = item.parentId;
-      if (!parentId) return;
-      const existing = map.get(parentId);
-      if (existing) {
-        existing.push(item);
-      } else {
-        map.set(parentId, [item]);
-      }
-    });
-    return map;
-  }, [hideSubcategories, typedCategories]);
+  const {
+    topLevelCategories,
+    topLevelCategoryById,
+    topLevelCategoryIdSet,
+    childCategoriesByParent,
+  } = useMemo(() => {
+    const topLevel: Category[] = [];
+    const topLevelById = new Map<string, Category>();
+    const topLevelIds = new Set<string>();
+    const childrenByParent = new Map<string, Category[]>();
 
-  const categoryPreview = useMemo(() => {
-    if (!categoryId) return null;
-    const parent = topLevelCategories.find((item) => item.id === categoryId);
-    if (parent) return { icon: resolveCategoryIcon(parent.icon), name: parent.name };
-    for (const [parentId, children] of childCategoriesByParent.entries()) {
-      const found = children.find((child) => child.id === categoryId);
-      if (!found) continue;
-      const parentNode = topLevelCategories.find((item) => item.id === parentId);
+    if (type !== 'expense' && type !== 'income') {
       return {
-        icon: resolveCategoryIcon(found.icon, parentNode?.icon ?? null),
-        name: parentNode ? `${parentNode.name} / ${found.name}` : found.name,
+        topLevelCategories: topLevel,
+        topLevelCategoryById: topLevelById,
+        topLevelCategoryIdSet: topLevelIds,
+        childCategoriesByParent: childrenByParent,
       };
     }
-    return null;
-  }, [categoryId, childCategoriesByParent, topLevelCategories]);
+
+    categories.forEach((category) => {
+      if (category.type !== type) return;
+      if (!category.parentId) {
+        topLevel.push(category);
+        topLevelById.set(category.id, category);
+        topLevelIds.add(category.id);
+        return;
+      }
+      if (hideSubcategories) return;
+      const existing = childrenByParent.get(category.parentId);
+      if (existing) {
+        existing.push(category);
+      } else {
+        childrenByParent.set(category.parentId, [category]);
+      }
+    });
+
+    return {
+      topLevelCategories: topLevel,
+      topLevelCategoryById: topLevelById,
+      topLevelCategoryIdSet: topLevelIds,
+      childCategoriesByParent: childrenByParent,
+    };
+  }, [categories, hideSubcategories, type]);
+
+  const categoryPreviewById = useMemo(() => {
+    const previews = new Map<string, { icon: string; name: string }>();
+    topLevelCategories.forEach((category) => {
+      previews.set(category.id, {
+        icon: resolveCategoryIcon(category.icon),
+        name: category.name,
+      });
+    });
+    childCategoriesByParent.forEach((children, parentId) => {
+      const parentNode = topLevelCategoryById.get(parentId);
+      children.forEach((child) => {
+        previews.set(child.id, {
+          icon: resolveCategoryIcon(child.icon, parentNode?.icon ?? null),
+          name: parentNode ? `${parentNode.name} / ${child.name}` : child.name,
+        });
+      });
+    });
+    return previews;
+  }, [childCategoriesByParent, topLevelCategories, topLevelCategoryById]);
+  const categoryPreview = useMemo(
+    () => (categoryId ? (categoryPreviewById.get(categoryId) ?? null) : null),
+    [categoryId, categoryPreviewById],
+  );
 
   const nudgeMessage = useMemo(() => {
     if (type !== 'expense') return null;
@@ -505,20 +531,13 @@ export function TransactionEditorScreen({
     return I18n.t('transactions.editor.nudge.large', { hours: formatHours(hours) });
   }, [amount, currentMonthWage?.trueHourlyRate, settings.hourRounding, type]);
 
-  const accountName = useMemo(() => {
-    if (!accountId) return null;
-    return accounts.find((a) => a.id === accountId)?.name ?? null;
-  }, [accountId, accounts]);
-
-  const fromAccountName = useMemo(() => {
-    if (!fromAccountId) return null;
-    return accounts.find((a) => a.id === fromAccountId)?.name ?? null;
-  }, [fromAccountId, accounts]);
-
-  const toAccountName = useMemo(() => {
-    if (!toAccountId) return null;
-    return accounts.find((a) => a.id === toAccountId)?.name ?? null;
-  }, [toAccountId, accounts]);
+  const accountNameById = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account.name])),
+    [accounts],
+  );
+  const accountName = accountId ? (accountNameById.get(accountId) ?? null) : null;
+  const fromAccountName = fromAccountId ? (accountNameById.get(fromAccountId) ?? null) : null;
+  const toAccountName = toAccountId ? (accountNameById.get(toAccountId) ?? null) : null;
 
   useEffect(() => {
     Keyboard.dismiss();
@@ -845,18 +864,8 @@ export function TransactionEditorScreen({
   }, [fromAccountId, toAccountId]);
 
   const categoryNoteLabel = useCallback(
-    (targetCategoryId: string) => {
-      const parent = topLevelCategories.find((item) => item.id === targetCategoryId);
-      if (parent) return parent.name;
-      for (const [parentId, children] of childCategoriesByParent.entries()) {
-        const child = children.find((item) => item.id === targetCategoryId);
-        if (!child) continue;
-        const parentNode = topLevelCategories.find((item) => item.id === parentId);
-        return parentNode ? `${parentNode.name} / ${child.name}` : child.name;
-      }
-      return null;
-    },
-    [childCategoriesByParent, topLevelCategories],
+    (targetCategoryId: string) => categoryPreviewById.get(targetCategoryId)?.name ?? null,
+    [categoryPreviewById],
   );
 
   const handleNoteChange = useCallback((nextNote: string) => {
@@ -869,7 +878,7 @@ export function TransactionEditorScreen({
       autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
     }
 
-    const isSelectedParent = topLevelCategories.some((item) => item.id === nextCategoryId);
+    const isSelectedParent = topLevelCategoryIdSet.has(nextCategoryId);
     const selectedParentHasChildren =
       (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
     if (mode === 'create' && isSelectedParent && selectedParentHasChildren) {
@@ -888,23 +897,19 @@ export function TransactionEditorScreen({
       })),
     [topLevelCategories],
   );
-  const categoryPanelChildren = useMemo(
-    () =>
-      new Map(
-        Array.from(childCategoriesByParent.entries()).map(([key, items]) => [
-          key,
-          items.map((item) => {
-            const parentNode = topLevelCategories.find((parent) => parent.id === key);
-            return {
-              id: item.id,
-              name: item.name,
-              icon: resolveCategoryIcon(item.icon, parentNode?.icon ?? null),
-            };
-          }),
-        ]),
-      ),
-    [childCategoriesByParent, topLevelCategories],
-  );
+  const categoryPanelChildren = useMemo(() => {
+    const panelChildrenByParent = new Map<string, { id: string; name: string; icon: string }[]>();
+    childCategoriesByParent.forEach((items, parentId) => {
+      const parentNode = topLevelCategoryById.get(parentId);
+      const panelChildren = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        icon: resolveCategoryIcon(item.icon, parentNode?.icon ?? null),
+      }));
+      panelChildrenByParent.set(parentId, panelChildren);
+    });
+    return panelChildrenByParent;
+  }, [childCategoriesByParent, topLevelCategoryById]);
 
   const renderToolPanel = () => {
     switch (activeField) {

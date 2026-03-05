@@ -12,23 +12,22 @@ export interface MonthTransactionBuckets {
   summaries: Map<string, MonthSummary>;
 }
 
-function transactionBelongsToWallet(
-  transaction: Pick<TransactionWithRelations, 'accountId' | 'fromAccountId' | 'toAccountId'>,
-  walletId: string,
-): boolean {
-  return (
-    transaction.accountId === walletId ||
-    transaction.fromAccountId === walletId ||
-    transaction.toAccountId === walletId
-  );
-}
-
 export function filterTransactionsByWallet(
   transactions: TransactionWithRelations[],
   walletId: string | null | undefined,
 ): TransactionWithRelations[] {
   if (!walletId) return transactions;
-  return transactions.filter((transaction) => transactionBelongsToWallet(transaction, walletId));
+  const filtered: TransactionWithRelations[] = [];
+  transactions.forEach((transaction) => {
+    if (
+      transaction.accountId === walletId ||
+      transaction.fromAccountId === walletId ||
+      transaction.toAccountId === walletId
+    ) {
+      filtered.push(transaction);
+    }
+  });
+  return filtered;
 }
 
 export function emptyMonthSummary(): MonthSummary {
@@ -38,9 +37,11 @@ export function emptyMonthSummary(): MonthSummary {
 function accumulateSummary(
   summary: MonthSummary,
   transaction: TransactionWithRelations,
-  value: number,
+  resolveValue: (transaction: TransactionWithRelations) => number,
 ): void {
   summary.count += 1;
+  if (transaction.type !== 'income' && transaction.type !== 'expense') return;
+  const value = resolveValue(transaction);
   if (transaction.type === 'income') summary.income += value;
   if (transaction.type === 'expense') summary.expense += value;
 }
@@ -51,8 +52,7 @@ export function summarizeTransactions(
 ): MonthSummary {
   const summary = emptyMonthSummary();
   transactions.forEach((transaction) => {
-    const value = resolveValue(transaction);
-    accumulateSummary(summary, transaction, value);
+    accumulateSummary(summary, transaction, resolveValue);
   });
   return summary;
 }
@@ -73,10 +73,12 @@ export function bucketTransactionsByMonth(
       transactionsMap.set(key, [transaction]);
     }
 
-    const summary = summaries.get(key) ?? emptyMonthSummary();
-    const value = resolveValue(transaction);
-    accumulateSummary(summary, transaction, value);
-    summaries.set(key, summary);
+    let summary = summaries.get(key);
+    if (!summary) {
+      summary = emptyMonthSummary();
+      summaries.set(key, summary);
+    }
+    accumulateSummary(summary, transaction, resolveValue);
   });
 
   return { transactionsMap, summaries };
