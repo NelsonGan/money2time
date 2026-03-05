@@ -10,6 +10,7 @@ import type {
   TransactionType,
   TransactionWithRelations,
 } from '~/types';
+import { sortTransactions } from '~/utils/transactionSorting';
 import { newId, nowIso } from '~/utils/id';
 
 import { toTransaction } from './mappers';
@@ -66,7 +67,7 @@ function normalizeTransactionFilters(
 function buildSort(sortBy: TransactionFilters['sortBy']) {
   switch (sortBy) {
     case 'date_asc':
-      return [asc(transactionsTable.date)];
+      return [sql`substr(${transactionsTable.date}, 1, 10) asc`, asc(transactionsTable.updatedAt)];
     case 'amount_desc':
       return [desc(transactionsTable.amount)];
     case 'amount_asc':
@@ -74,7 +75,7 @@ function buildSort(sortBy: TransactionFilters['sortBy']) {
     default:
       return [
         sql`substr(${transactionsTable.date}, 1, 10) desc`,
-        desc(transactionsTable.createdAt),
+        desc(transactionsTable.updatedAt),
       ];
   }
 }
@@ -181,8 +182,8 @@ class TransactionsRepository {
       .orderBy(...buildSort(normalized.sortBy))
       .all()
       .map(toTransaction);
-
-    return attachRelations(rows);
+    const orderedRows = sortTransactions(rows, normalized.sortBy);
+    return attachRelations(orderedRows);
   }
 
   listByAccount(accountId: string) {
@@ -323,12 +324,12 @@ class TransactionsRepository {
       )
       .orderBy(
         sql`substr(${transactionsTable.date}, 1, 10) desc`,
-        desc(transactionsTable.createdAt),
+        desc(transactionsTable.updatedAt),
       )
       .all()
       .map(toTransaction);
-
-    return attachRelations(rows);
+    const orderedRows = sortTransactions(rows, 'date_desc');
+    return attachRelations(orderedRows);
   }
 }
 

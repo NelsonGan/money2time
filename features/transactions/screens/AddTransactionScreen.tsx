@@ -8,15 +8,18 @@ interface AddTransactionScreenProps {
   onClose: () => void;
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
+  initialAccountId?: string;
 }
 
 export function AddTransactionScreen({
   onClose,
   isSimpleMode,
   simpleWalletId,
+  initialAccountId,
 }: AddTransactionScreenProps) {
   const { createTransaction } = useApp();
-  const initialAccountId = isSimpleMode && simpleWalletId ? simpleWalletId : undefined;
+  const resolvedInitialAccountId =
+    isSimpleMode && simpleWalletId ? simpleWalletId : initialAccountId;
   const restrictedTypes: TransactionType[] | undefined = isSimpleMode
     ? ['expense', 'income']
     : undefined;
@@ -28,7 +31,7 @@ export function AddTransactionScreen({
       onSubmit={createTransaction}
       restrictTypeOptions={restrictedTypes}
       hideAccountSelector={isSimpleMode}
-      initialAccountId={initialAccountId}
+      initialAccountId={resolvedInitialAccountId}
     />
   );
 }

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
+import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -31,7 +31,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
-import { EditTransactionScreen } from '~/features/transactions/screens';
+import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -198,6 +198,26 @@ const styles = StyleSheet.create({
   },
   accountPanel: {
     height: ACCOUNT_PANEL_HEIGHT,
+  },
+  floatingAddButtonContainer: {
+    position: 'absolute',
+    right: SETTINGS_HORIZONTAL_PADDING,
+    zIndex: 25,
+  },
+  floatingAddButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 6,
   },
 });
 
@@ -980,6 +1000,7 @@ export function AccountsScreen({
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
+  const safeAreaInsets = useSafeAreaInsets();
   const { persistOrder } = useDebouncedPersistence(500);
   const {
     accountGroups,
@@ -1012,6 +1033,7 @@ export function AccountsScreen({
   const [editingGroupName, setEditingGroupName] = useState('');
   const [showPayCard, setShowPayCard] = useState(false);
   const [showEditAccount, setShowEditAccount] = useState(false);
+  const [addTransactionAccountId, setAddTransactionAccountId] = useState<string | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
   );
@@ -1043,6 +1065,10 @@ export function AccountsScreen({
     ? (accounts.find((item) => item.id === activeAccountId) ?? null)
     : null;
   const edgeSwipeBackHandler = useCallback(() => {
+    if (addTransactionAccountId) {
+      setAddTransactionAccountId(null);
+      return;
+    }
     if (selectedTransaction) {
       setSelectedTransaction(null);
       return;
@@ -1054,6 +1080,7 @@ export function AccountsScreen({
     onBack?.();
   }, [
     activeAccountId,
+    addTransactionAccountId,
     closeSelectedAccount,
     managementOnly,
     onBack,
@@ -1580,7 +1607,19 @@ export function AccountsScreen({
     setSelectedAccountId(account.id);
     setShowEditAccount(true);
   }, []);
+  const handleAddTransactionForAccount = useCallback((accountId: string) => {
+    setAddTransactionAccountId(accountId);
+  }, []);
   const creditLabel = String(I18n.t('accounts.credit'));
+
+  if (addTransactionAccountId) {
+    return withBackGesture(
+      <AddTransactionScreen
+        onClose={() => setAddTransactionAccountId(null)}
+        initialAccountId={addTransactionAccountId}
+      />,
+    );
+  }
 
   if (selectedTransaction) {
     return withBackGesture(
@@ -1796,6 +1835,27 @@ export function AccountsScreen({
               </View>
             }
           />
+          {!isSelectionMode ? (
+            <View
+              pointerEvents="box-none"
+              style={[
+                styles.floatingAddButtonContainer,
+                { bottom: safeAreaInsets.bottom + spacing.sm },
+              ]}
+            >
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('medium');
+                  handleAddTransactionForAccount(account.id);
+                }}
+                style={[styles.floatingAddButton, { backgroundColor: themeColors.primary }]}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+              >
+                <Plus size={24} color="#fff" />
+              </Pressable>
+            </View>
+          ) : null}
         </View>
         <EditAccountSheet
           visible={showEditAccount}
