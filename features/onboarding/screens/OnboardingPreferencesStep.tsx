@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -40,12 +40,40 @@ export function OnboardingPreferencesStep({
   onBack,
   onContinue,
 }: OnboardingPreferencesStepProps) {
+  const languageOptions = useMemo(
+    () =>
+      SUPPORTED_LOCALES.map((item) => ({
+        value: item,
+        label: `${getLocaleLabel(item)} (${item})`,
+      })),
+    [],
+  );
+  const currencyOptions = useMemo(
+    () =>
+      MAJOR_CURRENCIES.map((item) => ({
+        value: item.code,
+        label: `${item.code} (${item.symbol}) · ${item.name}`,
+      })),
+    [],
+  );
+  const currencyByCode = useMemo(
+    () => new Map(MAJOR_CURRENCIES.map((item) => [item.code, item])),
+    [],
+  );
+  const currencyBySymbol = useMemo(() => {
+    const bySymbol = new Map<string, (typeof MAJOR_CURRENCIES)[number]>();
+    MAJOR_CURRENCIES.forEach((item) => {
+      if (bySymbol.has(item.symbol)) return;
+      bySymbol.set(item.symbol, item);
+    });
+    return bySymbol;
+  }, []);
   const selectedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
     ? locale
     : 'en';
-  const currentCurrencyCode = MAJOR_CURRENCIES.some((item) => item.code === currencyCode)
+  const currentCurrencyCode = currencyByCode.has(currencyCode)
     ? currencyCode
-    : (MAJOR_CURRENCIES.find((item) => item.symbol === currencySymbol)?.code ?? 'USD');
+    : (currencyBySymbol.get(currencySymbol)?.code ?? 'USD');
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   return (
@@ -62,21 +90,15 @@ export function OnboardingPreferencesStep({
                 <SelectField
                   label={I18n.t('onboarding.value_prop.language_label')}
                   value={selectedLocale}
-                  options={SUPPORTED_LOCALES.map((item) => ({
-                    value: item,
-                    label: `${getLocaleLabel(item)} (${item})`,
-                  }))}
+                  options={languageOptions}
                   onChange={(value) => onLocaleChange(value)}
                 />
                 <SelectField
                   label={I18n.t('onboarding.value_prop.currency_label')}
                   value={currentCurrencyCode}
-                  options={MAJOR_CURRENCIES.map((item) => ({
-                    value: item.code,
-                    label: `${item.code} (${item.symbol}) · ${item.name}`,
-                  }))}
+                  options={currencyOptions}
                   onChange={(value) => {
-                    const found = MAJOR_CURRENCIES.find((item) => item.code === value);
+                    const found = currencyByCode.get(value);
                     if (found) onCurrencyChange({ code: found.code, symbol: found.symbol });
                   }}
                 />

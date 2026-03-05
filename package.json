@@ -4,9 +4,10 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "npm run sync:icons && expo run:android",
+    "ios": "npm run sync:icons && expo run:ios",
     "web": "expo start --web",
+    "sync:icons": "node ./scripts/sync-icons.mjs",
     "lint": "expo lint",
     "lint:fix": "expo lint --fix",
     "typecheck": "tsc --noEmit",

@@ -28,16 +28,17 @@ import {
   formatHours,
   formatMonthYearLabel,
   monthKeyFromDateLocal,
+  monthKeyFromIsoLocal,
   startOfMonthDate,
 } from '~/utils/formatters';
-import {
-  bucketTransactionsByMonth,
-  emptyMonthSummary,
-  filterTransactionsByWallet,
-} from '~/utils/transactions';
+import { emptyMonthSummary, type MonthTransactionBuckets } from '~/utils/transactions';
 
 const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
 const FLEX_ONE_STYLE = { flex: 1 } as const;
+const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
+  transactionsMap: new Map<string, TransactionWithRelations[]>(),
+  summaries: new Map(),
+};
 
 interface SimpleActivityScreenProps {
   scrollToTopToken?: number;
@@ -52,12 +53,26 @@ export function SimpleActivityScreen({
   focusMonthToken = 0,
   onOpenTransaction,
 }: SimpleActivityScreenProps) {
-  const { transactions, settings, simpleWalletId, getDisplayValueForTransaction } = useApp();
+  const {
+    transactions,
+    settings,
+    simpleWalletId,
+    getDisplayValueForTransaction,
+    getTrueHourlyRateForDate,
+  } = useApp();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
+  const transactionDisplaySettings = useMemo(
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+      hourRounding: settings.hourRounding,
+    }),
+    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+  );
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const {
@@ -87,14 +102,6 @@ export function SimpleActivityScreen({
   const activeMonthKey = monthKeyFromDateLocal(activeMonthDate);
   const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
 
-  const walletTransactions = useMemo(() => {
-    return filterTransactionsByWallet(transactions, simpleWalletId);
-  }, [transactions, simpleWalletId]);
-
-  const filteredTransactions = useMemo(() => {
-    if (typeFilter === 'all') return walletTransactions;
-    return walletTransactions.filter((tx) => tx.type === typeFilter);
-  }, [walletTransactions, typeFilter]);
   const resolveTransactionValue = useCallback(
     (transaction: TransactionWithRelations) =>
       settings.displayMode === 'time'
@@ -104,8 +111,40 @@ export function SimpleActivityScreen({
   );
 
   const monthBuckets = useMemo(() => {
-    return bucketTransactionsByMonth(filteredTransactions, resolveTransactionValue);
-  }, [filteredTransactions, resolveTransactionValue]);
+    if (transactions.length === 0) return EMPTY_MONTH_BUCKETS;
+    const nextTransactionsMap = new Map<string, TransactionWithRelations[]>();
+    const nextSummaries = new Map<string, ReturnType<typeof emptyMonthSummary>>();
+
+    transactions.forEach((transaction) => {
+      if (simpleWalletId) {
+        const belongsToSimpleWallet =
+          transaction.accountId === simpleWalletId ||
+          transaction.fromAccountId === simpleWalletId ||
+          transaction.toAccountId === simpleWalletId;
+        if (!belongsToSimpleWallet) return;
+      }
+      if (typeFilter !== 'all' && transaction.type !== typeFilter) return;
+
+      const monthKey = monthKeyFromIsoLocal(transaction.date);
+      const transactionList = nextTransactionsMap.get(monthKey);
+      if (transactionList) {
+        transactionList.push(transaction);
+      } else {
+        nextTransactionsMap.set(monthKey, [transaction]);
+      }
+
+      const summary = nextSummaries.get(monthKey) ?? emptyMonthSummary();
+      summary.count += 1;
+      if (transaction.type === 'income') {
+        summary.income += resolveTransactionValue(transaction);
+      } else if (transaction.type === 'expense') {
+        summary.expense += resolveTransactionValue(transaction);
+      }
+      nextSummaries.set(monthKey, summary);
+    });
+
+    return { transactionsMap: nextTransactionsMap, summaries: nextSummaries };
+  }, [resolveTransactionValue, simpleWalletId, transactions, typeFilter]);
 
   const monthSummary = useMemo(
     () => monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary(),
@@ -157,6 +196,9 @@ export function SimpleActivityScreen({
           localeKey={activeLocale}
           monthPageStyle={monthPageStyle}
           monthTransactionsMap={monthBuckets.transactionsMap}
+          displaySettings={transactionDisplaySettings}
+          getDisplayValueForTransaction={getDisplayValueForTransaction}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onTransactionPress={onOpenTransaction}
           getScrollToTopRef={getPageScrollToTopRef}
         />
@@ -165,10 +207,13 @@ export function SimpleActivityScreen({
     [
       getPageScrollToTopRef,
       activeLocale,
+      getDisplayValueForTransaction,
+      getTrueHourlyRateForDate,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
       monthPageStyle,
       onOpenTransaction,
+      transactionDisplaySettings,
     ],
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);

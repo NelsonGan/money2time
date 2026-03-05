@@ -31,6 +31,7 @@ interface CategoryPanelMultiSelectProps extends CategoryPanelBaseProps {
 
 type CategoryPanelProps = CategoryPanelSingleSelectProps | CategoryPanelMultiSelectProps;
 const EMPTY_SELECTED_CATEGORY_IDS: string[] = [];
+const EMPTY_CATEGORY_OPTIONS: CategoryOption[] = [];
 const COLS = 3;
 const CATEGORY_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
 
@@ -72,6 +73,34 @@ export function CategoryPanel(props: CategoryPanelProps) {
     if (isMultiSelect) return new Set(selectedCategoryIds);
     return new Set(selectedCategoryId ? [selectedCategoryId] : []);
   }, [isMultiSelect, selectedCategoryId, selectedCategoryIds]);
+  const ownerParentIdByCategoryId = useMemo(() => {
+    const owners = new Map<string, string>();
+    parents.forEach((parent) => {
+      owners.set(parent.id, parent.id);
+      const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
+      children.forEach((child) => {
+        owners.set(child.id, parent.id);
+      });
+    });
+    return owners;
+  }, [childByParent, parents]);
+  const selectedChildCountByParentId = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (selectedCategorySet.size === 0) return counts;
+
+    parents.forEach((parent) => {
+      const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
+      if (children.length === 0) return;
+      let selectedCount = 0;
+      children.forEach((child) => {
+        if (selectedCategorySet.has(child.id)) selectedCount += 1;
+      });
+      if (selectedCount > 0) {
+        counts.set(parent.id, selectedCount);
+      }
+    });
+    return counts;
+  }, [childByParent, parents, selectedCategorySet]);
 
   const handleSelection = (categoryId: string) => {
     if (isMultiSelect) {
@@ -88,17 +117,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
     if (isMultiSelect) return;
 
     if (!selectedCategoryId) return;
-    const selectedParent = parents.find((parent) => parent.id === selectedCategoryId);
-    if (selectedParent) {
-      setExpandedParentId(selectedParent.id);
-      return;
-    }
-
-    const ownerParent = parents.find((p) =>
-      (childByParent.get(p.id) ?? []).some((child) => child.id === selectedCategoryId),
-    );
-    if (ownerParent) setExpandedParentId(ownerParent.id);
-  }, [childByParent, isMultiSelect, parents, selectedCategoryId]);
+    const ownerParentId = ownerParentIdByCategoryId.get(selectedCategoryId);
+    if (ownerParentId) setExpandedParentId(ownerParentId);
+  }, [isMultiSelect, ownerParentIdByCategoryId, selectedCategoryId]);
 
   const parentRows = useMemo(() => chunk(parents, COLS), [parents]);
 
@@ -116,7 +137,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
           const expandedInRow = expandedParentId
             ? row.find((p) => p.id === expandedParentId)
             : null;
-          const expandedChildren = expandedInRow ? (childByParent.get(expandedInRow.id) ?? []) : [];
+          const expandedChildren = expandedInRow
+            ? (childByParent.get(expandedInRow.id) ?? EMPTY_CATEGORY_OPTIONS)
+            : EMPTY_CATEGORY_OPTIONS;
           const childRows = expandedChildren.length > 0 ? chunk(expandedChildren, COLS) : [];
 
           return (
@@ -124,11 +147,8 @@ export function CategoryPanel(props: CategoryPanelProps) {
               {/* Parent row */}
               <View className="flex-row gap-2">
                 {row.map((parent) => {
-                  const children = childByParent.get(parent.id) ?? [];
-                  const selectedChildCount = children.reduce(
-                    (count, child) => (selectedCategorySet.has(child.id) ? count + 1 : count),
-                    0,
-                  );
+                  const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
+                  const selectedChildCount = selectedChildCountByParentId.get(parent.id) ?? 0;
                   const hasSelectedChild = selectedChildCount > 0;
                   const isParentSelected = selectedCategorySet.has(parent.id);
                   const parentSelectionState = isParentSelected

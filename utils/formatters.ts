@@ -1,10 +1,29 @@
 import { getLocales } from 'expo-localization';
 
-import { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL, MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import {
+  DEFAULT_CURRENCY,
+  DEFAULT_CURRENCY_SYMBOL,
+  MAJOR_CURRENCIES,
+} from '~/constants/appDefaults';
 import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode' | 'hourRounding'>;
+const MONEY_PRECISION_MULTIPLIER = 100;
+const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const RELATIVE_WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'long' });
+const RELATIVE_MONTH_DAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+});
+
+function getMonthYearFormatter(locale: string) {
+  const cached = monthYearFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
+  monthYearFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
 
 export function computeHourlyRates(config: WageConfig): {
   baseHourlyRate: number;
@@ -56,11 +75,37 @@ function pad2(value: number): string {
   return String(value).padStart(2, '0');
 }
 
+function isDigitCode(charCode: number): boolean {
+  return charCode >= 48 && charCode <= 57;
+}
+
+function isSimpleDayKey(dateText: string): boolean {
+  if (dateText.length !== 10) return false;
+  if (dateText.charCodeAt(4) !== 45 || dateText.charCodeAt(7) !== 45) return false;
+
+  for (let index = 0; index < dateText.length; index += 1) {
+    if (index === 4 || index === 7) continue;
+    if (!isDigitCode(dateText.charCodeAt(index))) return false;
+  }
+
+  const month = Number(dateText.slice(5, 7));
+  const day = Number(dateText.slice(8, 10));
+  return (
+    Number.isInteger(month) &&
+    Number.isInteger(day) &&
+    month >= 1 &&
+    month <= 12 &&
+    day >= 1 &&
+    day <= 31
+  );
+}
+
 export function dayKeyFromDateLocal(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
 export function dayKeyFromIsoLocal(dateIso: string): string {
+  if (isSimpleDayKey(dateIso)) return dateIso;
   const parsed = new Date(dateIso);
   if (Number.isNaN(parsed.getTime())) return dateIso.slice(0, 10);
   return dayKeyFromDateLocal(parsed);
@@ -71,6 +116,7 @@ export function monthKeyFromDateLocal(date: Date): string {
 }
 
 export function monthKeyFromIsoLocal(dateIso: string): string {
+  if (isSimpleDayKey(dateIso)) return dateIso.slice(0, 7);
   const parsed = new Date(dateIso);
   if (Number.isNaN(parsed.getTime())) return dateIso.slice(0, 7);
   return monthKeyFromDateLocal(parsed);
@@ -119,7 +165,7 @@ export function parseMonthKey(month: string): Date | null {
 }
 
 export function formatMonthYearLabel(date: Date, locale = 'en-GB'): string {
-  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+  return getMonthYearFormatter(locale).format(date);
 }
 
 export function amountToHoursByRate(
@@ -142,6 +188,12 @@ function amountToHours(
 
 export function formatCurrency(amount: number, currencySymbol = '$'): string {
   return `${currencySymbol}${Math.abs(amount).toFixed(2)}`;
+}
+
+export function normalizeMoneyAmount(amount: number): number {
+  if (!Number.isFinite(amount)) return 0;
+  const rounded = Math.round(amount * MONEY_PRECISION_MULTIPLIER) / MONEY_PRECISION_MULTIPLIER;
+  return Object.is(rounded, -0) ? 0 : rounded;
 }
 
 function trimTrailingZeros(value: string) {
@@ -202,17 +254,18 @@ export function formatAmount(
   } = {},
 ): string {
   const { showSign = false, neutralSign = false, trueHourlyRate = 0 } = options;
-  const amountSign = amount > 0 ? '+' : amount < 0 ? '-' : '';
-  const sign = showSign ? (neutralSign ? '' : amountSign) : amount < 0 ? '-' : '';
+  const normalizedAmount = normalizeMoneyAmount(amount);
+  const amountSign = normalizedAmount > 0 ? '+' : normalizedAmount < 0 ? '-' : '';
+  const sign = showSign ? (neutralSign ? '' : amountSign) : normalizedAmount < 0 ? '-' : '';
 
   if (settings.displayMode === 'time') {
     if (trueHourlyRate <= 0) {
-      return `${sign}${formatCurrency(Math.abs(amount), settings.currencySymbol)}`;
+      return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
     }
-    return `${sign}${formatHours(Math.abs(amountToHours(amount, settings, trueHourlyRate)))}`;
+    return `${sign}${formatHours(Math.abs(amountToHours(normalizedAmount, settings, trueHourlyRate)))}`;
   }
 
-  return `${sign}${formatCurrency(Math.abs(amount), settings.currencySymbol)}`;
+  return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
 }
 
 export function formatRelativeDate(dateString: string): string {
@@ -233,8 +286,8 @@ export function formatRelativeDate(dateString: string): string {
   if (dateOnly.getTime() === yesterdayOnly.getTime()) return I18n.t('common.yesterday');
 
   const daysDiff = Math.floor((todayOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysDiff < 7) return date.toLocaleDateString('en-US', { weekday: 'long' });
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (daysDiff < 7) return RELATIVE_WEEKDAY_FORMATTER.format(date);
+  return RELATIVE_MONTH_DAY_FORMATTER.format(date);
 }
 
 export function formatDateInput(date: Date): string {

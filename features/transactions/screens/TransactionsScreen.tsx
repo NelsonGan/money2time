@@ -52,6 +52,7 @@ import {
 import {
   bucketTransactionsByMonth,
   emptyMonthSummary,
+  type MonthTransactionBuckets,
   summarizeTransactions,
 } from '~/utils/transactions';
 
@@ -69,6 +70,10 @@ const FILTER_SELECTION_PANEL_CLASS =
   'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
 const SELECTION_PANEL_HEIGHT = 236;
 const BULK_DATE_PANEL_HEIGHT = 360;
+const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
+  transactionsMap: new Map<string, TransactionWithRelations[]>(),
+  summaries: new Map(),
+};
 
 interface CategoryPanelItem {
   id: string;
@@ -81,31 +86,74 @@ interface CategoryPanelData {
   childrenByParent: Map<string, CategoryPanelItem[]>;
 }
 
-function buildCategoryPanelData(categories: Category[], type: CategoryType): CategoryPanelData {
-  const parentCategories = categories.filter(
-    (category) => category.type === type && category.parentId === null,
-  );
-  const parentIconById = new Map(parentCategories.map((category) => [category.id, category.icon]));
-  const parents = parentCategories.map((category) => ({
-    id: category.id,
-    name: category.name,
-    icon: resolveCategoryIcon(category.icon),
-  }));
-  const childrenByParent = new Map<string, CategoryPanelItem[]>();
+function buildCategoryPanelDataByType(categories: Category[]): {
+  income: CategoryPanelData;
+  expense: CategoryPanelData;
+} {
+  const incomeParents: CategoryPanelItem[] = [];
+  const expenseParents: CategoryPanelItem[] = [];
+  const incomeChildrenByParent = new Map<string, CategoryPanelItem[]>();
+  const expenseChildrenByParent = new Map<string, CategoryPanelItem[]>();
+  const incomeParentIconById = new Map<string, string>();
+  const expenseParentIconById = new Map<string, string>();
 
   categories.forEach((category) => {
-    if (category.type !== type || category.parentId === null) return;
-    const parentId = category.parentId;
-    const list = childrenByParent.get(parentId) ?? [];
-    list.push({
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-    });
-    childrenByParent.set(parentId, list);
+    if (category.parentId !== null) return;
+    if (category.type === 'income') {
+      incomeParents.push({
+        id: category.id,
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon),
+      });
+      incomeParentIconById.set(category.id, category.icon);
+      return;
+    }
+    if (category.type === 'expense') {
+      expenseParents.push({
+        id: category.id,
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon),
+      });
+      expenseParentIconById.set(category.id, category.icon);
+    }
   });
 
-  return { parents, childrenByParent };
+  categories.forEach((category) => {
+    if (category.parentId === null) return;
+    const parentId = category.parentId;
+    if (category.type === 'income') {
+      const list = incomeChildrenByParent.get(parentId);
+      const child: CategoryPanelItem = {
+        id: category.id,
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon, incomeParentIconById.get(parentId) ?? null),
+      };
+      if (list) {
+        list.push(child);
+      } else {
+        incomeChildrenByParent.set(parentId, [child]);
+      }
+      return;
+    }
+    if (category.type === 'expense') {
+      const list = expenseChildrenByParent.get(parentId);
+      const child: CategoryPanelItem = {
+        id: category.id,
+        name: category.name,
+        icon: resolveCategoryIcon(category.icon, expenseParentIconById.get(parentId) ?? null),
+      };
+      if (list) {
+        list.push(child);
+      } else {
+        expenseChildrenByParent.set(parentId, [child]);
+      }
+    }
+  });
+
+  return {
+    income: { parents: incomeParents, childrenByParent: incomeChildrenByParent },
+    expense: { parents: expenseParents, childrenByParent: expenseChildrenByParent },
+  };
 }
 
 function isSortByValue(value: string): value is SortByValue {
@@ -134,17 +182,19 @@ export function TransactionsScreen({
     transactionFilters,
     setTransactionFilters,
     resetTransactionFilters,
-    updateTransaction,
-    deleteTransaction,
+    updateTransactionsBulk,
+    deleteTransactionsBulk,
     accounts,
     accountGroups,
     categories,
     getDisplayValueForTransaction,
+    getTrueHourlyRateForDate,
   } = useApp();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [showFilters, setShowFilters] = useState(false);
   const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
+  const [searchDraft, setSearchDraft] = useState(() => transactionFilters.search);
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
@@ -157,6 +207,14 @@ export function TransactionsScreen({
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
+  const transactionDisplaySettings = useMemo(
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+      hourRounding: settings.hourRounding,
+    }),
+    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+  );
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const {
@@ -186,19 +244,16 @@ export function TransactionsScreen({
   const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
-  const selectedTransactionIdSet = useMemo(
-    () => new Set(selectedTransactionIds),
-    [selectedTransactionIds],
-  );
-  const selectedTransactionTotal = useMemo(
-    () =>
-      filteredTransactions.reduce(
-        (sum, transaction) =>
-          selectedTransactionIdSet.has(transaction.id) ? sum + transaction.amount : sum,
-        0,
-      ),
-    [filteredTransactions, selectedTransactionIdSet],
-  );
+  const selectedTransactionTotal = useMemo(() => {
+    if (selectedTransactionIds.length === 0) return 0;
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let total = 0;
+    filteredTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      total += transaction.amount;
+    });
+    return total;
+  }, [filteredTransactions, selectedTransactionIds]);
   const selectedTransactionTotalLabel = useMemo(
     () =>
       formatAmount(
@@ -227,8 +282,23 @@ export function TransactionsScreen({
     [getDisplayValueForTransaction, settings.displayMode],
   );
   const monthBuckets = useMemo(() => {
+    if (hasActiveSearch) return EMPTY_MONTH_BUCKETS;
     return bucketTransactionsByMonth(filteredTransactions, resolveTransactionValue);
-  }, [filteredTransactions, resolveTransactionValue]);
+  }, [filteredTransactions, hasActiveSearch, resolveTransactionValue]);
+
+  useEffect(() => {
+    setSearchDraft((previous) =>
+      previous === transactionFilters.search ? previous : transactionFilters.search,
+    );
+  }, [transactionFilters.search]);
+
+  useEffect(() => {
+    if (searchDraft === transactionFilters.search) return;
+    const timeout = setTimeout(() => {
+      setTransactionFilters({ search: searchDraft });
+    }, 140);
+    return () => clearTimeout(timeout);
+  }, [searchDraft, setTransactionFilters, transactionFilters.search]);
 
   useEffect(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -238,6 +308,11 @@ export function TransactionsScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [filteredTransactions, selectedTransactionIds.length]);
+
+  useEffect(() => {
+    if (!hasActiveSearch) return;
+    searchResultsScrollToTopRef.current?.();
+  }, [hasActiveSearch, transactionFilters.search]);
 
   useEffect(() => {
     if (isSelectionMode) {
@@ -328,12 +403,8 @@ export function TransactionsScreen({
     transactionFilters.sortBy,
     transactionFilters.type,
   ]);
-  const incomeCategoryPanelData = useMemo(
-    () => buildCategoryPanelData(categories, 'income'),
-    [categories],
-  );
-  const expenseCategoryPanelData = useMemo(
-    () => buildCategoryPanelData(categories, 'expense'),
+  const { income: incomeCategoryPanelData, expense: expenseCategoryPanelData } = useMemo(
+    () => buildCategoryPanelDataByType(categories),
     [categories],
   );
   const shouldShowIncomeCategoryFilter =
@@ -371,12 +442,13 @@ export function TransactionsScreen({
   }, []);
   const handleCloseSearch = useCallback(() => {
     void triggerHaptic('light');
-    if (transactionFilters.search.length > 0) {
+    if (searchDraft.length > 0 || transactionFilters.search.length > 0) {
+      setSearchDraft('');
       setTransactionFilters({ search: '' });
     }
     searchInputRef.current?.blur();
     setIsSearchBoxOpen(false);
-  }, [setTransactionFilters, transactionFilters.search]);
+  }, [searchDraft.length, setTransactionFilters, transactionFilters.search]);
   const handleOpenFilters = useCallback(() => {
     setIsSearchBoxOpen(false);
     setShowFilters(true);
@@ -387,11 +459,14 @@ export function TransactionsScreen({
     setSelectedTransactionIds([]);
   }, []);
   const toggleTransactionSelection = useCallback((transactionId: string) => {
-    setSelectedTransactionIds((previous) =>
-      previous.includes(transactionId)
-        ? previous.filter((id) => id !== transactionId)
-        : [...previous, transactionId],
-    );
+    setSelectedTransactionIds((previous) => {
+      const index = previous.indexOf(transactionId);
+      if (index === -1) return [...previous, transactionId];
+      if (previous.length === 1) return [];
+      const next = [...previous];
+      next.splice(index, 1);
+      return next;
+    });
   }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -436,9 +511,9 @@ export function TransactionsScreen({
     }
     if (Object.keys(updates).length === 0) return;
 
-    selectedTransactionIds.forEach((transactionId) => {
-      updateTransaction(transactionId, updates);
-    });
+    updateTransactionsBulk(
+      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
+    );
     void triggerHaptic('success');
     setShowBulkUpdate(false);
     setSelectedTransactionIds([]);
@@ -449,7 +524,7 @@ export function TransactionsScreen({
     bulkNoteTouched,
     hasBulkChanges,
     selectedTransactionIds,
-    updateTransaction,
+    updateTransactionsBulk,
   ]);
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -463,16 +538,14 @@ export function TransactionsScreen({
           text: I18n.t('common.delete'),
           style: 'destructive',
           onPress: () => {
-            idsToDelete.forEach((transactionId) => {
-              deleteTransaction(transactionId);
-            });
+            deleteTransactionsBulk(idsToDelete);
             setShowBulkUpdate(false);
             setSelectedTransactionIds([]);
           },
         },
       ],
     );
-  }, [deleteTransaction, selectedTransactionIds]);
+  }, [deleteTransactionsBulk, selectedTransactionIds]);
   const handleResetFilters = useCallback(() => {
     void triggerHaptic('selection');
     resetTransactionFilters();
@@ -513,9 +586,9 @@ export function TransactionsScreen({
   }, [setTransactionFilters]);
   const handleSearchChange = useCallback(
     (text: string) => {
-      setTransactionFilters({ search: text });
+      setSearchDraft(text);
     },
-    [setTransactionFilters],
+    [setSearchDraft],
   );
   const handleTypeChange = useCallback(
     (type: TransactionType | 'all') => {
@@ -553,6 +626,9 @@ export function TransactionsScreen({
           localeKey={activeLocale}
           monthPageStyle={monthPageStyle}
           monthTransactionsMap={monthBuckets.transactionsMap}
+          displaySettings={transactionDisplaySettings}
+          getDisplayValueForTransaction={getDisplayValueForTransaction}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onTransactionPress={handleTransactionPress}
           onTransactionLongPress={handleTransactionLongPress}
           selectedTransactionIds={selectedTransactionIds}
@@ -566,11 +642,14 @@ export function TransactionsScreen({
       handleTransactionLongPress,
       handleTransactionPress,
       activeLocale,
+      getDisplayValueForTransaction,
+      getTrueHourlyRateForDate,
       isSelectionMode,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
       monthPageStyle,
       selectedTransactionIds,
+      transactionDisplaySettings,
     ],
   );
 
@@ -615,7 +694,7 @@ export function TransactionsScreen({
                 ref={searchInputRef}
                 containerClassName="flex-1"
                 placeholder={I18n.t('transactions.filters.search_placeholder')}
-                value={transactionFilters.search}
+                value={searchDraft}
                 onChangeText={handleSearchChange}
                 returnKeyType="search"
                 leftIcon={<Search size={16} color={themeColors.textMuted} />}
@@ -694,6 +773,9 @@ export function TransactionsScreen({
         {hasActiveSearch ? (
           <ActivityTransactionList
             transactions={filteredTransactions}
+            displaySettings={transactionDisplaySettings}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
             selectedTransactionIds={selectedTransactionIds}
@@ -703,7 +785,7 @@ export function TransactionsScreen({
             contentPaddingBottom={LIST_BOTTOM_PADDING}
             disableItemAnimations
             compactItems
-            listKey={`search-${transactionFilters.search.trim().toLowerCase()}`}
+            listKey="search-results"
             scrollToTopRef={searchResultsScrollToTopRef}
           />
         ) : (

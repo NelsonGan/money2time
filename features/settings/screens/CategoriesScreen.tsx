@@ -500,32 +500,38 @@ export function CategoriesScreen({
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const activeParentId = parentId ?? selectedParentId;
 
-  const typeCategories = useMemo(
-    () => categories.filter((category) => category.type === type),
-    [categories, type],
-  );
-  const topLevel = useMemo(
-    () => typeCategories.filter((category) => !category.parentId),
-    [typeCategories],
-  );
-  const childrenByParent = useMemo(() => {
-    const map = new Map<string, Category[]>();
-    typeCategories.forEach((item) => {
-      const parentCategoryId = item.parentId;
-      if (!parentCategoryId) return;
-      const existing = map.get(parentCategoryId);
+  const { topLevel, childrenByParent, iconById } = useMemo(() => {
+    const nextTopLevel: Category[] = [];
+    const nextChildrenByParent = new Map<string, Category[]>();
+    const nextIconById = new Map<string, string>();
+
+    categories.forEach((category) => {
+      if (category.type !== type) return;
+      nextIconById.set(category.id, category.icon);
+      if (!category.parentId) {
+        nextTopLevel.push(category);
+        return;
+      }
+      const existing = nextChildrenByParent.get(category.parentId);
       if (existing) {
-        existing.push(item);
+        existing.push(category);
       } else {
-        map.set(parentCategoryId, [item]);
+        nextChildrenByParent.set(category.parentId, [category]);
       }
     });
-    return map;
-  }, [typeCategories]);
 
-  const selectedParent = activeParentId
-    ? (topLevel.find((c) => c.id === activeParentId) ?? null)
-    : null;
+    return {
+      topLevel: nextTopLevel,
+      childrenByParent: nextChildrenByParent,
+      iconById: nextIconById,
+    };
+  }, [categories, type]);
+  const topLevelById = useMemo(
+    () => new Map(topLevel.map((category) => [category.id, category])),
+    [topLevel],
+  );
+
+  const selectedParent = activeParentId ? (topLevelById.get(activeParentId) ?? null) : null;
   const subcategoriesFromContext = useMemo(
     () => (activeParentId ? (childrenByParent.get(activeParentId) ?? []) : []),
     [activeParentId, childrenByParent],
@@ -563,13 +569,13 @@ export function CategoriesScreen({
   }, [isReordering, subcategoriesFromContext]);
   useEffect(() => {
     if (!activeParentId) return;
-    if (topLevel.find((category) => category.id === activeParentId)) return;
+    if (topLevelById.has(activeParentId)) return;
     if (parentId) {
       onBack?.();
       return;
     }
     setSelectedParentId(null);
-  }, [activeParentId, onBack, parentId, topLevel]);
+  }, [activeParentId, onBack, parentId, topLevelById]);
   useEffect(() => {
     setIsReordering(false);
   }, [activeParentId]);
@@ -590,19 +596,21 @@ export function CategoriesScreen({
       themeColors.textMuted,
     ],
   );
-  const iconById = useMemo(
-    () => new Map(typeCategories.map((category) => [category.id, category.icon])),
-    [typeCategories],
-  );
   const topLevelSubtitleById = useMemo(() => {
     const subtitles = new Map<string, string>();
     topLevel.forEach((parent) => {
-      const childNames = (childrenByParent.get(parent.id) ?? []).map((child) => child.name.trim());
-      if (childNames.length === 0) {
+      const children = childrenByParent.get(parent.id);
+      if (!children || children.length === 0) {
         subtitles.set(parent.id, I18n.t('categories.no_subcategories'));
         return;
       }
-      subtitles.set(parent.id, childNames.join(' · '));
+      let subtitle = '';
+      children.forEach((child) => {
+        const trimmedName = child.name.trim();
+        if (!trimmedName) return;
+        subtitle = subtitle ? `${subtitle} · ${trimmedName}` : trimmedName;
+      });
+      subtitles.set(parent.id, subtitle || I18n.t('categories.no_subcategories'));
     });
     return subtitles;
   }, [childrenByParent, topLevel]);
@@ -710,11 +718,9 @@ export function CategoriesScreen({
               void triggerHaptic('light');
               skipNextSubcategorySyncRef.current = true;
               setLocalSubcategories(data);
-              persistOrder(
-                'categories',
-                data.map((i) => i.id),
-              );
-              reorderCategories(data.map((i) => i.id));
+              const orderedIds = data.map((item) => item.id);
+              persistOrder('categories', orderedIds);
+              reorderCategories(orderedIds);
             }}
             autoscrollThreshold={80}
             showsVerticalScrollIndicator={false}
@@ -807,11 +813,9 @@ export function CategoriesScreen({
             void triggerHaptic('light');
             skipNextTopLevelSyncRef.current = true;
             setLocalTopLevel(data);
-            persistOrder(
-              'categories',
-              data.map((i) => i.id),
-            );
-            reorderCategories(data.map((i) => i.id));
+            const orderedIds = data.map((item) => item.id);
+            persistOrder('categories', orderedIds);
+            reorderCategories(orderedIds);
           }}
           autoscrollThreshold={80}
           showsVerticalScrollIndicator={false}
