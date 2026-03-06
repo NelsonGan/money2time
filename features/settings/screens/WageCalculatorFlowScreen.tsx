@@ -143,11 +143,9 @@ export function WageCalculatorFlowScreen({
     step >= 3;
 
   const next = () => {
-    void triggerHaptic('selection');
     setStep((prev) => Math.min(prev + 1, 5));
   };
   const back = () => {
-    void triggerHaptic('selection');
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
@@ -344,11 +342,11 @@ export function WageCalculatorFlowScreen({
 
       <SafeAreaView edges={['bottom']} className="border-t border-border/40 bg-background">
         <View style={styles.footerActions}>
-          <Button variant="outline" className="flex-1" onPress={handleBack}>
+          <Button variant="outline" className="flex-1" haptic="selection" onPress={handleBack}>
             <Text>{step === 1 ? I18n.t('common.cancel') : I18n.t('common.back')}</Text>
           </Button>
           {step < 5 ? (
-            <Button className="flex-1" onPress={next} disabled={!canContinue}>
+            <Button className="flex-1" haptic="selection" onPress={next} disabled={!canContinue}>
               <Text>{I18n.t('wage.next')}</Text>
             </Button>
           ) : (

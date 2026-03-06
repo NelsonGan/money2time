@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { vars } from 'nativewind';
-import { useResolvedTheme } from '~/context/ThemeContext';
-import { lightCssVars, darkCssVars } from '~/constants/designSystem';
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
+import { getThemeCssVars } from '~/constants/designSystem';
 
 /**
  * Returns a NativeWind `vars()` style object that sets all CSS custom properties
@@ -10,5 +10,7 @@ import { lightCssVars, darkCssVars } from '~/constants/designSystem';
  */
 export function useThemeVars() {
   const resolved = useResolvedTheme();
-  return useMemo(() => vars(resolved === 'dark' ? darkCssVars : lightCssVars), [resolved]);
+  const themeColor = useThemeColor();
+
+  return useMemo(() => vars(getThemeCssVars(themeColor, resolved)), [resolved, themeColor]);
 }

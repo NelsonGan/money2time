@@ -12,7 +12,7 @@ export type HapticKind =
 
 const SELECTION_HAPTIC_DEDUPE_WINDOW_MS = 80;
 const GLOBAL_HAPTIC_DEDUPE_WINDOW_MS = 140;
-const NAVIGATION_HAPTIC_SUPPRESS_WINDOW_MS = 180;
+const NAVIGATION_HAPTIC_SUPPRESS_WINDOW_MS = 420;
 let lastSelectionHapticAtMs = 0;
 let lastHapticAtMs = 0;
 

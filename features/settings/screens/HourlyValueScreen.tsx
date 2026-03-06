@@ -282,6 +282,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           rightAccessory={
             <Button
               size="icon"
+              haptic="none"
               onPress={() => {
                 void triggerHaptic('selection');
                 setShowAddModal(true);

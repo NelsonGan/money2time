@@ -36,6 +36,7 @@ class SettingsRepository {
         | 'hourRounding'
         | 'displayMode'
         | 'themeMode'
+        | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -79,6 +80,7 @@ class SettingsRepository {
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
+        themeColor: 'sage',
         insightsPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
