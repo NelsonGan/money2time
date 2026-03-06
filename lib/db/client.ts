@@ -41,6 +41,7 @@ function ensureCoreData() {
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
+        themeColor: 'sage',
         insightsPrefsJson: null,
         onboardingCompleted: false,
         createdAt: now,

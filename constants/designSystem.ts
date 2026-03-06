@@ -1,3 +1,5 @@
+import type { ThemeColor } from '~/types';
+
 export interface ColorPalette {
   brand: string;
   primary: string;
@@ -25,7 +27,10 @@ export interface ColorPalette {
   sky: string;
 }
 
-export const colors: ColorPalette = {
+type ResolvedTheme = 'light' | 'dark';
+type CssVarMap = Record<string, string>;
+
+const baseLightPalette: ColorPalette = {
   brand: '#1F8A6F',
   primary: '#1F8A6F',
   primarySoft: '#E0F5EE',
@@ -52,7 +57,7 @@ export const colors: ColorPalette = {
   sky: '#8CC7FF',
 };
 
-export const darkColors: ColorPalette = {
+const baseDarkPalette: ColorPalette = {
   brand: '#34C99A',
   primary: '#34C99A',
   primarySoft: '#1A3D32',
@@ -84,7 +89,7 @@ export const darkColors: ColorPalette = {
  * These map to the --variables used in tailwind.config.js color definitions.
  * Values are HSL components without the hsl() wrapper (e.g. "162 60% 36%").
  */
-export const lightCssVars: Record<string, string> = {
+const baseLightCssVars: CssVarMap = {
   '--background': '40 35% 97%',
   '--foreground': '170 20% 14%',
   '--card': '40 20% 99%',
@@ -110,7 +115,7 @@ export const lightCssVars: Record<string, string> = {
   '--ring': '162 60% 36%',
 };
 
-export const darkCssVars: Record<string, string> = {
+const baseDarkCssVars: CssVarMap = {
   '--background': '223 28% 9%',
   '--foreground': '210 20% 95%',
   '--card': '220 22% 13%',
@@ -135,6 +140,264 @@ export const darkCssVars: Record<string, string> = {
   '--input': '221 16% 28%',
   '--ring': '168 48% 50%',
 };
+
+interface ThemeColorOverrides {
+  swatch: { light: string; dark: string };
+  lightPalette: Partial<ColorPalette>;
+  darkPalette: Partial<ColorPalette>;
+  lightCssVars: Partial<CssVarMap>;
+  darkCssVars: Partial<CssVarMap>;
+}
+
+export const THEME_COLOR_OPTIONS: readonly ThemeColor[] = [
+  'sage',
+  'ocean',
+  'terracotta',
+  'berry',
+  'slate',
+  'amber',
+  'indigo',
+  'emerald',
+  'rosewood',
+] as const;
+
+const themeColorOverrides: Record<ThemeColor, ThemeColorOverrides> = {
+  sage: {
+    swatch: { light: '#1F8A6F', dark: '#34C99A' },
+    lightPalette: {},
+    darkPalette: {},
+    lightCssVars: {},
+    darkCssVars: {},
+  },
+  ocean: {
+    swatch: { light: '#2B6CB0', dark: '#63ABF0' },
+    lightPalette: {
+      brand: '#2B6CB0',
+      primary: '#2B6CB0',
+      primarySoft: '#E3EEFA',
+      primaryMuted: '#BED4EF',
+    },
+    darkPalette: {
+      brand: '#63ABF0',
+      primary: '#63ABF0',
+      primarySoft: '#1A314A',
+      primaryMuted: '#294A70',
+    },
+    lightCssVars: {
+      '--primary': '213 61% 43%',
+      '--ring': '213 61% 43%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '208 82% 67%',
+      '--ring': '208 82% 67%',
+      '--primary-foreground': '212 72% 12%',
+    },
+  },
+  terracotta: {
+    swatch: { light: '#B65F48', dark: '#E19279' },
+    lightPalette: {
+      brand: '#B65F48',
+      primary: '#B65F48',
+      primarySoft: '#F7E8E2',
+      primaryMuted: '#E8C3B7',
+    },
+    darkPalette: {
+      brand: '#E19279',
+      primary: '#E19279',
+      primarySoft: '#3B2520',
+      primaryMuted: '#5C382E',
+    },
+    lightCssVars: {
+      '--primary': '12 43% 50%',
+      '--ring': '12 43% 50%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '16 63% 68%',
+      '--ring': '16 63% 68%',
+      '--primary-foreground': '18 62% 12%',
+    },
+  },
+  berry: {
+    swatch: { light: '#A34E79', dark: '#D283AC' },
+    lightPalette: {
+      brand: '#A34E79',
+      primary: '#A34E79',
+      primarySoft: '#F5E6EE',
+      primaryMuted: '#E1BCD0',
+    },
+    darkPalette: {
+      brand: '#D283AC',
+      primary: '#D283AC',
+      primarySoft: '#382133',
+      primaryMuted: '#56394B',
+    },
+    lightCssVars: {
+      '--primary': '330 35% 47%',
+      '--ring': '330 35% 47%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '331 47% 67%',
+      '--ring': '331 47% 67%',
+      '--primary-foreground': '329 61% 14%',
+    },
+  },
+  slate: {
+    swatch: { light: '#3D6D79', dark: '#79B8C7' },
+    lightPalette: {
+      brand: '#3D6D79',
+      primary: '#3D6D79',
+      primarySoft: '#E4EFF2',
+      primaryMuted: '#B8CED5',
+    },
+    darkPalette: {
+      brand: '#79B8C7',
+      primary: '#79B8C7',
+      primarySoft: '#1D333A',
+      primaryMuted: '#34545D',
+    },
+    lightCssVars: {
+      '--primary': '191 33% 36%',
+      '--ring': '191 33% 36%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '192 40% 64%',
+      '--ring': '192 40% 64%',
+      '--primary-foreground': '193 58% 12%',
+    },
+  },
+  amber: {
+    swatch: { light: '#A97432', dark: '#D7A86B' },
+    lightPalette: {
+      brand: '#A97432',
+      primary: '#A97432',
+      primarySoft: '#F8ECDE',
+      primaryMuted: '#E6CBAA',
+    },
+    darkPalette: {
+      brand: '#D7A86B',
+      primary: '#D7A86B',
+      primarySoft: '#3A2B1C',
+      primaryMuted: '#5A4128',
+    },
+    lightCssVars: {
+      '--primary': '34 54% 43%',
+      '--ring': '34 54% 43%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '33 58% 63%',
+      '--ring': '33 58% 63%',
+      '--primary-foreground': '29 66% 12%',
+    },
+  },
+  indigo: {
+    swatch: { light: '#4F63B8', dark: '#8FA5F0' },
+    lightPalette: {
+      brand: '#4F63B8',
+      primary: '#4F63B8',
+      primarySoft: '#E7EBFA',
+      primaryMuted: '#C5CFEE',
+    },
+    darkPalette: {
+      brand: '#8FA5F0',
+      primary: '#8FA5F0',
+      primarySoft: '#232B47',
+      primaryMuted: '#38456E',
+    },
+    lightCssVars: {
+      '--primary': '230 42% 52%',
+      '--ring': '230 42% 52%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '228 76% 75%',
+      '--ring': '228 76% 75%',
+      '--primary-foreground': '228 63% 14%',
+    },
+  },
+  emerald: {
+    swatch: { light: '#1E8E64', dark: '#46C892' },
+    lightPalette: {
+      brand: '#1E8E64',
+      primary: '#1E8E64',
+      primarySoft: '#E0F6EC',
+      primaryMuted: '#B8E6D2',
+    },
+    darkPalette: {
+      brand: '#46C892',
+      primary: '#46C892',
+      primarySoft: '#1A3E31',
+      primaryMuted: '#295D49',
+    },
+    lightCssVars: {
+      '--primary': '158 65% 34%',
+      '--ring': '158 65% 34%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '156 54% 53%',
+      '--ring': '156 54% 53%',
+      '--primary-foreground': '160 70% 11%',
+    },
+  },
+  rosewood: {
+    swatch: { light: '#B1525F', dark: '#DF8693' },
+    lightPalette: {
+      brand: '#B1525F',
+      primary: '#B1525F',
+      primarySoft: '#F8E7EA',
+      primaryMuted: '#EBC1C8',
+    },
+    darkPalette: {
+      brand: '#DF8693',
+      primary: '#DF8693',
+      primarySoft: '#3D2328',
+      primaryMuted: '#5E3840',
+    },
+    lightCssVars: {
+      '--primary': '352 38% 51%',
+      '--ring': '352 38% 51%',
+      '--primary-foreground': '0 0% 100%',
+    },
+    darkCssVars: {
+      '--primary': '351 58% 70%',
+      '--ring': '351 58% 70%',
+      '--primary-foreground': '352 56% 14%',
+    },
+  },
+};
+
+export function getThemeColorSwatch(themeColor: ThemeColor, resolved: ResolvedTheme): string {
+  const palette = themeColorOverrides[themeColor];
+  return resolved === 'dark' ? palette.swatch.dark : palette.swatch.light;
+}
+
+export function getThemePalette(themeColor: ThemeColor, resolved: ResolvedTheme): ColorPalette {
+  const base = resolved === 'dark' ? baseDarkPalette : baseLightPalette;
+  const overrides =
+    resolved === 'dark'
+      ? themeColorOverrides[themeColor].darkPalette
+      : themeColorOverrides[themeColor].lightPalette;
+  return { ...base, ...overrides };
+}
+
+export function getThemeCssVars(themeColor: ThemeColor, resolved: ResolvedTheme): CssVarMap {
+  const base = resolved === 'dark' ? baseDarkCssVars : baseLightCssVars;
+  const overrides =
+    resolved === 'dark'
+      ? themeColorOverrides[themeColor].darkCssVars
+      : themeColorOverrides[themeColor].lightCssVars;
+  return { ...base, ...overrides } as CssVarMap;
+}
+
+export const colors: ColorPalette = getThemePalette('sage', 'light');
+export const darkColors: ColorPalette = getThemePalette('sage', 'dark');
+export const lightCssVars: CssVarMap = getThemeCssVars('sage', 'light');
+export const darkCssVars: CssVarMap = getThemeCssVars('sage', 'dark');
 
 export const spacing = {
   xxs: 4,

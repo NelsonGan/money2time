@@ -41,6 +41,7 @@ interface SelectFieldProps {
   helperText?: string;
   error?: string;
   fullHeight?: boolean;
+  listItemAlignment?: 'start' | 'center';
 }
 
 export function SelectField({
@@ -57,6 +58,7 @@ export function SelectField({
   helperText,
   error,
   fullHeight = false,
+  listItemAlignment = 'start',
 }: SelectFieldProps) {
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
@@ -275,7 +277,10 @@ export function SelectField({
                       }}
                       className={cn(
                         optionsLayout === 'list'
-                          ? 'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row items-start gap-3'
+                          ? cn(
+                              'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row gap-3',
+                              listItemAlignment === 'center' ? 'items-center' : 'items-start',
+                            )
                           : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
                         isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
                       )}
@@ -309,7 +314,7 @@ export function SelectField({
                             ) : null}
                           </View>
                           {isSelected ? (
-                            <View className="pt-0.5">
+                            <View className={cn(listItemAlignment === 'center' ? '' : 'pt-0.5')}>
                               <Check size={16} color={themeColors.primary} />
                             </View>
                           ) : null}

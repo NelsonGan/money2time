@@ -109,6 +109,7 @@ interface AppContextValue extends AppState {
         | 'hourRounding'
         | 'displayMode'
         | 'themeMode'
+        | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -855,6 +856,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'hourRounding'
           | 'displayMode'
           | 'themeMode'
+          | 'themeColor'
           | 'onboardingCompleted'
           | 'userMode'
         >

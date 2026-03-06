@@ -7,7 +7,7 @@ import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
+import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
 import { Button } from './button';
@@ -236,6 +236,7 @@ interface SettingsRowItemProps {
   label: string;
   subtitle?: string;
   onPress: () => void;
+  haptic?: HapticKind;
   icon?: React.ReactNode;
   emoji?: string;
   className?: string;
@@ -247,6 +248,7 @@ export function SettingsRowItem({
   label,
   subtitle,
   onPress,
+  haptic = 'selection',
   icon,
   emoji,
   className,
@@ -259,7 +261,7 @@ export function SettingsRowItem({
   return (
     <Pressable
       onPress={() => {
-        void triggerHaptic('selection');
+        void triggerHaptic(haptic);
         onPress();
       }}
       className={cn(

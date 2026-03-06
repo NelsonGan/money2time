@@ -391,6 +391,7 @@ export function OnboardingBootstrapStep({
                     size="sm"
                     variant="secondary"
                     className="mt-3 self-start"
+                    haptic="none"
                     onPress={() => {
                       void triggerHaptic('selection');
                       onCreateMinimalDefaults();
@@ -591,7 +592,13 @@ function ChecklistItem({
                 <Text variant="label" tone="muted" className="mt-1">
                   {description}
                 </Text>
-                <Button variant="outline" size="sm" className="mt-3 self-start" onPress={onAction}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 self-start"
+                  haptic="none"
+                  onPress={onAction}
+                >
                   <Text>{actionLabel}</Text>
                 </Button>
               </View>

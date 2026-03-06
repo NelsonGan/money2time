@@ -365,7 +365,7 @@ export function HeroAmountConverter({
               {I18n.t('home.converter.description')}
             </Text>
           </View>
-          <Button size="sm" variant="outline" bouncy={false} onPress={handleClearAmount}>
+          <Button size="sm" variant="outline" bouncy={false} haptic="none" onPress={handleClearAmount}>
             <Text variant="caption">{I18n.t('home.converter.clear')}</Text>
           </Button>
         </View>
