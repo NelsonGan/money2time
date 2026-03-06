@@ -24,7 +24,7 @@ interface SelectOption {
   value: string;
   label: string;
   description?: string;
-  icon?: string;
+  icon?: React.ReactNode | string;
 }
 
 interface SelectFieldProps {
@@ -65,9 +65,12 @@ export function SelectField({
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
   const selected = options.find((opt) => opt.value === value);
-  const selectedLabel = selected
-    ? `${selected.icon ? `${selected.icon} ` : ''}${selected.label}`
-    : placeholder;
+  const selectedLabel = selected ? selected.label : placeholder;
+  const renderOptionIcon = (icon?: SelectOption['icon']) => {
+    if (!icon) return null;
+    if (typeof icon === 'string') return <Text variant="friendly">{icon}</Text>;
+    return icon;
+  };
   const closeSheet = () => {
     void triggerHaptic('selection');
     setOpen(false);
@@ -163,12 +166,19 @@ export function SelectField({
                 ) : null}
               </View>
             ) : null}
-            <Text
-              numberOfLines={1}
-              className={cn(selected ? 'text-foreground mt-0.5' : 'text-muted-foreground mt-0.5')}
-            >
-              {selectedLabel}
-            </Text>
+            <View className="mt-0.5 flex-row items-center gap-2">
+              {selected?.icon
+                ? typeof selected.icon === 'string'
+                  ? renderOptionIcon(selected.icon)
+                  : selected.icon
+                : null}
+              <Text
+                numberOfLines={1}
+                className={cn('flex-1', selected ? 'text-foreground' : 'text-muted-foreground')}
+              >
+                {selectedLabel}
+              </Text>
+            </View>
             {showSelectedDescription && selected?.description ? (
               <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5">
                 {selected.description}
@@ -177,12 +187,19 @@ export function SelectField({
           </View>
         ) : (
           <View className="flex-1 pr-2">
-            <Text
-              numberOfLines={1}
-              className={cn(selected ? 'text-foreground' : 'text-muted-foreground')}
-            >
-              {selectedLabel}
-            </Text>
+            <View className="flex-row items-center gap-2">
+              {selected?.icon
+                ? typeof selected.icon === 'string'
+                  ? renderOptionIcon(selected.icon)
+                  : selected.icon
+                : null}
+              <Text
+                numberOfLines={1}
+                className={cn('flex-1', selected ? 'text-foreground' : 'text-muted-foreground')}
+              >
+                {selectedLabel}
+              </Text>
+            </View>
             {showSelectedDescription && selected?.description ? (
               <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5">
                 {selected.description}
@@ -266,16 +283,20 @@ export function SelectField({
                       {optionsLayout === 'list' ? (
                         <>
                           {option.icon ? (
-                            <View
-                              className={cn(
-                                'h-8 w-8 rounded-lg items-center justify-center border',
-                                isSelected
-                                  ? 'bg-primary/15 border-primary/35'
-                                  : 'bg-secondary/45 border-border/35',
-                              )}
-                            >
-                              <Text variant="friendly">{option.icon}</Text>
-                            </View>
+                            typeof option.icon === 'string' ? (
+                              <View
+                                className={cn(
+                                  'h-8 w-8 rounded-lg items-center justify-center border',
+                                  isSelected
+                                    ? 'bg-primary/15 border-primary/35'
+                                    : 'bg-secondary/45 border-border/35',
+                                )}
+                              >
+                                {renderOptionIcon(option.icon)}
+                              </View>
+                            ) : (
+                              option.icon
+                            )
                           ) : null}
                           <View className="flex-1">
                             <Text variant="caption" className="pr-2">
@@ -295,10 +316,16 @@ export function SelectField({
                         </>
                       ) : (
                         <>
-                          <Text numberOfLines={2} className="flex-1 pr-2">
-                            {option.icon ? `${option.icon} ` : ''}
-                            {option.label}
-                          </Text>
+                          <View className="flex-1 flex-row items-center gap-2 pr-2">
+                            {option.icon
+                              ? typeof option.icon === 'string'
+                                ? renderOptionIcon(option.icon)
+                                : option.icon
+                              : null}
+                            <Text numberOfLines={2} className="flex-1">
+                              {option.label}
+                            </Text>
+                          </View>
                           {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
                         </>
                       )}

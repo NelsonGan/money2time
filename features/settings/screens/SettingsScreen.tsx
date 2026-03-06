@@ -1,3 +1,13 @@
+import {
+  Clock3,
+  FolderTree,
+  Landmark,
+  Palette,
+  RefreshCcw,
+  Repeat2,
+  Sparkles,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -13,6 +23,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -43,6 +54,7 @@ export function SettingsScreen({
     switchToPowerMode,
     deleteSimpleWalletAndTransactions,
   } = useApp();
+  const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
@@ -75,13 +87,13 @@ export function SettingsScreen({
           {/* General settings */}
           <View style={styles.rowsGroup}>
             <SettingsRowItem
-              emoji="🎨"
+              icon={<Palette size={18} color={themeColors.primary} />}
               label={I18n.t('settings.display')}
               subtitle={I18n.t('settings.display_subtitle')}
               onPress={onOpenDisplay}
             />
             <SettingsRowItem
-              emoji="⏱️"
+              icon={<Clock3 size={18} color={themeColors.primary} />}
               label={I18n.t('settings.hourly_value')}
               subtitle={
                 latestWage
@@ -94,26 +106,26 @@ export function SettingsScreen({
             />
             {!isSimpleMode && (
               <SettingsRowItem
-                emoji="🏦"
+                icon={<Landmark size={18} color={themeColors.primary} />}
                 label={I18n.t('settings.accounts')}
                 subtitle={I18n.t('settings.accounts_subtitle')}
                 onPress={onOpenAccounts}
               />
             )}
             <SettingsRowItem
-              emoji="📂"
+              icon={<FolderTree size={18} color={themeColors.primary} />}
               label={I18n.t('settings.categories')}
               subtitle={I18n.t('settings.categories_subtitle')}
               onPress={onOpenCategories}
             />
             <SettingsRowItem
-              emoji="🔁"
+              icon={<Repeat2 size={18} color={themeColors.primary} />}
               label={I18n.t('settings.recurring')}
               subtitle={I18n.t('settings.recurring_subtitle')}
               onPress={onOpenRecurring}
             />
             <SettingsRowItem
-              emoji="👋"
+              icon={<RefreshCcw size={18} color={themeColors.primary} />}
               label={I18n.t('settings.replay_onboarding')}
               subtitle={I18n.t('settings.replay_onboarding_subtitle')}
               onPress={() => {
@@ -133,7 +145,7 @@ export function SettingsScreen({
           {/* Experience mode section */}
           <SettingsSection title={I18n.t('settings.section_experience')}>
             <SettingsRowItem
-              emoji="✨"
+              icon={<Sparkles size={18} color={themeColors.primary} />}
               label={I18n.t('settings.user_mode')}
               subtitle={
                 isSimpleMode
@@ -171,7 +183,7 @@ export function SettingsScreen({
             />
             {!isSimpleMode && simpleWalletId !== null && (
               <SettingsRowItem
-                emoji="🗑️"
+                icon={<Trash2 size={18} color={themeColors.error} />}
                 label={I18n.t('settings.remove_simple_wallet')}
                 subtitle={I18n.t('settings.remove_simple_wallet_subtitle')}
                 onPress={() => {
