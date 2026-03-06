@@ -104,6 +104,7 @@ export function OnboardingWageStep({
             <Animated.View entering={FadeIn.delay(400).duration(400)} className="mt-4">
               <Button
                 variant="outline"
+                haptic="none"
                 onPress={() => {
                   void triggerHaptic('selection');
                   onOpenWageCalculator();
@@ -173,6 +174,7 @@ export function OnboardingWageStep({
           {/* Set up wage CTA */}
           <Animated.View entering={FadeIn.delay(400).duration(400)} className="mt-6">
             <Button
+              haptic="none"
               onPress={() => {
                 void triggerHaptic('medium');
                 onOpenWageCalculator();

@@ -457,7 +457,6 @@ export function InsightsDrilldownScreen({
   );
 
   const clearSelection = useCallback(() => {
-    void triggerHaptic('selection');
     setSelectedTransactionIds([]);
   }, []);
   const handleInterceptBack = useCallback(() => {
@@ -789,7 +788,10 @@ export function InsightsDrilldownScreen({
               <View style={styles.headerContainer}>
                 <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
                   <Pressable
-                    onPress={clearSelection}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      clearSelection();
+                    }}
                     className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
                     accessibilityRole="button"
                     accessibilityLabel={I18n.t('common.cancel')}

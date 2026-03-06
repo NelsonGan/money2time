@@ -686,6 +686,7 @@ export function CategoriesScreen({
             rightAccessory={
               <Button
                 size="icon"
+                haptic="none"
                 onPress={() => {
                   void triggerHaptic('selection');
                   setCreateOpen(true);
@@ -770,6 +771,7 @@ export function CategoriesScreen({
           rightAccessory={
             <Button
               size="icon"
+              haptic="none"
               onPress={() => {
                 void triggerHaptic('selection');
                 setCreateOpen(true);

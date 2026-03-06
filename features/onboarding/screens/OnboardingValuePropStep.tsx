@@ -118,6 +118,7 @@ export function OnboardingValuePropStep({
       {/* Footer */}
       <SafeAreaView edges={['bottom']} style={styles.footer}>
         <Button
+          haptic="none"
           onPress={() => {
             void triggerHaptic('medium');
             onGetStarted();

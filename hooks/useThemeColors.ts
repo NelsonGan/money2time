@@ -1,5 +1,7 @@
-import { useResolvedTheme } from '~/context/ThemeContext';
-import { colors, darkColors, type ColorPalette } from '~/constants/designSystem';
+import { useMemo } from 'react';
+
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
+import { getThemePalette, type ColorPalette } from '~/constants/designSystem';
 
 /**
  * Returns the correct color palette based on the resolved theme.
@@ -7,5 +9,7 @@ import { colors, darkColors, type ColorPalette } from '~/constants/designSystem'
  */
 export function useThemeColors(): ColorPalette {
   const resolved = useResolvedTheme();
-  return resolved === 'dark' ? darkColors : colors;
+  const themeColor = useThemeColor();
+
+  return useMemo(() => getThemePalette(themeColor, resolved), [resolved, themeColor]);
 }

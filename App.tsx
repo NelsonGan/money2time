@@ -78,6 +78,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const { setColorScheme } = useColorScheme();
   const themeMode = settings?.themeMode ?? 'system';
+  const themeColor = settings?.themeColor ?? 'sage';
   const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(
     () => Appearance.getColorScheme() ?? 'light',
   );
@@ -95,7 +96,11 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 
   const resolved: 'light' | 'dark' = themeMode === 'system' ? systemScheme : themeMode;
 
-  return <ThemeProvider value={resolved}>{children}</ThemeProvider>;
+  return (
+    <ThemeProvider resolvedTheme={resolved} themeColor={themeColor}>
+      {children}
+    </ThemeProvider>
+  );
 }
 
 function MainShellScreen() {

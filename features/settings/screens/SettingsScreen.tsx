@@ -25,7 +25,6 @@ import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
 
 interface SettingsScreenProps {
   scrollToTopToken?: number;
@@ -153,7 +152,6 @@ export function SettingsScreen({
                   : I18n.t('settings.user_mode_subtitle_power')
               }
               onPress={() => {
-                void triggerHaptic('selection');
                 if (isSimpleMode) {
                   Alert.alert(
                     I18n.t('settings.switch_to_power_title'),
@@ -186,8 +184,8 @@ export function SettingsScreen({
                 icon={<Trash2 size={18} color={themeColors.error} />}
                 label={I18n.t('settings.remove_simple_wallet')}
                 subtitle={I18n.t('settings.remove_simple_wallet_subtitle')}
+                haptic="warning"
                 onPress={() => {
-                  void triggerHaptic('warning');
                   Alert.alert(
                     I18n.t('settings.remove_simple_wallet_title'),
                     I18n.t('settings.remove_simple_wallet_message'),

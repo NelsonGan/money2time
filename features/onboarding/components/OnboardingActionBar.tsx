@@ -31,10 +31,10 @@ export function OnboardingActionBar({
     >
       <View style={styles.inner}>
         <View style={styles.row}>
-          <Button variant="outline" className="flex-1" onPress={onBack}>
+          <Button variant="outline" className="flex-1" haptic="none" onPress={onBack}>
             <Text>{backLabel}</Text>
           </Button>
-          <Button className="flex-[2]" disabled={primaryDisabled} onPress={onPrimary}>
+          <Button className="flex-[2]" haptic="none" disabled={primaryDisabled} onPress={onPrimary}>
             <Text>{primaryLabel}</Text>
           </Button>
         </View>
