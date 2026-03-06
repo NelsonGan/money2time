@@ -1,3 +1,12 @@
+import {
+  CalendarDays,
+  HandCoins,
+  Landmark,
+  PiggyBank,
+  TimerReset,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,8 +21,8 @@ import {
   View,
 } from 'react-native';
 import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
-import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { PieChart } from 'react-native-chart-kit';
+import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -72,15 +81,71 @@ type TimeCostViewMode = 'category' | 'transaction';
 type IncomeRateDisplayUnit = 'hourly' | 'monthly' | 'yearly';
 type DrilldownScopeMatcher = (transaction: TransactionWithRelations) => boolean;
 
-const INSIGHT_ICONS: Record<InsightType, string> = {
-  expense_breakdown: '📉',
-  income_breakdown: '📈',
-  calendar_view: '🗓️',
-  time_cost_leaderboard: '⏱️',
-  savings_rate: '💹',
-  asset_history: '🏦',
-  income_rate_history: '💰',
-};
+const INSIGHT_TYPE_VISUALS = {
+  expense_breakdown: {
+    Icon: TrendingDown,
+    tint: '#D24B36',
+    background: '#FCE5E1',
+    border: '#F4BAAF',
+  },
+  income_breakdown: {
+    Icon: TrendingUp,
+    tint: '#1D9B63',
+    background: '#E3F7EB',
+    border: '#B5E5CA',
+  },
+  calendar_view: {
+    Icon: CalendarDays,
+    tint: '#2D78DA',
+    background: '#E4EEFF',
+    border: '#B8CCF6',
+  },
+  time_cost_leaderboard: {
+    Icon: TimerReset,
+    tint: '#D47A16',
+    background: '#FDEEDB',
+    border: '#F4CFA7',
+  },
+  savings_rate: {
+    Icon: PiggyBank,
+    tint: '#1B8D74',
+    background: '#DFF6F1',
+    border: '#A4E0D3',
+  },
+  asset_history: {
+    Icon: Landmark,
+    tint: '#6B5ECA',
+    background: '#E9E7FF',
+    border: '#C9C2FA',
+  },
+  income_rate_history: {
+    Icon: HandCoins,
+    tint: '#B86A16',
+    background: '#FDEFD9',
+    border: '#F0CDA0',
+  },
+} as const satisfies Record<
+  InsightType,
+  {
+    Icon: typeof TrendingUp;
+    tint: string;
+    background: string;
+    border: string;
+  }
+>;
+
+function renderInsightTypeIcon(insightType: InsightType) {
+  const visual = INSIGHT_TYPE_VISUALS[insightType];
+  const Icon = visual.Icon;
+  return (
+    <View
+      className="h-8 w-8 items-center justify-center rounded-lg border"
+      style={{ backgroundColor: visual.background, borderColor: visual.border }}
+    >
+      <Icon size={16} color={visual.tint} />
+    </View>
+  );
+}
 
 const TIME_COST_RANK_ACCENTS = [
   '#D9623B',
@@ -1513,7 +1578,7 @@ export function InsightsScreen({
           value: 'yearly' as const,
           label: I18n.t('wage.type.yearly'),
         },
-      ] satisfies Array<{ value: IncomeRateDisplayUnit; label: string }>,
+      ] satisfies { value: IncomeRateDisplayUnit; label: string }[],
     [],
   );
 
@@ -1523,7 +1588,7 @@ export function InsightsScreen({
         value: type,
         label: String(I18n.t(`insights.${type}`)),
         description: String(I18n.t(`insights.${type}_description`)),
-        icon: INSIGHT_ICONS[type],
+        icon: renderInsightTypeIcon(type),
       })),
     [visibleInsightTypes],
   );
@@ -1718,7 +1783,7 @@ export function InsightsScreen({
   );
   const accountScopedNonTransferEntries = useMemo(() => {
     const hasAccountScope = effectiveSelectedAccountIdSet.size > 0;
-    const scopedEntries: Array<{ transaction: TransactionWithRelations; timestamp: number }> = [];
+    const scopedEntries: { transaction: TransactionWithRelations; timestamp: number }[] = [];
 
     allTransactions.forEach((transaction) => {
       if (transaction.type === 'transfer') return;
@@ -2503,13 +2568,11 @@ export function InsightsScreen({
     },
     [
       accountScopedNonTransferEntries,
-      assetHistoryAccountOptions,
       assetHistoryMonthlyDeltas,
       assetHistorySortedDeltaMonthKeys,
       canUseTimeDisplayMode,
       categoryById,
       effectivePeriodPreset,
-      excludedAssetHistoryAccountSet,
       excludedSavingsExpenseCategorySet,
       excludedSavingsIncomeCategorySet,
       excludedTimeCostExpenseCategorySet,
