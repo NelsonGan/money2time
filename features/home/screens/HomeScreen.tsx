@@ -12,6 +12,7 @@ import {
 import Animated, {
   FadeIn,
   type SharedValue,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -185,7 +186,10 @@ function HomeTabs({
           tabWidth > 0 && pagerWidth > 0
             ? Math.max(
                 0,
-                Math.min((pagerOffsetX.value / pagerWidth) * tabWidth, tabWidth * (tabs.length - 1)),
+                Math.min(
+                  (pagerOffsetX.value / pagerWidth) * tabWidth,
+                  tabWidth * (tabs.length - 1),
+                ),
               )
             : activeIndex * tabWidth,
       },
@@ -241,7 +245,7 @@ export function HomeScreen({
 }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const pagerRef = useRef<ScrollView | null>(null);
+  const pagerRef = useRef<React.ElementRef<typeof Animated.ScrollView> | null>(null);
   const { width: screenWidth } = useWindowDimensions();
   const { recurringRules, categories, settings, currentMonthWage, isSimpleMode, simpleWalletId } =
     useApp();
@@ -284,15 +288,9 @@ export function HomeScreen({
     [pagerOffsetX, screenWidth],
   );
 
-  const handlePagerScroll = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      pagerOffsetX.value = x;
-      const nextIndex = Math.round(x / screenWidth);
-      setActiveHomeTabIndex((prev) => (prev === nextIndex ? prev : nextIndex));
-    },
-    [pagerOffsetX, screenWidth],
-  );
+  const handlePagerScroll = useAnimatedScrollHandler((event) => {
+    pagerOffsetX.value = event.contentOffset.x;
+  });
 
   const walletRecurringRules = useMemo(() => {
     if (!isSimpleMode) return recurringRules;
@@ -444,6 +442,7 @@ export function HomeScreen({
           <Button
             size="icon"
             variant="secondary"
+            haptic="none"
             style={styles.recurringSettingsButton}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('home.recurring.tab')}
@@ -492,7 +491,7 @@ export function HomeScreen({
         onTabChange={switchTab}
       />
 
-      <ScrollView
+      <Animated.ScrollView
         ref={pagerRef}
         horizontal
         pagingEnabled
@@ -520,7 +519,7 @@ export function HomeScreen({
         )}
         <View style={pagerPageStyle}>{overviewContent}</View>
         <View style={pagerPageStyle}>{recurringContent}</View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }

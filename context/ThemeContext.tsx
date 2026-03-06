@@ -1,19 +1,36 @@
 import React, { createContext, useContext } from 'react';
+import type { ThemeColor } from '~/types';
 
 type ResolvedTheme = 'light' | 'dark';
 
-const ThemeContext = createContext<ResolvedTheme>('light');
+interface ThemeContextValue {
+  resolvedTheme: ResolvedTheme;
+  themeColor: ThemeColor;
+}
+
+const ThemeContext = createContext<ThemeContextValue>({
+  resolvedTheme: 'light',
+  themeColor: 'sage',
+});
 
 export function ThemeProvider({
-  value,
+  resolvedTheme,
+  themeColor,
   children,
 }: {
-  value: ResolvedTheme;
+  resolvedTheme: ResolvedTheme;
+  themeColor: ThemeColor;
   children: React.ReactNode;
 }) {
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ resolvedTheme, themeColor }}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useResolvedTheme(): ResolvedTheme {
-  return useContext(ThemeContext);
+  return useContext(ThemeContext).resolvedTheme;
+}
+
+export function useThemeColor(): ThemeColor {
+  return useContext(ThemeContext).themeColor;
 }

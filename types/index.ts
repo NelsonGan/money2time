@@ -1,5 +1,15 @@
 export type DisplayMode = 'money' | 'time';
 export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeColor =
+  | 'sage'
+  | 'ocean'
+  | 'terracotta'
+  | 'berry'
+  | 'slate'
+  | 'amber'
+  | 'indigo'
+  | 'emerald'
+  | 'rosewood';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 export type UserMode = 'power' | 'simple';
 
@@ -40,6 +50,7 @@ export interface UserSettings {
   hourRounding: number;
   displayMode: DisplayMode;
   themeMode: ThemeMode;
+  themeColor: ThemeColor;
   onboardingCompleted: boolean;
   userMode: UserMode;
   createdAt: string;

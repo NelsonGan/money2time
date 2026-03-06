@@ -14,11 +14,12 @@ import {
   Text,
 } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
-import { spacing } from '~/constants/designSystem';
+import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { ThemeMode } from '~/types';
+import type { ThemeColor, ThemeMode, UserSettings } from '~/types';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
@@ -26,6 +27,7 @@ interface DisplaySettingsScreenProps {
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const { settings, updateSettings, resetAllData, resetTransactionsOnly } = useApp();
+  const resolvedTheme = useResolvedTheme();
 
   const languageOptions = useMemo(
     () =>
@@ -71,6 +73,22 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     { value: 'light' as const, label: I18n.t('settings.theme_light') },
     { value: 'dark' as const, label: I18n.t('settings.theme_dark') },
   ] satisfies { value: ThemeMode; label: string }[];
+  const themeColorOptions = useMemo(
+    () =>
+      THEME_COLOR_OPTIONS.map((value) => ({
+        value,
+        label: I18n.t(`settings.theme_color_${value}`),
+        icon: (
+          <View
+            style={[
+              styles.themeColorSwatch,
+              { backgroundColor: getThemeColorSwatch(value, resolvedTheme) },
+            ]}
+          />
+        ),
+      })),
+    [resolvedTheme, settings.locale],
+  );
   const currentLocaleSelection = SUPPORTED_LOCALES.includes(
     settings.locale as (typeof SUPPORTED_LOCALES)[number],
   )
@@ -87,6 +105,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     currentCurrencySelection === '__custom__' ? settings.currencySymbol : '',
   );
   const [selectedTheme, setSelectedTheme] = useState<ThemeMode>(settings.themeMode);
+  const [selectedThemeColor, setSelectedThemeColor] = useState<ThemeColor>(settings.themeColor);
 
   useEffect(() => {
     setSelectedLocale(currentLocaleSelection);
@@ -100,6 +119,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   useEffect(() => {
     setSelectedTheme(settings.themeMode);
   }, [settings.themeMode]);
+
+  useEffect(() => {
+    setSelectedThemeColor(settings.themeColor);
+  }, [settings.themeColor]);
 
   const isCustomCurrencyMode = selectedCurrency === '__custom__';
   const trimmedCustomCurrency = customCurrency.trim();
@@ -115,7 +138,8 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     selectedLocale !== currentLocaleSelection ||
     nextCurrencyCode !== settings.currencyCode ||
     nextCurrencySymbol !== settings.currencySymbol ||
-    selectedTheme !== settings.themeMode;
+    selectedTheme !== settings.themeMode ||
+    selectedThemeColor !== settings.themeColor;
   const canSave =
     hasChanges && (selectedCurrency !== '__custom__' || trimmedCustomCurrency.length > 0);
 
@@ -124,6 +148,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     setSelectedCurrency(currentCurrencySelection);
     setCustomCurrency(currentCurrencySelection === '__custom__' ? settings.currencySymbol : '');
     setSelectedTheme(settings.themeMode);
+    setSelectedThemeColor(settings.themeColor);
   };
 
   const handleCancel = () => {
@@ -162,8 +187,15 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
         });
       }
     }
+    const themeUpdates: Partial<Pick<UserSettings, 'themeMode' | 'themeColor'>> = {};
     if (selectedTheme !== settings.themeMode) {
-      updateSettings({ themeMode: selectedTheme });
+      themeUpdates.themeMode = selectedTheme;
+    }
+    if (selectedThemeColor !== settings.themeColor) {
+      themeUpdates.themeColor = selectedThemeColor;
+    }
+    if (Object.keys(themeUpdates).length > 0) {
+      updateSettings(themeUpdates);
     }
     onBack();
   };
@@ -218,6 +250,14 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 value={selectedTheme}
                 options={themeOptions}
                 onChange={(value) => setSelectedTheme(value as ThemeMode)}
+              />
+              <SelectField
+                label={I18n.t('settings.theme_color')}
+                value={selectedThemeColor}
+                options={themeColorOptions}
+                optionsLayout="list"
+                listItemAlignment="center"
+                onChange={(value) => setSelectedThemeColor(value as ThemeColor)}
               />
             </CardContent>
           </Card>
@@ -290,6 +330,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  themeColorSwatch: {
+    width: 16,
+    height: 16,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(17,24,39,0.18)',
   },
   dangerSection: {
     marginTop: spacing.xl + spacing.xs,

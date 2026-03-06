@@ -4,6 +4,7 @@ import type {
   Category,
   MonthlyWageSettings,
   RecurringTransactionRule,
+  ThemeColor,
   ThemeMode,
   Transaction,
   UserMode,
@@ -72,6 +73,23 @@ function asDisplayMode(value: string): UserSettings['displayMode'] {
 function asThemeMode(value: string | null | undefined): ThemeMode {
   if (value === 'light' || value === 'dark') return value;
   return 'system';
+}
+
+function asThemeColor(value: string | null | undefined): ThemeColor {
+  switch (value) {
+    case 'sage':
+    case 'ocean':
+    case 'terracotta':
+    case 'berry':
+    case 'slate':
+    case 'amber':
+    case 'indigo':
+    case 'emerald':
+    case 'rosewood':
+      return value;
+    default:
+      return 'sage';
+  }
 }
 
 function asUserMode(value: string | null | undefined): UserMode {
@@ -196,6 +214,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     hourRounding: row.hourRounding,
     displayMode: asDisplayMode(row.displayMode),
     themeMode: asThemeMode(row.themeMode),
+    themeColor: asThemeColor(row.themeColor),
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
     createdAt: row.createdAt,
