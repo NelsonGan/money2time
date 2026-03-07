@@ -7,6 +7,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
+import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
@@ -26,16 +27,9 @@ type ActivityRow =
     }
   | { kind: 'item'; id: string; transaction: TransactionWithRelations };
 
-const DAY_LABEL_FORMATTER = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-});
-const DAY_LABEL_WITH_YEAR_FORMATTER = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-});
-const WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+const dayLabelFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const weekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const dayHeaderLabelCache = new Map<string, { dateLabel: string; weekdayLabel: string }>();
 const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
 
@@ -61,6 +55,7 @@ interface ActivityTransactionListProps {
   disableVirtualization?: boolean;
   groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
+  locale?: string;
 }
 
 interface DayHeaderRowProps {
@@ -120,9 +115,43 @@ function dayKeyFromIso(isoDate: string) {
   return dayKeyFromIsoLocal(isoDate);
 }
 
-function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel: string } {
+function getDayLabelFormatter(locale: string) {
+  const cached = dayLabelFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+  });
+  dayLabelFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function getDayLabelWithYearFormatter(locale: string) {
+  const cached = dayLabelWithYearFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  dayLabelWithYearFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function getWeekdayFormatter(locale: string) {
+  const cached = weekdayFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  weekdayFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function formatDayHeaderParts(
+  dayKey: string,
+  locale: string,
+): { dateLabel: string; weekdayLabel: string } {
   const currentYear = new Date().getFullYear();
-  const cacheKey = `${currentYear}|${dayKey}`;
+  const cacheKey = `${locale}|${currentYear}|${dayKey}`;
   const cached = dayHeaderLabelCache.get(cacheKey);
   if (cached) return cached;
 
@@ -139,9 +168,9 @@ function formatDayHeaderParts(dayKey: string): { dateLabel: string; weekdayLabel
 
   const dateLabel =
     year !== currentYear
-      ? DAY_LABEL_WITH_YEAR_FORMATTER.format(date)
-      : DAY_LABEL_FORMATTER.format(date);
-  const weekdayLabel = WEEKDAY_FORMATTER.format(date);
+      ? getDayLabelWithYearFormatter(locale).format(date)
+      : getDayLabelFormatter(locale).format(date);
+  const weekdayLabel = getWeekdayFormatter(locale).format(date);
   const next = { dateLabel, weekdayLabel };
   dayHeaderLabelCache.set(cacheKey, next);
 
@@ -170,6 +199,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   disableVirtualization = false,
   groupByDate = true,
   scrollToTopRef,
+  locale = I18n.locale ?? 'en',
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -208,7 +238,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
       if (dayKey !== currentHeaderDay) {
         currentHeaderDay = dayKey;
-        const { dateLabel, weekdayLabel } = formatDayHeaderParts(dayKey);
+        const { dateLabel, weekdayLabel } = formatDayHeaderParts(dayKey, locale);
         const headerRow: Extract<ActivityRow, { kind: 'header' }> = {
           kind: 'header',
           id: `header-${dayKey}`,
@@ -238,7 +268,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     });
 
     return nextRows;
-  }, [getDisplayValueForTransaction, groupByDate, isTimeMode, transactions]);
+  }, [getDisplayValueForTransaction, groupByDate, isTimeMode, locale, transactions]);
 
   const contentContainerStyle = useMemo(
     () => ({

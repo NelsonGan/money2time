@@ -59,6 +59,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
     <View style={monthPageStyle} className="flex-1 bg-background">
       <ActivityTransactionList
         transactions={pageTransactions}
+        locale={localeKey}
         displaySettings={displaySettings}
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}

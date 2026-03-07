@@ -11,17 +11,34 @@ import type { DateRange, UserSettings, WageConfig } from '~/types';
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode' | 'hourRounding'>;
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
-const RELATIVE_WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'long' });
-const RELATIVE_MONTH_DAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-});
+const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const relativeMonthDayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function resolveLocale(locale?: string) {
+  return locale ?? I18n.locale ?? I18n.defaultLocale ?? 'en';
+}
 
 function getMonthYearFormatter(locale: string) {
   const cached = monthYearFormatterByLocale.get(locale);
   if (cached) return cached;
   const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
   monthYearFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function getRelativeWeekdayFormatter(locale: string) {
+  const cached = relativeWeekdayFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'long' });
+  relativeWeekdayFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function getRelativeMonthDayFormatter(locale: string) {
+  const cached = relativeMonthDayFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
+  relativeMonthDayFormatterByLocale.set(locale, formatter);
   return formatter;
 }
 
@@ -164,8 +181,8 @@ export function parseMonthKey(month: string): Date | null {
   return new Date(year, monthValue - 1, 1);
 }
 
-export function formatMonthYearLabel(date: Date, locale = 'en-GB'): string {
-  return getMonthYearFormatter(locale).format(date);
+export function formatMonthYearLabel(date: Date, locale?: string): string {
+  return getMonthYearFormatter(resolveLocale(locale)).format(date);
 }
 
 export function amountToHoursByRate(
@@ -268,8 +285,9 @@ export function formatAmount(
   return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
 }
 
-export function formatRelativeDate(dateString: string): string {
+export function formatRelativeDate(dateString: string, locale?: string): string {
   const date = new Date(dateString);
+  const resolvedLocale = resolveLocale(locale);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
@@ -286,8 +304,8 @@ export function formatRelativeDate(dateString: string): string {
   if (dateOnly.getTime() === yesterdayOnly.getTime()) return I18n.t('common.yesterday');
 
   const daysDiff = Math.floor((todayOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysDiff < 7) return RELATIVE_WEEKDAY_FORMATTER.format(date);
-  return RELATIVE_MONTH_DAY_FORMATTER.format(date);
+  if (daysDiff < 7) return getRelativeWeekdayFormatter(resolvedLocale).format(date);
+  return getRelativeMonthDayFormatter(resolvedLocale).format(date);
 }
 
 export function formatDateInput(date: Date): string {

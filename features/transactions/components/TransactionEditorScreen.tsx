@@ -290,6 +290,8 @@ export function TransactionEditorScreen({
   const recurrenceStatusValue: RecurrenceStatusValue = recurrenceIsActive ? 'active' : 'paused';
 
   const [activeField, setActiveField] = useState<ActiveField>('amount');
+  const initialActiveFieldRef = useRef<ActiveField>('amount');
+  const hasLeftInitialActiveFieldRef = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<
     Partial<
       Record<
@@ -743,7 +745,14 @@ export function TransactionEditorScreen({
   const registerFieldLayout = useCallback(
     (field: NonNullActiveField) => (event: LayoutChangeEvent) => {
       fieldOffsetsRef.current[field] = event.nativeEvent.layout.y;
-      if (activeField === field && showToolZone && TOOL_ZONE_FIELDS.includes(field)) {
+      const shouldSkipInitialAutoScroll =
+        !hasLeftInitialActiveFieldRef.current && field === initialActiveFieldRef.current;
+      if (
+        !shouldSkipInitialAutoScroll &&
+        activeField === field &&
+        showToolZone &&
+        TOOL_ZONE_FIELDS.includes(field)
+      ) {
         scrollFieldIntoView(field);
       }
     },
@@ -757,8 +766,17 @@ export function TransactionEditorScreen({
   }, [activeField, blurNativeInputs, isNativeKeyboardField]);
 
   useEffect(() => {
+    if (hasLeftInitialActiveFieldRef.current) return;
+    if (activeField === initialActiveFieldRef.current) return;
+    hasLeftInitialActiveFieldRef.current = true;
+  }, [activeField]);
+
+  useEffect(() => {
     if (!activeField || !showToolZone) return;
     if (!TOOL_ZONE_FIELDS.includes(activeField)) return;
+    if (!hasLeftInitialActiveFieldRef.current && activeField === initialActiveFieldRef.current) {
+      return;
+    }
     scrollFieldIntoView(activeField);
   }, [activeField, scrollFieldIntoView, showToolZone]);
 

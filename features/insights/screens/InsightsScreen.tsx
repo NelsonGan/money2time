@@ -75,6 +75,23 @@ const INSIGHT_TYPES = [
   'income_rate_history',
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
+const INSIGHT_TYPE_GROUPS = [
+  {
+    id: 'breakdowns',
+    insightTypes: ['expense_breakdown', 'income_breakdown'],
+  },
+  {
+    id: 'activity',
+    insightTypes: ['calendar_view', 'time_cost_leaderboard', 'savings_rate'],
+  },
+  {
+    id: 'trends',
+    insightTypes: ['asset_history', 'income_rate_history'],
+  },
+] as const satisfies readonly {
+  id: string;
+  insightTypes: readonly InsightType[];
+}[];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
@@ -1601,6 +1618,19 @@ export function InsightsScreen({
       })),
     [visibleInsightTypes],
   );
+  const insightTypeOptionGroups = useMemo(() => {
+    const visibleInsightTypeSet = new Set(visibleInsightTypes);
+    return INSIGHT_TYPE_GROUPS.map((group) => {
+      const optionValues = group.insightTypes.filter((type) => visibleInsightTypeSet.has(type));
+      if (!optionValues.length) return null;
+      return {
+        id: group.id,
+        label: String(I18n.t(`insights.groups.${group.id}.title`)),
+        optionValues,
+        defaultExpanded: optionValues.includes(selectedInsightType),
+      };
+    }).filter((group): group is NonNullable<typeof group> => !!group);
+  }, [selectedInsightType, visibleInsightTypes]);
   const calendarWeekdayLabels = useMemo(
     () => getCalendarWeekdayLabels(activeLocale),
     [activeLocale],
@@ -4284,6 +4314,7 @@ export function InsightsScreen({
             <SelectField
               value={selectedInsightType}
               options={insightTypeOptions}
+              optionGroups={insightTypeOptionGroups}
               optionsLayout="list"
               sheetTitle={I18n.t('insights.insight_type')}
               onChange={handleInsightTypeChange}

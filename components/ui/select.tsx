@@ -27,6 +27,14 @@ interface SelectOption {
   icon?: React.ReactNode | string;
 }
 
+interface SelectOptionGroup {
+  id: string;
+  label: string;
+  description?: string;
+  optionValues: string[];
+  defaultExpanded?: boolean;
+}
+
 interface SelectFieldProps {
   label?: string;
   sheetTitle?: string;
@@ -34,6 +42,7 @@ interface SelectFieldProps {
   compact?: boolean;
   value: string | null;
   options: SelectOption[];
+  optionGroups?: SelectOptionGroup[];
   optionsLayout?: 'grid' | 'list';
   showSelectedDescription?: boolean;
   placeholder?: string;
@@ -51,6 +60,7 @@ export function SelectField({
   compact = false,
   value,
   options,
+  optionGroups,
   optionsLayout = 'grid',
   showSelectedDescription = false,
   placeholder = I18n.t('ui.select.placeholder'),
@@ -68,6 +78,32 @@ export function SelectField({
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
   const selected = options.find((opt) => opt.value === value);
   const selectedLabel = selected ? selected.label : placeholder;
+  const optionsByValue = useMemo(() => {
+    const map = new Map<string, SelectOption>();
+    options.forEach((option) => map.set(option.value, option));
+    return map;
+  }, [options]);
+  const groupedOptions = useMemo(() => {
+    if (!optionGroups?.length) return [];
+    return optionGroups
+      .map((group) => {
+        const resolvedOptions = group.optionValues
+          .map((optionValue) => optionsByValue.get(optionValue))
+          .filter((option): option is SelectOption => !!option);
+        if (!resolvedOptions.length) return null;
+        return { ...group, options: resolvedOptions };
+      })
+      .filter((group): group is SelectOptionGroup & { options: SelectOption[] } => !!group);
+  }, [optionGroups, optionsByValue]);
+  const ungroupedOptions = useMemo(() => {
+    if (!groupedOptions.length) return options;
+    const groupedOptionValues = new Set(
+      groupedOptions.flatMap((group) => group.options.map((option) => option.value)),
+    );
+    return options.filter((option) => !groupedOptionValues.has(option.value));
+  }, [groupedOptions, options]);
+  const hasGroupedListLayout = optionsLayout === 'list' && groupedOptions.length > 0;
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const renderOptionIcon = (icon?: SelectOption['icon']) => {
     if (!icon) return null;
     if (typeof icon === 'string') return <Text variant="friendly">{icon}</Text>;
@@ -85,6 +121,32 @@ export function SelectField({
     }
     RNAnimated.timing(translateY, { toValue: hiddenOffset, ...SLIDE_CONFIG }).start();
   }, [hiddenOffset, open, translateY]);
+
+  useEffect(() => {
+    if (!groupedOptions.length) {
+      setExpandedGroups((current) => (Object.keys(current).length ? {} : current));
+      return;
+    }
+    setExpandedGroups((current) => {
+      let changed = Object.keys(current).length !== groupedOptions.length;
+      const next: Record<string, boolean> = {};
+
+      groupedOptions.forEach((group) => {
+        const hasSelectedOption = group.options.some((option) => option.value === value);
+        const existing = current[group.id];
+        if (typeof existing === 'boolean') {
+          const nextExpanded = hasSelectedOption ? true : existing;
+          next[group.id] = nextExpanded;
+          if (nextExpanded !== existing) changed = true;
+          return;
+        }
+        next[group.id] = hasSelectedOption || group.defaultExpanded !== false;
+        changed = true;
+      });
+
+      return changed ? next : current;
+    });
+  }, [groupedOptions, value]);
 
   const panResponder = useMemo(
     () =>
@@ -125,6 +187,78 @@ export function SelectField({
       }),
     [hiddenOffset, open, translateY],
   );
+  const renderOption = (option: SelectOption) => {
+    const isSelected = option.value === value;
+    return (
+      <Pressable
+        key={option.value}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onChange(option.value);
+          setOpen(false);
+        }}
+        className={cn(
+          optionsLayout === 'list'
+            ? cn(
+                'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row gap-3',
+                listItemAlignment === 'center' ? 'items-center' : 'items-start',
+              )
+            : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
+          isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
+        )}
+      >
+        {optionsLayout === 'list' ? (
+          <>
+            {option.icon ? (
+              typeof option.icon === 'string' ? (
+                <View
+                  className={cn(
+                    'h-8 w-8 rounded-lg items-center justify-center border',
+                    isSelected
+                      ? 'bg-primary/15 border-primary/35'
+                      : 'bg-secondary/45 border-border/35',
+                  )}
+                >
+                  {renderOptionIcon(option.icon)}
+                </View>
+              ) : (
+                option.icon
+              )
+            ) : null}
+            <View className="flex-1">
+              <Text variant="caption" className="pr-2">
+                {option.label}
+              </Text>
+              {option.description ? (
+                <Text variant="label" tone="muted" className="mt-0.5 pr-2">
+                  {option.description}
+                </Text>
+              ) : null}
+            </View>
+            {isSelected ? (
+              <View className={cn(listItemAlignment === 'center' ? '' : 'pt-0.5')}>
+                <Check size={16} color={themeColors.primary} />
+              </View>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <View className="flex-1 flex-row items-center gap-2 pr-2">
+              {option.icon
+                ? typeof option.icon === 'string'
+                  ? renderOptionIcon(option.icon)
+                  : option.icon
+                : null}
+              <Text numberOfLines={2} className="flex-1">
+                {option.label}
+              </Text>
+            </View>
+            {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
+          </>
+        )}
+      </Pressable>
+    );
+  };
 
   return (
     <View className="w-full">
@@ -262,82 +396,61 @@ export function SelectField({
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 26 }}
             >
-              <View
-                className={cn(optionsLayout === 'list' ? 'gap-1.5' : 'flex-row flex-wrap gap-2')}
-              >
-                {options.map((option) => {
-                  const isSelected = option.value === value;
-                  return (
-                    <Pressable
-                      key={option.value}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        onChange(option.value);
-                        setOpen(false);
-                      }}
-                      className={cn(
-                        optionsLayout === 'list'
-                          ? cn(
-                              'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row gap-3',
-                              listItemAlignment === 'center' ? 'items-center' : 'items-start',
-                            )
-                          : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
-                        isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
-                      )}
-                    >
-                      {optionsLayout === 'list' ? (
-                        <>
-                          {option.icon ? (
-                            typeof option.icon === 'string' ? (
-                              <View
-                                className={cn(
-                                  'h-8 w-8 rounded-lg items-center justify-center border',
-                                  isSelected
-                                    ? 'bg-primary/15 border-primary/35'
-                                    : 'bg-secondary/45 border-border/35',
-                                )}
-                              >
-                                {renderOptionIcon(option.icon)}
-                              </View>
-                            ) : (
-                              option.icon
-                            )
-                          ) : null}
+              {hasGroupedListLayout ? (
+                <View className="gap-2">
+                  {groupedOptions.map((group) => {
+                    const isExpanded = expandedGroups[group.id] ?? group.defaultExpanded !== false;
+                    const hasSelectedOption = group.options.some((option) => option.value === value);
+                    return (
+                      <View
+                        key={group.id}
+                        className="overflow-hidden rounded-2xl border border-border/35 bg-card/80"
+                      >
+                        <Pressable
+                          onPress={() => {
+                            void triggerHaptic('selection');
+                            setExpandedGroups((current) => ({
+                              ...current,
+                              [group.id]: !(current[group.id] ?? group.defaultExpanded !== false),
+                            }));
+                          }}
+                          className="flex-row items-center gap-3 px-3.5 py-3"
+                        >
                           <View className="flex-1">
-                            <Text variant="caption" className="pr-2">
-                              {option.label}
+                            <Text variant="caption" tone={hasSelectedOption ? 'default' : 'muted'}>
+                              {group.label}
                             </Text>
-                            {option.description ? (
-                              <Text variant="label" tone="muted" className="mt-0.5 pr-2">
-                                {option.description}
+                            {group.description ? (
+                              <Text variant="label" tone="muted" className="mt-0.5">
+                                {group.description}
                               </Text>
                             ) : null}
                           </View>
-                          {isSelected ? (
-                            <View className={cn(listItemAlignment === 'center' ? '' : 'pt-0.5')}>
-                              <Check size={16} color={themeColors.primary} />
-                            </View>
-                          ) : null}
-                        </>
-                      ) : (
-                        <>
-                          <View className="flex-1 flex-row items-center gap-2 pr-2">
-                            {option.icon
-                              ? typeof option.icon === 'string'
-                                ? renderOptionIcon(option.icon)
-                                : option.icon
-                              : null}
-                            <Text numberOfLines={2} className="flex-1">
-                              {option.label}
-                            </Text>
+                          <ChevronDown
+                            size={16}
+                            color={themeColors.textMuted}
+                            style={{ transform: [{ rotate: isExpanded ? '0deg' : '-90deg' }] }}
+                          />
+                        </Pressable>
+                        {isExpanded ? (
+                          <View className="gap-1.5 border-t border-border/20 px-2.5 pb-2.5 pt-2">
+                            {group.options.map((option) => renderOption(option))}
                           </View>
-                          {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
-                        </>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </View>
+                        ) : null}
+                      </View>
+                    );
+                  })}
+                  {ungroupedOptions.length ? (
+                    <View className="gap-1.5">{ungroupedOptions.map((option) => renderOption(option))}</View>
+                  ) : null}
+                </View>
+              ) : (
+                <View
+                  className={cn(optionsLayout === 'list' ? 'gap-1.5' : 'flex-row flex-wrap gap-2')}
+                >
+                  {options.map((option) => renderOption(option))}
+                </View>
+              )}
             </ScrollView>
           </RNAnimated.View>
         </View>
