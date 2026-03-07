@@ -366,6 +366,17 @@ const en = {
     title: 'Your money story',
     loading: 'Loading insights...',
     insight_type: 'Insight type',
+    groups: {
+      breakdowns: {
+        title: 'Breakdowns',
+      },
+      activity: {
+        title: 'Activity & habits',
+      },
+      trends: {
+        title: 'Long-term trends',
+      },
+    },
     expense_breakdown: 'Expense breakdown',
     expense_breakdown_description:
       'See where your spending goes by category, with share and drilldown detail.',

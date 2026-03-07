@@ -224,7 +224,7 @@ export function SettingsScreen({
           </View>
 
           {/* Experience mode section */}
-          <SettingsSection title={I18n.t('settings.section_experience')}>
+          <SettingsSection className="mt-5 gap-2" title={I18n.t('settings.section_experience')}>
             <SettingsRowItem
               icon={<Sparkles size={18} color={themeColors.primary} />}
               label={I18n.t('settings.user_mode')}
@@ -297,6 +297,6 @@ const styles = StyleSheet.create({
   },
   rowsGroup: {
     marginTop: spacing.xs,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
 });
