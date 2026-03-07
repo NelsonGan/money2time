@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -44,6 +44,7 @@ interface SimpleActivityScreenProps {
   scrollToTopToken?: number;
   focusMonthKey?: string | null;
   focusMonthToken?: number;
+  tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
@@ -51,6 +52,7 @@ export function SimpleActivityScreen({
   scrollToTopToken = 0,
   focusMonthKey = null,
   focusMonthToken = 0,
+  tutorialResetToken = 0,
   onOpenTransaction,
 }: SimpleActivityScreenProps) {
   const {
@@ -218,6 +220,11 @@ export function SimpleActivityScreen({
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
+
+  useEffect(() => {
+    if (tutorialResetToken <= 0) return;
+    setTypeFilter('all');
+  }, [tutorialResetToken]);
 
   return (
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>

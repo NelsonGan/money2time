@@ -3,7 +3,7 @@ import './global.css';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
-import { Text } from '~/components/ui';
+import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { HomeScreen } from '~/features/home/screens';
@@ -31,6 +31,12 @@ import {
   SimpleActivityScreen,
   TransactionsScreen,
 } from '~/features/transactions/screens';
+import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
+import type {
+  TutorialSpotlightRequest,
+  TutorialTargetId,
+  TutorialTargetRect,
+} from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
@@ -47,6 +53,58 @@ import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
 
 type MainTab = TabName;
+
+interface GuidedTutorialStep {
+  tab: MainTab;
+  targetId: TutorialTargetId;
+  titleKey: string;
+  bodyKey: string;
+}
+
+const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
+  {
+    tab: 'home',
+    targetId: 'home.display_toggle',
+    titleKey: 'tutorial.coach_steps.home_title',
+    bodyKey: 'tutorial.coach_steps.home_body',
+  },
+  {
+    tab: 'home',
+    targetId: 'home.converter',
+    titleKey: 'tutorial.coach_steps.converter_title',
+    bodyKey: 'tutorial.coach_steps.converter_body',
+  },
+  {
+    tab: 'transactions',
+    targetId: 'nav.add',
+    titleKey: 'tutorial.coach_steps.add_title',
+    bodyKey: 'tutorial.coach_steps.add_body',
+  },
+  {
+    tab: 'insights',
+    targetId: 'insights.type_selector',
+    titleKey: 'tutorial.coach_steps.insights_title',
+    bodyKey: 'tutorial.coach_steps.insights_body',
+  },
+  {
+    tab: 'settings',
+    targetId: 'settings.management',
+    titleKey: 'tutorial.coach_steps.management_title',
+    bodyKey: 'tutorial.coach_steps.management_body',
+  },
+  {
+    tab: 'settings',
+    targetId: 'settings.recurring',
+    titleKey: 'tutorial.coach_steps.recurring_title',
+    bodyKey: 'tutorial.coach_steps.recurring_body',
+  },
+  {
+    tab: 'settings',
+    targetId: 'settings.start_tutorial',
+    titleKey: 'tutorial.coach_steps.settings_title',
+    bodyKey: 'tutorial.coach_steps.settings_body',
+  },
+];
 
 const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
@@ -103,18 +161,33 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   );
 }
 
-function MainShellScreen() {
+interface MainShellScreenProps {
+  tutorialStartToken?: number;
+}
+
+function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
   const navigation = useNavigation<RootMainNavigationProp>();
   const { isSimpleMode } = useApp();
+  const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
+  const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
+  const [tutorialTargetRects, setTutorialTargetRects] = useState<
+    Partial<Record<TutorialTargetId, TutorialTargetRect>>
+  >({});
+  const [tutorialNavTabRects, setTutorialNavTabRects] = useState<
+    Partial<Record<MainTab, TutorialTargetRect>>
+  >({});
+  const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [isTransactionsSelectionMode, setIsTransactionsSelectionMode] = useState(false);
   const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
+  const [transactionsTutorialResetToken, setTransactionsTutorialResetToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
+  const tutorialStartTokenRef = useRef(0);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -197,6 +270,126 @@ function MainShellScreen() {
     [activeTab, jumpTransactionsToMonth],
   );
 
+  const handleTutorialTargetLayout = useCallback(
+    (targetId: TutorialTargetId, rect: TutorialTargetRect) => {
+      setTutorialTargetRects((previous) => {
+        const current = previous[targetId];
+        if (
+          current &&
+          Math.abs(current.x - rect.x) < 1 &&
+          Math.abs(current.y - rect.y) < 1 &&
+          Math.abs(current.width - rect.width) < 1 &&
+          Math.abs(current.height - rect.height) < 1
+        ) {
+          return previous;
+        }
+        return { ...previous, [targetId]: rect };
+      });
+    },
+    [],
+  );
+  const handleTutorialTabLayout = useCallback((tab: MainTab, rect: TutorialTargetRect) => {
+    setTutorialNavTabRects((previous) => {
+      const current = previous[tab];
+      if (
+        current &&
+        Math.abs(current.x - rect.x) < 1 &&
+        Math.abs(current.y - rect.y) < 1 &&
+        Math.abs(current.width - rect.width) < 1 &&
+        Math.abs(current.height - rect.height) < 1
+      ) {
+        return previous;
+      }
+      return { ...previous, [tab]: rect };
+    });
+  }, []);
+
+  const startGuidedTutorial = useCallback(() => {
+    setGuidedTutorialStepIndex(0);
+    setIsGuidedTutorialActive(true);
+  }, []);
+
+  const finishGuidedTutorial = useCallback(() => {
+    setIsGuidedTutorialActive(false);
+    setGuidedTutorialStepIndex(0);
+  }, []);
+
+  const handleGuidedTutorialBack = useCallback(() => {
+    setGuidedTutorialStepIndex((previous) => Math.max(0, previous - 1));
+  }, []);
+
+  const handleGuidedTutorialNext = useCallback(() => {
+    if (guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1) {
+      finishGuidedTutorial();
+      return;
+    }
+    setGuidedTutorialStepIndex((previous) => previous + 1);
+  }, [finishGuidedTutorial, guidedTutorialStepIndex]);
+
+  useEffect(() => {
+    if (!isGuidedTutorialActive) return;
+    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
+    if (!step) return;
+    if (activeTab !== step.tab) {
+      handleTabChange(step.tab);
+    }
+  }, [activeTab, guidedTutorialStepIndex, handleTabChange, isGuidedTutorialActive]);
+
+  useEffect(() => {
+    if (!isGuidedTutorialActive) return;
+    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
+    if (!step) return;
+    if (step.targetId === 'nav.add') {
+      setTransactionsTutorialResetToken((previous) => previous + 1);
+    }
+    if (
+      step.targetId === 'settings.start_tutorial' ||
+      step.targetId === 'settings.recurring' ||
+      step.targetId === 'settings.management'
+    ) {
+      setSettingsScrollTopToken((previous) => previous + 1);
+    }
+  }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
+
+  useEffect(() => {
+    if (!isGuidedTutorialActive) return;
+    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
+    if (!step) return;
+    if (activeTab !== step.tab) return;
+
+    const refresh = setTimeout(() => {
+      setTutorialSpotlightRequestToken((previous) => previous + 1);
+    }, 140);
+
+    return () => {
+      clearTimeout(refresh);
+    };
+  }, [activeTab, guidedTutorialStepIndex, isGuidedTutorialActive]);
+
+  useEffect(() => {
+    if (tutorialStartToken <= 0 || tutorialStartToken === tutorialStartTokenRef.current) return;
+    tutorialStartTokenRef.current = tutorialStartToken;
+    startGuidedTutorial();
+  }, [startGuidedTutorial, tutorialStartToken]);
+
+  const currentGuidedStep = isGuidedTutorialActive
+    ? (GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex] ?? null)
+    : null;
+  const currentGuidedTargetRect = currentGuidedStep
+    ? (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
+    : null;
+  const currentGuidedTabRect = currentGuidedStep
+    ? (tutorialNavTabRects[currentGuidedStep.tab] ?? null)
+    : null;
+  const tutorialSpotlightRequest = useMemo<TutorialSpotlightRequest>(
+    () => ({
+      active: isGuidedTutorialActive && currentGuidedStep !== null,
+      targetId: currentGuidedStep?.targetId ?? null,
+      token: tutorialSpotlightRequestToken,
+    }),
+    [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
+  );
+
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
@@ -206,6 +399,8 @@ function MainShellScreen() {
             onOpenAccount={openAccountDetail}
             onOpenTransaction={openTransactionEditor}
             onOpenSettingsScreen={openSettingsScreen}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'transactions'}>
@@ -215,6 +410,7 @@ function MainShellScreen() {
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              tutorialResetToken={transactionsTutorialResetToken}
             />
           ) : (
             <MemoTransactionsScreen
@@ -223,6 +419,7 @@ function MainShellScreen() {
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
               onSelectionModeChange={setIsTransactionsSelectionMode}
+              tutorialResetToken={transactionsTutorialResetToken}
             />
           )}
         </MountedTab>
@@ -232,6 +429,8 @@ function MainShellScreen() {
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
             isSimpleMode={isSimpleMode}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'settings'}>
@@ -239,6 +438,9 @@ function MainShellScreen() {
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
+            onStartTutorial={startGuidedTutorial}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
       </View>
@@ -248,8 +450,28 @@ function MainShellScreen() {
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onPressAdd={openAddTransaction}
+          onTutorialTargetLayout={handleTutorialTargetLayout}
+          onTutorialTabLayout={handleTutorialTabLayout}
+          tutorialSpotlightRequest={tutorialSpotlightRequest}
+          tutorialFocusedTab={isGuidedTutorialActive ? (currentGuidedStep?.tab ?? null) : null}
+          tutorialMeasureToken={tutorialSpotlightRequest.token}
         />
       ) : null}
+
+      <TutorialCoachmarkOverlay
+        visible={isGuidedTutorialActive && currentGuidedStep !== null}
+        stepIndex={guidedTutorialStepIndex}
+        totalSteps={GUIDED_TUTORIAL_STEPS.length}
+        title={currentGuidedStep ? I18n.t(currentGuidedStep.titleKey) : ''}
+        body={currentGuidedStep ? I18n.t(currentGuidedStep.bodyKey) : ''}
+        targetId={currentGuidedStep?.targetId ?? null}
+        targetRect={currentGuidedTargetRect}
+        secondaryTargetRect={currentGuidedTabRect}
+        onBack={handleGuidedTutorialBack}
+        onNext={handleGuidedTutorialNext}
+        onSkip={finishGuidedTutorial}
+        isLastStep={guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1}
+      />
     </View>
   );
 }
@@ -489,8 +711,24 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
+  const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
+  const [tutorialStartToken, setTutorialStartToken] = useState(0);
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
+
+  const handleOnboardingComplete = useCallback(() => {
+    updateSettings({ onboardingCompleted: true });
+    setShowTutorialPrompt(true);
+  }, [updateSettings]);
+
+  const handleStartTutorialNow = useCallback(() => {
+    setShowTutorialPrompt(false);
+    setTutorialStartToken((prev) => prev + 1);
+  }, []);
+
+  const handleSkipTutorialPrompt = useCallback(() => {
+    setShowTutorialPrompt(false);
+  }, []);
 
   if (isLoading) {
     return (
@@ -509,7 +747,7 @@ function AppContent() {
   if (!settings.onboardingCompleted) {
     return (
       <View style={[styles.flex, themeStyle]}>
-        <OnboardingFlow onComplete={() => updateSettings({ onboardingCompleted: true })} />
+        <OnboardingFlow onComplete={handleOnboardingComplete} />
       </View>
     );
   }
@@ -522,7 +760,9 @@ function AppContent() {
           screenOptions={SHARED_NATIVE_STACK_OPTIONS}
           screenListeners={rootScreenListeners}
         >
-          <RootStack.Screen name="Main" component={MainShellScreen} />
+          <RootStack.Screen name="Main">
+            {() => <MainShellScreen tutorialStartToken={tutorialStartToken} />}
+          </RootStack.Screen>
           <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
           <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
@@ -537,6 +777,31 @@ function AppContent() {
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
         </RootStack.Navigator>
       </NavigationContainer>
+
+      <ThemeModal
+        visible={showTutorialPrompt}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        onRequestClose={handleSkipTutorialPrompt}
+      >
+        <View className="flex-1 items-center justify-center bg-black/35 px-6">
+          <View className="w-full max-w-[360px] rounded-[26px] border border-border/45 bg-background px-5 py-5 shadow-soft">
+            <Text variant="subheading">{I18n.t('tutorial.prompt_title')}</Text>
+            <Text variant="friendly" tone="muted" className="mt-2">
+              {I18n.t('tutorial.prompt_message')}
+            </Text>
+            <View className="mt-5 gap-2.5">
+              <Button onPress={handleStartTutorialNow}>
+                <Text>{I18n.t('tutorial.prompt_yes')}</Text>
+              </Button>
+              <Button variant="secondary" onPress={handleSkipTutorialPrompt}>
+                <Text>{I18n.t('tutorial.prompt_not_now')}</Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </ThemeModal>
     </View>
   );
 }
