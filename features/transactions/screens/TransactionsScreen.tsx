@@ -164,6 +164,7 @@ interface TransactionsScreenProps {
   scrollToTopToken?: number;
   focusMonthKey?: string | null;
   focusMonthToken?: number;
+  tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
@@ -172,6 +173,7 @@ export function TransactionsScreen({
   scrollToTopToken = 0,
   focusMonthKey = null,
   focusMonthToken = 0,
+  tutorialResetToken = 0,
   onOpenTransaction,
   onSelectionModeChange,
 }: TransactionsScreenProps) {
@@ -313,6 +315,13 @@ export function TransactionsScreen({
     if (!hasActiveSearch) return;
     searchResultsScrollToTopRef.current?.();
   }, [hasActiveSearch, transactionFilters.search]);
+
+  useEffect(() => {
+    if (tutorialResetToken <= 0) return;
+    setSelectedTransactionIds([]);
+    setIsSearchBoxOpen(false);
+    setShowFilters(false);
+  }, [tutorialResetToken]);
 
   useEffect(() => {
     if (isSelectionMode) {

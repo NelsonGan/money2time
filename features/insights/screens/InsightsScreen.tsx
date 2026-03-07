@@ -38,6 +38,7 @@ import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/com
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
+import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -1456,6 +1457,11 @@ interface InsightsScreenProps {
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   isSimpleMode?: boolean;
+  onTutorialTargetLayout?: (
+    targetId: 'insights.type_selector',
+    rect: TutorialTargetRect,
+  ) => void;
+  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function InsightsScreen({
@@ -1463,6 +1469,8 @@ export function InsightsScreen({
   onOpenDrilldown,
   onOpenTransaction,
   isSimpleMode = false,
+  onTutorialTargetLayout,
+  tutorialSpotlightRequest,
 }: InsightsScreenProps) {
   const {
     isLoading,
@@ -1538,6 +1546,7 @@ export function InsightsScreen({
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
   const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
+  const insightsTypeSelectorRef = useRef<View | null>(null);
   const selectedIncomeRatePointIndexRef = useRef<number | null>(selectedIncomeRatePointIndex);
   const assetHistoryScrubMonthByYearRef = useRef<Record<string, string>>(
     assetHistoryScrubMonthByYear,
@@ -4213,6 +4222,29 @@ export function InsightsScreen({
     [effectivePeriodPreset, periodPreset, setActiveBreakdownSlice],
   );
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
+  const handleInsightTypeSelectorLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    insightsTypeSelectorRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      onTutorialTargetLayout('insights.type_selector', { x, y, width, height });
+    });
+  }, [onTutorialTargetLayout]);
+  useEffect(() => {
+    if (!tutorialSpotlightRequest?.active) return;
+    if (tutorialSpotlightRequest.targetId !== 'insights.type_selector') return;
+
+    const firstPass = setTimeout(() => {
+      handleInsightTypeSelectorLayout();
+    }, 40);
+    const secondPass = setTimeout(() => {
+      handleInsightTypeSelectorLayout();
+    }, 220);
+
+    return () => {
+      clearTimeout(firstPass);
+      clearTimeout(secondPass);
+    };
+  }, [handleInsightTypeSelectorLayout, tutorialSpotlightRequest]);
   const openDrilldown = useCallback(
     (nextState: {
       label: string;
@@ -4248,14 +4280,16 @@ export function InsightsScreen({
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
         titleNode={
-          <SelectField
-            value={selectedInsightType}
-            options={insightTypeOptions}
-            optionsLayout="list"
-            sheetTitle={I18n.t('insights.insight_type')}
-            onChange={handleInsightTypeChange}
-            fullHeight
-          />
+          <View ref={insightsTypeSelectorRef} onLayout={handleInsightTypeSelectorLayout}>
+            <SelectField
+              value={selectedInsightType}
+              options={insightTypeOptions}
+              optionsLayout="list"
+              sheetTitle={I18n.t('insights.insight_type')}
+              onChange={handleInsightTypeChange}
+              fullHeight
+            />
+          </View>
         }
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}

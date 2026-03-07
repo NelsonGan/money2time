@@ -27,6 +27,7 @@ import { useApp } from '~/context/AppContext';
 import { HeroAmountConverter } from '~/features/home/components';
 import { AccountsScreen } from '~/features/settings/screens';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -235,6 +236,11 @@ interface HomeScreenProps {
   onOpenAccount?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   onOpenSettingsScreen?: (screen: 'Accounts' | 'Recurring') => void;
+  onTutorialTargetLayout?: (
+    targetId: 'home.display_toggle' | 'home.converter',
+    rect: TutorialTargetRect,
+  ) => void;
+  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function HomeScreen({
@@ -242,10 +248,14 @@ export function HomeScreen({
   onOpenAccount,
   onOpenTransaction,
   onOpenSettingsScreen,
+  onTutorialTargetLayout,
+  tutorialSpotlightRequest,
 }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const pagerRef = useRef<React.ElementRef<typeof Animated.ScrollView> | null>(null);
+  const displayToggleRef = useRef<View | null>(null);
+  const converterRef = useRef<View | null>(null);
   const { width: screenWidth } = useWindowDimensions();
   const { recurringRules, categories, settings, currentMonthWage, isSimpleMode, simpleWalletId } =
     useApp();
@@ -395,6 +405,71 @@ export function HomeScreen({
     return () => cancelAnimationFrame(frame);
   }, [scrollToTopToken]);
 
+  const handleDisplayToggleLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    displayToggleRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      onTutorialTargetLayout('home.display_toggle', { x, y, width, height });
+    });
+  }, [onTutorialTargetLayout]);
+  const handleConverterLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    converterRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      const topInset = 13;
+      const adjustedHeight = Math.max(1, height - topInset);
+      onTutorialTargetLayout('home.converter', {
+        x,
+        y: y + topInset,
+        width,
+        height: adjustedHeight,
+      });
+    });
+  }, [onTutorialTargetLayout]);
+
+  useEffect(() => {
+    if (!tutorialSpotlightRequest?.active) return;
+    if (
+      tutorialSpotlightRequest.targetId !== 'home.display_toggle' &&
+      tutorialSpotlightRequest.targetId !== 'home.converter'
+    ) {
+      return;
+    }
+
+    if (tutorialSpotlightRequest.targetId === 'home.converter' && activeHomeTabIndex !== defaultTabIndex) {
+      setActiveHomeTabIndex(defaultTabIndex);
+      pagerRef.current?.scrollTo({ x: defaultTabIndex * screenWidth, animated: false });
+    }
+
+    const measureCurrentTarget =
+      tutorialSpotlightRequest.targetId === 'home.converter'
+        ? handleConverterLayout
+        : handleDisplayToggleLayout;
+
+    const firstPass = setTimeout(() => {
+      measureCurrentTarget();
+    }, 40);
+    const secondPass = setTimeout(() => {
+      measureCurrentTarget();
+    }, 220);
+    const thirdPass = setTimeout(() => {
+      measureCurrentTarget();
+    }, 460);
+
+    return () => {
+      clearTimeout(firstPass);
+      clearTimeout(secondPass);
+      clearTimeout(thirdPass);
+    };
+  }, [
+    activeHomeTabIndex,
+    defaultTabIndex,
+    handleConverterLayout,
+    handleDisplayToggleLayout,
+    screenWidth,
+    tutorialSpotlightRequest,
+  ]);
+
   // ── Overview page ──────────────────────────────────────────────────────────
   const overviewContent = (
     <ScrollView
@@ -412,17 +487,19 @@ export function HomeScreen({
         </Text>
       </View>
 
-      <Animated.View entering={FadeIn.delay(80).duration(400)}>
-        <HeroAmountConverter
-          amount={estimatorAmount}
-          currencySymbol={settings.currencySymbol}
-          hasRate={hasHourlyRate}
-          hours={estimatorHours}
-          workdays={estimatorWorkdays}
-          workdaysPerWeek={estimatorWorkdaysPerWeek}
-          onChangeAmount={setEstimatorAmount}
-        />
-      </Animated.View>
+      <View ref={converterRef} onLayout={handleConverterLayout}>
+        <Animated.View entering={FadeIn.delay(80).duration(400)}>
+          <HeroAmountConverter
+            amount={estimatorAmount}
+            currencySymbol={settings.currencySymbol}
+            hasRate={hasHourlyRate}
+            hours={estimatorHours}
+            workdays={estimatorWorkdays}
+            workdaysPerWeek={estimatorWorkdaysPerWeek}
+            onChangeAmount={setEstimatorAmount}
+          />
+        </Animated.View>
+      </View>
     </ScrollView>
   );
 
@@ -481,7 +558,9 @@ export function HomeScreen({
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
       <View style={styles.headerRow}>
         <Text variant="heading">{I18n.t('app.name')}</Text>
-        <DisplayModeToggle />
+        <View ref={displayToggleRef} onLayout={handleDisplayToggleLayout}>
+          <DisplayModeToggle />
+        </View>
       </View>
       <HomeTabs
         tabs={homeTabs}
