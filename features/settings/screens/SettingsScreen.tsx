@@ -8,7 +8,7 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react-native';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -23,6 +23,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
@@ -33,6 +34,12 @@ interface SettingsScreenProps {
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
+  onStartTutorial: () => void;
+  onTutorialTargetLayout?: (
+    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
+    rect: TutorialTargetRect,
+  ) => void;
+  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function SettingsScreen({
@@ -42,6 +49,9 @@ export function SettingsScreen({
   onOpenAccounts,
   onOpenCategories,
   onOpenRecurring,
+  onStartTutorial,
+  onTutorialTargetLayout,
+  tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const {
     settings,
@@ -55,6 +65,9 @@ export function SettingsScreen({
   } = useApp();
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const startTutorialRowRef = useRef<View | null>(null);
+  const recurringRowRef = useRef<View | null>(null);
+  const managementRowRef = useRef<View | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
 
@@ -65,6 +78,63 @@ export function SettingsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [scrollToTopToken]);
+
+  const handleStartTutorialRowLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    startTutorialRowRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      onTutorialTargetLayout('settings.start_tutorial', { x, y, width, height });
+    });
+  }, [onTutorialTargetLayout]);
+  const handleRecurringRowLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    recurringRowRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      onTutorialTargetLayout('settings.recurring', { x, y, width, height });
+    });
+  }, [onTutorialTargetLayout]);
+  const handleManagementRowLayout = useCallback(() => {
+    if (!onTutorialTargetLayout) return;
+    managementRowRef.current?.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      onTutorialTargetLayout('settings.management', { x, y, width, height });
+    });
+  }, [onTutorialTargetLayout]);
+
+  useEffect(() => {
+    if (!tutorialSpotlightRequest?.active) return;
+    if (
+      tutorialSpotlightRequest.targetId !== 'settings.start_tutorial' &&
+      tutorialSpotlightRequest.targetId !== 'settings.recurring' &&
+      tutorialSpotlightRequest.targetId !== 'settings.management'
+    ) {
+      return;
+    }
+
+    const measureTarget =
+      tutorialSpotlightRequest.targetId === 'settings.recurring'
+        ? handleRecurringRowLayout
+        : tutorialSpotlightRequest.targetId === 'settings.management'
+          ? handleManagementRowLayout
+          : handleStartTutorialRowLayout;
+
+    const firstPass = setTimeout(() => {
+      measureTarget();
+    }, 60);
+    const secondPass = setTimeout(() => {
+      measureTarget();
+    }, 280);
+
+    return () => {
+      clearTimeout(firstPass);
+      clearTimeout(secondPass);
+    };
+  }, [
+    handleManagementRowLayout,
+    handleRecurringRowLayout,
+    handleStartTutorialRowLayout,
+    tutorialSpotlightRequest,
+  ]);
 
   return (
     <SettingsPageLayout>
@@ -111,18 +181,30 @@ export function SettingsScreen({
                 onPress={onOpenAccounts}
               />
             )}
-            <SettingsRowItem
-              icon={<FolderTree size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.categories')}
-              subtitle={I18n.t('settings.categories_subtitle')}
-              onPress={onOpenCategories}
-            />
-            <SettingsRowItem
-              icon={<Repeat2 size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.recurring')}
-              subtitle={I18n.t('settings.recurring_subtitle')}
-              onPress={onOpenRecurring}
-            />
+            <View ref={managementRowRef} onLayout={handleManagementRowLayout}>
+              <SettingsRowItem
+                icon={<FolderTree size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.categories')}
+                subtitle={I18n.t('settings.categories_subtitle')}
+                onPress={onOpenCategories}
+              />
+            </View>
+            <View ref={recurringRowRef} onLayout={handleRecurringRowLayout}>
+              <SettingsRowItem
+                icon={<Repeat2 size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.recurring')}
+                subtitle={I18n.t('settings.recurring_subtitle')}
+                onPress={onOpenRecurring}
+              />
+            </View>
+            <View ref={startTutorialRowRef} onLayout={handleStartTutorialRowLayout}>
+              <SettingsRowItem
+                icon={<Sparkles size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.start_tutorial')}
+                subtitle={I18n.t('settings.start_tutorial_subtitle')}
+                onPress={onStartTutorial}
+              />
+            </View>
             <SettingsRowItem
               icon={<RefreshCcw size={18} color={themeColors.primary} />}
               label={I18n.t('settings.replay_onboarding')}

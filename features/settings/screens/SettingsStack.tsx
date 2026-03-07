@@ -9,6 +9,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 
 import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
@@ -22,13 +23,28 @@ interface SettingsStackProps {
   resetToRootToken?: number;
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
+  onStartTutorial: () => void;
+  onTutorialTargetLayout?: (
+    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
+    rect: TutorialTargetRect,
+  ) => void;
+  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
+  onStartTutorial,
+  onTutorialTargetLayout,
+  tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
+  onStartTutorial: () => void;
+  onTutorialTargetLayout?: (
+    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
+    rect: TutorialTargetRect,
+  ) => void;
+  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }) {
   return (
     <SettingsScreen
@@ -38,6 +54,9 @@ function SettingsHomeRoute({
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
+      onStartTutorial={onStartTutorial}
+      onTutorialTargetLayout={onTutorialTargetLayout}
+      tutorialSpotlightRequest={tutorialSpotlightRequest}
     />
   );
 }
@@ -64,6 +83,9 @@ export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
   onOpenRecurringEditor,
+  onStartTutorial,
+  onTutorialTargetLayout,
+  tutorialSpotlightRequest,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
   const suppressClosingHapticUntilRef = useRef(0);
@@ -97,7 +119,15 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="SettingsHome">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <SettingsHomeRoute {...props} scrollToTopToken={scrollToTopToken} />;
+          return (
+            <SettingsHomeRoute
+              {...props}
+              scrollToTopToken={scrollToTopToken}
+              onStartTutorial={onStartTutorial}
+              onTutorialTargetLayout={onTutorialTargetLayout}
+              tutorialSpotlightRequest={tutorialSpotlightRequest}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="DisplaySettings">
