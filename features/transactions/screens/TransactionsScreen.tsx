@@ -243,7 +243,7 @@ export function TransactionsScreen({
     [activeMonthIndex, monthPagerAnchorDate],
   );
   const activeMonthKey = monthKeyFromDateLocal(activeMonthDate);
-  const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
+  const activeMonthLabel = formatMonthYearLabel(activeMonthDate, activeLocale);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const selectedTransactionTotal = useMemo(() => {
@@ -782,6 +782,7 @@ export function TransactionsScreen({
         {hasActiveSearch ? (
           <ActivityTransactionList
             transactions={filteredTransactions}
+            locale={activeLocale}
             displaySettings={transactionDisplaySettings}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
