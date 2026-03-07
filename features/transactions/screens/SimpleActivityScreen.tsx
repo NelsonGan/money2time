@@ -102,7 +102,7 @@ export function SimpleActivityScreen({
     [activeMonthIndex, monthPagerAnchorDate],
   );
   const activeMonthKey = monthKeyFromDateLocal(activeMonthDate);
-  const activeMonthLabel = formatMonthYearLabel(activeMonthDate);
+  const activeMonthLabel = formatMonthYearLabel(activeMonthDate, activeLocale);
 
   const resolveTransactionValue = useCallback(
     (transaction: TransactionWithRelations) =>

@@ -94,6 +94,7 @@ function TransactionItemView({
     isTransfer && !hasNote
       ? `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`
       : null;
+  const transferSubtitleLabel = I18n.t('transactions.filters.moved');
 
   const title = isTransfer
     ? transaction.note || transferLabel
@@ -105,8 +106,8 @@ function TransactionItemView({
 
   const subtitle = isTransfer
     ? showDateInSubtitle
-      ? joinSubtitleParts(dateLabel, 'Transfer')
-      : 'Transfer'
+      ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
+      : transferSubtitleLabel
     : isBalanceAdjustment
       ? showDateInSubtitle
         ? joinSubtitleParts(dateLabel, I18n.t('transactions.filters.adjustment'))
