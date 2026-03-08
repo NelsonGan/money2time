@@ -30,6 +30,7 @@ import { I18n } from '~/lib/i18n';
 interface SettingsScreenProps {
   scrollToTopToken?: number;
   onOpenDisplay: () => void;
+  onOpenAdvertisement: () => void;
   onOpenHourlyValue: () => void;
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
@@ -45,6 +46,7 @@ interface SettingsScreenProps {
 export function SettingsScreen({
   scrollToTopToken = 0,
   onOpenDisplay,
+  onOpenAdvertisement,
   onOpenHourlyValue,
   onOpenAccounts,
   onOpenCategories,
@@ -155,6 +157,12 @@ export function SettingsScreen({
         <Animated.View entering={FadeIn.delay(200).duration(400)}>
           {/* General settings */}
           <View style={styles.rowsGroup}>
+            <SettingsRowItem
+              emoji="📣"
+              label={I18n.t('settings.advertisement')}
+              subtitle={I18n.t('settings.advertisement_subtitle')}
+              onPress={onOpenAdvertisement}
+            />
             <SettingsRowItem
               icon={<Palette size={18} color={themeColors.primary} />}
               label={I18n.t('settings.display')}
