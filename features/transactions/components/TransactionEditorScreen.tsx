@@ -119,6 +119,7 @@ interface TransactionEditorScreenProps {
   mode: 'create' | 'edit';
   onClose: () => void;
   onSubmit: (input: CreateTransactionInput) => void;
+  onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   titleOverride?: string;
@@ -235,6 +236,7 @@ export function TransactionEditorScreen({
   mode,
   onClose,
   onSubmit,
+  onSubmitReady,
   onDelete,
   initialValues,
   titleOverride,
@@ -582,6 +584,7 @@ export function TransactionEditorScreen({
     try {
       // Build the submission payload; validate per type.
       let submitPayload: CreateTransactionInput | null = null;
+      let preparedSubmitPayload: CreateTransactionInput | null = null;
       let recurringSubmit: (() => void) | null = null;
 
       if (isBalanceAdjustmentType) {
@@ -602,6 +605,7 @@ export function TransactionEditorScreen({
           toAccountId: null,
           note: resolvedNote,
         };
+        preparedSubmitPayload = submitPayload;
       } else if (isTransferType) {
         const transferErrors: typeof fieldErrors = {};
         if (!fromAccountId)
@@ -628,6 +632,7 @@ export function TransactionEditorScreen({
           categoryId: null,
           note: resolvedNote,
         };
+        preparedSubmitPayload = submitPayload;
       } else {
         const baseErrors: typeof fieldErrors = {};
         if (!hideAccountSelector && !accountId)
@@ -651,6 +656,7 @@ export function TransactionEditorScreen({
           toAccountId: null,
           note: resolvedNote,
         };
+        preparedSubmitPayload = submitPayload;
         if (recurringOptions) {
           const normalizedName = recurrenceName.trim();
           if (!normalizedName) {
@@ -668,6 +674,7 @@ export function TransactionEditorScreen({
             return;
           }
           const capturedPayload = submitPayload;
+          preparedSubmitPayload = capturedPayload;
           recurringSubmit = () => {
             recurringOptions.onSubmitRecurring({
               transaction: capturedPayload,
@@ -682,6 +689,10 @@ export function TransactionEditorScreen({
           };
           submitPayload = null; // handled by recurringSubmit
         }
+      }
+
+      if (preparedSubmitPayload) {
+        onSubmitReady?.(preparedSubmitPayload);
       }
 
       // Close modal immediately, then submit after the dismiss animation
