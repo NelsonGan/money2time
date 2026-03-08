@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/android/play_store_512.png",
+      "image": "./assets/money2time-base.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
