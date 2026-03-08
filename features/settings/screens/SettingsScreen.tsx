@@ -53,7 +53,49 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
+import { getErrorMessage } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
+
+const PREVIEW_SCREEN_COPY = {
+  en: {
+    sectionTitle: 'Preview Data',
+    rowLabel: 'Generate preview data',
+    rowSubtitle: 'Load American or Chinese sample data for screenshots and previews',
+    confirmTitle: 'Generate preview data?',
+    confirmMessage:
+      'Choose a profile. This replaces your local accounts, categories, transactions, recurring rules, and wage history with screenshot-ready sample data.',
+    americanProfile: 'American',
+    chineseProfile: 'Chinese',
+    failedMessage: 'Unable to generate preview data. Please try again.',
+    doneTitle: 'Preview data ready',
+    doneMessage:
+      '{{profile}} preview loaded with {{transactions}} transactions across {{accounts}} accounts, {{categories}} categories, {{recurringRules}} recurring rules, and {{wageMonths}} months of income history.',
+  },
+  zh: {
+    sectionTitle: '预览数据',
+    rowLabel: '生成预览数据',
+    rowSubtitle: '加载美式或中文样例数据，方便截图和预览',
+    confirmTitle: '生成预览数据？',
+    confirmMessage:
+      '请选择一个配置。这会用适合截图的样例数据替换你当前的本地账户、分类、交易、循环规则和收入历史。',
+    americanProfile: '美式',
+    chineseProfile: '中文',
+    failedMessage: '无法生成预览数据，请重试。',
+    doneTitle: '预览数据已准备好',
+    doneMessage:
+      '已加载 {{profile}} 预览：包含 {{transactions}} 条交易、{{accounts}} 个账户、{{categories}} 个分类、{{recurringRules}} 条循环规则，以及 {{wageMonths}} 个月的收入历史。',
+  },
+} as const;
+
+function formatPreviewDoneMessage(
+  template: string,
+  values: Record<'profile' | 'transactions' | 'accounts' | 'categories' | 'recurringRules' | 'wageMonths', string | number>,
+) {
+  return template.replace(
+    /\{\{(profile|transactions|accounts|categories|recurringRules|wageMonths)\}\}/g,
+    (_, key: keyof typeof values) => String(values[key]),
+  );
+}
 
 type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
@@ -115,7 +157,7 @@ export function SettingsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
-  const { settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
+  const { settings, monthlyWages, updateSettings, isSimpleMode, generatePreviewData } = useApp();
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
@@ -131,6 +173,7 @@ export function SettingsScreen({
   const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
+  const previewCopy = settings.locale === 'zh' ? PREVIEW_SCREEN_COPY.zh : PREVIEW_SCREEN_COPY.en;
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -300,6 +343,48 @@ export function SettingsScreen({
     },
     [activeTutorialTargetId, reportBottomNavScroll, scheduleTutorialTargetMeasurement],
   );
+
+  const handleGeneratePreviewData = useCallback(() => {
+    const runPreviewSeed = (profile: 'american' | 'chinese') => {
+      try {
+        const summary = generatePreviewData(profile);
+        const profileLabel =
+          profile === 'chinese' ? previewCopy.chineseProfile : previewCopy.americanProfile;
+        Alert.alert(
+          previewCopy.doneTitle,
+          formatPreviewDoneMessage(previewCopy.doneMessage, {
+            profile: profileLabel,
+            accounts: summary.accounts,
+            categories: summary.categories,
+            recurringRules: summary.recurringRules,
+            transactions: summary.transactions,
+            wageMonths: summary.wageMonths,
+          }),
+        );
+      } catch (error) {
+        Alert.alert(
+          I18n.t('errors.generic_operation_failed'),
+          getErrorMessage(error, previewCopy.failedMessage),
+        );
+      }
+    };
+
+    Alert.alert(
+      previewCopy.confirmTitle,
+      previewCopy.confirmMessage,
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: previewCopy.americanProfile,
+          onPress: () => runPreviewSeed('american'),
+        },
+        {
+          text: previewCopy.chineseProfile,
+          onPress: () => runPreviewSeed('chinese'),
+        },
+      ],
+    );
+  }, [generatePreviewData, previewCopy]);
 
   return (
     <SettingsPageLayout>
@@ -608,6 +693,13 @@ export function SettingsScreen({
                     onPress={onOpenWidgetPreviews}
                   />
                 ) : null}
+                <SettingsRowItem
+                  emoji="🧪"
+                  label={previewCopy.rowLabel}
+                  subtitle={previewCopy.rowSubtitle}
+                  haptic="warning"
+                  onPress={handleGeneratePreviewData}
+                />
               </View>
             </SettingsSection>
           ) : null}

@@ -77,6 +77,11 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import {
+  type PreviewSeedProfile,
+  type PreviewSeedSummary,
+  seedPreviewData,
+} from '~/services/previewData';
+import {
   type Account,
   type AccountBalance,
   type AccountGroup,
@@ -229,6 +234,7 @@ interface AppContextValue extends AppState {
 
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
+  generatePreviewData: (profile: PreviewSeedProfile) => PreviewSeedSummary;
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
@@ -2192,6 +2198,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
   }, [resetTransactionFilters, runMutation]);
 
+  const generatePreviewData = useCallback((profile: PreviewSeedProfile) => {
+    const summary = runMutation(
+      () => seedPreviewData(profile),
+      I18n.t('errors.generic_operation_failed'),
+    );
+    setAppLocale(summary.locale);
+    setActiveAccountFilter(null);
+    resetTransactionFilters();
+    return summary;
+  }, [resetTransactionFilters, runMutation]);
+
   const importMoneyManagerBackup = useCallback(
     async (uri: string, fileName?: string) => {
       const normalizedName = fileName?.trim().toLowerCase();
@@ -2389,6 +2406,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getDisplayValueForTransaction,
             resetTransactionsOnly,
             resetAllData,
+            generatePreviewData,
             importMoneyManagerBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
@@ -2468,6 +2486,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getDisplayValueForTransaction,
       resetTransactionsOnly,
       resetAllData,
+      generatePreviewData,
       importMoneyManagerBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
