@@ -12,6 +12,7 @@ import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHap
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 
 import { AccountsScreen } from './AccountsScreen';
+import { AdvertisementSettingsScreen } from './AdvertisementSettingsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
@@ -50,6 +51,7 @@ function SettingsHomeRoute({
     <SettingsScreen
       scrollToTopToken={scrollToTopToken}
       onOpenDisplay={() => navigation.navigate('DisplaySettings')}
+      onOpenAdvertisement={() => navigation.navigate('AdvertisementSettings')}
       onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenCategories={() => navigation.navigate('Categories')}
@@ -134,6 +136,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <DisplaySettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AdvertisementSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <AdvertisementSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="HourlyValue">

@@ -9,6 +9,7 @@ import type { WageConfig } from '~/types';
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
+  AdvertisementSettings: undefined;
   HourlyValue: undefined;
   WageCalculator: { monthKey: string; initialConfig: WageConfig };
   Accounts: undefined;

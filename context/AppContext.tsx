@@ -115,6 +115,8 @@ interface AppContextValue extends AppState {
       >
     >,
   ) => void;
+  adsEnabledInSession: boolean;
+  setAdsEnabledInSession: (value: boolean) => void;
   updateWageConfig: (config: WageConfig) => void;
   updateWageConfigForMonth: (month: string, config: WageConfig) => void;
   deleteWageConfigForMonth: (month: string) => void;
@@ -369,6 +371,7 @@ function applyTransactionFilters(
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [adsEnabledInSession, setAdsEnabledInSession] = useState(true);
   const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
   const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
@@ -853,14 +856,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'locale'
           | 'currencyCode'
           | 'currencySymbol'
-          | 'hourRounding'
-          | 'displayMode'
-          | 'themeMode'
-          | 'themeColor'
-          | 'onboardingCompleted'
-          | 'userMode'
-        >
-      >,
+        | 'hourRounding'
+        | 'displayMode'
+        | 'themeMode'
+        | 'themeColor'
+        | 'onboardingCompleted'
+        | 'userMode'
+      >
+    >,
     ) => {
       const nextUpdates = { ...updates };
       if (nextUpdates.displayMode === 'time' && !canUseTimeDisplayMode) {
@@ -1281,6 +1284,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionsBulk,
             deleteTransactionsBulk,
             updateSettings,
+            adsEnabledInSession,
+            setAdsEnabledInSession,
             updateWageConfig,
             updateWageConfigForMonth,
             deleteWageConfigForMonth,
@@ -1348,6 +1353,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionsBulk,
       deleteTransactionsBulk,
       updateSettings,
+      adsEnabledInSession,
+      setAdsEnabledInSession,
       updateWageConfig,
       updateWageConfigForMonth,
       deleteWageConfigForMonth,
