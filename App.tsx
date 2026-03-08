@@ -51,8 +51,12 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
+import {
+  requestOpenTransactions,
+  subscribeOpenTransactionsRequest,
+} from '~/services/transactionsNavigation';
 import type { TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 
 type MainTab = TabName;
 
@@ -201,6 +205,13 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
     setTransactionsFocusMonthKey(monthKey);
     setTransactionsFocusMonthToken((prev) => prev + 1);
   }, []);
+
+  useEffect(() => {
+    return subscribeOpenTransactionsRequest(({ monthKey }) => {
+      setActiveTab('transactions');
+      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()));
+    });
+  }, [jumpTransactionsToMonth]);
 
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
@@ -489,6 +500,9 @@ function AddTransactionRouteScreen({ navigation }: RootStackRouteProps<'AddTrans
   return (
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
+      onSubmitReady={(input) => {
+        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+      }}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
     />
