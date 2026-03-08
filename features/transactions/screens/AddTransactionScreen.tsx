@@ -2,10 +2,12 @@ import React from 'react';
 
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useApp } from '~/context/AppContext';
+import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { TransactionType } from '~/types';
 
 interface AddTransactionScreenProps {
   onClose: () => void;
+  onSubmitReady?: (input: CreateTransactionInput) => void;
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
   initialAccountId?: string;
@@ -13,6 +15,7 @@ interface AddTransactionScreenProps {
 
 export function AddTransactionScreen({
   onClose,
+  onSubmitReady,
   isSimpleMode,
   simpleWalletId,
   initialAccountId,
@@ -29,6 +32,7 @@ export function AddTransactionScreen({
       mode="create"
       onClose={onClose}
       onSubmit={createTransaction}
+      onSubmitReady={onSubmitReady}
       restrictTypeOptions={restrictedTypes}
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}
