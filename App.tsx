@@ -8,6 +8,7 @@ import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
@@ -48,6 +49,7 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal, monthKeyFromDateLocal } from '~/utils/formatters';
@@ -167,7 +169,7 @@ interface MainShellScreenProps {
 
 function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
   const navigation = useNavigation<RootMainNavigationProp>();
-  const { isSimpleMode } = useApp();
+  const { adsEnabledInSession, isSimpleMode } = useApp();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -389,6 +391,10 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
     }),
     [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
   );
+  const shouldShowBannerStrip =
+    !shouldHideBottomNav &&
+    !isGuidedTutorialActive &&
+    canRequestBannerAds({ adsEnabled: adsEnabledInSession });
 
   return (
     <View className="flex-1 bg-background">
@@ -444,6 +450,8 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
           />
         </MountedTab>
       </View>
+
+      {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
 
       {!shouldHideBottomNav ? (
         <BottomNav
@@ -707,7 +715,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { isLoading, settings, updateSettings } = useApp();
+  const { adsEnabledInSession, isLoading, settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
@@ -729,6 +737,14 @@ function AppContent() {
   const handleSkipTutorialPrompt = useCallback(() => {
     setShowTutorialPrompt(false);
   }, []);
+
+  useEffect(() => {
+    if (!settings.onboardingCompleted || !canRequestBannerAds({ adsEnabled: adsEnabledInSession })) {
+      return;
+    }
+
+    void initializeGoogleMobileAds();
+  }, [adsEnabledInSession, settings.onboardingCompleted]);
 
   if (isLoading) {
     return (

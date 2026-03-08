@@ -26,7 +26,7 @@ interface DisplaySettingsScreenProps {
 }
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
-  const { settings, updateSettings, resetAllData, resetTransactionsOnly } = useApp();
+  const { resetAllData, resetTransactionsOnly, settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
 
   const languageOptions = useMemo(
