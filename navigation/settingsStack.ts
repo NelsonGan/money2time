@@ -15,6 +15,7 @@ export type SettingsStackParamList = {
   Categories: undefined;
   CategoriesSubcategories: { parentId: string };
   Recurring: undefined;
+  DataManagement: undefined;
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;

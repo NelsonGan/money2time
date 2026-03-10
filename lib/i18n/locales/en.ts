@@ -700,6 +700,34 @@ const en = {
     remove_simple_wallet_message:
       'This will permanently delete the Simple Wallet and all transactions linked to it.',
     remove: 'Remove',
+    data_management: 'Data Management',
+    data_management_subtitle: 'Export and import your data',
+  },
+  data_management: {
+    title: 'Data Management',
+    subtitle: 'Export and import your data',
+    export_title: 'Export Database',
+    export_description:
+      'Save a full backup of all your accounts, categories, transactions, and settings as a JSON file.',
+    export_action: 'Export Database',
+    exporting: 'Exporting...',
+    export_error_title: 'Export Failed',
+    export_error_message: 'Could not export the database. Please try again.',
+    import_title: 'Import Database',
+    import_description:
+      'Restore from a previously exported backup file. This will replace all your current data.',
+    import_action: 'Import from File',
+    importing: 'Importing...',
+    import_confirm_title: 'Replace All Data?',
+    import_confirm_message:
+      'This will overwrite all your current accounts, categories, transactions, and settings with the data from the backup file. This cannot be undone.',
+    import_confirm_action: 'Replace Data',
+    import_success_title: 'Import Complete',
+    import_success_message: 'Your data has been successfully restored from the backup.',
+    import_error_title: 'Import Failed',
+    import_error_message: 'Could not import the backup file. Please make sure it is a valid Money2Time backup.',
+    import_warning:
+      'Importing a backup will permanently replace all your current data. Make sure to export a backup first if you want to keep your existing data.',
   },
   tutorial: {
     progress: '{{current}} / {{total}}',

@@ -13,6 +13,7 @@ import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tu
 
 import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
+import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { RecurringScreen } from './RecurringScreen';
@@ -54,6 +55,7 @@ function SettingsHomeRoute({
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
+      onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -203,6 +205,12 @@ export function SettingsStack({
               useNativeBackGesture
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="DataManagement">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <DataManagementScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
     </SettingsStackNavigator.Navigator>
