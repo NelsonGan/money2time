@@ -1,5 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
@@ -51,14 +51,11 @@ export async function exportDatabase(): Promise<void> {
   const json = JSON.stringify(backup, null, 2);
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const fileName = `money2time-backup-${timestamp}.json`;
-  const fileUri = `${FileSystem.documentDirectory ?? ''}${fileName}`;
-
-  await FileSystem.writeAsStringAsync(fileUri, json, {
-    encoding: 'utf8',
-  });
+  const file = new File(Paths.document, fileName);
+  file.write(json);
 
   if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(fileUri, {
+    await Sharing.shareAsync(file.uri, {
       mimeType: 'application/json',
       dialogTitle: 'Export Money2Time Backup',
       UTI: 'public.json',
