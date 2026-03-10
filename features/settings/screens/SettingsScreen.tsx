@@ -10,7 +10,15 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Alert, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  Alert,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import {
@@ -33,6 +41,14 @@ type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
   | 'settings.recurring'
   | 'settings.management';
+
+function isSettingsTutorialTargetId(targetId: string | null | undefined): targetId is SettingsTutorialTargetId {
+  return (
+    targetId === 'settings.start_tutorial' ||
+    targetId === 'settings.recurring' ||
+    targetId === 'settings.management'
+  );
+}
 
 interface SettingsScreenProps {
   scrollToTopToken?: number;
@@ -74,9 +90,11 @@ export function SettingsScreen({
   const { height: windowHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
+  const scrollMeasureFrameRef = useRef<number | null>(null);
   const startTutorialRowRef = useRef<View | null>(null);
   const recurringRowRef = useRef<View | null>(null);
   const managementRowRef = useRef<View | null>(null);
+  const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
   const shouldShowAdSupportSection = !adRemovalState.hasAdFreeEntitlement || __DEV__;
@@ -93,36 +111,59 @@ export function SettingsScreen({
     return () => cancelAnimationFrame(frame);
   }, [scrollToTopToken]);
 
+  const getTutorialTargetRef = useCallback((targetId: SettingsTutorialTargetId) => {
+    if (targetId === 'settings.recurring') return recurringRowRef.current;
+    if (targetId === 'settings.management') return managementRowRef.current;
+    return startTutorialRowRef.current;
+  }, []);
+  const measureTutorialTarget = useCallback(
+    (targetId: SettingsTutorialTargetId) => {
+      if (!onTutorialTargetLayout) return;
+      getTutorialTargetRef(targetId)?.measureInWindow((x, y, width, height) => {
+        if (width <= 0 || height <= 0) return;
+        onTutorialTargetLayout(targetId, { x, y, width, height });
+      });
+    },
+    [getTutorialTargetRef, onTutorialTargetLayout],
+  );
   const handleStartTutorialRowLayout = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    startTutorialRowRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTargetLayout('settings.start_tutorial', { x, y, width, height });
-    });
-  }, [onTutorialTargetLayout]);
+    measureTutorialTarget('settings.start_tutorial');
+  }, [measureTutorialTarget]);
   const handleRecurringRowLayout = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    recurringRowRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTargetLayout('settings.recurring', { x, y, width, height });
-    });
-  }, [onTutorialTargetLayout]);
+    measureTutorialTarget('settings.recurring');
+  }, [measureTutorialTarget]);
   const handleManagementRowLayout = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    managementRowRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTargetLayout('settings.management', { x, y, width, height });
-    });
-  }, [onTutorialTargetLayout]);
+    measureTutorialTarget('settings.management');
+  }, [measureTutorialTarget]);
+  const activeTutorialTargetId =
+    tutorialSpotlightRequest?.active && isSettingsTutorialTargetId(tutorialSpotlightRequest.targetId)
+      ? tutorialSpotlightRequest.targetId
+      : null;
+
+  useEffect(() => {
+    return () => {
+      if (scrollMeasureFrameRef.current !== null) {
+        cancelAnimationFrame(scrollMeasureFrameRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleTutorialTargetMeasurement = useCallback(
+    (targetId: SettingsTutorialTargetId) => {
+      if (scrollMeasureFrameRef.current !== null) {
+        cancelAnimationFrame(scrollMeasureFrameRef.current);
+      }
+      scrollMeasureFrameRef.current = requestAnimationFrame(() => {
+        scrollMeasureFrameRef.current = null;
+        measureTutorialTarget(targetId);
+      });
+    },
+    [measureTutorialTarget],
+  );
+
   const scrollTutorialTargetIntoView = useCallback(
     (targetId: SettingsTutorialTargetId) => {
-      const targetRef =
-        targetId === 'settings.recurring'
-          ? recurringRowRef.current
-          : targetId === 'settings.management'
-            ? managementRowRef.current
-            : startTutorialRowRef.current;
-
+      const targetRef = getTutorialTargetRef(targetId);
       if (!targetRef) {
         return;
       }
@@ -147,7 +188,7 @@ export function SettingsScreen({
           );
         }
 
-        if (nextOffset === scrollOffsetRef.current) {
+        if (Math.abs(nextOffset - scrollOffsetRef.current) < 1) {
           return;
         }
 
@@ -155,49 +196,47 @@ export function SettingsScreen({
         scrollViewRef.current?.scrollTo({ y: nextOffset, animated: false });
       });
     },
-    [windowHeight],
+    [getTutorialTargetRef, windowHeight],
   );
 
   useEffect(() => {
-    if (!tutorialSpotlightRequest?.active) return;
-    if (
-      tutorialSpotlightRequest.targetId !== 'settings.start_tutorial' &&
-      tutorialSpotlightRequest.targetId !== 'settings.recurring' &&
-      tutorialSpotlightRequest.targetId !== 'settings.management'
-    ) {
+    if (!activeTutorialTargetId) {
+      lastTutorialTargetIdRef.current = null;
       return;
     }
 
-    const targetId = tutorialSpotlightRequest.targetId as SettingsTutorialTargetId;
-    const measureTarget =
-      targetId === 'settings.recurring'
-        ? handleRecurringRowLayout
-        : targetId === 'settings.management'
-          ? handleManagementRowLayout
-          : handleStartTutorialRowLayout;
+    const shouldScrollIntoView = lastTutorialTargetIdRef.current !== activeTutorialTargetId;
+    lastTutorialTargetIdRef.current = activeTutorialTargetId;
 
-    scrollTutorialTargetIntoView(targetId);
+    if (shouldScrollIntoView) {
+      scrollTutorialTargetIntoView(activeTutorialTargetId);
+    }
 
-    const firstPass = setTimeout(() => {
-      scrollTutorialTargetIntoView(targetId);
-      measureTarget();
-    }, 90);
+    scheduleTutorialTargetMeasurement(activeTutorialTargetId);
+
     const secondPass = setTimeout(() => {
-      scrollTutorialTargetIntoView(targetId);
-      measureTarget();
-    }, 340);
+      measureTutorialTarget(activeTutorialTargetId);
+    }, shouldScrollIntoView ? 180 : 120);
 
     return () => {
-      clearTimeout(firstPass);
       clearTimeout(secondPass);
     };
   }, [
-    handleManagementRowLayout,
-    handleRecurringRowLayout,
-    handleStartTutorialRowLayout,
+    activeTutorialTargetId,
+    measureTutorialTarget,
+    scheduleTutorialTargetMeasurement,
     scrollTutorialTargetIntoView,
-    tutorialSpotlightRequest,
+    tutorialSpotlightRequest?.token,
   ]);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      if (!activeTutorialTargetId) return;
+      scheduleTutorialTargetMeasurement(activeTutorialTargetId);
+    },
+    [activeTutorialTargetId, scheduleTutorialTargetMeasurement],
+  );
 
   return (
     <SettingsPageLayout>
@@ -205,9 +244,7 @@ export function SettingsScreen({
         ref={scrollViewRef}
         className="flex-1"
         contentContainerStyle={styles.scrollContent}
-        onScroll={(event) => {
-          scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
-        }}
+        onScroll={handleScroll}
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.duration(400)}>
