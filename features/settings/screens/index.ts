@@ -1,5 +1,6 @@
 export { AccountsScreen } from './AccountsScreen';
 export { CategoriesScreen } from './CategoriesScreen';
+export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { HourlyValueScreen } from './HourlyValueScreen';
 export { RecurringScreen } from './RecurringScreen';
