@@ -8,6 +8,8 @@ const en = {
     reset: 'Reset',
     clear: 'Clear',
     retry: 'Retry',
+    copy: 'Copy',
+    copied: 'Copied',
     delete: 'Delete',
     edit: 'Edit',
     on: 'On',
@@ -512,18 +514,66 @@ const en = {
     display: 'Display',
     display_subtitle: 'Language, currency, and theme',
     advertisement: 'Advertisement',
-    advertisement_subtitle: 'Manage ads for this session',
-    advertisement_screen_subtitle: 'Ad controls and support',
-    advertisement_why_title: 'Why ads are here',
-    advertisement_why_body:
-      'Ads help cover development costs and keep Money2Time available without charging every user upfront.',
     ads: 'Ads',
-    ads_enabled_label: 'Ads',
-    ads_session_note: 'This only lasts for the current session. Ads turn back on next time you open the app.',
-    ads_prompt_title: 'Hide ads for this session?',
-    ads_prompt_message:
-      'Ads help support the developer. If you continue, ads stay off until you close the app.',
-    ads_prompt_confirm: 'Hide ads',
+    ad_support_open_modal_button: 'Remove Ads Forever',
+    ad_support_modal_title: 'Remove Ads Forever',
+    ad_support_modal_body:
+      'If Money2Time has been useful to you and has helped you cut down some unnecessary spending, consider tipping to support the creator and help fund the app. Tipping any amount will remove ads forever. Thank you and hope you always have control over your time and energy.',
+    ad_support_time_prefix: 'About ',
+    ad_support_time_minutes_value: '{{minutes}} min',
+    ad_support_time_hours_one_value: '{{hours}} hr',
+    ad_support_time_hours_other_value: '{{hours}} hrs',
+    ad_support_time_suffix: " of the creator's time",
+    ad_support_active_title: 'Ads are removed',
+    ad_support_active_body:
+      'This app account already has the ad-free entitlement, so banner ads stay hidden automatically.',
+    ad_support_active_date: 'Activated: {{date}}',
+    ad_support_loading_title: 'Checking purchase status',
+    ad_support_loading_body: 'Looking up your RevenueCat entitlement and available tip options.',
+    ad_support_purchase_success_title: 'Ads removed',
+    ad_support_purchase_success_message:
+      'Thank you and hope you always have control over your time and energy!',
+    ad_support_purchase_pending_title: 'Purchase completed',
+    ad_support_purchase_pending_message:
+      'The purchase finished, but the ad-free entitlement is not active yet. Check the RevenueCat entitlement mapping.',
+    ad_support_unavailable_title: 'Purchases unavailable',
+    ad_support_unavailable_expo_go:
+      'RevenueCat purchases need a development build, TestFlight, or an internal testing build. Expo Go can only preview the screen.',
+    ad_support_unavailable_unconfigured:
+      'RevenueCat is not configured in this build yet. Add the public API key and entitlement ID first.',
+    ad_support_unavailable_offering_missing:
+      'RevenueCat is configured, but the "{{offeringId}}" offering was not found in this build. Check the exact offering identifier on the same RevenueCat project as this API key.',
+    ad_support_unavailable_no_products:
+      'RevenueCat is configured, but the "{{offeringId}}" offering returned no available products in this build. Check that the offering contains store products for the same key you are using.',
+    ad_support_unavailable_platform:
+      'RevenueCat purchases are only available on iOS and Android builds.',
+    ad_support_offering_unknown: 'selected',
+    ad_support_purchase_missing_title: 'Amount not configured',
+    ad_support_purchase_missing_message:
+      'The selected RevenueCat product is no longer available in this offering.',
+    ad_support_purchase_error_title: 'Purchase failed',
+    ad_support_purchase_error_message:
+      'The purchase could not be completed right now. Try again in a moment.',
+    ad_support_restore_button: 'Restore purchases',
+    ad_support_restore_success_title: 'Purchase restored',
+    ad_support_restore_success_message: 'Your ad-free entitlement is active again.',
+    ad_support_restore_none_title: 'Nothing to restore',
+    ad_support_restore_none_message:
+      'No ad-free entitlement was found for the current store account.',
+    ad_support_restore_error_title: 'Restore failed',
+    ad_support_restore_error_message:
+      'The app could not restore purchases right now. Try again in a moment.',
+    ad_support_test_reset_button: 'Reset test purchase',
+    ad_support_test_reset_title: 'Reset the test purchase?',
+    ad_support_test_reset_message:
+      'This debug-only action switches the app to a fresh test user ID so you can run the purchase flow again.',
+    ad_support_test_reset_confirm: 'Reset',
+    ad_support_test_reset_success_title: 'Test purchase reset',
+    ad_support_test_reset_success_message:
+      'The app is now using a fresh test user ID. You can purchase again.',
+    ad_support_test_reset_error_title: 'Reset failed',
+    ad_support_test_reset_error_message:
+      'The app could not reset the test user ID right now. Try again in a moment.',
     theme: 'Theme',
     theme_system: 'System',
     theme_light: 'Light',
@@ -539,6 +589,8 @@ const en = {
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
     language: 'Language',
+    user_id: 'User ID',
+    user_id_unavailable: 'Unavailable',
     currency: 'Currency',
     custom_currency: 'Custom currency symbol/code',
     custom_currency_placeholder: 'e.g. Fr, zł, ฿, DKK',
@@ -630,6 +682,7 @@ const en = {
     formula_line_3:
       'Transaction screens use the rate from the transaction month when converting money to time.',
     history: 'History',
+    section_settings: 'Settings',
     section_experience: 'Experience Mode',
     user_mode: 'Experience Mode',
     user_mode_simple: 'Simple Mode',

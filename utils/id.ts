@@ -8,6 +8,10 @@ export function newId(): string {
   });
 }
 
+export function newAppUserId(): string {
+  return `m2t_${newId()}`;
+}
+
 export function nowIso(): string {
   return new Date().toISOString();
 }

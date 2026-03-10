@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import {
@@ -22,31 +22,32 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { AdSupportSection } from '~/features/settings/components/AdSupportSection';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
+type SettingsTutorialTargetId =
+  | 'settings.start_tutorial'
+  | 'settings.recurring'
+  | 'settings.management';
+
 interface SettingsScreenProps {
   scrollToTopToken?: number;
   onOpenDisplay: () => void;
-  onOpenAdvertisement: () => void;
   onOpenHourlyValue: () => void;
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
   onStartTutorial: () => void;
-  onTutorialTargetLayout?: (
-    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
-    rect: TutorialTargetRect,
-  ) => void;
+  onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function SettingsScreen({
   scrollToTopToken = 0,
   onOpenDisplay,
-  onOpenAdvertisement,
   onOpenHourlyValue,
   onOpenAccounts,
   onOpenCategories,
@@ -56,6 +57,7 @@ export function SettingsScreen({
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const {
+    adRemovalState,
     settings,
     monthlyWages,
     updateSettings,
@@ -66,12 +68,19 @@ export function SettingsScreen({
     deleteSimpleWalletAndTransactions,
   } = useApp();
   const themeColors = useThemeColors();
+  const { height: windowHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const scrollOffsetRef = useRef(0);
   const startTutorialRowRef = useRef<View | null>(null);
   const recurringRowRef = useRef<View | null>(null);
   const managementRowRef = useRef<View | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
+  const shouldShowAdSupportSection = !adRemovalState.hasAdFreeEntitlement || __DEV__;
+  const shouldShowAdSupportSectionAtTop =
+    shouldShowAdSupportSection && !adRemovalState.hasAdFreeEntitlement;
+  const shouldShowAdSupportSectionAtBottom =
+    shouldShowAdSupportSection && adRemovalState.hasAdFreeEntitlement;
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -102,6 +111,49 @@ export function SettingsScreen({
       onTutorialTargetLayout('settings.management', { x, y, width, height });
     });
   }, [onTutorialTargetLayout]);
+  const scrollTutorialTargetIntoView = useCallback(
+    (targetId: SettingsTutorialTargetId) => {
+      const targetRef =
+        targetId === 'settings.recurring'
+          ? recurringRowRef.current
+          : targetId === 'settings.management'
+            ? managementRowRef.current
+            : startTutorialRowRef.current;
+
+      if (!targetRef) {
+        return;
+      }
+
+      targetRef.measureInWindow((_x, y, _width, height) => {
+        if (height <= 0) {
+          return;
+        }
+
+        const preferredTop = 120;
+        const preferredBottom = Math.max(preferredTop + height + spacing.xl, windowHeight - 220);
+        const bottom = y + height;
+
+        let nextOffset = scrollOffsetRef.current;
+
+        if (y < preferredTop) {
+          nextOffset = Math.max(0, scrollOffsetRef.current - (preferredTop - y + spacing.md));
+        } else if (bottom > preferredBottom) {
+          nextOffset = Math.max(
+            0,
+            scrollOffsetRef.current + (bottom - preferredBottom + spacing.md),
+          );
+        }
+
+        if (nextOffset === scrollOffsetRef.current) {
+          return;
+        }
+
+        scrollOffsetRef.current = nextOffset;
+        scrollViewRef.current?.scrollTo({ y: nextOffset, animated: false });
+      });
+    },
+    [windowHeight],
+  );
 
   useEffect(() => {
     if (!tutorialSpotlightRequest?.active) return;
@@ -113,19 +165,24 @@ export function SettingsScreen({
       return;
     }
 
+    const targetId = tutorialSpotlightRequest.targetId as SettingsTutorialTargetId;
     const measureTarget =
-      tutorialSpotlightRequest.targetId === 'settings.recurring'
+      targetId === 'settings.recurring'
         ? handleRecurringRowLayout
-        : tutorialSpotlightRequest.targetId === 'settings.management'
+        : targetId === 'settings.management'
           ? handleManagementRowLayout
           : handleStartTutorialRowLayout;
 
+    scrollTutorialTargetIntoView(targetId);
+
     const firstPass = setTimeout(() => {
+      scrollTutorialTargetIntoView(targetId);
       measureTarget();
-    }, 60);
+    }, 90);
     const secondPass = setTimeout(() => {
+      scrollTutorialTargetIntoView(targetId);
       measureTarget();
-    }, 280);
+    }, 340);
 
     return () => {
       clearTimeout(firstPass);
@@ -135,6 +192,7 @@ export function SettingsScreen({
     handleManagementRowLayout,
     handleRecurringRowLayout,
     handleStartTutorialRowLayout,
+    scrollTutorialTargetIntoView,
     tutorialSpotlightRequest,
   ]);
 
@@ -144,6 +202,10 @@ export function SettingsScreen({
         ref={scrollViewRef}
         className="flex-1"
         contentContainerStyle={styles.scrollContent}
+        onScroll={(event) => {
+          scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.duration(400)}>
           <SettingsHeader
@@ -155,81 +217,93 @@ export function SettingsScreen({
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(200).duration(400)}>
-          {/* General settings */}
-          <View style={styles.rowsGroup}>
-            <SettingsRowItem
-              emoji="📣"
-              label={I18n.t('settings.advertisement')}
-              subtitle={I18n.t('settings.advertisement_subtitle')}
-              onPress={onOpenAdvertisement}
-            />
-            <SettingsRowItem
-              icon={<Palette size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.display')}
-              subtitle={I18n.t('settings.display_subtitle')}
-              onPress={onOpenDisplay}
-            />
-            <SettingsRowItem
-              icon={<Clock3 size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.hourly_value')}
-              subtitle={
-                latestWage
-                  ? I18n.t('settings.hourly_value_latest', {
-                      value: `${settings.currencySymbol}${latestWage.trueHourlyRate.toFixed(2)}/hr`,
-                    })
-                  : I18n.t('settings.manage_formulas')
-              }
-              onPress={onOpenHourlyValue}
-            />
-            {!isSimpleMode && (
+          {shouldShowAdSupportSectionAtTop ? <AdSupportSection /> : null}
+
+          <SettingsSection className="mt-5 gap-2" title={I18n.t('settings.section_settings')}>
+            <View style={styles.rowsGroup}>
               <SettingsRowItem
-                icon={<Landmark size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.accounts')}
-                subtitle={I18n.t('settings.accounts_subtitle')}
-                onPress={onOpenAccounts}
+                icon={<Palette size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.display')}
+                subtitle={I18n.t('settings.display_subtitle')}
+                onPress={onOpenDisplay}
               />
-            )}
-            <View ref={managementRowRef} onLayout={handleManagementRowLayout}>
               <SettingsRowItem
-                icon={<FolderTree size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.categories')}
-                subtitle={I18n.t('settings.categories_subtitle')}
-                onPress={onOpenCategories}
+                icon={<Clock3 size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.hourly_value')}
+                subtitle={
+                  latestWage
+                    ? I18n.t('settings.hourly_value_latest', {
+                        value: `${settings.currencySymbol}${latestWage.trueHourlyRate.toFixed(2)}/hr`,
+                      })
+                    : I18n.t('settings.manage_formulas')
+                }
+                onPress={onOpenHourlyValue}
               />
-            </View>
-            <View ref={recurringRowRef} onLayout={handleRecurringRowLayout}>
+              {!isSimpleMode ? (
+                <SettingsRowItem
+                  icon={<Landmark size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.accounts')}
+                  subtitle={I18n.t('settings.accounts_subtitle')}
+                  onPress={onOpenAccounts}
+                />
+              ) : null}
+              <View
+                ref={managementRowRef}
+                onLayout={() => {
+                  handleManagementRowLayout();
+                }}
+              >
+                <SettingsRowItem
+                  icon={<FolderTree size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.categories')}
+                  subtitle={I18n.t('settings.categories_subtitle')}
+                  onPress={onOpenCategories}
+                />
+              </View>
+              <View
+                ref={recurringRowRef}
+                onLayout={() => {
+                  handleRecurringRowLayout();
+                }}
+              >
+                <SettingsRowItem
+                  icon={<Repeat2 size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.recurring')}
+                  subtitle={I18n.t('settings.recurring_subtitle')}
+                  onPress={onOpenRecurring}
+                />
+              </View>
+              <View
+                ref={startTutorialRowRef}
+                onLayout={() => {
+                  handleStartTutorialRowLayout();
+                }}
+              >
+                <SettingsRowItem
+                  icon={<Sparkles size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.start_tutorial')}
+                  subtitle={I18n.t('settings.start_tutorial_subtitle')}
+                  onPress={onStartTutorial}
+                />
+              </View>
               <SettingsRowItem
-                icon={<Repeat2 size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.recurring')}
-                subtitle={I18n.t('settings.recurring_subtitle')}
-                onPress={onOpenRecurring}
-              />
-            </View>
-            <View ref={startTutorialRowRef} onLayout={handleStartTutorialRowLayout}>
-              <SettingsRowItem
-                icon={<Sparkles size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.start_tutorial')}
-                subtitle={I18n.t('settings.start_tutorial_subtitle')}
-                onPress={onStartTutorial}
-              />
-            </View>
-            <SettingsRowItem
-              icon={<RefreshCcw size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.replay_onboarding')}
-              subtitle={I18n.t('settings.replay_onboarding_subtitle')}
-              onPress={() => {
-                Alert.alert(I18n.t('settings.replay_title'), I18n.t('settings.replay_message'), [
-                  { text: I18n.t('common.cancel'), style: 'cancel' },
-                  {
-                    text: I18n.t('settings.replay_action'),
-                    onPress: () => {
-                      updateSettings({ onboardingCompleted: false });
+                icon={<RefreshCcw size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.replay_onboarding')}
+                subtitle={I18n.t('settings.replay_onboarding_subtitle')}
+                onPress={() => {
+                  Alert.alert(I18n.t('settings.replay_title'), I18n.t('settings.replay_message'), [
+                    { text: I18n.t('common.cancel'), style: 'cancel' },
+                    {
+                      text: I18n.t('settings.replay_action'),
+                      onPress: () => {
+                        updateSettings({ onboardingCompleted: false });
+                      },
                     },
-                  },
-                ]);
-              }}
-            />
-          </View>
+                  ]);
+                }}
+              />
+            </View>
+          </SettingsSection>
 
           {/* Experience mode section */}
           <SettingsSection className="mt-5 gap-2" title={I18n.t('settings.section_experience')}>
@@ -292,6 +366,8 @@ export function SettingsScreen({
               />
             )}
           </SettingsSection>
+
+          {shouldShowAdSupportSectionAtBottom ? <AdSupportSection /> : null}
         </Animated.View>
       </ScrollView>
     </SettingsPageLayout>

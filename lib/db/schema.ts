@@ -83,6 +83,7 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
 
 export const settingsTable = sqliteTable('settings', {
   id: text('id').primaryKey(),
+  appUserId: text('app_user_id').notNull(),
   locale: text('locale').notNull().default('en'),
   currencyCode: text('currency_code').notNull().default('USD'),
   currencySymbol: text('currency_symbol').notNull().default('$'),

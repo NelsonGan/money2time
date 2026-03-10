@@ -37,7 +37,7 @@ import { useScrollToTopTokenNavigation } from '~/hooks/useScrollToTopTokenNaviga
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, CategoryType, TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {

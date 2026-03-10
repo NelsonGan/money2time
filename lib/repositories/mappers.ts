@@ -208,6 +208,7 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
 export function toSettings(row: SettingsRow): UserSettings {
   return {
     id: row.id,
+    appUserId: row.appUserId,
     locale: row.locale,
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,

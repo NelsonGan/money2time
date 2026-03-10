@@ -10,13 +10,16 @@ const BANNER_RESERVED_HEIGHT = 84;
 
 export function AppBannerAdStrip() {
   const isExpoGo = Constants.executionEnvironment === 'storeClient';
-  const { adsEnabledInSession } = useApp();
+  const { adRemovalState } = useApp();
   const themeColors = useThemeColors();
   const unitId = getBannerAdUnitId();
-  const shouldRender = canRequestBannerAds({ adsEnabled: adsEnabledInSession });
+  const shouldRender =
+    !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
+    canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement });
   const [hasLoadFailed, setHasLoadFailed] = useState(false);
-  const [googleMobileAds, setGoogleMobileAds] =
-    useState<typeof import('react-native-google-mobile-ads') | null>(null);
+  const [googleMobileAds, setGoogleMobileAds] = useState<
+    typeof import('react-native-google-mobile-ads') | null
+  >(null);
   const BannerAd = googleMobileAds?.BannerAd;
   const bannerSize = googleMobileAds?.BannerAdSize?.BANNER;
 
