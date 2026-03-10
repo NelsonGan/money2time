@@ -1,17 +1,16 @@
 interface AdsVisibilityOptions {
-  adsEnabled?: boolean;
   hasAdFreeEntitlement?: boolean;
 }
 
-export function areAdsEnabled(options: AdsVisibilityOptions = {}) {
-  return options.adsEnabled !== false && !options.hasAdFreeEntitlement;
+function areAdsEnabled(options: AdsVisibilityOptions = {}) {
+  return !options.hasAdFreeEntitlement;
 }
 
 export function getBannerAdUnitId() {
   return null;
 }
 
-export function isBannerAdUnitAvailable() {
+function isBannerAdUnitAvailable() {
   return false;
 }
 

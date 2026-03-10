@@ -44,6 +44,7 @@ export interface MonthlyWageSettings {
 
 export interface UserSettings {
   id: string;
+  appUserId: string;
   locale: string;
   currencyCode: string;
   currencySymbol: string;

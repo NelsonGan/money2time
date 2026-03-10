@@ -2,7 +2,6 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 interface AdsVisibilityOptions {
-  adsEnabled?: boolean;
   hasAdFreeEntitlement?: boolean;
 }
 
@@ -49,8 +48,8 @@ function getConfiguredBannerAdUnitId() {
   return null;
 }
 
-export function areAdsEnabled(options: AdsVisibilityOptions = {}) {
-  return options.adsEnabled !== false && !options.hasAdFreeEntitlement;
+function areAdsEnabled(options: AdsVisibilityOptions = {}) {
+  return !options.hasAdFreeEntitlement;
 }
 
 export function getBannerAdUnitId() {
@@ -65,7 +64,7 @@ export function getBannerAdUnitId() {
   return getConfiguredBannerAdUnitId();
 }
 
-export function isBannerAdUnitAvailable() {
+function isBannerAdUnitAvailable() {
   return getBannerAdUnitId() !== null;
 }
 

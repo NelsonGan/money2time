@@ -8,7 +8,7 @@ import {
 } from '~/constants/appDefaults';
 import { getDeviceLocale } from '~/lib/i18n';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
-import { newId, nowIso } from '~/utils/id';
+import { newAppUserId, newId, nowIso } from '~/utils/id';
 
 import { runMigrations } from './migrations';
 import { categoriesTable, settingsTable } from './schema';
@@ -35,6 +35,7 @@ function ensureCoreData() {
     db.insert(settingsTable)
       .values({
         id: 'primary',
+        appUserId: newAppUserId(),
         locale: getDeviceLocale(),
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
