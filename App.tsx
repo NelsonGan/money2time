@@ -359,13 +359,6 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
     if (step.targetId === 'nav.add') {
       setTransactionsTutorialResetToken((previous) => previous + 1);
     }
-    if (
-      step.targetId === 'settings.start_tutorial' ||
-      step.targetId === 'settings.recurring' ||
-      step.targetId === 'settings.management'
-    ) {
-      setSettingsScrollTopToken((previous) => previous + 1);
-    }
   }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
 
   useEffect(() => {
