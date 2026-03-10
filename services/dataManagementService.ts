@@ -3,6 +3,8 @@ import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
+import { getErrorMessage } from '~/utils/errorHandling';
+import { nowIso } from '~/utils/id';
 
 const BACKUP_VERSION = 1;
 
@@ -24,10 +26,11 @@ interface BackupData {
 
 export async function exportDatabase(): Promise<void> {
   const sqlite = getSQLite();
+  const now = nowIso();
 
   const backup: BackupData = {
     version: BACKUP_VERSION,
-    exportedAt: new Date().toISOString(),
+    exportedAt: now,
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<
@@ -49,8 +52,7 @@ export async function exportDatabase(): Promise<void> {
   };
 
   const json = JSON.stringify(backup, null, 2);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const fileName = `money2time-backup-${timestamp}.json`;
+  const fileName = `money2time-backup-${now.replace(/[:.]/g, '-').slice(0, 19)}.json`;
   const file = new File(Paths.document, fileName);
   file.write(json);
 
@@ -60,6 +62,8 @@ export async function exportDatabase(): Promise<void> {
       dialogTitle: 'Export Money2Time Backup',
       UTI: 'public.json',
     });
+  } else {
+    file.delete();
   }
 }
 
@@ -67,6 +71,21 @@ export interface ImportResult {
   canceled: boolean;
   success?: boolean;
   error?: string;
+}
+
+function insertRows(
+  sqlite: ReturnType<typeof getSQLite>,
+  tableName: string,
+  rows: Record<string, unknown>[] | undefined,
+) {
+  if (!rows || rows.length === 0) return;
+  const keys = Object.keys(rows[0]);
+  if (keys.length === 0) return;
+  const placeholders = keys.map(() => '?').join(', ');
+  const sql = `INSERT OR REPLACE INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
+  for (const row of rows) {
+    sqlite.runSync(sql, keys.map((k) => row[k] as string | number | null));
+  }
 }
 
 export async function pickAndImportDatabase(): Promise<ImportResult> {
@@ -84,8 +103,7 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
 
   let json: string;
   try {
-    const response = await fetch(asset.uri);
-    json = await response.text();
+    json = new File(asset.uri).text();
   } catch {
     return { canceled: false, success: false, error: 'Failed to read file' };
   }
@@ -122,27 +140,13 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
     sqlite.execSync('DELETE FROM settings');
     sqlite.execSync('DELETE FROM monthly_wage_settings');
 
-    const insertRows = (tableName: string, rows: Record<string, unknown>[] | undefined) => {
-      if (!rows || rows.length === 0) return;
-      rows.forEach((row) => {
-        const keys = Object.keys(row);
-        if (keys.length === 0) return;
-        const placeholders = keys.map(() => '?').join(', ');
-        const values = keys.map((k) => row[k] as string | number | null);
-        sqlite.runSync(
-          `INSERT OR REPLACE INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`,
-          values,
-        );
-      });
-    };
-
-    insertRows('account_groups', backup.tables.account_groups);
-    insertRows('accounts', backup.tables.accounts);
-    insertRows('categories', backup.tables.categories);
-    insertRows('transactions', backup.tables.transactions);
-    insertRows('recurring_rules', backup.tables.recurring_rules);
-    insertRows('settings', backup.tables.settings);
-    insertRows('monthly_wage_settings', backup.tables.monthly_wage_settings);
+    insertRows(sqlite, 'account_groups', backup.tables.account_groups);
+    insertRows(sqlite, 'accounts', backup.tables.accounts);
+    insertRows(sqlite, 'categories', backup.tables.categories);
+    insertRows(sqlite, 'transactions', backup.tables.transactions);
+    insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules);
+    insertRows(sqlite, 'settings', backup.tables.settings);
+    insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
     sqlite.execSync('COMMIT');
     return { canceled: false, success: true };
@@ -155,7 +159,7 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
     return {
       canceled: false,
       success: false,
-      error: e instanceof Error ? e.message : 'Unknown error during import',
+      error: getErrorMessage(e, 'Unknown error during import'),
     };
   }
 }
