@@ -54,7 +54,7 @@ export async function exportDatabase(): Promise<void> {
   const fileUri = `${FileSystem.documentDirectory ?? ''}${fileName}`;
 
   await FileSystem.writeAsStringAsync(fileUri, json, {
-    encoding: FileSystem.EncodingType.UTF8,
+    encoding: 'utf8',
   });
 
   if (await Sharing.isAvailableAsync()) {
