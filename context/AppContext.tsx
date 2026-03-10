@@ -35,6 +35,17 @@ import {
   type MMImportSummary,
 } from '~/services/mmbakImportService';
 import {
+  fetchRevenueCatPaywallState,
+  getInitialRevenueCatPaywallState,
+  purchaseRevenueCatTip as purchaseRevenueCatTipRequest,
+  restoreRevenueCatPurchases as restoreRevenueCatPurchasesRequest,
+  setRevenueCatAppUserId,
+  type RevenueCatActionResult,
+  type RevenueCatCustomerState,
+  type RevenueCatPaywallState,
+  type RevenueCatTipOption,
+} from '~/services/revenueCat';
+import {
   type Account,
   type AccountBalance,
   type AccountGroup,
@@ -58,7 +69,7 @@ import {
   monthKeyFromDateLocal,
   normalizeMonthKey,
 } from '~/utils/formatters';
-import { newId, nowIso } from '~/utils/id';
+import { newAppUserId, newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 interface AppContextValue extends AppState {
@@ -115,8 +126,11 @@ interface AppContextValue extends AppState {
       >
     >,
   ) => void;
-  adsEnabledInSession: boolean;
-  setAdsEnabledInSession: (value: boolean) => void;
+  adRemovalState: RevenueCatPaywallState;
+  refreshAdRemovalState: () => Promise<void>;
+  purchaseAdRemovalTip: (option: RevenueCatTipOption) => Promise<RevenueCatActionResult>;
+  resetAdRemovalTestCustomer: () => Promise<RevenueCatActionResult>;
+  restoreAdRemovalPurchases: () => Promise<RevenueCatActionResult>;
   updateWageConfig: (config: WageConfig) => void;
   updateWageConfigForMonth: (month: string, config: WageConfig) => void;
   deleteWageConfigForMonth: (month: string) => void;
@@ -371,7 +385,9 @@ function applyTransactionFilters(
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [adsEnabledInSession, setAdsEnabledInSession] = useState(true);
+  const [adRemovalState, setAdRemovalState] = useState<RevenueCatPaywallState>(
+    getInitialRevenueCatPaywallState,
+  );
   const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
   const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
@@ -508,6 +524,95 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [refreshAll],
   );
+
+  const refreshAdRemovalState = useCallback(async () => {
+    const initialState = getInitialRevenueCatPaywallState();
+
+    setAdRemovalState((previous) => ({
+      ...previous,
+      canMakePurchases: initialState.canMakePurchases,
+      catalogStatus: initialState.catalogStatus,
+      entitlementIdentifier: initialState.entitlementIdentifier,
+      isConfigured: initialState.isConfigured,
+      isLoading: initialState.isLoading,
+      isTestStore: initialState.isTestStore,
+      offeringIdentifier: initialState.offeringIdentifier,
+      reason: initialState.reason,
+    }));
+
+    try {
+      const nextState = await fetchRevenueCatPaywallState();
+      setAdRemovalState(nextState);
+    } catch {
+      setAdRemovalState((previous) => ({ ...previous, isLoading: false }));
+    }
+  }, []);
+
+  const purchaseAdRemovalTip = useCallback(
+    async (option: RevenueCatTipOption) => {
+      const result = await purchaseRevenueCatTipRequest(option.productIdentifier);
+
+      if (result.customerState) {
+        setAdRemovalState((previous) => ({
+          ...previous,
+          ...result.customerState,
+          isLoading: false,
+        }));
+      }
+
+      if (result.status === 'success' || result.status === 'not_found') {
+        void refreshAdRemovalState();
+      }
+
+      return result;
+    },
+    [refreshAdRemovalState],
+  );
+
+  const restoreAdRemovalPurchases = useCallback(async () => {
+    const result = await restoreRevenueCatPurchasesRequest();
+
+    if (result.customerState) {
+      setAdRemovalState((previous) => ({
+        ...previous,
+        ...result.customerState,
+        isLoading: false,
+      }));
+    }
+
+    if (result.status === 'success') {
+      void refreshAdRemovalState();
+    }
+
+    return result;
+  }, [refreshAdRemovalState]);
+
+  const resetAdRemovalTestCustomer = useCallback(async () => {
+    const nextAppUserId = newAppUserId();
+    const nextCustomerState: RevenueCatCustomerState = {
+      activatedAt: null,
+      activeProductIdentifier: null,
+      expirationDate: null,
+      hasAdFreeEntitlement: false,
+      latestPurchaseDate: null,
+    };
+
+    runMutation(() => {
+      settingsRepository.updateAppUserId(nextAppUserId);
+    });
+
+    setAdRemovalState((previous) => ({
+      ...previous,
+      ...nextCustomerState,
+      isLoading: false,
+    }));
+
+    return {
+      customerState: nextCustomerState,
+      message: null,
+      status: 'success',
+    } satisfies RevenueCatActionResult;
+  }, [runMutation]);
 
   const createAccount = useCallback(
     (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
@@ -856,14 +961,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'locale'
           | 'currencyCode'
           | 'currencySymbol'
-        | 'hourRounding'
-        | 'displayMode'
-        | 'themeMode'
-        | 'themeColor'
-        | 'onboardingCompleted'
-        | 'userMode'
-      >
-    >,
+          | 'hourRounding'
+          | 'displayMode'
+          | 'themeMode'
+          | 'themeColor'
+          | 'onboardingCompleted'
+          | 'userMode'
+        >
+      >,
     ) => {
       const nextUpdates = { ...updates };
       if (nextUpdates.displayMode === 'time' && !canUseTimeDisplayMode) {
@@ -880,6 +985,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!settings?.locale) return;
     setAppLocale(settings.locale);
   }, [settings?.locale]);
+
+  useEffect(() => {
+    setRevenueCatAppUserId(settings?.appUserId ?? null);
+  }, [settings?.appUserId]);
+
+  useEffect(() => {
+    if (!settings?.appUserId) return;
+    void refreshAdRemovalState();
+  }, [refreshAdRemovalState, settings?.appUserId]);
 
   const updateWageConfig = useCallback(
     (config: WageConfig) => {
@@ -1284,8 +1398,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionsBulk,
             deleteTransactionsBulk,
             updateSettings,
-            adsEnabledInSession,
-            setAdsEnabledInSession,
+            adRemovalState,
+            refreshAdRemovalState,
+            purchaseAdRemovalTip,
+            resetAdRemovalTestCustomer,
+            restoreAdRemovalPurchases,
             updateWageConfig,
             updateWageConfigForMonth,
             deleteWageConfigForMonth,
@@ -1353,8 +1470,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionsBulk,
       deleteTransactionsBulk,
       updateSettings,
-      adsEnabledInSession,
-      setAdsEnabledInSession,
+      adRemovalState,
+      refreshAdRemovalState,
+      purchaseAdRemovalTip,
+      resetAdRemovalTestCustomer,
+      restoreAdRemovalPurchases,
       updateWageConfig,
       updateWageConfigForMonth,
       deleteWageConfigForMonth,

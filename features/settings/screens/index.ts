@@ -1,5 +1,4 @@
 export { AccountsScreen } from './AccountsScreen';
-export { AdvertisementSettingsScreen } from './AdvertisementSettingsScreen';
 export { CategoriesScreen } from './CategoriesScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { HourlyValueScreen } from './HourlyValueScreen';

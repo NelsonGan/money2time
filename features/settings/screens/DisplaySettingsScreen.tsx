@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Check, Copy } from 'lucide-react-native';
+import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -17,6 +18,7 @@ import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor, ThemeMode, UserSettings } from '~/types';
@@ -28,6 +30,7 @@ interface DisplaySettingsScreenProps {
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const { resetAllData, resetTransactionsOnly, settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
+  const themeColors = useThemeColors();
 
   const languageOptions = useMemo(
     () =>
@@ -104,8 +107,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const [customCurrency, setCustomCurrency] = useState(
     currentCurrencySelection === '__custom__' ? settings.currencySymbol : '',
   );
+  const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<ThemeMode>(settings.themeMode);
   const [selectedThemeColor, setSelectedThemeColor] = useState<ThemeColor>(settings.themeColor);
+  const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
 
   useEffect(() => {
     setSelectedLocale(currentLocaleSelection);
@@ -123,6 +128,18 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   useEffect(() => {
     setSelectedThemeColor(settings.themeColor);
   }, [settings.themeColor]);
+
+  useEffect(() => {
+    if (!didCopyRevenueCatUserId) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setDidCopyRevenueCatUserId(false);
+    }, 1600);
+
+    return () => clearTimeout(timeout);
+  }, [didCopyRevenueCatUserId]);
 
   const isCustomCurrencyMode = selectedCurrency === '__custom__';
   const trimmedCustomCurrency = customCurrency.trim();
@@ -154,6 +171,16 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const handleCancel = () => {
     resetDraft();
     onBack();
+  };
+
+  const handleCopyRevenueCatUserId = () => {
+    if (!appUserId) {
+      return;
+    }
+
+    Clipboard.setString(appUserId);
+    setDidCopyRevenueCatUserId(true);
+    void triggerHaptic('selection');
   };
 
   const handleSave = () => {
@@ -218,6 +245,36 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
         <View>
           <Card>
             <CardContent className="py-5 gap-3.5">
+              <View className="gap-1.5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('settings.user_id')}
+                </Text>
+                <View style={styles.userIdField}>
+                  <Text
+                    variant="caption"
+                    className="flex-1"
+                    selectable
+                    numberOfLines={1}
+                    ellipsizeMode="middle"
+                  >
+                    {appUserId ?? I18n.t('settings.user_id_unavailable')}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t(didCopyRevenueCatUserId ? 'common.copied' : 'common.copy')}
+                    disabled={!appUserId}
+                    onPress={handleCopyRevenueCatUserId}
+                    style={styles.copyIconButton}
+                  >
+                    {didCopyRevenueCatUserId ? (
+                      <Check size={16} color={themeColors.success} strokeWidth={2.25} />
+                    ) : (
+                      <Copy size={16} color={themeColors.textMuted} strokeWidth={2.1} />
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+
               <SelectField
                 label={I18n.t('settings.language')}
                 value={selectedLocale}
@@ -337,6 +394,24 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: 'rgba(17,24,39,0.18)',
+  },
+  copyIconButton: {
+    alignItems: 'center',
+    borderRadius: 999,
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+  },
+  userIdField: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(148, 163, 184, 0.10)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.28)',
+    flexDirection: 'row',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm - 1,
   },
   dangerSection: {
     marginTop: spacing.xl + spacing.xs,

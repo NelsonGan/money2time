@@ -49,6 +49,14 @@ class SettingsRepository {
       .run();
   }
 
+  updateAppUserId(appUserId: string) {
+    const db = getDb();
+    db.update(settingsTable)
+      .set({ appUserId, updatedAt: nowIso() })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
   getInsightsPreferencesJson(): string | null {
     const db = getDb();
     const row = db
