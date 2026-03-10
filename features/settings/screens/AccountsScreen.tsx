@@ -1025,7 +1025,6 @@ export function AccountsScreen({
     accountGroups,
     accounts,
     accountBalances,
-    transactions,
     settings,
     currentMonthWage,
     createAccount,

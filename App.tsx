@@ -56,7 +56,11 @@ import {
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal, monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+import {
+  dayKeyFromIsoLocal,
+  monthKeyFromDateLocal,
+  monthKeyFromIsoLocal,
+} from '~/utils/formatters';
 
 type MainTab = TabName;
 
@@ -173,7 +177,7 @@ interface MainShellScreenProps {
 
 function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
   const navigation = useNavigation<RootMainNavigationProp>();
-  const { adsEnabledInSession, isSimpleMode } = useApp();
+  const { adRemovalState, isSimpleMode } = useApp();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -405,7 +409,8 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
   const shouldShowBannerStrip =
     !shouldHideBottomNav &&
     !isGuidedTutorialActive &&
-    canRequestBannerAds({ adsEnabled: adsEnabledInSession });
+    !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
+    canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement });
 
   return (
     <View className="flex-1 bg-background">
@@ -729,7 +734,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { adsEnabledInSession, isLoading, settings, updateSettings } = useApp();
+  const { adRemovalState, isLoading, settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
@@ -753,12 +758,24 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (!settings.onboardingCompleted || !canRequestBannerAds({ adsEnabled: adsEnabledInSession })) {
+    if (adRemovalState.isConfigured && adRemovalState.isLoading) {
+      return;
+    }
+
+    if (
+      !settings.onboardingCompleted ||
+      !canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement })
+    ) {
       return;
     }
 
     void initializeGoogleMobileAds();
-  }, [adsEnabledInSession, settings.onboardingCompleted]);
+  }, [
+    adRemovalState.hasAdFreeEntitlement,
+    adRemovalState.isConfigured,
+    adRemovalState.isLoading,
+    settings.onboardingCompleted,
+  ]);
 
   if (isLoading) {
     return (
