@@ -356,6 +356,8 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
     if (!isGuidedTutorialActive) return;
     const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
     if (!step) return;
+    const previousStep =
+      guidedTutorialStepIndex > 0 ? GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex - 1] : null;
     if (step.targetId === 'nav.add') {
       setTransactionsTutorialResetToken((previous) => previous + 1);
     }
@@ -364,7 +366,10 @@ function MainShellScreen({ tutorialStartToken = 0 }: MainShellScreenProps) {
       step.targetId === 'settings.recurring' ||
       step.targetId === 'settings.management'
     ) {
-      setSettingsScrollTopToken((previous) => previous + 1);
+      const isEnteringSettingsTutorial = previousStep?.tab !== 'settings';
+      if (isEnteringSettingsTutorial) {
+        setSettingsScrollTopToken((previous) => previous + 1);
+      }
     }
   }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
 
