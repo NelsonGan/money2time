@@ -1,5 +1,6 @@
 import {
   Clock3,
+  DatabaseBackup,
   FolderTree,
   Landmark,
   Palette,
@@ -40,6 +41,7 @@ interface SettingsScreenProps {
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
+  onOpenDataManagement: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -52,6 +54,7 @@ export function SettingsScreen({
   onOpenAccounts,
   onOpenCategories,
   onOpenRecurring,
+  onOpenDataManagement,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
@@ -273,6 +276,12 @@ export function SettingsScreen({
                   onPress={onOpenRecurring}
                 />
               </View>
+              <SettingsRowItem
+                icon={<DatabaseBackup size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.data_management')}
+                subtitle={I18n.t('settings.data_management_subtitle')}
+                onPress={onOpenDataManagement}
+              />
               <View
                 ref={startTutorialRowRef}
                 onLayout={() => {
