@@ -88,6 +88,10 @@ export function SettingsScreen({
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
     const frame = requestAnimationFrame(() => {
+      // Keep the local offset tracker in sync with imperative resets.
+      // On first tutorial run this avoids computing spotlight scroll deltas
+      // from stale offsets and causing visible jumpiness.
+      scrollOffsetRef.current = 0;
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     });
     return () => cancelAnimationFrame(frame);
