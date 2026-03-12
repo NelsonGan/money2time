@@ -39,11 +39,10 @@ import {
   getInitialRevenueCatPaywallState,
   purchaseRevenueCatTip as purchaseRevenueCatTipRequest,
   restoreRevenueCatPurchases as restoreRevenueCatPurchasesRequest,
-  setRevenueCatAppUserId,
   type RevenueCatActionResult,
-  type RevenueCatCustomerState,
   type RevenueCatPaywallState,
   type RevenueCatTipOption,
+  setRevenueCatAppUserId,
 } from '~/services/revenueCat';
 import {
   type Account,
@@ -69,7 +68,7 @@ import {
   monthKeyFromDateLocal,
   normalizeMonthKey,
 } from '~/utils/formatters';
-import { newAppUserId, newId, nowIso } from '~/utils/id';
+import { newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 interface AppContextValue extends AppState {
@@ -106,7 +105,7 @@ interface AppContextValue extends AppState {
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
-    updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>,
+    updates: { id: string; input: Partial<CreateTransactionInput> }[],
   ) => void;
   deleteTransactionsBulk: (ids: string[]) => void;
 
@@ -129,7 +128,6 @@ interface AppContextValue extends AppState {
   adRemovalState: RevenueCatPaywallState;
   refreshAdRemovalState: () => Promise<void>;
   purchaseAdRemovalTip: (option: RevenueCatTipOption) => Promise<RevenueCatActionResult>;
-  resetAdRemovalTestCustomer: () => Promise<RevenueCatActionResult>;
   restoreAdRemovalPurchases: () => Promise<RevenueCatActionResult>;
   updateWageConfig: (config: WageConfig) => void;
   updateWageConfigForMonth: (month: string, config: WageConfig) => void;
@@ -587,33 +585,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, [refreshAdRemovalState]);
 
-  const resetAdRemovalTestCustomer = useCallback(async () => {
-    const nextAppUserId = newAppUserId();
-    const nextCustomerState: RevenueCatCustomerState = {
-      activatedAt: null,
-      activeProductIdentifier: null,
-      expirationDate: null,
-      hasAdFreeEntitlement: false,
-      latestPurchaseDate: null,
-    };
-
-    runMutation(() => {
-      settingsRepository.updateAppUserId(nextAppUserId);
-    });
-
-    setAdRemovalState((previous) => ({
-      ...previous,
-      ...nextCustomerState,
-      isLoading: false,
-    }));
-
-    return {
-      customerState: nextCustomerState,
-      message: null,
-      status: 'success',
-    } satisfies RevenueCatActionResult;
-  }, [runMutation]);
-
   const createAccount = useCallback(
     (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
       return runMutation(() => accountsRepository.create(input));
@@ -852,9 +823,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateTransactionsBulk = useCallback(
-    (updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>) => {
+    (updates: { id: string; input: Partial<CreateTransactionInput> }[]) => {
       if (updates.length === 0) return;
-      const normalizedUpdates: Array<{ id: string; input: Partial<CreateTransactionInput> }> = [];
+      const normalizedUpdates: { id: string; input: Partial<CreateTransactionInput> }[] = [];
       const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
       const inputById = new Map<string, Partial<CreateTransactionInput>>();
       updates.forEach(({ id, input }) => {
@@ -1401,7 +1372,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             adRemovalState,
             refreshAdRemovalState,
             purchaseAdRemovalTip,
-            resetAdRemovalTestCustomer,
             restoreAdRemovalPurchases,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -1473,7 +1443,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       adRemovalState,
       refreshAdRemovalState,
       purchaseAdRemovalTip,
-      resetAdRemovalTestCustomer,
       restoreAdRemovalPurchases,
       updateWageConfig,
       updateWageConfigForMonth,

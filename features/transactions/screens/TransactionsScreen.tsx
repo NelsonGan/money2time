@@ -1,5 +1,5 @@
 import { Pencil, Search, Trash2, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -331,7 +331,7 @@ export function TransactionsScreen({
     setShowBulkUpdate(false);
   }, [isSelectionMode]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onSelectionModeChange?.(isSelectionMode);
     return () => {
       onSelectionModeChange?.(false);
