@@ -162,6 +162,7 @@ export function AccountPanel(props: AccountPanelProps) {
 
   // If grouping is disabled or only one group, show accounts directly.
   const showGroupTiles = !disableGrouping && grouped.length > 1;
+  const groupRows = useMemo(() => chunk(grouped, COLS), [grouped]);
 
   if (!showGroupTiles) {
     const allAccounts = grouped.length === 1 ? grouped[0].accounts : accounts;
@@ -197,7 +198,7 @@ export function AccountPanel(props: AccountPanelProps) {
                       style={isDisabled ? styles.disabledAccount : undefined}
                     >
                       <Text
-                        variant="label"
+                        variant="caption"
                         numberOfLines={2}
                         className={cn(
                           'text-center',
@@ -226,8 +227,6 @@ export function AccountPanel(props: AccountPanelProps) {
   }
 
   // Multiple groups: show group tiles with expand/collapse
-  const groupRows = useMemo(() => chunk(grouped, COLS), [grouped]);
-
   return (
     <ScrollView
       className="flex-1 px-4 pt-2"
@@ -320,7 +319,7 @@ export function AccountPanel(props: AccountPanelProps) {
                           style={isDisabled ? styles.disabledAccount : undefined}
                         >
                           <Text
-                            variant="label"
+                            variant="caption"
                             numberOfLines={2}
                             className={cn(
                               'text-center',

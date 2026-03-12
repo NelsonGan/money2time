@@ -84,7 +84,10 @@ function insertRows(
   const placeholders = keys.map(() => '?').join(', ');
   const sql = `INSERT OR REPLACE INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
   for (const row of rows) {
-    sqlite.runSync(sql, keys.map((k) => row[k] as string | number | null));
+    sqlite.runSync(
+      sql,
+      keys.map((k) => row[k] as string | number | null),
+    );
   }
 }
 
@@ -103,7 +106,7 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
 
   let json: string;
   try {
-    json = new File(asset.uri).text();
+    json = await new File(asset.uri).text();
   } catch {
     return { canceled: false, success: false, error: 'Failed to read file' };
   }

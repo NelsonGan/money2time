@@ -1,9 +1,10 @@
 import { and, eq, inArray, isNull, or, sql, sum } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { Account, AccountBalance } from '~/types';
 import { newId, nowIso } from '~/utils/id';
+
 import { toAccount } from './mappers';
 
 interface CreateAccountInput {
@@ -77,6 +78,28 @@ class AccountsRepository {
       .set({ ...input, updatedAt: nowIso() })
       .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
       .run();
+  }
+
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      ids.forEach((id, index) => {
+        db.update(accountsTable)
+          .set({ sortOrder: index, updatedAt: now })
+          .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
+          .run();
+      });
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
   }
 
   softDelete(id: string) {

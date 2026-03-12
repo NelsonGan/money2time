@@ -100,7 +100,7 @@ const NumKey = React.memo(function NumKey({
   const pressProgress = useSharedValue(0);
   const tapFlash = useSharedValue(0);
   const pressAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressProgress.value * 0.08 }],
+    transform: [{ scale: 1 - pressProgress.value * 0.06 }],
   }));
   const tapFlashStyle = useAnimatedStyle(() => ({
     opacity: tapFlash.value,
@@ -112,7 +112,7 @@ const NumKey = React.memo(function NumKey({
       easing: Easing.out(Easing.quad),
     });
     tapFlash.value = withSequence(
-      withTiming(0.22, {
+      withTiming(0.18, {
         duration: 45,
         easing: Easing.out(Easing.quad),
       }),
@@ -140,8 +140,8 @@ const NumKey = React.memo(function NumKey({
           onPressOut={handlePressOut}
           unstable_pressDelay={0}
           android_disableSound
-          android_ripple={{ color: 'rgba(34, 138, 111, 0.2)', borderless: false }}
-          className="relative h-14 items-center justify-center bg-card overflow-hidden"
+          android_ripple={{ color: 'rgba(34, 138, 111, 0.15)', borderless: false }}
+          className="relative h-[52px] items-center justify-center bg-card/80 overflow-hidden rounded-xl mx-0.5 my-0.5"
         >
           {children ?? (
             <Text
@@ -153,7 +153,7 @@ const NumKey = React.memo(function NumKey({
           )}
           <Animated.View
             pointerEvents="none"
-            className="absolute inset-0 bg-foreground/10"
+            className="absolute inset-0 bg-primary/8 rounded-xl"
             style={tapFlashStyle}
           />
         </Pressable>
@@ -169,11 +169,11 @@ const NUM_ROWS = [
   ['.', '0', 'backspace'],
 ] as const;
 const INPUT_PROGRESS_SPRING = { damping: 18, stiffness: 180 } as const;
-const NUMPAD_ROW_STYLE = { flexDirection: 'row', gap: 1 } as const;
-const HERO_MAX_FONT_SIZE = 44;
-const HERO_MIN_FONT_SIZE = 24;
-const HERO_BASE_CHAR_COUNT = 8;
-const HERO_FONT_SHRINK_PER_CHAR = 2.5;
+const NUMPAD_ROW_STYLE = { flexDirection: 'row', gap: 0 } as const;
+const HERO_MAX_FONT_SIZE = 48;
+const HERO_MIN_FONT_SIZE = 26;
+const HERO_BASE_CHAR_COUNT = 7;
+const HERO_FONT_SHRINK_PER_CHAR = 2.8;
 const HERO_LINE_HEIGHT_RATIO = 1.14;
 const HERO_MAX_INPUT_VALUE = 1_000_000_000_000;
 const HERO_ROLLING_NUMBER_SPIN_CONFIG = {
@@ -189,18 +189,20 @@ const HERO_ROLLING_NUMBER_CONTAINER_STYLE = {
 
 const styles = StyleSheet.create({
   numKeyLabel: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
   },
   numKeyLabelDimmed: {
     opacity: 0.35,
   },
   currencyText: {
-    fontWeight: '800',
+    fontWeight: '900',
+    letterSpacing: -1,
   },
   numPadContainer: {
-    gap: 1,
-    borderTopWidth: 0.5,
+    gap: 0,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
   },
 });
 
@@ -248,15 +250,16 @@ export function HeroAmountConverter({
     [amountFontSize],
   );
   const currencyFontSize = useMemo(
-    () => Math.max(HERO_MIN_FONT_SIZE - 2, Math.round(amountFontSize * 0.82)),
+    () => Math.max(HERO_MIN_FONT_SIZE - 2, Math.round(amountFontSize * 0.78)),
     [amountFontSize],
   );
   const rollingTextStyle = useMemo(
     () => ({
       fontSize: amountFontSize,
       lineHeight: amountLineHeight,
-      fontWeight: '800' as const,
+      fontWeight: '900' as const,
       color: themeColors.text,
+      letterSpacing: -1.5,
     }),
     [amountFontSize, amountLineHeight, themeColors.text],
   );
@@ -272,10 +275,7 @@ export function HeroAmountConverter({
     [amountLineHeight, currencyFontSize],
   );
   const numPadContainerStyle = useMemo(
-    () => [
-      styles.numPadContainer,
-      { backgroundColor: themeColors.border, borderTopColor: themeColors.border },
-    ],
+    () => [styles.numPadContainer, { backgroundColor: `${themeColors.border}20` }],
     [themeColors.border],
   );
   const hoursLabel = useMemo(() => formatHours(hours), [hours]);
@@ -297,8 +297,8 @@ export function HeroAmountConverter({
   }, [onChangeAmount]);
 
   const cardStyle = useAnimatedStyle(() => ({
-    shadowOpacity: 0.08 + inputProgress.value * 0.14,
-    shadowRadius: 8 + inputProgress.value * 10,
+    shadowOpacity: 0.06 + inputProgress.value * 0.12,
+    shadowRadius: 12 + inputProgress.value * 16,
   }));
 
   const handleKey = useCallback(
@@ -353,86 +353,116 @@ export function HeroAmountConverter({
   const hasDot = amount.includes('.');
 
   return (
-    <Animated.View style={cardStyle} className="mx-5 mt-4">
-      <View className="relative overflow-hidden rounded-[28px] border border-border/35 px-5 pt-5 pb-4 bg-card">
-        <View className="absolute -top-10 -right-8 h-28 w-28 rounded-full bg-primary/12" />
+    <Animated.View style={cardStyle} className="mx-5 mt-3">
+      <View className="relative overflow-hidden rounded-[32px] border border-border/25 bg-card shadow-soft-lg">
+        {/* Decorative background shapes */}
+        <View
+          className="absolute -top-14 -right-14 h-36 w-36 rounded-full"
+          style={{ backgroundColor: themeColors.primary, opacity: 0.04 }}
+        />
+        <View
+          className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full"
+          style={{ backgroundColor: themeColors.accent, opacity: 0.03 }}
+        />
 
-        {/* Header */}
-        <View className="mb-3 flex-row items-start justify-between gap-3">
-          <View className="min-w-0 flex-1">
-            <Text variant="bodyStrong">{I18n.t('home.converter.title')}</Text>
-            <Text variant="label" tone="muted" className="mt-0.5">
-              {I18n.t('home.converter.description')}
-            </Text>
+        {/* Content area */}
+        <View className="px-5 pt-5 pb-4">
+          {/* Header */}
+          <View className="mb-4 flex-row items-start justify-between gap-3">
+            <View className="min-w-0 flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('home.converter.title')}
+              </Text>
+              <Text variant="caption" tone="muted" className="mt-0.5 opacity-60">
+                {I18n.t('home.converter.description')}
+              </Text>
+            </View>
+            <Button
+              size="sm"
+              variant="ghost"
+              bouncy={false}
+              haptic="none"
+              onPress={handleClearAmount}
+            >
+              <Text variant="caption" tone="muted">
+                {I18n.t('home.converter.clear')}
+              </Text>
+            </Button>
           </View>
-          <Button size="sm" variant="outline" bouncy={false} haptic="none" onPress={handleClearAmount}>
-            <Text variant="caption">{I18n.t('home.converter.clear')}</Text>
-          </Button>
-        </View>
 
-        {/* Amount display */}
-        <View className="min-h-[56px]">
-          <View className="min-w-0 flex-row items-end overflow-hidden">
-            <Text style={currencyTextStyle} className="shrink-0 text-foreground">
-              {currencySymbol}
-            </Text>
-            <View className="ml-1 min-w-0 flex-1 overflow-hidden">
-              <AnimatedRollingNumber
-                value={amountNumericValue}
-                formattedText={amountNumberLabel}
-                containerStyle={HERO_ROLLING_NUMBER_CONTAINER_STYLE}
-                textStyle={rollingTextStyle}
-                numberStyle={rollingGlyphStyle}
-                commaStyle={rollingGlyphStyle}
-                dotStyle={rollingGlyphStyle}
-                signStyle={rollingGlyphStyle}
-                compactNotationStyle={rollingGlyphStyle}
-                spinningAnimationConfig={HERO_ROLLING_NUMBER_SPIN_CONFIG}
-              />
+          {/* Amount display — dramatic large numbers */}
+          <View className="min-h-[60px]">
+            <View className="min-w-0 flex-row items-end overflow-hidden">
+              <Text style={currencyTextStyle} className="shrink-0 text-muted-foreground">
+                {currencySymbol}
+              </Text>
+              <View className="ml-1.5 min-w-0 flex-1 overflow-hidden">
+                <AnimatedRollingNumber
+                  value={amountNumericValue}
+                  formattedText={amountNumberLabel}
+                  containerStyle={HERO_ROLLING_NUMBER_CONTAINER_STYLE}
+                  textStyle={rollingTextStyle}
+                  numberStyle={rollingGlyphStyle}
+                  commaStyle={rollingGlyphStyle}
+                  dotStyle={rollingGlyphStyle}
+                  signStyle={rollingGlyphStyle}
+                  compactNotationStyle={rollingGlyphStyle}
+                  spinningAnimationConfig={HERO_ROLLING_NUMBER_SPIN_CONFIG}
+                />
+              </View>
             </View>
           </View>
+
+          {/* Hours result — glowing accent panel */}
+          <View
+            className="mt-4 mb-2 rounded-[22px] px-5 py-4 overflow-hidden"
+            style={{ backgroundColor: `${themeColors.primary}10` }}
+          >
+            {/* Inner decorative accent */}
+            <View
+              className="absolute top-0 left-0 w-1 h-full rounded-full"
+              style={{ backgroundColor: themeColors.primary, opacity: 0.4 }}
+            />
+
+            {hasRate ? (
+              <>
+                <Animated.View
+                  key={hoursLabel}
+                  entering={FadeInDown.duration(180)}
+                  exiting={FadeOutUp.duration(120)}
+                >
+                  <Text variant="heading" className="text-primary tracking-tight">
+                    {I18n.t('home.converter.of_work', { value: hoursLabel })}
+                  </Text>
+                </Animated.View>
+                <Animated.View
+                  key={exactHoursLabel}
+                  entering={FadeInDown.duration(180)}
+                  exiting={FadeOutUp.duration(120)}
+                >
+                  <Text variant="caption" tone="muted" className="mt-1.5">
+                    {I18n.t('home.converter.workday_equivalent', {
+                      exact: exactHoursLabel,
+                      duration: workDurationLabel,
+                    })}
+                  </Text>
+                </Animated.View>
+              </>
+            ) : (
+              <>
+                <Text variant="bodyStrong" tone="muted">
+                  {I18n.t('home.converter.no_rate_title')}
+                </Text>
+                <Text variant="caption" tone="muted" className="mt-1">
+                  {I18n.t('home.converter.no_rate_subtitle')}
+                </Text>
+              </>
+            )}
+          </View>
         </View>
 
-        {/* Hours result */}
-        <View className="mt-3 mb-3 rounded-[18px] border border-primary/20 bg-primary/8 px-4 py-3">
-          {hasRate ? (
-            <>
-              <Animated.View
-                key={hoursLabel}
-                entering={FadeInDown.duration(180)}
-                exiting={FadeOutUp.duration(120)}
-              >
-                <Text variant="subheading" className="text-primary">
-                  {I18n.t('home.converter.of_work', { value: hoursLabel })}
-                </Text>
-              </Animated.View>
-              <Animated.View
-                key={exactHoursLabel}
-                entering={FadeInDown.duration(180)}
-                exiting={FadeOutUp.duration(120)}
-              >
-                <Text variant="label" tone="muted" className="mt-1">
-                  {I18n.t('home.converter.workday_equivalent', {
-                    exact: exactHoursLabel,
-                    duration: workDurationLabel,
-                  })}
-                </Text>
-              </Animated.View>
-            </>
-          ) : (
-            <>
-              <Text variant="caption" tone="muted">
-                {I18n.t('home.converter.no_rate_title')}
-              </Text>
-              <Text variant="label" tone="muted" className="mt-1">
-                {I18n.t('home.converter.no_rate_subtitle')}
-              </Text>
-            </>
-          )}
-        </View>
-
-        {/* Numpad — flush to card edges */}
-        <View className="-mx-5 -mb-4" style={numPadContainerStyle}>
+        {/* Numpad — rounded keys with spacing */}
+        <View style={numPadContainerStyle}>
           {NUM_ROWS.map((row, rowIndex) => (
             <View key={rowIndex} style={NUMPAD_ROW_STYLE}>
               {row.map((key) => {

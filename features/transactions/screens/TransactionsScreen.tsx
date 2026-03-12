@@ -269,12 +269,7 @@ export function TransactionsScreen({
       ),
     [selectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
   );
-  const selectedTransactionTotalToneClass =
-    selectedTransactionTotal > 0
-      ? 'text-success'
-      : selectedTransactionTotal < 0
-        ? 'text-destructive'
-        : 'text-muted-foreground';
+  const selectedTransactionTotalToneClass = 'text-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const resolveTransactionValue = useCallback(
     (transaction: TransactionWithRelations) =>
@@ -428,7 +423,7 @@ export function TransactionsScreen({
         { label: I18n.t('transactions.filters.earned'), value: 'income' },
         { label: I18n.t('transactions.filters.moved'), value: 'transfer' },
         { label: I18n.t('transactions.filters.adjustment'), value: 'balance_adjustment' },
-      ] satisfies Array<{ label: string; value: 'all' | TransactionType }>,
+      ] satisfies { label: string; value: 'all' | TransactionType }[],
     [],
   );
   const sortOptions = useMemo(
@@ -662,39 +657,40 @@ export function TransactionsScreen({
     ],
   );
 
+  const headerActions = isSelectionMode ? (
+    <View className="h-10 w-[208px]" pointerEvents="none" />
+  ) : (
+    <View className="flex-row items-center gap-2">
+      <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('transactions.filters.search')}
+        onPress={handleOpenSearch}
+        className={cn(
+          'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+          isSearchBoxOpen || hasActiveSearch
+            ? 'border-primary/45 bg-primary/10'
+            : 'border-border/40 bg-card',
+        )}
+      >
+        <Search
+          size={15}
+          color={isSearchBoxOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
+        />
+      </Pressable>
+      <DisplayModeToggle />
+    </View>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
         title={I18n.t('transactions.title')}
+        showAccent={false}
         monthLabel={hasActiveSearch ? I18n.t('transactions.filters.search') : activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
-        actions={
-          isSelectionMode ? undefined : (
-            <View className="flex-row items-center gap-2">
-              <DisplayModeToggle />
-              <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.filters.search')}
-                onPress={handleOpenSearch}
-                className={cn(
-                  'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
-                  isSearchBoxOpen || hasActiveSearch
-                    ? 'border-primary/45 bg-primary/10'
-                    : 'border-border/40 bg-card',
-                )}
-              >
-                <Search
-                  size={15}
-                  color={
-                    isSearchBoxOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted
-                  }
-                />
-              </Pressable>
-            </View>
-          )
-        }
+        actions={headerActions}
       >
         <View className="gap-2">
           {isSearchBoxOpen ? (

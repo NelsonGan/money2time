@@ -1,9 +1,10 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { categoriesTable } from '~/lib/db/schema';
 import type { Category } from '~/types';
 import { newId, nowIso } from '~/utils/id';
+
 import { toCategory } from './mappers';
 
 interface CreateCategoryInput {
@@ -79,6 +80,28 @@ class CategoriesRepository {
       .set({ ...updates, updatedAt: nowIso() })
       .where(and(eq(categoriesTable.id, id), isNull(categoriesTable.deletedAt)))
       .run();
+  }
+
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      ids.forEach((id, index) => {
+        db.update(categoriesTable)
+          .set({ sortOrder: index, updatedAt: now })
+          .where(and(eq(categoriesTable.id, id), isNull(categoriesTable.deletedAt)))
+          .run();
+      });
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
   }
 
   softDelete(id: string) {

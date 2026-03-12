@@ -94,6 +94,28 @@ class AccountGroupsRepository {
       .run();
   }
 
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      ids.forEach((id, index) => {
+        db.update(accountGroupsTable)
+          .set({ sortOrder: index, updatedAt: now })
+          .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+          .run();
+      });
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
   softDelete(id: string) {
     const db = getDb();
     const row = db

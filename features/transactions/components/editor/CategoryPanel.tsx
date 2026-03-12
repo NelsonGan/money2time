@@ -280,7 +280,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                         >
                           <Text className="text-[13px] mr-1.5">{child.icon}</Text>
                           <Text
-                            variant="label"
+                            variant="caption"
                             numberOfLines={1}
                             className={cn(
                               'flex-1',

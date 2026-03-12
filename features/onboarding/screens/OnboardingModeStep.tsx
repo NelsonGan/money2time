@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
+import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { ONBOARDING_HORIZONTAL_PADDING } from '~/features/onboarding/constants/layout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 
 interface OnboardingModeStepProps {
   onBack: () => void;
@@ -17,16 +17,9 @@ interface OnboardingModeStepProps {
 }
 
 const styles = StyleSheet.create({
-  optionCard: {
-    borderRadius: 16,
-  },
-  optionBody: {
-    paddingVertical: spacing.lg,
-    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
-  },
   optionEmoji: {
-    fontSize: 28,
-    lineHeight: 36,
+    fontSize: 32,
+    lineHeight: 40,
   },
   contentContainer: {
     flex: 1,
@@ -53,22 +46,23 @@ export function OnboardingModeStep({
   return (
     <View className="flex-1">
       <View style={styles.contentContainer}>
-        <Animated.View entering={FadeIn.delay(100).duration(400)}>
-          <Text variant="label" tone="muted" className="text-center uppercase tracking-wider">
+        <Animated.View entering={FadeInDown.delay(100).duration(500).springify().damping(16)}>
+          <Text variant="label" tone="primary" className="text-center tracking-widest">
             {I18n.t('onboarding.mode.step_label')}
           </Text>
-          <Text variant="display" className="text-center mt-2 text-foreground">
+          <Text variant="title" className="text-center mt-2 text-foreground">
             {I18n.t('onboarding.mode.title')}
           </Text>
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(200).duration(400)} className="mt-3">
-          <Text variant="friendly" tone="secondary" className="text-center px-2">
+          <Text variant="friendly" tone="muted" className="text-center px-2">
             {I18n.t('onboarding.mode.subtitle')}
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(350).duration(500)} className="mt-6 gap-4">
+        <Animated.View entering={FadeIn.delay(350).duration(500)} className="mt-7 gap-4">
+          {/* Simple mode card */}
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
@@ -77,28 +71,34 @@ export function OnboardingModeStep({
             accessibilityRole="button"
             accessibilityLabel={I18n.t('onboarding.mode.simple_title')}
             accessibilityState={{ selected: selected === 'simple' }}
-            style={[
-              styles.optionCard,
-              {
-                borderWidth: selected === 'simple' ? 2 : 1,
-                borderColor:
-                  selected === 'simple' ? themeColors.primary : `${themeColors.textMuted}30`,
-                backgroundColor:
-                  selected === 'simple' ? themeColors.primarySoft : themeColors.surface,
-              },
-            ]}
+            className="overflow-hidden rounded-[24px] active:scale-[0.98]"
+            style={{
+              borderWidth: selected === 'simple' ? 2 : 1,
+              borderColor: selected === 'simple' ? themeColors.primary : `${themeColors.border}60`,
+              backgroundColor:
+                selected === 'simple' ? `${themeColors.primary}08` : themeColors.card,
+            }}
           >
-            <View style={styles.optionBody}>
+            {/* Decorative corner */}
+            {selected === 'simple' ? (
+              <View
+                className="absolute -top-4 -right-4 h-16 w-16 rounded-full"
+                style={{ backgroundColor: themeColors.primary, opacity: 0.08 }}
+              />
+            ) : null}
+
+            <View className="py-5 px-5">
               <Text style={styles.optionEmoji}>✨</Text>
-              <Text variant="heading" className="text-foreground mt-2">
+              <Text variant="heading" className="text-foreground mt-3">
                 {I18n.t('onboarding.mode.simple_title')}
               </Text>
-              <Text variant="body" tone="secondary" className="mt-1">
+              <Text variant="body" tone="muted" className="mt-1.5">
                 {I18n.t('onboarding.mode.simple_description')}
               </Text>
             </View>
           </Pressable>
 
+          {/* Power mode card */}
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
@@ -107,23 +107,26 @@ export function OnboardingModeStep({
             accessibilityRole="button"
             accessibilityLabel={I18n.t('onboarding.mode.power_title')}
             accessibilityState={{ selected: selected === 'power' }}
-            style={[
-              styles.optionCard,
-              {
-                borderWidth: selected === 'power' ? 2 : 1,
-                borderColor:
-                  selected === 'power' ? themeColors.primary : `${themeColors.textMuted}30`,
-                backgroundColor:
-                  selected === 'power' ? themeColors.primarySoft : themeColors.surface,
-              },
-            ]}
+            className="overflow-hidden rounded-[24px] active:scale-[0.98]"
+            style={{
+              borderWidth: selected === 'power' ? 2 : 1,
+              borderColor: selected === 'power' ? themeColors.primary : `${themeColors.border}60`,
+              backgroundColor: selected === 'power' ? `${themeColors.primary}08` : themeColors.card,
+            }}
           >
-            <View style={styles.optionBody}>
+            {selected === 'power' ? (
+              <View
+                className="absolute -top-4 -right-4 h-16 w-16 rounded-full"
+                style={{ backgroundColor: themeColors.primary, opacity: 0.08 }}
+              />
+            ) : null}
+
+            <View className="py-5 px-5">
               <Text style={styles.optionEmoji}>⚡️</Text>
-              <Text variant="heading" className="text-foreground mt-2">
+              <Text variant="heading" className="text-foreground mt-3">
                 {I18n.t('onboarding.mode.power_title')}
               </Text>
-              <Text variant="body" tone="secondary" className="mt-1">
+              <Text variant="body" tone="muted" className="mt-1.5">
                 {I18n.t('onboarding.mode.power_description')}
               </Text>
             </View>

@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '~/components/ui';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
@@ -18,6 +19,7 @@ export function TypeFilterPill<T extends string>({
   selected,
   onSelect,
 }: TypeFilterPillProps<T>) {
+  const themeColors = useThemeColors();
   const handlePress = useCallback(() => {
     void triggerHaptic('selection');
     onSelect(value);
@@ -27,11 +29,18 @@ export function TypeFilterPill<T extends string>({
     <Pressable
       onPress={handlePress}
       className={cn(
-        'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
-        selected ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
+        'rounded-pill border px-4 py-2 flex-row items-center gap-1.5 active:scale-95',
+        selected ? 'border-primary/40 bg-primary/12 shadow-glow' : 'border-border/30 bg-card',
       )}
     >
-      <Text variant="label" className={cn(selected ? 'text-primary' : 'text-muted-foreground')}>
+      {/* Active indicator dot */}
+      {selected ? (
+        <View
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ backgroundColor: themeColors.primary }}
+        />
+      ) : null}
+      <Text variant="caption" className={cn(selected ? 'text-primary' : 'text-muted-foreground')}>
         {label}
       </Text>
     </Pressable>

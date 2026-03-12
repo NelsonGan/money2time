@@ -62,7 +62,7 @@ export function DisplayModeToggle() {
   );
 
   const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: indicatorX.value * 56 }],
+    transform: [{ translateX: indicatorX.value * 52 }],
   }));
 
   const handleChange = (toTimeMode: boolean) => {
@@ -77,7 +77,6 @@ export function DisplayModeToggle() {
     setIsSwitchingMode(true);
     void triggerHaptic('selection');
 
-    // Let the loading modal paint first, then run the heavy blocking refresh work.
     pendingFrameRef.current = requestAnimationFrame(() => {
       pendingFrameRef.current = null;
       pendingToggleTimerRef.current = setTimeout(() => {
@@ -89,29 +88,33 @@ export function DisplayModeToggle() {
 
   return (
     <>
-      <View
-        className={cn(
-          'flex-row items-center rounded-full border border-border/40 bg-card p-1 w-[120px]',
-        )}
-      >
+      <View className="flex-row items-center rounded-pill bg-secondary/50 p-1 w-[112px] border border-border/20">
         <Animated.View
-          className="absolute left-1 top-1 bottom-1 w-[54px] rounded-full bg-primary"
+          className="absolute left-1 top-1 bottom-1 w-[50px] rounded-pill bg-primary shadow-glow"
           style={indicatorStyle}
         />
         <Pressable
           onPress={() => handleChange(false)}
-          className="flex-1 h-9 items-center justify-center rounded-full z-10"
+          className="flex-1 h-8 items-center justify-center rounded-pill z-10"
         >
-          <DollarSign size={15} color={isTimeMode ? themeColors.textMuted : '#FFFFFF'} />
+          <DollarSign
+            size={14}
+            color={isTimeMode ? themeColors.textMuted : '#FFFFFF'}
+            strokeWidth={isTimeMode ? 1.8 : 2.5}
+          />
         </Pressable>
         <Pressable
           onPress={() => handleChange(true)}
           className={cn(
-            'flex-1 h-9 items-center justify-center rounded-full z-10',
-            !canUseTimeDisplayMode && 'opacity-45',
+            'flex-1 h-8 items-center justify-center rounded-pill z-10',
+            !canUseTimeDisplayMode && 'opacity-40',
           )}
         >
-          <Clock size={15} color={isTimeMode ? '#FFFFFF' : themeColors.textMuted} />
+          <Clock
+            size={14}
+            color={isTimeMode ? '#FFFFFF' : themeColors.textMuted}
+            strokeWidth={isTimeMode ? 2.5 : 1.8}
+          />
         </Pressable>
       </View>
 
@@ -121,19 +124,19 @@ export function DisplayModeToggle() {
         animationType="fade"
         onRequestClose={() => setShowHourlyPrompt(false)}
       >
-        <View className="flex-1 items-center justify-center bg-black/35 px-6">
-          <View className="w-full max-w-[320px] rounded-[26px] border border-border/45 bg-card p-5">
-            <Text variant="subheading">{I18n.t('common.setup_hourly_title')}</Text>
-            <Text variant="friendly" tone="muted" className="mt-2">
+        <View className="flex-1 items-center justify-center bg-black/40 px-6">
+          <View className="w-full max-w-[320px] rounded-[28px] border border-border/30 bg-card p-6 shadow-float">
+            <Text variant="heading">{I18n.t('common.setup_hourly_title')}</Text>
+            <Text variant="body" tone="muted" className="mt-2">
               {I18n.t('common.setup_hourly_prompt')}
             </Text>
-            <View className="mt-4 flex-row items-center justify-end gap-2">
+            <View className="mt-5 flex-row items-center justify-end gap-2.5">
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
                   setShowHourlyPrompt(false);
                 }}
-                className="rounded-full bg-secondary px-4 py-2"
+                className="rounded-pill bg-secondary/60 px-5 py-2.5"
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('common.not_now')}
@@ -145,7 +148,7 @@ export function DisplayModeToggle() {
                   setShowHourlyPrompt(false);
                   requestOpenHourlyValueSetup();
                 }}
-                className="rounded-full bg-primary px-4 py-2"
+                className="rounded-pill bg-primary px-5 py-2.5 shadow-glow"
               >
                 <Text variant="caption" tone="inverse">
                   {I18n.t('common.setup')}
@@ -157,10 +160,10 @@ export function DisplayModeToggle() {
       </ThemeModal>
 
       <ThemeModal visible={isSwitchingMode} transparent animationType="fade">
-        <View className="flex-1 items-center justify-center bg-background/75 px-8">
-          <View className="w-full max-w-[280px] items-center rounded-[26px] border border-border/45 bg-card px-6 py-6">
+        <View className="flex-1 items-center justify-center bg-background/80 px-8">
+          <View className="w-full max-w-[280px] items-center rounded-[28px] border border-border/30 bg-card px-6 py-7 shadow-float">
             <ActivityIndicator size="large" color={themeColors.primary} />
-            <Text variant="friendly" className="mt-3 text-center">
+            <Text variant="bodyStrong" className="mt-4 text-center">
               {targetMode === 'time'
                 ? I18n.t('common.switching_to_time')
                 : I18n.t('common.switching_to_money')}

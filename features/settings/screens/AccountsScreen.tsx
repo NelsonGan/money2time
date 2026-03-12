@@ -1,9 +1,17 @@
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Settings, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import Animated, { FadeIn, useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -32,7 +40,6 @@ import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
-import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -44,15 +51,6 @@ import {
 } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount, formatDateInput, normalizeMoneyAmount } from '~/utils/formatters';
-
-const SNAP_CONFIG = {
-  damping: 100,
-  stiffness: 800,
-  mass: 0.2,
-  overshootClamping: true,
-  restDisplacementThreshold: 0.01,
-  restSpeedThreshold: 0.01,
-};
 
 interface AccountGroupSection {
   id: string;
@@ -99,50 +97,79 @@ const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
 const ACCOUNT_PANEL_HEIGHT = 236;
 const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
 const MASKED_BALANCE_VALUE = '••••';
-const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
-const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
+
+function withColorAlpha(hex: string, alpha: number) {
+  const value = hex.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
+  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
+}
 
 const styles = StyleSheet.create({
   rowContainer: {
-    paddingBottom: spacing.xxs,
+    paddingBottom: 0,
+    width: '100%',
   },
   rowCard: {
-    borderRadius: 14,
+    borderRadius: 22,
     borderWidth: 1,
+    width: '100%',
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
-    paddingVertical: spacing.xs,
-  },
-  rowCardActive: {
-    opacity: 0.95,
+    paddingVertical: spacing.sm,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 2,
   },
   rowDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+  },
+  rowLeadingBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  rowLeadingText: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+  },
+  rowLeadingEmoji: {
+    fontSize: 18,
   },
   rowTitleWrap: {
     flex: 1,
-  },
-  rowTitle: {
-    fontSize: 13,
-  },
-  rowSubtitle: {
-    fontSize: 11,
-    marginTop: 1,
-  },
-  rowActionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
+    minHeight: 44,
     justifyContent: 'center',
   },
-  rowDragButton: {
-    minWidth: 40,
-    minHeight: 40,
-    padding: spacing.xs,
-    marginRight: -2,
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  rowSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  rowActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -158,10 +185,22 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+    minHeight: 44,
   },
-  accountCreditBadge: {
+  rowTypePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  rowTypeText: {
     fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   headerContainer: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
@@ -818,13 +857,19 @@ function PayCreditCardSheet({
 
 // Module-level callbacks for Row — avoids hooks/closures inside renderItem
 let _acctThemeColors: {
-  surface: string;
-  surfaceMuted: string;
-  textMuted: string;
-  coral: string;
-  text: string;
+  accent: string;
+  accentBorder: string;
+  accentSoft: string;
+  border: string;
+  card: string;
+  deleteBorder: string;
+  deleteSurface: string;
   error: string;
-  errorSoft: string;
+  primary: string;
+  primaryMuted: string;
+  primarySoft: string;
+  textMuted: string;
+  text: string;
 } | null = null;
 let _acctEditingGroupId: string | null = null;
 let _acctEditingGroupName: string = '';
@@ -836,22 +881,67 @@ let _acctOnDeleteGroup: ((item: AccountGroup) => void) | null = null;
 let _acctAccountCountByGroupName: Map<string, number> = new Map();
 let _acctOnAccountPress: ((account: Account) => void) | null = null;
 let _acctCreditLabel: string = '';
+let _acctRowWidth: number | null = null;
 
-// IMPORTANT: Only inline `style` props inside renderItem — className/NativeWind causes freezes with DraggableFlatList
-function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) {
+interface GroupRowItemProps {
+  item: AccountGroup;
+}
+
+interface AccountMgmtRowItemProps {
+  account: Account;
+}
+
+function getBadgeLabel(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '#';
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+}
+
+function DragHandleButton({
+  backgroundColor,
+  borderColor,
+  iconColor,
+  label,
+}: {
+  backgroundColor: string;
+  borderColor: string;
+  iconColor: string;
+  label: string;
+}) {
+  return (
+    <Sortable.Handle>
+      <View
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor,
+            borderColor,
+          },
+        ]}
+      >
+        <GripVertical size={14} color={iconColor} />
+      </View>
+    </Sortable.Handle>
+  );
+}
+
+function GroupRowItem({ item }: GroupRowItemProps) {
   const tc = _acctThemeColors!;
   const isEditing = _acctEditingGroupId === item.id;
   const groupAccountCount = _acctAccountCountByGroupName.get(item.name.trim()) ?? 0;
 
   return (
-    <View style={styles.rowContainer}>
+    <View style={[styles.rowContainer, _acctRowWidth ? { width: _acctRowWidth } : null]}>
       <View
         style={[
           styles.rowCard,
-          isActive ? styles.rowCardActive : null,
           {
-            borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-            backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+            borderColor: tc.border,
+            backgroundColor: tc.card,
           },
         ]}
       >
@@ -878,6 +968,19 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
           </View>
         ) : (
           <View style={styles.rowDisplay}>
+            <View
+              style={[
+                styles.rowLeadingBadge,
+                {
+                  backgroundColor: tc.primarySoft,
+                  borderColor: tc.primaryMuted,
+                },
+              ]}
+            >
+              <Text style={[styles.rowLeadingText, { color: tc.primary }]}>
+                {getBadgeLabel(item.name)}
+              </Text>
+            </View>
             <View style={styles.rowTitleWrap}>
               <Text style={[styles.rowTitle, { color: tc.text }]}>{item.name}</Text>
               <Text style={[styles.rowSubtitle, { color: tc.textMuted }]}>
@@ -890,11 +993,17 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnStartEditGroup?.(item);
               }}
               hitSlop={4}
-              style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+              style={[
+                styles.rowActionButton,
+                {
+                  backgroundColor: tc.primarySoft,
+                  borderColor: tc.primaryMuted,
+                },
+              ]}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('common.edit')}
             >
-              <Pencil size={11} color={tc.textMuted} />
+              <Pencil size={13} color={tc.primary} />
             </Pressable>
             <Pressable
               onPress={() => {
@@ -902,23 +1011,24 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
                 _acctOnDeleteGroup?.(item);
               }}
               hitSlop={4}
-              style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+              style={[
+                styles.rowActionButton,
+                {
+                  backgroundColor: tc.deleteSurface,
+                  borderColor: tc.deleteBorder,
+                },
+              ]}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('common.delete')}
             >
-              <Trash2 size={11} color={tc.coral} />
+              <Trash2 size={13} color={tc.error} />
             </Pressable>
-            <Pressable
-              onLongPress={drag}
-              delayLongPress={100}
-              disabled={isActive}
-              hitSlop={8}
-              style={styles.rowDragButton}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('accounts.reorder_groups')}
-            >
-              <GripVertical size={16} color={tc.textMuted} />
-            </Pressable>
+            <DragHandleButton
+              backgroundColor={tc.primarySoft}
+              borderColor={tc.primaryMuted}
+              iconColor={tc.textMuted}
+              label={`${I18n.t('common.reorder')} ${item.name}`}
+            />
           </View>
         )}
       </View>
@@ -926,68 +1036,79 @@ function GroupRowItem({ item, drag, isActive }: RenderItemParams<AccountGroup>) 
   );
 }
 
-interface AccountMgmtAccountItem {
-  id: string;
-  account: Account;
-}
-
-function AccountMgmtRowItem({ item, drag, isActive }: RenderItemParams<AccountMgmtAccountItem>) {
+function AccountMgmtRowItem({ account }: AccountMgmtRowItemProps) {
   const tc = _acctThemeColors!;
-  const account = item.account;
   const isCredit = account.type === 'credit';
+  const accountTypeLabel =
+    ACCOUNT_TYPE_OPTIONS.find((option) => option.value === account.type)?.label ?? account.type;
+  const accountVisibilityLabel = account.includeInTotals
+    ? I18n.t('accounts.include_option_include')
+    : I18n.t('accounts.include_option_hide');
 
   return (
-    <View style={styles.rowContainer}>
+    <View style={[styles.rowContainer, _acctRowWidth ? { width: _acctRowWidth } : null]}>
       <View
         style={[
           styles.rowCard,
-          isActive ? styles.rowCardActive : null,
           styles.rowDisplay,
           {
-            borderColor: isCredit
-              ? isActive
-                ? tc.coral
-                : 'rgba(255,0,0,0.12)'
-              : isActive
-                ? tc.textMuted
-                : 'rgba(0,0,0,0.08)',
-            backgroundColor: isCredit
-              ? isActive
-                ? tc.errorSoft
-                : 'rgba(255,0,0,0.03)'
-              : isActive
-                ? tc.surfaceMuted
-                : tc.surface,
+            borderColor: tc.border,
+            backgroundColor: tc.card,
           },
         ]}
       >
         <Pressable
           onPress={() => _acctOnAccountPress?.(account)}
-          disabled={isActive}
           style={styles.accountRowPressable}
           accessibilityRole="button"
           accessibilityLabel={account.name}
         >
+          <View
+            style={[
+              styles.rowLeadingBadge,
+              {
+                backgroundColor: isCredit ? tc.accentSoft : tc.primarySoft,
+                borderColor: isCredit ? tc.accentBorder : tc.primaryMuted,
+              },
+            ]}
+          >
+            <Text style={styles.rowLeadingEmoji}>{account.icon || (isCredit ? '💳' : '🏦')}</Text>
+          </View>
           <View style={styles.rowTitleWrap}>
             <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>
               {account.name}
             </Text>
+            <Text style={[styles.rowSubtitle, { color: tc.textMuted }]} numberOfLines={1}>
+              {accountVisibilityLabel}
+            </Text>
           </View>
-          {isCredit ? (
-            <Text style={[styles.accountCreditBadge, { color: tc.error }]}>{_acctCreditLabel}</Text>
-          ) : null}
+          <View
+            style={[
+              styles.rowTypePill,
+              {
+                backgroundColor: isCredit ? tc.accentSoft : tc.primarySoft,
+                borderColor: isCredit ? tc.accentBorder : tc.primaryMuted,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.rowTypeText,
+                {
+                  color: isCredit ? tc.accent : tc.primary,
+                },
+              ]}
+            >
+              {isCredit ? _acctCreditLabel : accountTypeLabel}
+            </Text>
+          </View>
         </Pressable>
-        <Pressable
-          onLongPress={drag}
-          delayLongPress={100}
-          disabled={isActive}
-          hitSlop={8}
-          style={styles.rowDragButton}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('accounts.reorder_accounts')}
-        >
-          <GripVertical size={16} color={tc.textMuted} />
-        </Pressable>
+        <DragHandleButton
+          backgroundColor={tc.primarySoft}
+          borderColor={tc.primaryMuted}
+          iconColor={tc.textMuted}
+          label={`${I18n.t('common.reorder')} ${account.name}`}
+        />
       </View>
     </View>
   );
@@ -1019,8 +1140,38 @@ export function AccountsScreen({
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
+  const { width: windowWidth } = useWindowDimensions();
+  const accountRowThemeColors = useMemo(
+    () => ({
+      accent: themeColors.accent,
+      accentBorder: withColorAlpha(themeColors.accent, 0.32),
+      accentSoft: themeColors.accentSoft,
+      border: withColorAlpha(themeColors.primary, 0.18),
+      card: themeColors.card,
+      deleteBorder: withColorAlpha(themeColors.error, 0.28),
+      deleteSurface: themeColors.errorSoft,
+      error: themeColors.error,
+      primary: themeColors.primary,
+      primaryMuted: themeColors.primaryMuted,
+      primarySoft: themeColors.primarySoft,
+      text: themeColors.text,
+      textMuted: themeColors.textMuted,
+    }),
+    [
+      themeColors.accent,
+      themeColors.accentSoft,
+      themeColors.card,
+      themeColors.error,
+      themeColors.errorSoft,
+      themeColors.primary,
+      themeColors.primaryMuted,
+      themeColors.primarySoft,
+      themeColors.text,
+      themeColors.textMuted,
+    ],
+  );
   const safeAreaInsets = useSafeAreaInsets();
-  const { persistOrder } = useDebouncedPersistence(500);
+  const managementRowWidth = Math.max(windowWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
   const {
     accountGroups,
     accounts,
@@ -1051,6 +1202,7 @@ export function AccountsScreen({
   const [newGroupName, setNewGroupName] = useState('');
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
+  const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [showPayCard, setShowPayCard] = useState(false);
   const [showEditAccount, setShowEditAccount] = useState(false);
   const [addTransactionAccountId, setAddTransactionAccountId] = useState<string | null>(null);
@@ -1063,15 +1215,11 @@ export function AccountsScreen({
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
-  const [isReordering, setIsReordering] = useState(false);
   const accountsListRef = useRef<FlatList<AccountListRow> | null>(null);
+  const managementAccountsScrollRef =
+    useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
+  const managementGroupsScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
   const detailScrollToTopRef = useRef<(() => void) | null>(null);
-  const skipNextAccountGroupsSyncRef = useRef(false);
-  const skipNextAccountSectionsSyncRef = useRef(false);
-  const [localAccountGroups, setLocalAccountGroups] = useState<AccountGroup[]>(() => accountGroups);
-  const [localAccountGroupSections, setLocalAccountGroupSections] = useState<AccountGroupSection[]>(
-    [],
-  );
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -1094,6 +1242,7 @@ export function AccountsScreen({
   }, [accountId, onBack]);
 
   const selectedAccount = activeAccountId ? (accountById.get(activeAccountId) ?? null) : null;
+  const editingAccount = editingAccountId ? (accountById.get(editingAccountId) ?? null) : null;
   const edgeSwipeBackHandler = useCallback(() => {
     if (addTransactionAccountId) {
       setAddTransactionAccountId(null);
@@ -1159,12 +1308,7 @@ export function AccountsScreen({
       ),
     [normalizedSelectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
   );
-  const selectedTransactionTotalToneClass =
-    normalizedSelectedTransactionTotal > 0
-      ? 'text-success'
-      : normalizedSelectedTransactionTotal < 0
-        ? 'text-destructive'
-        : 'text-muted-foreground';
+  const selectedTransactionTotalToneClass = 'text-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const isManagementGroupsView = managementOnly && managementView === 'groups';
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -1207,12 +1351,13 @@ export function AccountsScreen({
   );
 
   const handleManagementViewChange = useCallback((nextView: AccountManagementView) => {
-    setIsReordering(false);
     setManagementView(nextView);
     setShowGroupComposer(false);
     setNewGroupName('');
     setEditingGroupId(null);
     setEditingGroupName('');
+    setEditingAccountId(null);
+    setShowEditAccount(false);
   }, []);
 
   useEffect(() => {
@@ -1232,9 +1377,16 @@ export function AccountsScreen({
   }, [accountId, activeAccountId, onBack, selectedAccount]);
 
   useEffect(() => {
+    if (managementOnly) return;
     if (selectedAccount) return;
     setShowEditAccount(false);
-  }, [selectedAccount]);
+  }, [managementOnly, selectedAccount]);
+  useEffect(() => {
+    if (!managementOnly) return;
+    if (editingAccount) return;
+    setShowEditAccount(false);
+    setEditingAccountId(null);
+  }, [editingAccount, managementOnly]);
 
   useEffect(() => {
     setSelectedTransaction(null);
@@ -1258,9 +1410,6 @@ export function AccountsScreen({
     }
     setShowBulkUpdate(false);
   }, [isSelectionMode]);
-  useEffect(() => {
-    setIsReordering(false);
-  }, [activeAccountId, managementOnly, selectedTransaction]);
 
   useEffect(() => {
     if (resetToRootToken <= 0) return;
@@ -1271,6 +1420,7 @@ export function AccountsScreen({
     setNewGroupName('');
     setEditingGroupId(null);
     setEditingGroupName('');
+    setEditingAccountId(null);
     setShowPayCard(false);
     setShowEditAccount(false);
   }, [accountId, resetToRootToken]);
@@ -1379,23 +1529,19 @@ export function AccountsScreen({
       groupedAccounts: rows,
     };
   }, [accounts, accountGroups]);
-  useEffect(() => {
-    if (isReordering) return;
-    if (skipNextAccountGroupsSyncRef.current) {
-      skipNextAccountGroupsSyncRef.current = false;
-      return;
-    }
-    setLocalAccountGroups(accountGroups);
-  }, [accountGroups, isReordering]);
-
-  useEffect(() => {
-    if (isReordering) return;
-    if (skipNextAccountSectionsSyncRef.current) {
-      skipNextAccountSectionsSyncRef.current = false;
-      return;
-    }
-    setLocalAccountGroupSections(accountGroupSections);
-  }, [accountGroupSections, isReordering]);
+  const buildReorderedAccountIds = useCallback(
+    (sectionId: string, orderedAccounts: Account[]) => {
+      const nextIds: string[] = [];
+      accountGroupSections.forEach((section) => {
+        const sectionAccounts = section.id === sectionId ? orderedAccounts : section.accounts;
+        sectionAccounts.forEach((account) => {
+          nextIds.push(account.id);
+        });
+      });
+      return nextIds;
+    },
+    [accountGroupSections],
+  );
 
   const canCreateGroup = newGroupName.trim().length > 0;
   const startCreateGroup = useCallback(() => {
@@ -1624,11 +1770,11 @@ export function AccountsScreen({
   );
   const handleAccountManagementPress = useCallback((account: Account) => {
     void triggerHaptic('selection');
-    setSelectedAccountId(account.id);
+    setEditingAccountId(account.id);
     setShowEditAccount(true);
   }, []);
-  const handleAddTransactionForAccount = useCallback((accountId: string) => {
-    setAddTransactionAccountId(accountId);
+  const handleAddTransactionForAccount = useCallback((targetAccountId: string) => {
+    setAddTransactionAccountId(targetAccountId);
   }, []);
   const creditLabel = String(I18n.t('accounts.credit'));
 
@@ -1787,7 +1933,11 @@ export function AccountsScreen({
                     </Text>
                     <Text
                       variant="friendly"
-                      className={isNegativeForDisplay(normalizedBalance) ? 'text-destructive' : 'text-foreground'}
+                      className={
+                        isNegativeForDisplay(normalizedBalance)
+                          ? 'text-destructive'
+                          : 'text-foreground'
+                      }
                     >
                       {formatVisibleBalance(normalizedBalance)}
                     </Text>
@@ -2016,7 +2166,7 @@ export function AccountsScreen({
   }
 
   // Set module-level callbacks for row components
-  _acctThemeColors = themeColors;
+  _acctThemeColors = accountRowThemeColors;
   _acctEditingGroupId = editingGroupId;
   _acctEditingGroupName = editingGroupName;
   _acctOnEditingNameChange = setEditingGroupName;
@@ -2027,6 +2177,7 @@ export function AccountsScreen({
   _acctAccountCountByGroupName = accountCountByGroupName;
   _acctOnAccountPress = handleAccountManagementPress;
   _acctCreditLabel = creditLabel;
+  _acctRowWidth = managementRowWidth;
 
   return withBackGesture(
     <SettingsPageLayout edges={safeAreaEdges}>
@@ -2054,6 +2205,8 @@ export function AccountsScreen({
           />
           <SegmentedToggle
             value={managementView}
+            variant="home"
+            className="my-2"
             onChange={handleManagementViewChange}
             options={[
               { value: 'accounts', label: I18n.t('accounts.title') },
@@ -2094,53 +2247,55 @@ export function AccountsScreen({
 
       {isManagementGroupsView ? (
         <>
-          {localAccountGroups.length === 0 ? (
+          {accountGroups.length === 0 ? (
             <EmptyState
               title={I18n.t('accounts.empty_groups_title')}
               message={I18n.t('accounts.empty_groups_message')}
               mascotMood="curious"
             />
           ) : (
-            <View style={styles.flexContainer}>
-              <DraggableFlatList
-                data={localAccountGroups}
-                keyExtractor={(item: AccountGroup) => item.id}
-                renderItem={GroupRowItem}
-                extraData={`${editingGroupId}-${editingGroupName}`}
-                dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
-                activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
-                animationConfig={SNAP_CONFIG}
-                onDragBegin={() => {
-                  setIsReordering(true);
-                  void triggerHaptic('medium');
+            <Animated.ScrollView
+              ref={managementGroupsScrollRef}
+              style={styles.flexContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE}
+            >
+              <Sortable.Flex
+                activeItemScale={1.02}
+                activeItemShadowOpacity={0.08}
+                customHandle
+                dragActivationDelay={0}
+                flexDirection="column"
+                flexWrap="nowrap"
+                gap={spacing.xs}
+                inactiveItemOpacity={1}
+                onDragEnd={({ fromIndex, order, toIndex }) => {
+                  if (fromIndex === toIndex) return;
+                  const orderedGroups = order(accountGroups);
+                  reorderAccountGroups(orderedGroups.map((group) => group.id));
+                  void triggerHaptic('selection');
                 }}
-                onRelease={() => {
-                  setIsReordering(false);
-                }}
-                onDragEnd={({ data }: { data: AccountGroup[] }) => {
-                  setIsReordering(false);
-                  void triggerHaptic('light');
-                  skipNextAccountGroupsSyncRef.current = true;
-                  setLocalAccountGroups(data);
-                  const ids = data.map((g) => g.id);
-                  persistOrder('account_groups', ids);
-                  reorderAccountGroups(ids);
-                }}
-                autoscrollThreshold={80}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE}
-              />
-            </View>
+                scrollableRef={managementGroupsScrollRef}
+                sortEnabled={editingGroupId === null}
+                width="fill"
+              >
+                {accountGroups.map((group) => (
+                  <GroupRowItem key={group.id} item={group} />
+                ))}
+              </Sortable.Flex>
+            </Animated.ScrollView>
           )}
         </>
       ) : managementOnly ? (
-        <ScrollView
+        <Animated.ScrollView
+          ref={managementAccountsScrollRef}
           style={styles.flexContainer}
           contentContainerStyle={ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {localAccountGroupSections.map((section, sectionIndex) => (
+          {accountGroupSections.map((section, sectionIndex) => (
             <View key={section.id}>
               <View
                 style={[
@@ -2154,40 +2309,31 @@ export function AccountsScreen({
                   {section.label}
                 </Text>
               </View>
-              <DraggableFlatList
-                data={section.accounts.map((acc) => ({ id: acc.id, account: acc }))}
-                keyExtractor={(item) => item.id}
-                renderItem={AccountMgmtRowItem}
-                dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
-                activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
-                animationConfig={SNAP_CONFIG}
-                scrollEnabled={false}
-                showsVerticalScrollIndicator={false}
-                onDragBegin={() => {
-                  setIsReordering(true);
-                  void triggerHaptic('medium');
+              <Sortable.Flex
+                activeItemScale={1.02}
+                activeItemShadowOpacity={0.08}
+                customHandle
+                dragActivationDelay={0}
+                flexDirection="column"
+                flexWrap="nowrap"
+                gap={spacing.xs}
+                inactiveItemOpacity={1}
+                onDragEnd={({ fromIndex, order, toIndex }) => {
+                  if (fromIndex === toIndex) return;
+                  const orderedAccounts = order(section.accounts);
+                  reorderAccounts(buildReorderedAccountIds(section.id, orderedAccounts));
+                  void triggerHaptic('selection');
                 }}
-                onRelease={() => {
-                  setIsReordering(false);
-                }}
-                onDragEnd={({ data: newData }: { data: AccountMgmtAccountItem[] }) => {
-                  setIsReordering(false);
-                  void triggerHaptic('light');
-                  const updatedSections = localAccountGroupSections.map((s) =>
-                    s.id === section.id
-                      ? { ...s, accounts: newData.map((item) => item.account) }
-                      : s,
-                  );
-                  skipNextAccountSectionsSyncRef.current = true;
-                  setLocalAccountGroupSections(updatedSections);
-                  const allIds = updatedSections.flatMap((s) => s.accounts.map((a) => a.id));
-                  persistOrder('accounts', allIds);
-                  reorderAccounts(allIds);
-                }}
-              />
+                scrollableRef={managementAccountsScrollRef}
+                width="fill"
+              >
+                {section.accounts.map((account) => (
+                  <AccountMgmtRowItem key={account.id} account={account} />
+                ))}
+              </Sortable.Flex>
             </View>
           ))}
-        </ScrollView>
+        </Animated.ScrollView>
       ) : (
         <FlatList
           ref={accountsListRef}
@@ -2197,7 +2343,7 @@ export function AccountsScreen({
           ListHeaderComponent={
             <View className="pb-2 gap-2">
               <SettingsHeader
-                className="px-0 pt-5 pb-1"
+                className="px-0 pt-3 pb-1.5"
                 onBack={onBack}
                 title={I18n.t('accounts.title')}
                 subtitle={onOpenSettings ? undefined : I18n.t('accounts.manage_balances')}
@@ -2288,7 +2434,11 @@ export function AccountsScreen({
                   ) : (
                     <Text
                       variant="caption"
-                      className={isNegativeForDisplay(normalizedBalance) ? 'text-destructive' : 'text-success'}
+                      className={
+                        isNegativeForDisplay(normalizedBalance)
+                          ? 'text-destructive'
+                          : 'text-success'
+                      }
                     >
                       {formatVisibleBalance(normalizedBalance)}
                     </Text>
@@ -2300,32 +2450,32 @@ export function AccountsScreen({
         />
       )}
 
-      {managementOnly && selectedAccount ? (
+      {managementOnly && editingAccount ? (
         <EditAccountSheet
           visible={showEditAccount}
-          account={selectedAccount}
-          currentBalance={balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance}
+          account={editingAccount}
+          currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
           currencySymbol={settings.currencySymbol}
           accountGroups={accountGroups}
           onClose={() => {
             setShowEditAccount(false);
-            setSelectedAccountId(null);
+            setEditingAccountId(null);
           }}
           onSave={(updates) => {
             applyAccountSave({
-              account: selectedAccount,
-              currentBalance: balanceMap.get(selectedAccount.id) ?? selectedAccount.startingBalance,
+              account: editingAccount,
+              currentBalance: balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance,
               updates,
               onComplete: () => {
                 setShowEditAccount(false);
-                setSelectedAccountId(null);
+                setEditingAccountId(null);
               },
             });
           }}
           onDelete={() => {
-            deleteAccount(selectedAccount.id);
+            deleteAccount(editingAccount.id);
             setShowEditAccount(false);
-            setSelectedAccountId(null);
+            setEditingAccountId(null);
           }}
         />
       ) : null}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Card, CardContent, Text } from '~/components/ui';
@@ -11,6 +11,7 @@ import {
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, UserSettings } from '~/types';
@@ -39,6 +40,7 @@ export function OnboardingWageStep({
   onContinue,
   onOpenWageCalculator,
 }: OnboardingWageStepProps) {
+  const themeColors = useThemeColors();
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const handleDoLater = () => {
@@ -69,31 +71,35 @@ export function OnboardingWageStep({
             </Animated.View>
 
             {/* Headline */}
-            <Animated.View entering={FadeIn.delay(100).duration(400)} className="mt-5">
-              <Text variant="heading" className="text-center text-foreground">
+            <Animated.View
+              entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
+              className="mt-5"
+            >
+              <Text variant="title" className="text-center text-foreground">
                 {I18n.t('onboarding.wage.set_title')}
               </Text>
-              <Text variant="friendly" tone="secondary" className="text-center mt-2">
+              <Text variant="friendly" tone="muted" className="text-center mt-2">
                 {I18n.t('onboarding.wage.set_subtitle')}
               </Text>
             </Animated.View>
 
-            {/* Rate hero card — bg-primary (dark teal), all text must be white/inverse */}
+            {/* Rate hero card */}
             <Animated.View entering={FadeIn.delay(250).duration(500)} className="mt-7">
-              <Card variant="hero">
-                <CardContent className="py-6 items-center">
-                  <Text
-                    variant="label"
-                    tone="inverse"
-                    className="uppercase tracking-wider opacity-70"
-                  >
+              <Card variant="hero" className="overflow-hidden">
+                <CardContent className="py-7 items-center">
+                  {/* Decorative inner glow */}
+                  <View
+                    className="absolute -top-8 -left-8 h-24 w-24 rounded-full"
+                    style={{ backgroundColor: '#fff', opacity: 0.06 }}
+                  />
+                  <Text variant="label" tone="inverse" className="tracking-widest opacity-70">
                     {I18n.t('onboarding.wage.true_rate_title')}
                   </Text>
-                  <Text variant="display" tone="inverse" className="mt-2">
+                  <Text variant="hero" tone="inverse" className="mt-3">
                     {settings.currencySymbol}
                     {(currentMonthWage?.trueHourlyRate ?? 0).toFixed(2)}/hr
                   </Text>
-                  <Text variant="label" tone="inverse" className="mt-2 opacity-70">
+                  <Text variant="caption" tone="inverse" className="mt-3 opacity-60">
                     {I18n.t('onboarding.wage.true_rate_based_on')}
                   </Text>
                 </CardContent>
@@ -148,23 +154,31 @@ export function OnboardingWageStep({
           </Animated.View>
 
           {/* Headline */}
-          <Animated.View entering={FadeIn.delay(100).duration(400)} className="mt-5">
-            <Text variant="heading" className="text-center text-foreground">
+          <Animated.View
+            entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
+            className="mt-5"
+          >
+            <Text variant="title" className="text-center text-foreground">
               {I18n.t('onboarding.wage.worth_title')}
             </Text>
-            <Text variant="friendly" tone="secondary" className="text-center mt-2 px-2">
+            <Text variant="friendly" tone="muted" className="text-center mt-2 px-2">
               {I18n.t('onboarding.wage.worth_body')}
             </Text>
           </Animated.View>
 
           {/* Why this matters card */}
           <Animated.View entering={FadeIn.delay(250).duration(500)} className="mt-7">
-            <Card>
-              <CardContent className="py-5">
-                <Text variant="label" tone="muted" className="uppercase tracking-wider">
+            <Card variant="accent" className="overflow-hidden">
+              <CardContent className="py-6">
+                {/* Decorative accent */}
+                <View
+                  className="absolute top-0 left-0 w-1 h-full rounded-full"
+                  style={{ backgroundColor: themeColors.primary, opacity: 0.3 }}
+                />
+                <Text variant="label" tone="primary" className="tracking-widest">
                   {I18n.t('onboarding.wage.why_matters')}
                 </Text>
-                <Text variant="friendly" tone="secondary" className="mt-2.5">
+                <Text variant="body" tone="muted" className="mt-3">
                   {I18n.t('onboarding.wage.why_matters_body', { symbol: settings.currencySymbol })}
                 </Text>
               </CardContent>
@@ -175,6 +189,7 @@ export function OnboardingWageStep({
           <Animated.View entering={FadeIn.delay(400).duration(400)} className="mt-6">
             <Button
               haptic="none"
+              className="shadow-glow-lg"
               onPress={() => {
                 void triggerHaptic('medium');
                 onOpenWageCalculator();

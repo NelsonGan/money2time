@@ -261,7 +261,9 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                   </Text>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t(didCopyRevenueCatUserId ? 'common.copied' : 'common.copy')}
+                    accessibilityLabel={I18n.t(
+                      didCopyRevenueCatUserId ? 'common.copied' : 'common.copy',
+                    )}
                     disabled={!appUserId}
                     onPress={handleCopyRevenueCatUserId}
                     style={styles.copyIconButton}
