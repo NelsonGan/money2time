@@ -68,29 +68,19 @@ function getCreatorTimeParts(amount: number) {
 }
 
 export function AdSupportSection() {
-  const {
-    adRemovalState,
-    purchaseAdRemovalTip,
-    resetAdRemovalTestCustomer,
-    restoreAdRemovalPurchases,
-  } = useApp();
+  const { adRemovalState, purchaseAdRemovalTip, restoreAdRemovalPurchases } = useApp();
   const themeColors = useThemeColors();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
-  const [isResettingTestCustomer, setIsResettingTestCustomer] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const purchasedAtLabel = useMemo(
     () => formatPurchaseDate(adRemovalState.activatedAt ?? adRemovalState.latestPurchaseDate),
     [adRemovalState.activatedAt, adRemovalState.latestPurchaseDate],
   );
   const isPurchasing = purchasingProductId !== null;
-  const isBusy =
-    adRemovalState.isLoading || isPurchasing || isResettingTestCustomer || isRestoring;
-  const availableTipAmountsLabel = useMemo(
-    () => adRemovalState.tipOptions.map((option) => option.priceString).join(' · '),
-    [adRemovalState.tipOptions],
-  );
-
+  const isBusy = adRemovalState.isLoading || isPurchasing || isRestoring;
+  const canShowPurchaseOptions =
+    adRemovalState.canMakePurchases && adRemovalState.tipOptions.length > 0;
   const handlePurchase = useCallback(
     async (optionProductIdentifier: string) => {
       const purchaseOption = adRemovalState.tipOptions.find(
@@ -196,49 +186,8 @@ export function AdSupportSection() {
     }
   }, [adRemovalState.reason, isRestoring, restoreAdRemovalPurchases]);
 
-  const handleResetTestPurchase = useCallback(() => {
-    Alert.alert(
-      I18n.t('settings.ad_support_test_reset_title'),
-      I18n.t('settings.ad_support_test_reset_message'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('settings.ad_support_test_reset_confirm'),
-          style: 'destructive',
-          onPress: () => {
-            void (async () => {
-              setIsResettingTestCustomer(true);
-
-              try {
-                await resetAdRemovalTestCustomer();
-                Alert.alert(
-                  I18n.t('settings.ad_support_test_reset_success_title'),
-                  I18n.t('settings.ad_support_test_reset_success_message'),
-                );
-              } catch (error) {
-                Alert.alert(
-                  I18n.t('settings.ad_support_test_reset_error_title'),
-                  error instanceof Error
-                    ? error.message
-                    : I18n.t('settings.ad_support_test_reset_error_message'),
-                );
-              } finally {
-                setIsResettingTestCustomer(false);
-              }
-            })();
-          },
-        },
-      ],
-    );
-  }, [resetAdRemovalTestCustomer]);
-
   const shouldShowRestoreButton =
     adRemovalState.canMakePurchases && !adRemovalState.hasAdFreeEntitlement;
-  const shouldShowTestResetButton =
-    __DEV__ &&
-    adRemovalState.isTestStore &&
-    adRemovalState.canMakePurchases &&
-    adRemovalState.hasAdFreeEntitlement;
   const unavailableMessageKey = !adRemovalState.canMakePurchases
     ? adRemovalState.reason === 'expo_go'
       ? 'settings.ad_support_unavailable_expo_go'
@@ -281,42 +230,14 @@ export function AdSupportSection() {
             </View>
           </CardContent>
         </Card>
-      ) : !adRemovalState.hasAdFreeEntitlement ? (
-        adRemovalState.canMakePurchases && adRemovalState.tipOptions.length > 0 ? (
-          <View className="gap-2">
-            <Button disabled={isBusy} onPress={() => setIsPurchaseModalOpen(true)}>
-              <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
-            </Button>
-            {availableTipAmountsLabel ? (
-              <Text variant="caption" tone="muted" className="px-1">
-                {I18n.t('settings.ad_support_available_amounts', {
-                  amounts: availableTipAmountsLabel,
-                })}
-              </Text>
-            ) : null}
-          </View>
-        ) : (
-          <View className="gap-2 rounded-[22px] border border-border/45 bg-secondary/35 px-4 py-4">
-            <Text variant="subheading">{I18n.t('settings.ad_support_unavailable_title')}</Text>
-            <Text variant="body" tone="muted">
-              {I18n.t(unavailableMessageKey, {
-                offeringId:
-                  adRemovalState.offeringIdentifier ??
-                  I18n.t('settings.ad_support_offering_unknown'),
-              })}
-            </Text>
-          </View>
-        )
       ) : null}
 
-      {shouldShowTestResetButton ? (
-        <Button
-          variant="destructive"
-          disabled={isBusy}
-          onPress={handleResetTestPurchase}
-        >
-          <Text>{I18n.t('settings.ad_support_test_reset_button')}</Text>
-        </Button>
+      {!adRemovalState.hasAdFreeEntitlement ? (
+        <View className="gap-2">
+          <Button disabled={isBusy} onPress={() => setIsPurchaseModalOpen(true)}>
+            <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
+          </Button>
+        </View>
       ) : null}
 
       <ThemeModal
@@ -374,44 +295,69 @@ export function AdSupportSection() {
             contentContainerStyle={styles.sheetContent}
             showsVerticalScrollIndicator={false}
           >
-            {adRemovalState.tipOptions.map((option, index) => {
-              const isOptionPurchasing = purchasingProductId === option.productIdentifier;
-              const accentColor = TIP_ROW_COLORS[index % TIP_ROW_COLORS.length];
-              const creatorTimeParts = getCreatorTimeParts(option.amount);
-
-              return (
-                <Pressable
-                  key={option.productIdentifier}
-                  accessibilityRole="button"
-                  disabled={isBusy}
-                  className="rounded-[22px] border border-border/45 bg-card px-4 py-4"
-                  onPress={() => void handlePurchase(option.productIdentifier)}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View style={[styles.rowColorDot, { backgroundColor: accentColor }]} />
-                    <View className="flex-1">
-                      <Text
-                        variant="bodyStrong"
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.85}
-                        style={{ color: accentColor }}
-                      >
-                        {option.priceString}
-                      </Text>
-                      <Text variant="caption" tone="muted" className="mt-1">
-                        {creatorTimeParts.prefix}
-                        <Text variant="caption" style={{ color: accentColor }}>
-                          {creatorTimeParts.value}
-                        </Text>
-                        {creatorTimeParts.suffix}
-                      </Text>
-                    </View>
-                    {isOptionPurchasing ? <ActivityIndicator color={accentColor} /> : null}
+            {adRemovalState.isLoading ? (
+              <View className="rounded-[22px] border border-border/45 bg-secondary/35 px-4 py-4">
+                <View className="flex-row items-center gap-3">
+                  <ActivityIndicator color={themeColors.primary} />
+                  <View className="flex-1">
+                    <Text variant="subheading">{I18n.t('settings.ad_support_loading_title')}</Text>
+                    <Text variant="body" tone="muted" className="mt-1">
+                      {I18n.t('settings.ad_support_loading_body')}
+                    </Text>
                   </View>
-                </Pressable>
-              );
-            })}
+                </View>
+              </View>
+            ) : canShowPurchaseOptions ? (
+              adRemovalState.tipOptions.map((option, index) => {
+                const isOptionPurchasing = purchasingProductId === option.productIdentifier;
+                const accentColor = TIP_ROW_COLORS[index % TIP_ROW_COLORS.length];
+                const creatorTimeParts = getCreatorTimeParts(option.amount);
+
+                return (
+                  <Pressable
+                    key={option.productIdentifier}
+                    accessibilityRole="button"
+                    disabled={isBusy}
+                    className="rounded-[22px] border border-border/45 bg-card px-4 py-4"
+                    onPress={() => void handlePurchase(option.productIdentifier)}
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View style={[styles.rowColorDot, { backgroundColor: accentColor }]} />
+                      <View className="flex-1">
+                        <Text
+                          variant="bodyStrong"
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.85}
+                          style={{ color: accentColor }}
+                        >
+                          {option.priceString}
+                        </Text>
+                        <Text variant="caption" tone="muted" className="mt-1">
+                          {creatorTimeParts.prefix}
+                          <Text variant="caption" style={{ color: accentColor }}>
+                            {creatorTimeParts.value}
+                          </Text>
+                          {creatorTimeParts.suffix}
+                        </Text>
+                      </View>
+                      {isOptionPurchasing ? <ActivityIndicator color={accentColor} /> : null}
+                    </View>
+                  </Pressable>
+                );
+              })
+            ) : (
+              <View className="gap-2 rounded-[22px] border border-border/45 bg-secondary/35 px-4 py-4">
+                <Text variant="subheading">{I18n.t('settings.ad_support_unavailable_title')}</Text>
+                <Text variant="body" tone="muted">
+                  {I18n.t(unavailableMessageKey, {
+                    offeringId:
+                      adRemovalState.offeringIdentifier ??
+                      I18n.t('settings.ad_support_offering_unknown'),
+                  })}
+                </Text>
+              </View>
+            )}
 
             {shouldShowRestoreButton ? (
               <Button variant="ghost" disabled={isBusy} onPress={() => void handleRestore()}>
