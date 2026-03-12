@@ -1121,6 +1121,7 @@ interface AccountsScreenProps {
   scrollToTopToken?: number;
   accountId?: string | null;
   onOpenAccount?: (accountId: string) => void;
+  onOpenAddTransaction?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
   useNativeBackGesture?: boolean;
@@ -1134,6 +1135,7 @@ export function AccountsScreen({
   scrollToTopToken = 0,
   accountId = null,
   onOpenAccount,
+  onOpenAddTransaction,
   onOpenTransaction,
   onOpenSettings,
   useNativeBackGesture = false,
@@ -1773,9 +1775,16 @@ export function AccountsScreen({
     setEditingAccountId(account.id);
     setShowEditAccount(true);
   }, []);
-  const handleAddTransactionForAccount = useCallback((targetAccountId: string) => {
-    setAddTransactionAccountId(targetAccountId);
-  }, []);
+  const handleAddTransactionForAccount = useCallback(
+    (targetAccountId: string) => {
+      if (onOpenAddTransaction) {
+        onOpenAddTransaction(targetAccountId);
+        return;
+      }
+      setAddTransactionAccountId(targetAccountId);
+    },
+    [onOpenAddTransaction],
+  );
   const creditLabel = String(I18n.t('accounts.credit'));
 
   if (addTransactionAccountId) {
