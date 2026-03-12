@@ -149,8 +149,7 @@ const zh = {
     },
     wage: {
       skip_title: '跳过时薪设置？',
-      skip_message:
-        '没有时薪，应用无法将金额转换为时间。你可以稍后在 设置 → 时薪 中配置。',
+      skip_message: '没有时薪，应用无法将金额转换为时间。你可以稍后在 设置 → 时薪 中配置。',
       set_now: '立即设置',
       skip_now: '稍后再说',
       set_title: '时薪已设置！',
@@ -170,15 +169,13 @@ const zh = {
     },
     bootstrap: {
       skip_title: '跳过设置？',
-      skip_message:
-        '你还没有创建账户。可以稍后在设置中创建，但部分功能在创建前无法使用。',
+      skip_message: '你还没有创建账户。可以稍后在设置中创建，但部分功能在创建前无法使用。',
       continue_setup: '继续设置',
       skip_anyway: '仍然跳过',
       choose_title: '准备好你的数据',
       choose_subtitle: '选择你想如何开始使用 money2time。',
       import_option_title: '从 Money Manager 导入',
-      import_option_subtitle:
-        '有 .mmbak 备份？一步导入你的账户、分类和交易。',
+      import_option_subtitle: '有 .mmbak 备份？一步导入你的账户、分类和交易。',
       import_option_brand: 'Money Manager by Realbyte',
       fresh_option_title: '全新开始',
       fresh_option_subtitle: '从头开始，只设置你需要的内容。',
@@ -192,34 +189,28 @@ const zh = {
       transfers: '转账',
       recurring: '固定支出',
       skipped: '已跳过',
-      import_ready:
-        '数据已就绪。你可以在设置完成后查看和编辑所有内容。',
+      import_ready: '数据已就绪。你可以在设置完成后查看和编辑所有内容。',
       finish_setup: '完成设置',
       checklist_title: '快速设置清单',
       checklist_subtitle: '先设置必要项，其余随时可调。',
       complete_of_total: '已完成 {{count}}/{{total}}',
       quick_start_title: '想快速开始？',
-      quick_start_subtitle:
-        '一键创建 5 个基础账户、常用分类和一笔示例交易。',
+      quick_start_subtitle: '一键创建 5 个基础账户、常用分类和一笔示例交易。',
       create_minimal_setup: '创建基础设置',
       accounts_item_title: '账户',
-      accounts_item_description:
-        '你的钱存放在哪里？至少添加一个账户来开始。',
+      accounts_item_description: '你的钱存放在哪里？至少添加一个账户来开始。',
       accounts_ready_one: '{{count}} 个账户已就绪',
       accounts_ready_other: '{{count}} 个账户已就绪',
       expense_categories_title: '支出分类',
-      expense_categories_description:
-        '你的钱花在哪里？创建几个分类，开始清晰记账。',
+      expense_categories_description: '你的钱花在哪里？创建几个分类，开始清晰记账。',
       expense_categories_ready_one: '{{count}} 个支出分类已就绪',
       expense_categories_ready_other: '{{count}} 个支出分类已就绪',
       income_categories_title: '收入分类',
-      income_categories_description:
-        '用至少一个收入分类来追踪你的收入来源。',
+      income_categories_description: '用至少一个收入分类来追踪你的收入来源。',
       income_categories_ready_one: '{{count}} 个收入分类已就绪',
       income_categories_ready_other: '{{count}} 个收入分类已就绪',
       first_tx_title: '记录第一笔交易',
-      first_tx_description:
-        '试着添加一笔最近的支出或收入，看看金额到时间的转换效果。',
+      first_tx_description: '试着添加一笔最近的支出或收入，看看金额到时间的转换效果。',
       tx_logged: '交易已记录',
       review_accounts: '查看账户',
       review_categories: '查看分类',
@@ -383,29 +374,21 @@ const zh = {
       },
     },
     expense_breakdown: '支出构成',
-    expense_breakdown_description:
-      '按分类查看支出去向，含占比和明细下钻。',
+    expense_breakdown_description: '按分类查看支出去向，含占比和明细下钻。',
     income_breakdown: '收入构成',
-    income_breakdown_description:
-      '按分类查看收入来源，含占比和明细下钻。',
+    income_breakdown_description: '按分类查看收入来源，含占比和明细下钻。',
     calendar_view: '日历视图',
-    calendar_view_description:
-      '在可视化日历上追踪每日收支，支持按天查看明细。',
+    calendar_view_description: '在可视化日历上追踪每日收支，支持按天查看明细。',
     time_cost_leaderboard: '时间成本排行',
-    time_cost_leaderboard_description:
-      '按消耗工作时间排列本期最大支出。',
+    time_cost_leaderboard_description: '按消耗工作时间排列本期最大支出。',
     savings_rate: '储蓄率',
-    savings_rate_description:
-      '衡量本期收入中，扣除支出后保留了多少。',
+    savings_rate_description: '衡量本期收入中，扣除支出后保留了多少。',
     expense_trend: '支出趋势',
-    expense_trend_description:
-      '追踪全年每月支出，快速发现高压月份。',
+    expense_trend_description: '追踪全年每月支出，快速发现高压月份。',
     asset_history: '资产历史',
-    asset_history_description:
-      '追踪全年总资产变化，查看月度余额趋势。',
+    asset_history_description: '追踪全年总资产变化，查看月度余额趋势。',
     income_rate_history: '时薪历史',
-    income_rate_history_description:
-      '查看你的真实时薪在整个交易历史中的变化。',
+    income_rate_history_description: '查看你的真实时薪在整个交易历史中的变化。',
     total_expense: '总支出',
     total_income: '总收入',
     no_positive_slices: '本期无正值支出数据。',
@@ -503,7 +486,11 @@ const zh = {
       period: '时间段',
       start: '开始',
       end: '结束',
+      all: '全部',
       accounts: '账户',
+      categories: '分类',
+      income: '收入',
+      expense: '支出',
       all_accounts: '全部账户',
       all_selected: '全部选中',
       asset_history_accounts: '资产历史账户',
@@ -541,14 +528,12 @@ const zh = {
     ad_support_time_hours_other_value: '{{hours}} 小时',
     ad_support_time_suffix: '的开发者时间',
     ad_support_active_title: '广告已去除',
-    ad_support_active_body:
-      '此账户已拥有无广告权益，横幅广告将自动隐藏。',
+    ad_support_active_body: '此账户已拥有无广告权益，横幅广告将自动隐藏。',
     ad_support_active_date: '激活日期: {{date}}',
     ad_support_loading_title: '正在检查购买状态',
     ad_support_loading_body: '正在查询 RevenueCat 权益和可用打赏选项。',
     ad_support_purchase_success_title: '广告已去除',
-    ad_support_purchase_success_message:
-      '感谢你，愿你始终掌控自己的时间和精力！',
+    ad_support_purchase_success_message: '感谢你，愿你始终掌控自己的时间和精力！',
     ad_support_purchase_pending_title: '购买已完成',
     ad_support_purchase_pending_message:
       '购买已完成，但无广告权益尚未激活。请检查 RevenueCat 权益映射。',
@@ -561,24 +546,19 @@ const zh = {
       'RevenueCat 已配置，但在此版本中未找到"{{offeringId}}"产品组。请检查相同 RevenueCat 项目下的产品组标识符。',
     ad_support_unavailable_no_products:
       'RevenueCat 已配置，但"{{offeringId}}"产品组未返回可用商品。请检查该产品组是否包含与当前密钥对应的商店商品。',
-    ad_support_unavailable_platform:
-      'RevenueCat 购买仅在 iOS 和 Android 版本中可用。',
+    ad_support_unavailable_platform: 'RevenueCat 购买仅在 iOS 和 Android 版本中可用。',
     ad_support_offering_unknown: '已选择',
     ad_support_purchase_missing_title: '金额未配置',
-    ad_support_purchase_missing_message:
-      '所选 RevenueCat 商品在此产品组中已不可用。',
+    ad_support_purchase_missing_message: '所选 RevenueCat 商品在此产品组中已不可用。',
     ad_support_purchase_error_title: '购买失败',
-    ad_support_purchase_error_message:
-      '当前无法完成购买，请稍后重试。',
+    ad_support_purchase_error_message: '当前无法完成购买，请稍后重试。',
     ad_support_restore_button: '恢复购买',
     ad_support_restore_success_title: '购买已恢复',
     ad_support_restore_success_message: '你的无广告权益已重新激活。',
     ad_support_restore_none_title: '无可恢复的购买',
-    ad_support_restore_none_message:
-      '未在当前商店账户中找到无广告权益。',
+    ad_support_restore_none_message: '未在当前商店账户中找到无广告权益。',
     ad_support_restore_error_title: '恢复失败',
-    ad_support_restore_error_message:
-      '当前无法恢复购买，请稍后重试。',
+    ad_support_restore_error_message: '当前无法恢复购买，请稍后重试。',
     theme: '主题',
     theme_system: '跟随系统',
     theme_light: '浅色',
@@ -630,8 +610,7 @@ const zh = {
     reset_data_message: '将删除所有账户、分类和交易，确定继续？',
     reset_all_data: '重置所有数据',
     reset_transactions_title: '重置交易',
-    reset_transactions_message:
-      '将仅删除所有交易。账户和分类会保留，确定继续？',
+    reset_transactions_message: '将仅删除所有交易。账户和分类会保留，确定继续？',
     reset_transactions_only: '仅重置交易',
     year: '年',
     month: '月',
@@ -649,32 +628,25 @@ const zh = {
     hourly_effective_status_inherited: '继承自历史记录',
     hourly_effective_source_month: '使用的来源月份',
     hourly_effective_reason_exact: '精确匹配 {{month}}。',
-    hourly_effective_reason_before_earliest:
-      '{{month}} 在最早月份之前，使用 {{sourceMonth}}。',
+    hourly_effective_reason_before_earliest: '{{month}} 在最早月份之前，使用 {{sourceMonth}}。',
     hourly_effective_reason_between: '无精确匹配，使用 {{sourceMonth}}。',
-    hourly_effective_reason_after_latest:
-      '{{month}} 在最新月份之后，使用 {{sourceMonth}}。',
+    hourly_effective_reason_after_latest: '{{month}} 在最新月份之后，使用 {{sourceMonth}}。',
     hourly_effective_reason_fallback: '暂无历史记录，使用当前月份设置。',
     hourly_rule_short: '规则：使用所选月份当月或之前的最新时薪。',
     hourly_how_it_works: '工作原理',
     hourly_how_it_works_1: '1. 你保存的时薪按月份从旧到新排列。',
     hourly_how_it_works_2: '2. 应用从最早的时薪开始使用。',
-    hourly_how_it_works_3:
-      '3. 向前推进，保留目标月份当月或之前的最新时薪。',
-    hourly_how_it_works_4:
-      '4. 若目标月份早于所有已保存月份，则使用最早的时薪。',
-    hourly_how_it_works_5:
-      '5. 若目标月份在已保存月份之间，则使用最近的前一个月份时薪。',
-    hourly_how_it_works_6:
-      '6. 若目标月份晚于最新已保存月份，则使用最新的时薪。',
+    hourly_how_it_works_3: '3. 向前推进，保留目标月份当月或之前的最新时薪。',
+    hourly_how_it_works_4: '4. 若目标月份早于所有已保存月份，则使用最早的时薪。',
+    hourly_how_it_works_5: '5. 若目标月份在已保存月份之间，则使用最近的前一个月份时薪。',
+    hourly_how_it_works_6: '6. 若目标月份晚于最新已保存月份，则使用最新的时薪。',
     hourly_badge_selected: '已选',
     hourly_badge_current: '当前',
     hourly_badge_source: '来源',
     hourly_current_month_locked: '当前月份的记录为必填项，不可删除。',
     hourly_history_empty: '暂无时薪历史记录。',
     hourly_delete_title: '删除月度时薪？',
-    hourly_delete_message:
-      '删除 {{month}} 的时薪？依赖此时薪的月份将回退到前一个可用月份。',
+    hourly_delete_message: '删除 {{month}} 的时薪？依赖此时薪的月份将回退到前一个可用月份。',
     hourly_add_title: '添加时薪记录',
     hourly_add_confirm: '开始',
     hourly_month_exists_title: '{{month}} 已存在',
@@ -682,28 +654,29 @@ const zh = {
     hourly_income_chart_title: '时薪历史',
     formula: '计算公式',
     formula_line_1: '基础时薪由你的薪资类型（时薪/月薪/年薪）推算。',
-    formula_line_2:
-      '真实时薪 = 每周收入 /（每周工作时间 + 每周通勤时间）。',
-    formula_line_3:
-      '交易页面使用交易当月的时薪进行金额到时间的转换。',
+    formula_line_2: '真实时薪 = 每周收入 /（每周工作时间 + 每周通勤时间）。',
+    formula_line_3: '交易页面使用交易当月的时薪进行金额到时间的转换。',
     history: '历史记录',
     section_settings: '设置',
     section_experience: '体验模式',
-    user_mode: '体验模式',
+    account_settings: '个性化',
+    account_settings_subtitle: '模式与偏好',
+    account_settings_description: '选择你想要的使用方式。',
+    user_mode: '模式',
     user_mode_simple: '简单模式',
     user_mode_power: '专业模式',
     user_mode_subtitle_simple: '当前：简单 — 点击切换到专业',
     user_mode_subtitle_power: '当前：专业 — 点击切换到简单',
+    user_mode_simple_description: '单钱包设置。',
+    user_mode_power_description: '完整账户设置。',
     switch_to_simple_title: '切换到简单模式？',
-    switch_to_simple_message:
-      '如果简单钱包不存在将自动创建。现有数据不受影响。',
+    switch_to_simple_message: '如果简单钱包不存在将自动创建。现有数据不受影响。',
     switch_to_power_title: '切换到专业模式？',
     switch_to_power_message: '所有账户和功能将恢复可用。',
     remove_simple_wallet: '删除简单钱包',
     remove_simple_wallet_subtitle: '删除简单钱包及其所有交易',
     remove_simple_wallet_title: '删除简单钱包？',
-    remove_simple_wallet_message:
-      '将永久删除简单钱包及其关联的所有交易。',
+    remove_simple_wallet_message: '将永久删除简单钱包及其关联的所有交易。',
     remove: '删除',
     data_management: '数据管理',
     data_management_subtitle: '导出和导入数据',
@@ -712,15 +685,13 @@ const zh = {
     title: '数据管理',
     subtitle: '导出和导入数据',
     export_title: '导出数据库',
-    export_description:
-      '将所有账户、分类、交易和设置保存为 JSON 文件的完整备份。',
+    export_description: '将所有账户、分类、交易和设置保存为 JSON 文件的完整备份。',
     export_action: '导出数据库',
     exporting: '正在导出...',
     export_error_title: '导出失败',
     export_error_message: '无法导出数据库，请重试。',
     import_title: '导入数据库',
-    import_description:
-      '从之前导出的备份文件中恢复。这将替换你当前的所有数据。',
+    import_description: '从之前导出的备份文件中恢复。这将替换你当前的所有数据。',
     import_action: '从文件导入',
     importing: '正在导入...',
     import_confirm_title: '替换所有数据？',
@@ -730,10 +701,8 @@ const zh = {
     import_success_title: '导入完成',
     import_success_message: '你的数据已成功从备份中恢复。',
     import_error_title: '导入失败',
-    import_error_message:
-      '无法导入备份文件，请确保它是有效的 Money2Time 备份。',
-    import_warning:
-      '导入备份将永久替换你当前的所有数据。如需保留现有数据，请先导出备份。',
+    import_error_message: '无法导入备份文件，请确保它是有效的 Money2Time 备份。',
+    import_warning: '导入备份将永久替换你当前的所有数据。如需保留现有数据，请先导出备份。',
   },
   tutorial: {
     progress: '{{current}} / {{total}}',
@@ -886,8 +855,7 @@ const zh = {
     hours_per_week: '每周工作时数',
     workdays_per_week: '每周工作天数',
     commute_minutes: '每个工作日通勤时间（往返，分钟）',
-    commute_helper:
-      '包括准备出门、通勤、停车等——所有因为工作才需要花费的时间。',
+    commute_helper: '包括准备出门、通勤、停车等——所有因为工作才需要花费的时间。',
     weekly_income: '每周收入',
     base_hourly_rate: '基础时薪',
     commute_hours_per_week: '每周通勤时数',

@@ -11,6 +11,7 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 
+import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
@@ -52,6 +53,7 @@ function SettingsHomeRoute({
       scrollToTopToken={scrollToTopToken}
       onOpenDisplay={() => navigation.navigate('DisplaySettings')}
       onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
+      onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
@@ -149,6 +151,12 @@ export function SettingsStack({
               }
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AccountSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <AccountSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="WageCalculator">

@@ -1,3 +1,4 @@
+export { AccountSettingsScreen } from './AccountSettingsScreen';
 export { AccountsScreen } from './AccountsScreen';
 export { CategoriesScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
