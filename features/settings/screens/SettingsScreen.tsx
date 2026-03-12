@@ -6,8 +6,8 @@ import {
   Palette,
   RefreshCcw,
   Repeat2,
+  SlidersHorizontal,
   Sparkles,
-  Trash2,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
@@ -56,6 +56,7 @@ interface SettingsScreenProps {
   scrollToTopToken?: number;
   onOpenDisplay: () => void;
   onOpenHourlyValue: () => void;
+  onOpenAccountSettings: () => void;
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
@@ -69,6 +70,7 @@ export function SettingsScreen({
   scrollToTopToken = 0,
   onOpenDisplay,
   onOpenHourlyValue,
+  onOpenAccountSettings,
   onOpenAccounts,
   onOpenCategories,
   onOpenRecurring,
@@ -77,17 +79,7 @@ export function SettingsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
-  const {
-    adRemovalState,
-    settings,
-    monthlyWages,
-    updateSettings,
-    isSimpleMode,
-    simpleWalletId,
-    switchToSimpleMode,
-    switchToPowerMode,
-    deleteSimpleWalletAndTransactions,
-  } = useApp();
+  const { adRemovalState, settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -290,6 +282,12 @@ export function SettingsScreen({
                 }
                 onPress={onOpenHourlyValue}
               />
+              <SettingsRowItem
+                icon={<SlidersHorizontal size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.account_settings')}
+                subtitle={I18n.t('settings.account_settings_subtitle')}
+                onPress={onOpenAccountSettings}
+              />
               {!isSimpleMode ? (
                 <SettingsRowItem
                   icon={<Landmark size={18} color={themeColors.primary} />}
@@ -360,72 +358,6 @@ export function SettingsScreen({
                 }}
               />
             </View>
-          </SettingsSection>
-
-          {/* Experience mode section */}
-          <SettingsSection
-            className="mt-5 gap-2"
-            title={I18n.t('settings.section_experience')}
-            showAccent={false}
-          >
-            <SettingsRowItem
-              icon={<Sparkles size={18} color={themeColors.primary} />}
-              label={I18n.t('settings.user_mode')}
-              subtitle={
-                isSimpleMode
-                  ? I18n.t('settings.user_mode_subtitle_simple')
-                  : I18n.t('settings.user_mode_subtitle_power')
-              }
-              onPress={() => {
-                if (isSimpleMode) {
-                  Alert.alert(
-                    I18n.t('settings.switch_to_power_title'),
-                    I18n.t('settings.switch_to_power_message'),
-                    [
-                      { text: I18n.t('common.cancel'), style: 'cancel' },
-                      {
-                        text: I18n.t('settings.user_mode_power'),
-                        onPress: () => switchToPowerMode(),
-                      },
-                    ],
-                  );
-                } else {
-                  Alert.alert(
-                    I18n.t('settings.switch_to_simple_title'),
-                    I18n.t('settings.switch_to_simple_message'),
-                    [
-                      { text: I18n.t('common.cancel'), style: 'cancel' },
-                      {
-                        text: I18n.t('settings.user_mode_simple'),
-                        onPress: () => switchToSimpleMode(),
-                      },
-                    ],
-                  );
-                }
-              }}
-            />
-            {!isSimpleMode && simpleWalletId !== null && (
-              <SettingsRowItem
-                icon={<Trash2 size={18} color={themeColors.error} />}
-                label={I18n.t('settings.remove_simple_wallet')}
-                subtitle={I18n.t('settings.remove_simple_wallet_subtitle')}
-                haptic="warning"
-                onPress={() => {
-                  Alert.alert(
-                    I18n.t('settings.remove_simple_wallet_title'),
-                    I18n.t('settings.remove_simple_wallet_message'),
-                    [
-                      { text: I18n.t('common.cancel'), style: 'cancel' },
-                      {
-                        text: I18n.t('settings.remove'),
-                        style: 'destructive',
-                        onPress: () => deleteSimpleWalletAndTransactions(),
-                      },
-                    ],
-                  );
-                }}
-              />
-            )}
           </SettingsSection>
 
           {shouldShowAdSupportSectionAtBottom ? <AdSupportSection /> : null}

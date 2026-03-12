@@ -11,6 +11,7 @@ export type SettingsStackParamList = {
   DisplaySettings: undefined;
   HourlyValue: undefined;
   WageCalculator: { monthKey: string; initialConfig: WageConfig };
+  AccountSettings: undefined;
   Accounts: undefined;
   Categories: undefined;
   CategoriesSubcategories: { parentId: string };
