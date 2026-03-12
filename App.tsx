@@ -517,7 +517,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   );
 }
 
-function AddTransactionRouteScreen({ navigation }: RootStackRouteProps<'AddTransaction'>) {
+function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'AddTransaction'>) {
   const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <AddTransactionScreen
@@ -527,6 +527,7 @@ function AddTransactionRouteScreen({ navigation }: RootStackRouteProps<'AddTrans
       }}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
+      initialAccountId={route.params?.initialAccountId}
     />
   );
 }
@@ -563,6 +564,9 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
       useNativeBackGesture
+      onOpenAddTransaction={(accountId) =>
+        navigation.push('AddTransaction', { initialAccountId: accountId })
+      }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }

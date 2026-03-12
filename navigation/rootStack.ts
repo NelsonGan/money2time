@@ -9,7 +9,7 @@ import type { WageConfig } from '~/types';
 
 export type RootStackParamList = {
   Main: undefined;
-  AddTransaction: undefined;
+  AddTransaction: { initialAccountId?: string } | undefined;
   EditTransaction: { transactionId: string };
   AccountDetail: { accountId: string };
   InsightsDrilldown: InsightsDrilldownPayload;

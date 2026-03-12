@@ -396,7 +396,7 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   },
   expense_trend: {
     fixedPeriodPreset: 'year',
-    allowAccountFilter: true,
+    allowAccountFilter: false,
   },
   asset_history: {
     fixedPeriodPreset: 'year',
@@ -4984,9 +4984,6 @@ export function InsightsScreen({
           <View style={styles.insightsFilterModalHeader}>
             <View>
               <Text variant="subheading">{I18n.t('insights.filters.title')}</Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('insights.filters.subtitle')}
-              </Text>
             </View>
             <View className="flex-row items-center gap-2">
               <Pressable
@@ -5119,7 +5116,7 @@ export function InsightsScreen({
                   contentContainerStyle={styles.insightsFilterPillsContent}
                 >
                   <FilterPill
-                    label={I18n.t('insights.filters.all_accounts')}
+                    label={I18n.t('insights.filters.all')}
                     active={selectedAccountIds.length === 0}
                     onPress={() => setSelectedAccountIds([])}
                   />
@@ -5138,16 +5135,11 @@ export function InsightsScreen({
             {hasAssetHistoryAccountExclusionFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-1 pr-2">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.asset_history_accounts')}
-                    </Text>
-                    <Text variant="label" tone="muted" className="mt-1">
-                      {I18n.t('insights.filters.include_accounts')}
-                    </Text>
-                  </View>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.accounts')}
+                  </Text>
                   <FilterPill
-                    label={I18n.t('insights.filters.all_selected')}
+                    label={I18n.t('insights.filters.all')}
                     active={
                       includedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
                     }
@@ -5175,12 +5167,11 @@ export function InsightsScreen({
 
             {hasExpenseTrendExclusionFilter ? (
               <View className="gap-3">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.expense_trend_exclusions')}
-                </Text>
-
                 <View className="gap-2">
-                  <View className="flex-row justify-end">
+                  <View className="flex-row items-center justify-between gap-3">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.accounts')}
+                    </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
                       active={excludedExpenseTrendAccountIds.length === 0}
@@ -5207,8 +5198,8 @@ export function InsightsScreen({
 
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('insights.filters.exclude_expense_categories')}
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.categories')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
@@ -5238,14 +5229,9 @@ export function InsightsScreen({
             {hasTimeCostExpenseCategoryExclusionFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-1 pr-2">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.time_cost_exclusions')}
-                    </Text>
-                    <Text variant="label" tone="muted" className="mt-1">
-                      {I18n.t('insights.filters.exclude_expense_categories')}
-                    </Text>
-                  </View>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.categories')}
+                  </Text>
                   <FilterPill
                     label={I18n.t('common.clear')}
                     active={excludedTimeCostExpenseCategoryId === null}
@@ -5268,14 +5254,10 @@ export function InsightsScreen({
 
             {hasSavingsCategoryExclusionFilter ? (
               <View className="gap-3">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.savings_exclusions')}
-                </Text>
-
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('insights.filters.exclude_income_categories')}
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.income')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
@@ -5302,8 +5284,8 @@ export function InsightsScreen({
 
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('insights.filters.exclude_expense_categories')}
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.expense')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
