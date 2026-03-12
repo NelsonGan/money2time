@@ -20,6 +20,7 @@ export function MonthControlsHeader({
   summary,
   children,
   hideNavigation = false,
+  showAccent = true,
 }: {
   title?: string;
   titleNode?: React.ReactNode;
@@ -33,41 +34,58 @@ export function MonthControlsHeader({
   summary?: React.ReactNode;
   children?: React.ReactNode;
   hideNavigation?: boolean;
+  showAccent?: boolean;
 }) {
   const themeColors = useThemeColors();
 
   return (
-    <View className="bg-background pb-2 pt-1">
-      <View className="px-5 pt-2 gap-3">
+    <View className="bg-background pb-1.5 pt-1">
+      <View className="px-5 pt-1.5 gap-2.5">
+        {/* Title row with decorative accent */}
         <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-          <View className="flex-1">
+          <View className="min-h-10 flex-1 justify-center">
             {titleNode ? (
               titleNode
             ) : (
               <>
-                {title ? <Text variant="heading">{title}</Text> : null}
+                {title ? (
+                  <View className="flex-row items-center gap-2">
+                    {showAccent ? (
+                      <View
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: themeColors.primary, opacity: 0.5 }}
+                      />
+                    ) : null}
+                    <Text variant="heading" className="tracking-tight">
+                      {title}
+                    </Text>
+                  </View>
+                ) : null}
                 {subtitle ? (
-                  <Text variant="friendly" tone="muted" className="mt-0.5">
+                  <Text variant="caption" tone="muted" className="mt-0.5">
                     {subtitle}
                   </Text>
                 ) : null}
               </>
             )}
           </View>
-          {actions ? <View className="flex-row items-center gap-2">{actions}</View> : null}
+          {actions ? (
+            <View className="min-h-10 flex-row items-center justify-end gap-2">{actions}</View>
+          ) : null}
         </View>
 
+        {/* Month navigation — floating capsule style */}
         {!hideNavigation ? (
-          <View className="rounded-[28px] bg-card border border-border/40 px-2 py-2">
+          <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
             <View className="flex-row items-center justify-between">
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
                   onPrevMonth();
                 }}
-                className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
+                className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
               >
-                <ChevronLeft size={18} color={themeColors.textSoft} />
+                <ChevronLeft size={16} color={themeColors.textSoft} />
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -81,7 +99,7 @@ export function MonthControlsHeader({
                   onMonthPress ? 'active:opacity-80' : undefined,
                 )}
               >
-                <Text variant="subheading" className="text-foreground">
+                <Text variant="bodyStrong" className="text-foreground tracking-tight">
                   {monthLabel}
                 </Text>
               </Pressable>
@@ -90,9 +108,9 @@ export function MonthControlsHeader({
                   void triggerHaptic('selection');
                   onNextMonth();
                 }}
-                className="h-10 w-10 rounded-full items-center justify-center active:opacity-70"
+                className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
               >
-                <ChevronRight size={18} color={themeColors.textSoft} />
+                <ChevronRight size={16} color={themeColors.textSoft} />
               </Pressable>
             </View>
           </View>
@@ -100,7 +118,7 @@ export function MonthControlsHeader({
 
         {summary ? <View className="flex-row flex-wrap gap-2">{summary}</View> : null}
 
-        {children ? <View className="gap-2.5 pt-0.5">{children}</View> : null}
+        {children ? <View className="gap-2 pt-0.5">{children}</View> : null}
       </View>
     </View>
   );

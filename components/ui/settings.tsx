@@ -64,7 +64,7 @@ function HeaderIconButton({
         void triggerHaptic('selection');
         onPress();
       }}
-      className="h-10 w-10 items-center justify-center rounded-full border border-border/35 bg-card"
+      className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card shadow-soft"
     >
       {icon}
     </Pressable>
@@ -94,14 +94,14 @@ export function SettingsHeader({
   const showActionRow = !!onBack || !!onClose;
 
   return (
-    <View className={cn('px-5 pt-5 pb-3', className)}>
+    <View className={cn('px-5 pt-3 pb-2', className)}>
       {showActionRow ? (
         <View className="mb-3 flex-row items-center justify-between">
           <View className="h-10 w-10 justify-center">
             {onBack ? (
               <HeaderIconButton
                 onPress={onBack}
-                icon={<ChevronLeft size={18} color={themeColors.textMuted} />}
+                icon={<ChevronLeft size={20} color={themeColors.textMuted} />}
                 label={I18n.t('common.back')}
               />
             ) : null}
@@ -118,19 +118,22 @@ export function SettingsHeader({
         </View>
       ) : null}
 
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1">
-          <Text variant="heading">{title}</Text>
-          {subtitleNode ? (
-            <View className="mt-1">{subtitleNode}</View>
-          ) : subtitle ? (
-            <Text variant="friendly" tone="muted" className="mt-1">
-              {subtitle}
-            </Text>
-          ) : null}
+      <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
+        <View className="min-h-10 flex-1 justify-center">
+          <Text variant="heading" className="tracking-tight">
+            {title}
+          </Text>
         </View>
-        {rightAccessory}
+        {rightAccessory ? <View className="h-10 justify-center">{rightAccessory}</View> : null}
       </View>
+
+      {subtitleNode ? (
+        <View className="mt-1">{subtitleNode}</View>
+      ) : subtitle ? (
+        <Text variant="caption" tone="muted" className="mt-1">
+          {subtitle}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -141,6 +144,7 @@ interface SettingsSectionProps extends ViewProps {
   subtitle?: string;
   icon?: React.ReactNode;
   danger?: boolean;
+  showAccent?: boolean;
 }
 
 export function SettingsSection({
@@ -149,20 +153,22 @@ export function SettingsSection({
   subtitle,
   icon,
   danger = false,
+  showAccent = true,
   className,
   ...props
 }: SettingsSectionProps) {
+  const themeColors = useThemeColors();
   const hasHeader = !!title || !!subtitle || !!icon;
 
   return (
-    <View className={cn('mt-6 gap-2.5', className)} {...props}>
+    <View className={cn('mt-7 gap-3', className)} {...props}>
       {hasHeader ? (
-        <View className="flex-row items-center gap-2.5 px-1">
+        <View className="flex-row items-center gap-3 px-1">
           {icon ? (
             <View
               className={cn(
-                'h-8 w-8 items-center justify-center rounded-full border bg-card shadow-soft',
-                danger ? 'border-destructive/25' : 'border-border/40',
+                'h-9 w-9 items-center justify-center rounded-2xl',
+                danger ? 'bg-destructive/10' : 'bg-primary/10',
               )}
             >
               {icon}
@@ -170,9 +176,26 @@ export function SettingsSection({
           ) : null}
           <View className="flex-1">
             {title ? (
-              <Text variant="subheading" className={danger ? 'text-destructive' : undefined}>
-                {title}
-              </Text>
+              <View className="flex-row items-center gap-2">
+                {showAccent ? (
+                  <View
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{
+                      backgroundColor: danger ? themeColors.error : themeColors.primary,
+                      opacity: 0.6,
+                    }}
+                  />
+                ) : null}
+                <Text
+                  variant="label"
+                  className={cn(
+                    'text-[12px] tracking-widest',
+                    danger ? 'text-destructive' : 'text-muted-foreground',
+                  )}
+                >
+                  {title}
+                </Text>
+              </View>
             ) : null}
             {subtitle ? (
               <Text variant="friendly" tone="muted" className="mt-0.5">
@@ -211,10 +234,10 @@ export function SettingsActionBar({
   return (
     <SafeAreaView
       edges={['bottom']}
-      className={cn('border-t border-border/35 bg-background', className)}
+      className={cn('border-t border-border/25 bg-background', className)}
     >
       <View className="px-5 pb-3 pt-3">
-        <View className="flex-row items-center gap-2.5">
+        <View className="flex-row items-center gap-3">
           <Button
             variant="secondary"
             className="flex-1"
@@ -265,27 +288,31 @@ export function SettingsRowItem({
         onPress();
       }}
       className={cn(
-        'flex-row items-center gap-3.5 rounded-[22px] border border-border/40 bg-card px-4 py-4 shadow-soft',
+        'flex-row items-center gap-4 rounded-[24px] border border-border/30 bg-card px-4 py-4 shadow-soft active:scale-[0.98] active:opacity-90',
         className,
       )}
     >
       {leading ? (
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/8">
+        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primary/8 border border-primary/10">
           {leading}
         </View>
       ) : null}
       <View className="flex-1">
-        <Text variant="caption" className="text-foreground">
+        <Text variant="bodyStrong" className="text-foreground">
           {label}
         </Text>
         {subtitle ? (
-          <Text variant="label" tone="muted" className="mt-0.5">
+          <Text variant="caption" tone="muted" className="mt-0.5">
             {subtitle}
           </Text>
         ) : null}
       </View>
       {rightAccessory ??
-        (showChevron ? <ChevronRight size={16} color={themeColors.textMuted} /> : null)}
+        (showChevron ? (
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/50">
+            <ChevronRight size={14} color={themeColors.textMuted} />
+          </View>
+        ) : null)}
     </Pressable>
   );
 }

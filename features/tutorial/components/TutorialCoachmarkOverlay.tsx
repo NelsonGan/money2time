@@ -168,7 +168,10 @@ export function TutorialCoachmarkOverlay({
     const tooltipBottomClearance = isConverterStep
       ? FAB_TOOLTIP_BOTTOM_CLEARANCE
       : DEFAULT_TOOLTIP_BOTTOM_CLEARANCE;
-    const maxTop = Math.max(minTop, windowHeight - TOOLTIP_ESTIMATED_HEIGHT - tooltipBottomClearance);
+    const maxTop = Math.max(
+      minTop,
+      windowHeight - TOOLTIP_ESTIMATED_HEIGHT - tooltipBottomClearance,
+    );
     if (isConverterStep) {
       return maxTop;
     }
@@ -186,18 +189,17 @@ export function TutorialCoachmarkOverlay({
     return Math.max(minTop, Math.min(maxTop, aboveTargetY));
   }, [highlightFrame, targetId, windowHeight]);
 
-  const overlayPalette = useMemo(
-    () => {
-      const tooltipIsDark = !isDark;
-      return {
-        backdrop: isDark ? 'rgba(9, 14, 24, 0.62)' : 'rgba(15, 23, 42, 0.44)',
-        // Invert tooltip surface by theme for stronger contrast.
-        tooltipBackground: tooltipIsDark ? '#0F172A' : '#F8FAFC',
-        tooltipBorder: tooltipIsDark ? 'rgba(255, 255, 255, 0.20)' : 'rgba(15, 23, 42, 0.18)',
-        titleText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
-        bodyText: tooltipIsDark ? '#E2E8F0' : '#334155',
-        mutedText: tooltipIsDark ? '#94A3B8' : '#64748B',
-        badgeText: tooltipIsDark ? '#C9D6EB' : themeColors.primary,
+  const overlayPalette = useMemo(() => {
+    const tooltipIsDark = !isDark;
+    return {
+      backdrop: isDark ? 'rgba(9, 14, 24, 0.62)' : 'rgba(15, 23, 42, 0.44)',
+      // Invert tooltip surface by theme for stronger contrast.
+      tooltipBackground: tooltipIsDark ? '#0F172A' : '#F8FAFC',
+      tooltipBorder: tooltipIsDark ? 'rgba(255, 255, 255, 0.20)' : 'rgba(15, 23, 42, 0.18)',
+      titleText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
+      bodyText: tooltipIsDark ? '#E2E8F0' : '#334155',
+      mutedText: tooltipIsDark ? '#94A3B8' : '#64748B',
+      badgeText: tooltipIsDark ? '#C9D6EB' : themeColors.primary,
       highlightBorder: isDark ? 'rgba(255,255,255,0.92)' : 'rgba(15,23,42,0.80)',
       highlightFill: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.02)',
       highlightHaloBorder: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(15,23,42,0.30)',
@@ -208,19 +210,15 @@ export function TutorialCoachmarkOverlay({
       secondaryHighlightFill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.04)',
       loadingHighlightBorder: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(15,23,42,0.22)',
       loadingHighlightFill: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.34)',
-        // Restore neutral button styling (no green tint), matched to tooltip surface.
-        subtleButtonBorder: tooltipIsDark
-          ? 'rgba(255, 255, 255, 0.32)'
-          : 'rgba(15, 23, 42, 0.24)',
-        subtleButtonBackground: tooltipIsDark
-          ? 'rgba(255, 255, 255, 0.10)'
-          : 'rgba(15, 23, 42, 0.07)',
-        subtleButtonText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
-        spinner: tooltipIsDark ? '#94A3B8' : '#475569',
-      };
-    },
-    [isDark, themeColors],
-  );
+      // Restore neutral button styling (no green tint), matched to tooltip surface.
+      subtleButtonBorder: tooltipIsDark ? 'rgba(255, 255, 255, 0.32)' : 'rgba(15, 23, 42, 0.24)',
+      subtleButtonBackground: tooltipIsDark
+        ? 'rgba(255, 255, 255, 0.10)'
+        : 'rgba(15, 23, 42, 0.07)',
+      subtleButtonText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
+      spinner: tooltipIsDark ? '#94A3B8' : '#475569',
+    };
+  }, [isDark, themeColors]);
 
   if (!visible) return null;
 
@@ -289,7 +287,11 @@ export function TutorialCoachmarkOverlay({
       ) : (
         <>
           <View
-            style={[styles.backdrop, StyleSheet.absoluteFillObject, { backgroundColor: overlayPalette.backdrop }]}
+            style={[
+              styles.backdrop,
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: overlayPalette.backdrop },
+            ]}
           />
           <View
             style={[
@@ -348,7 +350,9 @@ export function TutorialCoachmarkOverlay({
                 }}
                 onPress={onBack}
               >
-                <Text style={{ color: overlayPalette.subtleButtonText }}>{I18n.t('common.back')}</Text>
+                <Text style={{ color: overlayPalette.subtleButtonText }}>
+                  {I18n.t('common.back')}
+                </Text>
               </Button>
             </View>
           ) : null}
@@ -370,7 +374,9 @@ export function TutorialCoachmarkOverlay({
             }}
             onPress={onSkip}
           >
-            <Text style={{ color: overlayPalette.subtleButtonText }}>{I18n.t('tutorial.skip')}</Text>
+            <Text style={{ color: overlayPalette.subtleButtonText }}>
+              {I18n.t('tutorial.skip')}
+            </Text>
           </Button>
         ) : null}
       </View>

@@ -29,7 +29,10 @@ function normalizeEnvValue(value: string | undefined) {
   return normalized ? normalized : null;
 }
 
-function resolveAdMobAppId(envName: 'EXPO_PUBLIC_ADMOB_ANDROID_APP_ID' | 'EXPO_PUBLIC_ADMOB_IOS_APP_ID', fallback: string) {
+function resolveAdMobAppId(
+  envName: 'EXPO_PUBLIC_ADMOB_ANDROID_APP_ID' | 'EXPO_PUBLIC_ADMOB_IOS_APP_ID',
+  fallback: string,
+) {
   const configured = normalizeEnvValue(process.env[envName]);
 
   if (configured && ADMOB_APP_ID_PATTERN.test(configured)) {

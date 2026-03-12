@@ -16,7 +16,9 @@ type TextVariant =
   | 'body'
   | 'bodyStrong'
   | 'caption'
-  | 'label';
+  | 'label'
+  | 'mono'
+  | 'monoLg';
 
 type TextTone =
   | 'default'
@@ -29,8 +31,8 @@ type TextTone =
   | 'inverse';
 
 const variantMap: Record<TextVariant, string> = {
-  hero: 'text-[42px] leading-[48px] font-extrabold tracking-tight',
-  display: 'text-[36px] leading-[42px] font-extrabold',
+  hero: 'text-[48px] leading-[54px] font-extrabold tracking-tighter',
+  display: 'text-[38px] leading-[44px] font-extrabold tracking-tight',
   title: 'text-[30px] leading-[36px] font-extrabold',
   heading: 'text-[24px] leading-[30px] font-bold',
   subheading: 'text-[19px] leading-[26px] font-bold',
@@ -38,7 +40,9 @@ const variantMap: Record<TextVariant, string> = {
   body: 'text-[16px] leading-6 font-normal',
   bodyStrong: 'text-[16px] leading-6 font-bold',
   caption: 'text-[13px] leading-[18px] font-semibold',
-  label: 'text-[11px] leading-[14px] font-bold tracking-wide',
+  label: 'text-[11px] leading-[14px] font-bold tracking-widest uppercase',
+  mono: 'text-[16px] leading-[20px] font-bold tracking-tight',
+  monoLg: 'text-[22px] leading-[26px] font-extrabold tracking-tight',
 };
 
 const toneMap: Record<TextTone, string> = {

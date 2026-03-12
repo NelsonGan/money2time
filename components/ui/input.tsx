@@ -53,11 +53,11 @@ const Input = React.forwardRef<TextInput, InputProps>(
       <View className={cn('w-full', containerClassName)}>
         {label ? (
           <View className="mb-2.5 px-1 flex-row items-center">
-            <Text variant="caption" tone="muted">
+            <Text variant="label" tone="muted">
               {label}
             </Text>
             {required ? (
-              <Text variant="caption" tone="error">
+              <Text variant="label" tone="error">
                 {' '}
                 *
               </Text>
@@ -66,14 +66,14 @@ const Input = React.forwardRef<TextInput, InputProps>(
         ) : null}
         <View
           className={cn(
-            'rounded-3xl border bg-card/95 px-4',
+            'rounded-[22px] border bg-card px-4',
             isMultiline ? 'min-h-[112px] py-3' : 'h-[54px] py-0',
             hasError
-              ? 'border-destructive/55 bg-destructive/5'
+              ? 'border-destructive/40 bg-destructive/4'
               : focused
-                ? 'border-primary/55 bg-primary/5'
-                : 'border-border/40',
-            !editable && 'opacity-55',
+                ? 'border-primary/40 bg-primary/4 shadow-glow'
+                : 'border-border/30',
+            !editable && 'opacity-50',
           )}
         >
           <View
@@ -96,7 +96,7 @@ const Input = React.forwardRef<TextInput, InputProps>(
               numberOfLines={isMultiline ? (numberOfLines ?? 4) : undefined}
               textAlignVertical={isMultiline ? 'top' : 'center'}
               className={cn(
-                'flex-1 text-[16px] leading-6 text-foreground',
+                'flex-1 text-[16px] leading-6 text-foreground font-medium',
                 hasLeading && 'pl-0',
                 isMultiline ? 'min-h-[96px] pt-0.5' : 'h-full py-0',
                 className,

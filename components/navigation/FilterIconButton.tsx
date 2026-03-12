@@ -16,12 +16,12 @@ export function FilterIconButton({ onPress, count = 0 }: { onPress: () => void; 
         void triggerHaptic('selection');
         onPress();
       }}
-      className="h-10 w-10 items-center justify-center rounded-full border border-primary/45 bg-primary/10 active:opacity-85"
+      className="h-10 w-10 items-center justify-center rounded-2xl border border-primary/30 bg-primary/8 shadow-soft active:scale-95"
     >
-      <SlidersHorizontal size={15} color={themeColors.primary} />
+      <SlidersHorizontal size={15} color={themeColors.primary} strokeWidth={2.2} />
       {visibleCount > 0 ? (
-        <View className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-destructive px-1.5 py-[1px] items-center justify-center">
-          <Text variant="label" className="text-white">
+        <View className="absolute -right-1.5 -top-1.5 min-w-[20px] h-[20px] rounded-full bg-destructive px-1.5 items-center justify-center shadow-sm">
+          <Text variant="label" className="text-white text-[10px]">
             {visibleCount}
           </Text>
         </View>

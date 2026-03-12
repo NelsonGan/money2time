@@ -1,6 +1,6 @@
-import { Pencil, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -205,7 +205,7 @@ export function InsightsDrilldownScreen({
         { value: 'expense', label: I18n.t('transactions.filters.spent') },
         { value: 'income', label: I18n.t('transactions.filters.earned') },
         { value: 'transfer', label: I18n.t('transactions.filters.moved') },
-      ] satisfies Array<{ value: EditableTransactionType; label: string }>,
+      ] satisfies { value: EditableTransactionType; label: string }[],
     [],
   );
 
@@ -410,12 +410,7 @@ export function InsightsDrilldownScreen({
         : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false }),
     [selectedTransactionTotal, settings],
   );
-  const selectedTransactionTotalToneClass =
-    selectedTransactionTotal > 0
-      ? 'text-success'
-      : selectedTransactionTotal < 0
-        ? 'text-destructive'
-        : 'text-muted-foreground';
+  const selectedTransactionTotalToneClass = 'text-foreground';
   const shouldGroupByDate = drilldownSortOption !== 'largest_value';
   const handleSortOptionChange = useCallback(
     (nextOption: DrilldownSortOption) => {
@@ -543,7 +538,7 @@ export function InsightsDrilldownScreen({
       baseUpdates.note = normalizedNote.length > 0 ? normalizedNote : null;
     }
 
-    const updatesById: Array<{
+    const updatesById: {
       id: string;
       input: {
         date?: string;
@@ -554,7 +549,7 @@ export function InsightsDrilldownScreen({
         fromAccountId?: string | null;
         toAccountId?: string | null;
       };
-    }> = [];
+    }[] = [];
 
     selectedTransactionIds.forEach((transactionId) => {
       const existing = payloadTransactionById.get(transactionId);

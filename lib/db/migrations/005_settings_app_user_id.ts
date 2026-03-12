@@ -21,7 +21,7 @@ export const migration005SettingsAppUserId: DbMigration = {
     const hasAppUserId = columns.some((column) => column.name === 'app_user_id');
 
     if (!hasAppUserId) {
-      db.execSync("ALTER TABLE settings ADD COLUMN app_user_id TEXT;");
+      db.execSync('ALTER TABLE settings ADD COLUMN app_user_id TEXT;');
     }
 
     const rows = db.getAllSync<{ id: string; app_user_id: string | null }>(

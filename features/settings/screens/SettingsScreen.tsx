@@ -21,10 +21,10 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
-  SettingsHeader,
   SettingsPageLayout,
   SettingsRowItem,
   SettingsSection,
@@ -42,7 +42,9 @@ type SettingsTutorialTargetId =
   | 'settings.recurring'
   | 'settings.management';
 
-function isSettingsTutorialTargetId(targetId: string | null | undefined): targetId is SettingsTutorialTargetId {
+function isSettingsTutorialTargetId(
+  targetId: string | null | undefined,
+): targetId is SettingsTutorialTargetId {
   return (
     targetId === 'settings.start_tutorial' ||
     targetId === 'settings.recurring' ||
@@ -136,7 +138,8 @@ export function SettingsScreen({
     measureTutorialTarget('settings.management');
   }, [measureTutorialTarget]);
   const activeTutorialTargetId =
-    tutorialSpotlightRequest?.active && isSettingsTutorialTargetId(tutorialSpotlightRequest.targetId)
+    tutorialSpotlightRequest?.active &&
+    isSettingsTutorialTargetId(tutorialSpotlightRequest.targetId)
       ? tutorialSpotlightRequest.targetId
       : null;
 
@@ -214,9 +217,12 @@ export function SettingsScreen({
 
     scheduleTutorialTargetMeasurement(activeTutorialTargetId);
 
-    const secondPass = setTimeout(() => {
-      measureTutorialTarget(activeTutorialTargetId);
-    }, shouldScrollIntoView ? 180 : 120);
+    const secondPass = setTimeout(
+      () => {
+        measureTutorialTarget(activeTutorialTargetId);
+      },
+      shouldScrollIntoView ? 180 : 120,
+    );
 
     return () => {
       clearTimeout(secondPass);
@@ -240,6 +246,16 @@ export function SettingsScreen({
 
   return (
     <SettingsPageLayout>
+      <MonthControlsHeader
+        title={I18n.t('settings.title')}
+        monthLabel=""
+        onPrevMonth={() => {}}
+        onNextMonth={() => {}}
+        hideNavigation
+        showAccent={false}
+        actions={<DisplayModeToggle />}
+      />
+
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
@@ -247,19 +263,14 @@ export function SettingsScreen({
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <Animated.View entering={FadeIn.duration(400)}>
-          <SettingsHeader
-            className="px-0 pt-5 pb-2"
-            title={I18n.t('settings.title')}
-            subtitle={I18n.t('settings.subtitle')}
-            rightAccessory={<DisplayModeToggle />}
-          />
-        </Animated.View>
-
-        <Animated.View entering={FadeIn.delay(200).duration(400)}>
+        <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
           {shouldShowAdSupportSectionAtTop ? <AdSupportSection /> : null}
 
-          <SettingsSection className="mt-5 gap-2" title={I18n.t('settings.section_settings')}>
+          <SettingsSection
+            className="mt-5 gap-2"
+            title={I18n.t('settings.section_settings')}
+            showAccent={false}
+          >
             <View style={styles.rowsGroup}>
               <SettingsRowItem
                 icon={<Palette size={18} color={themeColors.primary} />}
@@ -352,7 +363,11 @@ export function SettingsScreen({
           </SettingsSection>
 
           {/* Experience mode section */}
-          <SettingsSection className="mt-5 gap-2" title={I18n.t('settings.section_experience')}>
+          <SettingsSection
+            className="mt-5 gap-2"
+            title={I18n.t('settings.section_experience')}
+            showAccent={false}
+          >
             <SettingsRowItem
               icon={<Sparkles size={18} color={themeColors.primary} />}
               label={I18n.t('settings.user_mode')}
@@ -422,8 +437,10 @@ export function SettingsScreen({
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  contentBody: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   },
   rowsGroup: {
     marginTop: spacing.xs,

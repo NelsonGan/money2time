@@ -301,7 +301,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const renderProgressDots = () => (
     <View
-      className="flex-row items-center justify-center gap-1.5 pt-3 pb-1"
+      className="flex-row items-center justify-center gap-2 pt-4 pb-2"
       accessibilityLabel={I18n.t('onboarding.flow.step_a11y', {
         step: visualStep,
         total: totalVisualSteps,
@@ -309,12 +309,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       accessibilityRole="header"
     >
       {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
-        <View key={i} className="flex-row items-center">
+        <View key={i} className="flex-row items-center gap-2">
           <View
-            className={`h-2.5 w-2.5 rounded-full ${visualStep >= i ? 'bg-primary' : 'bg-secondary'}`}
+            className={`rounded-full ${
+              visualStep >= i ? 'h-2.5 w-2.5 bg-primary shadow-glow' : 'h-2 w-2 bg-secondary/60'
+            }`}
           />
           {i < totalVisualSteps && (
-            <View className={`h-0.5 w-8 ${visualStep > i ? 'bg-primary' : 'bg-secondary'}`} />
+            <View
+              className={`h-[1.5px] w-6 rounded-full ${
+                visualStep > i ? 'bg-primary/50' : 'bg-secondary/40'
+              }`}
+            />
           )}
         </View>
       ))}
@@ -326,7 +332,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const renderStepLabel = () => {
     if (step === 1) return null;
     return (
-      <Text variant="label" tone="muted" className="text-center uppercase tracking-wider mt-2">
+      <Text variant="label" tone="muted" className="text-center tracking-widest mt-1">
         {I18n.t('onboarding.progress_step_of', { step: visualStep, total: totalVisualSteps })}
       </Text>
     );

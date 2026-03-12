@@ -199,7 +199,11 @@ export function AdSupportSection() {
       : 'settings.ad_support_unavailable_no_products';
 
   return (
-    <SettingsSection title={I18n.t('settings.advertisement')} className="mt-5 gap-3">
+    <SettingsSection
+      title={I18n.t('settings.advertisement')}
+      className="mt-5 gap-3"
+      showAccent={false}
+    >
       {adRemovalState.hasAdFreeEntitlement ? (
         <Card variant="soft">
           <CardContent className="gap-2">

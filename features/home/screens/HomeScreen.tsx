@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   type SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -21,7 +22,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Button, Card, Text } from '~/components/ui';
+import { Button, Card, SettingsHeader, Text } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { HeroAmountConverter } from '~/features/home/components';
@@ -89,9 +90,30 @@ interface RecurringDisplayRow {
   id: string;
   name: string;
   isActive: boolean;
+  recurrencePattern: RecurringSectionId;
   cadenceLabel: string;
   categoryIcon: string;
   valueLabel: string;
+}
+
+type RecurringSectionId = (typeof RECURRING_SECTION_ORDER)[number];
+
+interface RecurringDisplaySection {
+  id: RecurringSectionId;
+  label: string;
+  rows: RecurringDisplayRow[];
+}
+
+const RECURRING_SECTION_ORDER = ['monthly', 'yearly', 'weekly', 'daily'] as const;
+
+function formatRecurringSectionLabel(pattern: RecurringSectionId): string {
+  const labels: Record<RecurringSectionId, string> = {
+    monthly: I18n.t('transactions.editor.monthly'),
+    yearly: I18n.t('transactions.editor.yearly'),
+    weekly: I18n.t('transactions.editor.weekly'),
+    daily: I18n.t('transactions.editor.daily'),
+  };
+  return labels[pattern];
 }
 
 function RecurringRuleRow({
@@ -104,11 +126,11 @@ function RecurringRuleRow({
   themeColors: { primary: string; success: string; textMuted: string; border: string };
 }) {
   const iconBackgroundStyle = useMemo(
-    () => ({ backgroundColor: `${themeColors.primary}18` }),
+    () => ({ backgroundColor: `${themeColors.primary}14` }),
     [themeColors.primary],
   );
   const dividerStyle = useMemo(
-    () => ({ borderBottomColor: themeColors.border }),
+    () => ({ borderBottomColor: `${themeColors.border}60` }),
     [themeColors.border],
   );
   const inactiveDotStyle = useMemo(
@@ -138,13 +160,13 @@ function RecurringRuleRow({
           ) : (
             <View style={[styles.recurringStaticDot, inactiveDotStyle]} />
           )}
-          <Text variant="label" tone="muted">
+          <Text variant="caption" tone="muted">
             {item.cadenceLabel}
           </Text>
         </View>
       </View>
       <Text
-        variant="caption"
+        variant="mono"
         className={item.isActive ? 'text-destructive' : 'text-muted-foreground'}
         numberOfLines={1}
       >
@@ -154,7 +176,7 @@ function RecurringRuleRow({
   );
 }
 
-// Underline-style tab bar
+// Capsule-style tab bar
 function HomeTabs({
   tabs,
   activeIndex,
@@ -168,17 +190,8 @@ function HomeTabs({
   pagerWidth: number;
   onTabChange: (index: number) => void;
 }) {
-  const themeColors = useThemeColors();
   const [barWidth, setBarWidth] = useState(0);
   const tabWidth = barWidth > 0 ? barWidth / tabs.length : 0;
-  const tabsBorderStyle = useMemo(
-    () => ({ borderBottomColor: themeColors.border }),
-    [themeColors.border],
-  );
-  const indicatorColorStyle = useMemo(
-    () => ({ backgroundColor: themeColors.primary }),
-    [themeColors.primary],
-  );
 
   const indicatorStyle = useAnimatedStyle(() => ({
     transform: [
@@ -200,10 +213,15 @@ function HomeTabs({
 
   return (
     <View
-      style={[styles.tabsContainer, tabsBorderStyle]}
-      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+      className="rounded-pill bg-secondary/40 px-1.5 py-1.5"
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width - 12)}
     >
-      <View style={styles.tabsRow}>
+      <View className="relative flex-row" style={{ minHeight: 36 }}>
+        {/* Sliding capsule indicator */}
+        <Animated.View
+          className="absolute top-0 bottom-0 rounded-[16px] bg-card shadow-soft border border-border/30"
+          style={indicatorStyle}
+        />
         {tabs.map((label, index) => (
           <Pressable
             key={label}
@@ -214,11 +232,10 @@ function HomeTabs({
               void triggerHaptic('selection');
               onTabChange(index);
             }}
-            style={styles.tabPressable}
-            className="active:opacity-70"
+            className="z-10 h-9 flex-1 items-center justify-center px-2"
           >
             <Text
-              variant="bodyStrong"
+              variant="caption"
               className={cn(activeIndex === index ? 'text-foreground' : 'text-muted-foreground')}
             >
               {label}
@@ -226,7 +243,6 @@ function HomeTabs({
           </Pressable>
         ))}
       </View>
-      <Animated.View style={[styles.tabIndicator, indicatorStyle, indicatorColorStyle]} />
     </View>
   );
 }
@@ -330,9 +346,10 @@ export function HomeScreen({
       }
     };
 
-    const next: Array<
-      (typeof walletRecurringRules)[number] & { monthlyAmount: number; monthlyHours: number }
-    > = [];
+    const next: ((typeof walletRecurringRules)[number] & {
+      monthlyAmount: number;
+      monthlyHours: number;
+    })[] = [];
     walletRecurringRules.forEach((rule) => {
       if (rule.type !== 'expense') return;
       const factor = monthlyFactor(rule.recurrencePattern, rule.recurrenceInterval);
@@ -375,6 +392,7 @@ export function HomeScreen({
           id: rule.id,
           name: rule.name,
           isActive: rule.isActive,
+          recurrencePattern: rule.recurrencePattern,
           cadenceLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
           categoryIcon,
           valueLabel: isTimeMode
@@ -384,6 +402,19 @@ export function HomeScreen({
       }),
     [categoryById, isTimeMode, recurringInsights, settings],
   );
+  const recurringSections = useMemo<RecurringDisplaySection[]>(() => {
+    const sections: RecurringDisplaySection[] = [];
+    RECURRING_SECTION_ORDER.forEach((pattern) => {
+      const rows = recurringRows.filter((item) => item.recurrencePattern === pattern);
+      if (rows.length === 0) return;
+      sections.push({
+        id: pattern,
+        label: formatRecurringSectionLabel(pattern),
+        rows,
+      });
+    });
+    return sections;
+  }, [recurringRows]);
   const pagerPageStyle = useMemo(() => [styles.pagerPage, { width: screenWidth }], [screenWidth]);
   const initialPagerOffset = useMemo(
     () => ({ x: defaultTabIndex * screenWidth, y: 0 }),
@@ -436,7 +467,10 @@ export function HomeScreen({
       return;
     }
 
-    if (tutorialSpotlightRequest.targetId === 'home.converter' && activeHomeTabIndex !== defaultTabIndex) {
+    if (
+      tutorialSpotlightRequest.targetId === 'home.converter' &&
+      activeHomeTabIndex !== defaultTabIndex
+    ) {
       setActiveHomeTabIndex(defaultTabIndex);
       pagerRef.current?.scrollTo({ x: defaultTabIndex * screenWidth, animated: false });
     }
@@ -480,15 +514,31 @@ export function HomeScreen({
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
     >
-      <View style={styles.greetingSection}>
-        <Text variant="heading">{greeting}</Text>
-        <Text variant="friendly" tone="muted" className="mt-1">
-          {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
-        </Text>
+      {/* Hero greeting with decorative background */}
+      <View className="relative overflow-hidden">
+        {/* Decorative gradient blobs */}
+        <View
+          className="absolute -top-16 -right-12 h-40 w-40 rounded-full opacity-[0.06]"
+          style={{ backgroundColor: themeColors.primary }}
+        />
+        <View
+          className="absolute top-8 -left-8 h-24 w-24 rounded-full opacity-[0.04]"
+          style={{ backgroundColor: themeColors.accent }}
+        />
+
+        <Animated.View
+          entering={FadeInDown.delay(50).duration(500).springify().damping(18)}
+          style={styles.greetingSection}
+        >
+          <Text variant="label" tone="muted" className="mb-1">
+            {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
+          </Text>
+          <Text variant="title">{greeting}</Text>
+        </Animated.View>
       </View>
 
       <View ref={converterRef} onLayout={handleConverterLayout}>
-        <Animated.View entering={FadeIn.delay(80).duration(400)}>
+        <Animated.View entering={FadeIn.delay(150).duration(500)}>
           <HeroAmountConverter
             amount={estimatorAmount}
             currencySymbol={settings.currencySymbol}
@@ -511,39 +561,59 @@ export function HomeScreen({
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled
     >
-      <View style={styles.recurringHeader}>
-        <View style={styles.recurringHeaderTitleWrap}>
-          <Text variant="heading">{I18n.t('home.recurring.title')}</Text>
-        </View>
-        {onOpenSettingsScreen && (
-          <Button
-            size="icon"
-            variant="secondary"
-            haptic="none"
-            style={styles.recurringSettingsButton}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('home.recurring.tab')}
-            onPress={() => {
-              void triggerHaptic('selection');
-              onOpenSettingsScreen('Recurring');
-            }}
-          >
-            <Settings size={18} color={themeColors.textMuted} />
-          </Button>
-        )}
+      <View className="pb-2">
+        <SettingsHeader
+          className="px-0 pt-3 pb-1.5"
+          title={I18n.t('home.recurring.title')}
+          rightAccessory={
+            onOpenSettingsScreen ? (
+              <Button
+                size="icon"
+                variant="secondary"
+                haptic="selection"
+                className="h-10 w-10 rounded-full"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('home.recurring.tab')}
+                onPress={() => {
+                  onOpenSettingsScreen('Recurring');
+                }}
+              >
+                <Settings size={18} color={themeColors.textMuted} />
+              </Button>
+            ) : null
+          }
+        />
       </View>
 
-      {recurringRows.length > 0 ? (
-        <Card variant="default" style={styles.recurringCard}>
-          {recurringRows.map((item, index) => {
-            const isLast = index === recurringRows.length - 1;
-            return (
-              <Animated.View key={item.id} entering={FadeIn.delay(index * 60).duration(350)}>
-                <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
-              </Animated.View>
-            );
-          })}
-        </Card>
+      {recurringSections.length > 0 ? (
+        recurringSections.map((section, sectionIndex) => (
+          <View key={section.id} className="pb-2">
+            <View
+              className={cn(
+                'pl-1 pr-3 pb-1 flex-row items-center justify-between',
+                sectionIndex === 0 ? 'pt-1.5' : 'pt-5',
+              )}
+            >
+              <Text variant="label" tone="muted">
+                {section.label}
+              </Text>
+            </View>
+            <Card variant="default" style={styles.recurringCard}>
+              {section.rows.map((item, index) => {
+                const isLast = index === section.rows.length - 1;
+                const animationDelay = sectionIndex * 60 + index * 40;
+                return (
+                  <Animated.View
+                    key={item.id}
+                    entering={FadeIn.delay(animationDelay).duration(350)}
+                  >
+                    <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
+                  </Animated.View>
+                );
+              })}
+            </Card>
+          </View>
+        ))
       ) : (
         <EmptyState
           title={I18n.t('home.recurring.none_title')}
@@ -556,19 +626,34 @@ export function HomeScreen({
 
   return (
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text variant="heading">{I18n.t('app.name')}</Text>
-        <View ref={displayToggleRef} onLayout={handleDisplayToggleLayout}>
-          <DisplayModeToggle />
+      <View className="bg-background pb-1.5 pt-1">
+        <View className="px-5 pt-1.5 gap-2.5">
+          {/* Header with app name and display toggle */}
+          <View style={styles.headerRow}>
+            <View className="min-h-10 flex-row items-center">
+              <Text variant="heading" className="tracking-tight">
+                {I18n.t('app.name')}
+              </Text>
+            </View>
+            <View
+              ref={displayToggleRef}
+              onLayout={handleDisplayToggleLayout}
+              className="h-10 justify-center"
+            >
+              <DisplayModeToggle />
+            </View>
+          </View>
+
+          {/* Capsule tab bar */}
+          <HomeTabs
+            tabs={homeTabs}
+            activeIndex={activeHomeTabIndex}
+            pagerOffsetX={pagerOffsetX}
+            pagerWidth={screenWidth}
+            onTabChange={switchTab}
+          />
         </View>
       </View>
-      <HomeTabs
-        tabs={homeTabs}
-        activeIndex={activeHomeTabIndex}
-        pagerOffsetX={pagerOffsetX}
-        pagerWidth={screenWidth}
-        onTabChange={switchTab}
-      />
 
       <Animated.ScrollView
         ref={pagerRef}
@@ -608,32 +693,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerRow: {
-    paddingHorizontal: spacing.screenHorizontal,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  tabsContainer: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  tabsRow: {
-    flexDirection: 'row',
-  },
-  tabPressable: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 44,
-    paddingVertical: spacing.xs,
-  },
-  tabIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    height: 2,
-    borderRadius: 1,
+    minHeight: 40,
+    gap: spacing.sm,
   },
   pagerScroll: {
     flex: 1,
@@ -656,22 +720,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screenHorizontal,
     paddingBottom: LIST_BOTTOM_PADDING,
   },
-  recurringHeader: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  recurringHeaderTitleWrap: {
-    flex: 1,
-  },
-  recurringSettingsButton: {
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-  },
   recurringCard: {
     padding: 0,
     overflow: 'hidden',
@@ -680,7 +728,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 14,
   },
   recurringRowDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -689,8 +737,8 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   recurringIconWrap: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',

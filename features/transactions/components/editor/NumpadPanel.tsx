@@ -232,8 +232,12 @@ export function NumpadPanel({
           {formatMoney(previewValue)}
         </Text>
         {trueHourlyRate > 0 ? (
-          <Text variant="label" tone="muted" numberOfLines={1}>
-            ≈ {formatHours(previewHours)} of work
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            ≈{' '}
+            <Text variant="caption" tone="primary">
+              {formatHours(previewHours)}
+            </Text>{' '}
+            of work
           </Text>
         ) : null}
       </View>
