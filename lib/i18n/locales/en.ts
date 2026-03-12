@@ -516,9 +516,10 @@ const en = {
     advertisement: 'Advertisement',
     ads: 'Ads',
     ad_support_open_modal_button: 'Remove Ads Forever',
+    ad_support_available_amounts: 'Available: {{amounts}}',
     ad_support_modal_title: 'Remove Ads Forever',
     ad_support_modal_body:
-      'If Money2Time has been useful to you and has helped you cut down some unnecessary spending, consider tipping to support the creator and help fund the app. Tipping any amount will remove ads forever. Thank you and hope you always have control over your time and energy.',
+      'Choose one of the support options below to support the creator and help fund the app. Any option removes ads forever. Thank you and hope you always have control over your time and energy.',
     ad_support_time_prefix: 'About ',
     ad_support_time_minutes_value: '{{minutes}} min',
     ad_support_time_hours_one_value: '{{hours}} hr',

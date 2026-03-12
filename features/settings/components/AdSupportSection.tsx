@@ -39,7 +39,7 @@ function getNotAvailableMessageKey(reason: RevenueCatAvailabilityReason | null) 
   return 'settings.ad_support_unavailable_unconfigured';
 }
 
-const TIP_ROW_COLORS = ['#E53935', '#FB8C00', '#FDD835', '#43A047', '#00897B', '#00ACC1'];
+const TIP_ROW_COLORS = ['#E53935', '#FB8C00', '#43A047'];
 const CREATOR_HOURLY_RATE = 10;
 
 function getCreatorTimeParts(amount: number) {
@@ -84,6 +84,12 @@ export function AdSupportSection() {
     [adRemovalState.activatedAt, adRemovalState.latestPurchaseDate],
   );
   const isPurchasing = purchasingProductId !== null;
+  const isBusy =
+    adRemovalState.isLoading || isPurchasing || isResettingTestCustomer || isRestoring;
+  const availableTipAmountsLabel = useMemo(
+    () => adRemovalState.tipOptions.map((option) => option.priceString).join(' · '),
+    [adRemovalState.tipOptions],
+  );
 
   const handlePurchase = useCallback(
     async (optionProductIdentifier: string) => {
@@ -277,14 +283,18 @@ export function AdSupportSection() {
         </Card>
       ) : !adRemovalState.hasAdFreeEntitlement ? (
         adRemovalState.canMakePurchases && adRemovalState.tipOptions.length > 0 ? (
-          <Button
-            disabled={
-              adRemovalState.isLoading || isPurchasing || isResettingTestCustomer || isRestoring
-            }
-            onPress={() => setIsPurchaseModalOpen(true)}
-          >
-            <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
-          </Button>
+          <View className="gap-2">
+            <Button disabled={isBusy} onPress={() => setIsPurchaseModalOpen(true)}>
+              <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
+            </Button>
+            {availableTipAmountsLabel ? (
+              <Text variant="caption" tone="muted" className="px-1">
+                {I18n.t('settings.ad_support_available_amounts', {
+                  amounts: availableTipAmountsLabel,
+                })}
+              </Text>
+            ) : null}
+          </View>
         ) : (
           <View className="gap-2 rounded-[22px] border border-border/45 bg-secondary/35 px-4 py-4">
             <Text variant="subheading">{I18n.t('settings.ad_support_unavailable_title')}</Text>
@@ -302,9 +312,7 @@ export function AdSupportSection() {
       {shouldShowTestResetButton ? (
         <Button
           variant="destructive"
-          disabled={
-            adRemovalState.isLoading || isPurchasing || isResettingTestCustomer || isRestoring
-          }
+          disabled={isBusy}
           onPress={handleResetTestPurchase}
         >
           <Text>{I18n.t('settings.ad_support_test_reset_button')}</Text>
@@ -342,6 +350,24 @@ export function AdSupportSection() {
             >
               {I18n.t('settings.ad_support_modal_body')}
             </Text>
+            {adRemovalState.tipOptions.length > 0 ? (
+              <View style={styles.amountPillRow}>
+                {adRemovalState.tipOptions.map((option, index) => {
+                  const accentColor = TIP_ROW_COLORS[index % TIP_ROW_COLORS.length];
+
+                  return (
+                    <View
+                      key={`preview-${option.productIdentifier}`}
+                      style={[styles.amountPill, { borderColor: accentColor }]}
+                    >
+                      <Text variant="caption" style={{ color: accentColor }}>
+                        {option.priceString}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
           </View>
 
           <ScrollView
@@ -357,12 +383,7 @@ export function AdSupportSection() {
                 <Pressable
                   key={option.productIdentifier}
                   accessibilityRole="button"
-                  disabled={
-                    adRemovalState.isLoading ||
-                    isPurchasing ||
-                    isResettingTestCustomer ||
-                    isRestoring
-                  }
+                  disabled={isBusy}
                   className="rounded-[22px] border border-border/45 bg-card px-4 py-4"
                   onPress={() => void handlePurchase(option.productIdentifier)}
                 >
@@ -393,13 +414,7 @@ export function AdSupportSection() {
             })}
 
             {shouldShowRestoreButton ? (
-              <Button
-                variant="ghost"
-                disabled={
-                  adRemovalState.isLoading || isPurchasing || isResettingTestCustomer || isRestoring
-                }
-                onPress={() => void handleRestore()}
-              >
+              <Button variant="ghost" disabled={isBusy} onPress={() => void handleRestore()}>
                 <Text>{I18n.t('settings.ad_support_restore_button')}</Text>
               </Button>
             ) : null}
@@ -415,6 +430,18 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     height: 12,
     width: 12,
+  },
+  amountPillRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  amountPill: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   sheetHeader: {
     paddingBottom: spacing.md,
