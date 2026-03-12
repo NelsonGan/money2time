@@ -40,7 +40,7 @@ const iosTarget = path.join(
   'ios',
   'money2time',
   'Images.xcassets',
-  'AppIcon.appiconset'
+  'AppIcon.appiconset',
 );
 
 if (fs.existsSync(path.dirname(iosTarget))) {

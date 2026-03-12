@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Card, CardContent, SelectField, Text } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
@@ -11,6 +11,7 @@ import {
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -40,6 +41,7 @@ export function OnboardingPreferencesStep({
   onBack,
   onContinue,
 }: OnboardingPreferencesStepProps) {
+  const themeColors = useThemeColors();
   const languageOptions = useMemo(
     () =>
       SUPPORTED_LOCALES.map((item) => ({
@@ -84,9 +86,29 @@ export function OnboardingPreferencesStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View entering={FadeIn.duration(350)} className="mt-8">
-            <Card variant="soft" className="border border-border/30">
-              <CardContent className="py-4 gap-3">
+          {/* Title */}
+          <Animated.View
+            entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
+            className="mt-8 px-2"
+          >
+            <Text variant="label" tone="primary" className="text-center tracking-widest">
+              {I18n.t('onboarding.progress_step_of', { step: 2, total: 5 })}
+            </Text>
+            <Text variant="title" className="text-center mt-2 text-foreground">
+              {I18n.t('onboarding.value_prop.language_label')} &{' '}
+              {I18n.t('onboarding.value_prop.currency_label')}
+            </Text>
+          </Animated.View>
+
+          <Animated.View entering={FadeIn.delay(300).duration(350)} className="mt-8">
+            <Card variant="default" className="border border-border/25 overflow-hidden">
+              {/* Decorative blob */}
+              <View
+                className="absolute -top-8 -right-8 h-24 w-24 rounded-full"
+                style={{ backgroundColor: themeColors.primary, opacity: 0.04 }}
+              />
+
+              <CardContent className="py-5 gap-4">
                 <SelectField
                   label={I18n.t('onboarding.value_prop.language_label')}
                   value={selectedLocale}
@@ -102,7 +124,7 @@ export function OnboardingPreferencesStep({
                     if (found) onCurrencyChange({ code: found.code, symbol: found.symbol });
                   }}
                 />
-                <Text variant="label" tone="muted">
+                <Text variant="caption" tone="muted">
                   {I18n.t('onboarding.value_prop.prefill_note')}
                 </Text>
               </CardContent>

@@ -10,24 +10,28 @@ import { cn } from '~/utils';
 import { TextClassContext } from './text';
 
 const buttonVariants = cva(
-  'group flex-row items-center justify-center rounded-3xl border border-transparent web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2',
+  'group flex-row items-center justify-center border border-transparent web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2',
   {
     variants: {
       variant: {
-        default: 'bg-primary shadow-sm shadow-primary/25 web:hover:opacity-95 active:opacity-90',
+        default: 'bg-primary rounded-pill shadow-glow web:hover:opacity-95 active:opacity-90',
         destructive:
-          'bg-destructive shadow-sm shadow-destructive/20 web:hover:opacity-95 active:opacity-90',
-        outline: 'border border-border/80 bg-card web:hover:bg-secondary active:bg-secondary',
-        secondary: 'border border-border/70 bg-secondary web:hover:opacity-95 active:opacity-95',
-        ghost: 'bg-transparent web:hover:bg-secondary/80 active:bg-secondary/80',
+          'bg-destructive rounded-pill shadow-sm shadow-destructive/20 web:hover:opacity-95 active:opacity-90',
+        outline:
+          'border border-border/60 bg-card rounded-[22px] web:hover:bg-secondary active:bg-secondary',
+        secondary:
+          'border border-border/50 bg-secondary/60 rounded-[22px] web:hover:opacity-95 active:opacity-95',
+        ghost: 'bg-transparent rounded-[22px] web:hover:bg-secondary/80 active:bg-secondary/80',
         link: 'web:underline-offset-4 web:hover:underline web:focus:underline',
-        warm: 'bg-accent shadow-warm web:hover:opacity-95 active:opacity-90',
+        warm: 'bg-accent rounded-pill shadow-warm-lg web:hover:opacity-95 active:opacity-90',
+        glass:
+          'bg-card/70 border border-border/30 rounded-pill shadow-float web:hover:opacity-95 active:opacity-90',
       },
       size: {
-        default: 'h-[52px] px-6',
-        sm: 'h-10 px-4',
-        lg: 'h-14 px-7',
-        icon: 'h-11 w-11',
+        default: 'h-[54px] px-7',
+        sm: 'h-10 px-5',
+        lg: 'h-[58px] px-8',
+        icon: 'h-11 w-11 rounded-full',
       },
     },
     defaultVariants: {
@@ -47,6 +51,7 @@ const buttonTextVariants = cva('web:whitespace-nowrap font-bold web:transition-c
       ghost: 'text-foreground',
       link: 'text-primary group-active:underline',
       warm: 'text-accent-foreground',
+      glass: 'text-foreground',
     },
     size: {
       default: 'text-[15px]',

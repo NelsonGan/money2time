@@ -1,8 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Button, Text } from '~/components/ui';
+import { useThemeColors } from '~/hooks/useThemeColors';
 
 import { Mascot } from './Mascot';
 
@@ -21,20 +22,37 @@ export function EmptyState({
   action,
   animateIn = true,
 }: EmptyStateProps) {
+  const themeColors = useThemeColors();
+
   return (
     <Animated.View entering={animateIn ? FadeIn.duration(400).springify() : undefined}>
-      <View className="items-center justify-center py-14 px-8">
-        <View className="w-[140px] h-[140px] rounded-full bg-primary/8 items-center justify-center mb-2">
-          <Mascot size={120} mood={mascotMood} animate={false} />
-        </View>
-        <Text variant="subheading" className="mt-4 text-center">
+      <View className="items-center justify-center py-16 px-8 relative overflow-hidden">
+        {/* Decorative background circles */}
+        <View
+          className="absolute top-6 left-1/4 h-32 w-32 rounded-full"
+          style={{ backgroundColor: themeColors.primary, opacity: 0.03 }}
+        />
+        <View
+          className="absolute bottom-10 right-1/4 h-20 w-20 rounded-full"
+          style={{ backgroundColor: themeColors.accent, opacity: 0.04 }}
+        />
+
+        <Animated.View
+          entering={
+            animateIn ? FadeInDown.delay(100).duration(500).springify().damping(14) : undefined
+          }
+          className="w-[130px] h-[130px] rounded-full bg-primary/6 items-center justify-center"
+        >
+          <Mascot size={110} mood={mascotMood} animate={false} />
+        </Animated.View>
+        <Text variant="heading" className="mt-5 text-center">
           {title}
         </Text>
-        <Text variant="friendly" tone="muted" className="text-center mt-2">
+        <Text variant="body" tone="muted" className="text-center mt-2 max-w-[280px]">
           {message}
         </Text>
         {action ? (
-          <Button variant="warm" size="sm" className="mt-5" onPress={action.onPress}>
+          <Button variant="default" size="sm" className="mt-6 shadow-glow" onPress={action.onPress}>
             <Text>{action.label}</Text>
           </Button>
         ) : null}

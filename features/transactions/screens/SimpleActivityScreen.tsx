@@ -158,7 +158,7 @@ export function SimpleActivityScreen({
         { label: I18n.t('transactions.filters.all'), value: 'all' },
         { label: I18n.t('transactions.filters.spent'), value: 'expense' },
         { label: I18n.t('transactions.filters.earned'), value: 'income' },
-      ] satisfies Array<{ label: string; value: 'all' | 'expense' | 'income' }>,
+      ] satisfies { label: string; value: 'all' | 'expense' | 'income' }[],
     [],
   );
 
@@ -230,6 +230,7 @@ export function SimpleActivityScreen({
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
       <MonthControlsHeader
         title={I18n.t('transactions.title')}
+        showAccent={false}
         monthLabel={activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}

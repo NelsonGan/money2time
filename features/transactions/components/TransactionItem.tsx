@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
 import { Text } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations, UserSettings } from '~/types';
@@ -58,6 +59,7 @@ function TransactionItemView({
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
+  const themeColors = useThemeColors();
   const isLegacyAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -141,6 +143,14 @@ function TransactionItemView({
         ? 'text-success'
         : 'text-destructive';
 
+  // Color-coded accent strip
+  const accentColor = useMemo(() => {
+    if (isTransfer) return themeColors.textMuted;
+    if (isBalanceAdjustment) return themeColors.primary;
+    if (isIncome) return themeColors.success;
+    return themeColors.error;
+  }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
+
   return (
     <Pressable
       onPress={onPress}
@@ -148,13 +158,21 @@ function TransactionItemView({
       onPressIn={onPressIn}
       onPressOut={onPressOut}
       className={cn(
-        'flex-row items-center bg-card border border-border/40 shadow-soft',
-        selectionMode && selected ? 'border-primary/55 bg-primary/20' : null,
+        'flex-row items-center bg-card border border-border/30 shadow-soft overflow-hidden',
+        selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
         compact
-          ? 'gap-2 px-2.5 py-2 rounded-[16px] mb-1'
-          : 'gap-2.5 px-3 py-2.5 rounded-[20px] mb-1.5',
+          ? 'gap-2 px-2.5 py-2 rounded-[18px] mb-1'
+          : 'gap-3 pl-0 pr-3.5 py-3 rounded-[22px] mb-1.5',
       )}
     >
+      {/* Color-coded left accent strip */}
+      {!compact ? (
+        <View
+          className="w-[3px] self-stretch rounded-full ml-1"
+          style={{ backgroundColor: accentColor, opacity: 0.5 }}
+        />
+      ) : null}
+
       {selectionMode ? (
         <View
           className={cn(
@@ -172,20 +190,22 @@ function TransactionItemView({
 
       <View
         className={cn(
-          compact ? 'w-8 h-8 items-center justify-center' : 'w-9 h-9 items-center justify-center',
-          isTransfer || isBalanceAdjustment ? 'rounded-full' : null,
-          isTransfer ? 'bg-secondary' : isBalanceAdjustment ? 'bg-primary/12' : null,
+          'items-center justify-center',
+          compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
+          !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
+          isTransfer ? 'rounded-full bg-secondary/50' : null,
+          isBalanceAdjustment ? 'rounded-full bg-primary/10' : null,
         )}
       >
-        <Text className={compact ? 'text-[15px]' : 'text-[16px]'}>{leadingEmoji}</Text>
+        <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>{leadingEmoji}</Text>
       </View>
 
       <View className="flex-1 min-w-0 pr-1">
         <Text
-          variant="friendly"
+          variant="bodyStrong"
           className={cn(
             'text-foreground',
-            compact ? 'text-[13px] leading-[16px]' : 'text-[14px] leading-[18px]',
+            compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
           )}
           numberOfLines={1}
         >
@@ -205,9 +225,9 @@ function TransactionItemView({
 
       <View className="items-end">
         <Text
-          variant="friendly"
+          variant="mono"
           className={cn(
-            compact ? 'text-[13px] leading-[16px]' : 'text-[14px] leading-[18px]',
+            compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
             amountToneClass,
           )}
         >
@@ -217,7 +237,12 @@ function TransactionItemView({
             trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
           })}
         </Text>
-        <Text variant="caption" tone="muted" className={compact ? '' : 'mt-0.5'} numberOfLines={1}>
+        <Text
+          variant="label"
+          tone="muted"
+          className={cn('text-[10px]', compact ? '' : 'mt-0.5')}
+          numberOfLines={1}
+        >
           {isTransfer
             ? `${transaction.fromAccountName ?? '-'} → ${transaction.toAccountName ?? '-'}`
             : (transaction.accountName ?? I18n.t('common.no_account'))}

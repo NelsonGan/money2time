@@ -27,14 +27,19 @@ export function OnboardingActionBar({
     <SafeAreaView
       edges={['bottom']}
       style={styles.container}
-      className="border-t border-border/20 bg-background/95"
+      className="border-t border-border/15 bg-background/95"
     >
       <View style={styles.inner}>
         <View style={styles.row}>
-          <Button variant="outline" className="flex-1" haptic="none" onPress={onBack}>
+          <Button variant="ghost" className="flex-1" haptic="none" onPress={onBack}>
             <Text>{backLabel}</Text>
           </Button>
-          <Button className="flex-[2]" haptic="none" disabled={primaryDisabled} onPress={onPrimary}>
+          <Button
+            className="flex-[2] shadow-glow"
+            haptic="none"
+            disabled={primaryDisabled}
+            onPress={onPrimary}
+          >
             <Text>{primaryLabel}</Text>
           </Button>
         </View>

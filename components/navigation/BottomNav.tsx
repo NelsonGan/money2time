@@ -1,9 +1,8 @@
 import { BarChart2, House, Plus, Settings, Wallet } from 'lucide-react-native';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Path, Svg } from 'react-native-svg';
 
 import { Text } from '~/components/ui';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -20,6 +19,7 @@ interface BottomNavProps {
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
   onPressAdd?: () => void;
+  bottomOffset?: number;
   onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -34,10 +34,22 @@ const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
   { name: 'settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
-const NAV_CONTENT_HEIGHT = 62;
-const FAB_SIZE = 60;
-// Arc radius — slightly larger than FAB radius so it snugly curves around it
-const ARC_R = 36;
+const ADD_BUTTON_SIZE = 64;
+const ADD_BUTTON_SLOT_WIDTH = 84;
+const ADD_BUTTON_PROTRUSION = 18;
+const NAV_ROW_HEIGHT = 56;
+
+export function getBottomNavSafePadding(safeBottom: number) {
+  return Platform.OS === 'ios' ? Math.max(safeBottom - 12, 8) : Math.max(safeBottom, 10);
+}
+
+export function getBottomNavReservedInset(safeBottom: number, includeAddButton = true) {
+  return (
+    (includeAddButton ? ADD_BUTTON_PROTRUSION : 0) +
+    NAV_ROW_HEIGHT +
+    getBottomNavSafePadding(safeBottom)
+  );
+}
 
 const NavItem = memo(function NavItem({
   tab,
@@ -62,7 +74,7 @@ const NavItem = memo(function NavItem({
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
   tutorialMeasureToken?: number;
 }) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
+  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.88 });
   const navItemRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
   const reportLayout = useCallback(() => {
@@ -92,15 +104,18 @@ const NavItem = memo(function NavItem({
         onPressOut={handlePressOut}
         onLayout={reportLayout}
         className={cn(
-          'items-center gap-1 py-2 rounded-2xl mx-0.5 border border-transparent',
-          isActive && 'bg-primary/10',
-          isTutorialFocused && 'border-primary/45 bg-primary/18',
+          'min-h-[54px] items-center justify-center gap-0.5 rounded-2xl mx-0.5',
+          isTutorialFocused && 'bg-primary/12',
         )}
       >
-        <Icon size={18} color={isEmphasized ? tintActive : tintInactive} />
+        <Icon
+          size={20}
+          color={isEmphasized ? tintActive : tintInactive}
+          strokeWidth={isEmphasized ? 2.5 : 1.8}
+        />
         <Text
           variant="label"
-          className={cn(isEmphasized ? 'text-primary' : 'text-muted-foreground')}
+          className={cn('text-[10px]', isEmphasized ? 'text-primary' : 'text-muted-foreground')}
         >
           {label}
         </Text>
@@ -114,6 +129,7 @@ export function BottomNav({
   onTabChange,
   hideTabs,
   onPressAdd,
+  bottomOffset = 0,
   onTutorialTargetLayout,
   onTutorialTabLayout,
   tutorialSpotlightRequest,
@@ -121,9 +137,13 @@ export function BottomNav({
   tutorialMeasureToken,
 }: BottomNavProps) {
   const themeColors = useThemeColors();
-  const { width: screenWidth } = useWindowDimensions();
   const { bottom: safeBottom } = useSafeAreaInsets();
   const addButtonRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
+  const {
+    animatedStyle: fabAnimatedStyle,
+    handlePressIn: fabPressIn,
+    handlePressOut: fabPressOut,
+  } = usePressScale({ depth: 0.9 });
 
   const handleTabPress = useCallback(
     (tab: TabName) => {
@@ -169,30 +189,8 @@ export function BottomNav({
   const midIndex = Math.floor(visibleTabs.length / 2);
   const showAddButton = !!onPressAdd;
 
-  const totalHeight = NAV_CONTENT_HEIGHT + safeBottom;
-  const cx = screenWidth / 2;
-
-  // Perfect semicircle dent: horizontal line meets arc tangentially (no sharp corner)
-  // Arc center is at (cx, 0) — top edge of the nav — radius ARC_R dips straight down
-  const bgPath = [
-    `M 0 0`,
-    `H ${cx - ARC_R}`,
-    `A ${ARC_R} ${ARC_R} 0 0 1 ${cx + ARC_R} 0`,
-    `H ${screenWidth}`,
-    `V ${totalHeight}`,
-    `H 0`,
-    `Z`,
-  ].join(' ');
-
-  const borderPath = [
-    `M 0 0`,
-    `H ${cx - ARC_R}`,
-    `A ${ARC_R} ${ARC_R} 0 0 1 ${cx + ARC_R} 0`,
-    `H ${screenWidth}`,
-  ].join(' ');
-
-  // FAB center sits at the arc center (cx, 0) — half above, half inside the dent
-  const fabTop = -(FAB_SIZE / 2);
+  // Keep enough safe-area room without leaving a large block of background below the bar.
+  const bottomPad = getBottomNavSafePadding(safeBottom);
 
   const renderTabs = (tabs: typeof visibleTabs) =>
     tabs.map((tab) => (
@@ -212,70 +210,66 @@ export function BottomNav({
     ));
 
   return (
-    <View style={{ height: totalHeight, overflow: 'visible' }}>
-      {/* SVG curved background */}
-      <Svg
-        width={screenWidth}
-        height={totalHeight}
-        style={{ position: 'absolute', top: 0, left: 0 }}
-      >
-        <Path d={bgPath} fill={themeColors.card} />
-        <Path d={borderPath} fill="none" stroke={themeColors.border} strokeWidth={0.8} />
-      </Svg>
-
-      {/* Protruding FAB */}
-      {showAddButton ? (
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            top: fabTop,
-            left: 0,
-            right: 0,
-            height: FAB_SIZE,
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 20,
-          }}
-        >
-          <Pressable
-            ref={addButtonRef}
-            onPress={handlePressAdd}
-            onLayout={handleAddButtonLayout}
-            accessibilityRole="button"
-            style={{
-              width: FAB_SIZE,
-              height: FAB_SIZE,
-              borderRadius: FAB_SIZE / 2,
-              backgroundColor: themeColors.primary,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Plus size={28} color="#FFFFFF" />
-          </Pressable>
-        </View>
-      ) : null}
-
-      {/* Tab row */}
+    <View
+      pointerEvents="box-none"
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: bottomOffset,
+        paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
+        paddingBottom: bottomPad,
+      }}
+      className="px-4"
+    >
+      {/* Floating pill nav */}
       <View
-        style={{
-          flexDirection: 'row',
-          height: NAV_CONTENT_HEIGHT,
-          alignItems: 'center',
-          paddingHorizontal: 4,
-        }}
+        className="rounded-[26px] border border-border/30 bg-card/95 shadow-nav-float"
+        style={{ overflow: 'visible' }}
       >
-        {showAddButton ? (
-          <>
-            {renderTabs(visibleTabs.slice(0, midIndex))}
-            {/* Spacer under the FAB — matches the arc diameter */}
-            <View style={{ width: ARC_R * 2 + 16 }} />
-            {renderTabs(visibleTabs.slice(midIndex))}
-          </>
-        ) : (
-          renderTabs(visibleTabs)
-        )}
+        <View className="flex-row items-center px-2.5 py-1.5" style={{ minHeight: NAV_ROW_HEIGHT }}>
+          {showAddButton ? (
+            <>
+              {renderTabs(visibleTabs.slice(0, midIndex))}
+              <View
+                className="items-center justify-center"
+                style={{ width: ADD_BUTTON_SLOT_WIDTH, height: NAV_ROW_HEIGHT }}
+              >
+                <Animated.View
+                  style={[
+                    fabAnimatedStyle,
+                    {
+                      position: 'absolute',
+                      top: -ADD_BUTTON_PROTRUSION,
+                    },
+                  ]}
+                >
+                  <Pressable
+                    ref={addButtonRef}
+                    onPress={handlePressAdd}
+                    onPressIn={fabPressIn}
+                    onPressOut={fabPressOut}
+                    onLayout={handleAddButtonLayout}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
+                    className="items-center justify-center rounded-full shadow-glow-lg"
+                    style={{
+                      width: ADD_BUTTON_SIZE,
+                      height: ADD_BUTTON_SIZE,
+                      borderRadius: ADD_BUTTON_SIZE / 2,
+                      backgroundColor: themeColors.primary,
+                    }}
+                  >
+                    <Plus size={28} color="#FFFFFF" strokeWidth={2.8} />
+                  </Pressable>
+                </Animated.View>
+              </View>
+              {renderTabs(visibleTabs.slice(midIndex))}
+            </>
+          ) : (
+            renderTabs(visibleTabs)
+          )}
+        </View>
       </View>
     </View>
   );

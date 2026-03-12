@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Button, SegmentedToggle, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -70,7 +71,6 @@ type RecurrenceStatusValue = 'active' | 'paused';
 type TypeCardOption = {
   value: TransactionType;
   label: string;
-  emoji: string;
   bgClass: string;
   borderClass: string;
 };
@@ -193,7 +193,15 @@ function TypePill({
   selected: boolean;
   onPress: () => void;
 }) {
+  const themeColors = useThemeColors();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.94 });
+  const iconColor = selected
+    ? item.value === 'expense'
+      ? themeColors.error
+      : item.value === 'income'
+        ? themeColors.success
+        : themeColors.primary
+    : themeColors.textMuted;
   return (
     <Animated.View style={animatedStyle} className="flex-1">
       <Pressable
@@ -208,7 +216,7 @@ function TypePill({
           selected ? `${item.bgClass} ${item.borderClass}` : 'bg-card border-border/30',
         )}
       >
-        <Text className="text-[14px]">{item.emoji}</Text>
+        <TransactionTypeGlyph type={item.value} color={iconColor} />
         <Text
           variant="caption"
           className={cn(selected ? 'text-foreground' : 'text-muted-foreground')}
@@ -217,6 +225,55 @@ function TypePill({
         </Text>
       </Pressable>
     </Animated.View>
+  );
+}
+
+function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: string }) {
+  const strokeProps = {
+    stroke: color,
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
+
+  if (type === 'expense') {
+    return (
+      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+        <Circle cx={5.25} cy={5.25} r={2.35} {...strokeProps} />
+        <Path d="M7.25 7.25 13.5 13.5" {...strokeProps} />
+        <Path d="M10.7 13.5h2.8v-2.8" {...strokeProps} />
+      </Svg>
+    );
+  }
+
+  if (type === 'income') {
+    return (
+      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+        <Circle cx={5.25} cy={12.75} r={2.35} {...strokeProps} />
+        <Path d="M7.25 10.75 13.5 4.5" {...strokeProps} />
+        <Path d="M10.7 4.5h2.8v2.8" {...strokeProps} />
+      </Svg>
+    );
+  }
+
+  if (type === 'transfer') {
+    return (
+      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+        <Path d="M3 6h10" {...strokeProps} />
+        <Path d="m10.5 3.7 2.8 2.3-2.8 2.3" {...strokeProps} />
+        <Path d="M15 12H5" {...strokeProps} />
+        <Path d="m7.5 9.7-2.8 2.3 2.8 2.3" {...strokeProps} />
+      </Svg>
+    );
+  }
+
+  return (
+    <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+      <Path d="M3.5 5.25h11" {...strokeProps} />
+      <Path d="M3.5 12.75h11" {...strokeProps} />
+      <Circle cx={6.5} cy={5.25} r={1.55} {...strokeProps} />
+      <Circle cx={11.5} cy={12.75} r={1.55} {...strokeProps} />
+    </Svg>
   );
 }
 
@@ -230,6 +287,17 @@ function formatDateDisplay(dateStr: string, locale: string) {
     day: 'numeric',
     year: parsed.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
+}
+
+function splitHoursHighlightText(templateKey: string, hours: string) {
+  const hoursMarker = '__hours__';
+  const resolved = String(I18n.t(templateKey, { hours: hoursMarker }));
+  const [before, ...afterParts] = resolved.split(hoursMarker);
+  return {
+    before,
+    hours,
+    after: afterParts.join(hoursMarker),
+  };
 }
 
 export function TransactionEditorScreen({
@@ -365,28 +433,24 @@ export function TransactionEditorScreen({
       {
         value: 'expense',
         label: I18n.t('transactions.filters.spent'),
-        emoji: '💸',
         bgClass: 'bg-destructive/8',
         borderClass: 'border-destructive/50',
       },
       {
         value: 'income',
         label: I18n.t('transactions.filters.earned'),
-        emoji: '💰',
         bgClass: 'bg-success/10',
         borderClass: 'border-success/50',
       },
       {
         value: 'transfer',
         label: I18n.t('transactions.filters.moved'),
-        emoji: '↔️',
         bgClass: 'bg-primary/10',
         borderClass: 'border-primary/50',
       },
       {
         value: 'balance_adjustment',
         label: I18n.t('transactions.filters.adjustment'),
-        emoji: '⚖️',
         bgClass: 'bg-primary/10',
         borderClass: 'border-primary/50',
       },
@@ -522,17 +586,19 @@ export function TransactionEditorScreen({
     [categoryId, categoryPreviewById],
   );
 
-  const nudgeMessage = useMemo(() => {
+  const nudgeMessageParts = useMemo(() => {
     if (type !== 'expense') return null;
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) return null;
     const rate = currentMonthWage?.trueHourlyRate ?? 0;
     if (rate <= 0) return null;
     const hours = amountToHoursByRate(numericAmount, rate, settings.hourRounding);
+    const formattedHours = formatHours(hours);
     if (hours < 0.25)
-      return I18n.t('transactions.editor.nudge.small', { hours: formatHours(hours) });
-    if (hours < 1) return I18n.t('transactions.editor.nudge.pause', { hours: formatHours(hours) });
-    return I18n.t('transactions.editor.nudge.large', { hours: formatHours(hours) });
+      return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
+    if (hours < 1)
+      return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
+    return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
   }, [amount, currentMonthWage?.trueHourlyRate, settings.hourRounding, type]);
 
   const accountNameById = useMemo(
@@ -1211,14 +1277,18 @@ export function TransactionEditorScreen({
                     </Text>
                   </View>
                 </View>
-                {nudgeMessage ? (
+                {nudgeMessageParts ? (
                   <Text
-                    variant="label"
+                    variant="caption"
                     tone="muted"
                     className="text-right mt-0.5"
                     style={styles.nudgeLabel}
                   >
-                    {nudgeMessage}
+                    {nudgeMessageParts.before}
+                    <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
+                      {nudgeMessageParts.hours}
+                    </Text>
+                    {nudgeMessageParts.after}
                   </Text>
                 ) : null}
               </SummaryRow>

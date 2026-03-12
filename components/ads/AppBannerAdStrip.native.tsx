@@ -6,7 +6,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { canRequestBannerAds, getBannerAdUnitId } from '~/services/ads';
 
-const BANNER_RESERVED_HEIGHT = 84;
+export const APP_BANNER_AD_STRIP_HEIGHT = 84;
 
 export function AppBannerAdStrip() {
   const isExpoGo = Constants.executionEnvironment === 'storeClient';
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch',
     borderTopWidth: StyleSheet.hairlineWidth,
-    height: BANNER_RESERVED_HEIGHT,
+    height: APP_BANNER_AD_STRIP_HEIGHT,
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingTop: 8,

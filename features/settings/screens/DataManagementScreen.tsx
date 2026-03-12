@@ -108,7 +108,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                   <Text variant="caption" className="text-foreground">
                     {I18n.t('data_management.export_title')}
                   </Text>
-                  <Text variant="label" tone="muted" className="mt-0.5">
+                  <Text variant="caption" tone="muted" className="mt-0.5">
                     {I18n.t('data_management.export_description')}
                   </Text>
                 </View>
@@ -140,7 +140,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                   <Text variant="caption" className="text-foreground">
                     {I18n.t('data_management.import_title')}
                   </Text>
-                  <Text variant="label" tone="muted" className="mt-0.5">
+                  <Text variant="caption" tone="muted" className="mt-0.5">
                     {I18n.t('data_management.import_description')}
                   </Text>
                 </View>
@@ -162,7 +162,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
         </Card>
 
         <View style={styles.warningSection}>
-          <Text variant="label" tone="muted" className="px-1">
+          <Text variant="caption" tone="muted" className="px-1">
             {I18n.t('data_management.import_warning')}
           </Text>
         </View>
