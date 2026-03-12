@@ -406,9 +406,28 @@ export const spacing = {
   md: 16,
   lg: 20,
   xl: 24,
+  '2xl': 32,
+  '3xl': 40,
   screenHorizontal: 20,
   formBottom: 24,
   listBottom: 24,
 } as const;
 
 export const LIST_BOTTOM_PADDING = spacing.listBottom;
+
+/** Shared radius presets for StyleSheet-based layouts */
+export const radii = {
+  sm: 12,
+  md: 18,
+  lg: 24,
+  xl: 32,
+  pill: 9999,
+} as const;
+
+/** Shared duration presets (ms) */
+export const durations = {
+  fast: 150,
+  normal: 250,
+  slow: 400,
+  entrance: 500,
+} as const;

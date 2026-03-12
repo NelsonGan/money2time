@@ -1,8 +1,9 @@
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
+import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
@@ -22,7 +23,6 @@ import {
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { useDebouncedPersistence } from '~/hooks/useDebouncedPersistence';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -30,16 +30,6 @@ import type { Category, CategoryType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 
-const SNAP_CONFIG = {
-  damping: 100,
-  stiffness: 800,
-  mass: 0.2,
-  overshootClamping: true,
-  restDisplacementThreshold: 0.01,
-  restSpeedThreshold: 0.01,
-};
-const DRAGGABLE_LIST_BACK_SWIPE_GUARD = { left: -28 } as const;
-const DRAGGABLE_LIST_ACTIVATION_DISTANCE = 12;
 const CATEGORY_EDITOR_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
@@ -53,53 +43,57 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.xs,
+    width: '100%',
+    paddingVertical: spacing.sm,
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
-    marginBottom: spacing.xxs,
-    borderRadius: 14,
+    marginBottom: 0,
+    borderRadius: 22,
     borderWidth: 1,
-    gap: spacing.xs,
-  },
-  rowContainerActive: {
-    opacity: 0.9,
+    gap: spacing.sm,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 2,
   },
   rowIconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.06)',
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   rowIconText: {
-    fontSize: 12,
+    fontSize: 18,
   },
   rowPrimaryPressable: {
     flex: 1,
-  },
-  rowTextStack: {
-    gap: spacing.xxs,
-  },
-  rowTitle: {
-    fontSize: 13,
-  },
-  rowSubtitle: {
-    fontSize: 11,
-    marginTop: 1,
-  },
-  rowActionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
+    minHeight: 44,
     justifyContent: 'center',
   },
-  rowDragButton: {
-    minWidth: 40,
-    minHeight: 40,
-    padding: spacing.xs,
-    marginRight: -2,
+  rowTextStack: {
+    gap: 3,
+  },
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  rowSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  rowActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -116,6 +110,16 @@ const styles = StyleSheet.create({
 
 function isCategoryType(value: string): value is CategoryType {
   return value === 'expense' || value === 'income';
+}
+
+function withColorAlpha(hex: string, alpha: number) {
+  const value = hex.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
+  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
 function CategoryEditor({
@@ -316,24 +320,64 @@ function CategoryEditor({
 }
 
 type CategoryRowThemeColors = {
-  surface: string;
-  surfaceMuted: string;
+  border: string;
+  card: string;
+  error: string;
+  errorBorder: string;
+  errorSoft: string;
+  primary: string;
+  primaryMuted: string;
+  primarySoft: string;
   textMuted: string;
-  coral: string;
   text: string;
 };
 
+interface CategoryRowBaseProps {
+  item: Category;
+  themeColors: CategoryRowThemeColors;
+  rowWidth: number;
+}
+
+function DragHandleButton({
+  backgroundColor,
+  borderColor,
+  iconColor,
+  label,
+}: {
+  backgroundColor: string;
+  borderColor: string;
+  iconColor: string;
+  label: string;
+}) {
+  return (
+    <Sortable.Handle>
+      <View
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor,
+            borderColor,
+          },
+        ]}
+      >
+        <GripVertical size={14} color={iconColor} />
+      </View>
+    </Sortable.Handle>
+  );
+}
+
 function TopLevelRow({
   item,
-  drag,
-  isActive,
   themeColors,
+  rowWidth,
   subtitle,
   onEdit,
   onDelete,
   onNavigate,
-}: RenderItemParams<Category> & {
-  themeColors: CategoryRowThemeColors;
+}: CategoryRowBaseProps & {
   subtitle: string;
   onEdit: (item: Category) => void;
   onDelete: (item: Category) => void;
@@ -344,19 +388,26 @@ function TopLevelRow({
     <View
       style={[
         styles.rowContainer,
-        isActive ? styles.rowContainerActive : null,
+        { width: rowWidth },
         {
-          borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-          backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+          borderColor: tc.border,
+          backgroundColor: tc.card,
         },
       ]}
     >
-      <View style={styles.rowIconContainer}>
+      <View
+        style={[
+          styles.rowIconContainer,
+          {
+            backgroundColor: tc.primarySoft,
+            borderColor: tc.primaryMuted,
+          },
+        ]}
+      >
         <Text style={styles.rowIconText}>{resolveCategoryIcon(item.icon)}</Text>
       </View>
       <Pressable
         onPress={() => onNavigate(item)}
-        disabled={isActive}
         style={styles.rowPrimaryPressable}
         accessibilityRole="button"
         accessibilityLabel={item.name}
@@ -376,49 +427,52 @@ function TopLevelRow({
       </Pressable>
       <Pressable
         onPress={() => onEdit(item)}
-        disabled={isActive}
         hitSlop={4}
-        style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor: tc.primarySoft,
+            borderColor: tc.primaryMuted,
+          },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.edit')}
       >
-        <Pencil size={11} color={tc.textMuted} />
+        <Pencil size={13} color={tc.primary} />
       </Pressable>
       <Pressable
         onPress={() => onDelete(item)}
-        disabled={isActive}
         hitSlop={4}
-        style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor: tc.errorSoft,
+            borderColor: tc.errorBorder,
+          },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.delete')}
       >
-        <Trash2 size={11} color={tc.coral} />
+        <Trash2 size={13} color={tc.error} />
       </Pressable>
-      <Pressable
-        onLongPress={drag}
-        delayLongPress={100}
-        disabled={isActive}
-        hitSlop={8}
-        style={styles.rowDragButton}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('categories.reorder')}
-      >
-        <GripVertical size={16} color={tc.textMuted} />
-      </Pressable>
+      <DragHandleButton
+        backgroundColor={tc.primarySoft}
+        borderColor={tc.primaryMuted}
+        iconColor={tc.textMuted}
+        label={`${I18n.t('common.reorder')} ${item.name}`}
+      />
     </View>
   );
 }
 
 function SubcategoryRow({
   item,
-  drag,
-  isActive,
   themeColors,
+  rowWidth,
   parentIcon,
   onEdit,
   onDelete,
-}: RenderItemParams<Category> & {
-  themeColors: CategoryRowThemeColors;
+}: CategoryRowBaseProps & {
   parentIcon: string | null;
   onEdit: (item: Category) => void;
   onDelete: (item: Category) => void;
@@ -429,14 +483,22 @@ function SubcategoryRow({
     <View
       style={[
         styles.rowContainer,
-        isActive ? styles.rowContainerActive : null,
+        { width: rowWidth },
         {
-          borderColor: isActive ? tc.textMuted : 'rgba(0,0,0,0.08)',
-          backgroundColor: isActive ? tc.surfaceMuted : tc.surface,
+          borderColor: tc.border,
+          backgroundColor: tc.card,
         },
       ]}
     >
-      <View style={styles.rowIconContainer}>
+      <View
+        style={[
+          styles.rowIconContainer,
+          {
+            backgroundColor: tc.primarySoft,
+            borderColor: tc.primaryMuted,
+          },
+        ]}
+      >
         <Text style={styles.rowIconText}>{displayIcon}</Text>
       </View>
       <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>
@@ -444,35 +506,40 @@ function SubcategoryRow({
       </Text>
       <Pressable
         onPress={() => onEdit(item)}
-        disabled={isActive}
         hitSlop={4}
-        style={[styles.rowActionButton, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor: tc.primarySoft,
+            borderColor: tc.primaryMuted,
+          },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.edit')}
       >
-        <Pencil size={11} color={tc.textMuted} />
+        <Pencil size={13} color={tc.primary} />
       </Pressable>
       <Pressable
         onPress={() => onDelete(item)}
-        disabled={isActive}
         hitSlop={4}
-        style={[styles.rowActionButton, { backgroundColor: 'rgba(255,0,0,0.06)' }]}
+        style={[
+          styles.rowActionButton,
+          {
+            backgroundColor: tc.errorSoft,
+            borderColor: tc.errorBorder,
+          },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.delete')}
       >
-        <Trash2 size={11} color={tc.coral} />
+        <Trash2 size={13} color={tc.error} />
       </Pressable>
-      <Pressable
-        onLongPress={drag}
-        delayLongPress={100}
-        disabled={isActive}
-        hitSlop={8}
-        style={styles.rowDragButton}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('categories.reorder')}
-      >
-        <GripVertical size={16} color={tc.textMuted} />
-      </Pressable>
+      <DragHandleButton
+        backgroundColor={tc.primarySoft}
+        borderColor={tc.primaryMuted}
+        iconColor={tc.textMuted}
+        label={`${I18n.t('common.reorder')} ${item.name}`}
+      />
     </View>
   );
 }
@@ -492,13 +559,16 @@ export function CategoriesScreen({
 }: CategoriesScreenProps = {}) {
   const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
     useApp();
-  const { persistOrder } = useDebouncedPersistence(500);
   const themeColors = useThemeColors();
+  const { width: windowWidth } = useWindowDimensions();
   const [type, setType] = useState<CategoryType>('expense');
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const activeParentId = parentId ?? selectedParentId;
+  const topLevelScrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const subcategoriesScrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const rowWidth = Math.max(windowWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
 
   const { topLevel, childrenByParent, iconById } = useMemo(() => {
     const nextTopLevel: Category[] = [];
@@ -537,36 +607,6 @@ export function CategoriesScreen({
     [activeParentId, childrenByParent],
   );
 
-  const [localTopLevel, setLocalTopLevel] = useState(topLevel);
-  const [localSubcategories, setLocalSubcategories] = useState(subcategoriesFromContext);
-  const [isReordering, setIsReordering] = useState(false);
-  const skipNextTopLevelSyncRef = useRef(false);
-  const skipNextSubcategorySyncRef = useRef(false);
-
-  useEffect(() => {
-    skipNextTopLevelSyncRef.current = false;
-    skipNextSubcategorySyncRef.current = false;
-    setIsReordering(false);
-    setLocalTopLevel(topLevel);
-    setLocalSubcategories(subcategoriesFromContext);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab change only; topLevel/subcategories derive from type
-  }, [type]);
-  useEffect(() => {
-    if (isReordering) return;
-    if (skipNextTopLevelSyncRef.current) {
-      skipNextTopLevelSyncRef.current = false;
-      return;
-    }
-    setLocalTopLevel(topLevel);
-  }, [isReordering, topLevel]);
-  useEffect(() => {
-    if (isReordering) return;
-    if (skipNextSubcategorySyncRef.current) {
-      skipNextSubcategorySyncRef.current = false;
-      return;
-    }
-    setLocalSubcategories(subcategoriesFromContext);
-  }, [isReordering, subcategoriesFromContext]);
   useEffect(() => {
     if (!activeParentId) return;
     if (topLevelById.has(activeParentId)) return;
@@ -576,22 +616,27 @@ export function CategoriesScreen({
     }
     setSelectedParentId(null);
   }, [activeParentId, onBack, parentId, topLevelById]);
-  useEffect(() => {
-    setIsReordering(false);
-  }, [activeParentId]);
 
   const rowThemeColors = useMemo<CategoryRowThemeColors>(
     () => ({
-      surface: themeColors.surface,
-      surfaceMuted: themeColors.surfaceMuted,
+      border: withColorAlpha(themeColors.primary, 0.18),
+      card: themeColors.card,
+      error: themeColors.error,
+      errorBorder: withColorAlpha(themeColors.error, 0.28),
+      errorSoft: themeColors.errorSoft,
+      primary: themeColors.primary,
+      primaryMuted: themeColors.primaryMuted,
+      primarySoft: themeColors.primarySoft,
       textMuted: themeColors.textMuted,
-      coral: themeColors.coral,
       text: themeColors.text,
     }),
     [
-      themeColors.coral,
-      themeColors.surface,
-      themeColors.surfaceMuted,
+      themeColors.error,
+      themeColors.errorSoft,
+      themeColors.card,
+      themeColors.primary,
+      themeColors.primaryMuted,
+      themeColors.primarySoft,
       themeColors.text,
       themeColors.textMuted,
     ],
@@ -614,6 +659,43 @@ export function CategoriesScreen({
     });
     return subtitles;
   }, [childrenByParent, topLevel]);
+  const buildOrderedCategoryIds = useCallback(
+    ({
+      reorderedChildren,
+      reorderedTopLevel = topLevel,
+    }: {
+      reorderedChildren?: { items: Category[]; parentId: string };
+      reorderedTopLevel?: Category[];
+    }) => {
+      const nextIds: string[] = [];
+      const seen = new Set<string>();
+
+      reorderedTopLevel.forEach((parent) => {
+        if (parent.type !== type) return;
+        nextIds.push(parent.id);
+        seen.add(parent.id);
+
+        const children =
+          reorderedChildren?.parentId === parent.id
+            ? reorderedChildren.items
+            : (childrenByParent.get(parent.id) ?? []);
+
+        children.forEach((child) => {
+          if (child.type !== type || seen.has(child.id)) return;
+          nextIds.push(child.id);
+          seen.add(child.id);
+        });
+      });
+
+      categories.forEach((category) => {
+        if (category.type !== type || seen.has(category.id)) return;
+        nextIds.push(category.id);
+      });
+
+      return nextIds;
+    },
+    [categories, childrenByParent, topLevel, type],
+  );
   const handleEdit = useCallback((item: Category) => {
     void triggerHaptic('selection');
     setEditing(item);
@@ -635,31 +717,6 @@ export function CategoriesScreen({
       setSelectedParentId(item.id);
     },
     [onOpenParent],
-  );
-  const renderTopLevelRow = useCallback(
-    (params: RenderItemParams<Category>) => (
-      <TopLevelRow
-        {...params}
-        themeColors={rowThemeColors}
-        subtitle={topLevelSubtitleById.get(params.item.id) ?? I18n.t('categories.no_subcategories')}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onNavigate={handleNavigate}
-      />
-    ),
-    [handleDelete, handleEdit, handleNavigate, rowThemeColors, topLevelSubtitleById],
-  );
-  const renderSubcategoryRow = useCallback(
-    (params: RenderItemParams<Category>) => (
-      <SubcategoryRow
-        {...params}
-        themeColors={rowThemeColors}
-        parentIcon={params.item.parentId ? (iconById.get(params.item.parentId) ?? null) : null}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    ),
-    [handleDelete, handleEdit, iconById, rowThemeColors],
   );
 
   const handleSubcategoryBack = useCallback(() => {
@@ -700,33 +757,50 @@ export function CategoriesScreen({
         </View>
 
         <View style={styles.listContainer}>
-          <DraggableFlatList
-            data={localSubcategories}
-            keyExtractor={(item) => item.id}
-            renderItem={renderSubcategoryRow}
-            dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
-            activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
-            animationConfig={SNAP_CONFIG}
-            onDragBegin={() => {
-              setIsReordering(true);
-              void triggerHaptic('medium');
-            }}
-            onRelease={() => {
-              setIsReordering(false);
-            }}
-            onDragEnd={({ data }) => {
-              setIsReordering(false);
-              void triggerHaptic('light');
-              skipNextSubcategorySyncRef.current = true;
-              setLocalSubcategories(data);
-              const orderedIds = data.map((item) => item.id);
-              persistOrder('categories', orderedIds);
-              reorderCategories(orderedIds);
-            }}
-            autoscrollThreshold={80}
+          <Animated.ScrollView
+            ref={subcategoriesScrollRef}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
-          />
+            keyboardShouldPersistTaps="handled"
+          >
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.08}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={spacing.xs}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, order, toIndex }) => {
+                if (fromIndex === toIndex) return;
+                const orderedSubcategories = order(subcategoriesFromContext);
+                reorderCategories(
+                  buildOrderedCategoryIds({
+                    reorderedChildren: {
+                      items: orderedSubcategories,
+                      parentId: selectedParent.id,
+                    },
+                  }),
+                );
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={subcategoriesScrollRef}
+              width="fill"
+            >
+              {subcategoriesFromContext.map((item) => (
+                <SubcategoryRow
+                  key={item.id}
+                  item={item}
+                  themeColors={rowThemeColors}
+                  rowWidth={rowWidth}
+                  parentIcon={item.parentId ? (iconById.get(item.parentId) ?? null) : null}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </Sortable.Flex>
+          </Animated.ScrollView>
         </View>
 
         <CategoryEditor
@@ -783,6 +857,8 @@ export function CategoriesScreen({
         />
         <SegmentedToggle
           value={type}
+          variant="home"
+          className="my-2"
           onChange={(value) => {
             if (!isCategoryType(value)) return;
             setType(value);
@@ -796,33 +872,46 @@ export function CategoriesScreen({
       </View>
 
       <View style={styles.listContainer}>
-        <DraggableFlatList
-          data={localTopLevel}
-          keyExtractor={(item) => item.id}
-          renderItem={renderTopLevelRow}
-          dragHitSlop={DRAGGABLE_LIST_BACK_SWIPE_GUARD}
-          activationDistance={DRAGGABLE_LIST_ACTIVATION_DISTANCE}
-          animationConfig={SNAP_CONFIG}
-          onDragBegin={() => {
-            setIsReordering(true);
-            void triggerHaptic('medium');
-          }}
-          onRelease={() => {
-            setIsReordering(false);
-          }}
-          onDragEnd={({ data }) => {
-            setIsReordering(false);
-            void triggerHaptic('light');
-            skipNextTopLevelSyncRef.current = true;
-            setLocalTopLevel(data);
-            const orderedIds = data.map((item) => item.id);
-            persistOrder('categories', orderedIds);
-            reorderCategories(orderedIds);
-          }}
-          autoscrollThreshold={80}
+        <Animated.ScrollView
+          ref={topLevelScrollRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
-        />
+          keyboardShouldPersistTaps="handled"
+        >
+          <Sortable.Flex
+            activeItemScale={1.02}
+            activeItemShadowOpacity={0.08}
+            customHandle
+            dragActivationDelay={0}
+            flexDirection="column"
+            flexWrap="nowrap"
+            gap={spacing.xs}
+            inactiveItemOpacity={1}
+            onDragEnd={({ fromIndex, order, toIndex }) => {
+              if (fromIndex === toIndex) return;
+              const orderedTopLevel = order(topLevel);
+              reorderCategories(buildOrderedCategoryIds({ reorderedTopLevel: orderedTopLevel }));
+              void triggerHaptic('selection');
+            }}
+            scrollableRef={topLevelScrollRef}
+            width="fill"
+          >
+            {topLevel.map((item) => (
+              <TopLevelRow
+                key={item.id}
+                item={item}
+                themeColors={rowThemeColors}
+                rowWidth={rowWidth}
+                subtitle={
+                  topLevelSubtitleById.get(item.id) ?? I18n.t('categories.no_subcategories')
+                }
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onNavigate={handleNavigate}
+              />
+            ))}
+          </Sortable.Flex>
+        </Animated.ScrollView>
       </View>
 
       <CategoryEditor

@@ -19,6 +19,7 @@ import { ThemeModal } from './theme-modal';
 
 const SHEET_HEIGHT = 460;
 const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;
+const SHEET_HORIZONTAL_PADDING = 20;
 
 interface SelectOption {
   value: string;
@@ -40,10 +41,12 @@ interface SelectFieldProps {
   sheetTitle?: string;
   required?: boolean;
   compact?: boolean;
+  triggerSize?: 'default' | 'header';
+  triggerVariant?: 'default' | 'header-plain';
   value: string | null;
   options: SelectOption[];
   optionGroups?: SelectOptionGroup[];
-  optionsLayout?: 'grid' | 'list';
+  optionsLayout?: 'grid' | 'list' | 'icon-grid';
   showSelectedDescription?: boolean;
   placeholder?: string;
   onChange: (value: string) => void;
@@ -58,6 +61,8 @@ export function SelectField({
   sheetTitle,
   required = false,
   compact = false,
+  triggerSize = 'default',
+  triggerVariant = 'default',
   value,
   options,
   optionGroups,
@@ -72,7 +77,7 @@ export function SelectField({
 }: SelectFieldProps) {
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
@@ -103,6 +108,14 @@ export function SelectField({
     return options.filter((option) => !groupedOptionValues.has(option.value));
   }, [groupedOptions, options]);
   const hasGroupedListLayout = optionsLayout === 'list' && groupedOptions.length > 0;
+  const hasGroupedIconGridLayout = optionsLayout === 'icon-grid' && groupedOptions.length > 0;
+  const iconGridGap = 8;
+  const iconGridColumns = 4;
+  const iconGridCardWidth = Math.floor(
+    (windowWidth - SHEET_HORIZONTAL_PADDING * 2 - iconGridGap * (iconGridColumns - 1)) /
+      iconGridColumns,
+  );
+  const isHeaderPlainTrigger = triggerVariant === 'header-plain';
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const renderOptionIcon = (icon?: SelectOption['icon']) => {
     if (!icon) return null;
@@ -203,9 +216,14 @@ export function SelectField({
                 'w-full min-h-[52px] rounded-2xl border px-3 py-2.5 flex-row gap-3',
                 listItemAlignment === 'center' ? 'items-center' : 'items-start',
               )
-            : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
+            : optionsLayout === 'icon-grid'
+              ? 'rounded-[18px] border bg-card px-2 py-2 items-center justify-center'
+              : 'w-[48%] min-h-[64px] rounded-2xl border px-3.5 py-3 flex-row items-center justify-between',
           isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
         )}
+        style={
+          optionsLayout === 'icon-grid' ? { width: iconGridCardWidth, aspectRatio: 1 } : undefined
+        }
       >
         {optionsLayout === 'list' ? (
           <>
@@ -230,7 +248,7 @@ export function SelectField({
                 {option.label}
               </Text>
               {option.description ? (
-                <Text variant="label" tone="muted" className="mt-0.5 pr-2">
+                <Text variant="caption" tone="muted" className="mt-0.5 pr-2">
                   {option.description}
                 </Text>
               ) : null}
@@ -240,6 +258,33 @@ export function SelectField({
                 <Check size={16} color={themeColors.primary} />
               </View>
             ) : null}
+          </>
+        ) : optionsLayout === 'icon-grid' ? (
+          <>
+            {isSelected ? (
+              <View className="absolute right-2 top-2 h-5 w-5 items-center justify-center rounded-full bg-primary">
+                <Check size={12} color="#FFFFFF" />
+              </View>
+            ) : null}
+            <View className="flex-1 items-center justify-center gap-2 px-1">
+              <View className="min-h-[30px] items-center justify-center">
+                {option.icon
+                  ? typeof option.icon === 'string'
+                    ? renderOptionIcon(option.icon)
+                    : option.icon
+                  : null}
+              </View>
+              <Text
+                variant="caption"
+                className={cn(
+                  'text-center text-[11px] leading-[14px]',
+                  isSelected ? 'text-foreground' : 'text-muted-foreground',
+                )}
+                numberOfLines={2}
+              >
+                {option.label}
+              </Text>
+            </View>
           </>
         ) : (
           <>
@@ -283,8 +328,13 @@ export function SelectField({
         className={cn(
           compact
             ? 'h-[68px] rounded-2xl border bg-card/95 px-3.5 flex-row items-center justify-between'
-            : 'h-[54px] rounded-3xl border bg-card/95 px-4 flex-row items-center justify-between',
-          error ? 'border-destructive/55 bg-destructive/5' : 'border-border/40',
+            : isHeaderPlainTrigger
+              ? 'min-h-10 flex-row items-center justify-between gap-2'
+              : triggerSize === 'header'
+                ? 'h-10 rounded-[22px] border bg-card/95 px-3.5 flex-row items-center justify-between'
+                : 'h-[54px] rounded-3xl border bg-card/95 px-4 flex-row items-center justify-between',
+          !isHeaderPlainTrigger &&
+            (error ? 'border-destructive/55 bg-destructive/5' : 'border-border/40'),
         )}
       >
         {compact ? (
@@ -316,10 +366,23 @@ export function SelectField({
               </Text>
             </View>
             {showSelectedDescription && selected?.description ? (
-              <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
                 {selected.description}
               </Text>
             ) : null}
+          </View>
+        ) : isHeaderPlainTrigger ? (
+          <View className="flex-1 flex-row items-center gap-2 pr-2">
+            <Text
+              variant="heading"
+              numberOfLines={1}
+              className={cn(
+                'flex-1 tracking-tight',
+                selected ? 'text-foreground' : 'text-muted-foreground',
+              )}
+            >
+              {selectedLabel}
+            </Text>
           </View>
         ) : (
           <View className="flex-1 pr-2">
@@ -337,13 +400,19 @@ export function SelectField({
               </Text>
             </View>
             {showSelectedDescription && selected?.description ? (
-              <Text variant="label" tone="muted" numberOfLines={1} className="mt-0.5">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
                 {selected.description}
               </Text>
             ) : null}
           </View>
         )}
-        <ChevronDown size={16} color={themeColors.textMuted} />
+        {isHeaderPlainTrigger ? (
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/55">
+            <ChevronDown size={14} color={themeColors.textMuted} />
+          </View>
+        ) : (
+          <ChevronDown size={16} color={themeColors.textMuted} />
+        )}
       </Pressable>
       {error ? (
         <Text variant="caption" tone="error" className="mt-2 px-1">
@@ -400,7 +469,9 @@ export function SelectField({
                 <View className="gap-2">
                   {groupedOptions.map((group) => {
                     const isExpanded = expandedGroups[group.id] ?? group.defaultExpanded !== false;
-                    const hasSelectedOption = group.options.some((option) => option.value === value);
+                    const hasSelectedOption = group.options.some(
+                      (option) => option.value === value,
+                    );
                     return (
                       <View
                         key={group.id}
@@ -421,7 +492,7 @@ export function SelectField({
                               {group.label}
                             </Text>
                             {group.description ? (
-                              <Text variant="label" tone="muted" className="mt-0.5">
+                              <Text variant="caption" tone="muted" className="mt-0.5">
                                 {group.description}
                               </Text>
                             ) : null}
@@ -441,7 +512,36 @@ export function SelectField({
                     );
                   })}
                   {ungroupedOptions.length ? (
-                    <View className="gap-1.5">{ungroupedOptions.map((option) => renderOption(option))}</View>
+                    <View className="gap-1.5">
+                      {ungroupedOptions.map((option) => renderOption(option))}
+                    </View>
+                  ) : null}
+                </View>
+              ) : hasGroupedIconGridLayout ? (
+                <View className="gap-5">
+                  {groupedOptions.map((group) => (
+                    <View key={group.id} className="gap-2.5">
+                      <View className="px-1">
+                        <Text variant="label" tone="muted">
+                          {group.label}
+                        </Text>
+                      </View>
+                      <View className="flex-row flex-wrap gap-2">
+                        {group.options.map((option) => renderOption(option))}
+                      </View>
+                    </View>
+                  ))}
+                  {ungroupedOptions.length ? (
+                    <View className="gap-2.5">
+                      <View className="px-1">
+                        <Text variant="label" tone="muted">
+                          {I18n.t('common.other')}
+                        </Text>
+                      </View>
+                      <View className="flex-row flex-wrap gap-2">
+                        {ungroupedOptions.map((option) => renderOption(option))}
+                      </View>
+                    </View>
                   ) : null}
                 </View>
               ) : (

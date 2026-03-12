@@ -87,9 +87,11 @@ interface AppContextValue extends AppState {
     input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteAccount: (id: string) => void;
+  reorderAccounts: (ids: string[]) => void;
   createAccountGroup: (name: string) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
+  reorderAccountGroups: (ids: string[]) => void;
   createRecurringRule: (input: CreateRecurringRuleInput) => void;
   updateRecurringRule: (id: string, updates: Partial<CreateRecurringRuleInput>) => void;
   deleteRecurringRule: (id: string) => void;
@@ -100,6 +102,7 @@ interface AppContextValue extends AppState {
     updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteCategory: (id: string) => void;
+  reorderCategories: (ids: string[]) => void;
 
   createTransaction: (input: CreateTransactionInput) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -151,10 +154,6 @@ interface AppContextValue extends AppState {
   ) => TransactionWithRelations[];
   getTrueHourlyRateForDate: (dateIso: string) => number;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
-
-  reorderAccounts: (orderedIds: string[]) => void;
-  reorderAccountGroups: (orderedIds: string[]) => void;
-  reorderCategories: (orderedIds: string[]) => void;
 
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
@@ -443,27 +442,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const reorderAccounts = useCallback((orderedIds: string[]) => {
-    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setAccounts((prev) =>
-      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
-    );
-  }, []);
-
-  const reorderAccountGroups = useCallback((orderedIds: string[]) => {
-    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setAccountGroups((prev) =>
-      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
-    );
-  }, []);
-
-  const reorderCategories = useCallback((orderedIds: string[]) => {
-    const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-    setCategories((prev) =>
-      [...prev].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)),
-    );
-  }, []);
-
   useEffect(() => {
     setIsLoading(true);
     try {
@@ -610,6 +588,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const reorderAccounts = useCallback(
+    (ids: string[]) => {
+      runMutation(() => {
+        accountsRepository.reorder(ids);
+      });
+    },
+    [runMutation],
+  );
+
   const createAccountGroup = useCallback(
     (name: string) => {
       runMutation(() => {
@@ -632,6 +619,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         accountGroupsRepository.softDelete(id);
+      });
+    },
+    [runMutation],
+  );
+
+  const reorderAccountGroups = useCallback(
+    (ids: string[]) => {
+      runMutation(() => {
+        accountGroupsRepository.reorder(ids);
       });
     },
     [runMutation],
@@ -689,6 +685,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         categoriesRepository.softDelete(id);
+      });
+    },
+    [runMutation],
+  );
+
+  const reorderCategories = useCallback(
+    (ids: string[]) => {
+      runMutation(() => {
+        categoriesRepository.reorder(ids);
       });
     },
     [runMutation],
@@ -1351,18 +1356,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createAccount,
             updateAccount,
             deleteAccount,
+            reorderAccounts,
             createAccountGroup,
             renameAccountGroup,
             deleteAccountGroup,
-            reorderAccounts,
             reorderAccountGroups,
-            reorderCategories,
             createRecurringRule,
             updateRecurringRule,
             deleteRecurringRule,
             createCategory,
             updateCategory,
             deleteCategory,
+            reorderCategories,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -1422,18 +1427,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createAccount,
       updateAccount,
       deleteAccount,
+      reorderAccounts,
       createAccountGroup,
       renameAccountGroup,
       deleteAccountGroup,
-      reorderAccounts,
       reorderAccountGroups,
-      reorderCategories,
       createRecurringRule,
       updateRecurringRule,
       deleteRecurringRule,
       createCategory,
       updateCategory,
       deleteCategory,
+      reorderCategories,
       createTransaction,
       updateTransaction,
       deleteTransaction,

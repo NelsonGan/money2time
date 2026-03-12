@@ -21,6 +21,7 @@ interface SegmentedToggleProps<T extends string> {
   onChange: (value: T) => void;
   className?: string;
   size?: 'default' | 'compact';
+  variant?: 'default' | 'home';
 }
 
 export function SegmentedToggle<T extends string>({
@@ -29,14 +30,16 @@ export function SegmentedToggle<T extends string>({
   onChange,
   className,
   size = 'default',
+  variant = 'default',
 }: SegmentedToggleProps<T>) {
   const isCompact = size === 'compact';
+  const isHomeVariant = variant === 'home';
   const safeOptionCount = Math.max(options.length, 1);
   const activeIndex = Math.max(
     0,
     options.findIndex((opt) => opt.value === value),
   );
-  const totalHorizontalPadding = isCompact ? 8 : 12;
+  const totalHorizontalPadding = isHomeVariant || isCompact ? 8 : 12;
   const segmentWidth = useSharedValue(0);
   const indicatorX = useSharedValue(0);
 
@@ -64,18 +67,25 @@ export function SegmentedToggle<T extends string>({
   return (
     <View
       className={cn(
-        'relative flex-row items-center border border-border/50 bg-card',
-        isCompact ? 'rounded-2xl p-1' : 'rounded-3xl p-1.5',
+        'relative flex-row items-center',
+        isHomeVariant
+          ? 'rounded-[20px] bg-secondary/40 p-1'
+          : 'border border-border/30 bg-secondary/40',
+        !isHomeVariant && (isCompact ? 'rounded-2xl p-1' : 'rounded-[22px] p-1.5'),
         className,
       )}
       onLayout={handleLayout}
     >
       <Animated.View
         className={cn(
-          'absolute bg-primary',
-          isCompact
-            ? 'left-1 top-1 bottom-1 rounded-xl'
-            : 'left-1.5 top-1.5 bottom-1.5 rounded-2xl',
+          'absolute',
+          isHomeVariant
+            ? 'left-1 top-1 bottom-1 rounded-[16px] border border-border/30 bg-card shadow-soft'
+            : 'bg-primary shadow-glow',
+          !isHomeVariant &&
+            (isCompact
+              ? 'left-1 top-1 bottom-1 rounded-xl'
+              : 'left-1.5 top-1.5 bottom-1.5 rounded-[16px]'),
         )}
         style={indicatorStyle}
       />
@@ -91,15 +101,25 @@ export function SegmentedToggle<T extends string>({
               onChange(option.value);
             }}
             className={cn(
-              isCompact
-                ? 'min-h-[34px] min-w-[54px] flex-1 items-center justify-center rounded-xl px-2 py-1 z-10'
-                : 'min-h-[44px] min-w-[64px] flex-1 items-center justify-center rounded-2xl px-3 py-2 z-10',
+              isHomeVariant
+                ? 'min-h-[40px] min-w-[64px] flex-1 items-center justify-center rounded-[16px] px-3 py-2.5 z-10'
+                : isCompact
+                  ? 'min-h-[34px] min-w-[54px] flex-1 items-center justify-center rounded-xl px-2 py-1 z-10'
+                  : 'min-h-[44px] min-w-[64px] flex-1 items-center justify-center rounded-[16px] px-3 py-2 z-10',
               option.disabled && 'opacity-45',
             )}
           >
             <Text
               variant="caption"
-              className={cn(active ? 'text-primary-foreground' : 'text-muted-foreground')}
+              className={cn(
+                isHomeVariant
+                  ? active
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                  : active
+                    ? 'text-primary-foreground'
+                    : 'text-muted-foreground',
+              )}
             >
               {option.label}
             </Text>
