@@ -501,7 +501,6 @@ const zh = {
     advertisement: '广告',
     ads: '广告',
     ad_support_open_modal_button: '永久移除广告',
-    ad_support_available_amounts: '可选金额：{{amounts}}',
     ad_support_modal_title: '永久移除广告',
     ad_support_modal_body:
       '请选择下方其中一个支持金额，帮助创作者继续维护 Money2Time。任意一个选项都会永久移除广告。谢谢你，也希望你始终能掌控自己的时间与精力。',
@@ -542,16 +541,6 @@ const zh = {
     ad_support_restore_none_message: '当前商店账号下未找到无广告权益。',
     ad_support_restore_error_title: '恢复失败',
     ad_support_restore_error_message: '当前无法恢复购买，请稍后再试。',
-    ad_support_test_reset_button: '重置测试购买',
-    ad_support_test_reset_title: '要重置这次测试购买吗？',
-    ad_support_test_reset_message:
-      '这是仅限调试版本的操作。它会把应用切换到一个新的测试用户 ID，让你重新跑一遍购买流程。',
-    ad_support_test_reset_confirm: '重置',
-    ad_support_test_reset_success_title: '测试购买已重置',
-    ad_support_test_reset_success_message:
-      '应用现已切换到新的测试用户 ID，你可以再次购买。',
-    ad_support_test_reset_error_title: '重置失败',
-    ad_support_test_reset_error_message: '当前无法重置测试用户 ID，请稍后再试。',
     theme: '主题',
     theme_system: '跟随系统',
     theme_light: '浅色',

@@ -513,10 +513,9 @@ const en = {
     subtitle: 'Your control center',
     display: 'Display',
     display_subtitle: 'Language, currency, and theme',
-    advertisement: 'Advertisement',
+    advertisement: 'Tip Jar',
     ads: 'Ads',
     ad_support_open_modal_button: 'Remove Ads Forever',
-    ad_support_available_amounts: 'Available: {{amounts}}',
     ad_support_modal_title: 'Remove Ads Forever',
     ad_support_modal_body:
       'Choose one of the support options below to support the creator and help fund the app. Any option removes ads forever. Thank you and hope you always have control over your time and energy.',
@@ -564,17 +563,6 @@ const en = {
     ad_support_restore_error_title: 'Restore failed',
     ad_support_restore_error_message:
       'The app could not restore purchases right now. Try again in a moment.',
-    ad_support_test_reset_button: 'Reset test purchase',
-    ad_support_test_reset_title: 'Reset the test purchase?',
-    ad_support_test_reset_message:
-      'This debug-only action switches the app to a fresh test user ID so you can run the purchase flow again.',
-    ad_support_test_reset_confirm: 'Reset',
-    ad_support_test_reset_success_title: 'Test purchase reset',
-    ad_support_test_reset_success_message:
-      'The app is now using a fresh test user ID. You can purchase again.',
-    ad_support_test_reset_error_title: 'Reset failed',
-    ad_support_test_reset_error_message:
-      'The app could not reset the test user ID right now. Try again in a moment.',
     theme: 'Theme',
     theme_system: 'System',
     theme_light: 'Light',
