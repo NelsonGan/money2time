@@ -501,9 +501,10 @@ const zh = {
     advertisement: '广告',
     ads: '广告',
     ad_support_open_modal_button: '永久移除广告',
+    ad_support_available_amounts: '可选金额：{{amounts}}',
     ad_support_modal_title: '永久移除广告',
     ad_support_modal_body:
-      '如果 Money2Time 对你有帮助，也帮你减少了一些不必要的开销，欢迎通过打赏来支持这位创作者，并帮助应用持续发展。无论打赏多少，广告都会被永久移除。谢谢你，也希望你始终能掌控自己的时间与精力。',
+      '请选择下方其中一个支持金额，帮助创作者继续维护 Money2Time。任意一个选项都会永久移除广告。谢谢你，也希望你始终能掌控自己的时间与精力。',
     ad_support_time_prefix: '约 ',
     ad_support_time_minutes_value: '{{minutes}} 分钟',
     ad_support_time_hours_one_value: '{{hours}} 小时',
