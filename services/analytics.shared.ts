@@ -10,19 +10,14 @@
 // ---------------------------------------------------------------------------
 
 export const AnalyticsEvents = {
-  // App lifecycle
-  APP_OPENED: 'App Opened',
-
   // Onboarding
   ONBOARDING_STARTED: 'Onboarding Started',
-  ONBOARDING_STEP_VIEWED: 'Onboarding Step Viewed',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
   ONBOARDING_SKIPPED: 'Onboarding Skipped',
   ONBOARDING_MODE_SELECTED: 'Onboarding Mode Selected',
   ONBOARDING_IMPORT_STARTED: 'Onboarding Import Started',
   ONBOARDING_IMPORT_COMPLETED: 'Onboarding Import Completed',
   ONBOARDING_IMPORT_FAILED: 'Onboarding Import Failed',
-  ONBOARDING_DEFAULTS_CREATED: 'Onboarding Defaults Created',
 
   // Navigation / screen views
   TAB_VIEWED: 'Tab Viewed',
@@ -36,12 +31,10 @@ export const AnalyticsEvents = {
 
   // Accounts
   ACCOUNT_CREATED: 'Account Created',
-  ACCOUNT_UPDATED: 'Account Updated',
   ACCOUNT_DELETED: 'Account Deleted',
 
   // Categories
   CATEGORY_CREATED: 'Category Created',
-  CATEGORY_UPDATED: 'Category Updated',
   CATEGORY_DELETED: 'Category Deleted',
 
   // Recurring rules
@@ -51,7 +44,6 @@ export const AnalyticsEvents = {
 
   // Insights
   INSIGHTS_DRILLDOWN_OPENED: 'Insights Drilldown Opened',
-  INSIGHTS_TYPE_CHANGED: 'Insights Type Changed',
 
   // Settings
   SETTINGS_UPDATED: 'Settings Updated',
@@ -59,7 +51,6 @@ export const AnalyticsEvents = {
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
   MODE_SWITCHED: 'Mode Switched',
   DATA_RESET: 'Data Reset',
-  DATA_EXPORTED: 'Data Exported',
   DATA_IMPORTED: 'Data Imported',
 
   // Purchases / ads
@@ -75,8 +66,6 @@ export const AnalyticsEvents = {
   TUTORIAL_COMPLETED: 'Tutorial Completed',
   TUTORIAL_SKIPPED: 'Tutorial Skipped',
 } as const;
-
-export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
 
 // ---------------------------------------------------------------------------
 // Common property types
@@ -94,7 +83,6 @@ export interface AnalyticsSuperProperties {
   locale?: string;
   theme_mode?: string;
   theme_color?: string;
-  has_ad_free?: boolean;
   display_mode?: 'money' | 'time';
   current_screen?: string;
 }

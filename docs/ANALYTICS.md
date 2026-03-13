@@ -25,15 +25,14 @@ The identifier is set via `identifyUser(appUserId)` in `AppContext` whenever
 
 ## Super Properties (sent with every event)
 
-| Property       | Type    | Description                          |
-| -------------- | ------- | ------------------------------------ |
-| `user_mode`    | string  | `"simple"` or `"power"`             |
-| `currency_code`| string  | ISO currency code (e.g. `"USD"`)     |
-| `locale`       | string  | App locale (e.g. `"en"`, `"zh"`)     |
-| `theme_mode`   | string  | `"light"`, `"dark"`, or `"system"`   |
-| `theme_color`  | string  | Theme accent colour (e.g. `"sage"`)  |
-| `display_mode` | string  | `"money"` or `"time"`               |
-| `has_ad_free`  | boolean | Whether user has ad-free entitlement |
+| Property         | Type   | Description                          |
+| ---------------- | ------ | ------------------------------------ |
+| `user_mode`      | string | `"simple"` or `"power"`             |
+| `currency_code`  | string | ISO currency code (e.g. `"USD"`)     |
+| `locale`         | string | App locale (e.g. `"en"`, `"zh"`)     |
+| `theme_mode`     | string | `"light"`, `"dark"`, or `"system"`   |
+| `theme_color`    | string | Theme accent colour (e.g. `"sage"`)  |
+| `display_mode`   | string | `"money"` or `"time"`               |
 | `current_screen` | string | The current screen/tab the user is on (e.g. `"home"`, `"transactions"`, `"AddTransaction"`, `"DisplaySettings"`) |
 
 These are refreshed automatically whenever the underlying settings change or the user navigates.
@@ -44,40 +43,32 @@ every event, so you always know which page the user was on when an action occurr
 
 ## User Profile Properties (People)
 
-| Property   | Type   | Description                            |
-| ---------- | ------ | -------------------------------------- |
-| `$name`    | string | Same as `appUserId`                    |
-| `platform` | string | `"ios"` or `"android"`                 |
+| Property     | Type    | Description                            |
+| ------------ | ------- | -------------------------------------- |
+| `$name`      | string  | Same as `appUserId`                    |
+| `platform`   | string  | `"ios"` or `"android"`                 |
 | `has_ad_free` | boolean | Set to `true` after successful purchase |
 
 ## Events Reference
-
-### App Lifecycle
-
-| Event          | Properties | Trigger                     |
-| -------------- | ---------- | --------------------------- |
-| `App Opened`   | _none_     | Reserved for future use     |
 
 ### Onboarding
 
 | Event                         | Properties                                         | Trigger                                    |
 | ----------------------------- | -------------------------------------------------- | ------------------------------------------ |
 | `Onboarding Started`          | _none_                                             | User taps "Get Started" on the value prop  |
-| `Onboarding Step Viewed`      | _none_                                             | Reserved for future step-level tracking    |
 | `Onboarding Completed`        | _none_                                             | User finishes onboarding                   |
 | `Onboarding Skipped`          | `at_step`: number                                  | User skips onboarding at a specific step   |
 | `Onboarding Mode Selected`    | `mode`: `"simple"` \| `"power"`                    | User picks Simple or Power mode            |
 | `Onboarding Import Started`   | _none_                                             | User initiates a .mmbak file import        |
 | `Onboarding Import Completed` | `accounts`, `categories`, `transactions`: number   | Import finishes successfully               |
 | `Onboarding Import Failed`    | _none_                                             | Import fails                               |
-| `Onboarding Defaults Created` | _none_                                             | Reserved for future use                    |
 
 ### Navigation / Screen Views
 
 | Event           | Properties                  | Trigger                                |
 | --------------- | --------------------------- | -------------------------------------- |
 | `Tab Viewed`    | `tab`: string               | User taps a bottom navigation tab      |
-| `Screen Viewed` | `screen`: string            | User opens a modal screen (e.g. AddTransaction) |
+| `Screen Viewed` | `screen`: string            | User opens a modal or settings screen  |
 
 ### Transactions
 
@@ -93,7 +84,6 @@ every event, so you always know which page the user was on when an action occurr
 | Event             | Properties        | Trigger             |
 | ----------------- | ----------------- | ------------------- |
 | `Account Created` | `type`: string    | New account added   |
-| `Account Updated` | _none_            | Reserved            |
 | `Account Deleted` | _none_            | Account deleted     |
 
 ### Categories
@@ -101,7 +91,6 @@ every event, so you always know which page the user was on when an action occurr
 | Event              | Properties        | Trigger              |
 | ------------------ | ----------------- | -------------------- |
 | `Category Created` | `type`: string    | New category added   |
-| `Category Updated` | _none_            | Reserved             |
 | `Category Deleted` | _none_            | Category deleted     |
 
 ### Recurring Rules
@@ -117,7 +106,6 @@ every event, so you always know which page the user was on when an action occurr
 | Event                      | Properties | Trigger                                  |
 | -------------------------- | ---------- | ---------------------------------------- |
 | `Insights Drilldown Opened`| _none_     | User taps into a category drilldown      |
-| `Insights Type Changed`    | _none_     | Reserved for future use                  |
 
 ### Settings
 
@@ -128,7 +116,6 @@ every event, so you always know which page the user was on when an action occurr
 | `Wage Config Updated` | `wage_type`: string            | Wage settings saved                     |
 | `Mode Switched`       | `mode`: `"simple"` \| `"power"` | User switches app mode                 |
 | `Data Reset`          | `scope`: `"all"` \| `"transactions_only"` | User resets data              |
-| `Data Exported`       | _none_                         | Reserved for future use                 |
 | `Data Imported`       | `accounts`, `categories`, `transactions`: number | Data imported from .mmbak  |
 
 ### Purchases / Ad Removal
