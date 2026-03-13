@@ -19,7 +19,6 @@ interface BottomNavProps {
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
   onPressAdd?: () => void;
-  bottomOffset?: number;
   onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -129,7 +128,6 @@ export function BottomNav({
   onTabChange,
   hideTabs,
   onPressAdd,
-  bottomOffset = 0,
   onTutorialTargetLayout,
   onTutorialTabLayout,
   tutorialSpotlightRequest,
@@ -213,10 +211,6 @@ export function BottomNav({
     <View
       pointerEvents="box-none"
       style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: bottomOffset,
         paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
         paddingBottom: bottomPad,
       }}

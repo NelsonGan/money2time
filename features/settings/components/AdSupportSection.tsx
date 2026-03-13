@@ -7,6 +7,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import type { RevenueCatAvailabilityReason } from '~/services/revenueCat';
 
 function formatPurchaseDate(value: string | null) {
@@ -238,7 +239,13 @@ export function AdSupportSection() {
 
       {!adRemovalState.hasAdFreeEntitlement ? (
         <View className="gap-2">
-          <Button disabled={isBusy} onPress={() => setIsPurchaseModalOpen(true)}>
+          <Button
+            disabled={isBusy}
+            onPress={() => {
+              setIsPurchaseModalOpen(true);
+              void trackEvent(AnalyticsEvents.PURCHASE_MODAL_OPENED);
+            }}
+          >
             <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
           </Button>
         </View>
