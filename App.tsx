@@ -6,16 +6,12 @@ import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { APP_BANNER_AD_STRIP_HEIGHT, AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
+import { AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
-import {
-  BottomNav,
-  getBottomNavReservedInset,
-  type TabName,
-} from '~/components/navigation/BottomNav';
+import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -139,20 +135,14 @@ const styles = StyleSheet.create({
 function MountedTab({
   active,
   children,
-  bottomInset = 0,
 }: {
   active: boolean;
   children: React.ReactNode;
-  bottomInset?: number;
 }) {
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
-      style={[
-        styles.tabSlot,
-        bottomInset ? { bottom: bottomInset } : null,
-        active ? styles.tabVisible : styles.tabHidden,
-      ]}
+      style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
       {children}
     </View>
@@ -195,7 +185,6 @@ interface MainShellScreenProps {
 
 function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreenProps) {
   const { adRemovalState, isSimpleMode } = useApp();
-  const { bottom: safeBottom } = useSafeAreaInsets();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -447,12 +436,10 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     !isGuidedTutorialActive &&
     !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
     canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement });
-  const bottomNavReservedInset = shouldHideBottomNav ? 0 : getBottomNavReservedInset(safeBottom);
-
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
-        <MountedTab active={activeTab === 'home'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'home'}>
           <MemoHomeScreen
             scrollToTopToken={homeScrollTopToken}
             onOpenAccount={openAccountDetail}
@@ -462,7 +449,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'transactions'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'transactions'}>
           {isSimpleMode ? (
             <MemoSimpleActivityScreen
               scrollToTopToken={transactionsScrollTopToken}
@@ -482,7 +469,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             />
           )}
         </MountedTab>
-        <MountedTab active={activeTab === 'insights'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
@@ -492,7 +479,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'settings'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'settings'}>
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
@@ -504,20 +491,20 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         </MountedTab>
       </View>
 
-      {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
-
       {!shouldHideBottomNav ? (
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          onPressAdd={openAddTransaction}
-          bottomOffset={shouldShowBannerStrip ? APP_BANNER_AD_STRIP_HEIGHT : 0}
-          onTutorialTargetLayout={handleTutorialTargetLayout}
-          onTutorialTabLayout={handleTutorialTabLayout}
-          tutorialSpotlightRequest={tutorialSpotlightRequest}
-          tutorialFocusedTab={currentTutorialFocusedTab}
-          tutorialMeasureToken={tutorialSpotlightRequest.token}
-        />
+        <>
+          {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            onPressAdd={openAddTransaction}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            onTutorialTabLayout={handleTutorialTabLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+            tutorialFocusedTab={currentTutorialFocusedTab}
+            tutorialMeasureToken={tutorialSpotlightRequest.token}
+          />
+        </>
       ) : null}
 
       <TutorialCoachmarkOverlay
