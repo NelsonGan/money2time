@@ -2,7 +2,7 @@ import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
-import { setSuperProperties, trackEvent, AnalyticsEvents } from '~/services/analytics';
+import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -10,7 +10,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
+import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';

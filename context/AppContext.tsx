@@ -1035,23 +1035,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void identifyUser(settings.appUserId);
   }, [settings?.appUserId]);
 
+  const superPropUserMode = settings?.userMode ?? 'power';
+  const superPropCurrencyCode = settings?.currencyCode;
+  const superPropLocale = settings?.locale;
+  const superPropThemeMode = settings?.themeMode;
+  const superPropThemeColor = settings?.themeColor;
+  const superPropDisplayMode = settings?.displayMode;
+
   useEffect(() => {
-    if (!settings) return;
+    if (!superPropCurrencyCode) return;
     void setSuperProperties({
-      user_mode: settings.userMode ?? 'power',
-      currency_code: settings.currencyCode,
-      locale: settings.locale,
-      theme_mode: settings.themeMode,
-      theme_color: settings.themeColor,
-      display_mode: settings.displayMode,
+      user_mode: superPropUserMode,
+      currency_code: superPropCurrencyCode,
+      locale: superPropLocale,
+      theme_mode: superPropThemeMode,
+      theme_color: superPropThemeColor,
+      display_mode: superPropDisplayMode,
     });
   }, [
-    settings?.userMode,
-    settings?.currencyCode,
-    settings?.locale,
-    settings?.themeMode,
-    settings?.themeColor,
-    settings?.displayMode,
+    superPropUserMode,
+    superPropCurrencyCode,
+    superPropLocale,
+    superPropThemeMode,
+    superPropThemeColor,
+    superPropDisplayMode,
   ]);
 
   useEffect(() => {

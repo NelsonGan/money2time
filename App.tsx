@@ -53,8 +53,8 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
+import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
   requestOpenTransactions,
