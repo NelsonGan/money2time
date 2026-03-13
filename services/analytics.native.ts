@@ -9,7 +9,7 @@
  * Expo Go where native modules aren't available.
  */
 
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 
 import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.shared';
 
@@ -21,11 +21,46 @@ export * from './analytics.shared';
 
 type MixpanelInstance = any;
 
+let hasWarnedMissingMixpanelToken = false;
+let hasWarnedMissingMixpanelSdk = false;
+let hasWarnedUsingMixpanelJsMode = false;
+
+function warnMissingMixpanelToken() {
+  if (!__DEV__ || hasWarnedMissingMixpanelToken) return;
+
+  hasWarnedMissingMixpanelToken = true;
+  console.warn('[Analytics] EXPO_PUBLIC_MIXPANEL_TOKEN is missing. Mixpanel tracking is disabled.');
+}
+
+function warnMissingMixpanelSdk(error?: unknown) {
+  if (!__DEV__ || hasWarnedMissingMixpanelSdk) return;
+
+  hasWarnedMissingMixpanelSdk = true;
+  console.warn(
+    '[Analytics] mixpanel-react-native is unavailable. Rebuild the native app after installing native dependencies; Expo Go does not support this module.',
+    error,
+  );
+}
+
+function warnUsingMixpanelJsMode() {
+  if (!__DEV__ || hasWarnedUsingMixpanelJsMode) return;
+
+  hasWarnedUsingMixpanelJsMode = true;
+  console.warn(
+    '[Analytics] Mixpanel native module is unavailable in this build. Falling back to JavaScript mode.',
+  );
+}
+
+function isMixpanelNativeModuleAvailable(): boolean {
+  return Boolean(NativeModules.MixpanelReactNative);
+}
+
 function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('mixpanel-react-native').Mixpanel;
-  } catch {
+  } catch (error) {
+    warnMissingMixpanelSdk(error);
     return null;
   }
 }
@@ -37,6 +72,7 @@ function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | nu
 let mixpanelInstance: MixpanelInstance | null = null;
 let initPromise: Promise<void> | null = null;
 let identifiedUserId: string | null = null;
+let currentScreen: string | null = null;
 
 function getMixpanelToken(): string | null {
   const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
@@ -49,7 +85,10 @@ function getMixpanelToken(): string | null {
 
 async function ensureInitialized(): Promise<MixpanelInstance | null> {
   const token = getMixpanelToken();
-  if (!token) return null;
+  if (!token) {
+    warnMissingMixpanelToken();
+    return null;
+  }
 
   if (mixpanelInstance) return mixpanelInstance;
 
@@ -58,7 +97,13 @@ async function ensureInitialized(): Promise<MixpanelInstance | null> {
       const MixpanelClass = getMixpanelClass();
       if (!MixpanelClass) return;
 
-      const mp = new MixpanelClass(token, true);
+      const useNativeMixpanel = isMixpanelNativeModuleAvailable();
+
+      if (!useNativeMixpanel) {
+        warnUsingMixpanelJsMode();
+      }
+
+      const mp = new MixpanelClass(token, true, useNativeMixpanel);
       await mp.init();
       mixpanelInstance = mp;
     })().catch((error) => {
@@ -104,11 +149,38 @@ export async function trackEvent(
   const mp = await ensureInitialized();
   if (!mp) return;
 
-  if (properties) {
-    mp.track(eventName, properties);
+  const nextCurrentScreen =
+    typeof properties?.current_screen === 'string'
+      ? properties.current_screen
+      : typeof properties?.screen === 'string'
+        ? properties.screen
+        : typeof properties?.tab === 'string'
+          ? properties.tab
+          : currentScreen;
+  const eventProperties = nextCurrentScreen
+    ? { ...properties, current_screen: nextCurrentScreen }
+    : properties;
+
+  if (eventProperties) {
+    mp.track(eventName, eventProperties);
   } else {
     mp.track(eventName);
   }
+}
+
+/**
+ * Keep Mixpanel's `current_screen` in sync with the visible app screen.
+ */
+export async function setCurrentScreen(screen: string | null): Promise<void> {
+  if (screen === currentScreen) return;
+
+  currentScreen = screen;
+  if (!screen) return;
+
+  const mp = await ensureInitialized();
+  if (!mp) return;
+
+  mp.registerSuperProperties({ current_screen: screen });
 }
 
 /**
@@ -134,6 +206,16 @@ export async function setUserProperties(
 }
 
 /**
+ * Flush queued events immediately.
+ */
+export async function flushAnalytics(): Promise<void> {
+  const mp = await ensureInitialized();
+  if (!mp) return;
+
+  mp.flush();
+}
+
+/**
  * Reset Mixpanel state (e.g. on data reset / logout).
  */
 export async function resetAnalytics(): Promise<void> {
@@ -142,4 +224,5 @@ export async function resetAnalytics(): Promise<void> {
 
   mp.reset();
   identifiedUserId = null;
+  currentScreen = null;
 }

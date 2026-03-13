@@ -6,11 +6,11 @@ import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tu
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
+  type SettingsStackParamList,
   type SettingsStackRouteProps,
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
@@ -26,12 +26,24 @@ interface SettingsStackProps {
   resetToRootToken?: number;
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
+  onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
     targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
     rect: TutorialTargetRect,
   ) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
+}
+
+function getSettingsAnalyticsScreen(routeName: keyof SettingsStackParamList): string {
+  switch (routeName) {
+    case 'SettingsHome':
+      return 'settings';
+    case 'CategoriesSubcategories':
+      return 'Categories';
+    default:
+      return routeName;
+  }
 }
 
 function SettingsHomeRoute({
@@ -52,41 +64,13 @@ function SettingsHomeRoute({
   return (
     <SettingsScreen
       scrollToTopToken={scrollToTopToken}
-      onOpenDisplay={() => {
-        navigation.navigate('DisplaySettings');
-        void setSuperProperties({ current_screen: 'DisplaySettings' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'DisplaySettings' });
-      }}
-      onOpenHourlyValue={() => {
-        navigation.navigate('HourlyValue');
-        void setSuperProperties({ current_screen: 'HourlyValue' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'HourlyValue' });
-      }}
-      onOpenAccountSettings={() => {
-        navigation.navigate('AccountSettings');
-        void setSuperProperties({ current_screen: 'AccountSettings' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AccountSettings' });
-      }}
-      onOpenAccounts={() => {
-        navigation.navigate('Accounts');
-        void setSuperProperties({ current_screen: 'Accounts' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Accounts' });
-      }}
-      onOpenCategories={() => {
-        navigation.navigate('Categories');
-        void setSuperProperties({ current_screen: 'Categories' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Categories' });
-      }}
-      onOpenRecurring={() => {
-        navigation.navigate('Recurring');
-        void setSuperProperties({ current_screen: 'Recurring' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Recurring' });
-      }}
-      onOpenDataManagement={() => {
-        navigation.navigate('DataManagement');
-        void setSuperProperties({ current_screen: 'DataManagement' });
-        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'DataManagement' });
-      }}
+      onOpenDisplay={() => navigation.navigate('DisplaySettings')}
+      onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
+      onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
+      onOpenAccounts={() => navigation.navigate('Accounts')}
+      onOpenCategories={() => navigation.navigate('Categories')}
+      onOpenRecurring={() => navigation.navigate('Recurring')}
+      onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -116,21 +100,41 @@ export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
   onOpenRecurringEditor,
+  onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
+  const isResettingToRootRef = useRef(false);
   const suppressClosingHapticUntilRef = useRef(0);
   const suppressProgrammaticClosingHaptics = useCallback((durationMs = 600) => {
     suppressClosingHapticUntilRef.current = Date.now() + durationMs;
   }, []);
-  const screenListeners = useMemo(
+  const swipeBackScreenListeners = useMemo(
     () =>
       createNativeStackSwipeHapticListeners({
         shouldSuppress: () => Date.now() < suppressClosingHapticUntilRef.current,
       }),
     [],
+  );
+  const screenListeners = useCallback(
+    (context: Parameters<typeof swipeBackScreenListeners>[0]) => ({
+      ...swipeBackScreenListeners(context),
+      focus: () => {
+        const nextScreen = getSettingsAnalyticsScreen(
+          context.route.name as keyof SettingsStackParamList,
+        );
+
+        if (isResettingToRootRef.current) {
+          if (nextScreen !== 'settings') return;
+          isResettingToRootRef.current = false;
+        }
+
+        onScreenChange?.(nextScreen);
+      },
+    }),
+    [onScreenChange, swipeBackScreenListeners],
   );
 
   useEffect(() => {
@@ -139,6 +143,7 @@ export function SettingsStack({
     if (!nav) return;
     suppressProgrammaticClosingHaptics();
     if (nav.canGoBack()) {
+      isResettingToRootRef.current = true;
       nav.dispatch(StackActions.popToTop());
     }
   }, [resetToRootToken, suppressProgrammaticClosingHaptics]);
