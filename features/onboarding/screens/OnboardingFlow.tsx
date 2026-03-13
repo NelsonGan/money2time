@@ -20,6 +20,7 @@ import {
 } from '~/features/settings/screens';
 import { AddTransactionScreen } from '~/features/transactions/screens';
 import { I18n, setAppLocale } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
 import { type WageConfig } from '~/types';
@@ -172,12 +173,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           text: I18n.t('onboarding.flow.skip'),
           onPress: () => {
             void triggerHaptic('selection');
+            void trackEvent(AnalyticsEvents.ONBOARDING_SKIPPED, { at_step: step });
             onComplete();
           },
         },
       ],
     );
-  }, [onComplete]);
+  }, [onComplete, step]);
 
   const handleImport = useCallback(async () => {
     if (isImporting) return;
@@ -203,12 +205,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       }
 
       setIsImporting(true);
+      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_STARTED);
       const summary = await importMoneyManagerBackup(picked.uri, picked.name);
       void triggerHaptic('success');
       setImportResult(summary);
+      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_COMPLETED, {
+        accounts: summary.accounts,
+        categories: summary.categories,
+        transactions: summary.transactions,
+      });
     } catch (error) {
       const message = getErrorMessage(error, I18n.t('errors.import_failed_generic'));
       void triggerHaptic('error');
+      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_FAILED);
       Alert.alert(I18n.t('onboarding.flow.import_failed'), message);
     } finally {
       setIsImporting(false);
@@ -349,7 +358,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-1">
           <OnboardingValuePropStep
             currencySymbol={settings.currencySymbol}
-            onGetStarted={() => setStep(2)}
+            onGetStarted={() => {
+              void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
+              setStep(2);
+            }}
             onSkip={handleSkipOnboarding}
           />
         </Animated.View>
@@ -396,12 +408,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             onBack={() => setStep(3)}
             onSelectSimple={() => {
               void triggerHaptic('selection');
+              void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
               setIsSimpleUser(true);
               switchToSimpleMode(true);
               onComplete();
             }}
             onSelectPower={() => {
               void triggerHaptic('selection');
+              void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
               setIsSimpleUser(false);
               setStep(5);
             }}
