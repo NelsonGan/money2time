@@ -4,9 +4,11 @@
  * Initialises the Mixpanel SDK on first call, identifies the user with the
  * same appUserId used by RevenueCat, and exposes a thin `track` / `identify`
  * surface consumed by the rest of the app.
+ *
+ * The SDK is loaded via lazy `require()` so the bundle doesn't break in
+ * Expo Go where native modules aren't available.
  */
 
-import { Mixpanel } from 'mixpanel-react-native';
 import { Platform } from 'react-native';
 
 import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.shared';
@@ -14,10 +16,25 @@ import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.
 export * from './analytics.shared';
 
 // ---------------------------------------------------------------------------
+// Lazy SDK resolution – returns null in Expo Go
+// ---------------------------------------------------------------------------
+
+type MixpanelInstance = any;
+
+function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('mixpanel-react-native').Mixpanel;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Module state
 // ---------------------------------------------------------------------------
 
-let mixpanelInstance: Mixpanel | null = null;
+let mixpanelInstance: MixpanelInstance | null = null;
 let initPromise: Promise<void> | null = null;
 let identifiedUserId: string | null = null;
 
@@ -30,7 +47,7 @@ function getMixpanelToken(): string | null {
 // Initialisation
 // ---------------------------------------------------------------------------
 
-async function ensureInitialized(): Promise<Mixpanel | null> {
+async function ensureInitialized(): Promise<MixpanelInstance | null> {
   const token = getMixpanelToken();
   if (!token) return null;
 
@@ -38,7 +55,10 @@ async function ensureInitialized(): Promise<Mixpanel | null> {
 
   if (!initPromise) {
     initPromise = (async () => {
-      const mp = new Mixpanel(token, true);
+      const MixpanelClass = getMixpanelClass();
+      if (!MixpanelClass) return;
+
+      const mp = new MixpanelClass(token, true);
       await mp.init();
       mixpanelInstance = mp;
     })().catch((error) => {
