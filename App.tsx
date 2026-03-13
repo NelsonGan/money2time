@@ -53,6 +53,7 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
@@ -236,6 +237,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
 
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
+    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AddTransaction' });
   }, [navigation]);
 
   const openTransactionEditor = useCallback(
@@ -253,6 +255,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
+      void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED);
     },
     [navigation],
   );
@@ -300,6 +303,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         }
       }
       setActiveTab(tab);
+      void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab });
     },
     [activeTab, jumpTransactionsToMonth],
   );
@@ -341,12 +345,18 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const startGuidedTutorial = useCallback(() => {
     setGuidedTutorialStepIndex(0);
     setIsGuidedTutorialActive(true);
+    void trackEvent(AnalyticsEvents.TUTORIAL_STARTED);
   }, []);
 
   const finishGuidedTutorial = useCallback(() => {
+    const wasComplete = guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1;
     setIsGuidedTutorialActive(false);
     setGuidedTutorialStepIndex(0);
-  }, []);
+    void trackEvent(
+      wasComplete ? AnalyticsEvents.TUTORIAL_COMPLETED : AnalyticsEvents.TUTORIAL_SKIPPED,
+      { steps_viewed: guidedTutorialStepIndex + 1 },
+    );
+  }, [guidedTutorialStepIndex]);
 
   const handleGuidedTutorialBack = useCallback(() => {
     setGuidedTutorialStepIndex((previous) => Math.max(0, previous - 1));
@@ -767,6 +777,7 @@ function AppContent() {
   const handleOnboardingComplete = useCallback(() => {
     updateSettings({ onboardingCompleted: true });
     setShowTutorialPrompt(true);
+    void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
   }, [updateSettings]);
 
   const handleStartTutorialNow = useCallback(() => {

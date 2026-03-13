@@ -31,6 +31,14 @@ import {
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
 import {
+  AnalyticsEvents,
+  identifyUser,
+  resetAnalytics,
+  setSuperProperties,
+  setUserProperties,
+  trackEvent,
+} from '~/services/analytics';
+import {
   importMoneyManagerBackupFromUri,
   type MMImportSummary,
 } from '~/services/mmbakImportService';
@@ -526,6 +534,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const purchaseAdRemovalTip = useCallback(
     async (option: RevenueCatTipOption) => {
+      void trackEvent(AnalyticsEvents.PURCHASE_INITIATED, {
+        product_id: option.productIdentifier,
+        price: option.amount,
+      });
       const result = await purchaseRevenueCatTipRequest(option.productIdentifier);
 
       if (result.customerState) {
@@ -534,6 +546,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...result.customerState,
           isLoading: false,
         }));
+      }
+
+      if (result.status === 'success') {
+        void trackEvent(AnalyticsEvents.PURCHASE_COMPLETED, {
+          product_id: option.productIdentifier,
+          price: option.amount,
+        });
+        void setUserProperties({ has_ad_free: true });
+      } else if (result.status === 'cancelled') {
+        void trackEvent(AnalyticsEvents.PURCHASE_CANCELLED, {
+          product_id: option.productIdentifier,
+        });
+      } else if (result.status === 'error') {
+        void trackEvent(AnalyticsEvents.PURCHASE_FAILED, {
+          product_id: option.productIdentifier,
+        });
       }
 
       if (result.status === 'success' || result.status === 'not_found') {
@@ -557,6 +585,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (result.status === 'success') {
+      void trackEvent(AnalyticsEvents.PURCHASE_RESTORED, {
+        has_entitlement: result.customerState?.hasAdFreeEntitlement ?? false,
+      });
       void refreshAdRemovalState();
     }
 
@@ -565,7 +596,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createAccount = useCallback(
     (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-      return runMutation(() => accountsRepository.create(input));
+      const id = runMutation(() => accountsRepository.create(input));
+      void trackEvent(AnalyticsEvents.ACCOUNT_CREATED, { type: input.type });
+      return id;
     },
     [runMutation],
   );
@@ -584,6 +617,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         accountsRepository.softDelete(id);
       });
+      void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
     [runMutation],
   );
@@ -638,6 +672,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         recurringRulesRepository.create(input);
       });
+      void trackEvent(AnalyticsEvents.RECURRING_RULE_CREATED, {
+        type: input.type,
+        pattern: input.recurrencePattern,
+      });
     },
     [runMutation],
   );
@@ -647,6 +685,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         recurringRulesRepository.update(id, updates);
       });
+      void trackEvent(AnalyticsEvents.RECURRING_RULE_UPDATED);
     },
     [runMutation],
   );
@@ -656,6 +695,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         recurringRulesRepository.softDelete(id);
       });
+      void trackEvent(AnalyticsEvents.RECURRING_RULE_DELETED);
     },
     [runMutation],
   );
@@ -665,6 +705,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         categoriesRepository.create(input);
       });
+      void trackEvent(AnalyticsEvents.CATEGORY_CREATED, { type: input.type });
     },
     [runMutation],
   );
@@ -686,6 +727,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         categoriesRepository.softDelete(id);
       });
+      void trackEvent(AnalyticsEvents.CATEGORY_DELETED);
     },
     [runMutation],
   );
@@ -815,6 +857,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...resolveRelationNames(input),
       };
       setTransactions((prev) => [optimistic, ...prev]);
+      void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
+        type: input.type,
+        has_category: !!input.categoryId,
+        has_note: !!(input.note && input.note.trim()),
+      });
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(id, input);
@@ -848,6 +895,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         inputById.set(id, input);
       });
       if (normalizedUpdates.length === 0) return;
+
+      void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
 
       const nextUpdatedAt = nowIso();
       setTransactions((prev) =>
@@ -893,6 +942,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         uniqueIds.push(id);
       });
       if (uniqueIds.length === 0) return;
+
+      void trackEvent(
+        uniqueIds.length === 1
+          ? AnalyticsEvents.TRANSACTION_DELETED
+          : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
+        { count: uniqueIds.length },
+      );
 
       const idSet = new Set(uniqueIds);
       setTransactions((prev) => prev.filter((tx) => !idSet.has(tx.id)));
@@ -953,6 +1009,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         settingsRepository.updateSettings(nextUpdates);
       });
+      const changedKeys = Object.keys(nextUpdates).filter(
+        (key) => key !== 'onboardingCompleted' && key !== 'userMode',
+      );
+      if (changedKeys.length > 0) {
+        void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, {
+          changed_fields: changedKeys.join(','),
+        });
+      }
     },
     [canUseTimeDisplayMode, runMutation],
   );
@@ -965,6 +1029,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setRevenueCatAppUserId(settings?.appUserId ?? null);
   }, [settings?.appUserId]);
+
+  useEffect(() => {
+    if (!settings?.appUserId) return;
+    void identifyUser(settings.appUserId);
+  }, [settings?.appUserId]);
+
+  useEffect(() => {
+    if (!settings) return;
+    void setSuperProperties({
+      user_mode: settings.userMode ?? 'power',
+      currency_code: settings.currencyCode,
+      locale: settings.locale,
+      theme_mode: settings.themeMode,
+      theme_color: settings.themeColor,
+      display_mode: settings.displayMode,
+    });
+  }, [
+    settings?.userMode,
+    settings?.currencyCode,
+    settings?.locale,
+    settings?.themeMode,
+    settings?.themeColor,
+    settings?.displayMode,
+  ]);
 
   useEffect(() => {
     if (!settings?.appUserId) return;
@@ -985,6 +1073,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         monthlyWageRepository.saveForMonth(month, config);
       });
+      void trackEvent(AnalyticsEvents.WAGE_CONFIG_UPDATED, { wage_type: config.wageType });
     },
     [runMutation],
   );
@@ -1003,11 +1092,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (current.displayMode === 'money' && !canUseTimeDisplayMode) {
       return;
     }
+    const nextMode = current.displayMode === 'money' ? 'time' : 'money';
     runMutation(() => {
-      settingsRepository.updateSettings({
-        displayMode: current.displayMode === 'money' ? 'time' : 'money',
-      });
+      settingsRepository.updateSettings({ displayMode: nextMode });
     });
+    void trackEvent(AnalyticsEvents.DISPLAY_MODE_TOGGLED, { mode: nextMode });
   }, [canUseTimeDisplayMode, runMutation]);
 
   const updateInsightsPreferencesJson = useCallback((value: string | null) => {
@@ -1230,6 +1319,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeAllData();
     });
+    void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
+    void resetAnalytics();
   }, [runMutation]);
 
   const resetTransactionsOnly = useCallback(() => {
@@ -1237,6 +1328,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       purgeTransactionsOnly();
       resetTransactionFilters();
     });
+    void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
   }, [resetTransactionFilters, runMutation]);
 
   const importMoneyManagerBackup = useCallback(
@@ -1253,6 +1345,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
         refreshAll();
+        void trackEvent(AnalyticsEvents.DATA_IMPORTED, {
+          accounts: summary.accounts,
+          categories: summary.categories,
+          transactions: summary.transactions,
+        });
         return summary;
       } catch (error) {
         throw toError(error, I18n.t('errors.import_failed_generic'));
@@ -1301,6 +1398,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         settingsRepository.updateSettings({ userMode: 'simple' });
       });
+      void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: 'simple' });
     },
     [runMutation],
   );
@@ -1309,6 +1407,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       settingsRepository.updateSettings({ userMode: 'power' });
     });
+    void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: 'power' });
   }, [runMutation]);
 
   const deleteSimpleWalletAndTransactions = useCallback(() => {
