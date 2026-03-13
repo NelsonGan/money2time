@@ -32,6 +32,7 @@ import {
 } from '~/lib/repositories/transactionsRepository';
 import {
   AnalyticsEvents,
+  flushAnalytics,
   identifyUser,
   resetAnalytics,
   setSuperProperties,
@@ -318,7 +319,6 @@ function applyTransactionFilters(
   }
 
   const filtered: TransactionWithRelations[] = [];
-  const noteCache = noteSearchTextById;
 
   for (let index = 0; index < transactions.length; index += 1) {
     const transaction = transactions[index];
@@ -374,7 +374,8 @@ function applyTransactionFilters(
     if (hasMaxAmount && maxAmount !== null && transaction.amount > maxAmount) continue;
 
     if (hasSearchFilter) {
-      const note = noteCache?.get(transaction.id) ?? (transaction.note ?? '').toLowerCase();
+      const note =
+        noteSearchTextById?.get(transaction.id) ?? (transaction.note ?? '').toLowerCase();
       if (!note.includes(searchTerm)) continue;
     }
 
@@ -857,14 +858,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...resolveRelationNames(input),
       };
       setTransactions((prev) => [optimistic, ...prev]);
-      void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
-        type: input.type,
-        has_category: !!input.categoryId,
-        has_note: !!(input.note && input.note.trim()),
-      });
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(id, input);
+          void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
+            type: input.type,
+            has_category: !!input.categoryId,
+            has_note: !!(input.note && input.note.trim()),
+          });
         } catch {
           // rollback on failure
         }
@@ -896,8 +897,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       if (normalizedUpdates.length === 0) return;
 
-      void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
-
       const nextUpdatedAt = nowIso();
       setTransactions((prev) =>
         prev.map((tx) => {
@@ -921,6 +920,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
+          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
         } catch {
           // rollback on failure
         }
@@ -943,18 +943,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       if (uniqueIds.length === 0) return;
 
-      void trackEvent(
-        uniqueIds.length === 1
-          ? AnalyticsEvents.TRANSACTION_DELETED
-          : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
-        { count: uniqueIds.length },
-      );
-
       const idSet = new Set(uniqueIds);
       setTransactions((prev) => prev.filter((tx) => !idSet.has(tx.id)));
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.softDeleteMany(uniqueIds);
+          void trackEvent(
+            uniqueIds.length === 1
+              ? AnalyticsEvents.TRANSACTION_DELETED
+              : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
+            { count: uniqueIds.length },
+          );
         } catch {
           // rollback on failure
         }
@@ -1326,8 +1325,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeAllData();
     });
-    void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
-    void resetAnalytics();
+    void (async () => {
+      try {
+        await trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
+        await flushAnalytics();
+      } finally {
+        await resetAnalytics();
+      }
+    })();
   }, [runMutation]);
 
   const resetTransactionsOnly = useCallback(() => {

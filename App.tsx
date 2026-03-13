@@ -1,6 +1,6 @@
 import './global.css';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -50,7 +50,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
-import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
+import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
   requestOpenTransactions,
@@ -132,13 +132,7 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
-function MountedTab({
-  active,
-  children,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-}) {
+function MountedTab({ active, children }: { active: boolean; children: React.ReactNode }) {
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
@@ -147,6 +141,12 @@ function MountedTab({
       {children}
     </View>
   );
+}
+
+const MAIN_TAB_SCREEN_NAMES = new Set<string>(['home', 'transactions', 'insights', 'settings']);
+
+function isMainTabScreen(screen: string): boolean {
+  return MAIN_TAB_SCREEN_NAMES.has(screen);
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {
@@ -180,10 +180,15 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
+  onVisibleScreenChange?: (screen: string) => void;
   tutorialStartToken?: number;
 }
 
-function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreenProps) {
+function MainShellScreen({
+  navigation,
+  onVisibleScreenChange,
+  tutorialStartToken = 0,
+}: MainShellScreenProps) {
   const { adRemovalState, isSimpleMode } = useApp();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
@@ -202,9 +207,11 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
+  const [settingsCurrentScreen, setSettingsCurrentScreen] = useState('settings');
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const tutorialStartTokenRef = useRef(0);
+  const previousActiveTabRef = useRef<MainTab | null>(null);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -226,45 +233,35 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
 
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
-    void setSuperProperties({ current_screen: 'AddTransaction' });
-    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AddTransaction' });
   }, [navigation]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
       navigation.navigate('EditTransaction', { transactionId: transaction.id });
-      void setSuperProperties({ current_screen: 'EditTransaction' });
-      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'EditTransaction' });
     },
     [navigation],
   );
   const openAccountDetail = useCallback(
     (accountId: string) => {
       navigation.navigate('AccountDetail', { accountId });
-      void setSuperProperties({ current_screen: 'AccountDetail' });
-      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AccountDetail' });
     },
     [navigation],
   );
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
-      void setSuperProperties({ current_screen: 'InsightsDrilldown' });
-      void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED);
+      void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED, { screen: 'InsightsDrilldown' });
     },
     [navigation],
   );
 
   const openSettingsScreen = useCallback(
     (screen: 'Accounts' | 'Recurring') => {
-      const screenName = screen === 'Recurring' ? 'SettingsRecurring' : 'SettingsAccounts';
       if (screen === 'Recurring') {
         navigation.navigate('SettingsRecurring');
       } else {
         navigation.navigate('SettingsAccounts');
       }
-      void setSuperProperties({ current_screen: screenName });
-      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: screenName });
     },
     [navigation],
   );
@@ -276,7 +273,6 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
       } else {
         navigation.navigate('RecurringEditor');
       }
-      void setSuperProperties({ current_screen: 'RecurringEditor' });
     },
     [navigation],
   );
@@ -296,17 +292,29 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         setInsightsResetToMonthToken((prev) => prev + 1);
       }
       if (tab === 'settings') {
+        setSettingsCurrentScreen('settings');
         setSettingsResetToken((prev) => prev + 1);
         if (activeTab === 'settings') {
           setSettingsScrollTopToken((prev) => prev + 1);
         }
       }
       setActiveTab(tab);
-      void setSuperProperties({ current_screen: tab });
-      void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab });
     },
     [activeTab, jumpTransactionsToMonth],
   );
+
+  useEffect(() => {
+    const previousTab = previousActiveTabRef.current;
+    previousActiveTabRef.current = activeTab;
+
+    if (previousTab === activeTab) return;
+    void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab: activeTab });
+  }, [activeTab]);
+
+  useEffect(() => {
+    const visibleScreen = activeTab === 'settings' ? settingsCurrentScreen : activeTab;
+    onVisibleScreenChange?.(visibleScreen);
+  }, [activeTab, onVisibleScreenChange, settingsCurrentScreen]);
 
   const handleTutorialTargetLayout = useCallback(
     (targetId: TutorialTargetId, rect: TutorialTargetRect) => {
@@ -484,6 +492,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
+            onScreenChange={setSettingsCurrentScreen}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -607,10 +616,7 @@ function SettingsHourlyValueRouteScreen({
 }: RootStackRouteProps<'SettingsHourlyValue'>) {
   return (
     <HourlyValueScreen
-      onClose={() => {
-        void setSuperProperties({ current_screen: 'settings' });
-        navigation.goBack();
-      }}
+      onClose={() => navigation.goBack()}
       onOpenWageCalculator={({ monthKey, initialConfig }) =>
         navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
       }
@@ -770,10 +776,42 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [tutorialStartToken, setTutorialStartToken] = useState(0);
+  const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('home');
+  const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
+  const previousVisibleScreenRef = useRef<string | null>(null);
+
+  const syncRootActiveScreen = useCallback(() => {
+    const rootState = navigationRef.getRootState();
+    const nextScreen = (rootState?.routes[rootState.index]?.name ??
+      'Main') as keyof RootStackParamList;
+
+    setRootActiveScreen((previous) => (previous === nextScreen ? previous : nextScreen));
+  }, [navigationRef]);
+
+  const visibleScreen = settings.onboardingCompleted
+    ? rootActiveScreen === 'Main'
+      ? mainShellCurrentScreen
+      : rootActiveScreen
+    : 'onboarding';
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const previousScreen = previousVisibleScreenRef.current;
+    previousVisibleScreenRef.current = visibleScreen;
+
+    void setCurrentScreen(visibleScreen);
+
+    if (previousScreen === visibleScreen) return;
+    if (visibleScreen === 'onboarding' || isMainTabScreen(visibleScreen)) return;
+
+    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: visibleScreen });
+  }, [isLoading, visibleScreen]);
 
   const handleOnboardingComplete = useCallback(() => {
     updateSettings({ onboardingCompleted: true });
@@ -835,7 +873,12 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <NavigationContainer key={`locale:${navigationLocaleKey}`}>
+      <NavigationContainer
+        key={`locale:${navigationLocaleKey}`}
+        ref={navigationRef}
+        onReady={syncRootActiveScreen}
+        onStateChange={syncRootActiveScreen}
+      >
         <RootStack.Navigator
           screenOptions={SHARED_NATIVE_STACK_OPTIONS}
           screenListeners={rootScreenListeners}
@@ -844,6 +887,7 @@ function AppContent() {
             {(props) => (
               <MainShellScreen
                 navigation={props.navigation}
+                onVisibleScreenChange={setMainShellCurrentScreen}
                 tutorialStartToken={tutorialStartToken}
               />
             )}

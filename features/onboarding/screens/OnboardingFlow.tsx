@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,8 +19,9 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { AddTransactionScreen } from '~/features/transactions/screens';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
-import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
 import { type WageConfig } from '~/types';
@@ -48,6 +49,18 @@ function nameSeedKey(name: string) {
   return name.trim().toLowerCase();
 }
 
+function withColorAlpha(hex: string, alpha: number) {
+  const sanitized = hex.replace('#', '');
+
+  if (sanitized.length !== 6) return hex;
+
+  const red = parseInt(sanitized.slice(0, 2), 16);
+  const green = parseInt(sanitized.slice(2, 4), 16);
+  const blue = parseInt(sanitized.slice(4, 6), 16);
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
 interface OnboardingFlowProps {
   onComplete: () => void;
 }
@@ -67,6 +80,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     createTransaction,
     switchToSimpleMode,
   } = useApp();
+  const themeColors = useThemeColors();
 
   const [step, setStep] = useState<OnboardingStep>(1);
   const [isSimpleUser, setIsSimpleUser] = useState(false);
@@ -320,15 +334,35 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
         <View key={i} className="flex-row items-center gap-2">
           <View
-            className={`rounded-full ${
-              visualStep >= i ? 'h-2.5 w-2.5 bg-primary shadow-glow' : 'h-2 w-2 bg-secondary/60'
-            }`}
+            className="rounded-full"
+            style={[
+              styles.progressDot,
+              visualStep >= i ? styles.progressDotActive : styles.progressDotInactive,
+              {
+                backgroundColor:
+                  visualStep >= i
+                    ? themeColors.primary
+                    : withColorAlpha(themeColors.backgroundSubtle, 0.6),
+              },
+              visualStep >= i
+                ? {
+                    shadowColor: themeColors.primary,
+                  }
+                : null,
+            ]}
           />
           {i < totalVisualSteps && (
             <View
-              className={`h-[1.5px] w-6 rounded-full ${
-                visualStep > i ? 'bg-primary/50' : 'bg-secondary/40'
-              }`}
+              className="rounded-full"
+              style={[
+                styles.progressConnector,
+                {
+                  backgroundColor:
+                    visualStep > i
+                      ? withColorAlpha(themeColors.primary, 0.5)
+                      : withColorAlpha(themeColors.backgroundSubtle, 0.4),
+                },
+              ]}
             />
           )}
         </View>
@@ -359,7 +393,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <OnboardingValuePropStep
             currencySymbol={settings.currencySymbol}
             onGetStarted={() => {
-              void setSuperProperties({ current_screen: 'onboarding' });
               void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
               setStep(2);
             }}
@@ -477,3 +510,24 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  progressConnector: {
+    height: 1.5,
+    width: 24,
+  },
+  progressDot: {
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0,
+    shadowRadius: 10,
+  },
+  progressDotActive: {
+    height: 10,
+    width: 10,
+    shadowOpacity: 0.15,
+  },
+  progressDotInactive: {
+    height: 8,
+    width: 8,
+  },
+});

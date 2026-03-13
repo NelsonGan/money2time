@@ -16,10 +16,14 @@ export async function trackEvent(
   _properties?: AnalyticsProperties,
 ): Promise<void> {}
 
+export async function setCurrentScreen(_screen: string | null): Promise<void> {}
+
 export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<void> {}
 
 export async function setUserProperties(
   _properties: Record<string, string | number | boolean>,
 ): Promise<void> {}
+
+export async function flushAnalytics(): Promise<void> {}
 
 export async function resetAnalytics(): Promise<void> {}
