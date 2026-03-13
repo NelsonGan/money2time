@@ -101,10 +101,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch',
     borderTopWidth: StyleSheet.hairlineWidth,
-    height: APP_BANNER_AD_STRIP_HEIGHT,
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 6,
+    paddingBottom: 2,
     width: '100%',
   },
   bannerShell: {

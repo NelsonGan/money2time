@@ -11,7 +11,6 @@ import {
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, UserSettings } from '~/types';
@@ -40,7 +39,6 @@ export function OnboardingWageStep({
   onContinue,
   onOpenWageCalculator,
 }: OnboardingWageStepProps) {
-  const themeColors = useThemeColors();
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const handleDoLater = () => {
@@ -170,11 +168,6 @@ export function OnboardingWageStep({
           <Animated.View entering={FadeIn.delay(250).duration(500)} className="mt-7">
             <Card variant="accent" className="overflow-hidden">
               <CardContent className="py-6">
-                {/* Decorative accent */}
-                <View
-                  className="absolute top-0 left-0 w-1 h-full rounded-full"
-                  style={{ backgroundColor: themeColors.primary, opacity: 0.3 }}
-                />
                 <Text variant="label" tone="primary" className="tracking-widest">
                   {I18n.t('onboarding.wage.why_matters')}
                 </Text>

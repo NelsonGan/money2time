@@ -1,21 +1,17 @@
 import './global.css';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { APP_BANNER_AD_STRIP_HEIGHT, AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
+import { AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
-import {
-  BottomNav,
-  getBottomNavReservedInset,
-  type TabName,
-} from '~/components/navigation/BottomNav';
+import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -54,6 +50,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
+import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
   requestOpenTransactions,
@@ -135,27 +132,21 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
-function MountedTab({
-  active,
-  children,
-  bottomInset = 0,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-  bottomInset?: number;
-}) {
+function MountedTab({ active, children }: { active: boolean; children: React.ReactNode }) {
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
-      style={[
-        styles.tabSlot,
-        bottomInset ? { bottom: bottomInset } : null,
-        active ? styles.tabVisible : styles.tabHidden,
-      ]}
+      style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
       {children}
     </View>
   );
+}
+
+const MAIN_TAB_SCREEN_NAMES = new Set<string>(['home', 'transactions', 'insights', 'settings']);
+
+function isMainTabScreen(screen: string): boolean {
+  return MAIN_TAB_SCREEN_NAMES.has(screen);
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {
@@ -189,12 +180,16 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
+  onVisibleScreenChange?: (screen: string) => void;
   tutorialStartToken?: number;
 }
 
-function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreenProps) {
+function MainShellScreen({
+  navigation,
+  onVisibleScreenChange,
+  tutorialStartToken = 0,
+}: MainShellScreenProps) {
   const { adRemovalState, isSimpleMode } = useApp();
-  const { bottom: safeBottom } = useSafeAreaInsets();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -212,9 +207,11 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
+  const [settingsCurrentScreen, setSettingsCurrentScreen] = useState('settings');
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const tutorialStartTokenRef = useRef(0);
+  const previousActiveTabRef = useRef<MainTab | null>(null);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -253,6 +250,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
+      void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED, { screen: 'InsightsDrilldown' });
     },
     [navigation],
   );
@@ -261,9 +259,9 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     (screen: 'Accounts' | 'Recurring') => {
       if (screen === 'Recurring') {
         navigation.navigate('SettingsRecurring');
-        return;
+      } else {
+        navigation.navigate('SettingsAccounts');
       }
-      navigation.navigate('SettingsAccounts');
     },
     [navigation],
   );
@@ -272,9 +270,9 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     (ruleId?: string) => {
       if (ruleId) {
         navigation.navigate('RecurringEditor', { ruleId });
-        return;
+      } else {
+        navigation.navigate('RecurringEditor');
       }
-      navigation.navigate('RecurringEditor');
     },
     [navigation],
   );
@@ -294,6 +292,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         setInsightsResetToMonthToken((prev) => prev + 1);
       }
       if (tab === 'settings') {
+        setSettingsCurrentScreen('settings');
         setSettingsResetToken((prev) => prev + 1);
         if (activeTab === 'settings') {
           setSettingsScrollTopToken((prev) => prev + 1);
@@ -303,6 +302,19 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     },
     [activeTab, jumpTransactionsToMonth],
   );
+
+  useEffect(() => {
+    const previousTab = previousActiveTabRef.current;
+    previousActiveTabRef.current = activeTab;
+
+    if (previousTab === activeTab) return;
+    void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab: activeTab });
+  }, [activeTab]);
+
+  useEffect(() => {
+    const visibleScreen = activeTab === 'settings' ? settingsCurrentScreen : activeTab;
+    onVisibleScreenChange?.(visibleScreen);
+  }, [activeTab, onVisibleScreenChange, settingsCurrentScreen]);
 
   const handleTutorialTargetLayout = useCallback(
     (targetId: TutorialTargetId, rect: TutorialTargetRect) => {
@@ -341,12 +353,18 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
   const startGuidedTutorial = useCallback(() => {
     setGuidedTutorialStepIndex(0);
     setIsGuidedTutorialActive(true);
+    void trackEvent(AnalyticsEvents.TUTORIAL_STARTED);
   }, []);
 
   const finishGuidedTutorial = useCallback(() => {
+    const wasComplete = guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1;
     setIsGuidedTutorialActive(false);
     setGuidedTutorialStepIndex(0);
-  }, []);
+    void trackEvent(
+      wasComplete ? AnalyticsEvents.TUTORIAL_COMPLETED : AnalyticsEvents.TUTORIAL_SKIPPED,
+      { steps_viewed: guidedTutorialStepIndex + 1 },
+    );
+  }, [guidedTutorialStepIndex]);
 
   const handleGuidedTutorialBack = useCallback(() => {
     setGuidedTutorialStepIndex((previous) => Math.max(0, previous - 1));
@@ -426,12 +444,10 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     !isGuidedTutorialActive &&
     !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
     canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement });
-  const bottomNavReservedInset = shouldHideBottomNav ? 0 : getBottomNavReservedInset(safeBottom);
-
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
-        <MountedTab active={activeTab === 'home'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'home'}>
           <MemoHomeScreen
             scrollToTopToken={homeScrollTopToken}
             onOpenAccount={openAccountDetail}
@@ -441,7 +457,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'transactions'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'transactions'}>
           {isSimpleMode ? (
             <MemoSimpleActivityScreen
               scrollToTopToken={transactionsScrollTopToken}
@@ -461,7 +477,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             />
           )}
         </MountedTab>
-        <MountedTab active={activeTab === 'insights'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
@@ -471,11 +487,12 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'settings'} bottomInset={bottomNavReservedInset}>
+        <MountedTab active={activeTab === 'settings'}>
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
+            onScreenChange={setSettingsCurrentScreen}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -483,20 +500,20 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         </MountedTab>
       </View>
 
-      {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
-
       {!shouldHideBottomNav ? (
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          onPressAdd={openAddTransaction}
-          bottomOffset={shouldShowBannerStrip ? APP_BANNER_AD_STRIP_HEIGHT : 0}
-          onTutorialTargetLayout={handleTutorialTargetLayout}
-          onTutorialTabLayout={handleTutorialTabLayout}
-          tutorialSpotlightRequest={tutorialSpotlightRequest}
-          tutorialFocusedTab={currentTutorialFocusedTab}
-          tutorialMeasureToken={tutorialSpotlightRequest.token}
-        />
+        <>
+          {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            onPressAdd={openAddTransaction}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            onTutorialTabLayout={handleTutorialTabLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+            tutorialFocusedTab={currentTutorialFocusedTab}
+            tutorialMeasureToken={tutorialSpotlightRequest.token}
+          />
+        </>
       ) : null}
 
       <TutorialCoachmarkOverlay
@@ -759,14 +776,47 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [tutorialStartToken, setTutorialStartToken] = useState(0);
+  const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('home');
+  const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
+  const previousVisibleScreenRef = useRef<string | null>(null);
+
+  const syncRootActiveScreen = useCallback(() => {
+    const rootState = navigationRef.getRootState();
+    const nextScreen = (rootState?.routes[rootState.index]?.name ??
+      'Main') as keyof RootStackParamList;
+
+    setRootActiveScreen((previous) => (previous === nextScreen ? previous : nextScreen));
+  }, [navigationRef]);
+
+  const visibleScreen = settings.onboardingCompleted
+    ? rootActiveScreen === 'Main'
+      ? mainShellCurrentScreen
+      : rootActiveScreen
+    : 'onboarding';
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const previousScreen = previousVisibleScreenRef.current;
+    previousVisibleScreenRef.current = visibleScreen;
+
+    void setCurrentScreen(visibleScreen);
+
+    if (previousScreen === visibleScreen) return;
+    if (visibleScreen === 'onboarding' || isMainTabScreen(visibleScreen)) return;
+
+    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: visibleScreen });
+  }, [isLoading, visibleScreen]);
 
   const handleOnboardingComplete = useCallback(() => {
     updateSettings({ onboardingCompleted: true });
     setShowTutorialPrompt(true);
+    void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
   }, [updateSettings]);
 
   const handleStartTutorialNow = useCallback(() => {
@@ -823,7 +873,12 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <NavigationContainer key={`locale:${navigationLocaleKey}`}>
+      <NavigationContainer
+        key={`locale:${navigationLocaleKey}`}
+        ref={navigationRef}
+        onReady={syncRootActiveScreen}
+        onStateChange={syncRootActiveScreen}
+      >
         <RootStack.Navigator
           screenOptions={SHARED_NATIVE_STACK_OPTIONS}
           screenListeners={rootScreenListeners}
@@ -832,6 +887,7 @@ function AppContent() {
             {(props) => (
               <MainShellScreen
                 navigation={props.navigation}
+                onVisibleScreenChange={setMainShellCurrentScreen}
                 tutorialStartToken={tutorialStartToken}
               />
             )}

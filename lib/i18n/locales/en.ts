@@ -163,7 +163,7 @@ const en = {
         'To convert money into time, we need your true hourly rate — your real take-home pay divided by your real working hours (including commute).',
       why_matters: 'Why this matters',
       why_matters_body:
-        'A {{symbol}}12 cheesecake might seem harmless, but if you earn {{symbol}}15/hour it costs 48 minutes of your life. Knowing your rate changes how you see every purchase.',
+        'A {{symbol}}12 Netflix subscription might seem harmless, but if you earn {{symbol}}15/hour it costs 48 minutes of your life. Knowing your rate changes how you see every purchase.',
       setup_wage: 'Set Up My Wage',
       later_label: "I'll do this later →",
       later_a11y: 'Skip wage setup and do it later',
