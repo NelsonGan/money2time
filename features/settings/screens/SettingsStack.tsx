@@ -2,6 +2,7 @@ import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import { setSuperProperties, trackEvent, AnalyticsEvents } from '~/services/analytics';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -51,13 +52,41 @@ function SettingsHomeRoute({
   return (
     <SettingsScreen
       scrollToTopToken={scrollToTopToken}
-      onOpenDisplay={() => navigation.navigate('DisplaySettings')}
-      onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
-      onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
-      onOpenAccounts={() => navigation.navigate('Accounts')}
-      onOpenCategories={() => navigation.navigate('Categories')}
-      onOpenRecurring={() => navigation.navigate('Recurring')}
-      onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenDisplay={() => {
+        navigation.navigate('DisplaySettings');
+        void setSuperProperties({ current_screen: 'DisplaySettings' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'DisplaySettings' });
+      }}
+      onOpenHourlyValue={() => {
+        navigation.navigate('HourlyValue');
+        void setSuperProperties({ current_screen: 'HourlyValue' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'HourlyValue' });
+      }}
+      onOpenAccountSettings={() => {
+        navigation.navigate('AccountSettings');
+        void setSuperProperties({ current_screen: 'AccountSettings' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AccountSettings' });
+      }}
+      onOpenAccounts={() => {
+        navigation.navigate('Accounts');
+        void setSuperProperties({ current_screen: 'Accounts' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Accounts' });
+      }}
+      onOpenCategories={() => {
+        navigation.navigate('Categories');
+        void setSuperProperties({ current_screen: 'Categories' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Categories' });
+      }}
+      onOpenRecurring={() => {
+        navigation.navigate('Recurring');
+        void setSuperProperties({ current_screen: 'Recurring' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'Recurring' });
+      }}
+      onOpenDataManagement={() => {
+        navigation.navigate('DataManagement');
+        void setSuperProperties({ current_screen: 'DataManagement' });
+        void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'DataManagement' });
+      }}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}

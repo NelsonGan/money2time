@@ -53,7 +53,7 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
@@ -237,24 +237,30 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
 
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
+    void setSuperProperties({ current_screen: 'AddTransaction' });
     void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AddTransaction' });
   }, [navigation]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
       navigation.navigate('EditTransaction', { transactionId: transaction.id });
+      void setSuperProperties({ current_screen: 'EditTransaction' });
+      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'EditTransaction' });
     },
     [navigation],
   );
   const openAccountDetail = useCallback(
     (accountId: string) => {
       navigation.navigate('AccountDetail', { accountId });
+      void setSuperProperties({ current_screen: 'AccountDetail' });
+      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: 'AccountDetail' });
     },
     [navigation],
   );
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
+      void setSuperProperties({ current_screen: 'InsightsDrilldown' });
       void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED);
     },
     [navigation],
@@ -262,11 +268,14 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
 
   const openSettingsScreen = useCallback(
     (screen: 'Accounts' | 'Recurring') => {
+      const screenName = screen === 'Recurring' ? 'SettingsRecurring' : 'SettingsAccounts';
       if (screen === 'Recurring') {
         navigation.navigate('SettingsRecurring');
-        return;
+      } else {
+        navigation.navigate('SettingsAccounts');
       }
-      navigation.navigate('SettingsAccounts');
+      void setSuperProperties({ current_screen: screenName });
+      void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: screenName });
     },
     [navigation],
   );
@@ -275,9 +284,10 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
     (ruleId?: string) => {
       if (ruleId) {
         navigation.navigate('RecurringEditor', { ruleId });
-        return;
+      } else {
+        navigation.navigate('RecurringEditor');
       }
-      navigation.navigate('RecurringEditor');
+      void setSuperProperties({ current_screen: 'RecurringEditor' });
     },
     [navigation],
   );
@@ -303,6 +313,7 @@ function MainShellScreen({ navigation, tutorialStartToken = 0 }: MainShellScreen
         }
       }
       setActiveTab(tab);
+      void setSuperProperties({ current_screen: tab });
       void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab });
     },
     [activeTab, jumpTransactionsToMonth],
@@ -609,7 +620,10 @@ function SettingsHourlyValueRouteScreen({
 }: RootStackRouteProps<'SettingsHourlyValue'>) {
   return (
     <HourlyValueScreen
-      onClose={() => navigation.goBack()}
+      onClose={() => {
+        void setSuperProperties({ current_screen: 'settings' });
+        navigation.goBack();
+      }}
       onOpenWageCalculator={({ monthKey, initialConfig }) =>
         navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
       }

@@ -96,4 +96,5 @@ export interface AnalyticsSuperProperties {
   theme_color?: string;
   has_ad_free?: boolean;
   display_mode?: 'money' | 'time';
+  current_screen?: string;
 }
