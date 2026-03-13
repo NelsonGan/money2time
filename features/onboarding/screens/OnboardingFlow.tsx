@@ -20,7 +20,7 @@ import {
 } from '~/features/settings/screens';
 import { AddTransactionScreen } from '~/features/transactions/screens';
 import { I18n, setAppLocale } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { AnalyticsEvents, setSuperProperties, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
 import { type WageConfig } from '~/types';
@@ -359,6 +359,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <OnboardingValuePropStep
             currencySymbol={settings.currencySymbol}
             onGetStarted={() => {
+              void setSuperProperties({ current_screen: 'onboarding' });
               void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
               setStep(2);
             }}

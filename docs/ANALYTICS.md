@@ -34,8 +34,13 @@ The identifier is set via `identifyUser(appUserId)` in `AppContext` whenever
 | `theme_color`  | string  | Theme accent colour (e.g. `"sage"`)  |
 | `display_mode` | string  | `"money"` or `"time"`               |
 | `has_ad_free`  | boolean | Whether user has ad-free entitlement |
+| `current_screen` | string | The current screen/tab the user is on (e.g. `"home"`, `"transactions"`, `"AddTransaction"`, `"DisplaySettings"`) |
 
-These are refreshed automatically whenever the underlying settings change.
+These are refreshed automatically whenever the underlying settings change or the user navigates.
+
+The `current_screen` property is particularly useful: it is automatically attached to
+every event, so you always know which page the user was on when an action occurred
+(e.g. a `Transaction Created` event will carry `current_screen: "AddTransaction"`).
 
 ## User Profile Properties (People)
 
