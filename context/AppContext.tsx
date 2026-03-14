@@ -34,7 +34,6 @@ import {
   AnalyticsEvents,
   flushAnalytics,
   identifyUser,
-  resetAnalytics,
   setSuperProperties,
   setUserProperties,
   trackEvent,
@@ -262,7 +261,10 @@ function purgeAllData() {
   db.delete(recurringRulesTable).run();
   db.delete(accountGroupsTable).run();
   db.delete(monthlyWageSettingsTable).run();
-  db.delete(settingsTable).run();
+  // Reset settings to defaults but preserve appUserId so the device identity
+  // remains stable across in-app data resets. The ID only rotates on
+  // uninstall/reinstall (when SQLite itself is wiped).
+  settingsRepository.reset();
 }
 
 function purgeDataForImport() {
@@ -1325,14 +1327,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeAllData();
     });
-    void (async () => {
-      try {
-        await trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
-        await flushAnalytics();
-      } finally {
-        await resetAnalytics();
-      }
-    })();
+    void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
+    void flushAnalytics();
   }, [runMutation]);
 
   const resetTransactionsOnly = useCallback(() => {
