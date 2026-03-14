@@ -28,6 +28,7 @@ import {
   SettingsPageLayout,
   SettingsSection,
   Text,
+  TimeValueInline,
   ThemeModal,
 } from '~/components/ui';
 import {
@@ -1332,6 +1333,37 @@ export function AccountsScreen({
     },
     [hideAccountBalances, settings, trueHourlyRate],
   );
+  const renderVisibleBalanceNode = useCallback(
+    (
+      amount: number,
+      options: {
+        variant?: React.ComponentProps<typeof Text>['variant'];
+        tone?: React.ComponentProps<typeof Text>['tone'];
+        textClassName?: string;
+        iconColor?: string;
+      } = {},
+    ) => {
+      const { variant = 'caption', tone = 'default', textClassName, iconColor } = options;
+      const label = formatVisibleBalance(amount);
+      if (hideAccountBalances || settings.displayMode !== 'time') {
+        return (
+          <Text variant={variant} tone={tone} className={textClassName}>
+            {label}
+          </Text>
+        );
+      }
+      return (
+        <TimeValueInline
+          value={label}
+          variant={variant}
+          tone={tone}
+          textClassName={textClassName}
+          iconColor={iconColor}
+        />
+      );
+    },
+    [formatVisibleBalance, hideAccountBalances, settings.displayMode],
+  );
 
   const renderBalanceToggleButton = useCallback(
     () => (
@@ -1940,16 +1972,15 @@ export function AccountsScreen({
                     <Text variant="label" tone="muted">
                       {I18n.t('accounts.balance')}
                     </Text>
-                    <Text
-                      variant="friendly"
-                      className={
-                        isNegativeForDisplay(normalizedBalance)
-                          ? 'text-destructive'
-                          : 'text-foreground'
-                      }
-                    >
-                      {formatVisibleBalance(normalizedBalance)}
-                    </Text>
+                    {renderVisibleBalanceNode(normalizedBalance, {
+                      variant: 'friendly',
+                      textClassName: isNegativeForDisplay(normalizedBalance)
+                        ? 'text-destructive'
+                        : 'text-foreground',
+                      iconColor: isNegativeForDisplay(normalizedBalance)
+                        ? themeColors.error
+                        : themeColors.text,
+                    })}
                   </View>
                   <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
                     <Text variant="label" tone="muted">
@@ -1999,17 +2030,21 @@ export function AccountsScreen({
                           <Text variant="label" tone="muted">
                             {I18n.t('accounts.payable')}
                           </Text>
-                          <Text variant="caption" className="mt-0.5 text-destructive">
-                            {formatVisibleBalance(cyclePayable)}
-                          </Text>
+                          {renderVisibleBalanceNode(cyclePayable, {
+                            variant: 'caption',
+                            textClassName: 'mt-0.5 text-destructive',
+                            iconColor: themeColors.error,
+                          })}
                         </View>
                         <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
                           <Text variant="label" tone="muted">
                             {I18n.t('accounts.outstanding')}
                           </Text>
-                          <Text variant="caption" className="mt-0.5 text-destructive">
-                            {formatVisibleBalance(outstanding)}
-                          </Text>
+                          {renderVisibleBalanceNode(outstanding, {
+                            variant: 'caption',
+                            textClassName: 'mt-0.5 text-destructive',
+                            iconColor: themeColors.error,
+                          })}
                         </View>
                       </View>
                     </View>
@@ -2387,14 +2422,13 @@ export function AccountsScreen({
                   <Text variant="label" tone="muted">
                     {item.label}
                   </Text>
-                  {index === 0 ? (
-                    <Text
-                      variant="caption"
-                      className={total >= 0 ? 'text-success' : 'text-destructive'}
-                    >
-                      {formatVisibleBalance(total)}
-                    </Text>
-                  ) : null}
+                  {index === 0
+                    ? renderVisibleBalanceNode(total, {
+                        variant: 'caption',
+                        textClassName: total >= 0 ? 'text-success' : 'text-destructive',
+                        iconColor: total >= 0 ? themeColors.success : themeColors.error,
+                      })
+                    : null}
                 </View>
               );
             }
@@ -2433,24 +2467,37 @@ export function AccountsScreen({
                   </View>
                   {account.type === 'credit' && creditSummary ? (
                     <View className="items-end">
-                      <Text variant="label" className="text-destructive">
-                        {I18n.t('accounts.pay')} {formatVisibleBalance(creditSummary.payable)}
-                      </Text>
-                      <Text variant="label" tone="muted">
-                        {I18n.t('accounts.out')} {formatVisibleBalance(creditSummary.outstanding)}
-                      </Text>
+                      <View className="flex-row items-center gap-1">
+                        <Text variant="label" className="text-destructive">
+                          {I18n.t('accounts.pay')}
+                        </Text>
+                        {renderVisibleBalanceNode(creditSummary.payable, {
+                          variant: 'label',
+                          textClassName: 'text-destructive',
+                          iconColor: themeColors.error,
+                        })}
+                      </View>
+                      <View className="mt-0.5 flex-row items-center gap-1">
+                        <Text variant="label" tone="muted">
+                          {I18n.t('accounts.out')}
+                        </Text>
+                        {renderVisibleBalanceNode(creditSummary.outstanding, {
+                          variant: 'label',
+                          tone: 'muted',
+                          iconColor: themeColors.textMuted,
+                        })}
+                      </View>
                     </View>
                   ) : (
-                    <Text
-                      variant="caption"
-                      className={
-                        isNegativeForDisplay(normalizedBalance)
-                          ? 'text-destructive'
-                          : 'text-success'
-                      }
-                    >
-                      {formatVisibleBalance(normalizedBalance)}
-                    </Text>
+                    renderVisibleBalanceNode(normalizedBalance, {
+                      variant: 'caption',
+                      textClassName: isNegativeForDisplay(normalizedBalance)
+                        ? 'text-destructive'
+                        : 'text-success',
+                      iconColor: isNegativeForDisplay(normalizedBalance)
+                        ? themeColors.error
+                        : themeColors.success,
+                    })
                   )}
                 </Pressable>
               </Animated.View>

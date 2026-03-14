@@ -1,17 +1,13 @@
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
-import {
-  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-} from '~/constants/appDefaults';
 import { getDeviceLocale } from '~/lib/i18n';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
-import { newAppUserId, newId, nowIso } from '~/utils/id';
+import { newAppUserId, nowIso } from '~/utils/id';
 
 import { runMigrations } from './migrations';
-import { categoriesTable, settingsTable } from './schema';
+import { settingsTable } from './schema';
 
 const DB_NAME = 'money2time.db';
 export const SIMPLE_WALLET_NAME = 'Simple Wallet';
@@ -42,7 +38,7 @@ function ensureCoreData() {
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
-        themeColor: 'sage',
+        themeColor: 'rosewood',
         insightsPrefsJson: null,
         onboardingCompleted: false,
         createdAt: now,
@@ -51,43 +47,6 @@ function ensureCoreData() {
       })
       .run();
   }
-
-  ensureDefaultCategories();
-}
-
-function ensureDefaultCategories() {
-  const db = getDb();
-  const now = nowIso();
-
-  const existingCategories = db
-    .select({ count: sql<number>`count(*)` })
-    .from(categoriesTable)
-    .where(isNull(categoriesTable.deletedAt))
-    .get();
-
-  if ((existingCategories?.count ?? 0) > 0) return;
-
-  const allCategories = [
-    ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-    ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-  ];
-
-  allCategories.forEach((category, index) => {
-    db.insert(categoriesTable)
-      .values({
-        id: newId(),
-        name: category.name,
-        sortOrder: index,
-        type: category.type,
-        parentId: category.parentId,
-        icon: category.icon,
-        isDefault: true,
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null,
-      })
-      .run();
-  });
 }
 
 export function getSQLite(): SQLiteDatabase {

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react-native';
-import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -28,7 +28,7 @@ interface DisplaySettingsScreenProps {
 }
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
-  const { resetAllData, resetTransactionsOnly, settings, updateSettings } = useApp();
+  const { settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
 
@@ -321,62 +321,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
             </CardContent>
           </Card>
         </View>
-
-        <View style={styles.dangerSection}>
-          <Text variant="caption" tone="muted" className="px-1">
-            {I18n.t('settings.danger_description')}
-          </Text>
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('warning');
-              Alert.alert(
-                I18n.t('settings.reset_transactions_title'),
-                I18n.t('settings.reset_transactions_message'),
-                [
-                  { text: I18n.t('common.cancel'), style: 'cancel' },
-                  {
-                    text: I18n.t('common.reset'),
-                    style: 'destructive',
-                    onPress: () => resetTransactionsOnly(),
-                  },
-                ],
-              );
-            }}
-            style={styles.secondaryDangerAction}
-            className="border border-border/35 bg-secondary/45"
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('settings.reset_transactions_only')}
-          >
-            <Text variant="caption" tone="muted">
-              {I18n.t('settings.reset_transactions_only')}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('warning');
-              Alert.alert(
-                I18n.t('settings.reset_data_title'),
-                I18n.t('settings.reset_data_message'),
-                [
-                  { text: I18n.t('common.cancel'), style: 'cancel' },
-                  {
-                    text: I18n.t('common.reset'),
-                    style: 'destructive',
-                    onPress: () => resetAllData(),
-                  },
-                ],
-              );
-            }}
-            style={styles.primaryDangerAction}
-            className="border border-coral/30 bg-coral/8"
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('settings.reset_all_data')}
-          >
-            <Text variant="caption" className="text-destructive">
-              {I18n.t('settings.reset_all_data')}
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
     </SettingsPageLayout>
   );
@@ -414,25 +358,5 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm - 1,
-  },
-  dangerSection: {
-    marginTop: spacing.xl + spacing.xs,
-    gap: spacing.sm,
-  },
-  secondaryDangerAction: {
-    borderRadius: 22,
-    paddingHorizontal: spacing.screenHorizontal,
-    paddingVertical: spacing.sm,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryDangerAction: {
-    borderRadius: 22,
-    paddingHorizontal: spacing.screenHorizontal,
-    paddingVertical: spacing.sm,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

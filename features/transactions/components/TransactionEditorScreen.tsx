@@ -30,6 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Button, SegmentedToggle, Text } from '~/components/ui';
+import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
   AccountPanel,
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
   inlineSummaryInput: {
     fontSize: 14,
     textAlign: 'right',
-    paddingVertical: 0,
   },
 });
 
@@ -147,6 +147,13 @@ interface TransactionEditorScreenProps {
       };
     }) => void;
   };
+}
+
+interface TypeFieldSelection {
+  accountId: string | null;
+  fromAccountId: string | null;
+  toAccountId: string | null;
+  categoryId: string | null;
 }
 
 function toDateInput(d: Date) {
@@ -300,6 +307,10 @@ function splitHoursHighlightText(templateKey: string, hours: string) {
   };
 }
 
+function isPlainAmountDraft(value: string) {
+  return /^-?(?:\d+\.?\d*|\d*\.\d+)$/.test(value.trim());
+}
+
 export function TransactionEditorScreen({
   mode,
   onClose,
@@ -323,22 +334,23 @@ export function TransactionEditorScreen({
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const initialType = initialValues?.type ?? 'expense';
+  const initialSingleAccountId =
+    initialValues?.accountId ??
+    initialAccountId ??
+    (mode === 'create' ? null : (accounts[0]?.id ?? null));
+  const initialFromSelectionId =
+    initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null));
+  const initialToSelectionId =
+    initialValues?.toAccountId ??
+    (mode === 'create' ? null : (accounts[1]?.id ?? accounts[0]?.id ?? null));
+  const initialCategorySelectionId = initialValues?.categoryId ?? null;
   const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
-  const [accountId, setAccountId] = useState<string | null>(
-    initialValues?.accountId ??
-      initialAccountId ??
-      (mode === 'create' ? null : (accounts[0]?.id ?? null)),
-  );
-  const [fromAccountId, setFromAccountId] = useState<string | null>(
-    initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null)),
-  );
-  const [toAccountId, setToAccountId] = useState<string | null>(
-    initialValues?.toAccountId ??
-      (mode === 'create' ? null : (accounts[1]?.id ?? accounts[0]?.id ?? null)),
-  );
-  const [categoryId, setCategoryId] = useState<string | null>(initialValues?.categoryId ?? null);
+  const [accountId, setAccountId] = useState<string | null>(initialSingleAccountId);
+  const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
+  const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
+  const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
@@ -383,6 +395,38 @@ export function TransactionEditorScreen({
   const noteInputRef = useRef<TextInput>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
   const recurrenceIntervalRef = useRef<TextInput>(null);
+  const hasSavedTypeSelectionRef = useRef<Record<TransactionType, boolean>>({
+    expense: initialType === 'expense',
+    income: initialType === 'income',
+    transfer: initialType === 'transfer',
+    balance_adjustment: initialType === 'balance_adjustment',
+  });
+  const fieldSelectionsByTypeRef = useRef<Record<TransactionType, TypeFieldSelection>>({
+    expense: {
+      accountId: initialType === 'expense' ? initialSingleAccountId : null,
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: initialType === 'expense' ? initialCategorySelectionId : null,
+    },
+    income: {
+      accountId: initialType === 'income' ? initialSingleAccountId : null,
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: initialType === 'income' ? initialCategorySelectionId : null,
+    },
+    transfer: {
+      accountId: null,
+      fromAccountId: initialType === 'transfer' ? initialFromSelectionId : null,
+      toAccountId: initialType === 'transfer' ? initialToSelectionId : null,
+      categoryId: null,
+    },
+    balance_adjustment: {
+      accountId: initialType === 'balance_adjustment' ? initialSingleAccountId : null,
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: null,
+    },
+  });
   const patternLabels: Record<string, string> = {
     daily: I18n.t('transactions.editor.daily'),
     weekly: I18n.t('transactions.editor.weekly'),
@@ -465,28 +509,58 @@ export function TransactionEditorScreen({
   const isBalanceAdjustmentType = type === 'balance_adjustment';
   const showTypeSelector = availableTypeCards.length > 1;
 
+  useEffect(() => {
+    fieldSelectionsByTypeRef.current[type] = {
+      accountId: type === 'transfer' ? null : accountId,
+      fromAccountId: type === 'transfer' ? fromAccountId : null,
+      toAccountId: type === 'transfer' ? toAccountId : null,
+      categoryId: type === 'expense' || type === 'income' ? categoryId : null,
+    };
+    hasSavedTypeSelectionRef.current[type] = true;
+  }, [accountId, categoryId, fromAccountId, toAccountId, type]);
+
   const handleTypeChange = useCallback(
     (nextType: TransactionType) => {
       if (nextType === type) return;
       const previousType = type;
+      fieldSelectionsByTypeRef.current[previousType] = {
+        accountId: previousType === 'transfer' ? null : accountId,
+        fromAccountId: previousType === 'transfer' ? fromAccountId : null,
+        toAccountId: previousType === 'transfer' ? toAccountId : null,
+        categoryId: previousType === 'expense' || previousType === 'income' ? categoryId : null,
+      };
+      hasSavedTypeSelectionRef.current[previousType] = true;
+      const nextSelection = fieldSelectionsByTypeRef.current[nextType];
+      const hasSavedNextSelection = hasSavedTypeSelectionRef.current[nextType];
 
       setType(nextType);
-      setCategoryId(null);
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, nextType));
 
       if (nextType === 'transfer') {
-        if (previousType === 'income' || previousType === 'expense') {
-          setFromAccountId(accountId);
-          setToAccountId(null);
-          setAccountId(null);
-        } else if (mode === 'create') {
-          setAccountId(null);
-          setFromAccountId(null);
-          setToAccountId(null);
-        }
-      } else if (previousType === 'transfer') {
-        setAccountId(fromAccountId);
+        const fallbackFromAccountId = hasSavedNextSelection
+          ? nextSelection.fromAccountId
+          : previousType === 'transfer'
+            ? fromAccountId
+            : accountId;
+        setAccountId(null);
+        setCategoryId(null);
+        setFromAccountId(fallbackFromAccountId);
+        setToAccountId(hasSavedNextSelection ? nextSelection.toAccountId : null);
+      } else {
+        const fallbackAccountId = hasSavedNextSelection
+          ? nextSelection.accountId
+          : previousType === 'transfer'
+            ? fromAccountId
+            : accountId;
+        setAccountId(fallbackAccountId);
+        setCategoryId(
+          nextType === 'expense' || nextType === 'income'
+            ? hasSavedNextSelection
+              ? nextSelection.categoryId
+              : null
+            : null,
+        );
         setFromAccountId(null);
         setToAccountId(null);
       }
@@ -508,7 +582,7 @@ export function TransactionEditorScreen({
         return next;
       });
     },
-    [accountId, fromAccountId, mapActiveFieldForType, mode, type],
+    [accountId, categoryId, fromAccountId, mapActiveFieldForType, toAccountId, type],
   );
 
   useEffect(() => {
@@ -614,8 +688,9 @@ export function TransactionEditorScreen({
   }, []);
 
   const amountDisplay = useMemo(() => {
+    if (isPlainAmountDraft(amount)) return `${settings.currencySymbol}${amount}`;
     const num = Number(amount);
-    if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}0.00`;
+    if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}0`;
     return `${settings.currencySymbol}${formatMoney(num)}`;
   }, [amount, settings.currencySymbol]);
 
@@ -1485,7 +1560,11 @@ export function TransactionEditorScreen({
                           returnKeyType="done"
                           onFocus={() => setActiveField('note')}
                           onBlur={() => setActiveField((prev) => (prev === 'note' ? null : prev))}
-                          style={[styles.inlineSummaryInput, { color: themeColors.text }]}
+                          style={[
+                            SINGLE_LINE_TEXT_INPUT_STYLE,
+                            styles.inlineSummaryInput,
+                            { color: themeColors.text },
+                          ]}
                         />
                       </View>
                     </View>
@@ -1534,7 +1613,11 @@ export function TransactionEditorScreen({
                         returnKeyType="done"
                         onFocus={() => setActiveField('ruleName')}
                         onBlur={() => setActiveField((prev) => (prev === 'ruleName' ? null : prev))}
-                        style={[styles.inlineSummaryInput, { color: themeColors.text }]}
+                        style={[
+                          SINGLE_LINE_TEXT_INPUT_STYLE,
+                          styles.inlineSummaryInput,
+                          { color: themeColors.text },
+                        ]}
                       />
                     </View>
                   </View>
@@ -1598,7 +1681,11 @@ export function TransactionEditorScreen({
                         returnKeyType="done"
                         onFocus={() => setActiveField('interval')}
                         onBlur={() => setActiveField((prev) => (prev === 'interval' ? null : prev))}
-                        style={[styles.inlineSummaryInput, { color: themeColors.text }]}
+                        style={[
+                          SINGLE_LINE_TEXT_INPUT_STYLE,
+                          styles.inlineSummaryInput,
+                          { color: themeColors.text },
+                        ]}
                       />
                     </View>
                   </View>

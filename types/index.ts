@@ -4,7 +4,6 @@ export type ThemeColor =
   | 'sage'
   | 'ocean'
   | 'terracotta'
-  | 'berry'
   | 'slate'
   | 'amber'
   | 'indigo'

@@ -407,8 +407,11 @@ export function SelectField({
           </View>
         )}
         {isHeaderPlainTrigger ? (
-          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/55">
-            <ChevronDown size={14} color={themeColors.textMuted} />
+          <View
+            className="h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card"
+            style={{ marginRight: -2 }}
+          >
+            <ChevronDown size={15} color={themeColors.textMuted} />
           </View>
         ) : (
           <ChevronDown size={16} color={themeColors.textMuted} />

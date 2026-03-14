@@ -5,20 +5,9 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text, ThemeModal } from '~/components/ui';
-import {
-  DEFAULT_CURRENCY,
-  DEFAULT_WAGE_CONFIG,
-  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-  ONBOARDING_POWER_MINIMAL_ACCOUNTS,
-} from '~/constants/appDefaults';
+import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
-import {
-  AccountsScreen,
-  CategoriesScreen,
-  WageCalculatorFlowScreen,
-} from '~/features/settings/screens';
-import { AddTransactionScreen } from '~/features/transactions/screens';
+import { WageCalculatorFlowScreen } from '~/features/settings/screens';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -39,15 +28,6 @@ import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5;
-type SubRoute = 'main' | 'accounts' | 'categories';
-
-function categorySeedKey(type: 'expense' | 'income', name: string) {
-  return `${type}:${name.trim().toLowerCase()}`;
-}
-
-function nameSeedKey(name: string) {
-  return name.trim().toLowerCase();
-}
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -70,23 +50,17 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     settings,
     accounts,
     categories,
-    transactions,
     currentMonthWage,
+    completeOnboarding,
     updateSettings,
     updateWageConfigForMonth,
     importMoneyManagerBackup,
-    createCategory,
-    createAccount,
-    createTransaction,
-    switchToSimpleMode,
   } = useApp();
   const themeColors = useThemeColors();
 
   const [step, setStep] = useState<OnboardingStep>(1);
   const [isSimpleUser, setIsSimpleUser] = useState(false);
-  const [subRoute, setSubRoute] = useState<SubRoute>('main');
   const [showWageCalculator, setShowWageCalculator] = useState(false);
-  const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [importResult, setImportResult] = useState<MMImportSummary | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
@@ -96,69 +70,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
-  const accountCount = accounts.length;
-  const { expenseCategoryCount, incomeCategoryCount, existingCategorySeedKeys } = useMemo(() => {
-    let expenseCount = 0;
-    let incomeCount = 0;
-    const categorySeedKeys = new Set<string>();
-
-    categories.forEach((category) => {
-      categorySeedKeys.add(categorySeedKey(category.type, category.name));
-      if (category.type === 'expense') {
-        expenseCount += 1;
-      } else if (category.type === 'income') {
-        incomeCount += 1;
-      }
-    });
-
-    return {
-      expenseCategoryCount: expenseCount,
-      incomeCategoryCount: incomeCount,
-      existingCategorySeedKeys: categorySeedKeys,
-    };
-  }, [categories]);
-  const transactionCount = transactions.length;
-  const existingAccountNameKeys = useMemo(() => {
-    const accountNameKeys = new Set<string>();
-    accounts.forEach((account) => {
-      accountNameKeys.add(nameSeedKey(account.name));
-    });
-    return accountNameKeys;
-  }, [accounts]);
-  const { missingMinimalExpenseCategoryCount, missingMinimalIncomeCategoryCount } = useMemo(() => {
-    let missingExpenseCount = 0;
-    let missingIncomeCount = 0;
-
-    ONBOARDING_MINIMAL_EXPENSE_CATEGORIES.forEach((item) => {
-      if (!existingCategorySeedKeys.has(categorySeedKey(item.type, item.name))) {
-        missingExpenseCount += 1;
-      }
-    });
-    ONBOARDING_MINIMAL_INCOME_CATEGORIES.forEach((item) => {
-      if (!existingCategorySeedKeys.has(categorySeedKey(item.type, item.name))) {
-        missingIncomeCount += 1;
-      }
-    });
-
-    return {
-      missingMinimalExpenseCategoryCount: missingExpenseCount,
-      missingMinimalIncomeCategoryCount: missingIncomeCount,
-    };
-  }, [existingCategorySeedKeys]);
-  const missingMinimalPowerAccountCount = useMemo(() => {
-    let missingCount = 0;
-    ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((item) => {
-      if (!existingAccountNameKeys.has(nameSeedKey(item.name))) {
-        missingCount += 1;
-      }
-    });
-    return missingCount;
-  }, [existingAccountNameKeys]);
-  const canCreateMinimalDefaults =
-    missingMinimalPowerAccountCount > 0 ||
-    missingMinimalExpenseCategoryCount > 0 ||
-    missingMinimalIncomeCategoryCount > 0 ||
-    transactionCount === 0;
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
 
@@ -188,6 +99,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           onPress: () => {
             void triggerHaptic('selection');
             void trackEvent(AnalyticsEvents.ONBOARDING_SKIPPED, { at_step: step });
+            completeOnboarding();
             onComplete();
           },
         },
@@ -238,155 +150,67 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [isImporting, importMoneyManagerBackup]);
 
-  const handleCreateMinimalDefaults = useCallback(() => {
+  const completePowerOnboarding = useCallback(() => {
+    completeOnboarding({ userMode: 'power' });
+    onComplete();
+  }, [completeOnboarding, onComplete]);
+
+  const handleStartFresh = useCallback(() => {
     try {
-      const existing = new Set(categories.map((item) => categorySeedKey(item.type, item.name)));
-      const minimal = [
-        ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-        ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-      ];
-      let createdCategories = 0;
-
-      minimal.forEach((item) => {
-        const key = categorySeedKey(item.type, item.name);
-        if (existing.has(key)) return;
-        createCategory(item);
-        existing.add(key);
-        createdCategories += 1;
+      const result = completeOnboarding({
+        userMode: 'power',
+        seedPowerDefaults: accounts.length === 0 && categories.length === 0,
       });
 
-      const existingAccountNames = new Set(accounts.map((item) => nameSeedKey(item.name)));
-      const preferredCurrency = accounts[0]?.currency ?? DEFAULT_CURRENCY;
-      let accountIdForSample = accounts[0]?.id ?? null;
-      let createdAccounts = 0;
-      ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((item) => {
-        const key = nameSeedKey(item.name);
-        if (existingAccountNames.has(key)) return;
-        const accountId = createAccount({
-          ...item,
-          currency: preferredCurrency,
-        });
-        existingAccountNames.add(key);
-        createdAccounts += 1;
-        if (!accountIdForSample) {
-          accountIdForSample = accountId;
-        }
-      });
-
-      let createdSampleTransaction = false;
-      if (transactionCount === 0 && accountIdForSample) {
-        createTransaction({
-          type: 'expense',
-          amount: 12,
-          currency: settings.currencySymbol,
-          date: new Date().toISOString(),
-          accountId: accountIdForSample,
-          categoryId: null,
-          note: I18n.t('onboarding.flow.sample_transaction_note'),
-        });
-        createdSampleTransaction = true;
-      }
-
-      if (createdCategories > 0 || createdAccounts > 0 || createdSampleTransaction) {
+      if (result.createdCategories > 0 || result.createdAccounts > 0) {
         void triggerHaptic('success');
       } else {
         void triggerHaptic('selection');
       }
+      onComplete();
     } catch (error) {
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
-  }, [
-    accounts,
-    categories,
-    createAccount,
-    createCategory,
-    createTransaction,
-    settings.currencySymbol,
-    transactionCount,
-  ]);
+  }, [accounts.length, categories.length, completeOnboarding, onComplete]);
 
-  // --- Sub-route screens ---
-
-  if (subRoute === 'accounts') {
-    return <AccountsScreen onBack={() => setSubRoute('main')} />;
-  }
-
-  if (subRoute === 'categories') {
-    return <CategoriesScreen onBack={() => setSubRoute('main')} />;
-  }
-
-  if (showAddTransaction) {
-    return <AddTransactionScreen onClose={() => setShowAddTransaction(false)} />;
-  }
-
-  // --- Step progress indicator ---
-
-  const renderProgressDots = () => (
+  const renderProgressHeader = () => (
     <View
-      className="flex-row items-center justify-center gap-2 pt-4 pb-2"
+      className="px-5 pt-4 pb-2"
       accessibilityLabel={I18n.t('onboarding.flow.step_a11y', {
         step: visualStep,
         total: totalVisualSteps,
       })}
       accessibilityRole="header"
     >
-      {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
-        <View key={i} className="flex-row items-center gap-2">
+      <Text variant="caption" tone="muted" className="text-center">
+        {I18n.t('onboarding.progress_step_of', { step: visualStep, total: totalVisualSteps })}
+      </Text>
+      <View className="mt-3 flex-row items-center gap-2">
+        {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
           <View
-            className="rounded-full"
+            key={i}
+            className="flex-1 rounded-full"
             style={[
-              styles.progressDot,
-              visualStep >= i ? styles.progressDotActive : styles.progressDotInactive,
+              styles.progressSegment,
               {
                 backgroundColor:
                   visualStep >= i
                     ? themeColors.primary
-                    : withColorAlpha(themeColors.backgroundSubtle, 0.6),
+                    : withColorAlpha(themeColors.backgroundSubtle, 0.45),
               },
-              visualStep >= i
-                ? {
-                    shadowColor: themeColors.primary,
-                  }
-                : null,
             ]}
           />
-          {i < totalVisualSteps && (
-            <View
-              className="rounded-full"
-              style={[
-                styles.progressConnector,
-                {
-                  backgroundColor:
-                    visualStep > i
-                      ? withColorAlpha(themeColors.primary, 0.5)
-                      : withColorAlpha(themeColors.backgroundSubtle, 0.4),
-                },
-              ]}
-            />
-          )}
-        </View>
-      ))}
+        ))}
+      </View>
     </View>
   );
-
-  // --- Step label ---
-
-  const renderStepLabel = () => {
-    if (step === 1) return null;
-    return (
-      <Text variant="label" tone="muted" className="text-center tracking-widest mt-1">
-        {I18n.t('onboarding.progress_step_of', { step: visualStep, total: totalVisualSteps })}
-      </Text>
-    );
-  };
 
   // --- Main render ---
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      {renderProgressDots()}
-      {renderStepLabel()}
+      {renderProgressHeader()}
 
       {step === 1 && (
         <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-1">
@@ -407,12 +231,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             locale={settings.locale}
             currencyCode={settings.currencyCode}
             currencySymbol={settings.currencySymbol}
+            themeColor={settings.themeColor}
             onLocaleChange={(locale) => {
               setAppLocale(locale);
               updateSettings({ locale });
             }}
             onCurrencyChange={({ code, symbol }) => {
               updateSettings({ currencyCode: code, currencySymbol: symbol });
+            }}
+            onThemeColorChange={(themeColor) => {
+              updateSettings({ themeColor });
             }}
             onBack={() => setStep(1)}
             onContinue={() => setStep(3)}
@@ -441,14 +269,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <OnboardingModeStep
             onBack={() => setStep(3)}
             onSelectSimple={() => {
-              void triggerHaptic('selection');
               void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
               setIsSimpleUser(true);
-              switchToSimpleMode(true);
+              completeOnboarding({
+                userMode: 'simple',
+                seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
+              });
               onComplete();
             }}
             onSelectPower={() => {
-              void triggerHaptic('selection');
               void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
               setIsSimpleUser(false);
               setStep(5);
@@ -464,26 +293,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             onImport={() => {
               void handleImport();
             }}
-            onGoToAccounts={() => setSubRoute('accounts')}
-            onGoToCategories={() => setSubRoute('categories')}
-            onAddTransaction={() => {
-              void triggerHaptic('selection');
-              setShowAddTransaction(true);
-            }}
-            onFinish={onComplete}
-            onSkipWithWarning={onComplete}
+            onStartFresh={handleStartFresh}
+            onFinish={completePowerOnboarding}
+            onClearImportResult={() => setImportResult(null)}
             choice={bootstrapChoice}
             view={bootstrapView}
             onChoiceChange={setBootstrapChoice}
             onViewChange={setBootstrapView}
             importResult={importResult}
             isImporting={isImporting}
-            canCreateMinimalDefaults={canCreateMinimalDefaults}
-            onCreateMinimalDefaults={handleCreateMinimalDefaults}
-            accountCount={accountCount}
-            expenseCategoryCount={expenseCategoryCount}
-            incomeCategoryCount={incomeCategoryCount}
-            transactionCount={transactionCount}
           />
         </Animated.View>
       )}
@@ -512,22 +330,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 }
 
 const styles = StyleSheet.create({
-  progressConnector: {
-    height: 1.5,
-    width: 24,
-  },
-  progressDot: {
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0,
-    shadowRadius: 10,
-  },
-  progressDotActive: {
-    height: 10,
-    width: 10,
-    shadowOpacity: 0.15,
-  },
-  progressDotInactive: {
-    height: 8,
-    width: 8,
+  progressSegment: {
+    height: 6,
   },
 });

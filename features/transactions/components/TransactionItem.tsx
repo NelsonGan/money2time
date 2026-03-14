@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui';
+import { Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -10,7 +10,13 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
-import { formatAmount, formatRelativeDate } from '~/utils/formatters';
+import {
+  amountToHoursByRate,
+  formatAmount,
+  formatCurrency,
+  formatHours,
+  formatRelativeDate,
+} from '~/utils/formatters';
 
 type TransactionDisplaySettings = Pick<
   UserSettings,
@@ -97,6 +103,9 @@ function TransactionItemView({
       ? `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`
       : null;
   const transferSubtitleLabel = I18n.t('transactions.filters.moved');
+  const accountSubtitleLabel = !isTransfer
+    ? (transaction.accountName ?? I18n.t('common.no_account'))
+    : null;
 
   const title = isTransfer
     ? transaction.note || transferLabel
@@ -106,7 +115,7 @@ function TransactionItemView({
   const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
     parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
-  const subtitle = isTransfer
+  const subtitlePrimary = isTransfer
     ? showDateInSubtitle
       ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
       : transferSubtitleLabel
@@ -121,10 +130,7 @@ function TransactionItemView({
         : transaction.note
           ? categoryInline
           : null;
-  const rate =
-    isTimeMode && !isTransfer && !isBalanceAdjustment
-      ? getTrueHourlyRateForDate(transaction.date)
-      : 0;
+  const rate = !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
   const categoryEmoji = transaction.categoryIcon ?? undefined;
   const leadingEmoji = isTransfer
     ? '↔️'
@@ -142,6 +148,31 @@ function TransactionItemView({
       : isIncome
         ? 'text-success'
         : 'text-destructive';
+  const primaryValue = formatAmount(transaction.amount, settings, {
+    showSign: isBalanceAdjustment,
+    neutralSign: isTransfer,
+    trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
+  });
+  const secondaryValue =
+    isTransfer || isBalanceAdjustment || rate <= 0
+      ? null
+      : isTimeMode
+        ? formatCurrency(transaction.amount, settings.currencySymbol)
+        : formatHours(amountToHoursByRate(transaction.amount, rate, settings.hourRounding));
+  const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
+  const showsSecondaryTime = !isTimeMode && secondaryValue !== null;
+  const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
+  const amountToneColor = isTransfer
+    ? themeColors.textMuted
+    : isBalanceAdjustment
+      ? transaction.amount > 0
+        ? themeColors.success
+        : transaction.amount < 0
+          ? themeColors.error
+          : themeColors.textMuted
+      : isIncome
+        ? themeColors.success
+        : themeColors.error;
 
   // Color-coded accent strip
   const accentColor = useMemo(() => {
@@ -201,52 +232,94 @@ function TransactionItemView({
       </View>
 
       <View className="flex-1 min-w-0 pr-1">
-        <Text
-          variant="bodyStrong"
-          className={cn(
-            'text-foreground',
-            compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-          )}
-          numberOfLines={1}
-        >
-          {title}
-        </Text>
-        {subtitle ? (
+        <View className="flex-row items-center gap-1.5">
           <Text
-            variant="caption"
-            tone="muted"
-            className={compact ? '' : 'mt-0.5'}
+            variant="bodyStrong"
+            className={cn(
+              'min-w-0 flex-1 text-foreground',
+              compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+            )}
             numberOfLines={1}
           >
-            {subtitle}
+            {title}
           </Text>
+        </View>
+        {subtitlePrimary || accountSubtitleLabel ? (
+          accountSubtitleLabel ? (
+            <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
+              <View className="min-w-0 w-1/2 pr-2">
+                <Text variant="caption" tone="muted" numberOfLines={1}>
+                  {subtitlePrimary ?? ''}
+                </Text>
+              </View>
+              <View className="min-w-0 w-1/2 justify-center pl-2">
+                <View className="max-w-full self-start rounded-full border border-border/30 bg-secondary/55 px-2 py-0.5">
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {accountSubtitleLabel}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <Text
+              variant="caption"
+              tone="muted"
+              className={compact ? '' : 'mt-0.5'}
+              numberOfLines={1}
+            >
+              {subtitlePrimary ?? ''}
+            </Text>
+          )
         ) : null}
       </View>
 
-      <View className="items-end">
-        <Text
-          variant="mono"
-          className={cn(
-            compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-            amountToneClass,
+      <View className={cn('shrink-0 items-end', valueColumnClassName)}>
+        <View className="flex-row items-center justify-end gap-1">
+          {showsPrimaryTime ? (
+            <TimeValueInline
+              value={primaryValue}
+              variant="mono"
+              containerClassName="justify-end"
+              textClassName={cn(
+                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                amountToneClass,
+              )}
+              iconSize={compact ? 10 : 11}
+              iconColor={amountToneColor}
+            />
+          ) : (
+            <Text
+              variant="mono"
+              className={cn(
+                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                amountToneClass,
+              )}
+            >
+              {primaryValue}
+            </Text>
           )}
-        >
-          {formatAmount(transaction.amount, settings, {
-            showSign: isBalanceAdjustment,
-            neutralSign: isTransfer,
-            trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
-          })}
-        </Text>
-        <Text
-          variant="label"
-          tone="muted"
-          className={cn('text-[10px]', compact ? '' : 'mt-0.5')}
-          numberOfLines={1}
-        >
-          {isTransfer
-            ? `${transaction.fromAccountName ?? '-'} → ${transaction.toAccountName ?? '-'}`
-            : (transaction.accountName ?? I18n.t('common.no_account'))}
-        </Text>
+        </View>
+        {secondaryValue ? (
+          showsSecondaryTime ? (
+            <TimeValueInline
+              value={secondaryValue}
+              variant="label"
+              tone="muted"
+              containerClassName={cn('justify-end', compact ? '' : 'mt-0.5')}
+              iconSize={compact ? 9 : 10}
+              numberOfLines={1}
+            />
+          ) : (
+            <Text
+              variant="label"
+              tone="muted"
+              className={compact ? '' : 'mt-0.5'}
+              numberOfLines={1}
+            >
+              {secondaryValue}
+            </Text>
+          )
+        ) : null}
       </View>
     </Pressable>
   );

@@ -200,7 +200,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           {parent.name}
                         </Text>
 
-                        {allowParentSelection && hasChildren ? (
+                        {allowParentSelection && hasChildren && isMultiSelect ? (
                           <View className="ml-0.5 flex-row items-center gap-1">
                             {parentSelectionState === 'full' ? (
                               <View
@@ -240,6 +240,12 @@ export function CategoryPanel(props: CategoryPanelProps) {
                               />
                             </Pressable>
                           </View>
+                        ) : allowParentSelection && hasChildren ? (
+                          <ChevronDown
+                            size={13}
+                            color={isSelected ? themeColors.primary : themeColors.textMuted}
+                            style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
+                          />
                         ) : isParentSelected && !hasSelectedChild ? (
                           <Check size={14} color={themeColors.primary} />
                         ) : hasChildren ? (

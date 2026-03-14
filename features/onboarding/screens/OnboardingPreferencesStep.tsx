@@ -1,26 +1,31 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Card, CardContent, SelectField, Text } from '~/components/ui';
+import { Card, CardContent, SelectField } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { getThemeColorSwatch, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
 import {
   ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { ThemeColor } from '~/types';
 
 interface OnboardingPreferencesStepProps {
   locale: string;
   currencyCode: string;
   currencySymbol: string;
+  themeColor: ThemeColor;
   onLocaleChange: (locale: string) => void;
   onCurrencyChange: (currency: { code: string; symbol: string }) => void;
+  onThemeColorChange: (themeColor: ThemeColor) => void;
   onBack: () => void;
   onContinue: () => void;
 }
@@ -36,12 +41,14 @@ export function OnboardingPreferencesStep({
   locale,
   currencyCode,
   currencySymbol,
+  themeColor,
   onLocaleChange,
   onCurrencyChange,
+  onThemeColorChange,
   onBack,
   onContinue,
 }: OnboardingPreferencesStepProps) {
-  const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
   const languageOptions = useMemo(
     () =>
       SUPPORTED_LOCALES.map((item) => ({
@@ -70,6 +77,20 @@ export function OnboardingPreferencesStep({
     });
     return bySymbol;
   }, []);
+  const themeColorOptions = useMemo(
+    () =>
+      THEME_COLOR_OPTIONS.map((value) => ({
+        value,
+        label: I18n.t(`settings.theme_color_${value}`),
+        icon: (
+          <View
+            className="h-3.5 w-3.5 rounded-full"
+            style={{ backgroundColor: getThemeColorSwatch(value, resolvedTheme) }}
+          />
+        ),
+      })),
+    [locale, resolvedTheme],
+  );
   const selectedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
     ? locale
     : 'en';
@@ -86,28 +107,10 @@ export function OnboardingPreferencesStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Title */}
-          <Animated.View
-            entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
-            className="mt-8 px-2"
-          >
-            <Text variant="label" tone="primary" className="text-center tracking-widest">
-              {I18n.t('onboarding.progress_step_of', { step: 2, total: 5 })}
-            </Text>
-            <Text variant="title" className="text-center mt-2 text-foreground">
-              {I18n.t('onboarding.value_prop.language_label')} &{' '}
-              {I18n.t('onboarding.value_prop.currency_label')}
-            </Text>
-          </Animated.View>
+          <OnboardingStepHeader title={I18n.t('onboarding.preferences.title')} />
 
-          <Animated.View entering={FadeIn.delay(300).duration(350)} className="mt-8">
+          <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
             <Card variant="default" className="border border-border/25 overflow-hidden">
-              {/* Decorative blob */}
-              <View
-                className="absolute -top-8 -right-8 h-24 w-24 rounded-full"
-                style={{ backgroundColor: themeColors.primary, opacity: 0.04 }}
-              />
-
               <CardContent className="py-5 gap-4">
                 <SelectField
                   label={I18n.t('onboarding.value_prop.language_label')}
@@ -124,9 +127,13 @@ export function OnboardingPreferencesStep({
                     if (found) onCurrencyChange({ code: found.code, symbol: found.symbol });
                   }}
                 />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('onboarding.value_prop.prefill_note')}
-                </Text>
+                <SelectField
+                  label={I18n.t('settings.theme_color')}
+                  value={themeColor}
+                  options={themeColorOptions}
+                  optionsLayout="list"
+                  onChange={(value) => onThemeColorChange(value as ThemeColor)}
+                />
               </CardContent>
             </Card>
           </Animated.View>
