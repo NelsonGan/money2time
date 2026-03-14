@@ -1,8 +1,11 @@
 type Operator = '+' | '-' | '×' | '÷';
 
 export function formatMoney(value: number) {
-  if (!Number.isFinite(value)) return '0.00';
-  return value.toFixed(2);
+  if (!Number.isFinite(value)) return '0';
+  return value
+    .toFixed(2)
+    .replace(/\.00$/, '')
+    .replace(/(\.\d)0$/, '$1');
 }
 
 function normalizeExpression(expression: string) {

@@ -80,15 +80,16 @@ function asThemeColor(value: string | null | undefined): ThemeColor {
     case 'sage':
     case 'ocean':
     case 'terracotta':
-    case 'berry':
     case 'slate':
     case 'amber':
     case 'indigo':
     case 'emerald':
     case 'rosewood':
       return value;
+    case 'berry':
+      return 'rosewood';
     default:
-      return 'sage';
+      return 'rosewood';
   }
 }
 

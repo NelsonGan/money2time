@@ -91,11 +91,7 @@ export function SettingsScreen({
   const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
-  const shouldShowAdSupportSection = !adRemovalState.hasAdFreeEntitlement || __DEV__;
-  const shouldShowAdSupportSectionAtTop =
-    shouldShowAdSupportSection && !adRemovalState.hasAdFreeEntitlement;
-  const shouldShowAdSupportSectionAtBottom =
-    shouldShowAdSupportSection && adRemovalState.hasAdFreeEntitlement;
+  const shouldShowAdSupportSection = !adRemovalState.hasAdFreeEntitlement;
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -256,11 +252,11 @@ export function SettingsScreen({
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
-          {shouldShowAdSupportSectionAtTop ? <AdSupportSection /> : null}
+          {shouldShowAdSupportSection ? <AdSupportSection /> : null}
 
           <SettingsSection
-            className="mt-5 gap-2"
-            title={I18n.t('settings.section_settings')}
+            className="mt-6 gap-2"
+            title={I18n.t('settings.section_personal')}
             showAccent={false}
           >
             <View style={styles.rowsGroup}>
@@ -278,10 +274,19 @@ export function SettingsScreen({
                     ? I18n.t('settings.hourly_value_latest', {
                         value: `${settings.currencySymbol}${latestWage.trueHourlyRate.toFixed(2)}/hr`,
                       })
-                    : I18n.t('settings.manage_formulas')
+                    : I18n.t('settings.hourly_value_subtitle')
                 }
                 onPress={onOpenHourlyValue}
               />
+            </View>
+          </SettingsSection>
+
+          <SettingsSection
+            className="mt-6 gap-2"
+            title={I18n.t('settings.section_money')}
+            showAccent={false}
+          >
+            <View style={styles.rowsGroup}>
               <SettingsRowItem
                 icon={<SlidersHorizontal size={18} color={themeColors.primary} />}
                 label={I18n.t('settings.account_settings')}
@@ -296,19 +301,12 @@ export function SettingsScreen({
                   onPress={onOpenAccounts}
                 />
               ) : null}
-              <View
-                ref={managementRowRef}
-                onLayout={() => {
-                  handleManagementRowLayout();
-                }}
-              >
-                <SettingsRowItem
-                  icon={<FolderTree size={18} color={themeColors.primary} />}
-                  label={I18n.t('settings.categories')}
-                  subtitle={I18n.t('settings.categories_subtitle')}
-                  onPress={onOpenCategories}
-                />
-              </View>
+              <SettingsRowItem
+                icon={<FolderTree size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.categories')}
+                subtitle={I18n.t('settings.categories_subtitle')}
+                onPress={onOpenCategories}
+              />
               <View
                 ref={recurringRowRef}
                 onLayout={() => {
@@ -322,12 +320,28 @@ export function SettingsScreen({
                   onPress={onOpenRecurring}
                 />
               </View>
-              <SettingsRowItem
-                icon={<DatabaseBackup size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.data_management')}
-                subtitle={I18n.t('settings.data_management_subtitle')}
-                onPress={onOpenDataManagement}
-              />
+            </View>
+          </SettingsSection>
+
+          <SettingsSection
+            className="mt-6 gap-2"
+            title={I18n.t('settings.section_support')}
+            showAccent={false}
+          >
+            <View style={styles.rowsGroup}>
+              <View
+                ref={managementRowRef}
+                onLayout={() => {
+                  handleManagementRowLayout();
+                }}
+              >
+                <SettingsRowItem
+                  icon={<DatabaseBackup size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.data_management')}
+                  subtitle={I18n.t('settings.data_management_subtitle')}
+                  onPress={onOpenDataManagement}
+                />
+              </View>
               <View
                 ref={startTutorialRowRef}
                 onLayout={() => {
@@ -359,8 +373,6 @@ export function SettingsScreen({
               />
             </View>
           </SettingsSection>
-
-          {shouldShowAdSupportSectionAtBottom ? <AdSupportSection /> : null}
         </Animated.View>
       </ScrollView>
     </SettingsPageLayout>

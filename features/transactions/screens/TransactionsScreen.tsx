@@ -1,4 +1,4 @@
-import { Pencil, Search, Trash2, X } from 'lucide-react-native';
+import { Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -6,7 +6,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  type TextInput,
+  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -15,11 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { Input, SelectField, Text, ThemeModal } from '~/components/ui';
+import { Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   ActivityTransactionList,
+  ActivitySearchRow,
   DisplayModeToggle,
   MonthPagerPage,
   TypeFilterPill,
@@ -58,6 +59,7 @@ import {
 
 const SORT_OPTION_VALUES = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const;
 type SortByValue = (typeof SORT_OPTION_VALUES)[number];
+type BreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
 
 const FLEX_ONE_STYLE = { flex: 1 } as const;
 const FILTER_SCROLL_CONTENT_STYLE = {
@@ -84,6 +86,7 @@ interface CategoryPanelItem {
 interface CategoryPanelData {
   parents: CategoryPanelItem[];
   childrenByParent: Map<string, CategoryPanelItem[]>;
+  previewById: Map<string, { icon: string; label: string }>;
 }
 
 function buildCategoryPanelDataByType(categories: Category[]): {
@@ -96,25 +99,31 @@ function buildCategoryPanelDataByType(categories: Category[]): {
   const expenseChildrenByParent = new Map<string, CategoryPanelItem[]>();
   const incomeParentIconById = new Map<string, string>();
   const expenseParentIconById = new Map<string, string>();
+  const incomePreviewById = new Map<string, { icon: string; label: string }>();
+  const expensePreviewById = new Map<string, { icon: string; label: string }>();
 
   categories.forEach((category) => {
     if (category.parentId !== null) return;
     if (category.type === 'income') {
+      const icon = resolveCategoryIcon(category.icon);
       incomeParents.push({
         id: category.id,
         name: category.name,
-        icon: resolveCategoryIcon(category.icon),
+        icon,
       });
       incomeParentIconById.set(category.id, category.icon);
+      incomePreviewById.set(category.id, { icon, label: category.name });
       return;
     }
     if (category.type === 'expense') {
+      const icon = resolveCategoryIcon(category.icon);
       expenseParents.push({
         id: category.id,
         name: category.name,
-        icon: resolveCategoryIcon(category.icon),
+        icon,
       });
       expenseParentIconById.set(category.id, category.icon);
+      expensePreviewById.set(category.id, { icon, label: category.name });
     }
   });
 
@@ -123,36 +132,56 @@ function buildCategoryPanelDataByType(categories: Category[]): {
     const parentId = category.parentId;
     if (category.type === 'income') {
       const list = incomeChildrenByParent.get(parentId);
+      const icon = resolveCategoryIcon(category.icon, incomeParentIconById.get(parentId) ?? null);
       const child: CategoryPanelItem = {
         id: category.id,
         name: category.name,
-        icon: resolveCategoryIcon(category.icon, incomeParentIconById.get(parentId) ?? null),
+        icon,
       };
       if (list) {
         list.push(child);
       } else {
         incomeChildrenByParent.set(parentId, [child]);
       }
+      const parentName = incomeParents.find((item) => item.id === parentId)?.name ?? '';
+      incomePreviewById.set(category.id, {
+        icon,
+        label: parentName ? `${parentName} / ${category.name}` : category.name,
+      });
       return;
     }
     if (category.type === 'expense') {
       const list = expenseChildrenByParent.get(parentId);
+      const icon = resolveCategoryIcon(category.icon, expenseParentIconById.get(parentId) ?? null);
       const child: CategoryPanelItem = {
         id: category.id,
         name: category.name,
-        icon: resolveCategoryIcon(category.icon, expenseParentIconById.get(parentId) ?? null),
+        icon,
       };
       if (list) {
         list.push(child);
       } else {
         expenseChildrenByParent.set(parentId, [child]);
       }
+      const parentName = expenseParents.find((item) => item.id === parentId)?.name ?? '';
+      expensePreviewById.set(category.id, {
+        icon,
+        label: parentName ? `${parentName} / ${category.name}` : category.name,
+      });
     }
   });
 
   return {
-    income: { parents: incomeParents, childrenByParent: incomeChildrenByParent },
-    expense: { parents: expenseParents, childrenByParent: expenseChildrenByParent },
+    income: {
+      parents: incomeParents,
+      childrenByParent: incomeChildrenByParent,
+      previewById: incomePreviewById,
+    },
+    expense: {
+      parents: expenseParents,
+      childrenByParent: expenseChildrenByParent,
+      previewById: expensePreviewById,
+    },
   };
 }
 
@@ -166,6 +195,7 @@ interface TransactionsScreenProps {
   focusMonthToken?: number;
   tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenBreakdownInsight?: (insightType: BreakdownInsightType, monthKey: string) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
 
@@ -175,6 +205,7 @@ export function TransactionsScreen({
   focusMonthToken = 0,
   tutorialResetToken = 0,
   onOpenTransaction,
+  onOpenBreakdownInsight,
   onSelectionModeChange,
 }: TransactionsScreenProps) {
   const themeColors = useThemeColors();
@@ -372,9 +403,16 @@ export function TransactionsScreen({
   ]);
   const formatSummaryValue = useCallback(
     (value: number) =>
-      settings.displayMode === 'time'
-        ? formatHours(value)
-        : formatAmount(value, settings, { showSign: false }),
+      settings.displayMode === 'time' ? (
+        <TimeValueInline
+          value={formatHours(value)}
+          variant="mono"
+          textClassName="text-foreground"
+          iconSize={11}
+        />
+      ) : (
+        formatAmount(value, settings, { showSign: false })
+      ),
     [settings],
   );
 
@@ -411,6 +449,36 @@ export function TransactionsScreen({
     () => buildCategoryPanelDataByType(categories),
     [categories],
   );
+  const accountPreviewById = useMemo(
+    () =>
+      new Map(
+        accounts.map(
+          (account) => [account.id, { icon: account.icon, label: account.name }] as const,
+        ),
+      ),
+    [accounts],
+  );
+  const selectedAccountPreview = useMemo(
+    () =>
+      transactionFilters.accountId
+        ? (accountPreviewById.get(transactionFilters.accountId) ?? null)
+        : null,
+    [accountPreviewById, transactionFilters.accountId],
+  );
+  const selectedIncomeCategoryPreview = useMemo(
+    () =>
+      transactionFilters.incomeCategoryId
+        ? (incomeCategoryPanelData.previewById.get(transactionFilters.incomeCategoryId) ?? null)
+        : null,
+    [incomeCategoryPanelData.previewById, transactionFilters.incomeCategoryId],
+  );
+  const selectedExpenseCategoryPreview = useMemo(
+    () =>
+      transactionFilters.expenseCategoryId
+        ? (expenseCategoryPanelData.previewById.get(transactionFilters.expenseCategoryId) ?? null)
+        : null,
+    [expenseCategoryPanelData.previewById, transactionFilters.expenseCategoryId],
+  );
   const shouldShowIncomeCategoryFilter =
     transactionFilters.type === 'all' || transactionFilters.type === 'income';
   const shouldShowExpenseCategoryFilter =
@@ -437,13 +505,24 @@ export function TransactionsScreen({
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
+  const handleOpenIncomeBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight || hasActiveSearch) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('income_breakdown', activeMonthKey);
+  }, [activeMonthKey, hasActiveSearch, onOpenBreakdownInsight]);
+  const handleOpenExpenseBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight || hasActiveSearch) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('expense_breakdown', activeMonthKey);
+  }, [activeMonthKey, hasActiveSearch, onOpenBreakdownInsight]);
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
-    setIsSearchBoxOpen(true);
-    requestAnimationFrame(() => {
+    if (isSearchBoxOpen) {
       searchInputRef.current?.focus();
-    });
-  }, []);
+      return;
+    }
+    setIsSearchBoxOpen(true);
+  }, [isSearchBoxOpen]);
   const handleCloseSearch = useCallback(() => {
     void triggerHaptic('light');
     if (searchDraft.length > 0 || transactionFilters.search.length > 0) {
@@ -661,7 +740,6 @@ export function TransactionsScreen({
     <View className="h-10 w-[208px]" pointerEvents="none" />
   ) : (
     <View className="flex-row items-center gap-2">
-      <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={I18n.t('transactions.filters.search')}
@@ -678,6 +756,7 @@ export function TransactionsScreen({
           color={isSearchBoxOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
         />
       </Pressable>
+      <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
       <DisplayModeToggle />
     </View>
   );
@@ -693,27 +772,13 @@ export function TransactionsScreen({
         actions={headerActions}
       >
         <View className="gap-2">
-          {isSearchBoxOpen ? (
-            <View className="flex-row items-center gap-2">
-              <Input
-                ref={searchInputRef}
-                containerClassName="flex-1"
-                placeholder={I18n.t('transactions.filters.search_placeholder')}
-                value={searchDraft}
-                onChangeText={handleSearchChange}
-                returnKeyType="search"
-                leftIcon={<Search size={16} color={themeColors.textMuted} />}
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.close')}
-                onPress={handleCloseSearch}
-                className="h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card active:opacity-85"
-              >
-                <X size={14} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          ) : null}
+          <ActivitySearchRow
+            inputRef={searchInputRef}
+            visible={isSearchBoxOpen}
+            value={searchDraft}
+            onChangeText={handleSearchChange}
+            onClose={handleCloseSearch}
+          />
           <View style={styles.summarySlot}>
             {isSelectionMode ? (
               <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
@@ -768,6 +833,8 @@ export function TransactionsScreen({
               <InOutHeader
                 incomeValue={formatSummaryValue(monthSummary.income)}
                 expenseValue={formatSummaryValue(monthSummary.expense)}
+                onIncomePress={!hasActiveSearch ? handleOpenIncomeBreakdown : undefined}
+                onExpensePress={!hasActiveSearch ? handleOpenExpenseBreakdown : undefined}
               />
             )}
           </View>
@@ -955,11 +1022,25 @@ export function TransactionsScreen({
 
             <View className="gap-2.5">
               <View className="flex-row items-center justify-between gap-3">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.filters.account')}
-                </Text>
+                <View className="flex-1 gap-1.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.filters.account')}
+                  </Text>
+                  {selectedAccountPreview ? (
+                    <View className="self-start flex-row items-center gap-1.5 rounded-full border border-border/35 bg-secondary/65 px-3 py-1.5">
+                      <Text className="text-[12px]">{selectedAccountPreview.icon}</Text>
+                      <Text variant="label" className="text-foreground">
+                        {selectedAccountPreview.label}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
                 <TypeFilterPill
-                  label={I18n.t('transactions.filters.all_accounts')}
+                  label={
+                    selectedAccountPreview
+                      ? I18n.t('common.clear')
+                      : I18n.t('transactions.filters.all_accounts')
+                  }
                   value="all"
                   selected={transactionFilters.accountId === null}
                   onSelect={handleResetAccountFilter}
@@ -978,11 +1059,25 @@ export function TransactionsScreen({
             {shouldShowIncomeCategoryFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.filters.income_category')}
-                  </Text>
+                  <View className="flex-1 gap-1.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.filters.income_category')}
+                    </Text>
+                    {selectedIncomeCategoryPreview ? (
+                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1.5">
+                        <Text className="text-[12px]">{selectedIncomeCategoryPreview.icon}</Text>
+                        <Text variant="label" className="text-success">
+                          {selectedIncomeCategoryPreview.label}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <TypeFilterPill
-                    label={I18n.t('transactions.filters.all_income_categories')}
+                    label={
+                      selectedIncomeCategoryPreview
+                        ? I18n.t('common.clear')
+                        : I18n.t('transactions.filters.all_income_categories')
+                    }
                     value="all"
                     selected={transactionFilters.incomeCategoryId === null}
                     onSelect={handleResetIncomeCategoryFilter}
@@ -1003,11 +1098,25 @@ export function TransactionsScreen({
             {shouldShowExpenseCategoryFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.filters.expense_category')}
-                  </Text>
+                  <View className="flex-1 gap-1.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.filters.expense_category')}
+                    </Text>
+                    {selectedExpenseCategoryPreview ? (
+                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-destructive/25 bg-destructive/10 px-3 py-1.5">
+                        <Text className="text-[12px]">{selectedExpenseCategoryPreview.icon}</Text>
+                        <Text variant="label" className="text-destructive">
+                          {selectedExpenseCategoryPreview.label}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <TypeFilterPill
-                    label={I18n.t('transactions.filters.all_expense_categories')}
+                    label={
+                      selectedExpenseCategoryPreview
+                        ? I18n.t('common.clear')
+                        : I18n.t('transactions.filters.all_expense_categories')
+                    }
                     value="all"
                     selected={transactionFilters.expenseCategoryId === null}
                     onSelect={handleResetExpenseCategoryFilter}

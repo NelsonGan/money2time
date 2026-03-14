@@ -211,6 +211,7 @@ export function BottomNav({
     <View
       pointerEvents="box-none"
       style={{
+        marginTop: showAddButton ? -ADD_BUTTON_PROTRUSION : 0,
         paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
         paddingBottom: bottomPad,
       }}

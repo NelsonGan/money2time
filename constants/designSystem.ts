@@ -27,6 +27,12 @@ export interface ColorPalette {
   sky: string;
 }
 
+export interface WordmarkPalette {
+  money: string;
+  two: string;
+  time: string;
+}
+
 type ResolvedTheme = 'light' | 'dark';
 type CssVarMap = Record<string, string>;
 
@@ -150,15 +156,14 @@ interface ThemeColorOverrides {
 }
 
 export const THEME_COLOR_OPTIONS: readonly ThemeColor[] = [
-  'sage',
-  'ocean',
-  'terracotta',
-  'berry',
-  'slate',
-  'amber',
-  'indigo',
-  'emerald',
   'rosewood',
+  'terracotta',
+  'amber',
+  'sage',
+  'emerald',
+  'slate',
+  'ocean',
+  'indigo',
 ] as const;
 
 const themeColorOverrides: Record<ThemeColor, ThemeColorOverrides> = {
@@ -217,31 +222,6 @@ const themeColorOverrides: Record<ThemeColor, ThemeColorOverrides> = {
       '--primary': '16 63% 68%',
       '--ring': '16 63% 68%',
       '--primary-foreground': '18 62% 12%',
-    },
-  },
-  berry: {
-    swatch: { light: '#A34E79', dark: '#D283AC' },
-    lightPalette: {
-      brand: '#A34E79',
-      primary: '#A34E79',
-      primarySoft: '#F5E6EE',
-      primaryMuted: '#E1BCD0',
-    },
-    darkPalette: {
-      brand: '#D283AC',
-      primary: '#D283AC',
-      primarySoft: '#382133',
-      primaryMuted: '#56394B',
-    },
-    lightCssVars: {
-      '--primary': '330 35% 47%',
-      '--ring': '330 35% 47%',
-      '--primary-foreground': '0 0% 100%',
-    },
-    darkCssVars: {
-      '--primary': '331 47% 67%',
-      '--ring': '331 47% 67%',
-      '--primary-foreground': '329 61% 14%',
     },
   },
   slate: {
@@ -371,6 +351,57 @@ const themeColorOverrides: Record<ThemeColor, ThemeColorOverrides> = {
   },
 };
 
+const warmWordmarkPalette = {
+  light: { money: '#F37D57', two: '#F6B750' },
+  dark: { money: '#F39A79', two: '#E8AD4A' },
+} as const;
+
+const naturalWordmarkPalette = {
+  light: { money: '#8A74B8', two: '#B8ACD8' },
+  dark: { money: '#AE9BDA', two: '#D2C9ED' },
+} as const;
+
+const coolWordmarkPalette = {
+  light: { money: '#2F9E7A', two: '#7BD3B0' },
+  dark: { money: '#45B893', two: '#9FE5C8' },
+} as const;
+
+const themeWordmarkPalettes: Record<ThemeColor, { light: WordmarkPalette; dark: WordmarkPalette }> =
+  {
+    sage: {
+      light: { ...naturalWordmarkPalette.light, time: '#1F8A6F' },
+      dark: { ...naturalWordmarkPalette.dark, time: '#34C99A' },
+    },
+    ocean: {
+      light: { ...coolWordmarkPalette.light, time: '#2B6CB0' },
+      dark: { ...coolWordmarkPalette.dark, time: '#63ABF0' },
+    },
+    terracotta: {
+      light: { ...warmWordmarkPalette.light, time: '#B65F48' },
+      dark: { ...warmWordmarkPalette.dark, time: '#E19279' },
+    },
+    slate: {
+      light: { ...naturalWordmarkPalette.light, time: '#3D6D79' },
+      dark: { ...naturalWordmarkPalette.dark, time: '#79B8C7' },
+    },
+    amber: {
+      light: { ...warmWordmarkPalette.light, time: '#A97432' },
+      dark: { ...warmWordmarkPalette.dark, time: '#D7A86B' },
+    },
+    indigo: {
+      light: { ...coolWordmarkPalette.light, time: '#4F63B8' },
+      dark: { ...coolWordmarkPalette.dark, time: '#8FA5F0' },
+    },
+    emerald: {
+      light: { ...naturalWordmarkPalette.light, time: '#1E8E64' },
+      dark: { ...naturalWordmarkPalette.dark, time: '#46C892' },
+    },
+    rosewood: {
+      light: { ...warmWordmarkPalette.light, time: '#B1525F' },
+      dark: { ...warmWordmarkPalette.dark, time: '#DF8693' },
+    },
+  };
+
 export function getThemeColorSwatch(themeColor: ThemeColor, resolved: ResolvedTheme): string {
   const palette = themeColorOverrides[themeColor];
   return resolved === 'dark' ? palette.swatch.dark : palette.swatch.light;
@@ -385,6 +416,14 @@ export function getThemePalette(themeColor: ThemeColor, resolved: ResolvedTheme)
   return { ...base, ...overrides };
 }
 
+export function getThemeWordmarkPalette(
+  themeColor: ThemeColor,
+  resolved: ResolvedTheme,
+): WordmarkPalette {
+  const palette = themeWordmarkPalettes[themeColor];
+  return resolved === 'dark' ? palette.dark : palette.light;
+}
+
 export function getThemeCssVars(themeColor: ThemeColor, resolved: ResolvedTheme): CssVarMap {
   const base = resolved === 'dark' ? baseDarkCssVars : baseLightCssVars;
   const overrides =
@@ -394,10 +433,10 @@ export function getThemeCssVars(themeColor: ThemeColor, resolved: ResolvedTheme)
   return { ...base, ...overrides } as CssVarMap;
 }
 
-export const colors: ColorPalette = getThemePalette('sage', 'light');
-export const darkColors: ColorPalette = getThemePalette('sage', 'dark');
-export const lightCssVars: CssVarMap = getThemeCssVars('sage', 'light');
-export const darkCssVars: CssVarMap = getThemeCssVars('sage', 'dark');
+export const colors: ColorPalette = getThemePalette('rosewood', 'light');
+export const darkColors: ColorPalette = getThemePalette('rosewood', 'dark');
+export const lightCssVars: CssVarMap = getThemeCssVars('rosewood', 'light');
+export const darkCssVars: CssVarMap = getThemeCssVars('rosewood', 'dark');
 
 export const spacing = {
   xxs: 4,

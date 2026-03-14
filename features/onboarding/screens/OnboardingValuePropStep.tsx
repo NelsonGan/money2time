@@ -1,13 +1,20 @@
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button, Card, CardContent, Text } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
+import { Card, CardContent, Text, TimeValueInline } from '~/components/ui';
+import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
+import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
+import {
+  ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  ONBOARDING_HORIZONTAL_PADDING,
+} from '~/features/onboarding/constants/layout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { formatCurrency, formatHours } from '~/utils/formatters';
 
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
@@ -16,20 +23,92 @@ interface OnboardingValuePropStepProps {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: spacing.screenHorizontal,
-    justifyContent: 'space-between',
+  contentContainer: {
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   },
-  contentArea: {
-    flex: 1,
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 46,
+  },
+  wordmarkMoney: {
+    fontSize: 34,
+    lineHeight: 38,
+    fontWeight: '900',
+    letterSpacing: -1.1,
+  },
+  wordmarkTwo: {
+    fontSize: 18,
+    lineHeight: 18,
+    fontWeight: '900',
+    marginLeft: 1,
+    transform: [{ translateY: 8 }],
+  },
+  wordmarkTime: {
+    fontSize: 34,
+    lineHeight: 38,
+    fontWeight: '900',
+    letterSpacing: -1.1,
+    marginLeft: -1,
+  },
+  previewHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  previewBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  previewHero: {
+    borderRadius: 24,
+    borderWidth: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    marginTop: spacing.md,
+  },
+  previewHeroValues: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: spacing.md,
+  },
+  previewList: {
+    borderRadius: 24,
+    borderWidth: 1,
+    marginTop: spacing.md,
+    overflow: 'hidden',
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  previewRowDivider: {
+    height: 1,
+    marginLeft: spacing.lg * 2 + spacing.md,
+    marginRight: spacing.lg,
+  },
+  previewRowMark: {
+    width: 42,
+    height: 42,
+    borderRadius: 16,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  footer: {
-    paddingTop: spacing.sm,
+  previewRowDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 999,
   },
-  modeIcon: {
-    fontSize: 20,
+  previewRowValues: {
+    alignItems: 'flex-end',
+    minWidth: 92,
   },
 });
 
@@ -39,122 +118,186 @@ export function OnboardingValuePropStep({
   onSkip,
 }: OnboardingValuePropStepProps) {
   const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
+  const themeColor = useThemeColor();
   const sym = currencySymbol;
+  const trueHourlyRate = 15;
+  const wordmarkPalette = useMemo(
+    () => getThemeWordmarkPalette(themeColor, resolvedTheme),
+    [resolvedTheme, themeColor],
+  );
+  const previewTransactions = useMemo(
+    () => [
+      {
+        title: I18n.t('onboarding.value_prop.preview_tx_coffee_title'),
+        subtitle: I18n.t('onboarding.value_prop.preview_tx_coffee_subtitle'),
+        amount: 4.5,
+        color: themeColors.primary,
+      },
+      {
+        title: I18n.t('onboarding.value_prop.preview_tx_lunch_title'),
+        subtitle: I18n.t('onboarding.value_prop.preview_tx_lunch_subtitle'),
+        amount: 12,
+        color: themeColors.accent,
+      },
+      {
+        title: I18n.t('onboarding.value_prop.preview_tx_ride_title'),
+        subtitle: I18n.t('onboarding.value_prop.preview_tx_ride_subtitle'),
+        amount: 8.5,
+        color: themeColors.coral,
+      },
+    ],
+    [themeColors.accent, themeColors.coral, themeColors.primary],
+  );
+  const totalAmount = useMemo(
+    () => previewTransactions.reduce((sum, item) => sum + item.amount, 0),
+    [previewTransactions],
+  );
+  const totalTime = formatHours(totalAmount / trueHourlyRate);
 
   return (
-    <View style={styles.container}>
-      {/* Content area */}
-      <View style={styles.contentArea}>
-        {/* Overline + Hero */}
-        <Animated.View entering={FadeInDown.delay(100).duration(500).springify().damping(16)}>
-          <Text variant="label" tone="primary" className="text-center tracking-widest">
-            {I18n.t('onboarding.value_prop.welcome')}
-          </Text>
-          <Text variant="hero" className="text-center mt-3 text-foreground">
-            {I18n.t('onboarding.value_prop.title')}
-          </Text>
-        </Animated.View>
+    <View className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')}>
+          <View
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={I18n.t('app.name')}
+            style={styles.wordmarkRow}
+          >
+            <Text style={[styles.wordmarkMoney, { color: wordmarkPalette.money }]}>Money</Text>
+            <Text style={[styles.wordmarkTwo, { color: wordmarkPalette.two }]}>2</Text>
+            <Text style={[styles.wordmarkTime, { color: wordmarkPalette.time }]}>Time</Text>
+          </View>
+        </OnboardingStepHeader>
 
-        {/* Body text */}
-        <Animated.View entering={FadeIn.delay(300).duration(400)} className="mt-4">
-          <Text variant="friendly" tone="muted" className="text-center px-4 leading-6">
-            {I18n.t('onboarding.value_prop.body')}
-          </Text>
-        </Animated.View>
-
-        {/* Conversion example — dramatic visual */}
-        <Animated.View
-          entering={FadeInDown.delay(450).duration(500).springify().damping(16)}
-          className="mt-8"
-        >
-          <Card variant="accent" className="overflow-hidden">
-            <CardContent className="py-6 items-center">
-              {/* Decorative background */}
-              <View
-                className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full"
-                style={{ backgroundColor: themeColors.primary, opacity: 0.05 }}
-              />
-
-              <Text variant="label" tone="primary" className="tracking-widest">
-                {I18n.t('onboarding.value_prop.example')}
-              </Text>
-              <Text variant="display" className="mt-3 text-foreground tracking-tighter">
-                {sym}25.00
-              </Text>
-              <View className="flex-row items-center mt-2 gap-2">
-                <View className="h-px flex-1 bg-border/40" />
+        <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+          <Card variant="accent">
+            <CardContent>
+              <View style={styles.previewHeaderRow}>
+                <View
+                  style={[
+                    styles.previewBadge,
+                    {
+                      backgroundColor: `${themeColors.primary}10`,
+                      borderColor: `${themeColors.primary}24`,
+                    },
+                  ]}
+                >
+                  <Text variant="caption" tone="primary">
+                    {I18n.t('onboarding.value_prop.preview_day')}
+                  </Text>
+                </View>
                 <Text variant="caption" tone="muted">
-                  =
+                  {I18n.t('onboarding.value_prop.example_rate', { symbol: sym })}
                 </Text>
-                <View className="h-px flex-1 bg-border/40" />
               </View>
-              <Text variant="heading" className="text-primary mt-2">
-                {I18n.t('onboarding.value_prop.example_work')}
-              </Text>
-              <Text variant="caption" tone="muted" className="mt-2">
-                {I18n.t('onboarding.value_prop.example_rate', { symbol: sym })}
-              </Text>
+
+              <View
+                style={[
+                  styles.previewHero,
+                  {
+                    backgroundColor: `${themeColors.surface}E8`,
+                    borderColor: `${themeColors.border}45`,
+                  },
+                ]}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('onboarding.value_prop.preview_total')}
+                </Text>
+                <View style={styles.previewHeroValues} className="mt-3">
+                  <View>
+                    <Text variant="display" className="text-foreground tracking-tight">
+                      {formatCurrency(totalAmount, sym)}
+                    </Text>
+                    <Text variant="caption" tone="muted" className="mt-2">
+                      {I18n.t('onboarding.value_prop.money_mode')}
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <TimeValueInline
+                      value={totalTime}
+                      variant="heading"
+                      textClassName="text-primary"
+                      iconColor={themeColors.primary}
+                      iconSize={14}
+                    />
+                    <Text variant="caption" tone="muted" className="mt-2">
+                      {I18n.t('onboarding.value_prop.time_mode')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.previewList,
+                  {
+                    backgroundColor: `${themeColors.card}F4`,
+                    borderColor: `${themeColors.border}40`,
+                  },
+                ]}
+              >
+                {previewTransactions.map((item, index) => (
+                  <React.Fragment key={item.title}>
+                    <View style={styles.previewRow}>
+                      <View style={[styles.previewRowMark, { backgroundColor: `${item.color}16` }]}>
+                        <View style={[styles.previewRowDot, { backgroundColor: item.color }]} />
+                      </View>
+                      <View className="flex-1">
+                        <Text variant="bodyStrong" className="text-foreground">
+                          {item.title}
+                        </Text>
+                        <Text variant="caption" tone="muted" className="mt-1">
+                          {item.subtitle}
+                        </Text>
+                      </View>
+                      <View style={styles.previewRowValues}>
+                        <Text variant="bodyStrong" className="text-foreground">
+                          {formatCurrency(item.amount, sym)}
+                        </Text>
+                        <TimeValueInline
+                          value={formatHours(item.amount / trueHourlyRate)}
+                          variant="caption"
+                          containerClassName="mt-1"
+                          style={{ color: item.color }}
+                          iconColor={item.color}
+                          iconSize={10}
+                        />
+                      </View>
+                    </View>
+                    {index < previewTransactions.length - 1 ? (
+                      <View
+                        style={[
+                          styles.previewRowDivider,
+                          { backgroundColor: `${themeColors.border}32` },
+                        ]}
+                      />
+                    ) : null}
+                  </React.Fragment>
+                ))}
+              </View>
             </CardContent>
           </Card>
         </Animated.View>
+      </ScrollView>
 
-        {/* Display modes */}
-        <Animated.View entering={FadeIn.delay(600).duration(400)} className="mt-5 gap-2.5">
-          <View className="rounded-[22px] border border-border/25 bg-card px-4 py-3.5 flex-row items-center gap-3.5 shadow-soft">
-            <View className="w-11 h-11 rounded-2xl bg-primary/10 items-center justify-center">
-              <Text style={styles.modeIcon}>💵</Text>
-            </View>
-            <View className="flex-1">
-              <Text variant="bodyStrong" className="text-foreground">
-                {I18n.t('onboarding.value_prop.money_mode')}
-              </Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('onboarding.value_prop.money_mode_subtitle')}
-              </Text>
-            </View>
-          </View>
-          <View className="rounded-[22px] border border-border/25 bg-card px-4 py-3.5 flex-row items-center gap-3.5 shadow-soft">
-            <View className="w-11 h-11 rounded-2xl bg-accent/12 items-center justify-center">
-              <Text style={styles.modeIcon}>⏱️</Text>
-            </View>
-            <View className="flex-1">
-              <Text variant="bodyStrong" className="text-foreground">
-                {I18n.t('onboarding.value_prop.time_mode')}
-              </Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('onboarding.value_prop.time_mode_subtitle')}
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
-      </View>
-
-      {/* Footer */}
-      <SafeAreaView edges={['bottom']} style={styles.footer}>
-        <Button
-          haptic="none"
-          className="shadow-glow-lg"
-          onPress={() => {
-            void triggerHaptic('medium');
-            onGetStarted();
-          }}
-        >
-          <Text>{I18n.t('onboarding.value_prop.get_started')}</Text>
-        </Button>
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            onSkip();
-          }}
-          className="mt-3 items-center py-2"
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('onboarding.skip_setup_label')}
-        >
-          <Text variant="caption" tone="muted">
-            {I18n.t('onboarding.value_prop.skip_setup')}
-          </Text>
-        </Pressable>
-      </SafeAreaView>
+      <OnboardingActionBar
+        onBack={() => {
+          void triggerHaptic('selection');
+          onSkip();
+        }}
+        onPrimary={() => {
+          void triggerHaptic('medium');
+          onGetStarted();
+        }}
+        backLabel={I18n.t('onboarding.value_prop.skip_setup')}
+        primaryLabel={I18n.t('common.continue')}
+      />
     </View>
   );
 }

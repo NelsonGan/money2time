@@ -1,11 +1,12 @@
 import * as React from 'react';
 import type { TextInputProps } from 'react-native';
-import { TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 
 import { Text } from './text';
+import { SINGLE_LINE_TEXT_INPUT_STYLE } from './textInputStyles';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -36,11 +37,13 @@ const Input = React.forwardRef<TextInput, InputProps>(
       keyboardType,
       multiline,
       numberOfLines,
+      style,
       ...props
     },
     ref,
   ) => {
     const [focused, setFocused] = React.useState(false);
+    const isMountedRef = React.useRef(false);
     const themeColors = useThemeColors();
     const isMultiline = variant === 'multiline' || !!multiline;
     const resolvedKeyboardType =
@@ -48,6 +51,13 @@ const Input = React.forwardRef<TextInput, InputProps>(
       (variant === 'numeric' ? 'decimal-pad' : variant === 'currency' ? 'decimal-pad' : 'default');
     const hasError = !!error;
     const hasLeading = !!leftIcon || variant === 'currency';
+
+    React.useEffect(() => {
+      isMountedRef.current = true;
+      return () => {
+        isMountedRef.current = false;
+      };
+    }, []);
 
     return (
       <View className={cn('w-full', containerClassName)}>
@@ -96,18 +106,25 @@ const Input = React.forwardRef<TextInput, InputProps>(
               numberOfLines={isMultiline ? (numberOfLines ?? 4) : undefined}
               textAlignVertical={isMultiline ? 'top' : 'center'}
               className={cn(
-                'flex-1 text-[16px] leading-6 text-foreground font-medium',
+                'flex-1 text-[16px] text-foreground font-medium',
                 hasLeading && 'pl-0',
-                isMultiline ? 'min-h-[96px] pt-0.5' : 'h-full py-0',
+                isMultiline ? 'min-h-[96px] pt-0.5 leading-6' : '',
                 className,
               )}
+              style={
+                isMultiline ? style : [SINGLE_LINE_TEXT_INPUT_STYLE, styles.singleLineInput, style]
+              }
               placeholderTextColor={themeColors.textMuted}
               onFocus={(e) => {
-                setFocused(true);
+                if (isMountedRef.current) {
+                  setFocused(true);
+                }
                 props.onFocus?.(e);
               }}
               onBlur={(e) => {
-                setFocused(false);
+                if (isMountedRef.current) {
+                  setFocused(false);
+                }
                 props.onBlur?.(e);
               }}
               {...props}
@@ -131,5 +148,11 @@ const Input = React.forwardRef<TextInput, InputProps>(
 );
 
 Input.displayName = 'Input';
+
+const styles = StyleSheet.create({
+  singleLineInput: {
+    height: '100%',
+  },
+});
 
 export { Input };
