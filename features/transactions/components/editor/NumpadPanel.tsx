@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui';
+import { Text, TimeValueInline } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -36,6 +36,10 @@ interface NumpadPanelProps {
   onValueChange: (formatted: string) => void;
   onConfirm: (formatted: string) => void;
   compact?: boolean;
+}
+
+function isDirectAmountExpression(expression: string) {
+  return /^-?(?:\d+\.?\d*|\d*\.\d+)$/.test(expression);
 }
 
 const NumpadKey = React.memo(function NumpadKey({
@@ -211,7 +215,13 @@ export function NumpadPanel({
       expressionRef.current = nextExpression;
       setExpression(nextExpression);
       const evaluated = evaluateExpression(nextExpression);
-      onValueChange(formatMoney(evaluated));
+      if (!nextExpression) {
+        onValueChange('');
+        return;
+      }
+      onValueChange(
+        isDirectAmountExpression(nextExpression) ? nextExpression : formatMoney(evaluated),
+      );
     },
     [onConfirm, onValueChange],
   );
@@ -232,13 +242,21 @@ export function NumpadPanel({
           {formatMoney(previewValue)}
         </Text>
         {trueHourlyRate > 0 ? (
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            ≈{' '}
-            <Text variant="caption" tone="primary">
-              {formatHours(previewHours)}
-            </Text>{' '}
-            of work
-          </Text>
+          <View className="mt-0.5 flex-row items-center gap-1">
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              ≈
+            </Text>
+            <TimeValueInline
+              value={formatHours(previewHours)}
+              variant="caption"
+              tone="primary"
+              iconColor={themeColors.primary}
+              iconSize={10}
+            />
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {I18n.t('home.converter.of_work_suffix')}
+            </Text>
+          </View>
         ) : null}
       </View>
 

@@ -10,7 +10,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
   resolvedTheme: 'light',
-  themeColor: 'sage',
+  themeColor: 'rosewood',
 });
 
 export function ThemeProvider({

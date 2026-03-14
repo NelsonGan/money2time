@@ -5,15 +5,16 @@ function normalizeThemeColor(value: string | null | undefined) {
     case 'sage':
     case 'ocean':
     case 'terracotta':
-    case 'berry':
     case 'slate':
     case 'amber':
     case 'indigo':
     case 'emerald':
     case 'rosewood':
       return value;
+    case 'berry':
+      return 'rosewood';
     default:
-      return 'sage';
+      return 'rosewood';
   }
 }
 
@@ -25,7 +26,7 @@ export const migration003SettingsThemeColor: DbMigration = {
     const hasThemeColor = columns.some((column) => column.name === 'theme_color');
 
     if (!hasThemeColor) {
-      db.execSync("ALTER TABLE settings ADD COLUMN theme_color TEXT NOT NULL DEFAULT 'sage';");
+      db.execSync("ALTER TABLE settings ADD COLUMN theme_color TEXT NOT NULL DEFAULT 'rosewood';");
     }
 
     const rows = db.getAllSync<{ id: string; theme_color: string | null }>(

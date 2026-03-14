@@ -1,16 +1,17 @@
 import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Card, CardContent, Text } from '~/components/ui';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
 import {
   ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, UserSettings } from '~/types';
@@ -29,6 +30,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
     paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 16,
+    paddingVertical: 14,
+  },
+  divider: {
+    height: 1,
+  },
 });
 
 export function OnboardingWageStep({
@@ -40,6 +51,11 @@ export function OnboardingWageStep({
   onOpenWageCalculator,
 }: OnboardingWageStepProps) {
   const swipeBackGesture = useEdgeSwipeBack(onBack);
+  const themeColors = useThemeColors();
+  const wageAmountLabel = `${settings.currencySymbol}${(currentMonthWage?.wageAmount ?? 0).toFixed(2)}`;
+  const trueRateLabel = `${settings.currencySymbol}${(currentMonthWage?.trueHourlyRate ?? 0).toFixed(2)}/hr`;
+  const weeklyHoursLabel = `${currentMonthWage?.hoursWorkedPerWeek ?? 0}h · ${currentMonthWage?.workdaysPerWeek ?? 0}d`;
+  const commuteLabel = `${currentMonthWage?.commuteMinutesPerWorkday ?? 0} min`;
 
   const handleDoLater = () => {
     void triggerHaptic('selection');
@@ -52,90 +68,6 @@ export function OnboardingWageStep({
     ]);
   };
 
-  if (wageIsSet) {
-    return (
-      <GestureDetector gesture={swipeBackGesture}>
-        <View className="flex-1">
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Mascot */}
-            <Animated.View entering={FadeIn.duration(500)} className="items-center mt-8">
-              <View accessibilityElementsHidden>
-                <Mascot size={92} mood="proud" animate />
-              </View>
-            </Animated.View>
-
-            {/* Headline */}
-            <Animated.View
-              entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
-              className="mt-5"
-            >
-              <Text variant="title" className="text-center text-foreground">
-                {I18n.t('onboarding.wage.set_title')}
-              </Text>
-              <Text variant="friendly" tone="muted" className="text-center mt-2">
-                {I18n.t('onboarding.wage.set_subtitle')}
-              </Text>
-            </Animated.View>
-
-            {/* Rate hero card */}
-            <Animated.View entering={FadeIn.delay(250).duration(500)} className="mt-7">
-              <Card variant="hero" className="overflow-hidden">
-                <CardContent className="py-7 items-center">
-                  {/* Decorative inner glow */}
-                  <View
-                    className="absolute -top-8 -left-8 h-24 w-24 rounded-full"
-                    style={{ backgroundColor: '#fff', opacity: 0.06 }}
-                  />
-                  <Text variant="label" tone="inverse" className="tracking-widest opacity-70">
-                    {I18n.t('onboarding.wage.true_rate_title')}
-                  </Text>
-                  <Text variant="hero" tone="inverse" className="mt-3">
-                    {settings.currencySymbol}
-                    {(currentMonthWage?.trueHourlyRate ?? 0).toFixed(2)}/hr
-                  </Text>
-                  <Text variant="caption" tone="inverse" className="mt-3 opacity-60">
-                    {I18n.t('onboarding.wage.true_rate_based_on')}
-                  </Text>
-                </CardContent>
-              </Card>
-            </Animated.View>
-
-            {/* Recalculate option */}
-            <Animated.View entering={FadeIn.delay(400).duration(400)} className="mt-4">
-              <Button
-                variant="outline"
-                haptic="none"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenWageCalculator();
-                }}
-              >
-                <Text>{I18n.t('onboarding.wage.recalculate')}</Text>
-              </Button>
-            </Animated.View>
-          </ScrollView>
-
-          <OnboardingActionBar
-            onBack={() => {
-              void triggerHaptic('selection');
-              onBack();
-            }}
-            onPrimary={() => {
-              void triggerHaptic('medium');
-              onContinue();
-            }}
-            primaryLabel={I18n.t('common.continue')}
-          />
-        </View>
-      </GestureDetector>
-    );
-  }
-
-  // Wage NOT set
   return (
     <GestureDetector gesture={swipeBackGesture}>
       <View className="flex-1">
@@ -144,67 +76,97 @@ export function OnboardingWageStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Mascot */}
-          <Animated.View entering={FadeIn.duration(500)} className="items-center mt-8">
-            <View accessibilityElementsHidden>
-              <Mascot size={92} mood="thinking" animate />
-            </View>
-          </Animated.View>
+          <OnboardingStepHeader
+            title={I18n.t(wageIsSet ? 'onboarding.wage.set_title' : 'onboarding.wage.worth_title')}
+            subtitle={I18n.t(
+              wageIsSet ? 'onboarding.wage.set_subtitle' : 'onboarding.wage.worth_body',
+            )}
+          />
 
-          {/* Headline */}
-          <Animated.View
-            entering={FadeInDown.delay(100).duration(500).springify().damping(16)}
-            className="mt-5"
-          >
-            <Text variant="title" className="text-center text-foreground">
-              {I18n.t('onboarding.wage.worth_title')}
-            </Text>
-            <Text variant="friendly" tone="muted" className="text-center mt-2 px-2">
-              {I18n.t('onboarding.wage.worth_body')}
-            </Text>
-          </Animated.View>
+          {wageIsSet ? (
+            <>
+              <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+                <Card variant="hero" className="overflow-hidden">
+                  <CardContent className="items-center py-7">
+                    <Text variant="label" tone="inverse" className="tracking-widest opacity-70">
+                      {I18n.t('onboarding.wage.true_rate_title')}
+                    </Text>
+                    <Text variant="hero" tone="inverse" className="mt-3">
+                      {trueRateLabel}
+                    </Text>
+                    <Text variant="caption" tone="inverse" className="mt-3 opacity-60">
+                      {I18n.t('onboarding.wage.true_rate_based_on')}
+                    </Text>
+                  </CardContent>
+                </Card>
+              </Animated.View>
 
-          {/* Why this matters card */}
-          <Animated.View entering={FadeIn.delay(250).duration(500)} className="mt-7">
-            <Card variant="accent" className="overflow-hidden">
-              <CardContent className="py-6">
-                <Text variant="label" tone="primary" className="tracking-widest">
-                  {I18n.t('onboarding.wage.why_matters')}
-                </Text>
-                <Text variant="body" tone="muted" className="mt-3">
-                  {I18n.t('onboarding.wage.why_matters_body', { symbol: settings.currencySymbol })}
-                </Text>
-              </CardContent>
-            </Card>
-          </Animated.View>
+              <Animated.View entering={FadeIn.delay(220).duration(300)} className="mt-4">
+                <Card variant="default" className="border border-border/25">
+                  <CardContent className="py-1">
+                    <SummaryRow
+                      label={I18n.t(`wage.type.${currentMonthWage?.wageType ?? 'monthly'}`)}
+                      value={wageAmountLabel}
+                    />
+                    <View
+                      style={[styles.divider, { backgroundColor: `${themeColors.border}55` }]}
+                    />
+                    <SummaryRow label={I18n.t('wage.hours_per_week')} value={weeklyHoursLabel} />
+                    <View
+                      style={[styles.divider, { backgroundColor: `${themeColors.border}55` }]}
+                    />
+                    <SummaryRow label={I18n.t('wage.commute_minutes')} value={commuteLabel} />
+                  </CardContent>
+                </Card>
+              </Animated.View>
 
-          {/* Set up wage CTA */}
-          <Animated.View entering={FadeIn.delay(400).duration(400)} className="mt-6">
-            <Button
-              haptic="none"
-              className="shadow-glow-lg"
-              onPress={() => {
-                void triggerHaptic('medium');
-                onOpenWageCalculator();
-              }}
-            >
-              <Text>{I18n.t('onboarding.wage.setup_wage')}</Text>
-            </Button>
-          </Animated.View>
+              <Animated.View entering={FadeIn.delay(280).duration(300)} className="mt-4">
+                <Button
+                  variant="outline"
+                  haptic="none"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenWageCalculator();
+                  }}
+                >
+                  <Text>{I18n.t('onboarding.wage.recalculate')}</Text>
+                </Button>
+              </Animated.View>
+            </>
+          ) : (
+            <>
+              <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+                <Card variant="accent" className="overflow-hidden">
+                  <CardContent className="py-6">
+                    <Text variant="label" tone="primary" className="tracking-widest">
+                      {I18n.t('onboarding.wage.why_matters')}
+                    </Text>
+                    <Text variant="body" tone="muted" className="mt-3">
+                      {I18n.t('onboarding.wage.why_matters_body', {
+                        symbol: settings.currencySymbol,
+                      })}
+                    </Text>
+                  </CardContent>
+                </Card>
+              </Animated.View>
 
-          {/* Do later link */}
-          <Animated.View entering={FadeIn.delay(500).duration(400)} className="mt-4 items-center">
-            <Pressable
-              onPress={handleDoLater}
-              className="py-2"
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('onboarding.wage.later_a11y')}
-            >
-              <Text variant="caption" tone="muted">
-                {I18n.t('onboarding.wage.later_label')}
-              </Text>
-            </Pressable>
-          </Animated.View>
+              <Animated.View
+                entering={FadeIn.delay(220).duration(300)}
+                className="mt-4 items-center"
+              >
+                <Pressable
+                  onPress={handleDoLater}
+                  className="py-2"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('onboarding.wage.later_a11y')}
+                >
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('onboarding.wage.later_label')}
+                  </Text>
+                </Pressable>
+              </Animated.View>
+            </>
+          )}
         </ScrollView>
 
         <OnboardingActionBar
@@ -214,12 +176,28 @@ export function OnboardingWageStep({
           }}
           onPrimary={() => {
             void triggerHaptic('medium');
-            onContinue();
+            if (wageIsSet) {
+              onContinue();
+              return;
+            }
+            onOpenWageCalculator();
           }}
-          primaryLabel={I18n.t('common.continue')}
-          primaryDisabled={!wageIsSet}
+          primaryLabel={I18n.t(wageIsSet ? 'common.continue' : 'onboarding.wage.setup_wage')}
         />
       </View>
     </GestureDetector>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.summaryRow}>
+      <Text variant="body" tone="muted" className="flex-1">
+        {label}
+      </Text>
+      <Text variant="bodyStrong" className="text-right text-foreground">
+        {value}
+      </Text>
+    </View>
   );
 }

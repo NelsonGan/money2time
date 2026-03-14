@@ -22,9 +22,10 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Button, Card, SettingsHeader, Text } from '~/components/ui';
-import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
+import { Button, Card, SettingsHeader, Text, TimeValueInline } from '~/components/ui';
+import { getThemeWordmarkPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { HeroAmountConverter } from '~/features/home/components';
 import { AccountsScreen } from '~/features/settings/screens';
 import { DisplayModeToggle } from '~/features/transactions/components';
@@ -93,7 +94,7 @@ interface RecurringDisplayRow {
   recurrencePattern: RecurringSectionId;
   cadenceLabel: string;
   categoryIcon: string;
-  valueLabel: string;
+  valueLabel: React.ReactNode;
 }
 
 type RecurringSectionId = (typeof RECURRING_SECTION_ORDER)[number];
@@ -165,13 +166,17 @@ function RecurringRuleRow({
           </Text>
         </View>
       </View>
-      <Text
-        variant="mono"
-        className={item.isActive ? 'text-destructive' : 'text-muted-foreground'}
-        numberOfLines={1}
-      >
-        {item.valueLabel}
-      </Text>
+      {typeof item.valueLabel === 'string' ? (
+        <Text
+          variant="mono"
+          className={item.isActive ? 'text-destructive' : 'text-muted-foreground'}
+          numberOfLines={1}
+        >
+          {item.valueLabel}
+        </Text>
+      ) : (
+        item.valueLabel
+      )}
     </View>
   );
 }
@@ -268,6 +273,8 @@ export function HomeScreen({
   tutorialSpotlightRequest,
 }: HomeScreenProps = {}) {
   const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
+  const themeColor = useThemeColor();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const pagerRef = useRef<React.ElementRef<typeof Animated.ScrollView> | null>(null);
   const displayToggleRef = useRef<View | null>(null);
@@ -282,6 +289,10 @@ export function HomeScreen({
   const [activeHomeTabIndex, setActiveHomeTabIndex] = useState(defaultTabIndex);
   const pagerOffsetX = useSharedValue(defaultTabIndex * screenWidth);
   const [estimatorAmount, setEstimatorAmount] = useState('');
+  const wordmarkPalette = useMemo(
+    () => getThemeWordmarkPalette(themeColor, resolvedTheme),
+    [resolvedTheme, themeColor],
+  );
 
   // Reset to home if on out-of-range tab when entering simple mode
   useEffect(() => {
@@ -395,12 +406,27 @@ export function HomeScreen({
           recurrencePattern: rule.recurrencePattern,
           cadenceLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
           categoryIcon,
-          valueLabel: isTimeMode
-            ? formatHours(rule.monthlyHours)
-            : formatAmount(rule.monthlyAmount, settings, { showSign: false }),
+          valueLabel: isTimeMode ? (
+            <TimeValueInline
+              value={formatHours(rule.monthlyHours)}
+              variant="mono"
+              textClassName={rule.isActive ? 'text-destructive' : 'text-muted-foreground'}
+              iconColor={rule.isActive ? themeColors.error : themeColors.textMuted}
+              iconSize={11}
+            />
+          ) : (
+            formatAmount(rule.monthlyAmount, settings, { showSign: false })
+          ),
         };
       }),
-    [categoryById, isTimeMode, recurringInsights, settings],
+    [
+      categoryById,
+      isTimeMode,
+      recurringInsights,
+      settings,
+      themeColors.error,
+      themeColors.textMuted,
+    ],
   );
   const recurringSections = useMemo<RecurringDisplaySection[]>(() => {
     const sections: RecurringDisplaySection[] = [];
@@ -630,10 +656,15 @@ export function HomeScreen({
         <View className="px-5 pt-1.5 gap-2.5">
           {/* Header with app name and display toggle */}
           <View style={styles.headerRow}>
-            <View className="min-h-10 flex-row items-center">
-              <Text variant="heading" className="tracking-tight">
-                {I18n.t('app.name')}
-              </Text>
+            <View
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={I18n.t('app.name')}
+              style={styles.headerBrandRow}
+            >
+              <Text style={[styles.headerBrandMoney, { color: wordmarkPalette.money }]}>Money</Text>
+              <Text style={[styles.headerBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
+              <Text style={[styles.headerBrandTime, { color: wordmarkPalette.time }]}>Time</Text>
             </View>
             <View
               ref={displayToggleRef}
@@ -715,6 +746,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screenHorizontal,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xs,
+  },
+  headerBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 40,
+  },
+  headerBrandMoney: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.9,
+  },
+  headerBrandTwo: {
+    fontSize: 13,
+    lineHeight: 14,
+    fontWeight: '900',
+    marginLeft: 1,
+    marginRight: 0,
+    transform: [{ translateY: 6 }],
+  },
+  headerBrandTime: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.9,
+    marginLeft: -1,
   },
   recurringContentContainer: {
     paddingHorizontal: spacing.screenHorizontal,

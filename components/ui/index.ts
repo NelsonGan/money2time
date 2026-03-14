@@ -14,4 +14,9 @@ export {
 } from './settings';
 export { Text, TextClassContext } from './text';
 export { ThemeModal } from './theme-modal';
+export {
+  TIME_VALUE_ICON,
+  TIME_VALUE_ICON_STROKE_WIDTH,
+  TimeValueInline,
+} from './time-value-inline';
 export { SegmentedToggle } from './toggle';

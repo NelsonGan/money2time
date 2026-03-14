@@ -1,4 +1,5 @@
-import { Download, Upload } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import { Download, Trash2, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -16,16 +17,19 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
+import { triggerHaptic } from '~/services/haptics';
 
 interface DataManagementScreenProps {
   onBack: () => void;
 }
 
 export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
-  const { refreshAll } = useApp();
+  const { importMoneyManagerBackup, refreshAll, resetAllData } = useApp();
   const themeColors = useThemeColors();
   const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
+  const [importingSource, setImportingSource] = useState<'money2time' | 'money_manager' | null>(
+    null,
+  );
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -57,7 +61,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
   };
 
   const performImport = async () => {
-    setIsImporting(true);
+    setImportingSource('money2time');
     try {
       const result = await pickAndImportDatabase();
       if (result.canceled) return;
@@ -80,8 +84,77 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
         e instanceof Error ? e.message : I18n.t('data_management.import_error_message'),
       );
     } finally {
-      setIsImporting(false);
+      setImportingSource(null);
     }
+  };
+
+  const handleMoneyManagerImport = () => {
+    Alert.alert(
+      I18n.t('data_management.import_money_manager_confirm_title'),
+      I18n.t('data_management.import_money_manager_confirm_message'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('data_management.import_money_manager_confirm_action'),
+          style: 'destructive',
+          onPress: () => void performMoneyManagerImport(),
+        },
+      ],
+    );
+  };
+
+  const performMoneyManagerImport = async () => {
+    setImportingSource('money_manager');
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || result.assets.length === 0) return;
+
+      const picked = result.assets[0];
+      const name = picked.name?.toLowerCase() ?? '';
+      const uri = picked.uri?.toLowerCase() ?? '';
+      const hasMmbakExt = name.endsWith('.mmbak') || uri.endsWith('.mmbak');
+
+      if (!hasMmbakExt) {
+        Alert.alert(
+          I18n.t('data_management.import_money_manager_invalid_file_title'),
+          I18n.t('data_management.import_money_manager_invalid_file_message'),
+        );
+        return;
+      }
+
+      const summary = await importMoneyManagerBackup(picked.uri, picked.name);
+      Alert.alert(
+        I18n.t('data_management.import_money_manager_success_title'),
+        I18n.t('data_management.import_money_manager_success_message', {
+          accounts: summary.accounts,
+          categories: summary.categories,
+          transactions: summary.transactions,
+        }),
+      );
+    } catch (e) {
+      Alert.alert(
+        I18n.t('data_management.import_error_title'),
+        e instanceof Error ? e.message : I18n.t('errors.import_failed_generic'),
+      );
+    } finally {
+      setImportingSource(null);
+    }
+  };
+
+  const handleResetAllData = () => {
+    void triggerHaptic('warning');
+    Alert.alert(I18n.t('settings.reset_data_title'), I18n.t('settings.reset_data_message'), [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      {
+        text: I18n.t('common.reset'),
+        style: 'destructive',
+        onPress: () => resetAllData(),
+      },
+    ]);
   };
 
   return (
@@ -117,7 +190,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                 variant="outline"
                 className="mt-3"
                 onPress={() => void handleExport()}
-                disabled={isExporting}
+                disabled={isExporting || importingSource !== null}
               >
                 <Text>
                   {isExporting
@@ -149,23 +222,75 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                 variant="outline"
                 className="mt-3"
                 onPress={handleImport}
-                disabled={isImporting}
+                disabled={importingSource !== null}
               >
                 <Text>
-                  {isImporting
+                  {importingSource === 'money2time'
                     ? I18n.t('data_management.importing')
                     : I18n.t('data_management.import_action')}
                 </Text>
               </Button>
             </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
+                >
+                  <Upload size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.sectionTextWrap}>
+                  <Text variant="caption" className="text-foreground">
+                    {I18n.t('data_management.import_money_manager_title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('data_management.import_money_manager_description')}
+                  </Text>
+                </View>
+              </View>
+              <Button
+                variant="outline"
+                className="mt-3"
+                onPress={handleMoneyManagerImport}
+                disabled={importingSource !== null}
+              >
+                <Text>
+                  {importingSource === 'money_manager'
+                    ? I18n.t('data_management.import_money_manager_importing')
+                    : I18n.t('data_management.import_money_manager_action')}
+                </Text>
+              </Button>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View style={[styles.iconContainer, { backgroundColor: `${themeColors.coral}14` }]}>
+                  <Trash2 size={18} color={themeColors.coral} />
+                </View>
+                <View style={styles.sectionTextWrap}>
+                  <Text variant="caption" className="text-foreground">
+                    {I18n.t('settings.reset_data_title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('data_management.reset_data_description')}
+                  </Text>
+                </View>
+              </View>
+              <Button
+                variant="outline"
+                className="mt-3 border-coral/30 bg-coral/8"
+                onPress={handleResetAllData}
+                disabled={isExporting || importingSource !== null}
+              >
+                <Text className="text-destructive">{I18n.t('settings.reset_all_data')}</Text>
+              </Button>
+            </View>
           </CardContent>
         </Card>
-
-        <View style={styles.warningSection}>
-          <Text variant="caption" tone="muted" className="px-1">
-            {I18n.t('data_management.import_warning')}
-          </Text>
-        </View>
       </ScrollView>
     </SettingsPageLayout>
   );
@@ -202,8 +327,5 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  warningSection: {
-    marginTop: 20,
   },
 });

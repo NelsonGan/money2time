@@ -4,7 +4,7 @@ import { NavigationContainer, useNavigationContainerRef } from '@react-navigatio
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Appearance, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Appearance, InteractionManager, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -38,6 +38,7 @@ import type {
   TutorialTargetId,
   TutorialTargetRect,
 } from '~/features/tutorial/types';
+import { useAdsCooldownStatus } from '~/hooks/useAdsCooldownStatus';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
@@ -64,6 +65,13 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
+type ActivityBreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
+
+interface ActivityBreakdownInsightRequest {
+  insightType: ActivityBreakdownInsightType;
+  monthKey: string;
+  token: number;
+}
 
 interface GuidedTutorialStep {
   tab: MainTab;
@@ -99,15 +107,15 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   },
   {
     tab: 'settings',
-    targetId: 'settings.management',
-    titleKey: 'tutorial.coach_steps.management_title',
-    bodyKey: 'tutorial.coach_steps.management_body',
-  },
-  {
-    tab: 'settings',
     targetId: 'settings.recurring',
     titleKey: 'tutorial.coach_steps.recurring_title',
     bodyKey: 'tutorial.coach_steps.recurring_body',
+  },
+  {
+    tab: 'settings',
+    targetId: 'settings.management',
+    titleKey: 'tutorial.coach_steps.management_title',
+    bodyKey: 'tutorial.coach_steps.management_body',
   },
   {
     tab: 'settings',
@@ -153,7 +161,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const { setColorScheme } = useColorScheme();
   const themeMode = settings?.themeMode ?? 'system';
-  const themeColor = settings?.themeColor ?? 'sage';
+  const themeColor = settings?.themeColor ?? 'rosewood';
   const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(
     () => Appearance.getColorScheme() ?? 'light',
   );
@@ -189,7 +197,8 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { adRemovalState, isSimpleMode } = useApp();
+  const { adRemovalState, isSimpleMode, settings } = useApp();
+  const adsCooldownStatus = useAdsCooldownStatus(settings.createdAt);
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -207,6 +216,8 @@ function MainShellScreen({
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
+  const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
+    useState<ActivityBreakdownInsightRequest | null>(null);
   const [settingsCurrentScreen, setSettingsCurrentScreen] = useState('settings');
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
@@ -253,6 +264,17 @@ function MainShellScreen({
       void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED, { screen: 'InsightsDrilldown' });
     },
     [navigation],
+  );
+  const openActivityBreakdownInsight = useCallback(
+    (insightType: ActivityBreakdownInsightType, monthKey: string) => {
+      setActivityBreakdownInsightRequest((previous) => ({
+        insightType,
+        monthKey,
+        token: (previous?.token ?? 0) + 1,
+      }));
+      setActiveTab('insights');
+    },
+    [],
   );
 
   const openSettingsScreen = useCallback(
@@ -443,7 +465,11 @@ function MainShellScreen({
     !shouldHideBottomNav &&
     !isGuidedTutorialActive &&
     !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
-    canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement });
+    !adsCooldownStatus.isInCooldown &&
+    canRequestBannerAds({
+      hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement,
+      installStartedAt: settings.createdAt,
+    });
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
@@ -464,6 +490,7 @@ function MainShellScreen({
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              onOpenBreakdownInsight={openActivityBreakdownInsight}
               tutorialResetToken={transactionsTutorialResetToken}
             />
           ) : (
@@ -472,6 +499,7 @@ function MainShellScreen({
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              onOpenBreakdownInsight={openActivityBreakdownInsight}
               onSelectionModeChange={setIsTransactionsSelectionMode}
               tutorialResetToken={transactionsTutorialResetToken}
             />
@@ -482,6 +510,7 @@ function MainShellScreen({
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
+            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -772,7 +801,8 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { adRemovalState, isLoading, settings, updateSettings } = useApp();
+  const { adRemovalState, isLoading, settings } = useApp();
+  const adsCooldownStatus = useAdsCooldownStatus(settings.createdAt);
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
@@ -814,10 +844,12 @@ function AppContent() {
   }, [isLoading, visibleScreen]);
 
   const handleOnboardingComplete = useCallback(() => {
-    updateSettings({ onboardingCompleted: true });
-    setShowTutorialPrompt(true);
+    setTutorialStartToken(0);
+    InteractionManager.runAfterInteractions(() => {
+      setShowTutorialPrompt(true);
+    });
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
-  }, [updateSettings]);
+  }, []);
 
   const handleStartTutorialNow = useCallback(() => {
     setShowTutorialPrompt(false);
@@ -835,7 +867,11 @@ function AppContent() {
 
     if (
       !settings.onboardingCompleted ||
-      !canRequestBannerAds({ hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement })
+      adsCooldownStatus.isInCooldown ||
+      !canRequestBannerAds({
+        hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement,
+        installStartedAt: settings.createdAt,
+      })
     ) {
       return;
     }
@@ -845,6 +881,8 @@ function AppContent() {
     adRemovalState.hasAdFreeEntitlement,
     adRemovalState.isConfigured,
     adRemovalState.isLoading,
+    adsCooldownStatus.isInCooldown,
+    settings.createdAt,
     settings.onboardingCompleted,
   ]);
 
