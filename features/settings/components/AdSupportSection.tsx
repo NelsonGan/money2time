@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, Card, CardContent, SettingsSection, Text, ThemeModal } from '~/components/ui';
+import { Button, Card, CardContent, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -82,6 +82,7 @@ export function AdSupportSection() {
   const isBusy = adRemovalState.isLoading || isPurchasing || isRestoring;
   const canShowPurchaseOptions =
     adRemovalState.canMakePurchases && adRemovalState.tipOptions.length > 0;
+  const shouldShowPurchaseButton = !adRemovalState.hasAdFreeEntitlement;
   const handlePurchase = useCallback(
     async (optionProductIdentifier: string) => {
       const purchaseOption = adRemovalState.tipOptions.find(
@@ -200,11 +201,7 @@ export function AdSupportSection() {
       : 'settings.ad_support_unavailable_no_products';
 
   return (
-    <SettingsSection
-      title={I18n.t('settings.advertisement')}
-      className="mt-5 gap-3"
-      showAccent={false}
-    >
+    <View className="mt-5 gap-3">
       {adRemovalState.hasAdFreeEntitlement ? (
         <Card variant="soft">
           <CardContent className="gap-2">
@@ -237,16 +234,19 @@ export function AdSupportSection() {
         </Card>
       ) : null}
 
-      {!adRemovalState.hasAdFreeEntitlement ? (
+      {shouldShowPurchaseButton ? (
         <View className="gap-2">
           <Button
+            className="h-auto min-h-[60px] py-3"
             disabled={isBusy}
             onPress={() => {
               setIsPurchaseModalOpen(true);
               void trackEvent(AnalyticsEvents.PURCHASE_MODAL_OPENED);
             }}
           >
-            <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
+            <View className="items-center">
+              <Text>{I18n.t('settings.ad_support_open_modal_button')}</Text>
+            </View>
           </Button>
         </View>
       ) : null}
@@ -282,24 +282,6 @@ export function AdSupportSection() {
             >
               {I18n.t('settings.ad_support_modal_body')}
             </Text>
-            {adRemovalState.tipOptions.length > 0 ? (
-              <View style={styles.amountPillRow}>
-                {adRemovalState.tipOptions.map((option, index) => {
-                  const accentColor = TIP_ROW_COLORS[index % TIP_ROW_COLORS.length];
-
-                  return (
-                    <View
-                      key={`preview-${option.productIdentifier}`}
-                      style={[styles.amountPill, { borderColor: accentColor }]}
-                    >
-                      <Text variant="caption" style={{ color: accentColor }}>
-                        {option.priceString}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : null}
           </View>
 
           <ScrollView
@@ -378,7 +360,7 @@ export function AdSupportSection() {
           </ScrollView>
         </SafeAreaView>
       </ThemeModal>
-    </SettingsSection>
+    </View>
   );
 }
 
@@ -387,18 +369,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     height: 12,
     width: 12,
-  },
-  amountPillRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginTop: spacing.md,
-  },
-  amountPill: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
   },
   sheetHeader: {
     paddingBottom: spacing.md,

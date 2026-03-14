@@ -10,6 +10,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  TimeValueInline,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -410,6 +411,36 @@ export function InsightsDrilldownScreen({
         : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false }),
     [selectedTransactionTotal, settings],
   );
+  const renderDisplayValueNode = useCallback(
+    (
+      value: string,
+      options: {
+        variant?: React.ComponentProps<typeof Text>['variant'];
+        tone?: React.ComponentProps<typeof Text>['tone'];
+        textClassName?: string;
+        iconColor?: string;
+      } = {},
+    ) => {
+      const { variant = 'label', tone = 'default', textClassName, iconColor } = options;
+      if (settings.displayMode === 'time') {
+        return (
+          <TimeValueInline
+            value={value}
+            variant={variant}
+            tone={tone}
+            textClassName={textClassName}
+            iconColor={iconColor}
+          />
+        );
+      }
+      return (
+        <Text variant={variant} tone={tone} className={textClassName}>
+          {value}
+        </Text>
+      );
+    },
+    [settings.displayMode],
+  );
   const selectedTransactionTotalToneClass = 'text-foreground';
   const shouldGroupByDate = drilldownSortOption !== 'largest_value';
   const handleSortOptionChange = useCallback(
@@ -436,11 +467,18 @@ export function InsightsDrilldownScreen({
     [onOpenSubcategoryDrilldown, payload],
   );
   const renderSubcategoryValue = useCallback(
-    (value: number) =>
-      settings.displayMode === 'time'
-        ? formatHours(Math.abs(value))
-        : formatAmount(value, settings, { showSign: false }),
-    [settings],
+    (value: number) => {
+      const label =
+        settings.displayMode === 'time'
+          ? formatHours(Math.abs(value))
+          : formatAmount(value, settings, { showSign: false });
+      return renderDisplayValueNode(label, {
+        variant: 'label',
+        textClassName: 'text-foreground',
+        iconColor: themeColors.text,
+      });
+    },
+    [renderDisplayValueNode, settings, themeColors.text],
   );
   const handleTypeFilterChange = useCallback(
     (type: DrilldownTransactionFilter) => {
@@ -804,9 +842,11 @@ export function InsightsDrilldownScreen({
                         })}
                       </Text>
                       <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className={selectedTransactionTotalToneClass}>
-                          {selectedTransactionTotalLabel}
-                        </Text>
+                        {renderDisplayValueNode(selectedTransactionTotalLabel, {
+                          variant: 'label',
+                          textClassName: selectedTransactionTotalToneClass,
+                          iconColor: themeColors.text,
+                        })}
                       </View>
                     </View>
                   </View>
@@ -903,9 +943,7 @@ export function InsightsDrilldownScreen({
                         </Text>
                         <View className="items-end">
                           <View className="flex-row items-center gap-1.5">
-                            <Text variant="label" className="text-foreground">
-                              {renderSubcategoryValue(row.totalValue)}
-                            </Text>
+                            {renderSubcategoryValue(row.totalValue)}
                             <View
                               className="rounded-full px-1.5 py-0.5"
                               style={

@@ -21,8 +21,8 @@ export interface RankedImpactRow {
   rank: number;
   title: string;
   subtitle?: string;
-  primaryValue: string;
-  secondaryValue?: string;
+  primaryValue: React.ReactNode;
+  secondaryValue?: React.ReactNode;
   sharePct: number;
   emoji?: string;
   accentColor?: string;
@@ -107,13 +107,21 @@ export function RankedImpactChart({
                 </View>
               </View>
               <View className="items-end pl-1">
-                <Text variant="caption" style={accentTextStyle}>
-                  {row.primaryValue}
-                </Text>
-                {row.secondaryValue ? (
-                  <Text variant="label" tone="muted" className="mt-0.5">
-                    {row.secondaryValue}
+                {typeof row.primaryValue === 'string' ? (
+                  <Text variant="caption" style={accentTextStyle}>
+                    {row.primaryValue}
                   </Text>
+                ) : (
+                  row.primaryValue
+                )}
+                {row.secondaryValue ? (
+                  typeof row.secondaryValue === 'string' ? (
+                    <Text variant="label" tone="muted" className="mt-0.5">
+                      {row.secondaryValue}
+                    </Text>
+                  ) : (
+                    row.secondaryValue
+                  )
                 ) : null}
               </View>
             </View>

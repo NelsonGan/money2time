@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Button, Text } from '~/components/ui';
+import { Button, Text, TimeValueInline } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -431,9 +431,18 @@ export function HeroAmountConverter({
                   entering={FadeInDown.duration(180)}
                   exiting={FadeOutUp.duration(120)}
                 >
-                  <Text variant="heading" className="text-primary tracking-tight">
-                    {I18n.t('home.converter.of_work', { value: hoursLabel })}
-                  </Text>
+                  <View className="flex-row items-center gap-2">
+                    <TimeValueInline
+                      value={hoursLabel}
+                      variant="heading"
+                      textClassName="text-primary tracking-tight"
+                      iconColor={themeColors.primary}
+                      iconSize={16}
+                    />
+                    <Text variant="heading" className="text-primary tracking-tight">
+                      {I18n.t('home.converter.of_work_suffix')}
+                    </Text>
+                  </View>
                 </Animated.View>
                 <Animated.View
                   key={exactHoursLabel}

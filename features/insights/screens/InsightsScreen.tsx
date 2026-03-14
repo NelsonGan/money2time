@@ -30,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { Card, CardContent, SelectField, Text, ThemeModal } from '~/components/ui';
+import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { useApp } from '~/context/AppContext';
@@ -73,6 +73,7 @@ const INSIGHT_TYPES = [
   'time_cost_leaderboard',
   'savings_rate',
   'expense_trend',
+  'income_trend',
   'asset_history',
   'income_rate_history',
 ] as const;
@@ -88,7 +89,7 @@ const INSIGHT_TYPE_GROUPS = [
   },
   {
     id: 'trends',
-    insightTypes: ['expense_trend', 'asset_history', 'income_rate_history'],
+    insightTypes: ['expense_trend', 'income_trend', 'asset_history', 'income_rate_history'],
   },
 ] as const satisfies readonly {
   id: string;
@@ -137,6 +138,12 @@ const INSIGHT_TYPE_VISUALS = {
     tint: '#D65E43',
     background: '#FCE7E2',
     border: '#F3B8AB',
+  },
+  income_trend: {
+    Icon: TrendingUp,
+    tint: '#249A67',
+    background: '#E4F7EC',
+    border: '#B7E4CA',
   },
   asset_history: {
     Icon: Landmark,
@@ -398,6 +405,10 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
     fixedPeriodPreset: 'year',
     allowAccountFilter: false,
   },
+  income_trend: {
+    fixedPeriodPreset: 'year',
+    allowAccountFilter: false,
+  },
   asset_history: {
     fixedPeriodPreset: 'year',
     allowAccountFilter: false,
@@ -652,6 +663,26 @@ type ExpenseTrendPageData = InsightBasePageData & {
   peakMonthKey: string | null;
 };
 
+type IncomeTrendMonthRow = {
+  monthKey: string;
+  label: string;
+  totalIncome: number;
+  transactionCount: number;
+  topCategoryLabel: string | null;
+  topCategoryEmoji: string | null;
+  topCategoryAmount: number;
+  transactions: TransactionWithRelations[];
+};
+
+type IncomeTrendPageData = InsightBasePageData & {
+  kind: 'income_trend';
+  year: number;
+  monthRows: IncomeTrendMonthRow[];
+  averageMonthIncome: number;
+  activeMonths: number;
+  peakMonthKey: string | null;
+};
+
 type IncomeRatePoint = {
   monthKey: string;
   label: string;
@@ -671,9 +702,19 @@ type InsightPageData =
   | TimeCostPageData
   | AnalyticsPageData
   | ExpenseTrendPageData
+  | IncomeTrendPageData
   | AssetHistoryPageData
   | IncomeRateHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
+
+function buildMonthPeriodState(targetMonthDate: Date): PeriodState {
+  const monthStart = startOfMonthDate(targetMonthDate);
+  return {
+    anchorDate: monthStart,
+    customStart: formatDateInput(monthStart),
+    customEnd: formatDateInput(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)),
+  };
+}
 
 type InsightsPreferencesSnapshot = {
   version: 1;
@@ -686,6 +727,8 @@ type InsightsPreferencesSnapshot = {
   selectedAccountIds: string[];
   excludedExpenseTrendAccountIds: string[];
   excludedExpenseTrendExpenseCategoryIds: string[];
+  excludedIncomeTrendAccountIds: string[];
+  excludedIncomeTrendIncomeCategoryIds: string[];
   excludedSavingsIncomeCategoryIds: string[];
   excludedSavingsExpenseCategoryIds: string[];
   excludedTimeCostExpenseCategoryId: string | null;
@@ -747,6 +790,10 @@ function parseInsightsPreferencesPayload(
     next.excludedExpenseTrendAccountIds = toUniqueStringList(parsed.excludedExpenseTrendAccountIds);
     next.excludedExpenseTrendExpenseCategoryIds = toUniqueStringList(
       parsed.excludedExpenseTrendExpenseCategoryIds,
+    );
+    next.excludedIncomeTrendAccountIds = toUniqueStringList(parsed.excludedIncomeTrendAccountIds);
+    next.excludedIncomeTrendIncomeCategoryIds = toUniqueStringList(
+      parsed.excludedIncomeTrendIncomeCategoryIds,
     );
     next.excludedSavingsIncomeCategoryIds = toUniqueStringList(
       parsed.excludedSavingsIncomeCategoryIds,
@@ -1546,6 +1593,116 @@ const ExpenseTrendLineChart = React.memo(function ExpenseTrendLineChart({
   );
 });
 
+const IncomeTrendLineChart = React.memo(function IncomeTrendLineChart({
+  monthRows,
+  chartWidth,
+  primaryColor,
+  averageValue,
+  referenceColor,
+  onSelectMonthKey,
+  onGestureStart,
+  onGestureEnd,
+}: {
+  monthRows: IncomeTrendMonthRow[];
+  chartWidth: number;
+  primaryColor: string;
+  averageValue: number;
+  referenceColor: string;
+  onSelectMonthKey: (monthKey: string) => void;
+  onGestureStart: () => void;
+  onGestureEnd: () => void;
+}) {
+  const graphPoints = useMemo<GraphPoint[]>(
+    () =>
+      monthRows.map((row) => ({
+        value: row.totalIncome,
+        date: monthDateFromMonthKey(row.monthKey),
+      })),
+    [monthRows],
+  );
+  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
+  const graphDatasetSignature = useMemo(
+    () => buildGraphDatasetSignature(graphPoints),
+    [graphPoints],
+  );
+  const graphYDomain = useMemo(
+    () => resolveGraphYDomain(graphPoints, graphRange),
+    [graphPoints, graphRange],
+  );
+  const averageReferenceTop = useMemo(
+    () => resolveGraphValueTop(averageValue, EXPENSE_TREND_CHART_HEIGHT, graphYDomain),
+    [averageValue, graphYDomain],
+  );
+  const monthKeyByTime = useMemo(
+    () =>
+      new Map(
+        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
+      ),
+    [graphPoints, monthRows],
+  );
+  const handlePointSelected = useCallback(
+    (point: GraphPoint) => {
+      const normalizedMonthKey =
+        monthKeyByTime.get(point.date.getTime()) ??
+        normalizeMonthKey(monthKeyFromDateLocal(point.date));
+      if (!normalizedMonthKey) return;
+      onSelectMonthKey(normalizedMonthKey);
+    },
+    [monthKeyByTime, onSelectMonthKey],
+  );
+  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
+
+  return (
+    <View style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}>
+      {isChartReady ? (
+        <>
+          <LineGraph
+            animated
+            points={graphPoints}
+            range={graphRange}
+            color={primaryColor}
+            lineThickness={2.8}
+            gradientFillColors={[
+              withColorAlpha(primaryColor, 0.2),
+              withColorAlpha(primaryColor, 0.03),
+            ]}
+            enablePanGesture
+            panGestureDelay={0}
+            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
+            verticalPadding={GRAPH_VERTICAL_PADDING}
+            enableIndicator={false}
+            onPointSelected={handlePointSelected}
+            onGestureStart={onGestureStart}
+            onGestureEnd={onGestureEnd}
+            style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}
+          />
+          {averageReferenceTop !== null ? (
+            <View
+              pointerEvents="none"
+              style={[
+                styles.absoluteOverlay,
+                buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT),
+              ]}
+            >
+              <View
+                style={[
+                  styles.chartReferenceLine,
+                  {
+                    top: averageReferenceTop,
+                    borderTopColor: referenceColor,
+                  },
+                ]}
+              />
+            </View>
+          ) : null}
+        </>
+      ) : (
+        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={EXPENSE_TREND_CHART_HEIGHT} />
+      )}
+    </View>
+  );
+});
+
 const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   points,
   rates,
@@ -1656,6 +1813,11 @@ interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  activityBreakdownInsightRequest?: {
+    insightType: BreakdownInsightType;
+    monthKey: string;
+    token: number;
+  } | null;
   isSimpleMode?: boolean;
   onTutorialTargetLayout?: (targetId: 'insights.type_selector', rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -1665,6 +1827,7 @@ export function InsightsScreen({
   resetToCurrentMonthToken = 0,
   onOpenDrilldown,
   onOpenTransaction,
+  activityBreakdownInsightRequest = null,
   isSimpleMode = false,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
@@ -1722,6 +1885,10 @@ export function InsightsScreen({
   );
   const [excludedExpenseTrendExpenseCategoryIds, setExcludedExpenseTrendExpenseCategoryIds] =
     useState<string[]>([]);
+  const [excludedIncomeTrendAccountIds, setExcludedIncomeTrendAccountIds] = useState<string[]>([]);
+  const [excludedIncomeTrendIncomeCategoryIds, setExcludedIncomeTrendIncomeCategoryIds] = useState<
+    string[]
+  >([]);
   const [excludedSavingsIncomeCategoryIds, setExcludedSavingsIncomeCategoryIds] = useState<
     string[]
   >([]);
@@ -1735,6 +1902,9 @@ export function InsightsScreen({
     () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
   );
   const [expenseTrendScrubMonthByYear, setExpenseTrendScrubMonthByYear] = useState<
+    Record<string, string>
+  >({});
+  const [incomeTrendScrubMonthByYear, setIncomeTrendScrubMonthByYear] = useState<
     Record<string, string>
   >({});
   const [assetHistoryScrubMonthByYear, setAssetHistoryScrubMonthByYear] = useState<
@@ -1755,6 +1925,9 @@ export function InsightsScreen({
   const selectedIncomeRatePointIndexRef = useRef<number | null>(selectedIncomeRatePointIndex);
   const expenseTrendScrubMonthByYearRef = useRef<Record<string, string>>(
     expenseTrendScrubMonthByYear,
+  );
+  const incomeTrendScrubMonthByYearRef = useRef<Record<string, string>>(
+    incomeTrendScrubMonthByYear,
   );
   const assetHistoryScrubMonthByYearRef = useRef<Record<string, string>>(
     assetHistoryScrubMonthByYear,
@@ -1803,7 +1976,7 @@ export function InsightsScreen({
     () =>
       visibleInsightTypes.map((type) => ({
         value: type,
-        label: String(I18n.t(`insights.${type}`)),
+        label: String(I18n.t(`insights.short_labels.${type}`)),
         description: String(I18n.t(`insights.${type}_description`)),
         icon: renderInsightTypeIcon(type),
       })),
@@ -1836,6 +2009,8 @@ export function InsightsScreen({
   const isChartScrubLockedRef = useRef(false);
   const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);
   const periodPresetRef = useRef<PeriodPreset>(periodPreset);
+  const [handledActivityBreakdownRequestToken, setHandledActivityBreakdownRequestToken] =
+    useState(0);
   const committedPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
   const headerPreviewPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
@@ -1878,6 +2053,56 @@ export function InsightsScreen({
     periodPresetRef.current = periodPreset;
   }, [periodPreset]);
 
+  const pendingActivityBreakdownTarget = useMemo(() => {
+    if (!activityBreakdownInsightRequest) return null;
+    if (activityBreakdownInsightRequest.token <= handledActivityBreakdownRequestToken) {
+      return null;
+    }
+
+    const targetMonthDate =
+      parseMonthKey(activityBreakdownInsightRequest.monthKey) ?? startOfMonthDate(new Date());
+
+    return {
+      insightType: activityBreakdownInsightRequest.insightType,
+      periodState: buildMonthPeriodState(targetMonthDate),
+    };
+  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken]);
+
+  useEffect(() => {
+    if (!activityBreakdownInsightRequest) return;
+    if (activityBreakdownInsightRequest.token <= handledActivityBreakdownRequestToken) {
+      return;
+    }
+
+    setHandledActivityBreakdownRequestToken(activityBreakdownInsightRequest.token);
+    const targetMonthDate =
+      parseMonthKey(activityBreakdownInsightRequest.monthKey) ?? startOfMonthDate(new Date());
+    const nextPeriodState = buildMonthPeriodState(targetMonthDate);
+
+    setPeriodPreset('month');
+    setAnchorDate(nextPeriodState.anchorDate);
+    setCustomStart(nextPeriodState.customStart);
+    setCustomEnd(nextPeriodState.customEnd);
+    setActiveCustomDateField('start');
+    activeBreakdownSliceIdRef.current = null;
+    setActiveBreakdownSliceId(null);
+    setSelectedCalendarDayKey(null);
+    setSelectedIncomeRatePointIndex(null);
+    setIsFilterModalOpen(false);
+    setSelectedInsightType(activityBreakdownInsightRequest.insightType);
+    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+    pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({
+        index: INSIGHTS_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken]);
+
   useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
     const now = new Date();
@@ -1897,6 +2122,7 @@ export function InsightsScreen({
     }
     setActiveBreakdownSliceId(null);
     setExpenseTrendScrubMonthByYear({});
+    setIncomeTrendScrubMonthByYear({});
     setAssetHistoryScrubMonthByYear({});
     setSelectedCalendarDayKey(null);
     setSelectedIncomeRatePointIndex(null);
@@ -1926,6 +2152,12 @@ export function InsightsScreen({
       }
       if (saved.excludedExpenseTrendExpenseCategoryIds) {
         setExcludedExpenseTrendExpenseCategoryIds(saved.excludedExpenseTrendExpenseCategoryIds);
+      }
+      if (saved.excludedIncomeTrendAccountIds) {
+        setExcludedIncomeTrendAccountIds(saved.excludedIncomeTrendAccountIds);
+      }
+      if (saved.excludedIncomeTrendIncomeCategoryIds) {
+        setExcludedIncomeTrendIncomeCategoryIds(saved.excludedIncomeTrendIncomeCategoryIds);
       }
       if (saved.excludedSavingsIncomeCategoryIds) {
         setExcludedSavingsIncomeCategoryIds(saved.excludedSavingsIncomeCategoryIds);
@@ -1964,6 +2196,8 @@ export function InsightsScreen({
       selectedAccountIds,
       excludedExpenseTrendAccountIds,
       excludedExpenseTrendExpenseCategoryIds,
+      excludedIncomeTrendAccountIds,
+      excludedIncomeTrendIncomeCategoryIds,
       excludedSavingsIncomeCategoryIds,
       excludedSavingsExpenseCategoryIds,
       excludedTimeCostExpenseCategoryId,
@@ -1977,6 +2211,8 @@ export function InsightsScreen({
       customStart,
       excludedExpenseTrendAccountIds,
       excludedExpenseTrendExpenseCategoryIds,
+      excludedIncomeTrendAccountIds,
+      excludedIncomeTrendIncomeCategoryIds,
       excludedAssetHistoryAccountIds,
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
@@ -2053,6 +2289,14 @@ export function InsightsScreen({
   const excludedExpenseTrendExpenseCategorySet = useMemo(
     () => new Set(excludedExpenseTrendExpenseCategoryIds),
     [excludedExpenseTrendExpenseCategoryIds],
+  );
+  const excludedIncomeTrendAccountSet = useMemo(
+    () => new Set(excludedIncomeTrendAccountIds),
+    [excludedIncomeTrendAccountIds],
+  );
+  const excludedIncomeTrendIncomeCategorySet = useMemo(
+    () => new Set(excludedIncomeTrendIncomeCategoryIds),
+    [excludedIncomeTrendIncomeCategoryIds],
   );
   const excludedSavingsExpenseCategorySet = useMemo(
     () => new Set(excludedSavingsExpenseCategoryIds),
@@ -2189,6 +2433,7 @@ export function InsightsScreen({
   const hasPeriodFilter = activeInsightFilterConfig.fixedPeriodPreset === null;
   const hasAccountFilter = activeInsightFilterConfig.allowAccountFilter;
   const hasExpenseTrendExclusionFilter = selectedInsightType === 'expense_trend';
+  const hasIncomeTrendExclusionFilter = selectedInsightType === 'income_trend';
   const hasSavingsCategoryExclusionFilter = selectedInsightType === 'savings_rate';
   const hasTimeCostExpenseCategoryExclusionFilter = selectedInsightType === 'time_cost_leaderboard';
   const hasAssetHistoryAccountExclusionFilter = selectedInsightType === 'asset_history';
@@ -2196,6 +2441,7 @@ export function InsightsScreen({
     hasPeriodFilter ||
     hasAccountFilter ||
     hasExpenseTrendExclusionFilter ||
+    hasIncomeTrendExclusionFilter ||
     hasSavingsCategoryExclusionFilter ||
     hasTimeCostExpenseCategoryExclusionFilter ||
     hasAssetHistoryAccountExclusionFilter;
@@ -2263,9 +2509,13 @@ export function InsightsScreen({
   );
 
   const buildPageData = useCallback(
-    (state: PeriodState, insightType: InsightType): InsightPageData => {
+    (
+      state: PeriodState,
+      insightType: InsightType,
+      periodPresetOverride: PeriodPreset,
+    ): InsightPageData => {
       const range = getPeriodRange(
-        effectivePeriodPreset,
+        periodPresetOverride,
         state.anchorDate,
         state.customStart,
         state.customEnd,
@@ -2397,6 +2647,130 @@ export function InsightsScreen({
           filteredForRange,
           monthRows,
           averageMonthExpense: activeMonths > 0 ? totalExpense / activeMonths : 0,
+          activeMonths,
+          peakMonthKey,
+        };
+      }
+
+      if (insightType === 'income_trend') {
+        const year = state.anchorDate.getFullYear();
+        const monthLabels = monthLabelsForYear(year, activeLocale);
+        const monthRowsSeed: IncomeTrendMonthRow[] = Array.from(
+          { length: 12 },
+          (_, monthIndex) => ({
+            monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+            label: monthLabels[monthIndex] ?? '',
+            totalIncome: 0,
+            transactionCount: 0,
+            topCategoryLabel: null,
+            topCategoryEmoji: null,
+            topCategoryAmount: 0,
+            transactions: [],
+          }),
+        );
+        const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
+        const categoryTotalsByMonthKey = new Map<
+          string,
+          Map<string, { id: string; label: string; emoji: string; amount: number }>
+        >();
+        const filteredForRange: TransactionWithRelations[] = [];
+        let totalIncome = 0;
+
+        inRangeTransactions.forEach((tx) => {
+          if (tx.type !== 'income') return;
+          if (tx.accountId && excludedIncomeTrendAccountSet.has(tx.accountId)) return;
+          if (tx.categoryId) {
+            const category = categoryById.get(tx.categoryId);
+            const rootCategoryId = category?.parentId ?? tx.categoryId;
+            if (
+              excludedIncomeTrendIncomeCategorySet.has(tx.categoryId) ||
+              excludedIncomeTrendIncomeCategorySet.has(rootCategoryId)
+            ) {
+              return;
+            }
+          }
+          const value =
+            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+          if (!Number.isFinite(value) || value <= 0) return;
+
+          const monthKey = transactionMonthKeyById.get(tx.id) ?? monthKeyFromIsoLocal(tx.date);
+          const monthRow = monthRowByKey.get(monthKey);
+          if (!monthRow) return;
+
+          filteredForRange.push(tx);
+          monthRow.totalIncome += value;
+          monthRow.transactionCount += 1;
+          monthRow.transactions.push(tx);
+          totalIncome += value;
+
+          const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
+          const root = category?.parentId ? categoryById.get(category.parentId) : category;
+          const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
+          const fallbackRootKey = fallbackRootLabel
+            ? `legacy-root:${fallbackRootLabel.toLowerCase()}`
+            : null;
+          const categoryId = root?.id ?? fallbackRootKey ?? 'uncategorized';
+          const categoryLabel = String(
+            root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'),
+          );
+          const categoryEmoji = root?.icon ?? tx.categoryIcon ?? '•';
+          let monthCategoryTotals = categoryTotalsByMonthKey.get(monthKey);
+          if (!monthCategoryTotals) {
+            monthCategoryTotals = new Map();
+            categoryTotalsByMonthKey.set(monthKey, monthCategoryTotals);
+          }
+          const current = monthCategoryTotals.get(categoryId);
+          if (current) {
+            current.amount += value;
+          } else {
+            monthCategoryTotals.set(categoryId, {
+              id: categoryId,
+              label: categoryLabel,
+              emoji: categoryEmoji,
+              amount: value,
+            });
+          }
+        });
+
+        let peakMonthKey: string | null = null;
+        let peakMonthIncome = 0;
+        const monthRows = monthRowsSeed.map((row) => {
+          const topCategory =
+            Array.from(categoryTotalsByMonthKey.get(row.monthKey)?.values() ?? []).sort(
+              (a, b) => b.amount - a.amount,
+            )[0] ?? null;
+          const transactions =
+            row.transactions.length < 2
+              ? row.transactions
+              : row.transactions.sort((a, b) => {
+                  const dateDelta = b.date.localeCompare(a.date);
+                  if (dateDelta !== 0) return dateDelta;
+                  return b.createdAt.localeCompare(a.createdAt);
+                });
+          const nextRow = {
+            ...row,
+            topCategoryLabel: topCategory?.label ?? null,
+            topCategoryEmoji: topCategory?.emoji ?? null,
+            topCategoryAmount: topCategory?.amount ?? 0,
+            transactions,
+          };
+          if (nextRow.totalIncome > 0) {
+            if (peakMonthKey === null || nextRow.totalIncome > peakMonthIncome) {
+              peakMonthKey = nextRow.monthKey;
+              peakMonthIncome = nextRow.totalIncome;
+            }
+          }
+          return nextRow;
+        });
+        const activeMonths = monthRows.filter((row) => row.totalIncome > 0).length;
+
+        return {
+          kind: 'income_trend',
+          year,
+          range,
+          filteredForRange,
+          monthRows,
+          averageMonthIncome: activeMonths > 0 ? totalIncome / activeMonths : 0,
           activeMonths,
           peakMonthKey,
         };
@@ -2946,9 +3320,10 @@ export function InsightsScreen({
       assetHistorySortedDeltaMonthKeys,
       canUseTimeDisplayMode,
       categoryById,
-      effectivePeriodPreset,
       excludedExpenseTrendAccountSet,
       excludedExpenseTrendExpenseCategorySet,
+      excludedIncomeTrendAccountSet,
+      excludedIncomeTrendIncomeCategorySet,
       excludedSavingsExpenseCategorySet,
       excludedSavingsIncomeCategorySet,
       excludedTimeCostExpenseCategorySet,
@@ -2964,10 +3339,14 @@ export function InsightsScreen({
     ],
   );
   const getCachedPageData = useCallback(
-    (state: PeriodState, insightType: InsightType): InsightPageData => {
+    (
+      state: PeriodState,
+      insightType: InsightType,
+      periodPresetOverride: PeriodPreset,
+    ): InsightPageData => {
       const cacheKey = [
         insightType,
-        effectivePeriodPreset,
+        periodPresetOverride,
         state.anchorDate.toISOString(),
         state.customStart,
         state.customEnd,
@@ -2975,14 +3354,14 @@ export function InsightsScreen({
       const cachedPageData = pageDataCacheRef.current.get(cacheKey);
       if (cachedPageData) return cachedPageData;
 
-      const nextPageData = buildPageData(state, insightType);
+      const nextPageData = buildPageData(state, insightType, periodPresetOverride);
       if (pageDataCacheRef.current.size >= 72) {
         pageDataCacheRef.current.clear();
       }
       pageDataCacheRef.current.set(cacheKey, nextPageData);
       return nextPageData;
     },
-    [buildPageData, effectivePeriodPreset],
+    [buildPageData],
   );
   useEffect(() => {
     pageDataCacheRef.current.clear();
@@ -2991,30 +3370,43 @@ export function InsightsScreen({
     () => ({ anchorDate, customStart, customEnd }),
     [anchorDate, customEnd, customStart],
   );
+  const displaySelectedInsightType =
+    pendingActivityBreakdownTarget?.insightType ?? selectedInsightType;
+  const displayPeriodPreset = pendingActivityBreakdownTarget ? 'month' : effectivePeriodPreset;
+  const displayCurrentPeriodState =
+    pendingActivityBreakdownTarget?.periodState ?? currentPeriodState;
+  const displayCommittedPageIndex = pendingActivityBreakdownTarget
+    ? INSIGHTS_PAGER_CENTER_INDEX
+    : committedPageIndexRef.current;
+  const displayHeaderPreviewPageIndex = pendingActivityBreakdownTarget
+    ? INSIGHTS_PAGER_CENTER_INDEX
+    : headerPreviewPageIndex;
   const currentPage = useMemo(
-    () => getCachedPageData(currentPeriodState, selectedInsightType),
-    [currentPeriodState, getCachedPageData, selectedInsightType],
+    () =>
+      getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
+    [displayCurrentPeriodState, displayPeriodPreset, displaySelectedInsightType, getCachedPageData],
   );
-  const headerPreviewOffset = headerPreviewPageIndex - committedPageIndexRef.current;
+  const headerPreviewOffset = displayHeaderPreviewPageIndex - displayCommittedPageIndex;
   const headerPreviewPeriodState = useMemo(
-    () => shiftPeriodStateBySteps(currentPeriodState, headerPreviewOffset, effectivePeriodPreset),
-    [currentPeriodState, effectivePeriodPreset, headerPreviewOffset, shiftPeriodStateBySteps],
+    () =>
+      shiftPeriodStateBySteps(displayCurrentPeriodState, headerPreviewOffset, displayPeriodPreset),
+    [displayCurrentPeriodState, displayPeriodPreset, headerPreviewOffset, shiftPeriodStateBySteps],
   );
   const headerPreviewRange = useMemo(
     () =>
       getPeriodRange(
-        effectivePeriodPreset,
+        displayPeriodPreset,
         headerPreviewPeriodState.anchorDate,
         headerPreviewPeriodState.customStart,
         headerPreviewPeriodState.customEnd,
       ),
-    [effectivePeriodPreset, headerPreviewPeriodState],
+    [displayPeriodPreset, headerPreviewPeriodState],
   );
   const currentCalendarDefaultDayKey =
     currentPage.kind === 'calendar' ? currentPage.defaultSelectedDayKey : '';
   const activePeriodLabel = useMemo(
-    () => periodLabel(effectivePeriodPreset, headerPreviewRange, activeLocale),
-    [activeLocale, effectivePeriodPreset, headerPreviewRange],
+    () => periodLabel(displayPeriodPreset, headerPreviewRange, activeLocale),
+    [activeLocale, displayPeriodPreset, headerPreviewRange],
   );
 
   const renderValue = useCallback(
@@ -3029,6 +3421,98 @@ export function InsightsScreen({
       settings.displayMode === 'time'
         ? formatHours(value)
         : formatCompactCurrency(value, settings.currencySymbol),
+    [settings.currencySymbol, settings.displayMode],
+  );
+  const renderValueNode = useCallback(
+    (
+      value: number,
+      options: {
+        variant?: React.ComponentProps<typeof Text>['variant'];
+        tone?: React.ComponentProps<typeof Text>['tone'];
+        textClassName?: string;
+        containerClassName?: string;
+        iconColor?: string;
+        iconSize?: number;
+        style?: React.ComponentProps<typeof Text>['style'];
+      } = {},
+    ) => {
+      const {
+        variant = 'caption',
+        tone = 'default',
+        textClassName,
+        containerClassName,
+        iconColor,
+        iconSize,
+        style,
+      } = options;
+
+      if (settings.displayMode === 'time') {
+        return (
+          <TimeValueInline
+            value={formatHours(value)}
+            variant={variant}
+            tone={tone}
+            textClassName={textClassName}
+            containerClassName={containerClassName}
+            iconColor={iconColor}
+            iconSize={iconSize}
+            style={style}
+          />
+        );
+      }
+
+      return (
+        <Text variant={variant} tone={tone} className={textClassName} style={style}>
+          {formatAmount(value, settings, { showSign: false })}
+        </Text>
+      );
+    },
+    [settings],
+  );
+  const renderCompactValueNode = useCallback(
+    (
+      value: number,
+      options: {
+        variant?: React.ComponentProps<typeof Text>['variant'];
+        tone?: React.ComponentProps<typeof Text>['tone'];
+        textClassName?: string;
+        containerClassName?: string;
+        iconColor?: string;
+        iconSize?: number;
+        style?: React.ComponentProps<typeof Text>['style'];
+      } = {},
+    ) => {
+      const {
+        variant = 'label',
+        tone = 'default',
+        textClassName,
+        containerClassName,
+        iconColor,
+        iconSize,
+        style,
+      } = options;
+
+      if (settings.displayMode === 'time') {
+        return (
+          <TimeValueInline
+            value={formatHours(value)}
+            variant={variant}
+            tone={tone}
+            textClassName={textClassName}
+            containerClassName={containerClassName}
+            iconColor={iconColor}
+            iconSize={iconSize}
+            style={style}
+          />
+        );
+      }
+
+      return (
+        <Text variant={variant} tone={tone} className={textClassName} style={style}>
+          {formatCompactCurrency(value, settings.currencySymbol)}
+        </Text>
+      );
+    },
     [settings.currencySymbol, settings.displayMode],
   );
   const renderMoneyAmount = useCallback(
@@ -3123,7 +3607,11 @@ export function InsightsScreen({
 
   const onMonthStep = useCallback(
     (direction: 1 | -1) => {
-      if (selectedInsightType === 'asset_history' || selectedInsightType === 'expense_trend') {
+      if (
+        selectedInsightType === 'asset_history' ||
+        selectedInsightType === 'expense_trend' ||
+        selectedInsightType === 'income_trend'
+      ) {
         const nextState = shiftPeriodStateBySteps(
           currentPeriodState,
           direction,
@@ -3223,13 +3711,17 @@ export function InsightsScreen({
   const insightsPagerKeyExtractor = useCallback((item: number) => String(item), []);
 
   const renderInsightsWindowPage = ({ item }: { item: number }) => {
-    const pageOffset = item - committedPageIndexRef.current;
+    const pageOffset = item - displayCommittedPageIndex;
     const pagePeriodState = shiftPeriodStateBySteps(
-      currentPeriodState,
+      displayCurrentPeriodState,
       pageOffset,
-      effectivePeriodPreset,
+      displayPeriodPreset,
     );
-    const pageData = getCachedPageData(pagePeriodState, selectedInsightType);
+    const pageData = getCachedPageData(
+      pagePeriodState,
+      displaySelectedInsightType,
+      displayPeriodPreset,
+    );
 
     return (
       <View style={insightsPageStyle} className="flex-1 bg-background">
@@ -3272,6 +3764,9 @@ export function InsightsScreen({
   useEffect(() => {
     expenseTrendScrubMonthByYearRef.current = expenseTrendScrubMonthByYear;
   }, [expenseTrendScrubMonthByYear]);
+  useEffect(() => {
+    incomeTrendScrubMonthByYearRef.current = incomeTrendScrubMonthByYear;
+  }, [incomeTrendScrubMonthByYear]);
   useEffect(() => {
     assetHistoryScrubMonthByYearRef.current = assetHistoryScrubMonthByYear;
   }, [assetHistoryScrubMonthByYear]);
@@ -3480,9 +3975,11 @@ export function InsightsScreen({
                 <Text variant="label" tone="muted">
                   {totalLabel}
                 </Text>
-                <Text variant="caption" className="text-foreground">
-                  {renderValue(pageTotalAmount)}
-                </Text>
+                {renderValueNode(pageTotalAmount, {
+                  variant: 'caption',
+                  textClassName: 'text-foreground',
+                  iconColor: themeColors.text,
+                })}
               </View>
               {pagePieData.map((item) => {
                 const isSelected = activeBreakdownSliceId === item.id;
@@ -3551,9 +4048,11 @@ export function InsightsScreen({
                         {item.emoji} {item.name}
                       </Text>
                       <View className="flex-row items-center gap-1.5">
-                        <Text variant="label" className="text-foreground">
-                          {renderValue(item.amount)}
-                        </Text>
+                        {renderValueNode(item.amount, {
+                          variant: 'label',
+                          textClassName: 'text-foreground',
+                          iconColor: themeColors.text,
+                        })}
                         <View
                           className="rounded-full px-1.5 py-0.5"
                           style={[
@@ -3774,9 +4273,11 @@ export function InsightsScreen({
                   <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.expense')}
                   </Text>
-                  <Text variant="caption" className="text-destructive mt-0.5">
-                    {renderValue(selectedDayData.expense)}
-                  </Text>
+                  {renderValueNode(selectedDayData.expense, {
+                    variant: 'caption',
+                    textClassName: 'mt-0.5 text-destructive',
+                    iconColor: themeColors.error,
+                  })}
                 </View>
               </View>
             </View>
@@ -3838,7 +4339,14 @@ export function InsightsScreen({
               subtitle: I18n.t('insights.time_cost.transaction_count', {
                 count: categoryRow.count,
               }),
-              primaryValue: formatHours(categoryRow.hours),
+              primaryValue: (
+                <TimeValueInline
+                  value={formatHours(categoryRow.hours)}
+                  variant="caption"
+                  iconColor={accentColor}
+                  textClassName="text-foreground"
+                />
+              ),
               secondaryValue: renderMoneyAmount(categoryRow.amount),
               sharePct: categoryRow.sharePct,
               emoji: categoryRow.emoji,
@@ -3874,7 +4382,14 @@ export function InsightsScreen({
               rank: index + 1,
               title: transactionRow.label,
               subtitle: transactionRow.subtitle,
-              primaryValue: formatHours(transactionRow.hours),
+              primaryValue: (
+                <TimeValueInline
+                  value={formatHours(transactionRow.hours)}
+                  variant="caption"
+                  iconColor={accentColor}
+                  textClassName="text-foreground"
+                />
+              ),
               secondaryValue: renderMoneyAmount(transactionRow.amount),
               sharePct: transactionRow.sharePct,
               accentColor,
@@ -3899,9 +4414,13 @@ export function InsightsScreen({
                 <Text variant="label" tone="muted">
                   {I18n.t('insights.time_cost.total_hours')}
                 </Text>
-                <Text variant="caption" className="text-primary mt-1">
-                  {formatHours(pageData.totalHours)}
-                </Text>
+                <TimeValueInline
+                  value={formatHours(pageData.totalHours)}
+                  variant="caption"
+                  containerClassName="mt-1"
+                  textClassName="text-primary"
+                  iconColor={themeColors.primary}
+                />
               </View>
               <View className="flex-1 rounded-xl border border-border/30 bg-card/80 px-2.5 py-2">
                 <Text variant="label" tone="muted">
@@ -4063,9 +4582,12 @@ export function InsightsScreen({
               <View className="mt-2 flex-row items-end justify-between gap-3">
                 <View className="flex-1 flex-row items-center">
                   {settings.displayMode === 'time' ? (
-                    <Text variant="heading" style={toneStyle}>
-                      {formatHours(selectedMonthAbsoluteValue)}
-                    </Text>
+                    <TimeValueInline
+                      value={formatHours(selectedMonthAbsoluteValue)}
+                      variant="heading"
+                      iconColor={trendAccentColor}
+                      style={toneStyle}
+                    />
                   ) : (
                     <>
                       <Text variant="heading" style={toneStyle}>
@@ -4104,9 +4626,17 @@ export function InsightsScreen({
                 <Text variant="caption">
                   {I18n.t('insights.analytics.expense_trend.peak_title')}
                 </Text>
-                <Text variant="subheading" className="mt-1 text-foreground">
-                  {peakMonthRow ? renderValue(peakMonthRow.totalExpense) : '—'}
-                </Text>
+                {peakMonthRow ? (
+                  renderValueNode(peakMonthRow.totalExpense, {
+                    variant: 'subheading',
+                    textClassName: 'mt-1 text-foreground',
+                    iconColor: themeColors.text,
+                  })
+                ) : (
+                  <Text variant="subheading" className="mt-1 text-foreground">
+                    —
+                  </Text>
+                )}
                 <Text variant="label" tone="muted" className="mt-1">
                   {peakMonthRow?.label ?? '—'}
                 </Text>
@@ -4115,9 +4645,11 @@ export function InsightsScreen({
                 <Text variant="caption">
                   {I18n.t('insights.analytics.expense_trend.average_title')}
                 </Text>
-                <Text variant="subheading" className="mt-1 text-foreground">
-                  {renderValue(pageData.averageMonthExpense)}
-                </Text>
+                {renderValueNode(pageData.averageMonthExpense, {
+                  variant: 'subheading',
+                  textClassName: 'mt-1 text-foreground',
+                  iconColor: themeColors.text,
+                })}
                 <Text variant="label" tone="muted" className="mt-1">
                   {I18n.t('insights.analytics.expense_trend.active_months', {
                     count: pageData.activeMonths,
@@ -4142,9 +4674,247 @@ export function InsightsScreen({
                     <Text variant="subheading" numberOfLines={1}>
                       {selectedMonthRow.topCategoryLabel}
                     </Text>
-                    <Text variant="label" style={toneStyle} className="mt-0.5">
-                      {renderValue(selectedMonthRow.topCategoryAmount)}
+                    {renderValueNode(selectedMonthRow.topCategoryAmount, {
+                      variant: 'label',
+                      textClassName: 'mt-0.5',
+                      iconColor: trendAccentColor,
+                      style: toneStyle,
+                    })}
+                  </View>
+                </View>
+              ) : (
+                <Text variant="label" tone="muted" className="mt-1.5">
+                  —
+                </Text>
+              )}
+            </View>
+          </CardContent>
+        </Card>
+      </View>
+    );
+  };
+
+  const renderIncomeTrendPane = (pageData: IncomeTrendPageData) => {
+    if (pageData.filteredForRange.length === 0) {
+      return (
+        <EmptyState
+          title={I18n.t('insights.analytics.income_trend.no_data_title')}
+          message={I18n.t('insights.analytics.income_trend.no_data_message')}
+          mascotMood="curious"
+          animateIn={false}
+        />
+      );
+    }
+
+    const trendAccentColor = INSIGHT_TYPE_VISUALS.income_trend.tint;
+    const selectedYearKey = String(pageData.year);
+    const selectedMonthKey = incomeTrendScrubMonthByYear[selectedYearKey] ?? null;
+    const fallbackSelectedMonthRow =
+      [...pageData.monthRows].reverse().find((row) => row.totalIncome > 0) ??
+      pageData.monthRows[pageData.monthRows.length - 1] ??
+      null;
+    const selectedMonthRow =
+      pageData.monthRows.find((row) => row.monthKey === selectedMonthKey) ??
+      fallbackSelectedMonthRow;
+    if (!selectedMonthRow) return null;
+
+    const peakMonthRow =
+      pageData.monthRows.find((row) => row.monthKey === pageData.peakMonthKey) ?? null;
+    const monthValues = pageData.monthRows.map((row) => row.totalIncome);
+    const incomeGraphWidth = Math.max(140, lineChartWidth - EXPENSE_TREND_CHART_PADDING_RIGHT);
+    const incomeAxisTicks = buildGraphAxisTicks(monthValues, EXPENSE_TREND_CHART_HEIGHT);
+    const selectedMonthValue = selectedMonthRow.totalIncome;
+    const selectedMonthAbsoluteValue = Math.abs(selectedMonthValue);
+    const selectedMonthDisplayValue = selectedMonthAbsoluteValue.toFixed(2);
+    const toneStyle = { color: trendAccentColor };
+    const hasDrilldown = selectedMonthRow.transactions.length > 0;
+    const heroSurfaceStyle = {
+      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.18 : 0.1),
+      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.2),
+    };
+    const metricSurfaceStyle = {
+      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.1 : 0.045),
+      borderColor: withColorAlpha(themeColors.border, isDark ? 0.65 : 0.5),
+    };
+    const iconSurfaceStyle = {
+      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.22 : 0.12),
+      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.18),
+    };
+    const selectIncomeTrendMonth = (monthKey: string) => {
+      if (incomeTrendScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
+      triggerScrubHaptic();
+      incomeTrendScrubMonthByYearRef.current = {
+        ...incomeTrendScrubMonthByYearRef.current,
+        [selectedYearKey]: monthKey,
+      };
+      setIncomeTrendScrubMonthByYear((previous) => {
+        if (previous[selectedYearKey] === monthKey) return previous;
+        return { ...previous, [selectedYearKey]: monthKey };
+      });
+    };
+
+    return (
+      <View className="mt-2 gap-2.5">
+        <View style={lineChartSectionStyle} className="py-1">
+          <View
+            style={[
+              styles.chartSizeCenter,
+              buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
+            ]}
+            onTouchStart={lockChartScrub}
+            onTouchEnd={unlockChartScrub}
+            onTouchCancel={unlockChartScrub}
+          >
+            <GraphYAxisGrid
+              ticks={incomeAxisTicks}
+              chartWidth={incomeGraphWidth}
+              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
+              labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
+              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+              formatTick={formatAxisAssetValue}
+            />
+            <IncomeTrendLineChart
+              monthRows={pageData.monthRows}
+              chartWidth={incomeGraphWidth}
+              primaryColor={trendAccentColor}
+              averageValue={pageData.averageMonthIncome}
+              referenceColor={themeColors.success}
+              onSelectMonthKey={selectIncomeTrendMonth}
+              onGestureStart={lockChartScrub}
+              onGestureEnd={unlockChartScrub}
+            />
+          </View>
+        </View>
+
+        <Card className="p-3">
+          <CardContent className="gap-2.5 py-3">
+            <Pressable
+              disabled={!hasDrilldown}
+              onPress={() =>
+                openDrilldown({
+                  label: selectedMonthRow.label,
+                  transactions: selectedMonthRow.transactions,
+                  triggerSelectionHaptic: true,
+                })
+              }
+              className="rounded-[26px] border px-4 py-3.5 active:opacity-90"
+              style={heroSurfaceStyle}
+            >
+              <View className="flex-row items-center justify-between gap-2">
+                <Text variant="caption" className="flex-1">
+                  {I18n.t('insights.analytics.income_trend.selected_month_title')}
+                </Text>
+                <View className="flex-row items-center gap-2">
+                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
+                    <Text variant="label" tone="muted">
+                      {selectedMonthRow.label}
                     </Text>
+                  </View>
+                  {hasDrilldown ? <ChevronRight size={16} color={trendAccentColor} /> : null}
+                </View>
+              </View>
+
+              <View className="mt-2 flex-row items-end justify-between gap-3">
+                <View className="flex-1 flex-row items-center">
+                  {settings.displayMode === 'time' ? (
+                    <TimeValueInline
+                      value={formatHours(selectedMonthAbsoluteValue)}
+                      variant="heading"
+                      iconColor={trendAccentColor}
+                      style={toneStyle}
+                    />
+                  ) : (
+                    <>
+                      <Text variant="heading" style={toneStyle}>
+                        {settings.currencySymbol}
+                      </Text>
+                      <ScrubRollingNumber
+                        value={selectedMonthAbsoluteValue}
+                        formattedText={selectedMonthDisplayValue}
+                        color={trendAccentColor}
+                        resetKey={`income-trend-${selectedYearKey}`}
+                        containerClassName="ml-1"
+                      />
+                    </>
+                  )}
+                </View>
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.analytics.income_trend.transactions', {
+                    count: selectedMonthRow.transactionCount,
+                  })}
+                </Text>
+              </View>
+
+              <View className="mt-2 flex-row flex-wrap items-center gap-2">
+                {selectedMonthRow.topCategoryLabel ? (
+                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
+                    <Text variant="label" tone="muted">
+                      {`${selectedMonthRow.topCategoryEmoji ?? '•'} ${selectedMonthRow.topCategoryLabel}`}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+
+            <View className="flex-row gap-2">
+              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
+                <Text variant="caption">
+                  {I18n.t('insights.analytics.income_trend.peak_title')}
+                </Text>
+                {peakMonthRow ? (
+                  renderValueNode(peakMonthRow.totalIncome, {
+                    variant: 'subheading',
+                    textClassName: 'mt-1 text-foreground',
+                    iconColor: themeColors.text,
+                  })
+                ) : (
+                  <Text variant="subheading" className="mt-1 text-foreground">
+                    —
+                  </Text>
+                )}
+                <Text variant="label" tone="muted" className="mt-1">
+                  {peakMonthRow?.label ?? '—'}
+                </Text>
+              </View>
+              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
+                <Text variant="caption">
+                  {I18n.t('insights.analytics.income_trend.average_title')}
+                </Text>
+                {renderValueNode(pageData.averageMonthIncome, {
+                  variant: 'subheading',
+                  textClassName: 'mt-1 text-foreground',
+                  iconColor: themeColors.text,
+                })}
+                <Text variant="label" tone="muted" className="mt-1">
+                  {I18n.t('insights.analytics.income_trend.active_months', {
+                    count: pageData.activeMonths,
+                  })}
+                </Text>
+              </View>
+            </View>
+
+            <View className="rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
+              <Text variant="caption">
+                {I18n.t('insights.analytics.income_trend.top_category_title')}
+              </Text>
+              {selectedMonthRow.topCategoryLabel ? (
+                <View className="mt-1.5 flex-row items-center gap-3">
+                  <View
+                    className="h-10 w-10 items-center justify-center rounded-2xl border"
+                    style={iconSurfaceStyle}
+                  >
+                    <Text variant="subheading">{selectedMonthRow.topCategoryEmoji ?? '•'}</Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text variant="subheading" numberOfLines={1}>
+                      {selectedMonthRow.topCategoryLabel}
+                    </Text>
+                    {renderValueNode(selectedMonthRow.topCategoryAmount, {
+                      variant: 'label',
+                      textClassName: 'mt-0.5',
+                      iconColor: trendAccentColor,
+                      style: toneStyle,
+                    })}
                   </View>
                 </View>
               ) : (
@@ -4261,9 +5031,12 @@ export function InsightsScreen({
 
               <View className="mt-1 flex-row items-center">
                 {settings.displayMode === 'time' ? (
-                  <Text variant="heading" style={selectedAssetToneStyle}>
-                    {selectedAssetHoursLabel}
-                  </Text>
+                  <TimeValueInline
+                    value={selectedAssetHoursLabel}
+                    variant="heading"
+                    iconColor={selectedAssetToneColor}
+                    style={selectedAssetToneStyle}
+                  />
                 ) : (
                   <>
                     <Text variant="heading" style={selectedAssetToneStyle}>
@@ -4462,9 +5235,16 @@ export function InsightsScreen({
                   {formattedSavingsRate}
                 </Text>
                 <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
-                  <Text variant="label" className={cn(yearlySavedAmountClass)}>
-                    {renderCompactValue(yearlySavedAmount)}
-                  </Text>
+                  {renderCompactValueNode(yearlySavedAmount, {
+                    variant: 'label',
+                    textClassName: cn(yearlySavedAmountClass),
+                    iconColor:
+                      pageData.totalNet > 0
+                        ? themeColors.success
+                        : pageData.totalNet < 0
+                          ? themeColors.error
+                          : themeColors.textMuted,
+                  })}
                 </View>
               </View>
               <View className="mt-2 h-3 rounded-full bg-secondary overflow-hidden">
@@ -4501,33 +5281,36 @@ export function InsightsScreen({
                   <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.income')}
                   </Text>
-                  <Text variant="caption" className="text-success mt-0.5">
-                    {renderValue(pageData.totalIncome)}
-                  </Text>
+                  {renderValueNode(pageData.totalIncome, {
+                    variant: 'caption',
+                    textClassName: 'mt-0.5 text-success',
+                    iconColor: themeColors.success,
+                  })}
                 </View>
                 <View className="h-10 w-px bg-border/35" />
                 <View className="flex-1 px-2">
                   <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.expense')}
                   </Text>
-                  <Text variant="caption" className="text-destructive mt-0.5">
-                    {renderValue(pageData.totalExpense)}
-                  </Text>
+                  {renderValueNode(pageData.totalExpense, {
+                    variant: 'caption',
+                    textClassName: 'mt-0.5 text-destructive',
+                    iconColor: themeColors.error,
+                  })}
                 </View>
                 <View className="h-10 w-px bg-border/35" />
                 <View className="flex-1 pl-2 items-end">
                   <Text variant="label" tone="muted">
                     {I18n.t('insights.calendar.net')}
                   </Text>
-                  <Text
-                    variant="caption"
-                    className={cn(
+                  {renderValueNode(Math.abs(pageData.totalNet), {
+                    variant: 'caption',
+                    textClassName: cn(
                       'mt-0.5',
                       pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
-                    )}
-                  >
-                    {renderValue(Math.abs(pageData.totalNet))}
-                  </Text>
+                    ),
+                    iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
+                  })}
                 </View>
               </View>
             </View>
@@ -4625,9 +5408,16 @@ export function InsightsScreen({
                             monthlySavedBadgeClass,
                           )}
                         >
-                          <Text variant="label" className={cn(monthlySavedAmountClass)}>
-                            {renderCompactValue(monthlySavedAmount)}
-                          </Text>
+                          {renderCompactValueNode(monthlySavedAmount, {
+                            variant: 'label',
+                            textClassName: cn(monthlySavedAmountClass),
+                            iconColor:
+                              row.net > 0
+                                ? themeColors.success
+                                : row.net < 0
+                                  ? themeColors.error
+                                  : themeColors.textMuted,
+                          })}
                         </View>
                         <Text variant="caption" className={cn(monthlyToneClass)}>
                           {monthlyRateLabel}
@@ -4644,12 +5434,16 @@ export function InsightsScreen({
                       />
                     </View>
                     <View className="mt-2 flex-row items-center justify-between gap-2">
-                      <Text variant="label" className="text-success/90">
-                        {renderValue(row.income)}
-                      </Text>
-                      <Text variant="label" className="text-destructive/90">
-                        {renderValue(row.expense)}
-                      </Text>
+                      {renderValueNode(row.income, {
+                        variant: 'label',
+                        textClassName: 'text-success/90',
+                        iconColor: themeColors.success,
+                      })}
+                      {renderValueNode(row.expense, {
+                        variant: 'label',
+                        textClassName: 'text-destructive/90',
+                        iconColor: themeColors.error,
+                      })}
                     </View>
                   </Pressable>
                 );
@@ -4676,6 +5470,9 @@ export function InsightsScreen({
     }
     if (pageData.kind === 'expense_trend') {
       return renderExpenseTrendPane(pageData);
+    }
+    if (pageData.kind === 'income_trend') {
+      return renderIncomeTrendPane(pageData);
     }
     if (pageData.kind === 'asset_history') {
       return renderAssetHistoryPane(pageData);
@@ -4722,6 +5519,24 @@ export function InsightsScreen({
     });
   }, [categories, excludedExpenseTrendExpenseCategoryIds.length]);
   useEffect(() => {
+    if (excludedIncomeTrendAccountIds.length === 0) return;
+    const validAccountIds = new Set(accounts.map((account) => account.id));
+    setExcludedIncomeTrendAccountIds((previous) => {
+      const next = previous.filter((accountId) => validAccountIds.has(accountId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [accounts, excludedIncomeTrendAccountIds.length]);
+  useEffect(() => {
+    if (excludedIncomeTrendIncomeCategoryIds.length === 0) return;
+    const validIncomeCategoryIds = new Set(
+      categories.filter((category) => category.type === 'income').map((category) => category.id),
+    );
+    setExcludedIncomeTrendIncomeCategoryIds((previous) => {
+      const next = previous.filter((categoryId) => validIncomeCategoryIds.has(categoryId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [categories, excludedIncomeTrendIncomeCategoryIds.length]);
+  useEffect(() => {
     if (excludedAssetHistoryAccountIds.length === 0) return;
     const validAccountIds = new Set(assetHistoryAccountOptions.map((account) => account.id));
     setExcludedAssetHistoryAccountIds((previous) => {
@@ -4746,6 +5561,9 @@ export function InsightsScreen({
       count +=
         excludedExpenseTrendAccountIds.length + excludedExpenseTrendExpenseCategoryIds.length;
     }
+    if (hasIncomeTrendExclusionFilter) {
+      count += excludedIncomeTrendAccountIds.length + excludedIncomeTrendIncomeCategoryIds.length;
+    }
     if (hasAssetHistoryAccountExclusionFilter) count += excludedAssetHistoryAccountIds.length;
     if (hasSavingsCategoryExclusionFilter)
       count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
@@ -4754,18 +5572,83 @@ export function InsightsScreen({
   }, [
     excludedExpenseTrendAccountIds.length,
     excludedExpenseTrendExpenseCategoryIds.length,
+    excludedIncomeTrendAccountIds.length,
+    excludedIncomeTrendIncomeCategoryIds.length,
     excludedAssetHistoryAccountIds.length,
     excludedTimeCostExpenseCategoryId,
     excludedSavingsExpenseCategoryIds.length,
     excludedSavingsIncomeCategoryIds.length,
     hasAccountFilter,
     hasExpenseTrendExclusionFilter,
+    hasIncomeTrendExclusionFilter,
     hasAssetHistoryAccountExclusionFilter,
     hasSavingsCategoryExclusionFilter,
     hasTimeCostExpenseCategoryExclusionFilter,
     hasInsightsFilters,
     hasPeriodFilter,
     periodPreset,
+    selectedAccountIds.length,
+  ]);
+  const displayActiveInsightFilterConfig = useMemo(
+    () => getInsightFilterConfig(displaySelectedInsightType),
+    [displaySelectedInsightType],
+  );
+  const displayHasPeriodFilter = displayActiveInsightFilterConfig.fixedPeriodPreset === null;
+  const displayHasAccountFilter = displayActiveInsightFilterConfig.allowAccountFilter;
+  const displayHasExpenseTrendExclusionFilter = displaySelectedInsightType === 'expense_trend';
+  const displayHasIncomeTrendExclusionFilter = displaySelectedInsightType === 'income_trend';
+  const displayHasSavingsCategoryExclusionFilter = displaySelectedInsightType === 'savings_rate';
+  const displayHasTimeCostExpenseCategoryExclusionFilter =
+    displaySelectedInsightType === 'time_cost_leaderboard';
+  const displayHasAssetHistoryAccountExclusionFilter =
+    displaySelectedInsightType === 'asset_history';
+  const displayHasInsightsFilters =
+    displayHasPeriodFilter ||
+    displayHasAccountFilter ||
+    displayHasExpenseTrendExclusionFilter ||
+    displayHasIncomeTrendExclusionFilter ||
+    displayHasSavingsCategoryExclusionFilter ||
+    displayHasTimeCostExpenseCategoryExclusionFilter ||
+    displayHasAssetHistoryAccountExclusionFilter;
+  const displayInsightsFilterCount = useMemo(() => {
+    if (!displayHasInsightsFilters) return 0;
+    let count = 0;
+    if (displayHasPeriodFilter && displayPeriodPreset !== 'month') count += 1;
+    if (displayHasAccountFilter && selectedAccountIds.length > 0) count += 1;
+    if (displayHasExpenseTrendExclusionFilter) {
+      count +=
+        excludedExpenseTrendAccountIds.length + excludedExpenseTrendExpenseCategoryIds.length;
+    }
+    if (displayHasIncomeTrendExclusionFilter) {
+      count += excludedIncomeTrendAccountIds.length + excludedIncomeTrendIncomeCategoryIds.length;
+    }
+    if (displayHasAssetHistoryAccountExclusionFilter)
+      count += excludedAssetHistoryAccountIds.length;
+    if (displayHasSavingsCategoryExclusionFilter) {
+      count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
+    }
+    if (displayHasTimeCostExpenseCategoryExclusionFilter && excludedTimeCostExpenseCategoryId) {
+      count += 1;
+    }
+    return count;
+  }, [
+    displayHasAccountFilter,
+    displayHasAssetHistoryAccountExclusionFilter,
+    displayHasExpenseTrendExclusionFilter,
+    displayHasIncomeTrendExclusionFilter,
+    displayHasInsightsFilters,
+    displayHasPeriodFilter,
+    displayHasSavingsCategoryExclusionFilter,
+    displayHasTimeCostExpenseCategoryExclusionFilter,
+    displayPeriodPreset,
+    excludedAssetHistoryAccountIds.length,
+    excludedExpenseTrendAccountIds.length,
+    excludedExpenseTrendExpenseCategoryIds.length,
+    excludedIncomeTrendAccountIds.length,
+    excludedIncomeTrendIncomeCategoryIds.length,
+    excludedSavingsExpenseCategoryIds.length,
+    excludedSavingsIncomeCategoryIds.length,
+    excludedTimeCostExpenseCategoryId,
     selectedAccountIds.length,
   ]);
 
@@ -4779,10 +5662,13 @@ export function InsightsScreen({
     setSelectedAccountIds([]);
     setExcludedExpenseTrendAccountIds([]);
     setExcludedExpenseTrendExpenseCategoryIds([]);
+    setExcludedIncomeTrendAccountIds([]);
+    setExcludedIncomeTrendIncomeCategoryIds([]);
     setExcludedSavingsIncomeCategoryIds([]);
     setExcludedSavingsExpenseCategoryIds([]);
     setExcludedTimeCostExpenseCategoryId(null);
     setExpenseTrendScrubMonthByYear({});
+    setIncomeTrendScrubMonthByYear({});
     setExcludedAssetHistoryAccountIds([]);
     setAssetHistoryScrubMonthByYear({});
   }, []);
@@ -4909,7 +5795,7 @@ export function InsightsScreen({
             <SelectField
               triggerSize="header"
               triggerVariant="header-plain"
-              value={selectedInsightType}
+              value={displaySelectedInsightType}
               options={insightTypeOptions}
               optionGroups={insightTypeOptionGroups}
               optionsLayout="icon-grid"
@@ -4922,11 +5808,14 @@ export function InsightsScreen({
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
-        hideNavigation={selectedInsightType === 'income_rate_history'}
+        hideNavigation={displaySelectedInsightType === 'income_rate_history'}
         actions={
           <View className="flex-row items-center gap-2">
-            {hasInsightsFilters && (
-              <FilterIconButton onPress={handleOpenFiltersModal} count={insightsFilterCount} />
+            {displayHasInsightsFilters && (
+              <FilterIconButton
+                onPress={handleOpenFiltersModal}
+                count={displayInsightsFilterCount}
+              />
             )}
             <DisplayModeToggle />
           </View>
@@ -4950,7 +5839,9 @@ export function InsightsScreen({
             horizontal
             pagingEnabled
             disableIntervalMomentum
-            scrollEnabled={!isChartScrubbing && selectedInsightType !== 'income_rate_history'}
+            scrollEnabled={
+              !isChartScrubbing && displaySelectedInsightType !== 'income_rate_history'
+            }
             bounces={false}
             directionalLockEnabled
             decelerationRate="fast"
@@ -5136,13 +6027,11 @@ export function InsightsScreen({
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
                   <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.accounts')}
+                    {I18n.t('insights.filters.exclude_accounts')}
                   </Text>
                   <FilterPill
-                    label={I18n.t('insights.filters.all')}
-                    active={
-                      includedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
-                    }
+                    label={I18n.t('common.clear')}
+                    active={excludedAssetHistoryAccountIds.length === 0}
                     onPress={() => setExcludedAssetHistoryAccountIds([])}
                   />
                 </View>
@@ -5154,7 +6043,7 @@ export function InsightsScreen({
                     accounts={assetHistoryAccountOptions}
                     accountGroups={accountGroups}
                     disableGrouping
-                    selectedIds={includedAssetHistoryAccountIds}
+                    selectedIds={excludedAssetHistoryAccountIds}
                     onToggleSelect={(accountId) =>
                       setExcludedAssetHistoryAccountIds((previous) =>
                         toggleStringId(previous, accountId),
@@ -5170,7 +6059,7 @@ export function InsightsScreen({
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
                     <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.accounts')}
+                      {I18n.t('insights.filters.exclude_accounts')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
@@ -5199,7 +6088,7 @@ export function InsightsScreen({
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
                     <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.categories')}
+                      {I18n.t('insights.filters.exclude_expense_categories')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
@@ -5226,11 +6115,72 @@ export function InsightsScreen({
               </View>
             ) : null}
 
+            {hasIncomeTrendExclusionFilter ? (
+              <View className="gap-3">
+                <View className="gap-2">
+                  <View className="flex-row items-center justify-between gap-3">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.exclude_accounts')}
+                    </Text>
+                    <FilterPill
+                      label={I18n.t('common.clear')}
+                      active={excludedIncomeTrendAccountIds.length === 0}
+                      onPress={() => setExcludedIncomeTrendAccountIds([])}
+                    />
+                  </View>
+                  <View
+                    className={FILTER_SELECTION_PANEL_CLASS}
+                    style={styles.insightsFilterSelectionPanel}
+                  >
+                    <AccountPanel
+                      accounts={accounts}
+                      accountGroups={accountGroups}
+                      disableGrouping
+                      selectedIds={excludedIncomeTrendAccountIds}
+                      onToggleSelect={(accountId) =>
+                        setExcludedIncomeTrendAccountIds((previous) =>
+                          toggleStringId(previous, accountId),
+                        )
+                      }
+                    />
+                  </View>
+                </View>
+
+                <View className="gap-2">
+                  <View className="flex-row items-center justify-between gap-3">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.exclude_income_categories')}
+                    </Text>
+                    <FilterPill
+                      label={I18n.t('common.clear')}
+                      active={excludedIncomeTrendIncomeCategoryIds.length === 0}
+                      onPress={() => setExcludedIncomeTrendIncomeCategoryIds([])}
+                    />
+                  </View>
+                  <View
+                    className={FILTER_SELECTION_PANEL_CLASS}
+                    style={styles.insightsFilterSelectionPanel}
+                  >
+                    <CategoryPanel
+                      parents={savingsIncomeCategoryPanel.parents}
+                      childByParent={savingsIncomeCategoryPanel.childByParent}
+                      selectedCategoryIds={excludedIncomeTrendIncomeCategoryIds}
+                      onToggleSelect={(categoryId) =>
+                        setExcludedIncomeTrendIncomeCategoryIds((previous) =>
+                          toggleStringId(previous, categoryId),
+                        )
+                      }
+                    />
+                  </View>
+                </View>
+              </View>
+            ) : null}
+
             {hasTimeCostExpenseCategoryExclusionFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
                   <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.categories')}
+                    {I18n.t('insights.filters.exclude_expense_categories')}
                   </Text>
                   <FilterPill
                     label={I18n.t('common.clear')}
@@ -5257,7 +6207,7 @@ export function InsightsScreen({
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
                     <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.income')}
+                      {I18n.t('insights.filters.exclude_income_categories')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}
@@ -5285,7 +6235,7 @@ export function InsightsScreen({
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between gap-3">
                     <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.expense')}
+                      {I18n.t('insights.filters.exclude_expense_categories')}
                     </Text>
                     <FilterPill
                       label={I18n.t('common.clear')}

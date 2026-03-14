@@ -1,9 +1,13 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-interface AdsVisibilityOptions {
-  hasAdFreeEntitlement?: boolean;
-}
+import {
+  areAdsUnlocked,
+  ADS_INITIAL_COOLDOWN_HOURS,
+  getAdsCooldownState,
+  type AdsCooldownState,
+  type AdsVisibilityOptions,
+} from './adsShared';
 
 const ADMOB_BANNER_UNIT_ID_PATTERN = /^ca-app-pub-\d{16}\/\d{10,}$/;
 
@@ -49,7 +53,7 @@ function getConfiguredBannerAdUnitId() {
 }
 
 function areAdsEnabled(options: AdsVisibilityOptions = {}) {
-  return !options.hasAdFreeEntitlement;
+  return areAdsUnlocked(options);
 }
 
 export function getBannerAdUnitId() {
@@ -71,6 +75,9 @@ function isBannerAdUnitAvailable() {
 export function canRequestBannerAds(options: AdsVisibilityOptions = {}) {
   return areAdsEnabled(options) && isBannerAdUnitAvailable();
 }
+
+export { ADS_INITIAL_COOLDOWN_HOURS, getAdsCooldownState };
+export type { AdsCooldownState, AdsVisibilityOptions };
 
 let mobileAdsInitializationPromise: Promise<void> | null = null;
 

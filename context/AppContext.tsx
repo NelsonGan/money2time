@@ -2,9 +2,11 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
+  DEFAULT_CURRENCY_SYMBOL,
   DEFAULT_TRANSACTION_FILTERS,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+  ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { getDb, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import {
@@ -66,6 +68,7 @@ import {
   type TransactionFilters,
   type TransactionWithRelations,
   type UserSettings,
+  type UserMode,
   type WageConfig,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -171,6 +174,11 @@ interface AppContextValue extends AppState {
 
   isSimpleMode: boolean;
   simpleWalletId: string | null;
+  completeOnboarding: (options?: {
+    userMode?: UserMode;
+    seedSimpleDefaults?: boolean;
+    seedPowerDefaults?: boolean;
+  }) => { createdAccounts: number; createdCategories: number };
   switchToSimpleMode: (seedDefaults?: boolean) => void;
   switchToPowerMode: () => void;
   deleteSimpleWalletAndTransactions: () => void;
@@ -178,6 +186,80 @@ interface AppContextValue extends AppState {
 
 const AppContext = createContext<AppContextValue | null>(null);
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
+
+function categorySeedKey(type: Category['type'], name: string) {
+  return `${type}:${name.trim().toLowerCase()}`;
+}
+
+function accountNameSeedKey(name: string) {
+  return name.trim().toLowerCase();
+}
+
+function ensureSimpleWalletExists(currency: string) {
+  const existingWallet = accountsRepository
+    .list()
+    .find((account) => account.name === SIMPLE_WALLET_NAME);
+  if (existingWallet) {
+    return { id: existingWallet.id, created: false };
+  }
+
+  const id = accountsRepository.create({
+    name: SIMPLE_WALLET_NAME,
+    type: 'debit',
+    icon: '👛',
+    color: '#22917A',
+    startingBalance: 0,
+    accountGroup: null,
+    creditStatementDay: null,
+    creditDueDay: null,
+    currency,
+    includeInTotals: true,
+    sortOrder: 0,
+  });
+
+  return { id, created: true };
+}
+
+function seedMinimalCategoriesIfMissing() {
+  const existing = new Set(
+    categoriesRepository.list().map((category) => categorySeedKey(category.type, category.name)),
+  );
+  const minimal = [
+    ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+    ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+  ];
+  let createdCategories = 0;
+
+  minimal.forEach((category) => {
+    const key = categorySeedKey(category.type, category.name);
+    if (existing.has(key)) return;
+    categoriesRepository.create(category);
+    existing.add(key);
+    createdCategories += 1;
+  });
+
+  return createdCategories;
+}
+
+function seedPowerAccountsIfMissing(preferredCurrency: string) {
+  const existing = new Set(
+    accountsRepository.list().map((account) => accountNameSeedKey(account.name)),
+  );
+  let createdAccounts = 0;
+
+  ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((account) => {
+    const key = accountNameSeedKey(account.name);
+    if (existing.has(key)) return;
+    accountsRepository.create({
+      ...account,
+      currency: preferredCurrency,
+    });
+    existing.add(key);
+    createdAccounts += 1;
+  });
+
+  return createdAccounts;
+}
 
 const fallbackStyles = StyleSheet.create({
   errorRoot: {
@@ -1366,43 +1448,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol],
   );
 
+  const completeOnboarding = useCallback(
+    (options?: {
+      userMode?: UserMode;
+      seedSimpleDefaults?: boolean;
+      seedPowerDefaults?: boolean;
+    }) => {
+      try {
+        const currentSettings = settingsRepository.get();
+        const preferredCurrency = currentSettings.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
+        let createdCategories = 0;
+        let createdAccounts = 0;
+        let shouldRefreshAccounts = false;
+        let shouldRefreshCategories = false;
+
+        if (options?.userMode === 'simple') {
+          ensureSimpleWalletExists(preferredCurrency);
+          shouldRefreshAccounts = true;
+          if (options.seedSimpleDefaults) {
+            createdCategories = seedMinimalCategoriesIfMissing();
+            shouldRefreshCategories = true;
+          }
+        }
+
+        if (options?.userMode === 'power' && options.seedPowerDefaults) {
+          createdCategories = seedMinimalCategoriesIfMissing();
+          const powerPreferredCurrency =
+            accountsRepository.list()[0]?.currency ?? preferredCurrency;
+          createdAccounts = seedPowerAccountsIfMissing(powerPreferredCurrency);
+          shouldRefreshAccounts = true;
+          shouldRefreshCategories = true;
+        }
+
+        settingsRepository.updateSettings({
+          onboardingCompleted: true,
+          ...(options?.userMode ? { userMode: options.userMode } : null),
+        });
+
+        if (shouldRefreshAccounts) {
+          setAccounts(accountsRepository.list());
+        }
+        if (shouldRefreshCategories) {
+          setCategories(categoriesRepository.list());
+        }
+        setSettings(settingsRepository.get());
+        setLoadError(null);
+
+        if (options?.userMode) {
+          void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: options.userMode });
+        }
+
+        return { createdAccounts, createdCategories };
+      } catch (error) {
+        throw toError(error, I18n.t('errors.generic_operation_failed'));
+      }
+    },
+    [],
+  );
+
   const switchToSimpleMode = useCallback(
     (seedDefaults = false) => {
       runMutation(() => {
-        // Create Simple Wallet if missing
-        let walletId =
-          accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
-        if (!walletId) {
-          const currentSettings = settingsRepository.get();
-          accountsRepository.create({
-            name: SIMPLE_WALLET_NAME,
-            type: 'debit',
-            icon: '👛',
-            color: '#22917A',
-            startingBalance: 0,
-            accountGroup: null,
-            creditStatementDay: null,
-            creditDueDay: null,
-            currency: currentSettings.currencySymbol,
-            includeInTotals: true,
-            sortOrder: 0,
-          });
-        }
+        const currentSettings = settingsRepository.get();
+        ensureSimpleWalletExists(currentSettings.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL);
         if (seedDefaults) {
-          const existingCategories = categoriesRepository.list();
-          const existing = new Set(
-            existingCategories.map((item) => `${item.type}:${item.name.trim().toLowerCase()}`),
-          );
-          const minimal = [
-            ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-            ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-          ];
-          minimal.forEach((item) => {
-            const key = `${item.type}:${item.name.trim().toLowerCase()}`;
-            if (existing.has(key)) return;
-            categoriesRepository.create(item);
-            existing.add(key);
-          });
+          seedMinimalCategoriesIfMissing();
         }
         settingsRepository.updateSettings({ userMode: 'simple' });
       });
@@ -1508,6 +1618,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateInsightsPreferencesJson,
             isSimpleMode,
             simpleWalletId,
+            completeOnboarding,
             switchToSimpleMode,
             switchToPowerMode,
             deleteSimpleWalletAndTransactions,
@@ -1579,6 +1690,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateInsightsPreferencesJson,
       isSimpleMode,
       simpleWalletId,
+      completeOnboarding,
       switchToSimpleMode,
       switchToPowerMode,
       deleteSimpleWalletAndTransactions,

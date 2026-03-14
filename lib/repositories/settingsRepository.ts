@@ -88,7 +88,7 @@ class SettingsRepository {
         hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
-        themeColor: 'sage',
+        themeColor: 'rosewood',
         insightsPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',

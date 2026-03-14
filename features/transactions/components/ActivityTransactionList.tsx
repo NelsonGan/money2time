@@ -4,9 +4,10 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Text } from '~/components/ui';
+import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
@@ -75,6 +76,8 @@ const DayHeaderRow = memo(function DayHeaderRow({
   isTimeMode,
   settings,
 }: DayHeaderRowProps) {
+  const themeColors = useThemeColors();
+
   return (
     <View className="pt-2 pb-1.5 flex-row items-center justify-between">
       <View className="flex-row items-center gap-2">
@@ -90,20 +93,36 @@ const DayHeaderRow = memo(function DayHeaderRow({
       <View className="flex-row items-center gap-2">
         {incomeSubtotal !== 0 ? (
           <View className="px-2 py-0.5 rounded-full bg-success/10">
-            <Text variant="caption" className="text-success">
-              {isTimeMode
-                ? formatHours(Math.abs(incomeSubtotal))
-                : formatAmount(incomeSubtotal, settings, { showSign: false })}
-            </Text>
+            {isTimeMode ? (
+              <TimeValueInline
+                value={formatHours(Math.abs(incomeSubtotal))}
+                variant="caption"
+                textClassName="text-success"
+                iconColor={themeColors.success}
+                iconSize={10}
+              />
+            ) : (
+              <Text variant="caption" className="text-success">
+                {formatAmount(incomeSubtotal, settings, { showSign: false })}
+              </Text>
+            )}
           </View>
         ) : null}
         {expenseSubtotal !== 0 ? (
           <View className="px-2 py-0.5 rounded-full bg-destructive/8">
-            <Text variant="caption" className="text-destructive">
-              {isTimeMode
-                ? formatHours(Math.abs(expenseSubtotal))
-                : formatAmount(expenseSubtotal, settings, { showSign: false })}
-            </Text>
+            {isTimeMode ? (
+              <TimeValueInline
+                value={formatHours(Math.abs(expenseSubtotal))}
+                variant="caption"
+                textClassName="text-destructive"
+                iconColor={themeColors.error}
+                iconSize={10}
+              />
+            ) : (
+              <Text variant="caption" className="text-destructive">
+                {formatAmount(expenseSubtotal, settings, { showSign: false })}
+              </Text>
+            )}
           </View>
         ) : null}
       </View>

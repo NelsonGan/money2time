@@ -90,7 +90,7 @@ export const settingsTable = sqliteTable('settings', {
   hourRounding: real('hour_rounding').notNull().default(0.1),
   displayMode: text('display_mode').notNull().default('money'),
   themeMode: text('theme_mode').notNull().default('system'),
-  themeColor: text('theme_color').notNull().default('sage'),
+  themeColor: text('theme_color').notNull().default('rosewood'),
   insightsPrefsJson: text('insights_prefs_json'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()

@@ -1,16 +1,30 @@
+import { Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { spacing } from '~/constants/designSystem';
+import { Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
+  ActivityTransactionList,
+  ActivitySearchRow,
   DisplayModeToggle,
   MonthPagerPage,
   TypeFilterPill,
 } from '~/features/transactions/components';
+import { CategoryPanel } from '~/features/transactions/components/editor';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -20,25 +34,57 @@ import { useFocusMonthNavigation } from '~/hooks/useFocusMonthNavigation';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useScrollToTopTokenNavigation } from '~/hooks/useScrollToTopTokenNavigation';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import type { TransactionWithRelations } from '~/types';
+import { triggerHaptic } from '~/services/haptics';
+import type { Category, TransactionType, TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addMonthsAtMonthStart,
   formatAmount,
   formatHours,
   formatMonthYearLabel,
   monthKeyFromDateLocal,
-  monthKeyFromIsoLocal,
   startOfMonthDate,
 } from '~/utils/formatters';
-import { emptyMonthSummary, type MonthTransactionBuckets } from '~/utils/transactions';
+import {
+  bucketTransactionsByMonth,
+  emptyMonthSummary,
+  summarizeTransactions,
+  type MonthTransactionBuckets,
+} from '~/utils/transactions';
 
-const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
 const FLEX_ONE_STYLE = { flex: 1 } as const;
+const FILTER_SCROLL_CONTENT_STYLE = {
+  padding: spacing.md,
+  paddingBottom: spacing.xl + spacing.xs,
+  gap: spacing.sm,
+} as const;
+const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
+const FILTER_SELECTION_PANEL_CLASS =
+  'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
+const SELECTION_PANEL_HEIGHT = 236;
+const SORT_OPTION_VALUES = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const;
 const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
   transactionsMap: new Map<string, TransactionWithRelations[]>(),
   summaries: new Map(),
 };
+
+type SortByValue = (typeof SORT_OPTION_VALUES)[number];
+type BreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
+
+interface CategoryPanelItem {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+interface CategoryPanelData {
+  parents: CategoryPanelItem[];
+  childrenByParent: Map<string, CategoryPanelItem[]>;
+  previewById: Map<string, { icon: string; label: string }>;
+}
 
 interface SimpleActivityScreenProps {
   scrollToTopToken?: number;
@@ -46,6 +92,93 @@ interface SimpleActivityScreenProps {
   focusMonthToken?: number;
   tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenBreakdownInsight?: (insightType: BreakdownInsightType, monthKey: string) => void;
+}
+
+function buildCategoryPanelDataByType(categories: Category[]): {
+  income: CategoryPanelData;
+  expense: CategoryPanelData;
+} {
+  const incomeParents: CategoryPanelItem[] = [];
+  const expenseParents: CategoryPanelItem[] = [];
+  const incomeChildrenByParent = new Map<string, CategoryPanelItem[]>();
+  const expenseChildrenByParent = new Map<string, CategoryPanelItem[]>();
+  const incomeParentIconById = new Map<string, string>();
+  const expenseParentIconById = new Map<string, string>();
+  const incomePreviewById = new Map<string, { icon: string; label: string }>();
+  const expensePreviewById = new Map<string, { icon: string; label: string }>();
+
+  categories.forEach((category) => {
+    if (category.parentId !== null) return;
+    if (category.type === 'income') {
+      const icon = resolveCategoryIcon(category.icon);
+      incomeParents.push({ id: category.id, name: category.name, icon });
+      incomeParentIconById.set(category.id, category.icon);
+      incomePreviewById.set(category.id, { icon, label: category.name });
+      return;
+    }
+    if (category.type === 'expense') {
+      const icon = resolveCategoryIcon(category.icon);
+      expenseParents.push({ id: category.id, name: category.name, icon });
+      expenseParentIconById.set(category.id, category.icon);
+      expensePreviewById.set(category.id, { icon, label: category.name });
+    }
+  });
+
+  categories.forEach((category) => {
+    if (category.parentId === null) return;
+    const parentId = category.parentId;
+
+    if (category.type === 'income') {
+      const icon = resolveCategoryIcon(category.icon, incomeParentIconById.get(parentId) ?? null);
+      const child = { id: category.id, name: category.name, icon };
+      const list = incomeChildrenByParent.get(parentId);
+      if (list) {
+        list.push(child);
+      } else {
+        incomeChildrenByParent.set(parentId, [child]);
+      }
+      const parentName = incomeParents.find((item) => item.id === parentId)?.name ?? '';
+      incomePreviewById.set(category.id, {
+        icon,
+        label: parentName ? `${parentName} / ${category.name}` : category.name,
+      });
+      return;
+    }
+
+    if (category.type === 'expense') {
+      const icon = resolveCategoryIcon(category.icon, expenseParentIconById.get(parentId) ?? null);
+      const child = { id: category.id, name: category.name, icon };
+      const list = expenseChildrenByParent.get(parentId);
+      if (list) {
+        list.push(child);
+      } else {
+        expenseChildrenByParent.set(parentId, [child]);
+      }
+      const parentName = expenseParents.find((item) => item.id === parentId)?.name ?? '';
+      expensePreviewById.set(category.id, {
+        icon,
+        label: parentName ? `${parentName} / ${category.name}` : category.name,
+      });
+    }
+  });
+
+  return {
+    income: {
+      parents: incomeParents,
+      childrenByParent: incomeChildrenByParent,
+      previewById: incomePreviewById,
+    },
+    expense: {
+      parents: expenseParents,
+      childrenByParent: expenseChildrenByParent,
+      previewById: expensePreviewById,
+    },
+  };
+}
+
+function isSortByValue(value: string): value is SortByValue {
+  return SORT_OPTION_VALUES.includes(value as SortByValue);
 }
 
 export function SimpleActivityScreen({
@@ -54,16 +187,27 @@ export function SimpleActivityScreen({
   focusMonthToken = 0,
   tutorialResetToken = 0,
   onOpenTransaction,
+  onOpenBreakdownInsight,
 }: SimpleActivityScreenProps) {
+  const themeColors = useThemeColors();
   const {
     transactions,
     settings,
     simpleWalletId,
+    transactionFilters,
+    setTransactionFilters,
+    categories,
+    queryTransactions,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
-  const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
+  const [searchDraft, setSearchDraft] = useState(() => transactionFilters.search);
+  const hasActiveSearch = transactionFilters.search.trim().length > 0;
+  const searchInputRef = useRef<TextInput | null>(null);
+  const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -112,69 +256,159 @@ export function SimpleActivityScreen({
     [getDisplayValueForTransaction, settings.displayMode],
   );
 
+  const simpleModeTransactions = useMemo(() => {
+    const nextTransactions = queryTransactions({ ...transactionFilters, accountId: null });
+    if (!simpleWalletId) return nextTransactions;
+
+    return nextTransactions.filter(
+      (transaction) =>
+        transaction.accountId === simpleWalletId ||
+        transaction.fromAccountId === simpleWalletId ||
+        transaction.toAccountId === simpleWalletId,
+    );
+  }, [queryTransactions, simpleWalletId, transactionFilters, transactions]);
+
   const monthBuckets = useMemo(() => {
-    if (transactions.length === 0) return EMPTY_MONTH_BUCKETS;
-    const nextTransactionsMap = new Map<string, TransactionWithRelations[]>();
-    const nextSummaries = new Map<string, ReturnType<typeof emptyMonthSummary>>();
+    if (hasActiveSearch) return EMPTY_MONTH_BUCKETS;
+    return bucketTransactionsByMonth(simpleModeTransactions, resolveTransactionValue);
+  }, [hasActiveSearch, resolveTransactionValue, simpleModeTransactions]);
 
-    transactions.forEach((transaction) => {
-      if (simpleWalletId) {
-        const belongsToSimpleWallet =
-          transaction.accountId === simpleWalletId ||
-          transaction.fromAccountId === simpleWalletId ||
-          transaction.toAccountId === simpleWalletId;
-        if (!belongsToSimpleWallet) return;
-      }
-      if (typeFilter !== 'all' && transaction.type !== typeFilter) return;
+  const monthSummary = useMemo(() => {
+    if (hasActiveSearch) {
+      return summarizeTransactions(simpleModeTransactions, resolveTransactionValue);
+    }
+    return monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary();
+  }, [
+    activeMonthKey,
+    hasActiveSearch,
+    monthBuckets.summaries,
+    resolveTransactionValue,
+    simpleModeTransactions,
+  ]);
 
-      const monthKey = monthKeyFromIsoLocal(transaction.date);
-      const transactionList = nextTransactionsMap.get(monthKey);
-      if (transactionList) {
-        transactionList.push(transaction);
-      } else {
-        nextTransactionsMap.set(monthKey, [transaction]);
-      }
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (transactionFilters.type !== 'all') count += 1;
+    if (
+      (transactionFilters.type === 'all' || transactionFilters.type === 'income') &&
+      transactionFilters.incomeCategoryId
+    ) {
+      count += 1;
+    }
+    if (
+      (transactionFilters.type === 'all' || transactionFilters.type === 'expense') &&
+      transactionFilters.expenseCategoryId
+    ) {
+      count += 1;
+    }
+    if (transactionFilters.minAmount !== null) count += 1;
+    if (transactionFilters.maxAmount !== null) count += 1;
+    if (transactionFilters.sortBy !== 'date_desc') count += 1;
+    return count;
+  }, [
+    transactionFilters.expenseCategoryId,
+    transactionFilters.incomeCategoryId,
+    transactionFilters.maxAmount,
+    transactionFilters.minAmount,
+    transactionFilters.sortBy,
+    transactionFilters.type,
+  ]);
 
-      const summary = nextSummaries.get(monthKey) ?? emptyMonthSummary();
-      summary.count += 1;
-      if (transaction.type === 'income') {
-        summary.income += resolveTransactionValue(transaction);
-      } else if (transaction.type === 'expense') {
-        summary.expense += resolveTransactionValue(transaction);
-      }
-      nextSummaries.set(monthKey, summary);
-    });
-
-    return { transactionsMap: nextTransactionsMap, summaries: nextSummaries };
-  }, [resolveTransactionValue, simpleWalletId, transactions, typeFilter]);
-
-  const monthSummary = useMemo(
-    () => monthBuckets.summaries.get(activeMonthKey) ?? emptyMonthSummary(),
-    [activeMonthKey, monthBuckets.summaries],
+  const { income: incomeCategoryPanelData, expense: expenseCategoryPanelData } = useMemo(
+    () => buildCategoryPanelDataByType(categories),
+    [categories],
   );
+  const selectedIncomeCategoryPreview = useMemo(
+    () =>
+      transactionFilters.incomeCategoryId
+        ? (incomeCategoryPanelData.previewById.get(transactionFilters.incomeCategoryId) ?? null)
+        : null,
+    [incomeCategoryPanelData.previewById, transactionFilters.incomeCategoryId],
+  );
+  const selectedExpenseCategoryPreview = useMemo(
+    () =>
+      transactionFilters.expenseCategoryId
+        ? (expenseCategoryPanelData.previewById.get(transactionFilters.expenseCategoryId) ?? null)
+        : null,
+    [expenseCategoryPanelData.previewById, transactionFilters.expenseCategoryId],
+  );
+  const shouldShowIncomeCategoryFilter =
+    transactionFilters.type === 'all' || transactionFilters.type === 'income';
+  const shouldShowExpenseCategoryFilter =
+    transactionFilters.type === 'all' || transactionFilters.type === 'expense';
   const typeFilters = useMemo(
     () =>
       [
         { label: I18n.t('transactions.filters.all'), value: 'all' },
         { label: I18n.t('transactions.filters.spent'), value: 'expense' },
         { label: I18n.t('transactions.filters.earned'), value: 'income' },
-      ] satisfies { label: string; value: 'all' | 'expense' | 'income' }[],
+        { label: I18n.t('transactions.filters.moved'), value: 'transfer' },
+        { label: I18n.t('transactions.filters.adjustment'), value: 'balance_adjustment' },
+      ] satisfies { label: string; value: 'all' | TransactionType }[],
+    [],
+  );
+  const sortOptions = useMemo(
+    () => [
+      { value: 'date_desc', label: I18n.t('transactions.sort.newest') },
+      { value: 'date_asc', label: I18n.t('transactions.sort.oldest') },
+      { value: 'amount_desc', label: I18n.t('transactions.sort.high') },
+      { value: 'amount_asc', label: I18n.t('transactions.sort.low') },
+    ],
     [],
   );
 
   const formatSummaryValue = useCallback(
     (value: number) =>
-      settings.displayMode === 'time'
-        ? formatHours(value)
-        : formatAmount(value, settings, { showSign: false }),
+      settings.displayMode === 'time' ? (
+        <TimeValueInline
+          value={formatHours(value)}
+          variant="mono"
+          textClassName="text-foreground"
+          iconSize={11}
+        />
+      ) : (
+        formatAmount(value, settings, { showSign: false })
+      ),
     [settings],
   );
+
+  useEffect(() => {
+    setSearchDraft((previous) =>
+      previous === transactionFilters.search ? previous : transactionFilters.search,
+    );
+  }, [transactionFilters.search]);
+
+  useEffect(() => {
+    if (searchDraft === transactionFilters.search) return;
+    const timeout = setTimeout(() => {
+      setTransactionFilters({ search: searchDraft });
+    }, 140);
+    return () => clearTimeout(timeout);
+  }, [searchDraft, setTransactionFilters, transactionFilters.search]);
+
+  useEffect(() => {
+    if (!hasActiveSearch) return;
+    searchResultsScrollToTopRef.current?.();
+  }, [hasActiveSearch, transactionFilters.search]);
+
+  useEffect(() => {
+    if (tutorialResetToken <= 0) return;
+    setIsSearchBoxOpen(false);
+    setShowFilters(false);
+  }, [tutorialResetToken]);
+
+  const handleSearchScrollToTop = useCallback(() => {
+    if (!hasActiveSearch) return false;
+    searchResultsScrollToTopRef.current?.();
+    return true;
+  }, [hasActiveSearch]);
 
   useScrollToTopTokenNavigation({
     scrollToTopToken,
     activeIndexRef: activeMonthIndexRef,
     listRef: horizontalListRef,
     getScrollToTopRef: getPageScrollToTopRef,
+    onBeforePageScroll: handleSearchScrollToTop,
   });
 
   useFocusMonthNavigation({
@@ -189,27 +423,25 @@ export function SimpleActivityScreen({
   });
 
   const renderMonthPage = useCallback(
-    ({ item }: { item: number }) => {
-      return (
-        <MonthPagerPage
-          item={item}
-          monthPagerAnchorDate={monthPagerAnchorDate}
-          centerIndex={MONTH_PAGER_CENTER_INDEX}
-          localeKey={activeLocale}
-          monthPageStyle={monthPageStyle}
-          monthTransactionsMap={monthBuckets.transactionsMap}
-          displaySettings={transactionDisplaySettings}
-          getDisplayValueForTransaction={getDisplayValueForTransaction}
-          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onTransactionPress={onOpenTransaction}
-          getScrollToTopRef={getPageScrollToTopRef}
-        />
-      );
-    },
+    ({ item }: { item: number }) => (
+      <MonthPagerPage
+        item={item}
+        monthPagerAnchorDate={monthPagerAnchorDate}
+        centerIndex={MONTH_PAGER_CENTER_INDEX}
+        localeKey={activeLocale}
+        monthPageStyle={monthPageStyle}
+        monthTransactionsMap={monthBuckets.transactionsMap}
+        displaySettings={transactionDisplaySettings}
+        getDisplayValueForTransaction={getDisplayValueForTransaction}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        onTransactionPress={onOpenTransaction}
+        getScrollToTopRef={getPageScrollToTopRef}
+      />
+    ),
     [
-      getPageScrollToTopRef,
       activeLocale,
       getDisplayValueForTransaction,
+      getPageScrollToTopRef,
       getTrueHourlyRateForDate,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
@@ -218,62 +450,370 @@ export function SimpleActivityScreen({
       transactionDisplaySettings,
     ],
   );
+
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
+  const handleOpenIncomeBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight || hasActiveSearch) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('income_breakdown', activeMonthKey);
+  }, [activeMonthKey, hasActiveSearch, onOpenBreakdownInsight]);
+  const handleOpenExpenseBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight || hasActiveSearch) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('expense_breakdown', activeMonthKey);
+  }, [activeMonthKey, hasActiveSearch, onOpenBreakdownInsight]);
+  const handleOpenSearch = useCallback(() => {
+    void triggerHaptic('light');
+    if (isSearchBoxOpen) {
+      searchInputRef.current?.focus();
+      return;
+    }
+    setIsSearchBoxOpen(true);
+  }, [isSearchBoxOpen]);
+  const handleCloseSearch = useCallback(() => {
+    void triggerHaptic('light');
+    if (searchDraft.length > 0 || transactionFilters.search.length > 0) {
+      setSearchDraft('');
+      setTransactionFilters({ search: '' });
+    }
+    searchInputRef.current?.blur();
+    setIsSearchBoxOpen(false);
+  }, [searchDraft.length, setTransactionFilters, transactionFilters.search]);
+  const handleOpenFilters = useCallback(() => {
+    setIsSearchBoxOpen(false);
+    setShowFilters(true);
+  }, []);
+  const handleCloseFilters = useCallback(() => setShowFilters(false), []);
+  const handleResetFilters = useCallback(() => {
+    void triggerHaptic('selection');
+    setSearchDraft('');
+    setTransactionFilters({
+      search: '',
+      type: 'all',
+      incomeCategoryId: null,
+      expenseCategoryId: null,
+      categoryId: null,
+      minAmount: null,
+      maxAmount: null,
+      sortBy: 'date_desc',
+    });
+  }, [setTransactionFilters]);
+  const handleDoneFilters = useCallback(() => {
+    void triggerHaptic('selection');
+    setShowFilters(false);
+  }, []);
+  const handleSelectIncomeCategoryFilter = useCallback(
+    (categoryId: string) => {
+      setTransactionFilters({ incomeCategoryId: categoryId, categoryId: null });
+    },
+    [setTransactionFilters],
+  );
+  const handleSelectExpenseCategoryFilter = useCallback(
+    (categoryId: string) => {
+      setTransactionFilters({ expenseCategoryId: categoryId, categoryId: null });
+    },
+    [setTransactionFilters],
+  );
+  const handleResetIncomeCategoryFilter = useCallback(() => {
+    void triggerHaptic('selection');
+    setTransactionFilters({ incomeCategoryId: null, categoryId: null });
+  }, [setTransactionFilters]);
+  const handleResetExpenseCategoryFilter = useCallback(() => {
+    void triggerHaptic('selection');
+    setTransactionFilters({ expenseCategoryId: null, categoryId: null });
+  }, [setTransactionFilters]);
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchDraft(text);
+  }, []);
+  const handleTypeChange = useCallback(
+    (type: TransactionType | 'all') => {
+      setTransactionFilters({ type, categoryId: null });
+    },
+    [setTransactionFilters],
+  );
+  const handleMinAmountChange = useCallback(
+    (text: string) => {
+      setTransactionFilters({ minAmount: text ? Number(text) : null });
+    },
+    [setTransactionFilters],
+  );
+  const handleMaxAmountChange = useCallback(
+    (text: string) => {
+      setTransactionFilters({ maxAmount: text ? Number(text) : null });
+    },
+    [setTransactionFilters],
+  );
+  const handleSortChange = useCallback(
+    (value: string) => {
+      if (!isSortByValue(value)) return;
+      setTransactionFilters({ sortBy: value });
+    },
+    [setTransactionFilters],
+  );
 
-  useEffect(() => {
-    if (tutorialResetToken <= 0) return;
-    setTypeFilter('all');
-  }, [tutorialResetToken]);
+  const headerActions = (
+    <View className="flex-row items-center gap-2">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('transactions.filters.search')}
+        onPress={handleOpenSearch}
+        className={cn(
+          'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+          isSearchBoxOpen || hasActiveSearch
+            ? 'border-primary/45 bg-primary/10'
+            : 'border-border/40 bg-card',
+        )}
+      >
+        <Search
+          size={15}
+          color={isSearchBoxOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
+        />
+      </Pressable>
+      <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+      <DisplayModeToggle />
+    </View>
+  );
 
   return (
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
       <MonthControlsHeader
         title={I18n.t('transactions.title')}
         showAccent={false}
-        monthLabel={activeMonthLabel}
+        monthLabel={hasActiveSearch ? I18n.t('transactions.filters.search') : activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
-        actions={<DisplayModeToggle />}
+        actions={headerActions}
       >
         <View className="gap-2">
-          <InOutHeader
-            incomeValue={formatSummaryValue(monthSummary.income)}
-            expenseValue={formatSummaryValue(monthSummary.expense)}
+          <ActivitySearchRow
+            inputRef={searchInputRef}
+            visible={isSearchBoxOpen}
+            value={searchDraft}
+            onChangeText={handleSearchChange}
+            onClose={handleCloseSearch}
           />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
-          >
-            {typeFilters.map((item) => (
-              <TypeFilterPill
-                key={item.value}
-                label={item.label}
-                value={item.value}
-                selected={typeFilter === item.value}
-                onSelect={setTypeFilter}
-              />
-            ))}
-          </ScrollView>
+          <View style={styles.summarySlot}>
+            <InOutHeader
+              incomeValue={formatSummaryValue(monthSummary.income)}
+              expenseValue={formatSummaryValue(monthSummary.expense)}
+              onIncomePress={!hasActiveSearch ? handleOpenIncomeBreakdown : undefined}
+              onExpensePress={!hasActiveSearch ? handleOpenExpenseBreakdown : undefined}
+            />
+          </View>
         </View>
       </MonthControlsHeader>
 
       <View style={styles.listContainer} className="bg-background">
-        <FlatList
-          ref={horizontalListRef}
-          data={monthPagerSlots}
-          keyExtractor={monthPagerKeyExtractor}
-          style={FLEX_ONE_STYLE}
-          {...MONTH_PAGER_LIST_CONFIG}
-          renderItem={renderMonthPage}
-          initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-          getItemLayout={getHorizontalItemLayout}
-          onScrollEndDrag={handleHorizontalScrollEndDrag}
-          onMomentumScrollEnd={handleHorizontalMomentumEnd}
-          onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-        />
+        {hasActiveSearch ? (
+          <ActivityTransactionList
+            transactions={simpleModeTransactions}
+            locale={activeLocale}
+            displaySettings={transactionDisplaySettings}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            onTransactionPress={onOpenTransaction}
+            emptyTitle={I18n.t('transactions.empty_search_title')}
+            emptyMessage={I18n.t('transactions.empty_search_message')}
+            contentPaddingBottom={LIST_BOTTOM_PADDING}
+            disableItemAnimations
+            compactItems
+            listKey="simple-search-results"
+            scrollToTopRef={searchResultsScrollToTopRef}
+          />
+        ) : (
+          <FlatList
+            ref={horizontalListRef}
+            data={monthPagerSlots}
+            keyExtractor={monthPagerKeyExtractor}
+            style={FLEX_ONE_STYLE}
+            {...MONTH_PAGER_LIST_CONFIG}
+            renderItem={renderMonthPage}
+            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+            getItemLayout={getHorizontalItemLayout}
+            onScrollEndDrag={handleHorizontalScrollEndDrag}
+            onMomentumScrollEnd={handleHorizontalMomentumEnd}
+            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+          />
+        )}
       </View>
+
+      <ThemeModal
+        visible={showFilters}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseFilters}
+      >
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+          <View style={styles.modalHeaderRow}>
+            <View>
+              <Text variant="subheading">{I18n.t('transactions.filters.title')}</Text>
+              <Text variant="friendly" tone="muted">
+                {I18n.t('transactions.filters.subtitle')}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={handleResetFilters}
+                className="px-3 py-2 rounded-full bg-secondary/70"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.reset')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.reset')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleDoneFilters}
+                className="px-3 py-2 rounded-full bg-secondary"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.done')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.done')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.filters.type')}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
+              >
+                {typeFilters.map((item) => (
+                  <TypeFilterPill
+                    key={item.value}
+                    label={item.label}
+                    value={item.value}
+                    selected={transactionFilters.type === item.value}
+                    onSelect={handleTypeChange}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+
+            {shouldShowIncomeCategoryFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <View className="flex-1 gap-1.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.filters.income_category')}
+                    </Text>
+                    {selectedIncomeCategoryPreview ? (
+                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1.5">
+                        <Text className="text-[12px]">{selectedIncomeCategoryPreview.icon}</Text>
+                        <Text variant="label" className="text-success">
+                          {selectedIncomeCategoryPreview.label}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <TypeFilterPill
+                    label={
+                      selectedIncomeCategoryPreview
+                        ? I18n.t('common.clear')
+                        : I18n.t('transactions.filters.all_income_categories')
+                    }
+                    value="all"
+                    selected={transactionFilters.incomeCategoryId === null}
+                    onSelect={handleResetIncomeCategoryFilter}
+                  />
+                </View>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
+                  <CategoryPanel
+                    parents={incomeCategoryPanelData.parents}
+                    childByParent={incomeCategoryPanelData.childrenByParent}
+                    allowParentSelection
+                    selectedCategoryId={transactionFilters.incomeCategoryId}
+                    onSelect={handleSelectIncomeCategoryFilter}
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            {shouldShowExpenseCategoryFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <View className="flex-1 gap-1.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.filters.expense_category')}
+                    </Text>
+                    {selectedExpenseCategoryPreview ? (
+                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-destructive/25 bg-destructive/10 px-3 py-1.5">
+                        <Text className="text-[12px]">{selectedExpenseCategoryPreview.icon}</Text>
+                        <Text variant="label" className="text-destructive">
+                          {selectedExpenseCategoryPreview.label}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <TypeFilterPill
+                    label={
+                      selectedExpenseCategoryPreview
+                        ? I18n.t('common.clear')
+                        : I18n.t('transactions.filters.all_expense_categories')
+                    }
+                    value="all"
+                    selected={transactionFilters.expenseCategoryId === null}
+                    onSelect={handleResetExpenseCategoryFilter}
+                  />
+                </View>
+                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
+                  <CategoryPanel
+                    parents={expenseCategoryPanelData.parents}
+                    childByParent={expenseCategoryPanelData.childrenByParent}
+                    allowParentSelection
+                    selectedCategoryId={transactionFilters.expenseCategoryId}
+                    onSelect={handleSelectExpenseCategoryFilter}
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            <View className="gap-2.5">
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Input
+                    label={I18n.t('transactions.filters.min')}
+                    variant="numeric"
+                    value={
+                      transactionFilters.minAmount !== null
+                        ? String(transactionFilters.minAmount)
+                        : ''
+                    }
+                    onChangeText={handleMinAmountChange}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Input
+                    label={I18n.t('transactions.filters.max')}
+                    variant="numeric"
+                    value={
+                      transactionFilters.maxAmount !== null
+                        ? String(transactionFilters.maxAmount)
+                        : ''
+                    }
+                    onChangeText={handleMaxAmountChange}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <SelectField
+              label={I18n.t('transactions.filters.sort')}
+              value={transactionFilters.sortBy}
+              onChange={handleSortChange}
+              options={sortOptions}
+            />
+          </ScrollView>
+        </SafeAreaView>
+      </ThemeModal>
     </SafeAreaView>
   );
 }
@@ -285,5 +825,20 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     overflow: 'hidden',
+  },
+  summarySlot: {
+    minHeight: 56,
+    justifyContent: 'center',
+  },
+  modalHeaderRow: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectionPanel: {
+    height: SELECTION_PANEL_HEIGHT,
   },
 });
