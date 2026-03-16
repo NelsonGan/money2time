@@ -1,4 +1,5 @@
 import {
+  Bell,
   Clock3,
   DatabaseBackup,
   FolderTree,
@@ -60,6 +61,7 @@ interface SettingsScreenProps {
   onOpenAccounts: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
+  onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
@@ -74,6 +76,7 @@ export function SettingsScreen({
   onOpenAccounts,
   onOpenCategories,
   onOpenRecurring,
+  onOpenNotifications,
   onOpenDataManagement,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -277,6 +280,12 @@ export function SettingsScreen({
                     : I18n.t('settings.hourly_value_subtitle')
                 }
                 onPress={onOpenHourlyValue}
+              />
+              <SettingsRowItem
+                icon={<Bell size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.notifications')}
+                subtitle={I18n.t('settings.notifications_subtitle')}
+                onPress={onOpenNotifications}
               />
             </View>
           </SettingsSection>

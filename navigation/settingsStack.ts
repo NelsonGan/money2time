@@ -6,6 +6,8 @@ import {
 
 import type { WageConfig } from '~/types';
 
+export type NotificationDetailType = 'dailyCheckin' | 'weeklySummary';
+
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
@@ -16,6 +18,8 @@ export type SettingsStackParamList = {
   Categories: undefined;
   CategoriesSubcategories: { parentId: string };
   Recurring: undefined;
+  Notifications: undefined;
+  NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;
 };
 

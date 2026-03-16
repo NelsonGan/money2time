@@ -2,11 +2,12 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { settingsTable } from '~/lib/db/schema';
+import { getDeviceLocale } from '~/lib/i18n';
 import type { UserSettings } from '~/types';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
+
 import { toSettings } from './mappers';
-import { getDeviceLocale } from '~/lib/i18n';
 
 const SETTINGS_ID = 'primary';
 
@@ -75,6 +76,24 @@ class SettingsRepository {
       .run();
   }
 
+  getNotificationPreferencesJson(): string | null {
+    const db = getDb();
+    const row = db
+      .select({ notificationPrefsJson: settingsTable.notificationPrefsJson })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return row?.notificationPrefsJson ?? null;
+  }
+
+  updateNotificationPreferencesJson(value: string | null) {
+    const db = getDb();
+    db.update(settingsTable)
+      .set({ notificationPrefsJson: value, updatedAt: nowIso() })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
   reset() {
     const db = getDb();
     const now = nowIso();
@@ -90,6 +109,7 @@ class SettingsRepository {
         themeMode: 'system',
         themeColor: 'rosewood',
         insightsPrefsJson: null,
+        notificationPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
         updatedAt: now,

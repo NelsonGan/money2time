@@ -34,7 +34,7 @@
     "web": {
       "favicon": "./assets/android/play_store_512.png"
     },
-    "plugins": ["expo-localization"],
+    "plugins": ["expo-localization", "expo-notifications"],
     "extra": {
       "eas": {
         "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"

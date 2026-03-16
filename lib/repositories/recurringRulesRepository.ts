@@ -2,10 +2,11 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { recurringRulesTable } from '~/lib/db/schema';
+import type { ProcessedRecurringRule, RecurrencePattern,RecurringTransactionRule } from '~/types';
 import { newId, nowIso } from '~/utils/id';
-import type { RecurringTransactionRule, RecurrencePattern } from '~/types';
-import { transactionsRepository } from './transactionsRepository';
+
 import { toRecurringRule } from './mappers';
+import { transactionsRepository } from './transactionsRepository';
 
 export interface CreateRecurringRuleInput {
   name: string;
@@ -143,7 +144,10 @@ class RecurringRulesRepository {
       .run();
   }
 
-  runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10) {
+  runDueTransactions(
+    todayIso: string = nowIso(),
+    maxRules: number = 10,
+  ): ProcessedRecurringRule[] {
     const db = getDb();
     const dueRules = db
       .select()
@@ -160,7 +164,9 @@ class RecurringRulesRepository {
       .all()
       .map(toRecurringRule);
 
-    if (dueRules.length === 0) return;
+    if (dueRules.length === 0) return [];
+
+    const processed: ProcessedRecurringRule[] = [];
 
     dueRules.forEach((rule) => {
       let cursor = rule.nextRunDate;
@@ -206,7 +212,16 @@ class RecurringRulesRepository {
         })
         .where(and(eq(recurringRulesTable.id, rule.id), isNull(recurringRulesTable.deletedAt)))
         .run();
+
+      processed.push({
+        name: rule.name,
+        type: rule.type,
+        amount: rule.amount,
+        currency: rule.currency,
+      });
     });
+
+    return processed;
   }
 }
 
