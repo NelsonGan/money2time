@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CardContent, Text, TimeValueInline } from '~/components/ui';
@@ -7,10 +7,7 @@ import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
-import {
-  ONBOARDING_ACTION_BAR_RESERVED_SPACE,
-  ONBOARDING_HORIZONTAL_PADDING,
-} from '~/features/onboarding/constants/layout';
+import { ONBOARDING_HORIZONTAL_PADDING } from '~/features/onboarding/constants/layout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -22,96 +19,6 @@ interface OnboardingValuePropStepProps {
   onSkip: () => void;
 }
 
-const styles = StyleSheet.create({
-  contentContainer: {
-    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
-    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
-  },
-  wordmarkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 46,
-  },
-  wordmarkMoney: {
-    fontSize: 34,
-    lineHeight: 38,
-    fontWeight: '900',
-    letterSpacing: -1.1,
-  },
-  wordmarkTwo: {
-    fontSize: 18,
-    lineHeight: 18,
-    fontWeight: '900',
-    marginLeft: 1,
-    transform: [{ translateY: 8 }],
-  },
-  wordmarkTime: {
-    fontSize: 34,
-    lineHeight: 38,
-    fontWeight: '900',
-    letterSpacing: -1.1,
-    marginLeft: -1,
-  },
-  previewHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  previewBadge: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-  },
-  previewHero: {
-    borderRadius: 24,
-    borderWidth: 1,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    marginTop: spacing.md,
-  },
-  previewHeroValues: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    gap: spacing.md,
-  },
-  previewList: {
-    borderRadius: 24,
-    borderWidth: 1,
-    marginTop: spacing.md,
-    overflow: 'hidden',
-  },
-  previewRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  previewRowDivider: {
-    height: 1,
-    marginLeft: spacing.lg * 2 + spacing.md,
-    marginRight: spacing.lg,
-  },
-  previewRowMark: {
-    width: 42,
-    height: 42,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  previewRowDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 999,
-  },
-  previewRowValues: {
-    alignItems: 'flex-end',
-    minWidth: 92,
-  },
-});
-
 export function OnboardingValuePropStep({
   currencySymbol,
   onGetStarted,
@@ -120,8 +27,22 @@ export function OnboardingValuePropStep({
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
   const themeColor = useThemeColor();
+  const { height: windowHeight } = useWindowDimensions();
   const sym = currencySymbol;
   const trueHourlyRate = 15;
+
+  // Compact mode for smaller screens
+  const isCompact = windowHeight < 700;
+  const isMedium = windowHeight >= 700 && windowHeight < 800;
+
+  const wordmarkFontSize = isCompact ? 26 : isMedium ? 30 : 34;
+  const wordmarkLineHeight = isCompact ? 30 : isMedium ? 34 : 38;
+  const wordmarkTwoFontSize = isCompact ? 14 : isMedium ? 16 : 18;
+  const heroVerticalPadding = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
+  const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
+  const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.lg : spacing.xl;
+  const containerPaddingTop = isCompact ? spacing.xs : spacing.lg;
+
   const wordmarkPalette = useMemo(
     () => getThemeWordmarkPalette(themeColor, resolvedTheme),
     [resolvedTheme, themeColor],
@@ -155,28 +76,27 @@ export function OnboardingValuePropStep({
   );
   const totalTime = formatHours(totalAmount / trueHourlyRate);
 
+  const previewRowMarkSize = isCompact ? 36 : 42;
+  const previewRowDotSize = isCompact ? 10 : 12;
+
   return (
-    <View className="flex-1">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')}>
+    <View style={styles.container}>
+      <View style={[styles.content, { paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING, paddingTop: containerPaddingTop }]}>
+        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact={isCompact}>
           <View
             accessible
             accessibilityRole="text"
             accessibilityLabel={I18n.t('app.name')}
-            style={styles.wordmarkRow}
+            style={[styles.wordmarkRow, { minHeight: wordmarkLineHeight + 8 }]}
           >
-            <Text style={[styles.wordmarkMoney, { color: wordmarkPalette.money }]}>Money</Text>
-            <Text style={[styles.wordmarkTwo, { color: wordmarkPalette.two }]}>2</Text>
-            <Text style={[styles.wordmarkTime, { color: wordmarkPalette.time }]}>Time</Text>
+            <Text style={[styles.wordmarkBase, { fontSize: wordmarkFontSize, lineHeight: wordmarkLineHeight, color: wordmarkPalette.money }]}>Money</Text>
+            <Text style={[styles.wordmarkTwo, { fontSize: wordmarkTwoFontSize, lineHeight: wordmarkTwoFontSize, color: wordmarkPalette.two, transform: [{ translateY: wordmarkFontSize * 0.22 }] }]}>2</Text>
+            <Text style={[styles.wordmarkBase, { fontSize: wordmarkFontSize, lineHeight: wordmarkLineHeight, color: wordmarkPalette.time, marginLeft: -1 }]}>Time</Text>
           </View>
         </OnboardingStepHeader>
 
-        <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
-          <Card variant="accent">
+        <Animated.View entering={FadeIn.delay(150).duration(300)} style={[styles.cardWrapper, { marginTop: cardMarginTop }]}>
+          <Card variant="accent" className={isCompact ? 'p-3' : isMedium ? 'p-4' : undefined}>
             <CardContent>
               <View style={styles.previewHeaderRow}>
                 <View
@@ -203,30 +123,33 @@ export function OnboardingValuePropStep({
                   {
                     backgroundColor: `${themeColors.surface}E8`,
                     borderColor: `${themeColors.border}45`,
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: heroVerticalPadding,
+                    marginTop: isCompact ? spacing.xs : spacing.md,
                   },
                 ]}
               >
                 <Text variant="caption" tone="muted">
                   {I18n.t('onboarding.value_prop.preview_total')}
                 </Text>
-                <View style={styles.previewHeroValues} className="mt-3">
+                <View style={styles.previewHeroValues} className="mt-2">
                   <View>
-                    <Text variant="display" className="text-foreground tracking-tight">
+                    <Text variant={isCompact ? 'heading' : 'display'} className="text-foreground tracking-tight">
                       {formatCurrency(totalAmount, sym)}
                     </Text>
-                    <Text variant="caption" tone="muted" className="mt-2">
+                    <Text variant="caption" tone="muted" className="mt-1">
                       {I18n.t('onboarding.value_prop.money_mode')}
                     </Text>
                   </View>
                   <View className="items-end">
                     <TimeValueInline
                       value={totalTime}
-                      variant="heading"
+                      variant={isCompact ? 'subheading' : 'heading'}
                       textClassName="text-primary"
                       iconColor={themeColors.primary}
-                      iconSize={14}
+                      iconSize={isCompact ? 12 : 14}
                     />
-                    <Text variant="caption" tone="muted" className="mt-2">
+                    <Text variant="caption" tone="muted" className="mt-1">
                       {I18n.t('onboarding.value_prop.time_mode')}
                     </Text>
                   </View>
@@ -239,22 +162,25 @@ export function OnboardingValuePropStep({
                   {
                     backgroundColor: `${themeColors.card}F4`,
                     borderColor: `${themeColors.border}40`,
+                    marginTop: isCompact ? spacing.xs : spacing.md,
                   },
                 ]}
               >
                 {previewTransactions.map((item, index) => (
                   <React.Fragment key={item.title}>
-                    <View style={styles.previewRow}>
-                      <View style={[styles.previewRowMark, { backgroundColor: `${item.color}16` }]}>
-                        <View style={[styles.previewRowDot, { backgroundColor: item.color }]} />
+                    <View style={[styles.previewRow, { paddingHorizontal: spacing.lg, paddingVertical: rowVerticalPadding }]}>
+                      <View style={[styles.previewRowMark, { backgroundColor: `${item.color}16`, width: previewRowMarkSize, height: previewRowMarkSize }]}>
+                        <View style={[styles.previewRowDot, { backgroundColor: item.color, width: previewRowDotSize, height: previewRowDotSize }]} />
                       </View>
                       <View className="flex-1">
                         <Text variant="bodyStrong" className="text-foreground">
                           {item.title}
                         </Text>
-                        <Text variant="caption" tone="muted" className="mt-1">
-                          {item.subtitle}
-                        </Text>
+                        {!isCompact ? (
+                          <Text variant="caption" tone="muted" className="mt-0.5">
+                            {item.subtitle}
+                          </Text>
+                        ) : null}
                       </View>
                       <View style={styles.previewRowValues}>
                         <Text variant="bodyStrong" className="text-foreground">
@@ -263,7 +189,7 @@ export function OnboardingValuePropStep({
                         <TimeValueInline
                           value={formatHours(item.amount / trueHourlyRate)}
                           variant="caption"
-                          containerClassName="mt-1"
+                          containerClassName="mt-0.5"
                           style={{ color: item.color }}
                           iconColor={item.color}
                           iconSize={10}
@@ -284,7 +210,7 @@ export function OnboardingValuePropStep({
             </CardContent>
           </Card>
         </Animated.View>
-      </ScrollView>
+      </View>
 
       <OnboardingActionBar
         onBack={() => {
@@ -301,3 +227,75 @@ export function OnboardingValuePropStep({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  wordmarkBase: {
+    fontWeight: '900',
+    letterSpacing: -1.1,
+  },
+  wordmarkTwo: {
+    fontWeight: '900',
+    marginLeft: 1,
+  },
+  previewHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  previewBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  previewHero: {
+    borderRadius: 24,
+    borderWidth: 1,
+  },
+  previewHeroValues: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: spacing.md,
+  },
+  previewList: {
+    borderRadius: 24,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  previewRowDivider: {
+    height: 1,
+    marginLeft: spacing.lg * 2 + spacing.md,
+    marginRight: spacing.lg,
+  },
+  previewRowMark: {
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewRowDot: {
+    borderRadius: 999,
+  },
+  previewRowValues: {
+    alignItems: 'flex-end',
+    minWidth: 80,
+  },
+  cardWrapper: {
+    flex: 1,
+  },
+});

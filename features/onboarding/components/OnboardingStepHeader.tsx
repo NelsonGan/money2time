@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
@@ -8,34 +8,33 @@ interface OnboardingStepHeaderProps {
   title?: string;
   subtitle?: string;
   children?: React.ReactNode;
+  compact?: boolean;
 }
 
-const styles = StyleSheet.create({
-  container: {
+export function OnboardingStepHeader({ title, subtitle, children, compact }: OnboardingStepHeaderProps) {
+  const containerStyle: object = {
     alignItems: 'center',
-    paddingTop: spacing.lg,
-  },
-  subtitle: {
-    marginTop: spacing.sm,
+    paddingTop: compact ? spacing.xs : spacing.lg,
+  };
+  const subtitleStyle: object = {
+    marginTop: compact ? spacing.xxs : spacing.sm,
     maxWidth: 340,
-  },
-  content: {
-    marginTop: spacing.sm,
+  };
+  const contentStyle: object = {
+    marginTop: compact ? spacing.xxs : spacing.sm,
     alignItems: 'center',
-  },
-});
+  };
 
-export function OnboardingStepHeader({ title, subtitle, children }: OnboardingStepHeaderProps) {
   return (
-    <View style={styles.container}>
+    <View style={containerStyle}>
       {title ? (
         <Text variant="title" className="text-center text-foreground">
           {title}
         </Text>
       ) : null}
-      {children ? <View style={styles.content}>{children}</View> : null}
+      {children ? <View style={contentStyle}>{children}</View> : null}
       {subtitle ? (
-        <Text variant="friendly" tone="muted" className="text-center px-2" style={styles.subtitle}>
+        <Text variant="friendly" tone="muted" className="text-center px-2" style={subtitleStyle}>
           {subtitle}
         </Text>
       ) : null}

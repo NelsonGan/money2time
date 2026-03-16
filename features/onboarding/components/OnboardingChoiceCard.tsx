@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
@@ -77,6 +77,8 @@ export function OnboardingChoiceCard({
   centered = false,
 }: OnboardingChoiceCardProps) {
   const themeColors = useThemeColors();
+  const { height: windowHeight } = useWindowDimensions();
+  const minHeight = windowHeight < 700 ? 110 : 150;
 
   return (
     <Pressable
@@ -92,6 +94,7 @@ export function OnboardingChoiceCard({
           {
             backgroundColor: selected ? `${themeColors.primary}0A` : themeColors.card,
             borderColor: selected ? `${themeColors.primary}66` : `${themeColors.border}55`,
+            minHeight,
           },
         ]}
       >
