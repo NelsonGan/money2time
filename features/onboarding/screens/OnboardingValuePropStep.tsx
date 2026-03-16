@@ -7,7 +7,10 @@ import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
-import { ONBOARDING_HORIZONTAL_PADDING } from '~/features/onboarding/constants/layout';
+import {
+  ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  ONBOARDING_HORIZONTAL_PADDING,
+} from '~/features/onboarding/constants/layout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -33,15 +36,16 @@ export function OnboardingValuePropStep({
 
   // Compact mode for smaller screens
   const isCompact = windowHeight < 700;
-  const isMedium = windowHeight >= 700 && windowHeight < 800;
+  const isMedium = windowHeight >= 700 && windowHeight < 900;
 
   const wordmarkFontSize = isCompact ? 26 : isMedium ? 30 : 34;
   const wordmarkLineHeight = isCompact ? 30 : isMedium ? 34 : 38;
   const wordmarkTwoFontSize = isCompact ? 14 : isMedium ? 16 : 18;
   const heroVerticalPadding = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
-  const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.lg : spacing.xl;
-  const containerPaddingTop = isCompact ? spacing.xs : spacing.lg;
+  const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
+  // Keep top padding tight — the progress header already provides visual separation
+  const containerPaddingTop = isCompact ? spacing.xxs : spacing.xs;
 
   const wordmarkPalette = useMemo(
     () => getThemeWordmarkPalette(themeColor, resolvedTheme),
@@ -81,8 +85,8 @@ export function OnboardingValuePropStep({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.content, { paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING, paddingTop: containerPaddingTop }]}>
-        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact={isCompact}>
+      <View style={[styles.content, { paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING, paddingTop: containerPaddingTop, paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE }]}>
+        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact>
           <View
             accessible
             accessibilityRole="text"

@@ -178,7 +178,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const renderProgressHeader = () => (
     <View
-      className="px-5 pt-4 pb-2"
+      className="px-5 pt-3 pb-2"
       accessibilityLabel={I18n.t('onboarding.flow.step_a11y', {
         step: visualStep,
         total: totalVisualSteps,
@@ -188,7 +188,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       <Text variant="caption" tone="muted" className="text-center">
         {I18n.t('onboarding.progress_step_of', { step: visualStep, total: totalVisualSteps })}
       </Text>
-      <View className="mt-3 flex-row items-center gap-2">
+      <View className="mt-1.5 flex-row items-center gap-2">
         {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
           <View
             key={i}
