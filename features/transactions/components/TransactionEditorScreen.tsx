@@ -39,11 +39,12 @@ import {
   NumpadPanel,
   SummaryRow,
 } from '~/features/transactions/components/editor';
-import { formatMoney } from '~/features/transactions/components/editor/calculatorEngine';
+import { evaluateExpression, formatMoney } from '~/features/transactions/components/editor/calculatorEngine';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import { getDistinctNotesSuggestions } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionType } from '~/types';
 import { cn } from '~/utils';
@@ -352,6 +353,7 @@ export function TransactionEditorScreen({
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
+  const [amountExpression, setAmountExpression] = useState('');
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
   const [recurrencePattern, setRecurrencePattern] = useState<
@@ -393,6 +395,8 @@ export function TransactionEditorScreen({
   const editorScrollRef = useRef<ScrollView>(null);
   const fieldOffsetsRef = useRef<Partial<Record<NonNullActiveField, number>>>({});
   const noteInputRef = useRef<TextInput>(null);
+  const noteSuggestionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [noteSuggestions, setNoteSuggestions] = useState<string[]>([]);
   const recurrenceNameRef = useRef<TextInput>(null);
   const recurrenceIntervalRef = useRef<TextInput>(null);
   const hasSavedTypeSelectionRef = useRef<Record<TransactionType, boolean>>({
@@ -687,12 +691,21 @@ export function TransactionEditorScreen({
     Keyboard.dismiss();
   }, []);
 
+  useEffect(() => {
+    if (activeField !== 'amount') {
+      setAmountExpression('');
+    }
+  }, [activeField]);
+
   const amountDisplay = useMemo(() => {
+    if (activeField === 'amount' && amountExpression) {
+      return `${settings.currencySymbol}${amountExpression}`;
+    }
     if (isPlainAmountDraft(amount)) return `${settings.currencySymbol}${amount}`;
     const num = Number(amount);
     if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}0`;
     return `${settings.currencySymbol}${formatMoney(num)}`;
-  }, [amount, settings.currencySymbol]);
+  }, [activeField, amount, amountExpression, settings.currencySymbol]);
 
   const amountTone = useMemo(() => {
     if (isBalanceAdjustmentType) {
@@ -976,13 +989,20 @@ export function TransactionEditorScreen({
     [activateField],
   );
 
-  const handleAmountValueChange = useCallback((val: string) => {
-    setAmount(val);
+  const handleAmountValueChange = useCallback((expr: string) => {
+    setAmountExpression(expr);
+    if (!expr) {
+      setAmount('');
+    } else {
+      const evaluated = evaluateExpression(expr);
+      setAmount(Number.isFinite(evaluated) ? String(evaluated) : '');
+    }
   }, []);
 
   const handleAmountConfirm = useCallback(
     (val: string) => {
       setAmount(val);
+      setAmountExpression('');
       if (hideAccountSelector) {
         activateField('category');
       } else {
@@ -1040,6 +1060,14 @@ export function TransactionEditorScreen({
 
   const handleNoteChange = useCallback((nextNote: string) => {
     setNote(nextNote);
+    if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
+    if (!nextNote.trim()) {
+      setNoteSuggestions([]);
+      return;
+    }
+    noteSuggestionsTimerRef.current = setTimeout(() => {
+      setNoteSuggestions(getDistinctNotesSuggestions(nextNote.trim()));
+    }, 150);
   }, []);
 
   const handleCategorySelect = (nextCategoryId: string) => {
@@ -1087,9 +1115,6 @@ export function TransactionEditorScreen({
         return (
           <NumpadPanel
             initialExpression={amount}
-            currencySymbol={settings.currencySymbol}
-            trueHourlyRate={currentMonthWage?.trueHourlyRate ?? 0}
-            hourRounding={settings.hourRounding}
             onValueChange={handleAmountValueChange}
             onConfirm={handleAmountConfirm}
           />
@@ -1289,7 +1314,15 @@ export function TransactionEditorScreen({
           keyboardShouldPersistTaps="handled"
         >
           {/* Summary rows */}
-          <View className="rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+          <View
+            className="bg-card/60 border border-border/25 overflow-hidden"
+            style={{
+              borderRadius: 20,
+              ...(noteSuggestions.length > 0 && activeField === 'note'
+                ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottomWidth: 0 }
+                : {}),
+            }}
+          >
             {!isBalanceAdjustmentType ? (
               <>
                 {/* Date row */}
@@ -1336,9 +1369,12 @@ export function TransactionEditorScreen({
                       {I18n.t('transactions.editor.amount')}
                     </Text>
                   </View>
-                  <View>
+                  <View style={{ maxWidth: 200 }}>
                     <Text
                       variant="heading"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.5}
+                      numberOfLines={1}
                       className={cn(
                         amountTone === 'error'
                           ? 'text-destructive'
@@ -1569,9 +1605,52 @@ export function TransactionEditorScreen({
                     </View>
                   </SummaryRow>
                 </View>
+
               </>
             ) : null}
           </View>
+
+          {/* Note suggestions dropdown */}
+          {noteSuggestions.length > 0 && activeField === 'note' ? (
+            <Animated.View
+              entering={FadeIn.duration(120)}
+              style={{
+                zIndex: 20,
+                borderTopWidth: 0,
+                borderLeftWidth: 1,
+                borderRightWidth: 1,
+                borderBottomWidth: 1,
+                borderColor: `${themeColors.border}25`,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20,
+                backgroundColor: themeColors.card,
+                overflow: 'hidden',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.08,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+            >
+              {noteSuggestions.map((suggestion) => (
+                <React.Fragment key={suggestion}>
+                  <View className="h-[1px] bg-border/15 mx-4" />
+                  <Pressable
+                    style={{ paddingHorizontal: 16, paddingVertical: 11 }}
+                    onPress={() => {
+                      handleNoteChange(suggestion);
+                      setNoteSuggestions([]);
+                      noteInputRef.current?.blur();
+                    }}
+                  >
+                    <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                      {suggestion}
+                    </Text>
+                  </Pressable>
+                </React.Fragment>
+              ))}
+            </Animated.View>
+          ) : null}
 
           {/* Recurring options (traditional form inputs, secondary) */}
           {recurringOptions ? (

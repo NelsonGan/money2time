@@ -134,7 +134,7 @@ const en = {
       time_mode: 'Time mode',
       language_label: 'Language',
       currency_label: 'Currency',
-      skip_setup: 'Skip Setup',
+      skip_setup: 'Skip',
     },
     preferences: {
       title: 'Set the basics',
