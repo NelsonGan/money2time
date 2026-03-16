@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -35,6 +35,8 @@ export function OnboardingModeStep({
 }: OnboardingModeStepProps) {
   const swipeBackGesture = useEdgeSwipeBack(onBack);
   const [selected, setSelected] = useState<'simple' | 'power' | null>(null);
+  const { height: windowHeight } = useWindowDimensions();
+  const isCompact = windowHeight < 700;
 
   const handleContinue = () => {
     if (!selected) return;
@@ -53,7 +55,7 @@ export function OnboardingModeStep({
         >
           <OnboardingStepHeader title={I18n.t('onboarding.mode.title')} />
 
-          <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8 gap-4">
+          <Animated.View entering={FadeIn.delay(150).duration(300)} className={isCompact ? 'mt-4 gap-3' : 'mt-8 gap-4'}>
             <OnboardingChoiceCard
               title={I18n.t('onboarding.mode.simple_title')}
               description={I18n.t('onboarding.mode.simple_description')}

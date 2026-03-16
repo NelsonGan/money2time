@@ -1,6 +1,6 @@
 import { Bell, CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CardContent, Text } from '~/components/ui';
@@ -20,13 +20,16 @@ interface OnboardingNotificationsStepProps {
   onSkip: () => void;
 }
 
-const ICON_SIZE = 22;
-
 export function OnboardingNotificationsStep({
   onEnable,
   onSkip,
 }: OnboardingNotificationsStepProps) {
   const themeColors = useThemeColors();
+  const { height: windowHeight } = useWindowDimensions();
+  const isCompact = windowHeight < 700;
+  const ICON_SIZE = isCompact ? 18 : 22;
+  const iconCircleSize = isCompact ? 72 : 100;
+  const bellSize = isCompact ? 36 : 48;
 
   const features = [
     {
@@ -58,15 +61,15 @@ export function OnboardingNotificationsStep({
           subtitle={I18n.t('onboarding.notifications.subtitle')}
         />
 
-        <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+        <Animated.View entering={FadeIn.delay(150).duration(300)} className={isCompact ? 'mt-5' : 'mt-8'}>
           <View style={styles.iconContainer}>
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: `${themeColors.primary}14` },
+                { backgroundColor: `${themeColors.primary}14`, width: iconCircleSize, height: iconCircleSize, borderRadius: iconCircleSize / 2 },
               ]}
             >
-              <Bell size={48} color={themeColors.primary} />
+              <Bell size={bellSize} color={themeColors.primary} />
             </View>
           </View>
 

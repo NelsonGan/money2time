@@ -857,7 +857,7 @@ export function TransactionEditorScreen({
       : I18n.t('transactions.editor.title_edit'));
   const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
-  const summaryFlex = windowHeight < 700 ? 0.38 : 0.44;
+  const summaryFlex = windowHeight < 650 ? 0.32 : windowHeight < 750 ? 0.38 : 0.44;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
@@ -1092,7 +1092,6 @@ export function TransactionEditorScreen({
             hourRounding={settings.hourRounding}
             onValueChange={handleAmountValueChange}
             onConfirm={handleAmountConfirm}
-            compact={windowHeight < 700}
           />
         );
       case 'date':
@@ -1223,7 +1222,7 @@ export function TransactionEditorScreen({
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="px-5 pt-4 pb-2 flex-row items-start justify-between">
+      <View className={cn('px-5 pb-2 flex-row items-start justify-between', windowHeight < 700 ? 'pt-2' : 'pt-4')}>
         <View className="flex-row items-center gap-3">
           <Pressable
             accessibilityRole="button"
