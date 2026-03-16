@@ -12,6 +12,31 @@ export type ThemeColor =
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 export type UserMode = 'power' | 'simple';
 
+export interface NotificationPreferences {
+  dailyCheckin: {
+    enabled: boolean;
+    hour: number;
+    minute: number;
+  };
+  recurringAlert: {
+    enabled: boolean;
+  };
+  weeklySummary: {
+    enabled: boolean;
+    dayOfWeek: number; // 1=Mon..7=Sun
+    hour: number;
+    minute: number;
+    displayMode: DisplayMode;
+  };
+}
+
+export interface ProcessedRecurringRule {
+  name: string;
+  type: string;
+  amount: number;
+  currency: string;
+}
+
 export type AccountType = 'debit' | 'credit';
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;

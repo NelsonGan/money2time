@@ -13,6 +13,7 @@ import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
+import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
@@ -23,11 +24,12 @@ import {
   OnboardingBootstrapStep,
 } from './OnboardingBootstrapStep';
 import { OnboardingModeStep } from './OnboardingModeStep';
+import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -66,7 +68,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
   const visualStep = step;
-  const totalVisualSteps = isSimpleUser ? 4 : 5;
+  const totalVisualSteps = isSimpleUser ? 5 : 6;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -105,7 +107,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         },
       ],
     );
-  }, [onComplete, step]);
+  }, [completeOnboarding, onComplete, step]);
 
   const handleImport = useCallback(async () => {
     if (isImporting) return;
@@ -250,12 +252,28 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       {step === 3 && (
         <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-3">
+          <OnboardingNotificationsStep
+            onEnable={async () => {
+              void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
+              await requestPermissions();
+              setStep(4);
+            }}
+            onSkip={() => {
+              void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
+              setStep(4);
+            }}
+          />
+        </Animated.View>
+      )}
+
+      {step === 4 && (
+        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
           <OnboardingWageStep
             settings={settings}
             currentMonthWage={currentMonthWage}
             wageIsSet={wageIsSet}
-            onBack={() => setStep(2)}
-            onContinue={() => setStep(4)}
+            onBack={() => setStep(3)}
+            onContinue={() => setStep(5)}
             onOpenWageCalculator={() => {
               void triggerHaptic('selection');
               setShowWageCalculator(true);
@@ -264,10 +282,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         </Animated.View>
       )}
 
-      {step === 4 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
+      {step === 5 && (
+        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
           <OnboardingModeStep
-            onBack={() => setStep(3)}
+            onBack={() => setStep(4)}
             onSelectSimple={() => {
               void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
               setIsSimpleUser(true);
@@ -280,16 +298,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             onSelectPower={() => {
               void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
               setIsSimpleUser(false);
-              setStep(5);
+              setStep(6);
             }}
           />
         </Animated.View>
       )}
 
-      {step === 5 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+      {step === 6 && (
+        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
           <OnboardingBootstrapStep
-            onBack={() => setStep(4)}
+            onBack={() => setStep(5)}
             onImport={() => {
               void handleImport();
             }}
