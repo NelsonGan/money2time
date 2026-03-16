@@ -18,6 +18,8 @@ import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
+import { NotificationDetailScreen } from './NotificationDetailScreen';
+import { NotificationsScreen } from './NotificationsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
@@ -70,6 +72,7 @@ function SettingsHomeRoute({
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
+      onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
@@ -245,6 +248,30 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               onOpenEditor={onOpenRecurringEditor}
               useNativeBackGesture
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Notifications">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <NotificationsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenDetail={(type) =>
+                props.navigation.navigate('NotificationDetail', { type })
+              }
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="NotificationDetail">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <NotificationDetailScreen
+              type={props.route.params.type}
+              onBack={() => props.navigation.goBack()}
             />
           );
         }}

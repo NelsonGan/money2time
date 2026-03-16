@@ -40,6 +40,7 @@ function ensureCoreData() {
         themeMode: 'system',
         themeColor: 'rosewood',
         insightsPrefsJson: null,
+        notificationPrefsJson: null,
         onboardingCompleted: false,
         createdAt: now,
         updatedAt: now,

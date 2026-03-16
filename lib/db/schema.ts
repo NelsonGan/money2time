@@ -1,4 +1,4 @@
-import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+import { integer,real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const accountsTable = sqliteTable('accounts', {
   id: text('id').primaryKey(),
@@ -92,6 +92,7 @@ export const settingsTable = sqliteTable('settings', {
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
   insightsPrefsJson: text('insights_prefs_json'),
+  notificationPrefsJson: text('notification_prefs_json'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),
