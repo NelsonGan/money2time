@@ -41,32 +41,7 @@ function getNotAvailableMessageKey(reason: RevenueCatAvailabilityReason | null) 
 }
 
 const TIP_ROW_COLORS = ['#E53935', '#FB8C00', '#43A047'];
-const CREATOR_HOURLY_RATE = 10;
-
-function getCreatorTimeParts(amount: number) {
-  const totalMinutes = Math.round((amount / CREATOR_HOURLY_RATE) * 60);
-
-  if (totalMinutes < 60) {
-    return {
-      prefix: I18n.t('settings.ad_support_time_prefix'),
-      value: I18n.t('settings.ad_support_time_minutes_value', {
-        minutes: totalMinutes,
-      }),
-      suffix: I18n.t('settings.ad_support_time_suffix'),
-    };
-  }
-
-  const hours = totalMinutes / 60;
-
-  return {
-    prefix: I18n.t('settings.ad_support_time_prefix'),
-    value:
-      hours === 1
-        ? I18n.t('settings.ad_support_time_hours_one_value', { hours })
-        : I18n.t('settings.ad_support_time_hours_other_value', { hours }),
-    suffix: I18n.t('settings.ad_support_time_suffix'),
-  };
-}
+const TIP_TIME_LABELS = ['About 30 min', 'About 1 hr', 'About 3 hrs'];
 
 export function AdSupportSection() {
   const { adRemovalState, purchaseAdRemovalTip, restoreAdRemovalPurchases } = useApp();
@@ -304,7 +279,7 @@ export function AdSupportSection() {
               adRemovalState.tipOptions.map((option, index) => {
                 const isOptionPurchasing = purchasingProductId === option.productIdentifier;
                 const accentColor = TIP_ROW_COLORS[index % TIP_ROW_COLORS.length];
-                const creatorTimeParts = getCreatorTimeParts(option.amount);
+                const timeLabel = TIP_TIME_LABELS[index] ?? TIP_TIME_LABELS[TIP_TIME_LABELS.length - 1];
 
                 return (
                   <Pressable
@@ -327,11 +302,11 @@ export function AdSupportSection() {
                           {option.priceString}
                         </Text>
                         <Text variant="caption" tone="muted" className="mt-1">
-                          {creatorTimeParts.prefix}
+                          {I18n.t('settings.ad_support_time_prefix')}
                           <Text variant="caption" style={{ color: accentColor }}>
-                            {creatorTimeParts.value}
+                            {timeLabel}
                           </Text>
-                          {creatorTimeParts.suffix}
+                          {I18n.t('settings.ad_support_time_suffix')}
                         </Text>
                       </View>
                       {isOptionPurchasing ? <ActivityIndicator color={accentColor} /> : null}
