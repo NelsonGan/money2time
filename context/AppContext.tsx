@@ -15,7 +15,6 @@ import {
   categoriesTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
-  settingsTable,
   transactionsTable,
 } from '~/lib/db/schema';
 import { I18n, setAppLocale } from '~/lib/i18n';
@@ -45,6 +44,13 @@ import {
   type MMImportSummary,
 } from '~/services/mmbakImportService';
 import {
+  cancelAllNotifications,
+  DEFAULT_NOTIFICATION_PREFS,
+  fireRecurringTransactionNotification,
+  initNotificationHandler,
+  syncScheduledNotifications,
+} from '~/services/notifications';
+import {
   fetchRevenueCatPaywallState,
   getInitialRevenueCatPaywallState,
   purchaseRevenueCatTip as purchaseRevenueCatTipRequest,
@@ -64,17 +70,20 @@ import {
   type Category,
   type DateRange,
   type MonthlyWageSettings,
+  type NotificationPreferences,
   type RecurringTransactionRule,
   type TransactionFilters,
   type TransactionWithRelations,
-  type UserSettings,
   type UserMode,
+  type UserSettings,
   type WageConfig,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
+  dayKeyFromDateLocal,
+  formatHours,
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   normalizeMonthKey,
@@ -171,6 +180,8 @@ interface AppContextValue extends AppState {
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
+  notificationPrefs: NotificationPreferences;
+  updateNotificationPrefs: (updates: Partial<NotificationPreferences>) => void;
 
   isSimpleMode: boolean;
   simpleWalletId: string | null;
@@ -490,6 +501,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
   const [activeAccountFilter, setActiveAccountFilter] = useState<string | null>(null);
   const [insightsPreferencesJson, setInsightsPreferencesJson] = useState<string | null>(null);
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
+    DEFAULT_NOTIFICATION_PREFS,
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const refreshAll = useCallback(() => {
@@ -504,18 +518,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         null;
       const nextSettings = settingsRepository.get();
       const nextInsightsPreferencesJson = settingsRepository.getInsightsPreferencesJson();
+      const nextNotificationPrefsJson = settingsRepository.getNotificationPreferencesJson();
+      const nextNotificationPrefs: NotificationPreferences = nextNotificationPrefsJson
+        ? { ...DEFAULT_NOTIFICATION_PREFS, ...JSON.parse(nextNotificationPrefsJson) }
+        : DEFAULT_NOTIFICATION_PREFS;
       accountGroupsRepository.ensureFromActiveAccounts();
-      recurringRulesRepository.runDueTransactions();
+      const processedRules = recurringRulesRepository.runDueTransactions();
+      const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
+
+      // Fire notifications for processed recurring rules
+      if (processedRules.length > 0 && nextNotificationPrefs.recurringAlert.enabled) {
+        for (const rule of processedRules) {
+          const amountStr = `${nextSettings.currencySymbol}${rule.amount.toFixed(2)}`;
+          const hoursStr =
+            trueHourlyRate > 0
+              ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate, nextSettings.hourRounding))
+              : undefined;
+          void fireRecurringTransactionNotification(rule.name, amountStr, hoursStr);
+        }
+      }
+
       const nextAccountGroups = accountGroupsRepository.list();
       const nextRecurringRules = recurringRulesRepository.list();
       const nextAccounts = accountsRepository.list();
       const nextCategories = categoriesRepository.list();
       const nextTransactions = transactionsRepository.list();
 
+      // Compute last 7 days spending for weekly notification body
+      const sevenDaysAgoKey = (() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        return dayKeyFromDateLocal(d);
+      })();
+      const lastWeekSpending = nextTransactions
+        .filter((t) => t.type === 'expense' && !t.deletedAt && t.date >= sevenDaysAgoKey)
+        .reduce((sum, t) => sum + t.amount, 0);
+      const weeklyAmountStr = `${nextSettings.currencySymbol}${lastWeekSpending.toFixed(2)}`;
+      const weeklyHoursStr =
+        trueHourlyRate > 0
+          ? formatHours(amountToHoursByRate(lastWeekSpending, trueHourlyRate, nextSettings.hourRounding))
+          : undefined;
+      const weeklyBody = weeklyHoursStr
+        ? `${weeklyAmountStr} · ${weeklyHoursStr}`
+        : weeklyAmountStr;
+
+      // Sync scheduled notifications with current prefs and fresh weekly data
+      void syncScheduledNotifications(nextNotificationPrefs, weeklyBody);
+
       setCurrentMonthWage(effectiveCurrentWage);
       setMonthlyWages(allWages);
       setSettings(nextSettings);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
+      setNotificationPrefs(nextNotificationPrefs);
       setAccountGroups(nextAccountGroups);
       setRecurringRules(nextRecurringRules);
       setAccounts(nextAccounts);
@@ -1198,6 +1252,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateNotificationPrefs = useCallback(
+    (updates: Partial<NotificationPreferences>) => {
+      setNotificationPrefs((previous) => {
+        const merged = {
+          dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
+          recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
+          weeklySummary: { ...previous.weeklySummary, ...updates.weeklySummary },
+        };
+        settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
+        void syncScheduledNotifications(merged);
+        return merged;
+      });
+    },
+    [],
+  );
+
+  // Initialize notification handler and sync on mount
+  useEffect(() => {
+    initNotificationHandler();
+  }, []);
+
   useEffect(() => {
     if (settings?.displayMode !== 'time') return;
     if (canUseTimeDisplayMode) return;
@@ -1409,6 +1484,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeAllData();
     });
+    void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
   }, [runMutation]);
@@ -1616,6 +1692,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             importMoneyManagerBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
+            notificationPrefs,
+            updateNotificationPrefs,
             isSimpleMode,
             simpleWalletId,
             completeOnboarding,
@@ -1688,6 +1766,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       importMoneyManagerBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
+      notificationPrefs,
+      updateNotificationPrefs,
       isSimpleMode,
       simpleWalletId,
       completeOnboarding,
