@@ -10,8 +10,8 @@ import type {
   TransactionType,
   TransactionWithRelations,
 } from '~/types';
-import { sortTransactions } from '~/utils/transactionSorting';
 import { newId, nowIso } from '~/utils/id';
+import { sortTransactions } from '~/utils/transactionSorting';
 
 import { toTransaction } from './mappers';
 
@@ -248,7 +248,7 @@ class TransactionsRepository {
       .run();
   }
 
-  updateMany(updates: Array<{ id: string; input: Partial<CreateTransactionInput> }>) {
+  updateMany(updates: { id: string; input: Partial<CreateTransactionInput> }[]) {
     if (updates.length === 0) return;
     const sqlite = getSQLite();
     const db = getDb();
@@ -366,6 +366,16 @@ class TransactionsRepository {
     const orderedRows = sortTransactions(rows, 'date_desc');
     return attachRelations(orderedRows);
   }
+}
+
+export function getDistinctNotesSuggestions(prefix: string): string[] {
+  if (!prefix) return [];
+  const sqlite = getSQLite();
+  const rows = sqlite.getAllSync<{ note: string }>(
+    'SELECT DISTINCT note FROM transactions WHERE note IS NOT NULL AND note LIKE ? AND deleted_at IS NULL LIMIT 5',
+    [`${prefix}%`],
+  );
+  return rows.map((r) => r.note);
 }
 
 export const transactionsRepository = new TransactionsRepository();

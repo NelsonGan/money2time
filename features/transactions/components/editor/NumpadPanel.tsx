@@ -1,7 +1,6 @@
 import { Delete } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,13 +8,13 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text, TimeValueInline } from '~/components/ui';
+import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { amountToHoursByRate, formatHours } from '~/utils/formatters';
 
 import {
   appendDecimal,
@@ -31,16 +30,10 @@ type KeyValue = string;
 
 interface NumpadPanelProps {
   initialExpression: string;
-  currencySymbol: string;
-  trueHourlyRate: number;
-  hourRounding: number;
-  onValueChange: (formatted: string) => void;
+  onValueChange: (expression: string) => void;
   onConfirm: (formatted: string) => void;
 }
 
-function isDirectAmountExpression(expression: string) {
-  return /^-?(?:\d+\.?\d*|\d*\.\d+)$/.test(expression);
-}
 
 const NumpadKey = React.memo(function NumpadKey({
   value,
@@ -142,9 +135,6 @@ const NumpadKey = React.memo(function NumpadKey({
 
 export function NumpadPanel({
   initialExpression,
-  currencySymbol,
-  trueHourlyRate,
-  hourRounding,
   onValueChange,
   onConfirm,
 }: NumpadPanelProps) {
@@ -171,13 +161,6 @@ export function NumpadPanel({
     setExpression(sanitized);
     pristineRef.current = sanitized.length > 0;
   }, [initialExpression]);
-
-  const displayExpression = expression || '0';
-  const previewValue = useMemo(() => evaluateExpression(expression), [expression]);
-  const previewHours = useMemo(
-    () => amountToHoursByRate(Math.max(0, previewValue), trueHourlyRate, hourRounding),
-    [hourRounding, previewValue, trueHourlyRate],
-  );
 
   const handleKeyPress = useCallback(
     (key: KeyValue) => {
@@ -214,14 +197,7 @@ export function NumpadPanel({
 
       expressionRef.current = nextExpression;
       setExpression(nextExpression);
-      const evaluated = evaluateExpression(nextExpression);
-      if (!nextExpression) {
-        onValueChange('');
-        return;
-      }
-      onValueChange(
-        isDirectAmountExpression(nextExpression) ? nextExpression : formatMoney(evaluated),
-      );
+      onValueChange(nextExpression);
     },
     [onConfirm, onValueChange],
   );
@@ -232,32 +208,6 @@ export function NumpadPanel({
 
   return (
     <View className="flex-1 px-4 pt-1.5" style={{ paddingBottom: Math.max(8, bottomInset) }}>
-      <View className="rounded-2xl border border-border/30 bg-card/80 px-3 py-2 mb-2">
-        <Text variant="caption" tone="muted" numberOfLines={1}>
-          {displayExpression}
-        </Text>
-        <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
-          = {currencySymbol}
-          {formatMoney(previewValue)}
-        </Text>
-        {trueHourlyRate > 0 ? (
-          <View className="mt-0.5 flex-row items-center gap-1">
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              ≈
-            </Text>
-            <TimeValueInline
-              value={formatHours(previewHours)}
-              variant="caption"
-              tone="primary"
-              iconColor={themeColors.primary}
-              iconSize={10}
-            />
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t('home.converter.of_work_suffix')}
-            </Text>
-          </View>
-        ) : null}
-      </View>
 
       <View className="flex-1 gap-1.5">
         <View className="flex-1 flex-row gap-1.5">
