@@ -28,8 +28,8 @@ import {
   SettingsPageLayout,
   SettingsSection,
   Text,
-  TimeValueInline,
   ThemeModal,
+  TimeValueInline,
 } from '~/components/ui';
 import {
   ACCOUNT_TYPE_OPTIONS,
@@ -1227,9 +1227,8 @@ export function AccountsScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
-      hourRounding: settings.hourRounding,
     }),
-    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+    [settings.currencySymbol, settings.displayMode],
   );
   const activeAccountId = accountId ?? selectedAccountId;
   const accountById = useMemo(
@@ -1305,11 +1304,10 @@ export function AccountsScreen({
         {
           currencySymbol: settings.currencySymbol,
           displayMode: 'money',
-          hourRounding: settings.hourRounding,
         },
         { showSign: false, trueHourlyRate: 0 },
       ),
-    [normalizedSelectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
+    [normalizedSelectedTransactionTotal, settings.currencySymbol],
   );
   const selectedTransactionTotalToneClass = 'text-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;

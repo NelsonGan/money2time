@@ -1,12 +1,13 @@
 import { Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type {
+  TextInput} from 'react-native';
 import {
   Alert,
   FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -19,8 +20,8 @@ import { Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/compone
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
-  ActivityTransactionList,
   ActivitySearchRow,
+  ActivityTransactionList,
   DisplayModeToggle,
   MonthPagerPage,
   TypeFilterPill,
@@ -244,9 +245,8 @@ export function TransactionsScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
-      hourRounding: settings.hourRounding,
     }),
-    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+    [settings.currencySymbol, settings.displayMode],
   );
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
@@ -294,11 +294,10 @@ export function TransactionsScreen({
         {
           currencySymbol: settings.currencySymbol,
           displayMode: 'money',
-          hourRounding: settings.hourRounding,
         },
         { showSign: false, trueHourlyRate: 0 },
       ),
-    [selectedTransactionTotal, settings.currencySymbol, settings.hourRounding],
+    [selectedTransactionTotal, settings.currencySymbol],
   );
   const selectedTransactionTotalToneClass = 'text-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
