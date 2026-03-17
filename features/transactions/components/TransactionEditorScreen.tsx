@@ -1369,10 +1369,18 @@ export function TransactionEditorScreen({
                       {I18n.t('transactions.editor.amount')}
                     </Text>
                   </View>
-                  <View style={{ flexShrink: 1 }}>
+                  <View style={{ maxWidth: '55%' }}>
                     <Text
                       variant="heading"
                       numberOfLines={1}
+                      style={{
+                        fontSize:
+                          amountDisplay.length > 12
+                            ? 14
+                            : amountDisplay.length > 9
+                              ? 18
+                              : 24,
+                      }}
                       className={cn(
                         amountTone === 'error'
                           ? 'text-destructive'
