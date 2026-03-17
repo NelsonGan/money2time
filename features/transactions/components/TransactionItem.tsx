@@ -20,7 +20,7 @@ import {
 
 type TransactionDisplaySettings = Pick<
   UserSettings,
-  'currencySymbol' | 'displayMode' | 'hourRounding'
+  'currencySymbol' | 'displayMode'
 >;
 
 interface TransactionItemProps {
@@ -158,7 +158,7 @@ function TransactionItemView({
       ? null
       : isTimeMode
         ? formatCurrency(transaction.amount, settings.currencySymbol)
-        : formatHours(amountToHoursByRate(transaction.amount, rate, settings.hourRounding));
+        : formatHours(amountToHoursByRate(transaction.amount, rate));
   const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
   const showsSecondaryTime = !isTimeMode && secondaryValue !== null;
   const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
@@ -472,6 +472,5 @@ export const TransactionItem = memo(
     prev.selectionMode === next.selectionMode &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
-    prev.settings.hourRounding === next.settings.hourRounding &&
     prev.getTrueHourlyRateForDate === next.getTrueHourlyRateForDate,
 );

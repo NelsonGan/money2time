@@ -1,6 +1,15 @@
 import type {
-  AccountGroup,
+  AccountGroupRow,
+  AccountRow,
+  CategoryRow,
+  MonthlyWageSettingsRow,
+  RecurringRuleRow,
+  SettingsRow,
+  TransactionRow,
+} from '~/lib/db/schema';
+import type {
   Account,
+  AccountGroup,
   Category,
   MonthlyWageSettings,
   RecurringTransactionRule,
@@ -10,15 +19,6 @@ import type {
   UserMode,
   UserSettings,
 } from '~/types';
-import type {
-  AccountGroupRow,
-  AccountRow,
-  CategoryRow,
-  MonthlyWageSettingsRow,
-  RecurringRuleRow,
-  SettingsRow,
-  TransactionRow,
-} from '~/lib/db/schema';
 
 function asAccountType(value: string): Account['type'] {
   switch (value) {
@@ -213,7 +213,6 @@ export function toSettings(row: SettingsRow): UserSettings {
     locale: row.locale,
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
-    hourRounding: row.hourRounding,
     displayMode: asDisplayMode(row.displayMode),
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),

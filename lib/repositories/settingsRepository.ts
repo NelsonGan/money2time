@@ -34,7 +34,6 @@ class SettingsRepository {
         | 'locale'
         | 'currencyCode'
         | 'currencySymbol'
-        | 'hourRounding'
         | 'displayMode'
         | 'themeMode'
         | 'themeColor'
@@ -104,7 +103,6 @@ class SettingsRepository {
         locale: getDeviceLocale(),
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
-        hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
         themeColor: 'rosewood',

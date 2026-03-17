@@ -2316,7 +2316,6 @@ export function InsightsScreen({
   const assetHistoryAccountOptions = accounts;
   const {
     includedAssetHistoryAccounts,
-    includedAssetHistoryAccountIds,
     includedAssetHistoryAccountById,
   } = useMemo(() => {
     const includedAccounts: Account[] = [];
@@ -3023,7 +3022,7 @@ export function InsightsScreen({
           }
           if (trueHourlyRate <= 0) return;
 
-          const hours = amountToHoursByRate(tx.amount, trueHourlyRate, settings.hourRounding);
+          const hours = amountToHoursByRate(tx.amount, trueHourlyRate);
           if (!Number.isFinite(hours) || hours <= 0) return;
 
           const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
@@ -3333,7 +3332,6 @@ export function InsightsScreen({
       includedAssetHistoryAccounts,
       activeLocale,
       settings.displayMode,
-      settings.hourRounding,
       transactionDayKeyById,
       transactionMonthKeyById,
     ],
@@ -3409,20 +3407,6 @@ export function InsightsScreen({
     [activeLocale, displayPeriodPreset, headerPreviewRange],
   );
 
-  const renderValue = useCallback(
-    (value: number) =>
-      settings.displayMode === 'time'
-        ? formatHours(value)
-        : formatAmount(value, settings, { showSign: false }),
-    [settings],
-  );
-  const renderCompactValue = useCallback(
-    (value: number) =>
-      settings.displayMode === 'time'
-        ? formatHours(value)
-        : formatCompactCurrency(value, settings.currencySymbol),
-    [settings.currencySymbol, settings.displayMode],
-  );
   const renderValueNode = useCallback(
     (
       value: number,
@@ -4947,7 +4931,7 @@ export function InsightsScreen({
             const rate = getTrueHourlyRateForDate(`${row.monthKey}-15T12:00:00`);
             return {
               ...row,
-              totalAssets: amountToHoursByRate(row.totalAssets, rate, settings.hourRounding),
+              totalAssets: amountToHoursByRate(row.totalAssets, rate),
             };
           })
         : pageData.monthRows;
@@ -5552,43 +5536,6 @@ export function InsightsScreen({
     () => buildInsightsCategoryPanelData(categories, 'expense'),
     [categories],
   );
-  const insightsFilterCount = useMemo(() => {
-    if (!hasInsightsFilters) return 0;
-    let count = 0;
-    if (hasPeriodFilter && periodPreset !== 'month') count += 1;
-    if (hasAccountFilter && selectedAccountIds.length > 0) count += 1;
-    if (hasExpenseTrendExclusionFilter) {
-      count +=
-        excludedExpenseTrendAccountIds.length + excludedExpenseTrendExpenseCategoryIds.length;
-    }
-    if (hasIncomeTrendExclusionFilter) {
-      count += excludedIncomeTrendAccountIds.length + excludedIncomeTrendIncomeCategoryIds.length;
-    }
-    if (hasAssetHistoryAccountExclusionFilter) count += excludedAssetHistoryAccountIds.length;
-    if (hasSavingsCategoryExclusionFilter)
-      count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
-    if (hasTimeCostExpenseCategoryExclusionFilter && excludedTimeCostExpenseCategoryId) count += 1;
-    return count;
-  }, [
-    excludedExpenseTrendAccountIds.length,
-    excludedExpenseTrendExpenseCategoryIds.length,
-    excludedIncomeTrendAccountIds.length,
-    excludedIncomeTrendIncomeCategoryIds.length,
-    excludedAssetHistoryAccountIds.length,
-    excludedTimeCostExpenseCategoryId,
-    excludedSavingsExpenseCategoryIds.length,
-    excludedSavingsIncomeCategoryIds.length,
-    hasAccountFilter,
-    hasExpenseTrendExclusionFilter,
-    hasIncomeTrendExclusionFilter,
-    hasAssetHistoryAccountExclusionFilter,
-    hasSavingsCategoryExclusionFilter,
-    hasTimeCostExpenseCategoryExclusionFilter,
-    hasInsightsFilters,
-    hasPeriodFilter,
-    periodPreset,
-    selectedAccountIds.length,
-  ]);
   const displayActiveInsightFilterConfig = useMemo(
     () => getInsightFilterConfig(displaySelectedInsightType),
     [displaySelectedInsightType],

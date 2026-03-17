@@ -35,7 +35,6 @@ function ensureCoreData() {
         locale: getDeviceLocale(),
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
-        hourRounding: 0.1,
         displayMode: 'money',
         themeMode: 'system',
         themeColor: 'rosewood',

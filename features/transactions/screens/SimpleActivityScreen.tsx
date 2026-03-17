@@ -1,11 +1,12 @@
 import { Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  TextInput} from 'react-native';
 import {
   FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -18,8 +19,8 @@ import { Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/compone
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
-  ActivityTransactionList,
   ActivitySearchRow,
+  ActivityTransactionList,
   DisplayModeToggle,
   MonthPagerPage,
   TypeFilterPill,
@@ -51,8 +52,8 @@ import {
 import {
   bucketTransactionsByMonth,
   emptyMonthSummary,
-  summarizeTransactions,
   type MonthTransactionBuckets,
+  summarizeTransactions,
 } from '~/utils/transactions';
 
 const FLEX_ONE_STYLE = { flex: 1 } as const;
@@ -191,7 +192,6 @@ export function SimpleActivityScreen({
 }: SimpleActivityScreenProps) {
   const themeColors = useThemeColors();
   const {
-    transactions,
     settings,
     simpleWalletId,
     transactionFilters,
@@ -215,9 +215,8 @@ export function SimpleActivityScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
-      hourRounding: settings.hourRounding,
     }),
-    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+    [settings.currencySymbol, settings.displayMode],
   );
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
@@ -266,7 +265,7 @@ export function SimpleActivityScreen({
         transaction.fromAccountId === simpleWalletId ||
         transaction.toAccountId === simpleWalletId,
     );
-  }, [queryTransactions, simpleWalletId, transactionFilters, transactions]);
+  }, [queryTransactions, simpleWalletId, transactionFilters]);
 
   const monthBuckets = useMemo(() => {
     if (hasActiveSearch) return EMPTY_MONTH_BUCKETS;

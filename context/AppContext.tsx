@@ -139,7 +139,6 @@ interface AppContextValue extends AppState {
         | 'locale'
         | 'currencyCode'
         | 'currencySymbol'
-        | 'hourRounding'
         | 'displayMode'
         | 'themeMode'
         | 'themeColor'
@@ -532,7 +531,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const amountStr = `${nextSettings.currencySymbol}${rule.amount.toFixed(2)}`;
           const hoursStr =
             trueHourlyRate > 0
-              ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate, nextSettings.hourRounding))
+              ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate))
               : undefined;
           void fireRecurringTransactionNotification(rule.name, amountStr, hoursStr);
         }
@@ -556,7 +555,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const weeklyAmountStr = `${nextSettings.currencySymbol}${lastWeekSpending.toFixed(2)}`;
       const weeklyHoursStr =
         trueHourlyRate > 0
-          ? formatHours(amountToHoursByRate(lastWeekSpending, trueHourlyRate, nextSettings.hourRounding))
+          ? formatHours(amountToHoursByRate(lastWeekSpending, trueHourlyRate))
           : undefined;
       const weeklyBody = weeklyHoursStr
         ? `${weeklyAmountStr} · ${weeklyHoursStr}`
@@ -1130,7 +1129,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'locale'
           | 'currencyCode'
           | 'currencySymbol'
-          | 'hourRounding'
           | 'displayMode'
           | 'themeMode'
           | 'themeColor'
@@ -1343,7 +1341,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const isTimeDisplayMode = settings?.displayMode === 'time';
-  const hourRounding = settings?.hourRounding ?? 0.25;
   const valueForDisplay = useCallback(
     (amount: number, dateIso: string) => {
       if (!isTimeDisplayMode) {
@@ -1351,9 +1348,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const targetMonth = normalizeMonthKey(monthKeyFromDateIso(dateIso));
       const rate = getHourlyRateForMonth(targetMonth);
-      return amountToHoursByRate(amount, rate, hourRounding);
+      return amountToHoursByRate(amount, rate);
     },
-    [getHourlyRateForMonth, hourRounding, isTimeDisplayMode],
+    [getHourlyRateForMonth, isTimeDisplayMode],
   );
 
   const displayValueByTransactionId = useMemo(() => {
@@ -1367,10 +1364,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         rate = getHourlyRateForMonth(monthKey);
         hourlyRateByMonth.set(monthKey, rate);
       }
-      next.set(transaction.id, amountToHoursByRate(transaction.amount, rate, hourRounding));
+      next.set(transaction.id, amountToHoursByRate(transaction.amount, rate));
     });
     return next;
-  }, [getHourlyRateForMonth, hourRounding, isTimeDisplayMode, transactions]);
+  }, [getHourlyRateForMonth, isTimeDisplayMode, transactions]);
 
   const getDisplayValueForTransaction = useCallback(
     (transaction: TransactionWithRelations) => {

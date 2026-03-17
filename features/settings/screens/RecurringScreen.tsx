@@ -31,12 +31,10 @@ interface RecurringRuleCardProps {
   rule: RecurringTransactionRule;
   onEdit: (rule: RecurringTransactionRule) => void;
   onDelete: (id: string) => void;
-  localeKey: string;
   textMutedColor: string;
   dangerColor: string;
   currencySymbol: string;
   displayMode: 'money' | 'time';
-  hourRounding: number;
 }
 
 const RecurringRuleCard = memo(
@@ -44,12 +42,10 @@ const RecurringRuleCard = memo(
     rule,
     onEdit,
     onDelete,
-    localeKey,
     textMutedColor,
     dangerColor,
     currencySymbol,
     displayMode,
-    hourRounding,
   }: RecurringRuleCardProps) {
     const cadenceLabel = useMemo(
       () =>
@@ -57,12 +53,12 @@ const RecurringRuleCard = memo(
           interval: rule.recurrenceInterval,
           pattern: rule.recurrencePattern,
         }),
-      [localeKey, rule.recurrenceInterval, rule.recurrencePattern],
+      [rule.recurrenceInterval, rule.recurrencePattern],
     );
     const nextRunLabel = dayKeyFromIsoLocal(rule.nextRunDate);
     const formatSettings = useMemo(
-      () => ({ currencySymbol, displayMode, hourRounding }),
-      [currencySymbol, displayMode, hourRounding],
+      () => ({ currencySymbol, displayMode }),
+      [currencySymbol, displayMode],
     );
     const handleEdit = useCallback(() => {
       void triggerHaptic('selection');
@@ -152,12 +148,10 @@ const RecurringRuleCard = memo(
   (prev, next) =>
     prev.rule.id === next.rule.id &&
     prev.rule.updatedAt === next.rule.updatedAt &&
-    prev.localeKey === next.localeKey &&
     prev.textMutedColor === next.textMutedColor &&
     prev.dangerColor === next.dangerColor &&
     prev.currencySymbol === next.currencySymbol &&
     prev.displayMode === next.displayMode &&
-    prev.hourRounding === next.hourRounding &&
     prev.onEdit === next.onEdit &&
     prev.onDelete === next.onDelete,
 );
@@ -169,7 +163,6 @@ export function RecurringScreen({
 }: RecurringScreenProps) {
   const themeColors = useThemeColors();
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
-  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const allRules = useMemo(() => {
     if (!isSimpleMode) return recurringRules;
     return filterRecurringRulesByWallet(recurringRules, simpleWalletId);
@@ -198,21 +191,17 @@ export function RecurringScreen({
         rule={item}
         onEdit={openEdit}
         onDelete={handleDeleteRule}
-        localeKey={activeLocale}
         textMutedColor={themeColors.textMuted}
         dangerColor={themeColors.coral}
         currencySymbol={settings.currencySymbol}
         displayMode={settings.displayMode}
-        hourRounding={settings.hourRounding}
       />
     ),
     [
       handleDeleteRule,
       openEdit,
-      activeLocale,
       settings.currencySymbol,
       settings.displayMode,
-      settings.hourRounding,
       themeColors.coral,
       themeColors.textMuted,
     ],
