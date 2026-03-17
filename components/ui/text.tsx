@@ -71,6 +71,8 @@ const Text = React.forwardRef<
       className={cn('web:select-text', variantMap[variant], toneMap[tone], textClass, className)}
       ref={ref}
       {...props}
+      allowFontScaling={false}
+      maxFontSizeMultiplier={1}
     />
   );
 });

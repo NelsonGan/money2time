@@ -128,6 +128,8 @@ const Input = React.forwardRef<TextInput, InputProps>(
                 props.onBlur?.(e);
               }}
               {...props}
+              allowFontScaling={false}
+              maxFontSizeMultiplier={1}
             />
             {rightIcon ? <View className="ml-2 mt-[1px]">{rightIcon}</View> : null}
           </View>
