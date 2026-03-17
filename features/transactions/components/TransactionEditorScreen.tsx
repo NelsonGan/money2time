@@ -1369,11 +1369,9 @@ export function TransactionEditorScreen({
                       {I18n.t('transactions.editor.amount')}
                     </Text>
                   </View>
-                  <View style={{ maxWidth: 200 }}>
+                  <View style={{ flexShrink: 1 }}>
                     <Text
                       variant="heading"
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.5}
                       numberOfLines={1}
                       className={cn(
                         amountTone === 'error'
