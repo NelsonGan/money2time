@@ -3336,6 +3336,11 @@ export function InsightsScreen({
       transactionMonthKeyById,
     ],
   );
+  const prevBuildPageDataRef = useRef(buildPageData);
+  if (prevBuildPageDataRef.current !== buildPageData) {
+    prevBuildPageDataRef.current = buildPageData;
+    pageDataCacheRef.current.clear();
+  }
   const getCachedPageData = useCallback(
     (
       state: PeriodState,
@@ -3361,9 +3366,6 @@ export function InsightsScreen({
     },
     [buildPageData],
   );
-  useEffect(() => {
-    pageDataCacheRef.current.clear();
-  }, [buildPageData]);
   const currentPeriodState = useMemo<PeriodState>(
     () => ({ anchorDate, customStart, customEnd }),
     [anchorDate, customEnd, customStart],
@@ -5800,6 +5802,7 @@ export function InsightsScreen({
             maxToRenderPerBatch={3}
             windowSize={3}
             renderItem={renderInsightsWindowPage}
+            extraData={buildPageData}
             initialScrollIndex={INSIGHTS_PAGER_CENTER_INDEX}
             getItemLayout={getHorizontalItemLayout}
             onScroll={handleHorizontalScroll}
