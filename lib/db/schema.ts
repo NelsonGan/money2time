@@ -87,7 +87,6 @@ export const settingsTable = sqliteTable('settings', {
   locale: text('locale').notNull().default('en'),
   currencyCode: text('currency_code').notNull().default('USD'),
   currencySymbol: text('currency_symbol').notNull().default('$'),
-  hourRounding: real('hour_rounding').notNull().default(0.1),
   displayMode: text('display_mode').notNull().default('money'),
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),

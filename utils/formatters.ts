@@ -8,7 +8,7 @@ import {
 import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
-type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode' | 'hourRounding'>;
+type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -185,22 +185,9 @@ export function formatMonthYearLabel(date: Date, locale?: string): string {
   return getMonthYearFormatter(resolveLocale(locale)).format(date);
 }
 
-export function amountToHoursByRate(
-  amount: number,
-  trueHourlyRate: number,
-  rounding: number,
-): number {
+export function amountToHoursByRate(amount: number, trueHourlyRate: number): number {
   if (trueHourlyRate <= 0) return 0;
-  const raw = amount / trueHourlyRate;
-  return Math.round(raw / rounding) * rounding;
-}
-
-function amountToHours(
-  amount: number,
-  settings: AmountFormatSettings,
-  trueHourlyRate: number,
-): number {
-  return amountToHoursByRate(amount, trueHourlyRate, settings.hourRounding);
+  return amount / trueHourlyRate;
 }
 
 export function formatCurrency(amount: number, currencySymbol = '$'): string {
@@ -279,7 +266,7 @@ export function formatAmount(
     if (trueHourlyRate <= 0) {
       return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
     }
-    return `${sign}${formatHours(Math.abs(amountToHours(normalizedAmount, settings, trueHourlyRate)))}`;
+    return `${sign}${formatHours(Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate)))}`;
   }
 
   return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
