@@ -1,4 +1,4 @@
-Run the following two commands sequentially. If any command asks a yes/no question or asks for confirmation, answer Y (yes).
+Run the following two commands sequentially. When prompted with a yes/no question, answer Y (yes). When prompted for an email, enter nelson.ganlw@gmail.com.
 
 First, build:
 ```
