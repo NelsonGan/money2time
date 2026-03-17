@@ -14,7 +14,7 @@ import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatter
 
 export type TransactionDisplaySettings = Pick<
   UserSettings,
-  'currencySymbol' | 'displayMode' | 'hourRounding'
+  'currencySymbol' | 'displayMode'
 >;
 
 type ActivityRow =
@@ -238,7 +238,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     }
 
     const dailyTotals = new Map<string, { income: number; expense: number }>();
-    const headerRowsByDay = new Map<string, Array<Extract<ActivityRow, { kind: 'header' }>>>();
+    const headerRowsByDay = new Map<string, Extract<ActivityRow, { kind: 'header' }>[]>();
     const nextRows: ActivityRow[] = [];
     let currentHeaderDay: string | null = null;
 

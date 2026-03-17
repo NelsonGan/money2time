@@ -368,9 +368,7 @@ export function HomeScreen({
       next.push({
         ...rule,
         monthlyAmount,
-        monthlyHours: hasHourlyRate
-          ? amountToHoursByRate(monthlyAmount, rate, settings.hourRounding)
-          : 0,
+        monthlyHours: amountToHoursByRate(monthlyAmount, rate),
       });
     });
     next.sort((a, b) => {
@@ -378,7 +376,7 @@ export function HomeScreen({
       return Math.abs(b.monthlyAmount) - Math.abs(a.monthlyAmount);
     });
     return next;
-  }, [hasHourlyRate, rate, walletRecurringRules, settings.hourRounding]);
+  }, [rate, walletRecurringRules]);
 
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -386,8 +384,8 @@ export function HomeScreen({
   );
   const estimatorNumeric = useMemo(() => Number(estimatorAmount) || 0, [estimatorAmount]);
   const estimatorHours = useMemo(
-    () => (hasHourlyRate ? amountToHoursByRate(estimatorNumeric, rate, settings.hourRounding) : 0),
-    [estimatorNumeric, hasHourlyRate, rate, settings.hourRounding],
+    () => amountToHoursByRate(estimatorNumeric, rate),
+    [estimatorNumeric, rate],
   );
   const estimatorWorkdays = useMemo(() => estimatorHours / 8, [estimatorHours]);
   const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
@@ -452,7 +450,7 @@ export function HomeScreen({
     if (timeOfDay === 'morning') return I18n.t('home.greeting.morning');
     if (timeOfDay === 'afternoon') return I18n.t('home.greeting.afternoon');
     return I18n.t('home.greeting.evening');
-  }, [settings.locale]);
+  }, []);
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;

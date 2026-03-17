@@ -72,7 +72,6 @@ export interface UserSettings {
   locale: string;
   currencyCode: string;
   currencySymbol: string;
-  hourRounding: number;
   displayMode: DisplayMode;
   themeMode: ThemeMode;
   themeColor: ThemeColor;

@@ -159,9 +159,8 @@ export function InsightsDrilldownScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
-      hourRounding: settings.hourRounding,
     }),
-    [settings.currencySymbol, settings.displayMode, settings.hourRounding],
+    [settings.currencySymbol, settings.displayMode],
   );
 
   const categoryById = useMemo(
