@@ -1286,9 +1286,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [transactionsByAccountId],
   );
 
-  const queryTransactions = useCallback((filters: Partial<TransactionFilters> = {}) => {
-    return transactionsRepository.list(filters);
-  }, []);
+  const queryTransactions = useCallback(
+    (filters: Partial<TransactionFilters> = {}) => {
+      return transactionsRepository.list(filters);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transactions],
+  );
 
   const orderedRateHistory = useMemo(
     () => buildNormalizedRateHistory(monthlyWages),
