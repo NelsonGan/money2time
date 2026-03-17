@@ -2,7 +2,7 @@ Run the following two commands sequentially. When prompted with a yes/no questio
 
 First, build:
 ```
-eas env:exec production 'eas build --platform ios --profile production --local --output ./dist/Money2Time.ipa'
+eas env:exec production 'eas build --platform ios --profile production --local --output ./dist/Money2Time.ipa --non-interactive'
 ```
 
 Wait for it to complete successfully, then submit:
