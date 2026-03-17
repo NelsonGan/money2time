@@ -4,7 +4,15 @@ import { NavigationContainer, useNavigationContainerRef } from '@react-navigatio
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Appearance, InteractionManager, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Appearance,
+  InteractionManager,
+  StyleSheet,
+  Text as RNText,
+  TextInput as RNTextInput,
+  View,
+} from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -66,6 +74,21 @@ import {
 
 type MainTab = TabName;
 type ActivityBreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
+
+type FontScalingNativeComponent = {
+  defaultProps?: Record<string, unknown>;
+};
+
+function disableDynamicType(component: FontScalingNativeComponent) {
+  component.defaultProps = {
+    ...component.defaultProps,
+    allowFontScaling: false,
+    maxFontSizeMultiplier: 1,
+  };
+}
+
+disableDynamicType(RNText as unknown as FontScalingNativeComponent);
+disableDynamicType(RNTextInput as unknown as FontScalingNativeComponent);
 
 interface ActivityBreakdownInsightRequest {
   insightType: ActivityBreakdownInsightType;
