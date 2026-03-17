@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Start development server
-npm start
+# Start development server (always use tunnel)
+EXPO_TUNNEL_SUBDOMAIN=nikia-nonadaptive-hugeously npx expo start --tunnel --clear
 
 # Run on iOS/Android (syncs icons first)
 npm run ios
