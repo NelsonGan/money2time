@@ -518,7 +518,7 @@ const en = {
         no_income_message: 'Add income transactions in this period to calculate savings rate.',
         saved_per_year: '{{value}} saved this year',
         exclusions_active: 'Excluding {{count}} categories from calculation.',
-        goal_hint: '20%+ is typically considered a healthy savings pace.',
+        goal_hint: '20%+ is considered healthy.',
       },
       income_rate_history: {
         rate_title: 'Income rate',
