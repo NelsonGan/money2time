@@ -4097,7 +4097,8 @@ export function InsightsScreen({
     const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
     const isFutureDay = selectedDayKey > todayDayKey;
     const dayCellGap = 6;
-    const dayCellSize = Math.max(34, Math.floor((chartWidth - dayCellGap * 6 - 4) / 7));
+    const dayCellSize = Math.max(34, Math.floor((chartWidth - dayCellGap * 6) / 7));
+    const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
     const dayDetailScale = calendarDetailAnimRef.current.interpolate({
       inputRange: [0.68, 1],
       outputRange: [0.985, 1],
@@ -4108,19 +4109,12 @@ export function InsightsScreen({
     };
 
     return (
-      <Card className="mt-2">
-        <CardContent className="py-3 gap-2">
-          <View className="gap-2.5">
-            {pageData.monthSections.map((month) => (
-              <View
-                key={month.monthKey}
-                className="rounded-2xl border border-border/35 bg-card/95 px-3 py-3"
-              >
-                <Text variant="caption" className="pb-2">
-                  {month.label}
-                </Text>
-
-                <View className="flex-row mb-1.5">
+      <View className="mt-2 gap-3">
+        <View className="gap-2.5">
+          {pageData.monthSections.map((month) => (
+            <Card key={month.monthKey} className="items-center py-5">
+              <View style={{ width: calendarGridWidth }}>
+                <View className="flex-row mb-1.5" style={{ gap: dayCellGap }}>
                   {calendarWeekdayLabels.map((weekday) => (
                     <View
                       key={`${month.monthKey}-${weekday}`}
@@ -4134,146 +4128,144 @@ export function InsightsScreen({
                 </View>
 
                 <View style={[styles.calendarGrid, { gap: dayCellGap }]}>
-                  {month.cells.map((cell) => {
-                    if (cell.kind === 'spacer') {
-                      return (
-                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
-                      );
-                    }
-
-                    const isSelected = cell.dayKey === selectedDayKey;
-                    const hasActivity = cell.transactionCount > 0;
-                    const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
-                    const baseIntensity =
-                      cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
-                    const toneColor = themeColors.error;
-                    const dotSizeByTier = [3, 4, 5, 6, 7] as const;
-                    const dotSize =
-                      cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
-                    const bgColor = isSelected
-                      ? withColorAlpha(themeColors.primary, 0.24)
-                      : hasActivity
-                        ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
-                        : cell.isFuture
-                          ? withColorAlpha(themeColors.sky, 0.08)
-                          : withColorAlpha(themeColors.surfaceMuted, 0.6);
-                    const borderColor = isSelected
-                      ? withColorAlpha(themeColors.primary, 0.9)
-                      : hasActivity
-                        ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
-                        : withColorAlpha(themeColors.textMuted, 0.18);
-
+                {month.cells.map((cell) => {
+                  if (cell.kind === 'spacer') {
                     return (
-                      <Pressable
-                        key={cell.id}
-                        disabled={cell.isOutsideRange}
-                        onPress={() => {
-                          if (cell.isOutsideRange) return;
-                          void triggerHaptic('selection');
-                          setSelectedCalendarDayKey(cell.dayKey);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
-                        accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
-                        className={cn(
-                          'rounded-xl items-center justify-center border active:opacity-85',
-                        )}
-                        style={[
-                          styles.calendarDayCell,
-                          {
-                            width: dayCellSize,
-                            height: dayCellSize,
-                            backgroundColor: bgColor,
-                            borderColor,
-                            borderWidth: isSelected ? 2 : 1,
-                            opacity: inactiveOpacity,
-                          },
-                        ]}
-                      >
-                        <Text
-                          variant="caption"
-                          className={cn(
-                            isSelected
-                              ? 'text-primary font-bold'
-                              : hasActivity
-                                ? 'text-destructive'
-                                : 'text-muted-foreground',
-                          )}
-                        >
-                          {cell.dayNumber}
-                        </Text>
-                        {hasActivity && dotSize > 0 ? (
-                          <View
-                            style={[
-                              styles.calendarActivityDot,
-                              { width: dotSize, height: dotSize, backgroundColor: toneColor },
-                            ]}
-                          />
-                        ) : null}
-                      </Pressable>
+                      <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
                     );
-                  })}
-                </View>
-              </View>
-            ))}
-          </View>
+                  }
 
-          <RNAnimated.View style={dayDetailAnimatedStyle}>
-            <View className="rounded-2xl border border-border/35 bg-secondary/20 px-3.5 py-2.5">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-2">
-                  <Text variant="caption">{selectedDayLabel}</Text>
-                  <Text variant="label" tone="muted" className="mt-1">
+                  const isSelected = cell.dayKey === selectedDayKey;
+                  const hasActivity = cell.transactionCount > 0;
+                  const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
+                  const baseIntensity =
+                    cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
+                  const toneColor = themeColors.error;
+                  const dotSizeByTier = [3, 4, 5, 6, 7] as const;
+                  const dotSize =
+                    cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
+                  const bgColor = isSelected
+                    ? withColorAlpha(themeColors.primary, 0.24)
+                    : hasActivity
+                      ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
+                      : cell.isFuture
+                        ? withColorAlpha(themeColors.sky, 0.08)
+                        : withColorAlpha(themeColors.surfaceMuted, 0.6);
+                  const borderColor = isSelected
+                    ? withColorAlpha(themeColors.primary, 0.9)
+                    : hasActivity
+                      ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
+                      : withColorAlpha(themeColors.textMuted, 0.18);
+
+                  return (
+                    <Pressable
+                      key={cell.id}
+                      disabled={cell.isOutsideRange}
+                      onPress={() => {
+                        if (cell.isOutsideRange) return;
+                        void triggerHaptic('selection');
+                        setSelectedCalendarDayKey(cell.dayKey);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
+                      accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
+                      className={cn(
+                        'rounded-xl items-center justify-center border active:opacity-85',
+                      )}
+                      style={[
+                        styles.calendarDayCell,
+                        {
+                          width: dayCellSize,
+                          height: dayCellSize,
+                          backgroundColor: bgColor,
+                          borderColor,
+                          borderWidth: isSelected ? 2 : 1,
+                          opacity: inactiveOpacity,
+                        },
+                      ]}
+                    >
+                      <Text
+                        variant="caption"
+                        className={cn(
+                          isSelected
+                            ? 'text-primary font-bold'
+                            : hasActivity
+                              ? 'text-destructive'
+                              : 'text-muted-foreground',
+                        )}
+                      >
+                        {cell.dayNumber}
+                      </Text>
+                      {hasActivity && dotSize > 0 ? (
+                        <View
+                          style={[
+                            styles.calendarActivityDot,
+                            { width: dotSize, height: dotSize, backgroundColor: toneColor },
+                          ]}
+                        />
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+
+        <RNAnimated.View style={dayDetailAnimatedStyle}>
+          <Card className="p-4">
+            <Pressable
+              disabled={selectedDayTransactions.length === 0}
+              onPress={() => {
+                const targetDayKey = selectedDayKey;
+                openDrilldown({
+                  label: selectedDayLabel,
+                  transactions: selectedDayTransactions,
+                  triggerSelectionHaptic: true,
+                  scopeMatcher: (transaction) =>
+                    transaction.type === 'expense' &&
+                    (transactionDayKeyById.get(transaction.id) ??
+                      dayKeyFromIsoLocal(transaction.date)) === targetDayKey,
+                });
+              }}
+              className="flex-row items-center justify-between active:opacity-80"
+            >
+              <View className="flex-1">
+                <View className="flex-row items-center gap-2">
+                  <View
+                    className="rounded-full px-2.5 py-1"
+                    style={{ backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12) }}
+                  >
+                    <Text
+                      variant="label"
+                      style={{ color: themeColors.error, fontWeight: '600' }}
+                    >
+                      {selectedDayLabel}
+                    </Text>
+                  </View>
+                  <Text variant="label" tone="muted">
                     {isFutureDay
                       ? I18n.t('insights.calendar.future_day')
-                      : `${I18n.t('insights.calendar.transactions')}: ${selectedDayTransactions.length}`}
+                      : `${selectedDayTransactions.length} ${I18n.t('insights.calendar.transactions').toLowerCase()}`}
                   </Text>
                 </View>
-                {selectedDayTransactions.length > 0 ? (
-                  <Pressable
-                    onPress={() => {
-                      const targetDayKey = selectedDayKey;
-                      openDrilldown({
-                        label: selectedDayLabel,
-                        transactions: selectedDayTransactions,
-                        triggerSelectionHaptic: true,
-                        scopeMatcher: (transaction) =>
-                          transaction.type === 'expense' &&
-                          (transactionDayKeyById.get(transaction.id) ??
-                            dayKeyFromIsoLocal(transaction.date)) === targetDayKey,
-                      });
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('insights.calendar.view_all', {
-                      count: selectedDayTransactions.length,
-                    })}
-                    className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1.5 active:opacity-85"
-                  >
-                    <Text variant="label" className="text-primary">
-                      {I18n.t('insights.calendar.view_all', {
-                        count: selectedDayTransactions.length,
-                      })}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
 
-              <View className="mt-2 flex-row items-center gap-3">
-                <View className="flex-1">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.expense')}
-                  </Text>
+                <View className="mt-1.5">
                   {renderValueNode(selectedDayData.expense, {
-                    variant: 'caption',
-                    textClassName: 'mt-0.5 text-destructive',
+                    variant: 'heading',
+                    textClassName: 'text-destructive',
                     iconColor: themeColors.error,
                   })}
                 </View>
               </View>
-            </View>
-          </RNAnimated.View>
-        </CardContent>
-      </Card>
+              {selectedDayTransactions.length > 0 ? (
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              ) : null}
+            </Pressable>
+          </Card>
+        </RNAnimated.View>
+      </View>
     );
   };
 
@@ -4383,53 +4375,52 @@ export function InsightsScreen({
           });
 
     return (
-      <Card className="mt-2">
-        <CardContent className="py-3 gap-2">
-          <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
-            <View className="flex-row items-center gap-2">
-              <View className="flex-1 rounded-xl border border-primary/25 bg-primary/12 px-2.5 py-2">
-                <Text variant="label" tone="muted">
-                  {I18n.t('insights.time_cost.total_hours')}
-                </Text>
-                <TimeValueInline
-                  value={formatHours(pageData.totalHours)}
-                  variant="caption"
-                  containerClassName="mt-1"
-                  textClassName="text-primary"
-                  iconColor={themeColors.primary}
-                />
-              </View>
-              <View className="flex-1 rounded-xl border border-border/30 bg-card/80 px-2.5 py-2">
-                <Text variant="label" tone="muted">
-                  {I18n.t('insights.time_cost.money_equivalent')}
-                </Text>
-                <Text variant="caption" className="text-foreground mt-1">
-                  {renderMoneyAmount(pageData.totalAmount)}
-                </Text>
-              </View>
+      <View className="mt-2 gap-3">
+        <Card className="p-4">
+          <View className="flex-row items-stretch">
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.time_cost.total_hours')}
+              </Text>
+              <TimeValueInline
+                value={formatHours(pageData.totalHours)}
+                variant="subheading"
+                containerClassName="mt-1"
+                textClassName="text-primary"
+                iconColor={themeColors.primary}
+              />
+            </View>
+            <View className="mx-3 w-px bg-border/40" />
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.time_cost.money_equivalent')}
+              </Text>
+              <Text variant="subheading" className="text-foreground mt-1">
+                {renderMoneyAmount(pageData.totalAmount)}
+              </Text>
             </View>
           </View>
+        </Card>
 
-          <View className="flex-row items-center gap-2">
-            <FilterPill
-              label={I18n.t('insights.time_cost.views.category')}
-              active={timeCostViewMode === 'category'}
-              onPress={() => setTimeCostViewMode('category')}
-            />
-            <FilterPill
-              label={I18n.t('insights.time_cost.views.transaction')}
-              active={timeCostViewMode === 'transaction'}
-              onPress={() => setTimeCostViewMode('transaction')}
-            />
-          </View>
-
-          <RankedImpactChart
-            rows={impactRows}
-            accentColor={TIME_COST_RANK_ACCENTS[0]}
-            shareLabel={null}
+        <View className="flex-row items-center gap-2">
+          <FilterPill
+            label={I18n.t('insights.time_cost.views.category')}
+            active={timeCostViewMode === 'category'}
+            onPress={() => setTimeCostViewMode('category')}
           />
-        </CardContent>
-      </Card>
+          <FilterPill
+            label={I18n.t('insights.time_cost.views.transaction')}
+            active={timeCostViewMode === 'transaction'}
+            onPress={() => setTimeCostViewMode('transaction')}
+          />
+        </View>
+
+        <RankedImpactChart
+          rows={impactRows}
+          accentColor={TIME_COST_RANK_ACCENTS[0]}
+          shareLabel={null}
+        />
+      </View>
     );
   };
 
@@ -4467,17 +4458,8 @@ export function InsightsScreen({
     const selectedMonthDisplayValue = selectedMonthAbsoluteValue.toFixed(2);
     const toneStyle = { color: trendAccentColor };
     const hasDrilldown = selectedMonthRow.transactions.length > 0;
-    const heroSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.18 : 0.1),
-      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.2),
-    };
-    const metricSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.1 : 0.045),
-      borderColor: withColorAlpha(themeColors.border, isDark ? 0.65 : 0.5),
-    };
-    const iconSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.22 : 0.12),
-      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.18),
+    const metricDividerStyle = {
+      backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3),
     };
     const selectExpenseTrendMonth = (monthKey: string) => {
       if (expenseTrendScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
@@ -4493,7 +4475,7 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-2 gap-2.5">
+      <View className="mt-2 gap-3">
         <View style={lineChartSectionStyle} className="py-1">
           <View
             style={[
@@ -4525,57 +4507,30 @@ export function InsightsScreen({
           </View>
         </View>
 
-        <Card className="p-3">
-          <CardContent className="gap-2.5 py-3">
-            <Pressable
-              disabled={!hasDrilldown}
-              onPress={() =>
-                openDrilldown({
-                  label: selectedMonthRow.label,
-                  transactions: selectedMonthRow.transactions,
-                  triggerSelectionHaptic: true,
-                })
-              }
-              className="rounded-[26px] border px-4 py-3.5 active:opacity-90"
-              style={heroSurfaceStyle}
-            >
-              <View className="flex-row items-center justify-between gap-2">
-                <Text variant="caption" className="flex-1">
-                  {I18n.t('insights.analytics.expense_trend.selected_month_title')}
-                </Text>
-                <View className="flex-row items-center gap-2">
-                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                    <Text variant="label" tone="muted">
-                      {selectedMonthRow.label}
-                    </Text>
-                  </View>
-                  {hasDrilldown ? <ChevronRight size={16} color={trendAccentColor} /> : null}
-                </View>
-              </View>
-
-              <View className="mt-2 flex-row items-end justify-between gap-3">
-                <View className="flex-1 flex-row items-center">
-                  {settings.displayMode === 'time' ? (
-                    <TimeValueInline
-                      value={formatHours(selectedMonthAbsoluteValue)}
-                      variant="heading"
-                      iconColor={trendAccentColor}
-                      style={toneStyle}
-                    />
-                  ) : (
-                    <>
-                      <Text variant="heading" style={toneStyle}>
-                        {settings.currencySymbol}
-                      </Text>
-                      <ScrubRollingNumber
-                        value={selectedMonthAbsoluteValue}
-                        formattedText={selectedMonthDisplayValue}
-                        color={trendAccentColor}
-                        resetKey={`expense-trend-${selectedYearKey}`}
-                        containerClassName="ml-1"
-                      />
-                    </>
-                  )}
+        <Card className="gap-3 p-4">
+          <Pressable
+            disabled={!hasDrilldown}
+            onPress={() =>
+              openDrilldown({
+                label: selectedMonthRow.label,
+                transactions: selectedMonthRow.transactions,
+                triggerSelectionHaptic: true,
+              })
+            }
+            className="flex-row items-center justify-between active:opacity-80"
+          >
+            <View className="flex-1">
+              <View className="flex-row items-center gap-2">
+                <View
+                  className="rounded-full px-2.5 py-1"
+                  style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
+                >
+                  <Text
+                    variant="label"
+                    style={{ color: trendAccentColor, fontWeight: '600' }}
+                  >
+                    {selectedMonthRow.label}
+                  </Text>
                 </View>
                 <Text variant="label" tone="muted">
                   {I18n.t('insights.analytics.expense_trend.transactions', {
@@ -4584,85 +4539,94 @@ export function InsightsScreen({
                 </Text>
               </View>
 
-              <View className="mt-2 flex-row flex-wrap items-center gap-2">
+              <View className="mt-1.5 flex-row items-center">
+                {settings.displayMode === 'time' ? (
+                  <TimeValueInline
+                    value={formatHours(selectedMonthAbsoluteValue)}
+                    variant="heading"
+                    iconColor={trendAccentColor}
+                    style={toneStyle}
+                  />
+                ) : (
+                  <>
+                    <Text variant="heading" style={toneStyle}>
+                      {settings.currencySymbol}
+                    </Text>
+                    <ScrubRollingNumber
+                      value={selectedMonthAbsoluteValue}
+                      formattedText={selectedMonthDisplayValue}
+                      color={trendAccentColor}
+                      resetKey={`expense-trend-${selectedYearKey}`}
+                      containerClassName="ml-1"
+                    />
+                  </>
+                )}
+              </View>
+
+              <View className="mt-1 flex-row items-center gap-1.5">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.analytics.expense_trend.top_category_title')}:
+                </Text>
                 {selectedMonthRow.topCategoryLabel ? (
-                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                    <Text variant="label" tone="muted">
+                  <>
+                    <Text variant="label" style={{ color: trendAccentColor }}>
                       {`${selectedMonthRow.topCategoryEmoji ?? '•'} ${selectedMonthRow.topCategoryLabel}`}
                     </Text>
-                  </View>
-                ) : null}
+                    {renderCompactValueNode(selectedMonthRow.topCategoryAmount, {
+                      variant: 'label',
+                      style: toneStyle,
+                      containerClassName: 'ml-0.5',
+                    })}
+                  </>
+                ) : (
+                  <Text variant="label" tone="muted">—</Text>
+                )}
               </View>
-            </Pressable>
+            </View>
+            {hasDrilldown ? <ChevronRight size={16} color={themeColors.textMuted} /> : null}
+          </Pressable>
 
-            <View className="flex-row gap-2">
-              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-                <Text variant="caption">
-                  {I18n.t('insights.analytics.expense_trend.peak_title')}
-                </Text>
+          <View className="flex-row items-stretch border-t border-border/40 pt-3">
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.expense_trend.peak_title')}
+              </Text>
+              <View className="mt-1">
                 {peakMonthRow ? (
                   renderValueNode(peakMonthRow.totalExpense, {
                     variant: 'subheading',
-                    textClassName: 'mt-1 text-foreground',
+                    textClassName: 'text-foreground',
                     iconColor: themeColors.text,
                   })
                 ) : (
-                  <Text variant="subheading" className="mt-1 text-foreground">
+                  <Text variant="subheading" className="text-foreground">
                     —
                   </Text>
                 )}
-                <Text variant="label" tone="muted" className="mt-1">
-                  {peakMonthRow?.label ?? '—'}
-                </Text>
               </View>
-              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-                <Text variant="caption">
-                  {I18n.t('insights.analytics.expense_trend.average_title')}
-                </Text>
+              <Text variant="label" tone="muted" className="mt-0.5">
+                {peakMonthRow?.label ?? '—'}
+              </Text>
+            </View>
+            <View className="mx-3 w-px" style={metricDividerStyle} />
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.expense_trend.average_title')}
+              </Text>
+              <View className="mt-1">
                 {renderValueNode(pageData.averageMonthExpense, {
                   variant: 'subheading',
-                  textClassName: 'mt-1 text-foreground',
+                  textClassName: 'text-foreground',
                   iconColor: themeColors.text,
                 })}
-                <Text variant="label" tone="muted" className="mt-1">
-                  {I18n.t('insights.analytics.expense_trend.active_months', {
-                    count: pageData.activeMonths,
-                  })}
-                </Text>
               </View>
-            </View>
-
-            <View className="rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-              <Text variant="caption">
-                {I18n.t('insights.analytics.expense_trend.top_category_title')}
+              <Text variant="label" tone="muted" className="mt-0.5">
+                {I18n.t('insights.analytics.expense_trend.active_months', {
+                  count: pageData.activeMonths,
+                })}
               </Text>
-              {selectedMonthRow.topCategoryLabel ? (
-                <View className="mt-1.5 flex-row items-center gap-3">
-                  <View
-                    className="h-10 w-10 items-center justify-center rounded-2xl border"
-                    style={iconSurfaceStyle}
-                  >
-                    <Text variant="subheading">{selectedMonthRow.topCategoryEmoji ?? '•'}</Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text variant="subheading" numberOfLines={1}>
-                      {selectedMonthRow.topCategoryLabel}
-                    </Text>
-                    {renderValueNode(selectedMonthRow.topCategoryAmount, {
-                      variant: 'label',
-                      textClassName: 'mt-0.5',
-                      iconColor: trendAccentColor,
-                      style: toneStyle,
-                    })}
-                  </View>
-                </View>
-              ) : (
-                <Text variant="label" tone="muted" className="mt-1.5">
-                  —
-                </Text>
-              )}
             </View>
-          </CardContent>
+          </View>
         </Card>
       </View>
     );
@@ -4702,17 +4666,8 @@ export function InsightsScreen({
     const selectedMonthDisplayValue = selectedMonthAbsoluteValue.toFixed(2);
     const toneStyle = { color: trendAccentColor };
     const hasDrilldown = selectedMonthRow.transactions.length > 0;
-    const heroSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.18 : 0.1),
-      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.2),
-    };
-    const metricSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.1 : 0.045),
-      borderColor: withColorAlpha(themeColors.border, isDark ? 0.65 : 0.5),
-    };
-    const iconSurfaceStyle = {
-      backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.22 : 0.12),
-      borderColor: withColorAlpha(trendAccentColor, isDark ? 0.34 : 0.18),
+    const metricDividerStyle = {
+      backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3),
     };
     const selectIncomeTrendMonth = (monthKey: string) => {
       if (incomeTrendScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
@@ -4728,7 +4683,7 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-2 gap-2.5">
+      <View className="mt-2 gap-3">
         <View style={lineChartSectionStyle} className="py-1">
           <View
             style={[
@@ -4760,57 +4715,30 @@ export function InsightsScreen({
           </View>
         </View>
 
-        <Card className="p-3">
-          <CardContent className="gap-2.5 py-3">
-            <Pressable
-              disabled={!hasDrilldown}
-              onPress={() =>
-                openDrilldown({
-                  label: selectedMonthRow.label,
-                  transactions: selectedMonthRow.transactions,
-                  triggerSelectionHaptic: true,
-                })
-              }
-              className="rounded-[26px] border px-4 py-3.5 active:opacity-90"
-              style={heroSurfaceStyle}
-            >
-              <View className="flex-row items-center justify-between gap-2">
-                <Text variant="caption" className="flex-1">
-                  {I18n.t('insights.analytics.income_trend.selected_month_title')}
-                </Text>
-                <View className="flex-row items-center gap-2">
-                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                    <Text variant="label" tone="muted">
-                      {selectedMonthRow.label}
-                    </Text>
-                  </View>
-                  {hasDrilldown ? <ChevronRight size={16} color={trendAccentColor} /> : null}
-                </View>
-              </View>
-
-              <View className="mt-2 flex-row items-end justify-between gap-3">
-                <View className="flex-1 flex-row items-center">
-                  {settings.displayMode === 'time' ? (
-                    <TimeValueInline
-                      value={formatHours(selectedMonthAbsoluteValue)}
-                      variant="heading"
-                      iconColor={trendAccentColor}
-                      style={toneStyle}
-                    />
-                  ) : (
-                    <>
-                      <Text variant="heading" style={toneStyle}>
-                        {settings.currencySymbol}
-                      </Text>
-                      <ScrubRollingNumber
-                        value={selectedMonthAbsoluteValue}
-                        formattedText={selectedMonthDisplayValue}
-                        color={trendAccentColor}
-                        resetKey={`income-trend-${selectedYearKey}`}
-                        containerClassName="ml-1"
-                      />
-                    </>
-                  )}
+        <Card className="gap-3 p-4">
+          <Pressable
+            disabled={!hasDrilldown}
+            onPress={() =>
+              openDrilldown({
+                label: selectedMonthRow.label,
+                transactions: selectedMonthRow.transactions,
+                triggerSelectionHaptic: true,
+              })
+            }
+            className="flex-row items-center justify-between active:opacity-80"
+          >
+            <View className="flex-1">
+              <View className="flex-row items-center gap-2">
+                <View
+                  className="rounded-full px-2.5 py-1"
+                  style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
+                >
+                  <Text
+                    variant="label"
+                    style={{ color: trendAccentColor, fontWeight: '600' }}
+                  >
+                    {selectedMonthRow.label}
+                  </Text>
                 </View>
                 <Text variant="label" tone="muted">
                   {I18n.t('insights.analytics.income_trend.transactions', {
@@ -4819,85 +4747,94 @@ export function InsightsScreen({
                 </Text>
               </View>
 
-              <View className="mt-2 flex-row flex-wrap items-center gap-2">
+              <View className="mt-1.5 flex-row items-center">
+                {settings.displayMode === 'time' ? (
+                  <TimeValueInline
+                    value={formatHours(selectedMonthAbsoluteValue)}
+                    variant="heading"
+                    iconColor={trendAccentColor}
+                    style={toneStyle}
+                  />
+                ) : (
+                  <>
+                    <Text variant="heading" style={toneStyle}>
+                      {settings.currencySymbol}
+                    </Text>
+                    <ScrubRollingNumber
+                      value={selectedMonthAbsoluteValue}
+                      formattedText={selectedMonthDisplayValue}
+                      color={trendAccentColor}
+                      resetKey={`income-trend-${selectedYearKey}`}
+                      containerClassName="ml-1"
+                    />
+                  </>
+                )}
+              </View>
+
+              <View className="mt-1 flex-row items-center gap-1.5">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.analytics.income_trend.top_category_title')}:
+                </Text>
                 {selectedMonthRow.topCategoryLabel ? (
-                  <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                    <Text variant="label" tone="muted">
+                  <>
+                    <Text variant="label" style={{ color: trendAccentColor }}>
                       {`${selectedMonthRow.topCategoryEmoji ?? '•'} ${selectedMonthRow.topCategoryLabel}`}
                     </Text>
-                  </View>
-                ) : null}
+                    {renderCompactValueNode(selectedMonthRow.topCategoryAmount, {
+                      variant: 'label',
+                      style: toneStyle,
+                      containerClassName: 'ml-0.5',
+                    })}
+                  </>
+                ) : (
+                  <Text variant="label" tone="muted">—</Text>
+                )}
               </View>
-            </Pressable>
+            </View>
+            {hasDrilldown ? <ChevronRight size={16} color={themeColors.textMuted} /> : null}
+          </Pressable>
 
-            <View className="flex-row gap-2">
-              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-                <Text variant="caption">
-                  {I18n.t('insights.analytics.income_trend.peak_title')}
-                </Text>
+          <View className="flex-row items-stretch border-t border-border/40 pt-3">
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.income_trend.peak_title')}
+              </Text>
+              <View className="mt-1">
                 {peakMonthRow ? (
                   renderValueNode(peakMonthRow.totalIncome, {
                     variant: 'subheading',
-                    textClassName: 'mt-1 text-foreground',
+                    textClassName: 'text-foreground',
                     iconColor: themeColors.text,
                   })
                 ) : (
-                  <Text variant="subheading" className="mt-1 text-foreground">
+                  <Text variant="subheading" className="text-foreground">
                     —
                   </Text>
                 )}
-                <Text variant="label" tone="muted" className="mt-1">
-                  {peakMonthRow?.label ?? '—'}
-                </Text>
               </View>
-              <View className="flex-1 rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-                <Text variant="caption">
-                  {I18n.t('insights.analytics.income_trend.average_title')}
-                </Text>
+              <Text variant="label" tone="muted" className="mt-0.5">
+                {peakMonthRow?.label ?? '—'}
+              </Text>
+            </View>
+            <View className="mx-3 w-px" style={metricDividerStyle} />
+            <View className="flex-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.income_trend.average_title')}
+              </Text>
+              <View className="mt-1">
                 {renderValueNode(pageData.averageMonthIncome, {
                   variant: 'subheading',
-                  textClassName: 'mt-1 text-foreground',
+                  textClassName: 'text-foreground',
                   iconColor: themeColors.text,
                 })}
-                <Text variant="label" tone="muted" className="mt-1">
-                  {I18n.t('insights.analytics.income_trend.active_months', {
-                    count: pageData.activeMonths,
-                  })}
-                </Text>
               </View>
-            </View>
-
-            <View className="rounded-2xl border px-3.5 py-3" style={metricSurfaceStyle}>
-              <Text variant="caption">
-                {I18n.t('insights.analytics.income_trend.top_category_title')}
+              <Text variant="label" tone="muted" className="mt-0.5">
+                {I18n.t('insights.analytics.income_trend.active_months', {
+                  count: pageData.activeMonths,
+                })}
               </Text>
-              {selectedMonthRow.topCategoryLabel ? (
-                <View className="mt-1.5 flex-row items-center gap-3">
-                  <View
-                    className="h-10 w-10 items-center justify-center rounded-2xl border"
-                    style={iconSurfaceStyle}
-                  >
-                    <Text variant="subheading">{selectedMonthRow.topCategoryEmoji ?? '•'}</Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text variant="subheading" numberOfLines={1}>
-                      {selectedMonthRow.topCategoryLabel}
-                    </Text>
-                    {renderValueNode(selectedMonthRow.topCategoryAmount, {
-                      variant: 'label',
-                      textClassName: 'mt-0.5',
-                      iconColor: trendAccentColor,
-                      style: toneStyle,
-                    })}
-                  </View>
-                </View>
-              ) : (
-                <Text variant="label" tone="muted" className="mt-1.5">
-                  —
-                </Text>
-              )}
             </View>
-          </CardContent>
+          </View>
         </Card>
       </View>
     );
@@ -4989,45 +4926,44 @@ export function InsightsScreen({
           </View>
         </View>
 
-        <Card className="p-3">
-          <CardContent className="py-3 gap-2.5">
-            <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
-              <View className="flex-row items-center justify-between gap-2">
-                <Text variant="caption" className="flex-1">
-                  {I18n.t('insights.analytics.asset_history.summary_title')}
-                </Text>
-                <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                  <Text variant="label" tone="muted">
-                    {selectedAssetLabel}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="mt-1 flex-row items-center">
-                {settings.displayMode === 'time' ? (
-                  <TimeValueInline
-                    value={selectedAssetHoursLabel}
-                    variant="heading"
-                    iconColor={selectedAssetToneColor}
-                    style={selectedAssetToneStyle}
-                  />
-                ) : (
-                  <>
-                    <Text variant="heading" style={selectedAssetToneStyle}>
-                      {selectedAssetCurrencyPrefix}
-                    </Text>
-                    <ScrubRollingNumber
-                      value={selectedAssetAbsoluteValue}
-                      formattedText={selectedAssetDisplayValue}
-                      color={selectedAssetToneColor}
-                      resetKey={`asset-${selectedYearKey}`}
-                      containerClassName="ml-1"
-                    />
-                  </>
-                )}
-              </View>
+        <Card className="p-4">
+          <View className="flex-row items-center gap-2">
+            <View
+              className="rounded-full px-2.5 py-1"
+              style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
+            >
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontWeight: '600' }}
+              >
+                {selectedAssetLabel}
+              </Text>
             </View>
-          </CardContent>
+          </View>
+
+          <View className="mt-1.5 flex-row items-center">
+            {settings.displayMode === 'time' ? (
+              <TimeValueInline
+                value={selectedAssetHoursLabel}
+                variant="heading"
+                iconColor={selectedAssetToneColor}
+                style={selectedAssetToneStyle}
+              />
+            ) : (
+              <>
+                <Text variant="heading" style={selectedAssetToneStyle}>
+                  {selectedAssetCurrencyPrefix}
+                </Text>
+                <ScrubRollingNumber
+                  value={selectedAssetAbsoluteValue}
+                  formattedText={selectedAssetDisplayValue}
+                  color={selectedAssetToneColor}
+                  resetKey={`asset-${selectedYearKey}`}
+                  containerClassName="ml-1"
+                />
+              </>
+            )}
+          </View>
         </Card>
       </View>
     );
@@ -5109,48 +5045,49 @@ export function InsightsScreen({
           </View>
         </View>
 
-        <Card className="p-3">
-          <CardContent className="py-3 gap-2.5 px-3.5">
-            <View className="flex-row items-center justify-between gap-2">
-              <Text variant="caption" className="flex-1">
-                {I18n.t('insights.analytics.income_rate_history.rate_title')}
-              </Text>
-              <View className="rounded-full border border-border/45 bg-card/80 px-2 py-[3px]">
-                <Text variant="label" tone="muted">
-                  {selectedRateLabel}
-                </Text>
-              </View>
-            </View>
-            <View className="mt-1 flex-row items-center">
-              <Text variant="heading" className="text-primary">
-                {settings.currencySymbol}
-              </Text>
-              <ScrubRollingNumber
-                value={selectedRate}
-                formattedText={selectedRateDisplay}
-                color={themeColors.primary}
-                resetKey={`income-rate-${incomeRateResetKey}`}
-                containerClassName="ml-1"
-              />
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setIsIncomeRateUnitPickerOpen(true);
-                }}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('insights.analytics.income_rate_history.rate_title')}
-                className="ml-1 flex-row items-center active:opacity-80"
+        <Card className="p-4">
+          <View className="flex-row items-center gap-2">
+            <View
+              className="rounded-full px-2.5 py-1"
+              style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
+            >
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontWeight: '600' }}
               >
-                <Text variant="heading" className="text-primary">
-                  {selectedRateSuffix}
-                </Text>
-                <Text variant="label" tone="muted" className="ml-1">
-                  ▾
-                </Text>
-              </Pressable>
+                {selectedRateLabel}
+              </Text>
             </View>
-          </CardContent>
+          </View>
+          <View className="mt-1.5 flex-row items-center">
+            <Text variant="heading" className="text-primary">
+              {settings.currencySymbol}
+            </Text>
+            <ScrubRollingNumber
+              value={selectedRate}
+              formattedText={selectedRateDisplay}
+              color={themeColors.primary}
+              resetKey={`income-rate-${incomeRateResetKey}`}
+              containerClassName="ml-1"
+            />
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setIsIncomeRateUnitPickerOpen(true);
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('insights.analytics.income_rate_history.rate_title')}
+              className="ml-1 flex-row items-center active:opacity-80"
+            >
+              <Text variant="heading" className="text-primary">
+                {selectedRateSuffix}
+              </Text>
+              <Text variant="label" tone="muted" className="ml-1">
+                ▾
+              </Text>
+            </Pressable>
+          </View>
         </Card>
       </View>
     );
@@ -5200,10 +5137,12 @@ export function InsightsScreen({
       const healthyMarkerColor = withColorAlpha(themeColors.text, isDark ? 0.75 : 0.5);
 
       return (
-        <Card className="mt-2">
-          <CardContent className="py-3 gap-2.5">
-            <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
-              <Text variant="caption">{I18n.t('insights.analytics.savings_rate.title')}</Text>
+        <View className="mt-2 gap-3">
+          <Card className="gap-3 p-4">
+            <View>
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.savings_rate.title')}
+              </Text>
               <View className="mt-1 flex-row flex-wrap items-center gap-2">
                 <Text variant="heading" className={toneClass}>
                   {formattedSavingsRate}
@@ -5249,182 +5188,180 @@ export function InsightsScreen({
               ) : null}
             </View>
 
-            <View className="rounded-2xl border border-border/30 bg-card/90 px-3 py-2.5">
-              <View className="flex-row items-center">
-                <View className="flex-1 pr-2">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.income')}
-                  </Text>
-                  {renderValueNode(pageData.totalIncome, {
-                    variant: 'caption',
-                    textClassName: 'mt-0.5 text-success',
-                    iconColor: themeColors.success,
-                  })}
-                </View>
-                <View className="h-10 w-px bg-border/35" />
-                <View className="flex-1 px-2">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.expense')}
-                  </Text>
-                  {renderValueNode(pageData.totalExpense, {
-                    variant: 'caption',
-                    textClassName: 'mt-0.5 text-destructive',
-                    iconColor: themeColors.error,
-                  })}
-                </View>
-                <View className="h-10 w-px bg-border/35" />
-                <View className="flex-1 pl-2 items-end">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('insights.calendar.net')}
-                  </Text>
-                  {renderValueNode(Math.abs(pageData.totalNet), {
-                    variant: 'caption',
-                    textClassName: cn(
-                      'mt-0.5',
-                      pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
-                    ),
-                    iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
-                  })}
-                </View>
+            <View className="flex-row items-stretch border-t border-border/40 pt-3">
+              <View className="flex-1">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.calendar.income')}
+                </Text>
+                {renderValueNode(pageData.totalIncome, {
+                  variant: 'caption',
+                  textClassName: 'mt-0.5 text-success',
+                  iconColor: themeColors.success,
+                })}
+              </View>
+              <View className="mx-3 w-px bg-border/40" />
+              <View className="flex-1">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.calendar.expense')}
+                </Text>
+                {renderValueNode(pageData.totalExpense, {
+                  variant: 'caption',
+                  textClassName: 'mt-0.5 text-destructive',
+                  iconColor: themeColors.error,
+                })}
+              </View>
+              <View className="mx-3 w-px bg-border/40" />
+              <View className="flex-1">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.calendar.net')}
+                </Text>
+                {renderValueNode(Math.abs(pageData.totalNet), {
+                  variant: 'caption',
+                  textClassName: cn(
+                    'mt-0.5',
+                    pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
+                  ),
+                  iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
+                })}
               </View>
             </View>
+          </Card>
 
-            <View className="gap-1.5">
-              {pageData.savingsRateRows.map((row) => {
-                const monthlyRate = row.savingsRate;
-                const monthlySavedAmount = Math.abs(row.net);
-                const monthlyRateLabel =
-                  monthlyRate === null
-                    ? I18n.t('insights.analytics.savings_rate.no_income_short')
-                    : `${(monthlyRate * 100).toFixed(1)}%`;
-                const monthlySavedAmountClass =
-                  row.net > 0
+          <View className="gap-1.5">
+            {pageData.savingsRateRows.map((row) => {
+              const monthlyRate = row.savingsRate;
+              const monthlySavedAmount = Math.abs(row.net);
+              const monthlyRateLabel =
+                monthlyRate === null
+                  ? I18n.t('insights.analytics.savings_rate.no_income_short')
+                  : `${(monthlyRate * 100).toFixed(1)}%`;
+              const monthlySavedAmountClass =
+                row.net > 0
+                  ? 'text-success'
+                  : row.net < 0
+                    ? 'text-destructive'
+                    : 'text-muted-foreground';
+              const monthlySavedBadgeClass =
+                row.net > 0
+                  ? 'border-success/30 bg-success/10'
+                  : row.net < 0
+                    ? 'border-destructive/30 bg-destructive/10'
+                    : 'border-border/35 bg-secondary/20';
+              const monthlyIntensity =
+                monthlyRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(monthlyRate)));
+              const monthlyToneClass =
+                monthlyRate === null
+                  ? 'text-muted-foreground'
+                  : monthlyRate >= 0.2
                     ? 'text-success'
-                    : row.net < 0
-                      ? 'text-destructive'
-                      : 'text-muted-foreground';
-                const monthlySavedBadgeClass =
-                  row.net > 0
-                    ? 'border-success/30 bg-success/10'
-                    : row.net < 0
-                      ? 'border-destructive/30 bg-destructive/10'
-                      : 'border-border/35 bg-secondary/20';
-                const monthlyIntensity =
-                  monthlyRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(monthlyRate)));
-                const monthlyToneClass =
-                  monthlyRate === null
-                    ? 'text-muted-foreground'
-                    : monthlyRate >= 0.2
-                      ? 'text-success'
-                      : monthlyRate >= 0
-                        ? 'text-warning'
-                        : 'text-destructive';
-                const monthlyBarClass =
-                  monthlyRate === null
-                    ? 'bg-border'
-                    : monthlyRate >= 0.2
-                      ? 'bg-success'
-                      : monthlyRate >= 0
-                        ? 'bg-warning'
-                        : 'bg-destructive';
-                return (
-                  <Pressable
-                    key={row.monthKey}
-                    onPress={() => {
-                      const targetMonthKey = row.monthKey;
-                      const rangeStart = pageData.range.start;
-                      const rangeEnd = pageData.range.end;
-                      openDrilldown({
-                        label: row.label,
-                        transactions: row.transactions,
-                        showTypeFilter: true,
-                        triggerSelectionHaptic: true,
-                        scopeMatcher: (transaction) => {
-                          if (transaction.type !== 'income' && transaction.type !== 'expense') {
-                            return false;
-                          }
-                          if (transaction.date < rangeStart || transaction.date > rangeEnd) {
-                            return false;
-                          }
-                          if (
-                            (transactionMonthKeyById.get(transaction.id) ??
-                              monthKeyFromIsoLocal(transaction.date)) !== targetMonthKey
-                          ) {
-                            return false;
-                          }
-                          const categoryId = transaction.categoryId;
-                          if (!categoryId) return true;
-                          const category = categoryById.get(categoryId);
-                          const rootCategoryId = category?.parentId ?? categoryId;
-                          if (transaction.type === 'income') {
-                            return (
-                              !excludedSavingsIncomeCategorySet.has(categoryId) &&
-                              !excludedSavingsIncomeCategorySet.has(rootCategoryId)
-                            );
-                          }
+                    : monthlyRate >= 0
+                      ? 'text-warning'
+                      : 'text-destructive';
+              const monthlyBarClass =
+                monthlyRate === null
+                  ? 'bg-border'
+                  : monthlyRate >= 0.2
+                    ? 'bg-success'
+                    : monthlyRate >= 0
+                      ? 'bg-warning'
+                      : 'bg-destructive';
+              return (
+                <Pressable
+                  key={row.monthKey}
+                  onPress={() => {
+                    const targetMonthKey = row.monthKey;
+                    const rangeStart = pageData.range.start;
+                    const rangeEnd = pageData.range.end;
+                    openDrilldown({
+                      label: row.label,
+                      transactions: row.transactions,
+                      showTypeFilter: true,
+                      triggerSelectionHaptic: true,
+                      scopeMatcher: (transaction) => {
+                        if (transaction.type !== 'income' && transaction.type !== 'expense') {
+                          return false;
+                        }
+                        if (transaction.date < rangeStart || transaction.date > rangeEnd) {
+                          return false;
+                        }
+                        if (
+                          (transactionMonthKeyById.get(transaction.id) ??
+                            monthKeyFromIsoLocal(transaction.date)) !== targetMonthKey
+                        ) {
+                          return false;
+                        }
+                        const categoryId = transaction.categoryId;
+                        if (!categoryId) return true;
+                        const category = categoryById.get(categoryId);
+                        const rootCategoryId = category?.parentId ?? categoryId;
+                        if (transaction.type === 'income') {
                           return (
-                            !excludedSavingsExpenseCategorySet.has(categoryId) &&
-                            !excludedSavingsExpenseCategorySet.has(rootCategoryId)
+                            !excludedSavingsIncomeCategorySet.has(categoryId) &&
+                            !excludedSavingsIncomeCategorySet.has(rootCategoryId)
                           );
-                        },
-                      });
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={row.label}
-                    className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <Text variant="caption">{row.label}</Text>
-                      <View className="flex-row items-center gap-1.5">
-                        <View
-                          className={cn(
-                            'rounded-full border px-2 py-[3px]',
-                            monthlySavedBadgeClass,
-                          )}
-                        >
-                          {renderCompactValueNode(monthlySavedAmount, {
-                            variant: 'label',
-                            textClassName: cn(monthlySavedAmountClass),
-                            iconColor:
-                              row.net > 0
-                                ? themeColors.success
-                                : row.net < 0
-                                  ? themeColors.error
-                                  : themeColors.textMuted,
-                          })}
-                        </View>
-                        <Text variant="caption" className={cn(monthlyToneClass)}>
-                          {monthlyRateLabel}
-                        </Text>
-                      </View>
-                    </View>
-                    <View className="mt-1.5 h-1.5 rounded-full bg-secondary overflow-hidden">
+                        }
+                        return (
+                          !excludedSavingsExpenseCategorySet.has(categoryId) &&
+                          !excludedSavingsExpenseCategorySet.has(rootCategoryId)
+                        );
+                      },
+                    });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={row.label}
+                  className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text variant="caption">{row.label}</Text>
+                    <View className="flex-row items-center gap-1.5">
                       <View
-                        className={cn('h-full rounded-full', monthlyBarClass)}
-                        style={[
-                          styles.progressFill,
-                          buildWidthStyle(`${Math.round(monthlyIntensity * 100)}%`),
-                        ]}
-                      />
+                        className={cn(
+                          'rounded-full border px-2 py-[3px]',
+                          monthlySavedBadgeClass,
+                        )}
+                      >
+                        {renderCompactValueNode(monthlySavedAmount, {
+                          variant: 'label',
+                          textClassName: cn(monthlySavedAmountClass),
+                          iconColor:
+                            row.net > 0
+                              ? themeColors.success
+                              : row.net < 0
+                                ? themeColors.error
+                                : themeColors.textMuted,
+                        })}
+                      </View>
+                      <Text variant="caption" className={cn(monthlyToneClass)}>
+                        {monthlyRateLabel}
+                      </Text>
                     </View>
-                    <View className="mt-2 flex-row items-center justify-between gap-2">
-                      {renderValueNode(row.income, {
-                        variant: 'label',
-                        textClassName: 'text-success/90',
-                        iconColor: themeColors.success,
-                      })}
-                      {renderValueNode(row.expense, {
-                        variant: 'label',
-                        textClassName: 'text-destructive/90',
-                        iconColor: themeColors.error,
-                      })}
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </CardContent>
-        </Card>
+                  </View>
+                  <View className="mt-1.5 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <View
+                      className={cn('h-full rounded-full', monthlyBarClass)}
+                      style={[
+                        styles.progressFill,
+                        buildWidthStyle(`${Math.round(monthlyIntensity * 100)}%`),
+                      ]}
+                    />
+                  </View>
+                  <View className="mt-2 flex-row items-center justify-between gap-2">
+                    {renderValueNode(row.income, {
+                      variant: 'label',
+                      textClassName: 'text-success/90',
+                      iconColor: themeColors.success,
+                    })}
+                    {renderValueNode(row.expense, {
+                      variant: 'label',
+                      textClassName: 'text-destructive/90',
+                      iconColor: themeColors.error,
+                    })}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
       );
     }
 
