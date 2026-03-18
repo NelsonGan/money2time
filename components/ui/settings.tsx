@@ -77,6 +77,7 @@ interface SettingsHeaderProps {
   subtitleNode?: React.ReactNode;
   onBack?: () => void;
   onClose?: () => void;
+  closeRowAccessory?: React.ReactNode;
   rightAccessory?: React.ReactNode;
   className?: string;
 }
@@ -87,6 +88,7 @@ export function SettingsHeader({
   subtitleNode,
   onBack,
   onClose,
+  closeRowAccessory,
   rightAccessory,
   className,
 }: SettingsHeaderProps) {
@@ -106,7 +108,8 @@ export function SettingsHeader({
               />
             ) : null}
           </View>
-          <View className="h-10 w-10 items-end justify-center">
+          <View className="flex-row items-center gap-2">
+            {closeRowAccessory}
             {onClose ? (
               <HeaderIconButton
                 onPress={onClose}

@@ -372,7 +372,7 @@ export function getDistinctNotesSuggestions(prefix: string): string[] {
   if (!prefix) return [];
   const sqlite = getSQLite();
   const rows = sqlite.getAllSync<{ note: string }>(
-    'SELECT DISTINCT note FROM transactions WHERE note IS NOT NULL AND note LIKE ? AND deleted_at IS NULL LIMIT 5',
+    'SELECT note, MAX(date) AS latest FROM transactions WHERE note IS NOT NULL AND note LIKE ? AND deleted_at IS NULL GROUP BY note ORDER BY latest DESC LIMIT 5',
     [`${prefix}%`],
   );
   return rows.map((r) => r.note);

@@ -15,8 +15,6 @@ interface CreateAccountInput {
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
   currency: string;
-  icon: string;
-  color: string;
   startingBalance: number;
   includeInTotals: boolean;
   deletedAt?: string | null;

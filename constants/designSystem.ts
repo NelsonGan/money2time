@@ -17,6 +17,7 @@ export interface ColorPalette {
   text: string;
   textSoft: string;
   textMuted: string;
+  mutedForeground: string;
   muted: string;
   success: string;
   successSoft: string;
@@ -53,6 +54,7 @@ const baseLightPalette: ColorPalette = {
   text: '#1A2E2A',
   textSoft: '#6B7A77',
   textMuted: '#94A39F',
+  mutedForeground: '#677E7A',
   muted: '#6B7A77',
   success: '#1E9468',
   successSoft: '#DFFBF0',
@@ -80,6 +82,7 @@ const baseDarkPalette: ColorPalette = {
   text: '#E8EDF2',
   textSoft: '#9AACA6',
   textMuted: '#6B8078',
+  mutedForeground: '#A8B0BD',
   muted: '#9AACA6',
   success: '#2DB87E',
   successSoft: '#1A3D2E',
