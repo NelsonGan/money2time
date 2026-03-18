@@ -488,7 +488,7 @@ const zh = {
         no_income_message: '在本期添加收入交易以计算储蓄率。',
         saved_per_year: '今年已节省 {{value}}',
         exclusions_active: '已排除 {{count}} 个分类。',
-        goal_hint: '20% 以上通常被认为是健康的储蓄水平。',
+        goal_hint: '20% 以上为健康储蓄。',
       },
       income_rate_history: {
         rate_title: '时薪',
