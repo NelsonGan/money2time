@@ -118,8 +118,6 @@ export function toAccount(row: AccountRow): Account {
     creditStatementDay: row.creditStatementDay,
     creditDueDay: row.creditDueDay,
     currency: row.currency,
-    icon: row.icon,
-    color: row.color,
     startingBalance: row.startingBalance,
     includeInTotals: row.includeInTotals,
     createdAt: row.createdAt,
