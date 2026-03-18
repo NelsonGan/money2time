@@ -59,11 +59,9 @@ const styles = StyleSheet.create({
 export function RankedImpactChart({
   rows,
   accentColor,
-  shareLabel = 'Share',
 }: RankedImpactChartProps) {
   const themeColors = useThemeColors();
   const activeAccent = accentColor ?? themeColors.primary;
-  const showShareLabel = typeof shareLabel === 'string' && shareLabel.trim().length > 0;
 
   return (
     <View className="gap-1.5 mt-0.5">
@@ -105,6 +103,9 @@ export function RankedImpactChart({
                       {row.subtitle}
                     </Text>
                   ) : null}
+                  <Text variant="label" style={accentTextStyle}>
+                    {share.toFixed(1)}%
+                  </Text>
                 </View>
               </View>
               <View className="items-end pl-1">
@@ -127,7 +128,7 @@ export function RankedImpactChart({
               </View>
             </View>
 
-            <View className="mt-2">
+            <View className="mt-1.5">
               <View className="h-2 rounded-full bg-secondary/70 overflow-hidden">
                 <View
                   style={[
@@ -137,21 +138,6 @@ export function RankedImpactChart({
                 >
                   <View style={[styles.progressGlow, { backgroundColor: barGlow }]} />
                 </View>
-              </View>
-              <View
-                className={cn(
-                  'mt-1.5 flex-row items-center',
-                  showShareLabel ? 'justify-between' : 'justify-end',
-                )}
-              >
-                {showShareLabel ? (
-                  <Text variant="label" tone="muted">
-                    {shareLabel}
-                  </Text>
-                ) : null}
-                <Text variant="label" style={accentTextStyle}>
-                  {share.toFixed(1)}%
-                </Text>
               </View>
             </View>
           </>
