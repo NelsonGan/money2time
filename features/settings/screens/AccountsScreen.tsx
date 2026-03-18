@@ -1,4 +1,15 @@
-import { Eye, EyeOff, GripVertical, Pencil, Plus, Settings, Trash2 } from 'lucide-react-native';
+import {
+  CalendarDays,
+  CreditCard,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Landmark,
+  Pencil,
+  Plus,
+  Settings,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -6,6 +17,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -17,8 +29,6 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   Button,
-  Card,
-  CardContent,
   Input,
   SegmentedToggle,
   SelectField,
@@ -28,16 +38,11 @@ import {
   SettingsActionBar,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
   ThemeModal,
   TimeValueInline,
 } from '~/components/ui';
-import {
-  ACCOUNT_TYPE_OPTIONS,
-  DEFAULT_CATEGORY_EMOJIS,
-  DEFAULT_CURRENCY,
-} from '~/constants/appDefaults';
+import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
@@ -61,13 +66,14 @@ interface AccountGroupSection {
   accounts: Account[];
 }
 
-interface EditAccountSaveInput {
+interface AccountEditorInput {
   name: string;
+  type: AccountType;
   accountGroup: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   includeInTotals: boolean;
-  targetBalance: number;
+  startingBalance: number;
 }
 
 interface CreditSummary {
@@ -274,38 +280,42 @@ function isNegativeForDisplay(value: number) {
   return normalizeMoneyAmount(value) < 0;
 }
 
-function AddAccountSheet({
+function AccountEditorSheet({
   visible,
-  onClose,
-  onCreate,
-  accountGroups,
+  account,
+  currentBalance,
   currencySymbol,
+  accountGroups,
+  onClose,
+  onSave,
+  onDelete,
 }: {
   visible: boolean;
-  onClose: () => void;
-  accountGroups: AccountGroup[];
+  account: Account | null;
+  currentBalance: number;
   currencySymbol: string;
-  onCreate: (input: {
-    name: string;
-    type: AccountType;
-    accountGroup: string | null;
-    creditStatementDay: number | null;
-    creditDueDay: number | null;
-    icon: string;
-    color: string;
-    startingBalance: number;
-  }) => void;
+  accountGroups: AccountGroup[];
+  onClose: () => void;
+  onSave: (input: AccountEditorInput) => void;
+  onDelete?: () => void;
 }) {
+  const themeColors = useThemeColors();
+  const isEdit = account !== null;
+
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
-  const [icon, setIcon] = useState('🏦');
-  const [color, setColor] = useState<string>('#1F8A6F');
-  const [startingBalance, setStartingBalance] = useState('0');
+  const [includeInTotals, setIncludeInTotals] = useState(true);
+  const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+
   const accountGroupNameById = useMemo(
     () => new Map(accountGroups.map((group) => [group.id, group.name])),
+    [accountGroups],
+  );
+  const accountGroupIdByName = useMemo(
+    () => new Map(accountGroups.map((group) => [group.name, group.id])),
     [accountGroups],
   );
   const accountGroupOptions = useMemo(
@@ -315,10 +325,37 @@ function AddAccountSheet({
     ],
     [accountGroups],
   );
-  const canSave = name.trim().length > 0;
 
-  const handleCreate = () => {
-    if (!canSave) return;
+  useEffect(() => {
+    if (account) {
+      setName(account.name);
+      setType(account.type);
+      const matchedGroupId = account.accountGroup
+        ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
+        : 'none';
+      setAccountGroupId(matchedGroupId);
+      setIncludeInTotals(account.includeInTotals);
+      setBalanceInput(toBalanceInputValue(currentBalance));
+      setCreditStatementDay(String(account.creditStatementDay ?? '25'));
+      setCreditDueDay(String(account.creditDueDay ?? '1'));
+    } else {
+      setName('');
+      setType('debit');
+      setAccountGroupId('none');
+      setIncludeInTotals(true);
+      setBalanceInput('0');
+      setCreditStatementDay('25');
+      setCreditDueDay('1');
+    }
+  }, [account, accountGroupIdByName, currentBalance, visible]);
+
+  const normalizedName = name.trim();
+  const parsedBalance = Number(balanceInput);
+  const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
+  const canSave = normalizedName.length > 0 && hasValidBalance;
+
+  const handleSave = () => {
+    if (!canSave || !Number.isFinite(parsedBalance)) return;
     const parsedStatementDay = Number(creditStatementDay);
     const parsedDueDay = Number(creditDueDay);
     const normalizedStatementDay =
@@ -329,25 +366,36 @@ function AddAccountSheet({
       Number.isInteger(parsedDueDay) && parsedDueDay >= 1 && parsedDueDay <= 31
         ? parsedDueDay
         : null;
-    onCreate({
-      name: name.trim(),
+
+    onSave({
+      name: normalizedName,
       type,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: type === 'credit' ? normalizedStatementDay : null,
       creditDueDay: type === 'credit' ? normalizedDueDay : null,
-      icon: icon || '🏦',
-      color: color || '#1F8A6F',
-      startingBalance: Number(startingBalance) || 0,
+      includeInTotals,
+      startingBalance: parsedBalance,
     });
-    setName('');
-    setType('debit');
-    setAccountGroupId('none');
-    setIcon('🏦');
-    setColor('#1F8A6F');
-    setStartingBalance('0');
-    setCreditStatementDay('25');
-    setCreditDueDay('1');
+  };
+
+  const handleDelete = () => {
+    if (!onDelete) return;
+    Alert.alert(
+      I18n.t('accounts.delete_account'),
+      I18n.t('accounts.delete_account_confirm'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            void triggerHaptic('warning');
+            onDelete();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -360,8 +408,21 @@ function AddAccountSheet({
       <SafeAreaView className="flex-1 bg-background">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
-          title={I18n.t('accounts.new_account')}
+          title={isEdit ? I18n.t('accounts.edit_account') : I18n.t('accounts.new_account')}
           onClose={onClose}
+          closeRowAccessory={
+            isEdit && onDelete ? (
+              <Pressable
+                onPress={handleDelete}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('accounts.delete_account')}
+                className="h-10 w-10 items-center justify-center rounded-full bg-destructive/10"
+              >
+                <Trash2 size={18} color={themeColors.error} />
+              </Pressable>
+            ) : undefined
+          }
         />
 
         <ScrollView
@@ -375,14 +436,12 @@ function AddAccountSheet({
               onChangeText={setName}
               placeholder={I18n.t('accounts.account_name_placeholder')}
             />
-            <View className="gap-2">
-              <SelectField
-                label={I18n.t('accounts.account_group')}
-                value={accountGroupId}
-                onChange={setAccountGroupId}
-                options={accountGroupOptions}
-              />
-            </View>
+            <SelectField
+              label={I18n.t('accounts.account_group')}
+              value={accountGroupId}
+              onChange={setAccountGroupId}
+              options={accountGroupOptions}
+            />
             <View>
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('accounts.type')}
@@ -394,7 +453,6 @@ function AddAccountSheet({
                     onPress={() => {
                       void triggerHaptic('selection');
                       setType(item.value);
-                      setIcon(item.icon);
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={item.label}
@@ -440,242 +498,27 @@ function AddAccountSheet({
               </View>
             ) : null}
 
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Input label={I18n.t('categories.color')} value={color} onChangeText={setColor} />
-              </View>
-            </View>
-
-            <View>
-              <Text variant="label" tone="muted" className="mb-2">
-                {I18n.t('categories.emoji')}
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
-                  <Pressable
-                    key={emoji}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setIcon(emoji);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
-                    accessibilityState={{ selected: icon === emoji }}
-                    className={cn(
-                      'h-11 w-11 rounded-full border items-center justify-center',
-                      icon === emoji
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
-                    )}
-                  >
-                    <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
             <Input
-              label={I18n.t('accounts.starting_balance')}
+              label={isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')}
               variant="currency"
               currencySymbol={currencySymbol}
-              value={startingBalance}
-              onChangeText={setStartingBalance}
+              value={balanceInput}
+              onChangeText={setBalanceInput}
+              helperText={isEdit ? I18n.t('accounts.current_balance_hint') : undefined}
             />
-          </View>
-        </ScrollView>
-        <SettingsActionBar onCancel={onClose} onSave={handleCreate} saveDisabled={!canSave} />
-      </SafeAreaView>
-    </ThemeModal>
-  );
-}
 
-function EditAccountSheet({
-  visible,
-  account,
-  currentBalance,
-  currencySymbol,
-  accountGroups,
-  onClose,
-  onSave,
-  onDelete,
-}: {
-  visible: boolean;
-  account: Account;
-  currentBalance: number;
-  currencySymbol: string;
-  accountGroups: AccountGroup[];
-  onClose: () => void;
-  onSave: (updates: EditAccountSaveInput) => void;
-  onDelete: () => void;
-}) {
-  const [name, setName] = useState(account.name);
-  const [accountGroupId, setAccountGroupId] = useState<string>('none');
-  const [includeInTotals, setIncludeInTotals] = useState(account.includeInTotals);
-  const [balanceInput, setBalanceInput] = useState(() => toBalanceInputValue(currentBalance));
-  const [creditStatementDay, setCreditStatementDay] = useState(
-    String(account.creditStatementDay ?? '25'),
-  );
-  const [creditDueDay, setCreditDueDay] = useState(String(account.creditDueDay ?? '1'));
-  const accountGroupNameById = useMemo(
-    () => new Map(accountGroups.map((group) => [group.id, group.name])),
-    [accountGroups],
-  );
-  const accountGroupIdByName = useMemo(
-    () => new Map(accountGroups.map((group) => [group.name, group.id])),
-    [accountGroups],
-  );
-  const accountGroupOptions = useMemo(
-    () => [
-      { value: 'none', label: I18n.t('common.ungrouped') },
-      ...accountGroups.map((group) => ({ value: group.id, label: group.name })),
-    ],
-    [accountGroups],
-  );
-
-  useEffect(() => {
-    setName(account.name);
-    const matchedGroupId = account.accountGroup
-      ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
-      : 'none';
-    setAccountGroupId(matchedGroupId);
-    setIncludeInTotals(account.includeInTotals);
-    setBalanceInput(toBalanceInputValue(currentBalance));
-    setCreditStatementDay(String(account.creditStatementDay ?? '25'));
-    setCreditDueDay(String(account.creditDueDay ?? '1'));
-  }, [account, accountGroupIdByName, currentBalance, visible]);
-
-  const normalizedName = name.trim();
-  const parsedTargetBalance = Number(balanceInput);
-  const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedTargetBalance);
-  const canSave = normalizedName.length > 0 && hasValidBalance;
-
-  const handleSave = () => {
-    if (!canSave || !Number.isFinite(parsedTargetBalance)) return;
-    const parsedStatementDay = Number(creditStatementDay);
-    const parsedDueDay = Number(creditDueDay);
-    const normalizedStatementDay =
-      Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
-        ? parsedStatementDay
-        : null;
-    const normalizedDueDay =
-      Number.isInteger(parsedDueDay) && parsedDueDay >= 1 && parsedDueDay <= 31
-        ? parsedDueDay
-        : null;
-
-    onSave({
-      name: normalizedName,
-      accountGroup:
-        accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
-      creditStatementDay: account.type === 'credit' ? normalizedStatementDay : null,
-      creditDueDay: account.type === 'credit' ? normalizedDueDay : null,
-      includeInTotals,
-      targetBalance: parsedTargetBalance,
-    });
-  };
-
-  return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView className="flex-1 bg-background">
-        <SettingsHeader
-          className="px-5 pt-5 pb-2"
-          title={I18n.t('accounts.edit_account')}
-          onClose={onClose}
-        />
-        <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
-          <View className="gap-5">
-            <Card>
-              <CardContent className="py-5 gap-3.5">
-                <Input
-                  label={I18n.t('accounts.account_name')}
-                  value={name}
-                  onChangeText={setName}
-                  placeholder={I18n.t('accounts.account_name_placeholder')}
-                />
-                <Input
-                  label={I18n.t('accounts.current_balance')}
-                  variant="currency"
-                  currencySymbol={currencySymbol}
-                  value={balanceInput}
-                  onChangeText={setBalanceInput}
-                  helperText={I18n.t('accounts.current_balance_hint')}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="py-5 gap-3.5">
-                <SelectField
-                  label={I18n.t('accounts.account_group')}
-                  value={accountGroupId}
-                  onChange={setAccountGroupId}
-                  options={accountGroupOptions}
-                />
-                <View className="gap-2">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('accounts.include_in_totals')}
-                  </Text>
-                  <SegmentedToggle
-                    value={includeInTotals ? 'include' : 'hide'}
-                    onChange={(value) => setIncludeInTotals(value === 'include')}
-                    options={[
-                      { value: 'include', label: I18n.t('accounts.include_option_include') },
-                      { value: 'hide', label: I18n.t('accounts.include_option_hide') },
-                    ]}
-                  />
-                  <Text variant="label" tone="muted" className="px-1">
-                    {I18n.t('accounts.include_in_totals_hint')}
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
-
-            {account.type === 'credit' ? (
-              <Card>
-                <CardContent className="py-5">
-                  <View className="flex-row gap-2">
-                    <View className="flex-1">
-                      <Input
-                        label={I18n.t('accounts.statement_day')}
-                        variant="numeric"
-                        value={creditStatementDay}
-                        onChangeText={setCreditStatementDay}
-                        placeholder="25"
-                      />
-                    </View>
-                    <View className="flex-1">
-                      <Input
-                        label={I18n.t('accounts.due_day')}
-                        variant="numeric"
-                        value={creditDueDay}
-                        onChangeText={setCreditDueDay}
-                        placeholder="1"
-                      />
-                    </View>
-                  </View>
-                </CardContent>
-              </Card>
-            ) : null}
-          </View>
-
-          <SettingsSection className="mt-6" title={I18n.t('settings.danger_zone')} danger>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('warning');
-                onDelete();
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('accounts.delete_account')}
-              className="self-start rounded-full border border-destructive/30 bg-destructive/8 px-3 py-2"
-            >
-              <Text variant="caption" className="text-destructive">
-                {I18n.t('accounts.delete_account')}
+            <View className="flex-row items-center justify-between">
+              <Text variant="label" tone="muted">
+                {I18n.t('accounts.include_in_totals')}
               </Text>
-            </Pressable>
-          </SettingsSection>
+              <Switch
+                value={includeInTotals}
+                onValueChange={setIncludeInTotals}
+                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </SafeAreaView>
@@ -1089,7 +932,7 @@ function AccountMgmtRowItem({ account }: AccountMgmtRowItemProps) {
               },
             ]}
           >
-            <Text style={styles.rowLeadingEmoji}>{account.icon || (isCredit ? '💳' : '🏦')}</Text>
+            <Text style={styles.rowLeadingEmoji}>{isCredit ? '💳' : '🏦'}</Text>
           </View>
           <View style={styles.rowTitleWrap}>
             <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>
@@ -1744,17 +1587,18 @@ export function AccountsScreen({
     }: {
       account: Account;
       currentBalance: number;
-      updates: EditAccountSaveInput;
+      updates: AccountEditorInput;
       onComplete: () => void;
     }) => {
       const accountUpdates = {
         name: updates.name,
+        type: updates.type,
         accountGroup: updates.accountGroup,
         creditStatementDay: updates.creditStatementDay,
         creditDueDay: updates.creditDueDay,
         includeInTotals: updates.includeInTotals,
       };
-      const delta = updates.targetBalance - currentBalance;
+      const delta = updates.startingBalance - currentBalance;
       const adjustmentAmount = Math.abs(delta);
       const hasBalanceChange = adjustmentAmount > 0.000001;
 
@@ -1980,17 +1824,19 @@ export function AccountsScreen({
             compactItems
             scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
-              <View className="pb-3 gap-3">
-                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
-                  <View className="items-center gap-2">
-                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
-                      <Text style={{ fontSize: 26 }}>
-                        {account.icon || (account.type === 'credit' ? '💳' : '🏦')}
-                      </Text>
-                    </View>
-                    <Text variant="label" tone="muted" className="mt-1">
-                      {I18n.t('accounts.balance')}
-                    </Text>
+	              <View className="pb-3 gap-3">
+	                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
+	                  <View className="items-center gap-2">
+	                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
+	                      {account.type === 'credit' ? (
+	                        <CreditCard size={24} color={themeColors.primary} />
+	                      ) : (
+	                        <Landmark size={24} color={themeColors.primary} />
+	                      )}
+	                    </View>
+	                    <Text variant="label" tone="muted" className="mt-1">
+	                      {I18n.t('accounts.balance')}
+	                    </Text>
                     {renderVisibleBalanceNode(normalizedBalance, {
                       variant: 'heading',
                       textClassName: isNegativeForDisplay(normalizedBalance)
@@ -2028,15 +1874,15 @@ export function AccountsScreen({
                 </View>
 
                 {account.type === 'credit' ? (
-                  <View className="gap-2.5">
-                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
-                      <View className="flex-row items-center gap-2.5 mb-3">
-                        <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
-                          <Text style={{ fontSize: 14 }}>📅</Text>
-                        </View>
-                        <View className="flex-1">
-                          <Text variant="bodyStrong">
-                            {I18n.t('accounts.billing')}
+	                  <View className="gap-2.5">
+	                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
+	                      <View className="flex-row items-center gap-2.5 mb-3">
+	                        <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
+	                          <CalendarDays size={15} color={themeColors.accent} />
+	                        </View>
+	                        <View className="flex-1">
+	                          <Text variant="bodyStrong">
+	                            {I18n.t('accounts.billing')}
                           </Text>
                           <Text variant="label" tone="muted" className="mt-0.5">
                             {I18n.t('accounts.statement_due', {
@@ -2111,7 +1957,7 @@ export function AccountsScreen({
             </View>
           ) : null}
         </View>
-        <EditAccountSheet
+        <AccountEditorSheet
           visible={showEditAccount}
           account={account}
           currentBalance={balance}
@@ -2540,7 +2386,7 @@ export function AccountsScreen({
       )}
 
       {managementOnly && editingAccount ? (
-        <EditAccountSheet
+        <AccountEditorSheet
           visible={showEditAccount}
           account={editingAccount}
           currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
@@ -2569,16 +2415,17 @@ export function AccountsScreen({
         />
       ) : null}
 
-      <AddAccountSheet
+      <AccountEditorSheet
         visible={showCreate}
-        onClose={() => setShowCreate(false)}
-        accountGroups={accountGroups}
+        account={null}
+        currentBalance={0}
         currencySymbol={settings.currencySymbol}
-        onCreate={(input) => {
+        accountGroups={accountGroups}
+        onClose={() => setShowCreate(false)}
+        onSave={(input) => {
           createAccount({
             ...input,
             currency: DEFAULT_CURRENCY,
-            includeInTotals: true,
           });
           setShowCreate(false);
         }}

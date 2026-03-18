@@ -9,8 +9,6 @@ export const accountsTable = sqliteTable('accounts', {
   creditStatementDay: integer('credit_statement_day'),
   creditDueDay: integer('credit_due_day'),
   currency: text('currency').notNull(),
-  icon: text('icon').notNull(),
-  color: text('color').notNull(),
   startingBalance: real('starting_balance').notNull().default(0),
   includeInTotals: integer('include_in_totals', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').notNull(),

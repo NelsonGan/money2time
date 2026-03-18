@@ -510,8 +510,6 @@ export async function importMoneyManagerBackupFromUri(
         creditStatementDay: type === 'credit' ? creditStatementDay : null,
         creditDueDay: type === 'credit' ? creditDueDay : null,
         currency: currencySymbol,
-        icon: '🏦',
-        color: '#22917A',
         startingBalance: 0,
         includeInTotals: includeInTotalsFromReflectFlag(row.isReflect),
         deletedAt,
@@ -551,8 +549,6 @@ export async function importMoneyManagerBackupFromUri(
         type: inferAccountType(fallbackName, null, null, null),
         accountGroup: null,
         currency: currencySymbol,
-        icon: '🏦',
-        color: '#22917A',
         startingBalance: 0,
         includeInTotals: true,
       });
