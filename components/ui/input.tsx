@@ -1,12 +1,16 @@
 import * as React from 'react';
 import type { TextInputProps } from 'react-native';
 import { StyleSheet, TextInput, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 
 import { Text } from './text';
-import { SINGLE_LINE_TEXT_INPUT_STYLE } from './textInputStyles';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -20,10 +24,11 @@ interface InputProps extends TextInputProps {
   containerClassName?: string;
 }
 
+const TIMING_CONFIG = { duration: 150 };
+
 const Input = React.forwardRef<TextInput, InputProps>(
   (
     {
-      className,
       containerClassName,
       label,
       required = false,
@@ -42,22 +47,31 @@ const Input = React.forwardRef<TextInput, InputProps>(
     },
     ref,
   ) => {
-    const [focused, setFocused] = React.useState(false);
-    const isMountedRef = React.useRef(false);
     const themeColors = useThemeColors();
     const isMultiline = variant === 'multiline' || !!multiline;
     const resolvedKeyboardType =
       keyboardType ??
       (variant === 'numeric' ? 'decimal-pad' : variant === 'currency' ? 'decimal-pad' : 'default');
     const hasError = !!error;
-    const hasLeading = !!leftIcon || variant === 'currency';
 
-    React.useEffect(() => {
-      isMountedRef.current = true;
-      return () => {
-        isMountedRef.current = false;
+    const isFocused = useSharedValue(0);
+
+    const shellAnimatedStyle = useAnimatedStyle(() => {
+      const t = isFocused.value;
+      return {
+        borderColor: hasError
+          ? `${themeColors.error}66`
+          : t === 1
+            ? `${themeColors.primary}66`
+            : `${themeColors.border}4D`,
+        backgroundColor: hasError
+          ? `${themeColors.error}0A`
+          : t === 1
+            ? `${themeColors.primary}0A`
+            : themeColors.card,
+        shadowOpacity: !hasError && t === 1 ? 0.15 : 0,
       };
-    }, []);
+    });
 
     return (
       <View className={cn('w-full', containerClassName)}>
@@ -74,24 +88,16 @@ const Input = React.forwardRef<TextInput, InputProps>(
             ) : null}
           </View>
         ) : null}
-        <View
-          className={cn(
-            'rounded-[22px] border bg-card px-4',
-            isMultiline ? 'min-h-[112px] py-3' : 'h-[54px] py-0',
-            hasError
-              ? 'border-destructive/40 bg-destructive/4'
-              : focused
-                ? 'border-primary/40 bg-primary/4 shadow-glow'
-                : 'border-border/30',
-            !editable && 'opacity-50',
-          )}
+        <Animated.View
+          style={[
+            styles.shell,
+            isMultiline ? styles.shellMultiline : styles.shellSingleLine,
+            styles.shellShadow,
+            { opacity: editable ? 1 : 0.5 },
+            shellAnimatedStyle,
+          ]}
         >
-          <View
-            className={cn(
-              'flex-row items-center',
-              isMultiline ? 'min-h-[96px] items-start' : 'h-full',
-            )}
-          >
+          <View style={isMultiline ? styles.innerRowMultiline : styles.innerRow}>
             {variant === 'currency' ? (
               <Text variant="bodyStrong" className="mr-2 text-muted-foreground mt-[1px]">
                 {currencySymbol}
@@ -105,26 +111,19 @@ const Input = React.forwardRef<TextInput, InputProps>(
               multiline={isMultiline}
               numberOfLines={isMultiline ? (numberOfLines ?? 4) : undefined}
               textAlignVertical={isMultiline ? 'top' : 'center'}
-              className={cn(
-                'flex-1 text-[16px] text-foreground font-medium',
-                hasLeading && 'pl-0',
-                isMultiline ? 'min-h-[96px] pt-0.5 leading-6' : '',
-                className,
-              )}
-              style={
-                isMultiline ? style : [SINGLE_LINE_TEXT_INPUT_STYLE, styles.singleLineInput, style]
-              }
+              style={[
+                styles.textInput,
+                { color: themeColors.text },
+                isMultiline ? styles.textInputMultiline : styles.singleLineInput,
+                style,
+              ]}
               placeholderTextColor={themeColors.textMuted}
               onFocus={(e) => {
-                if (isMountedRef.current) {
-                  setFocused(true);
-                }
+                isFocused.value = withTiming(1, TIMING_CONFIG);
                 props.onFocus?.(e);
               }}
               onBlur={(e) => {
-                if (isMountedRef.current) {
-                  setFocused(false);
-                }
+                isFocused.value = withTiming(0, TIMING_CONFIG);
                 props.onBlur?.(e);
               }}
               {...props}
@@ -133,7 +132,7 @@ const Input = React.forwardRef<TextInput, InputProps>(
             />
             {rightIcon ? <View className="ml-2 mt-[1px]">{rightIcon}</View> : null}
           </View>
-        </View>
+        </Animated.View>
 
         {hasError ? (
           <Text variant="caption" tone="error" className="mt-2 px-1">
@@ -152,6 +151,51 @@ const Input = React.forwardRef<TextInput, InputProps>(
 Input.displayName = 'Input';
 
 const styles = StyleSheet.create({
+  shell: {
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+  },
+  shellSingleLine: {
+    height: 54,
+  },
+  shellMultiline: {
+    minHeight: 112,
+    paddingVertical: 12,
+  },
+  shellShadow: {
+    shadowColor: 'rgba(31,138,111,1)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  innerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    height: '100%',
+  },
+  innerRowMultiline: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    minHeight: 96,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    includeFontPadding: false,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingVertical: 0,
+    textAlignVertical: 'center',
+  },
+  textInputMultiline: {
+    minHeight: 96,
+    paddingTop: 2,
+    lineHeight: 24,
+    textAlignVertical: 'top',
+  },
   singleLineInput: {
     height: '100%',
   },

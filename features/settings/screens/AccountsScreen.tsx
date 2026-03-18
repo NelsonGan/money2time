@@ -17,6 +17,8 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   Button,
+  Card,
+  CardContent,
   Input,
   SegmentedToggle,
   SelectField,
@@ -584,64 +586,78 @@ function EditAccountSheet({
           onClose={onClose}
         />
         <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
-          <View className="gap-4">
-            <Input
-              label={I18n.t('accounts.account_name')}
-              value={name}
-              onChangeText={setName}
-              placeholder={I18n.t('accounts.account_name_placeholder')}
-            />
-            <Input
-              label={I18n.t('accounts.current_balance')}
-              variant="currency"
-              currencySymbol={currencySymbol}
-              value={balanceInput}
-              onChangeText={setBalanceInput}
-              helperText={I18n.t('accounts.current_balance_hint')}
-            />
-            <SelectField
-              label={I18n.t('accounts.account_group')}
-              value={accountGroupId}
-              onChange={setAccountGroupId}
-              options={accountGroupOptions}
-            />
-            <View className="gap-2">
-              <Text variant="label" tone="muted">
-                {I18n.t('accounts.include_in_totals')}
-              </Text>
-              <SegmentedToggle
-                value={includeInTotals ? 'include' : 'hide'}
-                onChange={(value) => setIncludeInTotals(value === 'include')}
-                options={[
-                  { value: 'include', label: I18n.t('accounts.include_option_include') },
-                  { value: 'hide', label: I18n.t('accounts.include_option_hide') },
-                ]}
-              />
-              <Text variant="label" tone="muted" className="px-1">
-                {I18n.t('accounts.include_in_totals_hint')}
-              </Text>
-            </View>
+          <View className="gap-5">
+            <Card>
+              <CardContent className="py-5 gap-3.5">
+                <Input
+                  label={I18n.t('accounts.account_name')}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder={I18n.t('accounts.account_name_placeholder')}
+                />
+                <Input
+                  label={I18n.t('accounts.current_balance')}
+                  variant="currency"
+                  currencySymbol={currencySymbol}
+                  value={balanceInput}
+                  onChangeText={setBalanceInput}
+                  helperText={I18n.t('accounts.current_balance_hint')}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="py-5 gap-3.5">
+                <SelectField
+                  label={I18n.t('accounts.account_group')}
+                  value={accountGroupId}
+                  onChange={setAccountGroupId}
+                  options={accountGroupOptions}
+                />
+                <View className="gap-2">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('accounts.include_in_totals')}
+                  </Text>
+                  <SegmentedToggle
+                    value={includeInTotals ? 'include' : 'hide'}
+                    onChange={(value) => setIncludeInTotals(value === 'include')}
+                    options={[
+                      { value: 'include', label: I18n.t('accounts.include_option_include') },
+                      { value: 'hide', label: I18n.t('accounts.include_option_hide') },
+                    ]}
+                  />
+                  <Text variant="label" tone="muted" className="px-1">
+                    {I18n.t('accounts.include_in_totals_hint')}
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
+
             {account.type === 'credit' ? (
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input
-                    label={I18n.t('accounts.statement_day')}
-                    variant="numeric"
-                    value={creditStatementDay}
-                    onChangeText={setCreditStatementDay}
-                    placeholder="25"
-                  />
-                </View>
-                <View className="flex-1">
-                  <Input
-                    label={I18n.t('accounts.due_day')}
-                    variant="numeric"
-                    value={creditDueDay}
-                    onChangeText={setCreditDueDay}
-                    placeholder="1"
-                  />
-                </View>
-              </View>
+              <Card>
+                <CardContent className="py-5">
+                  <View className="flex-row gap-2">
+                    <View className="flex-1">
+                      <Input
+                        label={I18n.t('accounts.statement_day')}
+                        variant="numeric"
+                        value={creditStatementDay}
+                        onChangeText={setCreditStatementDay}
+                        placeholder="25"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Input
+                        label={I18n.t('accounts.due_day')}
+                        variant="numeric"
+                        value={creditDueDay}
+                        onChangeText={setCreditDueDay}
+                        placeholder="1"
+                      />
+                    </View>
+                  </View>
+                </CardContent>
+              </Card>
             ) : null}
           </View>
 
@@ -1964,14 +1980,19 @@ export function AccountsScreen({
             compactItems
             scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
-              <View className="pb-2 gap-2">
-                <View className="gap-1.5 px-1 py-1">
-                  <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
-                    <Text variant="label" tone="muted">
+              <View className="pb-3 gap-3">
+                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
+                  <View className="items-center gap-2">
+                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
+                      <Text style={{ fontSize: 26 }}>
+                        {account.icon || (account.type === 'credit' ? '💳' : '🏦')}
+                      </Text>
+                    </View>
+                    <Text variant="label" tone="muted" className="mt-1">
                       {I18n.t('accounts.balance')}
                     </Text>
                     {renderVisibleBalanceNode(normalizedBalance, {
-                      variant: 'friendly',
+                      variant: 'heading',
                       textClassName: isNegativeForDisplay(normalizedBalance)
                         ? 'text-destructive'
                         : 'text-foreground',
@@ -1980,67 +2001,81 @@ export function AccountsScreen({
                         : themeColors.text,
                     })}
                   </View>
-                  <View className="flex-row items-center justify-between gap-3 border-b border-border/25 py-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.account_group')}
-                    </Text>
-                    <Text variant="friendly" numberOfLines={1} className="flex-1 text-right">
-                      {accountGroupLabel}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center justify-between gap-3 py-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.include_in_totals')}
-                    </Text>
-                    <Text
-                      variant="friendly"
-                      className={account.includeInTotals ? 'text-success' : 'text-muted-foreground'}
-                    >
-                      {includeInTotalsLabel}
-                    </Text>
+                  <View className="mt-4 flex-row gap-2">
+                    <View className="flex-1 rounded-[16px] bg-secondary/40 border border-border/15 px-3 py-2.5 items-center">
+                      <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+                        {I18n.t('accounts.account_group')}
+                      </Text>
+                      <Text variant="caption" className="mt-1" numberOfLines={1}>
+                        {accountGroupLabel}
+                      </Text>
+                    </View>
+                    <View className="flex-1 rounded-[16px] bg-secondary/40 border border-border/15 px-3 py-2.5 items-center">
+                      <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+                        {I18n.t('accounts.include_in_totals')}
+                      </Text>
+                      <Text
+                        variant="caption"
+                        className={cn(
+                          'mt-1',
+                          account.includeInTotals ? 'text-success' : 'text-muted-foreground',
+                        )}
+                      >
+                        {includeInTotalsLabel}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 
                 {account.type === 'credit' ? (
                   <View className="gap-2.5">
-                    <View className="rounded-[18px] border border-border/35 bg-card px-4 py-3">
-                      <Text variant="label" tone="muted">
-                        {I18n.t('accounts.billing')}
-                      </Text>
-                      <Text variant="caption" className="mt-1">
-                        {I18n.t('accounts.statement_due', {
-                          statementDay: statementDay ?? '-',
-                          dueDay: dueDay ?? '-',
-                        })}
-                      </Text>
-                      <Text variant="label" tone="muted" className="mt-1.5">
-                        {I18n.t('accounts.next_due', {
-                          date: nextDue
-                            ? nextDue.toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                              })
-                            : '-',
-                        })}
-                      </Text>
-                      <View className="mt-2.5 flex-row items-center gap-2">
-                        <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
-                          <Text variant="label" tone="muted">
+                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
+                      <View className="flex-row items-center gap-2.5 mb-3">
+                        <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
+                          <Text style={{ fontSize: 14 }}>📅</Text>
+                        </View>
+                        <View className="flex-1">
+                          <Text variant="bodyStrong">
+                            {I18n.t('accounts.billing')}
+                          </Text>
+                          <Text variant="label" tone="muted" className="mt-0.5">
+                            {I18n.t('accounts.statement_due', {
+                              statementDay: statementDay ?? '-',
+                              dueDay: dueDay ?? '-',
+                            })}
+                          </Text>
+                        </View>
+                        <View className="rounded-full bg-secondary/50 border border-border/20 px-2.5 py-1">
+                          <Text variant="label" tone="muted" className="text-[10px]">
+                            {I18n.t('accounts.next_due', {
+                              date: nextDue
+                                ? nextDue.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })
+                                : '-',
+                            })}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <View className="flex-1 rounded-[16px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
+                          <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
                             {I18n.t('accounts.payable')}
                           </Text>
                           {renderVisibleBalanceNode(cyclePayable, {
                             variant: 'caption',
-                            textClassName: 'mt-0.5 text-destructive',
+                            textClassName: 'mt-1 text-destructive',
                             iconColor: themeColors.error,
                           })}
                         </View>
-                        <View className="flex-1 rounded-[14px] border border-border/30 bg-background px-3 py-2">
-                          <Text variant="label" tone="muted">
+                        <View className="flex-1 rounded-[16px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
+                          <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
                             {I18n.t('accounts.outstanding')}
                           </Text>
                           {renderVisibleBalanceNode(outstanding, {
                             variant: 'caption',
-                            textClassName: 'mt-0.5 text-destructive',
+                            textClassName: 'mt-1 text-destructive',
                             iconColor: themeColors.error,
                           })}
                         </View>
