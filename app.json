@@ -4,11 +4,11 @@
     "slug": "money2time",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/money2time-base.png",
+    "icon": "./assets/ios/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/money2time-base.png",
+      "image": "./assets/ios/AppIcon~ios-marketing.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
