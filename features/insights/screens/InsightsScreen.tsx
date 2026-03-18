@@ -5098,8 +5098,7 @@ export function InsightsScreen({
       const savingsRate =
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
       const normalized = savingsRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(savingsRate)));
-      const totalCategoryExclusions =
-        excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
+
       const toneClass =
         savingsRate === null
           ? 'text-muted-foreground'
@@ -5179,13 +5178,6 @@ export function InsightsScreen({
                   ? I18n.t('insights.analytics.savings_rate.no_income_message')
                   : I18n.t('insights.analytics.savings_rate.goal_hint')}
               </Text>
-              {totalCategoryExclusions > 0 ? (
-                <Text variant="label" tone="muted" className="mt-1">
-                  {I18n.t('insights.analytics.savings_rate.exclusions_active', {
-                    count: totalCategoryExclusions,
-                  })}
-                </Text>
-              ) : null}
             </View>
 
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
