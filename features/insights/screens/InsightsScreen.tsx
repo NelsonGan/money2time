@@ -5917,7 +5917,6 @@ export function InsightsScreen({
                   <AccountPanel
                     accounts={assetHistoryAccountOptions}
                     accountGroups={accountGroups}
-                    disableGrouping
                     selectedIds={excludedAssetHistoryAccountIds}
                     onToggleSelect={(accountId) =>
                       setExcludedAssetHistoryAccountIds((previous) =>
@@ -5949,7 +5948,6 @@ export function InsightsScreen({
                     <AccountPanel
                       accounts={accounts}
                       accountGroups={accountGroups}
-                      disableGrouping
                       selectedIds={excludedExpenseTrendAccountIds}
                       onToggleSelect={(accountId) =>
                         setExcludedExpenseTrendAccountIds((previous) =>
@@ -6010,7 +6008,6 @@ export function InsightsScreen({
                     <AccountPanel
                       accounts={accounts}
                       accountGroups={accountGroups}
-                      disableGrouping
                       selectedIds={excludedIncomeTrendAccountIds}
                       onToggleSelect={(accountId) =>
                         setExcludedIncomeTrendAccountIds((previous) =>
