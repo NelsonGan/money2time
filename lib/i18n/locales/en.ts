@@ -20,6 +20,7 @@ const en = {
     not_now: 'Not now',
     today: 'Today',
     yesterday: 'Yesterday',
+    active: 'Active',
     ungrouped: 'Ungrouped',
     other: 'Other',
     unknown: 'Unknown',

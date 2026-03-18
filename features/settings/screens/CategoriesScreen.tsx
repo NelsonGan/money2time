@@ -8,6 +8,8 @@ import Sortable from 'react-native-sortables';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   Button,
+  Card,
+  CardContent,
   Input,
   SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -172,118 +174,130 @@ function CategoryEditor({
           contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}
           showsVerticalScrollIndicator={false}
         >
-          <View className="gap-4">
-            <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
-            <View>
-              <Text variant="label" tone="muted" className="mb-2">
-                {I18n.t('categories.emoji')}
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {isSubcategory ? (
+          <View className="gap-5">
+            <Card>
+              <CardContent className="py-5 gap-3.5">
+                <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
+                <View>
+                  <Text variant="label" tone="muted" className="mb-2 px-1">
+                    {I18n.t('categories.emoji')}
+                  </Text>
+                  <View className="flex-row flex-wrap gap-2">
+                    {isSubcategory ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setIcon('');
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('categories.none')}
+                        accessibilityState={{ selected: icon.trim().length === 0 }}
+                        className={cn(
+                          'h-11 px-3 rounded-full border items-center justify-center',
+                          icon.trim().length === 0
+                            ? 'bg-primary/15 border-primary/50'
+                            : 'bg-card border-border/40',
+                        )}
+                      >
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
+                          )}
+                        >
+                          {I18n.t('categories.none')}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                    {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
+                      <Pressable
+                        key={emoji}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setIcon(emoji);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
+                        accessibilityState={{ selected: icon === emoji }}
+                        className={cn(
+                          'h-11 w-11 rounded-full border items-center justify-center',
+                          icon === emoji
+                            ? 'bg-primary/15 border-primary/50'
+                            : 'bg-card border-border/40',
+                        )}
+                      >
+                        <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="py-5">
+                <Text variant="label" tone="muted" className="mb-2 px-1">
+                  {I18n.t('categories.parent_optional')}
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('selection');
-                      setIcon('');
+                      setParentId(null);
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={I18n.t('categories.none')}
-                    accessibilityState={{ selected: icon.trim().length === 0 }}
+                    accessibilityState={{ selected: !parentId }}
                     className={cn(
-                      'h-11 px-3 rounded-full border items-center justify-center',
-                      icon.trim().length === 0
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
+                      'px-4 py-2.5 rounded-full border',
+                      !parentId ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
                     )}
                   >
                     <Text
                       variant="caption"
-                      className={cn(
-                        icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
-                      )}
+                      className={cn(!parentId ? 'text-primary' : 'text-muted-foreground')}
                     >
                       {I18n.t('categories.none')}
                     </Text>
                   </Pressable>
-                ) : null}
-                {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
-                  <Pressable
-                    key={emoji}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setIcon(emoji);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
-                    accessibilityState={{ selected: icon === emoji }}
-                    className={cn(
-                      'h-11 w-11 rounded-full border items-center justify-center',
-                      icon === emoji
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
-                    )}
-                  >
-                    <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-            <View>
-              <Text variant="label" tone="muted" className="mb-2">
-                {I18n.t('categories.parent_optional')}
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setParentId(null);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('categories.none')}
-                  accessibilityState={{ selected: !parentId }}
-                  className={cn(
-                    'px-4 py-2.5 rounded-full border',
-                    !parentId ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
-                  )}
-                >
-                  <Text
-                    variant="caption"
-                    className={cn(!parentId ? 'text-primary' : 'text-muted-foreground')}
-                  >
-                    {I18n.t('categories.none')}
-                  </Text>
-                </Pressable>
-                {topLevel.map((item) => (
-                  <Pressable
-                    key={item.id}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setParentId(item.id);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={item.name}
-                    accessibilityState={{ selected: parentId === item.id }}
-                    className={cn(
-                      'px-4 py-2.5 rounded-full border',
-                      parentId === item.id
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
-                    )}
-                  >
-                    <Text
-                      variant="caption"
+                  {topLevel.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setParentId(item.id);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.name}
+                      accessibilityState={{ selected: parentId === item.id }}
                       className={cn(
-                        parentId === item.id ? 'text-primary' : 'text-muted-foreground',
+                        'px-4 py-2.5 rounded-full border',
+                        parentId === item.id
+                          ? 'bg-primary/15 border-primary/50'
+                          : 'bg-card border-border/40',
                       )}
                     >
-                      {item.name}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
+                      <Text
+                        variant="caption"
+                        className={cn(
+                          parentId === item.id ? 'text-primary' : 'text-muted-foreground',
+                        )}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </CardContent>
+            </Card>
 
             {mode === 'edit' ? (
-              <SettingsSection className="mt-2" title={I18n.t('settings.danger_zone')} danger>
+              <SettingsSection
+                className="mt-1"
+                title={I18n.t('settings.danger_zone')}
+                danger
+                showAccent={false}
+              >
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('warning');
