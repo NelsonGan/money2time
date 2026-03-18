@@ -452,7 +452,7 @@ export function TransactionsScreen({
     () =>
       new Map(
         accounts.map(
-          (account) => [account.id, { icon: account.icon, label: account.name }] as const,
+          (account) => [account.id, { icon: account.type === 'credit' ? '💳' : '🏦', label: account.name }] as const,
         ),
       ),
     [accounts],

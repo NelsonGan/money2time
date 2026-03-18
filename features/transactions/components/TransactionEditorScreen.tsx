@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     width: 14,
   },
   inlineSummaryInput: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: 'right',
   },
 });
@@ -1597,7 +1597,7 @@ export function TransactionEditorScreen({
                           value={note}
                           onChangeText={handleNoteChange}
                           placeholder={I18n.t('transactions.editor.optional')}
-                          placeholderTextColor={themeColors.textMuted}
+                          placeholderTextColor={`${themeColors.mutedForeground}99`}
                           returnKeyType="done"
                           onFocus={() => setActiveField('note')}
                           onBlur={() => setActiveField((prev) => (prev === 'note' ? null : prev))}
@@ -1693,7 +1693,7 @@ export function TransactionEditorScreen({
                         value={recurrenceName}
                         onChangeText={setRecurrenceName}
                         placeholder={I18n.t('transactions.editor.rule_name_placeholder')}
-                        placeholderTextColor={themeColors.textMuted}
+                        placeholderTextColor={`${themeColors.muted}99`}
                         returnKeyType="done"
                         onFocus={() => setActiveField('ruleName')}
                         onBlur={() => setActiveField((prev) => (prev === 'ruleName' ? null : prev))}
@@ -1760,7 +1760,7 @@ export function TransactionEditorScreen({
                         value={recurrenceInterval}
                         onChangeText={setRecurrenceInterval}
                         placeholder="1"
-                        placeholderTextColor={themeColors.textMuted}
+                        placeholderTextColor={`${themeColors.muted}99`}
                         keyboardType="number-pad"
                         returnKeyType="done"
                         onFocus={() => setActiveField('interval')}

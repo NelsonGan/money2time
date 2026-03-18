@@ -1,6 +1,6 @@
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -16,7 +16,6 @@ import {
   SettingsActionBar,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
   ThemeModal,
 } from '~/components/ui';
@@ -129,6 +128,7 @@ function CategoryEditor({
   initial,
   onClose,
   onSubmit,
+  onDelete,
 }: {
   visible: boolean;
   mode: 'create' | 'edit';
@@ -136,7 +136,9 @@ function CategoryEditor({
   initial?: Partial<Category>;
   onClose: () => void;
   onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
+  onDelete?: () => void;
 }) {
+  const themeColors = useThemeColors();
   const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
@@ -150,6 +152,25 @@ function CategoryEditor({
 
   const canSave = name.trim().length > 0;
   const isSubcategory = parentId !== null;
+
+  const handleDelete = () => {
+    if (!onDelete) return;
+    Alert.alert(
+      I18n.t('common.delete'),
+      I18n.t('categories.delete_confirm'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            void triggerHaptic('warning');
+            onDelete();
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ThemeModal
@@ -167,6 +188,19 @@ function CategoryEditor({
               : I18n.t('categories.edit_category')
           }
           onClose={onClose}
+          closeRowAccessory={
+            mode === 'edit' && onDelete ? (
+              <Pressable
+                onPress={handleDelete}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.delete')}
+                className="h-10 w-10 items-center justify-center rounded-full bg-destructive/10"
+              >
+                <Trash2 size={18} color={themeColors.error} />
+              </Pressable>
+            ) : undefined
+          }
         />
         <ScrollView
           contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}
@@ -227,6 +261,7 @@ function CategoryEditor({
                 ))}
               </View>
             </View>
+
             <View>
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('categories.parent_optional')}
@@ -282,23 +317,6 @@ function CategoryEditor({
               </View>
             </View>
 
-            {mode === 'edit' ? (
-              <SettingsSection className="mt-2" title={I18n.t('settings.danger_zone')} danger>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('warning');
-                    onClose();
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.delete')}
-                  className="self-start rounded-full border border-destructive/30 bg-destructive/8 px-3 py-2"
-                >
-                  <Text variant="caption" className="text-destructive">
-                    {I18n.t('common.delete')}
-                  </Text>
-                </Pressable>
-              </SettingsSection>
-            ) : null}
           </View>
         </ScrollView>
         <SettingsActionBar
@@ -322,9 +340,6 @@ function CategoryEditor({
 type CategoryRowThemeColors = {
   border: string;
   card: string;
-  error: string;
-  errorBorder: string;
-  errorSoft: string;
   primary: string;
   primaryMuted: string;
   primarySoft: string;
@@ -375,12 +390,10 @@ function TopLevelRow({
   rowWidth,
   subtitle,
   onEdit,
-  onDelete,
   onNavigate,
 }: CategoryRowBaseProps & {
   subtitle: string;
   onEdit: (item: Category) => void;
-  onDelete: (item: Category) => void;
   onNavigate: (item: Category) => void;
 }) {
   const tc = themeColors;
@@ -440,21 +453,6 @@ function TopLevelRow({
       >
         <Pencil size={13} color={tc.primary} />
       </Pressable>
-      <Pressable
-        onPress={() => onDelete(item)}
-        hitSlop={4}
-        style={[
-          styles.rowActionButton,
-          {
-            backgroundColor: tc.errorSoft,
-            borderColor: tc.errorBorder,
-          },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('common.delete')}
-      >
-        <Trash2 size={13} color={tc.error} />
-      </Pressable>
       <DragHandleButton
         backgroundColor={tc.primarySoft}
         borderColor={tc.primaryMuted}
@@ -471,11 +469,9 @@ function SubcategoryRow({
   rowWidth,
   parentIcon,
   onEdit,
-  onDelete,
 }: CategoryRowBaseProps & {
   parentIcon: string | null;
   onEdit: (item: Category) => void;
-  onDelete: (item: Category) => void;
 }) {
   const tc = themeColors;
   const displayIcon = resolveCategoryIcon(item.icon, parentIcon);
@@ -518,21 +514,6 @@ function SubcategoryRow({
         accessibilityLabel={I18n.t('common.edit')}
       >
         <Pencil size={13} color={tc.primary} />
-      </Pressable>
-      <Pressable
-        onPress={() => onDelete(item)}
-        hitSlop={4}
-        style={[
-          styles.rowActionButton,
-          {
-            backgroundColor: tc.errorSoft,
-            borderColor: tc.errorBorder,
-          },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('common.delete')}
-      >
-        <Trash2 size={13} color={tc.error} />
       </Pressable>
       <DragHandleButton
         backgroundColor={tc.primarySoft}
@@ -621,9 +602,6 @@ export function CategoriesScreen({
     () => ({
       border: withColorAlpha(themeColors.primary, 0.18),
       card: themeColors.card,
-      error: themeColors.error,
-      errorBorder: withColorAlpha(themeColors.error, 0.28),
-      errorSoft: themeColors.errorSoft,
       primary: themeColors.primary,
       primaryMuted: themeColors.primaryMuted,
       primarySoft: themeColors.primarySoft,
@@ -631,8 +609,6 @@ export function CategoriesScreen({
       text: themeColors.text,
     }),
     [
-      themeColors.error,
-      themeColors.errorSoft,
       themeColors.card,
       themeColors.primary,
       themeColors.primaryMuted,
@@ -700,13 +676,6 @@ export function CategoriesScreen({
     void triggerHaptic('selection');
     setEditing(item);
   }, []);
-  const handleDelete = useCallback(
-    (item: Category) => {
-      void triggerHaptic('warning');
-      deleteCategory(item.id);
-    },
-    [deleteCategory],
-  );
   const handleNavigate = useCallback(
     (item: Category) => {
       void triggerHaptic('selection');
@@ -796,7 +765,6 @@ export function CategoriesScreen({
                   rowWidth={rowWidth}
                   parentIcon={item.parentId ? (iconById.get(item.parentId) ?? null) : null}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
                 />
               ))}
             </Sortable.Flex>
@@ -823,6 +791,11 @@ export function CategoriesScreen({
           onSubmit={(input) => {
             if (!editing) return;
             updateCategory(editing.id, input);
+            setEditing(null);
+          }}
+          onDelete={() => {
+            if (!editing) return;
+            deleteCategory(editing.id);
             setEditing(null);
           }}
         />
@@ -906,7 +879,6 @@ export function CategoriesScreen({
                   topLevelSubtitleById.get(item.id) ?? I18n.t('categories.no_subcategories')
                 }
                 onEdit={handleEdit}
-                onDelete={handleDelete}
                 onNavigate={handleNavigate}
               />
             ))}
@@ -934,6 +906,11 @@ export function CategoriesScreen({
         onSubmit={(input) => {
           if (!editing) return;
           updateCategory(editing.id, input);
+          setEditing(null);
+        }}
+        onDelete={() => {
+          if (!editing) return;
+          deleteCategory(editing.id);
           setEditing(null);
         }}
       />

@@ -1,18 +1,21 @@
 import React, { useCallback } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Zap } from 'lucide-react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
   CardContent,
-  SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
+  SettingsSection,
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface AccountSettingsScreenProps {
   onBack: () => void;
@@ -22,6 +25,7 @@ type UserModeValue = 'simple' | 'power';
 
 export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
   const { isSimpleMode, switchToSimpleMode, switchToPowerMode } = useApp();
+  const themeColors = useThemeColors();
   const currentMode: UserModeValue = isSimpleMode ? 'simple' : 'power';
 
   const handleModeChange = useCallback(
@@ -58,10 +62,6 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
     [currentMode, switchToPowerMode, switchToSimpleMode],
   );
 
-  const activeModeDescription = isSimpleMode
-    ? I18n.t('settings.user_mode_simple_description')
-    : I18n.t('settings.user_mode_power_description');
-
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -74,33 +74,93 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
-        <Card variant="accent">
-          <CardContent className="gap-4">
-            <View className="gap-1.5">
-              <Text variant="label" tone="muted">
-                {I18n.t('settings.user_mode')}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('settings.account_settings_description')}
-              </Text>
-            </View>
+        <SettingsSection className="mt-0" title={I18n.t('settings.user_mode')} showAccent={false}>
+          <View className="gap-3">
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                handleModeChange('simple');
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('settings.user_mode_simple')}
+              accessibilityState={{ selected: currentMode === 'simple' }}
+            >
+              <Card
+                variant={currentMode === 'simple' ? 'accent' : 'default'}
+                className={currentMode === 'simple' ? 'border-primary/30' : ''}
+              >
+                <CardContent className="gap-3">
+                  <View className="flex-row items-center gap-3">
+                    <View
+                      className="h-11 w-11 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor:
+                          currentMode === 'simple' ? themeColors.primarySoft : themeColors.surface,
+                      }}
+                    >
+                      <Text style={{ fontSize: 20 }}>✨</Text>
+                    </View>
+                    <View className="flex-1">
+                      <Text variant="bodyStrong">{I18n.t('settings.user_mode_simple')}</Text>
+                      <Text variant="caption" tone="muted" className="mt-0.5">
+                        {I18n.t('settings.user_mode_simple_description')}
+                      </Text>
+                    </View>
+                    {currentMode === 'simple' ? (
+                      <View className="rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1">
+                        <Text variant="label" className="text-primary text-[10px] tracking-wide">
+                          {I18n.t('common.active')}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </CardContent>
+              </Card>
+            </Pressable>
 
-            <SegmentedToggle<UserModeValue>
-              value={currentMode}
-              onChange={handleModeChange}
-              options={[
-                { value: 'simple', label: I18n.t('settings.user_mode_simple') },
-                { value: 'power', label: I18n.t('settings.user_mode_power') },
-              ]}
-            />
-
-            <View className="rounded-[22px] border border-border/30 bg-secondary/30 px-4 py-3">
-              <Text variant="caption" tone="muted">
-                {activeModeDescription}
-              </Text>
-            </View>
-          </CardContent>
-        </Card>
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                handleModeChange('power');
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('settings.user_mode_power')}
+              accessibilityState={{ selected: currentMode === 'power' }}
+            >
+              <Card
+                variant={currentMode === 'power' ? 'accent' : 'default'}
+                className={currentMode === 'power' ? 'border-primary/30' : ''}
+              >
+                <CardContent className="gap-3">
+                  <View className="flex-row items-center gap-3">
+                    <View
+                      className="h-11 w-11 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor:
+                          currentMode === 'power' ? themeColors.primarySoft : themeColors.surface,
+                      }}
+                    >
+                      <Zap size={20} color={currentMode === 'power' ? themeColors.primary : themeColors.textMuted} />
+                    </View>
+                    <View className="flex-1">
+                      <Text variant="bodyStrong">{I18n.t('settings.user_mode_power')}</Text>
+                      <Text variant="caption" tone="muted" className="mt-0.5">
+                        {I18n.t('settings.user_mode_power_description')}
+                      </Text>
+                    </View>
+                    {currentMode === 'power' ? (
+                      <View className="rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1">
+                        <Text variant="label" className="text-primary text-[10px] tracking-wide">
+                          {I18n.t('common.active')}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </CardContent>
+              </Card>
+            </Pressable>
+          </View>
+        </SettingsSection>
       </ScrollView>
     </SettingsPageLayout>
   );

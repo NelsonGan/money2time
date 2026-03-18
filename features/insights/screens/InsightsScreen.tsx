@@ -3803,6 +3803,14 @@ export function InsightsScreen({
     const totalLabel = isIncomeBreakdown
       ? I18n.t('insights.total_income')
       : I18n.t('insights.total_expense');
+    const breakdownVisual = isIncomeBreakdown
+      ? INSIGHT_TYPE_VISUALS.income_breakdown
+      : INSIGHT_TYPE_VISUALS.expense_breakdown;
+    const totalRowAccentColor = breakdownVisual.tint;
+    const totalRowStyle = {
+      backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.18 : 0.1),
+      borderColor: withColorAlpha(totalRowAccentColor, isDark ? 0.4 : 0.24),
+    } as const;
     const normalizedRows: typeof pageData.categoryRows = [];
     let pageTotalAmount = 0;
     pageData.categoryRows.forEach((row) => {
@@ -3957,14 +3965,28 @@ export function InsightsScreen({
             </View>
 
             <View className="gap-1 mt-0">
-              <View className="rounded-xl border border-border/30 bg-secondary/35 px-3 py-2 flex-row items-center justify-between">
-                <Text variant="label" tone="muted">
-                  {totalLabel}
-                </Text>
+              <View
+                className="relative overflow-hidden rounded-xl border px-3 py-2 flex-row items-center justify-between"
+                style={totalRowStyle}
+              >
+                <View
+                  className="absolute left-0 top-0 bottom-0 w-1"
+                  style={{ backgroundColor: totalRowAccentColor }}
+                />
+                <View className="flex-row items-center gap-2 pl-2">
+                  <View
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: totalRowAccentColor }}
+                  />
+                  <Text variant="label" className="text-foreground/80">
+                    {totalLabel}
+                  </Text>
+                </View>
                 {renderValueNode(pageTotalAmount, {
                   variant: 'caption',
-                  textClassName: 'text-foreground',
-                  iconColor: themeColors.text,
+                  textClassName: 'text-[15px] leading-[18px] font-black tracking-tight text-foreground',
+                  iconColor: totalRowAccentColor,
+                  iconSize: 14,
                 })}
               </View>
               {pagePieData.map((item) => {
@@ -3990,34 +4012,16 @@ export function InsightsScreen({
                     key={item.id}
                     onPress={() => {
                       setActiveBreakdownSlice(null, false);
-                      const targetBreakdownId = item.id;
-                      const targetType = pageData.transactionType;
-                      const rangeStart = pageData.range.start;
-                      const rangeEnd = pageData.range.end;
+                      const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
                       const rootCategory = categoryById.get(item.id) ?? null;
                       openDrilldown({
                         label: item.name,
-                        transactions: pageData.breakdownTransactionsById.get(item.id) ?? [],
+                        transactions: rowTransactions,
                         categoryRootId: rootCategory?.id,
                         categoryRootLabel: rootCategory?.name ?? item.name,
                         categoryRootEmoji: rootCategory?.icon ?? item.emoji,
                         categoryRootColor: item.color,
                         triggerSelectionHaptic: true,
-                        scopeMatcher: (transaction) => {
-                          if (transaction.type !== targetType) return false;
-                          if (transaction.date < rangeStart || transaction.date > rangeEnd) {
-                            return false;
-                          }
-                          if (effectiveSelectedAccountIdSet.size > 0) {
-                            const accountId = transaction.accountId;
-                            if (!accountId || !effectiveSelectedAccountIdSet.has(accountId)) {
-                              return false;
-                            }
-                          }
-                          return (
-                            resolveBreakdownRootId(transaction, categoryById) === targetBreakdownId
-                          );
-                        },
                       });
                     }}
                     accessibilityRole="button"
@@ -4310,10 +4314,6 @@ export function InsightsScreen({
       );
     }
 
-    const viewSummaryLabel =
-      timeCostViewMode === 'category'
-        ? I18n.t('insights.time_cost.summary_top_categories')
-        : I18n.t('insights.time_cost.summary_top_transactions');
     const impactRows: RankedImpactRow[] =
       timeCostViewMode === 'category'
         ? pageData.categoryRows.map((categoryRow, index) => {
@@ -4322,9 +4322,6 @@ export function InsightsScreen({
               id: categoryRow.id,
               rank: index + 1,
               title: categoryRow.label,
-              subtitle: I18n.t('insights.time_cost.transaction_count', {
-                count: categoryRow.count,
-              }),
               primaryValue: (
                 <TimeValueInline
                   value={formatHours(categoryRow.hours)}
@@ -4389,13 +4386,7 @@ export function InsightsScreen({
       <Card className="mt-2">
         <CardContent className="py-3 gap-2">
           <View className="rounded-2xl border border-border/35 bg-secondary/30 px-3.5 py-3">
-            <View className="flex-row items-center justify-between">
-              <Text variant="caption">{I18n.t('insights.time_cost.summary_title')}</Text>
-              <Text variant="label" tone="muted">
-                {viewSummaryLabel}
-              </Text>
-            </View>
-            <View className="mt-2.5 flex-row items-center gap-2">
+            <View className="flex-row items-center gap-2">
               <View className="flex-1 rounded-xl border border-primary/25 bg-primary/12 px-2.5 py-2">
                 <Text variant="label" tone="muted">
                   {I18n.t('insights.time_cost.total_hours')}
@@ -4417,9 +4408,6 @@ export function InsightsScreen({
                 </Text>
               </View>
             </View>
-            <Text variant="label" tone="muted" className="mt-2">
-              {I18n.t('insights.time_cost.summary_hint')}
-            </Text>
           </View>
 
           <View className="flex-row items-center gap-2">
@@ -4438,7 +4426,7 @@ export function InsightsScreen({
           <RankedImpactChart
             rows={impactRows}
             accentColor={TIME_COST_RANK_ACCENTS[0]}
-            shareLabel={I18n.t('insights.time_cost.share_label')}
+            shareLabel={null}
           />
         </CardContent>
       </Card>

@@ -216,8 +216,6 @@ function ensureSimpleWalletExists(currency: string) {
   const id = accountsRepository.create({
     name: SIMPLE_WALLET_NAME,
     type: 'debit',
-    icon: '👛',
-    color: '#22917A',
     startingBalance: 0,
     accountGroup: null,
     creditStatementDay: null,

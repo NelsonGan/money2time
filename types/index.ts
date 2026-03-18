@@ -91,8 +91,6 @@ export interface Account {
   creditStatementDay: number | null;
   creditDueDay: number | null;
   currency: string;
-  icon: string;
-  color: string;
   startingBalance: number;
   includeInTotals: boolean;
   createdAt: string;
