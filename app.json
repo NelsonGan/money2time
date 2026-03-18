@@ -8,9 +8,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/ios/AppIcon~ios-marketing.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FAF7F0",
+      "dark": {
+        "image": "./assets/splash.png",
+        "backgroundColor": "#121A24"
+      }
     },
     "ios": {
       "icon": "./assets/ios/AppIcon~ios-marketing.png",
