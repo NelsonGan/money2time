@@ -358,6 +358,7 @@ function AccountEditorSheet({
     if (!canSave || !Number.isFinite(parsedBalance)) return;
     const parsedStatementDay = Number(creditStatementDay);
     const parsedDueDay = Number(creditDueDay);
+    const resolvedType = isEdit ? account.type : type;
     const normalizedStatementDay =
       Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
         ? parsedStatementDay
@@ -369,11 +370,11 @@ function AccountEditorSheet({
 
     onSave({
       name: normalizedName,
-      type,
+      type: resolvedType,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
-      creditStatementDay: type === 'credit' ? normalizedStatementDay : null,
-      creditDueDay: type === 'credit' ? normalizedDueDay : null,
+      creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
+      creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
       startingBalance: parsedBalance,
     });
@@ -446,36 +447,51 @@ function AccountEditorSheet({
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('accounts.type')}
               </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {ACCOUNT_TYPE_OPTIONS.map((item) => (
-                  <Pressable
-                    key={item.value}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setType(item.value);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={item.label}
-                    accessibilityState={{ selected: type === item.value }}
-                    className={cn(
-                      'px-4 py-2.5 rounded-full border',
-                      type === item.value
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
-                    )}
-                  >
-                    <Text
-                      variant="caption"
-                      className={cn(type === item.value ? 'text-primary' : 'text-muted-foreground')}
+              {isEdit ? (
+                <View className="flex-row flex-wrap gap-2">
+                  {ACCOUNT_TYPE_OPTIONS.filter((item) => item.value === account.type).map((item) => (
+                    <View
+                      key={item.value}
+                      className="px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
                     >
-                      {item.icon} {item.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                      <Text variant="caption" className="text-primary">
+                        {item.icon} {item.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View className="flex-row flex-wrap gap-2">
+                  {ACCOUNT_TYPE_OPTIONS.map((item) => (
+                    <Pressable
+                      key={item.value}
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setType(item.value);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.label}
+                      accessibilityState={{ selected: type === item.value }}
+                      className={cn(
+                        'px-4 py-2.5 rounded-full border',
+                        type === item.value
+                          ? 'bg-primary/15 border-primary/50'
+                          : 'bg-card border-border/40',
+                      )}
+                    >
+                      <Text
+                        variant="caption"
+                        className={cn(type === item.value ? 'text-primary' : 'text-muted-foreground')}
+                      >
+                        {item.icon} {item.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
 
-            {type === 'credit' ? (
+            {(isEdit ? account.type : type) === 'credit' ? (
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <Input
@@ -1592,7 +1608,6 @@ export function AccountsScreen({
     }) => {
       const accountUpdates = {
         name: updates.name,
-        type: updates.type,
         accountGroup: updates.accountGroup,
         creditStatementDay: updates.creditStatementDay,
         creditDueDay: updates.creditDueDay,
