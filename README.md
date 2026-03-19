@@ -23,26 +23,6 @@ npm run android
 npm run web
 ```
 
-## RevenueCat Ad Removal
-
-The advertisement settings screen now supports a RevenueCat-powered "tip to remove ads" flow.
-
-Required public environment variables:
-
-```bash
-EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_xxxxx
-EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=appl_xxxxx
-EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID=remove_ads
-EXPO_PUBLIC_REVENUECAT_OFFERING_ID=ad_support
-```
-
-Notes:
-
-- `EXPO_PUBLIC_REVENUECAT_OFFERING_ID` is optional. If omitted, the app falls back to RevenueCat's current offering.
-- Real purchases require a native development build, TestFlight, or an internal testing build. Expo Go can render the screen, but it cannot complete purchases.
-- The client can only purchase products that already exist in the selected RevenueCat offering.
-- The app now renders every one-time product returned in that offering, so the offering contents fully control which tip amounts users see.
-
 ## Scripts
 
 - `npm run typecheck` - TypeScript checks (`tsc --noEmit`)

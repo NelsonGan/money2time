@@ -32,7 +32,6 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { AdSupportSection } from '~/features/settings/components/AdSupportSection';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -82,7 +81,7 @@ export function SettingsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
-  const { adRemovalState, settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
+  const { settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -94,7 +93,6 @@ export function SettingsScreen({
   const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
-  const shouldShowAdSupportSection = !adRemovalState.hasAdFreeEntitlement;
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -255,8 +253,6 @@ export function SettingsScreen({
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
-          {shouldShowAdSupportSection ? <AdSupportSection /> : null}
-
           <SettingsSection
             className="mt-6 gap-2"
             title={I18n.t('settings.section_personal')}

@@ -13,24 +13,11 @@ export interface RevenueCatEnvironment {
   entitlementIdentifier: string | null;
 }
 
-export interface RevenueCatTipOption {
-  amount: number;
-  priceString: string;
-  productIdentifier: string;
-}
-
 export interface RevenueCatCustomerState {
   activatedAt: string | null;
   activeProductIdentifier: string | null;
   expirationDate: string | null;
-  hasAdFreeEntitlement: boolean;
   latestPurchaseDate: string | null;
-}
-
-export interface RevenueCatPaywallState extends RevenueCatEnvironment, RevenueCatCustomerState {
-  catalogStatus: 'offering_not_found' | 'no_packages' | null;
-  isLoading: boolean;
-  tipOptions: RevenueCatTipOption[];
 }
 
 export type RevenueCatActionStatus =
@@ -44,22 +31,4 @@ export interface RevenueCatActionResult {
   customerState: RevenueCatCustomerState | null;
   message: string | null;
   status: RevenueCatActionStatus;
-}
-
-export function createRevenueCatPaywallState(
-  environment: RevenueCatEnvironment,
-  overrides: Partial<RevenueCatPaywallState> = {},
-): RevenueCatPaywallState {
-  return {
-    activatedAt: null,
-    activeProductIdentifier: null,
-    catalogStatus: null,
-    expirationDate: null,
-    hasAdFreeEntitlement: false,
-    isLoading: environment.isConfigured && environment.canMakePurchases,
-    latestPurchaseDate: null,
-    tipOptions: [],
-    ...environment,
-    ...overrides,
-  };
 }

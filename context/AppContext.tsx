@@ -36,7 +36,6 @@ import {
   flushAnalytics,
   identifyUser,
   setSuperProperties,
-  setUserProperties,
   trackEvent,
 } from '~/services/analytics';
 import {
@@ -50,16 +49,7 @@ import {
   initNotificationHandler,
   syncScheduledNotifications,
 } from '~/services/notifications';
-import {
-  fetchRevenueCatPaywallState,
-  getInitialRevenueCatPaywallState,
-  purchaseRevenueCatTip as purchaseRevenueCatTipRequest,
-  restoreRevenueCatPurchases as restoreRevenueCatPurchasesRequest,
-  type RevenueCatActionResult,
-  type RevenueCatPaywallState,
-  type RevenueCatTipOption,
-  setRevenueCatAppUserId,
-} from '~/services/revenueCat';
+import { setRevenueCatAppUserId } from '~/services/revenueCat';
 import {
   type Account,
   type AccountBalance,
@@ -147,10 +137,6 @@ interface AppContextValue extends AppState {
       >
     >,
   ) => void;
-  adRemovalState: RevenueCatPaywallState;
-  refreshAdRemovalState: () => Promise<void>;
-  purchaseAdRemovalTip: (option: RevenueCatTipOption) => Promise<RevenueCatActionResult>;
-  restoreAdRemovalPurchases: () => Promise<RevenueCatActionResult>;
   updateWageConfig: (config: WageConfig) => void;
   updateWageConfigForMonth: (month: string, config: WageConfig) => void;
   deleteWageConfigForMonth: (month: string) => void;
@@ -483,9 +469,6 @@ function applyTransactionFilters(
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [adRemovalState, setAdRemovalState] = useState<RevenueCatPaywallState>(
-    getInitialRevenueCatPaywallState,
-  );
   const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
   const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
@@ -644,91 +627,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [refreshAll],
   );
-
-  const refreshAdRemovalState = useCallback(async () => {
-    const initialState = getInitialRevenueCatPaywallState();
-
-    setAdRemovalState((previous) => ({
-      ...previous,
-      canMakePurchases: initialState.canMakePurchases,
-      catalogStatus: initialState.catalogStatus,
-      entitlementIdentifier: initialState.entitlementIdentifier,
-      isConfigured: initialState.isConfigured,
-      isLoading: initialState.isLoading,
-      isTestStore: initialState.isTestStore,
-      offeringIdentifier: initialState.offeringIdentifier,
-      reason: initialState.reason,
-    }));
-
-    try {
-      const nextState = await fetchRevenueCatPaywallState();
-      setAdRemovalState(nextState);
-    } catch {
-      setAdRemovalState((previous) => ({ ...previous, isLoading: false }));
-    }
-  }, []);
-
-  const purchaseAdRemovalTip = useCallback(
-    async (option: RevenueCatTipOption) => {
-      void trackEvent(AnalyticsEvents.PURCHASE_INITIATED, {
-        product_id: option.productIdentifier,
-        price: option.amount,
-      });
-      const result = await purchaseRevenueCatTipRequest(option.productIdentifier);
-
-      if (result.customerState) {
-        setAdRemovalState((previous) => ({
-          ...previous,
-          ...result.customerState,
-          isLoading: false,
-        }));
-      }
-
-      if (result.status === 'success') {
-        void trackEvent(AnalyticsEvents.PURCHASE_COMPLETED, {
-          product_id: option.productIdentifier,
-          price: option.amount,
-        });
-        void setUserProperties({ has_ad_free: true });
-      } else if (result.status === 'cancelled') {
-        void trackEvent(AnalyticsEvents.PURCHASE_CANCELLED, {
-          product_id: option.productIdentifier,
-        });
-      } else if (result.status === 'error') {
-        void trackEvent(AnalyticsEvents.PURCHASE_FAILED, {
-          product_id: option.productIdentifier,
-        });
-      }
-
-      if (result.status === 'success' || result.status === 'not_found') {
-        void refreshAdRemovalState();
-      }
-
-      return result;
-    },
-    [refreshAdRemovalState],
-  );
-
-  const restoreAdRemovalPurchases = useCallback(async () => {
-    const result = await restoreRevenueCatPurchasesRequest();
-
-    if (result.customerState) {
-      setAdRemovalState((previous) => ({
-        ...previous,
-        ...result.customerState,
-        isLoading: false,
-      }));
-    }
-
-    if (result.status === 'success') {
-      void trackEvent(AnalyticsEvents.PURCHASE_RESTORED, {
-        has_entitlement: result.customerState?.hasAdFreeEntitlement ?? false,
-      });
-      void refreshAdRemovalState();
-    }
-
-    return result;
-  }, [refreshAdRemovalState]);
 
   const createAccount = useCallback(
     (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
@@ -1194,11 +1092,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     superPropDisplayMode,
   ]);
 
-  useEffect(() => {
-    if (!settings?.appUserId) return;
-    void refreshAdRemovalState();
-  }, [refreshAdRemovalState, settings?.appUserId]);
-
   const updateWageConfig = useCallback(
     (config: WageConfig) => {
       runMutation(() => {
@@ -1248,21 +1141,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const updateNotificationPrefs = useCallback(
-    (updates: Partial<NotificationPreferences>) => {
-      setNotificationPrefs((previous) => {
-        const merged = {
-          dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
-          recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
-          weeklySummary: { ...previous.weeklySummary, ...updates.weeklySummary },
-        };
-        settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
-        void syncScheduledNotifications(merged);
-        return merged;
-      });
-    },
-    [],
-  );
+  const updateNotificationPrefs = useCallback((updates: Partial<NotificationPreferences>) => {
+    setNotificationPrefs((previous) => {
+      const merged = {
+        dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
+        recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
+        weeklySummary: { ...previous.weeklySummary, ...updates.weeklySummary },
+      };
+      settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
+      void syncScheduledNotifications(merged);
+      return merged;
+    });
+  }, []);
 
   // Initialize notification handler and sync on mount
   useEffect(() => {
@@ -1666,10 +1556,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionsBulk,
             deleteTransactionsBulk,
             updateSettings,
-            adRemovalState,
-            refreshAdRemovalState,
-            purchaseAdRemovalTip,
-            restoreAdRemovalPurchases,
             updateWageConfig,
             updateWageConfigForMonth,
             deleteWageConfigForMonth,
@@ -1740,10 +1626,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionsBulk,
       deleteTransactionsBulk,
       updateSettings,
-      adRemovalState,
-      refreshAdRemovalState,
-      purchaseAdRemovalTip,
-      restoreAdRemovalPurchases,
       updateWageConfig,
       updateWageConfigForMonth,
       deleteWageConfigForMonth,
