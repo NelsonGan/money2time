@@ -4,18 +4,12 @@ import Purchases, {
   PURCHASES_ERROR_CODE,
   type CustomerInfo,
   type PurchasesError,
-  type PurchasesOffering,
-  type PurchasesPackage,
-  type PurchasesOfferings,
 } from 'react-native-purchases';
 
-import {
-  createRevenueCatPaywallState,
-  type RevenueCatActionResult,
-  type RevenueCatCustomerState,
-  type RevenueCatEnvironment,
-  type RevenueCatPaywallState,
-  type RevenueCatTipOption,
+import type {
+  RevenueCatActionResult,
+  RevenueCatCustomerState,
+  RevenueCatEnvironment,
 } from './revenueCat.shared';
 
 export * from './revenueCat.shared';
@@ -70,12 +64,7 @@ function getRevenueCatEnvironment(): RevenueCatEnvironment {
   };
 }
 
-export function getInitialRevenueCatPaywallState() {
-  return createRevenueCatPaywallState(getRevenueCatEnvironment());
-}
-
 let configurePromise: Promise<void> | null = null;
-let cachedPackagesByProductIdentifier = new Map<string, PurchasesPackage>();
 let desiredRevenueCatAppUserId: string | null = null;
 let activeRevenueCatAppUserId: string | null = null;
 
@@ -98,41 +87,8 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
     activatedAt: source?.originalPurchaseDate ?? null,
     activeProductIdentifier: source?.productIdentifier ?? null,
     expirationDate: source?.expirationDate ?? null,
-    hasAdFreeEntitlement: !!activeEntitlement?.isActive,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
   };
-}
-
-function toRevenueCatTipOptions(offering: PurchasesOffering | null): RevenueCatTipOption[] {
-  if (!offering) {
-    cachedPackagesByProductIdentifier.clear();
-    return [];
-  }
-
-  const uniquePackages = new Map<string, PurchasesPackage>();
-  offering.availablePackages.forEach((aPackage) => {
-    uniquePackages.set(aPackage.product.identifier, aPackage);
-  });
-
-  cachedPackagesByProductIdentifier = new Map(uniquePackages);
-
-  return Array.from(uniquePackages.values())
-    .map((aPackage) => ({
-      amount: aPackage.product.price,
-      priceString: aPackage.product.priceString,
-      productIdentifier: aPackage.product.identifier,
-    }))
-    .sort((left, right) => left.amount - right.amount);
-}
-
-function getOfferingFromCollection(offerings: PurchasesOfferings) {
-  const configuredOfferingIdentifier = getRevenueCatEnvironment().offeringIdentifier;
-
-  if (configuredOfferingIdentifier) {
-    return offerings.all[configuredOfferingIdentifier] ?? null;
-  }
-
-  return offerings.current;
 }
 
 async function ensureRevenueCatConfigured() {
@@ -165,31 +121,6 @@ async function ensureRevenueCatConfigured() {
   return environment;
 }
 
-async function getRevenueCatOffering() {
-  const offerings = await Purchases.getOfferings();
-  return getOfferingFromCollection(offerings);
-}
-
-async function getRevenueCatPackage(productIdentifier: string) {
-  const cachedPackage = cachedPackagesByProductIdentifier.get(productIdentifier);
-
-  if (cachedPackage) {
-    return cachedPackage;
-  }
-
-  const offering = await getRevenueCatOffering();
-  const nextOptions = toRevenueCatTipOptions(offering);
-  const matchedOption = nextOptions.find(
-    (option) => option.productIdentifier === productIdentifier,
-  );
-
-  if (!matchedOption) {
-    return null;
-  }
-
-  return cachedPackagesByProductIdentifier.get(matchedOption.productIdentifier) ?? null;
-}
-
 function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
   const purchasesError = error as Partial<PurchasesError> | null;
 
@@ -213,93 +144,19 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
   };
 }
 
-function withSuccessMessage(customerState: RevenueCatCustomerState): RevenueCatActionResult {
-  return {
-    customerState,
-    message: customerState.hasAdFreeEntitlement
-      ? null
-      : 'Purchase completed, but the ad-free entitlement is not active. Check your RevenueCat entitlement mapping.',
-    status: 'success',
-  };
-}
-
-export async function fetchRevenueCatPaywallState(): Promise<RevenueCatPaywallState> {
+export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomerState | null> {
   const environment = getRevenueCatEnvironment();
-  const fallbackState = createRevenueCatPaywallState(environment, { isLoading: false });
 
   if (!environment.isConfigured || !environment.canMakePurchases) {
-    return fallbackState;
+    return null;
   }
 
   try {
     await ensureRevenueCatConfigured();
+    const customerInfo = await Purchases.getCustomerInfo();
+    return toRevenueCatCustomerState(customerInfo);
   } catch {
-    return fallbackState;
-  }
-
-  const [customerInfoResult, offeringsResult] = await Promise.allSettled([
-    Purchases.getCustomerInfo(),
-    Purchases.getOfferings(),
-  ]);
-
-  const customerState =
-    customerInfoResult.status === 'fulfilled'
-      ? toRevenueCatCustomerState(customerInfoResult.value)
-      : fallbackState;
-  const offering =
-    offeringsResult.status === 'fulfilled'
-      ? getOfferingFromCollection(offeringsResult.value)
-      : null;
-  const tipOptions = toRevenueCatTipOptions(offering);
-  const catalogStatus = !offering
-    ? 'offering_not_found'
-    : tipOptions.length === 0
-      ? 'no_packages'
-      : null;
-
-  return createRevenueCatPaywallState(environment, {
-    activatedAt: customerState.activatedAt,
-    activeProductIdentifier: customerState.activeProductIdentifier,
-    catalogStatus,
-    expirationDate: customerState.expirationDate,
-    hasAdFreeEntitlement: customerState.hasAdFreeEntitlement,
-    isLoading: false,
-    latestPurchaseDate: customerState.latestPurchaseDate,
-    offeringIdentifier: offering?.identifier ?? environment.offeringIdentifier,
-    tipOptions,
-  });
-}
-
-export async function purchaseRevenueCatTip(
-  productIdentifier: string,
-): Promise<RevenueCatActionResult> {
-  const environment = getRevenueCatEnvironment();
-
-  if (!environment.isConfigured || !environment.canMakePurchases) {
-    return {
-      customerState: null,
-      message: null,
-      status: 'not_available',
-    };
-  }
-
-  try {
-    await ensureRevenueCatConfigured();
-
-    const matchedPackage = await getRevenueCatPackage(productIdentifier);
-
-    if (!matchedPackage) {
-      return {
-        customerState: null,
-        message: null,
-        status: 'not_found',
-      };
-    }
-
-    const result = await Purchases.purchasePackage(matchedPackage);
-    return withSuccessMessage(toRevenueCatCustomerState(result.customerInfo));
-  } catch (error) {
-    return toRevenueCatErrorResult(error);
+    return null;
   }
 }
 
@@ -317,7 +174,12 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
   try {
     await ensureRevenueCatConfigured();
     const customerInfo = await Purchases.restorePurchases();
-    return withSuccessMessage(toRevenueCatCustomerState(customerInfo));
+    const customerState = toRevenueCatCustomerState(customerInfo);
+    return {
+      customerState,
+      message: null,
+      status: 'success',
+    };
   } catch (error) {
     return toRevenueCatErrorResult(error);
   }

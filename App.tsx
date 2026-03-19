@@ -16,7 +16,6 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { AppBannerAdStrip } from '~/components/ads/AppBannerAdStrip';
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
@@ -46,7 +45,6 @@ import type {
   TutorialTargetId,
   TutorialTargetRect,
 } from '~/features/tutorial/types';
-import { useAdsCooldownStatus } from '~/hooks/useAdsCooldownStatus';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
@@ -58,7 +56,6 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { canRequestBannerAds, initializeGoogleMobileAds } from '~/services/ads';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import {
@@ -220,8 +217,7 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { adRemovalState, isSimpleMode, settings } = useApp();
-  const adsCooldownStatus = useAdsCooldownStatus(settings.createdAt);
+  const { isSimpleMode } = useApp();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -484,15 +480,6 @@ function MainShellScreen({
     }),
     [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
   );
-  const shouldShowBannerStrip =
-    !shouldHideBottomNav &&
-    !isGuidedTutorialActive &&
-    !(adRemovalState.isConfigured && adRemovalState.isLoading) &&
-    !adsCooldownStatus.isInCooldown &&
-    canRequestBannerAds({
-      hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement,
-      installStartedAt: settings.createdAt,
-    });
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
@@ -554,7 +541,6 @@ function MainShellScreen({
 
       {!shouldHideBottomNav ? (
         <>
-          {shouldShowBannerStrip ? <AppBannerAdStrip /> : null}
           <BottomNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
@@ -824,8 +810,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { adRemovalState, isLoading, settings } = useApp();
-  const adsCooldownStatus = useAdsCooldownStatus(settings.createdAt);
+  const { isLoading, settings } = useApp();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
@@ -882,32 +867,6 @@ function AppContent() {
   const handleSkipTutorialPrompt = useCallback(() => {
     setShowTutorialPrompt(false);
   }, []);
-
-  useEffect(() => {
-    if (adRemovalState.isConfigured && adRemovalState.isLoading) {
-      return;
-    }
-
-    if (
-      !settings.onboardingCompleted ||
-      adsCooldownStatus.isInCooldown ||
-      !canRequestBannerAds({
-        hasAdFreeEntitlement: adRemovalState.hasAdFreeEntitlement,
-        installStartedAt: settings.createdAt,
-      })
-    ) {
-      return;
-    }
-
-    void initializeGoogleMobileAds();
-  }, [
-    adRemovalState.hasAdFreeEntitlement,
-    adRemovalState.isConfigured,
-    adRemovalState.isLoading,
-    adsCooldownStatus.isInCooldown,
-    settings.createdAt,
-    settings.onboardingCompleted,
-  ]);
 
   if (isLoading) {
     return (
