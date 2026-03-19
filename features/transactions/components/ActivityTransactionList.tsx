@@ -12,10 +12,7 @@ import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
-export type TransactionDisplaySettings = Pick<
-  UserSettings,
-  'currencySymbol' | 'displayMode'
->;
+export type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
 
 type ActivityRow =
   | {

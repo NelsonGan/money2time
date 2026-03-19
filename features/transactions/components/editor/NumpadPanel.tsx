@@ -34,7 +34,6 @@ interface NumpadPanelProps {
   onConfirm: (formatted: string) => void;
 }
 
-
 const NumpadKey = React.memo(function NumpadKey({
   value,
   onPress,
@@ -133,11 +132,7 @@ const NumpadKey = React.memo(function NumpadKey({
   );
 });
 
-export function NumpadPanel({
-  initialExpression,
-  onValueChange,
-  onConfirm,
-}: NumpadPanelProps) {
+export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: NumpadPanelProps) {
   const themeColors = useThemeColors();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [expression, setExpression] = React.useState(() =>
@@ -208,7 +203,6 @@ export function NumpadPanel({
 
   return (
     <View className="flex-1 px-4 pt-1.5" style={{ paddingBottom: Math.max(8, bottomInset) }}>
-
       <View className="flex-1 gap-1.5">
         <View className="flex-1 flex-row gap-1.5">
           <NumpadKey value="C" variant="utility" onPress={handleKeyPress} />

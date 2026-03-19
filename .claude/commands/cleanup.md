@@ -9,11 +9,13 @@ Run `git diff main...HEAD --name-only` to get the list of files changed in this 
 For each changed file, read it fully and flag issues in these categories:
 
 **Dead / unused code**
+
 - Variables, imports, functions, or components that are declared but never used
 - Code that is unreachable (after an early return, inside a condition that is always false)
 - Commented-out code blocks left behind
 
 **Bugs**
+
 - Missing `await` on async calls
 - Off-by-one errors or incorrect conditions
 - Stale closures in hooks (missing deps in `useEffect`/`useCallback`/`useMemo`)
@@ -21,6 +23,7 @@ For each changed file, read it fully and flag issues in these categories:
 - Incorrect logic that contradicts the surrounding code's intent
 
 **Convention violations** (based on this codebase's patterns)
+
 - `console.log` instead of `console.warn` / `console.error`
 - Raw date logic instead of `dayKeyFromDateLocal()` / `monthKeyFromIsoLocal()` etc.
 - Raw currency/hour display instead of `formatAmount()` / `formatHours()`
@@ -30,6 +33,7 @@ For each changed file, read it fully and flag issues in these categories:
 - Type imports not using `import type`
 
 **Code quality**
+
 - Duplicate logic that already exists elsewhere in the codebase
 - Overly complex logic that can be simplified without changing behavior
 - Inconsistent naming relative to the surrounding file
@@ -37,6 +41,7 @@ For each changed file, read it fully and flag issues in these categories:
 ## Step 3: Fix issues
 
 Fix every issue you found. Edits must be surgical — change only the lines needed. Do not:
+
 - Reformat code that wasn't already broken
 - Add comments to self-documenting code
 - Refactor files that had no issues

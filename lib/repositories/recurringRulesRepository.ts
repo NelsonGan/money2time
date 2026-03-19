@@ -2,7 +2,7 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { recurringRulesTable } from '~/lib/db/schema';
-import type { ProcessedRecurringRule, RecurrencePattern,RecurringTransactionRule } from '~/types';
+import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
 import { newId, nowIso } from '~/utils/id';
 
 import { toRecurringRule } from './mappers';
@@ -144,10 +144,7 @@ class RecurringRulesRepository {
       .run();
   }
 
-  runDueTransactions(
-    todayIso: string = nowIso(),
-    maxRules: number = 10,
-  ): ProcessedRecurringRule[] {
+  runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10): ProcessedRecurringRule[] {
     const db = getDb();
     const dueRules = db
       .select()

@@ -11,7 +11,12 @@ interface OnboardingStepHeaderProps {
   compact?: boolean;
 }
 
-export function OnboardingStepHeader({ title, subtitle, children, compact }: OnboardingStepHeaderProps) {
+export function OnboardingStepHeader({
+  title,
+  subtitle,
+  children,
+  compact,
+}: OnboardingStepHeaderProps) {
   const containerStyle: object = {
     alignItems: 'center',
     paddingTop: compact ? spacing.xs : spacing.lg,

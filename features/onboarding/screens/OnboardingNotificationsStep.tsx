@@ -61,12 +61,20 @@ export function OnboardingNotificationsStep({
           subtitle={I18n.t('onboarding.notifications.subtitle')}
         />
 
-        <Animated.View entering={FadeIn.delay(150).duration(300)} className={isCompact ? 'mt-5' : 'mt-8'}>
+        <Animated.View
+          entering={FadeIn.delay(150).duration(300)}
+          className={isCompact ? 'mt-5' : 'mt-8'}
+        >
           <View style={styles.iconContainer}>
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: `${themeColors.primary}14`, width: iconCircleSize, height: iconCircleSize, borderRadius: iconCircleSize / 2 },
+                {
+                  backgroundColor: `${themeColors.primary}14`,
+                  width: iconCircleSize,
+                  height: iconCircleSize,
+                  borderRadius: iconCircleSize / 2,
+                },
               ]}
             >
               <Bell size={bellSize} color={themeColors.primary} />
@@ -78,10 +86,7 @@ export function OnboardingNotificationsStep({
               <Card key={feature.title} variant="accent">
                 <CardContent style={styles.featureCard}>
                   <View
-                    style={[
-                      styles.featureIcon,
-                      { backgroundColor: `${themeColors.primary}12` },
-                    ]}
+                    style={[styles.featureIcon, { backgroundColor: `${themeColors.primary}12` }]}
                   >
                     <feature.icon size={ICON_SIZE} color={themeColors.primary} />
                   </View>
