@@ -55,14 +55,6 @@ export const AnalyticsEvents = {
   DATA_RESET: 'Data Reset',
   DATA_IMPORTED: 'Data Imported',
 
-  // Purchases / ads
-  PURCHASE_MODAL_OPENED: 'Purchase Modal Opened',
-  PURCHASE_INITIATED: 'Purchase Initiated',
-  PURCHASE_COMPLETED: 'Purchase Completed',
-  PURCHASE_CANCELLED: 'Purchase Cancelled',
-  PURCHASE_FAILED: 'Purchase Failed',
-  PURCHASE_RESTORED: 'Purchase Restored',
-
   // Tutorial
   TUTORIAL_STARTED: 'Tutorial Started',
   TUTORIAL_COMPLETED: 'Tutorial Completed',
