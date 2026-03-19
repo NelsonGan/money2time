@@ -55,7 +55,10 @@ export function OnboardingModeStep({
         >
           <OnboardingStepHeader title={I18n.t('onboarding.mode.title')} />
 
-          <Animated.View entering={FadeIn.delay(150).duration(300)} className={isCompact ? 'mt-4 gap-3' : 'mt-8 gap-4'}>
+          <Animated.View
+            entering={FadeIn.delay(150).duration(300)}
+            className={isCompact ? 'mt-4 gap-3' : 'mt-8 gap-4'}
+          >
             <OnboardingChoiceCard
               title={I18n.t('onboarding.mode.simple_title')}
               description={I18n.t('onboarding.mode.simple_description')}

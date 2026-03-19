@@ -1,7 +1,6 @@
 import { Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type {
-  TextInput} from 'react-native';
+import type { TextInput } from 'react-native';
 import {
   Alert,
   FlatList,
@@ -452,7 +451,11 @@ export function TransactionsScreen({
     () =>
       new Map(
         accounts.map(
-          (account) => [account.id, { icon: account.type === 'credit' ? '💳' : '🏦', label: account.name }] as const,
+          (account) =>
+            [
+              account.id,
+              { icon: account.type === 'credit' ? '💳' : '🏦', label: account.name },
+            ] as const,
         ),
       ),
     [accounts],

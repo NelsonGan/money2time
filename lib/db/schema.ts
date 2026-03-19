@@ -1,4 +1,4 @@
-import { integer,real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const accountsTable = sqliteTable('accounts', {
   id: text('id').primaryKey(),

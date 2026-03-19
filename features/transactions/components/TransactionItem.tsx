@@ -18,10 +18,7 @@ import {
   formatRelativeDate,
 } from '~/utils/formatters';
 
-type TransactionDisplaySettings = Pick<
-  UserSettings,
-  'currencySymbol' | 'displayMode'
->;
+type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
 
 interface TransactionItemProps {
   transaction: TransactionWithRelations;

@@ -1,4 +1,12 @@
-import { Bell, CalendarCheck, ChevronRight, ExternalLink, FlaskConical, RefreshCw, TrendingUp } from 'lucide-react-native';
+import {
+  Bell,
+  CalendarCheck,
+  ChevronRight,
+  ExternalLink,
+  FlaskConical,
+  RefreshCw,
+  TrendingUp,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -116,7 +124,10 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
     [ensurePermissions, notificationPrefs.weeklySummary, updateNotificationPrefs],
   );
 
-  const dailySubtitle = formatTime(notificationPrefs.dailyCheckin.hour, notificationPrefs.dailyCheckin.minute);
+  const dailySubtitle = formatTime(
+    notificationPrefs.dailyCheckin.hour,
+    notificationPrefs.dailyCheckin.minute,
+  );
 
   const weeklySubtitle = `${getDayName(notificationPrefs.weeklySummary.dayOfWeek)} ${formatTime(notificationPrefs.weeklySummary.hour, notificationPrefs.weeklySummary.minute)}`;
 
@@ -225,7 +236,6 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
               themeColors={themeColors}
             />
           </Animated.View>
-
         </View>
       </ScrollView>
     </SettingsPageLayout>
@@ -261,10 +271,7 @@ function NotificationCard({
 }: NotificationCardProps) {
   const showFooter = onPress || (__DEV__ && onTest);
   return (
-    <View
-      className="rounded-2xl border border-border/30 bg-card shadow-soft"
-      style={styles.card}
-    >
+    <View className="rounded-2xl border border-border/30 bg-card shadow-soft" style={styles.card}>
       <View style={styles.cardHeader}>
         <View
           className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
@@ -274,17 +281,32 @@ function NotificationCard({
         </View>
         <View style={styles.cardTitleBlock}>
           <View style={styles.cardTitleRow}>
-            <Text variant="bodyStrong" className="text-foreground" style={styles.cardTitle} numberOfLines={1}>
+            <Text
+              variant="bodyStrong"
+              className="text-foreground"
+              style={styles.cardTitle}
+              numberOfLines={1}
+            >
               {title}
             </Text>
             {status ? (
               <View
-                style={[styles.statusBadge, { backgroundColor: enabled ? `${themeColors.primary}18` : `${themeColors.border}40` }]}
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor: enabled
+                      ? `${themeColors.primary}18`
+                      : `${themeColors.border}40`,
+                  },
+                ]}
               >
                 <Text
                   variant="caption"
                   numberOfLines={1}
-                  style={[styles.statusText, { color: enabled ? themeColors.primary : themeColors.muted }]}
+                  style={[
+                    styles.statusText,
+                    { color: enabled ? themeColors.primary : themeColors.muted },
+                  ]}
                 >
                   {status}
                 </Text>
@@ -315,12 +337,7 @@ function NotificationCard({
             <View />
           )}
           {__DEV__ && onTest ? (
-            <Text
-              variant="caption"
-              tone="muted"
-              onPress={onTest}
-              style={styles.footerLink}
-            >
+            <Text variant="caption" tone="muted" onPress={onTest} style={styles.footerLink}>
               <FlaskConical size={11} color={themeColors.muted} />
               {'  '}
               {I18n.t('notifications.send_test')}

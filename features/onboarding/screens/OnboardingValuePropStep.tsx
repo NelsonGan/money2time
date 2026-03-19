@@ -85,7 +85,16 @@ export function OnboardingValuePropStep({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.content, { paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING, paddingTop: containerPaddingTop, paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE }]}>
+      <View
+        style={[
+          styles.content,
+          {
+            paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+            paddingTop: containerPaddingTop,
+            paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+          },
+        ]}
+      >
         <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact>
           <View
             accessible
@@ -93,13 +102,51 @@ export function OnboardingValuePropStep({
             accessibilityLabel={I18n.t('app.name')}
             style={[styles.wordmarkRow, { minHeight: wordmarkLineHeight + 8 }]}
           >
-            <Text style={[styles.wordmarkBase, { fontSize: wordmarkFontSize, lineHeight: wordmarkLineHeight, color: wordmarkPalette.money }]}>Money</Text>
-            <Text style={[styles.wordmarkTwo, { fontSize: wordmarkTwoFontSize, lineHeight: wordmarkTwoFontSize, color: wordmarkPalette.two, transform: [{ translateY: wordmarkFontSize * 0.22 }] }]}>2</Text>
-            <Text style={[styles.wordmarkBase, { fontSize: wordmarkFontSize, lineHeight: wordmarkLineHeight, color: wordmarkPalette.time, marginLeft: -1 }]}>Time</Text>
+            <Text
+              style={[
+                styles.wordmarkBase,
+                {
+                  fontSize: wordmarkFontSize,
+                  lineHeight: wordmarkLineHeight,
+                  color: wordmarkPalette.money,
+                },
+              ]}
+            >
+              Money
+            </Text>
+            <Text
+              style={[
+                styles.wordmarkTwo,
+                {
+                  fontSize: wordmarkTwoFontSize,
+                  lineHeight: wordmarkTwoFontSize,
+                  color: wordmarkPalette.two,
+                  transform: [{ translateY: wordmarkFontSize * 0.22 }],
+                },
+              ]}
+            >
+              2
+            </Text>
+            <Text
+              style={[
+                styles.wordmarkBase,
+                {
+                  fontSize: wordmarkFontSize,
+                  lineHeight: wordmarkLineHeight,
+                  color: wordmarkPalette.time,
+                  marginLeft: -1,
+                },
+              ]}
+            >
+              Time
+            </Text>
           </View>
         </OnboardingStepHeader>
 
-        <Animated.View entering={FadeIn.delay(150).duration(300)} style={[styles.cardWrapper, { marginTop: cardMarginTop }]}>
+        <Animated.View
+          entering={FadeIn.delay(150).duration(300)}
+          style={[styles.cardWrapper, { marginTop: cardMarginTop }]}
+        >
           <Card variant="accent" className={isCompact ? 'p-3' : isMedium ? 'p-4' : undefined}>
             <CardContent>
               <View style={styles.previewHeaderRow}>
@@ -138,7 +185,10 @@ export function OnboardingValuePropStep({
                 </Text>
                 <View style={styles.previewHeroValues} className="mt-2">
                   <View>
-                    <Text variant={isCompact ? 'heading' : 'display'} className="text-foreground tracking-tight">
+                    <Text
+                      variant={isCompact ? 'heading' : 'display'}
+                      className="text-foreground tracking-tight"
+                    >
                       {formatCurrency(totalAmount, sym)}
                     </Text>
                     <Text variant="caption" tone="muted" className="mt-1">
@@ -172,9 +222,32 @@ export function OnboardingValuePropStep({
               >
                 {previewTransactions.map((item, index) => (
                   <React.Fragment key={item.title}>
-                    <View style={[styles.previewRow, { paddingHorizontal: spacing.lg, paddingVertical: rowVerticalPadding }]}>
-                      <View style={[styles.previewRowMark, { backgroundColor: `${item.color}16`, width: previewRowMarkSize, height: previewRowMarkSize }]}>
-                        <View style={[styles.previewRowDot, { backgroundColor: item.color, width: previewRowDotSize, height: previewRowDotSize }]} />
+                    <View
+                      style={[
+                        styles.previewRow,
+                        { paddingHorizontal: spacing.lg, paddingVertical: rowVerticalPadding },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.previewRowMark,
+                          {
+                            backgroundColor: `${item.color}16`,
+                            width: previewRowMarkSize,
+                            height: previewRowMarkSize,
+                          },
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.previewRowDot,
+                            {
+                              backgroundColor: item.color,
+                              width: previewRowDotSize,
+                              height: previewRowDotSize,
+                            },
+                          ]}
+                        />
                       </View>
                       <View className="flex-1">
                         <Text variant="bodyStrong" className="text-foreground">

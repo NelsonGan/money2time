@@ -155,21 +155,17 @@ function CategoryEditor({
 
   const handleDelete = () => {
     if (!onDelete) return;
-    Alert.alert(
-      I18n.t('common.delete'),
-      I18n.t('categories.delete_confirm'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            void triggerHaptic('warning');
-            onDelete();
-          },
+    Alert.alert(I18n.t('common.delete'), I18n.t('categories.delete_confirm'), [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      {
+        text: I18n.t('common.delete'),
+        style: 'destructive',
+        onPress: () => {
+          void triggerHaptic('warning');
+          onDelete();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -316,7 +312,6 @@ function CategoryEditor({
                 ))}
               </View>
             </View>
-
           </View>
         </ScrollView>
         <SettingsActionBar

@@ -39,7 +39,10 @@ import {
   NumpadPanel,
   SummaryRow,
 } from '~/features/transactions/components/editor';
-import { evaluateExpression, formatMoney } from '~/features/transactions/components/editor/calculatorEngine';
+import {
+  evaluateExpression,
+  formatMoney,
+} from '~/features/transactions/components/editor/calculatorEngine';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -1247,7 +1250,12 @@ export function TransactionEditorScreen({
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className={cn('px-5 pb-2 flex-row items-start justify-between', windowHeight < 700 ? 'pt-2' : 'pt-4')}>
+      <View
+        className={cn(
+          'px-5 pb-2 flex-row items-start justify-between',
+          windowHeight < 700 ? 'pt-2' : 'pt-4',
+        )}
+      >
         <View className="flex-row items-center gap-3">
           <Pressable
             accessibilityRole="button"
@@ -1375,11 +1383,7 @@ export function TransactionEditorScreen({
                       numberOfLines={1}
                       style={{
                         fontSize:
-                          amountDisplay.length > 12
-                            ? 14
-                            : amountDisplay.length > 9
-                              ? 18
-                              : 24,
+                          amountDisplay.length > 12 ? 14 : amountDisplay.length > 9 ? 18 : 24,
                       }}
                       className={cn(
                         amountTone === 'error'
@@ -1611,7 +1615,6 @@ export function TransactionEditorScreen({
                     </View>
                   </SummaryRow>
                 </View>
-
               </>
             ) : null}
           </View>

@@ -258,9 +258,7 @@ export function SettingsStack({
           return (
             <NotificationsScreen
               onBack={() => props.navigation.goBack()}
-              onOpenDetail={(type) =>
-                props.navigation.navigate('NotificationDetail', { type })
-              }
+              onOpenDetail={(type) => props.navigation.navigate('NotificationDetail', { type })}
             />
           );
         }}

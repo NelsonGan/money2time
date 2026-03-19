@@ -140,7 +140,12 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
                           currentMode === 'power' ? themeColors.primarySoft : themeColors.surface,
                       }}
                     >
-                      <Zap size={20} color={currentMode === 'power' ? themeColors.primary : themeColors.textMuted} />
+                      <Zap
+                        size={20}
+                        color={
+                          currentMode === 'power' ? themeColors.primary : themeColors.textMuted
+                        }
+                      />
                     </View>
                     <View className="flex-1">
                       <Text variant="bodyStrong">{I18n.t('settings.user_mode_power')}</Text>
