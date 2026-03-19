@@ -913,7 +913,7 @@ function AppContent() {
     return (
       <View className="flex-1 items-center justify-center bg-background" style={themeStyle}>
         <View className="items-center rounded-[28px] border border-border/40 bg-card px-8 py-8 shadow-soft">
-          <Mascot size={92} mood="sleepy" animate />
+          <Mascot size={130} mood="sleepy" animate />
           <Text variant="friendly" tone="muted" className="mt-4">
             {I18n.t('app.loading_world')}
           </Text>
