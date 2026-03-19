@@ -41,9 +41,9 @@ export function EmptyState({
           entering={
             animateIn ? FadeInDown.delay(100).duration(500).springify().damping(14) : undefined
           }
-          className="w-[130px] h-[130px] rounded-full bg-primary/6 items-center justify-center"
+          className="w-[160px] h-[160px] rounded-full bg-primary/6 items-center justify-center"
         >
-          <Mascot size={110} mood={mascotMood} animate={false} />
+          <Mascot size={150} animate={false} />
         </Animated.View>
         <Text variant="heading" className="mt-5 text-center">
           {title}
