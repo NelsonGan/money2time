@@ -1,7 +1,6 @@
 import { Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  TextInput} from 'react-native';
+import type { TextInput } from 'react-native';
 import {
   FlatList,
   Pressable,

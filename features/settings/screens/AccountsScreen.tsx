@@ -382,21 +382,17 @@ function AccountEditorSheet({
 
   const handleDelete = () => {
     if (!onDelete) return;
-    Alert.alert(
-      I18n.t('accounts.delete_account'),
-      I18n.t('accounts.delete_account_confirm'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            void triggerHaptic('warning');
-            onDelete();
-          },
+    Alert.alert(I18n.t('accounts.delete_account'), I18n.t('accounts.delete_account_confirm'), [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      {
+        text: I18n.t('common.delete'),
+        style: 'destructive',
+        onPress: () => {
+          void triggerHaptic('warning');
+          onDelete();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -449,16 +445,18 @@ function AccountEditorSheet({
               </Text>
               {isEdit ? (
                 <View className="flex-row flex-wrap gap-2">
-                  {ACCOUNT_TYPE_OPTIONS.filter((item) => item.value === account.type).map((item) => (
-                    <View
-                      key={item.value}
-                      className="px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
-                    >
-                      <Text variant="caption" className="text-primary">
-                        {item.icon} {item.label}
-                      </Text>
-                    </View>
-                  ))}
+                  {ACCOUNT_TYPE_OPTIONS.filter((item) => item.value === account.type).map(
+                    (item) => (
+                      <View
+                        key={item.value}
+                        className="px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
+                      >
+                        <Text variant="caption" className="text-primary">
+                          {item.icon} {item.label}
+                        </Text>
+                      </View>
+                    ),
+                  )}
                 </View>
               ) : (
                 <View className="flex-row flex-wrap gap-2">
@@ -481,7 +479,9 @@ function AccountEditorSheet({
                     >
                       <Text
                         variant="caption"
-                        className={cn(type === item.value ? 'text-primary' : 'text-muted-foreground')}
+                        className={cn(
+                          type === item.value ? 'text-primary' : 'text-muted-foreground',
+                        )}
                       >
                         {item.icon} {item.label}
                       </Text>
@@ -515,7 +515,9 @@ function AccountEditorSheet({
             ) : null}
 
             <Input
-              label={isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')}
+              label={
+                isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')
+              }
               variant="currency"
               currencySymbol={currencySymbol}
               value={balanceInput}
@@ -1839,19 +1841,19 @@ export function AccountsScreen({
             compactItems
             scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
-	              <View className="pb-3 gap-3">
-	                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
-	                  <View className="items-center gap-2">
-	                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
-	                      {account.type === 'credit' ? (
-	                        <CreditCard size={24} color={themeColors.primary} />
-	                      ) : (
-	                        <Landmark size={24} color={themeColors.primary} />
-	                      )}
-	                    </View>
-	                    <Text variant="label" tone="muted" className="mt-1">
-	                      {I18n.t('accounts.balance')}
-	                    </Text>
+              <View className="pb-3 gap-3">
+                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
+                  <View className="items-center gap-2">
+                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
+                      {account.type === 'credit' ? (
+                        <CreditCard size={24} color={themeColors.primary} />
+                      ) : (
+                        <Landmark size={24} color={themeColors.primary} />
+                      )}
+                    </View>
+                    <Text variant="label" tone="muted" className="mt-1">
+                      {I18n.t('accounts.balance')}
+                    </Text>
                     {renderVisibleBalanceNode(normalizedBalance, {
                       variant: 'heading',
                       textClassName: isNegativeForDisplay(normalizedBalance)
@@ -1889,16 +1891,14 @@ export function AccountsScreen({
                 </View>
 
                 {account.type === 'credit' ? (
-	                  <View className="gap-2.5">
-	                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
-	                      <View className="flex-row items-center gap-2.5 mb-3">
-	                        <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
-	                          <CalendarDays size={15} color={themeColors.accent} />
-	                        </View>
-	                        <View className="flex-1">
-	                          <Text variant="bodyStrong">
-	                            {I18n.t('accounts.billing')}
-                          </Text>
+                  <View className="gap-2.5">
+                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
+                      <View className="flex-row items-center gap-2.5 mb-3">
+                        <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
+                          <CalendarDays size={15} color={themeColors.accent} />
+                        </View>
+                        <View className="flex-1">
+                          <Text variant="bodyStrong">{I18n.t('accounts.billing')}</Text>
                           <Text variant="label" tone="muted" className="mt-0.5">
                             {I18n.t('accounts.statement_due', {
                               statementDay: statementDay ?? '-',

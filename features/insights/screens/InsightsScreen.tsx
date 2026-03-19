@@ -2314,10 +2314,7 @@ export function InsightsScreen({
     [excludedTimeCostExpenseCategoryId],
   );
   const assetHistoryAccountOptions = accounts;
-  const {
-    includedAssetHistoryAccounts,
-    includedAssetHistoryAccountById,
-  } = useMemo(() => {
+  const { includedAssetHistoryAccounts, includedAssetHistoryAccountById } = useMemo(() => {
     const includedAccounts: Account[] = [];
     const includedAccountIds: string[] = [];
     const includedAccountById = new Map<string, Account>();
@@ -3984,7 +3981,8 @@ export function InsightsScreen({
                 </View>
                 {renderValueNode(pageTotalAmount, {
                   variant: 'caption',
-                  textClassName: 'text-[15px] leading-[18px] font-black tracking-tight text-foreground',
+                  textClassName:
+                    'text-[15px] leading-[18px] font-black tracking-tight text-foreground',
                   iconColor: totalRowAccentColor,
                   iconSize: 14,
                 })}
@@ -4128,86 +4126,86 @@ export function InsightsScreen({
                 </View>
 
                 <View style={[styles.calendarGrid, { gap: dayCellGap }]}>
-                {month.cells.map((cell) => {
-                  if (cell.kind === 'spacer') {
+                  {month.cells.map((cell) => {
+                    if (cell.kind === 'spacer') {
+                      return (
+                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
+                      );
+                    }
+
+                    const isSelected = cell.dayKey === selectedDayKey;
+                    const hasActivity = cell.transactionCount > 0;
+                    const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
+                    const baseIntensity =
+                      cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
+                    const toneColor = themeColors.error;
+                    const dotSizeByTier = [3, 4, 5, 6, 7] as const;
+                    const dotSize =
+                      cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
+                    const bgColor = isSelected
+                      ? withColorAlpha(themeColors.primary, 0.24)
+                      : hasActivity
+                        ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
+                        : cell.isFuture
+                          ? withColorAlpha(themeColors.sky, 0.08)
+                          : withColorAlpha(themeColors.surfaceMuted, 0.6);
+                    const borderColor = isSelected
+                      ? withColorAlpha(themeColors.primary, 0.9)
+                      : hasActivity
+                        ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
+                        : withColorAlpha(themeColors.textMuted, 0.18);
+
                     return (
-                      <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
-                    );
-                  }
-
-                  const isSelected = cell.dayKey === selectedDayKey;
-                  const hasActivity = cell.transactionCount > 0;
-                  const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
-                  const baseIntensity =
-                    cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
-                  const toneColor = themeColors.error;
-                  const dotSizeByTier = [3, 4, 5, 6, 7] as const;
-                  const dotSize =
-                    cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
-                  const bgColor = isSelected
-                    ? withColorAlpha(themeColors.primary, 0.24)
-                    : hasActivity
-                      ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
-                      : cell.isFuture
-                        ? withColorAlpha(themeColors.sky, 0.08)
-                        : withColorAlpha(themeColors.surfaceMuted, 0.6);
-                  const borderColor = isSelected
-                    ? withColorAlpha(themeColors.primary, 0.9)
-                    : hasActivity
-                      ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
-                      : withColorAlpha(themeColors.textMuted, 0.18);
-
-                  return (
-                    <Pressable
-                      key={cell.id}
-                      disabled={cell.isOutsideRange}
-                      onPress={() => {
-                        if (cell.isOutsideRange) return;
-                        void triggerHaptic('selection');
-                        setSelectedCalendarDayKey(cell.dayKey);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
-                      accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
-                      className={cn(
-                        'rounded-xl items-center justify-center border active:opacity-85',
-                      )}
-                      style={[
-                        styles.calendarDayCell,
-                        {
-                          width: dayCellSize,
-                          height: dayCellSize,
-                          backgroundColor: bgColor,
-                          borderColor,
-                          borderWidth: isSelected ? 2 : 1,
-                          opacity: inactiveOpacity,
-                        },
-                      ]}
-                    >
-                      <Text
-                        variant="caption"
+                      <Pressable
+                        key={cell.id}
+                        disabled={cell.isOutsideRange}
+                        onPress={() => {
+                          if (cell.isOutsideRange) return;
+                          void triggerHaptic('selection');
+                          setSelectedCalendarDayKey(cell.dayKey);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
+                        accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
                         className={cn(
-                          isSelected
-                            ? 'text-primary font-bold'
-                            : hasActivity
-                              ? 'text-destructive'
-                              : 'text-muted-foreground',
+                          'rounded-xl items-center justify-center border active:opacity-85',
                         )}
+                        style={[
+                          styles.calendarDayCell,
+                          {
+                            width: dayCellSize,
+                            height: dayCellSize,
+                            backgroundColor: bgColor,
+                            borderColor,
+                            borderWidth: isSelected ? 2 : 1,
+                            opacity: inactiveOpacity,
+                          },
+                        ]}
                       >
-                        {cell.dayNumber}
-                      </Text>
-                      {hasActivity && dotSize > 0 ? (
-                        <View
-                          style={[
-                            styles.calendarActivityDot,
-                            { width: dotSize, height: dotSize, backgroundColor: toneColor },
-                          ]}
-                        />
-                      ) : null}
-                    </Pressable>
-                  );
-                })}
-              </View>
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            isSelected
+                              ? 'text-primary font-bold'
+                              : hasActivity
+                                ? 'text-destructive'
+                                : 'text-muted-foreground',
+                          )}
+                        >
+                          {cell.dayNumber}
+                        </Text>
+                        {hasActivity && dotSize > 0 ? (
+                          <View
+                            style={[
+                              styles.calendarActivityDot,
+                              { width: dotSize, height: dotSize, backgroundColor: toneColor },
+                            ]}
+                          />
+                        ) : null}
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
             </Card>
           ))}
@@ -4235,12 +4233,11 @@ export function InsightsScreen({
                 <View className="flex-row items-center gap-2">
                   <View
                     className="rounded-full px-2.5 py-1"
-                    style={{ backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12) }}
+                    style={{
+                      backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12),
+                    }}
                   >
-                    <Text
-                      variant="label"
-                      style={{ color: themeColors.error, fontWeight: '600' }}
-                    >
+                    <Text variant="label" style={{ color: themeColors.error, fontWeight: '600' }}>
                       {selectedDayLabel}
                     </Text>
                   </View>
@@ -4525,10 +4522,7 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text
-                    variant="label"
-                    style={{ color: trendAccentColor, fontWeight: '600' }}
-                  >
+                  <Text variant="label" style={{ color: trendAccentColor, fontWeight: '600' }}>
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -4579,7 +4573,9 @@ export function InsightsScreen({
                     })}
                   </>
                 ) : (
-                  <Text variant="label" tone="muted">—</Text>
+                  <Text variant="label" tone="muted">
+                    —
+                  </Text>
                 )}
               </View>
             </View>
@@ -4733,10 +4729,7 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text
-                    variant="label"
-                    style={{ color: trendAccentColor, fontWeight: '600' }}
-                  >
+                  <Text variant="label" style={{ color: trendAccentColor, fontWeight: '600' }}>
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -4787,7 +4780,9 @@ export function InsightsScreen({
                     })}
                   </>
                 ) : (
-                  <Text variant="label" tone="muted">—</Text>
+                  <Text variant="label" tone="muted">
+                    —
+                  </Text>
                 )}
               </View>
             </View>
@@ -4932,10 +4927,7 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text
-                variant="label"
-                style={{ color: themeColors.primary, fontWeight: '600' }}
-              >
+              <Text variant="label" style={{ color: themeColors.primary, fontWeight: '600' }}>
                 {selectedAssetLabel}
               </Text>
             </View>
@@ -5051,10 +5043,7 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text
-                variant="label"
-                style={{ color: themeColors.primary, fontWeight: '600' }}
-              >
+              <Text variant="label" style={{ color: themeColors.primary, fontWeight: '600' }}>
                 {selectedRateLabel}
               </Text>
             </View>
@@ -5307,10 +5296,7 @@ export function InsightsScreen({
                     <Text variant="caption">{row.label}</Text>
                     <View className="flex-row items-center gap-1.5">
                       <View
-                        className={cn(
-                          'rounded-full border px-2 py-[3px]',
-                          monthlySavedBadgeClass,
-                        )}
+                        className={cn('rounded-full border px-2 py-[3px]', monthlySavedBadgeClass)}
                       >
                         {renderCompactValueNode(monthlySavedAmount, {
                           variant: 'label',

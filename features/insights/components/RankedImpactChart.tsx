@@ -56,10 +56,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function RankedImpactChart({
-  rows,
-  accentColor,
-}: RankedImpactChartProps) {
+export function RankedImpactChart({ rows, accentColor }: RankedImpactChartProps) {
   const themeColors = useThemeColors();
   const activeAccent = accentColor ?? themeColors.primary;
 
