@@ -7,6 +7,7 @@ import type {
   CashflowSummary,
   Transaction,
   TransactionFilters,
+  TransactionSentiment,
   TransactionType,
   TransactionWithRelations,
 } from '~/types';
@@ -40,6 +41,7 @@ export interface CreateTransactionInput {
   toAccountId?: string | null;
   categoryId?: string | null;
   note?: string | null;
+  sentiment?: TransactionSentiment;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -226,6 +228,7 @@ class TransactionsRepository {
         toAccountId: input.toAccountId ?? null,
         categoryId: input.categoryId ?? null,
         note: input.note ?? null,
+        sentiment: input.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

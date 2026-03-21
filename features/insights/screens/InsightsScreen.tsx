@@ -18,6 +18,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text as RNText,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -28,6 +29,7 @@ import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
@@ -226,8 +228,8 @@ const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
 const GRAPH_HORIZONTAL_PADDING = 8;
 const GRAPH_VERTICAL_PADDING = 14;
-const Y_AXIS_LABEL_BASE_FONT_SIZE = 11;
-const Y_AXIS_LABEL_MIN_FONT_SIZE = 9;
+const Y_AXIS_LABEL_BASE_FONT_SIZE = 9.5;
+const Y_AXIS_LABEL_MIN_FONT_SIZE = 7.5;
 const CHART_SKELETON_READY_DELAY_MS = 180;
 const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
@@ -319,12 +321,24 @@ const styles = StyleSheet.create({
   calendarDayCell: {
     borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 6,
   },
   calendarActivityDot: {
-    position: 'absolute',
-    bottom: 4,
+    marginTop: 4,
     borderRadius: 999,
+  },
+  calendarEmojiCircle: {
+    marginTop: 2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarEmojiLabel: {
+    fontSize: 10,
+    lineHeight: 12,
+    textAlign: 'center',
   },
   progressFill: {
     height: '100%',
@@ -492,6 +506,7 @@ type CalendarDayCell = {
   isOutsideRange: boolean;
   isFuture: boolean;
   expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
+  topCategoryEmoji: string | null;
 };
 
 function clampCalendarExpenseDotTier(tier: number): 1 | 2 | 3 | 4 | 5 {
@@ -1483,225 +1498,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   );
 });
 
-const ExpenseTrendLineChart = React.memo(function ExpenseTrendLineChart({
-  monthRows,
-  chartWidth,
-  primaryColor,
-  averageValue,
-  referenceColor,
-  onSelectMonthKey,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  monthRows: ExpenseTrendMonthRow[];
-  chartWidth: number;
-  primaryColor: string;
-  averageValue: number;
-  referenceColor: string;
-  onSelectMonthKey: (monthKey: string) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      monthRows.map((row) => ({
-        value: row.totalExpense,
-        date: monthDateFromMonthKey(row.monthKey),
-      })),
-    [monthRows],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const graphYDomain = useMemo(
-    () => resolveGraphYDomain(graphPoints, graphRange),
-    [graphPoints, graphRange],
-  );
-  const averageReferenceTop = useMemo(
-    () => resolveGraphValueTop(averageValue, EXPENSE_TREND_CHART_HEIGHT, graphYDomain),
-    [averageValue, graphYDomain],
-  );
-  const monthKeyByTime = useMemo(
-    () =>
-      new Map(
-        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
-      ),
-    [graphPoints, monthRows],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const normalizedMonthKey =
-        monthKeyByTime.get(point.date.getTime()) ??
-        normalizeMonthKey(monthKeyFromDateLocal(point.date));
-      if (!normalizedMonthKey) return;
-      onSelectMonthKey(normalizedMonthKey);
-    },
-    [monthKeyByTime, onSelectMonthKey],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  return (
-    <View style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}
-          />
-          {averageReferenceTop !== null ? (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.absoluteOverlay,
-                buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT),
-              ]}
-            >
-              <View
-                style={[
-                  styles.chartReferenceLine,
-                  {
-                    top: averageReferenceTop,
-                    borderTopColor: referenceColor,
-                  },
-                ]}
-              />
-            </View>
-          ) : null}
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={EXPENSE_TREND_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
-
-const IncomeTrendLineChart = React.memo(function IncomeTrendLineChart({
-  monthRows,
-  chartWidth,
-  primaryColor,
-  averageValue,
-  referenceColor,
-  onSelectMonthKey,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  monthRows: IncomeTrendMonthRow[];
-  chartWidth: number;
-  primaryColor: string;
-  averageValue: number;
-  referenceColor: string;
-  onSelectMonthKey: (monthKey: string) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      monthRows.map((row) => ({
-        value: row.totalIncome,
-        date: monthDateFromMonthKey(row.monthKey),
-      })),
-    [monthRows],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const graphYDomain = useMemo(
-    () => resolveGraphYDomain(graphPoints, graphRange),
-    [graphPoints, graphRange],
-  );
-  const averageReferenceTop = useMemo(
-    () => resolveGraphValueTop(averageValue, EXPENSE_TREND_CHART_HEIGHT, graphYDomain),
-    [averageValue, graphYDomain],
-  );
-  const monthKeyByTime = useMemo(
-    () =>
-      new Map(
-        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
-      ),
-    [graphPoints, monthRows],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const normalizedMonthKey =
-        monthKeyByTime.get(point.date.getTime()) ??
-        normalizeMonthKey(monthKeyFromDateLocal(point.date));
-      if (!normalizedMonthKey) return;
-      onSelectMonthKey(normalizedMonthKey);
-    },
-    [monthKeyByTime, onSelectMonthKey],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  return (
-    <View style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}
-          />
-          {averageReferenceTop !== null ? (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.absoluteOverlay,
-                buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT),
-              ]}
-            >
-              <View
-                style={[
-                  styles.chartReferenceLine,
-                  {
-                    top: averageReferenceTop,
-                    borderTopColor: referenceColor,
-                  },
-                ]}
-              />
-            </View>
-          ) : null}
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={EXPENSE_TREND_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
+// ExpenseTrendLineChart and IncomeTrendLineChart replaced by TrendBarChart
 
 const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   points,
@@ -2872,6 +2669,32 @@ export function InsightsScreen({
           });
         });
 
+        const topEmojiByDayKey = new Map<string, string>();
+        dailyTotalsByDayKey.forEach((entry, dayKey) => {
+          if (entry.transactions.length === 0) return;
+          const amountByCategory = new Map<string, { amount: number; emoji: string }>();
+          for (const tx of entry.transactions) {
+            const catId = tx.categoryId ?? 'uncategorized';
+            const emoji = tx.categoryIcon ?? null;
+            if (!emoji) continue;
+            const existing = amountByCategory.get(catId);
+            if (existing) {
+              existing.amount += tx.amount;
+            } else {
+              amountByCategory.set(catId, { amount: tx.amount, emoji });
+            }
+          }
+          let topEmoji: string | null = null;
+          let topAmount = 0;
+          amountByCategory.forEach(({ amount, emoji }) => {
+            if (amount > topAmount) {
+              topAmount = amount;
+              topEmoji = emoji;
+            }
+          });
+          if (topEmoji) topEmojiByDayKey.set(dayKey, topEmoji);
+        });
+
         const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
         const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
         const todayDayKey = dayKeyFromDateLocal(new Date());
@@ -2947,6 +2770,7 @@ export function InsightsScreen({
                 isOutsideRange,
                 isFuture,
                 expenseDotTier,
+                topCategoryEmoji: totals ? (topEmojiByDayKey.get(dayKey) ?? null) : null,
               });
             }
 
@@ -4094,8 +3918,9 @@ export function InsightsScreen({
     const selectedDayTransactions = selectedDayData.transactions;
     const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
     const isFutureDay = selectedDayKey > todayDayKey;
-    const dayCellGap = 6;
-    const dayCellSize = Math.max(34, Math.floor((chartWidth - dayCellGap * 6) / 7));
+    const dayCellGap = 5;
+    const dayCellSize = Math.max(40, Math.floor((chartWidth - dayCellGap * 6) / 7));
+    const dayCellHeight = dayCellSize + 12;
     const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
     const dayDetailScale = calendarDetailAnimRef.current.interpolate({
       inputRange: [0.68, 1],
@@ -4129,7 +3954,7 @@ export function InsightsScreen({
                   {month.cells.map((cell) => {
                     if (cell.kind === 'spacer') {
                       return (
-                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
+                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellHeight)} />
                       );
                     }
 
@@ -4168,13 +3993,13 @@ export function InsightsScreen({
                         accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
                         accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
                         className={cn(
-                          'rounded-xl items-center justify-center border active:opacity-85',
+                          'rounded-xl items-center border active:opacity-85',
                         )}
                         style={[
                           styles.calendarDayCell,
                           {
                             width: dayCellSize,
-                            height: dayCellSize,
+                            height: dayCellHeight,
                             backgroundColor: bgColor,
                             borderColor,
                             borderWidth: isSelected ? 2 : 1,
@@ -4194,13 +4019,33 @@ export function InsightsScreen({
                         >
                           {cell.dayNumber}
                         </Text>
-                        {hasActivity && dotSize > 0 ? (
-                          <View
-                            style={[
-                              styles.calendarActivityDot,
-                              { width: dotSize, height: dotSize, backgroundColor: toneColor },
-                            ]}
-                          />
+                        {hasActivity ? (
+                          cell.topCategoryEmoji ? (
+                            <View
+                              style={[
+                                styles.calendarEmojiCircle,
+                                {
+                                  backgroundColor: isSelected
+                                    ? withColorAlpha(themeColors.primary, 0.18)
+                                    : withColorAlpha(toneColor, 0.12 + baseIntensity * 0.12),
+                                },
+                              ]}
+                            >
+                              <RNText
+                                allowFontScaling={false}
+                                style={styles.calendarEmojiLabel}
+                              >
+                                {cell.topCategoryEmoji}
+                              </RNText>
+                            </View>
+                          ) : dotSize > 0 ? (
+                            <View
+                              style={[
+                                styles.calendarActivityDot,
+                                { width: dotSize, height: dotSize, backgroundColor: toneColor },
+                              ]}
+                            />
+                          ) : null
                         ) : null}
                       </Pressable>
                     );
@@ -4491,15 +4336,23 @@ export function InsightsScreen({
               lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
               formatTick={formatAxisAssetValue}
             />
-            <ExpenseTrendLineChart
-              monthRows={pageData.monthRows}
+            <TrendBarChart
+              data={pageData.monthRows.map((row) => ({
+                monthKey: row.monthKey,
+                value: row.totalExpense,
+                label: row.label,
+              }))}
               chartWidth={expenseGraphWidth}
+              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
               primaryColor={trendAccentColor}
               averageValue={pageData.averageMonthExpense}
               referenceColor={themeColors.error}
+              selectedMonthKey={selectedMonthRow.monthKey}
               onSelectMonthKey={selectExpenseTrendMonth}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
+              labelColor={themeColors.textMuted}
+              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
             />
           </View>
         </View>
@@ -4698,15 +4551,23 @@ export function InsightsScreen({
               lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
               formatTick={formatAxisAssetValue}
             />
-            <IncomeTrendLineChart
-              monthRows={pageData.monthRows}
+            <TrendBarChart
+              data={pageData.monthRows.map((row) => ({
+                monthKey: row.monthKey,
+                value: row.totalIncome,
+                label: row.label,
+              }))}
               chartWidth={incomeGraphWidth}
+              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
               primaryColor={trendAccentColor}
               averageValue={pageData.averageMonthIncome}
               referenceColor={themeColors.success}
+              selectedMonthKey={selectedMonthRow.monthKey}
               onSelectMonthKey={selectIncomeTrendMonth}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
+              labelColor={themeColors.textMuted}
+              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
             />
           </View>
         </View>

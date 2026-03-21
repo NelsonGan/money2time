@@ -891,6 +891,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: input.toAccountId ?? null,
         categoryId: input.categoryId ?? null,
         note: input.note ?? null,
+        sentiment: input.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -908,6 +909,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             type: input.type,
             has_category: !!input.categoryId,
             has_note: !!(input.note && input.note.trim()),
+            sentiment: input.sentiment ?? 'neutral',
           });
         } catch {
           // rollback on failure

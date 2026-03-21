@@ -86,6 +86,8 @@ const en = {
       high_2: 'Big month so far. A quick check-in could help.',
       no_rate: 'Set up your hourly rate to see your spending in time.',
     },
+    weekly_mood: 'Weekly Mood',
+    recent_spendings: 'Recent Spendings',
     converter: {
       title: 'Before You Buy',
       description: 'Is it worth your time?',
@@ -339,6 +341,7 @@ const en = {
       never: 'Never',
       on_date: 'On date',
       end_date: 'End date',
+      sentiment_label: 'How do you feel?',
       status: 'Status',
       active: 'Active',
       paused: 'Paused',

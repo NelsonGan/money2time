@@ -202,9 +202,9 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
   }, [handleKeyPress]);
 
   return (
-    <View className="flex-1 px-4 pt-1.5" style={{ paddingBottom: Math.max(8, bottomInset) }}>
-      <View className="flex-1 gap-1.5">
-        <View className="flex-1 flex-row gap-1.5">
+    <View className="flex-1 px-4 pt-1" style={{ paddingBottom: Math.max(6, bottomInset) }}>
+      <View className="flex-1 gap-1">
+        <View className="flex-1 flex-row gap-1">
           <NumpadKey value="C" variant="utility" onPress={handleKeyPress} />
           <NumpadKey
             value="del"
@@ -216,19 +216,19 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
           <NumpadKey value="÷" variant="operator" onPress={handleKeyPress} />
           <NumpadKey value="×" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1.5">
+        <View className="flex-1 flex-row gap-1">
           <NumpadKey value="7" onPress={handleKeyPress} />
           <NumpadKey value="8" onPress={handleKeyPress} />
           <NumpadKey value="9" onPress={handleKeyPress} />
           <NumpadKey value="-" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1.5">
+        <View className="flex-1 flex-row gap-1">
           <NumpadKey value="4" onPress={handleKeyPress} />
           <NumpadKey value="5" onPress={handleKeyPress} />
           <NumpadKey value="6" onPress={handleKeyPress} />
           <NumpadKey value="+" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1.5">
+        <View className="flex-1 flex-row gap-1">
           <NumpadKey value="1" onPress={handleKeyPress} />
           <NumpadKey value="2" onPress={handleKeyPress} />
           <NumpadKey value="3" onPress={handleKeyPress} />
@@ -243,7 +243,7 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
             }
           />
         </View>
-        <View className="flex-1 flex-row gap-1.5 pr-[25%]">
+        <View className="flex-1 flex-row gap-1 pr-[25%]">
           <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
           <NumpadKey value="." onPress={handleKeyPress} />
         </View>
