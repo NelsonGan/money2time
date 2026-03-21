@@ -17,6 +17,7 @@ import { AccountsScreen } from './AccountsScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
+import { ProManagementScreen } from './ProManagementScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
@@ -78,6 +79,7 @@ function SettingsHomeRoute({
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenProPaywall={onOpenProPaywall}
+      onOpenProManagement={() => navigation.navigate('ProManagement')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -284,6 +286,17 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <DataManagementScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="ProManagement">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <ProManagementScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenPaywall={onOpenProPaywall}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
     </SettingsStackNavigator.Navigator>

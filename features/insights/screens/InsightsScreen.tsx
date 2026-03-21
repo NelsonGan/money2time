@@ -98,6 +98,7 @@ const INSIGHT_TYPE_GROUPS = [
   insightTypes: readonly InsightType[];
 }[];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
+type NavigableInsightType = BreakdownInsightType | 'expense_trend';
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
 type TimeCostViewMode = 'category' | 'transaction';
@@ -1611,7 +1612,7 @@ interface InsightsScreenProps {
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   activityBreakdownInsightRequest?: {
-    insightType: BreakdownInsightType;
+    insightType: NavigableInsightType;
     monthKey: string;
     token: number;
   } | null;
