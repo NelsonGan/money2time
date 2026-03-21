@@ -881,7 +881,7 @@ export function TransactionEditorScreen({
       : I18n.t('transactions.editor.title_edit'));
   const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
-  const summaryFlex = windowHeight < 650 ? 0.32 : windowHeight < 750 ? 0.38 : 0.44;
+  const summaryFlex = windowHeight < 650 ? 0.38 : windowHeight < 750 ? 0.42 : 0.46;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
