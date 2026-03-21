@@ -18,6 +18,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text as RNText,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -326,6 +327,11 @@ const styles = StyleSheet.create({
     bottom: 4,
     borderRadius: 999,
   },
+  calendarEmojiLabel: {
+    fontSize: 11,
+    lineHeight: 13,
+    textAlign: 'center',
+  },
   progressFill: {
     height: '100%',
     borderRadius: 999,
@@ -492,6 +498,7 @@ type CalendarDayCell = {
   isOutsideRange: boolean;
   isFuture: boolean;
   expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
+  topCategoryEmoji: string | null;
 };
 
 function clampCalendarExpenseDotTier(tier: number): 1 | 2 | 3 | 4 | 5 {
@@ -2872,6 +2879,32 @@ export function InsightsScreen({
           });
         });
 
+        const topEmojiByDayKey = new Map<string, string>();
+        dailyTotalsByDayKey.forEach((entry, dayKey) => {
+          if (entry.transactions.length === 0) return;
+          const amountByCategory = new Map<string, { amount: number; emoji: string }>();
+          for (const tx of entry.transactions) {
+            const catId = tx.categoryId ?? 'uncategorized';
+            const emoji = tx.categoryIcon ?? null;
+            if (!emoji) continue;
+            const existing = amountByCategory.get(catId);
+            if (existing) {
+              existing.amount += tx.amount;
+            } else {
+              amountByCategory.set(catId, { amount: tx.amount, emoji });
+            }
+          }
+          let topEmoji: string | null = null;
+          let topAmount = 0;
+          amountByCategory.forEach(({ amount, emoji }) => {
+            if (amount > topAmount) {
+              topAmount = amount;
+              topEmoji = emoji;
+            }
+          });
+          if (topEmoji) topEmojiByDayKey.set(dayKey, topEmoji);
+        });
+
         const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
         const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
         const todayDayKey = dayKeyFromDateLocal(new Date());
@@ -2947,6 +2980,7 @@ export function InsightsScreen({
                 isOutsideRange,
                 isFuture,
                 expenseDotTier,
+                topCategoryEmoji: totals ? (topEmojiByDayKey.get(dayKey) ?? null) : null,
               });
             }
 
@@ -4194,13 +4228,22 @@ export function InsightsScreen({
                         >
                           {cell.dayNumber}
                         </Text>
-                        {hasActivity && dotSize > 0 ? (
-                          <View
-                            style={[
-                              styles.calendarActivityDot,
-                              { width: dotSize, height: dotSize, backgroundColor: toneColor },
-                            ]}
-                          />
+                        {hasActivity ? (
+                          cell.topCategoryEmoji ? (
+                            <RNText
+                              allowFontScaling={false}
+                              style={[styles.calendarActivityDot, styles.calendarEmojiLabel]}
+                            >
+                              {cell.topCategoryEmoji}
+                            </RNText>
+                          ) : dotSize > 0 ? (
+                            <View
+                              style={[
+                                styles.calendarActivityDot,
+                                { width: dotSize, height: dotSize, backgroundColor: toneColor },
+                              ]}
+                            />
+                          ) : null
                         ) : null}
                       </Pressable>
                     );
