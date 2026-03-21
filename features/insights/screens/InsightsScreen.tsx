@@ -328,9 +328,18 @@ const styles = StyleSheet.create({
     bottom: 4,
     borderRadius: 999,
   },
+  calendarEmojiCircle: {
+    position: 'absolute',
+    bottom: 3,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   calendarEmojiLabel: {
-    fontSize: 11,
-    lineHeight: 13,
+    fontSize: 10,
+    lineHeight: 12,
     textAlign: 'center',
   },
   progressFill: {
@@ -3911,8 +3920,8 @@ export function InsightsScreen({
     const selectedDayTransactions = selectedDayData.transactions;
     const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
     const isFutureDay = selectedDayKey > todayDayKey;
-    const dayCellGap = 6;
-    const dayCellSize = Math.max(34, Math.floor((chartWidth - dayCellGap * 6) / 7));
+    const dayCellGap = 5;
+    const dayCellSize = Math.max(40, Math.floor((chartWidth - dayCellGap * 6) / 7));
     const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
     const dayDetailScale = calendarDetailAnimRef.current.interpolate({
       inputRange: [0.68, 1],
@@ -4013,12 +4022,23 @@ export function InsightsScreen({
                         </Text>
                         {hasActivity ? (
                           cell.topCategoryEmoji ? (
-                            <RNText
-                              allowFontScaling={false}
-                              style={[styles.calendarActivityDot, styles.calendarEmojiLabel]}
+                            <View
+                              style={[
+                                styles.calendarEmojiCircle,
+                                {
+                                  backgroundColor: isSelected
+                                    ? withColorAlpha(themeColors.primary, 0.18)
+                                    : withColorAlpha(toneColor, 0.12 + baseIntensity * 0.12),
+                                },
+                              ]}
                             >
-                              {cell.topCategoryEmoji}
-                            </RNText>
+                              <RNText
+                                allowFontScaling={false}
+                                style={styles.calendarEmojiLabel}
+                              >
+                                {cell.topCategoryEmoji}
+                              </RNText>
+                            </View>
                           ) : dotSize > 0 ? (
                             <View
                               style={[
