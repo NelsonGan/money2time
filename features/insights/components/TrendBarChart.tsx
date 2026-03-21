@@ -226,7 +226,7 @@ export const TrendBarChart = React.memo(function TrendBarChart({
                 fill={isSelected ? primaryColor : labelColor}
                 opacity={isSelected ? 1 : 0.6}
               >
-                {bar.label.slice(0, 1)}
+                {bar.index + 1}
               </SvgText>
             );
           })}
