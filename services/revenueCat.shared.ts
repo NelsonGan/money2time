@@ -36,7 +36,9 @@ export interface RevenueCatActionResult {
 export interface RevenueCatPackage {
   identifier: string;
   localizedPriceString: string;
+  localizedPricePerMonthString: string | null;
   packageType: string;
+  subscriptionPeriod: string | null;
 }
 
 export interface RevenueCatOffering {

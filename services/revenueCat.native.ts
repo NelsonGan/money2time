@@ -1,8 +1,8 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import Purchases, {
-  PURCHASES_ERROR_CODE,
   type CustomerInfo,
+  PURCHASES_ERROR_CODE,
   type PurchasesError,
 } from 'react-native-purchases';
 
@@ -182,7 +182,9 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
     const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
       identifier: pkg.identifier,
       localizedPriceString: pkg.product.priceString,
+      localizedPricePerMonthString: pkg.product.pricePerMonthString,
       packageType: pkg.packageType,
+      subscriptionPeriod: pkg.product.subscriptionPeriod,
     }));
 
     return {
