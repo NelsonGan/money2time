@@ -67,6 +67,7 @@
     "eslint-config-expo": "~10.0.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.6.2",
+    "react-native-svg-transformer": "^1.5.3",
     "typescript": "~5.9.2"
   },
   "private": true

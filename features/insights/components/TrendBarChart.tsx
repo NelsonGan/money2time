@@ -3,6 +3,7 @@ import { PanResponder, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Defs, Line, LinearGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 interface TrendBarChartProps {
@@ -23,6 +24,19 @@ interface TrendBarChartProps {
 const BOTTOM_LABEL_HEIGHT = 20;
 const TOP_PADDING = 12;
 const SIDE_PADDING = 4;
+
+const shortMonthFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function getShortMonthLabel(monthKey: string): string {
+  const locale = I18n.locale ?? I18n.defaultLocale ?? 'en';
+  let formatter = shortMonthFormatterByLocale.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, { month: 'short' });
+    shortMonthFormatterByLocale.set(locale, formatter);
+  }
+  const date = new Date(`${monthKey}-15T00:00:00`);
+  return formatter.format(date);
+}
 
 function withAlpha(hex: string, alpha: number): string {
   const alphaHex = Math.round(alpha * 255)
@@ -215,18 +229,19 @@ export const TrendBarChart = React.memo(function TrendBarChart({
           {/* Month labels */}
           {bars.map((bar) => {
             const isSelected = bar.monthKey === selectedMonthKey;
+            const labelFontSize = barCount > 6 ? Math.max(6.5, Math.min(8, barWidth * 0.4)) : 9;
             return (
               <SvgText
                 key={`label-${bar.monthKey}`}
                 x={bar.x + bar.barWidth / 2}
                 y={chartHeight - 4}
                 textAnchor="middle"
-                fontSize={9}
+                fontSize={labelFontSize}
                 fontWeight={isSelected ? '700' : '400'}
                 fill={isSelected ? primaryColor : labelColor}
                 opacity={isSelected ? 1 : 0.6}
               >
-                {bar.index + 1}
+                {getShortMonthLabel(bar.monthKey)}
               </SvgText>
             );
           })}
