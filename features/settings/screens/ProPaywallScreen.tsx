@@ -4,6 +4,8 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -30,6 +32,7 @@ interface ProPaywallScreenProps {
 
 const CARD_GAP = 12;
 const CARD_PEEK = 32;
+const PLAN_CARD_MIN_HEIGHT = 288;
 const SHOWCASE_INTERVAL = 4000;
 
 interface PaywallColors {
@@ -135,7 +138,6 @@ function PaywallBackdrop({ colors }: { colors: PaywallColors }) {
 }
 
 function FeatureShowcase({ colors, height }: { colors: PaywallColors; height: number }) {
-  const locale = I18n.locale;
   const featureTabs = useMemo<FeatureTab[]>(
     () => [
       {
@@ -163,7 +165,7 @@ function FeatureShowcase({ colors, height }: { colors: PaywallColors; height: nu
         proValue: I18n.t('pro.feature_unlimited_wage_entries'),
       },
     ],
-    [locale],
+    [],
   );
   const [activeIdx, setActiveIdx] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -291,22 +293,71 @@ interface PlanCardData {
   badge?: string;
 }
 
+function getPlanBillingLabel(pkg: RevenueCatPackage) {
+  switch (pkg.packageType) {
+    case 'ANNUAL':
+      return I18n.t('pro.yearly_billed_with_price', { price: pkg.localizedPriceString });
+    case 'MONTHLY':
+      return I18n.t('pro.monthly_subtitle');
+    case 'LIFETIME':
+      return I18n.t('pro.lifetime_subtitle');
+    default:
+      return null;
+  }
+}
+
+function getPlanPrimaryPriceLabel(pkg: RevenueCatPackage) {
+  switch (pkg.packageType) {
+    case 'ANNUAL':
+      if (pkg.localizedPricePerMonthString) {
+        return {
+          amount: pkg.localizedPricePerMonthString,
+          suffix: I18n.t('pro.per_month_suffix'),
+        };
+      }
+      return { amount: pkg.localizedPriceString, suffix: null };
+    case 'MONTHLY':
+      return {
+        amount: pkg.localizedPriceString,
+        suffix: I18n.t('pro.per_month_suffix'),
+      };
+    default:
+      return { amount: pkg.localizedPriceString, suffix: null };
+  }
+}
+
 function PlanCard({
   data,
   width,
+  height,
   colors,
   isPurchasing,
   onContinue,
+  onMeasureHeight,
 }: {
   data: PlanCardData;
   width: number;
+  height: number | null;
   colors: PaywallColors;
   isPurchasing: boolean;
   onContinue: () => void;
+  onMeasureHeight: (cardId: string, height: number) => void;
 }) {
+  const billingLabel = getPlanBillingLabel(data.pkg);
+  const primaryPriceLabel = getPlanPrimaryPriceLabel(data.pkg);
+
   return (
     <View style={{ width, marginRight: CARD_GAP }}>
-      <View style={[s.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View
+        onLayout={(event) => {
+          onMeasureHeight(data.pkg.identifier, event.nativeEvent.layout.height);
+        }}
+        style={[
+          s.card,
+          height ? { height } : null,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
         {data.badge ? (
           <View style={[s.badge, { backgroundColor: colors.primarySoft }]}>
             <Text style={[s.badgeText, { color: colors.primary }]}>{data.badge}</Text>
@@ -321,10 +372,18 @@ function PlanCard({
         </View>
 
         <View style={s.cardFooter}>
-          <View style={s.cardPriceRow}>
-            <Text style={[s.cardPrice, { color: colors.text }]}>
-              {data.pkg.localizedPriceString}
-            </Text>
+          <View style={s.cardPriceStack}>
+            <View style={s.cardPriceRow}>
+              <Text style={[s.cardPrice, { color: colors.text }]}>
+                {primaryPriceLabel.amount}
+                {primaryPriceLabel.suffix ? (
+                  <Text style={s.cardPriceSuffix}>{primaryPriceLabel.suffix}</Text>
+                ) : null}
+              </Text>
+            </View>
+            {billingLabel ? (
+              <Text style={[s.cardPriceMeta, { color: colors.textMuted }]}>{billingLabel}</Text>
+            ) : null}
           </View>
 
           <Button
@@ -359,9 +418,12 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
+  const activeIndexRef = useRef(0);
+  const measuredPlanCardHeightsRef = useRef<Record<string, number>>({});
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [planCardHeight, setPlanCardHeight] = useState<number | null>(null);
 
   const cardWidth = screenWidth - CARD_PEEK * 2;
   const estimatedHeaderHeight = 32 + spacing.sm * 2;
@@ -376,37 +438,49 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
     void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, { source: source ?? 'settings' });
   }, [source]);
 
-  const planCards: PlanCardData[] = [];
-  if (packages.monthly) {
-    planCards.push({
-      pkg: packages.monthly,
-      name: I18n.t('pro.monthly'),
-      description: I18n.t('pro.monthly_desc'),
-      badge: I18n.t('pro.flexible'),
-    });
-  }
-  if (packages.annual) {
-    planCards.push({
-      pkg: packages.annual,
-      name: I18n.t('pro.yearly'),
-      description: I18n.t('pro.yearly_desc'),
-      badge: I18n.t('pro.best_value'),
-    });
-  }
-  if (packages.lifetime) {
-    planCards.push({
-      pkg: packages.lifetime,
-      name: I18n.t('pro.lifetime'),
-      description: I18n.t('pro.lifetime_desc'),
-      badge: I18n.t('pro.forever'),
-    });
-  }
+  const planCards = useMemo<PlanCardData[]>(() => {
+    const cards: PlanCardData[] = [];
+
+    if (packages.monthly) {
+      cards.push({
+        pkg: packages.monthly,
+        name: I18n.t('pro.monthly'),
+        description: I18n.t('pro.monthly_desc'),
+        badge: I18n.t('pro.flexible'),
+      });
+    }
+    if (packages.annual) {
+      cards.push({
+        pkg: packages.annual,
+        name: I18n.t('pro.yearly'),
+        description: I18n.t('pro.yearly_desc'),
+        badge: I18n.t('pro.best_value'),
+      });
+    }
+    if (packages.lifetime) {
+      cards.push({
+        pkg: packages.lifetime,
+        name: I18n.t('pro.lifetime'),
+        description: I18n.t('pro.lifetime_desc'),
+        badge: I18n.t('pro.forever'),
+      });
+    }
+
+    return cards;
+  }, [packages.annual, packages.lifetime, packages.monthly]);
 
   const defaultIdx = planCards.findIndex((card) => card.pkg.packageType === 'ANNUAL');
   const startIdx = defaultIdx >= 0 ? defaultIdx : 0;
+  const planCardIds = useMemo(
+    () => planCards.map((card) => card.pkg.identifier),
+    [planCards],
+  );
 
   useEffect(() => {
-    if (planCards.length === 0 || startIdx <= 0) {
+    activeIndexRef.current = startIdx;
+    setActiveIndex(startIdx);
+
+    if (planCards.length === 0) {
       return;
     }
 
@@ -416,10 +490,53 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
         animated: false,
       });
     }, 50);
-    setActiveIndex(startIdx);
 
     return () => clearTimeout(timeout);
   }, [cardWidth, planCards.length, startIdx]);
+
+  useEffect(() => {
+    measuredPlanCardHeightsRef.current = {};
+    setPlanCardHeight(null);
+  }, [cardWidth, planCardIds]);
+
+  const syncActiveIndex = useCallback(
+    (offsetX: number) => {
+      const snap = cardWidth + CARD_GAP;
+      const idx = Math.max(0, Math.min(Math.round(offsetX / snap), planCards.length - 1));
+
+      if (idx !== activeIndexRef.current) {
+        activeIndexRef.current = idx;
+        setActiveIndex(idx);
+      }
+    },
+    [cardWidth, planCards.length],
+  );
+
+  const handlePlanCardMeasure = useCallback(
+    (cardId: string, height: number) => {
+      if (planCardHeight !== null) {
+        return;
+      }
+
+      const nextHeight = Math.max(Math.ceil(height), PLAN_CARD_MIN_HEIGHT);
+      if (measuredPlanCardHeightsRef.current[cardId] === nextHeight) {
+        return;
+      }
+
+      measuredPlanCardHeightsRef.current[cardId] = nextHeight;
+
+      if (planCardIds.some((id) => measuredPlanCardHeightsRef.current[id] == null)) {
+        return;
+      }
+
+      const tallestCard = Math.max(
+        PLAN_CARD_MIN_HEIGHT,
+        ...planCardIds.map((id) => measuredPlanCardHeightsRef.current[id] ?? PLAN_CARD_MIN_HEIGHT),
+      );
+      setPlanCardHeight(tallestCard);
+    },
+    [planCardHeight, planCardIds],
+  );
 
   const handlePurchase = useCallback(
     async (pkgId: string) => {
@@ -469,12 +586,10 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
   }, [isRestoring, restorePurchases, onClose]);
 
   const onCardScroll = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
-      const snap = cardWidth + CARD_GAP;
-      const idx = Math.round(e.nativeEvent.contentOffset.x / snap);
-      setActiveIndex(Math.max(0, Math.min(idx, planCards.length - 1)));
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      syncActiveIndex(event.nativeEvent.contentOffset.x);
     },
-    [cardWidth, planCards.length],
+    [syncActiveIndex],
   );
 
   if (isPro) {
@@ -532,7 +647,9 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
               showsHorizontalScrollIndicator={false}
               snapToInterval={cardWidth + CARD_GAP}
               decelerationRate="fast"
+              scrollEventThrottle={16}
               contentContainerStyle={{ paddingHorizontal: CARD_PEEK }}
+              onScroll={onCardScroll}
               onMomentumScrollEnd={onCardScroll}
             >
               {planCards.map((card) => (
@@ -540,9 +657,11 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
                   key={card.pkg.identifier}
                   data={card}
                   width={cardWidth}
+                  height={planCardHeight}
                   colors={colors}
                   isPurchasing={isPurchasing}
                   onContinue={() => handlePurchase(card.pkg.identifier)}
+                  onMeasureHeight={handlePlanCardMeasure}
                 />
               ))}
             </ScrollView>
@@ -727,7 +846,7 @@ const s = StyleSheet.create({
     borderRadius: 22,
     padding: 22,
     borderWidth: 1,
-    minHeight: 272,
+    minHeight: PLAN_CARD_MIN_HEIGHT,
   },
   badge: {
     alignSelf: 'flex-start',
@@ -744,15 +863,20 @@ const s = StyleSheet.create({
   cardFooter: {
     marginTop: 'auto',
   },
+  cardPriceStack: {
+    marginTop: 8,
+    gap: 2,
+  },
   cardPriceRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 6,
-    marginTop: 8,
   },
   cardTitle: { fontSize: 24, lineHeight: 32, fontWeight: '800', letterSpacing: -0.3 },
   cardDesc: { fontSize: 14, lineHeight: 20, marginTop: 2 },
   cardPrice: { fontSize: 22, fontWeight: '800' },
+  cardPriceSuffix: { fontSize: 13, fontWeight: '700' },
+  cardPriceMeta: { fontSize: 12, lineHeight: 18 },
   ctaContent: {
     flexDirection: 'row',
     alignItems: 'center',
