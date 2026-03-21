@@ -321,19 +321,17 @@ const styles = StyleSheet.create({
   calendarDayCell: {
     borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 6,
   },
   calendarActivityDot: {
-    position: 'absolute',
-    bottom: 4,
+    marginTop: 4,
     borderRadius: 999,
   },
   calendarEmojiCircle: {
-    position: 'absolute',
-    bottom: 3,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    marginTop: 2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -3922,6 +3920,7 @@ export function InsightsScreen({
     const isFutureDay = selectedDayKey > todayDayKey;
     const dayCellGap = 5;
     const dayCellSize = Math.max(40, Math.floor((chartWidth - dayCellGap * 6) / 7));
+    const dayCellHeight = dayCellSize + 12;
     const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
     const dayDetailScale = calendarDetailAnimRef.current.interpolate({
       inputRange: [0.68, 1],
@@ -3955,7 +3954,7 @@ export function InsightsScreen({
                   {month.cells.map((cell) => {
                     if (cell.kind === 'spacer') {
                       return (
-                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellSize)} />
+                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellHeight)} />
                       );
                     }
 
@@ -3994,13 +3993,13 @@ export function InsightsScreen({
                         accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
                         accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
                         className={cn(
-                          'rounded-xl items-center justify-center border active:opacity-85',
+                          'rounded-xl items-center border active:opacity-85',
                         )}
                         style={[
                           styles.calendarDayCell,
                           {
                             width: dayCellSize,
-                            height: dayCellSize,
+                            height: dayCellHeight,
                             backgroundColor: bgColor,
                             borderColor,
                             borderWidth: isSelected ? 2 : 1,
