@@ -9,12 +9,14 @@ import {
   restoreRevenueCatPurchases,
   setRevenueCatAppUserId,
   type RevenueCatActionResult,
+  type RevenueCatCustomerState,
   type RevenueCatOffering,
   type RevenueCatPackage,
 } from '~/services/revenueCat';
 
 interface ProContextValue {
   isPro: boolean;
+  customerState: RevenueCatCustomerState | null;
   offering: RevenueCatOffering | null;
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
   restorePurchases: () => Promise<RevenueCatActionResult>;
@@ -26,11 +28,13 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   const [isPro, setIsPro] = useState(false);
+  const [customerState, setCustomerState] = useState<RevenueCatCustomerState | null>(null);
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
   const checkProStatus = useCallback(async () => {
-    const customerState = await fetchRevenueCatCustomerState();
-    setIsPro(isRevenueCatCustomerStateActive(customerState));
+    const state = await fetchRevenueCatCustomerState();
+    setCustomerState(state);
+    setIsPro(isRevenueCatCustomerStateActive(state));
   }, []);
 
   useEffect(() => {
@@ -73,11 +77,12 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<ProContextValue>(
     () => ({
       isPro,
+      customerState,
       offering,
       purchasePackage,
       restorePurchases,
     }),
-    [isPro, offering, purchasePackage, restorePurchases],
+    [isPro, customerState, offering, purchasePackage, restorePurchases],
   );
 
   return <ProContext.Provider value={value}>{children}</ProContext.Provider>;

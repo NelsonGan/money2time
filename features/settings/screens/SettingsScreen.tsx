@@ -1,5 +1,6 @@
 import {
   Bell,
+  ChevronRight,
   Clock3,
   Crown,
   DatabaseBackup,
@@ -67,6 +68,7 @@ interface SettingsScreenProps {
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onOpenProPaywall: () => void;
+  onOpenProManagement: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -83,6 +85,7 @@ export function SettingsScreen({
   onOpenNotifications,
   onOpenDataManagement,
   onOpenProPaywall,
+  onOpenProManagement,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
@@ -261,7 +264,7 @@ export function SettingsScreen({
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
           <Pressable
-            onPress={isPro ? undefined : onOpenProPaywall}
+            onPress={isPro ? onOpenProManagement : onOpenProPaywall}
             className="mt-6 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
             style={!isPro ? styles.proButtonHighlight : undefined}
           >
@@ -290,9 +293,12 @@ export function SettingsScreen({
                 </Text>
               )}
               <Text variant="friendly" tone="muted" className="text-xs">
-                {isPro ? I18n.t('pro.active_subtitle') : I18n.t('pro.upgrade_subtitle')}
+                {isPro ? I18n.t('pro.manage') : I18n.t('pro.upgrade_subtitle')}
               </Text>
             </View>
+            {isPro ? (
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            ) : null}
           </Pressable>
 
           <SettingsSection

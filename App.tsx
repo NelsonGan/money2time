@@ -73,7 +73,7 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
-type ActivityBreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
+type ActivityInsightType = 'expense_breakdown' | 'income_breakdown' | 'expense_trend';
 
 type FontScalingNativeComponent = {
   defaultProps?: Record<string, unknown>;
@@ -91,7 +91,7 @@ disableDynamicType(RNText as unknown as FontScalingNativeComponent);
 disableDynamicType(RNTextInput as unknown as FontScalingNativeComponent);
 
 interface ActivityBreakdownInsightRequest {
-  insightType: ActivityBreakdownInsightType;
+  insightType: ActivityInsightType;
   monthKey: string;
   token: number;
 }
@@ -294,7 +294,7 @@ function MainShellScreen({
     [navigation],
   );
   const openActivityBreakdownInsight = useCallback(
-    (insightType: ActivityBreakdownInsightType, monthKey: string) => {
+    (insightType: ActivityInsightType, monthKey: string) => {
       setActivityBreakdownInsightRequest((previous) => ({
         insightType,
         monthKey,
@@ -326,6 +326,10 @@ function MainShellScreen({
     },
     [navigation],
   );
+
+  const openExpenseTrend = useCallback(() => {
+    openActivityBreakdownInsight('expense_trend', monthKeyFromDateLocal(new Date()));
+  }, [openActivityBreakdownInsight]);
 
   const openProPaywall = useCallback(
     (source?: string) => {
@@ -505,6 +509,7 @@ function MainShellScreen({
             onOpenAccount={openAccountDetail}
             onOpenTransaction={openTransactionEditor}
             onOpenSettingsScreen={openSettingsScreen}
+            onOpenExpenseTrend={openExpenseTrend}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />

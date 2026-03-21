@@ -1640,7 +1640,7 @@ export function TransactionEditorScreen({
                           className="items-center justify-center"
                           style={{ opacity: isActive ? 1 : 0.3 }}
                         >
-                          <SentimentIcon sentiment={s} size={28} />
+                          <SentimentIcon sentiment={s} size={36} />
                         </Pressable>
                       );
                     })}
