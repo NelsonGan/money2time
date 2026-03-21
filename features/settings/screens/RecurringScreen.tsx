@@ -14,6 +14,7 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -163,14 +164,16 @@ export function RecurringScreen({
 }: RecurringScreenProps) {
   const themeColors = useThemeColors();
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
+  const { checkLimit } = useProGate();
   const allRules = useMemo(() => {
     if (!isSimpleMode) return recurringRules;
     return filterRecurringRulesByWallet(recurringRules, simpleWalletId);
   }, [isSimpleMode, simpleWalletId, recurringRules]);
 
   const openCreate = useCallback(() => {
+    if (!checkLimit('recurring', recurringRules.length)) return;
     onOpenEditor();
-  }, [onOpenEditor]);
+  }, [checkLimit, onOpenEditor, recurringRules.length]);
 
   const openEdit = useCallback(
     (rule: RecurringTransactionRule) => {

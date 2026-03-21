@@ -16,6 +16,7 @@ import {
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -112,6 +113,7 @@ function formatMonthLabel(monthKey: string, locale: string) {
 
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
+  const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
@@ -284,6 +286,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
               size="icon"
               haptic="none"
               onPress={() => {
+                if (!checkLimit('wage_entries', monthlyWages.length)) return;
                 void triggerHaptic('selection');
                 setShowAddModal(true);
               }}

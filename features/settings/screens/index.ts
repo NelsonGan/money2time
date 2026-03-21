@@ -4,6 +4,7 @@ export { CategoriesScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { HourlyValueScreen } from './HourlyValueScreen';
+export { ProPaywallScreen } from './ProPaywallScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';

@@ -10,6 +10,8 @@ import type {
   RevenueCatActionResult,
   RevenueCatCustomerState,
   RevenueCatEnvironment,
+  RevenueCatOffering,
+  RevenueCatPackage,
 } from './revenueCat.shared';
 
 export * from './revenueCat.shared';
@@ -157,6 +159,82 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
     return toRevenueCatCustomerState(customerInfo);
   } catch {
     return null;
+  }
+}
+
+export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | null> {
+  const environment = getRevenueCatEnvironment();
+
+  if (!environment.isConfigured || !environment.canMakePurchases) {
+    return null;
+  }
+
+  try {
+    await ensureRevenueCatConfigured();
+    const offerings = await Purchases.getOfferings();
+
+    const offering = environment.offeringIdentifier
+      ? offerings.all[environment.offeringIdentifier]
+      : offerings.current;
+
+    if (!offering) return null;
+
+    const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
+      identifier: pkg.identifier,
+      localizedPriceString: pkg.product.priceString,
+      packageType: pkg.packageType,
+    }));
+
+    return {
+      identifier: offering.identifier,
+      packages,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function purchaseRevenueCatPackage(
+  packageIdentifier: string,
+): Promise<RevenueCatActionResult> {
+  const environment = getRevenueCatEnvironment();
+
+  if (!environment.isConfigured || !environment.canMakePurchases) {
+    return {
+      customerState: null,
+      message: null,
+      status: 'not_available',
+    };
+  }
+
+  try {
+    await ensureRevenueCatConfigured();
+    const offerings = await Purchases.getOfferings();
+
+    const offering = environment.offeringIdentifier
+      ? offerings.all[environment.offeringIdentifier]
+      : offerings.current;
+
+    const pkg = offering?.availablePackages.find((p) => p.identifier === packageIdentifier);
+
+    if (!pkg) {
+      return {
+        customerState: null,
+        message: 'Package not found.',
+        status: 'not_found',
+      };
+    }
+
+    const { customerInfo } = await Purchases.purchasePackage(pkg);
+    const customerState = toRevenueCatCustomerState(customerInfo);
+
+    return {
+      customerState,
+      message: null,
+      status: 'success',
+    };
+  } catch (error) {
+    return toRevenueCatErrorResult(error);
   }
 }
 

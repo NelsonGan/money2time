@@ -59,6 +59,16 @@ export const AnalyticsEvents = {
   TUTORIAL_STARTED: 'Tutorial Started',
   TUTORIAL_COMPLETED: 'Tutorial Completed',
   TUTORIAL_SKIPPED: 'Tutorial Skipped',
+
+  // Pro
+  PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',
+  PRO_PURCHASE_STARTED: 'Pro Purchase Started',
+  PRO_PURCHASE_COMPLETED: 'Pro Purchase Completed',
+  PRO_PURCHASE_CANCELLED: 'Pro Purchase Cancelled',
+  PRO_PURCHASE_FAILED: 'Pro Purchase Failed',
+  PRO_RESTORE_STARTED: 'Pro Restore Started',
+  PRO_RESTORE_COMPLETED: 'Pro Restore Completed',
+  PRO_LIMIT_HIT: 'Pro Limit Hit',
 } as const;
 
 // ---------------------------------------------------------------------------
