@@ -48,6 +48,7 @@ import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -1073,6 +1074,7 @@ export function AccountsScreen({
     updateAccount,
     updateTransactionsBulk,
   } = useApp();
+  const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
   const [hideAccountBalances, setHideAccountBalances] = useState(false);
@@ -2133,6 +2135,7 @@ export function AccountsScreen({
                   if (isManagementGroupsView) {
                     startCreateGroup();
                   } else {
+                    if (!checkLimit('accounts', accounts.length)) return;
                     setShowCreate(true);
                   }
                 }}

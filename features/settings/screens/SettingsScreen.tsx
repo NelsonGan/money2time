@@ -1,6 +1,7 @@
 import {
   Bell,
   Clock3,
+  Crown,
   DatabaseBackup,
   FolderTree,
   Landmark,
@@ -15,6 +16,7 @@ import {
   Alert,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Pressable,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
@@ -29,9 +31,11 @@ import {
   SettingsPageLayout,
   SettingsRowItem,
   SettingsSection,
+  Text,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -62,6 +66,7 @@ interface SettingsScreenProps {
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
+  onOpenProPaywall: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -77,11 +82,13 @@ export function SettingsScreen({
   onOpenRecurring,
   onOpenNotifications,
   onOpenDataManagement,
+  onOpenProPaywall,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const { settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
+  const { isPro } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -253,6 +260,22 @@ export function SettingsScreen({
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
+          <Pressable
+            onPress={onOpenProPaywall}
+            className="mt-6 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
+            style={!isPro ? styles.proButtonHighlight : undefined}
+          >
+            <Crown size={20} color={themeColors.primary} />
+            <View className="flex-1">
+              <Text variant="subheading" className="text-sm">
+                {isPro ? I18n.t('pro.active') : I18n.t('pro.upgrade')}
+              </Text>
+              <Text variant="friendly" tone="muted" className="text-xs">
+                {isPro ? I18n.t('pro.active_subtitle') : I18n.t('pro.upgrade_subtitle')}
+              </Text>
+            </View>
+          </Pressable>
+
           <SettingsSection
             className="mt-6 gap-2"
             title={I18n.t('settings.section_personal')}
@@ -394,5 +417,12 @@ const styles = StyleSheet.create({
   rowsGroup: {
     marginTop: spacing.xs,
     gap: spacing.xs,
+  },
+  proButtonHighlight: {
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
 });

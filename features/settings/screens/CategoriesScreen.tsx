@@ -22,6 +22,7 @@ import {
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -139,7 +140,8 @@ function CategoryEditor({
   onDelete?: () => void;
 }) {
   const themeColors = useThemeColors();
-  const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
+  const initialIcon =
+    initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
@@ -535,7 +537,12 @@ export function CategoriesScreen({
 }: CategoriesScreenProps = {}) {
   const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
     useApp();
+  const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
+  const topLevelCategoryCount = useMemo(
+    () => categories.filter((c) => !c.parentId).length,
+    [categories],
+  );
   const { width: windowWidth } = useWindowDimensions();
   const [type, setType] = useState<CategoryType>('expense');
   const [createOpen, setCreateOpen] = useState(false);
@@ -771,6 +778,7 @@ export function CategoriesScreen({
           mode="create"
           topLevel={topLevel}
           initial={{ parentId: activeParentId, type }}
+
           onClose={() => setCreateOpen(false)}
           onSubmit={(input) => {
             createCategory({ ...input, type, isDefault: false });
@@ -782,6 +790,7 @@ export function CategoriesScreen({
           mode="edit"
           topLevel={topLevel}
           initial={editing ?? undefined}
+
           onClose={() => setEditing(null)}
           onSubmit={(input) => {
             if (!editing) return;
@@ -815,6 +824,7 @@ export function CategoriesScreen({
               size="icon"
               haptic="none"
               onPress={() => {
+                if (!checkLimit('categories', topLevelCategoryCount)) return;
                 void triggerHaptic('selection');
                 setCreateOpen(true);
               }}

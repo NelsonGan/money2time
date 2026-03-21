@@ -8,6 +8,7 @@ import {
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
   ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { getDb, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import {
   accountGroupsTable,
@@ -49,7 +50,6 @@ import {
   initNotificationHandler,
   syncScheduledNotifications,
 } from '~/services/notifications';
-import { setRevenueCatAppUserId } from '~/services/revenueCat';
 import {
   type Account,
   type AccountBalance,
@@ -215,33 +215,42 @@ function ensureSimpleWalletExists(currency: string) {
 }
 
 function seedMinimalCategoriesIfMissing() {
+  const existingCategories = categoriesRepository.list();
   const existing = new Set(
-    categoriesRepository.list().map((category) => categorySeedKey(category.type, category.name)),
+    existingCategories.map((category) => categorySeedKey(category.type, category.name)),
   );
   const minimal = [
     ...ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
     ...ONBOARDING_MINIMAL_INCOME_CATEGORIES,
   ];
   let createdCategories = 0;
+  let remainingSlots = Math.max(
+    PRO_LIMITS.FREE_MAX_CATEGORIES -
+      existingCategories.filter((category) => !category.parentId).length,
+    0,
+  );
 
   minimal.forEach((category) => {
+    if (remainingSlots <= 0) return;
     const key = categorySeedKey(category.type, category.name);
     if (existing.has(key)) return;
     categoriesRepository.create(category);
     existing.add(key);
     createdCategories += 1;
+    remainingSlots -= 1;
   });
 
   return createdCategories;
 }
 
 function seedPowerAccountsIfMissing(preferredCurrency: string) {
-  const existing = new Set(
-    accountsRepository.list().map((account) => accountNameSeedKey(account.name)),
-  );
+  const existingAccounts = accountsRepository.list();
+  const existing = new Set(existingAccounts.map((account) => accountNameSeedKey(account.name)));
   let createdAccounts = 0;
+  let remainingSlots = Math.max(PRO_LIMITS.FREE_MAX_ACCOUNTS - existingAccounts.length, 0);
 
   ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((account) => {
+    if (remainingSlots <= 0) return;
     const key = accountNameSeedKey(account.name);
     if (existing.has(key)) return;
     accountsRepository.create({
@@ -250,6 +259,7 @@ function seedPowerAccountsIfMissing(preferredCurrency: string) {
     });
     existing.add(key);
     createdAccounts += 1;
+    remainingSlots -= 1;
   });
 
   return createdAccounts;
@@ -1056,10 +1066,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!settings?.locale) return;
     setAppLocale(settings.locale);
   }, [settings?.locale]);
-
-  useEffect(() => {
-    setRevenueCatAppUserId(settings?.appUserId ?? null);
-  }, [settings?.appUserId]);
 
   useEffect(() => {
     if (!settings?.appUserId) return;

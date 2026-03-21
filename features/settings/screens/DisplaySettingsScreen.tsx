@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react-native';
-import { Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
-  SettingsActionBar,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -21,7 +20,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { ThemeColor, ThemeMode, UserSettings } from '~/types';
+import type { ThemeColor, ThemeMode } from '~/types';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
@@ -31,6 +30,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const { settings, updateSettings } = useApp();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
+  const currentLocaleSelection = SUPPORTED_LOCALES.includes(
+    settings.locale as (typeof SUPPORTED_LOCALES)[number],
+  )
+    ? settings.locale
+    : 'en';
 
   const languageOptions = useMemo(
     () =>
@@ -40,16 +44,13 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       })),
     [],
   );
-  const currencyOptions = useMemo(
-    () => [
-      ...MAJOR_CURRENCIES.map((item) => ({
-        value: item.code,
-        label: `${item.code} (${item.symbol}) · ${item.name}`,
-      })),
-      { value: '__custom__', label: I18n.t('settings.custom_symbol_code') },
-    ],
-    [],
-  );
+  const currencyOptions = [
+    ...MAJOR_CURRENCIES.map((item) => ({
+      value: item.code,
+      label: `${item.code} (${item.symbol}) · ${item.name}`,
+    })),
+    { value: '__custom__', label: I18n.t('settings.custom_symbol_code') },
+  ];
   const currencyByCode = useMemo(
     () => new Map(MAJOR_CURRENCIES.map((item) => [item.code, item])),
     [],
@@ -76,58 +77,29 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     { value: 'light' as const, label: I18n.t('settings.theme_light') },
     { value: 'dark' as const, label: I18n.t('settings.theme_dark') },
   ] satisfies { value: ThemeMode; label: string }[];
-  const themeColorOptions = useMemo(
-    () =>
-      THEME_COLOR_OPTIONS.map((value) => ({
-        value,
-        label: I18n.t(`settings.theme_color_${value}`),
-        icon: (
-          <View
-            style={[
-              styles.themeColorSwatch,
-              { backgroundColor: getThemeColorSwatch(value, resolvedTheme) },
-            ]}
-          />
-        ),
-      })),
-    [resolvedTheme, settings.locale],
-  );
-  const currentLocaleSelection = SUPPORTED_LOCALES.includes(
-    settings.locale as (typeof SUPPORTED_LOCALES)[number],
-  )
-    ? settings.locale
-    : 'en';
+  const themeColorOptions = THEME_COLOR_OPTIONS.map((value) => ({
+    value,
+    label: I18n.t(`settings.theme_color_${value}`),
+    icon: (
+      <View
+        style={[styles.themeColorSwatch, { backgroundColor: getThemeColorSwatch(value, resolvedTheme) }]}
+      />
+    ),
+  }));
   const currentCurrencySelection =
     settings.currencyCode === '__custom__'
       ? '__custom__'
       : (selectedMajorCurrency?.code ?? fallbackMajorCurrency?.code ?? '__custom__');
 
-  const [selectedLocale, setSelectedLocale] = useState(currentLocaleSelection);
-  const [selectedCurrency, setSelectedCurrency] = useState(currentCurrencySelection);
   const [customCurrency, setCustomCurrency] = useState(
     currentCurrencySelection === '__custom__' ? settings.currencySymbol : '',
   );
   const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState<ThemeMode>(settings.themeMode);
-  const [selectedThemeColor, setSelectedThemeColor] = useState<ThemeColor>(settings.themeColor);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
 
   useEffect(() => {
-    setSelectedLocale(currentLocaleSelection);
-  }, [currentLocaleSelection]);
-
-  useEffect(() => {
-    setSelectedCurrency(currentCurrencySelection);
     setCustomCurrency(currentCurrencySelection === '__custom__' ? settings.currencySymbol : '');
   }, [currentCurrencySelection, settings.currencySymbol]);
-
-  useEffect(() => {
-    setSelectedTheme(settings.themeMode);
-  }, [settings.themeMode]);
-
-  useEffect(() => {
-    setSelectedThemeColor(settings.themeColor);
-  }, [settings.themeColor]);
 
   useEffect(() => {
     if (!didCopyRevenueCatUserId) {
@@ -141,37 +113,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     return () => clearTimeout(timeout);
   }, [didCopyRevenueCatUserId]);
 
-  const isCustomCurrencyMode = selectedCurrency === '__custom__';
-  const trimmedCustomCurrency = customCurrency.trim();
-  const nextCurrencySymbol = useMemo(() => {
-    if (selectedCurrency === '__custom__') return trimmedCustomCurrency;
-    return currencyByCode.get(selectedCurrency)?.symbol ?? settings.currencySymbol;
-  }, [currencyByCode, selectedCurrency, trimmedCustomCurrency, settings.currencySymbol]);
-  const nextCurrencyCode = useMemo(() => {
-    if (selectedCurrency === '__custom__') return '__custom__';
-    return currencyByCode.get(selectedCurrency)?.code ?? settings.currencyCode;
-  }, [currencyByCode, selectedCurrency, settings.currencyCode]);
-  const hasChanges =
-    selectedLocale !== currentLocaleSelection ||
-    nextCurrencyCode !== settings.currencyCode ||
-    nextCurrencySymbol !== settings.currencySymbol ||
-    selectedTheme !== settings.themeMode ||
-    selectedThemeColor !== settings.themeColor;
-  const canSave =
-    hasChanges && (selectedCurrency !== '__custom__' || trimmedCustomCurrency.length > 0);
-
-  const resetDraft = () => {
-    setSelectedLocale(currentLocaleSelection);
-    setSelectedCurrency(currentCurrencySelection);
-    setCustomCurrency(currentCurrencySelection === '__custom__' ? settings.currencySymbol : '');
-    setSelectedTheme(settings.themeMode);
-    setSelectedThemeColor(settings.themeColor);
-  };
-
-  const handleCancel = () => {
-    resetDraft();
-    onBack();
-  };
+  const isCustomCurrencyMode = currentCurrencySelection === '__custom__';
 
   const handleCopyRevenueCatUserId = () => {
     if (!appUserId) {
@@ -183,60 +125,97 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     void triggerHaptic('selection');
   };
 
-  const handleSave = () => {
-    if (!canSave) {
-      onBack();
+  const handleLanguageChange = (nextLocale: string) => {
+    if (nextLocale === currentLocaleSelection) {
       return;
     }
 
-    if (selectedLocale !== currentLocaleSelection) {
-      setAppLocale(selectedLocale);
-      updateSettings({ locale: selectedLocale });
-    }
-    if (selectedCurrency === '__custom__') {
-      if (
-        trimmedCustomCurrency &&
-        (trimmedCustomCurrency !== settings.currencySymbol ||
-          settings.currencyCode !== '__custom__')
-      ) {
-        updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedCustomCurrency });
+    Alert.alert(
+      I18n.t('settings.language_confirm_title'),
+      I18n.t('settings.language_confirm_message', {
+        language: getLocaleLabel(nextLocale),
+      }),
+      [
+        {
+          text: I18n.t('common.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: I18n.t('settings.language_confirm_action'),
+          onPress: () => {
+            setAppLocale(nextLocale);
+            updateSettings({ locale: nextLocale });
+          },
+        },
+      ],
+    );
+  };
+
+  const handleCurrencyChange = (nextCurrency: string) => {
+    if (nextCurrency === '__custom__') {
+      const nextSymbol = settings.currencySymbol;
+      setCustomCurrency(nextSymbol);
+      if (settings.currencyCode === '__custom__') {
+        return;
       }
-    } else {
-      const nextMajorCurrency = currencyByCode.get(selectedCurrency);
-      if (
-        nextMajorCurrency &&
-        (nextMajorCurrency.code !== settings.currencyCode ||
-          nextMajorCurrency.symbol !== settings.currencySymbol)
-      ) {
-        updateSettings({
-          currencyCode: nextMajorCurrency.code,
-          currencySymbol: nextMajorCurrency.symbol,
-        });
-      }
+      updateSettings({ currencyCode: '__custom__', currencySymbol: nextSymbol });
+      return;
     }
-    const themeUpdates: Partial<Pick<UserSettings, 'themeMode' | 'themeColor'>> = {};
-    if (selectedTheme !== settings.themeMode) {
-      themeUpdates.themeMode = selectedTheme;
+
+    const nextMajorCurrency = currencyByCode.get(nextCurrency);
+    if (!nextMajorCurrency) {
+      return;
     }
-    if (selectedThemeColor !== settings.themeColor) {
-      themeUpdates.themeColor = selectedThemeColor;
+
+    if (
+      nextMajorCurrency.code === settings.currencyCode &&
+      nextMajorCurrency.symbol === settings.currencySymbol
+    ) {
+      return;
     }
-    if (Object.keys(themeUpdates).length > 0) {
-      updateSettings(themeUpdates);
+
+    updateSettings({
+      currencyCode: nextMajorCurrency.code,
+      currencySymbol: nextMajorCurrency.symbol,
+    });
+  };
+
+  const handleCustomCurrencyChange = (value: string) => {
+    setCustomCurrency(value);
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      return;
     }
-    onBack();
+
+    if (settings.currencyCode === '__custom__' && trimmedValue === settings.currencySymbol) {
+      return;
+    }
+
+    updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedValue });
+  };
+
+  const handleThemeChange = (value: string) => {
+    const nextTheme = value as ThemeMode;
+    if (nextTheme === settings.themeMode) {
+      return;
+    }
+    updateSettings({ themeMode: nextTheme });
+  };
+
+  const handleThemeColorChange = (value: string) => {
+    const nextThemeColor = value as ThemeColor;
+    if (nextThemeColor === settings.themeColor) {
+      return;
+    }
+    updateSettings({ themeColor: nextThemeColor });
   };
 
   return (
-    <SettingsPageLayout
-      actionBar={
-        <SettingsActionBar onCancel={handleCancel} onSave={handleSave} saveDisabled={!canSave} />
-      }
-    >
+    <SettingsPageLayout>
       <View style={styles.headerWrap}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
-          onBack={handleCancel}
+          onBack={onBack}
           title={I18n.t('settings.display')}
           subtitle={I18n.t('settings.display_subtitle')}
         />
@@ -279,20 +258,15 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
 
               <SelectField
                 label={I18n.t('settings.language')}
-                value={selectedLocale}
+                value={currentLocaleSelection}
                 options={languageOptions}
-                onChange={setSelectedLocale}
+                onChange={handleLanguageChange}
               />
               <SelectField
                 label={I18n.t('settings.currency')}
-                value={selectedCurrency}
+                value={currentCurrencySelection}
                 options={currencyOptions}
-                onChange={(value) => {
-                  setSelectedCurrency(value);
-                  if (value === '__custom__' && !customCurrency) {
-                    setCustomCurrency(settings.currencySymbol);
-                  }
-                }}
+                onChange={handleCurrencyChange}
               />
               {isCustomCurrencyMode ? (
                 <View>
@@ -300,23 +274,23 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                     label={I18n.t('settings.custom_currency')}
                     placeholder={I18n.t('settings.custom_currency_placeholder')}
                     value={customCurrency}
-                    onChangeText={setCustomCurrency}
+                    onChangeText={handleCustomCurrencyChange}
                   />
                 </View>
               ) : null}
               <SelectField
                 label={I18n.t('settings.theme')}
-                value={selectedTheme}
+                value={settings.themeMode}
                 options={themeOptions}
-                onChange={(value) => setSelectedTheme(value as ThemeMode)}
+                onChange={handleThemeChange}
               />
               <SelectField
                 label={I18n.t('settings.theme_color')}
-                value={selectedThemeColor}
+                value={settings.themeColor}
                 options={themeColorOptions}
                 optionsLayout="list"
                 listItemAlignment="center"
-                onChange={(value) => setSelectedThemeColor(value as ThemeColor)}
+                onChange={handleThemeColorChange}
               />
             </CardContent>
           </Card>

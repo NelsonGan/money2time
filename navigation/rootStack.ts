@@ -18,6 +18,7 @@ export type RootStackParamList = {
   SettingsAccounts: undefined;
   SettingsHourlyValue: undefined;
   SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
+  ProPaywall: { source?: string } | undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

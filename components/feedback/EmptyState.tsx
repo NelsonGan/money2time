@@ -9,7 +9,7 @@ import { Mascot } from './Mascot';
 
 interface EmptyStateProps {
   title: string;
-  message: string;
+  message?: string;
   mascotMood?: 'happy' | 'thinking' | 'sleepy' | 'curious' | 'proud';
   action?: { label: string; onPress: () => void };
   animateIn?: boolean;
@@ -18,7 +18,7 @@ interface EmptyStateProps {
 export function EmptyState({
   title,
   message,
-  mascotMood = 'thinking',
+  mascotMood: _mascotMood = 'thinking',
   action,
   animateIn = true,
 }: EmptyStateProps) {
@@ -48,9 +48,11 @@ export function EmptyState({
         <Text variant="heading" className="mt-5 text-center">
           {title}
         </Text>
-        <Text variant="body" tone="muted" className="text-center mt-2 max-w-[280px]">
-          {message}
-        </Text>
+        {message ? (
+          <Text variant="body" tone="muted" className="text-center mt-2 max-w-[280px]">
+            {message}
+          </Text>
+        ) : null}
         {action ? (
           <Button variant="default" size="sm" className="mt-6 shadow-glow" onPress={action.onPress}>
             <Text>{action.label}</Text>
