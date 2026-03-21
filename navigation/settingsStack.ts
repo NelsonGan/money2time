@@ -21,6 +21,7 @@ export type SettingsStackParamList = {
   Notifications: undefined;
   NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;
+  ProManagement: undefined;
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;

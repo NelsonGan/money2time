@@ -265,6 +265,7 @@ interface HomeScreenProps {
   onOpenAccount?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   onOpenSettingsScreen?: (screen: 'Accounts' | 'Recurring') => void;
+  onOpenExpenseTrend?: () => void;
   onTutorialTargetLayout?: (
     targetId: 'home.display_toggle' | 'home.converter',
     rect: TutorialTargetRect,
@@ -277,6 +278,7 @@ export function HomeScreen({
   onOpenAccount,
   onOpenTransaction,
   onOpenSettingsScreen,
+  onOpenExpenseTrend,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: HomeScreenProps = {}) {
@@ -629,7 +631,10 @@ export function HomeScreen({
         </View>
 
         {/* Expense bar chart card */}
-        <View className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between">
+        <Pressable
+          onPress={onOpenExpenseTrend}
+          className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
+        >
           <Text variant="caption" tone="muted">
             {I18n.t('home.recent_spendings')}
           </Text>
@@ -651,7 +656,7 @@ export function HomeScreen({
               );
             })}
           </View>
-        </View>
+        </Pressable>
       </Animated.View>
 
       <View ref={converterRef} onLayout={handleConverterLayout}>
