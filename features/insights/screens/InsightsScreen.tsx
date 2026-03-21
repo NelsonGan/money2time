@@ -29,6 +29,7 @@ import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
@@ -1490,225 +1491,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   );
 });
 
-const ExpenseTrendLineChart = React.memo(function ExpenseTrendLineChart({
-  monthRows,
-  chartWidth,
-  primaryColor,
-  averageValue,
-  referenceColor,
-  onSelectMonthKey,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  monthRows: ExpenseTrendMonthRow[];
-  chartWidth: number;
-  primaryColor: string;
-  averageValue: number;
-  referenceColor: string;
-  onSelectMonthKey: (monthKey: string) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      monthRows.map((row) => ({
-        value: row.totalExpense,
-        date: monthDateFromMonthKey(row.monthKey),
-      })),
-    [monthRows],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const graphYDomain = useMemo(
-    () => resolveGraphYDomain(graphPoints, graphRange),
-    [graphPoints, graphRange],
-  );
-  const averageReferenceTop = useMemo(
-    () => resolveGraphValueTop(averageValue, EXPENSE_TREND_CHART_HEIGHT, graphYDomain),
-    [averageValue, graphYDomain],
-  );
-  const monthKeyByTime = useMemo(
-    () =>
-      new Map(
-        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
-      ),
-    [graphPoints, monthRows],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const normalizedMonthKey =
-        monthKeyByTime.get(point.date.getTime()) ??
-        normalizeMonthKey(monthKeyFromDateLocal(point.date));
-      if (!normalizedMonthKey) return;
-      onSelectMonthKey(normalizedMonthKey);
-    },
-    [monthKeyByTime, onSelectMonthKey],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  return (
-    <View style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}
-          />
-          {averageReferenceTop !== null ? (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.absoluteOverlay,
-                buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT),
-              ]}
-            >
-              <View
-                style={[
-                  styles.chartReferenceLine,
-                  {
-                    top: averageReferenceTop,
-                    borderTopColor: referenceColor,
-                  },
-                ]}
-              />
-            </View>
-          ) : null}
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={EXPENSE_TREND_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
-
-const IncomeTrendLineChart = React.memo(function IncomeTrendLineChart({
-  monthRows,
-  chartWidth,
-  primaryColor,
-  averageValue,
-  referenceColor,
-  onSelectMonthKey,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  monthRows: IncomeTrendMonthRow[];
-  chartWidth: number;
-  primaryColor: string;
-  averageValue: number;
-  referenceColor: string;
-  onSelectMonthKey: (monthKey: string) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      monthRows.map((row) => ({
-        value: row.totalIncome,
-        date: monthDateFromMonthKey(row.monthKey),
-      })),
-    [monthRows],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const graphYDomain = useMemo(
-    () => resolveGraphYDomain(graphPoints, graphRange),
-    [graphPoints, graphRange],
-  );
-  const averageReferenceTop = useMemo(
-    () => resolveGraphValueTop(averageValue, EXPENSE_TREND_CHART_HEIGHT, graphYDomain),
-    [averageValue, graphYDomain],
-  );
-  const monthKeyByTime = useMemo(
-    () =>
-      new Map(
-        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
-      ),
-    [graphPoints, monthRows],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const normalizedMonthKey =
-        monthKeyByTime.get(point.date.getTime()) ??
-        normalizeMonthKey(monthKeyFromDateLocal(point.date));
-      if (!normalizedMonthKey) return;
-      onSelectMonthKey(normalizedMonthKey);
-    },
-    [monthKeyByTime, onSelectMonthKey],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  return (
-    <View style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT)}
-          />
-          {averageReferenceTop !== null ? (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.absoluteOverlay,
-                buildSizeStyle(chartWidth, EXPENSE_TREND_CHART_HEIGHT),
-              ]}
-            >
-              <View
-                style={[
-                  styles.chartReferenceLine,
-                  {
-                    top: averageReferenceTop,
-                    borderTopColor: referenceColor,
-                  },
-                ]}
-              />
-            </View>
-          ) : null}
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={EXPENSE_TREND_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
+// ExpenseTrendLineChart and IncomeTrendLineChart replaced by TrendBarChart
 
 const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   points,
@@ -4534,15 +4317,23 @@ export function InsightsScreen({
               lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
               formatTick={formatAxisAssetValue}
             />
-            <ExpenseTrendLineChart
-              monthRows={pageData.monthRows}
+            <TrendBarChart
+              data={pageData.monthRows.map((row) => ({
+                monthKey: row.monthKey,
+                value: row.totalExpense,
+                label: row.label,
+              }))}
               chartWidth={expenseGraphWidth}
+              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
               primaryColor={trendAccentColor}
               averageValue={pageData.averageMonthExpense}
               referenceColor={themeColors.error}
+              selectedMonthKey={selectedMonthRow.monthKey}
               onSelectMonthKey={selectExpenseTrendMonth}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
+              labelColor={themeColors.textMuted}
+              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
             />
           </View>
         </View>
@@ -4741,15 +4532,23 @@ export function InsightsScreen({
               lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
               formatTick={formatAxisAssetValue}
             />
-            <IncomeTrendLineChart
-              monthRows={pageData.monthRows}
+            <TrendBarChart
+              data={pageData.monthRows.map((row) => ({
+                monthKey: row.monthKey,
+                value: row.totalIncome,
+                label: row.label,
+              }))}
               chartWidth={incomeGraphWidth}
+              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
               primaryColor={trendAccentColor}
               averageValue={pageData.averageMonthIncome}
               referenceColor={themeColors.success}
+              selectedMonthKey={selectedMonthRow.monthKey}
               onSelectMonthKey={selectIncomeTrendMonth}
               onGestureStart={lockChartScrub}
               onGestureEnd={unlockChartScrub}
+              labelColor={themeColors.textMuted}
+              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
             />
           </View>
         </View>
