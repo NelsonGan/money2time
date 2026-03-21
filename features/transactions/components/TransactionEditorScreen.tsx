@@ -30,6 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Button, SegmentedToggle, Text } from '~/components/ui';
+import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
@@ -49,7 +50,7 @@ import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { getDistinctNotesSuggestions } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionType } from '~/types';
+import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -117,6 +118,7 @@ interface TransactionEditorInitialValues {
   toAccountId: string | null;
   categoryId: string | null;
   note: string;
+  sentiment: TransactionSentiment;
 }
 
 interface TransactionEditorScreenProps {
@@ -356,6 +358,9 @@ export function TransactionEditorScreen({
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
+  const [sentiment, setSentiment] = useState<TransactionSentiment>(
+    initialValues?.sentiment ?? 'neutral',
+  );
   const [amountExpression, setAmountExpression] = useState('');
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
@@ -761,6 +766,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          sentiment: 'neutral',
         };
         preparedSubmitPayload = submitPayload;
       } else if (isTransferType) {
@@ -788,6 +794,7 @@ export function TransactionEditorScreen({
           accountId: null,
           categoryId: null,
           note: resolvedNote,
+          sentiment: 'neutral',
         };
         preparedSubmitPayload = submitPayload;
       } else {
@@ -812,6 +819,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          sentiment,
         };
         preparedSubmitPayload = submitPayload;
         if (recurringOptions) {
@@ -1615,6 +1623,35 @@ export function TransactionEditorScreen({
                     </View>
                   </SummaryRow>
                 </View>
+
+                {/* Sentiment picker */}
+                {!isTransferType && !isBalanceAdjustmentType ? (
+                  <View className="flex-row items-center justify-center gap-5 py-2.5">
+                    {(['happy', 'neutral', 'sad'] as const).map((s) => {
+                      const isActive = sentiment === s;
+                      return (
+                        <Pressable
+                          key={s}
+                          onPress={() => {
+                            setSentiment(s);
+                            void triggerHaptic('selection');
+                          }}
+                          className={cn(
+                            'w-10 h-10 rounded-full items-center justify-center',
+                            isActive ? 'bg-primary/15' : 'bg-secondary/40',
+                          )}
+                          style={isActive ? { transform: [{ scale: 1.15 }] } : undefined}
+                        >
+                          <SentimentIcon
+                            sentiment={s}
+                            size={22}
+                            color={isActive ? themeColors.primary : themeColors.textMuted}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : null}
               </>
             ) : null}
           </View>
