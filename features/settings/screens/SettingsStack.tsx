@@ -28,6 +28,7 @@ interface SettingsStackProps {
   resetToRootToken?: number;
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
+  onOpenProPaywall: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -51,11 +52,13 @@ function getSettingsAnalyticsScreen(routeName: keyof SettingsStackParamList): st
 function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
+  onOpenProPaywall,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
+  onOpenProPaywall: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
     targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
@@ -74,6 +77,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenProPaywall={onOpenProPaywall}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -103,6 +107,7 @@ export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
   onOpenRecurringEditor,
+  onOpenProPaywall,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -164,6 +169,7 @@ export function SettingsStack({
             <SettingsHomeRoute
               {...props}
               scrollToTopToken={scrollToTopToken}
+              onOpenProPaywall={onOpenProPaywall}
               onStartTutorial={onStartTutorial}
               onTutorialTargetLayout={onTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}

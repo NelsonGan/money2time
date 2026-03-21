@@ -21,6 +21,7 @@ import { Mascot } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
+import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { HomeScreen } from '~/features/home/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
@@ -28,6 +29,7 @@ import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
   AccountsScreen,
   HourlyValueScreen,
+  ProPaywallScreen,
   RecurringScreen,
   SettingsStack,
   WageCalculatorFlowScreen,
@@ -58,6 +60,7 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
+import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
@@ -249,6 +252,12 @@ function MainShellScreen({
     });
   }, [navigation]);
 
+  useEffect(() => {
+    return subscribeOpenPaywallRequest((source) => {
+      navigation.navigate('ProPaywall', { source });
+    });
+  }, [navigation]);
+
   const jumpTransactionsToMonth = useCallback((monthKey: string) => {
     setTransactionsFocusMonthKey(monthKey);
     setTransactionsFocusMonthToken((prev) => prev + 1);
@@ -314,6 +323,13 @@ function MainShellScreen({
       } else {
         navigation.navigate('RecurringEditor');
       }
+    },
+    [navigation],
+  );
+
+  const openProPaywall = useCallback(
+    (source?: string) => {
+      navigation.navigate('ProPaywall', source ? { source } : undefined);
     },
     [navigation],
   );
@@ -531,6 +547,7 @@ function MainShellScreen({
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
+            onOpenProPaywall={() => openProPaywall('settings')}
             onScreenChange={setSettingsCurrentScreen}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
@@ -627,6 +644,10 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       }
     />
   );
+}
+
+function ProPaywallRouteScreen({ route, navigation }: RootStackRouteProps<'ProPaywall'>) {
+  return <ProPaywallScreen onClose={() => navigation.goBack()} source={route.params?.source} />;
 }
 
 function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
@@ -924,6 +945,7 @@ function AppContent() {
           />
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
+          <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />
         </RootStack.Navigator>
       </NavigationContainer>
 
@@ -961,9 +983,11 @@ export default function App() {
       <SafeAreaProvider>
         <AppErrorBoundary>
           <AppProvider>
-            <ThemeGate>
-              <AppContent />
-            </ThemeGate>
+            <ProProvider>
+              <ThemeGate>
+                <AppContent />
+              </ThemeGate>
+            </ProProvider>
           </AppProvider>
         </AppErrorBoundary>
       </SafeAreaProvider>

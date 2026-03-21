@@ -32,3 +32,22 @@ export interface RevenueCatActionResult {
   message: string | null;
   status: RevenueCatActionStatus;
 }
+
+export interface RevenueCatPackage {
+  identifier: string;
+  localizedPriceString: string;
+  packageType: string;
+}
+
+export interface RevenueCatOffering {
+  identifier: string;
+  packages: RevenueCatPackage[];
+}
+
+export function isRevenueCatCustomerStateActive(customerState: RevenueCatCustomerState | null) {
+  if (!customerState?.activeProductIdentifier) {
+    return false;
+  }
+
+  return !customerState.expirationDate || new Date(customerState.expirationDate) > new Date();
+}
