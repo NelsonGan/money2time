@@ -53,6 +53,7 @@ export const transactionsTable = sqliteTable('transactions', {
   recurrenceInterval: integer('recurrence_interval').notNull().default(1),
   recurrenceEndDate: text('recurrence_end_date'),
   recurrenceParentId: text('recurrence_parent_id'),
+  sentiment: text('sentiment').notNull().default('neutral'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

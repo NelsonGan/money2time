@@ -16,6 +16,7 @@ import type {
   ThemeColor,
   ThemeMode,
   Transaction,
+  TransactionSentiment,
   UserMode,
   UserSettings,
 } from '~/types';
@@ -50,6 +51,17 @@ function asTransactionType(value: string): Transaction['type'] {
       return value;
     default:
       return 'expense';
+  }
+}
+
+function asTransactionSentiment(value: string | null | undefined): TransactionSentiment {
+  switch (value) {
+    case 'happy':
+    case 'neutral':
+    case 'sad':
+      return value;
+    default:
+      return 'neutral';
   }
 }
 
@@ -168,6 +180,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
     recurrenceEndDate: row.recurrenceEndDate,
     recurrenceParentId: row.recurrenceParentId,
+    sentiment: asTransactionSentiment(row.sentiment),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

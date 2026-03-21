@@ -30,6 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Button, SegmentedToggle, Text } from '~/components/ui';
+import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
@@ -49,7 +50,7 @@ import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { getDistinctNotesSuggestions } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionType } from '~/types';
+import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -117,6 +118,7 @@ interface TransactionEditorInitialValues {
   toAccountId: string | null;
   categoryId: string | null;
   note: string;
+  sentiment: TransactionSentiment;
 }
 
 interface TransactionEditorScreenProps {
@@ -356,6 +358,9 @@ export function TransactionEditorScreen({
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
+  const [sentiment, setSentiment] = useState<TransactionSentiment>(
+    initialValues?.sentiment ?? 'neutral',
+  );
   const [amountExpression, setAmountExpression] = useState('');
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
@@ -761,6 +766,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          sentiment: 'neutral',
         };
         preparedSubmitPayload = submitPayload;
       } else if (isTransferType) {
@@ -788,6 +794,7 @@ export function TransactionEditorScreen({
           accountId: null,
           categoryId: null,
           note: resolvedNote,
+          sentiment: 'neutral',
         };
         preparedSubmitPayload = submitPayload;
       } else {
@@ -812,6 +819,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          sentiment,
         };
         preparedSubmitPayload = submitPayload;
         if (recurringOptions) {
@@ -873,7 +881,7 @@ export function TransactionEditorScreen({
       : I18n.t('transactions.editor.title_edit'));
   const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
-  const summaryFlex = windowHeight < 650 ? 0.32 : windowHeight < 750 ? 0.38 : 0.44;
+  const summaryFlex = windowHeight < 650 ? 0.38 : windowHeight < 750 ? 0.42 : 0.46;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
@@ -1615,6 +1623,30 @@ export function TransactionEditorScreen({
                     </View>
                   </SummaryRow>
                 </View>
+
+                {/* Sentiment picker */}
+                {type === 'expense' ? (
+                  <View className="items-center py-2.5">
+                    <View className="flex-row items-center gap-5">
+                    {(['sad', 'neutral', 'happy'] as const).map((s) => {
+                      const isActive = sentiment === s;
+                      return (
+                        <Pressable
+                          key={s}
+                          onPress={() => {
+                            setSentiment(s);
+                            void triggerHaptic('selection');
+                          }}
+                          className="items-center justify-center"
+                          style={{ opacity: isActive ? 1 : 0.3 }}
+                        >
+                          <SentimentIcon sentiment={s} size={28} />
+                        </Pressable>
+                      );
+                    })}
+                    </View>
+                  </View>
+                ) : null}
               </>
             ) : null}
           </View>

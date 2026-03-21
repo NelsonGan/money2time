@@ -42,6 +42,7 @@ export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjus
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 export type CategoryType = 'expense' | 'income';
+export type TransactionSentiment = 'happy' | 'neutral' | 'sad';
 
 export interface WageConfig {
   wageType: WageType;
@@ -135,6 +136,7 @@ export interface Transaction {
   recurrenceInterval: number;
   recurrenceEndDate: string | null;
   recurrenceParentId: string | null;
+  sentiment: TransactionSentiment;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
