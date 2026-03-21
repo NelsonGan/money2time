@@ -14,7 +14,7 @@ import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository'
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
-import type { WageConfig } from '~/types';
+import type { TransactionSentiment, WageConfig } from '~/types';
 
 export type PreviewSeedProfile = 'american' | 'chinese';
 
@@ -866,8 +866,6 @@ function createAccount(profile: PreviewProfile, key: AccountKey) {
     name: account.name,
     type: meta.type,
     currency: profile.currencySymbol,
-    icon: meta.icon,
-    color: meta.color,
     startingBalance: account.startingBalance,
     includeInTotals: true,
     accountGroup: profile.accountGroups[meta.groupKey],
@@ -981,6 +979,21 @@ function seedRecurringRules(profile: PreviewProfile, accounts: AccountRefs, cate
   });
 }
 
+function randomSentiment(type: string, random: RandomFn): TransactionSentiment {
+  const r = random();
+  if (type === 'income') {
+    if (r < 0.55) return 'happy';
+    if (r < 0.85) return 'neutral';
+    return 'sad';
+  }
+  if (type === 'expense') {
+    if (r < 0.25) return 'happy';
+    if (r < 0.60) return 'neutral';
+    return 'sad';
+  }
+  return 'neutral';
+}
+
 function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, categories: CategoryRefs) {
   const random = createSeededRandom(profile.seed);
   const previewMonths = getPreviewMonths();
@@ -992,7 +1005,10 @@ function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, catego
 
   const add = (input: Parameters<typeof transactionsRepository.create>[0], multiplier = 1) => {
     for (let index = 0; index < multiplier; index += 1) {
-      transactionsRepository.create(input);
+      transactionsRepository.create({
+        ...input,
+        sentiment: input.sentiment ?? randomSentiment(input.type, random),
+      });
       transactionCount += 1;
     }
   };
