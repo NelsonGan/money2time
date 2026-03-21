@@ -101,6 +101,7 @@ export function EditTransactionScreen({
         toAccountId: transaction.toAccountId,
         categoryId: transaction.categoryId,
         note: transaction.note ?? '',
+        sentiment: transaction.sentiment ?? 'neutral',
       }}
     />
   );
