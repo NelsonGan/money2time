@@ -85,6 +85,8 @@ const zh = {
       high_2: '这个月开销不小，检查一下会有帮助。',
       no_rate: '设置你的时薪，以时间视角看支出。',
     },
+    weekly_mood: '每周心情',
+    recent_spendings: '近期消费',
     converter: {
       title: '买前算一算',
       description: '值得花这些时间吗？',
@@ -318,6 +320,7 @@ const zh = {
       never: '永不',
       on_date: '指定日期',
       end_date: '结束日期',
+      sentiment_label: '你感觉如何？',
       status: '状态',
       active: '进行中',
       paused: '已暂停',

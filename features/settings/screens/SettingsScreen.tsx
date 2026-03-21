@@ -261,15 +261,34 @@ export function SettingsScreen({
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
           <Pressable
-            onPress={onOpenProPaywall}
+            onPress={isPro ? undefined : onOpenProPaywall}
             className="mt-6 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
             style={!isPro ? styles.proButtonHighlight : undefined}
           >
             <Crown size={20} color={themeColors.primary} />
             <View className="flex-1">
-              <Text variant="subheading" className="text-sm">
-                {isPro ? I18n.t('pro.active') : I18n.t('pro.upgrade')}
-              </Text>
+              {isPro ? (
+                <View className="flex-row items-center gap-1.5">
+                  <Text variant="subheading" className="text-sm">
+                    Money2Time
+                  </Text>
+                  <View
+                    className="rounded-md px-1.5 py-0.5"
+                    style={{ backgroundColor: themeColors.primary }}
+                  >
+                    <Text
+                      className="text-[10px] font-extrabold tracking-wide"
+                      style={{ color: '#fff' }}
+                    >
+                      PRO
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text variant="subheading" className="text-sm">
+                  {I18n.t('pro.upgrade')}
+                </Text>
+              )}
               <Text variant="friendly" tone="muted" className="text-xs">
                 {isPro ? I18n.t('pro.active_subtitle') : I18n.t('pro.upgrade_subtitle')}
               </Text>

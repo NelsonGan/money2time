@@ -1625,9 +1625,10 @@ export function TransactionEditorScreen({
                 </View>
 
                 {/* Sentiment picker */}
-                {!isTransferType && !isBalanceAdjustmentType ? (
-                  <View className="flex-row items-center justify-center gap-5 py-2.5">
-                    {(['happy', 'neutral', 'sad'] as const).map((s) => {
+                {type === 'expense' ? (
+                  <View className="items-center py-2.5">
+                    <View className="flex-row items-center gap-5">
+                    {(['sad', 'neutral', 'happy'] as const).map((s) => {
                       const isActive = sentiment === s;
                       return (
                         <Pressable
@@ -1636,20 +1637,14 @@ export function TransactionEditorScreen({
                             setSentiment(s);
                             void triggerHaptic('selection');
                           }}
-                          className={cn(
-                            'w-10 h-10 rounded-full items-center justify-center',
-                            isActive ? 'bg-primary/15' : 'bg-secondary/40',
-                          )}
-                          style={isActive ? { transform: [{ scale: 1.15 }] } : undefined}
+                          className="items-center justify-center"
+                          style={{ opacity: isActive ? 1 : 0.3 }}
                         >
-                          <SentimentIcon
-                            sentiment={s}
-                            size={22}
-                            color={isActive ? themeColors.primary : themeColors.textMuted}
-                          />
+                          <SentimentIcon sentiment={s} size={28} />
                         </Pressable>
                       );
                     })}
+                    </View>
                   </View>
                 ) : null}
               </>

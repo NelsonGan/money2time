@@ -36,7 +36,15 @@ import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { amountToHoursByRate, formatAmount, formatHours } from '~/utils/formatters';
+import { SentimentIcon } from '~/components/ui/SentimentIcons';
+import {
+  amountToHoursByRate,
+  dayKeyFromDateLocal,
+  dayKeyFromIsoLocal,
+  formatAmount,
+  formatHours,
+  toRange,
+} from '~/utils/formatters';
 import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
 
 function formatCadence(pattern: string, interval: number): string {
@@ -280,8 +288,15 @@ export function HomeScreen({
   const displayToggleRef = useRef<View | null>(null);
   const converterRef = useRef<View | null>(null);
   const { width: screenWidth } = useWindowDimensions();
-  const { recurringRules, categories, settings, currentMonthWage, isSimpleMode, simpleWalletId } =
-    useApp();
+  const {
+    recurringRules,
+    categories,
+    settings,
+    currentMonthWage,
+    isSimpleMode,
+    simpleWalletId,
+    queryTransactions,
+  } = useApp();
 
   // Power mode: Accounts(0), Home(1), Recurring(2) — default center (1)
   // Simple mode: Home(0), Recurring(1) — default (0)
@@ -389,6 +404,49 @@ export function HomeScreen({
   );
   const estimatorWorkdays = useMemo(() => estimatorHours / 8, [estimatorHours]);
   const estimatorWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
+
+  // Past 7 days data for mini cards
+  const past7DaysData = useMemo(() => {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+    const txns = queryTransactions({
+      dateRange: toRange(sevenDaysAgo, now),
+      accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+    });
+
+    let happy = 0;
+    let neutral = 0;
+    let sad = 0;
+    const dailyExpense = new Map<string, number>();
+
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(sevenDaysAgo);
+      date.setDate(date.getDate() + d);
+      dailyExpense.set(dayKeyFromDateLocal(date), 0);
+    }
+
+    for (const tx of txns) {
+      if (tx.type === 'expense') {
+        if (tx.sentiment === 'happy') happy++;
+        else if (tx.sentiment === 'sad') sad++;
+        else neutral++;
+      }
+      if (tx.type === 'expense') {
+        const key = dayKeyFromIsoLocal(tx.date);
+        dailyExpense.set(key, (dailyExpense.get(key) ?? 0) + tx.amount);
+      }
+    }
+
+    const expenseBars = Array.from(dailyExpense.entries()).map(([key, value]) => ({
+      key,
+      value,
+    }));
+
+    return { happy, neutral, sad, expenseBars };
+  }, [isSimpleMode, queryTransactions, simpleWalletId]);
+
   const recurringRows = useMemo<RecurringDisplayRow[]>(
     () =>
       recurringInsights.map((rule) => {
@@ -538,28 +596,63 @@ export function HomeScreen({
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
     >
-      {/* Hero greeting with decorative background */}
-      <View className="relative overflow-hidden">
-        {/* Decorative gradient blobs */}
-        <View
-          className="absolute -top-16 -right-12 h-40 w-40 rounded-full opacity-[0.06]"
-          style={{ backgroundColor: themeColors.primary }}
-        />
-        <View
-          className="absolute top-8 -left-8 h-24 w-24 rounded-full opacity-[0.04]"
-          style={{ backgroundColor: themeColors.accent }}
-        />
-
-        <Animated.View
-          entering={FadeInDown.delay(50).duration(500).springify().damping(18)}
-          style={styles.greetingSection}
-        >
-          <Text variant="label" tone="muted" className="mb-1">
-            {isTimeMode ? I18n.t('home.day_mode.time') : I18n.t('home.day_mode.money')}
+      {/* Mini insight cards */}
+      <Animated.View
+        entering={FadeIn.delay(100).duration(400)}
+        className="flex-row gap-3 mx-5 mt-3"
+      >
+        {/* Sentiment card */}
+        <View className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between">
+          <Text variant="caption" tone="muted">
+            {I18n.t('home.weekly_mood')}
           </Text>
-          <Text variant="title">{greeting}</Text>
-        </Animated.View>
-      </View>
+          <View className="flex-row items-center justify-between mt-2">
+            <View className="flex-row items-center gap-1">
+              <SentimentIcon sentiment="sad" size={16} />
+              <Text variant="caption" className="text-foreground">
+                {past7DaysData.sad}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-1">
+              <SentimentIcon sentiment="neutral" size={16} />
+              <Text variant="caption" className="text-foreground">
+                {past7DaysData.neutral}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-1">
+              <SentimentIcon sentiment="happy" size={16} />
+              <Text variant="caption" className="text-foreground">
+                {past7DaysData.happy}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Expense bar chart card */}
+        <View className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between">
+          <Text variant="caption" tone="muted">
+            {I18n.t('home.recent_spendings')}
+          </Text>
+          <View className="flex-row items-end gap-1.5 mt-2" style={{ height: 24 }}>
+            {past7DaysData.expenseBars.map((bar) => {
+              const maxVal = Math.max(...past7DaysData.expenseBars.map((b) => b.value), 1);
+              const barHeight = bar.value > 0 ? Math.max(4, (bar.value / maxVal) * 22) : 3;
+              return (
+                <View
+                  key={bar.key}
+                  className="flex-1"
+                  style={{
+                    height: barHeight,
+                    borderRadius: 2,
+                    backgroundColor: bar.value > 0 ? themeColors.primary : `${themeColors.border}40`,
+                    opacity: bar.value > 0 ? 0.6 : 0.3,
+                  }}
+                />
+              );
+            })}
+          </View>
+        </View>
+      </Animated.View>
 
       <View ref={converterRef} onLayout={handleConverterLayout}>
         <Animated.View entering={FadeIn.delay(150).duration(500)}>

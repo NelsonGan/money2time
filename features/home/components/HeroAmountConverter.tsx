@@ -141,7 +141,7 @@ const NumKey = React.memo(function NumKey({
           unstable_pressDelay={0}
           android_disableSound
           android_ripple={{ color: 'rgba(34, 138, 111, 0.15)', borderless: false }}
-          className="relative h-[52px] items-center justify-center bg-card/80 overflow-hidden rounded-xl mx-0.5 my-0.5"
+          className="relative h-[44px] items-center justify-center bg-card/80 overflow-hidden rounded-xl mx-0.5 my-0.5"
         >
           {children ?? (
             <Text
@@ -170,8 +170,8 @@ const NUM_ROWS = [
 ] as const;
 const INPUT_PROGRESS_SPRING = { damping: 18, stiffness: 180 } as const;
 const NUMPAD_ROW_STYLE = { flexDirection: 'row', gap: 0 } as const;
-const HERO_MAX_FONT_SIZE = 48;
-const HERO_MIN_FONT_SIZE = 26;
+const HERO_MAX_FONT_SIZE = 40;
+const HERO_MIN_FONT_SIZE = 22;
 const HERO_BASE_CHAR_COUNT = 7;
 const HERO_FONT_SHRINK_PER_CHAR = 2.8;
 const HERO_LINE_HEIGHT_RATIO = 1.14;
@@ -297,8 +297,8 @@ export function HeroAmountConverter({
   }, [onChangeAmount]);
 
   const cardStyle = useAnimatedStyle(() => ({
-    shadowOpacity: 0.06 + inputProgress.value * 0.12,
-    shadowRadius: 12 + inputProgress.value * 16,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
   }));
 
   const handleKey = useCallback(
@@ -354,7 +354,7 @@ export function HeroAmountConverter({
 
   return (
     <Animated.View style={cardStyle} className="mx-5 mt-3">
-      <View className="relative overflow-hidden rounded-[32px] border border-border/25 bg-card shadow-soft-lg">
+      <View className="relative overflow-hidden rounded-[24px] border border-border/25 bg-card shadow-soft-lg">
         {/* Decorative background shapes */}
         <View
           className="absolute -top-14 -right-14 h-36 w-36 rounded-full"
@@ -366,9 +366,9 @@ export function HeroAmountConverter({
         />
 
         {/* Content area */}
-        <View className="px-5 pt-5 pb-4">
+        <View className="px-4 pt-3 pb-2">
           {/* Header */}
-          <View className="mb-4 flex-row items-start justify-between gap-3">
+          <View className="mb-2 flex-row items-start justify-between gap-3">
             <View className="min-w-0 flex-1">
               <Text variant="label" tone="muted">
                 {I18n.t('home.converter.title')}
@@ -390,8 +390,8 @@ export function HeroAmountConverter({
             </Button>
           </View>
 
-          {/* Amount display — dramatic large numbers */}
-          <View className="min-h-[60px]">
+          {/* Amount display */}
+          <View className="min-h-[48px]">
             <View className="min-w-0 flex-row items-end overflow-hidden">
               <Text style={currencyTextStyle} className="shrink-0 text-muted-foreground">
                 {currencySymbol}
@@ -415,7 +415,7 @@ export function HeroAmountConverter({
 
           {/* Hours result — glowing accent panel */}
           <View
-            className="mt-4 mb-2 rounded-[22px] px-5 py-4 overflow-hidden"
+            className="mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden"
             style={{ backgroundColor: `${themeColors.primary}10` }}
           >
             {/* Inner decorative accent */}
