@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
 import { Zap } from 'lucide-react-native';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   Card,
@@ -24,7 +24,8 @@ interface AccountSettingsScreenProps {
 type UserModeValue = 'simple' | 'power';
 
 export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
-  const { isSimpleMode, switchToSimpleMode, switchToPowerMode } = useApp();
+  const { isSimpleMode, settings, switchToSimpleMode, switchToPowerMode, updateSettings } =
+    useApp();
   const themeColors = useThemeColors();
   const currentMode: UserModeValue = isSimpleMode ? 'simple' : 'power';
 
@@ -60,6 +61,14 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       );
     },
     [currentMode, switchToPowerMode, switchToSimpleMode],
+  );
+
+  const handleHapticsToggle = useCallback(
+    (value: boolean) => {
+      if (value === settings.hapticsEnabled) return;
+      updateSettings({ hapticsEnabled: value });
+    },
+    [settings.hapticsEnabled, updateSettings],
   );
 
   return (
@@ -166,6 +175,30 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
             </Pressable>
           </View>
         </SettingsSection>
+
+        <SettingsSection className="mt-6" title={I18n.t('settings.haptics')} showAccent={false}>
+          <Card>
+            <CardContent className="py-4">
+              <View style={styles.preferenceRow}>
+                <View className="flex-1 pr-4">
+                  <Text variant="bodyStrong">{I18n.t('settings.haptics')}</Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('settings.haptics_subtitle')}
+                  </Text>
+                </View>
+                <Switch
+                  value={settings.hapticsEnabled}
+                  onValueChange={handleHapticsToggle}
+                  trackColor={{
+                    false: `${themeColors.border}80`,
+                    true: themeColors.primary,
+                  }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+            </CardContent>
+          </Card>
+        </SettingsSection>
       </ScrollView>
     </SettingsPageLayout>
   );
@@ -178,5 +211,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  preferenceRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    minHeight: 52,
   },
 });

@@ -39,6 +39,7 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
+import { setHapticsEnabled } from '~/services/haptics';
 import {
   importMoneyManagerBackupFromUri,
   type MMImportSummary,
@@ -130,6 +131,7 @@ interface AppContextValue extends AppState {
         | 'currencyCode'
         | 'currencySymbol'
         | 'displayMode'
+        | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
         | 'onboardingCompleted'
@@ -378,10 +380,16 @@ function applyTransactionFilters(
   const dateRangeEnd = dateRange?.end;
   const minAmount = filters.minAmount;
   const maxAmount = filters.maxAmount;
+  const excludedAccountIdSet = new Set(filters.excludedAccountIds);
+  const excludedIncomeCategoryIdSet = new Set(filters.excludedIncomeCategoryIds);
+  const excludedExpenseCategoryIdSet = new Set(filters.excludedExpenseCategoryIds);
   const hasDateRange = filters.dateRange !== null;
   const hasAccountFilter = filters.accountId !== null;
+  const hasExcludedAccountFilter = excludedAccountIdSet.size > 0;
   const hasIncomeCategoryFilter = filters.incomeCategoryId !== null;
   const hasExpenseCategoryFilter = filters.expenseCategoryId !== null;
+  const hasExcludedIncomeCategoryFilter = excludedIncomeCategoryIdSet.size > 0;
+  const hasExcludedExpenseCategoryFilter = excludedExpenseCategoryIdSet.size > 0;
   const hasCategoryFilter = filters.categoryId !== null;
   const hasMinAmount = filters.minAmount !== null;
   const hasMaxAmount = filters.maxAmount !== null;
@@ -392,8 +400,11 @@ function applyTransactionFilters(
   const hasAnyFilter =
     hasDateRange ||
     hasAccountFilter ||
+    hasExcludedAccountFilter ||
     hasIncomeCategoryFilter ||
     hasExpenseCategoryFilter ||
+    hasExcludedIncomeCategoryFilter ||
+    hasExcludedExpenseCategoryFilter ||
     hasCategoryFilter ||
     hasMinAmount ||
     hasMaxAmount ||
@@ -407,6 +418,17 @@ function applyTransactionFilters(
   }
 
   const filtered: TransactionWithRelations[] = [];
+
+  const matchesExcludedCategory = (
+    transaction: TransactionWithRelations,
+    excludedCategoryIdSet: ReadonlySet<string>,
+  ) => {
+    if (!transaction.categoryId) return false;
+    return (
+      excludedCategoryIdSet.has(transaction.categoryId) ||
+      (!!transaction.categoryParentId && excludedCategoryIdSet.has(transaction.categoryParentId))
+    );
+  };
 
   for (let index = 0; index < transactions.length; index += 1) {
     const transaction = transactions[index];
@@ -443,11 +465,35 @@ function applyTransactionFilters(
       if (!matchesAccount) continue;
     }
 
+    if (hasExcludedAccountFilter) {
+      if (
+        (transaction.accountId && excludedAccountIdSet.has(transaction.accountId)) ||
+        (transaction.fromAccountId && excludedAccountIdSet.has(transaction.fromAccountId)) ||
+        (transaction.toAccountId && excludedAccountIdSet.has(transaction.toAccountId))
+      ) {
+        continue;
+      }
+    }
+
     if (transaction.type === 'income' && hasIncomeCategoryFilter) {
       if (transaction.categoryId !== filters.incomeCategoryId) continue;
     }
     if (transaction.type === 'expense' && hasExpenseCategoryFilter) {
       if (transaction.categoryId !== filters.expenseCategoryId) continue;
+    }
+    if (
+      transaction.type === 'income' &&
+      hasExcludedIncomeCategoryFilter &&
+      matchesExcludedCategory(transaction, excludedIncomeCategoryIdSet)
+    ) {
+      continue;
+    }
+    if (
+      transaction.type === 'expense' &&
+      hasExcludedExpenseCategoryFilter &&
+      matchesExcludedCategory(transaction, excludedExpenseCategoryIdSet)
+    ) {
+      continue;
     }
     if (
       !hasIncomeCategoryFilter &&
@@ -1035,12 +1081,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         Pick<
           UserSettings,
           | 'locale'
-          | 'currencyCode'
-          | 'currencySymbol'
-          | 'displayMode'
-          | 'themeMode'
-          | 'themeColor'
-          | 'onboardingCompleted'
+        | 'currencyCode'
+        | 'currencySymbol'
+        | 'displayMode'
+        | 'hapticsEnabled'
+        | 'themeMode'
+        | 'themeColor'
+        | 'onboardingCompleted'
           | 'userMode'
         >
       >,
@@ -1068,6 +1115,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!settings?.locale) return;
     setAppLocale(settings.locale);
   }, [settings?.locale]);
+
+  useEffect(() => {
+    setHapticsEnabled(settings?.hapticsEnabled ?? true);
+  }, [settings?.hapticsEnabled]);
 
   useEffect(() => {
     if (!settings?.appUserId) return;

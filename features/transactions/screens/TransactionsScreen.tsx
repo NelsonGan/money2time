@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -71,7 +70,7 @@ const FILTER_SCROLL_CONTENT_STYLE = {
 } as const;
 const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
 const FILTER_SELECTION_PANEL_CLASS =
-  'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
+  'rounded-[18px] border border-border/30 bg-card/35 overflow-hidden';
 const SELECTION_PANEL_HEIGHT = 236;
 const BULK_DATE_PANEL_HEIGHT = 360;
 const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
@@ -189,6 +188,42 @@ function buildCategoryPanelDataByType(categories: Category[]): {
 
 function isSortByValue(value: string): value is SortByValue {
   return SORT_OPTION_VALUES.includes(value as SortByValue);
+}
+
+function toggleStringId(previous: string[], targetId: string): string[] {
+  return previous.includes(targetId)
+    ? previous.filter((id) => id !== targetId)
+    : [...previous, targetId];
+}
+
+function FilterPill({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('selection');
+        onPress();
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: active }}
+      className={cn(
+        'rounded-full border px-3.5 py-2 flex-row items-center gap-1 active:opacity-85',
+        active ? 'border-primary/50 bg-primary/15' : 'border-border/40 bg-card',
+      )}
+    >
+      <Text variant="label" className={cn(active ? 'text-primary' : 'text-muted-foreground')}>
+        {label}
+      </Text>
+    </Pressable>
+  );
 }
 
 interface TransactionsScreenProps {
@@ -421,27 +456,27 @@ export function TransactionsScreen({
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (transactionFilters.type !== 'all') count += 1;
-    if (transactionFilters.accountId) count += 1;
+    count += transactionFilters.excludedAccountIds.length;
     if (
       (transactionFilters.type === 'all' || transactionFilters.type === 'income') &&
-      transactionFilters.incomeCategoryId
+      transactionFilters.excludedIncomeCategoryIds.length > 0
     ) {
-      count += 1;
+      count += transactionFilters.excludedIncomeCategoryIds.length;
     }
     if (
       (transactionFilters.type === 'all' || transactionFilters.type === 'expense') &&
-      transactionFilters.expenseCategoryId
+      transactionFilters.excludedExpenseCategoryIds.length > 0
     ) {
-      count += 1;
+      count += transactionFilters.excludedExpenseCategoryIds.length;
     }
     if (transactionFilters.minAmount !== null) count += 1;
     if (transactionFilters.maxAmount !== null) count += 1;
     if (transactionFilters.sortBy !== 'date_desc') count += 1;
     return count;
   }, [
-    transactionFilters.accountId,
-    transactionFilters.expenseCategoryId,
-    transactionFilters.incomeCategoryId,
+    transactionFilters.excludedAccountIds.length,
+    transactionFilters.excludedExpenseCategoryIds.length,
+    transactionFilters.excludedIncomeCategoryIds.length,
     transactionFilters.maxAmount,
     transactionFilters.minAmount,
     transactionFilters.sortBy,
@@ -450,40 +485,6 @@ export function TransactionsScreen({
   const { income: incomeCategoryPanelData, expense: expenseCategoryPanelData } = useMemo(
     () => buildCategoryPanelDataByType(categories),
     [categories],
-  );
-  const accountPreviewById = useMemo(
-    () =>
-      new Map(
-        accounts.map(
-          (account) =>
-            [
-              account.id,
-              { icon: account.type === 'credit' ? '💳' : '🏦', label: account.name },
-            ] as const,
-        ),
-      ),
-    [accounts],
-  );
-  const selectedAccountPreview = useMemo(
-    () =>
-      transactionFilters.accountId
-        ? (accountPreviewById.get(transactionFilters.accountId) ?? null)
-        : null,
-    [accountPreviewById, transactionFilters.accountId],
-  );
-  const selectedIncomeCategoryPreview = useMemo(
-    () =>
-      transactionFilters.incomeCategoryId
-        ? (incomeCategoryPanelData.previewById.get(transactionFilters.incomeCategoryId) ?? null)
-        : null,
-    [incomeCategoryPanelData.previewById, transactionFilters.incomeCategoryId],
-  );
-  const selectedExpenseCategoryPreview = useMemo(
-    () =>
-      transactionFilters.expenseCategoryId
-        ? (expenseCategoryPanelData.previewById.get(transactionFilters.expenseCategoryId) ?? null)
-        : null,
-    [expenseCategoryPanelData.previewById, transactionFilters.expenseCategoryId],
   );
   const shouldShowIncomeCategoryFilter =
     transactionFilters.type === 'all' || transactionFilters.type === 'income';
@@ -643,35 +644,57 @@ export function TransactionsScreen({
     void triggerHaptic('selection');
     setShowFilters(false);
   }, []);
-  const handleSelectAccountFilter = useCallback(
+  const handleToggleExcludedAccountFilter = useCallback(
     (accountId: string) => {
-      setTransactionFilters({ accountId });
+      setTransactionFilters({
+        accountId: null,
+        excludedAccountIds: toggleStringId(transactionFilters.excludedAccountIds, accountId),
+      });
     },
-    [setTransactionFilters],
+    [setTransactionFilters, transactionFilters.excludedAccountIds],
   );
-  const handleSelectIncomeCategoryFilter = useCallback(
+  const handleToggleExcludedIncomeCategoryFilter = useCallback(
     (categoryId: string) => {
-      setTransactionFilters({ incomeCategoryId: categoryId, categoryId: null });
+      setTransactionFilters({
+        incomeCategoryId: null,
+        excludedIncomeCategoryIds: toggleStringId(
+          transactionFilters.excludedIncomeCategoryIds,
+          categoryId,
+        ),
+        categoryId: null,
+      });
     },
-    [setTransactionFilters],
+    [setTransactionFilters, transactionFilters.excludedIncomeCategoryIds],
   );
-  const handleSelectExpenseCategoryFilter = useCallback(
+  const handleToggleExcludedExpenseCategoryFilter = useCallback(
     (categoryId: string) => {
-      setTransactionFilters({ expenseCategoryId: categoryId, categoryId: null });
+      setTransactionFilters({
+        expenseCategoryId: null,
+        excludedExpenseCategoryIds: toggleStringId(
+          transactionFilters.excludedExpenseCategoryIds,
+          categoryId,
+        ),
+        categoryId: null,
+      });
     },
-    [setTransactionFilters],
+    [setTransactionFilters, transactionFilters.excludedExpenseCategoryIds],
   );
-  const handleResetAccountFilter = useCallback(() => {
-    void triggerHaptic('selection');
-    setTransactionFilters({ accountId: null });
+  const handleClearExcludedAccountFilter = useCallback(() => {
+    setTransactionFilters({ accountId: null, excludedAccountIds: [] });
   }, [setTransactionFilters]);
-  const handleResetIncomeCategoryFilter = useCallback(() => {
-    void triggerHaptic('selection');
-    setTransactionFilters({ incomeCategoryId: null, categoryId: null });
+  const handleClearExcludedIncomeCategoryFilter = useCallback(() => {
+    setTransactionFilters({
+      incomeCategoryId: null,
+      excludedIncomeCategoryIds: [],
+      categoryId: null,
+    });
   }, [setTransactionFilters]);
-  const handleResetExpenseCategoryFilter = useCallback(() => {
-    void triggerHaptic('selection');
-    setTransactionFilters({ expenseCategoryId: null, categoryId: null });
+  const handleClearExcludedExpenseCategoryFilter = useCallback(() => {
+    setTransactionFilters({
+      expenseCategoryId: null,
+      excludedExpenseCategoryIds: [],
+      categoryId: null,
+    });
   }, [setTransactionFilters]);
   const handleSearchChange = useCallback(
     (text: string) => {
@@ -1031,36 +1054,21 @@ export function TransactionsScreen({
 
             <View className="gap-2.5">
               <View className="flex-row items-center justify-between gap-3">
-                <View className="flex-1 gap-1.5">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.filters.account')}
-                  </Text>
-                  {selectedAccountPreview ? (
-                    <View className="self-start flex-row items-center gap-1.5 rounded-full border border-border/35 bg-secondary/65 px-3 py-1.5">
-                      <Text className="text-[12px]">{selectedAccountPreview.icon}</Text>
-                      <Text variant="label" className="text-foreground">
-                        {selectedAccountPreview.label}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-                <TypeFilterPill
-                  label={
-                    selectedAccountPreview
-                      ? I18n.t('common.clear')
-                      : I18n.t('transactions.filters.all_accounts')
-                  }
-                  value="all"
-                  selected={transactionFilters.accountId === null}
-                  onSelect={handleResetAccountFilter}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_accounts')}
+                </Text>
+                <FilterPill
+                  label={I18n.t('common.clear')}
+                  active={transactionFilters.excludedAccountIds.length === 0}
+                  onPress={handleClearExcludedAccountFilter}
                 />
               </View>
               <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
                 <AccountPanel
                   accounts={accounts}
                   accountGroups={accountGroups}
-                  selectedId={transactionFilters.accountId}
-                  onSelect={handleSelectAccountFilter}
+                  selectedIds={transactionFilters.excludedAccountIds}
+                  onToggleSelect={handleToggleExcludedAccountFilter}
                 />
               </View>
             </View>
@@ -1068,28 +1076,13 @@ export function TransactionsScreen({
             {shouldShowIncomeCategoryFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-1 gap-1.5">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.filters.income_category')}
-                    </Text>
-                    {selectedIncomeCategoryPreview ? (
-                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1.5">
-                        <Text className="text-[12px]">{selectedIncomeCategoryPreview.icon}</Text>
-                        <Text variant="label" className="text-success">
-                          {selectedIncomeCategoryPreview.label}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  <TypeFilterPill
-                    label={
-                      selectedIncomeCategoryPreview
-                        ? I18n.t('common.clear')
-                        : I18n.t('transactions.filters.all_income_categories')
-                    }
-                    value="all"
-                    selected={transactionFilters.incomeCategoryId === null}
-                    onSelect={handleResetIncomeCategoryFilter}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_income_categories')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('common.clear')}
+                    active={transactionFilters.excludedIncomeCategoryIds.length === 0}
+                    onPress={handleClearExcludedIncomeCategoryFilter}
                   />
                 </View>
                 <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
@@ -1097,8 +1090,8 @@ export function TransactionsScreen({
                     parents={incomeCategoryPanelData.parents}
                     childByParent={incomeCategoryPanelData.childrenByParent}
                     allowParentSelection
-                    selectedCategoryId={transactionFilters.incomeCategoryId}
-                    onSelect={handleSelectIncomeCategoryFilter}
+                    selectedCategoryIds={transactionFilters.excludedIncomeCategoryIds}
+                    onToggleSelect={handleToggleExcludedIncomeCategoryFilter}
                   />
                 </View>
               </View>
@@ -1107,28 +1100,13 @@ export function TransactionsScreen({
             {shouldShowExpenseCategoryFilter ? (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-1 gap-1.5">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.filters.expense_category')}
-                    </Text>
-                    {selectedExpenseCategoryPreview ? (
-                      <View className="self-start flex-row items-center gap-1.5 rounded-full border border-destructive/25 bg-destructive/10 px-3 py-1.5">
-                        <Text className="text-[12px]">{selectedExpenseCategoryPreview.icon}</Text>
-                        <Text variant="label" className="text-destructive">
-                          {selectedExpenseCategoryPreview.label}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  <TypeFilterPill
-                    label={
-                      selectedExpenseCategoryPreview
-                        ? I18n.t('common.clear')
-                        : I18n.t('transactions.filters.all_expense_categories')
-                    }
-                    value="all"
-                    selected={transactionFilters.expenseCategoryId === null}
-                    onSelect={handleResetExpenseCategoryFilter}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_expense_categories')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('common.clear')}
+                    active={transactionFilters.excludedExpenseCategoryIds.length === 0}
+                    onPress={handleClearExcludedExpenseCategoryFilter}
                   />
                 </View>
                 <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
@@ -1136,8 +1114,8 @@ export function TransactionsScreen({
                     parents={expenseCategoryPanelData.parents}
                     childByParent={expenseCategoryPanelData.childrenByParent}
                     allowParentSelection
-                    selectedCategoryId={transactionFilters.expenseCategoryId}
-                    onSelect={handleSelectExpenseCategoryFilter}
+                    selectedCategoryIds={transactionFilters.excludedExpenseCategoryIds}
+                    onToggleSelect={handleToggleExcludedExpenseCategoryFilter}
                   />
                 </View>
               </View>

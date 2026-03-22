@@ -15,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  type GestureResponderEvent,
   InteractionManager,
   Keyboard,
   type LayoutChangeEvent,
@@ -95,8 +96,11 @@ const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
 ];
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+  },
   summaryContainer: {
-    paddingHorizontal: 16,
+    flexGrow: 1,
   },
   nudgeLabel: {
     fontSize: 11,
@@ -107,6 +111,22 @@ const styles = StyleSheet.create({
   inlineSummaryInput: {
     fontSize: 16,
     textAlign: 'right',
+  },
+  summaryDismissLayout: {
+    flexDirection: 'row',
+    flexGrow: 1,
+    alignItems: 'stretch',
+  },
+  summaryDismissGutter: {
+    width: 16,
+  },
+  summaryDismissColumn: {
+    flex: 1,
+    flexGrow: 1,
+  },
+  summaryDismissFiller: {
+    flex: 1,
+    minHeight: 1,
   },
 });
 
@@ -464,6 +484,13 @@ export function TransactionEditorScreen({
       setActiveField(field);
     },
     [blurNativeInputs, isNativeKeyboardField],
+  );
+  const clearActiveField = useCallback(() => {
+    activateField(null);
+  }, [activateField]);
+  const shouldHandleBackgroundPress = useCallback(
+    (event: GestureResponderEvent) => activeField !== null && event.target === event.currentTarget,
+    [activeField],
   );
 
   const mapActiveFieldForType = useCallback(
@@ -888,6 +915,8 @@ export function TransactionEditorScreen({
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
   const showToolZone =
     activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
+  const effectiveSummaryFlex =
+    showToolZone && activeField === 'amount' ? Math.min(0.54, summaryFlex + 0.05) : summaryFlex;
   const recurringToolZonePadding =
     isRecurringEditor && showToolZone ? Math.max(520, Math.round(windowHeight * 0.62)) : 0;
   const summaryBottomPadding = isRecurringEditor
@@ -898,14 +927,17 @@ export function TransactionEditorScreen({
       ? 92
       : 16;
   const summaryContainerStyle = useMemo(
-    () => ({ flex: showToolZone ? summaryFlex : 1 }),
-    [showToolZone, summaryFlex],
+    () => ({ flex: showToolZone ? effectiveSummaryFlex : 1 }),
+    [effectiveSummaryFlex, showToolZone],
   );
   const scrollContentStyle = useMemo(
     () => [styles.summaryContainer, { paddingBottom: summaryBottomPadding, flexGrow: 1 }],
     [summaryBottomPadding],
   );
-  const toolZoneContainerStyle = useMemo(() => ({ flex: 1 - summaryFlex }), [summaryFlex]);
+  const toolZoneContainerStyle = useMemo(
+    () => ({ flex: 1 - effectiveSummaryFlex }),
+    [effectiveSummaryFlex],
+  );
 
   const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
     const y = fieldOffsetsRef.current[field];
@@ -1091,7 +1123,7 @@ export function TransactionEditorScreen({
     const isSelectedParent = topLevelCategoryIdSet.has(nextCategoryId);
     const selectedParentHasChildren =
       (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
-    if (mode === 'create' && isSelectedParent && selectedParentHasChildren) {
+    if (isSelectedParent && selectedParentHasChildren) {
       return;
     }
 
@@ -1139,6 +1171,7 @@ export function TransactionEditorScreen({
             accounts={accounts}
             accountGroups={accountGroups}
             selectedId={accountId}
+            onBackgroundPress={clearActiveField}
             onSelect={handleAccountSelect}
           />
         );
@@ -1149,6 +1182,7 @@ export function TransactionEditorScreen({
             accountGroups={accountGroups}
             selectedId={fromAccountId}
             disabledId={toAccountId}
+            onBackgroundPress={clearActiveField}
             onSelect={handleFromAccountSelect}
           />
         );
@@ -1159,6 +1193,7 @@ export function TransactionEditorScreen({
             accountGroups={accountGroups}
             selectedId={toAccountId}
             disabledId={fromAccountId}
+            onBackgroundPress={clearActiveField}
             onSelect={handleToAccountSelect}
           />
         );
@@ -1169,6 +1204,7 @@ export function TransactionEditorScreen({
             childByParent={categoryPanelChildren}
             allowParentSelection
             selectedCategoryId={categoryId}
+            onBackgroundPress={clearActiveField}
             onSelect={handleCategorySelect}
           />
         );
@@ -1202,6 +1238,11 @@ export function TransactionEditorScreen({
                 </Pressable>
               ))}
             </View>
+            <Pressable
+              accessible={false}
+              onPress={clearActiveField}
+              style={styles.summaryDismissFiller}
+            />
           </View>
         );
       case 'ends':
@@ -1246,6 +1287,11 @@ export function TransactionEditorScreen({
                 </Pressable>
               ))}
             </View>
+            <Pressable
+              accessible={false}
+              onPress={clearActiveField}
+              style={styles.summaryDismissFiller}
+            />
           </View>
         );
       case 'endDate':
@@ -1259,12 +1305,19 @@ export function TransactionEditorScreen({
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <View
+        style={styles.screenContainer}
+        onStartShouldSetResponder={shouldHandleBackgroundPress}
+        onResponderRelease={clearActiveField}
+      >
+        <TabletContentContainer style={{ flex: 1 }}>
         <View
           className={cn(
             'px-5 pb-2 flex-row items-start justify-between',
             windowHeight < 700 ? 'pt-2' : 'pt-4',
           )}
+          onStartShouldSetResponder={shouldHandleBackgroundPress}
+          onResponderRelease={clearActiveField}
         >
           <View className="flex-row items-center gap-3">
             <Pressable
@@ -1309,7 +1362,11 @@ export function TransactionEditorScreen({
         </View>
 
         {showTypeSelector ? (
-          <View className="px-4 pb-2">
+          <View
+            className="px-4 pb-2"
+            onStartShouldSetResponder={shouldHandleBackgroundPress}
+            onResponderRelease={clearActiveField}
+          >
             <View className="flex-row gap-2 mt-1">
               {availableTypeCards.map((item) => (
                 <TypePill
@@ -1330,23 +1387,30 @@ export function TransactionEditorScreen({
             contentContainerStyle={scrollContentStyle}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            onScrollBeginDrag={() => activateField(null)}
+            onScrollBeginDrag={clearActiveField}
           >
-            <Pressable onPress={() => activateField(null)} style={{ flexGrow: 1 }}>
-              {/* Summary rows */}
-              <View
-                className="bg-card/60 border border-border/25 overflow-hidden"
-                style={{
-                  borderRadius: 20,
-                  ...(noteSuggestions.length > 0 && activeField === 'note'
-                    ? {
-                        borderBottomLeftRadius: 0,
-                        borderBottomRightRadius: 0,
-                        borderBottomWidth: 0,
-                      }
-                    : {}),
-                }}
-              >
+            <View style={styles.summaryDismissLayout}>
+              <Pressable
+                accessible={false}
+                onPress={clearActiveField}
+                style={styles.summaryDismissGutter}
+              />
+              <View style={styles.summaryDismissColumn}>
+                <Pressable accessible={false} onPress={clearActiveField}>
+                  {/* Summary rows */}
+                  <View
+                    className="bg-card/60 border border-border/25 overflow-hidden"
+                    style={{
+                      borderRadius: 20,
+                      ...(noteSuggestions.length > 0 && activeField === 'note'
+                        ? {
+                            borderBottomLeftRadius: 0,
+                            borderBottomRightRadius: 0,
+                            borderBottomWidth: 0,
+                          }
+                        : {}),
+                    }}
+                  >
                 {!isBalanceAdjustmentType ? (
                   <>
                     {/* Date row */}
@@ -1560,15 +1624,9 @@ export function TransactionEditorScreen({
                       >
                         <View className="flex-row items-center justify-between">
                           <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                            {categoryPreview ? (
-                              <Text className="text-[18px] w-7 text-center">
-                                {categoryPreview.icon}
-                              </Text>
-                            ) : (
-                              <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                <Hash size={13} color={themeColors.textMuted} />
-                              </View>
-                            )}
+                            <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                              <Hash size={13} color={themeColors.textMuted} />
+                            </View>
                             <Text variant="caption" tone="muted">
                               {I18n.t('transactions.editor.category')}
                             </Text>
@@ -1937,7 +1995,19 @@ export function TransactionEditorScreen({
                   </Text>
                 </View>
               ) : null}
-            </Pressable>
+                </Pressable>
+                <Pressable
+                  accessible={false}
+                  onPress={clearActiveField}
+                  style={styles.summaryDismissFiller}
+                />
+              </View>
+              <Pressable
+                accessible={false}
+                onPress={clearActiveField}
+                style={styles.summaryDismissGutter}
+              />
+            </View>
           </ScrollView>
         </View>
 
@@ -1945,6 +2015,8 @@ export function TransactionEditorScreen({
           <View
             style={toolZoneContainerStyle}
             className="border-t-2 border-border/50 bg-secondary/30"
+            onStartShouldSetResponder={shouldHandleBackgroundPress}
+            onResponderRelease={clearActiveField}
           >
             <View className="items-center pt-1.5 pb-1">
               <View className="h-[3.5px] w-10 rounded-full bg-border/60" />
@@ -1959,7 +2031,8 @@ export function TransactionEditorScreen({
             </Animated.View>
           </View>
         ) : null}
-      </TabletContentContainer>
+        </TabletContentContainer>
+      </View>
     </SafeAreaView>
   );
 }

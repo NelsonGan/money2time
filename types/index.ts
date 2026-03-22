@@ -74,6 +74,7 @@ export interface UserSettings {
   currencyCode: string;
   currencySymbol: string;
   displayMode: DisplayMode;
+  hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
   onboardingCompleted: boolean;
@@ -147,6 +148,7 @@ export interface TransactionWithRelations extends Transaction {
   fromAccountName?: string | null;
   toAccountName?: string | null;
   categoryName?: string | null;
+  categoryParentId?: string | null;
   categoryParentName?: string | null;
   categoryIcon?: string | null;
 }
@@ -181,9 +183,12 @@ export interface TransactionFilters {
   search: string;
   dateRange: DateRange | null;
   accountId: string | null;
+  excludedAccountIds: string[];
   type: TransactionType | 'all';
   incomeCategoryId: string | null;
   expenseCategoryId: string | null;
+  excludedIncomeCategoryIds: string[];
+  excludedExpenseCategoryIds: string[];
   categoryId: string | null;
   minAmount: number | null;
   maxAmount: number | null;

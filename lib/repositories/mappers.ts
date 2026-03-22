@@ -225,6 +225,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
     displayMode: asDisplayMode(row.displayMode),
+    hapticsEnabled: row.hapticsEnabled ?? true,
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
     onboardingCompleted: row.onboardingCompleted,

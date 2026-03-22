@@ -712,6 +712,8 @@ const en = {
     user_mode: 'Mode',
     user_mode_simple: 'Simple Mode',
     user_mode_power: 'Power Mode',
+    haptics: 'Haptics',
+    haptics_subtitle: 'Turn touch feedback on or off across the app.',
     user_mode_subtitle_simple: 'Currently: Simple — tap to switch to Power',
     user_mode_subtitle_power: 'Currently: Power — tap to switch to Simple',
     user_mode_simple_description: 'Single wallet setup.',

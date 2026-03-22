@@ -87,6 +87,7 @@ export const settingsTable = sqliteTable('settings', {
   currencyCode: text('currency_code').notNull().default('USD'),
   currencySymbol: text('currency_symbol').notNull().default('$'),
   displayMode: text('display_mode').notNull().default('money'),
+  hapticsEnabled: integer('haptics_enabled', { mode: 'boolean' }).notNull().default(true),
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
   insightsPrefsJson: text('insights_prefs_json'),
