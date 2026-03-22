@@ -64,6 +64,7 @@ export const AnalyticsEvents = {
   PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',
   PRO_PURCHASE_STARTED: 'Pro Purchase Started',
   PRO_PURCHASE_COMPLETED: 'Pro Purchase Completed',
+  PRO_PURCHASE_PENDING: 'Pro Purchase Pending',
   PRO_PURCHASE_CANCELLED: 'Pro Purchase Cancelled',
   PRO_PURCHASE_FAILED: 'Pro Purchase Failed',
   PRO_RESTORE_STARTED: 'Pro Restore Started',

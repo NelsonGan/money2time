@@ -1,6 +1,7 @@
 import type {
   RevenueCatActionResult,
   RevenueCatCustomerState,
+  RevenueCatCustomerStateUpdateListener,
   RevenueCatOffering,
 } from './revenueCat.shared';
 
@@ -16,12 +17,18 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
   return null;
 }
 
+export function subscribeToRevenueCatCustomerStateUpdates(
+  _listener: RevenueCatCustomerStateUpdateListener,
+) {
+  return () => {};
+}
+
 export async function purchaseRevenueCatPackage(
   _packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
   return {
     customerState: null,
-    message: null,
+    message: 'Purchases are not available on this platform.',
     status: 'not_available',
   };
 }
@@ -29,7 +36,7 @@ export async function purchaseRevenueCatPackage(
 export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResult> {
   return {
     customerState: null,
-    message: null,
+    message: 'Purchases are not available on this platform.',
     status: 'not_available',
   };
 }

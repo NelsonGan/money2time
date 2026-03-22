@@ -3,11 +3,10 @@ import { PanResponder, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Defs, Line, LinearGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
-import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 interface TrendBarChartProps {
-  data: { monthKey: string; value: number; label: string }[];
+  data: { monthKey: string; value: number; label: string; subLabel?: string }[];
   chartWidth: number;
   chartHeight: number;
   primaryColor: string;
@@ -21,29 +20,10 @@ interface TrendBarChartProps {
   gridLineColor: string;
 }
 
-const BOTTOM_LABEL_HEIGHT = 20;
+const SINGLE_LINE_LABEL_HEIGHT = 20;
+const DOUBLE_LINE_LABEL_HEIGHT = 30;
 const TOP_PADDING = 12;
 const SIDE_PADDING = 4;
-
-const shortMonthFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
-
-function getShortMonthLabel(monthKey: string): string {
-  const locale = I18n.locale ?? I18n.defaultLocale ?? 'en';
-  let formatter = shortMonthFormatterByLocale.get(locale);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, { month: 'short' });
-    shortMonthFormatterByLocale.set(locale, formatter);
-  }
-  const date = new Date(`${monthKey}-15T00:00:00`);
-  return formatter.format(date);
-}
-
-function withAlpha(hex: string, alpha: number): string {
-  const alphaHex = Math.round(alpha * 255)
-    .toString(16)
-    .padStart(2, '0');
-  return `${hex}${alphaHex}`;
-}
 
 export const TrendBarChart = React.memo(function TrendBarChart({
   data,
@@ -60,8 +40,13 @@ export const TrendBarChart = React.memo(function TrendBarChart({
   gridLineColor,
 }: TrendBarChartProps) {
   const barCount = data.length;
+  const hasMultiLineLabels = useMemo(
+    () => data.some((datum) => Boolean(datum.subLabel)),
+    [data],
+  );
+  const bottomLabelHeight = hasMultiLineLabels ? DOUBLE_LINE_LABEL_HEIGHT : SINGLE_LINE_LABEL_HEIGHT;
   const drawableWidth = chartWidth - SIDE_PADDING * 2;
-  const drawableHeight = chartHeight - BOTTOM_LABEL_HEIGHT - TOP_PADDING;
+  const drawableHeight = chartHeight - bottomLabelHeight - TOP_PADDING;
   const maxValue = useMemo(() => {
     const peak = Math.max(...data.map((d) => d.value), 0);
     return peak > 0 ? peak * 1.1 : 1;
@@ -230,19 +215,34 @@ export const TrendBarChart = React.memo(function TrendBarChart({
           {bars.map((bar) => {
             const isSelected = bar.monthKey === selectedMonthKey;
             const labelFontSize = barCount > 6 ? Math.max(6.5, Math.min(8, barWidth * 0.4)) : 9;
+            const subLabelFontSize = Math.max(6, labelFontSize - 0.5);
             return (
-              <SvgText
-                key={`label-${bar.monthKey}`}
-                x={bar.x + bar.barWidth / 2}
-                y={chartHeight - 4}
-                textAnchor="middle"
-                fontSize={labelFontSize}
-                fontWeight={isSelected ? '700' : '400'}
-                fill={isSelected ? primaryColor : labelColor}
-                opacity={isSelected ? 1 : 0.6}
-              >
-                {getShortMonthLabel(bar.monthKey)}
-              </SvgText>
+              <React.Fragment key={`label-${bar.monthKey}`}>
+                <SvgText
+                  x={bar.x + bar.barWidth / 2}
+                  y={bar.subLabel ? chartHeight - 14 : chartHeight - 4}
+                  textAnchor="middle"
+                  fontSize={labelFontSize}
+                  fontWeight={isSelected ? '700' : '400'}
+                  fill={isSelected ? primaryColor : labelColor}
+                  opacity={isSelected ? 1 : 0.72}
+                >
+                  {bar.label}
+                </SvgText>
+                {bar.subLabel ? (
+                  <SvgText
+                    x={bar.x + bar.barWidth / 2}
+                    y={chartHeight - 3}
+                    textAnchor="middle"
+                    fontSize={subLabelFontSize}
+                    fontWeight={isSelected ? '700' : '400'}
+                    fill={isSelected ? primaryColor : labelColor}
+                    opacity={isSelected ? 0.95 : 0.58}
+                  >
+                    {bar.subLabel}
+                  </SvgText>
+                ) : null}
+              </React.Fragment>
             );
           })}
         </Svg>

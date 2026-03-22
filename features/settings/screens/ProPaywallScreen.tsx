@@ -1,4 +1,4 @@
-import { Crown, X } from 'lucide-react-native';
+import { AlertCircle, Crown, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +12,13 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInUp, SlideInLeft, SlideOutRight } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInUp,
+  FadeOutUp,
+  SlideInLeft,
+  SlideOutRight,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Text } from '~/components/ui';
@@ -28,12 +34,14 @@ import { isRevenueCatCustomerStateActive, type RevenueCatPackage } from '~/servi
 interface ProPaywallScreenProps {
   onClose: () => void;
   source?: string;
+  flashMessage?: string;
 }
 
 const CARD_GAP = 12;
 const CARD_PEEK = 32;
 const PLAN_CARD_MIN_HEIGHT = 288;
 const SHOWCASE_INTERVAL = 4000;
+const FLASH_MESSAGE_DURATION_MS = 3200;
 
 interface PaywallColors {
   bg: string;
@@ -293,8 +301,51 @@ interface PlanCardData {
   badge?: string;
 }
 
+function normalizePackageType(packageType: string) {
+  return packageType.trim().toUpperCase();
+}
+
+function humanizePackageType(value: string) {
+  const cleaned = value
+    .replace(/^\$rc_/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+
+  if (!cleaned) {
+    return I18n.t('pro.upgrade');
+  }
+
+  return cleaned
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function getFallbackPlanName(pkg: RevenueCatPackage) {
+  const normalizedType = normalizePackageType(pkg.packageType);
+
+  if (normalizedType !== 'CUSTOM' && normalizedType !== 'UNKNOWN') {
+    return humanizePackageType(normalizedType);
+  }
+
+  return humanizePackageType(pkg.identifier);
+}
+
+function getPlanSortOrder(pkg: RevenueCatPackage) {
+  switch (normalizePackageType(pkg.packageType)) {
+    case 'MONTHLY':
+      return 0;
+    case 'ANNUAL':
+      return 1;
+    case 'LIFETIME':
+      return 2;
+    default:
+      return 3;
+  }
+}
+
 function getPlanBillingLabel(pkg: RevenueCatPackage) {
-  switch (pkg.packageType) {
+  switch (normalizePackageType(pkg.packageType)) {
     case 'ANNUAL':
       return I18n.t('pro.yearly_billed_with_price', { price: pkg.localizedPriceString });
     case 'MONTHLY':
@@ -307,7 +358,7 @@ function getPlanBillingLabel(pkg: RevenueCatPackage) {
 }
 
 function getPlanPrimaryPriceLabel(pkg: RevenueCatPackage) {
-  switch (pkg.packageType) {
+  switch (normalizePackageType(pkg.packageType)) {
     case 'ANNUAL':
       if (pkg.localizedPricePerMonthString) {
         return {
@@ -411,8 +462,8 @@ function PlanCard({
 
 // ─── Main Screen ─────────────────────────────────────────────────────
 
-export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
-  const { isPro, offering, purchasePackage, restorePurchases } = usePro();
+export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallScreenProps) {
+  const { isLoading, isPro, offering, purchasePackage, refresh, restorePurchases } = usePro();
   const packages = usePackagesByType(offering);
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
@@ -420,10 +471,11 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
   const scrollRef = useRef<ScrollView>(null);
   const activeIndexRef = useRef(0);
   const measuredPlanCardHeightsRef = useRef<Record<string, number>>({});
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [planCardHeight, setPlanCardHeight] = useState<number | null>(null);
+  const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(flashMessage ?? null);
 
   const cardWidth = screenWidth - CARD_PEEK * 2;
   const estimatedHeaderHeight = 32 + spacing.sm * 2;
@@ -438,9 +490,27 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
     void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, { source: source ?? 'settings' });
   }, [source]);
 
+  useEffect(() => {
+    if (!flashMessage) {
+      setVisibleFlashMessage(null);
+      return;
+    }
+
+    setVisibleFlashMessage(flashMessage);
+
+    const timeoutId = setTimeout(() => {
+      setVisibleFlashMessage(null);
+    }, FLASH_MESSAGE_DURATION_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [flashMessage]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
   const planCards = useMemo<PlanCardData[]>(() => {
     const cards: PlanCardData[] = [];
-
     if (packages.monthly) {
       cards.push({
         pkg: packages.monthly,
@@ -466,11 +536,27 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
       });
     }
 
-    return cards;
-  }, [packages.annual, packages.lifetime, packages.monthly]);
+    if (cards.length === 0 && offering?.packages.length) {
+      return [...offering.packages]
+        .sort((left, right) => getPlanSortOrder(left) - getPlanSortOrder(right))
+        .map((pkg) => ({
+          pkg,
+          name: getFallbackPlanName(pkg),
+          description: I18n.t('pro.custom_plan_desc'),
+        }));
+    }
 
-  const defaultIdx = planCards.findIndex((card) => card.pkg.packageType === 'ANNUAL');
+    return cards;
+  }, [offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
+
+  const defaultIdx = planCards.findIndex(
+    (card) => normalizePackageType(card.pkg.packageType) === 'ANNUAL',
+  );
   const startIdx = defaultIdx >= 0 ? defaultIdx : 0;
+  const initialPlanContentOffset = useMemo(
+    () => ({ x: (cardWidth + CARD_GAP) * startIdx, y: 0 }),
+    [cardWidth, startIdx],
+  );
   const planCardIds = useMemo(
     () => planCards.map((card) => card.pkg.identifier),
     [planCards],
@@ -478,20 +564,11 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
 
   useEffect(() => {
     activeIndexRef.current = startIdx;
-    setActiveIndex(startIdx);
+    setActiveIndex(planCards.length > 0 ? startIdx : null);
 
     if (planCards.length === 0) {
       return;
     }
-
-    const timeout = setTimeout(() => {
-      scrollRef.current?.scrollTo({
-        x: (cardWidth + CARD_GAP) * startIdx,
-        animated: false,
-      });
-    }, 50);
-
-    return () => clearTimeout(timeout);
   }, [cardWidth, planCards.length, startIdx]);
 
   useEffect(() => {
@@ -548,6 +625,12 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
         if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
           onClose();
+        } else if (result.status === 'pending') {
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, { package: pkgId });
+          Alert.alert(
+            I18n.t('pro.purchase_pending_title'),
+            result.message ?? I18n.t('pro.purchase_pending_message'),
+          );
         } else if (result.status === 'cancelled') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, { package: pkgId });
         } else {
@@ -555,7 +638,10 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
             package: pkgId,
             reason: result.message ?? result.status,
           });
-          if (result.message) Alert.alert(I18n.t('pro.purchase_failed'), result.message);
+          Alert.alert(
+            I18n.t('pro.purchase_failed'),
+            result.message ?? I18n.t('errors.generic_operation_failed'),
+          );
         }
       } finally {
         setIsPurchasing(false);
@@ -577,13 +663,16 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
       } else if (result.status === 'success') {
         void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, { found: false });
         Alert.alert(I18n.t('pro.restore_none'));
-      } else if (result.message) {
-        Alert.alert(I18n.t('pro.restore_failed'), result.message);
+      } else {
+        Alert.alert(
+          I18n.t('pro.restore_failed'),
+          result.message ?? I18n.t('errors.generic_operation_failed'),
+        );
       }
     } finally {
       setIsRestoring(false);
     }
-  }, [isRestoring, restorePurchases, onClose]);
+  }, [isRestoring, onClose, restorePurchases]);
 
   const onCardScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -631,6 +720,25 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
         <CloseBtn onClose={onClose} colors={colors} />
       </View>
 
+      {visibleFlashMessage ? (
+        <Animated.View
+          pointerEvents="none"
+          entering={FadeInUp.duration(280)}
+          exiting={FadeOutUp.duration(220)}
+          style={[
+            s.flashBanner,
+            {
+              top: insets.top + 56,
+              backgroundColor: colors.isDark ? withAlpha(colors.accent, 0.16) : colors.accentSoft,
+              borderColor: withAlpha(colors.accent, colors.isDark ? 0.38 : 0.18),
+            },
+          ]}
+        >
+          <AlertCircle size={16} color={colors.accent} />
+          <Text style={[s.flashBannerText, { color: colors.text }]}>{visibleFlashMessage}</Text>
+        </Animated.View>
+      ) : null}
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, spacing.md) }}
@@ -642,12 +750,14 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
         {planCards.length > 0 ? (
           <Animated.View entering={FadeInUp.delay(200).duration(400)}>
             <ScrollView
+              key={`${planCardIds.join('|')}:${cardWidth}`}
               ref={scrollRef}
               horizontal
               showsHorizontalScrollIndicator={false}
               snapToInterval={cardWidth + CARD_GAP}
               decelerationRate="fast"
               scrollEventThrottle={16}
+              contentOffset={initialPlanContentOffset}
               contentContainerStyle={{ paddingHorizontal: CARD_PEEK }}
               onScroll={onCardScroll}
               onMomentumScrollEnd={onCardScroll}
@@ -674,8 +784,9 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
                     style={[
                       s.planDot,
                       {
-                        backgroundColor: i === activeIndex ? colors.dotActive : colors.dotInactive,
-                        width: i === activeIndex ? 20 : 7,
+                        backgroundColor:
+                          i === (activeIndex ?? startIdx) ? colors.dotActive : colors.dotInactive,
+                        width: i === (activeIndex ?? startIdx) ? 20 : 7,
                       },
                     ]}
                   />
@@ -683,7 +794,41 @@ export function ProPaywallScreen({ onClose, source }: ProPaywallScreenProps) {
               </View>
             ) : null}
           </Animated.View>
-        ) : null}
+        ) : (
+          <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+            <View
+              style={[
+                s.emptyState,
+                {
+                  backgroundColor: colors.cardBg,
+                  borderColor: colors.cardBorder,
+                },
+              ]}
+            >
+              <Text style={[s.emptyStateTitle, { color: colors.text }]}>
+                {isLoading
+                  ? I18n.t('pro.loading_plans')
+                  : I18n.t('pro.plans_unavailable_title')}
+              </Text>
+              <Text style={[s.emptyStateBody, { color: colors.textMuted }]}>
+                {isLoading
+                  ? I18n.t('pro.loading_plans_body')
+                  : I18n.t('pro.plans_unavailable_body')}
+              </Text>
+              {!isLoading ? (
+                <Button
+                  onPress={() => void refresh()}
+                  variant="outline"
+                  size="sm"
+                  className="mt-5 self-center"
+                  haptic="none"
+                >
+                  <Text>{I18n.t('pro.retry_loading_plans')}</Text>
+                </Button>
+              ) : null}
+            </View>
+          </Animated.View>
+        )}
 
         <View style={s.footer}>
           <Pressable onPress={handleRestore} disabled={isRestoring} hitSlop={12}>
@@ -779,6 +924,30 @@ const s = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  flashBanner: {
+    position: 'absolute',
+    left: spacing.screenHorizontal,
+    right: spacing.screenHorizontal,
+    zIndex: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  flashBannerText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
   },
 
   // Feature Showcase
@@ -893,6 +1062,26 @@ const s = StyleSheet.create({
     marginTop: 16,
   },
   planDot: { height: 7, borderRadius: 4 },
+  emptyState: {
+    marginHorizontal: CARD_PEEK,
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptyStateBody: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
 
   // Footer
   footer: {

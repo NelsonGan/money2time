@@ -67,13 +67,15 @@ import {
 } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations } from '~/types';
 import {
+  dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
 
 type MainTab = TabName;
-type ActivityInsightType = 'expense_breakdown' | 'income_breakdown' | 'expense_trend';
+type ActivityInsightType = 'expense_breakdown' | 'income_breakdown' | 'expense_trend' | 'expense_sentiment';
+type ActivityInsightPeriodPreset = 'week' | 'month' | 'year' | 'custom';
 
 type FontScalingNativeComponent = {
   defaultProps?: Record<string, unknown>;
@@ -93,7 +95,18 @@ disableDynamicType(RNTextInput as unknown as FontScalingNativeComponent);
 interface ActivityBreakdownInsightRequest {
   insightType: ActivityInsightType;
   monthKey: string;
+  anchorDateKey?: string;
+  customEnd?: string;
+  customStart?: string;
+  periodPreset?: ActivityInsightPeriodPreset;
   token: number;
+}
+
+interface ActivityInsightOpenOptions {
+  anchorDateKey?: string;
+  customEnd?: string;
+  customStart?: string;
+  periodPreset?: ActivityInsightPeriodPreset;
 }
 
 interface GuidedTutorialStep {
@@ -253,8 +266,8 @@ function MainShellScreen({
   }, [navigation]);
 
   useEffect(() => {
-    return subscribeOpenPaywallRequest((source) => {
-      navigation.navigate('ProPaywall', { source });
+    return subscribeOpenPaywallRequest(({ source, flashMessage }) => {
+      navigation.navigate('ProPaywall', { source, flashMessage });
     });
   }, [navigation]);
 
@@ -294,10 +307,18 @@ function MainShellScreen({
     [navigation],
   );
   const openActivityBreakdownInsight = useCallback(
-    (insightType: ActivityInsightType, monthKey: string) => {
+    (
+      insightType: ActivityInsightType,
+      monthKey: string,
+      options?: ActivityInsightOpenOptions,
+    ) => {
       setActivityBreakdownInsightRequest((previous) => ({
         insightType,
         monthKey,
+        anchorDateKey: options?.anchorDateKey,
+        customEnd: options?.customEnd,
+        customStart: options?.customStart,
+        periodPreset: options?.periodPreset,
         token: (previous?.token ?? 0) + 1,
       }));
       setActiveTab('insights');
@@ -328,7 +349,29 @@ function MainShellScreen({
   );
 
   const openExpenseTrend = useCallback(() => {
-    openActivityBreakdownInsight('expense_trend', monthKeyFromDateLocal(new Date()));
+    const now = new Date();
+    const rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    rangeStart.setDate(rangeStart.getDate() - 6);
+    const rangeEndKey = dayKeyFromDateLocal(now);
+    openActivityBreakdownInsight('expense_trend', monthKeyFromDateLocal(now), {
+      anchorDateKey: rangeEndKey,
+      customEnd: rangeEndKey,
+      customStart: dayKeyFromDateLocal(rangeStart),
+      periodPreset: 'custom',
+    });
+  }, [openActivityBreakdownInsight]);
+
+  const openExpenseSentiment = useCallback(() => {
+    const now = new Date();
+    const rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    rangeStart.setDate(rangeStart.getDate() - 6);
+    const rangeEndKey = dayKeyFromDateLocal(now);
+    openActivityBreakdownInsight('expense_sentiment', monthKeyFromDateLocal(now), {
+      anchorDateKey: rangeEndKey,
+      customEnd: rangeEndKey,
+      customStart: dayKeyFromDateLocal(rangeStart),
+      periodPreset: 'custom',
+    });
   }, [openActivityBreakdownInsight]);
 
   const openProPaywall = useCallback(
@@ -510,6 +553,7 @@ function MainShellScreen({
             onOpenTransaction={openTransactionEditor}
             onOpenSettingsScreen={openSettingsScreen}
             onOpenExpenseTrend={openExpenseTrend}
+            onOpenExpenseSentiment={openExpenseSentiment}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
@@ -652,7 +696,13 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
 }
 
 function ProPaywallRouteScreen({ route, navigation }: RootStackRouteProps<'ProPaywall'>) {
-  return <ProPaywallScreen onClose={() => navigation.goBack()} source={route.params?.source} />;
+  return (
+    <ProPaywallScreen
+      onClose={() => navigation.goBack()}
+      source={route.params?.source}
+      flashMessage={route.params?.flashMessage}
+    />
+  );
 }
 
 function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
