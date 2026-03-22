@@ -38,11 +38,20 @@
     "web": {
       "favicon": "./assets/android/play_store_512.png"
     },
-    "plugins": ["expo-localization", "expo-notifications"],
+    "plugins": [
+      "expo-localization",
+      "expo-notifications"
+    ],
     "extra": {
       "eas": {
         "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/27dec73c-197f-4b74-87ae-542e75fc549e"
     }
   }
 }
