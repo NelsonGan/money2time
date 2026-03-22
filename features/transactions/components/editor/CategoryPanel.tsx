@@ -1,11 +1,10 @@
-import { Check, ChevronDown } from 'lucide-react-native';
+import { ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
 
 interface CategoryOption {
   id: string;
@@ -17,6 +16,7 @@ interface CategoryPanelBaseProps {
   parents: CategoryOption[];
   childByParent: Map<string, CategoryOption[]>;
   allowParentSelection?: boolean;
+  onBackgroundPress?: () => void;
 }
 
 interface CategoryPanelSingleSelectProps extends CategoryPanelBaseProps {
@@ -33,7 +33,8 @@ type CategoryPanelProps = CategoryPanelSingleSelectProps | CategoryPanelMultiSel
 const EMPTY_SELECTED_CATEGORY_IDS: string[] = [];
 const EMPTY_CATEGORY_OPTIONS: CategoryOption[] = [];
 const COLS = 3;
-const CATEGORY_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
+const GRID_DIVIDER_WIDTH = 1;
+const CATEGORY_PANEL_CONTENT_STYLE = { paddingBottom: 16, flexGrow: 1 } as const;
 
 const styles = StyleSheet.create({
   chevronCollapsed: {
@@ -42,13 +43,41 @@ const styles = StyleSheet.create({
   chevronExpanded: {
     transform: [{ rotate: '180deg' }],
   },
-  parentSelectedBadge: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 999,
+  gridRow: {
+    flexDirection: 'row',
+    minHeight: 58,
+  },
+  gridCell: {
+    flex: 1,
+    minHeight: 58,
+  },
+  gridCellButton: {
+    flex: 1,
+    minHeight: 58,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  gridLabel: {
+    fontSize: 10,
+    lineHeight: 14,
+    textAlign: 'center',
+  },
+  inlineContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    width: '100%',
+  },
+  inlineIcon: {
+    marginRight: 6,
+  },
+  cornerRight: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
   },
 });
 
@@ -61,7 +90,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 export function CategoryPanel(props: CategoryPanelProps) {
-  const { parents, childByParent, allowParentSelection = false } = props;
+  const { parents, childByParent, allowParentSelection = false, onBackgroundPress } = props;
   const themeColors = useThemeColors();
   const [expandedParentId, setExpandedParentId] = useState<string | null>(null);
   const isMultiSelect = 'selectedCategoryIds' in props;
@@ -84,22 +113,18 @@ export function CategoryPanel(props: CategoryPanelProps) {
     });
     return owners;
   }, [childByParent, parents]);
-  const selectedChildCountByParentId = useMemo(() => {
-    const counts = new Map<string, number>();
-    if (selectedCategorySet.size === 0) return counts;
+  const selectedChildParentIdSet = useMemo(() => {
+    const parentIds = new Set<string>();
+    if (selectedCategorySet.size === 0) return parentIds;
 
     parents.forEach((parent) => {
       const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
       if (children.length === 0) return;
-      let selectedCount = 0;
-      children.forEach((child) => {
-        if (selectedCategorySet.has(child.id)) selectedCount += 1;
-      });
-      if (selectedCount > 0) {
-        counts.set(parent.id, selectedCount);
+      if (children.some((child) => selectedCategorySet.has(child.id))) {
+        parentIds.add(parent.id);
       }
     });
-    return counts;
+    return parentIds;
   }, [childByParent, parents, selectedCategorySet]);
 
   const handleSelection = (categoryId: string) => {
@@ -122,194 +147,192 @@ export function CategoryPanel(props: CategoryPanelProps) {
   }, [isMultiSelect, ownerParentIdByCategoryId, selectedCategoryId]);
 
   const parentRows = useMemo(() => chunk(parents, COLS), [parents]);
+  const gridDividerColor = themeColors.border;
+
+  const renderGridRow = <T,>(
+    rowKey: string,
+    items: T[],
+    _rowIndex: number,
+    renderCell: (item: T) => React.ReactNode,
+  ) => {
+    const populatedColumnCount = items.length;
+
+    return (
+      <View key={rowKey} style={styles.gridRow}>
+        {Array.from({ length: COLS }, (_, columnIndex) => {
+          const item = items[columnIndex];
+          const hasItem = item !== undefined;
+          const shouldShowRightBorder =
+            hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+
+          return (
+            <View
+              key={`${rowKey}-${columnIndex}`}
+              style={[
+                styles.gridCell,
+                hasItem ? { backgroundColor: themeColors.surface } : null,
+                hasItem
+                  ? { borderBottomWidth: GRID_DIVIDER_WIDTH, borderBottomColor: gridDividerColor }
+                  : null,
+                shouldShowRightBorder
+                  ? { borderRightWidth: GRID_DIVIDER_WIDTH, borderRightColor: gridDividerColor }
+                  : null,
+              ]}
+            >
+              {hasItem ? renderCell(item) : null}
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const groupedRows = parentRows.flatMap((row, rowIndex) => {
+    const rows: { key: string; kind: 'parent' | 'child'; items: CategoryOption[] }[] = [
+      { key: `parent-${rowIndex}`, kind: 'parent', items: row },
+    ];
+    const expandedInRow = expandedParentId ? row.find((parent) => parent.id === expandedParentId) : null;
+    if (!expandedInRow) return rows;
+
+    chunk(childByParent.get(expandedInRow.id) ?? EMPTY_CATEGORY_OPTIONS, COLS).forEach(
+      (childRow, childRowIndex) => {
+        rows.push({
+          key: `parent-${expandedInRow.id}-children-${childRowIndex}`,
+          kind: 'child',
+          items: childRow,
+        });
+      },
+    );
+    return rows;
+  });
 
   return (
     <ScrollView
-      className="flex-1 px-4 pt-2"
+      className="flex-1"
       showsVerticalScrollIndicator={false}
       bounces={false}
       alwaysBounceVertical={false}
       overScrollMode="never"
       contentContainerStyle={CATEGORY_PANEL_CONTENT_STYLE}
     >
-      <View className="gap-3">
-        {parentRows.map((row, rowIndex) => {
-          const expandedInRow = expandedParentId
-            ? row.find((p) => p.id === expandedParentId)
-            : null;
-          const expandedChildren = expandedInRow
-            ? (childByParent.get(expandedInRow.id) ?? EMPTY_CATEGORY_OPTIONS)
-            : EMPTY_CATEGORY_OPTIONS;
-          const childRows = expandedChildren.length > 0 ? chunk(expandedChildren, COLS) : [];
+      {groupedRows.map((row, rowIndex) =>
+        row.kind === 'parent'
+          ? renderGridRow(row.key, row.items, rowIndex, (parent) => {
+              const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
+              const hasSelectedChild = selectedChildParentIdSet.has(parent.id);
+              const isParentSelected = selectedCategorySet.has(parent.id);
+              const isExpanded = expandedParentId === parent.id;
+              const isSelected = isParentSelected || hasSelectedChild;
+              const hasChildren = children.length > 0;
 
-          return (
-            <React.Fragment key={rowIndex}>
-              {/* Parent row */}
-              <View className="flex-row gap-2">
-                {row.map((parent) => {
-                  const children = childByParent.get(parent.id) ?? EMPTY_CATEGORY_OPTIONS;
-                  const selectedChildCount = selectedChildCountByParentId.get(parent.id) ?? 0;
-                  const hasSelectedChild = selectedChildCount > 0;
-                  const isParentSelected = selectedCategorySet.has(parent.id);
-                  const parentSelectionState = isParentSelected
-                    ? 'full'
-                    : hasSelectedChild
-                      ? 'partial'
-                      : 'none';
-                  const isExpanded = expandedParentId === parent.id;
-                  const isSelected = parentSelectionState !== 'none';
-                  const hasChildren = children.length > 0;
-
-                  return (
-                    <View key={parent.id} className="flex-1">
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          if (hasChildren) {
-                            if (allowParentSelection) {
-                              handleSelection(parent.id);
-                              setExpandedParentId(parent.id);
-                            } else {
-                              handleToggleExpanded(parent.id);
-                            }
-                            return;
-                          }
-                          handleSelection(parent.id);
-                          setExpandedParentId(null);
-                        }}
-                        className={cn(
-                          'rounded-xl border px-2.5 py-2.5 flex-row items-center',
-                          parentSelectionState === 'full'
-                            ? 'bg-primary/16 border-primary/65'
-                            : parentSelectionState === 'partial'
-                              ? 'bg-primary/8 border-primary/45'
-                              : 'bg-card border-border/30',
-                        )}
-                        accessibilityRole="button"
-                        accessibilityState={{
-                          selected: parentSelectionState !== 'none',
-                          expanded: hasChildren ? isExpanded : undefined,
-                        }}
-                      >
-                        <Text className="text-[15px] mr-1.5">{parent.icon}</Text>
-                        <Text
-                          variant="caption"
-                          numberOfLines={1}
-                          className={cn('flex-1', isSelected ? 'text-primary' : 'text-foreground')}
-                        >
-                          {parent.name}
-                        </Text>
-
-                        {allowParentSelection && hasChildren && isMultiSelect ? (
-                          <View className="ml-0.5 flex-row items-center gap-1">
-                            {parentSelectionState === 'full' ? (
-                              <View
-                                style={styles.parentSelectedBadge}
-                                className="bg-primary border border-primary/60"
-                              >
-                                <Check size={10} color="#FFFFFF" />
-                              </View>
-                            ) : parentSelectionState === 'partial' ? (
-                              <View
-                                style={styles.parentSelectedBadge}
-                                className="bg-primary/14 border border-primary/35"
-                              >
-                                <Text variant="label" className="text-primary text-[10px]">
-                                  {selectedChildCount}
-                                </Text>
-                              </View>
-                            ) : null}
-
-                            <Pressable
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                void triggerHaptic('selection');
-                                handleToggleExpanded(parent.id);
-                              }}
-                              hitSlop={6}
-                              accessibilityRole="button"
-                              accessibilityState={{ expanded: isExpanded }}
-                              className="rounded-full p-0.5"
-                            >
-                              <ChevronDown
-                                size={13}
-                                color={isSelected ? themeColors.primary : themeColors.textMuted}
-                                style={
-                                  isExpanded ? styles.chevronExpanded : styles.chevronCollapsed
-                                }
-                              />
-                            </Pressable>
-                          </View>
-                        ) : allowParentSelection && hasChildren ? (
-                          <ChevronDown
-                            size={13}
-                            color={isSelected ? themeColors.primary : themeColors.textMuted}
-                            style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
-                          />
-                        ) : isParentSelected && !hasSelectedChild ? (
-                          <Check size={14} color={themeColors.primary} />
-                        ) : hasChildren ? (
-                          <ChevronDown
-                            size={13}
-                            color={isSelected ? themeColors.primary : themeColors.textMuted}
-                            style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
-                          />
-                        ) : null}
-                      </Pressable>
+              return (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    if (hasChildren) {
+                      if (allowParentSelection) {
+                        handleSelection(parent.id);
+                        setExpandedParentId(parent.id);
+                      } else {
+                        handleToggleExpanded(parent.id);
+                      }
+                      return;
+                    }
+                    handleSelection(parent.id);
+                    setExpandedParentId(null);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    selected: isSelected,
+                    expanded: hasChildren ? isExpanded : undefined,
+                  }}
+                  style={[
+                    styles.gridCellButton,
+                    {
+                      backgroundColor: isSelected
+                        ? themeColors.primarySoft
+                        : isExpanded
+                          ? themeColors.surfaceMuted
+                          : 'transparent',
+                    },
+                  ]}
+                >
+                  {allowParentSelection && hasChildren && isMultiSelect ? (
+                    <Pressable
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        void triggerHaptic('selection');
+                        handleToggleExpanded(parent.id);
+                      }}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      accessibilityState={{ expanded: isExpanded }}
+                      style={styles.cornerRight}
+                    >
+                      <ChevronDown
+                        size={13}
+                        color={isSelected || isExpanded ? themeColors.primary : themeColors.textMuted}
+                        style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
+                      />
+                    </Pressable>
+                  ) : hasChildren ? (
+                    <View style={styles.cornerRight}>
+                      <ChevronDown
+                        size={13}
+                        color={isSelected || isExpanded ? themeColors.primary : themeColors.textMuted}
+                        style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
+                      />
                     </View>
-                  );
-                })}
-                {row.length < COLS &&
-                  Array.from({ length: COLS - row.length }, (_, i) => (
-                    <View key={`pad-${i}`} className="flex-1" />
-                  ))}
-              </View>
+                  ) : null}
 
-              {/* Expanded children - full width below row */}
-              {childRows.map((childRow, childRowIndex) => (
-                <View key={`children-${childRowIndex}`} className="flex-row gap-2">
-                  {childRow.map((child) => {
-                    const isChildSelected = selectedCategorySet.has(child.id);
-                    return (
-                      <View key={child.id} className="flex-1">
-                        <Pressable
-                          onPress={() => {
-                            void triggerHaptic('selection');
-                            handleSelection(child.id);
-                          }}
-                          className={cn(
-                            'rounded-xl border px-2.5 py-2 flex-row items-center',
-                            isChildSelected
-                              ? 'bg-primary/14 border-primary/55'
-                              : 'bg-secondary/45 border-border/20',
-                          )}
-                        >
-                          <Text className="text-[13px] mr-1.5">{child.icon}</Text>
-                          <Text
-                            variant="caption"
-                            numberOfLines={1}
-                            className={cn(
-                              'flex-1',
-                              isChildSelected ? 'text-primary' : 'text-muted-foreground',
-                            )}
-                          >
-                            {child.name}
-                          </Text>
-                          {isChildSelected ? <Check size={12} color={themeColors.primary} /> : null}
-                        </Pressable>
-                      </View>
-                    );
-                  })}
-                  {childRow.length < COLS &&
-                    Array.from({ length: COLS - childRow.length }, (_, i) => (
-                      <View key={`cpad-${i}`} className="flex-1" />
-                    ))}
-                </View>
-              ))}
-            </React.Fragment>
-          );
-        })}
-      </View>
+                  <View style={styles.inlineContent}>
+                    <Text style={styles.inlineIcon}>{parent.icon}</Text>
+                    <Text
+                      variant="caption"
+                      numberOfLines={2}
+                      style={[
+                        styles.gridLabel,
+                        { color: isSelected ? themeColors.primary : themeColors.text },
+                      ]}
+                    >
+                      {parent.name}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })
+          : renderGridRow(row.key, row.items, rowIndex, (child) => {
+              const isChildSelected = selectedCategorySet.has(child.id);
+              return (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    handleSelection(child.id);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isChildSelected }}
+                  style={[
+                    styles.gridCellButton,
+                    {
+                      backgroundColor: isChildSelected ? themeColors.primarySoft : 'transparent',
+                    },
+                  ]}
+                >
+                  <Text
+                    variant="caption"
+                    numberOfLines={2}
+                    style={[
+                      styles.gridLabel,
+                      { color: isChildSelected ? themeColors.primary : themeColors.textMuted },
+                    ]}
+                  >
+                    {child.name}
+                  </Text>
+                </Pressable>
+              );
+            }),
+      )}
+      <Pressable accessible={false} onPress={onBackgroundPress} style={{ flex: 1 }} />
     </ScrollView>
   );
 }

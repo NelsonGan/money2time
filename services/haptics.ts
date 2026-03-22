@@ -15,9 +15,14 @@ const GLOBAL_HAPTIC_DEDUPE_WINDOW_MS = 140;
 const NAVIGATION_HAPTIC_SUPPRESS_WINDOW_MS = 420;
 let lastSelectionHapticAtMs = 0;
 let lastHapticAtMs = 0;
+let hapticsEnabled = true;
+
+export function setHapticsEnabled(enabled: boolean) {
+  hapticsEnabled = enabled;
+}
 
 export async function triggerHaptic(kind: HapticKind) {
-  if (kind === 'none') return;
+  if (kind === 'none' || !hapticsEnabled) return;
 
   const now = Date.now();
   if (now - lastHapticAtMs < GLOBAL_HAPTIC_DEDUPE_WINDOW_MS) {

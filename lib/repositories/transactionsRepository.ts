@@ -48,9 +48,12 @@ const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   search: '',
   dateRange: null,
   accountId: null,
+  excludedAccountIds: [],
   type: 'all',
   incomeCategoryId: null,
   expenseCategoryId: null,
+  excludedIncomeCategoryIds: [],
+  excludedExpenseCategoryIds: [],
   categoryId: null,
   minAmount: null,
   maxAmount: null,
@@ -142,11 +145,23 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       fromAccountName: rel?.fromAccountName ?? null,
       toAccountName: rel?.toAccountName ?? null,
       categoryName: rel?.categoryName ?? null,
+      categoryParentId: rel?.categoryParentId ?? null,
       categoryParentName: rel?.parentCategoryName ?? null,
       categoryIcon: rel?.categoryIcon ?? null,
     });
   }
   return withRelations;
+}
+
+function matchesExcludedCategory(
+  transaction: TransactionWithRelations,
+  excludedCategoryIdSet: ReadonlySet<string>,
+) {
+  if (!transaction.categoryId) return false;
+  return (
+    excludedCategoryIdSet.has(transaction.categoryId) ||
+    (!!transaction.categoryParentId && excludedCategoryIdSet.has(transaction.categoryParentId))
+  );
 }
 
 class TransactionsRepository {
@@ -156,7 +171,16 @@ class TransactionsRepository {
 
     const predicates = [
       isNull(transactionsTable.deletedAt),
-      normalized.type !== 'all' ? eq(transactionsTable.type, normalized.type) : undefined,
+      normalized.type === 'balance_adjustment'
+        ? or(
+            eq(transactionsTable.type, 'balance_adjustment'),
+            eq(transactionsTable.type, 'transfer'),
+          )
+        : normalized.type === 'transfer'
+          ? eq(transactionsTable.type, 'transfer')
+          : normalized.type !== 'all'
+            ? eq(transactionsTable.type, normalized.type)
+            : undefined,
       normalized.dateRange ? gte(transactionsTable.date, normalized.dateRange.start) : undefined,
       normalized.dateRange ? lte(transactionsTable.date, normalized.dateRange.end) : undefined,
       normalized.accountId
@@ -186,8 +210,70 @@ class TransactionsRepository {
       .where(and(...predicates))
       .all()
       .map(toTransaction);
-    const orderedRows = sortTransactions(rows, normalized.sortBy);
-    return attachRelations(orderedRows);
+    const transactions = attachRelations(rows);
+    const excludedAccountIdSet = new Set(normalized.excludedAccountIds);
+    const excludedIncomeCategoryIdSet = new Set(normalized.excludedIncomeCategoryIds);
+    const excludedExpenseCategoryIdSet = new Set(normalized.excludedExpenseCategoryIds);
+    const hasIncomeCategoryFilter = normalized.incomeCategoryId !== null;
+    const hasExpenseCategoryFilter = normalized.expenseCategoryId !== null;
+    const hasExcludedAccountFilter = excludedAccountIdSet.size > 0;
+    const hasExcludedIncomeCategoryFilter = excludedIncomeCategoryIdSet.size > 0;
+    const hasExcludedExpenseCategoryFilter = excludedExpenseCategoryIdSet.size > 0;
+    const requiresLegacyTransferTypeCheck =
+      normalized.type === 'transfer' || normalized.type === 'balance_adjustment';
+
+    const filtered = transactions.filter((transaction) => {
+      const isLegacyBalanceAdjustmentTransfer =
+        requiresLegacyTransferTypeCheck &&
+        transaction.type === 'transfer' &&
+        !!transaction.accountId &&
+        !transaction.fromAccountId &&
+        !transaction.toAccountId;
+
+      const matchesType =
+        normalized.type === 'all'
+          ? true
+          : normalized.type === 'balance_adjustment'
+            ? transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer
+            : normalized.type === 'transfer'
+              ? transaction.type === 'transfer' && !isLegacyBalanceAdjustmentTransfer
+              : transaction.type === normalized.type;
+      if (!matchesType) return false;
+
+      if (hasExcludedAccountFilter) {
+        if (
+          (transaction.accountId && excludedAccountIdSet.has(transaction.accountId)) ||
+          (transaction.fromAccountId && excludedAccountIdSet.has(transaction.fromAccountId)) ||
+          (transaction.toAccountId && excludedAccountIdSet.has(transaction.toAccountId))
+        ) {
+          return false;
+        }
+      }
+
+      if (transaction.type === 'income' && hasIncomeCategoryFilter) {
+        if (transaction.categoryId !== normalized.incomeCategoryId) return false;
+      }
+      if (transaction.type === 'expense' && hasExpenseCategoryFilter) {
+        if (transaction.categoryId !== normalized.expenseCategoryId) return false;
+      }
+      if (
+        transaction.type === 'income' &&
+        hasExcludedIncomeCategoryFilter &&
+        matchesExcludedCategory(transaction, excludedIncomeCategoryIdSet)
+      ) {
+        return false;
+      }
+      if (
+        transaction.type === 'expense' &&
+        hasExcludedExpenseCategoryFilter &&
+        matchesExcludedCategory(transaction, excludedExpenseCategoryIdSet)
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    return sortTransactions(filtered, normalized.sortBy);
   }
 
   listByAccount(accountId: string) {
