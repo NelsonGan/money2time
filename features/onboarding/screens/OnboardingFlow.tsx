@@ -4,6 +4,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text, ThemeModal } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
@@ -212,137 +213,139 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      {renderProgressHeader()}
+      <TabletContentContainer style={{ flex: 1 }}>
+        {renderProgressHeader()}
 
-      {step === 1 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-1">
-          <OnboardingValuePropStep
-            currencySymbol={settings.currencySymbol}
-            onGetStarted={() => {
-              void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
-              setStep(2);
-            }}
-            onSkip={handleSkipOnboarding}
-          />
-        </Animated.View>
-      )}
+        {step === 1 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-1">
+            <OnboardingValuePropStep
+              currencySymbol={settings.currencySymbol}
+              onGetStarted={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
+                setStep(2);
+              }}
+              onSkip={handleSkipOnboarding}
+            />
+          </Animated.View>
+        )}
 
-      {step === 2 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-2">
-          <OnboardingPreferencesStep
-            locale={settings.locale}
-            currencyCode={settings.currencyCode}
-            currencySymbol={settings.currencySymbol}
-            themeColor={settings.themeColor}
-            onLocaleChange={(locale) => {
-              setAppLocale(locale);
-              updateSettings({ locale });
-            }}
-            onCurrencyChange={({ code, symbol }) => {
-              updateSettings({ currencyCode: code, currencySymbol: symbol });
-            }}
-            onThemeColorChange={(themeColor) => {
-              updateSettings({ themeColor });
-            }}
-            onBack={() => setStep(1)}
-            onContinue={() => setStep(3)}
-          />
-        </Animated.View>
-      )}
+        {step === 2 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-2">
+            <OnboardingPreferencesStep
+              locale={settings.locale}
+              currencyCode={settings.currencyCode}
+              currencySymbol={settings.currencySymbol}
+              themeColor={settings.themeColor}
+              onLocaleChange={(locale) => {
+                setAppLocale(locale);
+                updateSettings({ locale });
+              }}
+              onCurrencyChange={({ code, symbol }) => {
+                updateSettings({ currencyCode: code, currencySymbol: symbol });
+              }}
+              onThemeColorChange={(themeColor) => {
+                updateSettings({ themeColor });
+              }}
+              onBack={() => setStep(1)}
+              onContinue={() => setStep(3)}
+            />
+          </Animated.View>
+        )}
 
-      {step === 3 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-3">
-          <OnboardingNotificationsStep
-            onEnable={async () => {
-              void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
-              await requestPermissions();
-              setStep(4);
-            }}
-            onSkip={() => {
-              void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
-              setStep(4);
-            }}
-          />
-        </Animated.View>
-      )}
+        {step === 3 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-3">
+            <OnboardingNotificationsStep
+              onEnable={async () => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
+                await requestPermissions();
+                setStep(4);
+              }}
+              onSkip={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
+                setStep(4);
+              }}
+            />
+          </Animated.View>
+        )}
 
-      {step === 4 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
-          <OnboardingWageStep
+        {step === 4 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
+            <OnboardingWageStep
+              settings={settings}
+              currentMonthWage={currentMonthWage}
+              wageIsSet={wageIsSet}
+              onBack={() => setStep(3)}
+              onContinue={() => setStep(5)}
+              onOpenWageCalculator={() => {
+                void triggerHaptic('selection');
+                setShowWageCalculator(true);
+              }}
+            />
+          </Animated.View>
+        )}
+
+        {step === 5 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+            <OnboardingModeStep
+              onBack={() => setStep(4)}
+              onSelectSimple={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
+                setIsSimpleUser(true);
+                completeOnboarding({
+                  userMode: 'simple',
+                  seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
+                });
+                onComplete();
+              }}
+              onSelectPower={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
+                setIsSimpleUser(false);
+                setStep(6);
+              }}
+            />
+          </Animated.View>
+        )}
+
+        {step === 6 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
+            <OnboardingBootstrapStep
+              onBack={() => setStep(5)}
+              onImport={() => {
+                void handleImport();
+              }}
+              onStartFresh={handleStartFresh}
+              onFinish={completePowerOnboarding}
+              onClearImportResult={() => setImportResult(null)}
+              choice={bootstrapChoice}
+              view={bootstrapView}
+              onChoiceChange={setBootstrapChoice}
+              onViewChange={setBootstrapView}
+              importResult={importResult}
+              isImporting={isImporting}
+            />
+          </Animated.View>
+        )}
+
+        {/* Wage Calculator Modal */}
+        <ThemeModal
+          visible={showWageCalculator}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowWageCalculator(false)}
+        >
+          <WageCalculatorFlowScreen
+            initialConfig={prefillConfig}
             settings={settings}
-            currentMonthWage={currentMonthWage}
-            wageIsSet={wageIsSet}
-            onBack={() => setStep(3)}
-            onContinue={() => setStep(5)}
-            onOpenWageCalculator={() => {
-              void triggerHaptic('selection');
-              setShowWageCalculator(true);
+            monthLabel={currentMonth}
+            onCancel={() => setShowWageCalculator(false)}
+            onComplete={(config) => {
+              updateWageConfigForMonth(currentMonth, config);
+              setShowWageCalculator(false);
+              void triggerHaptic('success');
             }}
           />
-        </Animated.View>
-      )}
-
-      {step === 5 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
-          <OnboardingModeStep
-            onBack={() => setStep(4)}
-            onSelectSimple={() => {
-              void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
-              setIsSimpleUser(true);
-              completeOnboarding({
-                userMode: 'simple',
-                seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
-              });
-              onComplete();
-            }}
-            onSelectPower={() => {
-              void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
-              setIsSimpleUser(false);
-              setStep(6);
-            }}
-          />
-        </Animated.View>
-      )}
-
-      {step === 6 && (
-        <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
-          <OnboardingBootstrapStep
-            onBack={() => setStep(5)}
-            onImport={() => {
-              void handleImport();
-            }}
-            onStartFresh={handleStartFresh}
-            onFinish={completePowerOnboarding}
-            onClearImportResult={() => setImportResult(null)}
-            choice={bootstrapChoice}
-            view={bootstrapView}
-            onChoiceChange={setBootstrapChoice}
-            onViewChange={setBootstrapView}
-            importResult={importResult}
-            isImporting={isImporting}
-          />
-        </Animated.View>
-      )}
-
-      {/* Wage Calculator Modal */}
-      <ThemeModal
-        visible={showWageCalculator}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowWageCalculator(false)}
-      >
-        <WageCalculatorFlowScreen
-          initialConfig={prefillConfig}
-          settings={settings}
-          monthLabel={currentMonth}
-          onCancel={() => setShowWageCalculator(false)}
-          onComplete={(config) => {
-            updateWageConfigForMonth(currentMonth, config);
-            setShowWageCalculator(false);
-            void triggerHaptic('success');
-          }}
-        />
-      </ThemeModal>
+        </ThemeModal>
+      </TabletContentContainer>
     </SafeAreaView>
   );
 }

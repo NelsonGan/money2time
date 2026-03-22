@@ -21,11 +21,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePackagesByType, usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -467,7 +469,8 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const packages = usePackagesByType(offering);
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { height: screenHeight } = useWindowDimensions();
+  const { contentWidth } = useDeviceLayout();
   const scrollRef = useRef<ScrollView>(null);
   const activeIndexRef = useRef(0);
   const measuredPlanCardHeightsRef = useRef<Record<string, number>>({});
@@ -475,9 +478,11 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [planCardHeight, setPlanCardHeight] = useState<number | null>(null);
-  const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(flashMessage ?? null);
+  const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(
+    flashMessage ?? null,
+  );
 
-  const cardWidth = screenWidth - CARD_PEEK * 2;
+  const cardWidth = contentWidth - CARD_PEEK * 2;
   const estimatedHeaderHeight = 32 + spacing.sm * 2;
   const reservedContentHeight = estimatedHeaderHeight + spacing.lg + 36;
   const usableContentHeight = Math.max(
@@ -557,10 +562,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     () => ({ x: (cardWidth + CARD_GAP) * startIdx, y: 0 }),
     [cardWidth, startIdx],
   );
-  const planCardIds = useMemo(
-    () => planCards.map((card) => card.pkg.identifier),
-    [planCards],
-  );
+  const planCardIds = useMemo(() => planCards.map((card) => card.pkg.identifier), [planCards]);
 
   useEffect(() => {
     activeIndexRef.current = startIdx;
@@ -743,109 +745,115 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, spacing.md) }}
       >
-        <Animated.View entering={FadeIn.duration(400)}>
-          <FeatureShowcase colors={colors} height={showcaseHeight} />
-        </Animated.View>
+        <TabletContentContainer>
+          <Animated.View entering={FadeIn.duration(400)}>
+            <FeatureShowcase colors={colors} height={showcaseHeight} />
+          </Animated.View>
+        </TabletContentContainer>
 
         {planCards.length > 0 ? (
-          <Animated.View entering={FadeInUp.delay(200).duration(400)}>
-            <ScrollView
-              key={`${planCardIds.join('|')}:${cardWidth}`}
-              ref={scrollRef}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={cardWidth + CARD_GAP}
-              decelerationRate="fast"
-              scrollEventThrottle={16}
-              contentOffset={initialPlanContentOffset}
-              contentContainerStyle={{ paddingHorizontal: CARD_PEEK }}
-              onScroll={onCardScroll}
-              onMomentumScrollEnd={onCardScroll}
-            >
-              {planCards.map((card) => (
-                <PlanCard
-                  key={card.pkg.identifier}
-                  data={card}
-                  width={cardWidth}
-                  height={planCardHeight}
-                  colors={colors}
-                  isPurchasing={isPurchasing}
-                  onContinue={() => handlePurchase(card.pkg.identifier)}
-                  onMeasureHeight={handlePlanCardMeasure}
-                />
-              ))}
-            </ScrollView>
-
-            {planCards.length > 1 ? (
-              <View style={s.planDots}>
-                {planCards.map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      s.planDot,
-                      {
-                        backgroundColor:
-                          i === (activeIndex ?? startIdx) ? colors.dotActive : colors.dotInactive,
-                        width: i === (activeIndex ?? startIdx) ? 20 : 7,
-                      },
-                    ]}
+          <TabletContentContainer>
+            <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+              <ScrollView
+                key={`${planCardIds.join('|')}:${cardWidth}`}
+                ref={scrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={cardWidth + CARD_GAP}
+                decelerationRate="fast"
+                scrollEventThrottle={16}
+                contentOffset={initialPlanContentOffset}
+                contentContainerStyle={{ paddingHorizontal: CARD_PEEK }}
+                onScroll={onCardScroll}
+                onMomentumScrollEnd={onCardScroll}
+              >
+                {planCards.map((card) => (
+                  <PlanCard
+                    key={card.pkg.identifier}
+                    data={card}
+                    width={cardWidth}
+                    height={planCardHeight}
+                    colors={colors}
+                    isPurchasing={isPurchasing}
+                    onContinue={() => handlePurchase(card.pkg.identifier)}
+                    onMeasureHeight={handlePlanCardMeasure}
                   />
                 ))}
-              </View>
-            ) : null}
-          </Animated.View>
-        ) : (
-          <Animated.View entering={FadeInUp.delay(200).duration(400)}>
-            <View
-              style={[
-                s.emptyState,
-                {
-                  backgroundColor: colors.cardBg,
-                  borderColor: colors.cardBorder,
-                },
-              ]}
-            >
-              <Text style={[s.emptyStateTitle, { color: colors.text }]}>
-                {isLoading
-                  ? I18n.t('pro.loading_plans')
-                  : I18n.t('pro.plans_unavailable_title')}
-              </Text>
-              <Text style={[s.emptyStateBody, { color: colors.textMuted }]}>
-                {isLoading
-                  ? I18n.t('pro.loading_plans_body')
-                  : I18n.t('pro.plans_unavailable_body')}
-              </Text>
-              {!isLoading ? (
-                <Button
-                  onPress={() => void refresh()}
-                  variant="outline"
-                  size="sm"
-                  className="mt-5 self-center"
-                  haptic="none"
-                >
-                  <Text>{I18n.t('pro.retry_loading_plans')}</Text>
-                </Button>
+              </ScrollView>
+
+              {planCards.length > 1 ? (
+                <View style={s.planDots}>
+                  {planCards.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        s.planDot,
+                        {
+                          backgroundColor:
+                            i === (activeIndex ?? startIdx) ? colors.dotActive : colors.dotInactive,
+                          width: i === (activeIndex ?? startIdx) ? 20 : 7,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
               ) : null}
-            </View>
-          </Animated.View>
+            </Animated.View>
+          </TabletContentContainer>
+        ) : (
+          <TabletContentContainer>
+            <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+              <View
+                style={[
+                  s.emptyState,
+                  {
+                    backgroundColor: colors.cardBg,
+                    borderColor: colors.cardBorder,
+                  },
+                ]}
+              >
+                <Text style={[s.emptyStateTitle, { color: colors.text }]}>
+                  {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
+                </Text>
+                <Text style={[s.emptyStateBody, { color: colors.textMuted }]}>
+                  {isLoading
+                    ? I18n.t('pro.loading_plans_body')
+                    : I18n.t('pro.plans_unavailable_body')}
+                </Text>
+                {!isLoading ? (
+                  <Button
+                    onPress={() => void refresh()}
+                    variant="outline"
+                    size="sm"
+                    className="mt-5 self-center"
+                    haptic="none"
+                  >
+                    <Text>{I18n.t('pro.retry_loading_plans')}</Text>
+                  </Button>
+                ) : null}
+              </View>
+            </Animated.View>
+          </TabletContentContainer>
         )}
 
-        <View style={s.footer}>
-          <Pressable onPress={handleRestore} disabled={isRestoring} hitSlop={12}>
-            <Text style={[s.footerLink, { color: colors.textMuted }]}>
-              {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
-            </Text>
-          </Pressable>
-          <Text style={[s.footerDot, { color: colors.dotInactive }]}>·</Text>
-          <Pressable
-            onPress={() => void Linking.openURL('https://money2time.app/privacy')}
-            hitSlop={12}
-          >
-            <Text style={[s.footerLink, { color: colors.textMuted }]}>
-              {I18n.t('pro.privacy_policy')}
-            </Text>
-          </Pressable>
-        </View>
+        <TabletContentContainer>
+          <View style={s.footer}>
+            <Pressable onPress={handleRestore} disabled={isRestoring} hitSlop={12}>
+              <Text style={[s.footerLink, { color: colors.textMuted }]}>
+                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+              </Text>
+            </Pressable>
+            <Text style={[s.footerDot, { color: colors.dotInactive }]}>·</Text>
+            <Pressable
+              onPress={() => void Linking.openURL('https://money2time.app/privacy')}
+              hitSlop={12}
+            >
+              <Text style={[s.footerLink, { color: colors.textMuted }]}>
+                {I18n.t('pro.privacy_policy')}
+              </Text>
+            </Pressable>
+          </View>
+        </TabletContentContainer>
       </ScrollView>
     </View>
   );

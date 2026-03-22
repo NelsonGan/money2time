@@ -1,6 +1,7 @@
 import './global.css';
 
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -47,6 +48,7 @@ import type {
   TutorialTargetId,
   TutorialTargetRect,
 } from '~/features/tutorial/types';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
@@ -74,7 +76,11 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
-type ActivityInsightType = 'expense_breakdown' | 'income_breakdown' | 'expense_trend' | 'expense_sentiment';
+type ActivityInsightType =
+  | 'expense_breakdown'
+  | 'income_breakdown'
+  | 'expense_trend'
+  | 'expense_sentiment';
 type ActivityInsightPeriodPreset = 'week' | 'month' | 'year' | 'custom';
 
 type FontScalingNativeComponent = {
@@ -307,11 +313,7 @@ function MainShellScreen({
     [navigation],
   );
   const openActivityBreakdownInsight = useCallback(
-    (
-      insightType: ActivityInsightType,
-      monthKey: string,
-      options?: ActivityInsightOpenOptions,
-    ) => {
+    (insightType: ActivityInsightType, monthKey: string, options?: ActivityInsightOpenOptions) => {
       setActivityBreakdownInsightRequest((previous) => ({
         insightType,
         monthKey,
@@ -887,6 +889,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 
 function AppContent() {
   const { isLoading, settings } = useApp();
+  const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
@@ -926,6 +929,22 @@ function AppContent() {
 
     void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: visibleScreen });
   }, [isLoading, visibleScreen]);
+
+  useEffect(() => {
+    const targetLock = isTablet
+      ? ScreenOrientation.OrientationLock.DEFAULT
+      : ScreenOrientation.OrientationLock.PORTRAIT_UP;
+
+    const syncOrientationLock = async () => {
+      try {
+        await ScreenOrientation.lockAsync(targetLock);
+      } catch {
+        // Ignore orientation failures so app startup is not blocked on unsupported devices.
+      }
+    };
+
+    void syncOrientationLock();
+  }, [isTablet]);
 
   const handleOnboardingComplete = useCallback(() => {
     setTutorialStartToken(0);

@@ -21,6 +21,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Card, SettingsHeader, Text, TimeValueInline } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { getThemeWordmarkPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
@@ -585,90 +586,92 @@ export function HomeScreen({
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
     >
-      {/* Mini insight cards */}
-      <Animated.View
-        entering={FadeIn.delay(100).duration(400)}
-        className="flex-row gap-3 mx-5 mt-3"
-      >
-        {/* Sentiment card */}
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('medium');
-            onOpenExpenseSentiment?.();
-          }}
-          className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
+      <TabletContentContainer>
+        {/* Mini insight cards */}
+        <Animated.View
+          entering={FadeIn.delay(100).duration(400)}
+          className="flex-row gap-3 mx-5 mt-3"
         >
-          <Text variant="caption" tone="muted">
-            {I18n.t('home.weekly_mood')}
-          </Text>
-          <View className="flex-row items-center justify-between mt-2">
-            <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="sad" size={20} />
-              <Text variant="caption" className="text-foreground">
-                {past7DaysData.sad}
-              </Text>
+          {/* Sentiment card */}
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('medium');
+              onOpenExpenseSentiment?.();
+            }}
+            className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
+          >
+            <Text variant="caption" tone="muted">
+              {I18n.t('home.weekly_mood')}
+            </Text>
+            <View className="flex-row items-center justify-between mt-2">
+              <View className="flex-row items-center gap-1">
+                <SentimentIcon sentiment="sad" size={20} />
+                <Text variant="caption" className="text-foreground">
+                  {past7DaysData.sad}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1">
+                <SentimentIcon sentiment="neutral" size={20} />
+                <Text variant="caption" className="text-foreground">
+                  {past7DaysData.neutral}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1">
+                <SentimentIcon sentiment="happy" size={20} />
+                <Text variant="caption" className="text-foreground">
+                  {past7DaysData.happy}
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="neutral" size={20} />
-              <Text variant="caption" className="text-foreground">
-                {past7DaysData.neutral}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="happy" size={20} />
-              <Text variant="caption" className="text-foreground">
-                {past7DaysData.happy}
-              </Text>
-            </View>
-          </View>
-        </Pressable>
+          </Pressable>
 
-        {/* Expense bar chart card */}
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('medium');
-            onOpenExpenseTrend?.();
-          }}
-          className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
-        >
-          <Text variant="caption" tone="muted">
-            {I18n.t('home.recent_spendings')}
-          </Text>
-          <View className="flex-row items-end gap-1.5 mt-2" style={{ height: 24 }}>
-            {past7DaysData.expenseBars.map((bar) => {
-              const maxVal = Math.max(...past7DaysData.expenseBars.map((b) => b.value), 1);
-              const barHeight = bar.value > 0 ? Math.max(4, (bar.value / maxVal) * 22) : 3;
-              return (
-                <View
-                  key={bar.key}
-                  className="flex-1"
-                  style={{
-                    height: barHeight,
-                    borderRadius: 2,
-                    backgroundColor:
-                      bar.value > 0 ? themeColors.primary : `${themeColors.border}40`,
-                    opacity: bar.value > 0 ? 0.6 : 0.3,
-                  }}
-                />
-              );
-            })}
-          </View>
-        </Pressable>
-      </Animated.View>
-
-      <View ref={converterRef} onLayout={handleConverterLayout}>
-        <Animated.View entering={FadeIn.delay(150).duration(500)}>
-          <HeroAmountConverter
-            amount={estimatorAmount}
-            currencySymbol={settings.currencySymbol}
-            hasRate={hasHourlyRate}
-            hours={estimatorHours}
-            workdays={estimatorWorkdays}
-            workdaysPerWeek={estimatorWorkdaysPerWeek}
-            onChangeAmount={setEstimatorAmount}
-          />
+          {/* Expense bar chart card */}
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('medium');
+              onOpenExpenseTrend?.();
+            }}
+            className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
+          >
+            <Text variant="caption" tone="muted">
+              {I18n.t('home.recent_spendings')}
+            </Text>
+            <View className="flex-row items-end gap-1.5 mt-2" style={{ height: 24 }}>
+              {past7DaysData.expenseBars.map((bar) => {
+                const maxVal = Math.max(...past7DaysData.expenseBars.map((b) => b.value), 1);
+                const barHeight = bar.value > 0 ? Math.max(4, (bar.value / maxVal) * 22) : 3;
+                return (
+                  <View
+                    key={bar.key}
+                    className="flex-1"
+                    style={{
+                      height: barHeight,
+                      borderRadius: 2,
+                      backgroundColor:
+                        bar.value > 0 ? themeColors.primary : `${themeColors.border}40`,
+                      opacity: bar.value > 0 ? 0.6 : 0.3,
+                    }}
+                  />
+                );
+              })}
+            </View>
+          </Pressable>
         </Animated.View>
-      </View>
+
+        <View ref={converterRef} onLayout={handleConverterLayout}>
+          <Animated.View entering={FadeIn.delay(150).duration(500)}>
+            <HeroAmountConverter
+              amount={estimatorAmount}
+              currencySymbol={settings.currencySymbol}
+              hasRate={hasHourlyRate}
+              hours={estimatorHours}
+              workdays={estimatorWorkdays}
+              workdaysPerWeek={estimatorWorkdaysPerWeek}
+              onChangeAmount={setEstimatorAmount}
+            />
+          </Animated.View>
+        </View>
+      </TabletContentContainer>
     </ScrollView>
   );
 
@@ -680,103 +683,109 @@ export function HomeScreen({
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled
     >
-      <View className="pb-2">
-        <SettingsHeader
-          className="px-0 pt-3 pb-1.5"
-          title={I18n.t('home.recurring.title')}
-          rightAccessory={
-            onOpenSettingsScreen ? (
-              <Button
-                size="icon"
-                variant="secondary"
-                haptic="selection"
-                className="h-10 w-10 rounded-full"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('home.recurring.tab')}
-                onPress={() => {
-                  onOpenSettingsScreen('Recurring');
-                }}
-              >
-                <Settings size={18} color={themeColors.textMuted} />
-              </Button>
-            ) : null
-          }
-        />
-      </View>
+      <TabletContentContainer>
+        <View className="pb-2">
+          <SettingsHeader
+            className="px-0 pt-3 pb-1.5"
+            title={I18n.t('home.recurring.title')}
+            rightAccessory={
+              onOpenSettingsScreen ? (
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  haptic="selection"
+                  className="h-10 w-10 rounded-full"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('home.recurring.tab')}
+                  onPress={() => {
+                    onOpenSettingsScreen('Recurring');
+                  }}
+                >
+                  <Settings size={18} color={themeColors.textMuted} />
+                </Button>
+              ) : null
+            }
+          />
+        </View>
 
-      {recurringSections.length > 0 ? (
-        recurringSections.map((section, sectionIndex) => (
-          <View key={section.id} className="pb-2">
-            <View
-              className={cn(
-                'pl-1 pr-3 pb-1 flex-row items-center justify-between',
-                sectionIndex === 0 ? 'pt-1.5' : 'pt-5',
-              )}
-            >
-              <Text variant="label" tone="muted">
-                {section.label}
-              </Text>
+        {recurringSections.length > 0 ? (
+          recurringSections.map((section, sectionIndex) => (
+            <View key={section.id} className="pb-2">
+              <View
+                className={cn(
+                  'pl-1 pr-3 pb-1 flex-row items-center justify-between',
+                  sectionIndex === 0 ? 'pt-1.5' : 'pt-5',
+                )}
+              >
+                <Text variant="label" tone="muted">
+                  {section.label}
+                </Text>
+              </View>
+              <Card variant="default" style={styles.recurringCard}>
+                {section.rows.map((item, index) => {
+                  const isLast = index === section.rows.length - 1;
+                  const animationDelay = sectionIndex * 60 + index * 40;
+                  return (
+                    <Animated.View
+                      key={item.id}
+                      entering={FadeIn.delay(animationDelay).duration(350)}
+                    >
+                      <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
+                    </Animated.View>
+                  );
+                })}
+              </Card>
             </View>
-            <Card variant="default" style={styles.recurringCard}>
-              {section.rows.map((item, index) => {
-                const isLast = index === section.rows.length - 1;
-                const animationDelay = sectionIndex * 60 + index * 40;
-                return (
-                  <Animated.View
-                    key={item.id}
-                    entering={FadeIn.delay(animationDelay).duration(350)}
-                  >
-                    <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
-                  </Animated.View>
-                );
-              })}
-            </Card>
-          </View>
-        ))
-      ) : (
-        <EmptyState
-          title={I18n.t('home.recurring.none_title')}
-          message={I18n.t('home.recurring.none_message')}
-          mascotMood="curious"
-        />
-      )}
+          ))
+        ) : (
+          <EmptyState
+            title={I18n.t('home.recurring.none_title')}
+            message={I18n.t('home.recurring.none_message')}
+            mascotMood="curious"
+          />
+        )}
+      </TabletContentContainer>
     </ScrollView>
   );
 
   return (
     <SafeAreaView className="bg-background" edges={['top']} style={styles.container}>
       <View className="bg-background pb-1.5 pt-1">
-        <View className="px-5 pt-1.5 gap-2.5">
-          {/* Header with app name and display toggle */}
-          <View style={styles.headerRow}>
-            <View
-              accessible
-              accessibilityRole="text"
-              accessibilityLabel={I18n.t('app.name')}
-              style={styles.headerBrandRow}
-            >
-              <Text style={[styles.headerBrandMoney, { color: wordmarkPalette.money }]}>Money</Text>
-              <Text style={[styles.headerBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
-              <Text style={[styles.headerBrandTime, { color: wordmarkPalette.time }]}>Time</Text>
+        <TabletContentContainer>
+          <View className="px-5 pt-1.5 gap-2.5">
+            {/* Header with app name and display toggle */}
+            <View style={styles.headerRow}>
+              <View
+                accessible
+                accessibilityRole="text"
+                accessibilityLabel={I18n.t('app.name')}
+                style={styles.headerBrandRow}
+              >
+                <Text style={[styles.headerBrandMoney, { color: wordmarkPalette.money }]}>
+                  Money
+                </Text>
+                <Text style={[styles.headerBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
+                <Text style={[styles.headerBrandTime, { color: wordmarkPalette.time }]}>Time</Text>
+              </View>
+              <View
+                ref={displayToggleRef}
+                onLayout={handleDisplayToggleLayout}
+                className="h-10 justify-center"
+              >
+                <DisplayModeToggle />
+              </View>
             </View>
-            <View
-              ref={displayToggleRef}
-              onLayout={handleDisplayToggleLayout}
-              className="h-10 justify-center"
-            >
-              <DisplayModeToggle />
-            </View>
-          </View>
 
-          {/* Capsule tab bar */}
-          <HomeTabs
-            tabs={homeTabs}
-            activeIndex={activeHomeTabIndex}
-            pagerOffsetX={pagerOffsetX}
-            pagerWidth={screenWidth}
-            onTabChange={switchTab}
-          />
-        </View>
+            {/* Capsule tab bar */}
+            <HomeTabs
+              tabs={homeTabs}
+              activeIndex={activeHomeTabIndex}
+              pagerOffsetX={pagerOffsetX}
+              pagerWidth={screenWidth}
+              onTabChange={switchTab}
+            />
+          </View>
+        </TabletContentContainer>
       </View>
 
       <Animated.ScrollView
