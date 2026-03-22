@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import {
@@ -8,6 +9,7 @@ import {
   purchaseRevenueCatPackage,
   restoreRevenueCatPurchases,
   setRevenueCatAppUserId,
+  subscribeToRevenueCatCustomerStateUpdates,
   type RevenueCatActionResult,
   type RevenueCatCustomerState,
   type RevenueCatOffering,
@@ -16,10 +18,12 @@ import {
 
 interface ProContextValue {
   isPro: boolean;
+  isLoading: boolean;
   customerState: RevenueCatCustomerState | null;
   offering: RevenueCatOffering | null;
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
   restorePurchases: () => Promise<RevenueCatActionResult>;
+  refresh: () => Promise<void>;
 }
 
 const ProContext = createContext<ProContextValue | null>(null);
@@ -28,61 +32,132 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   const [isPro, setIsPro] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [customerState, setCustomerState] = useState<RevenueCatCustomerState | null>(null);
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
-  const checkProStatus = useCallback(async () => {
-    const state = await fetchRevenueCatCustomerState();
+  const applyCustomerState = useCallback((state: RevenueCatCustomerState | null) => {
     setCustomerState(state);
     setIsPro(isRevenueCatCustomerStateActive(state));
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
+  const refresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [nextState, nextOffering] = await Promise.all([
+        fetchRevenueCatCustomerState(),
+        fetchRevenueCatOfferings(),
+      ]);
 
-    async function init() {
-      setRevenueCatAppUserId(appUserId);
-      await checkProStatus();
-      const fetchedOffering = await fetchRevenueCatOfferings();
-      if (!cancelled) {
-        setOffering(fetchedOffering);
+      applyCustomerState(nextState);
+      setOffering(nextOffering);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [applyCustomerState]);
+
+  useEffect(() => {
+    setRevenueCatAppUserId(appUserId);
+    void refresh();
+  }, [appUserId, refresh]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToRevenueCatCustomerStateUpdates((nextState) => {
+      applyCustomerState(nextState);
+    });
+
+    return unsubscribe;
+  }, [applyCustomerState]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void refresh();
       }
+    });
+
+    return () => subscription.remove();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!customerState?.activeProductIdentifier || !customerState.expirationDate) {
+      return;
     }
 
-    void init();
-    return () => {
-      cancelled = true;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const syncExpiration = () => {
+      const msUntilExpiration = new Date(customerState.expirationDate!).getTime() - Date.now();
+
+      if (msUntilExpiration <= 0) {
+        setIsPro(false);
+        void refresh();
+        return;
+      }
+
+      timeoutId = setTimeout(() => {
+        const stillActive = isRevenueCatCustomerStateActive(customerState);
+        setIsPro(stillActive);
+
+        if (stillActive) {
+          syncExpiration();
+        } else {
+          void refresh();
+        }
+      }, Math.min(msUntilExpiration, 60 * 60 * 1000));
     };
-  }, [appUserId, checkProStatus]);
+
+    syncExpiration();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [customerState, refresh]);
 
   const purchasePackage = useCallback(
     async (packageIdentifier: string): Promise<RevenueCatActionResult> => {
       const result = await purchaseRevenueCatPackage(packageIdentifier);
-      if (result.status === 'success') {
-        await checkProStatus();
+
+      if (result.customerState) {
+        applyCustomerState(result.customerState);
       }
+
+      if (result.status === 'success' || result.status === 'pending') {
+        void refresh();
+      }
+
       return result;
     },
-    [checkProStatus],
+    [applyCustomerState, refresh],
   );
 
   const restorePurchases = useCallback(async (): Promise<RevenueCatActionResult> => {
     const result = await restoreRevenueCatPurchases();
-    if (result.status === 'success') {
-      await checkProStatus();
+
+    if (result.customerState) {
+      applyCustomerState(result.customerState);
     }
+
+    if (result.status === 'success') {
+      void refresh();
+    }
+
     return result;
-  }, [checkProStatus]);
+  }, [applyCustomerState, refresh]);
 
   const value = useMemo<ProContextValue>(
     () => ({
       isPro,
+      isLoading,
       customerState,
       offering,
       purchasePackage,
       restorePurchases,
+      refresh,
     }),
-    [isPro, customerState, offering, purchasePackage, restorePurchases],
+    [isPro, isLoading, customerState, offering, purchasePackage, refresh, restorePurchases],
   );
 
   return <ProContext.Provider value={value}>{children}</ProContext.Provider>;
@@ -101,7 +176,7 @@ export function usePackagesByType(offering: RevenueCatOffering | null) {
     if (!offering) return { monthly: null, annual: null, lifetime: null };
 
     const findPackage = (type: string): RevenueCatPackage | null =>
-      offering.packages.find((p) => p.packageType === type) ?? null;
+      offering.packages.find((p) => p.packageType.toUpperCase() === type) ?? null;
 
     return {
       monthly: findPackage('MONTHLY'),

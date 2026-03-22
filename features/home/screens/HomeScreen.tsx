@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
-  FadeInDown,
   type SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -23,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Button, Card, SettingsHeader, Text, TimeValueInline } from '~/components/ui';
+import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { getThemeWordmarkPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
@@ -36,7 +36,6 @@ import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -67,13 +66,6 @@ function formatCadence(pattern: string, interval: number): string {
     interval: String(interval),
     pattern: plurals[pattern] ?? pattern,
   });
-}
-
-function getTimeOfDay(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 17) return 'afternoon';
-  return 'evening';
 }
 
 function BlinkingDot({ color }: { color: string }) {
@@ -266,6 +258,7 @@ interface HomeScreenProps {
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   onOpenSettingsScreen?: (screen: 'Accounts' | 'Recurring') => void;
   onOpenExpenseTrend?: () => void;
+  onOpenExpenseSentiment?: () => void;
   onTutorialTargetLayout?: (
     targetId: 'home.display_toggle' | 'home.converter',
     rect: TutorialTargetRect,
@@ -279,6 +272,7 @@ export function HomeScreen({
   onOpenTransaction,
   onOpenSettingsScreen,
   onOpenExpenseTrend,
+  onOpenExpenseSentiment,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: HomeScreenProps = {}) {
@@ -505,13 +499,6 @@ export function HomeScreen({
     [defaultTabIndex, screenWidth],
   );
 
-  const greeting = useMemo(() => {
-    const timeOfDay = getTimeOfDay();
-    if (timeOfDay === 'morning') return I18n.t('home.greeting.morning');
-    if (timeOfDay === 'afternoon') return I18n.t('home.greeting.afternoon');
-    return I18n.t('home.greeting.evening');
-  }, []);
-
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
     const frame = requestAnimationFrame(() => {
@@ -604,35 +591,44 @@ export function HomeScreen({
         className="flex-row gap-3 mx-5 mt-3"
       >
         {/* Sentiment card */}
-        <View className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between">
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('medium');
+            onOpenExpenseSentiment?.();
+          }}
+          className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
+        >
           <Text variant="caption" tone="muted">
             {I18n.t('home.weekly_mood')}
           </Text>
           <View className="flex-row items-center justify-between mt-2">
             <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="sad" size={16} />
+              <SentimentIcon sentiment="sad" size={20} />
               <Text variant="caption" className="text-foreground">
                 {past7DaysData.sad}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="neutral" size={16} />
+              <SentimentIcon sentiment="neutral" size={20} />
               <Text variant="caption" className="text-foreground">
                 {past7DaysData.neutral}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <SentimentIcon sentiment="happy" size={16} />
+              <SentimentIcon sentiment="happy" size={20} />
               <Text variant="caption" className="text-foreground">
                 {past7DaysData.happy}
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
 
         {/* Expense bar chart card */}
         <Pressable
-          onPress={onOpenExpenseTrend}
+          onPress={() => {
+            void triggerHaptic('medium');
+            onOpenExpenseTrend?.();
+          }}
           className="flex-1 rounded-2xl border border-border/25 bg-card p-3 justify-between"
         >
           <Text variant="caption" tone="muted">
@@ -649,7 +645,8 @@ export function HomeScreen({
                   style={{
                     height: barHeight,
                     borderRadius: 2,
-                    backgroundColor: bar.value > 0 ? themeColors.primary : `${themeColors.border}40`,
+                    backgroundColor:
+                      bar.value > 0 ? themeColors.primary : `${themeColors.border}40`,
                     opacity: bar.value > 0 ? 0.6 : 0.3,
                   }}
                 />
