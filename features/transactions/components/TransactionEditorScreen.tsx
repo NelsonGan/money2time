@@ -901,7 +901,7 @@ export function TransactionEditorScreen({
     [showToolZone, summaryFlex],
   );
   const scrollContentStyle = useMemo(
-    () => [styles.summaryContainer, { paddingBottom: summaryBottomPadding }],
+    () => [styles.summaryContainer, { paddingBottom: summaryBottomPadding, flexGrow: 1 }],
     [summaryBottomPadding],
   );
   const toolZoneContainerStyle = useMemo(() => ({ flex: 1 - summaryFlex }), [summaryFlex]);
@@ -1328,7 +1328,9 @@ export function TransactionEditorScreen({
           contentContainerStyle={scrollContentStyle}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          onScrollBeginDrag={() => activateField(null)}
         >
+          <Pressable onPress={() => activateField(null)} style={{ flexGrow: 1 }}>
           {/* Summary rows */}
           <View
             className="bg-card/60 border border-border/25 overflow-hidden"
@@ -1923,6 +1925,7 @@ export function TransactionEditorScreen({
               </Text>
             </View>
           ) : null}
+          </Pressable>
         </ScrollView>
       </View>
 
