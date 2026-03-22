@@ -103,7 +103,7 @@ const NumpadKey = React.memo(function NumpadKey({
           android_disableSound
           android_ripple={{ color: rippleColor, borderless: false }}
           className={cn(
-            'relative flex-1 overflow-hidden rounded-2xl items-center justify-center border',
+            'relative flex-1 overflow-hidden rounded-[18px] items-center justify-center border',
             variant === 'confirm' && 'bg-primary border-primary/60',
             variant === 'operator' && 'bg-primary/10 border-primary/35',
             variant === 'utility' && 'bg-secondary border-border/45',
@@ -123,7 +123,7 @@ const NumpadKey = React.memo(function NumpadKey({
           )}
           <Animated.View
             pointerEvents="none"
-            className={cn('absolute inset-0 rounded-2xl', tapOverlayClassName)}
+            className={cn('absolute inset-0 rounded-[18px]', tapOverlayClassName)}
             style={tapFlashStyle}
           />
         </Pressable>
@@ -202,33 +202,33 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
   }, [handleKeyPress]);
 
   return (
-    <View className="flex-1 px-4 pt-1" style={{ paddingBottom: Math.max(6, bottomInset) }}>
-      <View className="flex-1 gap-1">
-        <View className="flex-1 flex-row gap-1">
+    <View className="flex-1 px-3 pt-0.5" style={{ paddingBottom: Math.max(4, bottomInset) }}>
+      <View className="flex-1 gap-0.5">
+        <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="C" variant="utility" onPress={handleKeyPress} />
           <NumpadKey
             value="del"
             variant="utility"
             onPress={handleKeyPress}
             onLongPress={handleDeleteLongPress}
-            icon={<Delete size={16} color={themeColors.textMuted} />}
+            icon={<Delete size={15} color={themeColors.textMuted} />}
           />
           <NumpadKey value="÷" variant="operator" onPress={handleKeyPress} />
           <NumpadKey value="×" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="7" onPress={handleKeyPress} />
           <NumpadKey value="8" onPress={handleKeyPress} />
           <NumpadKey value="9" onPress={handleKeyPress} />
           <NumpadKey value="-" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="4" onPress={handleKeyPress} />
           <NumpadKey value="5" onPress={handleKeyPress} />
           <NumpadKey value="6" onPress={handleKeyPress} />
           <NumpadKey value="+" variant="operator" onPress={handleKeyPress} />
         </View>
-        <View className="flex-1 flex-row gap-1">
+        <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="1" onPress={handleKeyPress} />
           <NumpadKey value="2" onPress={handleKeyPress} />
           <NumpadKey value="3" onPress={handleKeyPress} />
@@ -243,7 +243,7 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
             }
           />
         </View>
-        <View className="flex-1 flex-row gap-1 pr-[25%]">
+        <View className="flex-1 flex-row gap-0.5 pr-[25%]">
           <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
           <NumpadKey value="." onPress={handleKeyPress} />
         </View>

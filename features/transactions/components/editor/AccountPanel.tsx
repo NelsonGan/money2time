@@ -7,13 +7,13 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup } from '~/types';
-import { cn } from '~/utils';
 
 interface AccountPanelBaseProps {
   accounts: Account[];
   accountGroups: AccountGroup[];
   disabledId?: string | null;
   disableGrouping?: boolean;
+  onBackgroundPress?: () => void;
 }
 
 interface AccountPanelSingleSelectProps extends AccountPanelBaseProps {
@@ -31,20 +31,47 @@ interface AccountPanelMultiSelectProps extends AccountPanelBaseProps {
 }
 
 type AccountPanelProps = AccountPanelSingleSelectProps | AccountPanelMultiSelectProps;
-const EMPTY_ACCOUNTS: Account[] = [];
 
 const COLS = 3;
-const ACCOUNT_PANEL_CONTENT_STYLE = { paddingBottom: 16 } as const;
+const GRID_DIVIDER_WIDTH = 1;
+const ACCOUNT_PANEL_CONTENT_STYLE = { paddingBottom: 16, flexGrow: 1 } as const;
 
 const styles = StyleSheet.create({
   disabledAccount: {
-    opacity: 0.4,
+    opacity: 0.45,
   },
   chevronCollapsed: {
     transform: [{ rotate: '0deg' }],
   },
   chevronExpanded: {
     transform: [{ rotate: '180deg' }],
+  },
+  gridRow: {
+    flexDirection: 'row',
+    minHeight: 58,
+  },
+  gridCell: {
+    flex: 1,
+    minHeight: 58,
+  },
+  gridCellButton: {
+    flex: 1,
+    minHeight: 58,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  gridLabel: {
+    fontSize: 10,
+    lineHeight: 14,
+    textAlign: 'center',
+  },
+  cornerRight: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
   },
 });
 
@@ -63,7 +90,7 @@ interface GroupSection {
 }
 
 export function AccountPanel(props: AccountPanelProps) {
-  const { accounts, accountGroups, disabledId, disableGrouping = false } = props;
+  const { accounts, accountGroups, disabledId, disableGrouping = false, onBackgroundPress } = props;
   const themeColors = useThemeColors();
   const isMultiSelect = 'selectedIds' in props;
   const selectedId = isMultiSelect ? null : props.selectedId;
@@ -116,28 +143,24 @@ export function AccountPanel(props: AccountPanelProps) {
     });
     return ownerByAccountId;
   }, [grouped]);
-  const selectedAccountCountByGroupKey = useMemo(() => {
-    const counts = new Map<string, number>();
+  const selectedGroupKeySet = useMemo(() => {
+    const groupKeys = new Set<string>();
     if (isMultiSelect) {
-      if (selectedIdSet.size === 0) return counts;
+      if (selectedIdSet.size === 0) return groupKeys;
       grouped.forEach((group) => {
-        let selectedCount = 0;
-        group.accounts.forEach((account) => {
-          if (selectedIdSet.has(account.id)) selectedCount += 1;
-        });
-        if (selectedCount > 0) {
-          counts.set(group.key, selectedCount);
+        if (group.accounts.some((account) => selectedIdSet.has(account.id))) {
+          groupKeys.add(group.key);
         }
       });
-      return counts;
+      return groupKeys;
     }
 
-    if (!selectedId) return counts;
+    if (!selectedId) return groupKeys;
     const ownerGroupKey = ownerGroupKeyByAccountId.get(selectedId);
     if (ownerGroupKey) {
-      counts.set(ownerGroupKey, 1);
+      groupKeys.add(ownerGroupKey);
     }
-    return counts;
+    return groupKeys;
   }, [grouped, isMultiSelect, ownerGroupKeyByAccountId, selectedId, selectedIdSet]);
 
   const isAccountSelected = (accountId: string) =>
@@ -163,6 +186,83 @@ export function AccountPanel(props: AccountPanelProps) {
   // If grouping is disabled or only one group, show accounts directly.
   const showGroupTiles = !disableGrouping && grouped.length > 1;
   const groupRows = useMemo(() => chunk(grouped, COLS), [grouped]);
+  const gridDividerColor = themeColors.border;
+
+  const renderGridRow = <T,>(
+    rowKey: string,
+    items: T[],
+    _rowIndex: number,
+    renderCell: (item: T) => React.ReactNode,
+  ) => {
+    const populatedColumnCount = items.length;
+
+    return (
+      <View key={rowKey} style={styles.gridRow}>
+        {Array.from({ length: COLS }, (_, columnIndex) => {
+          const item = items[columnIndex];
+          const hasItem = item !== undefined;
+          const shouldShowRightBorder =
+            hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+
+          return (
+            <View
+              key={`${rowKey}-${columnIndex}`}
+              style={[
+                styles.gridCell,
+                hasItem ? { backgroundColor: themeColors.surface } : null,
+                hasItem
+                  ? { borderBottomWidth: GRID_DIVIDER_WIDTH, borderBottomColor: gridDividerColor }
+                  : null,
+                shouldShowRightBorder
+                  ? { borderRightWidth: GRID_DIVIDER_WIDTH, borderRightColor: gridDividerColor }
+                  : null,
+              ]}
+            >
+              {hasItem ? renderCell(item) : null}
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const renderAccountCell = (account: Account) => {
+    const isSelected = isAccountSelected(account.id);
+    const isDisabled = disabledId === account.id;
+
+    return (
+      <Pressable
+        onPress={() => {
+          if (isDisabled) return;
+          handleAccountPress(account.id);
+        }}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected, disabled: isDisabled || undefined }}
+        style={[
+          styles.gridCellButton,
+          {
+            backgroundColor: isSelected
+              ? themeColors.primarySoft
+              : isDisabled
+                ? themeColors.surfaceMuted
+                : 'transparent',
+          },
+          isDisabled ? styles.disabledAccount : null,
+        ]}
+      >
+        <Text
+          variant="caption"
+          numberOfLines={2}
+          style={[
+            styles.gridLabel,
+            { color: isSelected ? themeColors.primary : isDisabled ? themeColors.textMuted : themeColors.text },
+          ]}
+        >
+          {account.name}
+        </Text>
+      </Pressable>
+    );
+  };
 
   if (!showGroupTiles) {
     const allAccounts = grouped.length === 1 ? grouped[0].accounts : accounts;
@@ -170,182 +270,93 @@ export function AccountPanel(props: AccountPanelProps) {
 
     return (
       <ScrollView
-        className="flex-1 px-4 pt-2"
+        className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
       >
-        <View className="gap-3">
-          {accountRows.map((row, rowIndex) => (
-            <View key={rowIndex} className="flex-row gap-2">
-              {row.map((account) => {
-                const isSelected = isAccountSelected(account.id);
-                const isDisabled = disabledId === account.id;
-                return (
-                  <View key={account.id} className="flex-1">
-                    <Pressable
-                      onPress={() => {
-                        if (isDisabled) return;
-                        handleAccountPress(account.id);
-                      }}
-                      className={cn(
-                        'rounded-xl border px-2.5 py-2.5 items-center justify-center',
-                        isSelected
-                          ? 'bg-primary/10 border-primary/45'
-                          : isDisabled
-                            ? 'bg-secondary/40 border-border/20'
-                            : 'bg-card border-border/30',
-                      )}
-                      style={isDisabled ? styles.disabledAccount : undefined}
-                    >
-                      <Text
-                        variant="caption"
-                        numberOfLines={2}
-                        className={cn(
-                          'text-center',
-                          isSelected
-                            ? 'text-primary'
-                            : isDisabled
-                              ? 'text-muted-foreground'
-                              : 'text-foreground',
-                        )}
-                      >
-                        {account.name}
-                      </Text>
-                    </Pressable>
-                  </View>
-                );
-              })}
-              {row.length < COLS &&
-                Array.from({ length: COLS - row.length }, (_, i) => (
-                  <View key={`pad-${i}`} className="flex-1" />
-                ))}
-            </View>
-          ))}
-        </View>
+        {accountRows.map((row, rowIndex) =>
+          renderGridRow(`accounts-${rowIndex}`, row, rowIndex, renderAccountCell),
+        )}
+        <Pressable accessible={false} onPress={onBackgroundPress} style={{ flex: 1 }} />
       </ScrollView>
     );
   }
 
   // Multiple groups: show group tiles with expand/collapse
+  const groupedRenderRows = groupRows.flatMap((row, rowIndex) => {
+    const rows: { key: string; kind: 'group' | 'account'; items: GroupSection[] | Account[] }[] = [
+      { key: `group-${rowIndex}`, kind: 'group', items: row },
+    ];
+    const expandedInRow = expandedGroupKey ? row.find((group) => group.key === expandedGroupKey) : null;
+    if (!expandedInRow) return rows;
+
+    chunk(expandedInRow.accounts, COLS).forEach((accountRow, accountRowIndex) => {
+      rows.push({
+        key: `group-${expandedInRow.key}-accounts-${accountRowIndex}`,
+        kind: 'account',
+        items: accountRow,
+      });
+    });
+    return rows;
+  });
+
   return (
     <ScrollView
-      className="flex-1 px-4 pt-2"
+      className="flex-1"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
     >
-      <View className="gap-2">
-        {groupRows.map((row, rowIndex) => {
-          const expandedInRow = expandedGroupKey
-            ? row.find((g) => g.key === expandedGroupKey)
-            : null;
-          const expandedAccounts = expandedInRow ? expandedInRow.accounts : EMPTY_ACCOUNTS;
-          const accountRows = expandedAccounts.length > 0 ? chunk(expandedAccounts, COLS) : [];
+      {groupedRenderRows.map((row, rowIndex) =>
+        row.kind === 'group'
+          ? renderGridRow(row.key, row.items as GroupSection[], rowIndex, (group) => {
+              const hasSelectedAccount = selectedGroupKeySet.has(group.key);
+              const isExpanded = expandedGroupKey === group.key;
 
-          return (
-            <React.Fragment key={rowIndex}>
-              {/* Group tiles row */}
-              <View className="flex-row gap-2">
-                {row.map((group) => {
-                  const hasSelectedAccount =
-                    (selectedAccountCountByGroupKey.get(group.key) ?? 0) > 0;
-                  const isExpanded = expandedGroupKey === group.key;
-
-                  return (
-                    <View key={group.key} className="flex-1">
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setExpandedGroupKey((prev) => (prev === group.key ? null : group.key));
-                        }}
-                        className={cn(
-                          'rounded-xl border px-2.5 py-2.5 flex-row items-center',
-                          hasSelectedAccount
-                            ? 'bg-primary/10 border-primary/45'
-                            : isExpanded
-                              ? 'bg-primary/5 border-primary/30'
-                              : 'bg-card border-border/30',
-                        )}
-                      >
-                        <Text
-                          variant="caption"
-                          numberOfLines={1}
-                          className={cn(
-                            'flex-1',
-                            hasSelectedAccount || isExpanded ? 'text-primary' : 'text-foreground',
-                          )}
-                        >
-                          {group.label}
-                        </Text>
-                        <ChevronDown
-                          size={13}
-                          color={
-                            hasSelectedAccount || isExpanded
-                              ? themeColors.primary
-                              : themeColors.textMuted
-                          }
-                          style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
-                        />
-                      </Pressable>
-                    </View>
-                  );
-                })}
-                {row.length < COLS &&
-                  Array.from({ length: COLS - row.length }, (_, i) => (
-                    <View key={`pad-${i}`} className="flex-1" />
-                  ))}
-              </View>
-
-              {/* Expanded accounts - full width below row */}
-              {accountRows.map((accRow, accRowIndex) => (
-                <View key={`acc-${accRowIndex}`} className="flex-row gap-2">
-                  {accRow.map((account) => {
-                    const isSelected = isAccountSelected(account.id);
-                    const isDisabled = disabledId === account.id;
-                    return (
-                      <View key={account.id} className="flex-1">
-                        <Pressable
-                          onPress={() => {
-                            if (isDisabled) return;
-                            handleAccountPress(account.id);
-                          }}
-                          className={cn(
-                            'rounded-xl border px-2.5 py-2 items-center justify-center',
-                            isSelected
-                              ? 'bg-primary/10 border-primary/40'
-                              : isDisabled
-                                ? 'bg-secondary/40 border-border/20'
-                                : 'bg-secondary/50 border-border/20',
-                          )}
-                          style={isDisabled ? styles.disabledAccount : undefined}
-                        >
-                          <Text
-                            variant="caption"
-                            numberOfLines={2}
-                            className={cn(
-                              'text-center',
-                              isSelected
-                                ? 'text-primary'
-                                : isDisabled
-                                  ? 'text-muted-foreground'
-                                  : 'text-foreground',
-                            )}
-                          >
-                            {account.name}
-                          </Text>
-                        </Pressable>
-                      </View>
-                    );
-                  })}
-                  {accRow.length < COLS &&
-                    Array.from({ length: COLS - accRow.length }, (_, i) => (
-                      <View key={`apad-${i}`} className="flex-1" />
-                    ))}
-                </View>
-              ))}
-            </React.Fragment>
-          );
-        })}
-      </View>
+              return (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setExpandedGroupKey((previous) => (previous === group.key ? null : group.key));
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: isExpanded, selected: hasSelectedAccount }}
+                  style={[
+                    styles.gridCellButton,
+                    {
+                      backgroundColor: hasSelectedAccount
+                        ? themeColors.primarySoft
+                        : isExpanded
+                          ? themeColors.surfaceMuted
+                          : 'transparent',
+                    },
+                  ]}
+                >
+                  <View style={styles.cornerRight}>
+                    <ChevronDown
+                      size={13}
+                      color={hasSelectedAccount || isExpanded ? themeColors.primary : themeColors.textMuted}
+                      style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
+                    />
+                  </View>
+                  <Text
+                    variant="caption"
+                    numberOfLines={2}
+                    style={[
+                      styles.gridLabel,
+                      {
+                        color:
+                          hasSelectedAccount || isExpanded ? themeColors.primary : themeColors.text,
+                      },
+                    ]}
+                  >
+                    {group.label}
+                  </Text>
+                </Pressable>
+              );
+            })
+          : renderGridRow(row.key, row.items as Account[], rowIndex, renderAccountCell),
+      )}
+      <Pressable accessible={false} onPress={onBackgroundPress} style={{ flex: 1 }} />
     </ScrollView>
   );
 }

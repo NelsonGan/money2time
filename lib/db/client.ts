@@ -36,6 +36,7 @@ function ensureCoreData() {
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
         displayMode: 'money',
+        hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
         insightsPrefsJson: null,
