@@ -95,16 +95,19 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      timeoutId = setTimeout(() => {
-        const stillActive = isRevenueCatCustomerStateActive(customerState);
-        setIsPro(stillActive);
+      timeoutId = setTimeout(
+        () => {
+          const stillActive = isRevenueCatCustomerStateActive(customerState);
+          setIsPro(stillActive);
 
-        if (stillActive) {
-          syncExpiration();
-        } else {
-          void refresh();
-        }
-      }, Math.min(msUntilExpiration, 60 * 60 * 1000));
+          if (stillActive) {
+            syncExpiration();
+          } else {
+            void refresh();
+          }
+        },
+        Math.min(msUntilExpiration, 60 * 60 * 1000),
+      );
     };
 
     syncExpiration();

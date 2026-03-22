@@ -544,7 +544,7 @@ export function WageCalculatorFlowScreen({
                 onComplete(config);
               }}
             >
-              <Text>{I18n.t('wage.save_for_month', { month: localizedMonthLabel })}</Text>
+              <Text>{I18n.t('common.save')}</Text>
             </Button>
           )}
         </View>

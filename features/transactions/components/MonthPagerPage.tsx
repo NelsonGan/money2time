@@ -28,6 +28,7 @@ interface MonthPagerPageProps {
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
+  contentPaddingHorizontal?: number;
 }
 
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
@@ -47,6 +48,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   selectedTransactionIds = [],
   selectionMode = false,
   getScrollToTopRef,
+  contentPaddingHorizontal,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
     () => addMonthsAtMonthStart(monthPagerAnchorDate, item - centerIndex),
@@ -70,6 +72,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         emptyTitle={I18n.t('transactions.empty_month_title')}
         emptyMessage={I18n.t('transactions.empty_month_message')}
         contentPaddingBottom={LIST_BOTTOM_PADDING}
+        contentPaddingHorizontal={contentPaddingHorizontal}
         disableItemAnimations
         compactItems
         listKey={`${pageMonthKey}-${localeKey}`}

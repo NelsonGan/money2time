@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -77,7 +78,8 @@ export function SelectField({
 }: SelectFieldProps) {
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const { height: windowHeight } = useWindowDimensions();
+  const { contentWidth: windowWidth, isTablet } = useDeviceLayout();
   const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
@@ -444,6 +446,13 @@ export function SelectField({
               maxHeight: fullHeight
                 ? windowHeight * 0.92
                 : Math.max(320, Math.min(windowHeight * 0.74, 620)),
+              ...(isTablet
+                ? {
+                    maxWidth: TABLET_CONTENT_MAX_WIDTH,
+                    width: '100%',
+                    alignSelf: 'center' as const,
+                  }
+                : {}),
             }}
             onLayout={(event) => {
               const next = event.nativeEvent.layout.height;

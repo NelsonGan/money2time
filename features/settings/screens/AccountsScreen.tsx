@@ -18,7 +18,6 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn, useAnimatedRef } from 'react-native-reanimated';
@@ -48,6 +47,7 @@ import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -1021,7 +1021,7 @@ export function AccountsScreen({
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
-  const { width: windowWidth } = useWindowDimensions();
+  const { contentWidth: windowWidth } = useDeviceLayout();
   const accountRowThemeColors = useMemo(
     () => ({
       accent: themeColors.accent,

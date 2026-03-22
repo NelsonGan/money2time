@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -31,6 +32,7 @@ import {
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useFocusMonthNavigation } from '~/hooks/useFocusMonthNavigation';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -238,8 +240,10 @@ export function TransactionsScreen({
   const searchInputRef = useRef<TextInput | null>(null);
   const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
   const { width } = useWindowDimensions();
+  const { tabletPadding } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
+  const listHorizontalPadding = Math.max(18, tabletPadding);
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -719,6 +723,7 @@ export function TransactionsScreen({
           selectedTransactionIds={selectedTransactionIds}
           selectionMode={isSelectionMode}
           getScrollToTopRef={getPageScrollToTopRef}
+          contentPaddingHorizontal={listHorizontalPadding}
         />
       );
     },
@@ -730,6 +735,7 @@ export function TransactionsScreen({
       getDisplayValueForTransaction,
       getTrueHourlyRateForDate,
       isSelectionMode,
+      listHorizontalPadding,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
       monthPageStyle,
@@ -858,6 +864,7 @@ export function TransactionsScreen({
             emptyTitle={I18n.t('transactions.empty_search_title')}
             emptyMessage={I18n.t('transactions.empty_search_message')}
             contentPaddingBottom={LIST_BOTTOM_PADDING}
+            contentPaddingHorizontal={listHorizontalPadding}
             disableItemAnimations
             compactItems
             listKey="search-results"

@@ -32,6 +32,7 @@ import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
@@ -46,6 +47,7 @@ import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -1858,46 +1860,48 @@ function FilterPill({
   );
 }
 
-const InsightsWindowPage = React.memo(function InsightsWindowPage({
-  item,
-  pageData,
-  pageStyle,
-  isChartScrubbing,
-  paneRenderVersion: _paneRenderVersion,
-  getPageScrollRef,
-  renderInsightsPane,
-}: {
-  item: number;
-  pageData: InsightPageData;
-  pageStyle: { width: number };
-  isChartScrubbing: boolean;
-  paneRenderVersion: string;
-  getPageScrollRef: (index: number) => { current: ScrollView | null };
-  renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
-}) {
-  return (
-    <View style={pageStyle} className="flex-1 bg-background">
-      <ScrollView
-        ref={(ref) => {
-          getPageScrollRef(item).current = ref;
-        }}
-        className="flex-1"
-        scrollEnabled={!isChartScrubbing}
-        contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-      >
-        {renderInsightsPane(pageData)}
-      </ScrollView>
-    </View>
-  );
-},
-(prev, next) =>
-  prev.item === next.item &&
-  prev.pageData === next.pageData &&
-  prev.pageStyle === next.pageStyle &&
-  prev.isChartScrubbing === next.isChartScrubbing &&
-  prev.paneRenderVersion === next.paneRenderVersion &&
-  prev.getPageScrollRef === next.getPageScrollRef &&
-  prev.renderInsightsPane === next.renderInsightsPane);
+const InsightsWindowPage = React.memo(
+  function InsightsWindowPage({
+    item,
+    pageData,
+    pageStyle,
+    isChartScrubbing,
+    paneRenderVersion: _paneRenderVersion,
+    getPageScrollRef,
+    renderInsightsPane,
+  }: {
+    item: number;
+    pageData: InsightPageData;
+    pageStyle: { width: number };
+    isChartScrubbing: boolean;
+    paneRenderVersion: string;
+    getPageScrollRef: (index: number) => { current: ScrollView | null };
+    renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
+  }) {
+    return (
+      <View style={pageStyle} className="flex-1 bg-background">
+        <ScrollView
+          ref={(ref) => {
+            getPageScrollRef(item).current = ref;
+          }}
+          className="flex-1"
+          scrollEnabled={!isChartScrubbing}
+          contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
+        >
+          <TabletContentContainer>{renderInsightsPane(pageData)}</TabletContentContainer>
+        </ScrollView>
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.item === next.item &&
+    prev.pageData === next.pageData &&
+    prev.pageStyle === next.pageStyle &&
+    prev.isChartScrubbing === next.isChartScrubbing &&
+    prev.paneRenderVersion === next.paneRenderVersion &&
+    prev.getPageScrollRef === next.getPageScrollRef &&
+    prev.renderInsightsPane === next.renderInsightsPane,
+);
 
 interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
@@ -2050,10 +2054,12 @@ export function InsightsScreen({
   const lastScrubHapticAtRef = useRef(0);
 
   const { width } = useWindowDimensions();
+  const { isTablet } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const chartWidth = Math.max(260, width - 76);
-  const lineChartWidth = Math.max(260, width - INSIGHTS_LINE_CHART_SIDE_INSET * 2);
+  const effectiveChartBasis = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
+  const chartWidth = Math.max(260, effectiveChartBasis - 76);
+  const lineChartWidth = Math.max(260, effectiveChartBasis - INSIGHTS_LINE_CHART_SIDE_INSET * 2);
   const lineChartSectionStyle = useMemo(
     () => ({ marginHorizontal: -INSIGHTS_LINE_CHART_SECTION_BLEED }),
     [],
@@ -2192,7 +2198,8 @@ export function InsightsScreen({
 
     const targetInsightType = activityBreakdownInsightRequest.insightType;
     const targetFixedPreset = getInsightFilterConfig(targetInsightType).fixedPeriodPreset;
-    const targetPreset = activityBreakdownInsightRequest.periodPreset ?? targetFixedPreset ?? 'month';
+    const targetPreset =
+      activityBreakdownInsightRequest.periodPreset ?? targetFixedPreset ?? 'month';
     setActivityRequestPeriodPreset({
       insightType: targetInsightType,
       preset: targetPreset,
@@ -2227,7 +2234,8 @@ export function InsightsScreen({
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const currentInsightType = selectedInsightTypeRef.current;
     const currentPeriodPreset =
-      periodPresetByInsightRef.current[currentInsightType] ?? getDefaultPeriodPreset(currentInsightType);
+      periodPresetByInsightRef.current[currentInsightType] ??
+      getDefaultPeriodPreset(currentInsightType);
     const nextPeriodPreset =
       getInsightFilterConfig(currentInsightType).fixedPeriodPreset ?? currentPeriodPreset;
 
@@ -5145,11 +5153,7 @@ export function InsightsScreen({
             <View className="flex-1 items-center justify-center py-1">
               <View className="flex-row items-center justify-center gap-1.5">
                 <SentimentIcon sentiment="sad" size={26} />
-                <X
-                  size={12}
-                  color="#000000"
-                  strokeWidth={2.4}
-                />
+                <X size={12} color="#000000" strokeWidth={2.4} />
                 <Text variant="subheading" style={{ color: SENTIMENT_COLORS.sad }}>
                   {pageData.totals.sad}
                 </Text>
@@ -5162,11 +5166,7 @@ export function InsightsScreen({
             <View className="flex-1 items-center justify-center py-1">
               <View className="flex-row items-center justify-center gap-1.5">
                 <SentimentIcon sentiment="neutral" size={26} />
-                <X
-                  size={12}
-                  color="#000000"
-                  strokeWidth={2.4}
-                />
+                <X size={12} color="#000000" strokeWidth={2.4} />
                 <Text variant="subheading" style={{ color: SENTIMENT_COLORS.neutral }}>
                   {pageData.totals.neutral}
                 </Text>
@@ -5179,11 +5179,7 @@ export function InsightsScreen({
             <View className="flex-1 items-center justify-center py-1">
               <View className="flex-row items-center justify-center gap-1.5">
                 <SentimentIcon sentiment="happy" size={26} />
-                <X
-                  size={12}
-                  color="#000000"
-                  strokeWidth={2.4}
-                />
+                <X size={12} color="#000000" strokeWidth={2.4} />
                 <Text variant="subheading" style={{ color: SENTIMENT_COLORS.happy }}>
                   {pageData.totals.happy}
                 </Text>
@@ -5907,7 +5903,11 @@ export function InsightsScreen({
   const displayInsightsFilterCount = useMemo(() => {
     if (!displayHasInsightsFilters) return 0;
     let count = 0;
-    if (displayHasPeriodFilter && displayPeriodPreset !== getDefaultPeriodPreset(displaySelectedInsightType)) count += 1;
+    if (
+      displayHasPeriodFilter &&
+      displayPeriodPreset !== getDefaultPeriodPreset(displaySelectedInsightType)
+    )
+      count += 1;
     if (displayHasAccountFilter && selectedAccountIds.length > 0) count += 1;
     if (displayHasExpenseTrendExclusionFilter) {
       count +=
@@ -6016,9 +6016,7 @@ export function InsightsScreen({
         p === 'month' ? 'month' : p === 'year' ? 'year' : 'other';
       if (periodMode(currentEffectivePreset) !== periodMode(nextEffectivePreset)) {
         const now = new Date();
-        setAnchorDate(
-          nextEffectivePreset === 'week' ? startOfDayDate(now) : startOfMonthDate(now),
-        );
+        setAnchorDate(nextEffectivePreset === 'week' ? startOfDayDate(now) : startOfMonthDate(now));
       }
 
       setActiveBreakdownSlice(null, false);

@@ -82,7 +82,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     label: I18n.t(`settings.theme_color_${value}`),
     icon: (
       <View
-        style={[styles.themeColorSwatch, { backgroundColor: getThemeColorSwatch(value, resolvedTheme) }]}
+        style={[
+          styles.themeColorSwatch,
+          { backgroundColor: getThemeColorSwatch(value, resolvedTheme) },
+        ]}
       />
     ),
   }));
