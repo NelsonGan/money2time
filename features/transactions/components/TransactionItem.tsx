@@ -128,6 +128,12 @@ function TransactionItemView({
           ? categoryInline
           : null;
   const rate = !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
+  const categoryEmoji = transaction.categoryIcon ?? undefined;
+  const leadingEmoji = isTransfer
+    ? '↔️'
+    : isBalanceAdjustment
+      ? '⚖️'
+      : categoryEmoji || (isIncome ? '⬆️' : '⬇️');
   const amountToneClass = isTransfer
     ? 'text-muted-foreground'
     : isBalanceAdjustment
@@ -209,6 +215,18 @@ function TransactionItemView({
           ) : null}
         </View>
       ) : null}
+
+      <View
+        className={cn(
+          'items-center justify-center',
+          compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
+          !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
+          isTransfer ? 'rounded-full bg-secondary/50' : null,
+          isBalanceAdjustment ? 'rounded-full bg-primary/10' : null,
+        )}
+      >
+        <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>{leadingEmoji}</Text>
+      </View>
 
       <View className="flex-1 min-w-0 pr-1">
         <View className="flex-row items-center gap-1.5">
