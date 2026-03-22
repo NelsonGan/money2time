@@ -22,6 +22,7 @@ export interface RevenueCatCustomerState {
 
 export type RevenueCatActionStatus =
   | 'success'
+  | 'pending'
   | 'cancelled'
   | 'not_available'
   | 'not_found'
@@ -45,6 +46,10 @@ export interface RevenueCatOffering {
   identifier: string;
   packages: RevenueCatPackage[];
 }
+
+export type RevenueCatCustomerStateUpdateListener = (
+  customerState: RevenueCatCustomerState,
+) => void;
 
 export function isRevenueCatCustomerStateActive(customerState: RevenueCatCustomerState | null) {
   if (!customerState?.activeProductIdentifier) {

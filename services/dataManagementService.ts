@@ -4,9 +4,10 @@ import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { nowIso } from '~/utils/id';
+import { newAppUserId, nowIso } from '~/utils/id';
 
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
+const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2]);
 
 interface BackupTables {
   accounts: Record<string, unknown>[];
@@ -22,6 +23,27 @@ interface BackupData {
   version: number;
   exportedAt: string;
   tables: BackupTables;
+}
+
+function sanitizeSettingsRowsForExport(rows: Record<string, unknown>[]) {
+  return rows.map((row) => {
+    const { app_user_id: _appUserId, ...rest } = row;
+    return rest;
+  });
+}
+
+function withPreservedAppUserId(
+  rows: Record<string, unknown>[] | undefined,
+  appUserId: string,
+): Record<string, unknown>[] {
+  if (!rows || rows.length === 0) {
+    return [];
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    app_user_id: appUserId,
+  }));
 }
 
 export async function exportDatabase(): Promise<void> {
@@ -43,7 +65,9 @@ export async function exportDatabase(): Promise<void> {
         string,
         unknown
       >[],
-      settings: sqlite.getAllSync('SELECT * FROM settings') as Record<string, unknown>[],
+      settings: sanitizeSettingsRowsForExport(
+        sqlite.getAllSync('SELECT * FROM settings') as Record<string, unknown>[],
+      ),
       monthly_wage_settings: sqlite.getAllSync('SELECT * FROM monthly_wage_settings') as Record<
         string,
         unknown
@@ -122,7 +146,7 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
     return { canceled: false, success: false, error: 'Invalid backup format' };
   }
 
-  if (backup.version !== BACKUP_VERSION) {
+  if (!SUPPORTED_BACKUP_VERSIONS.has(backup.version)) {
     return {
       canceled: false,
       success: false,
@@ -131,6 +155,13 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
   }
 
   const sqlite = getSQLite();
+  const currentAppUserId =
+    (
+      sqlite.getAllSync('SELECT app_user_id FROM settings LIMIT 1') as Array<{
+        app_user_id?: string | null;
+      }>
+    )[0]?.app_user_id ?? newAppUserId();
+  const settingsRows = withPreservedAppUserId(backup.tables.settings, currentAppUserId);
 
   try {
     sqlite.execSync('BEGIN TRANSACTION');
@@ -148,7 +179,7 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
     insertRows(sqlite, 'categories', backup.tables.categories);
     insertRows(sqlite, 'transactions', backup.tables.transactions);
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules);
-    insertRows(sqlite, 'settings', backup.tables.settings);
+    insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
     sqlite.execSync('COMMIT');
