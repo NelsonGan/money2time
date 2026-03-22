@@ -2,7 +2,12 @@ import { Crown, ExternalLink } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import {
+  SETTINGS_HORIZONTAL_PADDING,
+  SettingsHeader,
+  SettingsPageLayout,
+  Text,
+} from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -35,9 +40,7 @@ function openSubscriptionSettings() {
   if (Platform.OS === 'ios') {
     void Linking.openURL('https://apps.apple.com/account/subscriptions');
   } else {
-    void Linking.openURL(
-      'https://play.google.com/store/account/subscriptions',
-    );
+    void Linking.openURL('https://play.google.com/store/account/subscriptions');
   }
 }
 
@@ -54,11 +57,13 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
   if (!isPro) {
     return (
       <SettingsPageLayout>
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t('pro.manage_subscription')}
-        />
+        <View style={styles.headerWrap}>
+          <SettingsHeader
+            className="px-0 pt-5 pb-3"
+            onBack={onBack}
+            title={I18n.t('pro.manage_subscription')}
+          />
+        </View>
         <View style={styles.centeredContainer}>
           <Crown size={40} color={themeColors.textMuted} />
           <Text variant="subheading" className="mt-4 text-center">
@@ -83,11 +88,13 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader
-        className="px-0 pt-5 pb-3"
-        onBack={onBack}
-        title={I18n.t('pro.manage_subscription')}
-      />
+      <View style={styles.headerWrap}>
+        <SettingsHeader
+          className="px-0 pt-5 pb-3"
+          onBack={onBack}
+          title={I18n.t('pro.manage_subscription')}
+        />
+      </View>
 
       <View style={styles.content}>
         <View className="items-center py-6">
@@ -109,10 +116,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
               className="rounded-md px-1.5 py-0.5"
               style={{ backgroundColor: themeColors.primary }}
             >
-              <Text
-                className="text-[10px] font-extrabold tracking-wide"
-                style={{ color: '#fff' }}
-              >
+              <Text className="text-[10px] font-extrabold tracking-wide" style={{ color: '#fff' }}>
                 PRO
               </Text>
             </View>
@@ -136,18 +140,28 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           </View>
 
           {customerState?.activatedAt ? (
-            <View style={[styles.detailRow, styles.detailRowBorder, { borderColor: themeColors.border }]}>
+            <View
+              style={[
+                styles.detailRow,
+                styles.detailRowBorder,
+                { borderColor: themeColors.border },
+              ]}
+            >
               <Text variant="friendly" tone="muted" className="text-sm">
                 {I18n.t('pro.member_since')}
               </Text>
-              <Text className="text-sm">
-                {formatDate(customerState.activatedAt, activeLocale)}
-              </Text>
+              <Text className="text-sm">{formatDate(customerState.activatedAt, activeLocale)}</Text>
             </View>
           ) : null}
 
           {!isLifetime && customerState?.expirationDate ? (
-            <View style={[styles.detailRow, styles.detailRowBorder, { borderColor: themeColors.border }]}>
+            <View
+              style={[
+                styles.detailRow,
+                styles.detailRowBorder,
+                { borderColor: themeColors.border },
+              ]}
+            >
               <Text variant="friendly" tone="muted" className="text-sm">
                 {I18n.t('pro.expires_on')}
               </Text>
@@ -171,9 +185,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
               className="flex-row items-center justify-center gap-2 rounded-xl border border-border/40 bg-surface px-4 py-3.5"
             >
               <ExternalLink size={16} color={themeColors.text} />
-              <Text className="text-sm font-semibold">
-                {I18n.t('pro.cancel_subscription')}
-              </Text>
+              <Text className="text-sm font-semibold">{I18n.t('pro.cancel_subscription')}</Text>
             </Pressable>
             <Text variant="friendly" tone="muted" className="text-center text-xs px-4">
               {I18n.t('pro.cancel_subscription_note')}
@@ -186,6 +198,9 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
 }
 
 const styles = StyleSheet.create({
+  headerWrap: {
+    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
   content: {
     paddingHorizontal: spacing.screenHorizontal,
     paddingBottom: spacing.xl,

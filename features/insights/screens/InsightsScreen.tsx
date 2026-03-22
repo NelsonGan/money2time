@@ -1,12 +1,15 @@
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   CalendarDays,
   ChevronRight,
   HandCoins,
   Landmark,
   PiggyBank,
+  Smile,
   TimerReset,
   TrendingDown,
   TrendingUp,
+  X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -29,15 +32,17 @@ import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
+import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -76,6 +81,7 @@ const INSIGHT_TYPES = [
   'savings_rate',
   'expense_trend',
   'income_trend',
+  'expense_sentiment',
   'asset_history',
   'income_rate_history',
 ] as const;
@@ -91,14 +97,20 @@ const INSIGHT_TYPE_GROUPS = [
   },
   {
     id: 'trends',
-    insightTypes: ['expense_trend', 'income_trend', 'asset_history', 'income_rate_history'],
+    insightTypes: [
+      'expense_trend',
+      'income_trend',
+      'expense_sentiment',
+      'asset_history',
+      'income_rate_history',
+    ],
   },
 ] as const satisfies readonly {
   id: string;
   insightTypes: readonly InsightType[];
 }[];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
-type NavigableInsightType = BreakdownInsightType | 'expense_trend';
+type NavigableInsightType = BreakdownInsightType | 'expense_trend' | 'expense_sentiment';
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
 type TimeCostViewMode = 'category' | 'transaction';
@@ -147,6 +159,12 @@ const INSIGHT_TYPE_VISUALS = {
     tint: '#249A67',
     background: '#E4F7EC',
     border: '#B7E4CA',
+  },
+  expense_sentiment: {
+    Icon: Smile,
+    tint: '#C76A2E',
+    background: '#FFF3E8',
+    border: '#F4CFA7',
   },
   asset_history: {
     Icon: Landmark,
@@ -223,9 +241,13 @@ const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_RIGHT = 64;
 const EXPENSE_TREND_CHART_HEIGHT = 226;
 const EXPENSE_TREND_CHART_PADDING_RIGHT = 64;
+const SENTIMENT_CHART_HEIGHT = 200;
+const SENTIMENT_CHART_PADDING_RIGHT = 16;
+const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INCOME_RATE_CHART_HEIGHT = 200;
 const INCOME_RATE_CHART_PADDING_RIGHT = 64;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
+const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
 const GRAPH_HORIZONTAL_PADDING = 8;
 const GRAPH_VERTICAL_PADDING = 14;
@@ -301,6 +323,13 @@ const styles = StyleSheet.create({
     top: GRAPH_VERTICAL_PADDING,
     borderRadius: 14,
     backgroundColor: 'rgba(148, 163, 184, 0.22)',
+  },
+  chartRuntimeFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: spacing.lg,
   },
   pieFrame: {
     alignItems: 'center',
@@ -393,9 +422,17 @@ function buildLeftStyle(left: number | `${number}%`) {
   return { left };
 }
 
+function serializeRecordForSignature(record: Record<string, string>) {
+  return Object.entries(record)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}:${value}`)
+    .join('|');
+}
+
 type InsightFilterConfig = {
   fixedPeriodPreset: PeriodPreset | null;
   allowAccountFilter: boolean;
+  allowedPeriodPresets?: readonly PeriodPreset[];
 };
 
 const DEFAULT_INSIGHT_FILTER_CONFIG: InsightFilterConfig = {
@@ -417,12 +454,19 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
     allowAccountFilter: false,
   },
   expense_trend: {
-    fixedPeriodPreset: 'year',
+    fixedPeriodPreset: null,
     allowAccountFilter: false,
+    allowedPeriodPresets: ['week', 'year', 'custom'] as const,
   },
   income_trend: {
-    fixedPeriodPreset: 'year',
+    fixedPeriodPreset: null,
     allowAccountFilter: false,
+    allowedPeriodPresets: ['week', 'year', 'custom'] as const,
+  },
+  expense_sentiment: {
+    fixedPeriodPreset: null,
+    allowAccountFilter: false,
+    allowedPeriodPresets: ['week', 'month', 'custom'] as const,
   },
   asset_history: {
     fixedPeriodPreset: 'year',
@@ -444,6 +488,33 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
 
 function getInsightFilterConfig(insightType: InsightType): InsightFilterConfig {
   return INSIGHT_FILTER_CONFIG[insightType] ?? DEFAULT_INSIGHT_FILTER_CONFIG;
+}
+
+const DEFAULT_PERIOD_PRESET_BY_INSIGHT: Partial<Record<InsightType, PeriodPreset>> = {
+  expense_trend: 'year',
+  income_trend: 'year',
+  expense_sentiment: 'week',
+};
+
+function getDefaultPeriodPreset(insightType: InsightType): PeriodPreset {
+  const config = getInsightFilterConfig(insightType);
+  if (config.fixedPeriodPreset) return config.fixedPeriodPreset;
+  return DEFAULT_PERIOD_PRESET_BY_INSIGHT[insightType] ?? 'month';
+}
+
+function getHydratedInsightPeriodPreset(
+  saved: Partial<InsightsPreferencesSnapshot>,
+  fallbackInsightType: InsightType = 'expense_breakdown',
+): PeriodPreset {
+  const insightType = saved.selectedInsightType ?? fallbackInsightType;
+  const fixedPreset = getInsightFilterConfig(insightType).fixedPeriodPreset;
+  if (fixedPreset) return fixedPreset;
+
+  return (
+    saved.periodPresetByInsight?.[insightType] ??
+    (saved.selectedInsightType === insightType ? saved.periodPreset : undefined) ??
+    getDefaultPeriodPreset(insightType)
+  );
 }
 
 function isInsightType(value: string): value is InsightType {
@@ -643,6 +714,8 @@ type AssetHistoryMonthRow = {
 
 type ExpenseTrendMonthRow = {
   monthKey: string;
+  axisLabel: string;
+  axisSubLabel: string | null;
   label: string;
   totalExpense: number;
   transactionCount: number;
@@ -670,9 +743,13 @@ type AssetHistoryPageData = InsightBasePageData & {
   includedAccountsCount: number;
 };
 
+type TrendGranularity = 'month' | 'day';
+
 type ExpenseTrendPageData = InsightBasePageData & {
   kind: 'expense_trend';
   year: number;
+  periodKey: string;
+  granularity: TrendGranularity;
   monthRows: ExpenseTrendMonthRow[];
   averageMonthExpense: number;
   activeMonths: number;
@@ -681,6 +758,8 @@ type ExpenseTrendPageData = InsightBasePageData & {
 
 type IncomeTrendMonthRow = {
   monthKey: string;
+  axisLabel: string;
+  axisSubLabel: string | null;
   label: string;
   totalIncome: number;
   transactionCount: number;
@@ -693,10 +772,28 @@ type IncomeTrendMonthRow = {
 type IncomeTrendPageData = InsightBasePageData & {
   kind: 'income_trend';
   year: number;
+  periodKey: string;
+  granularity: TrendGranularity;
   monthRows: IncomeTrendMonthRow[];
   averageMonthIncome: number;
   activeMonths: number;
   peakMonthKey: string | null;
+};
+
+type SentimentDayRow = {
+  dayKey: string;
+  label: string;
+  subLabel: string | null;
+  happy: number;
+  neutral: number;
+  sad: number;
+  total: number;
+};
+
+type ExpenseSentimentPageData = InsightBasePageData & {
+  kind: 'expense_sentiment';
+  dayRows: SentimentDayRow[];
+  totals: { happy: number; neutral: number; sad: number };
 };
 
 type IncomeRatePoint = {
@@ -719,9 +816,21 @@ type InsightPageData =
   | AnalyticsPageData
   | ExpenseTrendPageData
   | IncomeTrendPageData
+  | ExpenseSentimentPageData
   | AssetHistoryPageData
   | IncomeRateHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
+
+function startOfDayDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfWeekMondayDate(date: Date): Date {
+  const day = startOfDayDate(date);
+  const offset = (day.getDay() + 6) % 7;
+  day.setDate(day.getDate() - offset);
+  return day;
+}
 
 function buildMonthPeriodState(targetMonthDate: Date): PeriodState {
   const monthStart = startOfMonthDate(targetMonthDate);
@@ -732,10 +841,21 @@ function buildMonthPeriodState(targetMonthDate: Date): PeriodState {
   };
 }
 
+function buildDayPeriodState(targetDate: Date): PeriodState {
+  const day = startOfDayDate(targetDate);
+  const dayKey = formatDateInput(day);
+  return {
+    anchorDate: day,
+    customStart: dayKey,
+    customEnd: dayKey,
+  };
+}
+
 type InsightsPreferencesSnapshot = {
   version: 1;
   selectedInsightType: InsightType;
   periodPreset: PeriodPreset;
+  periodPresetByInsight: Partial<Record<InsightType, PeriodPreset>>;
   anchorDate: string;
   customStart: string;
   customEnd: string;
@@ -785,6 +905,15 @@ function parseInsightsPreferencesPayload(
     }
     if (typeof parsed.periodPreset === 'string' && isPeriodPreset(parsed.periodPreset)) {
       next.periodPreset = parsed.periodPreset;
+    }
+    if (isObjectRecord(parsed.periodPresetByInsight)) {
+      const map: Partial<Record<InsightType, PeriodPreset>> = {};
+      for (const [key, val] of Object.entries(parsed.periodPresetByInsight)) {
+        if (isInsightType(key) && typeof val === 'string' && isPeriodPreset(val)) {
+          map[key as InsightType] = val;
+        }
+      }
+      if (Object.keys(map).length > 0) next.periodPresetByInsight = map;
     }
     if (typeof parsed.anchorDate === 'string' && parseDateInput(parsed.anchorDate)) {
       next.anchorDate = parsed.anchorDate;
@@ -861,21 +990,54 @@ function parseDateInput(dateText: string): Date | null {
   return parsed;
 }
 
+function buildCustomPeriodState(
+  customStart: string,
+  customEnd: string,
+  anchorDate: Date | null = null,
+): PeriodState | null {
+  const startDate = parseDateInput(customStart);
+  const endDate = parseDateInput(customEnd);
+  if (!startDate || !endDate || startDate > endDate) return null;
+
+  return {
+    anchorDate: startOfDayDate(anchorDate ?? endDate),
+    customStart,
+    customEnd,
+  };
+}
+
+function resolveActivityInsightPeriodState(request: {
+  monthKey: string;
+  anchorDateKey?: string;
+  customStart?: string;
+  customEnd?: string;
+  periodPreset?: PeriodPreset;
+}): PeriodState {
+  const parsedAnchorDate = request.anchorDateKey ? parseDateInput(request.anchorDateKey) : null;
+
+  if (request.periodPreset === 'custom' && request.customStart && request.customEnd) {
+    const customState = buildCustomPeriodState(
+      request.customStart,
+      request.customEnd,
+      parsedAnchorDate,
+    );
+    if (customState) return customState;
+  }
+
+  if (parsedAnchorDate) {
+    return buildDayPeriodState(parsedAnchorDate);
+  }
+
+  const monthDate = parseMonthKey(request.monthKey) ?? startOfMonthDate(new Date());
+  return buildMonthPeriodState(monthDate);
+}
+
 function addPeriodBySteps(date: Date, preset: Exclude<PeriodPreset, 'custom'>, steps: number) {
   const next = new Date(date);
   if (preset === 'week') next.setDate(next.getDate() + 7 * steps);
   if (preset === 'month') next.setMonth(next.getMonth() + steps);
   if (preset === 'year') next.setFullYear(next.getFullYear() + steps);
   return next;
-}
-
-function weekStart(date: Date) {
-  const copy = new Date(date);
-  const day = copy.getDay();
-  const diff = (day + 6) % 7;
-  copy.setDate(copy.getDate() - diff);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
 }
 
 function getPeriodRange(
@@ -890,7 +1052,7 @@ function getPeriodRange(
     if (startDate && endDate && startDate <= endDate) return toRange(startDate, endDate);
   }
   if (preset === 'week') {
-    const start = weekStart(anchorDate);
+    const start = startOfWeekMondayDate(anchorDate);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
     return toRange(start, end);
@@ -933,12 +1095,21 @@ function periodLabel(preset: PeriodPreset, range: { start: string; end: string }
 }
 
 function rangeLengthDays(range: { start: string; end: string }) {
+  const startDate = parseDateInput(dayKeyFromIsoLocal(range.start));
+  const endDate = parseDateInput(dayKeyFromIsoLocal(range.end));
+  if (!startDate || !endDate) return 1;
+
   return Math.max(
     1,
-    Math.round(
-      (new Date(range.end).getTime() - new Date(range.start).getTime()) / (1000 * 60 * 60 * 24),
-    ) + 1,
+    Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
   );
+}
+
+function resolveWeekAnchorDateFromRange(range: { start: string; end: string }) {
+  const rangeEndDate = parseDateInput(dayKeyFromIsoLocal(range.end));
+  const today = startOfDayDate(new Date());
+  if (!rangeEndDate) return today;
+  return rangeEndDate.getTime() > today.getTime() ? today : rangeEndDate;
 }
 
 function getCalendarWeekdayLabels(locale: string) {
@@ -1006,6 +1177,73 @@ function monthLabelsForYear(year: number, locale: string): string[] {
   );
   YEAR_MONTH_LABELS_CACHE.set(cacheKey, labels);
   return labels;
+}
+
+const DAY_LABEL_CACHE = new Map<string, string>();
+
+function dayLabelShort(dayKey: string, locale: string): string {
+  const cacheKey = `${locale}|${dayKey}`;
+  const cached = DAY_LABEL_CACHE.get(cacheKey);
+  if (cached) return cached;
+  const parts = dayKey.split('-');
+  const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  const label = date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+  DAY_LABEL_CACHE.set(cacheKey, label);
+  return label;
+}
+
+const WEEKDAY_LABEL_CACHE = new Map<string, string>();
+
+function weekdayLabelShort(dayKey: string, locale: string): string {
+  const cacheKey = `${locale}|${dayKey}`;
+  const cached = WEEKDAY_LABEL_CACHE.get(cacheKey);
+  if (cached) return cached;
+  const parts = dayKey.split('-');
+  const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  const label = date.toLocaleDateString(locale, { weekday: 'short' });
+  WEEKDAY_LABEL_CACHE.set(cacheKey, label);
+  return label;
+}
+
+const DAY_NUMBER_LABEL_CACHE = new Map<string, string>();
+
+function dayNumberLabel(dayKey: string): string {
+  const cached = DAY_NUMBER_LABEL_CACHE.get(dayKey);
+  if (cached) return cached;
+  const label = String(Number(dayKey.split('-')[2]));
+  DAY_NUMBER_LABEL_CACHE.set(dayKey, label);
+  return label;
+}
+
+const NUMERIC_DATE_LABEL_CACHE = new Map<string, string>();
+
+function numericDateLabelShort(dayKey: string, locale: string): string {
+  const cacheKey = `${locale}|${dayKey}`;
+  const cached = NUMERIC_DATE_LABEL_CACHE.get(cacheKey);
+  if (cached) return cached;
+  const parts = dayKey.split('-');
+  const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  const label = date.toLocaleDateString(locale, { month: 'numeric', day: 'numeric' });
+  NUMERIC_DATE_LABEL_CACHE.set(cacheKey, label);
+  return label;
+}
+
+function generateDayKeysForRange(startIso: string, endIso: string): string[] {
+  const keys: string[] = [];
+  const startDayKey = dayKeyFromIsoLocal(startIso);
+  const endDayKey = dayKeyFromIsoLocal(endIso);
+  const parts = startDayKey.split('-');
+  const cursor = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  const endParts = endDayKey.split('-');
+  const endDate = new Date(Number(endParts[0]), Number(endParts[1]) - 1, Number(endParts[2]));
+  while (cursor <= endDate) {
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    keys.push(`${y}-${m}-${d}`);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return keys;
 }
 
 function weekdayColumnIndexMonday(dayKey: string) {
@@ -1191,31 +1429,6 @@ function resolveFlatGraphRange(points: GraphPoint[]): GraphLineRange | undefined
   const centerValue = max;
   const offset = Math.max(1, Math.abs(centerValue) * 0.04);
   return { y: { min: centerValue - offset, max: centerValue + offset } };
-}
-
-function resolveGraphYDomain(points: GraphPoint[], range?: GraphLineRange) {
-  if (range?.y) return range.y;
-  if (points.length === 0) return null;
-  const values = points.map((point) => point.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
-  return { min, max };
-}
-
-function resolveGraphValueTop(
-  value: number,
-  chartHeight: number,
-  domain: { min: number; max: number } | null,
-) {
-  if (!domain || !Number.isFinite(value) || chartHeight <= 0) return null;
-  const span = domain.max - domain.min;
-  const plotHeight = Math.max(0, chartHeight - GRAPH_VERTICAL_PADDING * 2);
-  if (plotHeight <= 0) return null;
-  if (span <= 0) return GRAPH_VERTICAL_PADDING + plotHeight / 2;
-  const clampedValue = Math.max(domain.min, Math.min(domain.max, value));
-  const ratio = (domain.max - clampedValue) / span;
-  return GRAPH_VERTICAL_PADDING + ratio * plotHeight;
 }
 
 function buildGraphDatasetSignature(points: GraphPoint[]) {
@@ -1467,6 +1680,25 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   );
   const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
+  if (IS_EXPO_GO) {
+    return (
+      <View
+        style={[
+          buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT),
+          styles.chartRuntimeFallback,
+          {
+            borderColor: withColorAlpha(primaryColor, 0.18),
+            backgroundColor: withColorAlpha(primaryColor, 0.06),
+          },
+        ]}
+      >
+        <Text variant="label" tone="muted" className="text-center">
+          {I18n.t('insights.charts.expo_go_fallback')}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
       {isChartReady ? (
@@ -1545,6 +1777,25 @@ const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
   );
   const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
 
+  if (IS_EXPO_GO) {
+    return (
+      <View
+        style={[
+          buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT),
+          styles.chartRuntimeFallback,
+          {
+            borderColor: withColorAlpha(primaryColor, 0.18),
+            backgroundColor: withColorAlpha(primaryColor, 0.06),
+          },
+        ]}
+      >
+        <Text variant="label" tone="muted" className="text-center">
+          {I18n.t('insights.charts.expo_go_fallback')}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}>
       {isChartReady ? (
@@ -1607,13 +1858,58 @@ function FilterPill({
   );
 }
 
+const InsightsWindowPage = React.memo(function InsightsWindowPage({
+  item,
+  pageData,
+  pageStyle,
+  isChartScrubbing,
+  paneRenderVersion: _paneRenderVersion,
+  getPageScrollRef,
+  renderInsightsPane,
+}: {
+  item: number;
+  pageData: InsightPageData;
+  pageStyle: { width: number };
+  isChartScrubbing: boolean;
+  paneRenderVersion: string;
+  getPageScrollRef: (index: number) => { current: ScrollView | null };
+  renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
+}) {
+  return (
+    <View style={pageStyle} className="flex-1 bg-background">
+      <ScrollView
+        ref={(ref) => {
+          getPageScrollRef(item).current = ref;
+        }}
+        className="flex-1"
+        scrollEnabled={!isChartScrubbing}
+        contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
+      >
+        {renderInsightsPane(pageData)}
+      </ScrollView>
+    </View>
+  );
+},
+(prev, next) =>
+  prev.item === next.item &&
+  prev.pageData === next.pageData &&
+  prev.pageStyle === next.pageStyle &&
+  prev.isChartScrubbing === next.isChartScrubbing &&
+  prev.paneRenderVersion === next.paneRenderVersion &&
+  prev.getPageScrollRef === next.getPageScrollRef &&
+  prev.renderInsightsPane === next.renderInsightsPane);
+
 interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
+    anchorDateKey?: string;
+    customEnd?: string;
+    customStart?: string;
     monthKey: string;
+    periodPreset?: PeriodPreset;
     token: number;
   } | null;
   isSimpleMode?: boolean;
@@ -1668,7 +1964,13 @@ export function InsightsScreen({
   const isDark = useResolvedTheme() === 'dark';
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
-  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('month');
+  const [periodPresetByInsight, setPeriodPresetByInsight] = useState<
+    Partial<Record<InsightType, PeriodPreset>>
+  >({});
+  const [activityRequestPeriodPreset, setActivityRequestPeriodPreset] = useState<{
+    insightType: InsightType;
+    preset: PeriodPreset;
+  } | null>(null);
   const [anchorDate, setAnchorDate] = useState(() => startOfMonthDate(new Date()));
   const [customStart, setCustomStart] = useState(() =>
     formatDateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
@@ -1676,6 +1978,21 @@ export function InsightsScreen({
   const [customEnd, setCustomEnd] = useState(() => formatDateInput(new Date()));
   const [activeCustomDateField, setActiveCustomDateField] = useState<'start' | 'end'>('start');
   const [selectedInsightType, setSelectedInsightType] = useState<InsightType>('expense_breakdown');
+  const persistedPeriodPreset =
+    periodPresetByInsight[selectedInsightType] ?? getDefaultPeriodPreset(selectedInsightType);
+  const periodPreset =
+    activityRequestPeriodPreset?.insightType === selectedInsightType
+      ? activityRequestPeriodPreset.preset
+      : persistedPeriodPreset;
+  const setPeriodPreset = useCallback(
+    (preset: PeriodPreset) => {
+      setActivityRequestPeriodPreset((prev) =>
+        prev?.insightType === selectedInsightType ? null : prev,
+      );
+      setPeriodPresetByInsight((prev) => ({ ...prev, [selectedInsightType]: preset }));
+    },
+    [selectedInsightType],
+  );
   const [activeBreakdownSliceId, setActiveBreakdownSliceId] = useState<string | null>(null);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [excludedExpenseTrendAccountIds, setExcludedExpenseTrendAccountIds] = useState<string[]>(
@@ -1806,7 +2123,7 @@ export function InsightsScreen({
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const isChartScrubLockedRef = useRef(false);
   const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);
-  const periodPresetRef = useRef<PeriodPreset>(periodPreset);
+  const periodPresetByInsightRef = useRef(periodPresetByInsight);
   const [handledActivityBreakdownRequestToken, setHandledActivityBreakdownRequestToken] =
     useState(0);
   const committedPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
@@ -1848,8 +2165,8 @@ export function InsightsScreen({
   }, [selectedInsightType]);
 
   useEffect(() => {
-    periodPresetRef.current = periodPreset;
-  }, [periodPreset]);
+    periodPresetByInsightRef.current = periodPresetByInsight;
+  }, [periodPresetByInsight]);
 
   const pendingActivityBreakdownTarget = useMemo(() => {
     if (!activityBreakdownInsightRequest) return null;
@@ -1857,12 +2174,10 @@ export function InsightsScreen({
       return null;
     }
 
-    const targetMonthDate =
-      parseMonthKey(activityBreakdownInsightRequest.monthKey) ?? startOfMonthDate(new Date());
-
     return {
       insightType: activityBreakdownInsightRequest.insightType,
-      periodState: buildMonthPeriodState(targetMonthDate),
+      periodState: resolveActivityInsightPeriodState(activityBreakdownInsightRequest),
+      periodPreset: activityBreakdownInsightRequest.periodPreset,
     };
   }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken]);
 
@@ -1873,11 +2188,15 @@ export function InsightsScreen({
     }
 
     setHandledActivityBreakdownRequestToken(activityBreakdownInsightRequest.token);
-    const targetMonthDate =
-      parseMonthKey(activityBreakdownInsightRequest.monthKey) ?? startOfMonthDate(new Date());
-    const nextPeriodState = buildMonthPeriodState(targetMonthDate);
+    const nextPeriodState = resolveActivityInsightPeriodState(activityBreakdownInsightRequest);
 
-    setPeriodPreset('month');
+    const targetInsightType = activityBreakdownInsightRequest.insightType;
+    const targetFixedPreset = getInsightFilterConfig(targetInsightType).fixedPeriodPreset;
+    const targetPreset = activityBreakdownInsightRequest.periodPreset ?? targetFixedPreset ?? 'month';
+    setActivityRequestPeriodPreset({
+      insightType: targetInsightType,
+      preset: targetPreset,
+    });
     setAnchorDate(nextPeriodState.anchorDate);
     setCustomStart(nextPeriodState.customStart);
     setCustomEnd(nextPeriodState.customEnd);
@@ -1887,7 +2206,7 @@ export function InsightsScreen({
     setSelectedCalendarDayKey(null);
     setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
-    setSelectedInsightType(activityBreakdownInsightRequest.insightType);
+    setSelectedInsightType(targetInsightType);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
@@ -1907,7 +2226,8 @@ export function InsightsScreen({
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const currentInsightType = selectedInsightTypeRef.current;
-    const currentPeriodPreset = periodPresetRef.current;
+    const currentPeriodPreset =
+      periodPresetByInsightRef.current[currentInsightType] ?? getDefaultPeriodPreset(currentInsightType);
     const nextPeriodPreset =
       getInsightFilterConfig(currentInsightType).fixedPeriodPreset ?? currentPeriodPreset;
 
@@ -1915,6 +2235,8 @@ export function InsightsScreen({
       setCustomStart(formatDateInput(monthStart));
       setCustomEnd(formatDateInput(monthEnd));
       setActiveCustomDateField('start');
+    } else if (nextPeriodPreset === 'week') {
+      setAnchorDate(startOfDayDate(now));
     } else {
       setAnchorDate(startOfMonthDate(now));
     }
@@ -1940,7 +2262,14 @@ export function InsightsScreen({
 
   const applyInsightsPreferencesSnapshot = useCallback(
     (saved: Partial<InsightsPreferencesSnapshot>) => {
-      if (saved.periodPreset) setPeriodPreset(saved.periodPreset);
+      if (saved.periodPresetByInsight) {
+        setPeriodPresetByInsight((prev) => ({ ...prev, ...saved.periodPresetByInsight }));
+      } else if (saved.periodPreset && saved.selectedInsightType) {
+        setPeriodPresetByInsight((prev) => ({
+          ...prev,
+          [saved.selectedInsightType!]: saved.periodPreset,
+        }));
+      }
       if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
       if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
       if (saved.timeCostViewMode) setTimeCostViewMode(saved.timeCostViewMode);
@@ -1973,7 +2302,12 @@ export function InsightsScreen({
       if (saved.anchorDate) {
         const parsedAnchorDate = parseDateInput(saved.anchorDate);
         if (parsedAnchorDate) {
-          setAnchorDate(startOfMonthDate(parsedAnchorDate));
+          const restoredPeriodPreset = getHydratedInsightPeriodPreset(saved);
+          setAnchorDate(
+            restoredPeriodPreset === 'week' || restoredPeriodPreset === 'custom'
+              ? startOfDayDate(parsedAnchorDate)
+              : startOfMonthDate(parsedAnchorDate),
+          );
         }
       }
       if (saved.customStart) setCustomStart(saved.customStart);
@@ -1986,7 +2320,8 @@ export function InsightsScreen({
     () => ({
       version: INSIGHTS_PREFERENCES_VERSION,
       selectedInsightType,
-      periodPreset,
+      periodPreset: persistedPeriodPreset,
+      periodPresetByInsight,
       anchorDate: formatDateInput(anchorDate),
       customStart,
       customEnd,
@@ -2015,7 +2350,8 @@ export function InsightsScreen({
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
       excludedTimeCostExpenseCategoryId,
-      periodPreset,
+      persistedPeriodPreset,
+      periodPresetByInsight,
       selectedAccountIds,
       selectedInsightType,
       timeCostViewMode,
@@ -2324,11 +2660,17 @@ export function InsightsScreen({
 
       if (insightType === 'expense_trend') {
         const year = state.anchorDate.getFullYear();
-        const monthLabels = monthLabelsForYear(year, activeLocale);
-        const monthRowsSeed: ExpenseTrendMonthRow[] = Array.from(
-          { length: 12 },
-          (_, monthIndex) => ({
+        const isYearPeriod = periodPresetOverride === 'year';
+        const granularity: TrendGranularity = isYearPeriod ? 'month' : 'day';
+        const periodKey = isYearPeriod ? String(year) : `${range.start}|${range.end}`;
+
+        let monthRowsSeed: ExpenseTrendMonthRow[];
+        if (isYearPeriod) {
+          const monthLabels = monthLabelsForYear(year, activeLocale);
+          monthRowsSeed = Array.from({ length: 12 }, (_, monthIndex) => ({
             monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+            axisLabel: monthLabels[monthIndex] ?? '',
+            axisSubLabel: null,
             label: monthLabels[monthIndex] ?? '',
             totalExpense: 0,
             transactionCount: 0,
@@ -2336,8 +2678,27 @@ export function InsightsScreen({
             topCategoryEmoji: null,
             topCategoryAmount: 0,
             transactions: [],
-          }),
-        );
+          }));
+        } else {
+          const dayKeys = generateDayKeysForRange(range.start, range.end);
+          monthRowsSeed = dayKeys.map((dk) => ({
+            monthKey: dk,
+            axisLabel:
+              periodPresetOverride === 'week'
+                ? weekdayLabelShort(dk, activeLocale)
+                : dayLabelShort(dk, activeLocale),
+            axisSubLabel:
+              periodPresetOverride === 'week' ? numericDateLabelShort(dk, activeLocale) : null,
+            label: dayLabelShort(dk, activeLocale),
+            totalExpense: 0,
+            transactionCount: 0,
+            topCategoryLabel: null,
+            topCategoryEmoji: null,
+            topCategoryAmount: 0,
+            transactions: [],
+          }));
+        }
+
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
         const categoryTotalsByMonthKey = new Map<
           string,
@@ -2363,8 +2724,10 @@ export function InsightsScreen({
             settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
           if (!Number.isFinite(value) || value <= 0) return;
 
-          const monthKey = transactionMonthKeyById.get(tx.id) ?? monthKeyFromIsoLocal(tx.date);
-          const monthRow = monthRowByKey.get(monthKey);
+          const rowKey = isYearPeriod
+            ? (transactionMonthKeyById.get(tx.id) ?? monthKeyFromIsoLocal(tx.date))
+            : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
+          const monthRow = monthRowByKey.get(rowKey);
           if (!monthRow) return;
 
           filteredForRange.push(tx);
@@ -2384,10 +2747,10 @@ export function InsightsScreen({
             root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'),
           );
           const categoryEmoji = root?.icon ?? tx.categoryIcon ?? '•';
-          let monthCategoryTotals = categoryTotalsByMonthKey.get(monthKey);
+          let monthCategoryTotals = categoryTotalsByMonthKey.get(rowKey);
           if (!monthCategoryTotals) {
             monthCategoryTotals = new Map();
-            categoryTotalsByMonthKey.set(monthKey, monthCategoryTotals);
+            categoryTotalsByMonthKey.set(rowKey, monthCategoryTotals);
           }
           const current = monthCategoryTotals.get(categoryId);
           if (current) {
@@ -2437,6 +2800,8 @@ export function InsightsScreen({
         return {
           kind: 'expense_trend',
           year,
+          periodKey,
+          granularity,
           range,
           filteredForRange,
           monthRows,
@@ -2448,11 +2813,17 @@ export function InsightsScreen({
 
       if (insightType === 'income_trend') {
         const year = state.anchorDate.getFullYear();
-        const monthLabels = monthLabelsForYear(year, activeLocale);
-        const monthRowsSeed: IncomeTrendMonthRow[] = Array.from(
-          { length: 12 },
-          (_, monthIndex) => ({
+        const isYearPeriod = periodPresetOverride === 'year';
+        const granularity: TrendGranularity = isYearPeriod ? 'month' : 'day';
+        const periodKey = isYearPeriod ? String(year) : `${range.start}|${range.end}`;
+
+        let monthRowsSeed: IncomeTrendMonthRow[];
+        if (isYearPeriod) {
+          const monthLabels = monthLabelsForYear(year, activeLocale);
+          monthRowsSeed = Array.from({ length: 12 }, (_, monthIndex) => ({
             monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+            axisLabel: monthLabels[monthIndex] ?? '',
+            axisSubLabel: null,
             label: monthLabels[monthIndex] ?? '',
             totalIncome: 0,
             transactionCount: 0,
@@ -2460,8 +2831,27 @@ export function InsightsScreen({
             topCategoryEmoji: null,
             topCategoryAmount: 0,
             transactions: [],
-          }),
-        );
+          }));
+        } else {
+          const dayKeys = generateDayKeysForRange(range.start, range.end);
+          monthRowsSeed = dayKeys.map((dk) => ({
+            monthKey: dk,
+            axisLabel:
+              periodPresetOverride === 'week'
+                ? weekdayLabelShort(dk, activeLocale)
+                : dayLabelShort(dk, activeLocale),
+            axisSubLabel:
+              periodPresetOverride === 'week' ? numericDateLabelShort(dk, activeLocale) : null,
+            label: dayLabelShort(dk, activeLocale),
+            totalIncome: 0,
+            transactionCount: 0,
+            topCategoryLabel: null,
+            topCategoryEmoji: null,
+            topCategoryAmount: 0,
+            transactions: [],
+          }));
+        }
+
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
         const categoryTotalsByMonthKey = new Map<
           string,
@@ -2487,8 +2877,10 @@ export function InsightsScreen({
             settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
           if (!Number.isFinite(value) || value <= 0) return;
 
-          const monthKey = transactionMonthKeyById.get(tx.id) ?? monthKeyFromIsoLocal(tx.date);
-          const monthRow = monthRowByKey.get(monthKey);
+          const rowKey = isYearPeriod
+            ? (transactionMonthKeyById.get(tx.id) ?? monthKeyFromIsoLocal(tx.date))
+            : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
+          const monthRow = monthRowByKey.get(rowKey);
           if (!monthRow) return;
 
           filteredForRange.push(tx);
@@ -2508,10 +2900,10 @@ export function InsightsScreen({
             root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'),
           );
           const categoryEmoji = root?.icon ?? tx.categoryIcon ?? '•';
-          let monthCategoryTotals = categoryTotalsByMonthKey.get(monthKey);
+          let monthCategoryTotals = categoryTotalsByMonthKey.get(rowKey);
           if (!monthCategoryTotals) {
             monthCategoryTotals = new Map();
-            categoryTotalsByMonthKey.set(monthKey, monthCategoryTotals);
+            categoryTotalsByMonthKey.set(rowKey, monthCategoryTotals);
           }
           const current = monthCategoryTotals.get(categoryId);
           if (current) {
@@ -2561,12 +2953,56 @@ export function InsightsScreen({
         return {
           kind: 'income_trend',
           year,
+          periodKey,
+          granularity,
           range,
           filteredForRange,
           monthRows,
           averageMonthIncome: activeMonths > 0 ? totalIncome / activeMonths : 0,
           activeMonths,
           peakMonthKey,
+        };
+      }
+
+      if (insightType === 'expense_sentiment') {
+        const dayKeys = generateDayKeysForRange(range.start, range.end);
+        const isWeekView = periodPresetOverride === 'week';
+        const useDetailedDayLabels = isWeekView || dayKeys.length <= 7;
+        const dayRowByKey = new Map<string, SentimentDayRow>();
+        dayKeys.forEach((dk) => {
+          dayRowByKey.set(dk, {
+            dayKey: dk,
+            label: useDetailedDayLabels ? weekdayLabelShort(dk, activeLocale) : dayNumberLabel(dk),
+            subLabel: useDetailedDayLabels ? numericDateLabelShort(dk, activeLocale) : null,
+            happy: 0,
+            neutral: 0,
+            sad: 0,
+            total: 0,
+          });
+        });
+
+        const filteredForRange: TransactionWithRelations[] = [];
+        const totals = { happy: 0, neutral: 0, sad: 0 };
+
+        inRangeTransactions.forEach((tx) => {
+          if (tx.type !== 'expense') return;
+          const dayKey = transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date);
+          const dayRow = dayRowByKey.get(dayKey);
+          if (!dayRow) return;
+
+          filteredForRange.push(tx);
+          const sentiment = tx.sentiment ?? 'neutral';
+          dayRow[sentiment] += 1;
+          dayRow.total += 1;
+          totals[sentiment] += 1;
+        });
+
+        return {
+          kind: 'expense_sentiment',
+          range,
+          filteredForRange,
+          dayRows: dayKeys.map((dk) => dayRowByKey.get(dk)!),
+          totals,
         };
       }
 
@@ -3194,7 +3630,11 @@ export function InsightsScreen({
   );
   const displaySelectedInsightType =
     pendingActivityBreakdownTarget?.insightType ?? selectedInsightType;
-  const displayPeriodPreset = pendingActivityBreakdownTarget ? 'month' : effectivePeriodPreset;
+  const displayPeriodPreset = pendingActivityBreakdownTarget
+    ? (pendingActivityBreakdownTarget.periodPreset ??
+      getInsightFilterConfig(pendingActivityBreakdownTarget.insightType).fixedPeriodPreset ??
+      'month')
+    : effectivePeriodPreset;
   const displayCurrentPeriodState =
     pendingActivityBreakdownTarget?.periodState ?? currentPeriodState;
   const displayCommittedPageIndex = pendingActivityBreakdownTarget
@@ -3415,47 +3855,22 @@ export function InsightsScreen({
 
   const onMonthStep = useCallback(
     (direction: 1 | -1) => {
-      if (
-        selectedInsightType === 'asset_history' ||
-        selectedInsightType === 'expense_trend' ||
-        selectedInsightType === 'income_trend'
-      ) {
-        const nextState = shiftPeriodStateBySteps(
-          currentPeriodState,
-          direction,
-          effectivePeriodPreset,
-        );
-        setAnchorDate(nextState.anchorDate);
-        setCustomStart(nextState.customStart);
-        setCustomEnd(nextState.customEnd);
-        const currentIndex = committedPageIndexRef.current;
-        headerPreviewPageIndexRef.current = currentIndex;
-        setHeaderPreviewPageIndex(currentIndex);
-        return;
-      }
       resetAdjacentPagesToTop();
       const list = horizontalListRef.current;
+      const currentIndex = headerPreviewPageIndexRef.current;
+      const targetIndex = clampInsightsPageIndex(currentIndex + direction);
+
       if (!list) {
-        commitInsightsPageByIndex(committedPageIndexRef.current + direction);
+        commitInsightsPageByIndex(targetIndex);
         return;
       }
-      const targetIndex = clampInsightsPageIndex(committedPageIndexRef.current + direction);
-      headerPreviewPageIndexRef.current = targetIndex;
-      setHeaderPreviewPageIndex(targetIndex);
+
       list.scrollToIndex({
         index: targetIndex,
         animated: true,
       });
     },
-    [
-      clampInsightsPageIndex,
-      commitInsightsPageByIndex,
-      currentPeriodState,
-      effectivePeriodPreset,
-      resetAdjacentPagesToTop,
-      selectedInsightType,
-      shiftPeriodStateBySteps,
-    ],
+    [clampInsightsPageIndex, commitInsightsPageByIndex, resetAdjacentPagesToTop],
   );
 
   const finalizeHorizontalShift = useCallback(
@@ -3517,35 +3932,6 @@ export function InsightsScreen({
     [pageWidth],
   );
   const insightsPagerKeyExtractor = useCallback((item: number) => String(item), []);
-
-  const renderInsightsWindowPage = ({ item }: { item: number }) => {
-    const pageOffset = item - displayCommittedPageIndex;
-    const pagePeriodState = shiftPeriodStateBySteps(
-      displayCurrentPeriodState,
-      pageOffset,
-      displayPeriodPreset,
-    );
-    const pageData = getCachedPageData(
-      pagePeriodState,
-      displaySelectedInsightType,
-      displayPeriodPreset,
-    );
-
-    return (
-      <View style={insightsPageStyle} className="flex-1 bg-background">
-        <ScrollView
-          ref={(ref) => {
-            getPageScrollRef(item).current = ref;
-          }}
-          className="flex-1"
-          scrollEnabled={!isChartScrubbing}
-          contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
-        >
-          {renderInsightsPane(pageData)}
-        </ScrollView>
-      </View>
-    );
-  };
 
   const handlePrevMonth = useCallback(() => onMonthStep(-1), [onMonthStep]);
   const handleNextMonth = useCallback(() => onMonthStep(1), [onMonthStep]);
@@ -3993,9 +4379,7 @@ export function InsightsScreen({
                         accessibilityRole="button"
                         accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
                         accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
-                        className={cn(
-                          'rounded-xl items-center border active:opacity-85',
-                        )}
+                        className={cn('rounded-xl items-center border active:opacity-85')}
                         style={[
                           styles.calendarDayCell,
                           {
@@ -4032,10 +4416,7 @@ export function InsightsScreen({
                                 },
                               ]}
                             >
-                              <RNText
-                                allowFontScaling={false}
-                                style={styles.calendarEmojiLabel}
-                              >
+                              <RNText allowFontScaling={false} style={styles.calendarEmojiLabel}>
                                 {cell.topCategoryEmoji}
                               </RNText>
                             </View>
@@ -4280,7 +4661,7 @@ export function InsightsScreen({
     }
 
     const trendAccentColor = INSIGHT_TYPE_VISUALS.expense_trend.tint;
-    const selectedYearKey = String(pageData.year);
+    const selectedYearKey = pageData.periodKey;
     const selectedMonthKey = expenseTrendScrubMonthByYear[selectedYearKey] ?? null;
     const fallbackSelectedMonthRow =
       [...pageData.monthRows].reverse().find((row) => row.totalExpense > 0) ??
@@ -4341,7 +4722,8 @@ export function InsightsScreen({
               data={pageData.monthRows.map((row) => ({
                 monthKey: row.monthKey,
                 value: row.totalExpense,
-                label: row.label,
+                label: row.axisLabel,
+                subLabel: row.axisSubLabel ?? undefined,
               }))}
               chartWidth={expenseGraphWidth}
               chartHeight={EXPENSE_TREND_CHART_HEIGHT}
@@ -4439,7 +4821,11 @@ export function InsightsScreen({
           <View className="flex-row items-stretch border-t border-border/40 pt-3">
             <View className="flex-1">
               <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.expense_trend.peak_title')}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.expense_trend.peak_title_day'
+                    : 'insights.analytics.expense_trend.peak_title',
+                )}
               </Text>
               <View className="mt-1">
                 {peakMonthRow ? (
@@ -4461,7 +4847,11 @@ export function InsightsScreen({
             <View className="mx-3 w-px" style={metricDividerStyle} />
             <View className="flex-1">
               <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.expense_trend.average_title')}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.expense_trend.average_title_day'
+                    : 'insights.analytics.expense_trend.average_title',
+                )}
               </Text>
               <View className="mt-1">
                 {renderValueNode(pageData.averageMonthExpense, {
@@ -4471,9 +4861,14 @@ export function InsightsScreen({
                 })}
               </View>
               <Text variant="label" tone="muted" className="mt-0.5">
-                {I18n.t('insights.analytics.expense_trend.active_months', {
-                  count: pageData.activeMonths,
-                })}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.expense_trend.active_days'
+                    : 'insights.analytics.expense_trend.active_months',
+                  {
+                    count: pageData.activeMonths,
+                  },
+                )}
               </Text>
             </View>
           </View>
@@ -4495,7 +4890,7 @@ export function InsightsScreen({
     }
 
     const trendAccentColor = INSIGHT_TYPE_VISUALS.income_trend.tint;
-    const selectedYearKey = String(pageData.year);
+    const selectedYearKey = pageData.periodKey;
     const selectedMonthKey = incomeTrendScrubMonthByYear[selectedYearKey] ?? null;
     const fallbackSelectedMonthRow =
       [...pageData.monthRows].reverse().find((row) => row.totalIncome > 0) ??
@@ -4556,7 +4951,8 @@ export function InsightsScreen({
               data={pageData.monthRows.map((row) => ({
                 monthKey: row.monthKey,
                 value: row.totalIncome,
-                label: row.label,
+                label: row.axisLabel,
+                subLabel: row.axisSubLabel ?? undefined,
               }))}
               chartWidth={incomeGraphWidth}
               chartHeight={EXPENSE_TREND_CHART_HEIGHT}
@@ -4654,7 +5050,11 @@ export function InsightsScreen({
           <View className="flex-row items-stretch border-t border-border/40 pt-3">
             <View className="flex-1">
               <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.income_trend.peak_title')}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.income_trend.peak_title_day'
+                    : 'insights.analytics.income_trend.peak_title',
+                )}
               </Text>
               <View className="mt-1">
                 {peakMonthRow ? (
@@ -4676,7 +5076,11 @@ export function InsightsScreen({
             <View className="mx-3 w-px" style={metricDividerStyle} />
             <View className="flex-1">
               <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.income_trend.average_title')}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.income_trend.average_title_day'
+                    : 'insights.analytics.income_trend.average_title',
+                )}
               </Text>
               <View className="mt-1">
                 {renderValueNode(pageData.averageMonthIncome, {
@@ -4686,10 +5090,104 @@ export function InsightsScreen({
                 })}
               </View>
               <Text variant="label" tone="muted" className="mt-0.5">
-                {I18n.t('insights.analytics.income_trend.active_months', {
-                  count: pageData.activeMonths,
-                })}
+                {I18n.t(
+                  pageData.granularity === 'day'
+                    ? 'insights.analytics.income_trend.active_days'
+                    : 'insights.analytics.income_trend.active_months',
+                  {
+                    count: pageData.activeMonths,
+                  },
+                )}
               </Text>
+            </View>
+          </View>
+        </Card>
+      </View>
+    );
+  };
+
+  const renderExpenseSentimentPane = (pageData: ExpenseSentimentPageData) => {
+    if (pageData.filteredForRange.length === 0) {
+      return (
+        <EmptyState
+          title={I18n.t('insights.analytics.expense_sentiment.no_data_title')}
+          message={I18n.t('insights.analytics.expense_sentiment.no_data_message')}
+          mascotMood="curious"
+          animateIn={false}
+        />
+      );
+    }
+
+    const sentimentChartWidth = Math.max(140, lineChartWidth - SENTIMENT_CHART_PADDING_RIGHT);
+    return (
+      <View className="mt-2 gap-3">
+        <View style={lineChartSectionStyle} className="py-1">
+          <View
+            style={[styles.chartSizeCenter, buildSizeStyle(lineChartWidth, SENTIMENT_CHART_HEIGHT)]}
+          >
+            <SentimentStackedBarChart
+              data={pageData.dayRows}
+              chartWidth={sentimentChartWidth}
+              chartHeight={SENTIMENT_CHART_HEIGHT}
+              labelColor={themeColors.textMuted}
+              happyColor={SENTIMENT_COLORS.happy}
+              neutralColor={SENTIMENT_COLORS.neutral}
+              sadColor={SENTIMENT_COLORS.sad}
+            />
+          </View>
+        </View>
+
+        <Card className="gap-3 p-4">
+          <Text variant="label" tone="muted">
+            {I18n.t('insights.analytics.expense_sentiment.summary_title')}
+          </Text>
+          <View className="flex-row items-center pt-1">
+            <View className="flex-1 items-center justify-center py-1">
+              <View className="flex-row items-center justify-center gap-1.5">
+                <SentimentIcon sentiment="sad" size={26} />
+                <X
+                  size={12}
+                  color="#000000"
+                  strokeWidth={2.4}
+                />
+                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.sad }}>
+                  {pageData.totals.sad}
+                </Text>
+              </View>
+            </View>
+            <View
+              className="mx-3 w-px"
+              style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
+            />
+            <View className="flex-1 items-center justify-center py-1">
+              <View className="flex-row items-center justify-center gap-1.5">
+                <SentimentIcon sentiment="neutral" size={26} />
+                <X
+                  size={12}
+                  color="#000000"
+                  strokeWidth={2.4}
+                />
+                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.neutral }}>
+                  {pageData.totals.neutral}
+                </Text>
+              </View>
+            </View>
+            <View
+              className="mx-3 w-px"
+              style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
+            />
+            <View className="flex-1 items-center justify-center py-1">
+              <View className="flex-row items-center justify-center gap-1.5">
+                <SentimentIcon sentiment="happy" size={26} />
+                <X
+                  size={12}
+                  color="#000000"
+                  strokeWidth={2.4}
+                />
+                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.happy }}>
+                  {pageData.totals.happy}
+                </Text>
+              </View>
             </View>
           </View>
         </Card>
@@ -5225,6 +5723,9 @@ export function InsightsScreen({
     if (pageData.kind === 'income_trend') {
       return renderIncomeTrendPane(pageData);
     }
+    if (pageData.kind === 'expense_sentiment') {
+      return renderExpenseSentimentPane(pageData);
+    }
     if (pageData.kind === 'asset_history') {
       return renderAssetHistoryPane(pageData);
     }
@@ -5239,6 +5740,85 @@ export function InsightsScreen({
     }
     return renderBreakdownPane(pageData);
   };
+  const renderInsightsPaneRef = useRef(renderInsightsPane);
+  if (renderInsightsPaneRef.current !== renderInsightsPane) {
+    renderInsightsPaneRef.current = renderInsightsPane;
+  }
+  const renderInsightsPaneStable = useCallback(
+    (pageData: InsightPageData) => renderInsightsPaneRef.current(pageData),
+    [],
+  );
+  const paneRenderVersion = useMemo(
+    () =>
+      [
+        activeBreakdownSliceId ?? '',
+        selectedCalendarDayKey ?? '',
+        timeCostViewMode,
+        selectedIncomeRatePointIndex === null ? '' : String(selectedIncomeRatePointIndex),
+        incomeRateDisplayUnit,
+        activeLocale,
+        settings.currencySymbol,
+        settings.displayMode,
+        isDark ? 'dark' : 'light',
+        serializeRecordForSignature(expenseTrendScrubMonthByYear),
+        serializeRecordForSignature(incomeTrendScrubMonthByYear),
+        serializeRecordForSignature(assetHistoryScrubMonthByYear),
+      ].join('|'),
+    [
+      activeBreakdownSliceId,
+      activeLocale,
+      assetHistoryScrubMonthByYear,
+      expenseTrendScrubMonthByYear,
+      incomeRateDisplayUnit,
+      incomeTrendScrubMonthByYear,
+      isDark,
+      selectedCalendarDayKey,
+      selectedIncomeRatePointIndex,
+      settings.currencySymbol,
+      settings.displayMode,
+      timeCostViewMode,
+    ],
+  );
+  const renderInsightsWindowPage = useCallback(
+    ({ item }: { item: number }) => {
+      const pageOffset = item - displayCommittedPageIndex;
+      const pagePeriodState = shiftPeriodStateBySteps(
+        displayCurrentPeriodState,
+        pageOffset,
+        displayPeriodPreset,
+      );
+      const pageData = getCachedPageData(
+        pagePeriodState,
+        displaySelectedInsightType,
+        displayPeriodPreset,
+      );
+
+      return (
+        <InsightsWindowPage
+          item={item}
+          pageData={pageData}
+          pageStyle={insightsPageStyle}
+          isChartScrubbing={isChartScrubbing}
+          paneRenderVersion={paneRenderVersion}
+          getPageScrollRef={getPageScrollRef}
+          renderInsightsPane={renderInsightsPaneStable}
+        />
+      );
+    },
+    [
+      displayCommittedPageIndex,
+      displayCurrentPeriodState,
+      displayPeriodPreset,
+      displaySelectedInsightType,
+      getCachedPageData,
+      getPageScrollRef,
+      insightsPageStyle,
+      isChartScrubbing,
+      paneRenderVersion,
+      renderInsightsPaneStable,
+      shiftPeriodStateBySteps,
+    ],
+  );
 
   const accountOptions = useMemo(() => accounts.slice(0, 6), [accounts]);
   useEffect(() => {
@@ -5327,7 +5907,7 @@ export function InsightsScreen({
   const displayInsightsFilterCount = useMemo(() => {
     if (!displayHasInsightsFilters) return 0;
     let count = 0;
-    if (displayHasPeriodFilter && displayPeriodPreset !== 'month') count += 1;
+    if (displayHasPeriodFilter && displayPeriodPreset !== getDefaultPeriodPreset(displaySelectedInsightType)) count += 1;
     if (displayHasAccountFilter && selectedAccountIds.length > 0) count += 1;
     if (displayHasExpenseTrendExclusionFilter) {
       count +=
@@ -5355,6 +5935,7 @@ export function InsightsScreen({
     displayHasSavingsCategoryExclusionFilter,
     displayHasTimeCostExpenseCategoryExclusionFilter,
     displayPeriodPreset,
+    displaySelectedInsightType,
     excludedAssetHistoryAccountIds.length,
     excludedExpenseTrendAccountIds.length,
     excludedExpenseTrendExpenseCategoryIds.length,
@@ -5368,8 +5949,19 @@ export function InsightsScreen({
 
   const resetInsightsFilters = useCallback(() => {
     const now = new Date();
-    setPeriodPreset('month');
-    setAnchorDate(startOfMonthDate(now));
+    const resetPreset = getDefaultPeriodPreset(selectedInsightType);
+    setActivityRequestPeriodPreset((prev) =>
+      prev?.insightType === selectedInsightType ? null : prev,
+    );
+    setPeriodPresetByInsight((prev) => {
+      if (!(selectedInsightType in prev)) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[selectedInsightType];
+      return next;
+    });
+    setAnchorDate(resetPreset === 'week' ? startOfDayDate(now) : startOfMonthDate(now));
     setCustomStart(formatDateInput(new Date(now.getFullYear(), now.getMonth(), 1)));
     setCustomEnd(formatDateInput(now));
     setActiveCustomDateField('start');
@@ -5385,7 +5977,7 @@ export function InsightsScreen({
     setIncomeTrendScrubMonthByYear({});
     setExcludedAssetHistoryAccountIds([]);
     setAssetHistoryScrubMonthByYear({});
-  }, []);
+  }, [selectedInsightType]);
 
   const handleCustomDateSelect = useCallback(
     (field: 'start' | 'end', value: string) => {
@@ -5411,27 +6003,22 @@ export function InsightsScreen({
     (value: string) => {
       if (!isInsightType(value)) return;
       const nextInsightType = value;
-      const nextInsightFilterConfig = getInsightFilterConfig(nextInsightType);
-      const nextEffectivePeriodPreset = nextInsightFilterConfig.fixedPeriodPreset ?? periodPreset;
-      const currentPeriodMode =
-        effectivePeriodPreset === 'month'
-          ? 'month'
-          : effectivePeriodPreset === 'year'
-            ? 'year'
-            : 'other';
-      const nextPeriodMode =
-        nextEffectivePeriodPreset === 'month'
-          ? 'month'
-          : nextEffectivePeriodPreset === 'year'
-            ? 'year'
-            : 'other';
+      setActivityRequestPeriodPreset((prev) =>
+        prev?.insightType === selectedInsightType ? null : prev,
+      );
+      const nextEffectivePreset =
+        getInsightFilterConfig(nextInsightType).fixedPeriodPreset ??
+        periodPresetByInsight[nextInsightType] ??
+        getDefaultPeriodPreset(nextInsightType);
+      const currentEffectivePreset = effectivePeriodPreset;
 
-      if (
-        (currentPeriodMode === 'year' && nextPeriodMode === 'month') ||
-        (currentPeriodMode === 'month' && nextPeriodMode === 'year')
-      ) {
+      const periodMode = (p: PeriodPreset) =>
+        p === 'month' ? 'month' : p === 'year' ? 'year' : 'other';
+      if (periodMode(currentEffectivePreset) !== periodMode(nextEffectivePreset)) {
         const now = new Date();
-        setAnchorDate(startOfMonthDate(now));
+        setAnchorDate(
+          nextEffectivePreset === 'week' ? startOfDayDate(now) : startOfMonthDate(now),
+        );
       }
 
       setActiveBreakdownSlice(null, false);
@@ -5439,7 +6026,7 @@ export function InsightsScreen({
       setSelectedIncomeRatePointIndex(null);
       setSelectedInsightType(nextInsightType);
     },
-    [effectivePeriodPreset, periodPreset, setActiveBreakdownSlice],
+    [effectivePeriodPreset, periodPresetByInsight, selectedInsightType, setActiveBreakdownSlice],
   );
   const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
   const handleInsightTypeSelectorLayout = useCallback(() => {
@@ -5567,7 +6154,6 @@ export function InsightsScreen({
             maxToRenderPerBatch={3}
             windowSize={3}
             renderItem={renderInsightsWindowPage}
-            extraData={buildPageData}
             initialScrollIndex={INSIGHTS_PAGER_CENTER_INDEX}
             getItemLayout={getHorizontalItemLayout}
             onScroll={handleHorizontalScroll}
@@ -5637,12 +6223,21 @@ export function InsightsScreen({
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.insightsFilterPillsContent}
                 >
-                  {PERIOD_TABS.map((tab) => (
+                  {(activeInsightFilterConfig.allowedPeriodPresets ?? PERIOD_TABS).map((tab) => (
                     <FilterPill
                       key={tab}
                       label={I18n.t(`insights.period.${tab}`)}
                       active={periodPreset === tab}
                       onPress={() => {
+                        if (tab === 'week' && periodPreset !== 'week') {
+                          const currentRange = getPeriodRange(
+                            effectivePeriodPreset,
+                            currentPeriodState.anchorDate,
+                            currentPeriodState.customStart,
+                            currentPeriodState.customEnd,
+                          );
+                          setAnchorDate(resolveWeekAnchorDateFromRange(currentRange));
+                        }
                         setPeriodPreset(tab);
                         if (tab === 'custom') setActiveCustomDateField('start');
                       }}

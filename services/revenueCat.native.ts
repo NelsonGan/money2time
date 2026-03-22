@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import Purchases, {
   type CustomerInfo,
+  type CustomerInfoUpdateListener,
   PURCHASES_ERROR_CODE,
   type PurchasesError,
 } from 'react-native-purchases';
@@ -9,10 +10,12 @@ import Purchases, {
 import type {
   RevenueCatActionResult,
   RevenueCatCustomerState,
+  RevenueCatCustomerStateUpdateListener,
   RevenueCatEnvironment,
   RevenueCatOffering,
   RevenueCatPackage,
 } from './revenueCat.shared';
+import { isRevenueCatCustomerStateActive } from './revenueCat.shared';
 
 export * from './revenueCat.shared';
 
@@ -91,6 +94,20 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
     expirationDate: source?.expirationDate ?? null,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
   };
+}
+
+function getRevenueCatNotAvailableMessage(environment: RevenueCatEnvironment) {
+  switch (environment.reason) {
+    case 'expo_go':
+      return 'Purchases are unavailable in Expo Go. Use a development build or TestFlight.';
+    case 'missing_api_key':
+    case 'missing_entitlement':
+      return 'Purchases are not configured in this build.';
+    case 'unsupported':
+      return 'Purchases are not supported on this device.';
+    default:
+      return 'Purchases are not available right now.';
+  }
 }
 
 async function ensureRevenueCatConfigured() {
@@ -196,6 +213,26 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
   }
 }
 
+export function subscribeToRevenueCatCustomerStateUpdates(
+  listener: RevenueCatCustomerStateUpdateListener,
+) {
+  const environment = getRevenueCatEnvironment();
+
+  if (!environment.isConfigured || !environment.canMakePurchases) {
+    return () => {};
+  }
+
+  const customerInfoListener: CustomerInfoUpdateListener = (customerInfo) => {
+    listener(toRevenueCatCustomerState(customerInfo));
+  };
+
+  Purchases.addCustomerInfoUpdateListener(customerInfoListener);
+
+  return () => {
+    Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
+  };
+}
+
 export async function purchaseRevenueCatPackage(
   packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
@@ -204,7 +241,7 @@ export async function purchaseRevenueCatPackage(
   if (!environment.isConfigured || !environment.canMakePurchases) {
     return {
       customerState: null,
-      message: null,
+      message: getRevenueCatNotAvailableMessage(environment),
       status: 'not_available',
     };
   }
@@ -230,6 +267,15 @@ export async function purchaseRevenueCatPackage(
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     const customerState = toRevenueCatCustomerState(customerInfo);
 
+    if (!isRevenueCatCustomerStateActive(customerState)) {
+      return {
+        customerState,
+        message:
+          'Your purchase completed, but Pro access is not active yet. Please wait a moment or tap Restore Purchases.',
+        status: 'pending',
+      };
+    }
+
     return {
       customerState,
       message: null,
@@ -246,7 +292,7 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
   if (!environment.isConfigured || !environment.canMakePurchases) {
     return {
       customerState: null,
-      message: null,
+      message: getRevenueCatNotAvailableMessage(environment),
       status: 'not_available',
     };
   }

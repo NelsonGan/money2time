@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePro } from '~/context/ProContext';
@@ -28,13 +27,7 @@ export function useProGate() {
       void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type });
 
       const messageKey = `pro.limit_${type}` as const;
-      Alert.alert(I18n.t('pro.limit_reached_title'), I18n.t(messageKey, { count: limit }), [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('pro.upgrade'),
-          onPress: () => requestOpenPaywall(type),
-        },
-      ]);
+      requestOpenPaywall(type, I18n.t(messageKey, { count: limit }));
       return false;
     },
     [isPro],
