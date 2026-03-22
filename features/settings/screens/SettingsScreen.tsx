@@ -296,9 +296,7 @@ export function SettingsScreen({
                 {isPro ? I18n.t('pro.manage') : I18n.t('pro.upgrade_subtitle')}
               </Text>
             </View>
-            {isPro ? (
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            ) : null}
+            {isPro ? <ChevronRight size={18} color={themeColors.textMuted} /> : null}
           </Pressable>
 
           <SettingsSection

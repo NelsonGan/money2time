@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -183,6 +184,7 @@ export function BottomNav({
     };
   }, [measureAddButton, tutorialSpotlightRequest]);
 
+  const { isTablet } = useDeviceLayout();
   const visibleTabs = hideTabs?.length ? TABS.filter((t) => !hideTabs.includes(t.name)) : TABS;
   const midIndex = Math.floor(visibleTabs.length / 2);
   const showAddButton = !!onPressAdd;
@@ -210,11 +212,18 @@ export function BottomNav({
   return (
     <View
       pointerEvents="box-none"
-      style={{
-        marginTop: showAddButton ? -ADD_BUTTON_PROTRUSION : 0,
-        paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
-        paddingBottom: bottomPad,
-      }}
+      style={[
+        {
+          marginTop: showAddButton ? -ADD_BUTTON_PROTRUSION : 0,
+          paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
+          paddingBottom: bottomPad,
+        },
+        isTablet && {
+          maxWidth: TABLET_CONTENT_MAX_WIDTH,
+          alignSelf: 'center' as const,
+          width: '100%',
+        },
+      ]}
       className="px-4"
     >
       {/* Floating pill nav */}

@@ -39,10 +39,7 @@ export const SentimentStackedBarChart = React.memo(function SentimentStackedBarC
 }: SentimentStackedBarChartProps) {
   const clipPathPrefix = useId().replace(/:/g, '');
   const barCount = data.length;
-  const hasMultiLineLabels = useMemo(
-    () => data.some((datum) => Boolean(datum.subLabel)),
-    [data],
-  );
+  const hasMultiLineLabels = useMemo(() => data.some((datum) => Boolean(datum.subLabel)), [data]);
   const drawableWidth = chartWidth - SIDE_PADDING * 2;
   const drawableHeight =
     chartHeight -

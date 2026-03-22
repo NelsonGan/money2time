@@ -40,11 +40,10 @@ export const TrendBarChart = React.memo(function TrendBarChart({
   gridLineColor,
 }: TrendBarChartProps) {
   const barCount = data.length;
-  const hasMultiLineLabels = useMemo(
-    () => data.some((datum) => Boolean(datum.subLabel)),
-    [data],
-  );
-  const bottomLabelHeight = hasMultiLineLabels ? DOUBLE_LINE_LABEL_HEIGHT : SINGLE_LINE_LABEL_HEIGHT;
+  const hasMultiLineLabels = useMemo(() => data.some((datum) => Boolean(datum.subLabel)), [data]);
+  const bottomLabelHeight = hasMultiLineLabels
+    ? DOUBLE_LINE_LABEL_HEIGHT
+    : SINGLE_LINE_LABEL_HEIGHT;
   const drawableWidth = chartWidth - SIDE_PADDING * 2;
   const drawableHeight = chartHeight - bottomLabelHeight - TOP_PADDING;
   const maxValue = useMemo(() => {

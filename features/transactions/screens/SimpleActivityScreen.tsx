@@ -30,6 +30,7 @@ import {
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useFocusMonthNavigation } from '~/hooks/useFocusMonthNavigation';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -208,8 +209,10 @@ export function SimpleActivityScreen({
   const searchInputRef = useRef<TextInput | null>(null);
   const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
   const { width } = useWindowDimensions();
+  const { tabletPadding } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
+  const listHorizontalPadding = Math.max(18, tabletPadding);
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -434,6 +437,7 @@ export function SimpleActivityScreen({
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         onTransactionPress={onOpenTransaction}
         getScrollToTopRef={getPageScrollToTopRef}
+        contentPaddingHorizontal={listHorizontalPadding}
       />
     ),
     [
@@ -441,6 +445,7 @@ export function SimpleActivityScreen({
       getDisplayValueForTransaction,
       getPageScrollToTopRef,
       getTrueHourlyRateForDate,
+      listHorizontalPadding,
       monthBuckets.transactionsMap,
       monthPagerAnchorDate,
       monthPageStyle,
@@ -614,6 +619,7 @@ export function SimpleActivityScreen({
             emptyTitle={I18n.t('transactions.empty_search_title')}
             emptyMessage={I18n.t('transactions.empty_search_message')}
             contentPaddingBottom={LIST_BOTTOM_PADDING}
+            contentPaddingHorizontal={listHorizontalPadding}
             disableItemAnimations
             compactItems
             listKey="simple-search-results"

@@ -4,6 +4,7 @@ import { Pressable, View, type ViewProps } from 'react-native';
 import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -34,10 +35,12 @@ export function SettingsPageLayout({
 }: SettingsPageLayoutProps) {
   const content = (
     <SafeAreaView className="flex-1 bg-background" edges={edges}>
-      <View className={cn('flex-1', className)} {...props}>
-        {children}
-        {actionBar}
-      </View>
+      <TabletContentContainer style={{ flex: 1 }}>
+        <View className={cn('flex-1', className)} {...props}>
+          {children}
+          {actionBar}
+        </View>
+      </TabletContentContainer>
     </SafeAreaView>
   );
 

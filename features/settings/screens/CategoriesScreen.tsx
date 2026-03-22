@@ -1,6 +1,6 @@
 import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -22,6 +22,7 @@ import {
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -140,8 +141,7 @@ function CategoryEditor({
   onDelete?: () => void;
 }) {
   const themeColors = useThemeColors();
-  const initialIcon =
-    initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
+  const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
@@ -543,7 +543,7 @@ export function CategoriesScreen({
     () => categories.filter((c) => !c.parentId).length,
     [categories],
   );
-  const { width: windowWidth } = useWindowDimensions();
+  const { contentWidth: windowWidth } = useDeviceLayout();
   const [type, setType] = useState<CategoryType>('expense');
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
@@ -778,7 +778,6 @@ export function CategoriesScreen({
           mode="create"
           topLevel={topLevel}
           initial={{ parentId: activeParentId, type }}
-
           onClose={() => setCreateOpen(false)}
           onSubmit={(input) => {
             createCategory({ ...input, type, isDefault: false });
@@ -790,7 +789,6 @@ export function CategoriesScreen({
           mode="edit"
           topLevel={topLevel}
           initial={editing ?? undefined}
-
           onClose={() => setEditing(null)}
           onSubmit={(input) => {
             if (!editing) return;
