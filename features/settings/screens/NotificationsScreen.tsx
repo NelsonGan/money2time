@@ -318,6 +318,7 @@ function NotificationCard({
           </Text>
         </View>
         <Switch
+          style={styles.switchSmall}
           value={enabled}
           onValueChange={onToggle}
           trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
@@ -423,5 +424,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  switchSmall: {
+    transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],
   },
 });

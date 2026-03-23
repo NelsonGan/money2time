@@ -79,6 +79,9 @@ const styles = StyleSheet.create({
     right: 6,
     top: 6,
   },
+  flexShrink: {
+    flexShrink: 1,
+  },
 });
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -154,24 +157,30 @@ export function CategoryPanel(props: CategoryPanelProps) {
     items: T[],
     _rowIndex: number,
     renderCell: (item: T) => React.ReactNode,
+    fillColor?: string,
   ) => {
     const populatedColumnCount = items.length;
+    const showFill = !!fillColor;
+    const cellBg = fillColor ?? themeColors.surface;
 
     return (
       <View key={rowKey} style={styles.gridRow}>
         {Array.from({ length: COLS }, (_, columnIndex) => {
           const item = items[columnIndex];
           const hasItem = item !== undefined;
-          const shouldShowRightBorder =
-            hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+          const hasBg = hasItem || showFill;
+          const shouldShowRightBorder = showFill
+            ? hasBg && columnIndex < COLS - 1
+            : hasItem &&
+              (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
 
           return (
             <View
               key={`${rowKey}-${columnIndex}`}
               style={[
                 styles.gridCell,
-                hasItem ? { backgroundColor: themeColors.surface } : null,
-                hasItem
+                hasBg ? { backgroundColor: cellBg } : null,
+                hasBg
                   ? { borderBottomWidth: GRID_DIVIDER_WIDTH, borderBottomColor: gridDividerColor }
                   : null,
                 shouldShowRightBorder
@@ -292,6 +301,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                       numberOfLines={2}
                       style={[
                         styles.gridLabel,
+                        styles.flexShrink,
                         { color: isSelected ? themeColors.primary : themeColors.text },
                       ]}
                     >
@@ -301,36 +311,52 @@ export function CategoryPanel(props: CategoryPanelProps) {
                 </Pressable>
               );
             })
-          : renderGridRow(row.key, row.items, rowIndex, (child) => {
-              const isChildSelected = selectedCategorySet.has(child.id);
-              return (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    handleSelection(child.id);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isChildSelected }}
-                  style={[
-                    styles.gridCellButton,
-                    {
-                      backgroundColor: isChildSelected ? themeColors.primarySoft : 'transparent',
-                    },
-                  ]}
-                >
-                  <Text
-                    variant="caption"
-                    numberOfLines={2}
+          : renderGridRow(
+              row.key,
+              row.items,
+              rowIndex,
+              (child) => {
+                const isChildSelected = selectedCategorySet.has(child.id);
+                return (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      handleSelection(child.id);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isChildSelected }}
                     style={[
-                      styles.gridLabel,
-                      { color: isChildSelected ? themeColors.primary : themeColors.textMuted },
+                      styles.gridCellButton,
+                      {
+                        backgroundColor: isChildSelected
+                          ? themeColors.primarySoft
+                          : 'transparent',
+                      },
                     ]}
                   >
-                    {child.name}
-                  </Text>
-                </Pressable>
-              );
-            }),
+                    <View style={styles.inlineContent}>
+                      <Text style={styles.inlineIcon}>{child.icon}</Text>
+                      <Text
+                        variant="caption"
+                        numberOfLines={2}
+                        style={[
+                          styles.gridLabel,
+                          styles.flexShrink,
+                          {
+                            color: isChildSelected
+                              ? themeColors.primary
+                              : themeColors.textMuted,
+                          },
+                        ]}
+                      >
+                        {child.name}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              },
+              themeColors.surfaceMuted,
+            ),
       )}
       <Pressable accessible={false} onPress={onBackgroundPress} style={{ flex: 1 }} />
     </ScrollView>

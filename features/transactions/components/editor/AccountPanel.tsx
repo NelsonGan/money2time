@@ -193,24 +193,30 @@ export function AccountPanel(props: AccountPanelProps) {
     items: T[],
     _rowIndex: number,
     renderCell: (item: T) => React.ReactNode,
+    fillColor?: string,
   ) => {
     const populatedColumnCount = items.length;
+    const showFill = !!fillColor;
+    const cellBg = fillColor ?? themeColors.surface;
 
     return (
       <View key={rowKey} style={styles.gridRow}>
         {Array.from({ length: COLS }, (_, columnIndex) => {
           const item = items[columnIndex];
           const hasItem = item !== undefined;
-          const shouldShowRightBorder =
-            hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+          const hasBg = hasItem || showFill;
+          const shouldShowRightBorder = showFill
+            ? hasBg && columnIndex < COLS - 1
+            : hasItem &&
+              (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
 
           return (
             <View
               key={`${rowKey}-${columnIndex}`}
               style={[
                 styles.gridCell,
-                hasItem ? { backgroundColor: themeColors.surface } : null,
-                hasItem
+                hasBg ? { backgroundColor: cellBg } : null,
+                hasBg
                   ? { borderBottomWidth: GRID_DIVIDER_WIDTH, borderBottomColor: gridDividerColor }
                   : null,
                 shouldShowRightBorder
@@ -354,7 +360,13 @@ export function AccountPanel(props: AccountPanelProps) {
                 </Pressable>
               );
             })
-          : renderGridRow(row.key, row.items as Account[], rowIndex, renderAccountCell),
+          : renderGridRow(
+              row.key,
+              row.items as Account[],
+              rowIndex,
+              renderAccountCell,
+              themeColors.surfaceMuted,
+            ),
       )}
       <Pressable accessible={false} onPress={onBackgroundPress} style={{ flex: 1 }} />
     </ScrollView>
