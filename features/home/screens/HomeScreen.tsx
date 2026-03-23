@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { Button, Card, SettingsHeader, Text, TimeValueInline } from '~/components/ui';
+import { Button, Card, Text, TimeValueInline } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { getThemeWordmarkPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -43,9 +43,10 @@ import {
   dayKeyFromIsoLocal,
   formatAmount,
   formatHours,
+  normalizeMoneyAmount,
   toRange,
 } from '~/utils/formatters';
-import { filterRecurringRulesByWallet } from '~/utils/recurringRules';
+import { filterRecurringRulesByWallet, recurringAmountPerMonth } from '~/utils/recurringRules';
 
 function formatCadence(pattern: string, interval: number): string {
   if (interval === 1) {
@@ -351,32 +352,17 @@ export function HomeScreen({
   const isTimeMode = settings.displayMode === 'time';
 
   const recurringInsights = useMemo(() => {
-    const monthlyFactor = (
-      pattern: 'daily' | 'weekly' | 'monthly' | 'yearly',
-      interval: number,
-    ) => {
-      const safeInterval = Math.max(1, interval);
-      switch (pattern) {
-        case 'daily':
-          return 30 / safeInterval;
-        case 'weekly':
-          return 30 / (7 * safeInterval);
-        case 'yearly':
-          return 1 / (12 * safeInterval);
-        case 'monthly':
-        default:
-          return 1 / safeInterval;
-      }
-    };
-
     const next: ((typeof walletRecurringRules)[number] & {
       monthlyAmount: number;
       monthlyHours: number;
     })[] = [];
     walletRecurringRules.forEach((rule) => {
       if (rule.type !== 'expense') return;
-      const factor = monthlyFactor(rule.recurrencePattern, rule.recurrenceInterval);
-      const monthlyAmount = rule.amount * factor;
+      const monthlyAmount = recurringAmountPerMonth(
+        rule.amount,
+        rule.recurrencePattern,
+        rule.recurrenceInterval,
+      );
       next.push({
         ...rule,
         monthlyAmount,
@@ -494,6 +480,32 @@ export function HomeScreen({
     });
     return sections;
   }, [recurringRows]);
+  const recurringTotalCommitment = useMemo(
+    () =>
+      recurringInsights.reduce(
+        (sum, rule) => (rule.isActive ? sum + rule.monthlyAmount : sum),
+        0,
+      ),
+    [recurringInsights],
+  );
+  const normalizedRecurringTotalCommitment = useMemo(
+    () => normalizeMoneyAmount(recurringTotalCommitment),
+    [recurringTotalCommitment],
+  );
+  const recurringTotalCommitmentHours = useMemo(
+    () => amountToHoursByRate(recurringTotalCommitment, rate),
+    [rate, recurringTotalCommitment],
+  );
+  const recurringTotalCommitmentLabel = useMemo(
+    () =>
+      isTimeMode
+        ? formatHours(recurringTotalCommitmentHours)
+        : formatAmount(recurringTotalCommitment, settings, {
+            showSign: false,
+            trueHourlyRate: rate,
+          }),
+    [isTimeMode, rate, recurringTotalCommitment, recurringTotalCommitmentHours, settings],
+  );
   const pagerPageStyle = useMemo(() => [styles.pagerPage, { width: screenWidth }], [screenWidth]);
   const initialPagerOffset = useMemo(
     () => ({ x: defaultTabIndex * screenWidth, y: 0 }),
@@ -684,28 +696,69 @@ export function HomeScreen({
       nestedScrollEnabled
     >
       <TabletContentContainer>
-        <View className="pb-2">
-          <SettingsHeader
-            className="px-0 pt-3 pb-1.5"
-            title={I18n.t('home.recurring.title')}
-            rightAccessory={
-              onOpenSettingsScreen ? (
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  haptic="selection"
-                  className="h-10 w-10 rounded-full"
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('home.recurring.tab')}
-                  onPress={() => {
-                    onOpenSettingsScreen('Recurring');
-                  }}
+        <View style={styles.recurringSummaryHeader}>
+          <View style={styles.recurringSummaryContent}>
+            <Text
+              variant="label"
+              tone="muted"
+              style={styles.recurringSummaryLabel}
+            >
+              {I18n.t('home.recurring.total_commitment')}
+            </Text>
+            <View style={styles.recurringSummaryValueRow}>
+              {settings.displayMode !== 'time' ? (
+                <Text
+                  variant="heading"
+                  style={[
+                    styles.recurringSummaryValue,
+                    {
+                      color:
+                        normalizedRecurringTotalCommitment > 0
+                          ? themeColors.error
+                          : themeColors.textMuted,
+                    },
+                  ]}
                 >
-                  <Settings size={18} color={themeColors.textMuted} />
-                </Button>
-              ) : null
-            }
-          />
+                  {recurringTotalCommitmentLabel}
+                </Text>
+              ) : (
+                <TimeValueInline
+                  value={recurringTotalCommitmentLabel}
+                  variant="heading"
+                  textClassName={
+                    normalizedRecurringTotalCommitment > 0
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                  }
+                  iconColor={
+                    normalizedRecurringTotalCommitment > 0
+                      ? themeColors.error
+                      : themeColors.textMuted
+                  }
+                />
+              )}
+              <Text variant="caption" tone="muted" style={styles.recurringSummarySuffix}>
+                {I18n.t('home.recurring.per_month')}
+              </Text>
+            </View>
+          </View>
+          {onOpenSettingsScreen ? (
+            <View style={styles.recurringSummaryActions}>
+              <Button
+                size="icon"
+                variant="secondary"
+                haptic="selection"
+                className="h-10 w-10 rounded-full"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('home.recurring.tab')}
+                onPress={() => {
+                  onOpenSettingsScreen('Recurring');
+                }}
+              >
+                <Settings size={18} color={themeColors.textMuted} />
+              </Button>
+            </View>
+          ) : null}
         </View>
 
         {recurringSections.length > 0 ? (
@@ -878,6 +931,39 @@ const styles = StyleSheet.create({
   recurringContentContainer: {
     paddingHorizontal: spacing.screenHorizontal,
     paddingBottom: LIST_BOTTOM_PADDING,
+  },
+  recurringSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.xxs,
+  },
+  recurringSummaryContent: {
+    flex: 1,
+    paddingRight: spacing.md,
+  },
+  recurringSummaryLabel: {
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    fontSize: 10,
+  },
+  recurringSummaryValueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+  },
+  recurringSummaryValue: {
+    marginTop: 2,
+  },
+  recurringSummarySuffix: {
+    marginBottom: 3,
+  },
+  recurringSummaryActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   recurringCard: {
     padding: 0,
