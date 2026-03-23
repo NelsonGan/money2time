@@ -1,6 +1,7 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   CalendarDays,
+  ChevronLeft,
   ChevronRight,
   HandCoins,
   Landmark,
@@ -282,6 +283,8 @@ const CALENDAR_DATE_LABEL_CACHE = new Map<string, string>();
 const PERIOD_MONTH_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_MONTH_DAY_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
+const PERIOD_PICKER_SIDE_MARGIN = 12;
+const PERIOD_PICKER_CARD_WIDTH = 408;
 
 const styles = StyleSheet.create({
   absoluteOverlay: {
@@ -410,6 +413,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
+  periodPickerCard: {
+    position: 'absolute',
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.14,
+    shadowRadius: 28,
+    elevation: 18,
+  },
+  periodPickerGridItem: {
+    width: '31.6%',
+  },
 });
 
 function buildSizeStyle(width: number, height: number) {
@@ -429,6 +443,68 @@ function serializeRecordForSignature(record: Record<string, string>) {
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => `${key}:${value}`)
     .join('|');
+}
+
+function clampNumber(value: number, min: number, max: number) {
+  if (max < min) return min;
+  return Math.min(max, Math.max(min, value));
+}
+
+type PeriodPickerAnchorRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type PeriodPickerCommitPayload = {
+  preset: PeriodPreset;
+  anchorDate: Date;
+  customStart?: string;
+  customEnd?: string;
+  activeCustomDateField?: 'start' | 'end';
+};
+
+type WeekPickerOption = {
+  key: string;
+  range: { start: string; end: string };
+  dayKeys: string[];
+  anchorDate: Date;
+};
+
+function yearPickerPageStartFromYear(year: number) {
+  return Math.floor(year / MONTHS_PER_YEAR) * MONTHS_PER_YEAR;
+}
+
+function buildWeekPickerOptions(monthDate: Date): WeekPickerOption[] {
+  const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+  const lastWeekStart = startOfWeekMondayDate(monthEnd);
+  const rows: WeekPickerOption[] = [];
+  const cursor = startOfWeekMondayDate(monthStart);
+
+  while (cursor.getTime() <= lastWeekStart.getTime()) {
+    const weekStart = new Date(cursor);
+    const weekEnd = new Date(cursor);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const range = toRange(weekStart, weekEnd);
+    const dayKeys = Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + index);
+      return formatDateInput(day);
+    });
+
+    rows.push({
+      key: `${dayKeys[0]}|${dayKeys[6]}`,
+      range,
+      dayKeys,
+      anchorDate: startOfDayDate(weekEnd),
+    });
+
+    cursor.setDate(cursor.getDate() + 7);
+  }
+
+  return rows;
 }
 
 type InsightFilterConfig = {
@@ -1860,6 +1936,481 @@ function FilterPill({
   );
 }
 
+function PeriodPickerPopover({
+  visible,
+  anchorRect,
+  screenWidth,
+  screenHeight,
+  locale,
+  currentPreset,
+  currentAnchorDate,
+  currentCustomStart,
+  currentCustomEnd,
+  currentCustomDateField,
+  onClose,
+  onCommit,
+}: {
+  visible: boolean;
+  anchorRect: PeriodPickerAnchorRect | null;
+  screenWidth: number;
+  screenHeight: number;
+  locale: string;
+  currentPreset: PeriodPreset;
+  currentAnchorDate: Date;
+  currentCustomStart: string;
+  currentCustomEnd: string;
+  currentCustomDateField: 'start' | 'end';
+  onClose: () => void;
+  onCommit: (payload: PeriodPickerCommitPayload) => void;
+}) {
+  const themeColors = useThemeColors();
+  const today = useMemo(() => startOfDayDate(new Date()), []);
+  const [draftAnchorDate, setDraftAnchorDate] = useState(() => startOfDayDate(currentAnchorDate));
+  const [draftCustomStart, setDraftCustomStart] = useState(currentCustomStart);
+  const [draftCustomEnd, setDraftCustomEnd] = useState(currentCustomEnd);
+  const [draftCustomDateField, setDraftCustomDateField] =
+    useState<'start' | 'end'>(currentCustomDateField);
+  const [visibleYearPageStart, setVisibleYearPageStart] = useState(() =>
+    yearPickerPageStartFromYear(currentAnchorDate.getFullYear()),
+  );
+  const [visibleMonthYear, setVisibleMonthYear] = useState(currentAnchorDate.getFullYear());
+  const [visibleWeekMonth, setVisibleWeekMonth] = useState(() =>
+    startOfMonthDate(currentAnchorDate),
+  );
+
+  useEffect(() => {
+    if (!visible) return;
+    const normalizedAnchor = startOfDayDate(currentAnchorDate);
+    setDraftAnchorDate(normalizedAnchor);
+    setDraftCustomStart(currentCustomStart);
+    setDraftCustomEnd(currentCustomEnd);
+    setDraftCustomDateField(currentCustomDateField);
+    setVisibleYearPageStart(yearPickerPageStartFromYear(normalizedAnchor.getFullYear()));
+    setVisibleMonthYear(normalizedAnchor.getFullYear());
+    setVisibleWeekMonth(startOfMonthDate(normalizedAnchor));
+  }, [
+    currentAnchorDate,
+    currentCustomDateField,
+    currentCustomEnd,
+    currentCustomStart,
+    currentPreset,
+    visible,
+  ]);
+
+  const previewRange = useMemo(
+    () => getPeriodRange(currentPreset, draftAnchorDate, draftCustomStart, draftCustomEnd),
+    [currentPreset, draftAnchorDate, draftCustomEnd, draftCustomStart],
+  );
+  const previewLabel = useMemo(
+    () => periodLabel(currentPreset, previewRange, locale),
+    [currentPreset, locale, previewRange],
+  );
+  const selectedWeekKey = useMemo(
+    () =>
+      currentPreset === 'week'
+        ? `${dayKeyFromIsoLocal(previewRange.start)}|${dayKeyFromIsoLocal(previewRange.end)}`
+        : '',
+    [currentPreset, previewRange.end, previewRange.start],
+  );
+  const canApplyCustom = useMemo(
+    () => !!buildCustomPeriodState(draftCustomStart, draftCustomEnd),
+    [draftCustomEnd, draftCustomStart],
+  );
+  const weekOptions = useMemo(() => buildWeekPickerOptions(visibleWeekMonth), [visibleWeekMonth]);
+  const yearPage = useMemo(
+    () => Array.from({ length: MONTHS_PER_YEAR }, (_, index) => visibleYearPageStart + index),
+    [visibleYearPageStart],
+  );
+  const monthOptions = useMemo(() => monthLabelsForYear(visibleMonthYear, locale), [locale, visibleMonthYear]);
+  const cardWidth = Math.min(screenWidth - PERIOD_PICKER_SIDE_MARGIN * 2, PERIOD_PICKER_CARD_WIDTH);
+  const anchorCenterX = anchorRect ? anchorRect.x + anchorRect.width / 2 : screenWidth / 2;
+  const cardLeft = clampNumber(
+    anchorCenterX - cardWidth / 2,
+    PERIOD_PICKER_SIDE_MARGIN,
+    screenWidth - cardWidth - PERIOD_PICKER_SIDE_MARGIN,
+  );
+  const cardTop = Math.max(
+    PERIOD_PICKER_SIDE_MARGIN,
+    (anchorRect?.y ?? spacing.xl * 2) + (anchorRect?.height ?? 0) + spacing.xs,
+  );
+  const maxCardHeight = Math.max(240, screenHeight - cardTop - PERIOD_PICKER_SIDE_MARGIN);
+
+  const commitSelection = useCallback(
+    (payload: PeriodPickerCommitPayload) => {
+      void triggerHaptic('selection');
+      onCommit(payload);
+    },
+    [onCommit],
+  );
+
+  const handleCustomDateSelect = useCallback(
+    (field: 'start' | 'end', value: string) => {
+      if (field === 'start') {
+        setDraftCustomStart(value);
+        const nextStart = parseDateInput(value);
+        const currentEnd = parseDateInput(draftCustomEnd);
+        if (nextStart && currentEnd && nextStart > currentEnd) {
+          setDraftCustomEnd(value);
+        }
+        return;
+      }
+
+      setDraftCustomEnd(value);
+      const currentStart = parseDateInput(draftCustomStart);
+      const nextEnd = parseDateInput(value);
+      if (currentStart && nextEnd && nextEnd < currentStart) {
+        setDraftCustomStart(value);
+      }
+    },
+    [draftCustomEnd, draftCustomStart],
+  );
+
+  const applyCustomSelection = useCallback(() => {
+    const nextState = buildCustomPeriodState(draftCustomStart, draftCustomEnd);
+    if (!nextState) return;
+    commitSelection({
+      preset: 'custom',
+      anchorDate: nextState.anchorDate,
+      customStart: draftCustomStart,
+      customEnd: draftCustomEnd,
+      activeCustomDateField: draftCustomDateField,
+    });
+  }, [commitSelection, draftCustomDateField, draftCustomEnd, draftCustomStart]);
+
+  if (!visible) return null;
+
+  return (
+    <ThemeModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <View className="flex-1" pointerEvents="box-none">
+        <Pressable
+          className="absolute inset-0 bg-black/15"
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.close')}
+        />
+
+        <View
+          className="rounded-[28px] bg-background overflow-hidden"
+          style={[
+            styles.periodPickerCard,
+            {
+              left: cardLeft,
+              top: cardTop,
+              width: cardWidth,
+              maxHeight: maxCardHeight,
+              borderColor: withColorAlpha(themeColors.border, 0.45),
+              shadowColor: themeColors.text,
+            },
+          ]}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="gap-4 p-4">
+              <View className="min-h-9 items-center justify-center">
+                <View className="flex-row items-center justify-center gap-2">
+                  <CalendarDays size={18} color={themeColors.text} />
+                  <Text variant="subheading" className="text-foreground">
+                    {previewLabel}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.close')}
+                  className="absolute right-0 top-0 h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                >
+                  <X size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+
+              {currentPreset === 'year' ? (
+                <View className="gap-3">
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => setVisibleYearPageStart((previous) => previous - MONTHS_PER_YEAR)}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.previous')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronLeft size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                    <View className="rounded-full border border-border/35 bg-secondary/45 px-3 py-1.5">
+                      <Text variant="label" className="text-foreground">
+                        {visibleYearPageStart} - {visibleYearPageStart + MONTHS_PER_YEAR - 1}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setVisibleYearPageStart((previous) => previous + MONTHS_PER_YEAR)}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.next')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                  </View>
+                  <View className="flex-row flex-wrap justify-between gap-y-2">
+                    {yearPage.map((year) => {
+                      const isSelected = draftAnchorDate.getFullYear() === year;
+                      return (
+                        <Pressable
+                          key={year}
+                          onPress={() =>
+                            commitSelection({
+                              preset: 'year',
+                              anchorDate: new Date(year, 0, 1),
+                            })
+                          }
+                          accessibilityRole="button"
+                          accessibilityLabel={String(year)}
+                          accessibilityState={{ selected: isSelected }}
+                          style={styles.periodPickerGridItem}
+                          className={cn(
+                            'rounded-2xl border px-3 py-3 items-center',
+                            isSelected
+                              ? 'border-primary/50 bg-primary/12'
+                              : 'border-border/40 bg-card',
+                          )}
+                        >
+                          <Text
+                            variant="caption"
+                            className={cn(isSelected ? 'text-primary' : 'text-foreground')}
+                          >
+                            {year}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+
+              {currentPreset === 'month' ? (
+                <View className="gap-3">
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => setVisibleMonthYear((previous) => previous - 1)}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.previous')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronLeft size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                    <View className="rounded-full border border-border/35 bg-secondary/45 px-3 py-1.5">
+                      <Text variant="label" className="text-foreground">
+                        {visibleMonthYear}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setVisibleMonthYear((previous) => previous + 1)}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.next')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                  </View>
+                  <View className="flex-row flex-wrap justify-between gap-y-2">
+                    {monthOptions.map((label, monthIndex) => {
+                      const isSelected =
+                        draftAnchorDate.getFullYear() === visibleMonthYear &&
+                        draftAnchorDate.getMonth() === monthIndex;
+                      return (
+                        <Pressable
+                          key={`${visibleMonthYear}-${monthIndex}`}
+                          onPress={() =>
+                            commitSelection({
+                              preset: 'month',
+                              anchorDate: new Date(visibleMonthYear, monthIndex, 1),
+                            })
+                          }
+                          accessibilityRole="button"
+                          accessibilityLabel={label}
+                          accessibilityState={{ selected: isSelected }}
+                          style={styles.periodPickerGridItem}
+                          className={cn(
+                            'rounded-2xl border px-3 py-3 items-center',
+                            isSelected
+                              ? 'border-primary/50 bg-primary/12'
+                              : 'border-border/40 bg-card',
+                          )}
+                        >
+                          <Text
+                            variant="caption"
+                            className={cn(isSelected ? 'text-primary' : 'text-foreground')}
+                          >
+                            {label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+
+              {currentPreset === 'week' ? (
+                <View className="gap-3">
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() =>
+                        setVisibleWeekMonth(
+                          (previous) =>
+                            new Date(previous.getFullYear(), previous.getMonth() - 1, 1),
+                        )
+                      }
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.previous')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronLeft size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                    <View className="rounded-full border border-border/35 bg-secondary/45 px-3 py-1.5">
+                      <Text variant="label" className="text-foreground">
+                        {monthLabelFromMonthKey(monthKeyFromDateLocal(visibleWeekMonth), locale)}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() =>
+                        setVisibleWeekMonth(
+                          (previous) =>
+                            new Date(previous.getFullYear(), previous.getMonth() + 1, 1),
+                        )
+                      }
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.next')}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
+                    >
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                  </View>
+                  <View className="gap-2">
+                    {weekOptions.map((option) => {
+                      const isSelected = option.key === selectedWeekKey;
+                      return (
+                        <Pressable
+                          key={option.key}
+                          onPress={() =>
+                            commitSelection({
+                              preset: 'week',
+                              anchorDate: option.anchorDate,
+                            })
+                          }
+                          accessibilityRole="button"
+                          accessibilityLabel={periodLabel('week', option.range, locale)}
+                          accessibilityState={{ selected: isSelected }}
+                          className={cn(
+                            'rounded-[22px] border px-3.5 py-3',
+                            isSelected
+                              ? 'border-primary/50 bg-primary/12'
+                              : 'border-border/40 bg-card',
+                          )}
+                        >
+                          <Text
+                            variant="caption"
+                            className={cn(
+                              'text-foreground',
+                              isSelected ? 'text-primary' : undefined,
+                            )}
+                          >
+                            {periodLabel('week', option.range, locale)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+
+              {currentPreset === 'custom' ? (
+                <View className="gap-3">
+                  <View className="flex-row gap-2">
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setDraftCustomDateField('start');
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('insights.filters.start')}
+                      accessibilityState={{ selected: draftCustomDateField === 'start' }}
+                      className={cn(
+                        'flex-1 rounded-2xl border px-3 py-2.5',
+                        draftCustomDateField === 'start'
+                          ? 'border-primary/50 bg-primary/10'
+                          : 'border-border/30 bg-card',
+                      )}
+                    >
+                      <Text variant="label" tone="muted">
+                        {I18n.t('insights.filters.start')}
+                      </Text>
+                      <Text variant="caption" className="mt-0.5">
+                        {draftCustomStart}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setDraftCustomDateField('end');
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('insights.filters.end')}
+                      accessibilityState={{ selected: draftCustomDateField === 'end' }}
+                      className={cn(
+                        'flex-1 rounded-2xl border px-3 py-2.5',
+                        draftCustomDateField === 'end'
+                          ? 'border-primary/50 bg-primary/10'
+                          : 'border-border/30 bg-card',
+                      )}
+                    >
+                      <Text variant="label" tone="muted">
+                        {I18n.t('insights.filters.end')}
+                      </Text>
+                      <Text variant="caption" className="mt-0.5">
+                        {draftCustomEnd}
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <View className="overflow-hidden rounded-[22px] border border-border/30 bg-card/35">
+                    <DatePanel
+                      value={draftCustomDateField === 'start' ? draftCustomStart : draftCustomEnd}
+                      onSelect={(value) => handleCustomDateSelect(draftCustomDateField, value)}
+                      showQuickDates={false}
+                    />
+                  </View>
+                  <Pressable
+                    onPress={applyCustomSelection}
+                    disabled={!canApplyCustom}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('insights.period_picker.apply_custom')}
+                    className={cn(
+                      'rounded-2xl px-3.5 py-3 items-center',
+                      canApplyCustom ? 'bg-primary active:opacity-90' : 'bg-secondary/70',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(canApplyCustom ? 'text-primary-foreground' : 'text-muted-foreground')}
+                    >
+                      {I18n.t('insights.period_picker.apply_custom')}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : null}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </ThemeModal>
+  );
+}
+
 const InsightsWindowPage = React.memo(
   function InsightsWindowPage({
     item,
@@ -2036,11 +2587,15 @@ export function InsightsScreen({
     useState<IncomeRateDisplayUnit>('hourly');
   const [isIncomeRateUnitPickerOpen, setIsIncomeRateUnitPickerOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
+  const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
+    useState<PeriodPickerAnchorRect | null>(null);
   const [isChartScrubbing, setIsChartScrubbing] = useState(false);
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
   const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
   const insightsTypeSelectorRef = useRef<View | null>(null);
+  const periodPickerTriggerRef = useRef<View | null>(null);
   const selectedIncomeRatePointIndexRef = useRef<number | null>(selectedIncomeRatePointIndex);
   const expenseTrendScrubMonthByYearRef = useRef<Record<string, string>>(
     expenseTrendScrubMonthByYear,
@@ -2053,7 +2608,7 @@ export function InsightsScreen({
   );
   const lastScrubHapticAtRef = useRef(0);
 
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { isTablet } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -3881,6 +4436,19 @@ export function InsightsScreen({
     [clampInsightsPageIndex, commitInsightsPageByIndex, resetAdjacentPagesToTop],
   );
 
+  const recenterInsightsPager = useCallback(() => {
+    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+    pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
+    requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToIndex({
+        index: INSIGHTS_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+    });
+  }, []);
+
   const finalizeHorizontalShift = useCallback(
     (offsetX: number) => {
       const rawIndex = Math.round(offsetX / pageWidth);
@@ -3955,6 +4523,11 @@ export function InsightsScreen({
       setIsFilterModalOpen(false);
     }
   }, [hasInsightsFilters]);
+  useEffect(() => {
+    if (selectedInsightType === 'income_rate_history' && isPeriodPickerOpen) {
+      setIsPeriodPickerOpen(false);
+    }
+  }, [isPeriodPickerOpen, selectedInsightType]);
   useEffect(() => {
     if (selectedInsightType !== 'income_rate_history' && isIncomeRateUnitPickerOpen) {
       setIsIncomeRateUnitPickerOpen(false);
@@ -5999,10 +6572,56 @@ export function InsightsScreen({
     },
     [customEnd, customStart],
   );
+  const measurePeriodPickerTrigger = useCallback(() => {
+    periodPickerTriggerRef.current?.measureInWindow((x, y, measuredWidth, measuredHeight) => {
+      if (measuredWidth <= 0 || measuredHeight <= 0) return;
+      setPeriodPickerAnchorRect({
+        x,
+        y,
+        width: measuredWidth,
+        height: measuredHeight,
+      });
+    });
+  }, []);
+  const handlePeriodPickerTriggerLayout = useCallback(() => {
+    if (!isPeriodPickerOpen) return;
+    measurePeriodPickerTrigger();
+  }, [isPeriodPickerOpen, measurePeriodPickerTrigger]);
+  const applyPeriodPickerSelection = useCallback(
+    (payload: PeriodPickerCommitPayload) => {
+      setIsPeriodPickerOpen(false);
+      if (activeInsightFilterConfig.fixedPeriodPreset === null) {
+        setPeriodPreset(payload.preset);
+      } else {
+        setActivityRequestPeriodPreset((prev) =>
+          prev?.insightType === selectedInsightType ? null : prev,
+        );
+      }
+      setAnchorDate(payload.anchorDate);
+      if (payload.preset === 'custom' && payload.customStart && payload.customEnd) {
+        setCustomStart(payload.customStart);
+        setCustomEnd(payload.customEnd);
+        setActiveCustomDateField(payload.activeCustomDateField ?? 'start');
+      }
+      recenterInsightsPager();
+    },
+    [
+      activeInsightFilterConfig.fixedPeriodPreset,
+      recenterInsightsPager,
+      selectedInsightType,
+      setPeriodPreset,
+    ],
+  );
+  const handleOpenPeriodPicker = useCallback(() => {
+    measurePeriodPickerTrigger();
+    setIsFilterModalOpen(false);
+    setIsPeriodPickerOpen(true);
+  }, [measurePeriodPickerTrigger]);
   const handleInsightTypeChange = useCallback(
     (value: string) => {
       if (!isInsightType(value)) return;
       const nextInsightType = value;
+      setIsPeriodPickerOpen(false);
       setActivityRequestPeriodPreset((prev) =>
         prev?.insightType === selectedInsightType ? null : prev,
       );
@@ -6026,7 +6645,10 @@ export function InsightsScreen({
     },
     [effectivePeriodPreset, periodPresetByInsight, selectedInsightType, setActiveBreakdownSlice],
   );
-  const handleOpenFiltersModal = useCallback(() => setIsFilterModalOpen(true), []);
+  const handleOpenFiltersModal = useCallback(() => {
+    setIsPeriodPickerOpen(false);
+    setIsFilterModalOpen(true);
+  }, []);
   const handleInsightTypeSelectorLayout = useCallback(() => {
     if (!onTutorialTargetLayout) return;
     insightsTypeSelectorRef.current?.measureInWindow((x, y, measuredWidth, measuredHeight) => {
@@ -6039,6 +6661,13 @@ export function InsightsScreen({
       });
     });
   }, [onTutorialTargetLayout]);
+  useEffect(() => {
+    if (!isPeriodPickerOpen) return;
+    const frame = requestAnimationFrame(() => {
+      measurePeriodPickerTrigger();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [height, isPeriodPickerOpen, measurePeriodPickerTrigger, width]);
   useEffect(() => {
     if (!tutorialSpotlightRequest?.active) return;
     if (tutorialSpotlightRequest.targetId !== 'insights.type_selector') return;
@@ -6107,6 +6736,11 @@ export function InsightsScreen({
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
+        onMonthPress={
+          displaySelectedInsightType === 'income_rate_history' ? undefined : handleOpenPeriodPicker
+        }
+        monthTriggerRef={periodPickerTriggerRef}
+        onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
         hideNavigation={displaySelectedInsightType === 'income_rate_history'}
         actions={
           <View className="flex-row items-center gap-2">
@@ -6163,6 +6797,21 @@ export function InsightsScreen({
           />
         )}
       </View>
+
+      <PeriodPickerPopover
+        visible={isPeriodPickerOpen && displaySelectedInsightType !== 'income_rate_history'}
+        anchorRect={periodPickerAnchorRect}
+        screenWidth={width}
+        screenHeight={height}
+        locale={activeLocale}
+        currentPreset={effectivePeriodPreset}
+        currentAnchorDate={currentPeriodState.anchorDate}
+        currentCustomStart={customStart}
+        currentCustomEnd={customEnd}
+        currentCustomDateField={activeCustomDateField}
+        onClose={() => setIsPeriodPickerOpen(false)}
+        onCommit={applyPeriodPickerSelection}
+      />
 
       <ThemeModal
         visible={hasInsightsFilters && isFilterModalOpen}
@@ -6297,6 +6946,7 @@ export function InsightsScreen({
                       <DatePanel
                         value={activeCustomDateField === 'start' ? customStart : customEnd}
                         onSelect={(value) => handleCustomDateSelect(activeCustomDateField, value)}
+                        showQuickDates={false}
                       />
                     </View>
                   </View>

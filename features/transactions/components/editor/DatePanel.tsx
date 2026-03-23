@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
 interface DatePanelProps {
   value: string;
   onSelect: (date: string) => void;
+  showQuickDates?: boolean;
 }
 
 function toDateInput(date: Date) {
@@ -106,7 +107,7 @@ function buildYearRange(centerYear: number, left = 36, right = 36) {
   return Array.from({ length: left + right + 1 }, (_, i) => centerYear - left + i);
 }
 
-export function DatePanel({ value, onSelect }: DatePanelProps) {
+export function DatePanel({ value, onSelect, showQuickDates = true }: DatePanelProps) {
   const themeColors = useThemeColors();
   const parsed = parseDateInput(value);
   const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -123,7 +124,7 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
   });
   const isCalendarSwipeAnimatingRef = useRef(false);
 
-  const recentDays = useMemo(getRecentDays, []);
+  const recentDays = useMemo(() => (showQuickDates ? getRecentDays() : []), [showQuickDates]);
   const currentMonthCells = useMemo(() => monthGrid(calendarMonth), [calendarMonth]);
   const yearRailOffsetValue = useMemo(() => ({ x: yearRailOffset, y: 0 }), [yearRailOffset]);
 
@@ -264,39 +265,40 @@ export function DatePanel({ value, onSelect }: DatePanelProps) {
 
   return (
     <View className="flex-1 px-4 pt-2 pb-4">
-      {/* Quick date chips */}
-      <View className="flex-row items-center justify-between mb-3 gap-1.5">
-        {recentDays.map((day) => {
-          const isSelected = value === day.date;
-          return (
-            <Pressable
-              key={day.date}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onSelect(day.date);
-              }}
-              className={cn(
-                'flex-1 h-[48px] rounded-[14px] border items-center justify-center gap-0.5',
-                isSelected ? 'bg-primary/12 border-primary/50' : 'bg-card border-border/30',
-              )}
-            >
-              <Text
-                variant="caption"
-                className={cn(isSelected ? 'text-primary' : 'text-foreground')}
+      {showQuickDates ? (
+        <View className="mb-3 flex-row items-center justify-between gap-1.5">
+          {recentDays.map((day) => {
+            const isSelected = value === day.date;
+            return (
+              <Pressable
+                key={day.date}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onSelect(day.date);
+                }}
+                className={cn(
+                  'flex-1 h-[48px] rounded-[14px] border items-center justify-center gap-0.5',
+                  isSelected ? 'bg-primary/12 border-primary/50' : 'bg-card border-border/30',
+                )}
               >
-                {day.dayNum}
-              </Text>
-              <Text
-                variant="label"
-                className={cn(isSelected ? 'text-primary' : 'text-muted-foreground')}
-                style={styles.quickDateLabel}
-              >
-                {day.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+                <Text
+                  variant="caption"
+                  className={cn(isSelected ? 'text-primary' : 'text-foreground')}
+                >
+                  {day.dayNum}
+                </Text>
+                <Text
+                  variant="label"
+                  className={cn(isSelected ? 'text-primary' : 'text-muted-foreground')}
+                  style={styles.quickDateLabel}
+                >
+                  {day.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
 
       {/* Month navigation */}
       <View className="flex-row items-center justify-between pb-2">
