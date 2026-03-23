@@ -44,8 +44,8 @@ export function OnboardingValuePropStep({
   const heroVerticalPadding = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
   const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
-  // Add a bit more breathing room above the hero title on mobile-sized screens.
-  const containerPaddingTop = isCompact ? spacing.sm : spacing.xs;
+  // Keep top padding tight — the progress header already provides visual separation
+  const containerPaddingTop = isCompact ? spacing.xxs : spacing.xs;
 
   const wordmarkPalette = useMemo(
     () => getThemeWordmarkPalette(themeColor, resolvedTheme),
