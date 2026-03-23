@@ -16,6 +16,8 @@ export function MonthControlsHeader({
   onPrevMonth,
   onNextMonth,
   onMonthPress,
+  monthTriggerRef,
+  onMonthTriggerLayout,
   variant: _variant = 'default',
   actions,
   summary,
@@ -30,6 +32,8 @@ export function MonthControlsHeader({
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onMonthPress?: () => void;
+  monthTriggerRef?: React.Ref<View>;
+  onMonthTriggerLayout?: () => void;
   variant?: 'default' | 'transactions';
   actions?: React.ReactNode;
   summary?: React.ReactNode;
@@ -89,22 +93,27 @@ export function MonthControlsHeader({
                 >
                   <ChevronLeft size={16} color={themeColors.textSoft} />
                 </Pressable>
-                <Pressable
-                  onPress={() => {
-                    if (!onMonthPress) return;
-                    void triggerHaptic('selection');
-                    onMonthPress();
-                  }}
-                  disabled={!onMonthPress}
-                  className={cn(
-                    'flex-1 items-center px-2',
-                    onMonthPress ? 'active:opacity-80' : undefined,
-                  )}
-                >
-                  <Text variant="bodyStrong" className="text-foreground tracking-tight">
-                    {monthLabel}
-                  </Text>
-                </Pressable>
+                <View className="flex-1 items-center">
+                  <View ref={monthTriggerRef} onLayout={onMonthTriggerLayout}>
+                    <Pressable
+                      onPress={() => {
+                        if (!onMonthPress) return;
+                        void triggerHaptic('selection');
+                        onMonthPress();
+                      }}
+                      disabled={!onMonthPress}
+                      accessibilityRole="button"
+                      accessibilityLabel={monthLabel}
+                      className={cn(onMonthPress ? 'active:opacity-80' : undefined)}
+                    >
+                      <View className="px-2">
+                        <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                          {monthLabel}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </View>
+                </View>
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');

@@ -22,6 +22,7 @@ import {
   ActivitySearchRow,
   ActivityTransactionList,
   DisplayModeToggle,
+  MonthJumpPopover,
   MonthPagerPage,
   TypeFilterPill,
 } from '~/features/transactions/components';
@@ -263,6 +264,13 @@ export function TransactionsScreen({
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [showFilters, setShowFilters] = useState(false);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [monthPickerAnchorRect, setMonthPickerAnchorRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const [isSearchBoxOpen, setIsSearchBoxOpen] = useState(false);
   const [searchDraft, setSearchDraft] = useState(() => transactionFilters.search);
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
@@ -274,7 +282,8 @@ export function TransactionsScreen({
   const hasActiveSearch = transactionFilters.search.trim().length > 0;
   const searchInputRef = useRef<TextInput | null>(null);
   const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
-  const { width } = useWindowDimensions();
+  const monthPickerTriggerRef = useRef<View | null>(null);
+  const { width, height } = useWindowDimensions();
   const { tabletPadding } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -376,6 +385,7 @@ export function TransactionsScreen({
 
   useEffect(() => {
     if (!hasActiveSearch) return;
+    setIsMonthPickerOpen(false);
     searchResultsScrollToTopRef.current?.();
   }, [hasActiveSearch, transactionFilters.search]);
 
@@ -512,6 +522,37 @@ export function TransactionsScreen({
   );
   const handlePrevMonth = useCallback(() => scrollToRelativeMonth(-1), [scrollToRelativeMonth]);
   const handleNextMonth = useCallback(() => scrollToRelativeMonth(1), [scrollToRelativeMonth]);
+  const measureMonthPickerTrigger = useCallback(() => {
+    monthPickerTriggerRef.current?.measureInWindow((x, y, measuredWidth, measuredHeight) => {
+      if (measuredWidth <= 0 || measuredHeight <= 0) return;
+      setMonthPickerAnchorRect({
+        x,
+        y,
+        width: measuredWidth,
+        height: measuredHeight,
+      });
+    });
+  }, []);
+  const handleMonthTriggerLayout = useCallback(() => {
+    if (!isMonthPickerOpen) return;
+    measureMonthPickerTrigger();
+  }, [isMonthPickerOpen, measureMonthPickerTrigger]);
+  const jumpToMonthDate = useCallback(
+    (targetMonthDate: Date) => {
+      const monthOffset =
+        (targetMonthDate.getFullYear() - monthPagerAnchorDate.getFullYear()) * 12 +
+        targetMonthDate.getMonth() -
+        monthPagerAnchorDate.getMonth();
+      const targetIndex = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + monthOffset);
+      setIsMonthPickerOpen(false);
+      setActiveMonthIndex(targetIndex);
+      horizontalListRef.current?.scrollToIndex({
+        index: targetIndex,
+        animated: false,
+      });
+    },
+    [clampMonthIndex, monthPagerAnchorDate, setActiveMonthIndex],
+  );
   const handleOpenIncomeBreakdown = useCallback(() => {
     if (!onOpenBreakdownInsight || hasActiveSearch) return;
     void triggerHaptic('selection');
@@ -524,6 +565,7 @@ export function TransactionsScreen({
   }, [activeMonthKey, hasActiveSearch, onOpenBreakdownInsight]);
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
+    setIsMonthPickerOpen(false);
     if (isSearchBoxOpen) {
       searchInputRef.current?.focus();
       return;
@@ -540,9 +582,17 @@ export function TransactionsScreen({
     setIsSearchBoxOpen(false);
   }, [searchDraft.length, setTransactionFilters, transactionFilters.search]);
   const handleOpenFilters = useCallback(() => {
+    setIsMonthPickerOpen(false);
     setIsSearchBoxOpen(false);
     setShowFilters(true);
   }, []);
+  const handleOpenMonthPicker = useCallback(() => {
+    if (hasActiveSearch) return;
+    setShowFilters(false);
+    setIsSearchBoxOpen(false);
+    measureMonthPickerTrigger();
+    setIsMonthPickerOpen(true);
+  }, [hasActiveSearch, measureMonthPickerTrigger]);
   const handleCloseFilters = useCallback(() => setShowFilters(false), []);
   const clearSelection = useCallback(() => {
     void triggerHaptic('selection');
@@ -727,6 +777,13 @@ export function TransactionsScreen({
     },
     [setTransactionFilters],
   );
+  useEffect(() => {
+    if (!isMonthPickerOpen) return;
+    const frame = requestAnimationFrame(() => {
+      measureMonthPickerTrigger();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [height, isMonthPickerOpen, measureMonthPickerTrigger, width]);
 
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
@@ -800,6 +857,9 @@ export function TransactionsScreen({
         monthLabel={hasActiveSearch ? I18n.t('transactions.filters.search') : activeMonthLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
+        onMonthPress={hasActiveSearch ? undefined : handleOpenMonthPicker}
+        monthTriggerRef={monthPickerTriggerRef}
+        onMonthTriggerLayout={handleMonthTriggerLayout}
         actions={headerActions}
       >
         <View className="gap-2">
@@ -909,6 +969,17 @@ export function TransactionsScreen({
           />
         )}
       </View>
+
+      <MonthJumpPopover
+        visible={isMonthPickerOpen && !hasActiveSearch}
+        anchorRect={monthPickerAnchorRect}
+        screenWidth={width}
+        screenHeight={height}
+        locale={activeLocale}
+        currentMonthDate={activeMonthDate}
+        onClose={() => setIsMonthPickerOpen(false)}
+        onSelectMonth={jumpToMonthDate}
+      />
 
       <ThemeModal
         visible={showBulkUpdate}
