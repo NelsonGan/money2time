@@ -1,17 +1,15 @@
-import { Zap } from 'lucide-react-native';
+import { Smartphone, Zap } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
-  Card,
-  CardContent,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -29,9 +27,12 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
   const themeColors = useThemeColors();
   const currentMode: UserModeValue = isSimpleMode ? 'simple' : 'power';
 
-  const handleModeChange = useCallback(
-    (nextMode: UserModeValue) => {
+  const handleModeToggle = useCallback(
+    (value: boolean) => {
+      const nextMode: UserModeValue = value ? 'power' : 'simple';
       if (nextMode === currentMode) return;
+
+      void triggerHaptic('selection');
 
       if (nextMode === 'simple') {
         Alert.alert(
@@ -71,6 +72,10 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
     [settings.hapticsEnabled, updateSettings],
   );
 
+  const modeStatusLabel = isSimpleMode
+    ? I18n.t('settings.user_mode_simple')
+    : I18n.t('settings.user_mode_power');
+
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -83,122 +88,93 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
-        <SettingsSection className="mt-0" title={I18n.t('settings.user_mode')} showAccent={false}>
-          <View className="gap-3">
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                handleModeChange('simple');
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('settings.user_mode_simple')}
-              accessibilityState={{ selected: currentMode === 'simple' }}
-            >
-              <Card
-                variant={currentMode === 'simple' ? 'accent' : 'default'}
-                className={currentMode === 'simple' ? 'border-primary/30' : ''}
+        <View style={styles.cardList}>
+          <View
+            className="rounded-2xl border border-border/30 bg-card shadow-soft"
+            style={styles.card}
+          >
+            <View style={styles.row}>
+              <View
+                className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
+                style={styles.iconBox}
               >
-                <CardContent className="gap-3">
-                  <View className="flex-row items-center gap-3">
-                    <View
-                      className="h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor:
-                          currentMode === 'simple' ? themeColors.primarySoft : themeColors.surface,
-                      }}
-                    >
-                      <Text style={{ fontSize: 20 }}>✨</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text variant="bodyStrong">{I18n.t('settings.user_mode_simple')}</Text>
-                      <Text variant="caption" tone="muted" className="mt-0.5">
-                        {I18n.t('settings.user_mode_simple_description')}
-                      </Text>
-                    </View>
-                    {currentMode === 'simple' ? (
-                      <View className="rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1">
-                        <Text variant="label" className="text-primary text-[10px] tracking-wide">
-                          {I18n.t('common.active')}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                </CardContent>
-              </Card>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                handleModeChange('power');
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('settings.user_mode_power')}
-              accessibilityState={{ selected: currentMode === 'power' }}
-            >
-              <Card
-                variant={currentMode === 'power' ? 'accent' : 'default'}
-                className={currentMode === 'power' ? 'border-primary/30' : ''}
-              >
-                <CardContent className="gap-3">
-                  <View className="flex-row items-center gap-3">
-                    <View
-                      className="h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor:
-                          currentMode === 'power' ? themeColors.primarySoft : themeColors.surface,
-                      }}
-                    >
-                      <Zap
-                        size={20}
-                        color={
-                          currentMode === 'power' ? themeColors.primary : themeColors.textMuted
-                        }
-                      />
-                    </View>
-                    <View className="flex-1">
-                      <Text variant="bodyStrong">{I18n.t('settings.user_mode_power')}</Text>
-                      <Text variant="caption" tone="muted" className="mt-0.5">
-                        {I18n.t('settings.user_mode_power_description')}
-                      </Text>
-                    </View>
-                    {currentMode === 'power' ? (
-                      <View className="rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1">
-                        <Text variant="label" className="text-primary text-[10px] tracking-wide">
-                          {I18n.t('common.active')}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                </CardContent>
-              </Card>
-            </Pressable>
-          </View>
-        </SettingsSection>
-
-        <SettingsSection className="mt-6" title={I18n.t('settings.haptics')} showAccent={false}>
-          <Card>
-            <CardContent className="py-4">
-              <View style={styles.preferenceRow}>
-                <View className="flex-1 pr-4">
-                  <Text variant="bodyStrong">{I18n.t('settings.haptics')}</Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('settings.haptics_subtitle')}
-                  </Text>
-                </View>
-                <Switch
-                  value={settings.hapticsEnabled}
-                  onValueChange={handleHapticsToggle}
-                  trackColor={{
-                    false: `${themeColors.border}80`,
-                    true: themeColors.primary,
-                  }}
-                  thumbColor="#FFFFFF"
-                />
+                <Zap size={18} color={themeColors.primary} />
               </View>
-            </CardContent>
-          </Card>
-        </SettingsSection>
+              <View style={styles.titleBlock}>
+                <View style={styles.titleRow}>
+                  <Text
+                    variant="bodyStrong"
+                    className="text-foreground"
+                    numberOfLines={1}
+                    style={styles.titleText}
+                  >
+                    {I18n.t('settings.user_mode')}
+                  </Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor: `${themeColors.primary}18`,
+                      },
+                    ]}
+                  >
+                    <Text
+                      variant="caption"
+                      numberOfLines={1}
+                      style={[styles.statusText, { color: themeColors.primary }]}
+                    >
+                      {modeStatusLabel}
+                    </Text>
+                  </View>
+                </View>
+                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
+                  {isSimpleMode
+                    ? I18n.t('settings.user_mode_simple_description')
+                    : I18n.t('settings.user_mode_power_description')}
+                </Text>
+              </View>
+              <Switch
+                style={styles.switchSmall}
+                value={currentMode === 'power'}
+                onValueChange={handleModeToggle}
+                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          <View
+            className="rounded-2xl border border-border/30 bg-card shadow-soft"
+            style={styles.card}
+          >
+            <View style={styles.row}>
+              <View
+                className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
+                style={styles.iconBox}
+              >
+                <Smartphone size={18} color={themeColors.primary} />
+              </View>
+              <View style={styles.titleBlock}>
+                <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
+                  {I18n.t('settings.haptics')}
+                </Text>
+                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
+                  {I18n.t('settings.haptics_subtitle')}
+                </Text>
+              </View>
+              <Switch
+                style={styles.switchSmall}
+                value={settings.hapticsEnabled}
+                onValueChange={handleHapticsToggle}
+                trackColor={{
+                  false: `${themeColors.border}80`,
+                  true: themeColors.primary,
+                }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </SettingsPageLayout>
   );
@@ -212,9 +188,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  preferenceRow: {
-    alignItems: 'center',
+  cardList: {
+    marginTop: spacing.md,
+    gap: spacing.xs,
+  },
+  card: {
+    overflow: 'hidden',
+  },
+  row: {
     flexDirection: 'row',
-    minHeight: 52,
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  iconBox: {
+    width: 36,
+    height: 36,
+    flexShrink: 0,
+  },
+  titleBlock: {
+    flex: 1,
+    minWidth: 0,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'nowrap',
+  },
+  titleText: {
+    flexShrink: 0,
+  },
+  statusBadge: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  switchSmall: {
+    transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],
   },
 });
