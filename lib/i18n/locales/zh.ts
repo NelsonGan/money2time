@@ -110,6 +110,7 @@ const zh = {
     },
     recurring: {
       title: '固定支出',
+      total_commitment: '总固定支出',
       monthly_outflow: '每月支出 {{value}}',
       no_active: '暂无固定支出',
       paused: '已暂停',
@@ -833,6 +834,8 @@ const zh = {
     type_debit: '借记',
     title: '账户',
     manage_balances: '管理你的余额',
+    net_worth: '净资产',
+    view_transactions: '查看交易',
     groups: '分组',
     manage_accounts_subtitle: '创建和编辑你的账户',
     manage_groups_subtitle: '创建和重命名账户分组',
