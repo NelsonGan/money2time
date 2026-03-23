@@ -7,6 +7,8 @@ const zh = {
     cancel: '取消',
     reset: '重置',
     clear: '清除',
+    previous: '上一个',
+    next: '下一个',
     retry: '重试',
     copy: '复制',
     copied: '已复制',
@@ -554,6 +556,10 @@ const zh = {
       year: '年',
       custom: '自定义',
     },
+    period_picker: {
+      this_month: '本月',
+      apply_custom: '应用自定义范围',
+    },
   },
   settings: {
     title: '设置',
@@ -823,6 +829,8 @@ const zh = {
     pay_this_card: '还这张卡',
     delete_account: '删除账户',
     cc: '信用卡',
+    type_credit: '信用',
+    type_debit: '借记',
     title: '账户',
     manage_balances: '管理你的余额',
     groups: '分组',

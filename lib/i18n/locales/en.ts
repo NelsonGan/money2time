@@ -7,6 +7,8 @@ const en = {
     cancel: 'Cancel',
     reset: 'Reset',
     clear: 'Clear',
+    previous: 'Previous',
+    next: 'Next',
     retry: 'Retry',
     copy: 'Copy',
     copied: 'Copied',
@@ -586,6 +588,10 @@ const en = {
       year: 'Year',
       custom: 'Custom',
     },
+    period_picker: {
+      this_month: 'This month',
+      apply_custom: 'Apply custom range',
+    },
   },
   settings: {
     title: 'Settings',
@@ -877,6 +883,8 @@ const en = {
     delete_account_confirm:
       'This will permanently delete this account and all its transactions. This cannot be undone.',
     cc: 'CC',
+    type_credit: 'Credit',
+    type_debit: 'Debit',
     title: 'Accounts',
     manage_balances: 'Manage your balances',
     groups: 'Groups',

@@ -49,6 +49,7 @@ import { AccountPanel, DatePanel } from '~/features/transactions/components/edit
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -106,6 +107,8 @@ const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
 } as const;
 const ACCOUNT_PANEL_HEIGHT = 236;
 const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
+const FLOATING_ACTION_SIZE = 56;
+const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
 
 function withColorAlpha(hex: string, alpha: number) {
@@ -253,10 +256,14 @@ const styles = StyleSheet.create({
     right: SETTINGS_HORIZONTAL_PADDING,
     zIndex: 25,
   },
+  floatingButtonStack: {
+    alignItems: 'center' as const,
+    gap: FLOATING_ACTION_GAP,
+  },
   floatingAddButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: FLOATING_ACTION_SIZE,
+    height: FLOATING_ACTION_SIZE,
+    borderRadius: FLOATING_ACTION_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -267,6 +274,46 @@ const styles = StyleSheet.create({
       height: 5,
     },
     elevation: 6,
+  },
+  walletCard: {
+    borderRadius: 20,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 20,
+    overflow: 'hidden' as const,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 12,
+  },
+  walletCardSheen: {
+    position: 'absolute',
+    top: -60,
+    right: -40,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+  },
+  walletCardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  walletCardDivider: {
+    height: StyleSheet.hairlineWidth,
+  },
+  walletMetaLabel: {
+    fontSize: 9,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
+    marginBottom: 4,
+  },
+  walletCardChip: {
+    position: 'absolute' as const,
+    bottom: 22,
+    right: 22,
+    opacity: 0.6,
   },
 });
 
@@ -1021,6 +1068,8 @@ export function AccountsScreen({
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
+  const isDark = resolvedTheme === 'dark';
   const { contentWidth: windowWidth } = useDeviceLayout();
   const accountRowThemeColors = useMemo(
     () => ({
@@ -1738,6 +1787,56 @@ export function AccountsScreen({
       ? I18n.t('accounts.include_option_include')
       : I18n.t('accounts.include_option_hide');
 
+    const isCredit = account.type === 'credit';
+    const floatingActionStackHeight =
+      FLOATING_ACTION_SIZE + (isCredit ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
+    const detailListBottomPadding =
+      SETTINGS_FORM_BOTTOM_PADDING +
+      safeAreaInsets.bottom +
+      spacing.sm +
+      floatingActionStackHeight;
+    const wc = isDark
+      ? {
+          bg: isCredit ? '#1E1E22' : '#142B24',
+          sheen: 'rgba(255,255,255,0.025)',
+          iconBg: isCredit ? 'rgba(255,255,255,0.1)' : 'rgba(52,201,154,0.18)',
+          iconColor: isCredit ? '#E0E0E0' : '#34C99A',
+          name: 'rgba(255,255,255,0.6)',
+          badgeBg: 'rgba(255,255,255,0.07)',
+          badgeText: isCredit ? '#999' : '#5DD4A8',
+          balance: '#F5F5F5',
+          balanceLabel: 'rgba(255,255,255,0.35)',
+          divider: 'rgba(255,255,255,0.08)',
+          metaLabel: 'rgba(255,255,255,0.3)',
+          metaValue: 'rgba(255,255,255,0.7)',
+          includeActive: '#5DD4A8',
+          includeInactive: 'rgba(255,255,255,0.35)',
+          chipBg: 'rgba(255,255,255,0.04)',
+          chipBorder: 'rgba(255,255,255,0.07)',
+          shadow: '#000',
+          shadowOpacity: 0.4,
+        }
+      : {
+          bg: isCredit ? '#2C2C30' : '#1A3A2F',
+          sheen: 'rgba(255,255,255,0.04)',
+          iconBg: isCredit ? 'rgba(255,255,255,0.12)' : 'rgba(52,201,154,0.22)',
+          iconColor: isCredit ? '#E8E8E8' : '#5AE0B4',
+          name: 'rgba(255,255,255,0.6)',
+          badgeBg: 'rgba(255,255,255,0.08)',
+          badgeText: isCredit ? '#B0B0B0' : '#5AE0B4',
+          balance: '#FFFFFF',
+          balanceLabel: 'rgba(255,255,255,0.4)',
+          divider: 'rgba(255,255,255,0.08)',
+          metaLabel: 'rgba(255,255,255,0.32)',
+          metaValue: 'rgba(255,255,255,0.75)',
+          includeActive: '#5AE0B4',
+          includeInactive: 'rgba(255,255,255,0.4)',
+          chipBg: 'rgba(255,255,255,0.05)',
+          chipBorder: 'rgba(255,255,255,0.08)',
+          shadow: '#0A1A14',
+          shadowOpacity: 0.25,
+        };
+
     return withBackGesture(
       <SettingsPageLayout edges={safeAreaEdges}>
         <View className="flex-1">
@@ -1836,7 +1935,7 @@ export function AccountsScreen({
             selectionMode={isSelectionMode}
             emptyTitle={I18n.t('accounts.empty_transactions_title')}
             emptyMessage={I18n.t('accounts.empty_transactions_message')}
-            contentPaddingBottom={SETTINGS_FORM_BOTTOM_PADDING}
+            contentPaddingBottom={detailListBottomPadding}
             contentPaddingHorizontal={SETTINGS_HORIZONTAL_PADDING}
             contentPaddingTop={0}
             disableItemAnimations
@@ -1844,62 +1943,145 @@ export function AccountsScreen({
             scrollToTopRef={detailScrollToTopRef}
             listHeaderComponent={
               <View className="pb-3 gap-3">
-                <View className="rounded-[24px] border border-border/30 bg-card px-5 pt-5 pb-4 shadow-soft">
-                  <View className="items-center gap-2">
-                    <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary/10 border border-primary/15">
-                      {account.type === 'credit' ? (
-                        <CreditCard size={24} color={themeColors.primary} />
-                      ) : (
-                        <Landmark size={24} color={themeColors.primary} />
-                      )}
+                <View
+                  style={[
+                    styles.walletCard,
+                    {
+                      backgroundColor: wc.bg,
+                      shadowColor: wc.shadow,
+                      shadowOpacity: wc.shadowOpacity,
+                    },
+                  ]}
+                >
+                  <View style={[styles.walletCardSheen, { backgroundColor: wc.sheen }]} />
+
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2.5">
+                      <View
+                        style={[
+                          styles.walletCardIcon,
+                          { backgroundColor: wc.iconBg },
+                        ]}
+                      >
+                        {isCredit ? (
+                          <CreditCard size={18} color={wc.iconColor} />
+                        ) : (
+                          <Landmark size={18} color={wc.iconColor} />
+                        )}
+                      </View>
+                      <Text
+                        variant="bodyStrong"
+                        style={{ color: wc.name, fontSize: 13 }}
+                      >
+                        {account.name}
+                      </Text>
                     </View>
-                    <Text variant="label" tone="muted" className="mt-1">
-                      {I18n.t('accounts.balance')}
-                    </Text>
+                    <View
+                      style={{
+                        backgroundColor: wc.badgeBg,
+                        borderRadius: 20,
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                      }}
+                    >
+                      <Text
+                        variant="label"
+                        style={{
+                          color: wc.badgeText,
+                          fontSize: 10,
+                          textTransform: 'uppercase',
+                          letterSpacing: 1.2,
+                        }}
+                      >
+                        {isCredit
+                          ? I18n.t('accounts.type_credit')
+                          : I18n.t('accounts.type_debit')}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mt-6 mb-5">
                     {renderVisibleBalanceNode(normalizedBalance, {
                       variant: 'heading',
                       textClassName: isNegativeForDisplay(normalizedBalance)
                         ? 'text-destructive'
-                        : 'text-foreground',
+                        : 'text-white',
                       iconColor: isNegativeForDisplay(normalizedBalance)
                         ? themeColors.error
-                        : themeColors.text,
+                        : wc.balance,
                     })}
+                    <Text
+                      variant="label"
+                      style={{
+                        color: wc.balanceLabel,
+                        fontSize: 11,
+                        marginTop: 4,
+                        letterSpacing: 0.8,
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {I18n.t('accounts.balance')}
+                    </Text>
                   </View>
-                  <View className="mt-4 flex-row gap-2">
-                    <View className="flex-1 rounded-[16px] bg-secondary/40 border border-border/15 px-3 py-2.5 items-center">
-                      <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+
+                  <View style={[styles.walletCardDivider, { backgroundColor: wc.divider }]} />
+
+                  <View className="flex-row mt-4" style={{ gap: 16 }}>
+                    <View className="flex-1">
+                      <Text
+                        variant="label"
+                        style={[styles.walletMetaLabel, { color: wc.metaLabel }]}
+                      >
                         {I18n.t('accounts.account_group')}
                       </Text>
-                      <Text variant="caption" className="mt-1" numberOfLines={1}>
+                      <Text
+                        variant="caption"
+                        style={{ color: wc.metaValue }}
+                        numberOfLines={1}
+                      >
                         {accountGroupLabel}
                       </Text>
                     </View>
-                    <View className="flex-1 rounded-[16px] bg-secondary/40 border border-border/15 px-3 py-2.5 items-center">
-                      <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+                    <View className="flex-1 items-end">
+                      <Text
+                        variant="label"
+                        style={[styles.walletMetaLabel, { color: wc.metaLabel }]}
+                      >
                         {I18n.t('accounts.include_in_totals')}
                       </Text>
                       <Text
                         variant="caption"
-                        className={cn(
-                          'mt-1',
-                          account.includeInTotals ? 'text-success' : 'text-muted-foreground',
-                        )}
+                        style={{
+                          color: account.includeInTotals ? wc.includeActive : wc.includeInactive,
+                        }}
                       >
                         {includeInTotalsLabel}
                       </Text>
                     </View>
                   </View>
+
+                  <View style={styles.walletCardChip}>
+                    <View
+                      style={{
+                        width: 28,
+                        height: 20,
+                        borderRadius: 4,
+                        backgroundColor: wc.chipBg,
+                        borderWidth: 1,
+                        borderColor: wc.chipBorder,
+                      }}
+                    />
+                  </View>
                 </View>
 
-                {account.type === 'credit' ? (
-                  <View className="gap-2.5">
-                    <View className="rounded-[24px] border border-border/30 bg-card px-5 py-4 shadow-soft">
-                      <View className="flex-row items-center gap-2.5 mb-3">
+                {isCredit ? (
+                  <View className="rounded-[20px] border border-border/30 bg-card px-5 py-4 shadow-soft">
+                    <View className="flex-row items-center justify-between mb-3.5">
+                      <View className="flex-row items-center gap-2.5">
                         <View className="h-8 w-8 items-center justify-center rounded-xl bg-accent/10 border border-accent/15">
                           <CalendarDays size={15} color={themeColors.accent} />
                         </View>
-                        <View className="flex-1">
+                        <View>
                           <Text variant="bodyStrong">{I18n.t('accounts.billing')}</Text>
                           <Text variant="label" tone="muted" className="mt-0.5">
                             {I18n.t('accounts.statement_due', {
@@ -1908,45 +2090,42 @@ export function AccountsScreen({
                             })}
                           </Text>
                         </View>
-                        <View className="rounded-full bg-secondary/50 border border-border/20 px-2.5 py-1">
-                          <Text variant="label" tone="muted" className="text-[10px]">
-                            {I18n.t('accounts.next_due', {
-                              date: nextDue
-                                ? nextDue.toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                  })
-                                : '-',
-                            })}
-                          </Text>
-                        </View>
                       </View>
-                      <View className="flex-row items-center gap-2">
-                        <View className="flex-1 rounded-[16px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
-                          <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
-                            {I18n.t('accounts.payable')}
-                          </Text>
-                          {renderVisibleBalanceNode(cyclePayable, {
-                            variant: 'caption',
-                            textClassName: 'mt-1 text-destructive',
-                            iconColor: themeColors.error,
+                      <View className="rounded-full bg-secondary/60 border border-border/20 px-2.5 py-1">
+                        <Text variant="label" tone="muted" className="text-[10px]">
+                          {I18n.t('accounts.next_due', {
+                            date: nextDue
+                              ? nextDue.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : '-',
                           })}
-                        </View>
-                        <View className="flex-1 rounded-[16px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
-                          <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
-                            {I18n.t('accounts.outstanding')}
-                          </Text>
-                          {renderVisibleBalanceNode(outstanding, {
-                            variant: 'caption',
-                            textClassName: 'mt-1 text-destructive',
-                            iconColor: themeColors.error,
-                          })}
-                        </View>
+                        </Text>
                       </View>
                     </View>
-                    <Button variant="secondary" onPress={() => setShowPayCard(true)}>
-                      <Text>{I18n.t('accounts.pay_this_card')}</Text>
-                    </Button>
+                    <View className="flex-row gap-2">
+                      <View className="flex-1 rounded-[14px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
+                        <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+                          {I18n.t('accounts.payable')}
+                        </Text>
+                        {renderVisibleBalanceNode(cyclePayable, {
+                          variant: 'caption',
+                          textClassName: 'mt-1 text-destructive',
+                          iconColor: themeColors.error,
+                        })}
+                      </View>
+                      <View className="flex-1 rounded-[14px] border border-destructive/15 bg-destructive/5 px-3 py-2.5">
+                        <Text variant="label" tone="muted" className="text-[10px] tracking-wide">
+                          {I18n.t('accounts.outstanding')}
+                        </Text>
+                        {renderVisibleBalanceNode(outstanding, {
+                          variant: 'caption',
+                          textClassName: 'mt-1 text-destructive',
+                          iconColor: themeColors.error,
+                        })}
+                      </View>
+                    </View>
                   </View>
                 ) : null}
               </View>
@@ -1960,17 +2139,34 @@ export function AccountsScreen({
                 { bottom: safeAreaInsets.bottom + spacing.sm },
               ]}
             >
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('medium');
-                  handleAddTransactionForAccount(account.id);
-                }}
-                style={[styles.floatingAddButton, { backgroundColor: themeColors.primary }]}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-              >
-                <Plus size={24} color="#fff" />
-              </Pressable>
+              <View style={styles.floatingButtonStack}>
+                {isCredit ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('medium');
+                      setShowPayCard(true);
+                    }}
+                    style={[styles.floatingAddButton, { backgroundColor: themeColors.accent }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={String(I18n.t('accounts.pay_this_card'))}
+                  >
+                    <Text variant="bodyStrong" style={{ color: '#fff', fontSize: 14 }}>
+                      {I18n.t('accounts.pay')}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('medium');
+                    handleAddTransactionForAccount(account.id);
+                  }}
+                  style={[styles.floatingAddButton, { backgroundColor: themeColors.primary }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+                >
+                  <Plus size={24} color="#fff" />
+                </Pressable>
+              </View>
             </View>
           ) : null}
         </View>
