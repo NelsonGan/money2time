@@ -1,4 +1,4 @@
-import { AlertCircle, Crown, X } from 'lucide-react-native';
+import { AlertCircle, Crown, ExternalLink, FileText, Mail, Shield, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -19,14 +19,16 @@ import Animated, {
   SlideInLeft,
   SlideOutRight,
 } from 'react-native-reanimated';
+import { SvgXml } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { APP_ICON_SVG } from '~/assets/money2time-icon';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Text } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
+import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePackagesByType, usePro } from '~/context/ProContext';
-import { useResolvedTheme } from '~/context/ThemeContext';
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -44,6 +46,9 @@ const CARD_PEEK = 32;
 const PLAN_CARD_MIN_HEIGHT = 288;
 const SHOWCASE_INTERVAL = 4000;
 const FLASH_MESSAGE_DURATION_MS = 3200;
+const PRIVACY_POLICY_URL = 'https://www.money2time.com/privacy';
+const APPLE_STANDARD_EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const CONTACT_URL = 'https://www.money2time.com/contact';
 
 interface PaywallColors {
   bg: string;
@@ -109,9 +114,9 @@ function withAlpha(color: string, alpha: number) {
   const hex =
     normalized.length === 3
       ? normalized
-          .split('')
-          .map((char) => `${char}${char}`)
-          .join('')
+        .split('')
+        .map((char) => `${char}${char}`)
+        .join('')
       : normalized.slice(0, 6);
 
   const value = Number.parseInt(hex, 16);
@@ -303,6 +308,20 @@ interface PlanCardData {
   badge?: string;
 }
 
+interface SupportLinkItem {
+  icon: typeof Shield;
+  key: string;
+  title: string;
+  iconColor: string;
+  url: string;
+}
+
+interface PlanPricePresentation {
+  billingLabel: string | null;
+  primaryAmount: string;
+  primarySuffix: string | null;
+}
+
 function normalizePackageType(packageType: string) {
   return packageType.trim().toUpperCase();
 }
@@ -346,36 +365,32 @@ function getPlanSortOrder(pkg: RevenueCatPackage) {
   }
 }
 
-function getPlanBillingLabel(pkg: RevenueCatPackage) {
+function getPlanPricePresentation(pkg: RevenueCatPackage): PlanPricePresentation {
   switch (normalizePackageType(pkg.packageType)) {
     case 'ANNUAL':
-      return I18n.t('pro.yearly_billed_with_price', { price: pkg.localizedPriceString });
-    case 'MONTHLY':
-      return I18n.t('pro.monthly_subtitle');
-    case 'LIFETIME':
-      return I18n.t('pro.lifetime_subtitle');
-    default:
-      return null;
-  }
-}
-
-function getPlanPrimaryPriceLabel(pkg: RevenueCatPackage) {
-  switch (normalizePackageType(pkg.packageType)) {
-    case 'ANNUAL':
-      if (pkg.localizedPricePerMonthString) {
-        return {
-          amount: pkg.localizedPricePerMonthString,
-          suffix: I18n.t('pro.per_month_suffix'),
-        };
-      }
-      return { amount: pkg.localizedPriceString, suffix: null };
+      return {
+        billingLabel: I18n.t('pro.yearly_subtitle'),
+        primaryAmount: pkg.localizedPriceString,
+        primarySuffix: I18n.t('pro.per_year_suffix'),
+      };
     case 'MONTHLY':
       return {
-        amount: pkg.localizedPriceString,
-        suffix: I18n.t('pro.per_month_suffix'),
+        billingLabel: I18n.t('pro.monthly_subtitle'),
+        primaryAmount: pkg.localizedPriceString,
+        primarySuffix: I18n.t('pro.per_month_suffix'),
+      };
+    case 'LIFETIME':
+      return {
+        billingLabel: I18n.t('pro.lifetime_subtitle'),
+        primaryAmount: pkg.localizedPriceString,
+        primarySuffix: null,
       };
     default:
-      return { amount: pkg.localizedPriceString, suffix: null };
+      return {
+        billingLabel: null,
+        primaryAmount: pkg.localizedPriceString,
+        primarySuffix: null,
+      };
   }
 }
 
@@ -396,8 +411,7 @@ function PlanCard({
   onContinue: () => void;
   onMeasureHeight: (cardId: string, height: number) => void;
 }) {
-  const billingLabel = getPlanBillingLabel(data.pkg);
-  const primaryPriceLabel = getPlanPrimaryPriceLabel(data.pkg);
+  const pricePresentation = getPlanPricePresentation(data.pkg);
 
   return (
     <View style={{ width, marginRight: CARD_GAP }}>
@@ -428,17 +442,18 @@ function PlanCard({
           <View style={s.cardPriceStack}>
             <View style={s.cardPriceRow}>
               <Text style={[s.cardPrice, { color: colors.text }]}>
-                {primaryPriceLabel.amount}
-                {primaryPriceLabel.suffix ? (
-                  <Text style={s.cardPriceSuffix}>{primaryPriceLabel.suffix}</Text>
+                {pricePresentation.primaryAmount}
+                {pricePresentation.primarySuffix ? (
+                  <Text style={s.cardPriceSuffix}>{pricePresentation.primarySuffix}</Text>
                 ) : null}
               </Text>
             </View>
-            {billingLabel ? (
-              <Text style={[s.cardPriceMeta, { color: colors.textMuted }]}>{billingLabel}</Text>
+            {pricePresentation.billingLabel ? (
+              <Text style={[s.cardPriceMeta, { color: colors.textMuted }]}>
+                {pricePresentation.billingLabel}
+              </Text>
             ) : null}
           </View>
-
           <Button
             onPress={onContinue}
             disabled={isPurchasing}
@@ -468,10 +483,15 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const { isLoading, isPro, offering, purchasePackage, refresh, restorePurchases } = usePro();
   const packages = usePackagesByType(offering);
   const colors = usePaywallColors();
+  const resolvedTheme = useResolvedTheme();
+  const themeColor = useThemeColor();
+  const wordmarkPalette = useMemo(
+    () => getThemeWordmarkPalette(themeColor, resolvedTheme),
+    [resolvedTheme, themeColor],
+  );
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
   const { contentWidth } = useDeviceLayout();
-  const scrollRef = useRef<ScrollView>(null);
   const activeIndexRef = useRef(0);
   const measuredPlanCardHeightsRef = useRef<Record<string, number>>({});
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -555,7 +575,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   }, [offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
 
   const defaultIdx = planCards.findIndex(
-    (card) => normalizePackageType(card.pkg.packageType) === 'ANNUAL',
+    (card) => normalizePackageType(card.pkg.packageType) === 'MONTHLY',
   );
   const startIdx = defaultIdx >= 0 ? defaultIdx : 0;
   const initialPlanContentOffset = useMemo(
@@ -577,6 +597,33 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     measuredPlanCardHeightsRef.current = {};
     setPlanCardHeight(null);
   }, [cardWidth, planCardIds]);
+
+  const supportLinks = useMemo<SupportLinkItem[]>(
+    () => [
+      {
+        key: 'privacy',
+        title: I18n.t('pro.privacy_policy'),
+        url: PRIVACY_POLICY_URL,
+        icon: Shield,
+        iconColor: colors.primary,
+      },
+      {
+        key: 'eula',
+        title: I18n.t('pro.apple_standard_eula'),
+        url: APPLE_STANDARD_EULA_URL,
+        icon: FileText,
+        iconColor: colors.accent,
+      },
+      {
+        key: 'contact',
+        title: I18n.t('pro.contact'),
+        url: CONTACT_URL,
+        icon: Mail,
+        iconColor: colors.coral,
+      },
+    ],
+    [colors.accent, colors.coral, colors.primary],
+  );
 
   const syncActiveIndex = useCallback(
     (offsetX: number) => {
@@ -756,7 +803,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             <Animated.View entering={FadeInUp.delay(200).duration(400)}>
               <ScrollView
                 key={`${planCardIds.join('|')}:${cardWidth}`}
-                ref={scrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 snapToInterval={cardWidth + CARD_GAP}
@@ -838,20 +884,76 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
         <TabletContentContainer>
           <View style={s.footer}>
-            <Pressable onPress={handleRestore} disabled={isRestoring} hitSlop={12}>
-              <Text style={[s.footerLink, { color: colors.textMuted }]}>
+            <Pressable
+              onPress={handleRestore}
+              disabled={isRestoring}
+              hitSlop={12}
+              accessibilityRole="button"
+              style={s.footerRestoreButton}
+            >
+              <Text style={[s.footerRestoreText, { color: colors.textMuted }]}>
                 {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
               </Text>
             </Pressable>
-            <Text style={[s.footerDot, { color: colors.dotInactive }]}>·</Text>
-            <Pressable
-              onPress={() => void Linking.openURL('https://money2time.app/privacy')}
-              hitSlop={12}
+
+            <View
+              style={[
+                s.supportSection,
+                {
+                  backgroundColor: colors.cardBg,
+                  borderColor: colors.cardBorder,
+                },
+              ]}
             >
-              <Text style={[s.footerLink, { color: colors.textMuted }]}>
-                {I18n.t('pro.privacy_policy')}
-              </Text>
-            </Pressable>
+              <View style={s.supportHeaderRow}>
+                <View style={s.supportBrandRow}>
+                  <SvgXml xml={APP_ICON_SVG} width={36} height={36} />
+                  <View style={s.supportBrandWordmarkRow}>
+                    <Text style={[s.supportBrandMoney, { color: wordmarkPalette.money }]}>
+                      Money
+                    </Text>
+                    <Text style={[s.supportBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
+                    <Text style={[s.supportBrandTime, { color: wordmarkPalette.time }]}>Time</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={s.supportLinksStack}>
+                {supportLinks.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <Pressable
+                      key={item.key}
+                      onPress={() => void Linking.openURL(item.url)}
+                      hitSlop={12}
+                      accessibilityRole="link"
+                      style={({ pressed }) => [
+                        s.supportLinkRow,
+                        {
+                          backgroundColor: colors.isDark
+                            ? colors.surfaceMuted
+                            : withAlpha(colors.primary, 0.055),
+                          borderColor: colors.cardBorder,
+                        },
+                        pressed && { opacity: 0.92 },
+                      ]}
+                    >
+                      <View style={s.supportLinkContentRow}>
+                        <Icon size={18} color={item.iconColor} />
+                        <Text
+                          style={[s.supportLinkTitle, { color: colors.text }]}
+                          numberOfLines={1}
+                        >
+                          {item.title}
+                        </Text>
+                        <ExternalLink size={16} color={colors.textMuted} />
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
           </View>
         </TabletContentContainer>
       </ScrollView>
@@ -1035,14 +1137,15 @@ const s = StyleSheet.create({
   badgeText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8 },
   badgeSpacer: { height: 26 },
   cardBody: {
-    minHeight: 58,
+    minHeight: 82,
   },
   cardFooter: {
     marginTop: 'auto',
   },
   cardPriceStack: {
-    marginTop: 8,
-    gap: 2,
+    minHeight: 72,
+    gap: 4,
+    justifyContent: 'flex-end',
   },
   cardPriceRow: {
     flexDirection: 'row',
@@ -1051,8 +1154,8 @@ const s = StyleSheet.create({
   },
   cardTitle: { fontSize: 24, lineHeight: 32, fontWeight: '800', letterSpacing: -0.3 },
   cardDesc: { fontSize: 14, lineHeight: 20, marginTop: 2 },
-  cardPrice: { fontSize: 22, fontWeight: '800' },
-  cardPriceSuffix: { fontSize: 13, fontWeight: '700' },
+  cardPrice: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
+  cardPriceSuffix: { fontSize: 14, fontWeight: '700' },
   cardPriceMeta: { fontSize: 12, lineHeight: 18 },
   ctaContent: {
     flexDirection: 'row',
@@ -1093,14 +1196,82 @@ const s = StyleSheet.create({
 
   // Footer
   footer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: spacing['2xl'],
-    gap: 8,
+    paddingHorizontal: spacing.screenHorizontal,
+    gap: 14,
   },
-  footerLink: { fontSize: 13, fontWeight: '500' },
-  footerDot: { fontSize: 16, fontWeight: '700' },
+  footerRestoreButton: {
+    paddingVertical: 6,
+  },
+  footerRestoreText: { fontSize: 13, fontWeight: '500' },
+  supportSection: {
+    width: '100%',
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 18,
+    gap: 14,
+  },
+  supportHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  supportBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+    flexShrink: 1,
+  },
+  supportBrandWordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 30,
+  },
+  supportBrandMoney: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.9,
+  },
+  supportBrandTwo: {
+    fontSize: 13,
+    lineHeight: 14,
+    fontWeight: '900',
+    marginLeft: 1,
+    transform: [{ translateY: 6 }],
+  },
+  supportBrandTime: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.9,
+    marginLeft: -1,
+  },
+  supportLinksStack: {
+    gap: 14,
+  },
+  supportLinkRow: {
+    borderWidth: 1,
+    borderRadius: 16,
+    width: '100%',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+  },
+  supportLinkContentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    gap: 12,
+  },
+  supportLinkTitle: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
 
   // Active pro
   activeContainer: {
