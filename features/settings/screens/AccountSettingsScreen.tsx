@@ -14,6 +14,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { FONT } from '~/utils/fonts';
 
 interface AccountSettingsScreenProps {
   onBack: () => void;
@@ -229,6 +230,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   switchSmall: {

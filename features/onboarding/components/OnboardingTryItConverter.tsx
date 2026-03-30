@@ -17,6 +17,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { FONT } from '~/utils/fonts';
 import { formatHours } from '~/utils/formatters';
 
 interface OnboardingTryItConverterProps {
@@ -355,23 +356,27 @@ const styles = StyleSheet.create({
   timeHeroValue: {
     fontSize: 32,
     lineHeight: 40,
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -1,
   },
   currencySymbol: {
     fontSize: 22,
     lineHeight: 30,
+    fontFamily: FONT.extrabold,
     fontWeight: '800',
     letterSpacing: -0.5,
   },
   amountDisplay: {
     fontSize: 28,
     lineHeight: 36,
+    fontFamily: FONT.extrabold,
     fontWeight: '800',
     letterSpacing: -1,
   },
   numKeyLabel: {
     fontSize: 20,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   numKeyLabelDimmed: {

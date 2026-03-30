@@ -37,6 +37,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -910,12 +911,14 @@ const styles = StyleSheet.create({
   headerBrandMoney: {
     fontSize: 24,
     lineHeight: 30,
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -0.9,
   },
   headerBrandTwo: {
     fontSize: 13,
     lineHeight: 14,
+    fontFamily: FONT.black,
     fontWeight: '900',
     marginLeft: 1,
     marginRight: 0,
@@ -924,6 +927,7 @@ const styles = StyleSheet.create({
   headerBrandTime: {
     fontSize: 24,
     lineHeight: 30,
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -0.9,
     marginLeft: -1,

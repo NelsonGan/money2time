@@ -18,6 +18,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { FONT } from '~/utils/fonts';
 import { formatHours } from '~/utils/formatters';
 
 interface HeroAmountConverterProps {
@@ -198,12 +199,14 @@ const HERO_ROLLING_NUMBER_CONTAINER_STYLE = {
 const styles = StyleSheet.create({
   numKeyLabel: {
     fontSize: 20,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   numKeyLabelDimmed: {
     opacity: 0.35,
   },
   currencyText: {
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -1,
   },
@@ -267,6 +270,7 @@ export function HeroAmountConverter({
     () => ({
       fontSize: amountFontSize,
       lineHeight: amountLineHeight,
+      fontFamily: FONT.black,
       fontWeight: '900' as const,
       color: themeColors.text,
       letterSpacing: -1.5,

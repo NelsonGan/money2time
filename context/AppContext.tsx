@@ -71,6 +71,7 @@ import {
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -289,6 +290,7 @@ const fallbackStyles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 18,
+    fontFamily: FONT.bold,
     fontWeight: '700',
     color: '#1A2E2A',
   },
@@ -308,6 +310,7 @@ const fallbackStyles = StyleSheet.create({
   retryLabel: {
     color: '#FFFFFF',
     fontSize: 13,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
 });
