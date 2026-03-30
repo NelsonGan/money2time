@@ -23,8 +23,8 @@ const IOS_FONTS: FontMap = {
   bold: 'system-ui',
   extrabold: 'system-ui',
   black: 'system-ui',
-  mono: 'ui-monospace',
-  monoBold: 'ui-monospace',
+  mono: 'system-ui',
+  monoBold: 'system-ui',
 };
 
 const ANDROID_FONTS: FontMap = {

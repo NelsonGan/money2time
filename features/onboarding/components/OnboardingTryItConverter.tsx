@@ -298,10 +298,7 @@ export function OnboardingTryItConverter({
           </Pressable>
         ) : null}
       </View>
-      <View
-        className="mx-5 mt-1.5 h-px"
-        style={{ backgroundColor: `${themeColors.border}60` }}
-      />
+      <View className="mx-5 mt-1.5 h-px" style={{ backgroundColor: `${themeColors.border}60` }} />
 
       {/* Rate badge */}
       <View className="mx-5 mt-2 flex-row items-center justify-between">
@@ -332,18 +329,9 @@ export function OnboardingTryItConverter({
                 );
               }
               if (key === '.') {
-                return (
-                  <TryItNumKey
-                    key="."
-                    label="."
-                    dimmed={hasDot}
-                    onPress={keyHandlers['.']}
-                  />
-                );
+                return <TryItNumKey key="." label="." dimmed={hasDot} onPress={keyHandlers['.']} />;
               }
-              return (
-                <TryItNumKey key={key} label={key} onPress={keyHandlers[key]} />
-              );
+              return <TryItNumKey key={key} label={key} onPress={keyHandlers[key]} />;
             })}
           </View>
         ))}

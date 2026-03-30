@@ -8,9 +8,7 @@ export const migration010SettingsHapticsEnabled: DbMigration = {
     const hasColumn = columns.some((column) => column.name === 'haptics_enabled');
 
     if (!hasColumn) {
-      db.execSync(
-        'ALTER TABLE settings ADD COLUMN haptics_enabled INTEGER NOT NULL DEFAULT 1;',
-      );
+      db.execSync('ALTER TABLE settings ADD COLUMN haptics_enabled INTEGER NOT NULL DEFAULT 1;');
     }
   },
 };

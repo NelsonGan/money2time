@@ -1,9 +1,6 @@
 import './global.css';
 
-import {
-  SpaceMono_400Regular,
-  SpaceMono_700Bold,
-} from '@expo-google-fonts/space-mono';
+import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import {
   WorkSans_400Regular,
   WorkSans_500Medium,

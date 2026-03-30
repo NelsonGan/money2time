@@ -38,18 +38,42 @@ interface VariantConfig {
 }
 
 const variantMap: Record<TextVariant, VariantConfig> = {
-  hero: { className: 'text-[48px] leading-[54px] tracking-tighter', fontFamily: FONT.extrabold, fontWeight: '800' },
-  display: { className: 'text-[38px] leading-[44px] tracking-tight', fontFamily: FONT.extrabold, fontWeight: '800' },
+  hero: {
+    className: 'text-[48px] leading-[54px] tracking-tighter',
+    fontFamily: FONT.extrabold,
+    fontWeight: '800',
+  },
+  display: {
+    className: 'text-[38px] leading-[44px] tracking-tight',
+    fontFamily: FONT.extrabold,
+    fontWeight: '800',
+  },
   title: { className: 'text-[30px] leading-[36px]', fontFamily: FONT.extrabold, fontWeight: '800' },
   heading: { className: 'text-[24px] leading-[30px]', fontFamily: FONT.bold, fontWeight: '700' },
   subheading: { className: 'text-[19px] leading-[26px]', fontFamily: FONT.bold, fontWeight: '700' },
   friendly: { className: 'text-[17px] leading-[24px]', fontFamily: FONT.medium, fontWeight: '500' },
   body: { className: 'text-[16px] leading-6', fontFamily: FONT.regular, fontWeight: '400' },
   bodyStrong: { className: 'text-[16px] leading-6', fontFamily: FONT.bold, fontWeight: '700' },
-  caption: { className: 'text-[13px] leading-[18px]', fontFamily: FONT.semibold, fontWeight: '600' },
-  label: { className: 'text-[11px] leading-[14px] tracking-widest uppercase', fontFamily: FONT.bold, fontWeight: '700' },
-  mono: { className: 'text-[16px] leading-[20px] tracking-tight', fontFamily: FONT.monoBold, fontWeight: '700' },
-  monoLg: { className: 'text-[22px] leading-[26px] tracking-tight', fontFamily: FONT.monoBold, fontWeight: '700' },
+  caption: {
+    className: 'text-[13px] leading-[18px]',
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
+  },
+  label: {
+    className: 'text-[11px] leading-[14px] tracking-widest uppercase',
+    fontFamily: FONT.bold,
+    fontWeight: '700',
+  },
+  mono: {
+    className: 'text-[16px] leading-[20px] tracking-tight',
+    fontFamily: FONT.monoBold,
+    fontWeight: '700',
+  },
+  monoLg: {
+    className: 'text-[22px] leading-[26px] tracking-tight',
+    fontFamily: FONT.monoBold,
+    fontWeight: '700',
+  },
 };
 
 const toneMap: Record<TextTone, string> = {

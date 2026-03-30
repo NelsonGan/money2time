@@ -483,10 +483,7 @@ export function HomeScreen({
   }, [recurringRows]);
   const recurringTotalCommitment = useMemo(
     () =>
-      recurringInsights.reduce(
-        (sum, rule) => (rule.isActive ? sum + rule.monthlyAmount : sum),
-        0,
-      ),
+      recurringInsights.reduce((sum, rule) => (rule.isActive ? sum + rule.monthlyAmount : sum), 0),
     [recurringInsights],
   );
   const normalizedRecurringTotalCommitment = useMemo(
@@ -699,11 +696,7 @@ export function HomeScreen({
       <TabletContentContainer>
         <View style={styles.recurringSummaryHeader}>
           <View style={styles.recurringSummaryContent}>
-            <Text
-              variant="label"
-              tone="muted"
-              style={styles.recurringSummaryLabel}
-            >
+            <Text variant="label" tone="muted" style={styles.recurringSummaryLabel}>
               {I18n.t('home.recurring.total_commitment')}
             </Text>
             <View style={styles.recurringSummaryValueRow}>

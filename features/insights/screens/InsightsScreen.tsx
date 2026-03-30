@@ -5044,7 +5044,14 @@ export function InsightsScreen({
                       backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12),
                     }}
                   >
-                    <Text variant="label" style={{ color: themeColors.error, fontFamily: FONT.semibold, fontWeight: '600' }}>
+                    <Text
+                      variant="label"
+                      style={{
+                        color: themeColors.error,
+                        fontFamily: FONT.semibold,
+                        fontWeight: '600',
+                      }}
+                    >
                       {selectedDayLabel}
                     </Text>
                   </View>
@@ -5338,7 +5345,14 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text variant="label" style={{ color: trendAccentColor, fontFamily: FONT.semibold, fontWeight: '600' }}>
+                  <Text
+                    variant="label"
+                    style={{
+                      color: trendAccentColor,
+                      fontFamily: FONT.semibold,
+                      fontWeight: '600',
+                    }}
+                  >
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -5567,7 +5581,14 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text variant="label" style={{ color: trendAccentColor, fontFamily: FONT.semibold, fontWeight: '600' }}>
+                  <Text
+                    variant="label"
+                    style={{
+                      color: trendAccentColor,
+                      fontFamily: FONT.semibold,
+                      fontWeight: '600',
+                    }}
+                  >
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -5855,7 +5876,10 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text variant="label" style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}>
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
+              >
                 {selectedAssetLabel}
               </Text>
             </View>
@@ -5971,7 +5995,10 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text variant="label" style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}>
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
+              >
                 {selectedRateLabel}
               </Text>
             </View>

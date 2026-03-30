@@ -382,12 +382,18 @@ export function HeroAmountConverter({
         {/* Content area */}
         <View className={cn('px-4 pt-3 pb-2', compact && 'px-3.5 pt-2.5 pb-1.5')}>
           {/* Header */}
-          <View className={cn('mb-2 flex-row items-start justify-between gap-3', compact && 'mb-1.5')}>
+          <View
+            className={cn('mb-2 flex-row items-start justify-between gap-3', compact && 'mb-1.5')}
+          >
             <View className="min-w-0 flex-1">
               <Text variant="label" tone="muted">
                 {I18n.t('home.converter.title')}
               </Text>
-              <Text variant="caption" tone="muted" className={cn('mt-0.5 opacity-60', compact && 'mt-0')}>
+              <Text
+                variant="caption"
+                tone="muted"
+                className={cn('mt-0.5 opacity-60', compact && 'mt-0')}
+              >
                 {I18n.t('home.converter.description')}
               </Text>
             </View>
@@ -429,7 +435,10 @@ export function HeroAmountConverter({
 
           {/* Hours result — glowing accent panel */}
           <View
-            className={cn('mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden', compact && 'mt-1.5 px-3 py-2.5')}
+            className={cn(
+              'mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden',
+              compact && 'mt-1.5 px-3 py-2.5',
+            )}
             style={{ backgroundColor: `${themeColors.primary}10` }}
           >
             {/* Inner decorative accent */}
@@ -513,12 +522,7 @@ export function HeroAmountConverter({
                   );
                 }
                 return (
-                  <NumKey
-                    key={key}
-                    label={key}
-                    onPress={keyPressHandlers[key]}
-                    compact={compact}
-                  />
+                  <NumKey key={key} label={key} onPress={keyPressHandlers[key]} compact={compact} />
                 );
               })}
             </View>

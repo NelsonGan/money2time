@@ -1096,13 +1096,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         Pick<
           UserSettings,
           | 'locale'
-        | 'currencyCode'
-        | 'currencySymbol'
-        | 'displayMode'
-        | 'hapticsEnabled'
-        | 'themeMode'
-        | 'themeColor'
-        | 'onboardingCompleted'
+          | 'currencyCode'
+          | 'currencySymbol'
+          | 'displayMode'
+          | 'hapticsEnabled'
+          | 'themeMode'
+          | 'themeColor'
+          | 'onboardingCompleted'
           | 'userMode'
         >
       >,
