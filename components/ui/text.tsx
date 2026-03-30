@@ -1,8 +1,9 @@
 import * as Slot from '@rn-primitives/slot';
 import * as React from 'react';
-import { Text as RNText } from 'react-native';
+import { Platform, Text as RNText, type TextStyle } from 'react-native';
 
 import { cn } from '~/utils';
+import { FONT } from '~/utils/fonts';
 
 const TextClassContext = React.createContext<string | undefined>(undefined);
 
@@ -30,19 +31,49 @@ type TextTone =
   | 'error'
   | 'inverse';
 
-const variantMap: Record<TextVariant, string> = {
-  hero: 'text-[48px] leading-[54px] font-extrabold tracking-tighter',
-  display: 'text-[38px] leading-[44px] font-extrabold tracking-tight',
-  title: 'text-[30px] leading-[36px] font-extrabold',
-  heading: 'text-[24px] leading-[30px] font-bold',
-  subheading: 'text-[19px] leading-[26px] font-bold',
-  friendly: 'text-[17px] leading-[24px] font-medium',
-  body: 'text-[16px] leading-6 font-normal',
-  bodyStrong: 'text-[16px] leading-6 font-bold',
-  caption: 'text-[13px] leading-[18px] font-semibold',
-  label: 'text-[11px] leading-[14px] font-bold tracking-widest uppercase',
-  mono: 'text-[16px] leading-[20px] font-bold tracking-tight',
-  monoLg: 'text-[22px] leading-[26px] font-extrabold tracking-tight',
+interface VariantConfig {
+  className: string;
+  fontFamily: string;
+  fontWeight?: TextStyle['fontWeight'];
+}
+
+const variantMap: Record<TextVariant, VariantConfig> = {
+  hero: {
+    className: 'text-[48px] leading-[54px] tracking-tighter',
+    fontFamily: FONT.extrabold,
+    fontWeight: '800',
+  },
+  display: {
+    className: 'text-[38px] leading-[44px] tracking-tight',
+    fontFamily: FONT.extrabold,
+    fontWeight: '800',
+  },
+  title: { className: 'text-[30px] leading-[36px]', fontFamily: FONT.extrabold, fontWeight: '800' },
+  heading: { className: 'text-[24px] leading-[30px]', fontFamily: FONT.bold, fontWeight: '700' },
+  subheading: { className: 'text-[19px] leading-[26px]', fontFamily: FONT.bold, fontWeight: '700' },
+  friendly: { className: 'text-[17px] leading-[24px]', fontFamily: FONT.medium, fontWeight: '500' },
+  body: { className: 'text-[16px] leading-6', fontFamily: FONT.regular, fontWeight: '400' },
+  bodyStrong: { className: 'text-[16px] leading-6', fontFamily: FONT.bold, fontWeight: '700' },
+  caption: {
+    className: 'text-[13px] leading-[18px]',
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
+  },
+  label: {
+    className: 'text-[11px] leading-[14px] tracking-widest uppercase',
+    fontFamily: FONT.bold,
+    fontWeight: '700',
+  },
+  mono: {
+    className: 'text-[16px] leading-[20px] tracking-tight',
+    fontFamily: FONT.monoBold,
+    fontWeight: '700',
+  },
+  monoLg: {
+    className: 'text-[22px] leading-[26px] tracking-tight',
+    fontFamily: FONT.monoBold,
+    fontWeight: '700',
+  },
 };
 
 const toneMap: Record<TextTone, string> = {
@@ -63,13 +94,19 @@ const Text = React.forwardRef<
     variant?: TextVariant;
     tone?: TextTone;
   }
->(({ className, asChild = false, variant = 'body', tone = 'default', ...props }, ref) => {
+>(({ className, asChild = false, variant = 'body', tone = 'default', style, ...props }, ref) => {
   const textClass = React.useContext(TextClassContext);
   const Component = asChild ? Slot.Text : RNText;
+  const config = variantMap[variant];
   return (
     <Component
-      className={cn('web:select-text', variantMap[variant], toneMap[tone], textClass, className)}
+      className={cn('web:select-text', config.className, toneMap[tone], textClass, className)}
       ref={ref}
+      style={[
+        { fontFamily: config.fontFamily },
+        Platform.OS === 'ios' ? { fontWeight: config.fontWeight } : null,
+        style,
+      ]}
       {...props}
       allowFontScaling={false}
       maxFontSizeMultiplier={1}

@@ -1,6 +1,16 @@
 import './global.css';
 
+import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
+import {
+  WorkSans_400Regular,
+  WorkSans_500Medium,
+  WorkSans_600SemiBold,
+  WorkSans_700Bold,
+  WorkSans_800ExtraBold,
+  WorkSans_900Black,
+} from '@expo-google-fonts/work-sans';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
@@ -9,6 +19,7 @@ import {
   ActivityIndicator,
   Appearance,
   InteractionManager,
+  Platform,
   StyleSheet,
   Text as RNText,
   TextInput as RNTextInput,
@@ -1052,6 +1063,26 @@ function AppContent() {
 }
 
 export default function App() {
+  const shouldLoadCustomFonts = Platform.OS !== 'ios';
+  const [fontsLoaded] = useFonts(
+    shouldLoadCustomFonts
+      ? {
+          WorkSans_400Regular,
+          WorkSans_500Medium,
+          WorkSans_600SemiBold,
+          WorkSans_700Bold,
+          WorkSans_800ExtraBold,
+          WorkSans_900Black,
+          SpaceMono_400Regular,
+          SpaceMono_700Bold,
+        }
+      : {},
+  );
+
+  if (shouldLoadCustomFonts && !fontsLoaded) {
+    return null;
+  }
+
   return (
     <GestureHandlerRootView style={styles.flex}>
       <SafeAreaProvider>

@@ -19,6 +19,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { UserSettings, WageConfig, WageType } from '~/types';
 import { cn } from '~/utils';
+import { FONT } from '~/utils/fonts';
 import { computeHourlyRates, formatCurrency, parseMonthKey } from '~/utils/formatters';
 
 interface WageCalculatorFlowScreenProps {
@@ -105,6 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 16,
+    fontFamily: FONT.medium,
     fontWeight: '500',
   },
   dismissSpacer: {

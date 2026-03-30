@@ -57,6 +57,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category, CategoryType, TransactionWithRelations, WageType } from '~/types';
 import { cn } from '~/utils';
 import { getNetAssetContribution } from '~/utils/accountBalances';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -266,6 +267,7 @@ const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
   lineHeight: 30,
+  fontFamily: FONT.bold,
   fontWeight: '700' as const,
 };
 const INSIGHTS_ROLLING_NUMBER_SPIN_CONFIG = {
@@ -4678,6 +4680,7 @@ export function InsightsScreen({
               textAnchor="middle"
               alignmentBaseline="middle"
               fontSize={9.2}
+              fontFamily={FONT.bold}
               fontWeight="700"
               fill={labelTextColor}
             >
@@ -4689,6 +4692,7 @@ export function InsightsScreen({
               textAnchor="middle"
               alignmentBaseline="middle"
               fontSize={8}
+              fontFamily={FONT.semibold}
               fontWeight="600"
               fill={withColorAlpha(labelTextColor, isDark ? 0.75 : 0.55)}
             >
@@ -5040,7 +5044,14 @@ export function InsightsScreen({
                       backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12),
                     }}
                   >
-                    <Text variant="label" style={{ color: themeColors.error, fontWeight: '600' }}>
+                    <Text
+                      variant="label"
+                      style={{
+                        color: themeColors.error,
+                        fontFamily: FONT.semibold,
+                        fontWeight: '600',
+                      }}
+                    >
                       {selectedDayLabel}
                     </Text>
                   </View>
@@ -5334,7 +5345,14 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text variant="label" style={{ color: trendAccentColor, fontWeight: '600' }}>
+                  <Text
+                    variant="label"
+                    style={{
+                      color: trendAccentColor,
+                      fontFamily: FONT.semibold,
+                      fontWeight: '600',
+                    }}
+                  >
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -5563,7 +5581,14 @@ export function InsightsScreen({
                   className="rounded-full px-2.5 py-1"
                   style={{ backgroundColor: withColorAlpha(trendAccentColor, isDark ? 0.2 : 0.12) }}
                 >
-                  <Text variant="label" style={{ color: trendAccentColor, fontWeight: '600' }}>
+                  <Text
+                    variant="label"
+                    style={{
+                      color: trendAccentColor,
+                      fontFamily: FONT.semibold,
+                      fontWeight: '600',
+                    }}
+                  >
                     {selectedMonthRow.label}
                   </Text>
                 </View>
@@ -5851,7 +5876,10 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text variant="label" style={{ color: themeColors.primary, fontWeight: '600' }}>
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
+              >
                 {selectedAssetLabel}
               </Text>
             </View>
@@ -5967,7 +5995,10 @@ export function InsightsScreen({
               className="rounded-full px-2.5 py-1"
               style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
             >
-              <Text variant="label" style={{ color: themeColors.primary, fontWeight: '600' }}>
+              <Text
+                variant="label"
+                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
+              >
                 {selectedRateLabel}
               </Text>
             </View>

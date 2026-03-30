@@ -114,9 +114,9 @@ function withAlpha(color: string, alpha: number) {
   const hex =
     normalized.length === 3
       ? normalized
-        .split('')
-        .map((char) => `${char}${char}`)
-        .join('')
+          .split('')
+          .map((char) => `${char}${char}`)
+          .join('')
       : normalized.slice(0, 6);
 
   const value = Number.parseInt(hex, 16);
@@ -732,12 +732,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   if (isPro) {
     return (
-      <View
-        style={[
-          s.root,
-          { backgroundColor: colors.bg, paddingTop: insets.top },
-        ]}
-      >
+      <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
         <PaywallBackdrop colors={colors} />
         <View style={s.header}>
           <View style={{ width: 32 }} />
@@ -756,12 +751,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   }
 
   return (
-    <View
-      style={[
-        s.root,
-        { backgroundColor: colors.bg, paddingTop: insets.top },
-      ]}
-    >
+    <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <PaywallBackdrop colors={colors} />
       <View style={s.header}>
         <View style={{ width: 32 }} />

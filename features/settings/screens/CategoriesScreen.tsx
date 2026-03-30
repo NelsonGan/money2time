@@ -30,6 +30,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { FONT } from '~/utils/fonts';
 
 const CATEGORY_EDITOR_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 14,
+    fontFamily: FONT.bold,
     fontWeight: '700',
     letterSpacing: -0.2,
   },

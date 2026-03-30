@@ -14,6 +14,7 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { FONT } from '~/utils/fonts';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
 interface OnboardingValuePropStepProps {
@@ -317,10 +318,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   wordmarkBase: {
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -1.1,
   },
   wordmarkTwo: {
+    fontFamily: FONT.black,
     fontWeight: '900',
     marginLeft: 1,
   },
