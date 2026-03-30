@@ -4,6 +4,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Defs, Line, LinearGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
 import { triggerHaptic } from '~/services/haptics';
+import { FONT } from '~/utils/fonts';
 
 interface TrendBarChartProps {
   data: { monthKey: string; value: number; label: string; subLabel?: string }[];
@@ -222,6 +223,7 @@ export const TrendBarChart = React.memo(function TrendBarChart({
                   y={bar.subLabel ? chartHeight - 14 : chartHeight - 4}
                   textAnchor="middle"
                   fontSize={labelFontSize}
+                  fontFamily={isSelected ? FONT.bold : FONT.regular}
                   fontWeight={isSelected ? '700' : '400'}
                   fill={isSelected ? primaryColor : labelColor}
                   opacity={isSelected ? 1 : 0.72}
@@ -234,6 +236,7 @@ export const TrendBarChart = React.memo(function TrendBarChart({
                     y={chartHeight - 3}
                     textAnchor="middle"
                     fontSize={subLabelFontSize}
+                    fontFamily={isSelected ? FONT.bold : FONT.regular}
                     fontWeight={isSelected ? '700' : '400'}
                     fill={isSelected ? primaryColor : labelColor}
                     opacity={isSelected ? 0.95 : 0.58}

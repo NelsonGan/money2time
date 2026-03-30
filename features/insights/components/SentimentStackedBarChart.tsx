@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, G, Rect, Text as SvgText } from 'react-native-svg';
 
+import { FONT } from '~/utils/fonts';
+
 interface SentimentDayData {
   dayKey: string;
   label: string;
@@ -163,6 +165,7 @@ export const SentimentStackedBarChart = React.memo(function SentimentStackedBarC
                 y={bar.subLabel ? chartHeight - 14 : chartHeight - 4}
                 textAnchor="middle"
                 fontSize={labelFontSize}
+                fontFamily={FONT.regular}
                 fontWeight="400"
                 fill={labelColor}
                 opacity={0.68}
@@ -175,6 +178,7 @@ export const SentimentStackedBarChart = React.memo(function SentimentStackedBarC
                   y={chartHeight - 3}
                   textAnchor="middle"
                   fontSize={Math.max(6, labelFontSize - 0.5)}
+                  fontFamily={FONT.regular}
                   fontWeight="400"
                   fill={labelColor}
                   opacity={0.56}

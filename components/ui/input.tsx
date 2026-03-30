@@ -1,10 +1,11 @@
 import * as React from 'react';
 import type { TextInputProps } from 'react-native';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
+import { FONT } from '~/utils/fonts';
 
 import { Text } from './text';
 
@@ -178,8 +179,13 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    fontFamily: FONT.medium,
+    ...Platform.select({
+      ios: {
+        fontWeight: '500',
+      },
+    }),
     fontSize: 16,
-    fontWeight: '500',
     includeFontPadding: false,
     paddingTop: 0,
     paddingBottom: 0,

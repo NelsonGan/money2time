@@ -207,8 +207,7 @@ export function AccountPanel(props: AccountPanelProps) {
           const hasBg = hasItem || showFill;
           const shouldShowRightBorder = showFill
             ? hasBg && columnIndex < COLS - 1
-            : hasItem &&
-              (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+            : hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
 
           return (
             <View
@@ -261,7 +260,13 @@ export function AccountPanel(props: AccountPanelProps) {
           numberOfLines={2}
           style={[
             styles.gridLabel,
-            { color: isSelected ? themeColors.primary : isDisabled ? themeColors.textMuted : themeColors.text },
+            {
+              color: isSelected
+                ? themeColors.primary
+                : isDisabled
+                  ? themeColors.textMuted
+                  : themeColors.text,
+            },
           ]}
         >
           {account.name}
@@ -293,7 +298,9 @@ export function AccountPanel(props: AccountPanelProps) {
     const rows: { key: string; kind: 'group' | 'account'; items: GroupSection[] | Account[] }[] = [
       { key: `group-${rowIndex}`, kind: 'group', items: row },
     ];
-    const expandedInRow = expandedGroupKey ? row.find((group) => group.key === expandedGroupKey) : null;
+    const expandedInRow = expandedGroupKey
+      ? row.find((group) => group.key === expandedGroupKey)
+      : null;
     if (!expandedInRow) return rows;
 
     chunk(expandedInRow.accounts, COLS).forEach((accountRow, accountRowIndex) => {
@@ -340,7 +347,11 @@ export function AccountPanel(props: AccountPanelProps) {
                   <View style={styles.cornerRight}>
                     <ChevronDown
                       size={13}
-                      color={hasSelectedAccount || isExpanded ? themeColors.primary : themeColors.textMuted}
+                      color={
+                        hasSelectedAccount || isExpanded
+                          ? themeColors.primary
+                          : themeColors.textMuted
+                      }
                       style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                     />
                   </View>

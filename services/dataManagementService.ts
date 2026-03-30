@@ -105,9 +105,7 @@ function getTableColumnNames(
     name?: string | null;
   }>;
   return new Set(
-    columns
-      .map((column) => column.name?.trim())
-      .filter((name): name is string => Boolean(name)),
+    columns.map((column) => column.name?.trim()).filter((name): name is string => Boolean(name)),
   );
 }
 
@@ -121,9 +119,7 @@ function insertRows(
   if (validColumns.size === 0) return;
 
   for (const row of rows) {
-    const keys = Object.keys(row).filter(
-      (key) => validColumns.has(key) && row[key] !== undefined,
-    );
+    const keys = Object.keys(row).filter((key) => validColumns.has(key) && row[key] !== undefined);
     if (keys.length === 0) continue;
 
     const placeholders = keys.map(() => '?').join(', ');

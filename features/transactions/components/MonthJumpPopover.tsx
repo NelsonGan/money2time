@@ -75,7 +75,10 @@ export function MonthJumpPopover({
     setVisibleYear(currentMonthDate.getFullYear());
   }, [currentMonthDate, visible]);
 
-  const monthOptions = useMemo(() => monthLabelsForYear(visibleYear, locale), [locale, visibleYear]);
+  const monthOptions = useMemo(
+    () => monthLabelsForYear(visibleYear, locale),
+    [locale, visibleYear],
+  );
   const activeMonthLabel = useMemo(
     () => formatMonthYearLabel(currentMonthDate, locale),
     [currentMonthDate, locale],
@@ -191,9 +194,7 @@ export function MonthJumpPopover({
                       style={styles.gridItem}
                       className={cn(
                         'rounded-2xl border px-3 py-3 items-center',
-                        isSelected
-                          ? 'border-primary/50 bg-primary/12'
-                          : 'border-border/40 bg-card',
+                        isSelected ? 'border-primary/50 bg-primary/12' : 'border-border/40 bg-card',
                       )}
                     >
                       <Text

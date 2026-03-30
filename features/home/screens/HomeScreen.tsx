@@ -37,6 +37,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -482,10 +483,7 @@ export function HomeScreen({
   }, [recurringRows]);
   const recurringTotalCommitment = useMemo(
     () =>
-      recurringInsights.reduce(
-        (sum, rule) => (rule.isActive ? sum + rule.monthlyAmount : sum),
-        0,
-      ),
+      recurringInsights.reduce((sum, rule) => (rule.isActive ? sum + rule.monthlyAmount : sum), 0),
     [recurringInsights],
   );
   const normalizedRecurringTotalCommitment = useMemo(
@@ -698,11 +696,7 @@ export function HomeScreen({
       <TabletContentContainer>
         <View style={styles.recurringSummaryHeader}>
           <View style={styles.recurringSummaryContent}>
-            <Text
-              variant="label"
-              tone="muted"
-              style={styles.recurringSummaryLabel}
-            >
+            <Text variant="label" tone="muted" style={styles.recurringSummaryLabel}>
               {I18n.t('home.recurring.total_commitment')}
             </Text>
             <View style={styles.recurringSummaryValueRow}>
@@ -910,12 +904,14 @@ const styles = StyleSheet.create({
   headerBrandMoney: {
     fontSize: 24,
     lineHeight: 30,
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -0.9,
   },
   headerBrandTwo: {
     fontSize: 13,
     lineHeight: 14,
+    fontFamily: FONT.black,
     fontWeight: '900',
     marginLeft: 1,
     marginRight: 0,
@@ -924,6 +920,7 @@ const styles = StyleSheet.create({
   headerBrandTime: {
     fontSize: 24,
     lineHeight: 30,
+    fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -0.9,
     marginLeft: -1,

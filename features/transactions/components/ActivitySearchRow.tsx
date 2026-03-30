@@ -6,6 +6,7 @@ import { spacing } from '~/constants/designSystem';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { FONT } from '~/utils/fonts';
 
 interface ActivitySearchRowProps {
   inputRef: React.RefObject<TextInput | null>;
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 16,
+    fontFamily: FONT.medium,
     fontWeight: '500',
   },
   closeButton: {

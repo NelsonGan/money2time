@@ -171,8 +171,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
           const hasBg = hasItem || showFill;
           const shouldShowRightBorder = showFill
             ? hasBg && columnIndex < COLS - 1
-            : hasItem &&
-              (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
+            : hasItem && (columnIndex < populatedColumnCount - 1 || populatedColumnCount < COLS);
 
           return (
             <View
@@ -200,7 +199,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
     const rows: { key: string; kind: 'parent' | 'child'; items: CategoryOption[] }[] = [
       { key: `parent-${rowIndex}`, kind: 'parent', items: row },
     ];
-    const expandedInRow = expandedParentId ? row.find((parent) => parent.id === expandedParentId) : null;
+    const expandedInRow = expandedParentId
+      ? row.find((parent) => parent.id === expandedParentId)
+      : null;
     if (!expandedInRow) return rows;
 
     chunk(childByParent.get(expandedInRow.id) ?? EMPTY_CATEGORY_OPTIONS, COLS).forEach(
@@ -280,7 +281,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
                     >
                       <ChevronDown
                         size={13}
-                        color={isSelected || isExpanded ? themeColors.primary : themeColors.textMuted}
+                        color={
+                          isSelected || isExpanded ? themeColors.primary : themeColors.textMuted
+                        }
                         style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                       />
                     </Pressable>
@@ -288,7 +291,9 @@ export function CategoryPanel(props: CategoryPanelProps) {
                     <View style={styles.cornerRight}>
                       <ChevronDown
                         size={13}
-                        color={isSelected || isExpanded ? themeColors.primary : themeColors.textMuted}
+                        color={
+                          isSelected || isExpanded ? themeColors.primary : themeColors.textMuted
+                        }
                         style={isExpanded ? styles.chevronExpanded : styles.chevronCollapsed}
                       />
                     </View>
@@ -328,9 +333,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                     style={[
                       styles.gridCellButton,
                       {
-                        backgroundColor: isChildSelected
-                          ? themeColors.primarySoft
-                          : 'transparent',
+                        backgroundColor: isChildSelected ? themeColors.primarySoft : 'transparent',
                       },
                     ]}
                   >
@@ -343,9 +346,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
                           styles.gridLabel,
                           styles.flexShrink,
                           {
-                            color: isChildSelected
-                              ? themeColors.primary
-                              : themeColors.textMuted,
+                            color: isChildSelected ? themeColors.primary : themeColors.textMuted,
                           },
                         ]}
                       >

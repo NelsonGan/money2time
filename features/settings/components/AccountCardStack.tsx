@@ -17,6 +17,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
+import { FONT } from '~/utils/fonts';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface CreditSummary {
@@ -946,6 +947,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginBottom: 4,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   typeBadge: {
@@ -972,6 +974,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: 4,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   ctaRow: {

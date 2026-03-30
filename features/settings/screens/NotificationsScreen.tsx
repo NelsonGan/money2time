@@ -25,6 +25,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
+import { FONT } from '~/utils/fonts';
 import {
   fireTestNotification,
   getPermissionStatus,
@@ -410,6 +411,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
+    fontFamily: FONT.semibold,
     fontWeight: '600',
   },
   cardFooter: {
