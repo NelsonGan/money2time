@@ -77,6 +77,7 @@ import {
   formatHours,
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
+  normalizeMoneyAmount,
   normalizeMonthKey,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
@@ -924,20 +925,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput) => {
+      const normalizedInput = {
+        ...input,
+        amount: normalizeMoneyAmount(input.amount),
+      };
       const id = newId();
       const now = nowIso();
       const optimistic: TransactionWithRelations = {
         id,
-        type: input.type,
-        amount: input.amount,
-        currency: input.currency,
-        date: input.date,
-        accountId: input.accountId ?? null,
-        fromAccountId: input.fromAccountId ?? null,
-        toAccountId: input.toAccountId ?? null,
-        categoryId: input.categoryId ?? null,
-        note: input.note ?? null,
-        sentiment: input.sentiment ?? 'neutral',
+        type: normalizedInput.type,
+        amount: normalizedInput.amount,
+        currency: normalizedInput.currency,
+        date: normalizedInput.date,
+        accountId: normalizedInput.accountId ?? null,
+        fromAccountId: normalizedInput.fromAccountId ?? null,
+        toAccountId: normalizedInput.toAccountId ?? null,
+        categoryId: normalizedInput.categoryId ?? null,
+        note: normalizedInput.note ?? null,
+        sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -945,17 +950,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
-        ...resolveRelationNames(input),
+        ...resolveRelationNames(normalizedInput),
       };
       setTransactions((prev) => [optimistic, ...prev]);
       InteractionManager.runAfterInteractions(() => {
         try {
-          transactionsRepository.createWithId(id, input);
+          transactionsRepository.createWithId(id, normalizedInput);
           void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
-            type: input.type,
-            has_category: !!input.categoryId,
-            has_note: !!(input.note && input.note.trim()),
-            sentiment: input.sentiment ?? 'neutral',
+            type: normalizedInput.type,
+            has_category: !!normalizedInput.categoryId,
+            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+            sentiment: normalizedInput.sentiment ?? 'neutral',
           });
         } catch {
           // rollback on failure
@@ -973,18 +978,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
       const inputById = new Map<string, Partial<CreateTransactionInput>>();
       updates.forEach(({ id, input }) => {
+        const normalizedInput =
+          input.amount === undefined
+            ? input
+            : {
+                ...input,
+                amount: normalizeMoneyAmount(input.amount),
+              };
         if (id.trim().length === 0) return;
-        if (Object.keys(input).length === 0) return;
-        normalizedUpdates.push({ id, input });
+        if (Object.keys(normalizedInput).length === 0) return;
+        normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
-          'accountId' in input ||
-          'fromAccountId' in input ||
-          'toAccountId' in input ||
-          'categoryId' in input;
+          'accountId' in normalizedInput ||
+          'fromAccountId' in normalizedInput ||
+          'toAccountId' in normalizedInput ||
+          'categoryId' in normalizedInput;
         if (hasRelationChange) {
-          relationById.set(id, resolveRelationNames(input));
+          relationById.set(id, resolveRelationNames(normalizedInput));
         }
-        inputById.set(id, input);
+        inputById.set(id, normalizedInput);
       });
       if (normalizedUpdates.length === 0) return;
 

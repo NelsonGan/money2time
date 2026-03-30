@@ -34,6 +34,38 @@ function clearFilesInDirectory(dirPath) {
   }
 }
 
+function removeConflictingAndroidLauncherPngs(resDir) {
+  if (!fs.existsSync(resDir)) {
+    return 0;
+  }
+
+  const conflictingFiles = new Set([
+    'ic_launcher.png',
+    'ic_launcher_foreground.png',
+    'ic_launcher_monochrome.png',
+  ]);
+
+  let removedCount = 0;
+
+  for (const entry of fs.readdirSync(resDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('mipmap-')) {
+      continue;
+    }
+
+    const mipmapDir = path.join(resDir, entry.name);
+    for (const fileName of fs.readdirSync(mipmapDir)) {
+      if (!conflictingFiles.has(fileName)) {
+        continue;
+      }
+
+      fs.rmSync(path.join(mipmapDir, fileName), { force: true });
+      removedCount += 1;
+    }
+  }
+
+  return removedCount;
+}
+
 const iosSource = path.join(projectRoot, 'assets', 'ios');
 const iosTarget = path.join(
   projectRoot,
@@ -51,12 +83,15 @@ if (fs.existsSync(path.dirname(iosTarget))) {
   console.log('Skipped iOS sync: iOS native project not found');
 }
 
-const androidSource = path.join(projectRoot, 'assets', 'android', 'res');
 const androidTarget = path.join(projectRoot, 'android', 'app', 'src', 'main', 'res');
 
 if (fs.existsSync(path.dirname(androidTarget))) {
-  copyDirRecursive(androidSource, androidTarget);
-  console.log('Synced Android launcher icons to native res/mipmap');
+  const removedCount = removeConflictingAndroidLauncherPngs(androidTarget);
+  if (removedCount > 0) {
+    console.log(`Removed ${removedCount} conflicting Android launcher PNGs from native res/mipmap`);
+  }
+
+  console.log('Skipped Android sync: Expo manages native launcher icons from app.json');
 } else {
   console.log('Skipped Android sync: android project not found (run expo prebuild)');
 }

@@ -97,17 +97,37 @@ export interface ImportResult {
   error?: string;
 }
 
+function getTableColumnNames(
+  sqlite: ReturnType<typeof getSQLite>,
+  tableName: string,
+): ReadonlySet<string> {
+  const columns = sqlite.getAllSync(`PRAGMA table_info(${tableName})`) as Array<{
+    name?: string | null;
+  }>;
+  return new Set(
+    columns
+      .map((column) => column.name?.trim())
+      .filter((name): name is string => Boolean(name)),
+  );
+}
+
 function insertRows(
   sqlite: ReturnType<typeof getSQLite>,
   tableName: string,
   rows: Record<string, unknown>[] | undefined,
 ) {
   if (!rows || rows.length === 0) return;
-  const keys = Object.keys(rows[0]);
-  if (keys.length === 0) return;
-  const placeholders = keys.map(() => '?').join(', ');
-  const sql = `INSERT OR REPLACE INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
+  const validColumns = getTableColumnNames(sqlite, tableName);
+  if (validColumns.size === 0) return;
+
   for (const row of rows) {
+    const keys = Object.keys(row).filter(
+      (key) => validColumns.has(key) && row[key] !== undefined,
+    );
+    if (keys.length === 0) continue;
+
+    const placeholders = keys.map(() => '?').join(', ');
+    const sql = `INSERT OR REPLACE INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
     sqlite.runSync(
       sql,
       keys.map((k) => row[k] as string | number | null),

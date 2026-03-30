@@ -17,6 +17,7 @@ import { Button, Text, TimeValueInline } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 import { formatHours } from '~/utils/formatters';
 
 interface HeroAmountConverterProps {
@@ -27,6 +28,8 @@ interface HeroAmountConverterProps {
   workdays: number;
   workdaysPerWeek: number;
   onChangeAmount: (value: string) => void;
+  containerClassName?: string;
+  compact?: boolean;
 }
 
 function formatCount(value: number) {
@@ -90,12 +93,14 @@ const NumKey = React.memo(function NumKey({
   onLongPress,
   children,
   dimmed,
+  compact,
 }: {
   label?: string;
   children?: React.ReactNode;
   onPress: () => void;
   onLongPress?: () => void;
   dimmed?: boolean;
+  compact?: boolean;
 }) {
   const pressProgress = useSharedValue(0);
   const tapFlash = useSharedValue(0);
@@ -141,7 +146,10 @@ const NumKey = React.memo(function NumKey({
           unstable_pressDelay={0}
           android_disableSound
           android_ripple={{ color: 'rgba(34, 138, 111, 0.15)', borderless: false }}
-          className="relative h-[44px] items-center justify-center bg-card/80 overflow-hidden rounded-xl mx-0.5 my-0.5"
+          className={cn(
+            'relative h-[44px] items-center justify-center bg-card/80 overflow-hidden rounded-xl mx-0.5 my-0.5',
+            compact && 'h-[40px]',
+          )}
         >
           {children ?? (
             <Text
@@ -223,6 +231,8 @@ export function HeroAmountConverter({
   workdays,
   workdaysPerWeek,
   onChangeAmount,
+  containerClassName,
+  compact = false,
 }: HeroAmountConverterProps) {
   const themeColors = useThemeColors();
   const inputProgress = useSharedValue(0);
@@ -353,7 +363,7 @@ export function HeroAmountConverter({
   const hasDot = amount.includes('.');
 
   return (
-    <Animated.View style={cardStyle} className="mx-5 mt-3">
+    <Animated.View style={cardStyle} className={cn('mx-5 mt-3', containerClassName)}>
       <View className="relative overflow-hidden rounded-[24px] border border-border/25 bg-card shadow-soft-lg">
         {/* Decorative background shapes */}
         <View
@@ -366,14 +376,14 @@ export function HeroAmountConverter({
         />
 
         {/* Content area */}
-        <View className="px-4 pt-3 pb-2">
+        <View className={cn('px-4 pt-3 pb-2', compact && 'px-3.5 pt-2.5 pb-1.5')}>
           {/* Header */}
-          <View className="mb-2 flex-row items-start justify-between gap-3">
+          <View className={cn('mb-2 flex-row items-start justify-between gap-3', compact && 'mb-1.5')}>
             <View className="min-w-0 flex-1">
               <Text variant="label" tone="muted">
                 {I18n.t('home.converter.title')}
               </Text>
-              <Text variant="caption" tone="muted" className="mt-0.5 opacity-60">
+              <Text variant="caption" tone="muted" className={cn('mt-0.5 opacity-60', compact && 'mt-0')}>
                 {I18n.t('home.converter.description')}
               </Text>
             </View>
@@ -391,7 +401,7 @@ export function HeroAmountConverter({
           </View>
 
           {/* Amount display */}
-          <View className="min-h-[48px]">
+          <View className={cn('min-h-[48px]', compact && 'min-h-[42px]')}>
             <View className="min-w-0 flex-row items-end overflow-hidden">
               <Text style={currencyTextStyle} className="shrink-0 text-muted-foreground">
                 {currencySymbol}
@@ -415,7 +425,7 @@ export function HeroAmountConverter({
 
           {/* Hours result — glowing accent panel */}
           <View
-            className="mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden"
+            className={cn('mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden', compact && 'mt-1.5 px-3 py-2.5')}
             style={{ backgroundColor: `${themeColors.primary}10` }}
           >
             {/* Inner decorative accent */}
@@ -481,6 +491,7 @@ export function HeroAmountConverter({
                       key="backspace"
                       onPress={keyPressHandlers.backspace}
                       onLongPress={handleClearAmount}
+                      compact={compact}
                     >
                       <Delete size={18} color={themeColors.text} />
                     </NumKey>
@@ -488,10 +499,23 @@ export function HeroAmountConverter({
                 }
                 if (key === '.') {
                   return (
-                    <NumKey key="." label="." dimmed={hasDot} onPress={keyPressHandlers['.']} />
+                    <NumKey
+                      key="."
+                      label="."
+                      dimmed={hasDot}
+                      onPress={keyPressHandlers['.']}
+                      compact={compact}
+                    />
                   );
                 }
-                return <NumKey key={key} label={key} onPress={keyPressHandlers[key]} />;
+                return (
+                  <NumKey
+                    key={key}
+                    label={key}
+                    onPress={keyPressHandlers[key]}
+                    compact={compact}
+                  />
+                );
               })}
             </View>
           ))}

@@ -91,8 +91,8 @@ const en = {
     weekly_mood: 'Weekly Mood',
     recent_spendings: 'Recent Spendings',
     converter: {
-      title: 'Before You Buy',
-      description: 'Is it worth your time?',
+      title: 'Item Cost',
+      description: 'How many work hours is it?',
       tap_hint: 'Enter a price to check',
       of_work: '≈ {{value}} of your time',
       of_work_suffix: 'of your time',
@@ -163,7 +163,6 @@ const en = {
       set_now: 'Set Up Now',
       skip_now: 'Skip for Now',
       set_title: 'Hourly value ready',
-      set_subtitle: 'Money can now show up as time.',
       true_rate_title: 'Your True Hourly Rate',
       true_rate_based_on: 'Based on your current wage settings',
       recalculate: 'Edit hourly value',
@@ -174,6 +173,9 @@ const en = {
       setup_wage: 'Set hourly value',
       later_label: 'Do this later',
       later_a11y: 'Skip wage setup and do it later',
+      try_it_title: 'Try it out',
+      try_it_hint: 'Type any amount to see it in hours',
+      your_rate_label: 'Rate: {{rate}}',
     },
     bootstrap: {
       skip_title: 'Skip setup?',
