@@ -735,7 +735,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       <View
         style={[
           s.root,
-          { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom },
+          { backgroundColor: colors.bg, paddingTop: insets.top },
         ]}
       >
         <PaywallBackdrop colors={colors} />
@@ -759,7 +759,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     <View
       style={[
         s.root,
-        { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom },
+        { backgroundColor: colors.bg, paddingTop: insets.top },
       ]}
     >
       <PaywallBackdrop colors={colors} />
@@ -789,8 +789,11 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       ) : null}
 
       <ScrollView
+        style={s.bodyScroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, spacing.md) }}
+        contentInset={{ bottom: insets.bottom }}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        contentContainerStyle={s.bodyScrollContent}
       >
         <TabletContentContainer>
           <Animated.View entering={FadeIn.duration(400)}>
@@ -988,6 +991,12 @@ function CloseBtn({ onClose, colors }: { onClose: () => void; colors: PaywallCol
 
 const s = StyleSheet.create({
   root: { flex: 1 },
+  bodyScroll: {
+    flex: 1,
+  },
+  bodyScrollContent: {
+    paddingBottom: spacing.md,
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
@@ -1279,6 +1288,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
   },
   activeTitle: { fontSize: 24, fontWeight: '800', marginTop: 16 },
   activeSub: { fontSize: 15, marginTop: 8, textAlign: 'center' },
