@@ -1,11 +1,10 @@
+import { normalizeMoneyAmount } from '~/utils/formatters';
+
 type Operator = '+' | '-' | '×' | '÷';
 
 export function formatMoney(value: number) {
-  if (!Number.isFinite(value)) return '0';
-  return value
-    .toFixed(2)
-    .replace(/\.00$/, '')
-    .replace(/(\.\d)0$/, '$1');
+  if (!Number.isFinite(value)) return '0.00';
+  return normalizeMoneyAmount(value).toFixed(2);
 }
 
 function normalizeExpression(expression: string) {
@@ -82,7 +81,7 @@ export function evaluateExpression(expression: string) {
   }
 
   if (!Number.isFinite(result)) return 0;
-  return result;
+  return normalizeMoneyAmount(result);
 }
 
 function getCurrentOperand(expression: string) {
@@ -94,11 +93,16 @@ export function sanitizeInitialAmount(value: string) {
   if (!value) return '';
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) return '';
-  return String(numericValue);
+  return formatMoney(numericValue);
 }
 
 export function appendDigit(current: string, digit: string) {
   const operand = getCurrentOperand(current);
+  const decimalPointIndex = operand.indexOf('.');
+  if (decimalPointIndex >= 0) {
+    const decimalPlaces = operand.slice(decimalPointIndex + 1).length;
+    if (decimalPlaces >= 2) return current;
+  }
   if (operand === '0') {
     return `${current.slice(0, -1)}${digit}`;
   }

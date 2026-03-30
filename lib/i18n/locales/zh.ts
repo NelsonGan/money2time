@@ -90,8 +90,8 @@ const zh = {
     weekly_mood: '每周心情',
     recent_spendings: '近期消费',
     converter: {
-      title: '买前算一算',
-      description: '值得花这些时间吗？',
+      title: '物品成本',
+      description: '它要花你多少工作时间？',
       tap_hint: '输入价格来查看',
       of_work: '≈ 你的 {{value}} 工作时间',
       of_work_suffix: '工作时间',
@@ -161,7 +161,6 @@ const zh = {
       set_now: '立即设置',
       skip_now: '稍后再说',
       set_title: '真实时薪已就绪',
-      set_subtitle: '现在可以把金额显示为时间。',
       true_rate_title: '你的真实时薪',
       true_rate_based_on: '基于当前薪资设置',
       recalculate: '修改时薪',
@@ -172,6 +171,9 @@ const zh = {
       setup_wage: '设置真实时薪',
       later_label: '稍后再设',
       later_a11y: '跳过时薪设置，稍后再配置',
+      try_it_title: '试试看',
+      try_it_hint: '输入任意金额，查看对应工时',
+      your_rate_label: '时薪: {{rate}}',
     },
     bootstrap: {
       skip_title: '跳过设置？',

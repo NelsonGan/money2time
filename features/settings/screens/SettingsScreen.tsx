@@ -17,6 +17,7 @@ import {
   Alert,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -442,10 +443,13 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   proButtonHighlight: {
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    ...(Platform.OS === 'ios'
+      ? {
+          shadowColor: '#0F172A',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 4 },
+        }
+      : {}),
   },
 });

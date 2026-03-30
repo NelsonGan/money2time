@@ -11,6 +11,7 @@ import type {
   TransactionType,
   TransactionWithRelations,
 } from '~/types';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
 
@@ -75,6 +76,14 @@ function normalizeTransactionFilters(
   return {
     ...DEFAULT_TRANSACTION_QUERY,
     ...filters,
+  };
+}
+
+function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(input: T): T {
+  if (input.amount === undefined) return input;
+  return {
+    ...input,
+    amount: normalizeMoneyAmount(input.amount),
   };
 }
 
@@ -301,20 +310,21 @@ class TransactionsRepository {
   createWithId(id: string, input: CreateTransactionInput) {
     const db = getDb();
     const now = nowIso();
+    const normalizedInput = normalizeTransactionInput(input);
 
     db.insert(transactionsTable)
       .values({
         id,
-        type: input.type,
-        amount: input.amount,
-        currency: input.currency,
-        date: input.date,
-        accountId: input.accountId ?? null,
-        fromAccountId: input.fromAccountId ?? null,
-        toAccountId: input.toAccountId ?? null,
-        categoryId: input.categoryId ?? null,
-        note: input.note ?? null,
-        sentiment: input.sentiment ?? 'neutral',
+        type: normalizedInput.type,
+        amount: normalizedInput.amount,
+        currency: normalizedInput.currency,
+        date: normalizedInput.date,
+        accountId: normalizedInput.accountId ?? null,
+        fromAccountId: normalizedInput.fromAccountId ?? null,
+        toAccountId: normalizedInput.toAccountId ?? null,
+        categoryId: normalizedInput.categoryId ?? null,
+        note: normalizedInput.note ?? null,
+        sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -328,9 +338,10 @@ class TransactionsRepository {
 
   update(id: string, updates: Partial<CreateTransactionInput>) {
     const db = getDb();
+    const normalizedUpdates = normalizeTransactionInput(updates);
     db.update(transactionsTable)
       .set({
-        ...updates,
+        ...normalizedUpdates,
         updatedAt: nowIso(),
       })
       .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
@@ -348,7 +359,8 @@ class TransactionsRepository {
       for (let index = 0; index < updates.length; index += 1) {
         const update = updates[index];
         if (!update) continue;
-        const { id, input } = update;
+        const { id } = update;
+        const input = normalizeTransactionInput(update.input);
         db.update(transactionsTable)
           .set({
             ...input,
