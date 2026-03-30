@@ -32,6 +32,7 @@ interface NumpadPanelProps {
   initialExpression: string;
   onValueChange: (expression: string) => void;
   onConfirm: (formatted: string) => void;
+  onBackgroundPress?: () => void;
 }
 
 const NumpadKey = React.memo(function NumpadKey({
@@ -132,7 +133,12 @@ const NumpadKey = React.memo(function NumpadKey({
   );
 });
 
-export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: NumpadPanelProps) {
+export function NumpadPanel({
+  initialExpression,
+  onValueChange,
+  onConfirm,
+  onBackgroundPress,
+}: NumpadPanelProps) {
   const themeColors = useThemeColors();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [expression, setExpression] = React.useState(() =>
@@ -181,9 +187,8 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
         nextExpression = currentExpression.slice(0, -1);
       } else if (key === 'enter') {
         const formatted = formatMoney(evaluateExpression(currentExpression));
-        const normalized = String(Number(formatted));
-        expressionRef.current = normalized;
-        setExpression(normalized);
+        expressionRef.current = formatted;
+        setExpression(formatted);
         onConfirm(formatted);
         return;
       } else if (['+', '-', '×', '÷'].includes(key)) {
@@ -202,7 +207,7 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
   }, [handleKeyPress]);
 
   return (
-    <View className="flex-1 px-3 pt-0.5" style={{ paddingBottom: Math.max(4, bottomInset) }}>
+    <View className="flex-1 px-3 pt-0.5">
       <View className="flex-1 gap-0.5">
         <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="C" variant="utility" onPress={handleKeyPress} />
@@ -243,11 +248,29 @@ export function NumpadPanel({ initialExpression, onValueChange, onConfirm }: Num
             }
           />
         </View>
-        <View className="flex-1 flex-row gap-0.5 pr-[25%]">
+        <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
           <NumpadKey value="." onPress={handleKeyPress} />
+          {onBackgroundPress ? (
+            <Pressable
+              accessible={false}
+              onPress={onBackgroundPress}
+              className="flex-1 rounded-[18px]"
+            />
+          ) : (
+            <View className="flex-1" />
+          )}
         </View>
       </View>
+      {onBackgroundPress ? (
+        <Pressable
+          accessible={false}
+          onPress={onBackgroundPress}
+          style={{ minHeight: Math.max(4, bottomInset) }}
+        />
+      ) : (
+        <View style={{ minHeight: Math.max(4, bottomInset) }} />
+      )}
     </View>
   );
 }

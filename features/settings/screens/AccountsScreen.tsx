@@ -41,6 +41,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
+import { getNetAssetContribution } from '~/utils/accountBalances';
 import { formatAmount, formatDateInput, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface AccountGroupSection {
@@ -1331,7 +1332,7 @@ export function AccountsScreen({
     const sum = accounts.reduce((runningTotal, account) => {
       if (!account.includeInTotals) return runningTotal;
       const balance = balanceMap.get(account.id) ?? account.startingBalance;
-      const signedBalance = account.type === 'credit' ? -balance : balance;
+      const signedBalance = getNetAssetContribution(account.type, balance);
       return runningTotal + signedBalance;
     }, 0);
     return normalizeMoneyAmount(sum);

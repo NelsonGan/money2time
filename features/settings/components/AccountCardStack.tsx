@@ -16,6 +16,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup, UserSettings } from '~/types';
+import { getNetAssetContribution } from '~/utils/accountBalances';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface CreditSummary {
@@ -549,7 +550,6 @@ function StackCard({
           </Animated.View>
         ) : null}
       </Pressable>
-
     </Animated.View>
   );
 }
@@ -756,15 +756,19 @@ export function AccountCardStack({
             />
           )}
         </View>
-        {headerAccessory ? <View style={styles.totalHeaderAccessory}>{headerAccessory}</View> : null}
+        {headerAccessory ? (
+          <View style={styles.totalHeaderAccessory}>{headerAccessory}</View>
+        ) : null}
       </View>
 
       {sections.map((section, sectionIndex) => {
-        const sectionTotal = normalizeMoneyAmount(section.accounts.reduce((sum, a) => {
-          if (!a.includeInTotals) return sum;
-          const bal = balanceMap.get(a.id) ?? a.startingBalance;
-          return sum + (a.type === 'credit' ? -bal : bal);
-        }, 0));
+        const sectionTotal = normalizeMoneyAmount(
+          section.accounts.reduce((sum, a) => {
+            if (!a.includeInTotals) return sum;
+            const bal = balanceMap.get(a.id) ?? a.startingBalance;
+            return sum + getNetAssetContribution(a.type, bal);
+          }, 0),
+        );
         const sectionTotalLabel = hideBalances
           ? MASKED_BALANCE_VALUE
           : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });

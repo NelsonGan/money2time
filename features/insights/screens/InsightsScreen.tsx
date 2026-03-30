@@ -27,16 +27,17 @@ import {
   View,
 } from 'react-native';
 import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
-import { PieChart } from 'react-native-chart-kit';
+import { PieChart } from 'react-native-gifted-charts';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { G, Text as SvgText } from 'react-native-svg';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { Card, CardContent, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import { Card, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
@@ -55,6 +56,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category, CategoryType, TransactionWithRelations, WageType } from '~/types';
 import { cn } from '~/utils';
+import { getNetAssetContribution } from '~/utils/accountBalances';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -285,6 +287,14 @@ const PERIOD_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_MONTH_DAY_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_PICKER_SIDE_MARGIN = 12;
 const PERIOD_PICKER_CARD_WIDTH = 408;
+const BREAKDOWN_PIE_LABEL_MIN_WIDTH = 72;
+const BREAKDOWN_PIE_LABEL_MAX_WIDTH = 88;
+const BREAKDOWN_PIE_LABEL_HEIGHT = 24;
+const BREAKDOWN_PIE_LABEL_LINE_LENGTH = 12;
+const BREAKDOWN_PIE_LABEL_TAIL_LENGTH = 10;
+const BREAKDOWN_PIE_LABEL_MARGIN = 4;
+const BREAKDOWN_PIE_MIN_RADIUS = 48;
+const BREAKDOWN_PIE_MAX_RADIUS = 108;
 
 const styles = StyleSheet.create({
   absoluteOverlay: {
@@ -335,13 +345,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: spacing.lg,
-  },
-  pieFrame: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pieLabel: {
-    position: 'absolute',
   },
   breakdownPercentBadge: {
     borderRadius: 999,
@@ -1397,11 +1400,10 @@ function pieSliceIdFromTouch(
   point: { x: number; y: number },
   slices: { id: string; amount: number }[],
   totalAmount: number,
-  chartSize: number,
+  radius: number,
 ) {
-  if (slices.length === 0 || totalAmount <= 0) return null;
-  const center = chartSize / 2;
-  const radius = chartSize / 2.5;
+  if (slices.length === 0 || totalAmount <= 0 || radius <= 0) return null;
+  const center = radius;
   const dx = point.x - center;
   const dy = point.y - center;
   const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1964,12 +1966,12 @@ function PeriodPickerPopover({
   onCommit: (payload: PeriodPickerCommitPayload) => void;
 }) {
   const themeColors = useThemeColors();
-  const today = useMemo(() => startOfDayDate(new Date()), []);
   const [draftAnchorDate, setDraftAnchorDate] = useState(() => startOfDayDate(currentAnchorDate));
   const [draftCustomStart, setDraftCustomStart] = useState(currentCustomStart);
   const [draftCustomEnd, setDraftCustomEnd] = useState(currentCustomEnd);
-  const [draftCustomDateField, setDraftCustomDateField] =
-    useState<'start' | 'end'>(currentCustomDateField);
+  const [draftCustomDateField, setDraftCustomDateField] = useState<'start' | 'end'>(
+    currentCustomDateField,
+  );
   const [visibleYearPageStart, setVisibleYearPageStart] = useState(() =>
     yearPickerPageStartFromYear(currentAnchorDate.getFullYear()),
   );
@@ -2021,7 +2023,10 @@ function PeriodPickerPopover({
     () => Array.from({ length: MONTHS_PER_YEAR }, (_, index) => visibleYearPageStart + index),
     [visibleYearPageStart],
   );
-  const monthOptions = useMemo(() => monthLabelsForYear(visibleMonthYear, locale), [locale, visibleMonthYear]);
+  const monthOptions = useMemo(
+    () => monthLabelsForYear(visibleMonthYear, locale),
+    [locale, visibleMonthYear],
+  );
   const cardWidth = Math.min(screenWidth - PERIOD_PICKER_SIDE_MARGIN * 2, PERIOD_PICKER_CARD_WIDTH);
   const anchorCenterX = anchorRect ? anchorRect.x + anchorRect.width / 2 : screenWidth / 2;
   const cardLeft = clampNumber(
@@ -2136,7 +2141,9 @@ function PeriodPickerPopover({
                 <View className="gap-3">
                   <View className="flex-row items-center justify-between">
                     <Pressable
-                      onPress={() => setVisibleYearPageStart((previous) => previous - MONTHS_PER_YEAR)}
+                      onPress={() =>
+                        setVisibleYearPageStart((previous) => previous - MONTHS_PER_YEAR)
+                      }
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('common.previous')}
                       className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
@@ -2149,7 +2156,9 @@ function PeriodPickerPopover({
                       </Text>
                     </View>
                     <Pressable
-                      onPress={() => setVisibleYearPageStart((previous) => previous + MONTHS_PER_YEAR)}
+                      onPress={() =>
+                        setVisibleYearPageStart((previous) => previous + MONTHS_PER_YEAR)
+                      }
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('common.next')}
                       className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-80"
@@ -2396,7 +2405,9 @@ function PeriodPickerPopover({
                   >
                     <Text
                       variant="caption"
-                      className={cn(canApplyCustom ? 'text-primary-foreground' : 'text-muted-foreground')}
+                      className={cn(
+                        canApplyCustom ? 'text-primary-foreground' : 'text-muted-foreground',
+                      )}
                     >
                       {I18n.t('insights.period_picker.apply_custom')}
                     </Text>
@@ -2594,6 +2605,7 @@ export function InsightsScreen({
   const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
   const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
+  const breakdownHeaderDotPulse = useRef(new RNAnimated.Value(0)).current;
   const insightsTypeSelectorRef = useRef<View | null>(null);
   const periodPickerTriggerRef = useRef<View | null>(null);
   const selectedIncomeRatePointIndexRef = useRef<number | null>(selectedIncomeRatePointIndex);
@@ -2619,7 +2631,6 @@ export function InsightsScreen({
     () => ({ marginHorizontal: -INSIGHTS_LINE_CHART_SECTION_BLEED }),
     [],
   );
-  const pieSize = Math.min(240, chartWidth);
   const visibleInsightTypes = isSimpleMode
     ? INSIGHT_TYPES.filter((t) => t !== 'asset_history')
     : INSIGHT_TYPES;
@@ -2691,7 +2702,6 @@ export function InsightsScreen({
   const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
   const headerPreviewPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
-  const pieTouchStartRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const pageScrollRefs = useRef(new Map<number, { current: ScrollView | null }>());
   const pageDataCacheRef = useRef(new Map<string, InsightPageData>());
   const hasHydratedAssetHistoryExclusionsRef = useRef(false);
@@ -3052,22 +3062,14 @@ export function InsightsScreen({
       if (transaction.type === 'income' && transaction.accountId) {
         const account = includedAssetHistoryAccountById.get(transaction.accountId);
         if (account) {
-          addAccountDelta(
-            monthKey,
-            account.id,
-            account.type === 'credit' ? -transaction.amount : transaction.amount,
-          );
+          addAccountDelta(monthKey, account.id, transaction.amount);
         }
       }
 
       if (transaction.type === 'expense' && transaction.accountId) {
         const account = includedAssetHistoryAccountById.get(transaction.accountId);
         if (account) {
-          addAccountDelta(
-            monthKey,
-            account.id,
-            account.type === 'credit' ? transaction.amount : -transaction.amount,
-          );
+          addAccountDelta(monthKey, account.id, -transaction.amount);
         }
       }
 
@@ -3078,11 +3080,7 @@ export function InsightsScreen({
       ) {
         const account = includedAssetHistoryAccountById.get(transaction.toAccountId);
         if (account) {
-          addAccountDelta(
-            monthKey,
-            account.id,
-            account.type === 'credit' ? -transaction.amount : transaction.amount,
-          );
+          addAccountDelta(monthKey, account.id, transaction.amount);
         }
       }
 
@@ -3093,11 +3091,7 @@ export function InsightsScreen({
       ) {
         const account = includedAssetHistoryAccountById.get(transaction.fromAccountId);
         if (account) {
-          addAccountDelta(
-            monthKey,
-            account.id,
-            account.type === 'credit' ? transaction.amount : -transaction.amount,
-          );
+          addAccountDelta(monthKey, account.id, -transaction.amount);
         }
       }
 
@@ -3107,7 +3101,11 @@ export function InsightsScreen({
       ) {
         const account = includedAssetHistoryAccountById.get(transaction.accountId);
         if (account) {
-          addAccountDelta(monthKey, account.id, transaction.amount);
+          addAccountDelta(
+            monthKey,
+            account.id,
+            getNetAssetContribution(account.type, transaction.amount),
+          );
         }
       }
     });
@@ -3594,7 +3592,7 @@ export function InsightsScreen({
         }
 
         let runningTotalAssets = includedAccounts.reduce(
-          (sum, account) => sum + account.startingBalance,
+          (sum, account) => sum + getNetAssetContribution(account.type, account.startingBalance),
           0,
         );
         let deltaMonthIndex = 0;
@@ -4343,28 +4341,6 @@ export function InsightsScreen({
     [formatAxisCurrencyValue, settings.displayMode],
   );
 
-  const chartConfig = useMemo(
-    () => ({
-      backgroundGradientFrom: themeColors.surface,
-      backgroundGradientTo: themeColors.surface,
-      decimalPlaces: 0,
-      color: (opacity = 1) => {
-        const r = isDark ? 52 : 31;
-        const g = isDark ? 201 : 138;
-        const b = isDark ? 154 : 111;
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      },
-      labelColor: (opacity = 1) => {
-        const r = isDark ? 154 : 107;
-        const g = isDark ? 172 : 122;
-        const b = isDark ? 166 : 119;
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      },
-      propsForBackgroundLines: { stroke: themeColors.surfaceMuted, strokeWidth: 1 },
-    }),
-    [themeColors, isDark],
-  );
-
   const insightsPagerSlots = useMemo<number[]>(
     () => Array.from({ length: INSIGHTS_PAGER_TOTAL_SLOTS }, (_, index) => index),
     [],
@@ -4574,6 +4550,28 @@ export function InsightsScreen({
       useNativeDriver: true,
     }).start();
   }, [currentCalendarDefaultDayKey, selectedCalendarDayKey, selectedInsightType]);
+  useEffect(() => {
+    const pulse = RNAnimated.loop(
+      RNAnimated.sequence([
+        RNAnimated.timing(breakdownHeaderDotPulse, {
+          toValue: 1,
+          duration: 820,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(breakdownHeaderDotPulse, {
+          toValue: 0,
+          duration: 820,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => {
+      pulse.stop();
+      breakdownHeaderDotPulse.stopAnimation();
+      breakdownHeaderDotPulse.setValue(0);
+    };
+  }, [breakdownHeaderDotPulse]);
 
   const setActiveBreakdownSlice = useCallback((nextId: string | null, withHaptic = false) => {
     if (activeBreakdownSliceIdRef.current === nextId) return;
@@ -4585,21 +4583,24 @@ export function InsightsScreen({
   }, []);
 
   const renderBreakdownPane = (pageData: BreakdownPageData) => {
+    type BreakdownPieSlice = {
+      id: string;
+      name: string;
+      amount: number;
+      value: number;
+      emoji: string;
+      pct: number;
+      color: string;
+    };
+
     const isIncomeBreakdown = pageData.transactionType === 'income';
     const noPositiveSlicesMessage = isIncomeBreakdown
       ? I18n.t('insights.no_positive_income_slices')
       : I18n.t('insights.no_positive_slices');
-    const totalLabel = isIncomeBreakdown
-      ? I18n.t('insights.total_income')
-      : I18n.t('insights.total_expense');
     const breakdownVisual = isIncomeBreakdown
       ? INSIGHT_TYPE_VISUALS.income_breakdown
       : INSIGHT_TYPE_VISUALS.expense_breakdown;
     const totalRowAccentColor = breakdownVisual.tint;
-    const totalRowStyle = {
-      backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.18 : 0.1),
-      borderColor: withColorAlpha(totalRowAccentColor, isDark ? 0.4 : 0.24),
-    } as const;
     const normalizedRows: typeof pageData.categoryRows = [];
     let pageTotalAmount = 0;
     pageData.categoryRows.forEach((row) => {
@@ -4611,41 +4612,92 @@ export function InsightsScreen({
       id: row.id,
       name: row.label,
       amount: row.amount,
+      value: row.amount,
       emoji: row.emoji || categoryById.get(row.id)?.icon || '•',
       pct: pageTotalAmount > 0 ? (row.amount / pageTotalAmount) * 100 : 0,
       color: INSIGHTS_CHART_COLORS[i % INSIGHTS_CHART_COLORS.length],
-      legendFontColor: themeColors.textSoft,
-      legendFontSize: 11,
-    }));
+    })) satisfies BreakdownPieSlice[];
     const activeSlice = activeBreakdownSliceId
       ? (pagePieData.find((item) => item.id === activeBreakdownSliceId) ?? null)
       : null;
-    const interactivePieData = activeSlice
-      ? pagePieData.map((item) => ({
-          ...item,
-          color: item.id === activeSlice.id ? item.color : withColorAlpha(item.color, 0.28),
-        }))
-      : pagePieData;
-    const pieFramePadding = 30;
-    const pieFrameSize = pieSize + pieFramePadding * 2;
-    const selectSliceByTouch = (x: number, y: number, withHaptic = false) => {
-      const nextId = pieSliceIdFromTouch({ x, y }, pagePieData, pageTotalAmount, pieSize);
-      setActiveBreakdownSlice(nextId, withHaptic);
-      return nextId;
-    };
-    let startAngle = -Math.PI / 2;
-    const pagePieLabels =
-      pageTotalAmount <= 0
-        ? []
-        : pagePieData.map((item) => {
-            const sliceAngle = (item.amount / pageTotalAmount) * Math.PI * 2;
-            const midAngle = startAngle + sliceAngle / 2;
-            startAngle += sliceAngle;
-            const radius = pieSize / 2 + 22;
-            const x = pieSize / 2 + Math.cos(midAngle) * radius;
-            const y = pieSize / 2 + Math.sin(midAngle) * radius;
-            return { id: item.id, pct: item.pct, x, y, emoji: item.emoji };
-          });
+    const pieLayoutBleed = Math.max(24, spacing.screenHorizontal * 2);
+    const pieSideMargin = 14;
+    const pieLayoutWidth = Math.max(chartWidth, pageWidth + pieLayoutBleed - pieSideMargin * 2);
+    const pieLabelWidth = Math.max(
+      BREAKDOWN_PIE_LABEL_MIN_WIDTH,
+      Math.min(BREAKDOWN_PIE_LABEL_MAX_WIDTH, Math.floor(pieLayoutWidth * 0.25)),
+    );
+    const pieLabelMaxChars = Math.max(7, Math.min(13, Math.floor((pieLabelWidth - 14) / 5)));
+    const pieExtraRadius =
+      pieLabelWidth + BREAKDOWN_PIE_LABEL_LINE_LENGTH + BREAKDOWN_PIE_LABEL_MARGIN + 6;
+    const pieRadius = Math.max(
+      BREAKDOWN_PIE_MIN_RADIUS,
+      Math.min(BREAKDOWN_PIE_MAX_RADIUS, Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2)),
+    );
+    const pieStageWidth = (pieRadius + pieExtraRadius) * 2;
+    const pieStageHeight = Math.max(
+      pieRadius * 2 + 24,
+      pieStageWidth - Math.min(140, Math.max(92, pieExtraRadius * 1.2)),
+    );
+    const pieStageVerticalInset = Math.max(0, Math.floor((pieStageWidth - pieStageHeight) / 2));
+    const interactivePieData = pagePieData.map((item) => {
+      const isSelected = activeSlice?.id === item.id;
+      const hasSelection = activeSlice !== null;
+      const categoryLabel =
+        item.name.length <= pieLabelMaxChars
+          ? item.name
+          : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
+      const sliceColor =
+        hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
+      const labelStroke = isSelected
+        ? withColorAlpha(item.color, 0.72)
+        : hasSelection
+          ? withColorAlpha(item.color, 0.18)
+          : withColorAlpha(item.color, isDark ? 0.46 : 0.28);
+      const labelTextColor =
+        hasSelection && !isSelected ? withColorAlpha(themeColors.text, 0.62) : themeColors.text;
+
+      return {
+        ...item,
+        color: sliceColor,
+        labelLineConfig: {
+          color: labelStroke,
+          thickness: isSelected ? 1.7 : 1.2,
+          length: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
+          tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
+          labelComponentWidth: pieLabelWidth,
+          labelComponentHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
+          labelComponentMargin: BREAKDOWN_PIE_LABEL_MARGIN,
+          avoidOverlappingOfLabels: true,
+        },
+        externalLabelComponent: () => (
+          <G opacity={hasSelection && !isSelected ? 0.72 : 1}>
+            <SvgText
+              x={pieLabelWidth / 2}
+              y={-4}
+              textAnchor="middle"
+              alignmentBaseline="middle"
+              fontSize={9.2}
+              fontWeight="700"
+              fill={labelTextColor}
+            >
+              {`${item.emoji} ${categoryLabel}`}
+            </SvgText>
+            <SvgText
+              x={pieLabelWidth / 2}
+              y={8}
+              textAnchor="middle"
+              alignmentBaseline="middle"
+              fontSize={8}
+              fontWeight="600"
+              fill={withColorAlpha(labelTextColor, isDark ? 0.75 : 0.55)}
+            >
+              {`${item.pct.toFixed(1)}%`}
+            </SvgText>
+          </G>
+        ),
+      };
+    });
     if (pageData.filteredForRange.length === 0) {
       return (
         <EmptyState
@@ -4658,201 +4710,144 @@ export function InsightsScreen({
     }
 
     return (
-      <Card className="mt-2">
-        <CardContent className="py-3 gap-1.5">
-          <>
-            <View className="items-center py-0.5">
-              {pagePieData.length > 0 ? (
-                <View style={[styles.pieFrame, buildSizeStyle(pieFrameSize, pieFrameSize)]}>
-                  <View style={[styles.pieFrame, buildSizeStyle(pieSize, pieSize)]}>
+      <View className="gap-1">
+        <View className="items-center px-1">
+          <View className="w-full items-center gap-0.5 py-1">
+            {renderValueNode(pageTotalAmount, {
+              variant: 'heading',
+              textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
+              style: { color: totalRowAccentColor },
+              containerClassName: 'justify-center',
+              iconColor: totalRowAccentColor,
+              iconSize: 22,
+            })}
+            <View
+              style={{
+                width: 36,
+                height: 3,
+                borderRadius: 2,
+                backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+                marginTop: 1,
+              }}
+            />
+          </View>
+
+          <View className="mt-2 w-full items-center overflow-visible">
+            {pagePieData.length > 0 ? (
+              <View className="w-full items-center" style={styles.chartSizeCenter}>
+                <View
+                  style={buildSizeStyle(pieStageWidth, pieStageHeight)}
+                  onStartShouldSetResponder={() => true}
+                  onResponderRelease={(event) => {
+                    const { locationX, locationY } = event.nativeEvent;
+                    const nextId = pieSliceIdFromTouch(
+                      {
+                        x: locationX - pieExtraRadius,
+                        y: locationY + pieStageVerticalInset - pieExtraRadius,
+                      },
+                      pagePieData,
+                      pageTotalAmount,
+                      pieRadius,
+                    );
+                    if (!nextId) {
+                      setActiveBreakdownSlice(null, false);
+                      return;
+                    }
+                    if (activeBreakdownSliceId === nextId) return;
+                    setActiveBreakdownSlice(nextId, true);
+                  }}
+                >
+                  <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
                     <PieChart
                       data={interactivePieData}
-                      width={pieSize}
-                      height={pieSize}
-                      center={[pieSize / 4, 0]}
-                      chartConfig={chartConfig}
-                      accessor="amount"
-                      backgroundColor="transparent"
-                      paddingLeft="0"
-                      hasLegend={false}
-                      absolute={false}
+                      radius={pieRadius}
+                      showExternalLabels
+                      extraRadius={pieExtraRadius}
+                      labelsPosition="outward"
                     />
                   </View>
-                  {pagePieLabels.map((label) => (
-                    <View
-                      key={label.id}
-                      style={[styles.pieLabel, { left: label.x + 16, top: label.y + 16 }]}
-                      className={cn(
-                        'px-2 py-1 rounded-full bg-card border',
-                        activeSlice && activeSlice.id !== label.id
-                          ? 'border-border/20 opacity-55'
-                          : 'border-border/35',
-                      )}
-                    >
-                      <Text variant="label">
-                        {label.emoji} {label.pct.toFixed(0)}%
-                      </Text>
-                    </View>
-                  ))}
-                  <View
-                    className="absolute inset-0"
-                    onStartShouldSetResponder={() => true}
-                    onMoveShouldSetResponder={() => true}
-                    onResponderGrant={(event) => {
-                      const { locationX, locationY } = event.nativeEvent;
-                      pieTouchStartRef.current = { x: locationX, y: locationY, moved: false };
-                      selectSliceByTouch(
-                        locationX - pieFramePadding,
-                        locationY - pieFramePadding,
-                        true,
-                      );
-                    }}
-                    onResponderMove={(event) => {
-                      const { locationX, locationY } = event.nativeEvent;
-                      const start = pieTouchStartRef.current;
-                      if (start) {
-                        const movedDistance = Math.hypot(locationX - start.x, locationY - start.y);
-                        if (movedDistance > 8) {
-                          start.moved = true;
-                        }
-                      }
-                      selectSliceByTouch(
-                        locationX - pieFramePadding,
-                        locationY - pieFramePadding,
-                        true,
-                      );
-                    }}
-                    onResponderRelease={(event) => {
-                      const { locationX, locationY } = event.nativeEvent;
-                      const nextId = selectSliceByTouch(
-                        locationX - pieFramePadding,
-                        locationY - pieFramePadding,
-                        false,
-                      );
-                      const start = pieTouchStartRef.current;
-                      const isTap = !start?.moved;
-                      if (isTap && nextId) {
-                        setActiveBreakdownSlice(nextId, true);
-                      }
-                      if (isTap && !nextId) {
-                        setActiveBreakdownSlice(null, false);
-                      }
-                      pieTouchStartRef.current = null;
-                    }}
-                    onResponderTerminate={() => {
-                      pieTouchStartRef.current = null;
-                    }}
-                  />
                 </View>
-              ) : (
-                <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
-                  <Text variant="label" tone="muted">
-                    {noPositiveSlicesMessage}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View className="gap-1 mt-0">
-              <View
-                className="relative overflow-hidden rounded-xl border px-3 py-2 flex-row items-center justify-between"
-                style={totalRowStyle}
-              >
-                <View
-                  className="absolute left-0 top-0 bottom-0 w-1"
-                  style={{ backgroundColor: totalRowAccentColor }}
-                />
-                <View className="flex-row items-center gap-2 pl-2">
-                  <View
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: totalRowAccentColor }}
-                  />
-                  <Text variant="label" className="text-foreground/80">
-                    {totalLabel}
-                  </Text>
-                </View>
-                {renderValueNode(pageTotalAmount, {
-                  variant: 'caption',
-                  textClassName:
-                    'text-[15px] leading-[18px] font-black tracking-tight text-foreground',
-                  iconColor: totalRowAccentColor,
-                  iconSize: 14,
-                })}
               </View>
-              {pagePieData.map((item) => {
-                const isSelected = activeBreakdownSliceId === item.id;
-                const hasSelection = activeBreakdownSliceId !== null;
-                const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
-                const rowBackgroundColor = isSelected
-                  ? withColorAlpha(item.color, 0.28)
-                  : hasSelection
-                    ? withColorAlpha(item.color, 0.04)
-                    : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
-                const rowBorderColor = isSelected
-                  ? withColorAlpha(item.color, 0.7)
-                  : hasSelection
-                    ? withColorAlpha(item.color, 0.1)
-                    : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
-                const percentBadgeColor = isSelected
-                  ? withColorAlpha(item.color, 0.38)
-                  : withColorAlpha(item.color, 0.24);
+            ) : (
+              <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
+                <Text variant="label" tone="muted">
+                  {noPositiveSlicesMessage}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
 
-                return (
-                  <Pressable
-                    key={item.id}
-                    onPress={() => {
-                      setActiveBreakdownSlice(null, false);
-                      const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
-                      const rootCategory = categoryById.get(item.id) ?? null;
-                      openDrilldown({
-                        label: item.name,
-                        transactions: rowTransactions,
-                        categoryRootId: rootCategory?.id,
-                        categoryRootLabel: rootCategory?.name ?? item.name,
-                        categoryRootEmoji: rootCategory?.icon ?? item.emoji,
-                        categoryRootColor: item.color,
-                        triggerSelectionHaptic: true,
-                      });
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${item.emoji} ${item.name}`}
-                    className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
-                    style={[
-                      { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
-                      isSelected && { borderWidth: 2 },
-                      hasSelection && !isSelected && { opacity: 0.5 },
-                    ]}
-                  >
-                    <View className="flex-row items-center justify-between gap-2">
-                      <Text variant="caption" className="flex-1 pr-2" numberOfLines={2}>
-                        {item.emoji} {item.name}
+        <View className="gap-1.5">
+          {pagePieData.map((item) => {
+            const isSelected = activeBreakdownSliceId === item.id;
+            const hasSelection = activeBreakdownSliceId !== null;
+            const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
+            const rowBackgroundColor = isSelected
+              ? withColorAlpha(item.color, 0.28)
+              : hasSelection
+                ? withColorAlpha(item.color, 0.04)
+                : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
+            const rowBorderColor = isSelected
+              ? withColorAlpha(item.color, 0.7)
+              : hasSelection
+                ? withColorAlpha(item.color, 0.1)
+                : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
+            const percentBadgeColor = isSelected
+              ? withColorAlpha(item.color, 0.38)
+              : withColorAlpha(item.color, 0.24);
+
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() => {
+                  setActiveBreakdownSlice(null, false);
+                  const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
+                  const rootCategory = categoryById.get(item.id) ?? null;
+                  openDrilldown({
+                    label: item.name,
+                    transactions: rowTransactions,
+                    categoryRootId: rootCategory?.id,
+                    categoryRootLabel: rootCategory?.name ?? item.name,
+                    categoryRootEmoji: rootCategory?.icon ?? item.emoji,
+                    categoryRootColor: item.color,
+                    triggerSelectionHaptic: true,
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.emoji} ${item.name}`}
+                className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                style={[
+                  { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
+                  isSelected && { borderWidth: 2 },
+                  hasSelection && !isSelected && { opacity: 0.5 },
+                ]}
+              >
+                <View className="flex-row items-center justify-between gap-2">
+                  <Text variant="caption" className="flex-1 pr-2" numberOfLines={2}>
+                    {item.emoji} {item.name}
+                  </Text>
+                  <View className="flex-row items-center gap-1.5">
+                    {renderValueNode(item.amount, {
+                      variant: 'label',
+                      textClassName: 'text-foreground',
+                      iconColor: themeColors.text,
+                    })}
+                    <View
+                      className="rounded-full px-1.5 py-0.5"
+                      style={[styles.breakdownPercentBadge, { backgroundColor: percentBadgeColor }]}
+                    >
+                      <Text variant="label" className="text-foreground">
+                        {item.pct.toFixed(1)}%
                       </Text>
-                      <View className="flex-row items-center gap-1.5">
-                        {renderValueNode(item.amount, {
-                          variant: 'label',
-                          textClassName: 'text-foreground',
-                          iconColor: themeColors.text,
-                        })}
-                        <View
-                          className="rounded-full px-1.5 py-0.5"
-                          style={[
-                            styles.breakdownPercentBadge,
-                            { backgroundColor: percentBadgeColor },
-                          ]}
-                        >
-                          <Text variant="label" className="text-foreground">
-                            {item.pct.toFixed(1)}%
-                          </Text>
-                        </View>
-                      </View>
                     </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </>
-        </CardContent>
-      </Card>
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
     );
   };
 

@@ -56,7 +56,12 @@ import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { amountToHoursByRate, dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
+import {
+  amountToHoursByRate,
+  dayKeyFromIsoLocal,
+  formatHours,
+  normalizeMoneyAmount,
+} from '~/utils/formatters';
 
 type ActiveField =
   | 'amount'
@@ -332,10 +337,6 @@ function splitHoursHighlightText(templateKey: string, hours: string) {
     hours,
     after: afterParts.join(hoursMarker),
   };
-}
-
-function isPlainAmountDraft(value: string) {
-  return /^-?(?:\d+\.?\d*|\d*\.\d+)$/.test(value.trim());
 }
 
 export function TransactionEditorScreen({
@@ -737,9 +738,8 @@ export function TransactionEditorScreen({
     if (activeField === 'amount' && amountExpression) {
       return `${settings.currencySymbol}${amountExpression}`;
     }
-    if (isPlainAmountDraft(amount)) return `${settings.currencySymbol}${amount}`;
     const num = Number(amount);
-    if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}0`;
+    if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}${formatMoney(0)}`;
     return `${settings.currencySymbol}${formatMoney(num)}`;
   }, [activeField, amount, amountExpression, settings.currencySymbol]);
 
@@ -755,7 +755,7 @@ export function TransactionEditorScreen({
   }, [amount, isBalanceAdjustmentType, type]);
 
   const handleSubmit = () => {
-    const numericAmount = Number(amount);
+    const numericAmount = normalizeMoneyAmount(Number(amount));
     const amountDraft = amount.trim();
     const normalizedNote = note.trim();
     const fallbackDefaultNote =
@@ -1039,13 +1039,13 @@ export function TransactionEditorScreen({
       setAmount('');
     } else {
       const evaluated = evaluateExpression(expr);
-      setAmount(Number.isFinite(evaluated) ? String(evaluated) : '');
+      setAmount(Number.isFinite(evaluated) ? formatMoney(evaluated) : '');
     }
   }, []);
 
   const handleAmountConfirm = useCallback(
     (val: string) => {
-      setAmount(val);
+      setAmount(formatMoney(Number(val)));
       setAmountExpression('');
       if (hideAccountSelector) {
         activateField('category');
@@ -1159,6 +1159,7 @@ export function TransactionEditorScreen({
         return (
           <NumpadPanel
             initialExpression={amount}
+            onBackgroundPress={clearActiveField}
             onValueChange={handleAmountValueChange}
             onConfirm={handleAmountConfirm}
           />
