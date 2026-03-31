@@ -598,6 +598,7 @@ function MainShellScreen({
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
+            onOpenProPaywall={() => openProPaywall('insights_trend')}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
             onTutorialTargetLayout={handleTutorialTargetLayout}

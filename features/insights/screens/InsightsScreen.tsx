@@ -41,9 +41,12 @@ import { Card, SelectField, Text, ThemeModal, TimeValueInline } from '~/componen
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
+import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
@@ -2471,6 +2474,7 @@ interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenProPaywall?: () => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
     anchorDateKey?: string;
@@ -2489,6 +2493,7 @@ export function InsightsScreen({
   resetToCurrentMonthToken = 0,
   onOpenDrilldown,
   onOpenTransaction,
+  onOpenProPaywall,
   activityBreakdownInsightRequest = null,
   isSimpleMode = false,
   onTutorialTargetLayout,
@@ -2509,6 +2514,8 @@ export function InsightsScreen({
     simpleWalletId,
     monthlyWages,
   } = useApp();
+  const { isPro } = usePro();
+  const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 
   const allTransactions = useMemo(() => {
     if (!isSimpleMode) return rawTransactions;
@@ -2668,8 +2675,9 @@ export function InsightsScreen({
         label: String(I18n.t(`insights.short_labels.${type}`)),
         description: String(I18n.t(`insights.${type}_description`)),
         icon: renderInsightTypeIcon(type),
+        badge: !isPro && proTrendTypeSet.has(type) ? I18n.t('pro.badge') : undefined,
       })),
-    [visibleInsightTypes],
+    [visibleInsightTypes, isPro, proTrendTypeSet],
   );
   const insightTypeOptionGroups = useMemo(() => {
     const visibleInsightTypeSet = new Set(visibleInsightTypes);
@@ -6309,6 +6317,9 @@ export function InsightsScreen({
   };
 
   const renderInsightsPane = (pageData: InsightPageData) => {
+    if (!isPro && proTrendTypeSet.has(pageData.kind)) {
+      return <ProTrendPreviewOverlay onUpgrade={handleTrendUpgrade} />;
+    }
     if (pageData.kind === 'calendar') {
       return renderCalendarPane(pageData);
     }
@@ -6354,6 +6365,7 @@ export function InsightsScreen({
         activeLocale,
         settings.currencySymbol,
         settings.displayMode,
+        isPro ? 'pro' : 'free',
         isDark ? 'dark' : 'light',
         serializeRecordForSignature(expenseTrendScrubMonthByYear),
         serializeRecordForSignature(incomeTrendScrubMonthByYear),
@@ -6364,6 +6376,7 @@ export function InsightsScreen({
       activeLocale,
       assetHistoryScrubMonthByYear,
       expenseTrendScrubMonthByYear,
+      isPro,
       incomeRateDisplayUnit,
       incomeTrendScrubMonthByYear,
       isDark,
@@ -6374,6 +6387,10 @@ export function InsightsScreen({
       timeCostViewMode,
     ],
   );
+  const handleTrendUpgrade = useCallback(() => {
+    onOpenProPaywall?.();
+  }, [onOpenProPaywall]);
+
   const renderInsightsWindowPage = useCallback(
     ({ item }: { item: number }) => {
       const pageOffset = item - displayCommittedPageIndex;

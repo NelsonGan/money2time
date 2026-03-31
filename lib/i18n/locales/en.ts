@@ -1006,6 +1006,10 @@ const en = {
     recurring_description: 'Keep subscriptions and monthly commitments under control.',
     hourly_income_label: 'Hourly Income',
     hourly_income_description: 'Save past rates so your time value stays accurate over time.',
+    trends_label: 'Long-term Trends',
+    trends_description: 'Track spending, income, mood, assets, and hourly rate over time.',
+    feature_trends_free: '5 basic insights',
+    feature_trends_pro: '10 insights + trends',
     feature_unlimited_transactions: 'Unlimited transactions',
     feature_accounts: '{{count}} accounts',
     feature_unlimited_accounts: 'Unlimited accounts',
@@ -1037,6 +1041,11 @@ const en = {
       'You can have up to {{count}} recurring rules on the free plan. Upgrade to Pro for unlimited.',
     limit_wage_entries:
       'You can have up to {{count}} hourly rate entries on the free plan. Upgrade to Pro for unlimited.',
+    badge: 'PRO',
+    trend_preview_title: 'Unlock long-term trends',
+    trend_preview_message:
+      'Unlock trends to track patterns, spot shifts, and understand your money over time.',
+    trend_preview_cta: 'Upgrade to Pro',
   },
   notifications: {
     title: 'Notifications',
