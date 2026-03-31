@@ -77,6 +77,10 @@ export interface UserSettings {
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
+  centerAddButtonOpensAiChat: boolean;
+  aiChatEnabled: boolean;
+  aiChatDefaultAccountId: string | null;
+  aiChatDefaultIncomeCategoryId: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   createdAt: string;

@@ -1,5 +1,6 @@
 import {
   Bell,
+  BotMessageSquare,
   ChevronRight,
   Clock3,
   Crown,
@@ -69,6 +70,7 @@ interface SettingsScreenProps {
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
+  onOpenAIChat: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onStartTutorial: () => void;
@@ -86,6 +88,7 @@ export function SettingsScreen({
   onOpenRecurring,
   onOpenNotifications,
   onOpenDataManagement,
+  onOpenAIChat,
   onOpenProPaywall,
   onOpenProManagement,
   onStartTutorial,
@@ -386,6 +389,12 @@ export function SettingsScreen({
             showAccent={false}
           >
             <View style={styles.rowsGroup}>
+              <SettingsRowItem
+                icon={<BotMessageSquare size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.ai_chat')}
+                subtitle={I18n.t('settings.ai_chat_subtitle')}
+                onPress={onOpenAIChat}
+              />
               <View
                 ref={managementRowRef}
                 onLayout={() => {

@@ -38,6 +38,10 @@ class SettingsRepository {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
+        | 'centerAddButtonOpensAiChat'
+        | 'aiChatEnabled'
+        | 'aiChatDefaultAccountId'
+        | 'aiChatDefaultIncomeCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -108,6 +112,10 @@ class SettingsRepository {
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
+        centerAddButtonOpensAiChat: false,
+        aiChatEnabled: false,
+        aiChatDefaultAccountId: null,
+        aiChatDefaultIncomeCategoryId: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         onboardingCompleted: false,

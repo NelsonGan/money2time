@@ -30,6 +30,7 @@ interface SettingsStackProps {
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
   onOpenProPaywall: () => void;
+  onOpenAIChat: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -54,12 +55,14 @@ function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
   onOpenProPaywall,
+  onOpenAIChat,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: () => void;
+  onOpenAIChat: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
     targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
@@ -78,6 +81,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenAIChat={onOpenAIChat}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onStartTutorial={onStartTutorial}
@@ -110,6 +114,7 @@ export function SettingsStack({
   scrollToTopToken = 0,
   onOpenRecurringEditor,
   onOpenProPaywall,
+  onOpenAIChat,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -172,6 +177,7 @@ export function SettingsStack({
               {...props}
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
+              onOpenAIChat={onOpenAIChat}
               onStartTutorial={onStartTutorial}
               onTutorialTargetLayout={onTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}

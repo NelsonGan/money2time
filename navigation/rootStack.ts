@@ -5,11 +5,25 @@ import {
 } from '@react-navigation/native-stack';
 
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
-import type { WageConfig } from '~/types';
+import type { TransactionSentiment, TransactionType, WageConfig } from '~/types';
+
+export interface AddTransactionInitialValues {
+  type?: TransactionType;
+  amount?: string;
+  date?: string;
+  accountId?: string | null;
+  fromAccountId?: string | null;
+  toAccountId?: string | null;
+  categoryId?: string | null;
+  note?: string;
+  sentiment?: TransactionSentiment;
+}
 
 export type RootStackParamList = {
   Main: undefined;
-  AddTransaction: { initialAccountId?: string } | undefined;
+  AddTransaction:
+    | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
+    | undefined;
   EditTransaction: { transactionId: string };
   AccountDetail: { accountId: string };
   InsightsDrilldown: InsightsDrilldownPayload;
@@ -19,6 +33,7 @@ export type RootStackParamList = {
   SettingsHourlyValue: undefined;
   SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
   ProPaywall: { source?: string; flashMessage?: string } | undefined;
+  AIChat: undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
