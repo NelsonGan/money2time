@@ -206,9 +206,7 @@ function canAcceptPreviewTransaction(
     );
   }
 
-  if (!transaction.categoryId) return false;
-  if (!hideAccountSelector && !transaction.accountId) return false;
-  return true;
+  return Boolean(transaction.categoryId && (hideAccountSelector || transaction.accountId));
 }
 
 interface ChatMessage {
@@ -251,6 +249,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const [downloads, setDownloads] = useState<Record<string, number>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isContextBusy, setIsContextBusy] = useState(() => llamaService.isContextBusy());
   const [isActivatingAi, setIsActivatingAi] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
 
@@ -258,6 +257,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     {},
   );
   const loadRequestIdRef = useRef(0);
+  const sendInFlightRef = useRef(false);
   const rejectCleanupTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingPreview, setEditingPreview] = useState<EditingPreviewState | null>(null);
@@ -453,6 +453,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     };
   }, []);
 
+  useEffect(() => llamaService.subscribeToBusyState(setIsContextBusy), []);
+
   const handleEnableAiFeature = useCallback(async () => {
     if (isDownloadingDefaultModel || isActivatingAi) return;
 
@@ -489,6 +491,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     isActivatingAi,
     isDownloadingDefaultModel,
     loadModel,
+    refreshDownloadedModels,
     recoverFromDefaultModelFailure,
     updateSettings,
   ]);
@@ -499,10 +502,12 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     setShowSettingsModal(false);
     setMessages([]);
     setIsGenerating(false);
+    setIsContextBusy(false);
     setIsActivatingAi(false);
     setDownloads({});
     downloadsRef.current = {};
     loadRequestIdRef.current += 1;
+    sendInFlightRef.current = false;
     await llamaService.releaseModel();
     modelManager.deleteAllModels();
     refreshDownloadedModels();
@@ -511,7 +516,19 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   }, [refreshDownloadedModels, updateSettings]);
 
   const handleSend = useCallback(
-    async (text: string) => {
+    (text: string): boolean => {
+      const shouldBlockSend =
+        modelStatus !== 'ready' ||
+        isGenerating ||
+        sendInFlightRef.current ||
+        llamaService.isContextBusy();
+      if (shouldBlockSend) {
+        setIsContextBusy(llamaService.isContextBusy());
+        return false;
+      }
+
+      sendInFlightRef.current = true;
+
       const userMsg: ChatMessage = { id: newId(), role: 'user', content: text };
       setMessages((prev) => [...prev, userMsg]);
       const explicitMentions = resolveExplicitMentions(text, accounts, categories);
@@ -527,177 +544,193 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
         };
 
         setMessages((prev) => [...prev, assistantMsg]);
+        sendInFlightRef.current = false;
         setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-        return;
+        return true;
       }
 
       setIsGenerating(true);
 
-      try {
-        const today = dayKeyFromDateLocal(new Date());
-        const hasExplicitDate = hasExplicitDateReference(text);
-        const systemPrompt = buildSystemPrompt(
-          accounts,
-          categories,
-          settings.currencyCode,
-          settings.currencySymbol,
-          today,
-          !isSimpleMode,
-        );
-        const parsingInput = buildParsingInputWithExplicitMentions(text, explicitMentions);
-
-        const responseText = await llamaService.generateTransactions(parsingInput, systemPrompt);
-
-        let parsed: LLMTransactionOutput[] = [];
+      void (async () => {
         try {
-          const jsonResult = JSON.parse(responseText);
-          if (Array.isArray(jsonResult)) {
-            parsed = jsonResult;
-          } else if (jsonResult.transactions && Array.isArray(jsonResult.transactions)) {
-            parsed = jsonResult.transactions;
+          const today = dayKeyFromDateLocal(new Date());
+          const hasExplicitDate = hasExplicitDateReference(text);
+          const systemPrompt = buildSystemPrompt(
+            accounts,
+            categories,
+            settings.currencyCode,
+            settings.currencySymbol,
+            today,
+            !isSimpleMode,
+          );
+          const parsingInput = buildParsingInputWithExplicitMentions(text, explicitMentions);
+
+          const responseText = await llamaService.generateTransactions(parsingInput, systemPrompt);
+
+          let parsed: LLMTransactionOutput[] = [];
+          try {
+            const jsonResult = JSON.parse(responseText);
+            if (Array.isArray(jsonResult)) {
+              parsed = jsonResult;
+            } else if (jsonResult.transactions && Array.isArray(jsonResult.transactions)) {
+              parsed = jsonResult.transactions;
+            }
+          } catch {
+            parsed = [];
           }
-        } catch {
-          parsed = [];
+
+          parsed = alignParsedTransactionAmounts(parsed, text);
+          if (isSimpleMode) {
+            parsed = parsed.filter((transaction) => transaction.type !== 'transfer');
+          }
+
+          const explicitAccountMentions = explicitMentions.filter(
+            (mention) => mention.entityType === 'account',
+          );
+          const explicitExpenseCategoryMentions = explicitMentions.filter(
+            (mention) => mention.entityType === 'expense_category',
+          );
+          const explicitIncomeCategoryMentions = explicitMentions.filter(
+            (mention) => mention.entityType === 'income_category',
+          );
+
+          const previews: PreviewTransaction[] = parsed
+            .filter((t) => t.amount > 0 && ['expense', 'income', 'transfer'].includes(t.type))
+            .map((t) => {
+              const catType = t.type === 'transfer' ? 'expense' : t.type;
+              const explicitCategoryMentions =
+                catType === 'expense'
+                  ? explicitExpenseCategoryMentions
+                  : explicitIncomeCategoryMentions;
+              const explicitCategoryMention =
+                t.type !== 'transfer' &&
+                parsed.length === 1 &&
+                explicitCategoryMentions.length === 1
+                  ? (explicitCategoryMentions[0] ?? null)
+                  : null;
+              const explicitSharedAccountId =
+                t.type !== 'transfer' && explicitAccountMentions.length === 1
+                  ? (explicitAccountMentions[0]?.id ?? null)
+                  : null;
+              const transferMentionAccounts =
+                t.type === 'transfer' && parsed.length === 1
+                  ? explicitAccountMentions.slice(0, 2)
+                  : [];
+              const categoryId =
+                (t.type !== 'transfer' ? (explicitCategoryMention?.id ?? null) : null) ??
+                resolveCategoryByName(t.categoryName, categories, catType) ??
+                (t.type === 'income' ? (defaultAiChatIncomeCategory?.id ?? null) : null);
+              const accountId =
+                explicitSharedAccountId ??
+                resolveNameToId(
+                  t.accountName,
+                  accounts.map((a) => ({ id: a.id, name: a.name })),
+                );
+              const fromAccountId =
+                transferMentionAccounts[0]?.id ??
+                resolveNameToId(
+                  t.fromAccountName,
+                  accounts.map((a) => ({ id: a.id, name: a.name })),
+                );
+              const toAccountId =
+                transferMentionAccounts[1]?.id ??
+                resolveNameToId(
+                  t.toAccountName,
+                  accounts.map((a) => ({ id: a.id, name: a.name })),
+                );
+              const didUserSpecifyAccount = Boolean(
+                t.accountName?.trim() ||
+                  explicitSharedAccountId ||
+                  transferMentionAccounts.length > 0,
+              );
+
+              const resolvedAccountId =
+                isSimpleMode && simpleWalletId && t.type !== 'transfer'
+                  ? simpleWalletId
+                  : !didUserSpecifyAccount && t.type !== 'transfer'
+                    ? (defaultAiChatAccount?.id ?? null)
+                    : accountId;
+
+              const resolvedCategory = categoryId
+                ? categories.find((c) => c.id === categoryId)
+                : null;
+              const resolvedParentCategory =
+                resolvedCategory?.parentId != null
+                  ? categories.find((c) => c.id === resolvedCategory.parentId)
+                  : null;
+              const resolvedAccount = resolvedAccountId
+                ? accounts.find((a) => a.id === resolvedAccountId)
+                : null;
+              const resolvedFrom = fromAccountId
+                ? accounts.find((a) => a.id === fromAccountId)
+                : null;
+              const resolvedTo = toAccountId ? accounts.find((a) => a.id === toAccountId) : null;
+              const resolvedDate = normalizeTransactionDate(t.date, today);
+
+              return {
+                tempId: newId(),
+                type: t.type,
+                amount: t.amount,
+                currency: settings.currencySymbol,
+                date: resolvedDate,
+                showDate: hasExplicitDate || resolvedDate !== today,
+                categoryId,
+                categoryName: resolvedCategory?.name ?? null,
+                categoryIcon: resolvedCategory
+                  ? resolveCategoryIcon(resolvedCategory.icon, resolvedParentCategory?.icon ?? null)
+                  : null,
+                accountId: resolvedAccountId,
+                accountName: resolvedAccount?.name ?? t.accountName ?? null,
+                fromAccountId,
+                fromAccountName: resolvedFrom?.name ?? t.fromAccountName ?? null,
+                toAccountId,
+                toAccountName: resolvedTo?.name ?? t.toAccountName ?? null,
+                note: normalizeTransactionNote(t.note, text, t.amount, t.type),
+                status: 'pending' as const,
+              };
+            });
+
+          const assistantMsg: ChatMessage = {
+            id: newId(),
+            role: 'assistant',
+            content: previews.length > 0 ? '' : I18n.t('aiChat.no_transactions'),
+            transactions: previews,
+          };
+
+          setMessages((prev) => [...prev, assistantMsg]);
+        } catch (e) {
+          if (llamaService.isContextBusyError(e)) {
+            setIsContextBusy(true);
+            return;
+          }
+
+          const detail = e instanceof Error ? e.message : String(e);
+          console.warn('[AIChatScreen] generation error:', detail);
+          const errorMsg: ChatMessage = {
+            id: newId(),
+            role: 'assistant',
+            content: `${I18n.t('aiChat.error')}\n\n${detail}`,
+          };
+          setMessages((prev) => [...prev, errorMsg]);
+        } finally {
+          setIsGenerating(false);
+          sendInFlightRef.current = false;
+          setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
         }
+      })();
 
-        parsed = alignParsedTransactionAmounts(parsed, text);
-        if (isSimpleMode) {
-          parsed = parsed.filter((transaction) => transaction.type !== 'transfer');
-        }
-
-        const explicitAccountMentions = explicitMentions.filter(
-          (mention) => mention.entityType === 'account',
-        );
-        const explicitExpenseCategoryMentions = explicitMentions.filter(
-          (mention) => mention.entityType === 'expense_category',
-        );
-        const explicitIncomeCategoryMentions = explicitMentions.filter(
-          (mention) => mention.entityType === 'income_category',
-        );
-
-        const previews: PreviewTransaction[] = parsed
-          .filter((t) => t.amount > 0 && ['expense', 'income', 'transfer'].includes(t.type))
-          .map((t) => {
-            const catType = t.type === 'transfer' ? 'expense' : t.type;
-            const explicitCategoryMentions =
-              catType === 'expense'
-                ? explicitExpenseCategoryMentions
-                : explicitIncomeCategoryMentions;
-            const explicitCategoryMention =
-              t.type !== 'transfer' && parsed.length === 1 && explicitCategoryMentions.length === 1
-                ? (explicitCategoryMentions[0] ?? null)
-                : null;
-            const explicitSharedAccountId =
-              t.type !== 'transfer' && explicitAccountMentions.length === 1
-                ? (explicitAccountMentions[0]?.id ?? null)
-                : null;
-            const transferMentionAccounts =
-              t.type === 'transfer' && parsed.length === 1
-                ? explicitAccountMentions.slice(0, 2)
-                : [];
-            const categoryId =
-              (t.type !== 'transfer' ? (explicitCategoryMention?.id ?? null) : null) ??
-              resolveCategoryByName(t.categoryName, categories, catType) ??
-              (t.type === 'income' ? (defaultAiChatIncomeCategory?.id ?? null) : null);
-            const accountId =
-              explicitSharedAccountId ??
-              resolveNameToId(
-                t.accountName,
-                accounts.map((a) => ({ id: a.id, name: a.name })),
-              );
-            const fromAccountId =
-              transferMentionAccounts[0]?.id ??
-              resolveNameToId(
-                t.fromAccountName,
-                accounts.map((a) => ({ id: a.id, name: a.name })),
-              );
-            const toAccountId =
-              transferMentionAccounts[1]?.id ??
-              resolveNameToId(
-                t.toAccountName,
-                accounts.map((a) => ({ id: a.id, name: a.name })),
-              );
-            const didUserSpecifyAccount = Boolean(
-              t.accountName?.trim() ||
-              explicitSharedAccountId ||
-              transferMentionAccounts.length > 0,
-            );
-
-            const resolvedAccountId =
-              isSimpleMode && simpleWalletId && t.type !== 'transfer'
-                ? simpleWalletId
-                : !didUserSpecifyAccount && t.type !== 'transfer'
-                  ? (defaultAiChatAccount?.id ?? null)
-                  : accountId;
-
-            const resolvedCategory = categoryId
-              ? categories.find((c) => c.id === categoryId)
-              : null;
-            const resolvedParentCategory =
-              resolvedCategory?.parentId != null
-                ? categories.find((c) => c.id === resolvedCategory.parentId)
-                : null;
-            const resolvedAccount = resolvedAccountId
-              ? accounts.find((a) => a.id === resolvedAccountId)
-              : null;
-            const resolvedFrom = fromAccountId
-              ? accounts.find((a) => a.id === fromAccountId)
-              : null;
-            const resolvedTo = toAccountId ? accounts.find((a) => a.id === toAccountId) : null;
-            const resolvedDate = normalizeTransactionDate(t.date, today);
-
-            return {
-              tempId: newId(),
-              type: t.type,
-              amount: t.amount,
-              currency: settings.currencySymbol,
-              date: resolvedDate,
-              showDate: hasExplicitDate || resolvedDate !== today,
-              categoryId,
-              categoryName: resolvedCategory?.name ?? null,
-              categoryIcon: resolvedCategory
-                ? resolveCategoryIcon(resolvedCategory.icon, resolvedParentCategory?.icon ?? null)
-                : null,
-              accountId: resolvedAccountId,
-              accountName: resolvedAccount?.name ?? t.accountName ?? null,
-              fromAccountId,
-              fromAccountName: resolvedFrom?.name ?? t.fromAccountName ?? null,
-              toAccountId,
-              toAccountName: resolvedTo?.name ?? t.toAccountName ?? null,
-              note: normalizeTransactionNote(t.note, text, t.amount, t.type),
-              status: 'pending' as const,
-            };
-          });
-
-        const assistantMsg: ChatMessage = {
-          id: newId(),
-          role: 'assistant',
-          content: previews.length > 0 ? '' : I18n.t('aiChat.no_transactions'),
-          transactions: previews,
-        };
-
-        setMessages((prev) => [...prev, assistantMsg]);
-      } catch (e) {
-        const detail = e instanceof Error ? e.message : String(e);
-        console.warn('[AIChatScreen] generation error:', detail);
-        const errorMsg: ChatMessage = {
-          id: newId(),
-          role: 'assistant',
-          content: `${I18n.t('aiChat.error')}\n\n${detail}`,
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-      } finally {
-        setIsGenerating(false);
-        setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-      }
+      return true;
     },
     [
       accounts,
       categories,
       defaultAiChatAccount,
       defaultAiChatIncomeCategory,
-      settings,
+      isGenerating,
       isSimpleMode,
+      modelStatus,
+      settings.currencyCode,
+      settings.currencySymbol,
       simpleWalletId,
     ],
   );
@@ -850,6 +883,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     !isDefaultModelDownloaded ||
     isActivatingAi ||
     isDownloadingDefaultModel;
+  const isBusyScreenVisible = isModelReady && isContextBusy && !isGenerating;
+  const isChatInputDisabled = !isModelReady || isGenerating || isContextBusy;
   const gateProgressPercent =
     defaultModelDownloadProgress != null ? Math.round(defaultModelDownloadProgress * 100) : null;
   const chatInputPlaceholder = useMemo(() => {
@@ -1020,82 +1055,124 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
         </View>
       ) : (
         <>
-          <ScrollView
-            ref={scrollRef}
-            className="flex-1"
-            contentContainerStyle={styles.messagesContent}
-            keyboardDismissMode="interactive"
-          >
-            {messages.map((msg) => {
-              const hasTransactions = Boolean(msg.transactions && msg.transactions.length > 0);
+          {isBusyScreenVisible ? (
+            <View className="flex-1 px-5">
+              <View className="flex-1 items-center justify-center" style={styles.busyContent}>
+                <View className="relative w-full overflow-hidden rounded-[30px] border border-border/30 bg-card px-5 py-6 shadow-soft">
+                  <View
+                    className="absolute -right-10 -top-10 h-28 w-28 rounded-full"
+                    style={{ backgroundColor: `${themeColors.primary}12` }}
+                  />
+                  <View
+                    className="absolute -left-6 bottom-10 h-20 w-20 rounded-full"
+                    style={{ backgroundColor: `${themeColors.primary}0A` }}
+                  />
 
-              return (
-                <View
-                  key={msg.id}
-                  className={`mb-3 ${
-                    msg.role === 'user'
-                      ? 'max-w-[85%] self-end'
-                      : hasTransactions
-                        ? 'w-full self-stretch'
-                        : 'self-start'
-                  }`}
-                >
-                  {msg.content ? (
+                  <View className="items-center">
                     <View
-                      className="rounded-2xl px-3.5 py-2.5"
+                      className="h-16 w-16 items-center justify-center rounded-full border"
                       style={{
-                        backgroundColor:
-                          msg.role === 'user' ? themeColors.primary : themeColors.surface,
+                        borderColor: `${themeColors.primary}30`,
+                        backgroundColor: `${themeColors.primary}12`,
                       }}
                     >
-                      <Text
-                        variant="body"
-                        className="text-sm"
-                        style={{
-                          color: msg.role === 'user' ? '#fff' : themeColors.text,
-                        }}
-                      >
-                        {msg.content}
-                      </Text>
+                      <ActivityIndicator size="large" color={themeColors.primary} />
                     </View>
-                  ) : null}
 
-                  {hasTransactions ? (
-                    <View className={`w-full gap-2 ${msg.content ? 'mt-2' : ''}`}>
-                      {msg.transactions?.map((t) => (
-                        <TransactionPreviewCard
-                          key={t.tempId}
-                          transaction={t}
-                          acceptDisabled={!canAcceptPreviewTransaction(t, isSimpleMode)}
-                          onAccept={() => handleAcceptTransaction(msg.id, t.tempId)}
-                          onReject={() => handleRejectTransaction(msg.id, t.tempId)}
-                          onEdit={() => handleEditTransaction(msg.id, t)}
-                        />
-                      ))}
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
-
-            {isGenerating ? (
-              <View className="mb-3 self-start">
-                <View
-                  className="rounded-2xl px-4 py-3"
-                  style={{ backgroundColor: themeColors.surface }}
-                >
-                  <ActivityIndicator size="small" color={themeColors.primary} />
+                    <Text variant="heading" className="mt-5 text-center tracking-tight">
+                      {I18n.t('aiChat.busy_title')}
+                    </Text>
+                    <Text variant="body" tone="muted" className="mt-2 text-center">
+                      {I18n.t('aiChat.busy_description')}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            ) : null}
-          </ScrollView>
+            </View>
+          ) : (
+            <ScrollView
+              ref={scrollRef}
+              className="flex-1"
+              contentContainerStyle={styles.messagesContent}
+              keyboardDismissMode="interactive"
+            >
+              {messages.map((msg) => {
+                const hasTransactions = Boolean(msg.transactions && msg.transactions.length > 0);
+
+                return (
+                  <View
+                    key={msg.id}
+                    className={`mb-3 ${
+                      msg.role === 'user'
+                        ? 'max-w-[85%] self-end'
+                        : hasTransactions
+                          ? 'w-full self-stretch'
+                          : 'self-start'
+                    }`}
+                  >
+                    {msg.content ? (
+                      <View
+                        className="rounded-2xl px-3.5 py-2.5"
+                        style={{
+                          backgroundColor:
+                            msg.role === 'user' ? themeColors.primary : themeColors.surface,
+                        }}
+                      >
+                        <Text
+                          variant="body"
+                          className="text-sm"
+                          style={{
+                            color: msg.role === 'user' ? '#fff' : themeColors.text,
+                          }}
+                        >
+                          {msg.content}
+                        </Text>
+                      </View>
+                    ) : null}
+
+                    {hasTransactions ? (
+                      <View className={`w-full gap-2 ${msg.content ? 'mt-2' : ''}`}>
+                        {msg.transactions?.map((t) => (
+                          <TransactionPreviewCard
+                            key={t.tempId}
+                            transaction={t}
+                            acceptDisabled={!canAcceptPreviewTransaction(t, isSimpleMode)}
+                            onAccept={() => handleAcceptTransaction(msg.id, t.tempId)}
+                            onReject={() => handleRejectTransaction(msg.id, t.tempId)}
+                            onEdit={() => handleEditTransaction(msg.id, t)}
+                          />
+                        ))}
+                      </View>
+                    ) : null}
+                  </View>
+                );
+              })}
+
+              {isGenerating ? (
+                <View className="mb-3 self-start">
+                  <View
+                    className="rounded-2xl px-4 py-3"
+                    style={{ backgroundColor: themeColors.surface }}
+                  >
+                    <ActivityIndicator size="small" color={themeColors.primary} />
+                  </View>
+                </View>
+              ) : null}
+            </ScrollView>
+          )}
 
           <ChatInput
-            autoFocus={isModelReady}
-            inputDisabled={!isModelReady || isGenerating}
-            sendDisabled={!isModelReady || isGenerating}
+            autoFocus={isModelReady && !isContextBusy}
+            inputDisabled={isChatInputDisabled}
+            sendDisabled={isChatInputDisabled}
             onSend={handleSend}
-            placeholder={!isModelReady ? I18n.t('aiChat.model_loading') : chatInputPlaceholder}
+            placeholder={
+              !isModelReady
+                ? I18n.t('aiChat.model_loading')
+                : isContextBusy
+                  ? I18n.t('aiChat.busy_placeholder')
+                  : chatInputPlaceholder
+            }
             mentionOptions={mentionOptions}
           />
         </>
@@ -1245,6 +1322,9 @@ const styles = StyleSheet.create({
   },
   gateContent: {
     paddingTop: 32,
+  },
+  busyContent: {
+    paddingBottom: 24,
   },
   headerWrap: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
