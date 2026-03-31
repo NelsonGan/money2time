@@ -3,6 +3,7 @@ import React from 'react';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useApp } from '~/context/AppContext';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import type { TransactionType } from '~/types';
 
 interface AddTransactionScreenProps {
@@ -11,6 +12,7 @@ interface AddTransactionScreenProps {
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
   initialAccountId?: string;
+  initialValues?: AddTransactionInitialValues;
 }
 
 export function AddTransactionScreen({
@@ -19,6 +21,7 @@ export function AddTransactionScreen({
   isSimpleMode,
   simpleWalletId,
   initialAccountId,
+  initialValues,
 }: AddTransactionScreenProps) {
   const { createTransaction } = useApp();
   const resolvedInitialAccountId =
@@ -36,6 +39,7 @@ export function AddTransactionScreen({
       restrictTypeOptions={restrictedTypes}
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}
+      initialValues={initialValues}
     />
   );
 }

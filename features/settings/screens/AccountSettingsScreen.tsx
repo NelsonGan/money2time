@@ -1,4 +1,4 @@
-import { Smartphone, Zap } from 'lucide-react-native';
+import { BotMessageSquare, Smartphone, Zap } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -71,6 +71,13 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       updateSettings({ hapticsEnabled: value });
     },
     [settings.hapticsEnabled, updateSettings],
+  );
+  const handleCenterAddButtonToggle = useCallback(
+    (value: boolean) => {
+      if (value === settings.centerAddButtonOpensAiChat) return;
+      updateSettings({ centerAddButtonOpensAiChat: value });
+    },
+    [settings.centerAddButtonOpensAiChat, updateSettings],
   );
 
   const modeStatusLabel = isSimpleMode
@@ -167,6 +174,38 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
                 style={styles.switchSmall}
                 value={settings.hapticsEnabled}
                 onValueChange={handleHapticsToggle}
+                trackColor={{
+                  false: `${themeColors.border}80`,
+                  true: themeColors.primary,
+                }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          <View
+            className="rounded-2xl border border-border/30 bg-card shadow-soft"
+            style={styles.card}
+          >
+            <View style={styles.row}>
+              <View
+                className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
+                style={styles.iconBox}
+              >
+                <BotMessageSquare size={18} color={themeColors.primary} />
+              </View>
+              <View style={styles.titleBlock}>
+                <Text variant="bodyStrong" className="text-foreground" numberOfLines={2}>
+                  {I18n.t('settings.center_add_button_ai_chat')}
+                </Text>
+                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
+                  {I18n.t('settings.center_add_button_ai_chat_subtitle')}
+                </Text>
+              </View>
+              <Switch
+                style={styles.switchSmall}
+                value={settings.centerAddButtonOpensAiChat}
+                onValueChange={handleCenterAddButtonToggle}
                 trackColor={{
                   false: `${themeColors.border}80`,
                   true: themeColors.primary,
