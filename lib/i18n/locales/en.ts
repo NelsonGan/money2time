@@ -1145,6 +1145,10 @@ const en = {
     no_model_status: 'No model downloaded',
     no_model: 'Open chat settings to download a model before chatting',
     model_loading: 'Loading AI model...',
+    busy_title: 'AI is getting ready',
+    busy_description:
+      'AI Chat is finishing another task. Please wait a moment before sending your message.',
+    busy_placeholder: 'AI Chat is busy. Please wait...',
     placeholder: 'eg: 20 for lunch',
     placeholder_expense_with_account: 'eg: 20 for lunch from {{account}}',
     placeholder_transfer_with_accounts: 'eg: transfer 20 from {{fromAccount}} to {{toAccount}}',
