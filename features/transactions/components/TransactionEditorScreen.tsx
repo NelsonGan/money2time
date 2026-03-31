@@ -128,10 +128,17 @@ const styles = StyleSheet.create({
   summaryDismissColumn: {
     flex: 1,
     flexGrow: 1,
+    position: 'relative',
   },
   summaryDismissFiller: {
     flex: 1,
     minHeight: 1,
+  },
+  noteSuggestionsDropdown: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 30,
   },
 });
 
@@ -428,6 +435,7 @@ export function TransactionEditorScreen({
   const noteBlurFrameRef = useRef<number | null>(null);
   const noteSuggestionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [noteSuggestions, setNoteSuggestions] = useState<string[]>([]);
+  const [noteFieldFrame, setNoteFieldFrame] = useState<{ y: number; height: number } | null>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
   const recurrenceIntervalRef = useRef<TextInput>(null);
   const hasSavedTypeSelectionRef = useRef<Record<TransactionType, boolean>>({
@@ -917,6 +925,7 @@ export function TransactionEditorScreen({
   const showToolZone =
     activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
   const noteSuggestionsVisible = noteSuggestions.length > 0 && activeField === 'note';
+  const noteSuggestionsTop = noteFieldFrame ? noteFieldFrame.y + noteFieldFrame.height : null;
   const effectiveSummaryFlex =
     showToolZone && activeField === 'amount' ? Math.min(0.54, summaryFlex + 0.05) : summaryFlex;
   const recurringToolZonePadding =
@@ -1142,6 +1151,13 @@ export function TransactionEditorScreen({
     },
     [],
   );
+
+  const handleNoteFieldLayout = useCallback((event: LayoutChangeEvent) => {
+    const { y, height } = event.nativeEvent.layout;
+    setNoteFieldFrame((previous) =>
+      previous && previous.y === y && previous.height === height ? previous : { y, height },
+    );
+  }, []);
 
   const handleCategorySelect = (nextCategoryId: string) => {
     setCategoryId(nextCategoryId);
@@ -1432,13 +1448,6 @@ export function TransactionEditorScreen({
                       className="bg-card/60 border border-border/25 overflow-hidden"
                       style={{
                         borderRadius: 20,
-                        ...(noteSuggestionsVisible
-                          ? {
-                              borderBottomLeftRadius: 0,
-                              borderBottomRightRadius: 0,
-                              borderBottomWidth: 0,
-                            }
-                          : {}),
                       }}
                     >
                       {!isBalanceAdjustmentType ? (
@@ -1688,40 +1697,42 @@ export function TransactionEditorScreen({
                           <View className="h-[1px] bg-border/15 mx-4" />
 
                           {/* Note row */}
-                          <SummaryRow
-                            label={I18n.t('transaction_detail.note')}
-                            isActive={activeField === 'note'}
-                            onPress={focusNoteField}
-                            rightElement={<View style={styles.trailingSpacer} />}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <FileText size={13} color={themeColors.textMuted} />
+                          <View onLayout={handleNoteFieldLayout}>
+                            <SummaryRow
+                              label={I18n.t('transaction_detail.note')}
+                              isActive={activeField === 'note'}
+                              onPress={focusNoteField}
+                              rightElement={<View style={styles.trailingSpacer} />}
+                            >
+                              <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-2">
+                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                    <FileText size={13} color={themeColors.textMuted} />
+                                  </View>
+                                  <Text variant="caption" tone="muted">
+                                    {I18n.t('transaction_detail.note')}
+                                  </Text>
                                 </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transaction_detail.note')}
-                                </Text>
+                                <View className="max-w-[66%] min-w-[40%]">
+                                  <TextInput
+                                    ref={noteInputRef}
+                                    value={note}
+                                    onChangeText={handleNoteChange}
+                                    placeholder={I18n.t('transactions.editor.optional')}
+                                    placeholderTextColor={`${themeColors.mutedForeground}99`}
+                                    returnKeyType="done"
+                                    onFocus={handleNoteFocus}
+                                    onBlur={handleNoteBlur}
+                                    style={[
+                                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                                      styles.inlineSummaryInput,
+                                      { color: themeColors.text },
+                                    ]}
+                                  />
+                                </View>
                               </View>
-                              <View className="max-w-[66%] min-w-[40%]">
-                                <TextInput
-                                  ref={noteInputRef}
-                                  value={note}
-                                  onChangeText={handleNoteChange}
-                                  placeholder={I18n.t('transactions.editor.optional')}
-                                  placeholderTextColor={`${themeColors.mutedForeground}99`}
-                                  returnKeyType="done"
-                                  onFocus={handleNoteFocus}
-                                  onBlur={handleNoteBlur}
-                                  style={[
-                                    SINGLE_LINE_TEXT_INPUT_STYLE,
-                                    styles.inlineSummaryInput,
-                                    { color: themeColors.text },
-                                  ]}
-                                />
-                              </View>
-                            </View>
-                          </SummaryRow>
+                            </SummaryRow>
+                          </View>
 
                           {/* Sentiment picker */}
                           {type === 'expense' ? (
@@ -1751,31 +1762,33 @@ export function TransactionEditorScreen({
                     </View>
 
                     {/* Note suggestions dropdown */}
-                    {noteSuggestionsVisible ? (
+                    {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
                       <Animated.View
                         entering={FadeIn.duration(120)}
                         exiting={FadeOut.duration(120)}
-                        style={{
-                          zIndex: 20,
-                          borderTopWidth: 0,
-                          borderLeftWidth: 1,
-                          borderRightWidth: 1,
-                          borderBottomWidth: 1,
-                          borderColor: `${themeColors.border}25`,
-                          borderBottomLeftRadius: 20,
-                          borderBottomRightRadius: 20,
-                          backgroundColor: themeColors.card,
-                          overflow: 'hidden',
-                          shadowColor: '#000',
-                          shadowOffset: { width: 0, height: 6 },
-                          shadowOpacity: 0.08,
-                          shadowRadius: 12,
-                          elevation: 6,
-                        }}
+                        style={[
+                          styles.noteSuggestionsDropdown,
+                          {
+                            top: noteSuggestionsTop,
+                            borderWidth: 1,
+                            borderColor: `${themeColors.border}25`,
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                            borderBottomLeftRadius: 18,
+                            borderBottomRightRadius: 18,
+                            backgroundColor: themeColors.card,
+                            overflow: 'hidden',
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 6 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 12,
+                            elevation: 6,
+                          },
+                        ]}
                       >
-                        {noteSuggestions.map((suggestion) => (
+                        {noteSuggestions.map((suggestion, index) => (
                           <React.Fragment key={suggestion}>
-                            <View className="h-[1px] bg-border/15 mx-4" />
+                            {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
                             <Pressable
                               style={{ paddingHorizontal: 16, paddingVertical: 11 }}
                               onPress={() => {
