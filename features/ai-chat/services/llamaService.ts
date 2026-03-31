@@ -20,6 +20,7 @@ const WARMUP_USER_PROMPT = '30 for breakfast';
 
 export type LlamaServiceStatus = 'idle' | 'loading' | 'ready' | 'error';
 type BusyStateListener = (isBusy: boolean) => void;
+type StatusListener = () => void;
 
 let status: LlamaServiceStatus = 'idle';
 let statusError: string | null = null;
@@ -27,6 +28,7 @@ let hasCompletedSinceLoad = false;
 let hasPrimedTransactionParserSinceLoad = false;
 let activeCompletionCount = 0;
 const busyStateListeners = new Set<BusyStateListener>();
+const statusListeners = new Set<StatusListener>();
 
 class CompletionTimeoutError extends Error {
   constructor() {
@@ -44,6 +46,17 @@ class ContextBusyError extends Error {
 
 export function getStatus(): { status: LlamaServiceStatus; error: string | null } {
   return { status, error: statusError };
+}
+
+export function subscribeToStatus(listener: StatusListener): () => void {
+  statusListeners.add(listener);
+  return () => {
+    statusListeners.delete(listener);
+  };
+}
+
+function emitStatusChange(): void {
+  statusListeners.forEach((listener) => listener());
 }
 
 export function isContextBusy(): boolean {
@@ -79,6 +92,7 @@ export async function loadModel(modelPath: string): Promise<void> {
   status = 'loading';
   statusError = null;
   loadPromiseModelPath = modelPath;
+  emitStatusChange();
 
   let pendingLoad: Promise<void> | null = null;
   pendingLoad = (async () => {
@@ -105,9 +119,11 @@ export async function loadModel(modelPath: string): Promise<void> {
       primePromise = null;
       await warmModel();
       status = 'ready';
+      emitStatusChange();
     } catch (e) {
       status = 'error';
       statusError = e instanceof Error ? e.message : 'Failed to load model';
+      emitStatusChange();
       throw e;
     } finally {
       if (loadPromise === pendingLoad) {
@@ -140,6 +156,7 @@ export async function releaseModel(): Promise<void> {
   statusError = null;
   hasCompletedSinceLoad = false;
   hasPrimedTransactionParserSinceLoad = false;
+  emitStatusChange();
 }
 
 function buildChatMLPrompt(systemPrompt: string, userMessage: string): string {
@@ -157,9 +174,7 @@ export async function generateTransactions(
   if (!context) throw new Error('Model not loaded');
 
   const prompt = buildChatMLPrompt(systemPrompt, userMessage);
-  const timeoutMs = hasCompletedSinceLoad
-    ? COMPLETION_TIMEOUT_MS
-    : INITIAL_COMPLETION_TIMEOUT_MS;
+  const timeoutMs = hasCompletedSinceLoad ? COMPLETION_TIMEOUT_MS : INITIAL_COMPLETION_TIMEOUT_MS;
 
   const result = await completeTransactionPrompt(prompt, timeoutMs);
   hasCompletedSinceLoad = true;

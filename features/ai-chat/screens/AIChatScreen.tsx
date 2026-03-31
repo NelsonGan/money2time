@@ -1,6 +1,15 @@
 import { Download, Settings, Shield, Trash2 } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import {
   Button,
@@ -39,7 +48,9 @@ import {
   resolveCategoryByName,
   resolveNameToId,
 } from '../constants/prompts';
+import * as aiActivationService from '../services/aiActivationService';
 import * as llamaService from '../services/llamaService';
+import * as modelDownloadService from '../services/modelDownloadService';
 import * as modelManager from '../services/modelManager';
 
 const NO_DEFAULT_ACCOUNT_OPTION_VALUE = '__none__';
@@ -237,25 +248,27 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   } = useApp();
   const themeColors = useThemeColors();
   const scrollRef = useRef<ScrollView>(null);
+  const modelStatus = useSyncExternalStore(
+    llamaService.subscribeToStatus,
+    () => llamaService.getStatus().status,
+  );
+  const defaultModelDownloadProgress = useSyncExternalStore(
+    modelDownloadService.subscribeToDownloadState,
+    () => modelDownloadService.getModelDownloadProgress(AI_CHAT_DEFAULT_MODEL.id),
+  );
+  const activationError = useSyncExternalStore(
+    aiActivationService.subscribeToActivationState,
+    aiActivationService.getActivationError,
+  );
 
   const [downloadedModels, setDownloadedModels] = useState<string[]>(() =>
     modelManager.getDownloadedModelFileNames(),
   );
-  const [modelStatus, setModelStatus] = useState<llamaService.LlamaServiceStatus>(() => {
-    if (!settings.aiChatEnabled) return 'idle';
-    const files = modelManager.getDownloadedModelFileNames();
-    return files.includes(AI_CHAT_DEFAULT_MODEL.fileName) ? 'loading' : 'idle';
-  });
-  const [downloads, setDownloads] = useState<Record<string, number>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isContextBusy, setIsContextBusy] = useState(() => llamaService.isContextBusy());
   const [isActivatingAi, setIsActivatingAi] = useState(false);
-  const [activationError, setActivationError] = useState<string | null>(null);
 
-  const downloadsRef = useRef<Record<string, ReturnType<typeof modelManager.createModelDownload>>>(
-    {},
-  );
   const loadRequestIdRef = useRef(0);
   const sendInFlightRef = useRef(false);
   const rejectCleanupTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -275,7 +288,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     [categories, settings.aiChatDefaultIncomeCategoryId],
   );
   const isDefaultModelDownloaded = downloadedModels.includes(AI_CHAT_DEFAULT_MODEL.fileName);
-  const defaultModelDownloadProgress = downloads[AI_CHAT_DEFAULT_MODEL.id] ?? null;
   const isDownloadingDefaultModel = defaultModelDownloadProgress !== null;
   const simpleWallet = useMemo(
     () => accounts.find((account) => account.id === simpleWalletId) ?? null,
@@ -356,19 +368,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     setEditingPreview(null);
   }, []);
 
-  const clearDefaultModelDownloadState = useCallback(() => {
-    delete downloadsRef.current[AI_CHAT_DEFAULT_MODEL.id];
-    setDownloads((prev) => {
-      if (!(AI_CHAT_DEFAULT_MODEL.id in prev)) return prev;
-      const next = { ...prev };
-      delete next[AI_CHAT_DEFAULT_MODEL.id];
-      return next;
-    });
-  }, []);
-
   const recoverFromDefaultModelFailure = useCallback(
     async (message: string) => {
-      clearDefaultModelDownloadState();
       loadRequestIdRef.current += 1;
 
       try {
@@ -382,19 +383,16 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       }
 
       refreshDownloadedModels();
-      setModelStatus('idle');
-      setActivationError(message);
+      aiActivationService.setActivationError(message);
     },
-    [clearDefaultModelDownloadState, refreshDownloadedModels],
+    [refreshDownloadedModels],
   );
 
   const loadModel = useCallback(async () => {
     const requestId = ++loadRequestIdRef.current;
-    setModelStatus('loading');
     try {
       await llamaService.loadModel(modelManager.getModelPath(AI_CHAT_DEFAULT_MODEL.fileName));
       if (loadRequestIdRef.current !== requestId) return;
-      setModelStatus('ready');
 
       const today = dayKeyFromDateLocal(new Date());
       const systemPrompt = buildSystemPrompt(
@@ -408,7 +406,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       void llamaService.primeTransactionParser(systemPrompt).catch(() => {});
     } catch {
       if (loadRequestIdRef.current !== requestId) return;
-      setModelStatus('error');
       throw new Error(I18n.t('aiChat.prepare_failed'));
     }
   }, [accounts, categories, settings.currencyCode, settings.currencySymbol, isSimpleMode]);
@@ -424,12 +421,11 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       const hasDefaultModel = files.includes(AI_CHAT_DEFAULT_MODEL.fileName);
 
       if (!settings.aiChatEnabled || !hasDefaultModel) {
-        setModelStatus('idle');
         return;
       }
 
       try {
-        setActivationError(null);
+        aiActivationService.setActivationError(null);
         await loadModel();
       } catch (error) {
         if (!isMounted) return;
@@ -456,30 +452,17 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   useEffect(() => llamaService.subscribeToBusyState(setIsContextBusy), []);
 
   const handleEnableAiFeature = useCallback(async () => {
-    if (isDownloadingDefaultModel || isActivatingAi) return;
+    if (isDownloadingDefaultModel || isActivatingAi || modelStatus === 'loading') return;
 
-    setActivationError(null);
+    aiActivationService.setActivationError(null);
     setIsActivatingAi(true);
 
     try {
-      if (!modelManager.isModelDownloaded(AI_CHAT_DEFAULT_MODEL.fileName)) {
-        setDownloads((prev) => ({ ...prev, [AI_CHAT_DEFAULT_MODEL.id]: 0 }));
-        const dl = modelManager.createModelDownload(AI_CHAT_DEFAULT_MODEL, (progress) => {
-          setDownloads((prev) => ({ ...prev, [AI_CHAT_DEFAULT_MODEL.id]: progress }));
-        });
-        downloadsRef.current[AI_CHAT_DEFAULT_MODEL.id] = dl;
-
-        await dl.downloadAsync();
-        delete downloadsRef.current[AI_CHAT_DEFAULT_MODEL.id];
-        setDownloads((prev) => {
-          const next = { ...prev };
-          delete next[AI_CHAT_DEFAULT_MODEL.id];
-          return next;
-        });
-        refreshDownloadedModels();
-      }
+      await modelDownloadService.ensureModelDownloaded(AI_CHAT_DEFAULT_MODEL);
+      refreshDownloadedModels();
 
       await loadModel();
+      aiActivationService.setActivationError(null);
       updateSettings({ aiChatEnabled: true });
     } catch (error) {
       const detail = error instanceof Error ? error.message : I18n.t('aiChat.error');
@@ -491,6 +474,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     isActivatingAi,
     isDownloadingDefaultModel,
     loadModel,
+    modelStatus,
     refreshDownloadedModels,
     recoverFromDefaultModelFailure,
     updateSettings,
@@ -498,20 +482,17 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 
   const handleDisableAiFeature = useCallback(async () => {
     void triggerHaptic('warning');
-    setActivationError(null);
+    aiActivationService.setActivationError(null);
     setShowSettingsModal(false);
     setMessages([]);
     setIsGenerating(false);
     setIsContextBusy(false);
     setIsActivatingAi(false);
-    setDownloads({});
-    downloadsRef.current = {};
     loadRequestIdRef.current += 1;
     sendInFlightRef.current = false;
     await llamaService.releaseModel();
     modelManager.deleteAllModels();
     refreshDownloadedModels();
-    setModelStatus('idle');
     updateSettings({ aiChatEnabled: false });
   }, [refreshDownloadedModels, updateSettings]);
 
@@ -640,8 +621,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                 );
               const didUserSpecifyAccount = Boolean(
                 t.accountName?.trim() ||
-                  explicitSharedAccountId ||
-                  transferMentionAccounts.length > 0,
+                explicitSharedAccountId ||
+                transferMentionAccounts.length > 0,
               );
 
               const resolvedAccountId =
@@ -1054,7 +1035,10 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
           </View>
         </View>
       ) : (
-        <>
+        <KeyboardAvoidingView
+          style={styles.chatContent}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           {isBusyScreenVisible ? (
             <View className="flex-1 px-5">
               <View className="flex-1 items-center justify-center" style={styles.busyContent}>
@@ -1175,7 +1159,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
             }
             mentionOptions={mentionOptions}
           />
-        </>
+        </KeyboardAvoidingView>
       )}
 
       <Modal
@@ -1316,6 +1300,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  chatContent: {
+    flex: 1,
+  },
   messagesContent: {
     padding: 16,
     flexGrow: 1,
