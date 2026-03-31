@@ -35,6 +35,11 @@ import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
+import { AI_CHAT_DEFAULT_MODEL } from '~/features/ai-chat/constants/models';
+import { buildSystemPrompt } from '~/features/ai-chat/constants/prompts';
+import * as aiChatLlamaService from '~/features/ai-chat/services/llamaService';
+import * as aiChatModelManager from '~/features/ai-chat/services/modelManager';
+import { AIChatScreen } from '~/features/ai-chat/screens/AIChatScreen';
 import { HomeScreen } from '~/features/home/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -239,6 +244,52 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AIChatStartupPreloader() {
+  const { accounts, categories, isLoading, isSimpleMode, settings } = useApp();
+
+  useEffect(() => {
+    if (isLoading || !settings.onboardingCompleted || !settings.aiChatEnabled) return;
+    if (!aiChatModelManager.isModelDownloaded(AI_CHAT_DEFAULT_MODEL.fileName)) return;
+
+    const preloadModel = async () => {
+      try {
+        await aiChatLlamaService.loadModel(
+          aiChatModelManager.getModelPath(AI_CHAT_DEFAULT_MODEL.fileName),
+        );
+
+        const today = dayKeyFromDateLocal(new Date());
+        await aiChatLlamaService.primeTransactionParser(
+          buildSystemPrompt(
+            accounts,
+            categories,
+            settings.currencyCode,
+            settings.currencySymbol,
+            today,
+            !isSimpleMode,
+          ),
+          '30 for breakfast',
+        );
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        console.warn('[App] AI chat startup preload failed:', detail);
+      }
+    };
+
+    void preloadModel();
+  }, [
+    accounts,
+    categories,
+    isLoading,
+    isSimpleMode,
+    settings.aiChatEnabled,
+    settings.currencyCode,
+    settings.currencySymbol,
+    settings.onboardingCompleted,
+  ]);
+
+  return null;
+}
+
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
   onVisibleScreenChange?: (screen: string) => void;
@@ -250,7 +301,7 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode } = useApp();
+  const { isSimpleMode, settings } = useApp();
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -394,7 +445,19 @@ function MainShellScreen({
     [navigation],
   );
 
-  const shouldHideBottomNav = activeTab === 'transactions' && isTransactionsSelectionMode;
+  const openAIChat = useCallback(() => {
+    navigation.navigate('AIChat');
+  }, [navigation]);
+  const openBottomNavPrimaryAction = useCallback(() => {
+    if (settings.centerAddButtonOpensAiChat) {
+      openAIChat();
+      return;
+    }
+    openAddTransaction();
+  }, [openAIChat, openAddTransaction, settings.centerAddButtonOpensAiChat]);
+
+  const shouldHideBottomNav =
+    activeTab === 'transactions' && isTransactionsSelectionMode;
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
@@ -611,6 +674,7 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
+            onOpenAIChat={openAIChat}
             onScreenChange={setSettingsCurrentScreen}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
@@ -624,7 +688,12 @@ function MainShellScreen({
           <BottomNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            onPressAdd={openAddTransaction}
+            onPressAdd={openBottomNavPrimaryAction}
+            addButtonAccessibilityLabel={
+              settings.centerAddButtonOpensAiChat
+                ? I18n.t('settings.ai_chat')
+                : I18n.t('onboarding.checklist.add_transaction')
+            }
             onTutorialTargetLayout={handleTutorialTargetLayout}
             onTutorialTabLayout={handleTutorialTabLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -663,6 +732,7 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
+      initialValues={route.params?.initialValues}
     />
   );
 }
@@ -717,6 +787,10 @@ function ProPaywallRouteScreen({ route, navigation }: RootStackRouteProps<'ProPa
       flashMessage={route.params?.flashMessage}
     />
   );
+}
+
+function AIChatRouteScreen({ navigation }: RootStackRouteProps<'AIChat'>) {
+  return <AIChatScreen onBack={() => navigation.goBack()} />;
 }
 
 function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
@@ -1000,6 +1074,7 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+      <AIChatStartupPreloader />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}
@@ -1032,6 +1107,7 @@ function AppContent() {
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
           <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />
+          <RootStack.Screen name="AIChat" component={AIChatRouteScreen} />
         </RootStack.Navigator>
       </NavigationContainer>
 
