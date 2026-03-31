@@ -20,6 +20,7 @@ interface BottomNavProps {
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
   onPressAdd?: () => void;
+  addButtonAccessibilityLabel?: string;
   onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -129,6 +130,7 @@ export function BottomNav({
   onTabChange,
   hideTabs,
   onPressAdd,
+  addButtonAccessibilityLabel,
   onTutorialTargetLayout,
   onTutorialTabLayout,
   tutorialSpotlightRequest,
@@ -255,7 +257,9 @@ export function BottomNav({
                     onPressOut={fabPressOut}
                     onLayout={handleAddButtonLayout}
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
+                    accessibilityLabel={
+                      addButtonAccessibilityLabel ?? I18n.t('onboarding.checklist.add_transaction')
+                    }
                     className="items-center justify-center rounded-full shadow-glow-lg"
                     style={{
                       width: ADD_BUTTON_SIZE,

@@ -136,6 +136,10 @@ interface AppContextValue extends AppState {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
+        | 'centerAddButtonOpensAiChat'
+        | 'aiChatEnabled'
+        | 'aiChatDefaultAccountId'
+        | 'aiChatDefaultIncomeCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -710,6 +714,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         accountsRepository.softDelete(id);
+        const currentSettings = settingsRepository.get();
+        if (currentSettings.aiChatDefaultAccountId === id) {
+          settingsRepository.updateSettings({ aiChatDefaultAccountId: null });
+        }
       });
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
@@ -811,6 +819,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ) => {
       runMutation(() => {
         categoriesRepository.update(id, updates);
+        if (updates.type === 'expense') {
+          const currentSettings = settingsRepository.get();
+          if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
+            settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
+          }
+        }
       });
     },
     [runMutation],
@@ -820,6 +834,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         categoriesRepository.softDelete(id);
+        const currentSettings = settingsRepository.get();
+        if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
+          settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
+        }
       });
       void trackEvent(AnalyticsEvents.CATEGORY_DELETED);
     },
@@ -1102,6 +1120,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'hapticsEnabled'
           | 'themeMode'
           | 'themeColor'
+          | 'centerAddButtonOpensAiChat'
+          | 'aiChatEnabled'
+          | 'aiChatDefaultAccountId'
+          | 'aiChatDefaultIncomeCategoryId'
           | 'onboardingCompleted'
           | 'userMode'
         >
@@ -1574,6 +1596,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       transactionsRepository.softDeleteByAccountId(walletId);
       accountsRepository.softDelete(walletId);
+      const currentSettings = settingsRepository.get();
+      if (currentSettings.aiChatDefaultAccountId === walletId) {
+        settingsRepository.updateSettings({ aiChatDefaultAccountId: null });
+      }
     });
   }, [runMutation]);
 
