@@ -27,6 +27,7 @@ interface SelectOption {
   label: string;
   description?: string;
   icon?: React.ReactNode | string;
+  badge?: string;
 }
 
 interface SelectOptionGroup {
@@ -266,6 +267,23 @@ export function SelectField({
             {isSelected ? (
               <View className="absolute right-2 top-2 h-5 w-5 items-center justify-center rounded-full bg-primary">
                 <Check size={12} color="#FFFFFF" />
+              </View>
+            ) : option.badge ? (
+              <View
+                className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5"
+                style={{ backgroundColor: themeColors.primary }}
+              >
+                <Text
+                  style={{
+                    fontSize: 8,
+                    lineHeight: 10,
+                    fontWeight: '700',
+                    color: '#FFFFFF',
+                    letterSpacing: 0.4,
+                  }}
+                >
+                  {option.badge}
+                </Text>
               </View>
             ) : null}
             <View className="flex-1 items-center justify-center gap-2 px-1">

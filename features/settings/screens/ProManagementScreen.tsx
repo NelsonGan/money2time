@@ -12,6 +12,7 @@ import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { FONT } from '~/utils/fonts';
 
 interface ProManagementScreenProps {
   onBack: () => void;
@@ -66,7 +67,11 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
         </View>
         <View style={styles.centeredContainer}>
           <Crown size={40} color={themeColors.textMuted} />
-          <Text variant="subheading" className="mt-4 text-center">
+          <Text
+            variant="subheading"
+            className="mt-4 text-center"
+            style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+          >
             {I18n.t('pro.upgrade')}
           </Text>
           <Text variant="friendly" tone="muted" className="mt-1 text-center text-sm">
@@ -77,7 +82,10 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
             className="mt-6 rounded-xl px-6 py-3"
             style={{ backgroundColor: themeColors.primary }}
           >
-            <Text className="font-bold" style={{ color: '#fff' }}>
+            <Text
+              className="font-bold"
+              style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+            >
               {I18n.t('pro.upgrade')}
             </Text>
           </Pressable>

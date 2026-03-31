@@ -425,6 +425,7 @@ export function TransactionEditorScreen({
   const editorScrollRef = useRef<ScrollView>(null);
   const fieldOffsetsRef = useRef<Partial<Record<NonNullActiveField, number>>>({});
   const noteInputRef = useRef<TextInput>(null);
+  const noteBlurFrameRef = useRef<number | null>(null);
   const noteSuggestionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [noteSuggestions, setNoteSuggestions] = useState<string[]>([]);
   const recurrenceNameRef = useRef<TextInput>(null);
@@ -995,6 +996,25 @@ export function TransactionEditorScreen({
     requestAnimationFrame(() => noteInputRef.current?.focus());
   }, [activateField]);
 
+  const handleNoteFocus = useCallback(() => {
+    if (noteBlurFrameRef.current !== null) {
+      cancelAnimationFrame(noteBlurFrameRef.current);
+      noteBlurFrameRef.current = null;
+    }
+    setActiveField('note');
+  }, []);
+
+  const handleNoteBlur = useCallback(() => {
+    if (noteBlurFrameRef.current !== null) {
+      cancelAnimationFrame(noteBlurFrameRef.current);
+    }
+    noteBlurFrameRef.current = requestAnimationFrame(() => {
+      noteBlurFrameRef.current = null;
+      if (noteInputRef.current?.isFocused()) return;
+      setActiveField((prev) => (prev === 'note' ? null : prev));
+    });
+  }, []);
+
   const focusRecurrenceIntervalField = useCallback(() => {
     activateField('interval');
     requestAnimationFrame(() => recurrenceIntervalRef.current?.focus());
@@ -1114,6 +1134,14 @@ export function TransactionEditorScreen({
       setNoteSuggestions(getDistinctNotesSuggestions(nextNote.trim()));
     }, 150);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
+      if (noteBlurFrameRef.current !== null) cancelAnimationFrame(noteBlurFrameRef.current);
+    },
+    [],
+  );
 
   const handleCategorySelect = (nextCategoryId: string) => {
     setCategoryId(nextCategoryId);
@@ -1660,44 +1688,40 @@ export function TransactionEditorScreen({
                           <View className="h-[1px] bg-border/15 mx-4" />
 
                           {/* Note row */}
-                          <View>
-                            <SummaryRow
-                              label={I18n.t('transaction_detail.note')}
-                              isActive={activeField === 'note'}
-                              onPress={focusNoteField}
-                              rightElement={<View style={styles.trailingSpacer} />}
-                            >
-                              <View className="flex-row items-center justify-between">
-                                <View className="flex-row items-center gap-2">
-                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                    <FileText size={13} color={themeColors.textMuted} />
-                                  </View>
-                                  <Text variant="caption" tone="muted">
-                                    {I18n.t('transaction_detail.note')}
-                                  </Text>
+                          <SummaryRow
+                            label={I18n.t('transaction_detail.note')}
+                            isActive={activeField === 'note'}
+                            onPress={focusNoteField}
+                            rightElement={<View style={styles.trailingSpacer} />}
+                          >
+                            <View className="flex-row items-center justify-between">
+                              <View className="flex-row items-center gap-2">
+                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                  <FileText size={13} color={themeColors.textMuted} />
                                 </View>
-                                <View className="max-w-[66%] min-w-[40%]">
-                                  <TextInput
-                                    ref={noteInputRef}
-                                    value={note}
-                                    onChangeText={handleNoteChange}
-                                    placeholder={I18n.t('transactions.editor.optional')}
-                                    placeholderTextColor={`${themeColors.mutedForeground}99`}
-                                    returnKeyType="done"
-                                    onFocus={() => setActiveField('note')}
-                                    onBlur={() =>
-                                      setActiveField((prev) => (prev === 'note' ? null : prev))
-                                    }
-                                    style={[
-                                      SINGLE_LINE_TEXT_INPUT_STYLE,
-                                      styles.inlineSummaryInput,
-                                      { color: themeColors.text },
-                                    ]}
-                                  />
-                                </View>
+                                <Text variant="caption" tone="muted">
+                                  {I18n.t('transaction_detail.note')}
+                                </Text>
                               </View>
-                            </SummaryRow>
-                          </View>
+                              <View className="max-w-[66%] min-w-[40%]">
+                                <TextInput
+                                  ref={noteInputRef}
+                                  value={note}
+                                  onChangeText={handleNoteChange}
+                                  placeholder={I18n.t('transactions.editor.optional')}
+                                  placeholderTextColor={`${themeColors.mutedForeground}99`}
+                                  returnKeyType="done"
+                                  onFocus={handleNoteFocus}
+                                  onBlur={handleNoteBlur}
+                                  style={[
+                                    SINGLE_LINE_TEXT_INPUT_STYLE,
+                                    styles.inlineSummaryInput,
+                                    { color: themeColors.text },
+                                  ]}
+                                />
+                              </View>
+                            </View>
+                          </SummaryRow>
 
                           {/* Sentiment picker */}
                           {type === 'expense' ? (
@@ -1730,6 +1754,7 @@ export function TransactionEditorScreen({
                     {noteSuggestionsVisible ? (
                       <Animated.View
                         entering={FadeIn.duration(120)}
+                        exiting={FadeOut.duration(120)}
                         style={{
                           zIndex: 20,
                           borderTopWidth: 0,

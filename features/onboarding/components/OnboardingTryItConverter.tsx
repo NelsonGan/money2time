@@ -1,4 +1,4 @@
-import { Clock3, Delete } from 'lucide-react-native';
+import { Delete, Pencil } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,8 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
+import { Text, TimeValueInline } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -237,130 +236,175 @@ export function OnboardingTryItConverter({
 
   const hasDot = amount.includes('.');
 
+  const numPadContainerStyle = useMemo(
+    () => [styles.numpadContainer, { backgroundColor: `${themeColors.border}20` }],
+    [themeColors.border],
+  );
+
   return (
-    <View>
-      {/* Time result — the hero moment */}
-      <View
-        className="mx-5 rounded-2xl px-5 py-4 items-center"
-        style={{ backgroundColor: `${themeColors.primary}10` }}
-      >
-        {hasInput ? (
-          <Animated.View
-            key={hoursLabel}
-            entering={FadeInDown.duration(180)}
-            exiting={FadeOutUp.duration(120)}
-            className="items-center"
-          >
-            <View className="flex-row items-center gap-2">
-              <Clock3 size={22} color={themeColors.primary} strokeWidth={2.2} />
-              <Text style={styles.timeHeroValue} className="text-primary">
-                {hoursLabel}
-              </Text>
-            </View>
-            <Text variant="label" className="text-primary mt-1">
-              {I18n.t('home.converter.of_work_suffix')}
-            </Text>
-            <Text variant="caption" tone="muted" className="mt-2 text-center">
-              {I18n.t('home.converter.workday_equivalent', {
-                exact: exactHoursLabel,
-                duration: workDurationLabel,
-              })}
-            </Text>
-          </Animated.View>
-        ) : (
-          <View className="items-center py-1">
-            <Text variant="body" tone="muted" className="text-center">
+    <View className="mx-5">
+      <View className="relative overflow-hidden rounded-[24px] border border-border/25 bg-card shadow-soft-lg">
+        {/* Decorative background shapes */}
+        <View
+          className="absolute -top-14 -right-14 h-36 w-36 rounded-full"
+          style={{ backgroundColor: themeColors.primary, opacity: 0.04 }}
+        />
+        <View
+          className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full"
+          style={{ backgroundColor: themeColors.accent, opacity: 0.03 }}
+        />
+
+        {/* Content area */}
+        <View className="px-4 pt-3 pb-2">
+          {/* Header row */}
+          <View className="flex-row items-center justify-between mb-1">
+            <Text variant="label" tone="muted">
               {I18n.t('onboarding.wage.try_it_hint')}
             </Text>
+            {hasInput ? (
+              <Pressable onPress={handleClear}>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('home.converter.clear')}
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
-        )}
-      </View>
 
-      {/* Amount input display */}
-      <View className="mx-5 mt-3 flex-row items-baseline justify-between">
-        <View className="flex-row items-baseline flex-1 min-w-0">
-          <Text style={styles.currencySymbol} className="text-muted-foreground">
-            {currencySymbol}
-          </Text>
-          <Text
-            style={styles.amountDisplay}
-            className={cn('ml-1', hasInput ? 'text-foreground' : 'text-muted-foreground/40')}
-            numberOfLines={1}
-          >
-            {displayAmount}
-          </Text>
-        </View>
-        {hasInput ? (
-          <Pressable onPress={handleClear} className="pl-3">
-            <Text variant="caption" tone="muted">
-              {I18n.t('home.converter.clear')}
+          {/* Amount display */}
+          <View className="min-h-[48px] flex-row items-end">
+            <Text style={styles.currencySymbol} className="shrink-0 text-muted-foreground">
+              {currencySymbol}
             </Text>
-          </Pressable>
-        ) : null}
-      </View>
-      <View className="mx-5 mt-1.5 h-px" style={{ backgroundColor: `${themeColors.border}60` }} />
-
-      {/* Rate badge */}
-      <View className="mx-5 mt-2 flex-row items-center justify-between">
-        <Text variant="caption" tone="muted">
-          {I18n.t('onboarding.wage.your_rate_label', { rate: trueRateLabel })}
-        </Text>
-        <Pressable onPress={onEditRate} hitSlop={8}>
-          <Text variant="caption" tone="primary">
-            {I18n.t('common.edit')}
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* Numpad — directly under fields */}
-      <View style={styles.numpadContainer} className="mx-4 mt-4 rounded-2xl overflow-hidden">
-        {NUM_ROWS.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.numpadRow}>
-            {row.map((key) => {
-              if (key === 'backspace') {
-                return (
-                  <TryItNumKey
-                    key="backspace"
-                    onPress={keyHandlers.backspace}
-                    onLongPress={handleClear}
-                  >
-                    <Delete size={17} color={themeColors.text} />
-                  </TryItNumKey>
-                );
-              }
-              if (key === '.') {
-                return <TryItNumKey key="." label="." dimmed={hasDot} onPress={keyHandlers['.']} />;
-              }
-              return <TryItNumKey key={key} label={key} onPress={keyHandlers[key]} />;
-            })}
+            <Text
+              style={styles.amountDisplay}
+              className={cn(
+                'ml-1.5 flex-1',
+                hasInput ? 'text-foreground' : 'text-muted-foreground/40',
+              )}
+              numberOfLines={1}
+            >
+              {displayAmount}
+            </Text>
           </View>
-        ))}
+
+          {/* Time result panel */}
+          <View
+            className="mt-2 mb-1 rounded-[18px] px-4 py-3 overflow-hidden"
+            style={{ backgroundColor: `${themeColors.primary}10` }}
+          >
+            <View
+              className="absolute top-0 left-0 w-1 h-full rounded-full"
+              style={{ backgroundColor: themeColors.primary, opacity: 0.4 }}
+            />
+
+            {hasInput ? (
+              <>
+                <Animated.View
+                  key={hoursLabel}
+                  entering={FadeInDown.duration(180)}
+                  exiting={FadeOutUp.duration(120)}
+                >
+                  <View className="flex-row items-center gap-2">
+                    <TimeValueInline
+                      value={hoursLabel}
+                      variant="heading"
+                      textClassName="text-primary tracking-tight"
+                      iconColor={themeColors.primary}
+                      iconSize={16}
+                    />
+                    <Text variant="heading" className="text-primary tracking-tight">
+                      {I18n.t('home.converter.of_work_suffix')}
+                    </Text>
+                  </View>
+                </Animated.View>
+                <Animated.View
+                  key={exactHoursLabel}
+                  entering={FadeInDown.duration(180)}
+                  exiting={FadeOutUp.duration(120)}
+                >
+                  <Text variant="caption" tone="muted" className="mt-1.5">
+                    {I18n.t('home.converter.workday_equivalent', {
+                      exact: exactHoursLabel,
+                      duration: workDurationLabel,
+                    })}
+                  </Text>
+                </Animated.View>
+              </>
+            ) : (
+              <View className="flex-row items-center gap-2 py-0.5">
+                <TimeValueInline
+                  value="0h"
+                  variant="heading"
+                  textClassName="text-muted-foreground/30 tracking-tight"
+                  iconColor={`${themeColors.textMuted}50`}
+                  iconSize={16}
+                />
+                <Text variant="heading" className="text-muted-foreground/30 tracking-tight">
+                  {I18n.t('home.converter.of_work_suffix')}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Rate badge */}
+          <View className="mt-1 mb-1 flex-row items-center justify-between px-1">
+            <Text variant="caption" tone="muted">
+              {I18n.t('onboarding.wage.your_rate_label', { rate: trueRateLabel })}
+            </Text>
+            <Pressable onPress={onEditRate} hitSlop={8} className="flex-row items-center gap-1">
+              <Pencil size={10} color={themeColors.primary} strokeWidth={2.2} />
+              <Text variant="caption" tone="primary">
+                {I18n.t('common.edit')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Numpad */}
+        <View style={numPadContainerStyle}>
+          {NUM_ROWS.map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.numpadRow}>
+              {row.map((key) => {
+                if (key === 'backspace') {
+                  return (
+                    <TryItNumKey
+                      key="backspace"
+                      onPress={keyHandlers.backspace}
+                      onLongPress={handleClear}
+                    >
+                      <Delete size={17} color={themeColors.text} />
+                    </TryItNumKey>
+                  );
+                }
+                if (key === '.') {
+                  return (
+                    <TryItNumKey key="." label="." dimmed={hasDot} onPress={keyHandlers['.']} />
+                  );
+                }
+                return <TryItNumKey key={key} label={key} onPress={keyHandlers[key]} />;
+              })}
+            </View>
+          ))}
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  timeHeroValue: {
-    fontSize: 32,
-    lineHeight: 40,
+  currencySymbol: {
+    fontSize: 22,
+    lineHeight: 30,
     fontFamily: FONT.black,
     fontWeight: '900',
     letterSpacing: -1,
   },
-  currencySymbol: {
-    fontSize: 22,
-    lineHeight: 30,
-    fontFamily: FONT.extrabold,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
   amountDisplay: {
-    fontSize: 28,
-    lineHeight: 36,
-    fontFamily: FONT.extrabold,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontSize: 34,
+    lineHeight: 42,
+    fontFamily: FONT.black,
+    fontWeight: '900',
+    letterSpacing: -1.5,
   },
   numKeyLabel: {
     fontSize: 20,
@@ -372,8 +416,8 @@ const styles = StyleSheet.create({
   },
   numpadContainer: {
     gap: 0,
-    paddingHorizontal: spacing.xxs,
-    paddingVertical: spacing.xxs,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
   },
   numpadRow: {
     flexDirection: 'row',

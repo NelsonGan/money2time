@@ -34,6 +34,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { isRevenueCatCustomerStateActive, type RevenueCatPackage } from '~/services/revenueCat';
+import { FONT } from '~/utils/fonts';
 
 interface ProPaywallScreenProps {
   onClose: () => void;
@@ -179,6 +180,12 @@ function FeatureShowcase({ colors, height }: { colors: PaywallColors; height: nu
         freeValue: I18n.t('pro.feature_wage_entries', { count: PRO_LIMITS.FREE_MAX_WAGE_ENTRIES }),
         proValue: I18n.t('pro.feature_unlimited_wage_entries'),
       },
+      {
+        label: I18n.t('pro.trends_label'),
+        description: I18n.t('pro.trends_description'),
+        freeValue: I18n.t('pro.feature_trends_free'),
+        proValue: I18n.t('pro.feature_trends_pro'),
+      },
     ],
     [],
   );
@@ -210,6 +217,7 @@ function FeatureShowcase({ colors, height }: { colors: PaywallColors; height: nu
       { strong: colors.accent, soft: colors.accentSoft },
       { strong: colors.coral, soft: withAlpha(colors.coral, colors.isDark ? 0.18 : 0.12) },
       { strong: colors.sky, soft: withAlpha(colors.sky, colors.isDark ? 0.2 : 0.12) },
+      { strong: '#6B5ECA', soft: withAlpha('#6B5ECA', colors.isDark ? 0.2 : 0.12) },
     ],
     [
       colors.accent,
@@ -467,7 +475,9 @@ function PlanCard({
             ) : (
               <View style={s.ctaContent}>
                 <Crown size={16} color="#fff" fill="#fff" />
-                <Text>{I18n.t('pro.upgrade')}</Text>
+                <Text style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}>
+                  {I18n.t('pro.upgrade')}
+                </Text>
               </View>
             )}
           </Button>
@@ -768,8 +778,8 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             s.flashBanner,
             {
               top: insets.top + 56,
-              backgroundColor: colors.isDark ? withAlpha(colors.accent, 0.16) : colors.accentSoft,
-              borderColor: withAlpha(colors.accent, colors.isDark ? 0.38 : 0.18),
+              backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
+              borderColor: withAlpha(colors.accent, colors.isDark ? 0.42 : 0.24),
             },
           ]}
         >
