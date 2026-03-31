@@ -42,6 +42,7 @@ import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { FONT } from '~/utils/fonts';
 
 type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
@@ -289,7 +290,11 @@ export function SettingsScreen({
                   </View>
                 </View>
               ) : (
-                <Text variant="subheading" className="text-sm">
+                <Text
+                  variant="subheading"
+                  className="text-sm"
+                  style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
                   {I18n.t('pro.upgrade')}
                 </Text>
               )}

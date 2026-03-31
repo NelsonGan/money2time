@@ -65,9 +65,9 @@ export function OnboardingWageStep({
       <View className="flex-1">
         {wageIsSet ? (
           <View className="flex-1">
-            <OnboardingStepHeader compact title={I18n.t('onboarding.wage.try_it_title')} />
+            <OnboardingStepHeader title={I18n.t('onboarding.wage.try_it_title')} />
 
-            <Animated.View entering={FadeIn.delay(150).duration(300)} className="flex-1 mt-3">
+            <Animated.View entering={FadeIn.delay(150).duration(300)} className="flex-1 mt-6">
               <OnboardingTryItConverter
                 amount={demoAmount}
                 currencySymbol={settings.currencySymbol}
