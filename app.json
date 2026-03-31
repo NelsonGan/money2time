@@ -20,6 +20,10 @@
       "icon": "./assets/ios/AppIcon~ios-marketing.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.nelsongan.money2time",
+      "entitlements": {
+        "com.apple.developer.kernel.extended-virtual-addressing": true,
+        "com.apple.developer.kernel.increased-memory-limit": true
+      },
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false
