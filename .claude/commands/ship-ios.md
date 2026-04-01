@@ -9,5 +9,5 @@ eas env:exec production 'eas build --platform ios --profile production --local -
 Wait for it to complete successfully, then submit:
 
 ```
-yes | eas submit --platform ios --profile production --path ./dist/Money2Time.ipa
+yes | eas submit --platform ios --profile production --path ./dist/Money2Time.ipa --non-interactive
 ```
