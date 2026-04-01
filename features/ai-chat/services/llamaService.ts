@@ -1,4 +1,5 @@
 import { initLlama, type LlamaContext } from 'llama.rn';
+import { Platform } from 'react-native';
 
 import { TRANSACTION_JSON_SCHEMA } from '../constants/prompts';
 
@@ -119,7 +120,7 @@ export async function loadModel(modelPath: string): Promise<void> {
       context = await initLlama({
         model: modelPath,
         n_ctx: 2048,
-        n_gpu_layers: 0,
+        n_gpu_layers: Platform.OS === 'ios' && !__DEV__ ? 99 : 0,
         use_mlock: true,
       });
       currentModelPath = modelPath;
