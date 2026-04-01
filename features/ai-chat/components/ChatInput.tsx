@@ -1,5 +1,5 @@
 import { Send, Square } from 'lucide-react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -69,6 +69,12 @@ export function ChatInput({
   const isSubmittingRef = useRef(false);
   const themeColors = useThemeColors();
   const sendScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (!autoFocus) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 600);
+    return () => clearTimeout(timer);
+  }, [autoFocus]);
 
   const canSend = text.trim().length > 0 && !sendDisabled;
   const isExpanded = inputHeight > LINE_HEIGHT * 1.5;
@@ -235,7 +241,6 @@ export function ChatInput({
             onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
             onContentSizeChange={handleContentSizeChange}
             editable={!inputDisabled}
-            autoFocus={autoFocus}
             multiline
             submitBehavior="newline"
             maxLength={500}

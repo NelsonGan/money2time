@@ -1,4 +1,4 @@
-import { Download, Settings, Shield, Trash2 } from 'lucide-react-native';
+import { Check, Download, HardDrive, Settings, Shield, Trash2 } from 'lucide-react-native';
 import {
   useCallback,
   useEffect,
@@ -44,7 +44,7 @@ import { newId } from '~/utils/id';
 import { ChatInput, type ChatInputMentionOption } from '../components/ChatInput';
 import { TransactionPreviewCard } from '../components/TransactionPreviewCard';
 import type { ModelDefinition } from '../constants/models';
-import { AI_CHAT_MODEL } from '../constants/models';
+import { AI_CHAT_DEFAULT_MODEL, AVAILABLE_MODELS, getModelById } from '../constants/models';
 import type { LLMTransactionOutput } from '../constants/prompts';
 import {
   alignParsedTransactionAmounts,
@@ -276,7 +276,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     llamaService.subscribeToStatus,
     () => llamaService.getStatus().status,
   );
-  const activeModel = AI_CHAT_MODEL;
+  const [activeModelId, setActiveModelId] = useState<string>(AI_CHAT_DEFAULT_MODEL.id);
+  const activeModel: ModelDefinition = getModelById(activeModelId) ?? AI_CHAT_DEFAULT_MODEL;
   const activeModelDownloadProgress = useSyncExternalStore(
     modelDownloadService.subscribeToDownloadState,
     () => modelDownloadService.getModelDownloadProgress(activeModel.id),
@@ -507,6 +508,70 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     recoverFromModelFailure,
     updateSettings,
   ]);
+
+  const handleSwitchModel = useCallback(
+    async (model: ModelDefinition) => {
+      if (model.id === activeModelId && modelStatus === 'ready') return;
+
+      void triggerHaptic('selection');
+      setActiveModelId(model.id);
+      setMessages([]);
+      setIsGenerating(false);
+      loadRequestIdRef.current += 1;
+      sendInFlightRef.current = false;
+
+      try {
+        await llamaService.releaseModel();
+      } catch {
+        // ignore release errors
+      }
+
+      if (!modelManager.isModelDownloaded(model.fileName)) {
+        aiActivationService.setActivationError(null);
+        setIsActivatingAi(true);
+        try {
+          await modelDownloadService.ensureModelDownloaded(model);
+          refreshDownloadedModels();
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : I18n.t('aiChat.error');
+          aiActivationService.setActivationError(detail);
+          setIsActivatingAi(false);
+          return;
+        }
+      }
+
+      try {
+        await llamaService.loadModel(modelManager.getModelPath(model.fileName));
+        aiActivationService.setActivationError(null);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : I18n.t('aiChat.prepare_failed');
+        await recoverFromModelFailure(detail, model);
+      } finally {
+        setIsActivatingAi(false);
+      }
+    },
+    [activeModelId, modelStatus, refreshDownloadedModels, recoverFromModelFailure],
+  );
+
+  const handleDeleteModel = useCallback(
+    async (model: ModelDefinition) => {
+      void triggerHaptic('warning');
+
+      if (model.id === activeModelId) {
+        loadRequestIdRef.current += 1;
+        sendInFlightRef.current = false;
+        try {
+          await llamaService.releaseModel();
+        } catch {
+          // ignore
+        }
+      }
+
+      modelManager.deleteModel(model.fileName);
+      refreshDownloadedModels();
+    },
+    [activeModelId, refreshDownloadedModels],
+  );
 
   const handleDisableAiFeature = useCallback(async () => {
     void triggerHaptic('warning');
@@ -1269,6 +1334,94 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     });
                   }}
                 />
+              </CardContent>
+            </Card>
+
+            <Card className="mt-5">
+              <CardContent className="py-5 gap-4">
+                <View className="flex-row items-center gap-3">
+                  <View
+                    className="h-10 w-10 items-center justify-center rounded-full"
+                    style={{ backgroundColor: `${themeColors.primary}14` }}
+                  >
+                    <HardDrive size={18} color={themeColors.primary} />
+                  </View>
+                  <View className="flex-1">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('aiChat.model_section_title')}
+                    </Text>
+                  </View>
+                </View>
+
+                {AVAILABLE_MODELS.map((model) => {
+                  const isDownloaded = downloadedModels.includes(model.fileName);
+                  const isActive = model.id === activeModelId;
+                  const isDownloading = modelDownloadService.isModelDownloading(model.id);
+
+                  return (
+                    <View
+                      key={model.id}
+                      className="rounded-2xl border border-border/30 bg-background/60 px-4 py-3"
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="flex-1">
+                          <Text variant="bodyStrong">{model.displayName}</Text>
+                          <Text variant="caption" tone="muted">
+                            {model.sizeLabel}
+                          </Text>
+                        </View>
+
+                        {isActive && isDownloaded && modelStatus === 'ready' ? (
+                          <View
+                            className="h-8 w-8 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${themeColors.primary}20` }}
+                          >
+                            <Check size={16} color={themeColors.primary} />
+                          </View>
+                        ) : null}
+
+                        {isDownloaded && !(isActive && modelStatus === 'ready') ? (
+                          <Pressable
+                            onPress={() => void handleSwitchModel(model)}
+                            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5"
+                          >
+                            <Text variant="caption" style={{ color: themeColors.primary }}>
+                              {I18n.t('aiChat.select_model')}
+                            </Text>
+                          </Pressable>
+                        ) : null}
+
+                        {!isDownloaded && !isDownloading ? (
+                          <Pressable
+                            onPress={() => void handleSwitchModel(model)}
+                            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5"
+                          >
+                            <View className="flex-row items-center gap-1.5">
+                              <Download size={12} color={themeColors.primary} />
+                              <Text variant="caption" style={{ color: themeColors.primary }}>
+                                {I18n.t('aiChat.download')}
+                              </Text>
+                            </View>
+                          </Pressable>
+                        ) : null}
+
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color={themeColors.primary} />
+                        ) : null}
+
+                        {isDownloaded && !(isActive && modelStatus === 'ready') ? (
+                          <Pressable
+                            onPress={() => void handleDeleteModel(model)}
+                            className="ml-1 h-8 w-8 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${themeColors.error}14` }}
+                          >
+                            <Trash2 size={14} color={themeColors.error} />
+                          </Pressable>
+                        ) : null}
+                      </View>
+                    </View>
+                  );
+                })}
               </CardContent>
             </Card>
 
