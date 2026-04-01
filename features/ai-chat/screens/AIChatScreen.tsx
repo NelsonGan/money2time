@@ -2,14 +2,17 @@ import { Download, Settings, Shield, Trash2 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   Button,
@@ -247,6 +250,11 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     simpleWalletId,
   } = useApp();
   const themeColors = useThemeColors();
+  const { bottom: safeBottom } = useSafeAreaInsets();
+  const keyboard = useAnimatedKeyboard();
+  const keyboardPaddingStyle = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(keyboard.height.value, safeBottom),
+  }));
   const scrollRef = useRef<ScrollView>(null);
   const modelStatus = useSyncExternalStore(
     llamaService.subscribeToStatus,
@@ -270,6 +278,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const [isActivatingAi, setIsActivatingAi] = useState(false);
 
   const loadRequestIdRef = useRef(0);
+  const [stoppedManually, setStoppedManually] = useState(false);
+  const stoppedManuallyRef = useRef(false);
   const sendInFlightRef = useRef(false);
   const rejectCleanupTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -509,9 +519,11 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       }
 
       sendInFlightRef.current = true;
+      stoppedManuallyRef.current = false;
+      setStoppedManually(false);
 
       const userMsg: ChatMessage = { id: newId(), role: 'user', content: text };
-      setMessages((prev) => [...prev, userMsg]);
+      setMessages([userMsg]);
       const explicitMentions = resolveExplicitMentions(text, accounts, categories);
 
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
@@ -547,6 +559,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
           const parsingInput = buildParsingInputWithExplicitMentions(text, explicitMentions);
 
           const responseText = await llamaService.generateTransactions(parsingInput, systemPrompt);
+
+          if (stoppedManuallyRef.current) return;
 
           let parsed: LLMTransactionOutput[] = [];
           try {
@@ -624,7 +638,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                 explicitSharedAccountId ||
                 transferMentionAccounts.length > 0,
               );
-
               const resolvedAccountId =
                 isSimpleMode && simpleWalletId && t.type !== 'transfer'
                   ? simpleWalletId
@@ -680,6 +693,10 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 
           setMessages((prev) => [...prev, assistantMsg]);
         } catch (e) {
+          if (stoppedManuallyRef.current || llamaService.isGenerationStoppedError(e)) {
+            return;
+          }
+
           if (llamaService.isContextBusyError(e)) {
             setIsContextBusy(true);
             return;
@@ -715,6 +732,15 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       simpleWalletId,
     ],
   );
+
+  const handleStopGeneration = useCallback(() => {
+    stoppedManuallyRef.current = true;
+    setStoppedManually(true);
+    llamaService.stopGeneration();
+    setIsGenerating(false);
+    setIsContextBusy(false);
+    sendInFlightRef.current = false;
+  }, []);
 
   const handleAcceptTransaction = useCallback(
     (messageId: string, tempId: string) => {
@@ -864,8 +890,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     !isDefaultModelDownloaded ||
     isActivatingAi ||
     isDownloadingDefaultModel;
-  const isBusyScreenVisible = isModelReady && isContextBusy && !isGenerating;
-  const isChatInputDisabled = !isModelReady || isGenerating || isContextBusy;
+  const isBusyScreenVisible = isModelReady && isContextBusy && !isGenerating && !stoppedManually;
+  const isChatInputDisabled = !isModelReady;
+  const isChatSendDisabled = isChatInputDisabled || isGenerating || isContextBusy;
   const gateProgressPercent =
     defaultModelDownloadProgress != null ? Math.round(defaultModelDownloadProgress * 100) : null;
   const chatInputPlaceholder = useMemo(() => {
@@ -900,7 +927,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   }, [isSimpleMode, placeholderPrimaryAccount, placeholderTransferToAccount]);
 
   return (
-    <SettingsPageLayout edges={['top', 'bottom']}>
+    <SettingsPageLayout edges={['top']}>
       <SettingsHeader
         title={I18n.t('aiChat.title')}
         onBack={onBack}
@@ -1035,10 +1062,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
           </View>
         </View>
       ) : (
-        <KeyboardAvoidingView
-          style={styles.chatContent}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <Animated.View style={[styles.chatContent, keyboardPaddingStyle]}>
           {isBusyScreenVisible ? (
             <View className="flex-1 px-5">
               <View className="flex-1 items-center justify-center" style={styles.busyContent}>
@@ -1096,7 +1120,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   >
                     {msg.content ? (
                       <View
-                        className="rounded-2xl px-3.5 py-2.5"
+                        className="rounded-2xl px-4 py-3"
                         style={{
                           backgroundColor:
                             msg.role === 'user' ? themeColors.primary : themeColors.surface,
@@ -1104,7 +1128,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                       >
                         <Text
                           variant="body"
-                          className="text-sm"
+                          className="text-base"
                           style={{
                             color: msg.role === 'user' ? '#fff' : themeColors.text,
                           }}
@@ -1148,18 +1172,18 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
           <ChatInput
             autoFocus={isModelReady && !isContextBusy}
             inputDisabled={isChatInputDisabled}
-            sendDisabled={isChatInputDisabled}
+            sendDisabled={isChatSendDisabled}
+            isGenerating={isGenerating}
             onSend={handleSend}
+            onStop={handleStopGeneration}
             placeholder={
               !isModelReady
                 ? I18n.t('aiChat.model_loading')
-                : isContextBusy
-                  ? I18n.t('aiChat.busy_placeholder')
-                  : chatInputPlaceholder
+                : chatInputPlaceholder
             }
             mentionOptions={mentionOptions}
           />
-        </KeyboardAvoidingView>
+        </Animated.View>
       )}
 
       <Modal
@@ -1265,7 +1289,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       <Modal
         visible={editingPreview !== null}
         animationType="slide"
-        presentationStyle="fullScreen"
+        presentationStyle="pageSheet"
         onRequestClose={closeEditingPreview}
       >
         {editingPreview ? (

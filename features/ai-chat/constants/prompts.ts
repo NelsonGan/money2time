@@ -12,25 +12,8 @@ export function buildSystemPrompt(
 
   const accountLines = accounts.map((a) => `- "${a.name}" (${a.type}, ${a.currency})`).join('\n');
 
-  const expenseCategories = categories
-    .filter((c) => c.type === 'expense' && !c.parentId)
-    .map((c) => {
-      const subs = categories.filter((s) => s.parentId === c.id);
-      const subStr =
-        subs.length > 0 ? ` (subcategories: ${subs.map((s) => s.name).join(', ')})` : '';
-      return `- "${c.name}"${subStr}`;
-    })
-    .join('\n');
-
-  const incomeCategories = categories
-    .filter((c) => c.type === 'income' && !c.parentId)
-    .map((c) => {
-      const subs = categories.filter((s) => s.parentId === c.id);
-      const subStr =
-        subs.length > 0 ? ` (subcategories: ${subs.map((s) => s.name).join(', ')})` : '';
-      return `- "${c.name}"${subStr}`;
-    })
-    .join('\n');
+  const expenseCategories = formatCategoryTree(categories, 'expense');
+  const incomeCategories = formatCategoryTree(categories, 'income');
 
   return `You are a financial transaction parser. Today is ${today}. Yesterday was ${yesterday}.
 The user's currency is ${currencyCode} (${currencySymbol}).
@@ -48,14 +31,14 @@ Parse the user's message into transactions. Return a JSON array where each item 
 - "type": ${allowTransfers ? '"expense" | "income" | "transfer"' : '"expense" | "income"'}
 - "amount": positive number
 - "date": use "${today}" by default. Only use a different date when the user explicitly specifies a date or a relative day like yesterday/today/tomorrow (ISO 8601 YYYY-MM-DD)
-- "categoryName": must match one of the categories above (pick closest match). For transfers, set to null.
+- "categoryName": must match one of the categories listed above (parent or subcategory). When the user's input matches a subcategory, use the subcategory name — not its parent. For transfers, set to null.
 - "accountName": account name from the list above, or null if unspecified
 - "fromAccountName": for transfers only, source account name
 - "toAccountName": for transfers only, destination account name
 - "note": only include a note when the user explicitly provides descriptive text worth saving. Otherwise return null. Do not invent notes from the category or transaction type.
 
 Rules:
-- "20 for chicken rice" → expense, amount 20, note "chicken rice", pick closest food category
+- "20 for chicken rice" → expense, amount 20, note "chicken rice", pick the most specific matching category (e.g. subcategory "Restaurants" under "Food" rather than just "Food")
 - "50 for lunch, 20 for dinner" → two expense transactions with notes "lunch" and "dinner"
 - "20 for lunch 50 for dinner" → two expense transactions; first amount is 20, second amount is 50
 - "50 for lunch from Maybank" → expense, amount 50, accountName "Maybank", note "lunch"
@@ -67,12 +50,27 @@ ${allowTransfers ? '- "transfer 50 from X to Y" → transfer, amount 50, fromAcc
 - Mentions starting with "@" are explicit user selections made inside the app
 - Account names may be prefixed with "@". Treat "@Cash Wallet" as account name "Cash Wallet"
 - If the input includes a resolved @mention list, honor each resolved mention exactly and do not reinterpret it as a different account or category
+- Categories are organized as parent > subcategory (e.g. "Transport > Fuel" means "Fuel" is a subcategory of "Transport"). When a subcategory fits, use the subcategory name. Only use the parent name when no subcategory is a better match.
 - If no real category from the list is a close match, set "categoryName" to null. Never invent a new category name
 - Copy notes from the user's own wording when they clearly provided one; otherwise set "note" to null
 - ${allowTransfers ? 'Transfers are allowed when the user clearly asks for one' : 'Transfers are unavailable in the current mode. If the user asks for a transfer, return an empty array []'}
 - If the message is not about transactions, return an empty array []
 - Always return a JSON array, even for a single transaction
 - Do NOT include any text outside the JSON array`;
+}
+
+function formatCategoryTree(categories: Category[], type: 'expense' | 'income'): string {
+  return (
+    categories
+      .filter((c) => c.type === type && !c.parentId)
+      .map((parent) => {
+        const subs = categories.filter((s) => s.parentId === parent.id);
+        if (subs.length === 0) return `- "${parent.name}"`;
+        const subLines = subs.map((s) => `  - "${s.name}"`).join('\n');
+        return `- "${parent.name}"\n${subLines}`;
+      })
+      .join('\n') || '- (none)'
+  );
 }
 
 function getYesterday(todayIso: string): string {

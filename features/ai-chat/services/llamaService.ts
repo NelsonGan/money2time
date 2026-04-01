@@ -37,6 +37,15 @@ class CompletionTimeoutError extends Error {
   }
 }
 
+class GenerationStoppedError extends Error {
+  constructor() {
+    super('Generation stopped by user');
+    this.name = 'GenerationStoppedError';
+  }
+}
+
+let manualStopRequested = false;
+
 class ContextBusyError extends Error {
   constructor() {
     super('Context is busy');
@@ -167,6 +176,17 @@ function buildChatMLPrompt(systemPrompt: string, userMessage: string): string {
   );
 }
 
+export function stopGeneration(): void {
+  if (context && activeCompletionCount > 0) {
+    manualStopRequested = true;
+    void Promise.resolve(context.stopCompletion()).catch(() => {});
+  }
+}
+
+export function isGenerationStoppedError(error: unknown): boolean {
+  return error instanceof GenerationStoppedError;
+}
+
 export async function generateTransactions(
   userMessage: string,
   systemPrompt: string,
@@ -210,6 +230,10 @@ async function completeWithTimeout(
     ]);
 
     if (result.interrupted) {
+      if (manualStopRequested) {
+        manualStopRequested = false;
+        throw new GenerationStoppedError();
+      }
       throw new CompletionTimeoutError();
     }
 

@@ -1,4 +1,4 @@
-import { Send } from 'lucide-react-native';
+import { Send, Square } from 'lucide-react-native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
@@ -23,8 +23,10 @@ export interface ChatInputMentionOption {
 interface ChatInputProps {
   inputDisabled?: boolean;
   sendDisabled?: boolean;
+  isGenerating?: boolean;
   autoFocus?: boolean;
   onSend: (text: string) => boolean | void | Promise<boolean | void>;
+  onStop?: () => void;
   placeholder?: string;
   mentionOptions?: ChatInputMentionOption[];
 }
@@ -52,8 +54,10 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export function ChatInput({
   inputDisabled = false,
   sendDisabled = false,
+  isGenerating = false,
   autoFocus = false,
   onSend,
+  onStop,
   placeholder,
   mentionOptions = [],
 }: ChatInputProps) {
@@ -233,37 +237,62 @@ export function ChatInput({
             editable={!inputDisabled}
             autoFocus={autoFocus}
             multiline
+            submitBehavior="newline"
             maxLength={500}
             scrollEnabled={isScrollable}
             style={[
               styles.textInput,
               {
                 color: themeColors.text,
-                height: inputHeight,
+                minHeight: LINE_HEIGHT,
+                maxHeight: MAX_INPUT_HEIGHT,
               },
             ]}
           />
 
-          <AnimatedPressable
-            onPress={handleSend}
-            disabled={!canSend}
-            onPressIn={() => {
-              sendScale.value = withSpring(0.85, { damping: 15, stiffness: 300 });
-            }}
-            onPressOut={() => {
-              sendScale.value = withSpring(1, { damping: 12, stiffness: 200 });
-            }}
-            className="items-center justify-center rounded-full"
-            style={[
-              sendAnimatedStyle,
-              styles.sendButton,
-              {
-                backgroundColor: canSend ? themeColors.primary : `${themeColors.border}66`,
-              },
-            ]}
-          >
-            <Send size={15} color={canSend ? '#fff' : themeColors.textMuted} />
-          </AnimatedPressable>
+          {isGenerating ? (
+            <AnimatedPressable
+              onPress={() => {
+                void triggerHaptic('medium');
+                onStop?.();
+              }}
+              onPressIn={() => {
+                sendScale.value = withSpring(0.85, { damping: 15, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                sendScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+              }}
+              className="items-center justify-center rounded-full"
+              style={[
+                sendAnimatedStyle,
+                styles.sendButton,
+                { backgroundColor: themeColors.primary },
+              ]}
+            >
+              <Square size={12} fill="#fff" color="#fff" />
+            </AnimatedPressable>
+          ) : (
+            <AnimatedPressable
+              onPress={handleSend}
+              disabled={!canSend}
+              onPressIn={() => {
+                sendScale.value = withSpring(0.85, { damping: 15, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                sendScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+              }}
+              className="items-center justify-center rounded-full"
+              style={[
+                sendAnimatedStyle,
+                styles.sendButton,
+                {
+                  backgroundColor: canSend ? themeColors.primary : `${themeColors.border}66`,
+                },
+              ]}
+            >
+              <Send size={15} color={canSend ? '#fff' : themeColors.textMuted} />
+            </AnimatedPressable>
+          )}
         </View>
       </View>
     </View>
