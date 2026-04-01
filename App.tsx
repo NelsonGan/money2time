@@ -35,7 +35,7 @@ import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
-import { AI_CHAT_DEFAULT_MODEL } from '~/features/ai-chat/constants/models';
+import { AI_CHAT_MODEL } from '~/features/ai-chat/constants/models';
 import { buildSystemPrompt } from '~/features/ai-chat/constants/prompts';
 import * as aiChatLlamaService from '~/features/ai-chat/services/llamaService';
 import * as aiChatModelManager from '~/features/ai-chat/services/modelManager';
@@ -249,12 +249,12 @@ function AIChatStartupPreloader() {
 
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted || !settings.aiChatEnabled) return;
-    if (!aiChatModelManager.isModelDownloaded(AI_CHAT_DEFAULT_MODEL.fileName)) return;
+    if (!aiChatModelManager.isModelDownloaded(AI_CHAT_MODEL.fileName)) return;
 
     const preloadModel = async () => {
       try {
         await aiChatLlamaService.loadModel(
-          aiChatModelManager.getModelPath(AI_CHAT_DEFAULT_MODEL.fileName),
+          aiChatModelManager.getModelPath(AI_CHAT_MODEL.fileName),
         );
 
         const today = dayKeyFromDateLocal(new Date());
