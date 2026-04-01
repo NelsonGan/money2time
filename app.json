@@ -27,7 +27,8 @@
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "3"
     },
     "android": {
       "icon": "./assets/android/play_store_512.png",
@@ -42,7 +43,12 @@
     "web": {
       "favicon": "./assets/android/play_store_512.png"
     },
-    "plugins": ["expo-localization", "expo-notifications", "expo-screen-orientation", "llama.rn"],
+    "plugins": [
+      "expo-localization",
+      "expo-notifications",
+      "expo-screen-orientation",
+      "llama.rn"
+    ],
     "extra": {
       "eas": {
         "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"
