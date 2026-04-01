@@ -52,3 +52,6 @@ yarn-error.*
 *.mmbak
 skills-lock.json
 /.agents
+
+# training data
+/training
