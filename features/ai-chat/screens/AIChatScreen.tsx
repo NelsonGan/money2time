@@ -1280,14 +1280,14 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     tone="muted"
                     className="mt-4 text-center text-base leading-6"
                   >
-                    Type a transaction in plain text
+                    {I18n.t('aiChat.empty_state_title')}
                   </Text>
                   <Text
                     variant="caption"
                     tone="muted"
                     className="mt-1 text-center"
                   >
-                    Use @ to tag accounts and categories
+                    {I18n.t('aiChat.empty_state_subtitle')}
                   </Text>
 
                   {/* Quick suggestion chips */}
@@ -1746,7 +1746,7 @@ function FeatureChip({
   bgColor,
   borderColor,
 }: {
-  icon: React.ReactNode;
+  icon: JSX.Element;
   label: string;
   color: string;
   bgColor: string;
