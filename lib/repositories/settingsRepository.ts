@@ -42,6 +42,7 @@ class SettingsRepository {
         | 'aiChatEnabled'
         | 'aiChatDefaultAccountId'
         | 'aiChatDefaultIncomeCategoryId'
+        | 'aiChatDefaultExpenseCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -116,6 +117,7 @@ class SettingsRepository {
         aiChatEnabled: false,
         aiChatDefaultAccountId: null,
         aiChatDefaultIncomeCategoryId: null,
+        aiChatDefaultExpenseCategoryId: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         onboardingCompleted: false,

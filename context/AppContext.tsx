@@ -140,6 +140,7 @@ interface AppContextValue extends AppState {
         | 'aiChatEnabled'
         | 'aiChatDefaultAccountId'
         | 'aiChatDefaultIncomeCategoryId'
+        | 'aiChatDefaultExpenseCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -819,10 +820,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ) => {
       runMutation(() => {
         categoriesRepository.update(id, updates);
+        const currentSettings = settingsRepository.get();
         if (updates.type === 'expense') {
-          const currentSettings = settingsRepository.get();
           if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
             settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
+          }
+        }
+        if (updates.type === 'income') {
+          if (currentSettings.aiChatDefaultExpenseCategoryId === id) {
+            settingsRepository.updateSettings({ aiChatDefaultExpenseCategoryId: null });
           }
         }
       });
@@ -837,6 +843,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const currentSettings = settingsRepository.get();
         if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
           settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
+        }
+        if (currentSettings.aiChatDefaultExpenseCategoryId === id) {
+          settingsRepository.updateSettings({ aiChatDefaultExpenseCategoryId: null });
         }
       });
       void trackEvent(AnalyticsEvents.CATEGORY_DELETED);
@@ -1124,6 +1133,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'aiChatEnabled'
           | 'aiChatDefaultAccountId'
           | 'aiChatDefaultIncomeCategoryId'
+          | 'aiChatDefaultExpenseCategoryId'
           | 'onboardingCompleted'
           | 'userMode'
         >
