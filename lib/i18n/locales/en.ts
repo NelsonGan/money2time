@@ -1157,6 +1157,8 @@ const en = {
     reject: 'Reject',
     edit: 'Edit',
     accepted: 'Added',
+    empty_state_title: 'Type a transaction in plain text',
+    empty_state_subtitle: 'Use @ to tag accounts and categories',
     no_transactions:
       'I couldn\'t parse any transactions from that. Try something like "50 for groceries" or "earned 3000 salary".',
     error: 'Something went wrong. Try again.',
