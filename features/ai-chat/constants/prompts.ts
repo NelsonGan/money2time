@@ -9,6 +9,7 @@ export function buildSystemPrompt(
   allowTransfers: boolean,
   defaultAccountName?: string | null,
   defaultIncomeCategoryName?: string | null,
+  defaultExpenseCategoryName?: string | null,
 ): string {
   const yesterday = getYesterday(today);
 
@@ -52,6 +53,7 @@ ${allowTransfers ? '- "transfer 50 from X to Y" → transfer, amount 50, fromAcc
 - Mentions starting with "@" are explicit user selections. When the input ends with a "USE THESE VALUES" section, you MUST copy those exact field values into your output — they override any interpretation
 ${defaultAccountName ? `- When the user does not specify an account, use accountName "${defaultAccountName}". This is the user's default account` : '- If no account is mentioned, set accountName to null'}
 ${defaultIncomeCategoryName ? `- When the transaction is income and the user does not specify a category, use categoryName "${defaultIncomeCategoryName}". This is the user's default income category` : ''}
+${defaultExpenseCategoryName ? `- When the transaction is expense and no category from the list is a close match, use categoryName "${defaultExpenseCategoryName}". This is the user's default expense category` : ''}
 - Categories are organized as parent > subcategory (e.g. "Transport > Fuel" means "Fuel" is a subcategory of "Transport"). When a subcategory fits, use the subcategory name. Only use the parent name when no subcategory is a better match.
 - If no real category from the list is a close match, set "categoryName" to null. Never invent a new category name
 - Copy notes from the user's own wording when they clearly provided one; otherwise set "note" to null
