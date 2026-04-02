@@ -1,4 +1,14 @@
-import { Check, Download, HardDrive, Settings, Shield, Trash2 } from 'lucide-react-native';
+import {
+  Check,
+  Download,
+  HardDrive,
+  MessageSquareText,
+  Settings,
+  Shield,
+  Sparkles,
+  Trash2,
+  Zap,
+} from 'lucide-react-native';
 import {
   useCallback,
   useEffect,
@@ -17,6 +27,17 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -43,6 +64,7 @@ import { newId } from '~/utils/id';
 
 import { ChatInput, type ChatInputMentionOption } from '../components/ChatInput';
 import { TransactionPreviewCard } from '../components/TransactionPreviewCard';
+import { TypingDots } from '../components/TypingDots';
 import type { ModelDefinition } from '../constants/models';
 import { AI_CHAT_DEFAULT_MODEL, AVAILABLE_MODELS, getModelById } from '../constants/models';
 import type { LLMTransactionOutput } from '../constants/prompts';
@@ -1012,6 +1034,23 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     );
   }, [isSimpleMode, placeholderPrimaryAccount, placeholderTransferToAccount]);
 
+  const hasMessages = messages.length > 0;
+
+  const suggestionChips = useMemo(() => {
+    const chips: { label: string; value: string }[] = [];
+    const primaryName = placeholderPrimaryAccount?.name;
+    if (primaryName) {
+      chips.push({ label: `20 lunch @${primaryName}`, value: `20 lunch @${primaryName}` });
+      chips.push({ label: `50 groceries`, value: `50 groceries` });
+      chips.push({ label: `earned 100 freelance`, value: `earned 100 freelance @${primaryName}` });
+    } else {
+      chips.push({ label: '20 for lunch', value: '20 for lunch' });
+      chips.push({ label: '50 groceries', value: '50 groceries' });
+      chips.push({ label: 'earned 100', value: 'earned 100' });
+    }
+    return chips;
+  }, [placeholderPrimaryAccount]);
+
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.chatContent}>
     <SettingsPageLayout edges={['top']}>
@@ -1027,9 +1066,14 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                 void triggerHaptic('selection');
                 setShowSettingsModal(true);
               }}
-              className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card shadow-soft"
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: `${themeColors.primary}10`,
+                borderWidth: 1,
+                borderColor: `${themeColors.primary}20`,
+              }}
             >
-              <Settings size={18} color={themeColors.textMuted} />
+              <Settings size={17} color={themeColors.primary} />
             </Pressable>
           ) : null
         }
@@ -1038,61 +1082,86 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       {isAiGateVisible ? (
         <View className="flex-1 px-5">
           <View className="flex-1 items-center" style={styles.gateContent}>
-            <View className="relative w-full overflow-hidden rounded-[30px] border border-border/30 bg-card px-5 py-6 shadow-soft">
+            <Animated.View
+              entering={FadeInUp.delay(100).springify().damping(16).stiffness(140)}
+              className="relative w-full overflow-hidden rounded-[28px] border bg-card"
+              style={{
+                borderColor: `${themeColors.border}30`,
+                shadowColor: themeColors.primary,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.08,
+                shadowRadius: 32,
+                elevation: 8,
+              }}
+            >
+              {/* Decorative background orbs */}
               <View
-                className="absolute -right-10 -top-10 h-28 w-28 rounded-full"
-                style={{ backgroundColor: `${themeColors.primary}12` }}
+                className="absolute -right-12 -top-12 h-36 w-36 rounded-full"
+                style={{ backgroundColor: `${themeColors.primary}08` }}
               />
               <View
-                className="absolute -left-6 bottom-10 h-20 w-20 rounded-full"
-                style={{ backgroundColor: `${themeColors.primary}0A` }}
+                className="absolute -left-8 bottom-8 h-24 w-24 rounded-full"
+                style={{ backgroundColor: `${themeColors.accent}06` }}
               />
 
-              <View className="items-center">
-                <View
-                  className="h-14 w-14 items-center justify-center rounded-full border"
-                  style={{
-                    borderColor: `${themeColors.primary}30`,
-                    backgroundColor: `${themeColors.primary}12`,
-                  }}
+              <View className="items-center px-6 pb-7 pt-8">
+                {/* Animated icon */}
+                <GatePulseIcon color={themeColors.primary} />
+
+                {/* Feature chips */}
+                <Animated.View
+                  entering={FadeInDown.delay(200).duration(300)}
+                  className="mt-5 flex-row flex-wrap justify-center gap-2"
                 >
-                  <Shield size={24} color={themeColors.primary} />
-                </View>
+                  <FeatureChip
+                    icon={<Shield size={11} color={themeColors.primary} />}
+                    label={I18n.t('aiChat.enable_chip_private')}
+                    color={themeColors.primary}
+                    bgColor={themeColors.background}
+                    borderColor={themeColors.border}
+                  />
+                  <FeatureChip
+                    icon={<Zap size={11} color={themeColors.primary} />}
+                    label={I18n.t('aiChat.enable_chip_local')}
+                    color={themeColors.primary}
+                    bgColor={themeColors.background}
+                    borderColor={themeColors.border}
+                  />
+                  <FeatureChip
+                    icon={<HardDrive size={11} color={themeColors.textMuted} />}
+                    label={activeModel.sizeLabel}
+                    color={themeColors.textMuted}
+                    bgColor={themeColors.background}
+                    borderColor={themeColors.border}
+                  />
+                </Animated.View>
 
-                <View className="mt-4 flex-row flex-wrap justify-center gap-2">
-                  <View className="rounded-full border border-border/40 bg-background/60 px-3 py-1">
-                    <Text variant="caption" tone="muted" className="text-[11px]">
-                      {I18n.t('aiChat.enable_chip_private')}
-                    </Text>
-                  </View>
-                  <View className="rounded-full border border-border/40 bg-background/60 px-3 py-1">
-                    <Text variant="caption" tone="muted" className="text-[11px]">
-                      {I18n.t('aiChat.enable_chip_local')}
-                    </Text>
-                  </View>
-                  <View className="rounded-full border border-border/40 bg-background/60 px-3 py-1">
-                    <Text variant="caption" tone="muted" className="text-[11px]">
-                      {activeModel.sizeLabel}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text variant="heading" className="mt-5 text-center tracking-tight">
-                  {I18n.t('aiChat.enable_title')}
-                </Text>
-                <Text variant="body" tone="muted" className="mt-2 text-center">
-                  {I18n.t('aiChat.enable_description_intro')}{' '}
-                  {I18n.t('aiChat.enable_description_download_prefix')}{' '}
-                  <Text variant="bodyStrong" tone="muted">
-                    {I18n.t('aiChat.enable_description_once')}
-                  </Text>{' '}
-                  {I18n.t('aiChat.enable_description_download_suffix')}
-                </Text>
+                <Animated.View entering={FadeInDown.delay(300).duration(300)} className="mt-5">
+                  <Text variant="heading" className="text-center text-xl tracking-tight">
+                    {I18n.t('aiChat.enable_title')}
+                  </Text>
+                </Animated.View>
+                <Animated.View entering={FadeInDown.delay(350).duration(300)} className="mt-2.5">
+                  <Text variant="body" tone="muted" className="text-center leading-6">
+                    {I18n.t('aiChat.enable_description_intro')}{' '}
+                    {I18n.t('aiChat.enable_description_download_prefix')}{' '}
+                    <Text variant="bodyStrong" tone="muted">
+                      {I18n.t('aiChat.enable_description_once')}
+                    </Text>{' '}
+                    {I18n.t('aiChat.enable_description_download_suffix')}
+                  </Text>
+                </Animated.View>
 
                 {isDownloadingActiveModel ? (
-                  <View className="mt-5 w-full">
-                    <View className="h-2 overflow-hidden rounded-full bg-border/40">
-                      <View
+                  <Animated.View
+                    entering={FadeIn.duration(200)}
+                    className="mt-6 w-full"
+                  >
+                    <View
+                      className="h-2.5 overflow-hidden rounded-full"
+                      style={{ backgroundColor: `${themeColors.border}30` }}
+                    >
+                      <Animated.View
                         className="h-full rounded-full"
                         style={{
                           width: `${gateProgressPercent ?? 0}%`,
@@ -1100,122 +1169,198 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                         }}
                       />
                     </View>
-                    <Text variant="caption" tone="muted" className="mt-2 text-center">
+                    <Text variant="caption" tone="muted" className="mt-2.5 text-center">
                       {I18n.t('aiChat.downloading_local_ai_progress', {
                         progress: gateProgressPercent ?? 0,
                       })}
                     </Text>
-                  </View>
+                  </Animated.View>
                 ) : null}
 
                 {activationError ? (
-                  <Text variant="caption" tone="error" className="mt-4 text-center">
-                    {activationError}
-                  </Text>
+                  <Animated.View entering={FadeIn.duration(200)} className="mt-4">
+                    <Text variant="caption" tone="error" className="text-center">
+                      {activationError}
+                    </Text>
+                  </Animated.View>
                 ) : null}
 
-                <Button
+                <Animated.View
+                  entering={FadeInDown.delay(450).duration(300)}
                   className="mt-6 w-full"
-                  onPress={() => {
-                    void handleEnableAiFeature();
-                  }}
-                  disabled={
-                    isDownloadingActiveModel || isActivatingAi || modelStatus === 'loading'
-                  }
                 >
-                  <View className="flex-row items-center gap-2">
-                    {isDownloadingActiveModel || isActivatingAi || modelStatus === 'loading' ? (
-                      <ActivityIndicator size="small" color={GATE_BUTTON_CONTENT_COLOR} />
-                    ) : (
-                      <Download size={16} color={GATE_BUTTON_CONTENT_COLOR} />
-                    )}
-                    <Text variant="bodyStrong" style={{ color: GATE_BUTTON_CONTENT_COLOR }}>
-                      {isDownloadingActiveModel
-                        ? I18n.t('aiChat.downloading_local_ai')
-                        : isActivatingAi || modelStatus === 'loading'
-                          ? I18n.t('aiChat.preparing_local_ai')
-                          : isActiveModelDownloaded
-                            ? I18n.t('aiChat.enable_local_ai')
-                            : I18n.t('aiChat.download_local_ai')}
-                    </Text>
-                  </View>
-                </Button>
+                  <Button
+                    onPress={() => {
+                      void handleEnableAiFeature();
+                    }}
+                    disabled={
+                      isDownloadingActiveModel || isActivatingAi || modelStatus === 'loading'
+                    }
+                  >
+                    <View className="flex-row items-center gap-2.5">
+                      {isDownloadingActiveModel || isActivatingAi || modelStatus === 'loading' ? (
+                        <ActivityIndicator size="small" color={GATE_BUTTON_CONTENT_COLOR} />
+                      ) : (
+                        <Download size={16} color={GATE_BUTTON_CONTENT_COLOR} />
+                      )}
+                      <Text variant="bodyStrong" style={{ color: GATE_BUTTON_CONTENT_COLOR }}>
+                        {isDownloadingActiveModel
+                          ? I18n.t('aiChat.downloading_local_ai')
+                          : isActivatingAi || modelStatus === 'loading'
+                            ? I18n.t('aiChat.preparing_local_ai')
+                            : isActiveModelDownloaded
+                              ? I18n.t('aiChat.enable_local_ai')
+                              : I18n.t('aiChat.download_local_ai')}
+                      </Text>
+                    </View>
+                  </Button>
+                </Animated.View>
 
                 <Text variant="caption" tone="muted" className="mt-3 text-center">
                   {I18n.t('aiChat.enable_stay_on_screen')}
                 </Text>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </View>
       ) : (
         <View style={styles.chatContent}>
           {isBusyScreenVisible ? (
-            <View className="flex-1 px-5">
-              <View className="flex-1 items-center justify-center" style={styles.busyContent}>
-                <View className="relative w-full overflow-hidden rounded-[30px] border border-border/30 bg-card px-5 py-6 shadow-soft">
-                  <View
-                    className="absolute -right-10 -top-10 h-28 w-28 rounded-full"
-                    style={{ backgroundColor: `${themeColors.primary}12` }}
-                  />
-                  <View
-                    className="absolute -left-6 bottom-10 h-20 w-20 rounded-full"
-                    style={{ backgroundColor: `${themeColors.primary}0A` }}
-                  />
-
-                  <View className="items-center">
-                    <View
-                      className="h-16 w-16 items-center justify-center rounded-full border"
-                      style={{
-                        borderColor: `${themeColors.primary}30`,
-                        backgroundColor: `${themeColors.primary}12`,
-                      }}
-                    >
-                      <ActivityIndicator size="large" color={themeColors.primary} />
-                    </View>
-
-                    <Text variant="heading" className="mt-5 text-center tracking-tight">
-                      {I18n.t('aiChat.busy_title')}
-                    </Text>
-                    <Text variant="body" tone="muted" className="mt-2 text-center">
-                      {I18n.t('aiChat.busy_description')}
-                    </Text>
-                  </View>
+            <View className="flex-1 items-center justify-center px-5">
+              <Animated.View
+                entering={FadeIn.springify().damping(14).stiffness(120)}
+                className="w-full items-center rounded-[28px] border bg-card px-6 py-8"
+                style={{
+                  borderColor: `${themeColors.border}30`,
+                  shadowColor: themeColors.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.06,
+                  shadowRadius: 20,
+                  elevation: 6,
+                }}
+              >
+                <View
+                  className="h-16 w-16 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: `${themeColors.primary}10` }}
+                >
+                  <TypingDots color={themeColors.primary} dotSize={8} gap={6} />
                 </View>
-              </View>
+
+                <Text variant="heading" className="mt-5 text-center tracking-tight">
+                  {I18n.t('aiChat.busy_title')}
+                </Text>
+                <Text variant="body" tone="muted" className="mt-2 text-center leading-6">
+                  {I18n.t('aiChat.busy_description')}
+                </Text>
+              </Animated.View>
             </View>
           ) : (
             <ScrollView
               ref={scrollRef}
               className="flex-1"
-              contentContainerStyle={styles.messagesContent}
+              contentContainerStyle={[
+                styles.messagesContent,
+                !hasMessages && styles.emptyMessagesContent,
+              ]}
               keyboardDismissMode="interactive"
             >
-              {messages.map((msg) => {
+              {!hasMessages && !isGenerating ? (
+                <Animated.View
+                  entering={FadeIn.delay(200).duration(400)}
+                  className="flex-1 items-center justify-center px-4"
+                >
+                  <View
+                    className="h-16 w-16 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: `${themeColors.primary}0C` }}
+                  >
+                    <MessageSquareText size={28} color={`${themeColors.primary}60`} />
+                  </View>
+                  <Text
+                    variant="body"
+                    tone="muted"
+                    className="mt-4 text-center text-base leading-6"
+                  >
+                    Type a transaction in plain text
+                  </Text>
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    className="mt-1 text-center"
+                  >
+                    Use @ to tag accounts and categories
+                  </Text>
+
+                  {/* Quick suggestion chips */}
+                  <View className="mt-6 flex-row flex-wrap justify-center gap-2">
+                    {suggestionChips.map((chip) => (
+                      <Pressable
+                        key={chip.label}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          handleSend(chip.value);
+                        }}
+                        className="rounded-full px-4 py-2"
+                        style={{
+                          backgroundColor: `${themeColors.primary}08`,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.primary}18`,
+                        }}
+                      >
+                        <View className="flex-row items-center gap-1.5">
+                          <Sparkles size={12} color={`${themeColors.primary}80`} />
+                          <Text
+                            variant="caption"
+                            className="font-medium"
+                            style={{ color: `${themeColors.primary}CC` }}
+                          >
+                            {chip.label}
+                          </Text>
+                        </View>
+                      </Pressable>
+                    ))}
+                  </View>
+                </Animated.View>
+              ) : null}
+
+              {messages.map((msg, msgIndex) => {
                 const hasTransactions = Boolean(msg.transactions && msg.transactions.length > 0);
 
                 return (
-                  <View
+                  <Animated.View
                     key={msg.id}
+                    entering={FadeInUp.delay(msgIndex * 40)
+                      .springify()
+                      .damping(16)
+                      .stiffness(160)}
                     className={`mb-3 ${
                       msg.role === 'user'
                         ? 'max-w-[85%] self-end'
                         : hasTransactions
                           ? 'w-full self-stretch'
-                          : 'self-start'
+                          : 'max-w-[90%] self-start'
                     }`}
                   >
                     {msg.content ? (
                       <View
-                        className="rounded-2xl px-4 py-3"
+                        className={`px-4 py-3 ${
+                          msg.role === 'user'
+                            ? 'rounded-2xl rounded-br-lg'
+                            : 'rounded-2xl rounded-bl-lg'
+                        }`}
                         style={{
                           backgroundColor:
                             msg.role === 'user' ? themeColors.primary : themeColors.surface,
+                          ...(msg.role !== 'user'
+                            ? {
+                                borderWidth: 1,
+                                borderColor: `${themeColors.border}30`,
+                              }
+                            : {}),
                         }}
                       >
                         <Text
                           variant="body"
-                          className="text-base"
+                          className="text-base leading-6"
                           style={{
                             color: msg.role === 'user' ? '#fff' : themeColors.text,
                           }}
@@ -1226,7 +1371,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     ) : null}
 
                     {hasTransactions ? (
-                      <View className={`w-full gap-2 ${msg.content ? 'mt-2' : ''}`}>
+                      <View className={`w-full gap-2.5 ${msg.content ? 'mt-2.5' : ''}`}>
                         {msg.transactions?.map((t) => (
                           <TransactionPreviewCard
                             key={t.tempId}
@@ -1239,19 +1384,27 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                         ))}
                       </View>
                     ) : null}
-                  </View>
+                  </Animated.View>
                 );
               })}
 
               {isGenerating ? (
-                <View className="mb-3 self-start">
+                <Animated.View
+                  entering={FadeIn.duration(200)}
+                  exiting={FadeOut.duration(150)}
+                  className="mb-3 self-start"
+                >
                   <View
-                    className="rounded-2xl px-4 py-3"
-                    style={{ backgroundColor: themeColors.surface }}
+                    className="rounded-2xl rounded-bl-lg px-5 py-3.5"
+                    style={{
+                      backgroundColor: themeColors.surface,
+                      borderWidth: 1,
+                      borderColor: `${themeColors.border}30`,
+                    }}
                   >
-                    <ActivityIndicator size="small" color={themeColors.primary} />
+                    <TypingDots color={themeColors.primary} />
                   </View>
-                </View>
+                </Animated.View>
               ) : null}
             </ScrollView>
           )}
@@ -1341,7 +1494,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
               <CardContent className="py-5 gap-4">
                 <View className="flex-row items-center gap-3">
                   <View
-                    className="h-10 w-10 items-center justify-center rounded-full"
+                    className="h-10 w-10 items-center justify-center rounded-xl"
                     style={{ backgroundColor: `${themeColors.primary}14` }}
                   >
                     <HardDrive size={18} color={themeColors.primary} />
@@ -1361,9 +1514,21 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   return (
                     <View
                       key={model.id}
-                      className="rounded-2xl border border-border/30 bg-background/60 px-4 py-3"
+                      className="overflow-hidden rounded-2xl border bg-background/60"
+                      style={{
+                        borderColor:
+                          isActive && isDownloaded && modelStatus === 'ready'
+                            ? `${themeColors.primary}30`
+                            : `${themeColors.border}30`,
+                      }}
                     >
-                      <View className="flex-row items-center gap-3">
+                      {isActive && isDownloaded && modelStatus === 'ready' ? (
+                        <View
+                          className="h-0.5 w-full"
+                          style={{ backgroundColor: themeColors.primary }}
+                        />
+                      ) : null}
+                      <View className="flex-row items-center gap-3 px-4 py-3">
                         <View className="flex-1">
                           <Text variant="bodyStrong">{model.displayName}</Text>
                           <Text variant="caption" tone="muted">
@@ -1373,19 +1538,27 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 
                         {isActive && isDownloaded && modelStatus === 'ready' ? (
                           <View
-                            className="h-8 w-8 items-center justify-center rounded-full"
-                            style={{ backgroundColor: `${themeColors.primary}20` }}
+                            className="h-8 w-8 items-center justify-center rounded-xl"
+                            style={{ backgroundColor: `${themeColors.primary}18` }}
                           >
-                            <Check size={16} color={themeColors.primary} />
+                            <Check size={15} color={themeColors.primary} />
                           </View>
                         ) : null}
 
                         {isDownloaded && !(isActive && modelStatus === 'ready') ? (
                           <Pressable
                             onPress={() => void handleSwitchModel(model)}
-                            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5"
+                            className="rounded-xl border px-3 py-1.5"
+                            style={{
+                              borderColor: `${themeColors.primary}30`,
+                              backgroundColor: `${themeColors.primary}08`,
+                            }}
                           >
-                            <Text variant="caption" style={{ color: themeColors.primary }}>
+                            <Text
+                              variant="caption"
+                              className="font-medium"
+                              style={{ color: themeColors.primary }}
+                            >
                               {I18n.t('aiChat.select_model')}
                             </Text>
                           </Pressable>
@@ -1394,11 +1567,19 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                         {!isDownloaded && !isDownloading ? (
                           <Pressable
                             onPress={() => void handleSwitchModel(model)}
-                            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5"
+                            className="rounded-xl border px-3 py-1.5"
+                            style={{
+                              borderColor: `${themeColors.primary}30`,
+                              backgroundColor: `${themeColors.primary}08`,
+                            }}
                           >
                             <View className="flex-row items-center gap-1.5">
                               <Download size={12} color={themeColors.primary} />
-                              <Text variant="caption" style={{ color: themeColors.primary }}>
+                              <Text
+                                variant="caption"
+                                className="font-medium"
+                                style={{ color: themeColors.primary }}
+                              >
                                 {I18n.t('aiChat.download')}
                               </Text>
                             </View>
@@ -1412,8 +1593,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                         {isDownloaded && !(isActive && modelStatus === 'ready') ? (
                           <Pressable
                             onPress={() => void handleDeleteModel(model)}
-                            className="ml-1 h-8 w-8 items-center justify-center rounded-full"
-                            style={{ backgroundColor: `${themeColors.error}14` }}
+                            className="ml-1 h-8 w-8 items-center justify-center rounded-xl"
+                            style={{ backgroundColor: `${themeColors.error}0E` }}
                           >
                             <Trash2 size={14} color={themeColors.error} />
                           </Pressable>
@@ -1432,7 +1613,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     style={[
                       styles.disableIcon,
                       {
-                        backgroundColor: `${themeColors.error}14`,
+                        backgroundColor: `${themeColors.error}0E`,
                       },
                     ]}
                   >
@@ -1500,6 +1681,94 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   );
 }
 
+/* ---------- Sub-components ---------- */
+
+function GatePulseIcon({ color }: { color: string }) {
+  const pulseScale = useSharedValue(1);
+  const pulseOpacity = useSharedValue(0.5);
+
+  useEffect(() => {
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.3, { duration: 1200 }),
+        withTiming(1, { duration: 1200 }),
+      ),
+      -1,
+      false,
+    );
+    pulseOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0, { duration: 1200 }),
+        withTiming(0.5, { duration: 1200 }),
+      ),
+      -1,
+      false,
+    );
+  }, [pulseOpacity, pulseScale]);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+    opacity: pulseOpacity.value,
+  }));
+
+  return (
+    <View className="items-center justify-center" style={{ width: 72, height: 72 }}>
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            width: 72,
+            height: 72,
+            borderRadius: 36,
+            backgroundColor: `${color}20`,
+          },
+          pulseStyle,
+        ]}
+      />
+      <View
+        className="h-16 w-16 items-center justify-center rounded-full"
+        style={{
+          backgroundColor: `${color}12`,
+          borderWidth: 1,
+          borderColor: `${color}25`,
+        }}
+      >
+        <Sparkles size={26} color={color} />
+      </View>
+    </View>
+  );
+}
+
+function FeatureChip({
+  icon,
+  label,
+  color,
+  bgColor,
+  borderColor,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}) {
+  return (
+    <View
+      className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+      style={{
+        backgroundColor: `${bgColor}80`,
+        borderWidth: 1,
+        borderColor: `${borderColor}40`,
+      }}
+    >
+      {icon}
+      <Text variant="caption" className="text-[11px] font-medium" style={{ color }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   chatContent: {
     flex: 1,
@@ -1508,11 +1777,11 @@ const styles = StyleSheet.create({
     padding: 16,
     flexGrow: 1,
   },
+  emptyMessagesContent: {
+    justifyContent: 'center',
+  },
   gateContent: {
     paddingTop: 32,
-  },
-  busyContent: {
-    paddingBottom: 24,
   },
   headerWrap: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
@@ -1529,7 +1798,7 @@ const styles = StyleSheet.create({
   disableIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
