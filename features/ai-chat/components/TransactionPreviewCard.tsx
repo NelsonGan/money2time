@@ -1,8 +1,16 @@
-import { ArrowRightLeft, Check, Pencil, TrendingDown, TrendingUp, X } from 'lucide-react-native';
+import {
+  ArrowRightLeft,
+  Check,
+  Pencil,
+  TrendingDown,
+  TrendingUp,
+  X,
+} from 'lucide-react-native';
 import { useCallback, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeInUp,
   FadeOut,
   Layout,
@@ -50,6 +58,12 @@ function useButtonScale() {
   return { animatedStyle, onPressIn, onPressOut };
 }
 
+const TYPE_CONFIG = {
+  expense: { icon: TrendingDown, label: 'Expense' },
+  income: { icon: TrendingUp, label: 'Income' },
+  transfer: { icon: ArrowRightLeft, label: 'Transfer' },
+} as const;
+
 export function TransactionPreviewCard({
   transaction,
   acceptDisabled = false,
@@ -70,13 +84,15 @@ export function TransactionPreviewCard({
     opacity: cardOpacity.value,
   }));
 
-  const typeConfig = {
-    expense: { icon: TrendingDown, color: themeColors.error, label: 'Expense' },
-    income: { icon: TrendingUp, color: themeColors.success, label: 'Income' },
-    transfer: { icon: ArrowRightLeft, color: themeColors.primary, label: 'Transfer' },
-  }[transaction.type];
+  const typeColor =
+    transaction.type === 'expense'
+      ? themeColors.error
+      : transaction.type === 'income'
+        ? themeColors.success
+        : themeColors.primary;
 
-  const TypeIcon = typeConfig.icon;
+  const config = TYPE_CONFIG[transaction.type];
+  const TypeIcon = config.icon;
 
   const isAccepted = transaction.status === 'accepted';
   const isRejected = transaction.status === 'rejected';
@@ -113,33 +129,36 @@ export function TransactionPreviewCard({
       layout={CARD_LAYOUT}
       exiting={CARD_REJECT_EXITING}
       style={cardAnimatedStyle}
-      className={`w-full rounded-xl border border-border/50 bg-card ${
-        isAccepted ? 'px-3 py-2.5' : 'p-3'
-      }`}
+      className="w-full overflow-hidden rounded-2xl"
     >
       {isAccepted ? (
         <Animated.View
           key="accepted"
           entering={CARD_CONTENT_ENTERING}
           exiting={CARD_CONTENT_EXITING}
+          className="rounded-2xl border px-4 py-3"
+          style={{
+            borderColor: `${themeColors.success}30`,
+            backgroundColor: `${themeColors.success}08`,
+          }}
         >
-          <View className="flex-row items-center justify-between gap-3">
-            <Text variant="caption" tone="muted" className="text-[10px] uppercase tracking-[0.8px]">
-              {I18n.t('transactions.editor.amount')}
-            </Text>
-            <View className="flex-row items-center gap-2">
-              <Text variant="subheading" className="text-base">
-                {transaction.currency}
-                {transaction.amount.toFixed(2)}
+          <View className="flex-row items-center gap-3">
+            <Animated.View
+              entering={FadeIn.delay(80).springify().damping(10).stiffness(200)}
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${themeColors.success}18` }}
+            >
+              <Check size={16} color={themeColors.success} />
+            </Animated.View>
+            <View className="min-w-0 flex-1">
+              <Text variant="caption" tone="muted" className="text-[10px] uppercase tracking-wider">
+                {config.label}
               </Text>
-              <Animated.View
-                entering={FadeIn.delay(100).springify().damping(10).stiffness(200)}
-                className="h-7 w-7 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${themeColors.success}20` }}
-              >
-                <Check size={15} color={themeColors.success} />
-              </Animated.View>
             </View>
+            <Text variant="subheading" className="text-base" style={{ color: themeColors.success }}>
+              {transaction.currency}
+              {transaction.amount.toFixed(2)}
+            </Text>
           </View>
         </Animated.View>
       ) : (
@@ -147,120 +166,173 @@ export function TransactionPreviewCard({
           key="pending"
           entering={CARD_CONTENT_ENTERING}
           exiting={CARD_CONTENT_EXITING}
+          className="rounded-2xl border"
+          style={{
+            borderColor: `${themeColors.border}40`,
+            backgroundColor: themeColors.card,
+          }}
         >
-          <View className="flex-row items-start justify-between gap-3">
-            <View className="min-w-0 flex-1 flex-row items-center gap-2">
-              <View
-                className="h-7 w-7 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${typeConfig.color}18` }}
-              >
-                <TypeIcon size={14} color={typeConfig.color} />
+          {/* Accent stripe */}
+          <View
+            className="h-1 w-full rounded-t-2xl"
+            style={{ backgroundColor: typeColor }}
+          />
+
+          <View className="px-4 pb-3.5 pt-3">
+            {/* Header: type badge + amount */}
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2.5">
+                <View
+                  className="h-8 w-8 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: `${typeColor}14` }}
+                >
+                  <TypeIcon size={15} color={typeColor} />
+                </View>
+                <Text
+                  variant="caption"
+                  className="font-semibold uppercase tracking-wider text-[11px]"
+                  style={{ color: typeColor }}
+                >
+                  {config.label}
+                </Text>
               </View>
-              <Text variant="caption" style={{ color: typeConfig.color }} className="font-semibold">
-                {typeConfig.label}
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text
-                variant="caption"
-                tone="muted"
-                className="text-[10px] uppercase tracking-[0.8px]"
-              >
-                {I18n.t('transactions.editor.amount')}
-              </Text>
-              <Text variant="subheading" className="text-base">
+              <Text variant="heading" className="text-xl tracking-tight">
                 {transaction.currency}
                 {transaction.amount.toFixed(2)}
               </Text>
             </View>
-          </View>
 
-          <View className="mt-3 gap-2.5 border-t border-border/40 pt-3">
-            {transaction.type === 'transfer' ? (
-              <>
-                {transaction.fromAccountName ? (
-                  <PreviewField
-                    label={I18n.t('transactions.editor.from')}
-                    value={transaction.fromAccountName}
-                  />
-                ) : null}
-                {transaction.toAccountName ? (
-                  <PreviewField
-                    label={I18n.t('transactions.editor.to')}
-                    value={transaction.toAccountName}
-                  />
-                ) : null}
-              </>
-            ) : (
-              <>
-                {transaction.categoryName ? (
-                  <PreviewField
-                    label={I18n.t('transactions.editor.category')}
-                    value={
-                      transaction.categoryIcon
-                        ? `${transaction.categoryIcon} ${transaction.categoryName}`
-                        : transaction.categoryName
-                    }
-                  />
-                ) : null}
-                {transaction.accountName ? (
-                  <PreviewField
-                    label={I18n.t('transactions.editor.account')}
-                    value={transaction.accountName}
-                  />
-                ) : null}
-              </>
-            )}
-            {transaction.note ? (
-              <PreviewField label={I18n.t('transaction_detail.note')} value={transaction.note} />
-            ) : null}
-            {transaction.showDate ? (
-              <PreviewField label={I18n.t('transactions.editor.date')} value={transaction.date} />
-            ) : null}
-          </View>
+            {/* Details rows */}
+            <Animated.View
+              entering={FadeInDown.delay(60).duration(200)}
+              className="mt-3 gap-2"
+            >
+              {transaction.type === 'transfer' ? (
+                <>
+                  {transaction.fromAccountName ? (
+                    <PreviewField
+                      label={I18n.t('transactions.editor.from')}
+                      value={transaction.fromAccountName}
+                      color={typeColor}
+                    />
+                  ) : null}
+                  {transaction.toAccountName ? (
+                    <PreviewField
+                      label={I18n.t('transactions.editor.to')}
+                      value={transaction.toAccountName}
+                      color={typeColor}
+                    />
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {transaction.categoryName ? (
+                    <PreviewField
+                      label={I18n.t('transactions.editor.category')}
+                      value={
+                        transaction.categoryIcon
+                          ? `${transaction.categoryIcon} ${transaction.categoryName}`
+                          : transaction.categoryName
+                      }
+                      color={typeColor}
+                    />
+                  ) : null}
+                  {transaction.accountName ? (
+                    <PreviewField
+                      label={I18n.t('transactions.editor.account')}
+                      value={transaction.accountName}
+                      color={typeColor}
+                    />
+                  ) : null}
+                </>
+              )}
+              {transaction.note ? (
+                <PreviewField
+                  label={I18n.t('transaction_detail.note')}
+                  value={transaction.note}
+                  color={typeColor}
+                />
+              ) : null}
+              {transaction.showDate ? (
+                <PreviewField
+                  label={I18n.t('transactions.editor.date')}
+                  value={transaction.date}
+                  color={typeColor}
+                />
+              ) : null}
+            </Animated.View>
 
-          <View className="mt-2.5 flex-row items-center justify-end gap-1.5">
-            <AnimatedPressable
-              onPressIn={acceptBtnScale.onPressIn}
-              onPressOut={acceptBtnScale.onPressOut}
-              onPress={handleAccept}
-              disabled={acceptDisabled}
-              style={[
-                {
-                  backgroundColor: acceptDisabled
-                    ? `${themeColors.border}40`
-                    : `${themeColors.success}20`,
-                },
-                acceptBtnScale.animatedStyle,
-              ]}
-              className="h-8 w-8 items-center justify-center rounded-full"
-              hitSlop={4}
-            >
-              <Check
-                size={16}
-                color={acceptDisabled ? themeColors.textMuted : themeColors.success}
-              />
-            </AnimatedPressable>
-            <AnimatedPressable
-              onPressIn={editBtnScale.onPressIn}
-              onPressOut={editBtnScale.onPressOut}
-              onPress={handleEdit}
-              style={[{ backgroundColor: `${themeColors.primary}20` }, editBtnScale.animatedStyle]}
-              className="h-8 w-8 items-center justify-center rounded-full"
-              hitSlop={4}
-            >
-              <Pencil size={14} color={themeColors.primary} />
-            </AnimatedPressable>
-            <AnimatedPressable
-              onPressIn={rejectBtnScale.onPressIn}
-              onPressOut={rejectBtnScale.onPressOut}
-              onPress={handleReject}
-              style={[{ backgroundColor: `${themeColors.error}20` }, rejectBtnScale.animatedStyle]}
-              className="h-8 w-8 items-center justify-center rounded-full"
-              hitSlop={4}
-            >
-              <X size={16} color={themeColors.error} />
-            </AnimatedPressable>
+            {/* Action buttons */}
+            <View className="mt-3 flex-row items-center justify-end gap-2">
+              <AnimatedPressable
+                onPressIn={rejectBtnScale.onPressIn}
+                onPressOut={rejectBtnScale.onPressOut}
+                onPress={handleReject}
+                style={[
+                  { backgroundColor: `${themeColors.error}10` },
+                  rejectBtnScale.animatedStyle,
+                ]}
+                className="h-9 flex-row items-center gap-1.5 rounded-xl px-3"
+                hitSlop={4}
+              >
+                <X size={14} color={themeColors.error} />
+                <Text variant="caption" className="font-medium" style={{ color: themeColors.error }}>
+                  {I18n.t('aiChat.reject')}
+                </Text>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                onPressIn={editBtnScale.onPressIn}
+                onPressOut={editBtnScale.onPressOut}
+                onPress={handleEdit}
+                style={[
+                  { backgroundColor: `${themeColors.primary}10` },
+                  editBtnScale.animatedStyle,
+                ]}
+                className="h-9 flex-row items-center gap-1.5 rounded-xl px-3"
+                hitSlop={4}
+              >
+                <Pencil size={13} color={themeColors.primary} />
+                <Text
+                  variant="caption"
+                  className="font-medium"
+                  style={{ color: themeColors.primary }}
+                >
+                  {I18n.t('aiChat.edit')}
+                </Text>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                onPressIn={acceptBtnScale.onPressIn}
+                onPressOut={acceptBtnScale.onPressOut}
+                onPress={handleAccept}
+                disabled={acceptDisabled}
+                style={[
+                  {
+                    backgroundColor: acceptDisabled
+                      ? `${themeColors.border}40`
+                      : `${themeColors.success}14`,
+                  },
+                  acceptBtnScale.animatedStyle,
+                ]}
+                className="h-9 flex-row items-center gap-1.5 rounded-xl px-3"
+                hitSlop={4}
+              >
+                <Check
+                  size={15}
+                  color={acceptDisabled ? themeColors.textMuted : themeColors.success}
+                />
+                <Text
+                  variant="caption"
+                  className="font-medium"
+                  style={{
+                    color: acceptDisabled ? themeColors.textMuted : themeColors.success,
+                  }}
+                >
+                  {I18n.t('aiChat.accept')}
+                </Text>
+              </AnimatedPressable>
+            </View>
           </View>
         </Animated.View>
       )}
@@ -271,23 +343,25 @@ export function TransactionPreviewCard({
 function PreviewField({
   label,
   value,
-  valueTone = 'secondary',
+  color,
 }: {
   label: string;
   value: string;
-  valueTone?: 'default' | 'secondary' | 'muted' | 'primary' | 'success' | 'warning' | 'error';
+  color: string;
 }) {
   return (
-    <View className="flex-row items-start gap-3">
+    <View className="flex-row items-center gap-3 rounded-lg px-2.5 py-1.5"
+      style={{ backgroundColor: `${color}06` }}
+    >
       <Text
         variant="caption"
         tone="muted"
         numberOfLines={1}
-        className="w-24 shrink-0 pt-0.5 text-left text-[10px] uppercase tracking-[0.8px]"
+        className="w-20 shrink-0 text-[10px] uppercase tracking-wider"
       >
         {label}
       </Text>
-      <Text variant="body" tone={valueTone} className="min-w-0 flex-1 text-sm leading-5">
+      <Text variant="body" className="min-w-0 flex-1 text-sm">
         {value}
       </Text>
     </View>
