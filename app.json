@@ -27,8 +27,7 @@
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "buildNumber": "3"
+      }
     },
     "android": {
       "icon": "./assets/android/play_store_512.png",
