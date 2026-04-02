@@ -232,6 +232,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     aiChatEnabled: row.aiChatEnabled ?? false,
     aiChatDefaultAccountId: row.aiChatDefaultAccountId ?? null,
     aiChatDefaultIncomeCategoryId: row.aiChatDefaultIncomeCategoryId ?? null,
+    aiChatDefaultExpenseCategoryId: row.aiChatDefaultExpenseCategoryId ?? null,
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
     createdAt: row.createdAt,

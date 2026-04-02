@@ -163,7 +163,7 @@ export function ChatInput({
       const before = text.slice(0, activeMention.start);
       const after = text.slice(activeMention.end).replace(/^\s*/, '');
       const mentionText = `@${option.label}`;
-      const spacer = after.length > 0 ? ' ' : '';
+      const spacer = ' ';
       const nextText = `${before}${mentionText}${spacer}${after}`;
       const cursor = (before + mentionText + spacer).length;
 
