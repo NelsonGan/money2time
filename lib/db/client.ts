@@ -43,6 +43,7 @@ function ensureCoreData() {
         aiChatEnabled: false,
         aiChatDefaultAccountId: null,
         aiChatDefaultIncomeCategoryId: null,
+        aiChatDefaultExpenseCategoryId: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         onboardingCompleted: false,

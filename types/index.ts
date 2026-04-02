@@ -81,6 +81,7 @@ export interface UserSettings {
   aiChatEnabled: boolean;
   aiChatDefaultAccountId: string | null;
   aiChatDefaultIncomeCategoryId: string | null;
+  aiChatDefaultExpenseCategoryId: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   createdAt: string;

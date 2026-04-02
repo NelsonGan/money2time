@@ -1,5 +1,4 @@
 import {
-  Check,
   Download,
   HardDrive,
   MessageSquareText,
@@ -44,7 +43,6 @@ import {
   Button,
   Card,
   CardContent,
-  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -52,6 +50,10 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import {
+  AccountPanel,
+  CategoryPanel,
+} from '~/features/transactions/components/editor';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -65,8 +67,8 @@ import { newId } from '~/utils/id';
 import { ChatInput, type ChatInputMentionOption } from '../components/ChatInput';
 import { TransactionPreviewCard } from '../components/TransactionPreviewCard';
 import { TypingDots } from '../components/TypingDots';
-import type { ModelDefinition } from '../constants/models';
-import { AI_CHAT_DEFAULT_MODEL, AVAILABLE_MODELS, getModelById } from '../constants/models';
+import { AI_CHAT_MODEL } from '../constants/models';
+import { SMART_ENTRY_PLACEHOLDER_EXAMPLES } from '../constants/placeholders';
 import type { LLMTransactionOutput } from '../constants/prompts';
 import {
   alignParsedTransactionAmounts,
@@ -84,8 +86,6 @@ import * as llamaService from '../services/llamaService';
 import * as modelDownloadService from '../services/modelDownloadService';
 import * as modelManager from '../services/modelManager';
 
-const NO_DEFAULT_ACCOUNT_OPTION_VALUE = '__none__';
-const NO_DEFAULT_INCOME_CATEGORY_OPTION_VALUE = '__none_income_category__';
 const GATE_BUTTON_CONTENT_COLOR = '#14181f';
 const PREVIEW_REJECT_EXIT_DURATION_MS = 350;
 
@@ -274,6 +274,7 @@ interface AIChatScreenProps {
 export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const {
     accounts,
+    accountGroups,
     categories,
     settings,
     createTransaction,
@@ -298,8 +299,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     llamaService.subscribeToStatus,
     () => llamaService.getStatus().status,
   );
-  const [activeModelId, setActiveModelId] = useState<string>(AI_CHAT_DEFAULT_MODEL.id);
-  const activeModel: ModelDefinition = getModelById(activeModelId) ?? AI_CHAT_DEFAULT_MODEL;
+  const activeModel = AI_CHAT_MODEL;
   const activeModelDownloadProgress = useSyncExternalStore(
     modelDownloadService.subscribeToDownloadState,
     () => modelDownloadService.getModelDownloadProgress(activeModel.id),
@@ -307,10 +307,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const activationError = useSyncExternalStore(
     aiActivationService.subscribeToActivationState,
     aiActivationService.getActivationError,
-  );
-
-  const [downloadedModels, setDownloadedModels] = useState<string[]>(() =>
-    modelManager.getDownloadedModelFileNames(),
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -337,7 +333,15 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       ) ?? null,
     [categories, settings.aiChatDefaultIncomeCategoryId],
   );
-  const isActiveModelDownloaded = downloadedModels.includes(activeModel.fileName);
+  const defaultAiChatExpenseCategory = useMemo(
+    () =>
+      categories.find(
+        (category) =>
+          category.id === settings.aiChatDefaultExpenseCategoryId && category.type === 'expense',
+      ) ?? null,
+    [categories, settings.aiChatDefaultExpenseCategoryId],
+  );
+  const isActiveModelDownloaded = modelManager.isModelDownloaded(activeModel.fileName);
   const isDownloadingActiveModel = activeModelDownloadProgress !== null;
   const simpleWallet = useMemo(
     () => accounts.find((account) => account.id === simpleWalletId) ?? null,
@@ -373,53 +377,56 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       }),
     ];
   }, [accounts, categories]);
-  const defaultAccountSelectOptions = useMemo(
-    () => [
-      {
-        value: NO_DEFAULT_ACCOUNT_OPTION_VALUE,
-        label: I18n.t('aiChat.no_default_account'),
-      },
-      ...accounts.map((account) => ({
-        value: account.id,
-        label: account.name,
-        description: account.currency,
-        icon: getDefaultAccountIcon(),
-      })),
-    ],
-    [accounts],
+  const buildCategoryPanelData = useCallback(
+    (type: 'expense' | 'income') => {
+      const parents: { id: string; name: string; icon: string }[] = [];
+      const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
+      const topLevelById = new Map<string, Category>();
+
+      categories.forEach((category) => {
+        if (category.type !== type) return;
+        if (!category.parentId) {
+          parents.push({
+            id: category.id,
+            name: category.name,
+            icon: resolveCategoryIcon(category.icon),
+          });
+          topLevelById.set(category.id, category);
+        }
+      });
+
+      categories.forEach((category) => {
+        if (category.type !== type || !category.parentId) return;
+        const parentNode = topLevelById.get(category.parentId);
+        const children = childByParent.get(category.parentId) ?? [];
+        children.push({
+          id: category.id,
+          name: category.name,
+          icon: resolveCategoryIcon(category.icon, parentNode?.icon ?? null),
+        });
+        childByParent.set(category.parentId, children);
+      });
+
+      return { parents, childByParent };
+    },
+    [categories],
   );
-  const defaultIncomeCategorySelectOptions = useMemo(() => {
-    const categoriesById = new Map(categories.map((category) => [category.id, category]));
 
-    return [
-      {
-        value: NO_DEFAULT_INCOME_CATEGORY_OPTION_VALUE,
-        label: I18n.t('aiChat.no_default_income_category'),
-      },
-      ...categories
-        .filter((category) => category.type === 'income')
-        .map((category) => {
-          const parentCategory = category.parentId ? categoriesById.get(category.parentId) : null;
-          return {
-            value: category.id,
-            label: category.name,
-            description: parentCategory?.name,
-            icon: resolveCategoryIcon(category.icon, parentCategory?.icon ?? null),
-          };
-        }),
-    ];
-  }, [categories]);
-
-  const refreshDownloadedModels = useCallback(() => {
-    setDownloadedModels(modelManager.getDownloadedModelFileNames());
-  }, []);
+  const expenseCategoryPanelData = useMemo(
+    () => buildCategoryPanelData('expense'),
+    [buildCategoryPanelData],
+  );
+  const incomeCategoryPanelData = useMemo(
+    () => buildCategoryPanelData('income'),
+    [buildCategoryPanelData],
+  );
 
   const closeEditingPreview = useCallback(() => {
     setEditingPreview(null);
   }, []);
 
   const recoverFromModelFailure = useCallback(
-    async (message: string, model: ModelDefinition) => {
+    async (message: string, model: { fileName: string }) => {
       loadRequestIdRef.current += 1;
 
       try {
@@ -432,10 +439,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
         modelManager.deleteModel(model.fileName);
       }
 
-      refreshDownloadedModels();
       aiActivationService.setActivationError(message);
     },
-    [refreshDownloadedModels],
+    [],
   );
 
   const loadModelForActiveModel = useCallback(async () => {
@@ -464,11 +470,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     let isMounted = true;
 
     const initializeModel = async () => {
-      const files = modelManager.getDownloadedModelFileNames();
       if (!isMounted) return;
 
-      setDownloadedModels(files);
-      const hasModel = files.includes(activeModel.fileName);
+      const hasModel = modelManager.isModelDownloaded(activeModel.fileName);
 
       if (!settings.aiChatEnabled || !hasModel) {
         return;
@@ -509,7 +513,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 
     try {
       await modelDownloadService.ensureModelDownloaded(activeModel);
-      refreshDownloadedModels();
 
       await loadModelForActiveModel();
       aiActivationService.setActivationError(null);
@@ -526,74 +529,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     isDownloadingActiveModel,
     loadModelForActiveModel,
     modelStatus,
-    refreshDownloadedModels,
     recoverFromModelFailure,
     updateSettings,
   ]);
-
-  const handleSwitchModel = useCallback(
-    async (model: ModelDefinition) => {
-      if (model.id === activeModelId && modelStatus === 'ready') return;
-
-      void triggerHaptic('selection');
-      setActiveModelId(model.id);
-      setMessages([]);
-      setIsGenerating(false);
-      loadRequestIdRef.current += 1;
-      sendInFlightRef.current = false;
-
-      try {
-        await llamaService.releaseModel();
-      } catch {
-        // ignore release errors
-      }
-
-      if (!modelManager.isModelDownloaded(model.fileName)) {
-        aiActivationService.setActivationError(null);
-        setIsActivatingAi(true);
-        try {
-          await modelDownloadService.ensureModelDownloaded(model);
-          refreshDownloadedModels();
-        } catch (error) {
-          const detail = error instanceof Error ? error.message : I18n.t('aiChat.error');
-          aiActivationService.setActivationError(detail);
-          setIsActivatingAi(false);
-          return;
-        }
-      }
-
-      try {
-        await llamaService.loadModel(modelManager.getModelPath(model.fileName));
-        aiActivationService.setActivationError(null);
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : I18n.t('aiChat.prepare_failed');
-        await recoverFromModelFailure(detail, model);
-      } finally {
-        setIsActivatingAi(false);
-      }
-    },
-    [activeModelId, modelStatus, refreshDownloadedModels, recoverFromModelFailure],
-  );
-
-  const handleDeleteModel = useCallback(
-    async (model: ModelDefinition) => {
-      void triggerHaptic('warning');
-
-      if (model.id === activeModelId) {
-        loadRequestIdRef.current += 1;
-        sendInFlightRef.current = false;
-        try {
-          await llamaService.releaseModel();
-        } catch {
-          // ignore
-        }
-      }
-
-      modelManager.deleteModel(model.fileName);
-      refreshDownloadedModels();
-    },
-    [activeModelId, refreshDownloadedModels],
-  );
 
   const handleDisableAiFeature = useCallback(async () => {
     void triggerHaptic('warning');
@@ -607,9 +545,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     sendInFlightRef.current = false;
     await llamaService.releaseModel();
     modelManager.deleteAllModels();
-    refreshDownloadedModels();
     updateSettings({ aiChatEnabled: false });
-  }, [refreshDownloadedModels, updateSettings]);
+  }, [updateSettings]);
 
   const handleSend = useCallback(
     (text: string): boolean => {
@@ -662,6 +599,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
             !isSimpleMode,
             isSimpleMode ? simpleWallet?.name : defaultAiChatAccount?.name,
             defaultAiChatIncomeCategory?.name,
+            defaultAiChatExpenseCategory?.name,
           );
           const parsingInput = buildParsingInputWithExplicitMentions(text, explicitMentions);
 
@@ -721,7 +659,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
               const categoryId =
                 (t.type !== 'transfer' ? (explicitCategoryMention?.id ?? null) : null) ??
                 resolveCategoryByName(t.categoryName, categories, catType) ??
-                (t.type === 'income' ? (defaultAiChatIncomeCategory?.id ?? null) : null);
+                (t.type === 'income' ? (defaultAiChatIncomeCategory?.id ?? null) : null) ??
+                (t.type === 'expense' ? (defaultAiChatExpenseCategory?.id ?? null) : null);
               const accountId =
                 explicitSharedAccountId ??
                 resolveNameToId(
@@ -830,6 +769,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       accounts,
       categories,
       defaultAiChatAccount,
+      defaultAiChatExpenseCategory,
       defaultAiChatIncomeCategory,
       isGenerating,
       isSimpleMode,
@@ -1004,35 +944,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const gateProgressPercent =
     activeModelDownloadProgress != null ? Math.round(activeModelDownloadProgress * 100) : null;
   const chatInputPlaceholder = useMemo(() => {
-    const primaryAccountName = placeholderPrimaryAccount?.name ?? null;
-    const secondaryAccountName = placeholderTransferToAccount?.name ?? null;
-    const candidates: string[] = [];
-
-    if (primaryAccountName) {
-      const accountMention = `@${primaryAccountName}`;
-      candidates.push(
-        I18n.t('aiChat.placeholder_expense_with_account', { account: accountMention }),
-      );
-      candidates.push(
-        I18n.t('aiChat.placeholder_income_with_account', { account: accountMention }),
-      );
-    } else {
-      candidates.push(I18n.t('aiChat.placeholder'));
-    }
-
-    if (!isSimpleMode && primaryAccountName && secondaryAccountName) {
-      candidates.push(
-        I18n.t('aiChat.placeholder_transfer_with_accounts', {
-          fromAccount: `@${primaryAccountName}`,
-          toAccount: `@${secondaryAccountName}`,
-        }),
-      );
-    }
-
-    return (
-      candidates[Math.floor(Math.random() * candidates.length)] ?? I18n.t('aiChat.placeholder')
-    );
-  }, [isSimpleMode, placeholderPrimaryAccount, placeholderTransferToAccount]);
+    const examples = SMART_ENTRY_PLACEHOLDER_EXAMPLES;
+    return `eg: ${examples[Math.floor(Math.random() * examples.length)]}`;
+  }, []);
 
   const hasMessages = messages.length > 0;
 
@@ -1457,152 +1371,158 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     </View>
                   </View>
                 ) : (
-                  <SelectField
-                    label={I18n.t('aiChat.account_section_title')}
-                    sheetTitle={I18n.t('aiChat.account_section_title')}
-                    value={defaultAiChatAccount?.id ?? NO_DEFAULT_ACCOUNT_OPTION_VALUE}
-                    options={defaultAccountSelectOptions}
-                    optionsLayout="list"
-                    placeholder={I18n.t('aiChat.no_default_account')}
-                    onChange={(value) => {
-                      updateSettings({
-                        aiChatDefaultAccountId:
-                          value === NO_DEFAULT_ACCOUNT_OPTION_VALUE ? null : value,
-                      });
-                    }}
-                  />
+                  <View className="gap-2">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('aiChat.account_section_title')}
+                    </Text>
+                    {defaultAiChatAccount ? (
+                      <Pressable
+                        onPress={() =>
+                          updateSettings({ aiChatDefaultAccountId: null })
+                        }
+                        className="self-start rounded-full px-3 py-1"
+                        style={{
+                          backgroundColor: `${themeColors.primary}14`,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.primary}30`,
+                        }}
+                      >
+                        <Text
+                          variant="caption"
+                          className="font-medium"
+                          style={{ color: themeColors.primary }}
+                        >
+                          {defaultAiChatAccount.name} ✕
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('aiChat.no_default_account')}
+                      </Text>
+                    )}
+                    <View
+                      className="overflow-hidden rounded-xl border border-border/30"
+                      style={{ maxHeight: 200 }}
+                    >
+                      <AccountPanel
+                        accounts={accounts}
+                        accountGroups={accountGroups}
+                        selectedId={settings.aiChatDefaultAccountId}
+                        onSelect={(accountId) => {
+                          void triggerHaptic('selection');
+                          updateSettings({
+                            aiChatDefaultAccountId:
+                              accountId === settings.aiChatDefaultAccountId ? null : accountId,
+                          });
+                        }}
+                      />
+                    </View>
+                  </View>
                 )}
 
-                <SelectField
-                  label={I18n.t('aiChat.income_category_section_title')}
-                  sheetTitle={I18n.t('aiChat.income_category_section_title')}
-                  value={defaultAiChatIncomeCategory?.id ?? NO_DEFAULT_INCOME_CATEGORY_OPTION_VALUE}
-                  options={defaultIncomeCategorySelectOptions}
-                  optionsLayout="list"
-                  placeholder={I18n.t('aiChat.no_default_income_category')}
-                  onChange={(value) => {
-                    updateSettings({
-                      aiChatDefaultIncomeCategoryId:
-                        value === NO_DEFAULT_INCOME_CATEGORY_OPTION_VALUE ? null : value,
-                    });
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="mt-5">
-              <CardContent className="py-5 gap-4">
-                <View className="flex-row items-center gap-3">
-                  <View
-                    className="h-10 w-10 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `${themeColors.primary}14` }}
-                  >
-                    <HardDrive size={18} color={themeColors.primary} />
-                  </View>
-                  <View className="flex-1">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('aiChat.model_section_title')}
+                <View className="gap-2">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('aiChat.expense_category_section_title')}
+                  </Text>
+                  {defaultAiChatExpenseCategory ? (
+                    <Pressable
+                      onPress={() =>
+                        updateSettings({ aiChatDefaultExpenseCategoryId: null })
+                      }
+                      className="self-start rounded-full px-3 py-1"
+                      style={{
+                        backgroundColor: `${themeColors.primary}14`,
+                        borderWidth: 1,
+                        borderColor: `${themeColors.primary}30`,
+                      }}
+                    >
+                      <Text
+                        variant="caption"
+                        className="font-medium"
+                        style={{ color: themeColors.primary }}
+                      >
+                        {resolveCategoryIcon(defaultAiChatExpenseCategory.icon)}{' '}
+                        {defaultAiChatExpenseCategory.name} ✕
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('aiChat.no_default_expense_category')}
                     </Text>
+                  )}
+                  <View
+                    className="overflow-hidden rounded-xl border border-border/30"
+                    style={{ maxHeight: 240 }}
+                  >
+                    <CategoryPanel
+                      parents={expenseCategoryPanelData.parents}
+                      childByParent={expenseCategoryPanelData.childByParent}
+                      allowParentSelection
+                      selectedCategoryId={settings.aiChatDefaultExpenseCategoryId}
+                      onSelect={(categoryId) => {
+                        void triggerHaptic('selection');
+                        updateSettings({
+                          aiChatDefaultExpenseCategoryId:
+                            categoryId === settings.aiChatDefaultExpenseCategoryId
+                              ? null
+                              : categoryId,
+                        });
+                      }}
+                    />
                   </View>
                 </View>
 
-                {AVAILABLE_MODELS.map((model) => {
-                  const isDownloaded = downloadedModels.includes(model.fileName);
-                  const isActive = model.id === activeModelId;
-                  const isDownloading = modelDownloadService.isModelDownloading(model.id);
-
-                  return (
-                    <View
-                      key={model.id}
-                      className="overflow-hidden rounded-2xl border bg-background/60"
+                <View className="gap-2">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('aiChat.income_category_section_title')}
+                  </Text>
+                  {defaultAiChatIncomeCategory ? (
+                    <Pressable
+                      onPress={() =>
+                        updateSettings({ aiChatDefaultIncomeCategoryId: null })
+                      }
+                      className="self-start rounded-full px-3 py-1"
                       style={{
-                        borderColor:
-                          isActive && isDownloaded && modelStatus === 'ready'
-                            ? `${themeColors.primary}30`
-                            : `${themeColors.border}30`,
+                        backgroundColor: `${themeColors.primary}14`,
+                        borderWidth: 1,
+                        borderColor: `${themeColors.primary}30`,
                       }}
                     >
-                      {isActive && isDownloaded && modelStatus === 'ready' ? (
-                        <View
-                          className="h-0.5 w-full"
-                          style={{ backgroundColor: themeColors.primary }}
-                        />
-                      ) : null}
-                      <View className="flex-row items-center gap-3 px-4 py-3">
-                        <View className="flex-1">
-                          <Text variant="bodyStrong">{model.displayName}</Text>
-                          <Text variant="caption" tone="muted">
-                            {model.sizeLabel}
-                          </Text>
-                        </View>
-
-                        {isActive && isDownloaded && modelStatus === 'ready' ? (
-                          <View
-                            className="h-8 w-8 items-center justify-center rounded-xl"
-                            style={{ backgroundColor: `${themeColors.primary}18` }}
-                          >
-                            <Check size={15} color={themeColors.primary} />
-                          </View>
-                        ) : null}
-
-                        {isDownloaded && !(isActive && modelStatus === 'ready') ? (
-                          <Pressable
-                            onPress={() => void handleSwitchModel(model)}
-                            className="rounded-xl border px-3 py-1.5"
-                            style={{
-                              borderColor: `${themeColors.primary}30`,
-                              backgroundColor: `${themeColors.primary}08`,
-                            }}
-                          >
-                            <Text
-                              variant="caption"
-                              className="font-medium"
-                              style={{ color: themeColors.primary }}
-                            >
-                              {I18n.t('aiChat.select_model')}
-                            </Text>
-                          </Pressable>
-                        ) : null}
-
-                        {!isDownloaded && !isDownloading ? (
-                          <Pressable
-                            onPress={() => void handleSwitchModel(model)}
-                            className="rounded-xl border px-3 py-1.5"
-                            style={{
-                              borderColor: `${themeColors.primary}30`,
-                              backgroundColor: `${themeColors.primary}08`,
-                            }}
-                          >
-                            <View className="flex-row items-center gap-1.5">
-                              <Download size={12} color={themeColors.primary} />
-                              <Text
-                                variant="caption"
-                                className="font-medium"
-                                style={{ color: themeColors.primary }}
-                              >
-                                {I18n.t('aiChat.download')}
-                              </Text>
-                            </View>
-                          </Pressable>
-                        ) : null}
-
-                        {isDownloading ? (
-                          <ActivityIndicator size="small" color={themeColors.primary} />
-                        ) : null}
-
-                        {isDownloaded && !(isActive && modelStatus === 'ready') ? (
-                          <Pressable
-                            onPress={() => void handleDeleteModel(model)}
-                            className="ml-1 h-8 w-8 items-center justify-center rounded-xl"
-                            style={{ backgroundColor: `${themeColors.error}0E` }}
-                          >
-                            <Trash2 size={14} color={themeColors.error} />
-                          </Pressable>
-                        ) : null}
-                      </View>
-                    </View>
-                  );
-                })}
+                      <Text
+                        variant="caption"
+                        className="font-medium"
+                        style={{ color: themeColors.primary }}
+                      >
+                        {resolveCategoryIcon(defaultAiChatIncomeCategory.icon)}{' '}
+                        {defaultAiChatIncomeCategory.name} ✕
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('aiChat.no_default_income_category')}
+                    </Text>
+                  )}
+                  <View
+                    className="overflow-hidden rounded-xl border border-border/30"
+                    style={{ maxHeight: 240 }}
+                  >
+                    <CategoryPanel
+                      parents={incomeCategoryPanelData.parents}
+                      childByParent={incomeCategoryPanelData.childByParent}
+                      allowParentSelection
+                      selectedCategoryId={settings.aiChatDefaultIncomeCategoryId}
+                      onSelect={(categoryId) => {
+                        void triggerHaptic('selection');
+                        updateSettings({
+                          aiChatDefaultIncomeCategoryId:
+                            categoryId === settings.aiChatDefaultIncomeCategoryId
+                              ? null
+                              : categoryId,
+                        });
+                      }}
+                    />
+                  </View>
+                </View>
               </CardContent>
             </Card>
 
