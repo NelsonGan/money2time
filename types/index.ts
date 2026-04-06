@@ -82,6 +82,7 @@ export interface UserSettings {
   aiChatDefaultAccountId: string | null;
   aiChatDefaultIncomeCategoryId: string | null;
   aiChatDefaultExpenseCategoryId: string | null;
+  aiChatModelId: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   createdAt: string;

@@ -141,6 +141,7 @@ interface AppContextValue extends AppState {
         | 'aiChatDefaultAccountId'
         | 'aiChatDefaultIncomeCategoryId'
         | 'aiChatDefaultExpenseCategoryId'
+        | 'aiChatModelId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -1134,6 +1135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'aiChatDefaultAccountId'
           | 'aiChatDefaultIncomeCategoryId'
           | 'aiChatDefaultExpenseCategoryId'
+          | 'aiChatModelId'
           | 'onboardingCompleted'
           | 'userMode'
         >

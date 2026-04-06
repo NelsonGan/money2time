@@ -1,11 +1,17 @@
 import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Check,
+  ChevronDown,
   Download,
   HardDrive,
+  Landmark,
   MessageSquareText,
   Settings,
   Shield,
   Sparkles,
   Trash2,
+  X,
   Zap,
 } from 'lucide-react-native';
 import {
@@ -42,7 +48,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Button,
   Card,
-  CardContent,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -50,11 +55,11 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { TransactionEditorScreen } from '~/features/transactions/components';
 import {
   AccountPanel,
   CategoryPanel,
 } from '~/features/transactions/components/editor';
-import { TransactionEditorScreen } from '~/features/transactions/components';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -67,7 +72,8 @@ import { newId } from '~/utils/id';
 import { ChatInput, type ChatInputMentionOption } from '../components/ChatInput';
 import { TransactionPreviewCard } from '../components/TransactionPreviewCard';
 import { TypingDots } from '../components/TypingDots';
-import { AI_CHAT_MODEL } from '../constants/models';
+import type { ModelDefinition } from '../constants/models';
+import { AI_CHAT_DEFAULT_MODEL, AVAILABLE_MODELS, getModelById } from '../constants/models';
 import { SMART_ENTRY_PLACEHOLDER_EXAMPLES } from '../constants/placeholders';
 import type { LLMTransactionOutput } from '../constants/prompts';
 import {
@@ -299,7 +305,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     llamaService.subscribeToStatus,
     () => llamaService.getStatus().status,
   );
-  const activeModel = AI_CHAT_MODEL;
+  const activeModel: ModelDefinition =
+    (settings.aiChatModelId ? getModelById(settings.aiChatModelId) : undefined) ??
+    AI_CHAT_DEFAULT_MODEL;
   const activeModelDownloadProgress = useSyncExternalStore(
     modelDownloadService.subscribeToDownloadState,
     () => modelDownloadService.getModelDownloadProgress(activeModel.id),
@@ -312,6 +320,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isContextBusy, setIsContextBusy] = useState(() => llamaService.isContextBusy());
   const [isActivatingAi, setIsActivatingAi] = useState(false);
+  const [switchingModelId, setSwitchingModelId] = useState<string | null>(null);
 
   const loadRequestIdRef = useRef(0);
   const [stoppedManually, setStoppedManually] = useState(false);
@@ -320,6 +329,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const rejectCleanupTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingPreview, setEditingPreview] = useState<EditingPreviewState | null>(null);
+  const [expandedSettingsSection, setExpandedSettingsSection] = useState<
+    'account' | 'expense' | 'income' | null
+  >(null);
 
   const defaultAiChatAccount = useMemo(
     () => accounts.find((account) => account.id === settings.aiChatDefaultAccountId) ?? null,
@@ -351,11 +363,6 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     if (isSimpleMode) return simpleWallet ?? accounts[0] ?? null;
     return defaultAiChatAccount ?? accounts[0] ?? null;
   }, [accounts, defaultAiChatAccount, isSimpleMode, simpleWallet]);
-  const placeholderTransferToAccount = useMemo(() => {
-    if (isSimpleMode) return null;
-    if (!placeholderPrimaryAccount) return accounts[1] ?? accounts[0] ?? null;
-    return accounts.find((account) => account.id !== placeholderPrimaryAccount.id) ?? null;
-  }, [accounts, isSimpleMode, placeholderPrimaryAccount]);
   const mentionOptions = useMemo<ChatInputMentionOption[]>(() => {
     const categoriesById = new Map(categories.map((category) => [category.id, category]));
 
@@ -532,6 +539,49 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     recoverFromModelFailure,
     updateSettings,
   ]);
+
+  const handleSwitchModel = useCallback(
+    async (model: ModelDefinition) => {
+      if (model.id === activeModel.id && modelStatus === 'ready') return;
+      if (switchingModelId) return;
+
+      void triggerHaptic('selection');
+      setSwitchingModelId(model.id);
+      setMessages([]);
+      setIsGenerating(false);
+      loadRequestIdRef.current += 1;
+      sendInFlightRef.current = false;
+
+      try {
+        await llamaService.releaseModel();
+      } catch {
+        // ignore release errors
+      }
+
+      if (!modelManager.isModelDownloaded(model.fileName)) {
+        try {
+          await modelDownloadService.ensureModelDownloaded(model);
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : I18n.t('aiChat.error');
+          aiActivationService.setActivationError(detail);
+          setSwitchingModelId(null);
+          return;
+        }
+      }
+
+      try {
+        await llamaService.loadModel(modelManager.getModelPath(model.fileName));
+        aiActivationService.setActivationError(null);
+        updateSettings({ aiChatModelId: model.id });
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : I18n.t('aiChat.prepare_failed');
+        await recoverFromModelFailure(detail, model);
+      } finally {
+        setSwitchingModelId(null);
+      }
+    },
+    [activeModel.id, modelStatus, switchingModelId, recoverFromModelFailure, updateSettings],
+  );
 
   const handleDisableAiFeature = useCallback(async () => {
     void triggerHaptic('warning');
@@ -950,20 +1000,26 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
 
   const hasMessages = messages.length > 0;
 
+  const [chipSeed, setChipSeed] = useState(0);
+  useEffect(() => {
+    if (messages.length === 0) setChipSeed((s) => s + 1);
+  }, [messages.length]);
+
   const suggestionChips = useMemo(() => {
-    const chips: { label: string; value: string }[] = [];
-    const primaryName = placeholderPrimaryAccount?.name;
-    if (primaryName) {
-      chips.push({ label: `20 lunch @${primaryName}`, value: `20 lunch @${primaryName}` });
-      chips.push({ label: `50 groceries`, value: `50 groceries` });
-      chips.push({ label: `earned 100 freelance`, value: `earned 100 freelance @${primaryName}` });
-    } else {
-      chips.push({ label: '20 for lunch', value: '20 for lunch' });
-      chips.push({ label: '50 groceries', value: '50 groceries' });
-      chips.push({ label: 'earned 100', value: 'earned 100' });
+    const pool = SMART_ENTRY_PLACEHOLDER_EXAMPLES;
+    const picked = new Set<number>();
+    while (picked.size < 3 && picked.size < pool.length) {
+      picked.add(Math.floor(Math.random() * pool.length));
     }
-    return chips;
-  }, [placeholderPrimaryAccount]);
+    const primaryName = placeholderPrimaryAccount?.name;
+    return [...picked].map((index) => {
+      const example = pool[index];
+      const withAccount =
+        primaryName && !example.includes('@') ? `${example} @${primaryName}` : example;
+      return { label: example, value: withAccount };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeholderPrimaryAccount, chipSeed]);
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.chatContent}>
@@ -1345,64 +1401,98 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
         visible={showSettingsModal}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowSettingsModal(false)}
+        onRequestClose={() => {
+          setShowSettingsModal(false);
+          setExpandedSettingsSection(null);
+        }}
       >
         <SettingsPageLayout edges={['top', 'bottom']}>
           <View style={styles.headerWrap}>
             <SettingsHeader
               className="px-0 pt-5 pb-3"
               title={I18n.t('aiChat.settings_title')}
-              onClose={() => setShowSettingsModal(false)}
+              onClose={() => {
+                setShowSettingsModal(false);
+                setExpandedSettingsSection(null);
+              }}
             />
           </View>
 
           <ScrollView className="flex-1" contentContainerStyle={styles.settingsContent}>
-            <Card>
-              <CardContent className="py-5 gap-4">
-                {isSimpleMode ? (
-                  <View className="gap-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('aiChat.account_section_title')}
+            <Text variant="caption" tone="muted" className="mb-4 px-1">
+              {I18n.t('aiChat.settings_description')}
+            </Text>
+
+            {/* ── Default Account ── */}
+            <Card className="mb-3">
+              <Pressable
+                onPress={() => {
+                  if (isSimpleMode) return;
+                  void triggerHaptic('selection');
+                  setExpandedSettingsSection((prev) =>
+                    prev === 'account' ? null : 'account',
+                  );
+                }}
+                className="flex-row items-center gap-3"
+              >
+                <View
+                  style={[
+                    styles.sectionIconBadge,
+                    { backgroundColor: `${themeColors.primary}12` },
+                  ]}
+                >
+                  <Landmark size={19} color={themeColors.primary} />
+                </View>
+                <View className="flex-1 gap-0.5">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('aiChat.account_section_title')}
+                  </Text>
+                  {isSimpleMode ? (
+                    <Text variant="bodyStrong">
+                      {simpleWallet?.name ?? I18n.t('aiChat.no_default_account')}
                     </Text>
-                    <View className="rounded-[22px] border border-border/40 bg-card px-4 py-4">
-                      <Text variant="bodyStrong">
-                        {simpleWallet?.name ?? I18n.t('aiChat.no_default_account')}
-                      </Text>
-                    </View>
+                  ) : defaultAiChatAccount ? (
+                    <Text
+                      variant="bodyStrong"
+                      style={{ color: themeColors.primary }}
+                    >
+                      {defaultAiChatAccount.name}
+                    </Text>
+                  ) : (
+                    <Text variant="friendly" tone="muted">
+                      {I18n.t('aiChat.no_default_account')}
+                    </Text>
+                  )}
+                </View>
+                {!isSimpleMode ? (
+                  <View
+                    style={[
+                      styles.chevronBadge,
+                      { backgroundColor: `${themeColors.border}20` },
+                    ]}
+                  >
+                    <ChevronDown
+                      size={15}
+                      color={themeColors.textMuted}
+                      style={
+                        expandedSettingsSection === 'account'
+                          ? styles.chevronRotated
+                          : undefined
+                      }
+                    />
                   </View>
-                ) : (
-                  <View className="gap-2">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('aiChat.account_section_title')}
-                    </Text>
-                    {defaultAiChatAccount ? (
-                      <Pressable
-                        onPress={() =>
-                          updateSettings({ aiChatDefaultAccountId: null })
-                        }
-                        className="self-start rounded-full px-3 py-1"
-                        style={{
-                          backgroundColor: `${themeColors.primary}14`,
-                          borderWidth: 1,
-                          borderColor: `${themeColors.primary}30`,
-                        }}
-                      >
-                        <Text
-                          variant="caption"
-                          className="font-medium"
-                          style={{ color: themeColors.primary }}
-                        >
-                          {defaultAiChatAccount.name} ✕
-                        </Text>
-                      </Pressable>
-                    ) : (
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('aiChat.no_default_account')}
-                      </Text>
-                    )}
+                ) : null}
+              </Pressable>
+
+              {expandedSettingsSection === 'account' && !isSimpleMode ? (
+                <Animated.View
+                  entering={FadeInDown.duration(200)}
+                  exiting={FadeOut.duration(150)}
+                >
+                  <View className="mt-4 gap-2.5">
                     <View
-                      className="overflow-hidden rounded-xl border border-border/30"
-                      style={{ maxHeight: 200 }}
+                      className="overflow-hidden rounded-2xl border border-border/20"
+                      style={styles.accountPanelWrap}
                     >
                       <AccountPanel
                         accounts={accounts}
@@ -1412,143 +1502,367 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                           void triggerHaptic('selection');
                           updateSettings({
                             aiChatDefaultAccountId:
-                              accountId === settings.aiChatDefaultAccountId ? null : accountId,
+                              accountId === settings.aiChatDefaultAccountId
+                                ? null
+                                : accountId,
                           });
                         }}
                       />
                     </View>
+                    {defaultAiChatAccount ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          updateSettings({ aiChatDefaultAccountId: null });
+                        }}
+                        className="flex-row items-center justify-center gap-1.5 rounded-xl py-2"
+                        style={{
+                          backgroundColor: `${themeColors.error}0A`,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.error}20`,
+                        }}
+                      >
+                        <X size={13} color={themeColors.error} />
+                        <Text
+                          variant="caption"
+                          className="font-semibold"
+                          style={{ color: themeColors.error }}
+                        >
+                          {I18n.t('common.clear')}
+                        </Text>
+                      </Pressable>
+                    ) : null}
                   </View>
-                )}
+                </Animated.View>
+              ) : null}
+            </Card>
 
-                <View className="gap-2">
+            {/* ── Default Expense Category ── */}
+            <Card className="mb-3">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setExpandedSettingsSection((prev) =>
+                    prev === 'expense' ? null : 'expense',
+                  );
+                }}
+                className="flex-row items-center gap-3"
+              >
+                <View
+                  style={[
+                    styles.sectionIconBadge,
+                    { backgroundColor: `${themeColors.coral}12` },
+                  ]}
+                >
+                  <ArrowUpRight size={19} color={themeColors.coral} />
+                </View>
+                <View className="flex-1 gap-0.5">
                   <Text variant="label" tone="muted">
                     {I18n.t('aiChat.expense_category_section_title')}
                   </Text>
                   {defaultAiChatExpenseCategory ? (
-                    <Pressable
-                      onPress={() =>
-                        updateSettings({ aiChatDefaultExpenseCategoryId: null })
-                      }
-                      className="self-start rounded-full px-3 py-1"
-                      style={{
-                        backgroundColor: `${themeColors.primary}14`,
-                        borderWidth: 1,
-                        borderColor: `${themeColors.primary}30`,
-                      }}
+                    <Text
+                      variant="bodyStrong"
+                      style={{ color: themeColors.primary }}
                     >
-                      <Text
-                        variant="caption"
-                        className="font-medium"
-                        style={{ color: themeColors.primary }}
-                      >
-                        {resolveCategoryIcon(defaultAiChatExpenseCategory.icon)}{' '}
-                        {defaultAiChatExpenseCategory.name} ✕
-                      </Text>
-                    </Pressable>
+                      {resolveCategoryIcon(defaultAiChatExpenseCategory.icon)}{' '}
+                      {defaultAiChatExpenseCategory.name}
+                    </Text>
                   ) : (
-                    <Text variant="caption" tone="muted">
+                    <Text variant="friendly" tone="muted">
                       {I18n.t('aiChat.no_default_expense_category')}
                     </Text>
                   )}
-                  <View
-                    className="overflow-hidden rounded-xl border border-border/30"
-                    style={{ maxHeight: 240 }}
-                  >
-                    <CategoryPanel
-                      parents={expenseCategoryPanelData.parents}
-                      childByParent={expenseCategoryPanelData.childByParent}
-                      allowParentSelection
-                      selectedCategoryId={settings.aiChatDefaultExpenseCategoryId}
-                      onSelect={(categoryId) => {
-                        void triggerHaptic('selection');
-                        updateSettings({
-                          aiChatDefaultExpenseCategoryId:
-                            categoryId === settings.aiChatDefaultExpenseCategoryId
-                              ? null
-                              : categoryId,
-                        });
-                      }}
-                    />
-                  </View>
                 </View>
+                <View
+                  style={[
+                    styles.chevronBadge,
+                    { backgroundColor: `${themeColors.border}20` },
+                  ]}
+                >
+                  <ChevronDown
+                    size={15}
+                    color={themeColors.textMuted}
+                    style={
+                      expandedSettingsSection === 'expense'
+                        ? styles.chevronRotated
+                        : undefined
+                    }
+                  />
+                </View>
+              </Pressable>
 
-                <View className="gap-2">
+              {expandedSettingsSection === 'expense' ? (
+                <Animated.View
+                  entering={FadeInDown.duration(200)}
+                  exiting={FadeOut.duration(150)}
+                >
+                  <View className="mt-4 gap-2.5">
+                    <View
+                      className="overflow-hidden rounded-2xl border border-border/20"
+                      style={styles.categoryPanelWrap}
+                    >
+                      <CategoryPanel
+                        parents={expenseCategoryPanelData.parents}
+                        childByParent={expenseCategoryPanelData.childByParent}
+                        allowParentSelection
+                        selectedCategoryId={settings.aiChatDefaultExpenseCategoryId}
+                        onSelect={(categoryId) => {
+                          void triggerHaptic('selection');
+                          updateSettings({
+                            aiChatDefaultExpenseCategoryId:
+                              categoryId === settings.aiChatDefaultExpenseCategoryId
+                                ? null
+                                : categoryId,
+                          });
+                        }}
+                      />
+                    </View>
+                    {defaultAiChatExpenseCategory ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          updateSettings({ aiChatDefaultExpenseCategoryId: null });
+                        }}
+                        className="flex-row items-center justify-center gap-1.5 rounded-xl py-2"
+                        style={{
+                          backgroundColor: `${themeColors.error}0A`,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.error}20`,
+                        }}
+                      >
+                        <X size={13} color={themeColors.error} />
+                        <Text
+                          variant="caption"
+                          className="font-semibold"
+                          style={{ color: themeColors.error }}
+                        >
+                          {I18n.t('common.clear')}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                </Animated.View>
+              ) : null}
+            </Card>
+
+            {/* ── Default Income Category ── */}
+            <Card className="mb-3">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setExpandedSettingsSection((prev) =>
+                    prev === 'income' ? null : 'income',
+                  );
+                }}
+                className="flex-row items-center gap-3"
+              >
+                <View
+                  style={[
+                    styles.sectionIconBadge,
+                    { backgroundColor: `${themeColors.success}12` },
+                  ]}
+                >
+                  <ArrowDownLeft size={19} color={themeColors.success} />
+                </View>
+                <View className="flex-1 gap-0.5">
                   <Text variant="label" tone="muted">
                     {I18n.t('aiChat.income_category_section_title')}
                   </Text>
                   {defaultAiChatIncomeCategory ? (
-                    <Pressable
-                      onPress={() =>
-                        updateSettings({ aiChatDefaultIncomeCategoryId: null })
-                      }
-                      className="self-start rounded-full px-3 py-1"
-                      style={{
-                        backgroundColor: `${themeColors.primary}14`,
-                        borderWidth: 1,
-                        borderColor: `${themeColors.primary}30`,
-                      }}
+                    <Text
+                      variant="bodyStrong"
+                      style={{ color: themeColors.primary }}
                     >
-                      <Text
-                        variant="caption"
-                        className="font-medium"
-                        style={{ color: themeColors.primary }}
-                      >
-                        {resolveCategoryIcon(defaultAiChatIncomeCategory.icon)}{' '}
-                        {defaultAiChatIncomeCategory.name} ✕
-                      </Text>
-                    </Pressable>
+                      {resolveCategoryIcon(defaultAiChatIncomeCategory.icon)}{' '}
+                      {defaultAiChatIncomeCategory.name}
+                    </Text>
                   ) : (
-                    <Text variant="caption" tone="muted">
+                    <Text variant="friendly" tone="muted">
                       {I18n.t('aiChat.no_default_income_category')}
                     </Text>
                   )}
-                  <View
-                    className="overflow-hidden rounded-xl border border-border/30"
-                    style={{ maxHeight: 240 }}
-                  >
-                    <CategoryPanel
-                      parents={incomeCategoryPanelData.parents}
-                      childByParent={incomeCategoryPanelData.childByParent}
-                      allowParentSelection
-                      selectedCategoryId={settings.aiChatDefaultIncomeCategoryId}
-                      onSelect={(categoryId) => {
-                        void triggerHaptic('selection');
-                        updateSettings({
-                          aiChatDefaultIncomeCategoryId:
-                            categoryId === settings.aiChatDefaultIncomeCategoryId
-                              ? null
-                              : categoryId,
-                        });
-                      }}
-                    />
-                  </View>
                 </View>
-              </CardContent>
+                <View
+                  style={[
+                    styles.chevronBadge,
+                    { backgroundColor: `${themeColors.border}20` },
+                  ]}
+                >
+                  <ChevronDown
+                    size={15}
+                    color={themeColors.textMuted}
+                    style={
+                      expandedSettingsSection === 'income'
+                        ? styles.chevronRotated
+                        : undefined
+                    }
+                  />
+                </View>
+              </Pressable>
+
+              {expandedSettingsSection === 'income' ? (
+                <Animated.View
+                  entering={FadeInDown.duration(200)}
+                  exiting={FadeOut.duration(150)}
+                >
+                  <View className="mt-4 gap-2.5">
+                    <View
+                      className="overflow-hidden rounded-2xl border border-border/20"
+                      style={styles.categoryPanelWrap}
+                    >
+                      <CategoryPanel
+                        parents={incomeCategoryPanelData.parents}
+                        childByParent={incomeCategoryPanelData.childByParent}
+                        allowParentSelection
+                        selectedCategoryId={settings.aiChatDefaultIncomeCategoryId}
+                        onSelect={(categoryId) => {
+                          void triggerHaptic('selection');
+                          updateSettings({
+                            aiChatDefaultIncomeCategoryId:
+                              categoryId === settings.aiChatDefaultIncomeCategoryId
+                                ? null
+                                : categoryId,
+                          });
+                        }}
+                      />
+                    </View>
+                    {defaultAiChatIncomeCategory ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          updateSettings({ aiChatDefaultIncomeCategoryId: null });
+                        }}
+                        className="flex-row items-center justify-center gap-1.5 rounded-xl py-2"
+                        style={{
+                          backgroundColor: `${themeColors.error}0A`,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.error}20`,
+                        }}
+                      >
+                        <X size={13} color={themeColors.error} />
+                        <Text
+                          variant="caption"
+                          className="font-semibold"
+                          style={{ color: themeColors.error }}
+                        >
+                          {I18n.t('common.clear')}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                </Animated.View>
+              ) : null}
             </Card>
 
-            <Card variant="outline" className="mt-5">
-              <CardContent className="py-5 gap-4">
-                <View style={styles.disableRow}>
+            {/* ── Model Selection ── */}
+            <Card className="mb-3">
+              <View className="flex-row items-center gap-3 mb-3">
+                <View
+                  style={[
+                    styles.sectionIconBadge,
+                    { backgroundColor: `${themeColors.primary}12` },
+                  ]}
+                >
+                  <HardDrive size={19} color={themeColors.primary} />
+                </View>
+                <View className="flex-1 gap-0.5">
+                  <Text variant="label" tone="muted">
+                    {I18n.t('aiChat.model_section_title')}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="gap-2">
+                {AVAILABLE_MODELS.map((model) => {
+                  const isActive = model.id === activeModel.id && !switchingModelId;
+                  const isSwitchingTo = model.id === switchingModelId;
+                  const isDownloaded = modelManager.isModelDownloaded(model.fileName);
+
+                  return (
+                    <Pressable
+                      key={model.id}
+                      onPress={() => void handleSwitchModel(model)}
+                      disabled={(isActive && modelStatus === 'ready') || !!switchingModelId}
+                      className="flex-row items-center gap-3 rounded-2xl border px-4 py-3"
+                      style={{
+                        borderColor: (isActive || isSwitchingTo)
+                          ? `${themeColors.primary}40`
+                          : `${themeColors.border}30`,
+                        backgroundColor: (isActive || isSwitchingTo)
+                          ? `${themeColors.primary}08`
+                          : 'transparent',
+                      }}
+                    >
+                      <View className="flex-1">
+                        <Text variant="bodyStrong">{model.displayName}</Text>
+                        <Text variant="caption" tone="muted">
+                          {model.sizeLabel}
+                        </Text>
+                      </View>
+
+                      {isActive && isDownloaded && modelStatus === 'ready' ? (
+                        <View
+                          className="h-8 w-8 items-center justify-center rounded-full"
+                          style={{ backgroundColor: `${themeColors.primary}20` }}
+                        >
+                          <Check size={16} color={themeColors.primary} />
+                        </View>
+                      ) : isSwitchingTo ? (
+                        <ActivityIndicator size="small" color={themeColors.primary} />
+                      ) : !isDownloaded ? (
+                        <View className="flex-row items-center gap-1.5">
+                          <Download size={14} color={themeColors.primary} />
+                          <Text variant="caption" style={{ color: themeColors.primary }}>
+                            {I18n.t('aiChat.download')}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Card>
+
+            {/* ── Danger Zone ── */}
+            <View className="mt-5 gap-3">
+              <View className="flex-row items-center gap-2 px-1">
+                <View
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    backgroundColor: themeColors.error,
+                    opacity: 0.6,
+                  }}
+                />
+                <Text
+                  variant="label"
+                  className="text-[11px] tracking-widest text-destructive"
+                >
+                  {I18n.t('aiChat.disable_section_title')}
+                </Text>
+              </View>
+
+              <Card variant="outline" className="border-destructive/15">
+                <View className="flex-row items-start gap-3">
                   <View
                     style={[
-                      styles.disableIcon,
-                      {
-                        backgroundColor: `${themeColors.error}0E`,
-                      },
+                      styles.sectionIconBadge,
+                      { backgroundColor: `${themeColors.error}0E` },
                     ]}
                   >
                     <Trash2 size={18} color={themeColors.error} />
                   </View>
-                  <View style={styles.disableTextWrap}>
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('aiChat.disable_section_subtitle')}
-                    </Text>
-                  </View>
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    className="flex-1 pt-2"
+                  >
+                    {I18n.t('aiChat.disable_section_subtitle')}
+                  </Text>
                 </View>
-
                 <Button
                   variant="outline"
-                  className="border-destructive/30 bg-destructive/5"
+                  className="mt-4 border-destructive/25 bg-destructive/5"
                   onPress={() => {
                     void handleDisableAiFeature();
                   }}
@@ -1557,8 +1871,8 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     {I18n.t('aiChat.disable_button')}
                   </Text>
                 </Button>
-              </CardContent>
-            </Card>
+              </Card>
+            </View>
           </ScrollView>
         </SettingsPageLayout>
       </Modal>
@@ -1666,7 +1980,7 @@ function FeatureChip({
   bgColor,
   borderColor,
 }: {
-  icon: JSX.Element;
+  icon: React.ReactElement;
   label: string;
   color: string;
   bgColor: string;
@@ -1710,19 +2024,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  disableRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+  sectionIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
-  disableIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+  chevronBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
-  disableTextWrap: {
-    flex: 1,
+  chevronRotated: {
+    transform: [{ rotate: '180deg' }],
+  },
+  accountPanelWrap: {
+    height: 200,
+  },
+  categoryPanelWrap: {
+    height: 240,
   },
 });
