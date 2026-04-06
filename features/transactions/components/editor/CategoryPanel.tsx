@@ -223,6 +223,7 @@ export function CategoryPanel(props: CategoryPanelProps) {
       bounces={false}
       alwaysBounceVertical={false}
       overScrollMode="never"
+      nestedScrollEnabled
       contentContainerStyle={CATEGORY_PANEL_CONTENT_STYLE}
     >
       {groupedRows.map((row, rowIndex) =>
