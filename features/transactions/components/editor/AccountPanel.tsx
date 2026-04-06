@@ -283,6 +283,7 @@ export function AccountPanel(props: AccountPanelProps) {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
         contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
       >
         {accountRows.map((row, rowIndex) =>
@@ -317,6 +318,7 @@ export function AccountPanel(props: AccountPanelProps) {
     <ScrollView
       className="flex-1"
       showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
       contentContainerStyle={ACCOUNT_PANEL_CONTENT_STYLE}
     >
       {groupedRenderRows.map((row, rowIndex) =>

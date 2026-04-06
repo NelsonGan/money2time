@@ -35,11 +35,11 @@ import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
-import { AI_CHAT_MODEL } from '~/features/ai-chat/constants/models';
+import { AI_CHAT_DEFAULT_MODEL, getModelById } from '~/features/ai-chat/constants/models';
 import { buildSystemPrompt } from '~/features/ai-chat/constants/prompts';
+import { AIChatScreen } from '~/features/ai-chat/screens/AIChatScreen';
 import * as aiChatLlamaService from '~/features/ai-chat/services/llamaService';
 import * as aiChatModelManager from '~/features/ai-chat/services/modelManager';
-import { AIChatScreen } from '~/features/ai-chat/screens/AIChatScreen';
 import { HomeScreen } from '~/features/home/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -249,12 +249,13 @@ function AIChatStartupPreloader() {
 
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted || !settings.aiChatEnabled) return;
-    if (!aiChatModelManager.isModelDownloaded(AI_CHAT_MODEL.fileName)) return;
+    const activeModel = (settings.aiChatModelId ? getModelById(settings.aiChatModelId) : undefined) ?? AI_CHAT_DEFAULT_MODEL;
+    if (!aiChatModelManager.isModelDownloaded(activeModel.fileName)) return;
 
     const preloadModel = async () => {
       try {
         await aiChatLlamaService.loadModel(
-          aiChatModelManager.getModelPath(AI_CHAT_MODEL.fileName),
+          aiChatModelManager.getModelPath(activeModel.fileName),
         );
 
         const today = dayKeyFromDateLocal(new Date());
@@ -284,6 +285,7 @@ function AIChatStartupPreloader() {
     settings.aiChatEnabled,
     settings.currencyCode,
     settings.currencySymbol,
+    settings.aiChatModelId,
     settings.onboardingCompleted,
   ]);
 

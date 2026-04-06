@@ -1,6 +1,6 @@
 import { BarChart2, House, Plus, Settings, Wallet } from 'lucide-react-native';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -76,6 +76,8 @@ const NavItem = memo(function NavItem({
   tutorialMeasureToken?: number;
 }) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.88 });
+  const { width: screenWidth } = useWindowDimensions();
+  const labelSize = screenWidth < 380 ? 'text-[8px]' : 'text-[10px]';
   const navItemRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
   const reportLayout = useCallback(() => {
@@ -116,7 +118,8 @@ const NavItem = memo(function NavItem({
         />
         <Text
           variant="label"
-          className={cn('text-[10px]', isEmphasized ? 'text-primary' : 'text-muted-foreground')}
+          numberOfLines={1}
+          className={cn(labelSize, isEmphasized ? 'text-primary' : 'text-muted-foreground')}
         >
           {label}
         </Text>

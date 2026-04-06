@@ -1108,6 +1108,7 @@ const en = {
     title: 'Smart Entry',
     open_settings: 'Open Smart Entry settings',
     settings_title: 'Smart Entry Settings',
+    settings_description: "Used when your message doesn't mention specifics.",
     enable_chip_private: 'Private',
     enable_chip_local: 'On-device',
     enable_title: 'On-Device AI',
@@ -1159,6 +1160,8 @@ const en = {
       'I couldn\'t parse any transactions from that. Try something like "50 for groceries" or "earned 3000 salary".',
     error: 'Something went wrong. Try again.',
     generation_cancelled: 'Cancelled.',
+    model_section_title: 'AI Model',
+    download: 'Download',
   },
 };
 
