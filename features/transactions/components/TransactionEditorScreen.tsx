@@ -1761,55 +1761,6 @@ export function TransactionEditorScreen({
                       ) : null}
                     </View>
 
-                    {/* Note suggestions dropdown */}
-                    {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
-                      <Animated.View
-                        entering={FadeIn.duration(120)}
-                        exiting={FadeOut.duration(120)}
-                        style={[
-                          styles.noteSuggestionsDropdown,
-                          {
-                            top: noteSuggestionsTop,
-                            borderWidth: 1,
-                            borderColor: `${themeColors.border}25`,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                            borderBottomLeftRadius: 18,
-                            borderBottomRightRadius: 18,
-                            backgroundColor: themeColors.card,
-                            overflow: 'hidden',
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 6 },
-                            shadowOpacity: 0.08,
-                            shadowRadius: 12,
-                            elevation: 6,
-                          },
-                        ]}
-                      >
-                        {noteSuggestions.map((suggestion, index) => (
-                          <React.Fragment key={suggestion}>
-                            {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
-                            <Pressable
-                              style={{ paddingHorizontal: 16, paddingVertical: 11 }}
-                              onPress={() => {
-                                handleNoteChange(suggestion);
-                                setNoteSuggestions([]);
-                                noteInputRef.current?.blur();
-                              }}
-                            >
-                              <Text
-                                variant="body"
-                                numberOfLines={1}
-                                style={{ color: themeColors.text }}
-                              >
-                                {suggestion}
-                              </Text>
-                            </Pressable>
-                          </React.Fragment>
-                        ))}
-                      </Animated.View>
-                    ) : null}
-
                     {/* Recurring options (traditional form inputs, secondary) */}
                     {recurringOptions ? (
                       <View className="mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
@@ -2045,6 +1996,56 @@ export function TransactionEditorScreen({
                       </View>
                     ) : null}
                   </Pressable>
+
+                  {/* Note suggestions dropdown — outside Pressable so taps aren't intercepted */}
+                  {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
+                    <Animated.View
+                      entering={FadeIn.duration(120)}
+                      exiting={FadeOut.duration(120)}
+                      style={[
+                        styles.noteSuggestionsDropdown,
+                        {
+                          top: noteSuggestionsTop,
+                          borderWidth: 1,
+                          borderColor: `${themeColors.border}25`,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                          borderBottomLeftRadius: 18,
+                          borderBottomRightRadius: 18,
+                          backgroundColor: themeColors.card,
+                          overflow: 'hidden',
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 6 },
+                          shadowOpacity: 0.08,
+                          shadowRadius: 12,
+                          elevation: 6,
+                        },
+                      ]}
+                    >
+                      {noteSuggestions.map((suggestion, index) => (
+                        <React.Fragment key={suggestion}>
+                          {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
+                          <Pressable
+                            style={{ paddingHorizontal: 16, paddingVertical: 11 }}
+                            onPress={() => {
+                              handleNoteChange(suggestion);
+                              setNoteSuggestions([]);
+                              noteInputRef.current?.blur();
+                            }}
+                          >
+                            <Text
+                              variant="body"
+                              numberOfLines={1}
+                              style={{ color: themeColors.text }}
+                            >
+                              {suggestion}
+                            </Text>
+                          </Pressable>
+                        </React.Fragment>
+                      ))}
+                    </Animated.View>
+                  ) : null}
+
                   <Pressable
                     accessible={false}
                     onPress={clearActiveField}

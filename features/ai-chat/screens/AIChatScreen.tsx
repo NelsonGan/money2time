@@ -321,6 +321,10 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const [isContextBusy, setIsContextBusy] = useState(() => llamaService.isContextBusy());
   const [isActivatingAi, setIsActivatingAi] = useState(false);
   const [switchingModelId, setSwitchingModelId] = useState<string | null>(null);
+  const switchingModelDownloadProgress = useSyncExternalStore(
+    modelDownloadService.subscribeToDownloadState,
+    () => (switchingModelId ? modelDownloadService.getModelDownloadProgress(switchingModelId) : null),
+  );
 
   const loadRequestIdRef = useRef(0);
   const [stoppedManually, setStoppedManually] = useState(false);
@@ -1778,47 +1782,87 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   const isActive = model.id === activeModel.id && !switchingModelId;
                   const isSwitchingTo = model.id === switchingModelId;
                   const isDownloaded = modelManager.isModelDownloaded(model.fileName);
+                  const isDownloading = isSwitchingTo && switchingModelDownloadProgress != null;
+                  const downloadPercent = isDownloading
+                    ? Math.round(switchingModelDownloadProgress * 100)
+                    : null;
 
                   return (
-                    <Pressable
-                      key={model.id}
-                      onPress={() => void handleSwitchModel(model)}
-                      disabled={(isActive && modelStatus === 'ready') || !!switchingModelId}
-                      className="flex-row items-center gap-3 rounded-2xl border px-4 py-3"
-                      style={{
-                        borderColor: (isActive || isSwitchingTo)
-                          ? `${themeColors.primary}40`
-                          : `${themeColors.border}30`,
-                        backgroundColor: (isActive || isSwitchingTo)
-                          ? `${themeColors.primary}08`
-                          : 'transparent',
-                      }}
-                    >
-                      <View className="flex-1">
-                        <Text variant="bodyStrong">{model.displayName}</Text>
-                        <Text variant="caption" tone="muted">
-                          {model.sizeLabel}
-                        </Text>
-                      </View>
-
-                      {isActive && isDownloaded && modelStatus === 'ready' ? (
-                        <View
-                          className="h-8 w-8 items-center justify-center rounded-full"
-                          style={{ backgroundColor: `${themeColors.primary}20` }}
-                        >
-                          <Check size={16} color={themeColors.primary} />
+                    <View key={model.id}>
+                      <Pressable
+                        onPress={() => void handleSwitchModel(model)}
+                        disabled={(isActive && modelStatus === 'ready') || !!switchingModelId}
+                        className="flex-row items-center gap-3 rounded-2xl border px-4 py-3"
+                        style={{
+                          borderColor: (isActive || isSwitchingTo)
+                            ? `${themeColors.primary}40`
+                            : `${themeColors.border}30`,
+                          backgroundColor: (isActive || isSwitchingTo)
+                            ? `${themeColors.primary}08`
+                            : 'transparent',
+                          borderBottomLeftRadius: isDownloading ? 0 : undefined,
+                          borderBottomRightRadius: isDownloading ? 0 : undefined,
+                        }}
+                      >
+                        <View className="flex-1">
+                          <Text variant="bodyStrong">{model.displayName}</Text>
+                          <Text variant="caption" tone="muted">
+                            {model.sizeLabel}
+                          </Text>
                         </View>
-                      ) : isSwitchingTo ? (
-                        <ActivityIndicator size="small" color={themeColors.primary} />
-                      ) : !isDownloaded ? (
-                        <View className="flex-row items-center gap-1.5">
-                          <Download size={14} color={themeColors.primary} />
-                          <Text variant="caption" style={{ color: themeColors.primary }}>
-                            {I18n.t('aiChat.download')}
+
+                        {isActive && isDownloaded && modelStatus === 'ready' ? (
+                          <View
+                            className="h-8 w-8 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${themeColors.primary}20` }}
+                          >
+                            <Check size={16} color={themeColors.primary} />
+                          </View>
+                        ) : isSwitchingTo ? (
+                          <View className="items-end">
+                            <ActivityIndicator size="small" color={themeColors.primary} />
+                          </View>
+                        ) : !isDownloaded ? (
+                          <View className="flex-row items-center gap-1.5">
+                            <Download size={14} color={themeColors.primary} />
+                            <Text variant="caption" style={{ color: themeColors.primary }}>
+                              {I18n.t('aiChat.download')}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </Pressable>
+                      {isDownloading ? (
+                        <View
+                          className="rounded-b-2xl overflow-hidden px-4 pb-3 pt-2"
+                          style={{
+                            borderWidth: 1,
+                            borderTopWidth: 0,
+                            borderColor: `${themeColors.primary}40`,
+                            backgroundColor: `${themeColors.primary}08`,
+                            borderBottomLeftRadius: 16,
+                            borderBottomRightRadius: 16,
+                          }}
+                        >
+                          <View
+                            className="h-2 overflow-hidden rounded-full"
+                            style={{ backgroundColor: `${themeColors.border}30` }}
+                          >
+                            <View
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${downloadPercent ?? 0}%`,
+                                backgroundColor: themeColors.primary,
+                              }}
+                            />
+                          </View>
+                          <Text variant="caption" tone="muted" className="mt-1.5 text-center">
+                            {I18n.t('aiChat.downloading_local_ai_progress', {
+                              progress: downloadPercent ?? 0,
+                            })}
                           </Text>
                         </View>
                       ) : null}
-                    </Pressable>
+                    </View>
                   );
                 })}
               </View>
