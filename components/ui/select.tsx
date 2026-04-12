@@ -79,8 +79,9 @@ export function SelectField({
 }: SelectFieldProps) {
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
-  const { height: windowHeight } = useWindowDimensions();
+  const { width: screenWidth, height: windowHeight } = useWindowDimensions();
   const { contentWidth: windowWidth, isTablet } = useDeviceLayout();
+  const isSmallScreen = screenWidth < 380;
   const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
@@ -394,8 +395,9 @@ export function SelectField({
         ) : isHeaderPlainTrigger ? (
           <View className="flex-1 flex-row items-center gap-2 pr-2">
             <Text
-              variant="heading"
+              variant={isSmallScreen ? 'subheading' : 'heading'}
               numberOfLines={1}
+              adjustsFontSizeToFit
               className={cn(
                 'flex-1 tracking-tight',
                 selected ? 'text-foreground' : 'text-muted-foreground',
