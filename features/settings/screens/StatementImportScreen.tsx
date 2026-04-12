@@ -45,6 +45,7 @@ interface ParsedTransaction {
   description: string;
   amount: number;
   category?: string;
+  account?: string;
 }
 
 interface ParsedStatement {
@@ -62,9 +63,9 @@ const CLAUDE_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 const GEMINI_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81" fill="currentColor"/></svg>`;
 
 const AI_LINKS = [
-  { svg: CHATGPT_SVG, appUrl: 'chatgpt://', webUrl: 'https://chat.openai.com', label: 'GPT' },
-  { svg: CLAUDE_SVG, appUrl: 'claude://', webUrl: 'https://claude.ai', label: 'Claude' },
-  { svg: GEMINI_SVG, appUrl: 'gemini://', webUrl: 'https://gemini.google.com', label: 'Gemini' },
+  { svg: CLAUDE_SVG, appUrl: 'claude://', webUrl: 'https://claude.ai', label: 'Claude', color: '#D97757' },
+  { svg: CHATGPT_SVG, appUrl: 'chatgpt://', webUrl: 'https://chat.openai.com', label: 'GPT', color: null },
+  { svg: GEMINI_SVG, appUrl: null, webUrl: 'https://gemini.google.com', label: 'Gemini', color: '#4285F4' },
 ] as const;
 
 function formatCategoryTree(categories: Category[], type: 'expense' | 'income'): string {
@@ -94,16 +95,16 @@ function buildPrompt(accounts: Account[], categories: Category[]): string {
   const expenseTree = formatCategoryTree(categories, 'expense');
   const incomeTree = formatCategoryTree(categories, 'income');
 
-  return `You are a financial statement parser for the money2time app.
+  return `Parse the uploaded bank statement(s) into JSON. One or more files may be attached.
 
-## Instructions
-1. Extract ALL transactions from the uploaded bank or financial statement (credit card, debit, savings, etc.).
-2. For each transaction, extract: date, description (merchant or payee name), and amount.
-3. Amounts: expenses/debits are NEGATIVE, income/credits/payments are POSITIVE.
-4. Dates: use ISO format YYYY-MM-DD.
-5. Clean up descriptions — remove extra codes, reference numbers, and trailing digits. Keep it human-readable.
-6. Assign a category from my list below. If a subcategory fits, use the format "Parent > Subcategory" (e.g. "Travelling > Food"). If only the parent category fits, use just the parent name. If unsure, use "Other".
-7. Ignore summary lines, interest charges, fee lines, balance lines, and other non-transaction entries.
+For each transaction row found:
+- date: YYYY-MM-DD
+- description: clean merchant/payee name (remove codes, reference numbers, trailing digits)
+- amount: NEGATIVE for expenses/debits, POSITIVE for income/credits
+- category: best match from my categories below using "Parent > Subcategory" when a subcategory fits, just parent name otherwise, "Other" if unsure
+- account: specific account name as printed on the statement (e.g. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), not generic labels
+
+Skip only: balance lines, statement totals, disclosures, headers/footers.
 
 ## My Accounts
 ${accountNames}
@@ -114,32 +115,27 @@ ${expenseTree}
 ## My Income Categories
 ${incomeTree}
 
-## Output Format
-Wrap your JSON response in a \`\`\`json code block so it can be easily copied. No explanation or commentary before or after the code block.
+Reply with ONLY a json code block, no other text:
 
+\`\`\`json
 {
   "statement": {
-    "issuer": "<bank or card name>",
+    "issuer": "<name or 'Multiple'>",
     "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }
   },
   "transactions": [
-    {
-      "date": "YYYY-MM-DD",
-      "description": "<clean merchant name>",
-      "amount": -0.00,
-      "category": "<category or Parent > Subcategory>"
-    }
+    { "date": "YYYY-MM-DD", "description": "...", "amount": -0.00, "category": "...", "account": "..." }
   ]
 }
-
-After the JSON, add ONLY this single line and nothing else:
-"Copy the JSON above, go back to money2time, and tap Import."
+\`\`\`
 
 ## Rules
-- NEVER fabricate transactions. Only output what is in the document.
-- If you cannot read the file or it is not a financial statement, say so.
+- NEVER fabricate or hallucinate transactions. Only output what is in the document.
+- NEVER skip, truncate, or omit transactions. Read every page of every file from start to finish. Output every single transaction row.
+- If multiple files are uploaded, process each file fully then merge all transactions into the single "transactions" array.
 - If the statement spans a year boundary and only shows month/day, infer the year from the statement period.
-- Do NOT add any commentary, totals, summaries, or explanations. Raw JSON + one line only.`;
+- Do not ask questions, do not refuse, do not offer to split into multiple responses.
+- If your output gets cut off, stop mid-JSON and I will reply "continue" so you can finish. Do not stop early to avoid being cut off — just keep going.`;
 }
 
 function stripCodeFences(text: string): string {
@@ -200,6 +196,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     isSimpleMode ? simpleWalletId : null,
   );
+  const [accountMapping, setAccountMapping] = useState<Record<string, string | null>>({});
   const [isImporting, setIsImporting] = useState(false);
   const [importExpenses, setImportExpenses] = useState(true);
   const [importIncome, setImportIncome] = useState(true);
@@ -235,6 +232,17 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     return map;
   }, [categories]);
 
+  const uniqueAccounts = useMemo(() => {
+    if (!parsed) return [];
+    const names = new Set<string>();
+    for (const tx of parsed.transactions) {
+      if (tx.account) names.add(tx.account);
+    }
+    return [...names];
+  }, [parsed]);
+
+  const isMultiAccount = uniqueAccounts.length > 1;
+
   const handleCopyPrompt = useCallback(() => {
     Clipboard.setString(prompt);
     setDidCopyPrompt(true);
@@ -242,9 +250,19 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setTimeout(() => setDidCopyPrompt(false), 1500);
   }, [prompt]);
 
-  const handleOpenAI = useCallback(async (appUrl: string, webUrl: string) => {
-    const canOpen = await Linking.canOpenURL(appUrl);
-    void Linking.openURL(canOpen ? appUrl : webUrl);
+  const handleOpenAI = useCallback(async (appUrl: string | null, webUrl: string) => {
+    if (appUrl) {
+      const canOpen = await Linking.canOpenURL(appUrl);
+      if (canOpen) {
+        try {
+          await Linking.openURL(appUrl);
+          return;
+        } catch {
+          // App scheme registered but failed to open, fall through to web
+        }
+      }
+    }
+    void Linking.openURL(webUrl);
   }, []);
 
   const handlePaste = useCallback(async () => {
@@ -276,6 +294,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setImportExpenses(true);
     setImportIncome(true);
     setExcludedIndices(new Set());
+    setAccountMapping({});
   }, []);
 
   const toggleExpenseCheckbox = useCallback(() => {
@@ -307,7 +326,17 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const handleImport = useCallback(async () => {
     if (!parsed) return;
 
-    if (!isSimpleMode && !selectedAccountId) {
+    if (!isSimpleMode && isMultiAccount) {
+      const unmapped = uniqueAccounts.filter((name) => !accountMapping[name]);
+      if (unmapped.length > 0) {
+        void triggerHaptic('warning');
+        Alert.alert(
+          I18n.t('statement_import.import_error_title'),
+          I18n.t('statement_import.account_mapping_required'),
+        );
+        return;
+      }
+    } else if (!isSimpleMode && !selectedAccountId) {
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('statement_import.import_error_title'),
@@ -320,7 +349,6 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
 
     await new Promise((r) => setTimeout(r, 0));
 
-    const accountId = selectedAccountId;
     let imported = 0;
 
     for (let i = 0; i < parsed.transactions.length; i++) {
@@ -331,6 +359,15 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
 
       if (type === 'expense' && !importExpenses) continue;
       if (type === 'income' && !importIncome) continue;
+
+      let accountId: string | null;
+      if (isSimpleMode) {
+        accountId = simpleWalletId;
+      } else if (isMultiAccount && tx.account) {
+        accountId = accountMapping[tx.account] ?? null;
+      } else {
+        accountId = selectedAccountId;
+      }
 
       const resolvedCategoryId = tx.category
         ? categoryNameToId.get(tx.category.toLowerCase()) ?? null
@@ -360,7 +397,8 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setImportExpenses(true);
     setImportIncome(true);
     setExcludedIndices(new Set());
-  }, [parsed, selectedAccountId, isSimpleMode, categoryNameToId, settings.currencyCode, createTransaction, excludedIndices, importExpenses, importIncome]);
+    setAccountMapping({});
+  }, [parsed, selectedAccountId, isSimpleMode, isMultiAccount, uniqueAccounts, accountMapping, simpleWalletId, categoryNameToId, settings.currencyCode, createTransaction, excludedIndices, importExpenses, importIncome]);
 
   const expenseIndices = useMemo(() => {
     if (!parsed) return [];
@@ -467,10 +505,14 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                     onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
                     className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
                   >
-                    <SvgXml xml={link.svg} width={22} height={22} color={themeColors.text} />
+                    <SvgXml xml={link.svg} width={22} height={22} color={link.color ?? themeColors.text} />
                   </Pressable>
                 ))}
               </View>
+
+              <Text variant="caption" tone="muted" className="text-center text-[11px]">
+                {I18n.t('statement_import.step1_recommended')}
+              </Text>
             </CardContent>
           </Card>
         </View>
@@ -636,16 +678,36 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                     </View>
                   ) : null}
 
-                  {/* Account selector (power mode only) */}
+                  {/* Account selector / mapping (power mode only) */}
                   {!isSimpleMode ? (
-                    <View className="mt-4">
-                      <SelectField
-                        value={selectedAccountId}
-                        options={accountOptions}
-                        placeholder={I18n.t('statement_import.account_placeholder')}
-                        onChange={setSelectedAccountId}
-                      />
-                    </View>
+                    isMultiAccount ? (
+                      <View className="mt-4 gap-3">
+                        {uniqueAccounts.map((aiAccount) => (
+                          <View key={aiAccount} className="gap-1.5">
+                            <Text variant="caption" className="text-[12px]">
+                              {aiAccount}
+                            </Text>
+                            <SelectField
+                              value={accountMapping[aiAccount] ?? null}
+                              options={accountOptions}
+                              placeholder={I18n.t('statement_import.account_placeholder')}
+                              onChange={(val) =>
+                                setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
+                              }
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View className="mt-4">
+                        <SelectField
+                          value={selectedAccountId}
+                          options={accountOptions}
+                          placeholder={I18n.t('statement_import.account_placeholder')}
+                          onChange={setSelectedAccountId}
+                        />
+                      </View>
+                    )
                   ) : null}
                 </CardContent>
               </Card>
