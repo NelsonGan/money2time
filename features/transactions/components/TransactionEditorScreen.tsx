@@ -50,7 +50,10 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import { getDistinctNotesSuggestions } from '~/lib/repositories/transactionsRepository';
+import {
+  getDistinctNotesSuggestions,
+  getLatestTransactionFieldsByNote,
+} from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
@@ -2031,6 +2034,20 @@ export function TransactionEditorScreen({
                               handleNoteChange(suggestion);
                               setNoteSuggestions([]);
                               noteInputRef.current?.blur();
+                              if (mode === 'create') {
+                                const fields = getLatestTransactionFieldsByNote(suggestion);
+                                if (fields) {
+                                  if (!categoryId && fields.categoryId) {
+                                    setCategoryId(fields.categoryId);
+                                  }
+                                  if (!accountId && fields.accountId) {
+                                    setAccountId(fields.accountId);
+                                  }
+                                  if (!amount && fields.amount != null) {
+                                    setAmount(String(fields.amount));
+                                  }
+                                }
+                              }
                             }}
                           >
                             <Text

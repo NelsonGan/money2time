@@ -412,7 +412,7 @@ function StackCard({
                 variant="bodyStrong"
                 style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
               >
-                {formatBalance(creditSummary.payable)}
+                {formatBalance(creditSummary.payable + creditSummary.outstanding)}
               </Text>
             ) : (
               <Text
