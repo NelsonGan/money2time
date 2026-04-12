@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
@@ -42,6 +42,8 @@ export function MonthControlsHeader({
   showAccent?: boolean;
 }) {
   const themeColors = useThemeColors();
+  const { width: screenWidth } = useWindowDimensions();
+  const isSmallScreen = screenWidth < 380;
 
   return (
     <View className="bg-background pb-1.5 pt-1">
@@ -62,7 +64,12 @@ export function MonthControlsHeader({
                           style={{ backgroundColor: themeColors.primary, opacity: 0.5 }}
                         />
                       ) : null}
-                      <Text variant="heading" className="tracking-tight">
+                      <Text
+                        variant={isSmallScreen ? 'subheading' : 'heading'}
+                        className="tracking-tight"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                      >
                         {title}
                       </Text>
                     </View>
