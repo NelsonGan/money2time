@@ -745,6 +745,38 @@ const en = {
     remove: 'Remove',
     data_management: 'Data Management',
     data_management_subtitle: 'Export and import your data',
+    statement_import: 'Statement Import',
+    statement_import_subtitle: 'Import from bank statement',
+  },
+  statement_import: {
+    title: 'Statement Import',
+    step1_title: 'Copy Prompt',
+    copy_prompt: 'Copy Prompt',
+    step1_instructions:
+      'Paste the prompt in ChatGPT, Claude, or Gemini and attach your bank statement.',
+    open_in: 'Open in',
+    step2_title: 'Import Result',
+    step2_description: 'Copy the JSON from the AI response and paste it here.',
+    paste_json: 'Paste from Clipboard',
+    preview_title: 'Preview',
+    expenses: 'Expenses',
+    income: 'Income',
+    import_action: 'Import %{count} Transactions',
+    importing: 'Importing...',
+    import_success_title: 'Import Complete',
+    import_success_message: 'Successfully imported %{count} transactions.',
+    import_error_title: 'Import Failed',
+    import_error_empty_clipboard:
+      'Nothing on your clipboard. Copy the JSON from the AI response first.',
+    import_error_invalid_json:
+      'This doesn\u2019t look like valid JSON. Copy only the JSON object from the AI response, no extra text.',
+    import_error_no_transactions: 'The JSON was valid but contained no transactions.',
+    import_error_invalid_transaction:
+      'Some transactions are missing a date or amount. Ask the AI to regenerate.',
+    import_error_generic: 'Could not import transactions. Please try again.',
+    clear: 'Clear',
+    account_label: 'Import to Account',
+    account_placeholder: 'Select account',
   },
   data_management: {
     title: 'Data Management',

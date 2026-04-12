@@ -5,6 +5,7 @@ import {
   Clock3,
   Crown,
   DatabaseBackup,
+  FileText,
   FolderTree,
   Landmark,
   Palette,
@@ -70,6 +71,7 @@ interface SettingsScreenProps {
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
+  onOpenStatementImport: () => void;
   onOpenAIChat: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
@@ -88,6 +90,7 @@ export function SettingsScreen({
   onOpenRecurring,
   onOpenNotifications,
   onOpenDataManagement,
+  onOpenStatementImport,
   onOpenAIChat,
   onOpenProPaywall,
   onOpenProManagement,
@@ -394,6 +397,12 @@ export function SettingsScreen({
                 label={I18n.t('settings.ai_chat')}
                 subtitle={I18n.t('settings.ai_chat_subtitle')}
                 onPress={onOpenAIChat}
+              />
+              <SettingsRowItem
+                icon={<FileText size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.statement_import')}
+                subtitle={I18n.t('settings.statement_import_subtitle')}
+                onPress={onOpenStatementImport}
               />
               <View
                 ref={managementRowRef}
