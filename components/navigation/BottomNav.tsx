@@ -1,10 +1,15 @@
-import { BarChart2, House, Plus, Settings, Wallet } from 'lucide-react-native';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { Platform, Pressable, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text } from '~/components/ui';
+import {
+  ActivityIcon,
+  HomeIcon,
+  InsightsIcon,
+  PlusIcon,
+  SettingsIcon,
+} from '~/components/icons/NavIcons';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
@@ -28,34 +33,31 @@ interface BottomNavProps {
   tutorialMeasureToken?: number;
 }
 
-const TABS: { name: TabName; labelKey: string; icon: typeof House }[] = [
-  { name: 'home', labelKey: 'nav.home', icon: House },
-  { name: 'transactions', labelKey: 'nav.activity', icon: Wallet },
-  { name: 'insights', labelKey: 'nav.insights', icon: BarChart2 },
-  { name: 'settings', labelKey: 'nav.settings', icon: Settings },
+type NavIconComponent = typeof HomeIcon;
+
+const TABS: { name: TabName; icon: NavIconComponent }[] = [
+  { name: 'home', icon: HomeIcon },
+  { name: 'transactions', icon: ActivityIcon },
+  { name: 'insights', icon: InsightsIcon },
+  { name: 'settings', icon: SettingsIcon },
 ];
 
-const ADD_BUTTON_SIZE = 64;
-const ADD_BUTTON_SLOT_WIDTH = 84;
-const ADD_BUTTON_PROTRUSION = 18;
-const NAV_ROW_HEIGHT = 56;
+const ADD_BUTTON_SIZE = 44;
+const ADD_BUTTON_SLOT_WIDTH = 60;
+const NAV_ROW_HEIGHT = 58;
+const ICON_SIZE = 26;
 
 export function getBottomNavSafePadding(safeBottom: number) {
   return Platform.OS === 'ios' ? Math.max(safeBottom - 12, 8) : Math.max(safeBottom, 10);
 }
 
-export function getBottomNavReservedInset(safeBottom: number, includeAddButton = true) {
-  return (
-    (includeAddButton ? ADD_BUTTON_PROTRUSION : 0) +
-    NAV_ROW_HEIGHT +
-    getBottomNavSafePadding(safeBottom)
-  );
+export function getBottomNavReservedInset(safeBottom: number) {
+  return NAV_ROW_HEIGHT + getBottomNavSafePadding(safeBottom);
 }
 
 const NavItem = memo(function NavItem({
   tab,
-  icon: Icon,
-  label,
+  Icon,
   isActive,
   isTutorialFocused,
   onPressTab,
@@ -65,8 +67,7 @@ const NavItem = memo(function NavItem({
   tutorialMeasureToken,
 }: {
   tab: TabName;
-  icon: typeof House;
-  label: string;
+  Icon: NavIconComponent;
   isActive: boolean;
   isTutorialFocused: boolean;
   onPressTab: (tab: TabName) => void;
@@ -75,11 +76,10 @@ const NavItem = memo(function NavItem({
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
   tutorialMeasureToken?: number;
 }) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.88 });
-  const { width: screenWidth } = useWindowDimensions();
-  const labelSize = screenWidth < 380 ? 'text-[8px]' : 'text-[10px]';
+  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.85 });
   const navItemRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
+
   const reportLayout = useCallback(() => {
     if (!onTutorialTabLayout) return;
     navItemRef.current?.measureInWindow((x, y, width, height) => {
@@ -107,22 +107,17 @@ const NavItem = memo(function NavItem({
         onPressOut={handlePressOut}
         onLayout={reportLayout}
         className={cn(
-          'min-h-[54px] items-center justify-center gap-0.5 rounded-2xl mx-0.5',
+          'items-center justify-center rounded-2xl mx-0.5',
           isTutorialFocused && 'bg-primary/12',
         )}
+        style={{ height: NAV_ROW_HEIGHT }}
       >
         <Icon
-          size={20}
+          size={ICON_SIZE}
           color={isEmphasized ? tintActive : tintInactive}
-          strokeWidth={isEmphasized ? 2.5 : 1.8}
+          strokeWidth={isEmphasized ? 2.2 : 1.6}
+          filled={isEmphasized}
         />
-        <Text
-          variant="label"
-          numberOfLines={1}
-          className={cn(labelSize, isEmphasized ? 'text-primary' : 'text-muted-foreground')}
-        >
-          {label}
-        </Text>
       </Pressable>
     </Animated.View>
   );
@@ -194,7 +189,6 @@ export function BottomNav({
   const midIndex = Math.floor(visibleTabs.length / 2);
   const showAddButton = !!onPressAdd;
 
-  // Keep enough safe-area room without leaving a large block of background below the bar.
   const bottomPad = getBottomNavSafePadding(safeBottom);
 
   const renderTabs = (tabs: typeof visibleTabs) =>
@@ -202,8 +196,7 @@ export function BottomNav({
       <NavItem
         key={tab.name}
         tab={tab.name}
-        icon={tab.icon}
-        label={I18n.t(tab.labelKey)}
+        Icon={tab.icon}
         isActive={activeTab === tab.name}
         isTutorialFocused={tutorialFocusedTab === tab.name}
         tintActive={themeColors.primary}
@@ -218,69 +211,54 @@ export function BottomNav({
     <View
       pointerEvents="box-none"
       style={[
-        {
-          marginTop: showAddButton ? -ADD_BUTTON_PROTRUSION : 0,
-          paddingTop: showAddButton ? ADD_BUTTON_PROTRUSION : 0,
-          paddingBottom: bottomPad,
-        },
+        { paddingBottom: bottomPad },
         isTablet && {
           maxWidth: TABLET_CONTENT_MAX_WIDTH,
           alignSelf: 'center' as const,
           width: '100%',
         },
       ]}
-      className="px-4"
+      className="border-t border-border/30 bg-card"
     >
-      {/* Floating pill nav */}
       <View
-        className="rounded-[26px] border border-border/30 bg-card/95 shadow-nav-float"
-        style={{ overflow: 'visible' }}
+        className="flex-row items-center px-2"
+        style={{ minHeight: NAV_ROW_HEIGHT }}
       >
-        <View className="flex-row items-center px-2.5 py-1.5" style={{ minHeight: NAV_ROW_HEIGHT }}>
-          {showAddButton ? (
-            <>
-              {renderTabs(visibleTabs.slice(0, midIndex))}
-              <View
-                className="items-center justify-center"
-                style={{ width: ADD_BUTTON_SLOT_WIDTH, height: NAV_ROW_HEIGHT }}
-              >
-                <Animated.View
-                  style={[
-                    fabAnimatedStyle,
-                    {
-                      position: 'absolute',
-                      top: -ADD_BUTTON_PROTRUSION,
-                    },
-                  ]}
+        {showAddButton ? (
+          <>
+            {renderTabs(visibleTabs.slice(0, midIndex))}
+            <View
+              className="items-center justify-center"
+              style={{ width: ADD_BUTTON_SLOT_WIDTH, height: NAV_ROW_HEIGHT }}
+            >
+              <Animated.View style={fabAnimatedStyle}>
+                <Pressable
+                  ref={addButtonRef}
+                  onPress={handlePressAdd}
+                  onPressIn={fabPressIn}
+                  onPressOut={fabPressOut}
+                  onLayout={handleAddButtonLayout}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    addButtonAccessibilityLabel ?? I18n.t('onboarding.checklist.add_transaction')
+                  }
+                  className="items-center justify-center rounded-full"
+                  style={{
+                    width: ADD_BUTTON_SIZE,
+                    height: ADD_BUTTON_SIZE,
+                    borderRadius: ADD_BUTTON_SIZE / 2,
+                    backgroundColor: themeColors.primary,
+                  }}
                 >
-                  <Pressable
-                    ref={addButtonRef}
-                    onPress={handlePressAdd}
-                    onPressIn={fabPressIn}
-                    onPressOut={fabPressOut}
-                    onLayout={handleAddButtonLayout}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      addButtonAccessibilityLabel ?? I18n.t('onboarding.checklist.add_transaction')
-                    }
-                    className="items-center justify-center rounded-full shadow-glow-lg"
-                    style={{
-                      width: ADD_BUTTON_SIZE,
-                      height: ADD_BUTTON_SIZE,
-                      borderRadius: ADD_BUTTON_SIZE / 2,
-                      backgroundColor: themeColors.primary,
-                    }}
-                  >
-                    <Plus size={28} color="#FFFFFF" strokeWidth={2.8} />
-                  </Pressable>
-                </Animated.View>
-              </View>
-              {renderTabs(visibleTabs.slice(midIndex))}
-            </>
-          ) : (
-            renderTabs(visibleTabs)
-          )}
-        </View>
+                  <PlusIcon size={22} color="#FFFFFF" strokeWidth={2.8} />
+                </Pressable>
+              </Animated.View>
+            </View>
+            {renderTabs(visibleTabs.slice(midIndex))}
+          </>
+        ) : (
+          renderTabs(visibleTabs)
+        )}
       </View>
     </View>
   );
