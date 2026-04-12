@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   ChevronRight,
@@ -27,11 +26,18 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, Category, DisplayMode, TransactionType } from '~/types';
+import type { Account, Category, TransactionType } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
   onBack: () => void;
+  onOpenList: (params: {
+    section: 'expense' | 'income';
+    transactions: ParsedTransaction[];
+    indices: number[];
+    excludedIndices: number[];
+    onToggle: (index: number) => void;
+  }) => void;
 }
 
 interface ParsedTransaction {
@@ -61,16 +67,32 @@ const AI_LINKS = [
   { svg: GEMINI_SVG, appUrl: 'gemini://', webUrl: 'https://gemini.google.com', label: 'Gemini' },
 ] as const;
 
+function formatCategoryTree(categories: Category[], type: 'expense' | 'income'): string {
+  const parents = categories.filter((c) => c.type === type && !c.parentId);
+  const childrenByParent = new Map<string, Category[]>();
+  for (const c of categories) {
+    if (c.type === type && c.parentId) {
+      const list = childrenByParent.get(c.parentId) ?? [];
+      list.push(c);
+      childrenByParent.set(c.parentId, list);
+    }
+  }
+  const lines: string[] = [];
+  for (const parent of parents) {
+    const children = childrenByParent.get(parent.id);
+    if (children && children.length > 0) {
+      lines.push(`- ${parent.name}: ${children.map((c) => c.name).join(', ')}`);
+    } else {
+      lines.push(`- ${parent.name}`);
+    }
+  }
+  return lines.join('\n');
+}
+
 function buildPrompt(accounts: Account[], categories: Category[]): string {
   const accountNames = accounts.map((a) => a.name).join(', ');
-  const expenseCategories = categories
-    .filter((c) => c.type === 'expense' && !c.parentId)
-    .map((c) => c.name)
-    .join(', ');
-  const incomeCategories = categories
-    .filter((c) => c.type === 'income' && !c.parentId)
-    .map((c) => c.name)
-    .join(', ');
+  const expenseTree = formatCategoryTree(categories, 'expense');
+  const incomeTree = formatCategoryTree(categories, 'income');
 
   return `You are a financial statement parser for the money2time app.
 
@@ -80,17 +102,17 @@ function buildPrompt(accounts: Account[], categories: Category[]): string {
 3. Amounts: expenses/debits are NEGATIVE, income/credits/payments are POSITIVE.
 4. Dates: use ISO format YYYY-MM-DD.
 5. Clean up descriptions — remove extra codes, reference numbers, and trailing digits. Keep it human-readable.
-6. Assign a category from my list below. If unsure, use "Other".
+6. Assign a category from my list below. If a subcategory fits, use the format "Parent > Subcategory" (e.g. "Travelling > Food"). If only the parent category fits, use just the parent name. If unsure, use "Other".
 7. Ignore summary lines, interest charges, fee lines, balance lines, and other non-transaction entries.
 
 ## My Accounts
 ${accountNames}
 
 ## My Expense Categories
-${expenseCategories}
+${expenseTree}
 
 ## My Income Categories
-${incomeCategories}
+${incomeTree}
 
 ## Output Format
 Wrap your JSON response in a \`\`\`json code block so it can be easily copied. No explanation or commentary before or after the code block.
@@ -105,7 +127,7 @@ Wrap your JSON response in a \`\`\`json code block so it can be easily copied. N
       "date": "YYYY-MM-DD",
       "description": "<clean merchant name>",
       "amount": -0.00,
-      "category": "<category from my list>"
+      "category": "<category or Parent > Subcategory>"
     }
   ]
 }
@@ -168,7 +190,7 @@ function getParseErrorMessage(error: unknown): string {
   return I18n.t('statement_import.import_error_generic');
 }
 
-export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
+export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
   const { accounts, categories, settings, isSimpleMode, simpleWalletId, createTransaction } =
     useApp();
   const themeColors = useThemeColors();
@@ -181,7 +203,6 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [importExpenses, setImportExpenses] = useState(true);
   const [importIncome, setImportIncome] = useState(true);
-  const [activeListSection, setActiveListSection] = useState<'expense' | 'income' | null>(null);
   const [excludedIndices, setExcludedIndices] = useState<Set<number>>(new Set());
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -194,8 +215,22 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
 
   const categoryNameToId = useMemo(() => {
     const map = new Map<string, string>();
+    const byId = new Map(categories.map((c) => [c.id, c]));
+    // Add children first so parent categories win on plain-name collisions
     for (const cat of categories) {
-      map.set(cat.name.toLowerCase(), cat.id);
+      if (cat.parentId) {
+        map.set(cat.name.toLowerCase(), cat.id);
+        const parent = byId.get(cat.parentId);
+        if (parent) {
+          map.set(`${parent.name.toLowerCase()} > ${cat.name.toLowerCase()}`, cat.id);
+        }
+      }
+    }
+    // Parents overwrite plain-name keys so "Food" resolves to the parent if both exist
+    for (const cat of categories) {
+      if (!cat.parentId) {
+        map.set(cat.name.toLowerCase(), cat.id);
+      }
     }
     return map;
   }, [categories]);
@@ -240,7 +275,6 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
     setParseError(null);
     setImportExpenses(true);
     setImportIncome(true);
-    setActiveListSection(null);
     setExcludedIndices(new Set());
   }, []);
 
@@ -325,7 +359,6 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
     setParseError(null);
     setImportExpenses(true);
     setImportIncome(true);
-    setActiveListSection(null);
     setExcludedIndices(new Set());
   }, [parsed, selectedAccountId, isSimpleMode, categoryNameToId, settings.currencyCode, createTransaction, excludedIndices, importExpenses, importIncome]);
 
@@ -381,9 +414,7 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <View style={styles.headerWrap}>
-        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={I18n.t('statement_import.title')} />
-      </View>
+      <SettingsHeader onBack={onBack} title={I18n.t('statement_import.title')} />
 
       <ScrollView ref={scrollViewRef} className="flex-1" contentContainerStyle={styles.scrollContent}>
         {/* Step 1 */}
@@ -533,7 +564,15 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
                         {importExpenses ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
                       </Pressable>
                       <Pressable
-                        onPress={() => setActiveListSection('expense')}
+                        onPress={() =>
+                          onOpenList({
+                            section: 'expense',
+                            transactions: parsed!.transactions,
+                            indices: expenseIndices,
+                            excludedIndices: [...excludedIndices],
+                            onToggle: toggleTransactionExclusion,
+                          })
+                        }
                         className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
                         style={{ backgroundColor: themeColors.errorSoft }}
                       >
@@ -569,7 +608,15 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
                         {importIncome ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
                       </Pressable>
                       <Pressable
-                        onPress={() => setActiveListSection('income')}
+                        onPress={() =>
+                          onOpenList({
+                            section: 'income',
+                            transactions: parsed!.transactions,
+                            indices: incomeIndices,
+                            excludedIndices: [...excludedIndices],
+                            onToggle: toggleTransactionExclusion,
+                          })
+                        }
                         className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
                         style={{ backgroundColor: themeColors.successSoft }}
                       >
@@ -593,7 +640,6 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
                   {!isSimpleMode ? (
                     <View className="mt-4">
                       <SelectField
-                        label={I18n.t('statement_import.account_label')}
                         value={selectedAccountId}
                         options={accountOptions}
                         placeholder={I18n.t('statement_import.account_placeholder')}
@@ -619,75 +665,68 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
         </View>
       </ScrollView>
 
-      {/* Full-screen transaction list */}
-      {activeListSection && parsed ? (
-        <TransactionListPage
-          section={activeListSection}
-          transactions={parsed.transactions}
-          indices={activeListSection === 'expense' ? expenseIndices : incomeIndices}
-          excludedIndices={excludedIndices}
-          onToggle={toggleTransactionExclusion}
-          onBack={() => setActiveListSection(null)}
-          settings={settings}
-          themeColors={themeColors}
-        />
-      ) : null}
     </SettingsPageLayout>
   );
 }
 
-interface TransactionListPageProps {
+interface StatementImportListScreenProps {
   section: 'expense' | 'income';
   transactions: ParsedTransaction[];
   indices: number[];
-  excludedIndices: Set<number>;
+  excludedIndices: number[];
   onToggle: (index: number) => void;
   onBack: () => void;
-  settings: { currencyCode: string; currencySymbol: string; displayMode: DisplayMode };
-  themeColors: ReturnType<typeof useThemeColors>;
 }
 
-function TransactionListPage({
+export function StatementImportListScreen({
   section,
   transactions,
   indices,
-  excludedIndices,
+  excludedIndices: initialExcluded,
   onToggle,
   onBack,
-  settings,
-  themeColors,
-}: TransactionListPageProps) {
+}: StatementImportListScreenProps) {
+  const { settings } = useApp();
+  const themeColors = useThemeColors();
+  const [excludedSet, setExcludedSet] = useState(() => new Set(initialExcluded));
   const isExpense = section === 'expense';
   const accentColor = isExpense ? themeColors.error : themeColors.success;
-  const selectedCount = indices.filter((i) => !excludedIndices.has(i)).length;
+  const selectedCount = indices.filter((i) => !excludedSet.has(i)).length;
   const title = isExpense
     ? I18n.t('statement_import.expenses')
     : I18n.t('statement_import.income');
 
-  return (
-    <View className="absolute inset-0" style={{ backgroundColor: themeColors.background }}>
-      <View style={styles.headerWrap}>
-        <View className="flex-row items-center gap-3 pt-5 pb-3">
-          <Pressable onPress={onBack} hitSlop={12} className="active:opacity-50">
-            <ArrowLeft size={22} color={themeColors.text} />
-          </Pressable>
-          <View className="flex-1">
-            <Text variant="bodyStrong">{title}</Text>
-            <Text variant="caption" tone="muted" className="text-[11px]">
-              {selectedCount}/{indices.length} {I18n.t('statement_import.selected').toLowerCase()}
-            </Text>
-          </View>
-        </View>
-      </View>
+  const handleToggle = useCallback(
+    (idx: number) => {
+      setExcludedSet((prev) => {
+        const next = new Set(prev);
+        if (next.has(idx)) {
+          next.delete(idx);
+        } else {
+          next.add(idx);
+        }
+        return next;
+      });
+      onToggle(idx);
+    },
+    [onToggle],
+  );
 
+  return (
+    <SettingsPageLayout>
+      <SettingsHeader
+        onBack={onBack}
+        title={title}
+        subtitle={`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
+      />
       <ScrollView className="flex-1" contentContainerStyle={styles.listContent}>
         {indices.map((idx) => {
           const tx = transactions[idx];
-          const isSelected = !excludedIndices.has(idx);
+          const isSelected = !excludedSet.has(idx);
           return (
             <Pressable
               key={idx}
-              onPress={() => onToggle(idx)}
+              onPress={() => handleToggle(idx)}
               className="flex-row items-center border-b px-5 py-3.5 active:opacity-70"
               style={{ borderColor: themeColors.textMuted + '15' }}
             >
@@ -724,14 +763,11 @@ function TransactionListPage({
           );
         })}
       </ScrollView>
-    </View>
+    </SettingsPageLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  headerWrap: {
-    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  },
   scrollContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,

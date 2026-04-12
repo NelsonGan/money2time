@@ -23,7 +23,7 @@ import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
-import { StatementImportScreen } from './StatementImportScreen';
+import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 
 interface SettingsStackProps {
@@ -299,7 +299,30 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="StatementImport">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <StatementImportScreen onBack={() => props.navigation.goBack()} />;
+          return (
+            <StatementImportScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenList={(params) =>
+                props.navigation.navigate('StatementImportList', params)
+              }
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="StatementImportList">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          const { section, transactions, indices, excludedIndices, onToggle } = props.route.params;
+          return (
+            <StatementImportListScreen
+              section={section}
+              transactions={transactions}
+              indices={indices}
+              excludedIndices={excludedIndices}
+              onToggle={onToggle}
+              onBack={() => props.navigation.goBack()}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="ProManagement">
