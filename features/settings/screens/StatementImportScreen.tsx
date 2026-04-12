@@ -85,7 +85,7 @@ ${expenseCategories}
 ${incomeCategories}
 
 ## Output Format
-Your ENTIRE response must be ONLY raw JSON — no markdown, no code fences, no explanation, no commentary. Do NOT wrap the JSON in \`\`\`json code blocks. Output the raw JSON object directly.
+Wrap your JSON response in a \`\`\`json code block so it can be easily copied. No explanation or commentary before or after the code block.
 
 {
   "statement": {
