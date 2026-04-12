@@ -479,4 +479,21 @@ export function getDistinctNotesSuggestions(prefix: string): string[] {
   return rows.map((r) => r.note);
 }
 
+export function getLatestTransactionFieldsByNote(
+  exactNote: string,
+): { categoryId: string | null; accountId: string | null; amount: number | null } | null {
+  if (!exactNote) return null;
+  const sqlite = getSQLite();
+  const row = sqlite.getFirstSync<{
+    category_id: string | null;
+    account_id: string | null;
+    amount: number | null;
+  }>(
+    'SELECT category_id, account_id, amount FROM transactions WHERE note = ? AND deleted_at IS NULL ORDER BY date DESC, created_at DESC LIMIT 1',
+    [exactNote],
+  );
+  if (!row) return null;
+  return { categoryId: row.category_id, accountId: row.account_id, amount: row.amount };
+}
+
 export const transactionsRepository = new TransactionsRepository();
