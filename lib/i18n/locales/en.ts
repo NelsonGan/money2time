@@ -753,7 +753,8 @@ const en = {
     step1_title: 'Copy Prompt',
     copy_prompt: 'Copy Prompt',
     step1_instructions:
-      'Paste the prompt in ChatGPT, Claude, or Gemini and attach your bank statement.',
+      'Paste the prompt and attach your bank statement(s). You can attach multiple at once.',
+    step1_recommended: 'For large or multiple attachments, enable thinking/reasoning mode for best results.',
     open_in: 'Open in',
     step2_title: 'Import Result',
     step2_description: 'Copy the JSON from the AI response and paste it here.',
@@ -778,6 +779,7 @@ const en = {
     account_label: 'Import to Account',
     account_placeholder: 'Select account',
     account_required: 'Please select an account before importing.',
+    account_mapping_required: 'Please map all statement accounts before importing.',
     selected: 'Selected',
   },
   data_management: {
