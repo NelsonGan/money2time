@@ -22,6 +22,13 @@ export type SettingsStackParamList = {
   NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;
   StatementImport: undefined;
+  StatementImportList: {
+    section: 'expense' | 'income';
+    transactions: { date: string; description: string; amount: number; category?: string }[];
+    indices: number[];
+    excludedIndices: number[];
+    onToggle: (index: number) => void;
+  };
   ProManagement: undefined;
 };
 
