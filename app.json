@@ -26,7 +26,8 @@
       },
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"]
       }
     },
     "android": {

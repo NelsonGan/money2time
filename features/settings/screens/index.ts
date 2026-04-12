@@ -8,5 +8,6 @@ export { ProPaywallScreen } from './ProPaywallScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
+export { StatementImportScreen } from './StatementImportScreen';
 export { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 export type { SettingsStackParamList } from '~/navigation/settingsStack';

@@ -21,6 +21,7 @@ export type SettingsStackParamList = {
   Notifications: undefined;
   NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;
+  StatementImport: undefined;
   ProManagement: undefined;
 };
 

@@ -23,6 +23,7 @@ import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
+import { StatementImportScreen } from './StatementImportScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 
 interface SettingsStackProps {
@@ -81,6 +82,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenAIChat={onOpenAIChat}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -292,6 +294,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <DataManagementScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="StatementImport">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <StatementImportScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="ProManagement">
