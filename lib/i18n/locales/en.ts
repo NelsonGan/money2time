@@ -777,6 +777,8 @@ const en = {
     clear: 'Clear',
     account_label: 'Import to Account',
     account_placeholder: 'Select account',
+    account_required: 'Please select an account before importing.',
+    selected: 'Selected',
   },
   data_management: {
     title: 'Data Management',

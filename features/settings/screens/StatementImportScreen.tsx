@@ -1,4 +1,12 @@
-import { ArrowRight, Check, ClipboardPaste, Copy, X } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  ClipboardPaste,
+  Copy,
+  X,
+} from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Clipboard, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
@@ -19,7 +27,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, Category, TransactionType } from '~/types';
+import type { Account, Category, DisplayMode, TransactionType } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
@@ -171,6 +179,10 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
     isSimpleMode ? simpleWalletId : null,
   );
   const [isImporting, setIsImporting] = useState(false);
+  const [importExpenses, setImportExpenses] = useState(true);
+  const [importIncome, setImportIncome] = useState(true);
+  const [activeListSection, setActiveListSection] = useState<'expense' | 'income' | null>(null);
+  const [excludedIndices, setExcludedIndices] = useState<Set<number>>(new Set());
   const scrollViewRef = useRef<ScrollView>(null);
 
   const prompt = useMemo(() => buildPrompt(accounts, categories), [accounts, categories]);
@@ -226,20 +238,66 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
   const handleClear = useCallback(() => {
     setParsed(null);
     setParseError(null);
+    setImportExpenses(true);
+    setImportIncome(true);
+    setActiveListSection(null);
+    setExcludedIndices(new Set());
+  }, []);
+
+  const toggleExpenseCheckbox = useCallback(() => {
+    setImportExpenses((prev) => {
+      if (prev && !importIncome) return prev;
+      return !prev;
+    });
+  }, [importIncome]);
+
+  const toggleIncomeCheckbox = useCallback(() => {
+    setImportIncome((prev) => {
+      if (prev && !importExpenses) return prev;
+      return !prev;
+    });
+  }, [importExpenses]);
+
+  const toggleTransactionExclusion = useCallback((index: number) => {
+    setExcludedIndices((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   }, []);
 
   const handleImport = useCallback(async () => {
     if (!parsed) return;
+
+    if (!isSimpleMode && !selectedAccountId) {
+      void triggerHaptic('warning');
+      Alert.alert(
+        I18n.t('statement_import.import_error_title'),
+        I18n.t('statement_import.account_required'),
+      );
+      return;
+    }
+
     setIsImporting(true);
 
-    // Yield to let React render the importing state
     await new Promise((r) => setTimeout(r, 0));
 
     const accountId = selectedAccountId;
     let imported = 0;
 
-    for (const tx of parsed.transactions) {
+    for (let i = 0; i < parsed.transactions.length; i++) {
+      if (excludedIndices.has(i)) continue;
+
+      const tx = parsed.transactions[i];
       const type: TransactionType = tx.amount < 0 ? 'expense' : 'income';
+
+      if (type === 'expense' && !importExpenses) continue;
+      if (type === 'income' && !importIncome) continue;
+
       const resolvedCategoryId = tx.category
         ? categoryNameToId.get(tx.category.toLowerCase()) ?? null
         : null;
@@ -265,31 +323,61 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
     );
     setParsed(null);
     setParseError(null);
-  }, [parsed, selectedAccountId, categoryNameToId, settings.currencyCode, createTransaction]);
+    setImportExpenses(true);
+    setImportIncome(true);
+    setActiveListSection(null);
+    setExcludedIndices(new Set());
+  }, [parsed, selectedAccountId, isSimpleMode, categoryNameToId, settings.currencyCode, createTransaction, excludedIndices, importExpenses, importIncome]);
+
+  const expenseIndices = useMemo(() => {
+    if (!parsed) return [];
+    return parsed.transactions
+      .map((tx, i) => ({ tx, i }))
+      .filter(({ tx }) => tx.amount < 0)
+      .map(({ i }) => i);
+  }, [parsed]);
+
+  const incomeIndices = useMemo(() => {
+    if (!parsed) return [];
+    return parsed.transactions
+      .map((tx, i) => ({ tx, i }))
+      .filter(({ tx }) => tx.amount > 0)
+      .map(({ i }) => i);
+  }, [parsed]);
+
+  const expenseCount = expenseIndices.length;
+  const incomeCount = incomeIndices.length;
+
+  const selectedExpenseCount = useMemo(
+    () => expenseIndices.filter((i) => !excludedIndices.has(i)).length,
+    [expenseIndices, excludedIndices],
+  );
+
+  const selectedIncomeCount = useMemo(
+    () => incomeIndices.filter((i) => !excludedIndices.has(i)).length,
+    [incomeIndices, excludedIndices],
+  );
 
   const totalExpenses = useMemo(() => {
     if (!parsed) return 0;
-    return parsed.transactions
-      .filter((tx) => tx.amount < 0)
-      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-  }, [parsed]);
+    return expenseIndices
+      .filter((i) => !excludedIndices.has(i))
+      .reduce((sum, i) => sum + Math.abs(parsed.transactions[i].amount), 0);
+  }, [parsed, expenseIndices, excludedIndices]);
 
   const totalIncome = useMemo(() => {
     if (!parsed) return 0;
-    return parsed.transactions
-      .filter((tx) => tx.amount > 0)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-  }, [parsed]);
+    return incomeIndices
+      .filter((i) => !excludedIndices.has(i))
+      .reduce((sum, i) => sum + parsed.transactions[i].amount, 0);
+  }, [parsed, incomeIndices, excludedIndices]);
 
-  const expenseCount = useMemo(() => {
-    if (!parsed) return 0;
-    return parsed.transactions.filter((tx) => tx.amount < 0).length;
-  }, [parsed]);
-
-  const incomeCount = useMemo(() => {
-    if (!parsed) return 0;
-    return parsed.transactions.filter((tx) => tx.amount > 0).length;
-  }, [parsed]);
+  const totalImportCount = useMemo(() => {
+    let count = 0;
+    if (importExpenses) count += selectedExpenseCount;
+    if (importIncome) count += selectedIncomeCount;
+    return count;
+  }, [importExpenses, importIncome, selectedExpenseCount, selectedIncomeCount]);
 
   return (
     <SettingsPageLayout>
@@ -429,35 +517,77 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
                     </Pressable>
                   </View>
 
-                  {/* Stats row */}
-                  <View
-                    className="mt-4 flex-row rounded-xl py-3"
-                    style={{ backgroundColor: themeColors.surfaceMuted }}
-                  >
-                    {expenseCount > 0 ? (
-                      <View className={`items-center ${incomeCount > 0 ? 'flex-1' : 'flex-1'}`}>
-                        <Text variant="mono" className="text-destructive text-[15px]">
-                          -{formatAmount(totalExpenses, settings)}
-                        </Text>
-                        <Text variant="caption" tone="muted" className="mt-1 text-[11px]">
-                          {expenseCount} {I18n.t('statement_import.expenses').toLowerCase()}
-                        </Text>
-                      </View>
-                    ) : null}
-                    {expenseCount > 0 && incomeCount > 0 ? (
-                      <View style={styles.verticalDivider} />
-                    ) : null}
-                    {incomeCount > 0 ? (
-                      <View className="flex-1 items-center">
-                        <Text variant="mono" className="text-emerald-600 text-[15px]">
-                          +{formatAmount(totalIncome, settings)}
-                        </Text>
-                        <Text variant="caption" tone="muted" className="mt-1 text-[11px]">
-                          {incomeCount} {I18n.t('statement_import.income').toLowerCase()}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
+                  {/* Expense row */}
+                  {expenseCount > 0 ? (
+                    <View className="mt-4 flex-row items-center gap-3">
+                      <Pressable
+                        onPress={toggleExpenseCheckbox}
+                        hitSlop={8}
+                        className="h-[22px] w-[22px] items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: importExpenses ? themeColors.error : 'transparent',
+                          borderWidth: importExpenses ? 0 : 1.5,
+                          borderColor: importExpenses ? undefined : themeColors.textMuted + '50',
+                        }}
+                      >
+                        {importExpenses ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setActiveListSection('expense')}
+                        className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
+                        style={{ backgroundColor: themeColors.errorSoft }}
+                      >
+                        <View className="flex-1">
+                          <Text variant="mono" style={{ color: themeColors.error, fontSize: 15 }}>
+                            -{formatAmount(totalExpenses, settings)}
+                          </Text>
+                          <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
+                            {selectedExpenseCount < expenseCount
+                              ? `${selectedExpenseCount}/${expenseCount}`
+                              : `${expenseCount}`}{' '}
+                            {I18n.t('statement_import.expenses').toLowerCase()}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </Pressable>
+                    </View>
+                  ) : null}
+
+                  {/* Income row */}
+                  {incomeCount > 0 ? (
+                    <View className="mt-3 flex-row items-center gap-3">
+                      <Pressable
+                        onPress={toggleIncomeCheckbox}
+                        hitSlop={8}
+                        className="h-[22px] w-[22px] items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: importIncome ? themeColors.success : 'transparent',
+                          borderWidth: importIncome ? 0 : 1.5,
+                          borderColor: importIncome ? undefined : themeColors.textMuted + '50',
+                        }}
+                      >
+                        {importIncome ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setActiveListSection('income')}
+                        className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
+                        style={{ backgroundColor: themeColors.successSoft }}
+                      >
+                        <View className="flex-1">
+                          <Text variant="mono" style={{ color: themeColors.success, fontSize: 15 }}>
+                            +{formatAmount(totalIncome, settings)}
+                          </Text>
+                          <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
+                            {selectedIncomeCount < incomeCount
+                              ? `${selectedIncomeCount}/${incomeCount}`
+                              : `${incomeCount}`}{' '}
+                            {I18n.t('statement_import.income').toLowerCase()}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </Pressable>
+                    </View>
+                  ) : null}
 
                   {/* Account selector (power mode only) */}
                   {!isSimpleMode ? (
@@ -475,12 +605,12 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
               </Card>
 
               {/* Import button */}
-              <Button onPress={() => void handleImport()} disabled={isImporting}>
+              <Button onPress={() => void handleImport()} disabled={isImporting || totalImportCount === 0}>
                 <Text>
                   {isImporting
                     ? I18n.t('statement_import.importing')
                     : I18n.t('statement_import.import_action', {
-                        count: parsed.transactions.length,
+                        count: totalImportCount,
                       })}
                 </Text>
               </Button>
@@ -488,7 +618,113 @@ export function StatementImportScreen({ onBack }: StatementImportScreenProps) {
           )}
         </View>
       </ScrollView>
+
+      {/* Full-screen transaction list */}
+      {activeListSection && parsed ? (
+        <TransactionListPage
+          section={activeListSection}
+          transactions={parsed.transactions}
+          indices={activeListSection === 'expense' ? expenseIndices : incomeIndices}
+          excludedIndices={excludedIndices}
+          onToggle={toggleTransactionExclusion}
+          onBack={() => setActiveListSection(null)}
+          settings={settings}
+          themeColors={themeColors}
+        />
+      ) : null}
     </SettingsPageLayout>
+  );
+}
+
+interface TransactionListPageProps {
+  section: 'expense' | 'income';
+  transactions: ParsedTransaction[];
+  indices: number[];
+  excludedIndices: Set<number>;
+  onToggle: (index: number) => void;
+  onBack: () => void;
+  settings: { currencyCode: string; currencySymbol: string; displayMode: DisplayMode };
+  themeColors: ReturnType<typeof useThemeColors>;
+}
+
+function TransactionListPage({
+  section,
+  transactions,
+  indices,
+  excludedIndices,
+  onToggle,
+  onBack,
+  settings,
+  themeColors,
+}: TransactionListPageProps) {
+  const isExpense = section === 'expense';
+  const accentColor = isExpense ? themeColors.error : themeColors.success;
+  const selectedCount = indices.filter((i) => !excludedIndices.has(i)).length;
+  const title = isExpense
+    ? I18n.t('statement_import.expenses')
+    : I18n.t('statement_import.income');
+
+  return (
+    <View className="absolute inset-0" style={{ backgroundColor: themeColors.background }}>
+      <View style={styles.headerWrap}>
+        <View className="flex-row items-center gap-3 pt-5 pb-3">
+          <Pressable onPress={onBack} hitSlop={12} className="active:opacity-50">
+            <ArrowLeft size={22} color={themeColors.text} />
+          </Pressable>
+          <View className="flex-1">
+            <Text variant="bodyStrong">{title}</Text>
+            <Text variant="caption" tone="muted" className="text-[11px]">
+              {selectedCount}/{indices.length} {I18n.t('statement_import.selected').toLowerCase()}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView className="flex-1" contentContainerStyle={styles.listContent}>
+        {indices.map((idx) => {
+          const tx = transactions[idx];
+          const isSelected = !excludedIndices.has(idx);
+          return (
+            <Pressable
+              key={idx}
+              onPress={() => onToggle(idx)}
+              className="flex-row items-center border-b px-5 py-3.5 active:opacity-70"
+              style={{ borderColor: themeColors.textMuted + '15' }}
+            >
+              <View
+                className="mr-3.5 h-[22px] w-[22px] items-center justify-center rounded-md"
+                style={{
+                  backgroundColor: isSelected ? accentColor : 'transparent',
+                  borderWidth: isSelected ? 0 : 1.5,
+                  borderColor: isSelected ? undefined : themeColors.textMuted + '50',
+                }}
+              >
+                {isSelected ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+              </View>
+              <Text
+                variant="body"
+                className="flex-1 text-[14px]"
+                numberOfLines={1}
+                style={{ opacity: isSelected ? 1 : 0.35 }}
+              >
+                {tx.description || tx.category || tx.date}
+              </Text>
+              <Text
+                variant="mono"
+                className="ml-3 text-[13px]"
+                style={{
+                  color: accentColor,
+                  opacity: isSelected ? 1 : 0.35,
+                }}
+              >
+                {isExpense ? '-' : '+'}
+                {formatAmount(Math.abs(tx.amount), settings)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -500,14 +736,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
+  listContent: {
+    paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
   thinDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: 'rgba(148, 163, 184, 0.25)',
-  },
-  verticalDivider: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch' as const,
-    marginVertical: 4,
-    backgroundColor: 'rgba(148, 163, 184, 0.3)',
   },
 });
