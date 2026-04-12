@@ -1127,7 +1127,7 @@ const en = {
     expense_category_section_title: 'Default expense category',
     income_category_section_title: 'Default income category',
     disable_section_title: 'Disable AI Feature',
-    disable_section_subtitle: 'Delete the local model and save about 1.1 GB of storage.',
+    disable_section_subtitle: 'Delete the local AI model to free up storage.',
     disable_button: 'Disable Feature',
     account_section_subtitle: 'Used when a message does not mention an account.',
     default_account_label: 'Account',
