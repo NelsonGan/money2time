@@ -97,7 +97,6 @@ export const settingsTable = sqliteTable('settings', {
   aiChatDefaultAccountId: text('ai_chat_default_account_id'),
   aiChatDefaultIncomeCategoryId: text('ai_chat_default_income_category_id'),
   aiChatDefaultExpenseCategoryId: text('ai_chat_default_expense_category_id'),
-  aiChatModelId: text('ai_chat_model_id'),
   insightsPrefsJson: text('insights_prefs_json'),
   notificationPrefsJson: text('notification_prefs_json'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
