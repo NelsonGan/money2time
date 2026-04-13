@@ -781,6 +781,7 @@ const en = {
     account_required: 'Please select an account before importing.',
     account_mapping_required: 'Please map all statement accounts before importing.',
     selected: 'Selected',
+    how_to_video: 'See how it works',
   },
   data_management: {
     title: 'Data Management',
