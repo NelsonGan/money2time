@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
+  CirclePlay,
   ClipboardPaste,
   Copy,
   X,
@@ -14,9 +15,9 @@ import {
   Button,
   Card,
   CardContent,
+  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
-  SelectField,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -513,6 +514,20 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
               <Text variant="caption" tone="muted" className="text-center text-[11px]">
                 {I18n.t('statement_import.step1_recommended')}
               </Text>
+
+              <View className="flex-row items-center gap-3">
+                <View className="flex-1" style={styles.thinDivider} />
+              </View>
+
+              <Pressable
+                onPress={() => void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM')}
+                className="flex-row items-center justify-center gap-1.5 active:opacity-50"
+              >
+                <CirclePlay size={14} color={themeColors.primary} />
+                <Text variant="caption" style={{ color: themeColors.primary }}>
+                  {I18n.t('statement_import.how_to_video')}
+                </Text>
+              </Pressable>
             </CardContent>
           </Card>
         </View>
