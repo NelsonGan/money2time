@@ -17,8 +17,10 @@ import {
   ActivityIndicator,
   Animated as RNAnimated,
   FlatList,
+  InteractionManager,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -67,6 +69,7 @@ import {
   dayKeyFromIsoLocal,
   formatAmount,
   formatCompactCurrency,
+  formatCompactNumber,
   formatDateInput,
   formatHours,
   monthKeyFromDateLocal,
@@ -382,6 +385,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
     textAlign: 'center',
+  },
+  calendarNetLabel: {
+    marginTop: 2,
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingHorizontal: 2,
   },
   progressFill: {
     height: '100%',
@@ -953,7 +964,9 @@ type InsightsPreferencesSnapshot = {
   excludedIncomeTrendIncomeCategoryIds: string[];
   excludedSavingsIncomeCategoryIds: string[];
   excludedSavingsExpenseCategoryIds: string[];
-  excludedTimeCostExpenseCategoryId: string | null;
+  excludedTimeCostExpenseCategoryIds: string[];
+  excludedExpenseBreakdownCategoryIds: string[];
+  excludedIncomeBreakdownCategoryIds: string[];
   excludedAssetHistoryAccountIds: string[];
   timeCostViewMode: TimeCostViewMode;
 };
@@ -1032,15 +1045,25 @@ function parseInsightsPreferencesPayload(
     next.excludedSavingsExpenseCategoryIds = toUniqueStringList(
       parsed.excludedSavingsExpenseCategoryIds,
     );
+    next.excludedExpenseBreakdownCategoryIds = toUniqueStringList(
+      parsed.excludedExpenseBreakdownCategoryIds,
+    );
+    next.excludedIncomeBreakdownCategoryIds = toUniqueStringList(
+      parsed.excludedIncomeBreakdownCategoryIds,
+    );
     if (Object.prototype.hasOwnProperty.call(parsed, 'excludedAssetHistoryAccountIds')) {
       next.excludedAssetHistoryAccountIds = toUniqueStringList(
         parsed.excludedAssetHistoryAccountIds,
       );
     }
-    if (typeof parsed.excludedTimeCostExpenseCategoryId === 'string') {
+    if (Array.isArray(parsed.excludedTimeCostExpenseCategoryIds)) {
+      next.excludedTimeCostExpenseCategoryIds = toUniqueStringList(
+        parsed.excludedTimeCostExpenseCategoryIds,
+      );
+    } else if (typeof parsed.excludedTimeCostExpenseCategoryId === 'string') {
       const normalized = parsed.excludedTimeCostExpenseCategoryId.trim();
       if (normalized) {
-        next.excludedTimeCostExpenseCategoryId = normalized;
+        next.excludedTimeCostExpenseCategoryIds = [normalized];
       }
     }
 
@@ -2585,9 +2608,15 @@ export function InsightsScreen({
   const [excludedSavingsExpenseCategoryIds, setExcludedSavingsExpenseCategoryIds] = useState<
     string[]
   >([]);
-  const [excludedTimeCostExpenseCategoryId, setExcludedTimeCostExpenseCategoryId] = useState<
-    string | null
-  >(null);
+  const [excludedTimeCostExpenseCategoryIds, setExcludedTimeCostExpenseCategoryIds] = useState<
+    string[]
+  >([]);
+  const [excludedExpenseBreakdownCategoryIds, setExcludedExpenseBreakdownCategoryIds] = useState<
+    string[]
+  >([]);
+  const [excludedIncomeBreakdownCategoryIds, setExcludedIncomeBreakdownCategoryIds] = useState<
+    string[]
+  >([]);
   const [excludedAssetHistoryAccountIds, setExcludedAssetHistoryAccountIds] = useState<string[]>(
     () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
   );
@@ -2879,8 +2908,14 @@ export function InsightsScreen({
         hasHydratedAssetHistoryExclusionsRef.current = true;
         setExcludedAssetHistoryAccountIds(saved.excludedAssetHistoryAccountIds);
       }
-      if (saved.excludedTimeCostExpenseCategoryId) {
-        setExcludedTimeCostExpenseCategoryId(saved.excludedTimeCostExpenseCategoryId);
+      if (saved.excludedTimeCostExpenseCategoryIds) {
+        setExcludedTimeCostExpenseCategoryIds(saved.excludedTimeCostExpenseCategoryIds);
+      }
+      if (saved.excludedExpenseBreakdownCategoryIds) {
+        setExcludedExpenseBreakdownCategoryIds(saved.excludedExpenseBreakdownCategoryIds);
+      }
+      if (saved.excludedIncomeBreakdownCategoryIds) {
+        setExcludedIncomeBreakdownCategoryIds(saved.excludedIncomeBreakdownCategoryIds);
       }
       if (saved.anchorDate) {
         const parsedAnchorDate = parseDateInput(saved.anchorDate);
@@ -2916,7 +2951,9 @@ export function InsightsScreen({
       excludedIncomeTrendIncomeCategoryIds,
       excludedSavingsIncomeCategoryIds,
       excludedSavingsExpenseCategoryIds,
-      excludedTimeCostExpenseCategoryId,
+      excludedTimeCostExpenseCategoryIds,
+      excludedExpenseBreakdownCategoryIds,
+      excludedIncomeBreakdownCategoryIds,
       excludedAssetHistoryAccountIds,
       timeCostViewMode,
     }),
@@ -2932,7 +2969,9 @@ export function InsightsScreen({
       excludedAssetHistoryAccountIds,
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
-      excludedTimeCostExpenseCategoryId,
+      excludedTimeCostExpenseCategoryIds,
+      excludedExpenseBreakdownCategoryIds,
+      excludedIncomeBreakdownCategoryIds,
       persistedPeriodPreset,
       periodPresetByInsight,
       selectedAccountIds,
@@ -3024,11 +3063,16 @@ export function InsightsScreen({
     [excludedAssetHistoryAccountIds],
   );
   const excludedTimeCostExpenseCategorySet = useMemo(
-    () =>
-      excludedTimeCostExpenseCategoryId
-        ? new Set([excludedTimeCostExpenseCategoryId])
-        : new Set<string>(),
-    [excludedTimeCostExpenseCategoryId],
+    () => new Set(excludedTimeCostExpenseCategoryIds),
+    [excludedTimeCostExpenseCategoryIds],
+  );
+  const excludedExpenseBreakdownCategorySet = useMemo(
+    () => new Set(excludedExpenseBreakdownCategoryIds),
+    [excludedExpenseBreakdownCategoryIds],
+  );
+  const excludedIncomeBreakdownCategorySet = useMemo(
+    () => new Set(excludedIncomeBreakdownCategoryIds),
+    [excludedIncomeBreakdownCategoryIds],
   );
   const assetHistoryAccountOptions = accounts;
   const { includedAssetHistoryAccounts, includedAssetHistoryAccountById } = useMemo(() => {
@@ -3137,6 +3181,8 @@ export function InsightsScreen({
   const hasIncomeTrendExclusionFilter = selectedInsightType === 'income_trend';
   const hasSavingsCategoryExclusionFilter = selectedInsightType === 'savings_rate';
   const hasTimeCostExpenseCategoryExclusionFilter = selectedInsightType === 'time_cost_leaderboard';
+  const hasExpenseBreakdownExclusionFilter = selectedInsightType === 'expense_breakdown';
+  const hasIncomeBreakdownExclusionFilter = selectedInsightType === 'income_breakdown';
   const hasAssetHistoryAccountExclusionFilter = selectedInsightType === 'asset_history';
   const hasInsightsFilters =
     hasPeriodFilter ||
@@ -3145,6 +3191,8 @@ export function InsightsScreen({
     hasIncomeTrendExclusionFilter ||
     hasSavingsCategoryExclusionFilter ||
     hasTimeCostExpenseCategoryExclusionFilter ||
+    hasExpenseBreakdownExclusionFilter ||
+    hasIncomeBreakdownExclusionFilter ||
     hasAssetHistoryAccountExclusionFilter;
   const incomeRateHistoryPoints = useMemo<IncomeRatePoint[]>(() => {
     const byMonth = new Map<
@@ -4095,6 +4143,10 @@ export function InsightsScreen({
       }
 
       const transactionType = transactionTypeFromInsightType(insightType);
+      const breakdownExclusionSet =
+        transactionType === 'expense'
+          ? excludedExpenseBreakdownCategorySet
+          : excludedIncomeBreakdownCategorySet;
       const filteredForRange: TransactionWithRelations[] = [];
       const breakdownTotals = new Map<
         string,
@@ -4103,6 +4155,16 @@ export function InsightsScreen({
       const breakdownTransactionsById = new Map<string, TransactionWithRelations[]>();
       inRangeTransactions.forEach((tx) => {
         if (tx.type !== transactionType) return;
+        if (breakdownExclusionSet.size > 0 && tx.categoryId) {
+          const category = categoryById.get(tx.categoryId);
+          const rootId = category?.parentId ?? tx.categoryId;
+          if (
+            breakdownExclusionSet.has(tx.categoryId) ||
+            breakdownExclusionSet.has(rootId)
+          ) {
+            return;
+          }
+        }
         filteredForRange.push(tx);
 
         const id = resolveBreakdownRootId(tx, categoryById);
@@ -4155,6 +4217,8 @@ export function InsightsScreen({
       excludedSavingsExpenseCategorySet,
       excludedSavingsIncomeCategorySet,
       excludedTimeCostExpenseCategorySet,
+      excludedExpenseBreakdownCategorySet,
+      excludedIncomeBreakdownCategorySet,
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       incomeRateHistoryPoints,
@@ -4337,6 +4401,21 @@ export function InsightsScreen({
   const renderMoneyAmount = useCallback(
     (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
     [settings],
+  );
+  const formatCalendarCellNet = useCallback(
+    (value: number): string => {
+      if (value === 0) return '';
+      const absValue = Math.abs(value);
+      if (settings.displayMode === 'time') {
+        if (absValue < 1) {
+          const minutes = Math.round(absValue * 60);
+          return `${minutes}m`;
+        }
+        return `${formatCompactNumber(absValue)}h`;
+      }
+      return formatCompactNumber(absValue);
+    },
+    [settings.displayMode],
   );
   const formatAxisCurrencyValue = useCallback(
     (value: number) =>
@@ -4895,7 +4974,7 @@ export function InsightsScreen({
     const isFutureDay = selectedDayKey > todayDayKey;
     const dayCellGap = 5;
     const dayCellSize = Math.max(40, Math.floor((chartWidth - dayCellGap * 6) / 7));
-    const dayCellHeight = dayCellSize + 12;
+    const dayCellHeight = dayCellSize + 22;
     const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
     const dayDetailScale = calendarDetailAnimRef.current.interpolate({
       inputRange: [0.68, 1],
@@ -5016,6 +5095,24 @@ export function InsightsScreen({
                               ]}
                             />
                           ) : null
+                        ) : null}
+                        {hasActivity && cell.net !== 0 ? (
+                          <RNText
+                            allowFontScaling={false}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                            style={[
+                              styles.calendarNetLabel,
+                              {
+                                color:
+                                  cell.net > 0 ? themeColors.success : themeColors.error,
+                                maxWidth: dayCellSize - 4,
+                              },
+                            ]}
+                          >
+                            {formatCalendarCellNet(cell.net)}
+                          </RNText>
                         ) : null}
                       </Pressable>
                     );
@@ -6434,15 +6531,35 @@ export function InsightsScreen({
 
   const accountOptions = useMemo(() => accounts.slice(0, 6), [accounts]);
   useEffect(() => {
-    if (!excludedTimeCostExpenseCategoryId) return;
-    const stillExists = categories.some(
-      (category) =>
-        category.type === 'expense' && category.id === excludedTimeCostExpenseCategoryId,
+    if (excludedTimeCostExpenseCategoryIds.length === 0) return;
+    const validExpenseCategoryIds = new Set(
+      categories.filter((category) => category.type === 'expense').map((category) => category.id),
     );
-    if (!stillExists) {
-      setExcludedTimeCostExpenseCategoryId(null);
-    }
-  }, [categories, excludedTimeCostExpenseCategoryId]);
+    setExcludedTimeCostExpenseCategoryIds((previous) => {
+      const next = previous.filter((categoryId) => validExpenseCategoryIds.has(categoryId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [categories, excludedTimeCostExpenseCategoryIds.length]);
+  useEffect(() => {
+    if (excludedExpenseBreakdownCategoryIds.length === 0) return;
+    const validExpenseCategoryIds = new Set(
+      categories.filter((category) => category.type === 'expense').map((category) => category.id),
+    );
+    setExcludedExpenseBreakdownCategoryIds((previous) => {
+      const next = previous.filter((categoryId) => validExpenseCategoryIds.has(categoryId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [categories, excludedExpenseBreakdownCategoryIds.length]);
+  useEffect(() => {
+    if (excludedIncomeBreakdownCategoryIds.length === 0) return;
+    const validIncomeCategoryIds = new Set(
+      categories.filter((category) => category.type === 'income').map((category) => category.id),
+    );
+    setExcludedIncomeBreakdownCategoryIds((previous) => {
+      const next = previous.filter((categoryId) => validIncomeCategoryIds.has(categoryId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [categories, excludedIncomeBreakdownCategoryIds.length]);
   useEffect(() => {
     if (excludedExpenseTrendAccountIds.length === 0) return;
     const validAccountIds = new Set(accounts.map((account) => account.id));
@@ -6506,6 +6623,10 @@ export function InsightsScreen({
   const displayHasSavingsCategoryExclusionFilter = displaySelectedInsightType === 'savings_rate';
   const displayHasTimeCostExpenseCategoryExclusionFilter =
     displaySelectedInsightType === 'time_cost_leaderboard';
+  const displayHasExpenseBreakdownExclusionFilter =
+    displaySelectedInsightType === 'expense_breakdown';
+  const displayHasIncomeBreakdownExclusionFilter =
+    displaySelectedInsightType === 'income_breakdown';
   const displayHasAssetHistoryAccountExclusionFilter =
     displaySelectedInsightType === 'asset_history';
   const displayHasInsightsFilters =
@@ -6515,6 +6636,8 @@ export function InsightsScreen({
     displayHasIncomeTrendExclusionFilter ||
     displayHasSavingsCategoryExclusionFilter ||
     displayHasTimeCostExpenseCategoryExclusionFilter ||
+    displayHasExpenseBreakdownExclusionFilter ||
+    displayHasIncomeBreakdownExclusionFilter ||
     displayHasAssetHistoryAccountExclusionFilter;
   const displayInsightsFilterCount = useMemo(() => {
     if (!displayHasInsightsFilters) return 0;
@@ -6537,8 +6660,14 @@ export function InsightsScreen({
     if (displayHasSavingsCategoryExclusionFilter) {
       count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
     }
-    if (displayHasTimeCostExpenseCategoryExclusionFilter && excludedTimeCostExpenseCategoryId) {
-      count += 1;
+    if (displayHasTimeCostExpenseCategoryExclusionFilter) {
+      count += excludedTimeCostExpenseCategoryIds.length;
+    }
+    if (displayHasExpenseBreakdownExclusionFilter) {
+      count += excludedExpenseBreakdownCategoryIds.length;
+    }
+    if (displayHasIncomeBreakdownExclusionFilter) {
+      count += excludedIncomeBreakdownCategoryIds.length;
     }
     return count;
   }, [
@@ -6550,6 +6679,8 @@ export function InsightsScreen({
     displayHasPeriodFilter,
     displayHasSavingsCategoryExclusionFilter,
     displayHasTimeCostExpenseCategoryExclusionFilter,
+    displayHasExpenseBreakdownExclusionFilter,
+    displayHasIncomeBreakdownExclusionFilter,
     displayPeriodPreset,
     displaySelectedInsightType,
     excludedAssetHistoryAccountIds.length,
@@ -6559,7 +6690,9 @@ export function InsightsScreen({
     excludedIncomeTrendIncomeCategoryIds.length,
     excludedSavingsExpenseCategoryIds.length,
     excludedSavingsIncomeCategoryIds.length,
-    excludedTimeCostExpenseCategoryId,
+    excludedTimeCostExpenseCategoryIds.length,
+    excludedExpenseBreakdownCategoryIds.length,
+    excludedIncomeBreakdownCategoryIds.length,
     selectedAccountIds.length,
   ]);
 
@@ -6588,7 +6721,9 @@ export function InsightsScreen({
     setExcludedIncomeTrendIncomeCategoryIds([]);
     setExcludedSavingsIncomeCategoryIds([]);
     setExcludedSavingsExpenseCategoryIds([]);
-    setExcludedTimeCostExpenseCategoryId(null);
+    setExcludedTimeCostExpenseCategoryIds([]);
+    setExcludedExpenseBreakdownCategoryIds([]);
+    setExcludedIncomeBreakdownCategoryIds([]);
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setExcludedAssetHistoryAccountIds([]);
@@ -6715,16 +6850,27 @@ export function InsightsScreen({
     if (!tutorialSpotlightRequest?.active) return;
     if (tutorialSpotlightRequest.targetId !== 'insights.type_selector') return;
 
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      handleInsightTypeSelectorLayout();
+    });
     const firstPass = setTimeout(() => {
       handleInsightTypeSelectorLayout();
     }, 40);
     const secondPass = setTimeout(() => {
       handleInsightTypeSelectorLayout();
     }, 220);
+    const androidExtraPass =
+      Platform.OS === 'android'
+        ? setTimeout(() => {
+            handleInsightTypeSelectorLayout();
+          }, 520)
+        : null;
 
     return () => {
+      interactionHandle.cancel();
       clearTimeout(firstPass);
       clearTimeout(secondPass);
+      if (androidExtraPass) clearTimeout(androidExtraPass);
     };
   }, [handleInsightTypeSelectorLayout, tutorialSpotlightRequest]);
   const openDrilldown = useCallback(
@@ -7182,8 +7328,8 @@ export function InsightsScreen({
                   </Text>
                   <FilterPill
                     label={I18n.t('common.clear')}
-                    active={excludedTimeCostExpenseCategoryId === null}
-                    onPress={() => setExcludedTimeCostExpenseCategoryId(null)}
+                    active={excludedTimeCostExpenseCategoryIds.length === 0}
+                    onPress={() => setExcludedTimeCostExpenseCategoryIds([])}
                   />
                 </View>
                 <View
@@ -7193,8 +7339,72 @@ export function InsightsScreen({
                   <CategoryPanel
                     parents={savingsExpenseCategoryPanel.parents}
                     childByParent={savingsExpenseCategoryPanel.childByParent}
-                    selectedCategoryId={excludedTimeCostExpenseCategoryId}
-                    onSelect={(categoryId) => setExcludedTimeCostExpenseCategoryId(categoryId)}
+                    selectedCategoryIds={excludedTimeCostExpenseCategoryIds}
+                    onToggleSelect={(categoryId) =>
+                      setExcludedTimeCostExpenseCategoryIds((prev) =>
+                        toggleStringId(prev, categoryId),
+                      )
+                    }
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            {hasExpenseBreakdownExclusionFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_expense_categories')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('common.clear')}
+                    active={excludedExpenseBreakdownCategoryIds.length === 0}
+                    onPress={() => setExcludedExpenseBreakdownCategoryIds([])}
+                  />
+                </View>
+                <View
+                  className={FILTER_SELECTION_PANEL_CLASS}
+                  style={styles.insightsFilterSelectionPanel}
+                >
+                  <CategoryPanel
+                    parents={savingsExpenseCategoryPanel.parents}
+                    childByParent={savingsExpenseCategoryPanel.childByParent}
+                    selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
+                    onToggleSelect={(categoryId) =>
+                      setExcludedExpenseBreakdownCategoryIds((prev) =>
+                        toggleStringId(prev, categoryId),
+                      )
+                    }
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            {hasIncomeBreakdownExclusionFilter ? (
+              <View className="gap-2.5">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_income_categories')}
+                  </Text>
+                  <FilterPill
+                    label={I18n.t('common.clear')}
+                    active={excludedIncomeBreakdownCategoryIds.length === 0}
+                    onPress={() => setExcludedIncomeBreakdownCategoryIds([])}
+                  />
+                </View>
+                <View
+                  className={FILTER_SELECTION_PANEL_CLASS}
+                  style={styles.insightsFilterSelectionPanel}
+                >
+                  <CategoryPanel
+                    parents={savingsIncomeCategoryPanel.parents}
+                    childByParent={savingsIncomeCategoryPanel.childByParent}
+                    selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
+                    onToggleSelect={(categoryId) =>
+                      setExcludedIncomeBreakdownCategoryIds((prev) =>
+                        toggleStringId(prev, categoryId),
+                      )
+                    }
                   />
                 </View>
               </View>

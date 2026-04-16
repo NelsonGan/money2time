@@ -26,6 +26,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category, TransactionType } from '~/types';
 import { formatAmount } from '~/utils/formatters';
@@ -389,6 +390,9 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
 
     setIsImporting(false);
     void triggerHaptic('success');
+    void trackEvent(AnalyticsEvents.STATEMENT_IMPORT_COMPLETED, {
+      imported_count: imported,
+    });
     Alert.alert(
       I18n.t('statement_import.import_success_title'),
       I18n.t('statement_import.import_success_message', { count: imported }),

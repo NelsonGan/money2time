@@ -50,6 +50,8 @@ const en = {
   errors: {
     invalid_file_path: 'Invalid file path.',
     only_mmbak_supported: 'Only .mmbak backup files are supported.',
+    mm_unsupported_backup_schema:
+      "This backup file's format isn't supported. Please use a Money Manager backup exported from the iOS app.",
     recurring_fallback_name: 'Recurring {{id}}',
     import_failed_generic: 'Import failed. Please try again.',
     data_load_failed_title: 'Unable to load your data',
@@ -851,6 +853,9 @@ const en = {
       management_body: 'Use this to export, import, or reset your local data when needed.',
       recurring_title: 'Recurring transactions',
       recurring_body: 'Use this to create repeating transactions so regular bills are automated.',
+      statement_import_title: 'Statement Import',
+      statement_import_body:
+        'Import transactions from your bank statements to quickly bring in your history.',
       settings_title: 'Replay tutorial',
       settings_body: 'Use this row in Settings to restart the guided tour anytime.',
     },

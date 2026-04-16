@@ -171,6 +171,12 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   },
   {
     tab: 'settings',
+    targetId: 'settings.statement_import',
+    titleKey: 'tutorial.coach_steps.statement_import_title',
+    bodyKey: 'tutorial.coach_steps.statement_import_body',
+  },
+  {
+    tab: 'settings',
     targetId: 'settings.management',
     titleKey: 'tutorial.coach_steps.management_title',
     bodyKey: 'tutorial.coach_steps.management_body',
@@ -580,11 +586,30 @@ function MainShellScreen({
     if (!isGuidedTutorialActive) return;
     const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
     if (!step) return;
+
+    // Clear stale rect for the incoming target so the overlay shows the loading
+    // state instead of a position measured on a prior visit. This is critical on
+    // Android where `measureInWindow` can lag behind layout/scroll changes.
+    setTutorialTargetRects((previous) => {
+      if (!(step.targetId in previous)) return previous;
+      const next = { ...previous };
+      delete next[step.targetId];
+      return next;
+    });
+  }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
+
+  useEffect(() => {
+    if (!isGuidedTutorialActive) return;
+    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
+    if (!step) return;
     if (activeTab !== step.tab) return;
 
+    // Android layout/scroll commits happen on a separate thread, so we wait
+    // longer than iOS before prompting a remeasure.
+    const delay = Platform.OS === 'android' ? 240 : 140;
     const refresh = setTimeout(() => {
       setTutorialSpotlightRequestToken((previous) => previous + 1);
-    }, 140);
+    }, delay);
 
     return () => {
       clearTimeout(refresh);

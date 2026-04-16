@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
   Alert,
+  InteractionManager,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Platform,
@@ -49,7 +50,8 @@ import { FONT } from '~/utils/fonts';
 type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
   | 'settings.recurring'
-  | 'settings.management';
+  | 'settings.management'
+  | 'settings.statement_import';
 
 function isSettingsTutorialTargetId(
   targetId: string | null | undefined,
@@ -57,7 +59,8 @@ function isSettingsTutorialTargetId(
   return (
     targetId === 'settings.start_tutorial' ||
     targetId === 'settings.recurring' ||
-    targetId === 'settings.management'
+    targetId === 'settings.management' ||
+    targetId === 'settings.statement_import'
   );
 }
 
@@ -108,6 +111,7 @@ export function SettingsScreen({
   const startTutorialRowRef = useRef<View | null>(null);
   const recurringRowRef = useRef<View | null>(null);
   const managementRowRef = useRef<View | null>(null);
+  const statementImportRowRef = useRef<View | null>(null);
   const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const latestWage = monthlyWages[0] ?? null;
@@ -123,6 +127,7 @@ export function SettingsScreen({
   const getTutorialTargetRef = useCallback((targetId: SettingsTutorialTargetId) => {
     if (targetId === 'settings.recurring') return recurringRowRef.current;
     if (targetId === 'settings.management') return managementRowRef.current;
+    if (targetId === 'settings.statement_import') return statementImportRowRef.current;
     return startTutorialRowRef.current;
   }, []);
   const measureTutorialTarget = useCallback(
@@ -143,6 +148,9 @@ export function SettingsScreen({
   }, [measureTutorialTarget]);
   const handleManagementRowLayout = useCallback(() => {
     measureTutorialTarget('settings.management');
+  }, [measureTutorialTarget]);
+  const handleStatementImportRowLayout = useCallback(() => {
+    measureTutorialTarget('settings.statement_import');
   }, [measureTutorialTarget]);
   const activeTutorialTargetId =
     tutorialSpotlightRequest?.active &&
@@ -224,15 +232,40 @@ export function SettingsScreen({
 
     scheduleTutorialTargetMeasurement(activeTutorialTargetId);
 
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      measureTutorialTarget(activeTutorialTargetId);
+    });
     const secondPass = setTimeout(
       () => {
         measureTutorialTarget(activeTutorialTargetId);
       },
       shouldScrollIntoView ? 180 : 120,
     );
+    // Android commits scroll / layout later than iOS; give it two extra passes.
+    const androidThirdPass =
+      Platform.OS === 'android'
+        ? setTimeout(
+            () => {
+              measureTutorialTarget(activeTutorialTargetId);
+            },
+            shouldScrollIntoView ? 420 : 320,
+          )
+        : null;
+    const androidFourthPass =
+      Platform.OS === 'android'
+        ? setTimeout(
+            () => {
+              measureTutorialTarget(activeTutorialTargetId);
+            },
+            shouldScrollIntoView ? 720 : 600,
+          )
+        : null;
 
     return () => {
+      interactionHandle.cancel();
       clearTimeout(secondPass);
+      if (androidThirdPass) clearTimeout(androidThirdPass);
+      if (androidFourthPass) clearTimeout(androidFourthPass);
     };
   }, [
     activeTutorialTargetId,
@@ -398,12 +431,19 @@ export function SettingsScreen({
                 subtitle={I18n.t('settings.ai_chat_subtitle')}
                 onPress={onOpenAIChat}
               />
-              <SettingsRowItem
-                icon={<FileText size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.statement_import')}
-                subtitle={I18n.t('settings.statement_import_subtitle')}
-                onPress={onOpenStatementImport}
-              />
+              <View
+                ref={statementImportRowRef}
+                onLayout={() => {
+                  handleStatementImportRowLayout();
+                }}
+              >
+                <SettingsRowItem
+                  icon={<FileText size={18} color={themeColors.primary} />}
+                  label={I18n.t('settings.statement_import')}
+                  subtitle={I18n.t('settings.statement_import_subtitle')}
+                  onPress={onOpenStatementImport}
+                />
+              </View>
               <View
                 ref={managementRowRef}
                 onLayout={() => {

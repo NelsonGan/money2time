@@ -12,6 +12,7 @@ export type TutorialTargetId =
   | 'insights.type_selector'
   | 'settings.management'
   | 'settings.recurring'
+  | 'settings.statement_import'
   | 'settings.start_tutorial';
 
 export interface TutorialSpotlightRequest {

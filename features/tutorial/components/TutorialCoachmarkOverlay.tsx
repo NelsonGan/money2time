@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Button, Text } from '~/components/ui';
@@ -7,6 +7,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import type { TutorialTargetId, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 
 interface TutorialCoachmarkOverlayProps {
   visible: boolean;
@@ -26,7 +27,7 @@ interface TutorialCoachmarkOverlayProps {
 const HORIZONTAL_MARGIN = 16;
 const HIGHLIGHT_PADDING = 8;
 const SECONDARY_HIGHLIGHT_PADDING = 5;
-const TOOLTIP_ESTIMATED_HEIGHT = 286;
+const TOOLTIP_ESTIMATED_HEIGHT = 260;
 const SPOTLIGHT_EDGE_MARGIN = 8;
 const DEFAULT_TOOLTIP_BOTTOM_CLEARANCE = 16;
 const FAB_TOOLTIP_BOTTOM_CLEARANCE = 132;
@@ -189,45 +190,51 @@ export function TutorialCoachmarkOverlay({
     return Math.max(minTop, Math.min(maxTop, aboveTargetY));
   }, [highlightFrame, targetId, windowHeight]);
 
-  const overlayPalette = useMemo(() => {
-    const tooltipIsDark = !isDark;
+  const palette = useMemo(() => {
+    const primary = themeColors.primary;
     return {
-      backdrop: isDark ? 'rgba(9, 14, 24, 0.62)' : 'rgba(15, 23, 42, 0.44)',
-      // Invert tooltip surface by theme for stronger contrast.
-      tooltipBackground: tooltipIsDark ? '#0F172A' : '#F8FAFC',
-      tooltipBorder: tooltipIsDark ? 'rgba(255, 255, 255, 0.20)' : 'rgba(15, 23, 42, 0.18)',
-      titleText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
-      bodyText: tooltipIsDark ? '#E2E8F0' : '#334155',
-      mutedText: tooltipIsDark ? '#94A3B8' : '#64748B',
-      badgeText: tooltipIsDark ? '#C9D6EB' : themeColors.primary,
-      highlightBorder: isDark ? 'rgba(255,255,255,0.92)' : 'rgba(15,23,42,0.80)',
-      highlightFill: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.02)',
-      highlightHaloBorder: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(15,23,42,0.30)',
-      highlightHaloFill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.04)',
-      highlightShadowColor: isDark ? '#FFFFFF' : '#0F172A',
-      highlightShadowOpacity: isDark ? 0.32 : 0.2,
-      secondaryHighlightBorder: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(15,23,42,0.58)',
-      secondaryHighlightFill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.04)',
-      loadingHighlightBorder: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(15,23,42,0.22)',
-      loadingHighlightFill: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.34)',
-      // Restore neutral button styling (no green tint), matched to tooltip surface.
-      subtleButtonBorder: tooltipIsDark ? 'rgba(255, 255, 255, 0.32)' : 'rgba(15, 23, 42, 0.24)',
-      subtleButtonBackground: tooltipIsDark
-        ? 'rgba(255, 255, 255, 0.10)'
-        : 'rgba(15, 23, 42, 0.07)',
-      subtleButtonText: tooltipIsDark ? '#F8FAFC' : '#0F172A',
-      spinner: tooltipIsDark ? '#94A3B8' : '#475569',
+      backdrop: isDark ? 'rgba(2, 6, 15, 0.72)' : 'rgba(15, 23, 42, 0.55)',
+      tooltipBackground: isDark ? '#14181F' : '#FFFFFF',
+      tooltipBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+      titleText: isDark ? '#F8FAFC' : '#0F172A',
+      bodyText: isDark ? '#CBD5E1' : '#475569',
+      mutedText: isDark ? '#64748B' : '#94A3B8',
+      primary,
+      primaryText: '#FFFFFF',
+      pillBackground: isDark ? `${primary}22` : `${primary}1A`,
+      pillText: primary,
+      progressTrack: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(15, 23, 42, 0.08)',
+      progressFill: primary,
+      highlightBorder: primary,
+      highlightGlow: primary,
+      secondaryHighlightBorder: isDark ? 'rgba(255, 255, 255, 0.80)' : 'rgba(255, 255, 255, 0.95)',
+      secondaryHighlightFill: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.08)',
+      backButtonBackground: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.05)',
+      backButtonText: isDark ? '#CBD5E1' : '#334155',
+      skipText: isDark ? '#64748B' : '#94A3B8',
+      loadingBorder: isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.65)',
+      loadingFill: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.12)',
     };
   }, [isDark, themeColors]);
 
   if (!visible) return null;
+
+  const handleSkip = () => {
+    void triggerHaptic('selection');
+    onSkip();
+  };
+
+  const progressPercent = Math.max(
+    0,
+    Math.min(100, ((stepIndex + 1) / Math.max(1, totalSteps)) * 100),
+  );
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.overlayRoot]} pointerEvents="box-none">
       {highlightFrame || secondaryHighlightFrame ? (
         <>
           <Svg style={StyleSheet.absoluteFillObject} pointerEvents="none">
-            <Path d={backdropMaskPath ?? ''} fill={overlayPalette.backdrop} fillRule="evenodd" />
+            <Path d={backdropMaskPath ?? ''} fill={palette.backdrop} fillRule="evenodd" />
           </Svg>
 
           {highlightFrame ? (
@@ -235,15 +242,14 @@ export function TutorialCoachmarkOverlay({
               <View
                 pointerEvents="none"
                 style={[
-                  styles.highlightHalo,
+                  styles.highlightGlow,
                   {
-                    left: highlightFrame.left - 4,
-                    top: highlightFrame.top - 4,
-                    width: highlightFrame.width + 8,
-                    height: highlightFrame.height + 8,
-                    borderRadius: highlightRadius + 6,
-                    borderColor: overlayPalette.highlightHaloBorder,
-                    backgroundColor: overlayPalette.highlightHaloFill,
+                    left: highlightFrame.left - 6,
+                    top: highlightFrame.top - 6,
+                    width: highlightFrame.width + 12,
+                    height: highlightFrame.height + 12,
+                    borderRadius: highlightRadius + 8,
+                    borderColor: `${palette.highlightGlow}33`,
                   },
                 ]}
               />
@@ -257,10 +263,8 @@ export function TutorialCoachmarkOverlay({
                     width: highlightFrame.width,
                     height: highlightFrame.height,
                     borderRadius: highlightRadius,
-                    borderColor: overlayPalette.highlightBorder,
-                    backgroundColor: overlayPalette.highlightFill,
-                    shadowColor: overlayPalette.highlightShadowColor,
-                    shadowOpacity: overlayPalette.highlightShadowOpacity,
+                    borderColor: palette.highlightBorder,
+                    shadowColor: palette.highlightGlow,
                   },
                 ]}
               />
@@ -277,8 +281,8 @@ export function TutorialCoachmarkOverlay({
                   width: secondaryHighlightFrame.width,
                   height: secondaryHighlightFrame.height,
                   borderRadius: secondaryHighlightRadius,
-                  borderColor: overlayPalette.secondaryHighlightBorder,
-                  backgroundColor: overlayPalette.secondaryHighlightFill,
+                  borderColor: palette.secondaryHighlightBorder,
+                  backgroundColor: palette.secondaryHighlightFill,
                 },
               ]}
             />
@@ -288,17 +292,16 @@ export function TutorialCoachmarkOverlay({
         <>
           <View
             style={[
-              styles.backdrop,
               StyleSheet.absoluteFillObject,
-              { backgroundColor: overlayPalette.backdrop },
+              { backgroundColor: palette.backdrop },
             ]}
           />
           <View
             style={[
               styles.loadingHighlight,
               {
-                borderColor: overlayPalette.loadingHighlightBorder,
-                backgroundColor: overlayPalette.loadingHighlightFill,
+                borderColor: palette.loadingBorder,
+                backgroundColor: palette.loadingFill,
               },
             ]}
             pointerEvents="none"
@@ -311,74 +314,87 @@ export function TutorialCoachmarkOverlay({
           styles.tooltip,
           {
             top: tooltipTop,
-            borderColor: overlayPalette.tooltipBorder,
-            backgroundColor: overlayPalette.tooltipBackground,
+            borderColor: palette.tooltipBorder,
+            backgroundColor: palette.tooltipBackground,
+            shadowColor: isDark ? '#000000' : '#0F172A',
           },
         ]}
       >
-        <Text variant="label" style={{ color: overlayPalette.badgeText }}>
-          {I18n.t('tutorial.coachmark_badge')}
-        </Text>
-        <Text variant="subheading" className="mt-1" style={{ color: overlayPalette.titleText }}>
+        <View style={styles.tooltipHeader}>
+          <View style={[styles.pill, { backgroundColor: palette.pillBackground }]}>
+            <Text variant="label" style={[styles.pillText, { color: palette.pillText }]}>
+              {I18n.t('tutorial.coachmark_badge')}
+            </Text>
+          </View>
+          <Text variant="label" style={[styles.progressLabel, { color: palette.mutedText }]}>
+            {I18n.t('tutorial.progress', { current: stepIndex + 1, total: totalSteps })}
+          </Text>
+        </View>
+
+        <View style={[styles.progressTrack, { backgroundColor: palette.progressTrack }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${progressPercent}%`, backgroundColor: palette.progressFill },
+            ]}
+          />
+        </View>
+
+        <Text variant="subheading" style={[styles.title, { color: palette.titleText }]}>
           {title}
         </Text>
-        <Text variant="friendly" className="mt-2" style={{ color: overlayPalette.bodyText }}>
+        <Text variant="friendly" style={[styles.body, { color: palette.bodyText }]}>
           {body}
         </Text>
-        <Text variant="label" className="mt-2" style={{ color: overlayPalette.mutedText }}>
-          {I18n.t('tutorial.progress', { current: stepIndex + 1, total: totalSteps })}
-        </Text>
+
         {!highlightFrame ? (
-          <View className="mt-2 flex-row items-center gap-2">
-            <ActivityIndicator size="small" color={overlayPalette.spinner} />
-            <Text variant="label" style={{ color: overlayPalette.mutedText }}>
+          <View style={styles.loadingRow}>
+            <ActivityIndicator size="small" color={palette.mutedText} />
+            <Text variant="label" style={{ color: palette.mutedText }}>
               {I18n.t('tutorial.locating_target')}
             </Text>
           </View>
         ) : null}
 
         <View style={styles.actionsRow}>
-          {stepIndex > 0 ? (
-            <View style={styles.actionSlot}>
+          {!isLastStep ? (
+            <Pressable
+              onPress={handleSkip}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('tutorial.skip')}
+              style={({ pressed }) => [styles.skipInline, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text variant="label" style={[styles.skipText, { color: palette.skipText }]}>
+                {I18n.t('tutorial.skip')}
+              </Text>
+            </Pressable>
+          ) : (
+            <View />
+          )}
+
+          <View style={styles.rightActions}>
+            {stepIndex > 0 ? (
               <Button
-                variant="ghost"
-                className="w-full"
-                style={{
-                  borderWidth: 1,
-                  borderColor: overlayPalette.subtleButtonBorder,
-                  backgroundColor: overlayPalette.subtleButtonBackground,
-                }}
+                variant="outline"
+                size="sm"
+                haptic="selection"
                 onPress={onBack}
+                accessibilityLabel={I18n.t('common.back')}
               >
-                <Text style={{ color: overlayPalette.subtleButtonText }}>
-                  {I18n.t('common.back')}
-                </Text>
+                <Text>{I18n.t('common.back')}</Text>
               </Button>
-            </View>
-          ) : null}
-          <View style={styles.actionSlot}>
-            <Button className="w-full" onPress={onNext}>
+            ) : null}
+            <Button
+              variant="default"
+              size="sm"
+              haptic={isLastStep ? 'success' : 'selection'}
+              onPress={onNext}
+              accessibilityLabel={isLastStep ? I18n.t('tutorial.finish') : I18n.t('tutorial.next')}
+            >
               <Text>{isLastStep ? I18n.t('tutorial.finish') : I18n.t('tutorial.next')}</Text>
             </Button>
           </View>
         </View>
-
-        {!isLastStep ? (
-          <Button
-            variant="ghost"
-            className="mt-2"
-            style={{
-              borderWidth: 1,
-              borderColor: overlayPalette.subtleButtonBorder,
-              backgroundColor: overlayPalette.subtleButtonBackground,
-            }}
-            onPress={onSkip}
-          >
-            <Text style={{ color: overlayPalette.subtleButtonText }}>
-              {I18n.t('tutorial.skip')}
-            </Text>
-          </Button>
-        ) : null}
       </View>
     </View>
   );
@@ -389,21 +405,23 @@ const styles = StyleSheet.create({
     zIndex: 4000,
     elevation: 4000,
   },
-  backdrop: {
+  highlightGlow: {
     position: 'absolute',
-    backgroundColor: 'rgba(11, 18, 32, 0.58)',
-  },
-  highlightHalo: {
-    position: 'absolute',
-    borderWidth: 1,
+    borderWidth: 2,
   },
   highlight: {
     position: 'absolute',
-    borderWidth: 2,
-    shadowColor: '#FFFFFF',
-    shadowOpacity: 0.32,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 0 },
+    borderWidth: 2.5,
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0.55,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 0 },
+      },
+      android: {
+        elevation: 0,
+      },
+    }),
   },
   secondaryHighlight: {
     position: 'absolute',
@@ -422,19 +440,87 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: HORIZONTAL_MARGIN,
     right: HORIZONTAL_MARGIN,
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    maxHeight: 286,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0.18,
+        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 12 },
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  tooltipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  pill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  pillText: {
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  progressTrack: {
+    height: 3,
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 24,
+  },
+  body: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  loadingRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   actionsRow: {
     marginTop: 16,
     flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  actionSlot: {
-    flex: 1,
+  skipInline: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  skipText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });

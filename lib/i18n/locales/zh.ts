@@ -49,6 +49,7 @@ const zh = {
   errors: {
     invalid_file_path: '文件路径无效。',
     only_mmbak_supported: '仅支持 .mmbak 备份文件。',
+    mm_unsupported_backup_schema: '此备份文件格式暂不支持。请使用从 iOS 版 Money Manager 导出的备份。',
     recurring_fallback_name: '循环 {{id}}',
     import_failed_generic: '导入失败，请重试。',
     data_load_failed_title: '无法加载数据',
@@ -760,6 +761,8 @@ const zh = {
       management_body: '需要时可在这里导出、导入或重置本地数据。',
       recurring_title: '固定交易',
       recurring_body: '使用此功能创建重复交易，让固定账单自动记录。',
+      statement_import_title: '账单导入',
+      statement_import_body: '从银行账单导入交易，快速录入历史记录。',
       settings_title: '重播教程',
       settings_body: '在设置中使用此选项随时重新开始引导教程。',
     },

@@ -35,7 +35,11 @@ interface SettingsStackProps {
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
-    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
+    targetId:
+      | 'settings.start_tutorial'
+      | 'settings.recurring'
+      | 'settings.management'
+      | 'settings.statement_import',
     rect: TutorialTargetRect,
   ) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -66,7 +70,11 @@ function SettingsHomeRoute({
   onOpenAIChat: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
-    targetId: 'settings.start_tutorial' | 'settings.recurring' | 'settings.management',
+    targetId:
+      | 'settings.start_tutorial'
+      | 'settings.recurring'
+      | 'settings.management'
+      | 'settings.statement_import',
     rect: TutorialTargetRect,
   ) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;

@@ -2,7 +2,17 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { PieChart } from 'react-native-gifted-charts';
+import { G, Text as SvgText } from 'react-native-svg';
 
 import {
   Input,
@@ -12,10 +22,12 @@ import {
   Text,
   TimeValueInline,
 } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { DatePanel } from '~/features/transactions/components/editor';
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -23,6 +35,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { FONT } from '~/utils/fonts';
 import { formatAmount, formatDateInput, formatHours } from '~/utils/formatters';
 
 type DrilldownSortOption = 'default' | 'largest_value';
@@ -37,6 +50,63 @@ const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = {
 const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: spacing.xs } as const;
 const DRILLDOWN_DIRECT_PARENT_ROW_ID = '__direct-parent__';
 const EMPTY_DRILLDOWN_TRANSACTIONS: TransactionWithRelations[] = [];
+
+const INSIGHTS_CHART_COLORS = [
+  '#E53935',
+  '#FB8C00',
+  '#FDD835',
+  '#43A047',
+  '#00897B',
+  '#00ACC1',
+  '#1E88E5',
+  '#3949AB',
+  '#8E24AA',
+  '#D81B60',
+  '#6D4C41',
+  '#546E7A',
+];
+
+const BREAKDOWN_PIE_LABEL_MIN_WIDTH = 72;
+const BREAKDOWN_PIE_LABEL_MAX_WIDTH = 88;
+const BREAKDOWN_PIE_LABEL_HEIGHT = 24;
+const BREAKDOWN_PIE_LABEL_LINE_LENGTH = 12;
+const BREAKDOWN_PIE_LABEL_TAIL_LENGTH = 10;
+const BREAKDOWN_PIE_LABEL_MARGIN = 4;
+const BREAKDOWN_PIE_MIN_RADIUS = 48;
+const BREAKDOWN_PIE_MAX_RADIUS = 108;
+
+const BREAKDOWN_TINT_EXPENSE = '#D24B36';
+const BREAKDOWN_TINT_INCOME = '#1D9B63';
+
+function buildSizeStyle(width: number, height: number) {
+  return { width, height };
+}
+
+function pieSliceIdFromTouch(
+  point: { x: number; y: number },
+  slices: { id: string; amount: number }[],
+  totalAmount: number,
+  radius: number,
+) {
+  if (slices.length === 0 || totalAmount <= 0 || radius <= 0) return null;
+  const center = radius;
+  const dx = point.x - center;
+  const dy = point.y - center;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  if (distance > radius) return null;
+
+  const fullCircle = Math.PI * 2;
+  const startAngle = -Math.PI / 2;
+  let normalizedAngle = Math.atan2(dy, dx) - startAngle;
+  if (normalizedAngle < 0) normalizedAngle += fullCircle;
+
+  let cursor = 0;
+  for (const slice of slices) {
+    cursor += (slice.amount / totalAmount) * fullCircle;
+    if (normalizedAngle <= cursor) return slice.id;
+  }
+  return slices[slices.length - 1]?.id ?? null;
+}
 
 const styles = StyleSheet.create({
   bulkDatePanelContainer: {
@@ -56,6 +126,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     alignItems: 'center',
     paddingRight: spacing.xs,
+  },
+  chartSizeCenter: {
+    alignSelf: 'center',
+  },
+  breakdownPercentBadge: {
+    borderRadius: 999,
+  },
+  subcategoryScrollContent: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingBottom: LIST_BOTTOM_PADDING,
+    paddingTop: spacing.xxs,
   },
 });
 
@@ -135,6 +216,10 @@ export function InsightsDrilldownScreen({
 }: InsightsDrilldownScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
+  const isDark = resolvedTheme === 'dark';
+  const { width } = useWindowDimensions();
+  const { isTablet } = useDeviceLayout();
   const {
     categories,
     transactions,
@@ -154,6 +239,16 @@ export function InsightsDrilldownScreen({
   const [bulkType, setBulkType] = useState<EditableTransactionType | null>(null);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
+  const [activeBreakdownSliceId, setActiveBreakdownSliceId] = useState<string | null>(null);
+  const activeBreakdownSliceIdRef = useRef<string | null>(null);
+  const setActiveBreakdownSlice = useCallback((nextId: string | null, withHaptic = false) => {
+    if (activeBreakdownSliceIdRef.current === nextId) return;
+    activeBreakdownSliceIdRef.current = nextId;
+    setActiveBreakdownSliceId(nextId);
+    if (withHaptic && nextId) {
+      void triggerHaptic('selection');
+    }
+  }, []);
   const drilldownScrollToTopRef = useRef<(() => void) | null>(null);
   const transactionDisplaySettings = useMemo(
     () => ({
@@ -418,9 +513,18 @@ export function InsightsDrilldownScreen({
         tone?: React.ComponentProps<typeof Text>['tone'];
         textClassName?: string;
         iconColor?: string;
+        iconSize?: number;
+        style?: React.ComponentProps<typeof Text>['style'];
       } = {},
     ) => {
-      const { variant = 'label', tone = 'default', textClassName, iconColor } = options;
+      const {
+        variant = 'label',
+        tone = 'default',
+        textClassName,
+        iconColor,
+        iconSize,
+        style,
+      } = options;
       if (settings.displayMode === 'time') {
         return (
           <TimeValueInline
@@ -429,11 +533,13 @@ export function InsightsDrilldownScreen({
             tone={tone}
             textClassName={textClassName}
             iconColor={iconColor}
+            iconSize={iconSize}
+            style={style}
           />
         );
       }
       return (
-        <Text variant={variant} tone={tone} className={textClassName}>
+        <Text variant={variant} tone={tone} className={textClassName} style={style}>
           {value}
         </Text>
       );
@@ -672,7 +778,8 @@ export function InsightsDrilldownScreen({
   useEffect(() => {
     setSelectedTransactionIds([]);
     setShowBulkUpdate(false);
-  }, [payload.categoryRootId, payload.label]);
+    setActiveBreakdownSlice(null, false);
+  }, [payload.categoryRootId, payload.label, setActiveBreakdownSlice]);
 
   useEffect(() => {
     if (!shouldShowSubcategoryList) return;
@@ -697,11 +804,120 @@ export function InsightsDrilldownScreen({
   const shouldShowSortControls = shouldShowTransactions;
   const shouldShowTypeFilter = payload.showTypeFilter && shouldShowTransactions;
   const headerTitle = payload.label || I18n.t('insights.category_fallback');
-  const rootAccentColor =
-    typeof payload.categoryRootColor === 'string' &&
-    /^#[0-9a-fA-F]{6}$/.test(payload.categoryRootColor)
-      ? payload.categoryRootColor
-      : null;
+  const totalRowAccentColor =
+    rootCategory?.type === 'income' ? BREAKDOWN_TINT_INCOME : BREAKDOWN_TINT_EXPENSE;
+
+  const pageWidth = Math.max(1, width);
+  const effectiveChartBasis = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
+  const chartWidth = Math.max(260, effectiveChartBasis - 76);
+
+  const pagePieData = useMemo(() => {
+    return subcategoryRows.map((row, i) => {
+      const absAmount = Math.abs(row.totalValue);
+      return {
+        id: row.id,
+        name: row.label,
+        amount: absAmount,
+        emoji: row.emoji,
+        pct: row.sharePct,
+        color: INSIGHTS_CHART_COLORS[i % INSIGHTS_CHART_COLORS.length],
+        transactions: row.transactions,
+        count: row.count,
+        totalValue: row.totalValue,
+      };
+    });
+  }, [subcategoryRows]);
+
+  const pageTotalAmount = useMemo(
+    () => pagePieData.reduce((sum, item) => sum + item.amount, 0),
+    [pagePieData],
+  );
+  const activeBreakdownSlice = activeBreakdownSliceId
+    ? (pagePieData.find((item) => item.id === activeBreakdownSliceId) ?? null)
+    : null;
+
+  const pieLayoutBleed = Math.max(24, spacing.screenHorizontal * 2);
+  const pieSideMargin = 14;
+  const pieLayoutWidth = Math.max(chartWidth, pageWidth + pieLayoutBleed - pieSideMargin * 2);
+  const pieLabelWidth = Math.max(
+    BREAKDOWN_PIE_LABEL_MIN_WIDTH,
+    Math.min(BREAKDOWN_PIE_LABEL_MAX_WIDTH, Math.floor(pieLayoutWidth * 0.25)),
+  );
+  const pieLabelMaxChars = Math.max(7, Math.min(13, Math.floor((pieLabelWidth - 14) / 5)));
+  const pieExtraRadius =
+    pieLabelWidth + BREAKDOWN_PIE_LABEL_LINE_LENGTH + BREAKDOWN_PIE_LABEL_MARGIN + 6;
+  const pieRadius = Math.max(
+    BREAKDOWN_PIE_MIN_RADIUS,
+    Math.min(BREAKDOWN_PIE_MAX_RADIUS, Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2)),
+  );
+  const pieStageWidth = (pieRadius + pieExtraRadius) * 2;
+  const pieStageHeight = Math.max(
+    pieRadius * 2 + 24,
+    pieStageWidth - Math.min(140, Math.max(92, pieExtraRadius * 1.2)),
+  );
+  const pieStageVerticalInset = Math.max(0, Math.floor((pieStageWidth - pieStageHeight) / 2));
+
+  const interactivePieData = pagePieData.map((item) => {
+    const isSelected = activeBreakdownSlice?.id === item.id;
+    const hasSelection = activeBreakdownSlice !== null;
+    const categoryLabel =
+      item.name.length <= pieLabelMaxChars
+        ? item.name
+        : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
+    const sliceColor =
+      hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
+    const labelStroke = isSelected
+      ? withColorAlpha(item.color, 0.72)
+      : hasSelection
+        ? withColorAlpha(item.color, 0.18)
+        : withColorAlpha(item.color, isDark ? 0.46 : 0.28);
+    const labelTextColor =
+      hasSelection && !isSelected ? withColorAlpha(themeColors.text, 0.62) : themeColors.text;
+
+    return {
+      ...item,
+      value: item.amount,
+      color: sliceColor,
+      labelLineConfig: {
+        color: labelStroke,
+        thickness: isSelected ? 1.7 : 1.2,
+        length: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
+        tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
+        labelComponentWidth: pieLabelWidth,
+        labelComponentHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
+        labelComponentMargin: BREAKDOWN_PIE_LABEL_MARGIN,
+        avoidOverlappingOfLabels: true,
+      },
+      externalLabelComponent: () => (
+        <G opacity={hasSelection && !isSelected ? 0.72 : 1}>
+          <SvgText
+            x={pieLabelWidth / 2}
+            y={-4}
+            textAnchor="middle"
+            alignmentBaseline="middle"
+            fontSize={9.2}
+            fontFamily={FONT.bold}
+            fontWeight="700"
+            fill={labelTextColor}
+          >
+            {`${item.emoji} ${categoryLabel}`}
+          </SvgText>
+          <SvgText
+            x={pieLabelWidth / 2}
+            y={8}
+            textAnchor="middle"
+            alignmentBaseline="middle"
+            fontSize={8}
+            fontFamily={FONT.semibold}
+            fontWeight="600"
+            fill={withColorAlpha(labelTextColor, isDark ? 0.75 : 0.55)}
+          >
+            {`${item.pct.toFixed(1)}%`}
+          </SvgText>
+        </G>
+      ),
+    };
+  });
 
   return (
     <SettingsPageLayout>
@@ -900,72 +1116,159 @@ export function InsightsDrilldownScreen({
           ) : null}
 
           {shouldShowSubcategoryList ? (
-            <View className="px-5 pb-2">
-              <Text variant="caption" tone="muted">
-                {I18n.t('categories.subcategories')}
-              </Text>
-              <View className="mt-1.5 gap-1.5">
-                {subcategoryRows.map((row) => {
-                  const pctRatio = Math.min(1, Math.max(0, row.sharePct / 100));
-                  const rowBackgroundColor = rootAccentColor
-                    ? withColorAlpha(rootAccentColor, 0.07 + pctRatio * 0.22)
-                    : null;
-                  const rowBorderColor = rootAccentColor
-                    ? withColorAlpha(rootAccentColor, 0.2 + pctRatio * 0.32)
-                    : null;
-                  const percentBadgeColor = rootAccentColor
-                    ? withColorAlpha(rootAccentColor, 0.24)
-                    : null;
-                  return (
-                    <Pressable
-                      key={row.id}
-                      onPress={() => handleSelectSubcategory(row)}
-                      disabled={isSelectionMode || !onOpenSubcategoryDrilldown}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${row.emoji} ${row.label}`}
-                      accessibilityState={{
-                        disabled: isSelectionMode || !onOpenSubcategoryDrilldown,
+            <ScrollView
+              className="flex-1"
+              contentContainerStyle={styles.subcategoryScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View className="gap-1">
+                <View className="items-center px-1">
+                  <View className="w-full items-center gap-0.5 py-1">
+                    {renderDisplayValueNode(
+                      settings.displayMode === 'time'
+                        ? formatHours(pageTotalAmount)
+                        : formatAmount(pageTotalAmount, settings, { showSign: false }),
+                      {
+                        variant: 'heading',
+                        textClassName:
+                          'text-[24px] leading-[38px] font-black tracking-tight text-center',
+                        iconColor: totalRowAccentColor,
+                        iconSize: 22,
+                        style: { color: totalRowAccentColor },
+                      },
+                    )}
+                    <View
+                      style={{
+                        width: 36,
+                        height: 3,
+                        borderRadius: 2,
+                        backgroundColor: withColorAlpha(
+                          totalRowAccentColor,
+                          isDark ? 0.38 : 0.28,
+                        ),
+                        marginTop: 1,
                       }}
-                      className={cn(
-                        'rounded-xl border px-3 py-2.5 active:opacity-85',
-                        'border-border/35 bg-card/90',
-                      )}
-                      style={
-                        rowBackgroundColor && rowBorderColor
-                          ? { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor }
-                          : undefined
-                      }
-                    >
-                      <View className="flex-row items-center justify-between gap-2">
-                        <Text variant="caption" className="flex-1 pr-2" numberOfLines={2}>
-                          {row.emoji} {row.label}
-                        </Text>
-                        <View className="items-end">
-                          <View className="flex-row items-center gap-1.5">
-                            {renderSubcategoryValue(row.totalValue)}
-                            <View
-                              className="rounded-full px-1.5 py-0.5"
-                              style={
-                                percentBadgeColor
-                                  ? { backgroundColor: percentBadgeColor }
-                                  : undefined
-                              }
-                            >
-                              <Text variant="label" className="text-foreground">
-                                {row.sharePct.toFixed(1)}%
-                              </Text>
-                            </View>
+                    />
+                  </View>
+
+                  <View className="mt-2 w-full items-center overflow-visible">
+                    {pagePieData.length > 0 && pageTotalAmount > 0 ? (
+                      <View className="w-full items-center" style={styles.chartSizeCenter}>
+                        <View
+                          style={buildSizeStyle(pieStageWidth, pieStageHeight)}
+                          onStartShouldSetResponder={() => true}
+                          onResponderRelease={(event) => {
+                            const { locationX, locationY } = event.nativeEvent;
+                            const nextId = pieSliceIdFromTouch(
+                              {
+                                x: locationX - pieExtraRadius,
+                                y: locationY + pieStageVerticalInset - pieExtraRadius,
+                              },
+                              pagePieData,
+                              pageTotalAmount,
+                              pieRadius,
+                            );
+                            if (!nextId) {
+                              setActiveBreakdownSlice(null, false);
+                              return;
+                            }
+                            if (activeBreakdownSliceId === nextId) return;
+                            setActiveBreakdownSlice(nextId, true);
+                          }}
+                        >
+                          <View
+                            pointerEvents="none"
+                            style={{ marginTop: -pieStageVerticalInset }}
+                          >
+                            <PieChart
+                              data={interactivePieData}
+                              radius={pieRadius}
+                              showExternalLabels
+                              extraRadius={pieExtraRadius}
+                              labelsPosition="outward"
+                            />
                           </View>
-                          <Text variant="label" tone="muted" className="mt-0.5">
-                            {row.count} {I18n.t('insights.calendar.transactions')}
-                          </Text>
                         </View>
                       </View>
-                    </Pressable>
-                  );
-                })}
+                    ) : null}
+                  </View>
+                </View>
+
+                <View className="gap-1.5">
+                  {pagePieData.map((item) => {
+                    const isSelected = activeBreakdownSliceId === item.id;
+                    const hasSelection = activeBreakdownSliceId !== null;
+                    const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
+                    const rowBackgroundColor = isSelected
+                      ? withColorAlpha(item.color, 0.28)
+                      : hasSelection
+                        ? withColorAlpha(item.color, 0.04)
+                        : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
+                    const rowBorderColor = isSelected
+                      ? withColorAlpha(item.color, 0.7)
+                      : hasSelection
+                        ? withColorAlpha(item.color, 0.1)
+                        : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
+                    const percentBadgeColor = isSelected
+                      ? withColorAlpha(item.color, 0.38)
+                      : withColorAlpha(item.color, 0.24);
+
+                    return (
+                      <Pressable
+                        key={item.id}
+                        onPress={() => {
+                          setActiveBreakdownSlice(null, false);
+                          handleSelectSubcategory({
+                            id: item.id,
+                            label: item.name,
+                            emoji: item.emoji,
+                            totalValue: item.totalValue,
+                            sharePct: item.pct,
+                            count: item.count,
+                            transactions: item.transactions,
+                          });
+                        }}
+                        disabled={!onOpenSubcategoryDrilldown}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${item.emoji} ${item.name}`}
+                        accessibilityState={{ disabled: !onOpenSubcategoryDrilldown }}
+                        className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                        style={[
+                          { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
+                          isSelected && { borderWidth: 2 },
+                          hasSelection && !isSelected && { opacity: 0.5 },
+                        ]}
+                      >
+                        <View className="flex-row items-center justify-between gap-2">
+                          <Text variant="caption" className="flex-1 pr-2" numberOfLines={2}>
+                            {item.emoji} {item.name}
+                          </Text>
+                          <View className="items-end">
+                            <View className="flex-row items-center gap-1.5">
+                              {renderSubcategoryValue(item.totalValue)}
+                              <View
+                                className="rounded-full px-1.5 py-0.5"
+                                style={[
+                                  styles.breakdownPercentBadge,
+                                  { backgroundColor: percentBadgeColor },
+                                ]}
+                              >
+                                <Text variant="label" className="text-foreground">
+                                  {item.pct.toFixed(1)}%
+                                </Text>
+                              </View>
+                            </View>
+                            <Text variant="label" tone="muted" className="mt-0.5">
+                              {item.count} {I18n.t('insights.calendar.transactions')}
+                            </Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
+            </ScrollView>
           ) : null}
 
           {shouldShowTypeFilter ? (
