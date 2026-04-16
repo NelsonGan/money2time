@@ -125,11 +125,12 @@ export const ONBOARDING_MINIMAL_EXPENSE_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Bills', type: 'expense', parentId: null, icon: '💡', isDefault: true },
   { name: 'Healthcare', type: 'expense', parentId: null, icon: '💊', isDefault: true },
   { name: 'Shopping', type: 'expense', parentId: null, icon: '🛍️', isDefault: true },
+  { name: 'Other', type: 'expense', parentId: null, icon: '🏷️', isDefault: true },
 ];
 
 export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Salary', type: 'income', parentId: null, icon: '💰', isDefault: true },
-  { name: 'Other Income', type: 'income', parentId: null, icon: '🎁', isDefault: true },
+  { name: 'Other', type: 'income', parentId: null, icon: '🏷️', isDefault: true },
 ];
 
 export const ONBOARDING_POWER_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [

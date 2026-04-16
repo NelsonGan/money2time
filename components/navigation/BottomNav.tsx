@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { InteractionManager, Platform, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -95,7 +95,16 @@ const NavItem = memo(function NavItem({
     const refresh = setTimeout(() => {
       reportLayout();
     }, 70);
-    return () => clearTimeout(refresh);
+    const androidExtra =
+      Platform.OS === 'android'
+        ? setTimeout(() => {
+            reportLayout();
+          }, 300)
+        : null;
+    return () => {
+      clearTimeout(refresh);
+      if (androidExtra) clearTimeout(androidExtra);
+    };
   }, [onTutorialTabLayout, reportLayout, tutorialMeasureToken]);
 
   return (
@@ -171,16 +180,27 @@ export function BottomNav({
     if (!tutorialSpotlightRequest?.active) return;
     if (tutorialSpotlightRequest.targetId !== 'nav.add') return;
 
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      measureAddButton();
+    });
     const firstPass = setTimeout(() => {
       measureAddButton();
     }, 40);
     const secondPass = setTimeout(() => {
       measureAddButton();
     }, 220);
+    const androidExtraPass =
+      Platform.OS === 'android'
+        ? setTimeout(() => {
+            measureAddButton();
+          }, 500)
+        : null;
 
     return () => {
+      interactionHandle.cancel();
       clearTimeout(firstPass);
       clearTimeout(secondPass);
+      if (androidExtraPass) clearTimeout(androidExtraPass);
     };
   }, [measureAddButton, tutorialSpotlightRequest]);
 

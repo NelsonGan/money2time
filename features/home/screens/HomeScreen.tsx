@@ -1,8 +1,10 @@
 import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  InteractionManager,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -562,6 +564,9 @@ export function HomeScreen({
         ? handleConverterLayout
         : handleDisplayToggleLayout;
 
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      measureCurrentTarget();
+    });
     const firstPass = setTimeout(() => {
       measureCurrentTarget();
     }, 40);
@@ -571,11 +576,19 @@ export function HomeScreen({
     const thirdPass = setTimeout(() => {
       measureCurrentTarget();
     }, 460);
+    const androidExtraPass =
+      Platform.OS === 'android'
+        ? setTimeout(() => {
+            measureCurrentTarget();
+          }, 720)
+        : null;
 
     return () => {
+      interactionHandle.cancel();
       clearTimeout(firstPass);
       clearTimeout(secondPass);
       clearTimeout(thirdPass);
+      if (androidExtraPass) clearTimeout(androidExtraPass);
     };
   }, [
     activeHomeTabIndex,

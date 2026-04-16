@@ -294,6 +294,15 @@ function recurrencePatternFromRepeatType(
   }
 }
 
+const REQUIRED_IOS_TABLES = ['ZINOUTCOME', 'ZASSET', 'ZCATEGORY'] as const;
+
+async function listTableNames(db: Awaited<ReturnType<typeof openDatabaseAsync>>): Promise<string[]> {
+  const rows = await db.getAllAsync<{ name: string | null }>(
+    `SELECT name FROM sqlite_master WHERE type = 'table'`,
+  );
+  return rows.map((row) => (row.name ?? '').trim()).filter(Boolean);
+}
+
 export async function importMoneyManagerBackupFromUri(
   uri: string,
   currencySymbol: string,
@@ -302,6 +311,18 @@ export async function importMoneyManagerBackupFromUri(
   const sourceDb = await openDatabaseAsync(fileName, undefined, directory);
 
   try {
+    const tableNames = await listTableNames(sourceDb);
+    const tableNameSet = new Set(tableNames.map((name) => name.toUpperCase()));
+    const missingIosTables = REQUIRED_IOS_TABLES.filter(
+      (table) => !tableNameSet.has(table.toUpperCase()),
+    );
+    if (missingIosTables.length > 0) {
+      console.warn(
+        `[mmbakImport] Unsupported backup schema. Missing tables: ${missingIosTables.join(', ')}. Available tables: ${tableNames.join(', ')}`,
+      );
+      throw new Error(I18n.t('errors.mm_unsupported_backup_schema'));
+    }
+
     const [assetRows, assetGroupRows, categoryRows, txRows, recurringRows] = await Promise.all([
       sourceDb.getAllAsync<MMAssetRow>(
         `SELECT
