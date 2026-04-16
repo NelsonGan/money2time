@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { Download, Trash2, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -232,37 +232,44 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
               </Button>
             </View>
 
-            <View style={styles.divider} />
+            {Platform.OS === 'ios' ? (
+              <>
+                <View style={styles.divider} />
 
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
-                >
-                  <Upload size={18} color={themeColors.primary} />
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: `${themeColors.primary}14` },
+                      ]}
+                    >
+                      <Upload size={18} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.sectionTextWrap}>
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('data_management.import_money_manager_title')}
+                      </Text>
+                      <Text variant="caption" tone="muted" className="mt-0.5">
+                        {I18n.t('data_management.import_money_manager_description')}
+                      </Text>
+                    </View>
+                  </View>
+                  <Button
+                    variant="outline"
+                    className="mt-3"
+                    onPress={handleMoneyManagerImport}
+                    disabled={importingSource !== null}
+                  >
+                    <Text>
+                      {importingSource === 'money_manager'
+                        ? I18n.t('data_management.import_money_manager_importing')
+                        : I18n.t('data_management.import_money_manager_action')}
+                    </Text>
+                  </Button>
                 </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('data_management.import_money_manager_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('data_management.import_money_manager_description')}
-                  </Text>
-                </View>
-              </View>
-              <Button
-                variant="outline"
-                className="mt-3"
-                onPress={handleMoneyManagerImport}
-                disabled={importingSource !== null}
-              >
-                <Text>
-                  {importingSource === 'money_manager'
-                    ? I18n.t('data_management.import_money_manager_importing')
-                    : I18n.t('data_management.import_money_manager_action')}
-                </Text>
-              </Button>
-            </View>
+              </>
+            ) : null}
 
             <View style={styles.divider} />
 

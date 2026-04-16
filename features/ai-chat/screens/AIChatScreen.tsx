@@ -58,6 +58,7 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -511,6 +512,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       await loadModelForActiveModel();
       aiActivationService.setActivationError(null);
       updateSettings({ aiChatEnabled: true });
+      void trackEvent(AnalyticsEvents.AI_CHAT_ENABLED);
     } catch (error) {
       const detail = error instanceof Error ? error.message : I18n.t('aiChat.error');
       await recoverFromModelFailure(detail, AI_CHAT_MODEL);
@@ -560,6 +562,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       const userMsg: ChatMessage = { id: newId(), role: 'user', content: text };
       setMessages([userMsg]);
       const explicitMentions = resolveExplicitMentions(text, accounts, categories);
+      void trackEvent(AnalyticsEvents.AI_CHAT_MESSAGE_SENT);
 
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
 
@@ -809,6 +812,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
         note: resolvedNote,
         sentiment: 'neutral',
       });
+      void trackEvent(AnalyticsEvents.AI_CHAT_TRANSACTION_ACCEPTED);
 
       setMessages((prev) =>
         prev.map((msg) => {
