@@ -308,6 +308,18 @@ function MainShellScreen({
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
   const { isSimpleMode, settings } = useApp();
+  const shellRootRef = useRef<View>(null);
+  // Window-space origin of the shell root. `measureInWindow` returns
+  // coordinates relative to the native window; on Android (and sometimes on
+  // iOS with tall status bars) the shell's render origin isn't (0,0) in that
+  // space because of `react-native-screens` fragment insets and edge-to-edge
+  // status bar handling. We measure the shell's window position on layout and
+  // subtract it from target rects so tutorial highlights render in the
+  // overlay's local coordinate space.
+  const [shellWindowOrigin, setShellWindowOrigin] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
   const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
   const [tutorialTargetRects, setTutorialTargetRects] = useState<
@@ -622,16 +634,53 @@ function MainShellScreen({
     startGuidedTutorial();
   }, [startGuidedTutorial, tutorialStartToken]);
 
+  const handleShellRootLayout = useCallback(() => {
+    shellRootRef.current?.measureInWindow((x, y) => {
+      setShellWindowOrigin((previous) =>
+        Math.abs(previous.x - x) < 0.5 && Math.abs(previous.y - y) < 0.5
+          ? previous
+          : { x, y },
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isGuidedTutorialActive) return;
+    handleShellRootLayout();
+  }, [
+    activeTab,
+    guidedTutorialStepIndex,
+    handleShellRootLayout,
+    isGuidedTutorialActive,
+    tutorialSpotlightRequestToken,
+  ]);
+
   const currentGuidedStep = isGuidedTutorialActive
     ? (GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex] ?? null)
     : null;
-  const currentGuidedTargetRect = currentGuidedStep
+  const rawGuidedTargetRect = currentGuidedStep
     ? (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
     : null;
-  const currentGuidedTabRect =
+  const rawGuidedTabRect =
     currentGuidedStep && currentGuidedStep.targetId !== 'nav.add'
       ? (tutorialNavTabRects[currentGuidedStep.tab] ?? null)
       : null;
+  const currentGuidedTargetRect = useMemo<TutorialTargetRect | null>(() => {
+    if (!rawGuidedTargetRect) return null;
+    return {
+      ...rawGuidedTargetRect,
+      x: rawGuidedTargetRect.x - shellWindowOrigin.x,
+      y: rawGuidedTargetRect.y - shellWindowOrigin.y,
+    };
+  }, [rawGuidedTargetRect, shellWindowOrigin.x, shellWindowOrigin.y]);
+  const currentGuidedTabRect = useMemo<TutorialTargetRect | null>(() => {
+    if (!rawGuidedTabRect) return null;
+    return {
+      ...rawGuidedTabRect,
+      x: rawGuidedTabRect.x - shellWindowOrigin.x,
+      y: rawGuidedTabRect.y - shellWindowOrigin.y,
+    };
+  }, [rawGuidedTabRect, shellWindowOrigin.x, shellWindowOrigin.y]);
   const currentTutorialFocusedTab =
     isGuidedTutorialActive && currentGuidedStep?.targetId !== 'nav.add'
       ? (currentGuidedStep?.tab ?? null)
@@ -645,7 +694,7 @@ function MainShellScreen({
     [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
   );
   return (
-    <View className="flex-1 bg-background">
+    <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'home'}>
           <MemoHomeScreen
