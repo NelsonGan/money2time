@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { LayoutChangeEvent } from 'react-native';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -91,24 +92,42 @@ export function TutorialCoachmarkOverlay({
   isLastStep,
 }: TutorialCoachmarkOverlayProps) {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const [overlaySize, setOverlaySize] = useState<{ width: number; height: number }>({
+    width: windowWidth,
+    height: windowHeight,
+  });
+  const handleOverlayLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setOverlaySize((previous) =>
+      Math.abs(previous.width - width) < 0.5 && Math.abs(previous.height - height) < 0.5
+        ? previous
+        : { width, height },
+    );
+  }, []);
+  // On Android with edgeToEdgeEnabled, useWindowDimensions() can return values
+  // smaller than the overlay's rendered bounds (shell root extends behind system
+  // bars), leaving the BottomNav area uncovered by the SVG fill. Measure the
+  // overlay itself and use that for the backdrop path.
+  const backdropWidth = Math.max(windowWidth, overlaySize.width);
+  const backdropHeight = Math.max(windowHeight, overlaySize.height);
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
 
   const highlightFrame = useMemo(
-    () => resolveSpotlightFrame(targetRect, HIGHLIGHT_PADDING, windowWidth, windowHeight),
-    [targetRect, windowHeight, windowWidth],
+    () => resolveSpotlightFrame(targetRect, HIGHLIGHT_PADDING, backdropWidth, backdropHeight),
+    [targetRect, backdropHeight, backdropWidth],
   );
   const secondaryHighlightFrame = useMemo(
     () =>
       resolveSpotlightFrame(
         secondaryTargetRect,
         SECONDARY_HIGHLIGHT_PADDING,
-        windowWidth,
-        windowHeight,
+        backdropWidth,
+        backdropHeight,
         0,
       ),
-    [secondaryTargetRect, windowHeight, windowWidth],
+    [secondaryTargetRect, backdropHeight, backdropWidth],
   );
 
   const highlightRadius = useMemo(() => {
@@ -128,7 +147,7 @@ export function TutorialCoachmarkOverlay({
 
   const backdropMaskPath = useMemo(() => {
     if (!highlightFrame && !secondaryHighlightFrame) return null;
-    const outerPath = `M0 0 H${windowWidth} V${windowHeight} H0 Z`;
+    const outerPath = `M0 0 H${backdropWidth} V${backdropHeight} H0 Z`;
     const holes: string[] = [];
     if (highlightFrame) {
       holes.push(
@@ -158,8 +177,8 @@ export function TutorialCoachmarkOverlay({
     highlightRadius,
     secondaryHighlightFrame,
     secondaryHighlightRadius,
-    windowHeight,
-    windowWidth,
+    backdropHeight,
+    backdropWidth,
   ]);
 
   const tooltipTop = useMemo(() => {
@@ -171,24 +190,24 @@ export function TutorialCoachmarkOverlay({
       : DEFAULT_TOOLTIP_BOTTOM_CLEARANCE;
     const maxTop = Math.max(
       minTop,
-      windowHeight - TOOLTIP_ESTIMATED_HEIGHT - tooltipBottomClearance,
+      backdropHeight - TOOLTIP_ESTIMATED_HEIGHT - tooltipBottomClearance,
     );
     if (isConverterStep) {
       return maxTop;
     }
     if (!highlightFrame) {
-      return Math.min(maxTop, Math.max(96, windowHeight - TOOLTIP_ESTIMATED_HEIGHT - 32));
+      return Math.min(maxTop, Math.max(96, backdropHeight - TOOLTIP_ESTIMATED_HEIGHT - 32));
     }
     const belowTargetY = highlightFrame.bottom + (isAddStep ? 24 : 16);
     const aboveTargetY = highlightFrame.top - TOOLTIP_ESTIMATED_HEIGHT - (isAddStep ? 44 : 16);
     if (isAddStep) {
       return Math.max(minTop, Math.min(maxTop, aboveTargetY));
     }
-    if (belowTargetY + TOOLTIP_ESTIMATED_HEIGHT <= windowHeight - 16 && belowTargetY <= maxTop) {
+    if (belowTargetY + TOOLTIP_ESTIMATED_HEIGHT <= backdropHeight - 16 && belowTargetY <= maxTop) {
       return Math.max(minTop, belowTargetY);
     }
     return Math.max(minTop, Math.min(maxTop, aboveTargetY));
-  }, [highlightFrame, targetId, windowHeight]);
+  }, [highlightFrame, targetId, backdropHeight]);
 
   const palette = useMemo(() => {
     const primary = themeColors.primary;
@@ -230,10 +249,19 @@ export function TutorialCoachmarkOverlay({
   );
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.overlayRoot]} pointerEvents="box-none">
+    <View
+      onLayout={handleOverlayLayout}
+      style={[StyleSheet.absoluteFill, styles.overlayRoot]}
+      pointerEvents="box-none"
+    >
       {highlightFrame || secondaryHighlightFrame ? (
         <>
-          <Svg style={StyleSheet.absoluteFillObject} pointerEvents="none">
+          <Svg
+            style={styles.backdropSvg}
+            width={backdropWidth}
+            height={backdropHeight}
+            pointerEvents="none"
+          >
             <Path d={backdropMaskPath ?? ''} fill={palette.backdrop} fillRule="evenodd" />
           </Svg>
 
@@ -404,6 +432,11 @@ const styles = StyleSheet.create({
   overlayRoot: {
     zIndex: 4000,
     elevation: 4000,
+  },
+  backdropSvg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
   },
   highlightGlow: {
     position: 'absolute',
