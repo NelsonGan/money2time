@@ -77,7 +77,13 @@ const NavItem = memo(function NavItem({
   tutorialMeasureToken?: number;
 }) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.85 });
-  const navItemRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
+  // Measure the plain wrapper View, not the Pressable. On Android the
+  // Pressable sits inside a reanimated `Animated.View` with no explicit
+  // width, and `measureInWindow` on it returns the icon's intrinsic bounds
+  // instead of the full tab slot — leaving the tutorial highlight rendered
+  // as a small pill above the icon. The wrapper is not transformed and
+  // owns the flex-1 slot width, so its measurement is stable.
+  const navItemRef = useRef<View>(null);
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
 
   const reportLayout = useCallback(() => {
@@ -108,27 +114,27 @@ const NavItem = memo(function NavItem({
   }, [onTutorialTabLayout, reportLayout, tutorialMeasureToken]);
 
   return (
-    <Animated.View style={animatedStyle} className="flex-1">
-      <Pressable
-        ref={navItemRef}
-        onPress={handlePress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        onLayout={reportLayout}
-        className={cn(
-          'items-center justify-center rounded-2xl mx-0.5',
-          isTutorialFocused && 'bg-primary/12',
-        )}
-        style={{ height: NAV_ROW_HEIGHT }}
-      >
-        <Icon
-          size={ICON_SIZE}
-          color={isEmphasized ? tintActive : tintInactive}
-          strokeWidth={isEmphasized ? 2.2 : 1.6}
-          filled={isEmphasized}
-        />
-      </Pressable>
-    </Animated.View>
+    <View ref={navItemRef} onLayout={reportLayout} className="flex-1">
+      <Animated.View style={animatedStyle} className="flex-1">
+        <Pressable
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          className={cn(
+            'items-center justify-center rounded-2xl mx-0.5',
+            isTutorialFocused && 'bg-primary/12',
+          )}
+          style={{ height: NAV_ROW_HEIGHT }}
+        >
+          <Icon
+            size={ICON_SIZE}
+            color={isEmphasized ? tintActive : tintInactive}
+            strokeWidth={isEmphasized ? 2.2 : 1.6}
+            filled={isEmphasized}
+          />
+        </Pressable>
+      </Animated.View>
+    </View>
   );
 });
 
