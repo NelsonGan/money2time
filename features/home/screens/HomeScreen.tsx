@@ -23,6 +23,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { Mascot } from '~/components/feedback/Mascot';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Card, Text, TimeValueInline } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
@@ -801,7 +802,7 @@ export function HomeScreen({
           <EmptyState
             title={I18n.t('home.recurring.none_title')}
             message={I18n.t('home.recurring.none_message')}
-            mascotMood="curious"
+            mascotMood="sleepy"
           />
         )}
       </TabletContentContainer>
@@ -821,11 +822,18 @@ export function HomeScreen({
                 accessibilityLabel={I18n.t('app.name')}
                 style={styles.headerBrandRow}
               >
-                <Text style={[styles.headerBrandMoney, { color: wordmarkPalette.money }]}>
-                  Money
-                </Text>
-                <Text style={[styles.headerBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
-                <Text style={[styles.headerBrandTime, { color: wordmarkPalette.time }]}>Time</Text>
+                <View style={styles.headerBrandMascot}>
+                  <Mascot size={36} name="wink" animate />
+                </View>
+                <View style={styles.headerBrandWordmark}>
+                  <Text style={[styles.headerBrandMoney, { color: wordmarkPalette.money }]}>
+                    Money
+                  </Text>
+                  <Text style={[styles.headerBrandTwo, { color: wordmarkPalette.two }]}>2</Text>
+                  <Text style={[styles.headerBrandTime, { color: wordmarkPalette.time }]}>
+                    Time
+                  </Text>
+                </View>
               </View>
               <View
                 ref={displayToggleRef}
@@ -914,6 +922,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 40,
   },
+  headerBrandMascot: {
+    marginRight: 8,
+  },
+  headerBrandWordmark: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
   headerBrandMoney: {
     fontSize: 24,
     lineHeight: 30,
@@ -928,7 +943,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     marginLeft: 1,
     marginRight: 0,
-    transform: [{ translateY: 6 }],
   },
   headerBrandTime: {
     fontSize: 24,

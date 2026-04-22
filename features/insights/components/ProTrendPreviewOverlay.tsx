@@ -32,7 +32,7 @@ export function ProTrendPreviewOverlay({ onUpgrade }: ProTrendPreviewOverlayProp
           entering={FadeInDown.delay(100).duration(500).springify().damping(14)}
           className="w-[160px] h-[160px] rounded-full bg-primary/6 items-center justify-center"
         >
-          <Mascot size={150} animate={false} />
+          <Mascot size={150} animate name="rich" />
         </Animated.View>
 
         <Text variant="heading" className="mt-5 text-center">

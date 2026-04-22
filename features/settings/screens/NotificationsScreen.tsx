@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import {
   Button,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -142,6 +143,10 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
             title={I18n.t('notifications.title')}
             subtitle={I18n.t('notifications.subtitle')}
           />
+
+          <View className="items-center pt-1 pb-3">
+            <Mascot size={96} name="announce" animate />
+          </View>
 
           {permissionStatus === 'denied' && (
             <Animated.View

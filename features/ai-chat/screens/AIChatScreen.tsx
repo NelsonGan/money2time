@@ -1,7 +1,6 @@
 import {
   Download,
   HardDrive,
-  MessageSquareText,
   Settings,
   Shield,
   Sparkles,
@@ -40,6 +39,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import {
   Button,
   Card,
@@ -1186,12 +1186,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   entering={FadeIn.delay(200).duration(400)}
                   className="flex-1 items-center justify-center px-4"
                 >
-                  <View
-                    className="h-16 w-16 items-center justify-center rounded-2xl"
-                    style={{ backgroundColor: `${themeColors.primary}0C` }}
-                  >
-                    <MessageSquareText size={28} color={`${themeColors.primary}60`} />
-                  </View>
+                  <Mascot size={120} name="working" animate />
                   <Text
                     variant="body"
                     tone="muted"
