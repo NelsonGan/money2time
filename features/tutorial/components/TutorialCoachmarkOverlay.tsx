@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { Mascot, type MascotName } from '~/components/feedback/Mascot';
 import { Button, Text } from '~/components/ui';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import type { TutorialTargetId, TutorialTargetRect } from '~/features/tutorial/types';
@@ -19,6 +20,7 @@ interface TutorialCoachmarkOverlayProps {
   targetId?: TutorialTargetId | null;
   targetRect?: TutorialTargetRect | null;
   secondaryTargetRect?: TutorialTargetRect | null;
+  mascotName?: MascotName;
   onBack: () => void;
   onNext: () => void;
   onSkip: () => void;
@@ -28,7 +30,7 @@ interface TutorialCoachmarkOverlayProps {
 const HORIZONTAL_MARGIN = 16;
 const HIGHLIGHT_PADDING = 8;
 const SECONDARY_HIGHLIGHT_PADDING = 5;
-const TOOLTIP_ESTIMATED_HEIGHT = 260;
+const TOOLTIP_ESTIMATED_HEIGHT = 285;
 const SPOTLIGHT_EDGE_MARGIN = 8;
 const DEFAULT_TOOLTIP_BOTTOM_CLEARANCE = 16;
 const FAB_TOOLTIP_BOTTOM_CLEARANCE = 132;
@@ -86,11 +88,13 @@ export function TutorialCoachmarkOverlay({
   targetId = null,
   targetRect,
   secondaryTargetRect = null,
+  mascotName,
   onBack,
   onNext,
   onSkip,
   isLastStep,
 }: TutorialCoachmarkOverlayProps) {
+  const resolvedMascot: MascotName = mascotName ?? (isLastStep ? 'celebrate' : 'happy');
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const [overlaySize, setOverlaySize] = useState<{ width: number; height: number }>({
     width: windowWidth,
@@ -348,24 +352,29 @@ export function TutorialCoachmarkOverlay({
           },
         ]}
       >
-        <View style={styles.tooltipHeader}>
-          <View style={[styles.pill, { backgroundColor: palette.pillBackground }]}>
-            <Text variant="label" style={[styles.pillText, { color: palette.pillText }]}>
-              {I18n.t('tutorial.coachmark_badge')}
-            </Text>
-          </View>
-          <Text variant="label" style={[styles.progressLabel, { color: palette.mutedText }]}>
-            {I18n.t('tutorial.progress', { current: stepIndex + 1, total: totalSteps })}
-          </Text>
-        </View>
+        <View style={styles.headerRow}>
+          <Mascot size={60} name={resolvedMascot} animate />
+          <View style={styles.headerContent}>
+            <View style={styles.tooltipHeader}>
+              <View style={[styles.pill, { backgroundColor: palette.pillBackground }]}>
+                <Text variant="label" style={[styles.pillText, { color: palette.pillText }]}>
+                  {I18n.t('tutorial.coachmark_badge')}
+                </Text>
+              </View>
+              <Text variant="label" style={[styles.progressLabel, { color: palette.mutedText }]}>
+                {I18n.t('tutorial.progress', { current: stepIndex + 1, total: totalSteps })}
+              </Text>
+            </View>
 
-        <View style={[styles.progressTrack, { backgroundColor: palette.progressTrack }]}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${progressPercent}%`, backgroundColor: palette.progressFill },
-            ]}
-          />
+            <View style={[styles.progressTrack, { backgroundColor: palette.progressTrack }]}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${progressPercent}%`, backgroundColor: palette.progressFill },
+                ]}
+              />
+            </View>
+          </View>
         </View>
 
         <Text variant="subheading" style={[styles.title, { color: palette.titleText }]}>
@@ -377,7 +386,7 @@ export function TutorialCoachmarkOverlay({
 
         {!highlightFrame ? (
           <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color={palette.mutedText} />
+            <Mascot size={28} name="confused" animate />
             <Text variant="label" style={{ color: palette.mutedText }}>
               {I18n.t('tutorial.locating_target')}
             </Text>
@@ -469,6 +478,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  headerContent: {
+    flex: 1,
+  },
   tooltip: {
     position: 'absolute',
     left: HORIZONTAL_MARGIN,
@@ -493,7 +511,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   pill: {
     paddingHorizontal: 10,
@@ -514,7 +532,6 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 999,
     overflow: 'hidden',
-    marginBottom: 14,
   },
   progressFill: {
     height: '100%',

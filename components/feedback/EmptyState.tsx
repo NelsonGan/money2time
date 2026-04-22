@@ -5,12 +5,13 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 
-import { Mascot } from './Mascot';
+import { Mascot, type MascotName } from './Mascot';
 
 interface EmptyStateProps {
   title: string;
   message?: string;
   mascotMood?: 'happy' | 'thinking' | 'sleepy' | 'curious' | 'proud';
+  mascotName?: MascotName;
   action?: { label: string; onPress: () => void };
   animateIn?: boolean;
 }
@@ -18,7 +19,8 @@ interface EmptyStateProps {
 export function EmptyState({
   title,
   message,
-  mascotMood: _mascotMood = 'thinking',
+  mascotMood = 'thinking',
+  mascotName,
   action,
   animateIn = true,
 }: EmptyStateProps) {
@@ -43,7 +45,7 @@ export function EmptyState({
           }
           className="w-[160px] h-[160px] rounded-full bg-primary/6 items-center justify-center"
         >
-          <Mascot size={150} animate={false} />
+          <Mascot size={150} animate={false} name={mascotName} mood={mascotMood} />
         </Animated.View>
         <Text variant="heading" className="mt-5 text-center">
           {title}

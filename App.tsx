@@ -29,7 +29,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
-import { Mascot } from '~/components/feedback/Mascot';
+import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
@@ -136,6 +136,7 @@ interface GuidedTutorialStep {
   targetId: TutorialTargetId;
   titleKey: string;
   bodyKey: string;
+  mascot: MascotName;
 }
 
 const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
@@ -144,48 +145,56 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
     targetId: 'home.display_toggle',
     titleKey: 'tutorial.coach_steps.home_title',
     bodyKey: 'tutorial.coach_steps.home_body',
+    mascot: 'wink',
   },
   {
     tab: 'home',
     targetId: 'home.converter',
     titleKey: 'tutorial.coach_steps.converter_title',
     bodyKey: 'tutorial.coach_steps.converter_body',
+    mascot: 'working',
   },
   {
     tab: 'transactions',
     targetId: 'nav.add',
     titleKey: 'tutorial.coach_steps.add_title',
     bodyKey: 'tutorial.coach_steps.add_body',
+    mascot: 'excited',
   },
   {
     tab: 'insights',
     targetId: 'insights.type_selector',
     titleKey: 'tutorial.coach_steps.insights_title',
     bodyKey: 'tutorial.coach_steps.insights_body',
+    mascot: 'rich',
   },
   {
     tab: 'settings',
     targetId: 'settings.recurring',
     titleKey: 'tutorial.coach_steps.recurring_title',
     bodyKey: 'tutorial.coach_steps.recurring_body',
+    mascot: 'sleepy',
   },
   {
     tab: 'settings',
     targetId: 'settings.statement_import',
     titleKey: 'tutorial.coach_steps.statement_import_title',
     bodyKey: 'tutorial.coach_steps.statement_import_body',
+    mascot: 'announce',
   },
   {
     tab: 'settings',
     targetId: 'settings.management',
     titleKey: 'tutorial.coach_steps.management_title',
     bodyKey: 'tutorial.coach_steps.management_body',
+    mascot: 'love',
   },
   {
     tab: 'settings',
     targetId: 'settings.start_tutorial',
     titleKey: 'tutorial.coach_steps.settings_title',
     bodyKey: 'tutorial.coach_steps.settings_body',
+    mascot: 'celebrate',
   },
 ];
 
@@ -786,6 +795,7 @@ function MainShellScreen({
         targetId={currentGuidedStep?.targetId ?? null}
         targetRect={currentGuidedTargetRect}
         secondaryTargetRect={currentGuidedTabRect}
+        mascotName={currentGuidedStep?.mascot}
         onBack={handleGuidedTutorialBack}
         onNext={handleGuidedTutorialNext}
         onSkip={finishGuidedTutorial}
@@ -1246,6 +1256,7 @@ export default function App() {
             </ProProvider>
           </AppProvider>
         </AppErrorBoundary>
+        <MascotWarmup />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

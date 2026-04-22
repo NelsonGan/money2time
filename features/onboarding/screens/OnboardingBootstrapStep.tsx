@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text, ThemeModal } from '~/components/ui';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingChoiceCard } from '~/features/onboarding/components/OnboardingChoiceCard';
@@ -109,7 +110,11 @@ export function OnboardingBootstrapStep({
               subtitle={I18n.t('onboarding.bootstrap.choose_subtitle')}
             />
 
-            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8 gap-4">
+            <View className="items-center mt-4">
+              <Mascot size={96} name="happy" animate />
+            </View>
+
+            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-6 gap-4">
               <OnboardingChoiceCard
                 title={I18n.t('onboarding.bootstrap.import_option_title')}
                 description={I18n.t('onboarding.bootstrap.import_option_subtitle')}
@@ -163,7 +168,7 @@ export function OnboardingBootstrapStep({
           <ThemeModal visible={isImporting} transparent animationType="fade">
             <View className="flex-1 bg-foreground/35 items-center justify-center px-6">
               <View className="w-full max-w-[360px] rounded-[24px] border border-border/35 bg-card px-6 py-7 items-center">
-                <ActivityIndicator size="large" color={themeColors.primary} />
+                <Mascot size={120} name="working" animate />
                 <Text variant="subheading" className="mt-4 text-center text-foreground">
                   {I18n.t('onboarding.bootstrap.importing_title')}
                 </Text>
@@ -192,7 +197,11 @@ export function OnboardingBootstrapStep({
               subtitle={I18n.t('onboarding.bootstrap.import_complete_subtitle')}
             />
 
-            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+            <View className="items-center mt-4">
+              <Mascot size={110} name="celebrate" animate />
+            </View>
+
+            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-6">
               <Card className="border border-success/25">
                 <CardContent className="py-5">
                   <View style={styles.statsGrid}>

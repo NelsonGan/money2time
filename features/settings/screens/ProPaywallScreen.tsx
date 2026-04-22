@@ -23,6 +23,7 @@ import { SvgXml } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { APP_ICON_SVG } from '~/assets/money2time-icon';
+import { Mascot, type MascotName } from '~/components/feedback/Mascot';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Text } from '~/components/ui';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
@@ -44,7 +45,7 @@ interface ProPaywallScreenProps {
 
 const CARD_GAP = 12;
 const CARD_PEEK = 32;
-const PLAN_CARD_MIN_HEIGHT = 288;
+const PLAN_CARD_MIN_HEIGHT = 300;
 const SHOWCASE_INTERVAL = 4000;
 const FLASH_MESSAGE_DURATION_MS = 3200;
 const PRIVACY_POLICY_URL = 'https://www.money2time.com/privacy';
@@ -314,6 +315,7 @@ interface PlanCardData {
   name: string;
   description: string;
   badge?: string;
+  mascot?: MascotName;
 }
 
 interface SupportLinkItem {
@@ -420,6 +422,9 @@ function PlanCard({
   onMeasureHeight: (cardId: string, height: number) => void;
 }) {
   const pricePresentation = getPlanPricePresentation(data.pkg);
+  const { height: screenHeight } = useWindowDimensions();
+  const isCompact = screenHeight < 700;
+  const mascotSize = isCompact ? 90 : 120;
 
   return (
     <View style={{ width, marginRight: CARD_GAP }}>
@@ -430,21 +435,32 @@ function PlanCard({
         style={[
           s.card,
           height ? { height } : null,
+          isCompact ? s.cardCompact : null,
           { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
         ]}
       >
         {data.badge ? (
-          <View style={[s.badge, { backgroundColor: colors.primarySoft }]}>
+          <View style={[s.badgeFloating, { backgroundColor: colors.primarySoft }]}>
             <Text style={[s.badgeText, { color: colors.primary }]}>{data.badge}</Text>
           </View>
+        ) : null}
+
+        {data.mascot ? (
+          <View
+            style={s.cardMascotRow}
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={data.name}
+          >
+            <Mascot size={mascotSize} name={data.mascot} animate />
+          </View>
         ) : (
-          <View style={s.badgeSpacer} />
+          <Text style={[s.cardTitle, { color: colors.text }]}>{data.name}</Text>
         )}
 
-        <View style={s.cardBody}>
-          <Text style={[s.cardTitle, { color: colors.text }]}>{data.name}</Text>
-          <Text style={[s.cardDesc, { color: colors.textMuted }]}>{data.description}</Text>
-        </View>
+        <Text style={[s.cardDesc, { color: colors.textMuted }]} numberOfLines={2}>
+          {data.description}
+        </Text>
 
         <View style={s.cardFooter}>
           <View style={s.cardPriceStack}>
@@ -467,7 +483,7 @@ function PlanCard({
             disabled={isPurchasing}
             variant="warm"
             size="lg"
-            className="mt-4 w-full shadow-warm-lg"
+            className="mt-3 w-full shadow-warm-lg"
             haptic="none"
           >
             {isPurchasing ? (
@@ -552,6 +568,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         name: I18n.t('pro.monthly'),
         description: I18n.t('pro.monthly_desc'),
         badge: I18n.t('pro.flexible'),
+        mascot: 'plan-monthly',
       });
     }
     if (packages.annual) {
@@ -560,6 +577,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         name: I18n.t('pro.yearly'),
         description: I18n.t('pro.yearly_desc'),
         badge: I18n.t('pro.best_value'),
+        mascot: 'plan-annual',
       });
     }
     if (packages.lifetime) {
@@ -568,6 +586,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         name: I18n.t('pro.lifetime'),
         description: I18n.t('pro.lifetime_desc'),
         badge: I18n.t('pro.forever'),
+        mascot: 'plan-lifetime',
       });
     }
 
@@ -750,7 +769,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           <CloseBtn onClose={onClose} colors={colors} />
         </View>
         <View style={s.activeContainer}>
-          <Crown size={48} color={colors.primary} fill={colors.primary} />
+          <Mascot size={140} name="rich" animate />
+          <View style={s.activeCrownRow}>
+            <Crown size={20} color={colors.primary} fill={colors.primary} />
+          </View>
           <Text style={[s.activeTitle, { color: colors.text }]}>{I18n.t('pro.active')}</Text>
           <Text style={[s.activeSub, { color: colors.textMuted }]}>
             {I18n.t('pro.active_subtitle')}
@@ -1132,37 +1154,53 @@ const s = StyleSheet.create({
   // Plan cards
   card: {
     borderRadius: 22,
-    padding: 22,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 18,
     borderWidth: 1,
     minHeight: PLAN_CARD_MIN_HEIGHT,
   },
-  badge: {
-    alignSelf: 'flex-start',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginBottom: 14,
+  cardCompact: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 14,
   },
-  badgeText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8 },
-  badgeSpacer: { height: 26 },
-  cardBody: {
-    minHeight: 82,
+  badgeFloating: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    zIndex: 2,
+  },
+  badgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.7 },
+  cardMascotRow: {
+    alignItems: 'center',
+    marginTop: 2,
+    marginBottom: 2,
   },
   cardFooter: {
     marginTop: 'auto',
+    paddingTop: 8,
   },
   cardPriceStack: {
-    minHeight: 72,
-    gap: 4,
-    justifyContent: 'flex-end',
+    gap: 2,
+    alignItems: 'center',
   },
   cardPriceRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 6,
   },
-  cardTitle: { fontSize: 24, lineHeight: 32, fontWeight: '800', letterSpacing: -0.3 },
-  cardDesc: { fontSize: 14, lineHeight: 20, marginTop: 2 },
+  cardTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    textAlign: 'center',
+  },
+  cardDesc: { fontSize: 13, lineHeight: 18, marginTop: 2, textAlign: 'center' },
   cardPrice: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
   cardPriceSuffix: { fontSize: 14, fontWeight: '700' },
   cardPriceMeta: { fontSize: 12, lineHeight: 18 },
@@ -1292,4 +1330,10 @@ const s = StyleSheet.create({
   },
   activeTitle: { fontSize: 24, fontWeight: '800', marginTop: 16 },
   activeSub: { fontSize: 15, marginTop: 8, textAlign: 'center' },
+  activeCrownRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

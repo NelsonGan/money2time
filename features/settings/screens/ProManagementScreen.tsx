@@ -2,6 +2,7 @@ import { Crown, ExternalLink } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -66,7 +67,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           />
         </View>
         <View style={styles.centeredContainer}>
-          <Crown size={40} color={themeColors.textMuted} />
+          <Mascot size={120} name="rich" animate />
           <Text
             variant="subheading"
             className="mt-4 text-center"
@@ -106,15 +107,18 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
 
       <View style={styles.content}>
         <View className="items-center py-6">
-          <View
-            className="rounded-full items-center justify-center"
-            style={{
-              width: 64,
-              height: 64,
-              backgroundColor: `${themeColors.primary}18`,
-            }}
-          >
-            <Crown size={32} color={themeColors.primary} fill={themeColors.primary} />
+          <View className="relative items-center justify-center">
+            <Mascot size={110} name="celebrate" animate />
+            <View
+              className="absolute -top-1 -right-1 rounded-full items-center justify-center"
+              style={{
+                width: 32,
+                height: 32,
+                backgroundColor: themeColors.primary,
+              }}
+            >
+              <Crown size={18} color="#fff" fill="#fff" />
+            </View>
           </View>
           <View className="flex-row items-center gap-1.5 mt-3">
             <Text variant="subheading" className="text-lg">

@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text } from '~/components/ui';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
@@ -67,7 +68,11 @@ export function OnboardingWageStep({
           <View className="flex-1">
             <OnboardingStepHeader title={I18n.t('onboarding.wage.try_it_title')} />
 
-            <Animated.View entering={FadeIn.delay(150).duration(300)} className="flex-1 mt-6">
+            <View className="items-center mt-2">
+              <Mascot size={88} name="excited" animate />
+            </View>
+
+            <Animated.View entering={FadeIn.delay(150).duration(300)} className="flex-1 mt-4">
               <OnboardingTryItConverter
                 amount={demoAmount}
                 currencySymbol={settings.currencySymbol}
@@ -94,7 +99,11 @@ export function OnboardingWageStep({
               subtitle={I18n.t('onboarding.wage.worth_body')}
             />
 
-            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-8">
+            <View className="items-center mt-4">
+              <Mascot size={110} name="working" animate />
+            </View>
+
+            <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-6">
               <Card variant="accent" className="overflow-hidden">
                 <CardContent className="py-6">
                   <Text variant="label" tone="primary" className="tracking-widest">
