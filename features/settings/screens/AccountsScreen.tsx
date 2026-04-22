@@ -1,12 +1,22 @@
 import { Eye, EyeOff, GripVertical, Pencil, Plus, Settings, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   Button,
   Input,
@@ -29,7 +39,14 @@ import { AccountCardStack } from '~/features/settings/components/AccountCardStac
 import { ActivityTransactionList } from '~/features/transactions/components';
 import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
+import {
+  MONTH_PAGER_CENTER_INDEX,
+  MONTH_PAGER_TOTAL_SLOTS,
+} from '~/features/transactions/constants/monthPager';
+import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
+import { useMonthPager } from '~/hooks/useMonthPager';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -42,7 +59,22 @@ import {
 } from '~/types';
 import { cn } from '~/utils';
 import { getNetAssetContribution } from '~/utils/accountBalances';
-import { formatAmount, formatDateInput, normalizeMoneyAmount } from '~/utils/formatters';
+import {
+  addMonthsAtMonthStart,
+  formatAmount,
+  formatDateInput,
+  formatMonthYearLabel,
+  monthKeyFromDateLocal,
+  normalizeMoneyAmount,
+  startOfMonthDate,
+} from '~/utils/formatters';
+import {
+  bucketTransactionsByAccountPeriod,
+  DAY_IN_MS,
+  formatStatementRangeSublabel,
+  getCurrentStatementCycleStart,
+  statementPeriodFromAnchor,
+} from '~/utils/statementPeriods';
 
 interface AccountGroupSection {
   id: string;
@@ -89,6 +121,8 @@ const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
 const FLOATING_ACTION_SIZE = 56;
 const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
+const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
+const DEFAULT_CREDIT_STATEMENT_DAY = 25;
 
 function withColorAlpha(hex: string, alpha: number) {
   const value = hex.replace('#', '');
@@ -527,17 +561,6 @@ function AccountEditorSheet({
   );
 }
 
-function clampStatementDate(year: number, month: number, day: number) {
-  const last = new Date(year, month + 1, 0).getDate();
-  return new Date(year, month, Math.min(Math.max(day, 1), last));
-}
-
-function getCurrentStatementStart(statementDay: number, now: Date) {
-  const thisMonth = clampStatementDate(now.getFullYear(), now.getMonth(), statementDay);
-  if (thisMonth.getTime() <= now.getTime()) return thisMonth;
-  return clampStatementDate(now.getFullYear(), now.getMonth() - 1, statementDay);
-}
-
 function creditDeltaForAccountTransaction(
   tx: {
     type: 'expense' | 'income' | 'transfer' | 'balance_adjustment';
@@ -582,7 +605,7 @@ function computeCreditCycleSummary(
   if (!account.creditStatementDay) {
     return { outstanding: Math.max(0, balance), payable: 0 };
   }
-  const currentCycleStartIso = getCurrentStatementStart(
+  const currentCycleStartIso = getCurrentStatementCycleStart(
     account.creditStatementDay,
     now,
   ).toISOString();
@@ -1073,7 +1096,6 @@ export function AccountsScreen({
   const managementAccountsScrollRef =
     useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
   const managementGroupsScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
-  const detailScrollToTopRef = useRef<(() => void) | null>(null);
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -1132,6 +1154,74 @@ export function AccountsScreen({
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
     [activeAccountId, getTransactionsByAccount],
   );
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
+  const { width: windowFullWidth } = useWindowDimensions();
+  const pagerPageWidth = Math.max(1, windowFullWidth);
+  const pagerPageStyle = useMemo(() => ({ width: pagerPageWidth }), [pagerPageWidth]);
+  const pagerListRef = useRef<FlatList<number> | null>(null);
+  const selectedAccountStatementDay =
+    selectedAccount?.type === 'credit'
+      ? (selectedAccount.creditStatementDay ?? DEFAULT_CREDIT_STATEMENT_DAY)
+      : null;
+  const usesStatementPeriods = selectedAccountStatementDay != null;
+  const pagerAnchorDate = useMemo(() => {
+    const now = new Date();
+    if (usesStatementPeriods && selectedAccountStatementDay != null) {
+      return getCurrentStatementCycleStart(selectedAccountStatementDay, now);
+    }
+    return startOfMonthDate(now);
+  }, [selectedAccountStatementDay, usesStatementPeriods]);
+  const {
+    activeIndex: pagerActiveIndex,
+    activeIndexRef: pagerActiveIndexRef,
+    slots: pagerSlots,
+    handleMomentumEnd: handlePagerMomentumEnd,
+    handleScrollEndDrag: handlePagerScrollEndDrag,
+    handleScrollToIndexFailed: handlePagerScrollToIndexFailed,
+    getItemLayout: getPagerItemLayout,
+    keyExtractor: pagerKeyExtractor,
+    scrollToRelative: scrollToRelativePage,
+    setActiveIndex: setPagerActiveIndex,
+  } = useMonthPager({
+    listRef: pagerListRef,
+    pageWidth: pagerPageWidth,
+    totalSlots: MONTH_PAGER_TOTAL_SLOTS,
+    initialIndex: MONTH_PAGER_CENTER_INDEX,
+  });
+  const getPagerScrollToTopRef = useIndexedScrollToTopRefs();
+  const accountPeriodTransactionsMap = useMemo(() => {
+    if (!selectedAccount) return new Map<string, TransactionWithRelations[]>();
+    return bucketTransactionsByAccountPeriod(
+      selectedAccountTransactions,
+      selectedAccountStatementDay,
+    );
+  }, [selectedAccount, selectedAccountStatementDay, selectedAccountTransactions]);
+  const activePagerOffset = pagerActiveIndex - MONTH_PAGER_CENTER_INDEX;
+  const activePagerPeriod = useMemo(() => {
+    if (usesStatementPeriods && selectedAccountStatementDay != null) {
+      const period = statementPeriodFromAnchor(
+        pagerAnchorDate,
+        selectedAccountStatementDay,
+        activePagerOffset,
+      );
+      const endInclusive = new Date(period.end.getTime() - DAY_IN_MS);
+      return {
+        key: period.key,
+        label: formatStatementRangeSublabel(period.start, endInclusive, activeLocale),
+      };
+    }
+    const monthDate = addMonthsAtMonthStart(pagerAnchorDate, activePagerOffset);
+    return {
+      key: monthKeyFromDateLocal(monthDate),
+      label: formatMonthYearLabel(monthDate, activeLocale),
+    };
+  }, [
+    activeLocale,
+    activePagerOffset,
+    pagerAnchorDate,
+    selectedAccountStatementDay,
+    usesStatementPeriods,
+  ]);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const selectedTransactionTotal = useMemo(() => {
@@ -1278,6 +1368,20 @@ export function AccountsScreen({
   }, [activeAccountId]);
 
   useEffect(() => {
+    if (!activeAccountId) return;
+    if (pagerActiveIndexRef.current === MONTH_PAGER_CENTER_INDEX) return;
+    setPagerActiveIndex(MONTH_PAGER_CENTER_INDEX);
+    const frame = requestAnimationFrame(() => {
+      pagerListRef.current?.scrollToIndex({
+        index: MONTH_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAccountId]);
+
+  useEffect(() => {
     if (managementOnly || !activeAccountId || selectedTransactionIds.length === 0) return;
     const availableIds = new Set(selectedAccountTransactions.map((transaction) => transaction.id));
     setSelectedTransactionIds((previous) => {
@@ -1312,7 +1416,9 @@ export function AccountsScreen({
     if (scrollToTopToken <= 0) return;
     const frame = requestAnimationFrame(() => {
       if (!managementOnly && activeAccountId && selectedAccount) {
-        detailScrollToTopRef.current?.();
+        const currentIndex = pagerActiveIndexRef.current;
+        pagerListRef.current?.scrollToIndex({ index: currentIndex, animated: false });
+        getPagerScrollToTopRef(currentIndex).current?.();
         return;
       }
       if (isManagementGroupsView) {
@@ -1659,6 +1765,76 @@ export function AccountsScreen({
   );
   const creditLabel = String(I18n.t('accounts.credit'));
 
+  const selectedAccountIsCredit = selectedAccount?.type === 'credit';
+  const detailListBottomPadding =
+    SETTINGS_FORM_BOTTOM_PADDING +
+    safeAreaInsets.bottom +
+    spacing.sm +
+    FLOATING_ACTION_SIZE +
+    (selectedAccountIsCredit ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
+  const selectedAccountIdForPager = selectedAccount?.id ?? '';
+  const renderPagerPage = useCallback(
+    ({ item }: { item: number }) => {
+      const offset = item - MONTH_PAGER_CENTER_INDEX;
+      const periodKey =
+        usesStatementPeriods && selectedAccountStatementDay != null
+          ? statementPeriodFromAnchor(pagerAnchorDate, selectedAccountStatementDay, offset).key
+          : monthKeyFromDateLocal(addMonthsAtMonthStart(pagerAnchorDate, offset));
+      const pageTransactions =
+        accountPeriodTransactionsMap.get(periodKey) ?? EMPTY_PERIOD_TRANSACTIONS;
+      return (
+        <View style={pagerPageStyle} className="flex-1 bg-background">
+          <ActivityTransactionList
+            transactions={pageTransactions}
+            locale={activeLocale}
+            displaySettings={transactionDisplaySettings}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            onTransactionPress={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            emptyTitle={I18n.t(
+              usesStatementPeriods
+                ? 'accounts.empty_statement_title'
+                : 'accounts.empty_period_title',
+            )}
+            emptyMessage={I18n.t(
+              usesStatementPeriods
+                ? 'accounts.empty_statement_message'
+                : 'accounts.empty_period_message',
+            )}
+            contentPaddingBottom={detailListBottomPadding}
+            contentPaddingHorizontal={SETTINGS_HORIZONTAL_PADDING}
+            contentPaddingTop={0}
+            disableItemAnimations
+            compactItems
+            listKey={`${selectedAccountIdForPager}-${periodKey}`}
+            scrollToTopRef={getPagerScrollToTopRef(item)}
+          />
+        </View>
+      );
+    },
+    [
+      accountPeriodTransactionsMap,
+      activeLocale,
+      detailListBottomPadding,
+      getDisplayValueForTransaction,
+      getPagerScrollToTopRef,
+      getTrueHourlyRateForDate,
+      handleTransactionLongPress,
+      handleTransactionPress,
+      isSelectionMode,
+      pagerAnchorDate,
+      pagerPageStyle,
+      selectedAccountIdForPager,
+      selectedAccountStatementDay,
+      selectedTransactionIds,
+      transactionDisplaySettings,
+      usesStatementPeriods,
+    ],
+  );
+
   if (addTransactionAccountId) {
     return withBackGesture(
       <AddTransactionScreen
@@ -1689,10 +1865,6 @@ export function AccountsScreen({
     const cyclePayable = isCredit
       ? computeCreditCycleSummary(account, txns, balance, new Date()).payable
       : 0;
-    const floatingActionStackHeight =
-      FLOATING_ACTION_SIZE + (isCredit ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
-    const detailListBottomPadding =
-      SETTINGS_FORM_BOTTOM_PADDING + safeAreaInsets.bottom + spacing.sm + floatingActionStackHeight;
     return withBackGesture(
       <SettingsPageLayout edges={safeAreaEdges}>
         <View className="flex-1">
@@ -1700,6 +1872,7 @@ export function AccountsScreen({
             <SettingsHeader
               className="px-0 pt-5 pb-2"
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
+              reserveActionRow
               title={I18n.t('accounts.title')}
               subtitleNode={
                 <Text variant="friendly" tone="muted" numberOfLines={1}>
@@ -1778,27 +1951,29 @@ export function AccountsScreen({
                 </View>
               </View>
             </View>
-          ) : null}
-
-          <ActivityTransactionList
-            transactions={txns}
-            displaySettings={transactionDisplaySettings}
-            getDisplayValueForTransaction={getDisplayValueForTransaction}
-            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-            onTransactionPress={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('accounts.empty_transactions_title')}
-            emptyMessage={I18n.t('accounts.empty_transactions_message')}
-            contentPaddingBottom={detailListBottomPadding}
-            contentPaddingHorizontal={SETTINGS_HORIZONTAL_PADDING}
-            contentPaddingTop={0}
-            disableItemAnimations
-            compactItems
-            scrollToTopRef={detailScrollToTopRef}
-            listHeaderComponent={undefined}
-          />
+          ) : (
+            <MonthControlsHeader
+              monthLabel={activePagerPeriod.label}
+              onPrevMonth={() => scrollToRelativePage(-1)}
+              onNextMonth={() => scrollToRelativePage(1)}
+              hideTitleRow
+            />
+          )}
+          <View className="flex-1 overflow-hidden bg-background">
+            <FlatList
+              ref={pagerListRef}
+              data={pagerSlots}
+              keyExtractor={pagerKeyExtractor}
+              style={styles.flexContainer}
+              {...MONTH_PAGER_LIST_CONFIG}
+              renderItem={renderPagerPage}
+              initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+              getItemLayout={getPagerItemLayout}
+              onScrollEndDrag={handlePagerScrollEndDrag}
+              onMomentumScrollEnd={handlePagerMomentumEnd}
+              onScrollToIndexFailed={handlePagerScrollToIndexFailed}
+            />
+          </View>
           {!isSelectionMode ? (
             <View
               pointerEvents="box-none"

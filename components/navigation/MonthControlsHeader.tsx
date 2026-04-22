@@ -23,6 +23,7 @@ export function MonthControlsHeader({
   summary,
   children,
   hideNavigation = false,
+  hideTitleRow = false,
   showAccent = true,
 }: {
   title?: string;
@@ -39,6 +40,7 @@ export function MonthControlsHeader({
   summary?: React.ReactNode;
   children?: React.ReactNode;
   hideNavigation?: boolean;
+  hideTitleRow?: boolean;
   showAccent?: boolean;
 }) {
   const themeColors = useThemeColors();
@@ -50,42 +52,44 @@ export function MonthControlsHeader({
       <TabletContentContainer>
         <View className="px-5 pt-1.5 gap-2.5">
           {/* Title row with decorative accent */}
-          <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-            <View className="min-h-10 flex-1 justify-center">
-              {titleNode ? (
-                titleNode
-              ) : (
-                <>
-                  {title ? (
-                    <View className="flex-row items-center gap-2">
-                      {showAccent ? (
-                        <View
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{ backgroundColor: themeColors.primary, opacity: 0.5 }}
-                        />
-                      ) : null}
-                      <Text
-                        variant={isSmallScreen ? 'subheading' : 'heading'}
-                        className="tracking-tight"
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                      >
-                        {title}
+          {!hideTitleRow ? (
+            <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
+              <View className="min-h-10 flex-1 justify-center">
+                {titleNode ? (
+                  titleNode
+                ) : (
+                  <>
+                    {title ? (
+                      <View className="flex-row items-center gap-2">
+                        {showAccent ? (
+                          <View
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{ backgroundColor: themeColors.primary, opacity: 0.5 }}
+                          />
+                        ) : null}
+                        <Text
+                          variant={isSmallScreen ? 'subheading' : 'heading'}
+                          className="tracking-tight"
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                        >
+                          {title}
+                        </Text>
+                      </View>
+                    ) : null}
+                    {subtitle ? (
+                      <Text variant="caption" tone="muted" className="mt-0.5">
+                        {subtitle}
                       </Text>
-                    </View>
-                  ) : null}
-                  {subtitle ? (
-                    <Text variant="caption" tone="muted" className="mt-0.5">
-                      {subtitle}
-                    </Text>
-                  ) : null}
-                </>
-              )}
+                    ) : null}
+                  </>
+                )}
+              </View>
+              {actions ? (
+                <View className="min-h-10 flex-row items-center justify-end gap-2">{actions}</View>
+              ) : null}
             </View>
-            {actions ? (
-              <View className="min-h-10 flex-row items-center justify-end gap-2">{actions}</View>
-            ) : null}
-          </View>
+          ) : null}
 
           {/* Month navigation — floating capsule style */}
           {!hideNavigation ? (

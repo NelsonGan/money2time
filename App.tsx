@@ -26,7 +26,7 @@ import {
   View,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
@@ -1246,7 +1246,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.flex}>
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <AppErrorBoundary>
           <AppProvider>
             <ProProvider>

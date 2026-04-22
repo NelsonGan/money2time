@@ -83,6 +83,7 @@ interface SettingsHeaderProps {
   closeRowAccessory?: React.ReactNode;
   rightAccessory?: React.ReactNode;
   className?: string;
+  reserveActionRow?: boolean;
 }
 
 export function SettingsHeader({
@@ -94,9 +95,10 @@ export function SettingsHeader({
   closeRowAccessory,
   rightAccessory,
   className,
+  reserveActionRow = false,
 }: SettingsHeaderProps) {
   const themeColors = useThemeColors();
-  const showActionRow = !!onBack || !!onClose;
+  const showActionRow = reserveActionRow || !!onBack || !!onClose;
 
   return (
     <View className={cn('px-5 pt-3 pb-2', className)}>
