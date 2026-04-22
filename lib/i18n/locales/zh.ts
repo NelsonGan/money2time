@@ -871,6 +871,10 @@ const zh = {
     save_name: '保存名称',
     empty_transactions_title: '暂无交易',
     empty_transactions_message: '这个账户还是空的',
+    empty_period_title: '此期间暂无交易',
+    empty_period_message: '滑动查看其他月份',
+    empty_statement_title: '此账单周期暂无交易',
+    empty_statement_message: '滑动查看其他账单周期',
   },
   wage: {
     step_1_title: '你的收入是多少？',

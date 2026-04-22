@@ -967,6 +967,10 @@ const en = {
     save_name: 'Save name',
     empty_transactions_title: 'No transactions yet',
     empty_transactions_message: 'This account is squeaky clean',
+    empty_period_title: 'No transactions in this period',
+    empty_period_message: 'Swipe to browse other months',
+    empty_statement_title: 'No transactions in this statement',
+    empty_statement_message: 'Swipe to browse other statement periods',
   },
   wage: {
     step_1_title: 'What do you earn?',
