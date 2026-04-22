@@ -1,8 +1,9 @@
-import { Bell, CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
+import { CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -28,8 +29,7 @@ export function OnboardingNotificationsStep({
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
-  const iconCircleSize = isCompact ? 72 : 100;
-  const bellSize = isCompact ? 36 : 48;
+  const mascotSize = isCompact ? 100 : 130;
 
   const features = [
     {
@@ -66,19 +66,7 @@ export function OnboardingNotificationsStep({
           className={isCompact ? 'mt-5' : 'mt-8'}
         >
           <View style={styles.iconContainer}>
-            <View
-              style={[
-                styles.iconCircle,
-                {
-                  backgroundColor: `${themeColors.primary}14`,
-                  width: iconCircleSize,
-                  height: iconCircleSize,
-                  borderRadius: iconCircleSize / 2,
-                },
-              ]}
-            >
-              <Bell size={bellSize} color={themeColors.primary} />
-            </View>
+            <Mascot size={mascotSize} name="announce" animate />
           </View>
 
           <View style={styles.featureList}>
@@ -129,13 +117,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     marginBottom: spacing.lg,
-  },
-  iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   featureList: {
     gap: spacing.sm,

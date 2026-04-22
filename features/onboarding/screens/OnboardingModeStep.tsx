@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingChoiceCard } from '~/features/onboarding/components/OnboardingChoiceCard';
@@ -55,9 +56,13 @@ export function OnboardingModeStep({
         >
           <OnboardingStepHeader title={I18n.t('onboarding.mode.title')} />
 
+          <View className={isCompact ? 'items-center mt-3' : 'items-center mt-4'}>
+            <Mascot size={isCompact ? 80 : 100} name="confused" animate />
+          </View>
+
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}
-            className={isCompact ? 'mt-4 gap-3' : 'mt-8 gap-4'}
+            className={isCompact ? 'mt-3 gap-3' : 'mt-6 gap-4'}
           >
             <OnboardingChoiceCard
               title={I18n.t('onboarding.mode.simple_title')}

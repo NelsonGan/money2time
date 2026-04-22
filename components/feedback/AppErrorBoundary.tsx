@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -38,14 +39,17 @@ export class AppErrorBoundary extends React.Component<
 
     return (
       <View className="flex-1 items-center justify-center bg-background px-6">
-        <View className="w-full max-w-[420px] rounded-[24px] border border-border/40 bg-card px-5 py-6">
-          <Text variant="subheading">{I18n.t('errors.data_load_failed_title')}</Text>
-          <Text variant="friendly" tone="muted" className="mt-2">
+        <View className="w-full max-w-[420px] items-center rounded-[24px] border border-border/40 bg-card px-5 py-6">
+          <Mascot size={110} name="confused" animate />
+          <Text variant="subheading" className="mt-3 text-center">
+            {I18n.t('errors.data_load_failed_title')}
+          </Text>
+          <Text variant="friendly" tone="muted" className="mt-2 text-center">
             {getErrorMessage(this.state.error, I18n.t('errors.generic_operation_failed'))}
           </Text>
           <Pressable
             onPress={this.handleRetry}
-            className="mt-5 self-start rounded-full bg-primary px-4 py-2.5"
+            className="mt-5 rounded-full bg-primary px-4 py-2.5"
           >
             <Text variant="caption" tone="inverse">
               {I18n.t('common.retry')}

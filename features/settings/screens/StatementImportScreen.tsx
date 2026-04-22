@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Clipboard, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import {
   Button,
   Card,
@@ -460,6 +461,9 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       <SettingsHeader onBack={onBack} title={I18n.t('statement_import.title')} />
 
       <ScrollView ref={scrollViewRef} className="flex-1" contentContainerStyle={styles.scrollContent}>
+        <View className="items-center pt-1 pb-4">
+          <Mascot size={88} name={isImporting ? 'working' : 'announce'} animate />
+        </View>
         {/* Step 1 */}
         <View>
           <View className="mb-2 flex-row items-center gap-2 px-1">

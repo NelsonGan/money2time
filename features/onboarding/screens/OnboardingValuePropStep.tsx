@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text, TimeValueInline } from '~/components/ui';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
@@ -97,50 +98,53 @@ export function OnboardingValuePropStep({
         ]}
       >
         <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact>
-          <View
-            accessible
-            accessibilityRole="text"
-            accessibilityLabel={I18n.t('app.name')}
-            style={[styles.wordmarkRow, { minHeight: wordmarkLineHeight + 8 }]}
-          >
-            <Text
-              style={[
-                styles.wordmarkBase,
-                {
-                  fontSize: wordmarkFontSize,
-                  lineHeight: wordmarkLineHeight,
-                  color: wordmarkPalette.money,
-                },
-              ]}
+          <View style={styles.wordmarkWithMascot}>
+            <Mascot size={isCompact ? 48 : 60} name="wink" animate />
+            <View
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={I18n.t('app.name')}
+              style={[styles.wordmarkRow, { minHeight: wordmarkLineHeight + 8 }]}
             >
-              Money
-            </Text>
-            <Text
-              style={[
-                styles.wordmarkTwo,
-                {
-                  fontSize: wordmarkTwoFontSize,
-                  lineHeight: wordmarkTwoFontSize,
-                  color: wordmarkPalette.two,
-                  transform: [{ translateY: wordmarkFontSize * 0.22 }],
-                },
-              ]}
-            >
-              2
-            </Text>
-            <Text
-              style={[
-                styles.wordmarkBase,
-                {
-                  fontSize: wordmarkFontSize,
-                  lineHeight: wordmarkLineHeight,
-                  color: wordmarkPalette.time,
-                  marginLeft: -1,
-                },
-              ]}
-            >
-              Time
-            </Text>
+              <Text
+                style={[
+                  styles.wordmarkBase,
+                  {
+                    fontSize: wordmarkFontSize,
+                    lineHeight: wordmarkLineHeight,
+                    color: wordmarkPalette.money,
+                  },
+                ]}
+              >
+                Money
+              </Text>
+              <Text
+                style={[
+                  styles.wordmarkTwo,
+                  {
+                    fontSize: wordmarkTwoFontSize,
+                    lineHeight: wordmarkTwoFontSize,
+                    color: wordmarkPalette.two,
+                    transform: [{ translateY: wordmarkFontSize * 0.22 }],
+                  },
+                ]}
+              >
+                2
+              </Text>
+              <Text
+                style={[
+                  styles.wordmarkBase,
+                  {
+                    fontSize: wordmarkFontSize,
+                    lineHeight: wordmarkLineHeight,
+                    color: wordmarkPalette.time,
+                    marginLeft: -1,
+                  },
+                ]}
+              >
+                Time
+              </Text>
+            </View>
           </View>
         </OnboardingStepHeader>
 
@@ -312,6 +316,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  wordmarkWithMascot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   wordmarkRow: {
     flexDirection: 'row',
