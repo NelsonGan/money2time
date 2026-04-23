@@ -14,7 +14,6 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Animated as RNAnimated,
   FlatList,
   InteractionManager,
@@ -36,6 +35,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { G, Text as SvgText } from 'react-native-svg';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -6947,7 +6947,7 @@ export function InsightsScreen({
       <View className="flex-1 overflow-hidden bg-background">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color={themeColors.primary} />
+            <LoadingDots size="large" />
             <Text variant="friendly" tone="muted" className="mt-3">
               {I18n.t('insights.loading')}
             </Text>

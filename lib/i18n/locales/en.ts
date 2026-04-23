@@ -192,7 +192,6 @@ const en = {
       fresh_option_title: 'Start Fresh',
       fresh_option_subtitle: 'Create default accounts and categories.',
       importing_title: 'Importing your backup',
-      importing_subtitle: 'Importing accounts, categories, and transactions...',
       import_complete_title: "You're ready",
       import_complete_subtitle: 'Your data is in.',
       accounts: 'Accounts',
@@ -799,7 +798,7 @@ const en = {
     import_description:
       'Restore from a previously exported Money2Time JSON backup. This will replace all your current data.',
     import_action: 'Import Money2Time JSON',
-    importing: 'Importing Money2Time backup...',
+    importing: 'Importing Money2Time backup',
     import_confirm_title: 'Replace All Data?',
     import_confirm_message:
       'This will overwrite all your current accounts, categories, transactions, and settings with the data from the backup file. This cannot be undone.',
@@ -813,7 +812,7 @@ const en = {
     import_money_manager_description:
       'Import accounts, categories, transactions, and recurring rules from a Money Manager .mmbak backup. Your Money2Time settings and hourly value history will be kept.',
     import_money_manager_action: 'Import Money Manager .mmbak',
-    import_money_manager_importing: 'Importing Money Manager backup...',
+    import_money_manager_importing: 'Importing Money Manager backup',
     import_money_manager_confirm_title: 'Import Money Manager Backup?',
     import_money_manager_confirm_message:
       'This will replace your current accounts, categories, transactions, and recurring rules with the data from the selected .mmbak backup. Your Money2Time settings and hourly value history will be kept.',

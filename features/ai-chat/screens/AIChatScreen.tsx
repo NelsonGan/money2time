@@ -17,7 +17,6 @@ import {
   useSyncExternalStore,
 } from 'react';
 import {
-  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -39,6 +38,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot } from '~/components/feedback/Mascot';
 import {
   Button,
@@ -1116,7 +1116,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   >
                     <View className="flex-row items-center gap-2.5">
                       {isDownloadingActiveModel || isActivatingAi || modelStatus === 'loading' ? (
-                        <ActivityIndicator size="small" color={GATE_BUTTON_CONTENT_COLOR} />
+                        <LoadingDots size="small" color={GATE_BUTTON_CONTENT_COLOR} />
                       ) : (
                         <Download size={16} color={GATE_BUTTON_CONTENT_COLOR} />
                       )}

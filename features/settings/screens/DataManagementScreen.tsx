@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { Download, Trash2, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
+import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -23,13 +24,19 @@ interface DataManagementScreenProps {
   onBack: () => void;
 }
 
+type ImportSource = 'money2time' | 'money_manager';
+
 export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
   const { importMoneyManagerBackup, refreshAll, resetAllData } = useApp();
   const themeColors = useThemeColors();
   const [isExporting, setIsExporting] = useState(false);
-  const [importingSource, setImportingSource] = useState<'money2time' | 'money_manager' | null>(
-    null,
-  );
+  // `activeFlow` covers the whole picker + import lifecycle and drives button
+  // disable state, so rapid taps can't fire two DocumentPicker calls in
+  // parallel (iOS rejects the second with "different document pick in
+  // progress"). `importingSource` drives only the overlay, and is set after
+  // the picker dismisses so it never contends with the picker on iOS.
+  const [activeFlow, setActiveFlow] = useState<ImportSource | null>(null);
+  const [importingSource, setImportingSource] = useState<ImportSource | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -61,9 +68,12 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
   };
 
   const performImport = async () => {
-    setImportingSource('money2time');
+    if (activeFlow) return;
+    setActiveFlow('money2time');
     try {
-      const result = await pickAndImportDatabase();
+      const result = await pickAndImportDatabase({
+        onFilePicked: () => setImportingSource('money2time'),
+      });
       if (result.canceled) return;
 
       if (result.success) {
@@ -85,6 +95,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
       );
     } finally {
       setImportingSource(null);
+      setActiveFlow(null);
     }
   };
 
@@ -104,7 +115,8 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
   };
 
   const performMoneyManagerImport = async () => {
-    setImportingSource('money_manager');
+    if (activeFlow) return;
+    setActiveFlow('money_manager');
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: '*/*',
@@ -126,6 +138,9 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
         return;
       }
 
+      // Only show the blocking overlay after the picker has dismissed with a
+      // valid file — on iOS the picker can't present on top of another modal.
+      setImportingSource('money_manager');
       const summary = await importMoneyManagerBackup(picked.uri, picked.name);
       Alert.alert(
         I18n.t('data_management.import_money_manager_success_title'),
@@ -142,6 +157,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
       );
     } finally {
       setImportingSource(null);
+      setActiveFlow(null);
     }
   };
 
@@ -190,7 +206,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                 variant="outline"
                 className="mt-3"
                 onPress={() => void handleExport()}
-                disabled={isExporting || importingSource !== null}
+                disabled={isExporting || activeFlow !== null}
               >
                 <Text>
                   {isExporting
@@ -222,7 +238,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                 variant="outline"
                 className="mt-3"
                 onPress={handleImport}
-                disabled={importingSource !== null}
+                disabled={activeFlow !== null}
               >
                 <Text>
                   {importingSource === 'money2time'
@@ -232,44 +248,40 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
               </Button>
             </View>
 
-            {Platform.OS === 'ios' ? (
-              <>
-                <View style={styles.divider} />
+            <View style={styles.divider} />
 
-                <View style={styles.section}>
-                  <View style={styles.sectionHeader}>
-                    <View
-                      style={[
-                        styles.iconContainer,
-                        { backgroundColor: `${themeColors.primary}14` },
-                      ]}
-                    >
-                      <Upload size={18} color={themeColors.primary} />
-                    </View>
-                    <View style={styles.sectionTextWrap}>
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('data_management.import_money_manager_title')}
-                      </Text>
-                      <Text variant="caption" tone="muted" className="mt-0.5">
-                        {I18n.t('data_management.import_money_manager_description')}
-                      </Text>
-                    </View>
-                  </View>
-                  <Button
-                    variant="outline"
-                    className="mt-3"
-                    onPress={handleMoneyManagerImport}
-                    disabled={importingSource !== null}
-                  >
-                    <Text>
-                      {importingSource === 'money_manager'
-                        ? I18n.t('data_management.import_money_manager_importing')
-                        : I18n.t('data_management.import_money_manager_action')}
-                    </Text>
-                  </Button>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${themeColors.primary}14` },
+                  ]}
+                >
+                  <Upload size={18} color={themeColors.primary} />
                 </View>
-              </>
-            ) : null}
+                <View style={styles.sectionTextWrap}>
+                  <Text variant="caption" className="text-foreground">
+                    {I18n.t('data_management.import_money_manager_title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('data_management.import_money_manager_description')}
+                  </Text>
+                </View>
+              </View>
+              <Button
+                variant="outline"
+                className="mt-3"
+                onPress={handleMoneyManagerImport}
+                disabled={activeFlow !== null}
+              >
+                <Text>
+                  {importingSource === 'money_manager'
+                    ? I18n.t('data_management.import_money_manager_importing')
+                    : I18n.t('data_management.import_money_manager_action')}
+                </Text>
+              </Button>
+            </View>
 
             <View style={styles.divider} />
 
@@ -291,7 +303,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
                 variant="outline"
                 className="mt-3 border-coral/30 bg-coral/8"
                 onPress={handleResetAllData}
-                disabled={isExporting || importingSource !== null}
+                disabled={isExporting || activeFlow !== null}
               >
                 <Text className="text-destructive">{I18n.t('settings.reset_all_data')}</Text>
               </Button>
@@ -299,6 +311,15 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
           </CardContent>
         </Card>
       </ScrollView>
+
+      <ImportingOverlay
+        visible={importingSource !== null}
+        title={
+          importingSource === 'money_manager'
+            ? I18n.t('data_management.import_money_manager_importing')
+            : I18n.t('data_management.importing')
+        }
+      />
     </SettingsPageLayout>
   );
 }

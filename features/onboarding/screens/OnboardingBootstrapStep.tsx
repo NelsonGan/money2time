@@ -4,8 +4,9 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { Mascot } from '~/components/feedback/Mascot';
-import { Card, CardContent, Text, ThemeModal } from '~/components/ui';
+import { Card, CardContent, Text } from '~/components/ui';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingChoiceCard } from '~/features/onboarding/components/OnboardingChoiceCard';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
@@ -165,19 +166,10 @@ export function OnboardingBootstrapStep({
             primaryDisabled={!choice}
           />
 
-          <ThemeModal visible={isImporting} transparent animationType="fade">
-            <View className="flex-1 bg-foreground/35 items-center justify-center px-6">
-              <View className="w-full max-w-[360px] rounded-[24px] border border-border/35 bg-card px-6 py-7 items-center">
-                <Mascot size={120} name="working" animate />
-                <Text variant="subheading" className="mt-4 text-center text-foreground">
-                  {I18n.t('onboarding.bootstrap.importing_title')}
-                </Text>
-                <Text variant="friendly" tone="secondary" className="mt-1 text-center">
-                  {I18n.t('onboarding.bootstrap.importing_subtitle')}
-                </Text>
-              </View>
-            </View>
-          </ThemeModal>
+          <ImportingOverlay
+            visible={isImporting}
+            title={I18n.t('onboarding.bootstrap.importing_title')}
+          />
         </View>
       </GestureDetector>
     );
