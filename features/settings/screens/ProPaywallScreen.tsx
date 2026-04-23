@@ -1,7 +1,6 @@
 import { AlertCircle, Crown, ExternalLink, FileText, Mail, Shield, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Linking,
   type NativeScrollEvent,
@@ -23,6 +22,7 @@ import { SvgXml } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { APP_ICON_SVG } from '~/assets/money2time-icon';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Text } from '~/components/ui';
@@ -487,7 +487,7 @@ function PlanCard({
             haptic="none"
           >
             {isPurchasing ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <LoadingDots size="small" color="#fff" />
             ) : (
               <View style={s.ctaContent}>
                 <Crown size={16} color="#fff" fill="#fff" />

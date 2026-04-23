@@ -16,7 +16,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Appearance,
   InteractionManager,
   Platform,
@@ -29,6 +28,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
@@ -65,7 +65,6 @@ import type {
   TutorialTargetRect,
 } from '~/features/tutorial/types';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -1061,7 +1060,6 @@ function AppContent() {
   const { isLoading, settings } = useApp();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
-  const themeColors = useThemeColors();
   const themeStyle = useThemeVars();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
@@ -1142,7 +1140,9 @@ function AppContent() {
             {I18n.t('app.loading_world')}
           </Text>
         </View>
-        <ActivityIndicator size="large" color={themeColors.primary} className="mt-4" />
+        <View className="mt-4">
+          <LoadingDots size="large" />
+        </View>
       </View>
     );
   }

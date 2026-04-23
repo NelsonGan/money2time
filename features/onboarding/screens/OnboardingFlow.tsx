@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -69,8 +69,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
   const visualStep = step;
-  // Android power-mode users don't see the Money Manager bootstrap step (step 6).
-  const totalVisualSteps = isSimpleUser ? 5 : Platform.OS === 'ios' ? 6 : 5;
+  const totalVisualSteps = isSimpleUser ? 5 : 6;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -301,12 +300,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               onSelectPower={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
                 setIsSimpleUser(false);
-                // Money Manager import only works on iOS right now, so Android
-                // power-mode users skip the bootstrap step and start fresh.
-                if (Platform.OS !== 'ios') {
-                  handleStartFresh();
-                  return;
-                }
                 setStep(6);
               }}
             />
