@@ -188,7 +188,6 @@ const zh = {
       fresh_option_title: '全新开始',
       fresh_option_subtitle: '创建默认账户和分类。',
       importing_title: '正在导入备份',
-      importing_subtitle: '正在导入账户、分类和交易...',
       import_complete_title: '已经就绪',
       import_complete_subtitle: '你的数据已导入。',
       accounts: '账户',
@@ -711,7 +710,7 @@ const zh = {
     import_title: '导入 Money2Time 备份',
     import_description: '从之前导出的 Money2Time JSON 备份中恢复。这将替换你当前的所有数据。',
     import_action: '导入 Money2Time JSON',
-    importing: '正在导入 Money2Time 备份...',
+    importing: '正在导入 Money2Time 备份',
     import_confirm_title: '替换所有数据？',
     import_confirm_message:
       '这将用备份文件中的数据覆盖你当前的所有账户、分类、交易和设置。此操作不可撤销。',
@@ -724,7 +723,7 @@ const zh = {
     import_money_manager_description:
       '从 Money Manager 的 .mmbak 备份中导入账户、分类、交易和循环规则。你的 Money2Time 设置和时薪历史会被保留。',
     import_money_manager_action: '导入 Money Manager .mmbak',
-    import_money_manager_importing: '正在导入 Money Manager 备份...',
+    import_money_manager_importing: '正在导入 Money Manager 备份',
     import_money_manager_confirm_title: '导入 Money Manager 备份？',
     import_money_manager_confirm_message:
       '这将用所选 .mmbak 备份中的数据替换你当前的账户、分类、交易和循环规则。你的 Money2Time 设置和时薪历史会被保留。',

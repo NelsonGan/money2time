@@ -1,8 +1,9 @@
 import { Clock, DollarSign } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Text, ThemeModal } from '~/components/ui';
 import { springPresets } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
@@ -162,7 +163,7 @@ export function DisplayModeToggle() {
       <ThemeModal visible={isSwitchingMode} transparent animationType="fade">
         <View className="flex-1 items-center justify-center bg-background/80 px-8">
           <View className="w-full max-w-[280px] items-center rounded-[28px] border border-border/30 bg-card px-6 py-7 shadow-float">
-            <ActivityIndicator size="large" color={themeColors.primary} />
+            <LoadingDots size="large" />
             <Text variant="bodyStrong" className="mt-4 text-center">
               {targetMode === 'time'
                 ? I18n.t('common.switching_to_time')

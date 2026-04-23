@@ -131,7 +131,9 @@ function insertRows(
   }
 }
 
-export async function pickAndImportDatabase(): Promise<ImportResult> {
+export async function pickAndImportDatabase(options?: {
+  onFilePicked?: () => void;
+}): Promise<ImportResult> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/json', 'text/plain', 'public.json'],
     copyToCacheDirectory: true,
@@ -143,6 +145,17 @@ export async function pickAndImportDatabase(): Promise<ImportResult> {
 
   const asset = result.assets[0];
   if (!asset) return { canceled: false, success: false, error: 'No file selected' };
+
+  // Fires once the native picker has dismissed and we have a valid file.
+  // Used by callers to reveal the blocking "importing..." overlay only after
+  // the picker is out of the way — on iOS, presenting a RN Modal while the
+  // picker is trying to present prevents the picker from opening at all.
+  options?.onFilePicked?.();
+  // Yield a frame so React actually paints the overlay before we block the
+  // JS thread on the synchronous SQLite writes below. Without this, the
+  // state update queued by `onFilePicked` gets batched with the `finally`
+  // cleanup and the overlay never becomes visible.
+  await new Promise<void>((resolve) => setTimeout(resolve, 50));
 
   let json: string;
   try {
