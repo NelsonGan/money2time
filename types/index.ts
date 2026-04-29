@@ -156,6 +156,30 @@ export interface TransactionWithRelations extends Transaction {
   categoryParentId?: string | null;
   categoryParentName?: string | null;
   categoryIcon?: string | null;
+  splits?: TransactionSplit[];
+  splitsSummary?: TransactionSplitsSummary;
+}
+
+export interface TransactionSplit {
+  id: string;
+  transactionId: string;
+  personName: string | null;
+  amount: number;
+  isSelf: boolean;
+  paybackAccountId: string | null;
+  paidAt: string | null;
+  paidTransactionId: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface TransactionSplitsSummary {
+  count: number;
+  paidCount: number;
+  unpaidAmount: number;
+  totalOwed: number;
 }
 
 export interface RecurringTransactionRule {

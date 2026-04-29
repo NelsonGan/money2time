@@ -6,6 +6,7 @@ import type {
   RecurringRuleRow,
   SettingsRow,
   TransactionRow,
+  TransactionSplitRow,
 } from '~/lib/db/schema';
 import type {
   Account,
@@ -17,6 +18,7 @@ import type {
   ThemeMode,
   Transaction,
   TransactionSentiment,
+  TransactionSplit,
   UserMode,
   UserSettings,
 } from '~/types';
@@ -181,6 +183,23 @@ export function toTransaction(row: TransactionRow): Transaction {
     recurrenceEndDate: row.recurrenceEndDate,
     recurrenceParentId: row.recurrenceParentId,
     sentiment: asTransactionSentiment(row.sentiment),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
+  return {
+    id: row.id,
+    transactionId: row.transactionId,
+    personName: row.personName,
+    amount: row.amount,
+    isSelf: !!row.isSelf,
+    paybackAccountId: row.paybackAccountId,
+    paidAt: row.paidAt,
+    paidTransactionId: row.paidTransactionId,
+    sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

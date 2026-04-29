@@ -104,6 +104,15 @@ function TransactionItemView({
     ? (transaction.accountName ?? I18n.t('common.no_account'))
     : null;
 
+  const splitsSummary = transaction.splitsSummary;
+  // Tint the row + show a count badge while friends still owe. Once everyone's
+  // settled, the parent expense already reflects only the user's share so the
+  // row reverts to the standard look.
+  const unpaidSplitsCount = splitsSummary
+    ? Math.max(0, splitsSummary.count - splitsSummary.paidCount)
+    : 0;
+  const hasUnpaidSplits = unpaidSplitsCount > 0;
+
   const title = isTransfer
     ? transaction.note || transferLabel
     : isBalanceAdjustment
@@ -180,145 +189,154 @@ function TransactionItemView({
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
   return (
-    <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
-      onPressIn={onPressIn}
-      onPressOut={onPressOut}
-      className={cn(
-        'flex-row items-center bg-card border border-border/30 shadow-soft overflow-hidden',
-        selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
-        compact
-          ? 'gap-2 px-2.5 py-2 rounded-[18px] mb-1'
-          : 'gap-3 pl-0 pr-3.5 py-3 rounded-[22px] mb-1.5',
-      )}
-    >
-      {/* Color-coded left accent strip */}
-      {!compact ? (
+    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
+      {hasUnpaidSplits ? (
         <View
-          className="w-[3px] self-stretch rounded-full ml-1"
-          style={{ backgroundColor: accentColor, opacity: 0.5 }}
-        />
-      ) : null}
-
-      {selectionMode ? (
-        <View
-          className={cn(
-            'mr-1 h-5 w-5 rounded-full border items-center justify-center',
-            selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
-          )}
+          pointerEvents="none"
+          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
         >
-          {selected ? (
-            <Text variant="label" className="text-primary">
-              ✓
-            </Text>
-          ) : null}
+          <Text className="text-white text-[10px] font-bold leading-[12px]">
+            {unpaidSplitsCount}
+          </Text>
         </View>
       ) : null}
-
-      <View
+      <Pressable
+        onPress={onPress}
+        onLongPress={onLongPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
         className={cn(
-          'items-center justify-center',
-          compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
-          !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
-          isTransfer ? 'rounded-full bg-secondary/50' : null,
-          isBalanceAdjustment ? 'rounded-full bg-primary/10' : null,
+          'flex-row items-center border shadow-soft overflow-hidden',
+          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
+          selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
+          compact ? 'gap-2 px-2.5 py-2 rounded-[18px]' : 'gap-3 pl-0 pr-3.5 py-3 rounded-[22px]',
         )}
       >
-        <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>{leadingEmoji}</Text>
-      </View>
+        {/* Color-coded left accent strip */}
+        {!compact ? (
+          <View
+            className="w-[3px] self-stretch rounded-full ml-1"
+            style={{ backgroundColor: accentColor, opacity: 0.5 }}
+          />
+        ) : null}
 
-      <View className="flex-1 min-w-0 pr-1">
-        <View className="flex-row items-center gap-1.5">
+        {selectionMode ? (
+          <View
+            className={cn(
+              'mr-1 h-5 w-5 rounded-full border items-center justify-center',
+              selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
+            )}
+          >
+            {selected ? (
+              <Text variant="label" className="text-primary">
+                ✓
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        <View
+          className={cn(
+            'items-center justify-center',
+            compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
+            !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
+            isTransfer ? 'rounded-full bg-secondary/50' : null,
+            isBalanceAdjustment ? 'rounded-full bg-primary/10' : null,
+          )}
+        >
+          <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>{leadingEmoji}</Text>
+        </View>
+
+        <View className="flex-1 min-w-0 pr-1">
           <Text
             variant="bodyStrong"
             className={cn(
-              'min-w-0 flex-1 text-foreground',
+              'min-w-0 text-foreground',
               compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
             )}
             numberOfLines={1}
           >
             {title}
           </Text>
-        </View>
-        {subtitlePrimary || accountSubtitleLabel ? (
-          accountSubtitleLabel ? (
-            <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
-              <View className="min-w-0 w-1/2 pr-2">
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {subtitlePrimary ?? ''}
-                </Text>
-              </View>
-              <View className="min-w-0 w-1/2 justify-center pl-2">
-                <View className="max-w-full self-start rounded-full border border-border/30 bg-secondary/55 px-2 py-0.5">
+          {subtitlePrimary || accountSubtitleLabel ? (
+            accountSubtitleLabel ? (
+              <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
+                <View className="min-w-0 w-1/2 pr-2">
                   <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {accountSubtitleLabel}
+                    {subtitlePrimary ?? ''}
                   </Text>
                 </View>
+                <View className="min-w-0 w-1/2 justify-center pl-2">
+                  <View className="max-w-full self-start rounded-full border border-border/30 bg-secondary/55 px-2 py-0.5">
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
+                      {accountSubtitleLabel}
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          ) : (
-            <Text
-              variant="caption"
-              tone="muted"
-              className={compact ? '' : 'mt-0.5'}
-              numberOfLines={1}
-            >
-              {subtitlePrimary ?? ''}
-            </Text>
-          )
-        ) : null}
-      </View>
-
-      <View className={cn('shrink-0 items-end', valueColumnClassName)}>
-        <View className="flex-row items-center justify-end gap-1">
-          {showsPrimaryTime ? (
-            <TimeValueInline
-              value={primaryValue}
-              variant="mono"
-              containerClassName="justify-end"
-              textClassName={cn(
-                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-                amountToneClass,
-              )}
-              iconSize={compact ? 10 : 11}
-              iconColor={amountToneColor}
-            />
-          ) : (
-            <Text
-              variant="mono"
-              className={cn(
-                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-                amountToneClass,
-              )}
-            >
-              {primaryValue}
-            </Text>
-          )}
+            ) : (
+              <Text
+                variant="caption"
+                tone="muted"
+                className={compact ? '' : 'mt-0.5'}
+                numberOfLines={1}
+              >
+                {subtitlePrimary ?? ''}
+              </Text>
+            )
+          ) : null}
         </View>
-        {secondaryValue ? (
-          showsSecondaryTime ? (
-            <TimeValueInline
-              value={secondaryValue}
-              variant="label"
-              tone="muted"
-              containerClassName={cn('justify-end', compact ? '' : 'mt-0.5')}
-              iconSize={compact ? 9 : 10}
-              numberOfLines={1}
-            />
-          ) : (
-            <Text
-              variant="label"
-              tone="muted"
-              className={compact ? '' : 'mt-0.5'}
-              numberOfLines={1}
-            >
-              {secondaryValue}
-            </Text>
-          )
-        ) : null}
-      </View>
-    </Pressable>
+
+        <View className={cn('shrink-0 items-end', valueColumnClassName)}>
+          <View className="flex-row items-center justify-end gap-1">
+            {showsPrimaryTime ? (
+              <TimeValueInline
+                value={primaryValue}
+                variant="mono"
+                containerClassName="justify-end"
+                textClassName={cn(
+                  compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                  amountToneClass,
+                )}
+                iconSize={compact ? 10 : 11}
+                iconColor={amountToneColor}
+              />
+            ) : (
+              <Text
+                variant="mono"
+                className={cn(
+                  compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                  amountToneClass,
+                )}
+              >
+                {primaryValue}
+              </Text>
+            )}
+          </View>
+          {secondaryValue ? (
+            showsSecondaryTime ? (
+              <TimeValueInline
+                value={secondaryValue}
+                variant="label"
+                tone="muted"
+                containerClassName={cn('justify-end', compact ? '' : 'mt-0.5')}
+                iconSize={compact ? 9 : 10}
+                numberOfLines={1}
+              />
+            ) : (
+              <Text
+                variant="label"
+                tone="muted"
+                className={compact ? '' : 'mt-0.5'}
+                numberOfLines={1}
+              >
+                {secondaryValue}
+              </Text>
+            )
+          ) : null}
+        </View>
+      </Pressable>
+    </View>
   );
 }
 

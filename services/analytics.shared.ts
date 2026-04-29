@@ -31,6 +31,10 @@ export const AnalyticsEvents = {
   TRANSACTION_DELETED: 'Transaction Deleted',
   TRANSACTIONS_BULK_DELETED: 'Transactions Bulk Deleted',
 
+  // Split bills (Pay First)
+  SPLIT_MARKED_PAID: 'Split Marked Paid',
+  SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
+
   // Accounts
   ACCOUNT_CREATED: 'Account Created',
   ACCOUNT_DELETED: 'Account Deleted',
