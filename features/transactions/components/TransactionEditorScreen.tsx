@@ -40,6 +40,9 @@ import {
   CategoryPanel,
   DatePanel,
   NumpadPanel,
+  SplitBillModal,
+  type SplitDraft,
+  splitsHelpers,
   SummaryRow,
 } from '~/features/transactions/components/editor';
 import {
@@ -59,6 +62,7 @@ import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { newId } from '~/utils/id';
 import {
   amountToHoursByRate,
   dayKeyFromIsoLocal,
@@ -161,9 +165,11 @@ interface TransactionEditorScreenProps {
   mode: 'create' | 'edit';
   onClose: () => void;
   onSubmit: (input: CreateTransactionInput) => void;
+  onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
+  initialSplits?: SplitDraft[];
   titleOverride?: string;
   subtitleOverride?: string;
   submitLabelOverride?: string;
@@ -171,6 +177,7 @@ interface TransactionEditorScreenProps {
   restrictTypeOptions?: TransactionType[];
   hideAccountSelector?: boolean;
   hideSubcategories?: boolean;
+  hideSplitMode?: boolean;
   initialAccountId?: string;
   recurringOptions?: {
     initialName?: string;
@@ -353,9 +360,11 @@ export function TransactionEditorScreen({
   mode,
   onClose,
   onSubmit,
+  onSubmitWithSplits,
   onSubmitReady,
   onDelete,
   initialValues,
+  initialSplits,
   titleOverride,
   subtitleOverride,
   submitLabelOverride,
@@ -363,6 +372,7 @@ export function TransactionEditorScreen({
   restrictTypeOptions,
   hideAccountSelector = false,
   hideSubcategories = false,
+  hideSplitMode = false,
   initialAccountId,
   recurringOptions,
 }: TransactionEditorScreenProps) {
@@ -394,6 +404,11 @@ export function TransactionEditorScreen({
     initialValues?.sentiment ?? 'neutral',
   );
   const [amountExpression, setAmountExpression] = useState('');
+
+  const hasInitialSplits = !!initialSplits && initialSplits.length > 0;
+  const [splitMode, setSplitMode] = useState(hasInitialSplits);
+  const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
+  const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
   const [recurrencePattern, setRecurrencePattern] = useState<
@@ -740,11 +755,209 @@ export function TransactionEditorScreen({
     Keyboard.dismiss();
   }, []);
 
+  // Sync amount field when the parent transaction's amount changes externally
+  // (e.g. after a Mark Paid commit reduces it). Only the amount string is mirrored.
+  useEffect(() => {
+    if (initialValues?.amount === undefined) return;
+    setAmount(initialValues.amount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues?.amount]);
+
   useEffect(() => {
     if (activeField !== 'amount') {
       setAmountExpression('');
     }
   }, [activeField]);
+
+  // When parent amount changes and split-evenly is on, redistribute split amounts
+  // across UNPAID rows (paid ones are settled and keep their stored amount).
+  useEffect(() => {
+    if (!splitMode || !splitEvenly) return;
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount)) return;
+    if (splits.length === 0) return;
+    const unpaidIndices: number[] = [];
+    splits.forEach((s, i) => {
+      if (!s.paid) unpaidIndices.push(i);
+    });
+    if (unpaidIndices.length === 0) return;
+    const portions = splitsHelpers.distributeEvenly(numericAmount, unpaidIndices.length);
+    const next = splits.map((row, idx) => {
+      const slot = unpaidIndices.indexOf(idx);
+      if (slot < 0) return row;
+      return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
+    });
+    const isEqual = next.every((row, i) => row.amount === splits[i]?.amount);
+    if (!isEqual) setSplits(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount, splitMode, splitEvenly]);
+
+  // When type leaves expense, force-disable splitMode so a saved transfer/income doesn't carry splits.
+  useEffect(() => {
+    if (type !== 'expense' && splitMode) {
+      setSplitMode(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
+
+  // Sync the editor's splits state with externally-updated initialSplits
+  // (happens when user taps Mark Paid / Undo and AppContext refreshes the
+  // parent transaction). Preserve any in-flight name/amount edits per row.
+  useEffect(() => {
+    if (!initialSplits) return;
+    setSplits((current) => {
+      if (current.length === 0) return initialSplits;
+      const currentById = new Map(current.filter((s) => s.id).map((s) => [s.id!, s]));
+      return initialSplits.map((incoming) => {
+        if (!incoming.id) return incoming;
+        const existing = currentById.get(incoming.id);
+        if (!existing) return incoming;
+        // Keep user's edits to mutable fields; refresh paid state from incoming.
+        return {
+          ...existing,
+          paid: incoming.paid,
+          paybackAccountId: incoming.paid ? incoming.paybackAccountId : existing.paybackAccountId,
+        };
+      });
+    });
+  }, [initialSplits]);
+
+  const [splitBillModalVisible, setSplitBillModalVisible] = useState(false);
+
+  const ensureSplitsInitialized = useCallback(() => {
+    if (splits.length > 0) return;
+    const numericAmount = Number(amount);
+    const total = Number.isFinite(numericAmount) ? numericAmount : 0;
+    const portions = splitsHelpers.distributeEvenly(total, 2);
+    // Pre-assign ids so Mark Paid is available even in create mode (the modal
+    // gates the action on `row.id` being present).
+    setSplits([
+      {
+        id: newId(),
+        personName: I18n.t('transactions.editor.split.me_label'),
+        amount: (portions[0] ?? 0).toFixed(2),
+        isSelf: true,
+        paybackAccountId: null,
+      },
+      {
+        id: newId(),
+        personName: '',
+        amount: (portions[1] ?? 0).toFixed(2),
+        isSelf: false,
+        paybackAccountId: accountId,
+      },
+    ]);
+    setSplitEvenly(true);
+  }, [accountId, amount, splits.length]);
+
+  const numericAmountForGate = Number(amount);
+  const canOpenSplitBill =
+    !hideSplitMode &&
+    type === 'expense' &&
+    !recurringOptions &&
+    Number.isFinite(numericAmountForGate) &&
+    numericAmountForGate > 0 &&
+    !!accountId &&
+    !!categoryId;
+
+  // Snapshot taken when the modal opens so the user can discard everything
+  // (edits + Mark Paid + new rows + split-evenly toggle) by tapping back.
+  // Only "Done" commits the staged changes back into the editor's state.
+  const splitBillSnapshotRef = useRef<{
+    splits: SplitDraft[];
+    amount: string;
+    splitEvenly: boolean;
+    splitMode: boolean;
+  } | null>(null);
+
+  const handleOpenSplitBill = useCallback(() => {
+    if (!canOpenSplitBill) return;
+    void triggerHaptic('selection');
+    Keyboard.dismiss();
+    splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
+    if (!splitMode) setSplitMode(true);
+    ensureSplitsInitialized();
+    setSplitBillModalVisible(true);
+  }, [amount, canOpenSplitBill, ensureSplitsInitialized, splitEvenly, splitMode, splits]);
+
+  const handleDoneSplitBill = useCallback(() => {
+    setSplitBillModalVisible(false);
+    splitBillSnapshotRef.current = null;
+    // If user committed an empty configuration, fold split mode back off.
+    if (splits.filter((s) => !s.isSelf).length === 0) {
+      setSplitMode(false);
+      setSplits([]);
+    }
+  }, [splits]);
+
+  const handleCancelSplitBill = useCallback(() => {
+    setSplitBillModalVisible(false);
+    const snapshot = splitBillSnapshotRef.current;
+    splitBillSnapshotRef.current = null;
+    if (!snapshot) return;
+    setSplits(snapshot.splits);
+    setAmount(snapshot.amount);
+    setSplitEvenly(snapshot.splitEvenly);
+    setSplitMode(snapshot.splitMode);
+  }, []);
+
+  // Show a red notification badge on the Split Bills button with the count of
+  // friends who still owe. Same affordance as the row tint in the activity list.
+  const splitBillsUnpaidCount = splitMode ? splits.filter((s) => !s.isSelf && !s.paid).length : 0;
+
+  // Mark Paid / Undo only stage the change locally. They adjust the editor's
+  // amount field and flip the row's paid badge. Nothing is persisted until the
+  // user taps Save in the editor — the Save flow diffs splits against the
+  // persisted state and applies markSplitPaid / markSplitUnpaid then.
+  // `newlyPaidIds` tracks splits the user marked paid during this editor
+  // session (across modal opens/closes); it resets when the editor unmounts
+  // after Save. Drives whether the modal shows an Undo affordance.
+  const [newlyPaidIds, setNewlyPaidIds] = useState<Set<string>>(new Set());
+
+  const adjustAmountBy = useCallback((delta: number) => {
+    if (!Number.isFinite(delta) || delta === 0) return;
+    setAmount((current) => {
+      const num = Number(current);
+      if (!Number.isFinite(num)) return current;
+      return (Math.round((num + delta) * 100) / 100).toFixed(2);
+    });
+  }, []);
+
+  const handleSplitMarkPaidLocal = useCallback(
+    (splitId: string) => {
+      const target = splits.find((s) => s.id === splitId);
+      if (!target || target.isSelf || target.paid) return;
+      const splitAmount = Number(target.amount);
+      setSplits((current) =>
+        current.map((s) =>
+          s.id === splitId
+            ? { ...s, paid: { paidAt: new Date().toISOString(), paidTransactionId: null } }
+            : s,
+        ),
+      );
+      setNewlyPaidIds((s) => {
+        if (s.has(splitId)) return s;
+        const next = new Set(s);
+        next.add(splitId);
+        return next;
+      });
+      adjustAmountBy(-splitAmount);
+    },
+    [adjustAmountBy, splits],
+  );
+
+  const handleSplitMarkUnpaidLocal = useCallback(
+    (splitId: string) => {
+      const target = splits.find((s) => s.id === splitId);
+      if (!target || !target.paid) return;
+      const splitAmount = Number(target.amount);
+      setSplits((current) =>
+        current.map((s) => (s.id === splitId ? { ...s, paid: undefined } : s)),
+      );
+      adjustAmountBy(splitAmount);
+    },
+    [adjustAmountBy, splits],
+  );
 
   const amountDisplay = useMemo(() => {
     if (activeField === 'amount' && amountExpression) {
@@ -900,11 +1113,50 @@ export function TransactionEditorScreen({
         onSubmitReady?.(preparedSubmitPayload);
       }
 
+      const useSplitsPath =
+        splitMode &&
+        type === 'expense' &&
+        !recurringOptions &&
+        splits.filter((s) => !s.isSelf).length > 0;
+
+      if (useSplitsPath && submitPayload) {
+        // Sum only UNPAID splits (Me + outstanding friends). Paid splits are
+        // settled — their amounts have already been deducted from the parent
+        // expense via Mark Paid, so they should not be counted here.
+        const sumOfUnpaidSplits = splits.reduce(
+          (acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)),
+          0,
+        );
+        if (Math.abs(sumOfUnpaidSplits - submitPayload.amount) > 0.005) {
+          setError(
+            sumOfUnpaidSplits > submitPayload.amount
+              ? I18n.t('transactions.editor.split.sum_over', {
+                  diff: `${settings.currencySymbol}${(sumOfUnpaidSplits - submitPayload.amount).toFixed(2)}`,
+                })
+              : I18n.t('transactions.editor.split.sum_mismatch', {
+                  diff: `${settings.currencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
+                }),
+          );
+          setFieldErrors({ amount: I18n.t('transactions.editor.error.required') });
+          return;
+        }
+      }
+
       // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
       onClose();
 
-      const deferredSubmit = submitPayload ? () => onSubmit(submitPayload) : recurringSubmit;
+      let deferredSubmit: (() => void) | null = null;
+      if (useSplitsPath && submitPayload && onSubmitWithSplits) {
+        const capturedPayload = submitPayload;
+        const capturedSplits = splits;
+        deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits);
+      } else if (submitPayload) {
+        const capturedPayload = submitPayload;
+        deferredSubmit = () => onSubmit(capturedPayload);
+      } else {
+        deferredSubmit = recurringSubmit;
+      }
 
       if (deferredSubmit) {
         InteractionManager.runAfterInteractions(deferredSubmit);
@@ -1388,6 +1640,38 @@ export function TransactionEditorScreen({
                   </Text>
                 ) : null}
               </View>
+              {!hideSplitMode && type === 'expense' && !recurringOptions ? (
+                <View className="relative">
+                  {splitBillsUnpaidCount > 0 ? (
+                    <View
+                      pointerEvents="none"
+                      className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+                    >
+                      <Text className="text-white text-[10px] font-bold leading-[12px]">
+                        {splitBillsUnpaidCount}
+                      </Text>
+                    </View>
+                  ) : null}
+                  <Pressable
+                    onPress={handleOpenSplitBill}
+                    disabled={!canOpenSplitBill}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+                    className={cn(
+                      'flex-row items-center gap-1.5 px-2.5 h-8 rounded-full',
+                      splitMode && splits.some((s) => !s.isSelf)
+                        ? 'bg-primary/15'
+                        : 'bg-secondary/60',
+                    )}
+                    style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
+                  >
+                    <Text className="text-[14px]">🤝</Text>
+                    <Text variant="caption" className="text-[12px]">
+                      {I18n.t('transactions.editor.split.button_label')}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : null}
             </View>
             {mode === 'edit' && onDelete ? (
               <View className="flex-row items-center gap-2">
@@ -2100,6 +2384,26 @@ export function TransactionEditorScreen({
           ) : null}
         </TabletContentContainer>
       </View>
+      {!hideSplitMode ? (
+        <SplitBillModal
+          visible={splitBillModalVisible}
+          onCancel={handleCancelSplitBill}
+          onDone={handleDoneSplitBill}
+          total={Number(amount) || 0}
+          defaultAccountId={accountId}
+          splits={splits}
+          onChange={setSplits}
+          splitEvenly={splitEvenly}
+          onSplitEvenlyChange={setSplitEvenly}
+          accounts={accounts}
+          accountGroups={accountGroups}
+          currencySymbol={settings.currencySymbol}
+          formatSettings={settings}
+          onMarkPaid={handleSplitMarkPaidLocal}
+          onMarkUnpaid={handleSplitMarkUnpaidLocal}
+          newlyPaidIds={newlyPaidIds}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

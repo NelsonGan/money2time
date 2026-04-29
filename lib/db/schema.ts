@@ -108,6 +108,21 @@ export const settingsTable = sqliteTable('settings', {
   deletedAt: text('deleted_at'),
 });
 
+export const transactionSplitsTable = sqliteTable('transaction_splits', {
+  id: text('id').primaryKey(),
+  transactionId: text('transaction_id').notNull(),
+  personName: text('person_name'),
+  amount: real('amount').notNull(),
+  isSelf: integer('is_self', { mode: 'boolean' }).notNull().default(false),
+  paybackAccountId: text('payback_account_id'),
+  paidAt: text('paid_at'),
+  paidTransactionId: text('paid_transaction_id'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -128,5 +143,6 @@ export type AccountGroupRow = typeof accountGroupsTable.$inferSelect;
 export type CategoryRow = typeof categoriesTable.$inferSelect;
 export type TransactionRow = typeof transactionsTable.$inferSelect;
 export type RecurringRuleRow = typeof recurringRulesTable.$inferSelect;
+export type TransactionSplitRow = typeof transactionSplitsTable.$inferSelect;
 export type SettingsRow = typeof settingsTable.$inferSelect;
 export type MonthlyWageSettingsRow = typeof monthlyWageSettingsTable.$inferSelect;
