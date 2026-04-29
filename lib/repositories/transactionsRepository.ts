@@ -8,6 +8,8 @@ import type {
   Transaction,
   TransactionFilters,
   TransactionSentiment,
+  TransactionSplit,
+  TransactionSplitsSummary,
   TransactionType,
   TransactionWithRelations,
 } from '~/types';
@@ -16,6 +18,7 @@ import { newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 import { toTransaction } from './mappers';
+import { transactionSplitsRepository } from './transactionSplitsRepository';
 
 type RelationRow = {
   txId: string;
@@ -85,6 +88,37 @@ function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(in
     ...input,
     amount: normalizeMoneyAmount(input.amount),
   };
+}
+
+export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSummary {
+  let count = 0;
+  let paidCount = 0;
+  let unpaidAmount = 0;
+  let totalOwed = 0;
+  for (const split of splits) {
+    if (split.isSelf) continue;
+    count += 1;
+    totalOwed += split.amount;
+    if (split.paidAt) {
+      paidCount += 1;
+    } else {
+      unpaidAmount += split.amount;
+    }
+  }
+  return { count, paidCount, unpaidAmount, totalOwed };
+}
+
+function attachSplits(transactions: TransactionWithRelations[]): void {
+  if (transactions.length === 0) return;
+  const ids = transactions.map((t) => t.id);
+  const grouped = transactionSplitsRepository.listByTransactionIds(ids);
+  for (const transaction of transactions) {
+    const splits = grouped.get(transaction.id);
+    if (splits && splits.length > 0) {
+      transaction.splits = splits;
+      transaction.splitsSummary = summarizeSplits(splits);
+    }
+  }
 }
 
 function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
@@ -220,6 +254,7 @@ class TransactionsRepository {
       .all()
       .map(toTransaction);
     const transactions = attachRelations(rows);
+    attachSplits(transactions);
     const excludedAccountIdSet = new Set(normalized.excludedAccountIds);
     const excludedIncomeCategoryIdSet = new Set(normalized.excludedIncomeCategoryIds);
     const excludedExpenseCategoryIdSet = new Set(normalized.excludedExpenseCategoryIds);
@@ -298,7 +333,9 @@ class TransactionsRepository {
       .get();
 
     if (!row) return null;
-    return attachRelations([toTransaction(row)])[0] ?? null;
+    const withRelations = attachRelations([toTransaction(row)]);
+    attachSplits(withRelations);
+    return withRelations[0] ?? null;
   }
 
   create(input: CreateTransactionInput): string {

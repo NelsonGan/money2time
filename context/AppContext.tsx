@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -30,8 +38,10 @@ import {
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import {
   type CreateTransactionInput,
+  summarizeSplits,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
+import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
   AnalyticsEvents,
   flushAnalytics,
@@ -64,6 +74,7 @@ import {
   type NotificationPreferences,
   type RecurringTransactionRule,
   type TransactionFilters,
+  type TransactionSplit,
   type TransactionWithRelations,
   type UserMode,
   type UserSettings,
@@ -83,6 +94,19 @@ import {
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
+
+export interface SplitDraftInput {
+  id?: string;
+  personName: string | null;
+  amount: number;
+  isSelf: boolean;
+  paybackAccountId: string | null;
+  sortOrder?: number;
+  /** Set when the user marked this row paid before saving (create-mode flow).
+   *  paidTransactionId is null for same-account paybacks; for cross-account
+   *  the AppContext create flow allocates a transfer tx id and links it. */
+  paid?: { paidAt: string; paidTransactionId: string | null };
+}
 
 interface AppContextValue extends AppState {
   filteredTransactions: TransactionWithRelations[];
@@ -124,6 +148,13 @@ interface AppContextValue extends AppState {
     updates: { id: string; input: Partial<CreateTransactionInput> }[],
   ) => void;
   deleteTransactionsBulk: (ids: string[]) => void;
+  createTransactionWithSplits: (input: CreateTransactionInput, splits: SplitDraftInput[]) => void;
+  updateTransactionSplits: (transactionId: string, splits: SplitDraftInput[]) => void;
+  markSplitPaid: (
+    splitId: string,
+    options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
+  ) => void;
+  markSplitUnpaid: (splitId: string) => void;
 
   updateSettings: (
     updates: Partial<
@@ -634,6 +665,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // When several mutations land in the same JS turn (e.g. a Save flush that
+  // calls markSplitPaid + updateTransaction + updateTransactionSplits), each
+  // one would otherwise trigger its own full transactions re-fetch + re-render.
+  // Coalesce them into one trailing refresh per burst.
+  const refreshTransactionsScheduled = useRef(false);
+  const scheduleRefreshTransactions = useCallback(() => {
+    if (refreshTransactionsScheduled.current) return;
+    refreshTransactionsScheduled.current = true;
+    setTimeout(() => {
+      refreshTransactionsScheduled.current = false;
+      refreshTransactions();
+    }, 0);
+  }, [refreshTransactions]);
+
   useEffect(() => {
     setIsLoading(true);
     try {
@@ -995,10 +1040,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } catch {
           // rollback on failure
         }
-        refreshTransactions();
+        scheduleRefreshTransactions();
       });
     },
-    [refreshTransactions, resolveRelationNames],
+    [scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -1057,10 +1102,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } catch {
           // rollback on failure
         }
-        refreshTransactions();
+        scheduleRefreshTransactions();
       });
     },
-    [refreshTransactions, resolveRelationNames],
+    [scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const deleteTransactionsBulk = useCallback(
@@ -1077,10 +1122,66 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (uniqueIds.length === 0) return;
 
       const idSet = new Set(uniqueIds);
-      setTransactions((prev) => prev.filter((tx) => !idSet.has(tx.id)));
+      // Determine which deletions affect splits:
+      //   - Deleting a parent expense → cascade-delete its splits.
+      //   - Deleting a transfer tx referenced by a paid split → restore the
+      //     parent's amount (since the parent was reduced when the split was
+      //     marked paid) and mark the split unpaid.
+      const parentTxIdsWithSplits = new Set<string>();
+      const restoreByParentId = new Map<string, number>(); // parentId → cumulative restore amount
+      const reverseSplitMap = new Map<string, string>(); // transferTxId → splitId
+      transactions.forEach((tx) => {
+        if (idSet.has(tx.id) && tx.splits && tx.splits.length > 0) {
+          parentTxIdsWithSplits.add(tx.id);
+        }
+        tx.splits?.forEach((s) => {
+          if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
+            reverseSplitMap.set(s.paidTransactionId, s.id);
+            restoreByParentId.set(tx.id, (restoreByParentId.get(tx.id) ?? 0) + s.amount);
+          }
+        });
+      });
+
+      setTransactions((prev) =>
+        prev
+          .filter((tx) => !idSet.has(tx.id))
+          .map((tx) => {
+            if (!tx.splits || tx.splits.length === 0) return tx;
+            const restore = restoreByParentId.get(tx.id) ?? 0;
+            const updatedSplits = tx.splits.map((s) => {
+              if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
+                return { ...s, paidAt: null, paidTransactionId: null };
+              }
+              return s;
+            });
+            return {
+              ...tx,
+              amount: restore > 0 ? normalizeMoneyAmount(tx.amount + restore) : tx.amount,
+              splits: updatedSplits,
+              splitsSummary: summarizeSplits(updatedSplits),
+            };
+          }),
+      );
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.softDeleteMany(uniqueIds);
+          if (parentTxIdsWithSplits.size > 0) {
+            transactionSplitsRepository.softDeleteByTransactionIds(
+              Array.from(parentTxIdsWithSplits),
+            );
+          }
+          // Restore parent amounts in one update per parent (re-read from DB so
+          // multiple restored splits per parent accumulate correctly).
+          restoreByParentId.forEach((restore, parentId) => {
+            const currentParent = transactionsRepository.getById(parentId);
+            if (!currentParent) return;
+            transactionsRepository.update(parentId, {
+              amount: normalizeMoneyAmount(currentParent.amount + restore),
+            });
+          });
+          reverseSplitMap.forEach((splitId) => {
+            transactionSplitsRepository.markUnpaid(splitId);
+          });
           void trackEvent(
             uniqueIds.length === 1
               ? AnalyticsEvents.TRANSACTION_DELETED
@@ -1090,10 +1191,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } catch {
           // rollback on failure
         }
-        refreshTransactions();
+        scheduleRefreshTransactions();
       });
     },
-    [refreshTransactions],
+    [scheduleRefreshTransactions, transactions],
   );
 
   const updateTransaction = useCallback(
@@ -1108,6 +1209,415 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteTransactionsBulk([id]);
     },
     [deleteTransactionsBulk],
+  );
+
+  const createTransactionWithSplits = useCallback(
+    (input: CreateTransactionInput, splits: SplitDraftInput[]) => {
+      const normalizedInput = { ...input, amount: normalizeMoneyAmount(input.amount) };
+      const txId = newId();
+      const now = nowIso();
+
+      // Pre-marked-paid splits (create-mode Mark Paid) need a transfer tx if
+      // the payback account differs from the parent's account. We allocate
+      // those ids upfront so the split can link to them via paidTransactionId.
+      type Transfer = { id: string; amount: number; toAccountId: string };
+      const transfersToCreate: Transfer[] = [];
+      const optimisticSplits: TransactionSplit[] = splits.map((draft, index) => {
+        const splitAmount = normalizeMoneyAmount(draft.amount);
+        let paidTransactionId: string | null = draft.paid?.paidTransactionId ?? null;
+        if (
+          draft.paid &&
+          !paidTransactionId &&
+          normalizedInput.accountId &&
+          draft.paybackAccountId &&
+          draft.paybackAccountId !== normalizedInput.accountId
+        ) {
+          paidTransactionId = newId();
+          transfersToCreate.push({
+            id: paidTransactionId,
+            amount: splitAmount,
+            toAccountId: draft.paybackAccountId,
+          });
+        }
+        return {
+          id: draft.id ?? newId(),
+          transactionId: txId,
+          personName: draft.personName,
+          amount: splitAmount,
+          isSelf: draft.isSelf,
+          paybackAccountId: draft.paybackAccountId,
+          paidAt: draft.paid?.paidAt ?? null,
+          paidTransactionId,
+          sortOrder: draft.sortOrder ?? index,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        };
+      });
+
+      const optimisticTransfers: TransactionWithRelations[] = transfersToCreate.map((t) => ({
+        id: t.id,
+        type: 'transfer',
+        amount: t.amount,
+        currency: normalizedInput.currency,
+        date: normalizedInput.date,
+        accountId: null,
+        fromAccountId: normalizedInput.accountId ?? null,
+        toAccountId: t.toAccountId,
+        categoryId: null,
+        note: null,
+        sentiment: 'neutral',
+        recurrencePattern: 'none',
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        recurrenceParentId: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        ...resolveRelationNames({
+          fromAccountId: normalizedInput.accountId,
+          toAccountId: t.toAccountId,
+        }),
+      }));
+
+      const optimisticParent: TransactionWithRelations = {
+        id: txId,
+        type: normalizedInput.type,
+        amount: normalizedInput.amount,
+        currency: normalizedInput.currency,
+        date: normalizedInput.date,
+        accountId: normalizedInput.accountId ?? null,
+        fromAccountId: normalizedInput.fromAccountId ?? null,
+        toAccountId: normalizedInput.toAccountId ?? null,
+        categoryId: normalizedInput.categoryId ?? null,
+        note: normalizedInput.note ?? null,
+        sentiment: normalizedInput.sentiment ?? 'neutral',
+        recurrencePattern: 'none',
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        recurrenceParentId: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        ...resolveRelationNames(normalizedInput),
+        splits: optimisticSplits,
+        splitsSummary: summarizeSplits(optimisticSplits),
+      };
+      setTransactions((prev) => {
+        const next = [optimisticParent, ...prev];
+        return optimisticTransfers.length > 0
+          ? sortTransactions([...optimisticTransfers, ...next], 'date_desc')
+          : next;
+      });
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          transactionsRepository.createWithId(txId, normalizedInput);
+          for (const t of transfersToCreate) {
+            transactionsRepository.createWithId(t.id, {
+              type: 'transfer',
+              amount: t.amount,
+              currency: normalizedInput.currency,
+              date: normalizedInput.date,
+              fromAccountId: normalizedInput.accountId ?? null,
+              toAccountId: t.toAccountId,
+              accountId: null,
+              categoryId: null,
+              note: null,
+              sentiment: 'neutral',
+            });
+          }
+          // Persist each split with the same id used in the optimistic state so
+          // references stay stable across the refresh below.
+          optimisticSplits.forEach((s) => {
+            transactionSplitsRepository.createWithId(s.id, {
+              transactionId: txId,
+              personName: s.personName,
+              amount: s.amount,
+              isSelf: s.isSelf,
+              paybackAccountId: s.paybackAccountId,
+              sortOrder: s.sortOrder,
+              paidAt: s.paidAt,
+              paidTransactionId: s.paidTransactionId,
+            });
+          });
+          void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
+            type: normalizedInput.type,
+            has_category: !!normalizedInput.categoryId,
+            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+            sentiment: normalizedInput.sentiment ?? 'neutral',
+            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
+            split_total: normalizedInput.amount,
+          });
+        } catch {
+          // optimistic rollback handled by refresh
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions, resolveRelationNames],
+  );
+
+  const updateTransactionSplits = useCallback(
+    (transactionId: string, splits: SplitDraftInput[]) => {
+      const now = nowIso();
+      const optimisticSplits: TransactionSplit[] = splits.map((draft, index) => {
+        const existing = draft.id;
+        return {
+          id: existing ?? newId(),
+          transactionId,
+          personName: draft.personName,
+          amount: normalizeMoneyAmount(draft.amount),
+          isSelf: draft.isSelf,
+          paybackAccountId: draft.paybackAccountId,
+          paidAt: null,
+          paidTransactionId: null,
+          sortOrder: draft.sortOrder ?? index,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        };
+      });
+      // Preserve existing paid state on rows that are kept by id.
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          if (tx.id !== transactionId) return tx;
+          const existingById = new Map((tx.splits ?? []).map((s) => [s.id, s]));
+          const merged = optimisticSplits.map((next) => {
+            const prior = existingById.get(next.id);
+            if (prior) {
+              return {
+                ...next,
+                paidAt: prior.paidAt,
+                paidTransactionId: prior.paidTransactionId,
+                createdAt: prior.createdAt,
+              };
+            }
+            return next;
+          });
+          return { ...tx, splits: merged, splitsSummary: summarizeSplits(merged) };
+        }),
+      );
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          const existingPersisted = transactionSplitsRepository.listByTransactionId(transactionId);
+          const nextIds = new Set(optimisticSplits.map((s) => s.id));
+          // Soft-delete removed splits.
+          existingPersisted
+            .filter((s) => !nextIds.has(s.id))
+            .forEach((s) => transactionSplitsRepository.softDelete(s.id));
+          // Upsert the rest.
+          const existingMap = new Map(existingPersisted.map((s) => [s.id, s]));
+          optimisticSplits.forEach((next) => {
+            const prior = existingMap.get(next.id);
+            if (prior) {
+              transactionSplitsRepository.update(next.id, {
+                personName: next.personName,
+                amount: next.amount,
+                paybackAccountId: next.paybackAccountId,
+                sortOrder: next.sortOrder,
+              });
+            } else {
+              transactionSplitsRepository.createWithId(next.id, {
+                transactionId,
+                personName: next.personName,
+                amount: next.amount,
+                isSelf: next.isSelf,
+                paybackAccountId: next.paybackAccountId,
+                sortOrder: next.sortOrder,
+              });
+            }
+          });
+          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, {
+            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
+          });
+        } catch {
+          // ignore; refresh below restores truth
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  const markSplitPaid = useCallback(
+    (
+      splitId: string,
+      options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
+    ) => {
+      const parent = transactions.find((tx) => tx.splits?.some((s) => s.id === splitId));
+      const split = parent?.splits?.find((s) => s.id === splitId);
+      if (!parent || !split || split.isSelf) return;
+      if (split.paidAt) return; // already paid
+
+      const paybackAccountId =
+        options?.paybackAccountId !== undefined
+          ? options.paybackAccountId
+          : (split.paybackAccountId ?? parent.accountId ?? null);
+      if (!parent.accountId) return; // parent must have an account
+      if (!paybackAccountId) return; // need a destination
+
+      const sameAccount = paybackAccountId === parent.accountId;
+      const splitAmount = split.amount;
+      const paidAtIso = nowIso();
+      const now = paidAtIso;
+      const date = options?.date ?? dayKeyFromDateLocal(new Date());
+
+      // For cross-account paybacks we model the friend's repayment as a transfer
+      // from the original-paying account to the destination account, and reduce
+      // the parent expense so its account balance reflects only the user's net
+      // outlay. Same-account paybacks just reduce the parent expense.
+      // Note left empty so the activity list falls back to its standard
+      // "<from> → <to>" display for unlabelled transfers.
+      const note = options?.note?.trim() || null;
+      let transferTxId: string | null = null;
+      let optimisticTransfer: TransactionWithRelations | null = null;
+      if (!sameAccount) {
+        transferTxId = newId();
+        optimisticTransfer = {
+          id: transferTxId,
+          type: 'transfer',
+          amount: split.amount,
+          currency: parent.currency,
+          date,
+          accountId: null,
+          fromAccountId: parent.accountId,
+          toAccountId: paybackAccountId,
+          categoryId: null,
+          note,
+          sentiment: 'neutral',
+          recurrencePattern: 'none',
+          recurrenceInterval: 1,
+          recurrenceEndDate: null,
+          recurrenceParentId: null,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+          ...resolveRelationNames({
+            fromAccountId: parent.accountId,
+            toAccountId: paybackAccountId,
+          }),
+        };
+      }
+
+      setTransactions((prev) => {
+        // Read tx.amount from prev so back-to-back markSplitPaid calls reduce
+        // cumulatively (avoids the closure-capture bug).
+        const next = prev.map((tx) => {
+          if (tx.id !== parent.id) return tx;
+          const reducedAmount = normalizeMoneyAmount(tx.amount - splitAmount);
+          const updatedSplits = (tx.splits ?? []).map((s) =>
+            s.id === splitId
+              ? {
+                  ...s,
+                  paidAt: paidAtIso,
+                  paidTransactionId: transferTxId,
+                  paybackAccountId,
+                }
+              : s,
+          );
+          return {
+            ...tx,
+            amount: reducedAmount,
+            updatedAt: now,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        });
+        // Insert at the correct sorted position so the list doesn't reshuffle
+        // when the trailing refresh lands.
+        return optimisticTransfer
+          ? sortTransactions([optimisticTransfer, ...next], 'date_desc')
+          : next;
+      });
+
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          // Re-read parent from DB so cumulative reductions don't clobber each other.
+          const currentParent = transactionsRepository.getById(parent.id);
+          if (currentParent) {
+            const persistedReducedAmount = normalizeMoneyAmount(currentParent.amount - splitAmount);
+            transactionsRepository.update(parent.id, { amount: persistedReducedAmount });
+          }
+          if (transferTxId) {
+            transactionsRepository.createWithId(transferTxId, {
+              type: 'transfer',
+              amount: splitAmount,
+              currency: parent.currency,
+              date,
+              fromAccountId: parent.accountId,
+              toAccountId: paybackAccountId,
+              accountId: null,
+              categoryId: null,
+              note,
+              sentiment: 'neutral',
+            });
+          }
+          transactionSplitsRepository.update(splitId, {
+            paybackAccountId,
+            paidAt: paidAtIso,
+            paidTransactionId: transferTxId,
+          });
+          void trackEvent(AnalyticsEvents.SPLIT_MARKED_PAID, {
+            payback_account_changed: !sameAccount,
+            same_account: sameAccount,
+          });
+        } catch {
+          // ignore; refresh below restores truth
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [resolveRelationNames, scheduleRefreshTransactions, transactions],
+  );
+
+  const markSplitUnpaid = useCallback(
+    (splitId: string) => {
+      const parent = transactions.find((tx) => tx.splits?.some((s) => s.id === splitId));
+      const split = parent?.splits?.find((s) => s.id === splitId);
+      if (!parent || !split || !split.paidAt) return;
+      const transferTxId = split.paidTransactionId;
+      const splitAmount = split.amount;
+      const now = nowIso();
+
+      setTransactions((prev) => {
+        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        return filtered.map((tx) => {
+          if (tx.id !== parent.id) return tx;
+          const restoredAmount = normalizeMoneyAmount(tx.amount + splitAmount);
+          const updatedSplits = (tx.splits ?? []).map((s) =>
+            s.id === splitId ? { ...s, paidAt: null, paidTransactionId: null } : s,
+          );
+          return {
+            ...tx,
+            amount: restoredAmount,
+            updatedAt: now,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        });
+      });
+
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          const currentParent = transactionsRepository.getById(parent.id);
+          if (currentParent) {
+            const persistedRestoredAmount = normalizeMoneyAmount(
+              currentParent.amount + splitAmount,
+            );
+            transactionsRepository.update(parent.id, { amount: persistedRestoredAmount });
+          }
+          if (transferTxId) {
+            transactionsRepository.softDelete(transferTxId);
+          }
+          transactionSplitsRepository.markUnpaid(splitId);
+          void trackEvent(AnalyticsEvents.SPLIT_MARKED_UNPAID, {});
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions, transactions],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -1665,6 +2175,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteTransaction,
             updateTransactionsBulk,
             deleteTransactionsBulk,
+            createTransactionWithSplits,
+            updateTransactionSplits,
+            markSplitPaid,
+            markSplitUnpaid,
             updateSettings,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -1735,6 +2249,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteTransaction,
       updateTransactionsBulk,
       deleteTransactionsBulk,
+      createTransactionWithSplits,
+      updateTransactionSplits,
+      markSplitPaid,
+      markSplitUnpaid,
       updateSettings,
       updateWageConfig,
       updateWageConfigForMonth,
