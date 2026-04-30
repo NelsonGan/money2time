@@ -1444,64 +1444,87 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       splitId: string,
       options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
     ) => {
-      const parent = transactions.find((tx) => tx.splits?.some((s) => s.id === splitId));
-      const split = parent?.splits?.find((s) => s.id === splitId);
-      if (!parent || !split || split.isSelf) return;
-      if (split.paidAt) return; // already paid
-
-      const paybackAccountId =
-        options?.paybackAccountId !== undefined
-          ? options.paybackAccountId
-          : (split.paybackAccountId ?? parent.accountId ?? null);
-      if (!parent.accountId) return; // parent must have an account
-      if (!paybackAccountId) return; // need a destination
-
-      const sameAccount = paybackAccountId === parent.accountId;
-      const splitAmount = split.amount;
+      // Pre-allocate everything we might need so the setTransactions updater
+      // can be a pure function of `prev`. Reading the parent from `prev`
+      // (instead of the `transactions` closure) makes this safe to call
+      // immediately after another setter that just inserted a new split
+      // (e.g. updateTransactionSplits during Save), since React batches the
+      // updaters and the second one sees the first one's result.
+      const transferTxId = newId();
       const paidAtIso = nowIso();
-      const now = paidAtIso;
       const date = options?.date ?? dayKeyFromDateLocal(new Date());
-
-      // For cross-account paybacks we model the friend's repayment as a transfer
-      // from the original-paying account to the destination account, and reduce
-      // the parent expense so its account balance reflects only the user's net
-      // outlay. Same-account paybacks just reduce the parent expense.
-      // Note left empty so the activity list falls back to its standard
-      // "<from> → <to>" display for unlabelled transfers.
       const note = options?.note?.trim() || null;
-      let transferTxId: string | null = null;
-      let optimisticTransfer: TransactionWithRelations | null = null;
-      if (!sameAccount) {
-        transferTxId = newId();
-        optimisticTransfer = {
-          id: transferTxId,
-          type: 'transfer',
-          amount: split.amount,
-          currency: parent.currency,
-          date,
-          accountId: null,
-          fromAccountId: parent.accountId,
-          toAccountId: paybackAccountId,
-          categoryId: null,
-          note,
-          sentiment: 'neutral',
-          recurrencePattern: 'none',
-          recurrenceInterval: 1,
-          recurrenceEndDate: null,
-          recurrenceParentId: null,
-          createdAt: now,
-          updatedAt: now,
-          deletedAt: null,
-          ...resolveRelationNames({
-            fromAccountId: parent.accountId,
-            toAccountId: paybackAccountId,
-          }),
-        };
-      }
+
+      type Collected = {
+        parentId: string;
+        parentAccountId: string;
+        parentCurrency: string;
+        sameAccount: boolean;
+        splitAmount: number;
+        usedTransferTxId: string | null;
+        resolvedPaybackAccountId: string;
+      };
+      let collected: Collected | null = null;
 
       setTransactions((prev) => {
-        // Read tx.amount from prev so back-to-back markSplitPaid calls reduce
-        // cumulatively (avoids the closure-capture bug).
+        const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
+        const split = parent?.splits?.find((s) => s.id === splitId);
+        if (!parent || !split || split.isSelf) return prev;
+        if (split.paidAt) return prev; // already paid
+
+        const paybackAccountId =
+          options?.paybackAccountId !== undefined
+            ? options.paybackAccountId
+            : (split.paybackAccountId ?? parent.accountId ?? null);
+        if (!parent.accountId) return prev;
+        if (!paybackAccountId) return prev;
+
+        const sameAccount = paybackAccountId === parent.accountId;
+        const splitAmount = split.amount;
+        const usedTransferTxId = sameAccount ? null : transferTxId;
+
+        // For cross-account paybacks we model the friend's repayment as a
+        // transfer from the original-paying account to the destination
+        // account, and reduce the parent expense so its account balance
+        // reflects only the user's net outlay. Same-account paybacks just
+        // reduce the parent expense — no transfer needed.
+        const optimisticTransfer: TransactionWithRelations | null = sameAccount
+          ? null
+          : {
+              id: transferTxId,
+              type: 'transfer',
+              amount: splitAmount,
+              currency: parent.currency,
+              date,
+              accountId: null,
+              fromAccountId: parent.accountId,
+              toAccountId: paybackAccountId,
+              categoryId: null,
+              note,
+              sentiment: 'neutral',
+              recurrencePattern: 'none',
+              recurrenceInterval: 1,
+              recurrenceEndDate: null,
+              recurrenceParentId: null,
+              createdAt: paidAtIso,
+              updatedAt: paidAtIso,
+              deletedAt: null,
+              ...resolveRelationNames({
+                fromAccountId: parent.accountId,
+                toAccountId: paybackAccountId,
+              }),
+            };
+
+        collected = {
+          parentId: parent.id,
+          parentAccountId: parent.accountId,
+          parentCurrency: parent.currency,
+          sameAccount,
+          splitAmount,
+          usedTransferTxId,
+          resolvedPaybackAccountId: paybackAccountId,
+        };
+
         const next = prev.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const reducedAmount = normalizeMoneyAmount(tx.amount - splitAmount);
@@ -1510,7 +1533,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               ? {
                   ...s,
                   paidAt: paidAtIso,
-                  paidTransactionId: transferTxId,
+                  paidTransactionId: usedTransferTxId,
                   paybackAccountId,
                 }
               : s,
@@ -1518,34 +1541,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return {
             ...tx,
             amount: reducedAmount,
-            updatedAt: now,
+            updatedAt: paidAtIso,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
           };
         });
-        // Insert at the correct sorted position so the list doesn't reshuffle
-        // when the trailing refresh lands.
         return optimisticTransfer
           ? sortTransactions([optimisticTransfer, ...next], 'date_desc')
           : next;
       });
 
+      if (!collected) return;
+      const c = collected as Collected;
+
       InteractionManager.runAfterInteractions(() => {
         try {
-          // Re-read parent from DB so cumulative reductions don't clobber each other.
-          const currentParent = transactionsRepository.getById(parent.id);
+          // Re-read parent from DB so cumulative reductions don't clobber
+          // each other when several markSplitPaid calls are queued.
+          const currentParent = transactionsRepository.getById(c.parentId);
           if (currentParent) {
-            const persistedReducedAmount = normalizeMoneyAmount(currentParent.amount - splitAmount);
-            transactionsRepository.update(parent.id, { amount: persistedReducedAmount });
+            const persistedReducedAmount = normalizeMoneyAmount(
+              currentParent.amount - c.splitAmount,
+            );
+            transactionsRepository.update(c.parentId, { amount: persistedReducedAmount });
           }
-          if (transferTxId) {
-            transactionsRepository.createWithId(transferTxId, {
+          if (!c.sameAccount && c.usedTransferTxId) {
+            transactionsRepository.createWithId(c.usedTransferTxId, {
               type: 'transfer',
-              amount: splitAmount,
-              currency: parent.currency,
+              amount: c.splitAmount,
+              currency: c.parentCurrency,
               date,
-              fromAccountId: parent.accountId,
-              toAccountId: paybackAccountId,
+              fromAccountId: c.parentAccountId,
+              toAccountId: c.resolvedPaybackAccountId,
               accountId: null,
               categoryId: null,
               note,
@@ -1553,13 +1580,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           transactionSplitsRepository.update(splitId, {
-            paybackAccountId,
+            paybackAccountId: c.resolvedPaybackAccountId,
             paidAt: paidAtIso,
-            paidTransactionId: transferTxId,
+            paidTransactionId: c.usedTransferTxId,
           });
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_PAID, {
-            payback_account_changed: !sameAccount,
-            same_account: sameAccount,
+            payback_account_changed: !c.sameAccount,
+            same_account: c.sameAccount,
           });
         } catch {
           // ignore; refresh below restores truth
@@ -1567,19 +1594,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [resolveRelationNames, scheduleRefreshTransactions, transactions],
+    [resolveRelationNames, scheduleRefreshTransactions],
   );
 
   const markSplitUnpaid = useCallback(
     (splitId: string) => {
-      const parent = transactions.find((tx) => tx.splits?.some((s) => s.id === splitId));
-      const split = parent?.splits?.find((s) => s.id === splitId);
-      if (!parent || !split || !split.paidAt) return;
-      const transferTxId = split.paidTransactionId;
-      const splitAmount = split.amount;
+      // Pre-allocate so the setTransactions updater can read parent from
+      // `prev` (kept in sync with batched setters from the same handler).
       const now = nowIso();
 
+      type Collected = {
+        parentId: string;
+        splitAmount: number;
+        transferTxId: string | null;
+      };
+      let collected: Collected | null = null;
+
       setTransactions((prev) => {
+        const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
+        const split = parent?.splits?.find((s) => s.id === splitId);
+        if (!parent || !split || !split.paidAt) return prev;
+        const transferTxId = split.paidTransactionId;
+        const splitAmount = split.amount;
+        collected = { parentId: parent.id, splitAmount, transferTxId };
+
         const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
@@ -1597,17 +1635,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
+      if (!collected) return;
+      const c = collected as Collected;
+
       InteractionManager.runAfterInteractions(() => {
         try {
-          const currentParent = transactionsRepository.getById(parent.id);
+          const currentParent = transactionsRepository.getById(c.parentId);
           if (currentParent) {
             const persistedRestoredAmount = normalizeMoneyAmount(
-              currentParent.amount + splitAmount,
+              currentParent.amount + c.splitAmount,
             );
-            transactionsRepository.update(parent.id, { amount: persistedRestoredAmount });
+            transactionsRepository.update(c.parentId, { amount: persistedRestoredAmount });
           }
-          if (transferTxId) {
-            transactionsRepository.softDelete(transferTxId);
+          if (c.transferTxId) {
+            transactionsRepository.softDelete(c.transferTxId);
           }
           transactionSplitsRepository.markUnpaid(splitId);
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_UNPAID, {});
@@ -1617,7 +1658,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, transactions],
+    [scheduleRefreshTransactions],
   );
 
   const canUseTimeDisplayMode = useMemo(

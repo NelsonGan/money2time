@@ -95,6 +95,9 @@ export function EditTransactionScreen({
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
       // Diff editor splits against the persisted state to find newly paid /
       // newly unpaid rows. These were staged locally — flush them to the DB now.
+      // NOTE: a brand-new split (no prior in DB) with `s.paid` set is also
+      // routed through markSplitPaid below; updateTransactionSplits runs first
+      // so the row exists in state by the time markSplitPaid looks it up.
       const persistedSplits = transaction.splits ?? [];
       const persistedById = new Map(persistedSplits.map((s) => [s.id, s]));
       const pendingMarkPaid: { id: string; paybackAccountId: string | null }[] = [];
@@ -102,8 +105,7 @@ export function EditTransactionScreen({
       splits.forEach((s) => {
         if (!s.id) return;
         const prior = persistedById.get(s.id);
-        if (!prior) return;
-        const wasPaid = !!prior.paidAt;
+        const wasPaid = prior ? !!prior.paidAt : false;
         const isPaid = !!s.paid;
         if (isPaid && !wasPaid) {
           pendingMarkPaid.push({
@@ -115,8 +117,19 @@ export function EditTransactionScreen({
         }
       });
 
-      // Apply paid/unpaid first — these adjust the parent amount and create or
-      // delete linked transfer transactions.
+      // Persist split structure FIRST so any brand-new rows exist (in
+      // optimistic state and queued for DB) before we ask markSplitPaid to
+      // find them. updateTransactionSplits preserves the prior paid state on
+      // existing rows; new rows are inserted unpaid (paidAt=null).
+      updateTransactionSplits(
+        transaction.id,
+        splitsHelpers.toSplitDraftInputs(splits, input.accountId),
+      );
+
+      // Then flip paid/unpaid — these adjust parent amount and create or
+      // delete linked transfer transactions. Because they read parent from
+      // setTransactions(prev=>...), they see the freshly-inserted splits
+      // from the previous setter in the same React batch.
       pendingMarkPaid.forEach(({ id, paybackAccountId }) => {
         markSplitPaid(id, { paybackAccountId });
       });
@@ -124,17 +137,11 @@ export function EditTransactionScreen({
         markSplitUnpaid(id);
       });
 
-      // Then update parent fields (amount will already be in sync since the
-      // editor's amount mirrors the staged paid actions; updating it again
-      // here is a no-op).
+      // Finally write parent fields. The editor's amount already accounts for
+      // all the user's paid/unpaid toggles (handleSplitMarkPaidLocal mutates
+      // it in lockstep), so input.amount is the intended final value — this
+      // overwrites the cumulative reductions from markSplitPaid above.
       updateTransaction(transaction.id, input);
-
-      // Then update split structure (names, amounts, accounts of unpaid rows).
-      // updateTransactionSplits preserves the paid state set above.
-      updateTransactionSplits(
-        transaction.id,
-        splitsHelpers.toSplitDraftInputs(splits, input.accountId),
-      );
     },
     [
       markSplitPaid,
