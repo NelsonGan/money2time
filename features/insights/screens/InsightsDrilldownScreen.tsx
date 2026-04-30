@@ -205,6 +205,7 @@ interface InsightsDrilldownScreenProps {
   payload: InsightsDrilldownPayload;
   onBack: () => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSubcategoryDrilldown?: (payload: InsightsDrilldownPayload) => void;
 }
 
@@ -212,6 +213,7 @@ export function InsightsDrilldownScreen({
   payload,
   onBack,
   onOpenTransaction,
+  onOpenTransactionSplitBadge,
   onOpenSubcategoryDrilldown,
 }: InsightsDrilldownScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -647,6 +649,20 @@ export function InsightsDrilldownScreen({
       onOpenTransaction(transaction);
     },
     [isSelectionMode, onOpenTransaction, toggleSelection],
+  );
+  const handleTransactionSplitBadgePress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleSelection(transaction.id);
+        return;
+      }
+      if (onOpenTransactionSplitBadge) {
+        onOpenTransactionSplitBadge(transaction);
+        return;
+      }
+      onOpenTransaction(transaction);
+    },
+    [isSelectionMode, onOpenTransaction, onOpenTransactionSplitBadge, toggleSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -1336,6 +1352,7 @@ export function InsightsDrilldownScreen({
               getTrueHourlyRateForDate={getTrueHourlyRateForDate}
               onTransactionPress={handleTransactionPress}
               onTransactionLongPress={handleTransactionLongPress}
+              onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
               selectedTransactionIds={selectedTransactionIds}
               selectionMode={isSelectionMode}
               emptyTitle={I18n.t('insights.empty_category.title')}

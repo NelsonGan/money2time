@@ -15,6 +15,9 @@ interface EditTransactionScreenProps {
   onClose: () => void;
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
+  /** Open the Split Bill modal automatically when the editor mounts. Set by
+   *  callers (e.g. activity list) when the tapped row has unpaid splits. */
+  openSplitBillOnMount?: boolean;
 }
 
 export function EditTransactionScreen({
@@ -22,6 +25,7 @@ export function EditTransactionScreen({
   onClose,
   isSimpleMode,
   simpleWalletId,
+  openSplitBillOnMount,
 }: EditTransactionScreenProps) {
   const {
     updateTransaction,
@@ -166,6 +170,7 @@ export function EditTransactionScreen({
       onSubmitWithSplits={handleSubmitWithSplits}
       restrictTypeOptions={restrictedTypes}
       initialSplits={initialSplits}
+      openSplitBillOnMount={openSplitBillOnMount}
       subtitleOverride={
         isBalanceAdjustment
           ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')

@@ -178,6 +178,9 @@ interface TransactionEditorScreenProps {
   hideAccountSelector?: boolean;
   hideSubcategories?: boolean;
   hideSplitMode?: boolean;
+  /** Open the Split Bill modal once on mount (used when the activity list
+   *  routes the user here from a transaction with unpaid friends). */
+  openSplitBillOnMount?: boolean;
   initialAccountId?: string;
   recurringOptions?: {
     initialName?: string;
@@ -373,6 +376,7 @@ export function TransactionEditorScreen({
   hideAccountSelector = false,
   hideSubcategories = false,
   hideSplitMode = false,
+  openSplitBillOnMount = false,
   initialAccountId,
   recurringOptions,
 }: TransactionEditorScreenProps) {
@@ -900,6 +904,21 @@ export function TransactionEditorScreen({
     setSplitEvenly(snapshot.splitEvenly);
     setSplitMode(snapshot.splitMode);
   }, []);
+
+  // One-shot auto-open: if the caller (e.g. activity list tap) asked us to
+  // jump straight into the Split Bill modal AND the gating fields are ready,
+  // open it once. Re-fires only if the prop flips back to true.
+  const autoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (!openSplitBillOnMount) {
+      autoOpenedRef.current = false;
+      return;
+    }
+    if (autoOpenedRef.current) return;
+    if (!canOpenSplitBill) return;
+    autoOpenedRef.current = true;
+    handleOpenSplitBill();
+  }, [openSplitBillOnMount, canOpenSplitBill, handleOpenSplitBill]);
 
   // Show a red notification badge on the Split Bills button with the count of
   // friends who still owe. Same affordance as the row tint in the activity list.

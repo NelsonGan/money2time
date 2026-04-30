@@ -26,6 +26,9 @@ interface TransactionItemProps {
   onPressTransaction?: (transaction: TransactionWithRelations) => void;
   onLongPress?: () => void;
   onLongPressTransaction?: (transaction: TransactionWithRelations) => void;
+  /** When provided AND the row has unpaid splits, the red count badge becomes
+   *  tappable and routes here instead of bubbling to onPress. */
+  onPressSplitBadge?: (transaction: TransactionWithRelations) => void;
   disableAnimations?: boolean;
   showDateInSubtitle?: boolean;
   compact?: boolean;
@@ -41,6 +44,7 @@ interface TransactionItemViewProps {
   onLongPress?: () => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
+  onPressSplitBadge?: () => void;
   showDateInSubtitle: boolean;
   compact: boolean;
   selected: boolean;
@@ -55,6 +59,7 @@ function TransactionItemView({
   onLongPress,
   onPressIn,
   onPressOut,
+  onPressSplitBadge,
   showDateInSubtitle,
   compact,
   selected,
@@ -191,14 +196,16 @@ function TransactionItemView({
   return (
     <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
       {hasUnpaidSplits ? (
-        <View
-          pointerEvents="none"
+        <Pressable
+          onPress={onPressSplitBadge}
+          disabled={!onPressSplitBadge}
+          hitSlop={8}
           className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
         >
           <Text className="text-white text-[10px] font-bold leading-[12px]">
             {unpaidSplitsCount}
           </Text>
-        </View>
+        </Pressable>
       ) : null}
       <Pressable
         onPress={onPress}
@@ -344,6 +351,7 @@ function AnimatedTransactionItem({
   transaction,
   onPress,
   onLongPress,
+  onPressSplitBadge,
   showDateInSubtitle,
   compact,
   selected,
@@ -366,6 +374,7 @@ function AnimatedTransactionItem({
         onLongPress={onLongPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
+        onPressSplitBadge={onPressSplitBadge}
         showDateInSubtitle={showDateInSubtitle}
         compact={compact}
         selected={selected}
@@ -381,6 +390,7 @@ function StaticTransactionItem({
   transaction,
   onPress,
   onLongPress,
+  onPressSplitBadge,
   showDateInSubtitle,
   compact,
   selected,
@@ -393,6 +403,7 @@ function StaticTransactionItem({
       transaction={transaction}
       onPress={onPress}
       onLongPress={onLongPress}
+      onPressSplitBadge={onPressSplitBadge}
       showDateInSubtitle={showDateInSubtitle}
       compact={compact}
       selected={selected}
@@ -409,6 +420,7 @@ function TransactionItemComponent({
   onPressTransaction,
   onLongPress,
   onLongPressTransaction,
+  onPressSplitBadge,
   disableAnimations = false,
   showDateInSubtitle = true,
   compact = false,
@@ -439,6 +451,12 @@ function TransactionItemComponent({
           onLongPressTransaction(transaction);
         }
       : undefined;
+  const handlePressSplitBadge = onPressSplitBadge
+    ? () => {
+        void triggerHaptic('light');
+        onPressSplitBadge(transaction);
+      }
+    : undefined;
 
   if (disableAnimations) {
     return (
@@ -446,6 +464,7 @@ function TransactionItemComponent({
         transaction={transaction}
         onPress={handlePress}
         onLongPress={handleLongPress}
+        onPressSplitBadge={handlePressSplitBadge}
         showDateInSubtitle={showDateInSubtitle}
         compact={compact}
         selected={selected}
@@ -461,6 +480,7 @@ function TransactionItemComponent({
       transaction={transaction}
       onPress={handlePress}
       onLongPress={handleLongPress}
+      onPressSplitBadge={handlePressSplitBadge}
       showDateInSubtitle={showDateInSubtitle}
       compact={compact}
       selected={selected}
@@ -480,6 +500,7 @@ export const TransactionItem = memo(
     prev.onPressTransaction === next.onPressTransaction &&
     prev.onLongPress === next.onLongPress &&
     prev.onLongPressTransaction === next.onLongPressTransaction &&
+    prev.onPressSplitBadge === next.onPressSplitBadge &&
     prev.disableAnimations === next.disableAnimations &&
     prev.showDateInSubtitle === next.showDateInSubtitle &&
     prev.compact === next.compact &&
