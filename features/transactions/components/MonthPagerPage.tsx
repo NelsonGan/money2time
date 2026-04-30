@@ -25,6 +25,7 @@ interface MonthPagerPageProps {
   getTrueHourlyRateForDate: (dateIso: string) => number;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
+  onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
@@ -45,6 +46,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   getTrueHourlyRateForDate,
   onTransactionPress,
   onTransactionLongPress,
+  onTransactionSplitBadgePress,
   selectedTransactionIds = [],
   selectionMode = false,
   getScrollToTopRef,
@@ -67,6 +69,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         onTransactionPress={onTransactionPress}
         onTransactionLongPress={onTransactionLongPress}
+        onTransactionSplitBadgePress={onTransactionSplitBadgePress}
         selectedTransactionIds={selectedTransactionIds}
         selectionMode={selectionMode}
         emptyTitle={I18n.t('transactions.empty_month_title')}

@@ -24,7 +24,7 @@ export type RootStackParamList = {
   AddTransaction:
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
-  EditTransaction: { transactionId: string };
+  EditTransaction: { transactionId: string; openSplitBill?: boolean };
   AccountDetail: { accountId: string };
   InsightsDrilldown: InsightsDrilldownPayload;
   RecurringEditor: { ruleId?: string } | undefined;

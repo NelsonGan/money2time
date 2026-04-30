@@ -94,6 +94,7 @@ interface SimpleActivityScreenProps {
   focusMonthToken?: number;
   tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenBreakdownInsight?: (insightType: BreakdownInsightType, monthKey: string) => void;
 }
 
@@ -225,6 +226,7 @@ export function SimpleActivityScreen({
   focusMonthToken = 0,
   tutorialResetToken = 0,
   onOpenTransaction,
+  onOpenTransactionSplitBadge,
   onOpenBreakdownInsight,
 }: SimpleActivityScreenProps) {
   const themeColors = useThemeColors();
@@ -472,6 +474,7 @@ export function SimpleActivityScreen({
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         onTransactionPress={onOpenTransaction}
+        onTransactionSplitBadgePress={onOpenTransactionSplitBadge}
         getScrollToTopRef={getPageScrollToTopRef}
         contentPaddingHorizontal={listHorizontalPadding}
       />
@@ -486,6 +489,7 @@ export function SimpleActivityScreen({
       monthPagerAnchorDate,
       monthPageStyle,
       onOpenTransaction,
+      onOpenTransactionSplitBadge,
       transactionDisplaySettings,
     ],
   );
@@ -726,6 +730,7 @@ export function SimpleActivityScreen({
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={onOpenTransaction}
+            onTransactionSplitBadgePress={onOpenTransactionSplitBadge}
             emptyTitle={I18n.t('transactions.empty_search_title')}
             emptyMessage={I18n.t('transactions.empty_search_message')}
             contentPaddingBottom={LIST_BOTTOM_PADDING}

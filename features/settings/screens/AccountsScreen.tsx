@@ -997,6 +997,7 @@ interface AccountsScreenProps {
   onOpenAccount?: (accountId: string) => void;
   onOpenAddTransaction?: (accountId: string) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
+  onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
@@ -1011,6 +1012,7 @@ export function AccountsScreen({
   onOpenAccount,
   onOpenAddTransaction,
   onOpenTransaction,
+  onOpenTransactionSplitBadge,
   onOpenSettings,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
@@ -1600,6 +1602,20 @@ export function AccountsScreen({
     },
     [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
   );
+  const handleTransactionSplitBadgePress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      if (onOpenTransactionSplitBadge) {
+        onOpenTransactionSplitBadge(transaction);
+        return;
+      }
+      setSelectedTransaction(transaction);
+    },
+    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+  );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -1792,6 +1808,7 @@ export function AccountsScreen({
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
+            onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
             selectedTransactionIds={selectedTransactionIds}
             selectionMode={isSelectionMode}
             emptyTitle={I18n.t(
@@ -1824,6 +1841,7 @@ export function AccountsScreen({
       getTrueHourlyRateForDate,
       handleTransactionLongPress,
       handleTransactionPress,
+      handleTransactionSplitBadgePress,
       isSelectionMode,
       pagerAnchorDate,
       pagerPageStyle,

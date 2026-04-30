@@ -267,9 +267,7 @@ function AIChatStartupPreloader() {
 
     const preloadModel = async () => {
       try {
-        await aiChatLlamaService.loadModel(
-          aiChatModelManager.getModelPath(AI_CHAT_MODEL.fileName),
-        );
+        await aiChatLlamaService.loadModel(aiChatModelManager.getModelPath(AI_CHAT_MODEL.fileName));
 
         const today = dayKeyFromDateLocal(new Date());
         await aiChatLlamaService.primeTransactionParser(
@@ -383,7 +381,18 @@ function MainShellScreen({
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
-      navigation.navigate('EditTransaction', { transactionId: transaction.id });
+      navigation.navigate('EditTransaction', {
+        transactionId: transaction.id,
+      });
+    },
+    [navigation],
+  );
+  const openTransactionSplitBill = useCallback(
+    (transaction: TransactionWithRelations) => {
+      navigation.navigate('EditTransaction', {
+        transactionId: transaction.id,
+        openSplitBill: true,
+      });
     },
     [navigation],
   );
@@ -482,8 +491,7 @@ function MainShellScreen({
     openAddTransaction();
   }, [openAIChat, openAddTransaction, settings.centerAddButtonOpensAiChat]);
 
-  const shouldHideBottomNav =
-    activeTab === 'transactions' && isTransactionsSelectionMode;
+  const shouldHideBottomNav = activeTab === 'transactions' && isTransactionsSelectionMode;
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
@@ -645,9 +653,7 @@ function MainShellScreen({
   const handleShellRootLayout = useCallback(() => {
     shellRootRef.current?.measureInWindow((x, y) => {
       setShellWindowOrigin((previous) =>
-        Math.abs(previous.x - x) < 0.5 && Math.abs(previous.y - y) < 0.5
-          ? previous
-          : { x, y },
+        Math.abs(previous.x - x) < 0.5 && Math.abs(previous.y - y) < 0.5 ? previous : { x, y },
       );
     });
   }, []);
@@ -723,6 +729,7 @@ function MainShellScreen({
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
               onOpenBreakdownInsight={openActivityBreakdownInsight}
               tutorialResetToken={transactionsTutorialResetToken}
             />
@@ -732,6 +739,7 @@ function MainShellScreen({
               focusMonthKey={transactionsFocusMonthKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
               onOpenBreakdownInsight={openActivityBreakdownInsight}
               onSelectionModeChange={setIsTransactionsSelectionMode}
               tutorialResetToken={transactionsTutorialResetToken}
@@ -842,6 +850,7 @@ function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'
       onClose={() => navigation.goBack()}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
+      openSplitBillOnMount={route.params.openSplitBill}
     />
   );
 }
@@ -856,7 +865,15 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
         navigation.push('AddTransaction', { initialAccountId: accountId })
       }
       onOpenTransaction={(transaction) =>
-        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+        navigation.navigate('EditTransaction', {
+          transactionId: transaction.id,
+        })
+      }
+      onOpenTransactionSplitBadge={(transaction) =>
+        navigation.navigate('EditTransaction', {
+          transactionId: transaction.id,
+          openSplitBill: true,
+        })
       }
     />
   );
@@ -939,7 +956,15 @@ function InsightsDrilldownRouteScreen({
       payload={route.params}
       onBack={() => navigation.goBack()}
       onOpenTransaction={(transaction) =>
-        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+        navigation.navigate('EditTransaction', {
+          transactionId: transaction.id,
+        })
+      }
+      onOpenTransactionSplitBadge={(transaction) =>
+        navigation.navigate('EditTransaction', {
+          transactionId: transaction.id,
+          openSplitBill: true,
+        })
       }
       onOpenSubcategoryDrilldown={(payload) => navigation.push('InsightsDrilldown', payload)}
     />
