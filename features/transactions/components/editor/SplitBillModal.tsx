@@ -277,7 +277,10 @@ export function SplitBillModal({
     (index: number) => {
       void triggerHaptic('warning');
       const target = splits[index];
-      if (!target || target.isSelf || target.paid) return;
+      if (!target || target.isSelf) return;
+      // Removing a paid row drops the local entry but leaves the linked
+      // transfer + parent's reduced amount alone — the user can clean up the
+      // transfer separately from the activity list if they want.
       const next = splits.filter((_, i) => i !== index);
       onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
     },
@@ -378,6 +381,7 @@ export function SplitBillModal({
     onCancel();
   }, [onCancel]);
   const handleDone = useCallback(() => {
+    void triggerHaptic('success');
     Keyboard.dismiss();
     onDone();
   }, [onDone]);
@@ -540,6 +544,7 @@ export function SplitBillModal({
                         editable={!disabledRow}
                         onChangeText={(text) => handleAmountChange(index, text)}
                         onBlur={() => handleAmountBlur(index)}
+                        selectTextOnFocus
                         keyboardType="decimal-pad"
                         placeholder="0"
                         placeholderTextColor={`${themeColors.mutedForeground}99`}
@@ -553,7 +558,7 @@ export function SplitBillModal({
                         ]}
                       />
 
-                      {!row.isSelf && !disabledRow ? (
+                      {!row.isSelf ? (
                         <Pressable
                           onPress={() => handleRemove(index)}
                           hitSlop={8}

@@ -38,6 +38,9 @@ interface ActivityTransactionListProps {
   getTrueHourlyRateForDate: (dateIso: string) => number;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
+  /** Tap on the unpaid-splits notification badge — overrides the row tap so
+   *  the caller can route directly to the Split Bill modal. */
+  onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
   emptyTitle: string;
@@ -200,6 +203,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   getTrueHourlyRateForDate,
   onTransactionPress,
   onTransactionLongPress,
+  onTransactionSplitBadgePress,
   selectedTransactionIds = [],
   selectionMode = false,
   emptyTitle,
@@ -318,6 +322,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           transaction={item.transaction}
           onPressTransaction={onTransactionPress}
           onLongPressTransaction={onTransactionLongPress}
+          onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(item.transaction.id)}
           selectionMode={selectionMode}
           disableAnimations={disableItemAnimations}
@@ -336,6 +341,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       isTimeMode,
       onTransactionPress,
       onTransactionLongPress,
+      onTransactionSplitBadgePress,
       selectedTransactionIdSet,
       selectionMode,
       displaySettings,

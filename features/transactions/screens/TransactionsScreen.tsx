@@ -233,6 +233,7 @@ interface TransactionsScreenProps {
   focusMonthToken?: number;
   tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenBreakdownInsight?: (insightType: BreakdownInsightType, monthKey: string) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
@@ -243,6 +244,7 @@ export function TransactionsScreen({
   focusMonthToken = 0,
   tutorialResetToken = 0,
   onOpenTransaction,
+  onOpenTransactionSplitBadge,
   onOpenBreakdownInsight,
   onSelectionModeChange,
 }: TransactionsScreenProps) {
@@ -618,6 +620,17 @@ export function TransactionsScreen({
     },
     [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
   );
+  const handleTransactionSplitBadgePress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      // Selection mode wins over the badge so taps stay consistent across the row.
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      onOpenTransactionSplitBadge?.(transaction);
+    },
+    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+  );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -800,6 +813,7 @@ export function TransactionsScreen({
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onTransactionPress={handleTransactionPress}
           onTransactionLongPress={handleTransactionLongPress}
+          onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
           selectedTransactionIds={selectedTransactionIds}
           selectionMode={isSelectionMode}
           getScrollToTopRef={getPageScrollToTopRef}
@@ -811,6 +825,7 @@ export function TransactionsScreen({
       getPageScrollToTopRef,
       handleTransactionLongPress,
       handleTransactionPress,
+      handleTransactionSplitBadgePress,
       activeLocale,
       getDisplayValueForTransaction,
       getTrueHourlyRateForDate,
@@ -942,6 +957,7 @@ export function TransactionsScreen({
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
+            onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
             selectedTransactionIds={selectedTransactionIds}
             selectionMode={isSelectionMode}
             emptyTitle={I18n.t('transactions.empty_search_title')}
