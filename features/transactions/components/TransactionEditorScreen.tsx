@@ -773,25 +773,21 @@ export function TransactionEditorScreen({
     }
   }, [activeField]);
 
-  // When parent amount changes and split-evenly is on, redistribute split amounts
-  // across UNPAID rows (paid ones are settled and keep their stored amount).
+  // When the parent amount changes (user typing in the amount field), keep
+  // the split rows in sync so the modal's sum bar doesn't show "unaccounted".
+  // - Split-evenly: redistribute the new total across all UNPAID rows.
+  // - Manual: Me absorbs the delta (autoBalanceSelf), friends keep their amounts.
+  // Paid rows are "settled" in either mode and keep their stored amount.
   useEffect(() => {
-    if (!splitMode || !splitEvenly) return;
+    if (!splitMode) return;
     const numericAmount = Number(amount);
     if (!Number.isFinite(numericAmount)) return;
     if (splits.length === 0) return;
-    const unpaidIndices: number[] = [];
-    splits.forEach((s, i) => {
-      if (!s.paid) unpaidIndices.push(i);
-    });
-    if (unpaidIndices.length === 0) return;
-    const portions = splitsHelpers.distributeEvenly(numericAmount, unpaidIndices.length);
-    const next = splits.map((row, idx) => {
-      const slot = unpaidIndices.indexOf(idx);
-      if (slot < 0) return row;
-      return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
-    });
-    const isEqual = next.every((row, i) => row.amount === splits[i]?.amount);
+    const next = splitEvenly
+      ? splitsHelpers.distributeEvenlyAcrossUnpaid(splits, numericAmount)
+      : splitsHelpers.autoBalanceSelf(splits, numericAmount);
+    const isEqual =
+      next.length === splits.length && next.every((row, i) => row.amount === splits[i]?.amount);
     if (!isEqual) setSplits(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amount, splitMode, splitEvenly]);

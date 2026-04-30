@@ -108,6 +108,23 @@ function autoBalanceSelf(rows: SplitDraft[], total: number, changedIndex?: numbe
   return rows.map((r, i) => (i === selfIndex ? { ...r, amount: selfAmount.toFixed(2) } : r));
 }
 
+/** Even-split: divide `total` across all unpaid rows (Me + unpaid friends).
+ *  Paid rows keep their amount — they're already settled. */
+function distributeEvenlyAcrossUnpaid(rows: SplitDraft[], total: number): SplitDraft[] {
+  if (rows.length === 0) return rows;
+  const unpaidIndices: number[] = [];
+  rows.forEach((r, i) => {
+    if (!r.paid) unpaidIndices.push(i);
+  });
+  if (unpaidIndices.length === 0) return rows;
+  const portions = distributeEvenly(total, unpaidIndices.length);
+  return rows.map((row, idx) => {
+    const slot = unpaidIndices.indexOf(idx);
+    if (slot < 0) return row;
+    return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
+  });
+}
+
 /** Mirror of autoBalanceSelf: when the user edits Me, redistribute the
  *  remaining (total - Me) evenly across the unpaid friend rows. Floors at 0
  *  so friends can't go negative if Me eats more than the total. */
@@ -151,7 +168,12 @@ function toSplitDraftInputs(
   }));
 }
 
-export const splitsHelpers = { distributeEvenly, toSplitDraftInputs };
+export const splitsHelpers = {
+  distributeEvenly,
+  toSplitDraftInputs,
+  distributeEvenlyAcrossUnpaid,
+  autoBalanceSelf,
+};
 
 export function SplitBillModal({
   visible,
@@ -231,21 +253,7 @@ export function SplitBillModal({
   );
 
   const applyEvenSplit = useCallback(
-    (rows: SplitDraft[]) => {
-      if (rows.length === 0) return rows;
-      // Even-split divides only the unpaid total across unpaid rows; paid rows keep their amount.
-      const unpaidIndices: number[] = [];
-      rows.forEach((r, i) => {
-        if (!r.paid) unpaidIndices.push(i);
-      });
-      if (unpaidIndices.length === 0) return rows;
-      const portions = distributeEvenly(total, unpaidIndices.length);
-      return rows.map((row, idx) => {
-        const slot = unpaidIndices.indexOf(idx);
-        if (slot < 0) return row;
-        return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
-      });
-    },
+    (rows: SplitDraft[]) => distributeEvenlyAcrossUnpaid(rows, total),
     [total],
   );
 
