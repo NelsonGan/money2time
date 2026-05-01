@@ -26,6 +26,7 @@ const en = {
     ungrouped: 'Ungrouped',
     other: 'Other',
     unknown: 'Unknown',
+    none: 'None',
     no_account: 'No account',
     uncategorized: 'Uncategorized',
     transfers: 'Transfers',
@@ -604,6 +605,7 @@ const en = {
       exclude_accounts: 'Exclude accounts',
       exclude_income_categories: 'Exclude income categories',
       exclude_expense_categories: 'Exclude expense categories',
+      excluded: 'excluded',
       none: 'No exclusions',
     },
     period: {

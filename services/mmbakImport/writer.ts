@@ -6,6 +6,7 @@ import { transactionsRepository } from '~/lib/repositories/transactionsRepositor
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import type { AccountType, CategoryType } from '~/types';
 import { I18n } from '~/lib/i18n';
+import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
 
 import type { MMBackupData, MMImportSummary, MMTxRow } from './types';
 
@@ -481,7 +482,7 @@ export function writeImportedData(
     }
 
     const now = new Date().toISOString();
-    const defaultIcon = parentId ? '' : randomCategoryEmoji();
+    const defaultIcon = parentId ? '' : (suggestCategoryEmoji(row.name) ?? randomCategoryEmoji());
     const id = categoriesRepository.create({
       name: row.name,
       type: row.type,

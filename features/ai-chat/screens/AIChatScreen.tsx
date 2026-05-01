@@ -1,4 +1,5 @@
 import {
+  ChevronRight,
   Download,
   HardDrive,
   Settings,
@@ -41,8 +42,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot } from '~/components/feedback/Mascot';
 import {
+  AccountPickerSheet,
   Button,
   Card,
+  CategoryPickerSheet,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -51,10 +54,6 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
-import {
-  AccountPanel,
-  CategoryPanel,
-} from '~/features/transactions/components/editor';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -320,6 +319,9 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
   const rejectCleanupTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingPreview, setEditingPreview] = useState<EditingPreviewState | null>(null);
+  const [activeSettingsPicker, setActiveSettingsPicker] = useState<
+    'account' | 'expenseCategory' | 'incomeCategory' | null
+  >(null);
 
   const defaultAiChatAccount = useMemo(
     () => accounts.find((account) => account.id === settings.aiChatDefaultAccountId) ?? null,
@@ -372,7 +374,7 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
       }),
     ];
   }, [accounts, categories]);
-  const buildCategoryPanelData = useCallback(
+  const buildCategoryPickerData = useCallback(
     (type: 'expense' | 'income') => {
       const parents: { id: string; name: string; icon: string }[] = [];
       const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
@@ -407,13 +409,13 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
     [categories],
   );
 
-  const expenseCategoryPanelData = useMemo(
-    () => buildCategoryPanelData('expense'),
-    [buildCategoryPanelData],
+  const expenseCategoryPickerData = useMemo(
+    () => buildCategoryPickerData('expense'),
+    [buildCategoryPickerData],
   );
-  const incomeCategoryPanelData = useMemo(
-    () => buildCategoryPanelData('income'),
-    [buildCategoryPanelData],
+  const incomeCategoryPickerData = useMemo(
+    () => buildCategoryPickerData('income'),
+    [buildCategoryPickerData],
   );
 
   const closeEditingPreview = useCallback(() => {
@@ -1388,23 +1390,17 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                     </Pressable>
                   ) : null}
                 </View>
-                <View
-                  className="overflow-hidden rounded-[18px] border border-border/30 bg-card/35"
-                  style={styles.accountPanelWrap}
+                <Pressable
+                  onPress={() => setActiveSettingsPicker('account')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <AccountPanel
-                    accounts={accounts}
-                    accountGroups={accountGroups}
-                    selectedId={settings.aiChatDefaultAccountId}
-                    onSelect={(accountId) => {
-                      void triggerHaptic('selection');
-                      updateSettings({
-                        aiChatDefaultAccountId:
-                          accountId === settings.aiChatDefaultAccountId ? null : accountId,
-                      });
-                    }}
-                  />
-                </View>
+                  <Text variant="body" tone={settings.aiChatDefaultAccountId ? undefined : 'muted'}>
+                    {settings.aiChatDefaultAccountId
+                      ? accounts.find((a) => a.id === settings.aiChatDefaultAccountId)?.name ?? I18n.t('common.none')
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : (
               <View className="mb-4 px-1">
@@ -1444,24 +1440,17 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   </Pressable>
                 ) : null}
               </View>
-              <View
-                className="overflow-hidden rounded-[18px] border border-border/30 bg-card/35"
-                style={styles.categoryPanelWrap}
+              <Pressable
+                onPress={() => setActiveSettingsPicker('expenseCategory')}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
               >
-                <CategoryPanel
-                  parents={expenseCategoryPanelData.parents}
-                  childByParent={expenseCategoryPanelData.childByParent}
-                  allowParentSelection
-                  selectedCategoryId={settings.aiChatDefaultExpenseCategoryId}
-                  onSelect={(categoryId) => {
-                    void triggerHaptic('selection');
-                    updateSettings({
-                      aiChatDefaultExpenseCategoryId:
-                        categoryId === settings.aiChatDefaultExpenseCategoryId ? null : categoryId,
-                    });
-                  }}
-                />
-              </View>
+                <Text variant="body" tone={settings.aiChatDefaultExpenseCategoryId ? undefined : 'muted'}>
+                  {settings.aiChatDefaultExpenseCategoryId
+                    ? categories.find((c) => c.id === settings.aiChatDefaultExpenseCategoryId)?.name ?? I18n.t('common.none')
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
             </View>
 
             {/* ── Default Income Category ── */}
@@ -1488,24 +1477,17 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
                   </Pressable>
                 ) : null}
               </View>
-              <View
-                className="overflow-hidden rounded-[18px] border border-border/30 bg-card/35"
-                style={styles.categoryPanelWrap}
+              <Pressable
+                onPress={() => setActiveSettingsPicker('incomeCategory')}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
               >
-                <CategoryPanel
-                  parents={incomeCategoryPanelData.parents}
-                  childByParent={incomeCategoryPanelData.childByParent}
-                  allowParentSelection
-                  selectedCategoryId={settings.aiChatDefaultIncomeCategoryId}
-                  onSelect={(categoryId) => {
-                    void triggerHaptic('selection');
-                    updateSettings({
-                      aiChatDefaultIncomeCategoryId:
-                        categoryId === settings.aiChatDefaultIncomeCategoryId ? null : categoryId,
-                    });
-                  }}
-                />
-              </View>
+                <Text variant="body" tone={settings.aiChatDefaultIncomeCategoryId ? undefined : 'muted'}>
+                  {settings.aiChatDefaultIncomeCategoryId
+                    ? categories.find((c) => c.id === settings.aiChatDefaultIncomeCategoryId)?.name ?? I18n.t('common.none')
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
             </View>
 
 
@@ -1595,6 +1577,50 @@ export function AIChatScreen({ onBack }: AIChatScreenProps) {
           />
         ) : null}
       </Modal>
+      <AccountPickerSheet
+        visible={activeSettingsPicker === 'account'}
+        onClose={() => setActiveSettingsPicker(null)}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={settings.aiChatDefaultAccountId}
+        onSelect={(accountId) => {
+          void triggerHaptic('selection');
+          updateSettings({
+            aiChatDefaultAccountId:
+              accountId === settings.aiChatDefaultAccountId ? null : accountId,
+          });
+        }}
+      />
+      <CategoryPickerSheet
+        visible={activeSettingsPicker === 'expenseCategory'}
+        onClose={() => setActiveSettingsPicker(null)}
+        parents={expenseCategoryPickerData.parents}
+        childByParent={expenseCategoryPickerData.childByParent}
+        allowParentSelection
+        selectedCategoryId={settings.aiChatDefaultExpenseCategoryId}
+        onSelect={(categoryId) => {
+          void triggerHaptic('selection');
+          updateSettings({
+            aiChatDefaultExpenseCategoryId:
+              categoryId === settings.aiChatDefaultExpenseCategoryId ? null : categoryId,
+          });
+        }}
+      />
+      <CategoryPickerSheet
+        visible={activeSettingsPicker === 'incomeCategory'}
+        onClose={() => setActiveSettingsPicker(null)}
+        parents={incomeCategoryPickerData.parents}
+        childByParent={incomeCategoryPickerData.childByParent}
+        allowParentSelection
+        selectedCategoryId={settings.aiChatDefaultIncomeCategoryId}
+        onSelect={(categoryId) => {
+          void triggerHaptic('selection');
+          updateSettings({
+            aiChatDefaultIncomeCategoryId:
+              categoryId === settings.aiChatDefaultIncomeCategoryId ? null : categoryId,
+          });
+        }}
+      />
     </SettingsPageLayout>
     </KeyboardAvoidingView>
   );
@@ -1715,11 +1741,5 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-  },
-  accountPanelWrap: {
-    height: 200,
-  },
-  categoryPanelWrap: {
-    height: 240,
   },
 });

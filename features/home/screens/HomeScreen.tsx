@@ -25,7 +25,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Mascot } from '~/components/feedback/Mascot';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { Button, Card, Text, TimeValueInline } from '~/components/ui';
+import { Button, Card, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { getThemeWordmarkPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -100,6 +100,7 @@ interface RecurringDisplayRow {
   recurrencePattern: RecurringSectionId;
   cadenceLabel: string;
   categoryIcon: string;
+  categoryName: string | null;
   valueLabel: React.ReactNode;
 }
 
@@ -155,7 +156,11 @@ function RecurringRuleRow({
       ]}
     >
       <View style={[styles.recurringIconWrap, iconBackgroundStyle]}>
-        <Text style={styles.recurringIconText}>{item.categoryIcon}</Text>
+        <CategoryEmoji
+          style={styles.recurringIconText}
+          icon={item.categoryIcon}
+          name={item.categoryName ?? item.name}
+        />
       </View>
       <View style={styles.recurringTextWrap}>
         <Text variant="bodyStrong" numberOfLines={1}>
@@ -449,6 +454,7 @@ export function HomeScreen({
           recurrencePattern: rule.recurrencePattern,
           cadenceLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
           categoryIcon,
+          categoryName: category?.name ?? null,
           valueLabel: isTimeMode ? (
             <TimeValueInline
               value={formatHours(rule.monthlyHours)}

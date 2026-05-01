@@ -46,7 +46,6 @@ export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
   includeInTotals: true,
 };
 
-export const CATEGORY_ICON_PLACEHOLDER = '🏷️';
 export const DEFAULT_CATEGORY_EMOJIS = [
   '🍔',
   '🛒',

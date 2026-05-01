@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react-native';
+import { ChevronRight, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import {
@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import { CategoryPickerSheet, Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
@@ -23,9 +23,7 @@ import {
   DisplayModeToggle,
   MonthJumpPopover,
   MonthPagerPage,
-  TypeFilterPill,
 } from '~/features/transactions/components';
-import { CategoryPanel } from '~/features/transactions/components/editor';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -64,9 +62,6 @@ const FILTER_SCROLL_CONTENT_STYLE = {
   gap: spacing.sm,
 } as const;
 const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
-const FILTER_SELECTION_PANEL_CLASS =
-  'rounded-[18px] border border-border/30 bg-card/35 overflow-hidden';
-const SELECTION_PANEL_HEIGHT = 236;
 const SORT_OPTION_VALUES = ['date_desc', 'date_asc', 'amount_desc', 'amount_asc'] as const;
 const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
   transactionsMap: new Map<string, TransactionWithRelations[]>(),
@@ -76,15 +71,15 @@ const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
 type SortByValue = (typeof SORT_OPTION_VALUES)[number];
 type BreakdownInsightType = 'expense_breakdown' | 'income_breakdown';
 
-interface CategoryPanelItem {
+interface CategoryPickerItem {
   id: string;
   name: string;
   icon: string;
 }
 
-interface CategoryPanelData {
-  parents: CategoryPanelItem[];
-  childrenByParent: Map<string, CategoryPanelItem[]>;
+interface CategoryPickerData {
+  parents: CategoryPickerItem[];
+  childrenByParent: Map<string, CategoryPickerItem[]>;
   previewById: Map<string, { icon: string; label: string }>;
 }
 
@@ -98,14 +93,14 @@ interface SimpleActivityScreenProps {
   onOpenBreakdownInsight?: (insightType: BreakdownInsightType, monthKey: string) => void;
 }
 
-function buildCategoryPanelDataByType(categories: Category[]): {
-  income: CategoryPanelData;
-  expense: CategoryPanelData;
+function buildCategoryPickerDataByType(categories: Category[]): {
+  income: CategoryPickerData;
+  expense: CategoryPickerData;
 } {
-  const incomeParents: CategoryPanelItem[] = [];
-  const expenseParents: CategoryPanelItem[] = [];
-  const incomeChildrenByParent = new Map<string, CategoryPanelItem[]>();
-  const expenseChildrenByParent = new Map<string, CategoryPanelItem[]>();
+  const incomeParents: CategoryPickerItem[] = [];
+  const expenseParents: CategoryPickerItem[] = [];
+  const incomeChildrenByParent = new Map<string, CategoryPickerItem[]>();
+  const expenseChildrenByParent = new Map<string, CategoryPickerItem[]>();
   const incomeParentIconById = new Map<string, string>();
   const expenseParentIconById = new Map<string, string>();
   const incomePreviewById = new Map<string, { icon: string; label: string }>();
@@ -242,6 +237,13 @@ export function SimpleActivityScreen({
   } = useApp();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [showFilters, setShowFilters] = useState(false);
+  const [activeFilterPicker, setActiveFilterPicker] = useState<
+    'incomeCategories' | 'expenseCategories' | null
+  >(null);
+  const closeFilterPicker = useCallback(() => setActiveFilterPicker(null), []);
+  useEffect(() => {
+    if (!showFilters) setActiveFilterPicker(null);
+  }, [showFilters]);
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [monthPickerAnchorRect, setMonthPickerAnchorRect] = useState<{
     x: number;
@@ -366,8 +368,8 @@ export function SimpleActivityScreen({
     transactionFilters.type,
   ]);
 
-  const { income: incomeCategoryPanelData, expense: expenseCategoryPanelData } = useMemo(
-    () => buildCategoryPanelDataByType(categories),
+  const { income: incomeCategoryPickerData, expense: expenseCategoryPickerData } = useMemo(
+    () => buildCategoryPickerDataByType(categories),
     [categories],
   );
   const shouldShowIncomeCategoryFilter =
@@ -567,7 +569,13 @@ export function SimpleActivityScreen({
     measureMonthPickerTrigger();
     setIsMonthPickerOpen(true);
   }, [hasActiveSearch, measureMonthPickerTrigger]);
-  const handleCloseFilters = useCallback(() => setShowFilters(false), []);
+  const handleCloseFilters = useCallback(() => {
+    if (activeFilterPicker) {
+      setActiveFilterPicker(null);
+      return;
+    }
+    setShowFilters(false);
+  }, [activeFilterPicker]);
   const handleResetFilters = useCallback(() => {
     void triggerHaptic('selection');
     setSearchDraft('');
@@ -817,12 +825,11 @@ export function SimpleActivityScreen({
                 contentContainerStyle={FILTER_CHIPS_CONTENT_STYLE}
               >
                 {typeFilters.map((item) => (
-                  <TypeFilterPill
+                  <FilterPill
                     key={item.value}
                     label={item.label}
-                    value={item.value}
-                    selected={transactionFilters.type === item.value}
-                    onSelect={handleTypeChange}
+                    active={transactionFilters.type === item.value}
+                    onPress={() => handleTypeChange(item.value)}
                   />
                 ))}
               </ScrollView>
@@ -830,49 +837,39 @@ export function SimpleActivityScreen({
 
             {shouldShowIncomeCategoryFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_income_categories')}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_income_categories')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveFilterPicker('incomeCategories')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+                >
+                  <Text variant="body" tone={transactionFilters.excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                    {transactionFilters.excludedIncomeCategoryIds.length > 0
+                      ? `${transactionFilters.excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
                   </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={transactionFilters.excludedIncomeCategoryIds.length === 0}
-                    onPress={handleClearExcludedIncomeCategoryFilter}
-                  />
-                </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
-                  <CategoryPanel
-                    parents={incomeCategoryPanelData.parents}
-                    childByParent={incomeCategoryPanelData.childrenByParent}
-                    allowParentSelection
-                    selectedCategoryIds={transactionFilters.excludedIncomeCategoryIds}
-                    onToggleSelect={handleToggleExcludedIncomeCategoryFilter}
-                  />
-                </View>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
             {shouldShowExpenseCategoryFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_expense_categories')}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_expense_categories')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveFilterPicker('expenseCategories')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+                >
+                  <Text variant="body" tone={transactionFilters.excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                    {transactionFilters.excludedExpenseCategoryIds.length > 0
+                      ? `${transactionFilters.excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
                   </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={transactionFilters.excludedExpenseCategoryIds.length === 0}
-                    onPress={handleClearExcludedExpenseCategoryFilter}
-                  />
-                </View>
-                <View className={FILTER_SELECTION_PANEL_CLASS} style={styles.selectionPanel}>
-                  <CategoryPanel
-                    parents={expenseCategoryPanelData.parents}
-                    childByParent={expenseCategoryPanelData.childrenByParent}
-                    allowParentSelection
-                    selectedCategoryIds={transactionFilters.excludedExpenseCategoryIds}
-                    onToggleSelect={handleToggleExcludedExpenseCategoryFilter}
-                  />
-                </View>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
@@ -912,6 +909,28 @@ export function SimpleActivityScreen({
               options={sortOptions}
             />
           </ScrollView>
+          <CategoryPickerSheet
+            overlay
+            visible={activeFilterPicker === 'incomeCategories'}
+            onClose={closeFilterPicker}
+            parents={incomeCategoryPickerData.parents}
+            childByParent={incomeCategoryPickerData.childrenByParent}
+            allowParentSelection
+            selectedCategoryIds={transactionFilters.excludedIncomeCategoryIds}
+            onToggleSelect={handleToggleExcludedIncomeCategoryFilter}
+            onClear={handleClearExcludedIncomeCategoryFilter}
+          />
+          <CategoryPickerSheet
+            overlay
+            visible={activeFilterPicker === 'expenseCategories'}
+            onClose={closeFilterPicker}
+            parents={expenseCategoryPickerData.parents}
+            childByParent={expenseCategoryPickerData.childrenByParent}
+            allowParentSelection
+            selectedCategoryIds={transactionFilters.excludedExpenseCategoryIds}
+            onToggleSelect={handleToggleExcludedExpenseCategoryFilter}
+            onClear={handleClearExcludedExpenseCategoryFilter}
+          />
         </SafeAreaView>
       </ThemeModal>
     </SafeAreaView>
@@ -937,8 +956,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  selectionPanel: {
-    height: SELECTION_PANEL_HEIGHT,
   },
 });

@@ -1027,7 +1027,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deletedAt: null,
         ...resolveRelationNames(normalizedInput),
       };
-      setTransactions((prev) => [optimistic, ...prev]);
+      setTransactions((prev) => sortTransactions([optimistic, ...prev], 'date_desc'));
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(id, normalizedInput);

@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, Plus, RotateCcw, UserRound, X } from 'lucide-react-native';
+import { Check, ChevronLeft, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Keyboard,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text, ThemeModal } from '~/components/ui';
+import { AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -66,14 +66,6 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     flex: 1,
-  },
-  pickerBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  pickerSheet: {
-    maxHeight: '85%',
   },
 });
 
@@ -338,41 +330,6 @@ export function SplitBillModal({
 
   const sumMatches = Math.abs(diff) < 0.005;
 
-  // Group accounts by their account group for the payback picker. Mirrors the
-  // ordering used in the main editor's AccountPanel.
-  const accountSections = useMemo(() => {
-    type Section = { key: string; label: string; accounts: Account[] };
-    const groupNames = new Set(accountGroups.map((g) => g.name));
-    const buckets = new Map<string, Account[]>();
-    for (const account of accounts) {
-      const key = account.accountGroup?.trim() || '__ungrouped__';
-      const list = buckets.get(key) ?? [];
-      list.push(account);
-      buckets.set(key, list);
-    }
-    const sections: Section[] = [];
-    for (const group of accountGroups) {
-      const list = buckets.get(group.name);
-      if (list && list.length > 0) {
-        sections.push({ key: group.id, label: group.name, accounts: list });
-      }
-    }
-    for (const [key, list] of buckets) {
-      if (key === '__ungrouped__') continue;
-      if (groupNames.has(key)) continue;
-      sections.push({ key, label: key, accounts: list });
-    }
-    const ungrouped = buckets.get('__ungrouped__');
-    if (ungrouped && ungrouped.length > 0) {
-      sections.push({
-        key: '__ungrouped__',
-        label: sections.length > 0 ? I18n.t('common.other') : '',
-        accounts: ungrouped,
-      });
-    }
-    return sections;
-  }, [accounts, accountGroups]);
-
   const accountPickerSplit = useMemo(() => {
     if (!accountPickerForKey) return null;
     const idx = splits.findIndex(
@@ -566,17 +523,6 @@ export function SplitBillModal({
                         ]}
                       />
 
-                      {!row.isSelf ? (
-                        <Pressable
-                          onPress={() => handleRemove(index)}
-                          hitSlop={8}
-                          className="h-7 w-7 items-center justify-center"
-                        >
-                          <X size={14} color={themeColors.textMuted} />
-                        </Pressable>
-                      ) : (
-                        <View className="w-2" />
-                      )}
                     </View>
 
                     {!row.isSelf ? (
@@ -603,6 +549,7 @@ export function SplitBillModal({
                                 onMarkUnpaid?.(row.id ?? '');
                               }}
                               hitSlop={6}
+                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                               className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-secondary/50"
                             >
                               <RotateCcw size={11} color={themeColors.textMuted} />
@@ -613,12 +560,24 @@ export function SplitBillModal({
                           ) : null}
                         </View>
                       ) : (
-                        <View className="flex-row items-center justify-between mt-2 pl-11 gap-2">
+                        <View className="flex-row items-center mt-2 gap-2">
+                          {/* Trash sits under the avatar (w-9 + gap-2.5 = ~44px / pl-11). */}
+                          <View className="w-9 items-center">
+                            <Pressable
+                              onPress={() => handleRemove(index)}
+                              hitSlop={8}
+                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                              className="h-7 w-7 rounded-full bg-destructive/10 items-center justify-center"
+                            >
+                              <Trash2 size={14} color={themeColors.error} />
+                            </Pressable>
+                          </View>
                           <Pressable
                             onPress={() => {
                               void triggerHaptic('selection');
                               setAccountPickerForKey(rowKey);
                             }}
+                            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                             className="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/50 flex-shrink min-w-0"
                           >
                             <Text variant="caption" tone="muted">
@@ -629,12 +588,15 @@ export function SplitBillModal({
                             </Text>
                           </Pressable>
 
+                          <View className="flex-1" />
+
                           {canMarkPaid ? (
                             <Pressable
                               onPress={() => {
                                 void triggerHaptic('success');
                                 onMarkPaid?.(row.id ?? '');
                               }}
+                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                               className="px-3 py-1.5 rounded-full bg-success/15"
                             >
                               <Text variant="caption" className="text-success font-medium">
@@ -702,80 +664,26 @@ export function SplitBillModal({
         </View>
       </SafeAreaView>
 
-      {/* Per-row payback account picker */}
-      <ThemeModal
+      <AccountPickerSheet
         visible={accountPickerSplit !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAccountPickerForKey(null)}
-      >
-        <Pressable style={styles.pickerBackdrop} onPress={() => setAccountPickerForKey(null)}>
-          <Pressable onPress={(e) => e.stopPropagation()} style={styles.pickerSheet}>
-            <View
-              className="bg-card rounded-t-[28px]"
-              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-            >
-              <View className="px-5 pt-5 pb-3">
-                <Text variant="heading">{I18n.t('transactions.editor.split.payback_to')}</Text>
-              </View>
-              <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
-                {accountSections.map((section, sectionIndex) => {
-                  const selectedAccountId = accountPickerSplit
-                    ? (splits[accountPickerSplit.index]?.paybackAccountId ?? null)
-                    : null;
-                  return (
-                    <View key={section.key} className={cn(sectionIndex > 0 && 'mt-4')}>
-                      {section.label ? (
-                        <Text variant="caption" tone="muted" className="mb-2 px-1 uppercase">
-                          {section.label}
-                        </Text>
-                      ) : null}
-                      <View className="flex-row flex-wrap -mx-1">
-                        {section.accounts.map((acct) => {
-                          const isSelected = acct.id === selectedAccountId;
-                          return (
-                            <View key={acct.id} className="w-1/2 px-1 mb-2">
-                              <Pressable
-                                onPress={() => {
-                                  if (!accountPickerSplit) return;
-                                  void triggerHaptic('selection');
-                                  const { index } = accountPickerSplit;
-                                  const next = splits.map((s, i) =>
-                                    i === index ? { ...s, paybackAccountId: acct.id } : s,
-                                  );
-                                  onChange(next);
-                                  setAccountPickerForKey(null);
-                                }}
-                                className={cn(
-                                  'rounded-2xl px-3 py-3 flex-row items-center justify-between gap-2',
-                                  isSelected
-                                    ? 'bg-primary/15 border border-primary/30'
-                                    : 'bg-secondary/40 border border-transparent',
-                                )}
-                              >
-                                <Text
-                                  variant="body"
-                                  numberOfLines={1}
-                                  className={cn('flex-1', isSelected && 'text-primary font-medium')}
-                                >
-                                  {acct.name}
-                                </Text>
-                                {isSelected ? (
-                                  <Check size={14} color={themeColors.primary} />
-                                ) : null}
-                              </Pressable>
-                            </View>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </View>
-          </Pressable>
-        </Pressable>
-      </ThemeModal>
+        onClose={() => setAccountPickerForKey(null)}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={
+          accountPickerSplit
+            ? (splits[accountPickerSplit.index]?.paybackAccountId ?? null)
+            : null
+        }
+        onSelect={(accountId) => {
+          if (!accountPickerSplit) return;
+          const { index } = accountPickerSplit;
+          const next = splits.map((s, i) =>
+            i === index ? { ...s, paybackAccountId: accountId } : s,
+          );
+          onChange(next);
+          setAccountPickerForKey(null);
+        }}
+      />
     </ThemeModal>
   );
 }

@@ -8,6 +8,7 @@ import Sortable from 'react-native-sortables';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   Button,
+  CategoryEmoji,
   Input,
   SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -29,7 +30,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType } from '~/types';
 import { cn } from '~/utils';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
 import { FONT } from '~/utils/fonts';
 
 const CATEGORY_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -147,15 +148,30 @@ function CategoryEditor({
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
+  const [iconManuallyPicked, setIconManuallyPicked] = useState(mode === 'edit');
 
   useEffect(() => {
+    if (!visible) return;
     setName(initial?.name ?? '');
     setIcon(initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]));
     setParentId(initial?.parentId ?? null);
-  }, [initial, visible]);
+    setIconManuallyPicked(mode === 'edit');
+    // Reset on open only. The modal always closes between edits, so we don't
+    // need to react to `initial` identity changes (parent passes a fresh
+    // object literal each render, which would otherwise wipe user input).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
+  useEffect(() => {
+    if (iconManuallyPicked || parentId !== null) return;
+    const timer = setTimeout(() => {
+      const suggested = suggestCategoryEmoji(name);
+      if (suggested) setIcon(suggested);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [name, iconManuallyPicked, parentId]);
 
   const canSave = name.trim().length > 0;
-  const isSubcategory = parentId !== null;
 
   const handleDelete = () => {
     if (!onDelete) return;
@@ -213,37 +229,40 @@ function CategoryEditor({
                 {I18n.t('categories.emoji')}
               </Text>
               <View className="flex-row flex-wrap gap-2">
-                {isSubcategory ? (
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setIcon('');
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('categories.none')}
-                    accessibilityState={{ selected: icon.trim().length === 0 }}
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setIconManuallyPicked(true);
+                    setIcon('');
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('categories.none')}
+                  accessibilityState={{ selected: icon.trim().length === 0 }}
+                  className={cn(
+                    'h-11 px-3 rounded-full border items-center justify-center',
+                    icon.trim().length === 0
+                      ? 'bg-primary/15 border-primary/50'
+                      : 'bg-card border-border/40',
+                  )}
+                >
+                  <Text
+                    variant="caption"
                     className={cn(
-                      'h-11 px-3 rounded-full border items-center justify-center',
-                      icon.trim().length === 0
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
+                      icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    <Text
-                      variant="caption"
-                      className={cn(
-                        icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t('categories.none')}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {DEFAULT_CATEGORY_EMOJIS.map((emoji) => (
+                    {I18n.t('categories.none')}
+                  </Text>
+                </Pressable>
+                {(icon && !DEFAULT_CATEGORY_EMOJIS.includes(icon)
+                  ? [icon, ...DEFAULT_CATEGORY_EMOJIS]
+                  : DEFAULT_CATEGORY_EMOJIS
+                ).map((emoji) => (
                   <Pressable
                     key={emoji}
                     onPress={() => {
                       void triggerHaptic('selection');
+                      setIconManuallyPicked(true);
                       setIcon(emoji);
                     }}
                     accessibilityRole="button"
@@ -325,7 +344,7 @@ function CategoryEditor({
             const normalizedIcon = icon.trim();
             onSubmit({
               name: name.trim(),
-              icon: parentId ? normalizedIcon : normalizedIcon || DEFAULT_CATEGORY_EMOJIS[0],
+              icon: normalizedIcon,
               parentId,
             });
           }}
@@ -416,7 +435,7 @@ function TopLevelRow({
           },
         ]}
       >
-        <Text style={styles.rowIconText}>{resolveCategoryIcon(item.icon)}</Text>
+        <CategoryEmoji style={styles.rowIconText} icon={item.icon} name={item.name} />
       </View>
       <Pressable
         onPress={() => onNavigate(item)}
@@ -473,7 +492,6 @@ function SubcategoryRow({
   onEdit: (item: Category) => void;
 }) {
   const tc = themeColors;
-  const displayIcon = resolveCategoryIcon(item.icon, parentIcon);
   return (
     <View
       style={[
@@ -494,7 +512,12 @@ function SubcategoryRow({
           },
         ]}
       >
-        <Text style={styles.rowIconText}>{displayIcon}</Text>
+        <CategoryEmoji
+          style={styles.rowIconText}
+          icon={item.icon}
+          parentIcon={parentIcon}
+          name={item.name}
+        />
       </View>
       <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>
         {item.name}
