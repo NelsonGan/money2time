@@ -31,13 +31,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { Button, SegmentedToggle, Text } from '~/components/ui';
+import {
+  AccountPickerSheet,
+  Button,
+  CategoryPickerSheet,
+  SegmentedToggle,
+  Text,
+} from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
-  AccountPanel,
-  CategoryPanel,
   DatePanel,
   NumpadPanel,
   SplitBillModal,
@@ -98,13 +102,17 @@ type TypeCardOption = {
 const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
   'amount',
   'date',
+  'repeat',
+  'ends',
+  'endDate',
+];
+
+// These fields render as a modal sheet over the editor — no inline tool zone.
+const SHEET_FIELDS: readonly NonNullActiveField[] = [
   'account',
   'fromAccount',
   'toAccount',
   'category',
-  'repeat',
-  'ends',
-  'endDate',
 ];
 
 const styles = StyleSheet.create({
@@ -663,22 +671,15 @@ export function TransactionEditorScreen({
     handleTypeChange(fallbackType);
   }, [availableTypeCards, handleTypeChange, type]);
 
-  const {
-    topLevelCategories,
-    topLevelCategoryById,
-    topLevelCategoryIdSet,
-    childCategoriesByParent,
-  } = useMemo(() => {
+  const { topLevelCategories, topLevelCategoryById, childCategoriesByParent } = useMemo(() => {
     const topLevel: Category[] = [];
     const topLevelById = new Map<string, Category>();
-    const topLevelIds = new Set<string>();
     const childrenByParent = new Map<string, Category[]>();
 
     if (type !== 'expense' && type !== 'income') {
       return {
         topLevelCategories: topLevel,
         topLevelCategoryById: topLevelById,
-        topLevelCategoryIdSet: topLevelIds,
         childCategoriesByParent: childrenByParent,
       };
     }
@@ -688,7 +689,6 @@ export function TransactionEditorScreen({
       if (!category.parentId) {
         topLevel.push(category);
         topLevelById.set(category.id, category);
-        topLevelIds.add(category.id);
         return;
       }
       if (hideSubcategories) return;
@@ -703,7 +703,6 @@ export function TransactionEditorScreen({
     return {
       topLevelCategories: topLevel,
       topLevelCategoryById: topLevelById,
-      topLevelCategoryIdSet: topLevelIds,
       childCategoriesByParent: childrenByParent,
     };
   }, [categories, hideSubcategories, type]);
@@ -1193,7 +1192,10 @@ export function TransactionEditorScreen({
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
   const showToolZone =
-    activeField !== null && activeField !== 'note' && !inlineRecurringFields.includes(activeField);
+    activeField !== null &&
+    activeField !== 'note' &&
+    !inlineRecurringFields.includes(activeField) &&
+    !SHEET_FIELDS.includes(activeField);
   const noteSuggestionsVisible = noteSuggestions.length > 0 && activeField === 'note';
   const noteSuggestionsTop = noteFieldFrame ? noteFieldFrame.y + noteFieldFrame.height : null;
   const effectiveSummaryFlex =
@@ -1434,14 +1436,6 @@ export function TransactionEditorScreen({
     if (mode === 'create') {
       autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
     }
-
-    const isSelectedParent = topLevelCategoryIdSet.has(nextCategoryId);
-    const selectedParentHasChildren =
-      (childCategoriesByParent.get(nextCategoryId)?.length ?? 0) > 0;
-    if (isSelectedParent && selectedParentHasChildren) {
-      return;
-    }
-
     focusNoteField();
   };
 
@@ -1481,49 +1475,6 @@ export function TransactionEditorScreen({
         );
       case 'date':
         return <DatePanel value={date} onSelect={handleDateSelect} />;
-      case 'account':
-        return (
-          <AccountPanel
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedId={accountId}
-            onBackgroundPress={clearActiveField}
-            onSelect={handleAccountSelect}
-          />
-        );
-      case 'fromAccount':
-        return (
-          <AccountPanel
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedId={fromAccountId}
-            disabledId={toAccountId}
-            onBackgroundPress={clearActiveField}
-            onSelect={handleFromAccountSelect}
-          />
-        );
-      case 'toAccount':
-        return (
-          <AccountPanel
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedId={toAccountId}
-            disabledId={fromAccountId}
-            onBackgroundPress={clearActiveField}
-            onSelect={handleToAccountSelect}
-          />
-        );
-      case 'category':
-        return (
-          <CategoryPanel
-            parents={categoryPanelParents}
-            childByParent={categoryPanelChildren}
-            allowParentSelection
-            selectedCategoryId={categoryId}
-            onBackgroundPress={clearActiveField}
-            onSelect={handleCategorySelect}
-          />
-        );
       case 'repeat':
         return (
           <View className="flex-1 px-5 pt-3">
@@ -2419,6 +2370,41 @@ export function TransactionEditorScreen({
           newlyPaidIds={newlyPaidIds}
         />
       ) : null}
+      <AccountPickerSheet
+        visible={activeField === 'account'}
+        onClose={clearActiveField}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={accountId}
+        onSelect={handleAccountSelect}
+      />
+      <AccountPickerSheet
+        visible={activeField === 'fromAccount'}
+        onClose={clearActiveField}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={fromAccountId}
+        disabledId={toAccountId}
+        onSelect={handleFromAccountSelect}
+      />
+      <AccountPickerSheet
+        visible={activeField === 'toAccount'}
+        onClose={clearActiveField}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={toAccountId}
+        disabledId={fromAccountId}
+        onSelect={handleToAccountSelect}
+      />
+      <CategoryPickerSheet
+        visible={activeField === 'category'}
+        onClose={clearActiveField}
+        parents={categoryPanelParents}
+        childByParent={categoryPanelChildren}
+        allowParentSelection
+        selectedCategoryId={categoryId}
+        onSelect={handleCategorySelect}
+      />
     </SafeAreaView>
   );
 }
