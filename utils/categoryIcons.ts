@@ -1,5 +1,3 @@
-import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
-
 function normalizeIcon(icon?: string | null): string | null {
   if (!icon) return null;
   const trimmed = icon.trim();
@@ -9,7 +7,7 @@ function normalizeIcon(icon?: string | null): string | null {
 export function resolveCategoryIcon(
   icon?: string | null,
   parentIcon?: string | null,
-  fallbackIcon = CATEGORY_ICON_PLACEHOLDER,
+  fallbackIcon = '',
 ): string {
   return normalizeIcon(icon) ?? normalizeIcon(parentIcon) ?? fallbackIcon;
 }

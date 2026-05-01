@@ -39,7 +39,15 @@ import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { Card, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import {
+  AccountPickerSheet,
+  Card,
+  CategoryPickerSheet,
+  SelectField,
+  Text,
+  ThemeModal,
+  TimeValueInline,
+} from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
@@ -52,7 +60,7 @@ import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendP
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
-import { AccountPanel, CategoryPanel, DatePanel } from '~/features/transactions/components/editor';
+import { DatePanel } from '~/features/transactions/components/editor';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
@@ -62,6 +70,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category, CategoryType, TransactionWithRelations, WageType } from '~/types';
 import { cn } from '~/utils';
 import { getNetAssetContribution } from '~/utils/accountBalances';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
@@ -247,8 +256,6 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingBottom: LIST_BOTTOM_PADDING,
   paddingTop: spacing.xxs,
 } as const;
-const FILTER_SELECTION_PANEL_CLASS =
-  'rounded-[18px] border-2 border-border/60 bg-card/80 shadow-soft overflow-hidden';
 const ASSET_HISTORY_CHART_HEIGHT = 226;
 const ASSET_HISTORY_CHART_PADDING_RIGHT = 64;
 const EXPENSE_TREND_CHART_HEIGHT = 226;
@@ -422,9 +429,6 @@ const styles = StyleSheet.create({
   },
   insightsFilterDatePanel: {
     height: 360,
-  },
-  insightsFilterSelectionPanel: {
-    height: 236,
   },
   incomeRateUnitPickerSheet: {
     marginHorizontal: spacing.screenHorizontal,
@@ -762,37 +766,45 @@ type InsightAnalyticsSavingsRateMonthRow = {
   transactions: TransactionWithRelations[];
 };
 
-interface InsightsCategoryPanelItem {
+interface InsightsCategoryPickerItem {
   id: string;
   name: string;
   icon: string;
 }
 
-interface InsightsCategoryPanelData {
-  parents: InsightsCategoryPanelItem[];
-  childByParent: Map<string, InsightsCategoryPanelItem[]>;
+interface InsightsCategoryPickerData {
+  parents: InsightsCategoryPickerItem[];
+  childByParent: Map<string, InsightsCategoryPickerItem[]>;
 }
 
-function buildInsightsCategoryPanelData(
+function buildInsightsCategoryPickerData(
   categories: Category[],
   categoryType: CategoryType,
-): InsightsCategoryPanelData {
+): InsightsCategoryPickerData {
   const parentCategories = categories.filter(
     (category) => category.type === categoryType && category.parentId === null,
   );
   const parentIds = new Set(parentCategories.map((parent) => parent.id));
+  const parentIconById = new Map<string, string>();
+  parentCategories.forEach((category) => {
+    parentIconById.set(category.id, category.icon);
+  });
   const parents = parentCategories.map((category) => ({
     id: category.id,
     name: category.name,
-    icon: category.icon || '•',
+    icon: resolveCategoryIcon(category.icon),
   }));
-  const childByParent = new Map<string, InsightsCategoryPanelItem[]>();
+  const childByParent = new Map<string, InsightsCategoryPickerItem[]>();
 
   categories.forEach((category) => {
     const parentId = category.parentId;
     if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
     const existing = childByParent.get(parentId);
-    const child = { id: category.id, name: category.name, icon: category.icon || '•' };
+    const child = {
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
+    };
     if (existing) {
       existing.push(child);
     } else {
@@ -2635,7 +2647,24 @@ export function InsightsScreen({
   const [incomeRateDisplayUnit, setIncomeRateDisplayUnit] =
     useState<IncomeRateDisplayUnit>('hourly');
   const [isIncomeRateUnitPickerOpen, setIsIncomeRateUnitPickerOpen] = useState(false);
+  const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] = useState<
+    | 'assetHistoryAccounts'
+    | 'expenseTrendAccounts'
+    | 'expenseTrendExpenseCategories'
+    | 'incomeTrendAccounts'
+    | 'incomeTrendIncomeCategories'
+    | 'timeCostExpenseCategories'
+    | 'expenseBreakdownCategories'
+    | 'incomeBreakdownCategories'
+    | 'savingsIncomeCategories'
+    | 'savingsExpenseCategories'
+    | null
+  >(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const closeInsightsFilterPicker = useCallback(() => setActiveInsightsFilterPicker(null), []);
+  useEffect(() => {
+    if (!isFilterModalOpen) setActiveInsightsFilterPicker(null);
+  }, [isFilterModalOpen]);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
@@ -6604,12 +6633,12 @@ export function InsightsScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [assetHistoryAccountOptions, excludedAssetHistoryAccountIds.length]);
-  const savingsIncomeCategoryPanel = useMemo(
-    () => buildInsightsCategoryPanelData(categories, 'income'),
+  const savingsIncomeCategoryPicker = useMemo(
+    () => buildInsightsCategoryPickerData(categories, 'income'),
     [categories],
   );
-  const savingsExpenseCategoryPanel = useMemo(
-    () => buildInsightsCategoryPanelData(categories, 'expense'),
+  const savingsExpenseCategoryPicker = useMemo(
+    () => buildInsightsCategoryPickerData(categories, 'expense'),
     [categories],
   );
   const displayActiveInsightFilterConfig = useMemo(
@@ -7006,7 +7035,13 @@ export function InsightsScreen({
         visible={hasInsightsFilters && isFilterModalOpen}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setIsFilterModalOpen(false)}
+        onRequestClose={() => {
+          if (activeInsightsFilterPicker) {
+            setActiveInsightsFilterPicker(null);
+            return;
+          }
+          setIsFilterModalOpen(false);
+        }}
       >
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
           <View style={styles.insightsFilterModalHeader}>
@@ -7172,90 +7207,57 @@ export function InsightsScreen({
 
             {hasAssetHistoryAccountExclusionFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_accounts')}
-                  </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={excludedAssetHistoryAccountIds.length === 0}
-                    onPress={() => setExcludedAssetHistoryAccountIds([])}
-                  />
-                </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={styles.insightsFilterSelectionPanel}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_accounts')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <AccountPanel
-                    accounts={assetHistoryAccountOptions}
-                    accountGroups={accountGroups}
-                    selectedIds={excludedAssetHistoryAccountIds}
-                    onToggleSelect={(accountId) =>
-                      setExcludedAssetHistoryAccountIds((previous) =>
-                        toggleStringId(previous, accountId),
-                      )
-                    }
-                  />
-                </View>
+                  <Text variant="body" tone={excludedAssetHistoryAccountIds.length > 0 ? undefined : 'muted'}>
+                    {excludedAssetHistoryAccountIds.length > 0
+                      ? `${excludedAssetHistoryAccountIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
             {hasExpenseTrendExclusionFilter ? (
               <View className="gap-3">
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_accounts')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedExpenseTrendAccountIds.length === 0}
-                      onPress={() => setExcludedExpenseTrendAccountIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_accounts')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <AccountPanel
-                      accounts={accounts}
-                      accountGroups={accountGroups}
-                      selectedIds={excludedExpenseTrendAccountIds}
-                      onToggleSelect={(accountId) =>
-                        setExcludedExpenseTrendAccountIds((previous) =>
-                          toggleStringId(previous, accountId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedExpenseTrendAccountIds.length > 0 ? undefined : 'muted'}>
+                      {excludedExpenseTrendAccountIds.length > 0
+                        ? `${excludedExpenseTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
 
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_expense_categories')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedExpenseTrendExpenseCategoryIds.length === 0}
-                      onPress={() => setExcludedExpenseTrendExpenseCategoryIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_expense_categories')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <CategoryPanel
-                      parents={savingsExpenseCategoryPanel.parents}
-                      childByParent={savingsExpenseCategoryPanel.childByParent}
-                      selectedCategoryIds={excludedExpenseTrendExpenseCategoryIds}
-                      onToggleSelect={(categoryId) =>
-                        setExcludedExpenseTrendExpenseCategoryIds((previous) =>
-                          toggleStringId(previous, categoryId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedExpenseTrendExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                      {excludedExpenseTrendExpenseCategoryIds.length > 0
+                        ? `${excludedExpenseTrendExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
               </View>
             ) : null}
@@ -7263,213 +7265,283 @@ export function InsightsScreen({
             {hasIncomeTrendExclusionFilter ? (
               <View className="gap-3">
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_accounts')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedIncomeTrendAccountIds.length === 0}
-                      onPress={() => setExcludedIncomeTrendAccountIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_accounts')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <AccountPanel
-                      accounts={accounts}
-                      accountGroups={accountGroups}
-                      selectedIds={excludedIncomeTrendAccountIds}
-                      onToggleSelect={(accountId) =>
-                        setExcludedIncomeTrendAccountIds((previous) =>
-                          toggleStringId(previous, accountId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedIncomeTrendAccountIds.length > 0 ? undefined : 'muted'}>
+                      {excludedIncomeTrendAccountIds.length > 0
+                        ? `${excludedIncomeTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
 
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_income_categories')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedIncomeTrendIncomeCategoryIds.length === 0}
-                      onPress={() => setExcludedIncomeTrendIncomeCategoryIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_income_categories')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <CategoryPanel
-                      parents={savingsIncomeCategoryPanel.parents}
-                      childByParent={savingsIncomeCategoryPanel.childByParent}
-                      selectedCategoryIds={excludedIncomeTrendIncomeCategoryIds}
-                      onToggleSelect={(categoryId) =>
-                        setExcludedIncomeTrendIncomeCategoryIds((previous) =>
-                          toggleStringId(previous, categoryId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedIncomeTrendIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                      {excludedIncomeTrendIncomeCategoryIds.length > 0
+                        ? `${excludedIncomeTrendIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
               </View>
             ) : null}
 
             {hasTimeCostExpenseCategoryExclusionFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_expense_categories')}
-                  </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={excludedTimeCostExpenseCategoryIds.length === 0}
-                    onPress={() => setExcludedTimeCostExpenseCategoryIds([])}
-                  />
-                </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={styles.insightsFilterSelectionPanel}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_expense_categories')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveInsightsFilterPicker('timeCostExpenseCategories')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <CategoryPanel
-                    parents={savingsExpenseCategoryPanel.parents}
-                    childByParent={savingsExpenseCategoryPanel.childByParent}
-                    selectedCategoryIds={excludedTimeCostExpenseCategoryIds}
-                    onToggleSelect={(categoryId) =>
-                      setExcludedTimeCostExpenseCategoryIds((prev) =>
-                        toggleStringId(prev, categoryId),
-                      )
-                    }
-                  />
-                </View>
+                  <Text variant="body" tone={excludedTimeCostExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                    {excludedTimeCostExpenseCategoryIds.length > 0
+                      ? `${excludedTimeCostExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
             {hasExpenseBreakdownExclusionFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_expense_categories')}
-                  </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={excludedExpenseBreakdownCategoryIds.length === 0}
-                    onPress={() => setExcludedExpenseBreakdownCategoryIds([])}
-                  />
-                </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={styles.insightsFilterSelectionPanel}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_expense_categories')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <CategoryPanel
-                    parents={savingsExpenseCategoryPanel.parents}
-                    childByParent={savingsExpenseCategoryPanel.childByParent}
-                    selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
-                    onToggleSelect={(categoryId) =>
-                      setExcludedExpenseBreakdownCategoryIds((prev) =>
-                        toggleStringId(prev, categoryId),
-                      )
-                    }
-                  />
-                </View>
+                  <Text variant="body" tone={excludedExpenseBreakdownCategoryIds.length > 0 ? undefined : 'muted'}>
+                    {excludedExpenseBreakdownCategoryIds.length > 0
+                      ? `${excludedExpenseBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
             {hasIncomeBreakdownExclusionFilter ? (
               <View className="gap-2.5">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_income_categories')}
-                  </Text>
-                  <FilterPill
-                    label={I18n.t('common.clear')}
-                    active={excludedIncomeBreakdownCategoryIds.length === 0}
-                    onPress={() => setExcludedIncomeBreakdownCategoryIds([])}
-                  />
-                </View>
-                <View
-                  className={FILTER_SELECTION_PANEL_CLASS}
-                  style={styles.insightsFilterSelectionPanel}
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_income_categories')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <CategoryPanel
-                    parents={savingsIncomeCategoryPanel.parents}
-                    childByParent={savingsIncomeCategoryPanel.childByParent}
-                    selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
-                    onToggleSelect={(categoryId) =>
-                      setExcludedIncomeBreakdownCategoryIds((prev) =>
-                        toggleStringId(prev, categoryId),
-                      )
-                    }
-                  />
-                </View>
+                  <Text variant="body" tone={excludedIncomeBreakdownCategoryIds.length > 0 ? undefined : 'muted'}>
+                    {excludedIncomeBreakdownCategoryIds.length > 0
+                      ? `${excludedIncomeBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
 
             {hasSavingsCategoryExclusionFilter ? (
               <View className="gap-3">
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_income_categories')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedSavingsIncomeCategoryIds.length === 0}
-                      onPress={() => setExcludedSavingsIncomeCategoryIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_income_categories')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <CategoryPanel
-                      parents={savingsIncomeCategoryPanel.parents}
-                      childByParent={savingsIncomeCategoryPanel.childByParent}
-                      selectedCategoryIds={excludedSavingsIncomeCategoryIds}
-                      onToggleSelect={(categoryId) =>
-                        setExcludedSavingsIncomeCategoryIds((prev) =>
-                          toggleStringId(prev, categoryId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedSavingsIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                      {excludedSavingsIncomeCategoryIds.length > 0
+                        ? `${excludedSavingsIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
 
                 <View className="gap-2">
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('insights.filters.exclude_expense_categories')}
-                    </Text>
-                    <FilterPill
-                      label={I18n.t('common.clear')}
-                      active={excludedSavingsExpenseCategoryIds.length === 0}
-                      onPress={() => setExcludedSavingsExpenseCategoryIds([])}
-                    />
-                  </View>
-                  <View
-                    className={FILTER_SELECTION_PANEL_CLASS}
-                    style={styles.insightsFilterSelectionPanel}
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('insights.filters.exclude_expense_categories')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
+                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <CategoryPanel
-                      parents={savingsExpenseCategoryPanel.parents}
-                      childByParent={savingsExpenseCategoryPanel.childByParent}
-                      selectedCategoryIds={excludedSavingsExpenseCategoryIds}
-                      onToggleSelect={(categoryId) =>
-                        setExcludedSavingsExpenseCategoryIds((prev) =>
-                          toggleStringId(prev, categoryId),
-                        )
-                      }
-                    />
-                  </View>
+                    <Text variant="body" tone={excludedSavingsExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                      {excludedSavingsExpenseCategoryIds.length > 0
+                        ? `${excludedSavingsExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                        : I18n.t('common.none')}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
                 </View>
               </View>
             ) : null}
           </ScrollView>
+          <AccountPickerSheet
+            overlay
+            visible={activeInsightsFilterPicker === 'assetHistoryAccounts'}
+            onClose={closeInsightsFilterPicker}
+            accounts={assetHistoryAccountOptions}
+            accountGroups={accountGroups}
+            selectedIds={excludedAssetHistoryAccountIds}
+            onToggleSelect={(accountId) =>
+              setExcludedAssetHistoryAccountIds((previous) =>
+                toggleStringId(previous, accountId),
+              )
+            }
+            onClear={() => setExcludedAssetHistoryAccountIds([])}
+          />
+          <AccountPickerSheet
+            overlay
+            visible={activeInsightsFilterPicker === 'expenseTrendAccounts'}
+            onClose={closeInsightsFilterPicker}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedIds={excludedExpenseTrendAccountIds}
+            onToggleSelect={(accountId) =>
+              setExcludedExpenseTrendAccountIds((previous) =>
+                toggleStringId(previous, accountId),
+              )
+            }
+            onClear={() => setExcludedExpenseTrendAccountIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'expenseTrendExpenseCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsExpenseCategoryPicker.parents}
+            childByParent={savingsExpenseCategoryPicker.childByParent}
+            selectedCategoryIds={excludedExpenseTrendExpenseCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedExpenseTrendExpenseCategoryIds((previous) =>
+                toggleStringId(previous, categoryId),
+              )
+            }
+            onClear={() => setExcludedExpenseTrendExpenseCategoryIds([])}
+          />
+          <AccountPickerSheet
+            overlay
+            visible={activeInsightsFilterPicker === 'incomeTrendAccounts'}
+            onClose={closeInsightsFilterPicker}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedIds={excludedIncomeTrendAccountIds}
+            onToggleSelect={(accountId) =>
+              setExcludedIncomeTrendAccountIds((previous) =>
+                toggleStringId(previous, accountId),
+              )
+            }
+            onClear={() => setExcludedIncomeTrendAccountIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'incomeTrendIncomeCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsIncomeCategoryPicker.parents}
+            childByParent={savingsIncomeCategoryPicker.childByParent}
+            selectedCategoryIds={excludedIncomeTrendIncomeCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedIncomeTrendIncomeCategoryIds((previous) =>
+                toggleStringId(previous, categoryId),
+              )
+            }
+            onClear={() => setExcludedIncomeTrendIncomeCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'timeCostExpenseCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsExpenseCategoryPicker.parents}
+            childByParent={savingsExpenseCategoryPicker.childByParent}
+            selectedCategoryIds={excludedTimeCostExpenseCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedTimeCostExpenseCategoryIds((prev) =>
+                toggleStringId(prev, categoryId),
+              )
+            }
+            onClear={() => setExcludedTimeCostExpenseCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'expenseBreakdownCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsExpenseCategoryPicker.parents}
+            childByParent={savingsExpenseCategoryPicker.childByParent}
+            selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedExpenseBreakdownCategoryIds((prev) =>
+                toggleStringId(prev, categoryId),
+              )
+            }
+            onClear={() => setExcludedExpenseBreakdownCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'incomeBreakdownCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsIncomeCategoryPicker.parents}
+            childByParent={savingsIncomeCategoryPicker.childByParent}
+            selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedIncomeBreakdownCategoryIds((prev) =>
+                toggleStringId(prev, categoryId),
+              )
+            }
+            onClear={() => setExcludedIncomeBreakdownCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'savingsIncomeCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsIncomeCategoryPicker.parents}
+            childByParent={savingsIncomeCategoryPicker.childByParent}
+            selectedCategoryIds={excludedSavingsIncomeCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedSavingsIncomeCategoryIds((prev) =>
+                toggleStringId(prev, categoryId),
+              )
+            }
+            onClear={() => setExcludedSavingsIncomeCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeInsightsFilterPicker === 'savingsExpenseCategories'}
+            onClose={closeInsightsFilterPicker}
+            parents={savingsExpenseCategoryPicker.parents}
+            childByParent={savingsExpenseCategoryPicker.childByParent}
+            selectedCategoryIds={excludedSavingsExpenseCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedSavingsExpenseCategoryIds((prev) =>
+                toggleStringId(prev, categoryId),
+              )
+            }
+            onClear={() => setExcludedSavingsExpenseCategoryIds([])}
+          />
         </SafeAreaView>
       </ThemeModal>
 
@@ -7523,6 +7595,7 @@ export function InsightsScreen({
           </View>
         </View>
       </ThemeModal>
+
     </SafeAreaView>
   );
 }

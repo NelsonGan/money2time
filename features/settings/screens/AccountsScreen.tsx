@@ -1,4 +1,13 @@
-import { Eye, EyeOff, GripVertical, Pencil, Plus, Settings, Trash2 } from 'lucide-react-native';
+import {
+  ChevronRight,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Pencil,
+  Plus,
+  Settings,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -18,6 +27,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
+  AccountPickerSheet,
   Button,
   Input,
   SegmentedToggle,
@@ -37,13 +47,13 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { AccountPanel, DatePanel } from '~/features/transactions/components/editor';
-import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
+import { DatePanel } from '~/features/transactions/components/editor';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -116,7 +126,6 @@ const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING + spacing.xs,
   gap: spacing.sm,
 } as const;
-const ACCOUNT_PANEL_HEIGHT = 236;
 const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
 const FLOATING_ACTION_SIZE = 56;
 const FLOATING_ACTION_GAP = 12;
@@ -260,9 +269,6 @@ const styles = StyleSheet.create({
   },
   bulkDatePanel: {
     height: ACCOUNT_BULK_DATE_PANEL_HEIGHT,
-  },
-  accountPanel: {
-    height: ACCOUNT_PANEL_HEIGHT,
   },
   floatingAddButtonContainer: {
     position: 'absolute',
@@ -650,8 +656,10 @@ function PayCreditCardSheet({
   defaultAmount?: number;
 }) {
   const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
+  const [showFromAccountPicker, setShowFromAccountPicker] = useState(false);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState(I18n.t('accounts.credit_payment_note'));
+  const themeColors = useThemeColors();
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
 
@@ -695,17 +703,18 @@ function PayCreditCardSheet({
               <Text variant="caption" tone="muted">
                 {I18n.t('accounts.pay_from')}
               </Text>
-              <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={styles.accountPanel}
+              <Pressable
+                onPress={() => setShowFromAccountPicker(true)}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
               >
-                <AccountPanel
-                  accounts={fromAccounts}
-                  accountGroups={accountGroups}
-                  selectedId={fromAccountId}
-                  onSelect={setFromAccountId}
-                />
-              </View>
+                <Text variant="body" tone={fromAccountId ? undefined : 'muted'}>
+                  {fromAccountId
+                    ? fromAccounts.find((a) => a.id === fromAccountId)?.name ??
+                      I18n.t('common.none')
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
             </View>
             <Input
               label={I18n.t('transactions.editor.amount')}
@@ -725,6 +734,17 @@ function PayCreditCardSheet({
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </SafeAreaView>
+      <AccountPickerSheet
+        visible={showFromAccountPicker}
+        onClose={() => setShowFromAccountPicker(false)}
+        accounts={fromAccounts}
+        accountGroups={accountGroups}
+        selectedAccountId={fromAccountId}
+        onSelect={(accountId) => {
+          setFromAccountId(accountId);
+          setShowFromAccountPicker(false);
+        }}
+      />
     </ThemeModal>
   );
 }

@@ -25,6 +25,7 @@ const zh = {
     ungrouped: '未分组',
     other: '其他',
     unknown: '未知',
+    none: '无',
     no_account: '无账户',
     uncategorized: '未分类',
     transfers: '转账',
@@ -572,6 +573,7 @@ const zh = {
       exclude_accounts: '排除账户',
       exclude_income_categories: '排除收入分类',
       exclude_expense_categories: '排除支出分类',
+      excluded: '项已排除',
       none: '无排除项',
     },
     period: {

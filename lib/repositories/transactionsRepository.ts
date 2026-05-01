@@ -1,6 +1,5 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
-import { CATEGORY_ICON_PLACEHOLDER } from '~/constants/appDefaults';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
@@ -156,15 +155,15 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       ta.name as toAccountName,
       t.category_id as categoryId,
       c.name as categoryName,
-      COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), ''), '${CATEGORY_ICON_PLACEHOLDER}') as categoryIcon,
+      COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), '')) as categoryIcon,
       c.parent_id as categoryParentId,
       p.name as parentCategoryName
     FROM transactions t
     LEFT JOIN accounts a ON a.id = t.account_id AND a.deleted_at IS NULL
     LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
     LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
-    LEFT JOIN categories c ON c.id = t.category_id AND c.deleted_at IS NULL
-    LEFT JOIN categories p ON p.id = c.parent_id AND p.deleted_at IS NULL
+    LEFT JOIN categories c ON c.id = t.category_id
+    LEFT JOIN categories p ON p.id = c.parent_id
     WHERE t.id IN (${inClausePlaceholders})
   `,
     txIds,

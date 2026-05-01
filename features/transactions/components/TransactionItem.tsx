@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
-import { Text, TimeValueInline } from '~/components/ui';
+import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -142,12 +142,7 @@ function TransactionItemView({
           ? categoryInline
           : null;
   const rate = !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
-  const categoryEmoji = transaction.categoryIcon ?? undefined;
-  const leadingEmoji = isTransfer
-    ? '↔️'
-    : isBalanceAdjustment
-      ? '⚖️'
-      : categoryEmoji || (isIncome ? '⬆️' : '⬇️');
+  const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
   const amountToneClass = isTransfer
     ? 'text-muted-foreground'
     : isBalanceAdjustment
@@ -251,7 +246,21 @@ function TransactionItemView({
             isBalanceAdjustment ? 'rounded-full bg-primary/10' : null,
           )}
         >
-          <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>{leadingEmoji}</Text>
+          {isTransfer ? (
+            <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>↔️</Text>
+          ) : isBalanceAdjustment ? (
+            <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>⚖️</Text>
+          ) : hasCategoryRef ? (
+            <CategoryEmoji
+              icon={transaction.categoryIcon}
+              name={transaction.categoryName}
+              className={compact ? 'text-[15px]' : 'text-[18px]'}
+            />
+          ) : (
+            <Text className={compact ? 'text-[15px]' : 'text-[18px]'}>
+              {isIncome ? '⬆️' : '⬇️'}
+            </Text>
+          )}
         </View>
 
         <View className="flex-1 min-w-0 pr-1">
