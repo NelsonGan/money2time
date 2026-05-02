@@ -1349,13 +1349,17 @@ export function TransactionEditorScreen({
     (val: string) => {
       setAmount(formatMoney(Number(val)));
       setAmountExpression('');
+      // Only auto-jump if the next field is empty — don't yank focus when the
+      // user is just touching up the amount on an already-filled transaction.
       if (hideAccountSelector) {
-        activateField('category');
+        activateField(categoryId ? null : 'category');
+      } else if (isTransferType) {
+        activateField(fromAccountId ? null : 'fromAccount');
       } else {
-        activateField(isTransferType ? 'fromAccount' : 'account');
+        activateField(accountId ? null : 'account');
       }
     },
-    [activateField, hideAccountSelector, isTransferType],
+    [accountId, activateField, categoryId, fromAccountId, hideAccountSelector, isTransferType],
   );
 
   const handleAccountSelect = useCallback(
@@ -1365,17 +1369,17 @@ export function TransactionEditorScreen({
         activateField('amount');
         return;
       }
-      activateField('category');
+      activateField(categoryId ? null : 'category');
     },
-    [activateField, isBalanceAdjustmentType],
+    [activateField, categoryId, isBalanceAdjustmentType],
   );
 
   const handleFromAccountSelect = useCallback(
     (nextAccountId: string) => {
       setFromAccountId(nextAccountId);
-      activateField('toAccount');
+      activateField(toAccountId ? null : 'toAccount');
     },
-    [activateField],
+    [activateField, toAccountId],
   );
 
   const handleToAccountSelect = useCallback(
