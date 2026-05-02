@@ -24,6 +24,7 @@ import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-ar
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -239,13 +240,6 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  },
-  selectionOverlay: {
-    position: 'absolute',
-    top: spacing.xs,
-    left: 0,
-    right: 0,
-    zIndex: 20,
   },
   headerSpacer: {
     height: spacing.xs,
@@ -1934,60 +1928,62 @@ export function AccountsScreen({
             />
           </View>
           {isSelectionMode ? (
-            <View pointerEvents="box-none" style={styles.selectionOverlay}>
-              <View style={styles.headerContainer}>
-                <View className="rounded-2xl bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      clearSelection();
-                    }}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
-                  </Pressable>
-
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
+            <View className="bg-background pb-1.5 pt-1">
+              <TabletContentContainer>
+                <View className="px-5 pt-1.5">
+                  <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5 flex-row items-center justify-between gap-1.5">
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        clearSelection();
+                      }}
+                      className="h-9 px-3 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.cancel')}
+                    >
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('common.cancel')}
                       </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className={selectedTransactionTotalToneClass}>
-                          {selectedTransactionTotalLabel}
+                    </Pressable>
+
+                    <View className="flex-1 items-center px-1">
+                      <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                        <Text variant="caption" className="text-foreground">
+                          {I18n.t('transactions.selection.selected_count', {
+                            count: selectedTransactionCount,
+                          })}
                         </Text>
+                        <View className="rounded-full border border-border/35 bg-card px-2 py-[3px]">
+                          <Text variant="label" className={selectedTransactionTotalToneClass}>
+                            {selectedTransactionTotalLabel}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
 
-                  <View className="flex-row items-center gap-2">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
+                    <View className="flex-row items-center gap-1.5">
+                      <Pressable
+                        onPress={handleOpenBulkUpdate}
+                        className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.selection.update')}
+                        hitSlop={8}
+                      >
+                        <Pencil size={14} color={themeColors.primary} />
+                      </Pressable>
+                      <Pressable
+                        onPress={handleDeleteSelectedTransactions}
+                        className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('common.delete')}
+                        hitSlop={8}
+                      >
+                        <Trash2 size={14} color={themeColors.coral} />
+                      </Pressable>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </TabletContentContainer>
             </View>
           ) : (
             <MonthControlsHeader

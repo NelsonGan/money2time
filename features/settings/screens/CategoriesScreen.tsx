@@ -435,7 +435,7 @@ function TopLevelRow({
           },
         ]}
       >
-        <CategoryEmoji style={styles.rowIconText} icon={item.icon} name={item.name} />
+        <CategoryEmoji style={styles.rowIconText} icon={item.icon} />
       </View>
       <Pressable
         onPress={() => onNavigate(item)}
@@ -516,7 +516,6 @@ function SubcategoryRow({
           style={styles.rowIconText}
           icon={item.icon}
           parentIcon={parentIcon}
-          name={item.name}
         />
       </View>
       <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>

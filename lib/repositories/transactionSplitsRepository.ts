@@ -29,6 +29,16 @@ export interface UpdateTransactionSplitInput {
 }
 
 class TransactionSplitsRepository {
+  findById(id: string): TransactionSplit | null {
+    const db = getDb();
+    const row = db
+      .select()
+      .from(transactionSplitsTable)
+      .where(and(eq(transactionSplitsTable.id, id), isNull(transactionSplitsTable.deletedAt)))
+      .get();
+    return row ? toTransactionSplit(row) : null;
+  }
+
   listByTransactionId(transactionId: string): TransactionSplit[] {
     const db = getDb();
     return db

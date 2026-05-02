@@ -100,7 +100,6 @@ interface RecurringDisplayRow {
   recurrencePattern: RecurringSectionId;
   cadenceLabel: string;
   categoryIcon: string;
-  categoryName: string | null;
   valueLabel: React.ReactNode;
 }
 
@@ -156,11 +155,7 @@ function RecurringRuleRow({
       ]}
     >
       <View style={[styles.recurringIconWrap, iconBackgroundStyle]}>
-        <CategoryEmoji
-          style={styles.recurringIconText}
-          icon={item.categoryIcon}
-          name={item.categoryName ?? item.name}
-        />
+        <CategoryEmoji style={styles.recurringIconText} icon={item.categoryIcon} />
       </View>
       <View style={styles.recurringTextWrap}>
         <Text variant="bodyStrong" numberOfLines={1}>
@@ -454,7 +449,6 @@ export function HomeScreen({
           recurrencePattern: rule.recurrencePattern,
           cadenceLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
           categoryIcon,
-          categoryName: category?.name ?? null,
           valueLabel: isTimeMode ? (
             <TimeValueInline
               value={formatHours(rule.monthlyHours)}
