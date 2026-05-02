@@ -239,7 +239,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                     : '',
                             )}
                           >
-                            <CategoryEmoji icon={parent.icon} name={parent.name} />
+                            <CategoryEmoji icon={parent.icon} />
                             <Text
                               variant="body"
                               numberOfLines={1}
@@ -266,8 +266,10 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                               />
                             ) : null}
                           </Pressable>
-                          {isExpanded ? (
-                            <View className="h-2 bg-primary/[0.06]" />
+                          {showChildren ? (
+                            <View
+                              className={cn('h-2', isExpanded && 'bg-primary/[0.06]')}
+                            />
                           ) : null}
                         </View>
                       );
@@ -299,7 +301,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                     )}
                                   >
                                     {showChildIcon ? (
-                                      <CategoryEmoji icon={child.icon} name={child.name} />
+                                      <CategoryEmoji icon={child.icon} />
                                     ) : null}
                                     <Text
                                       variant="body"

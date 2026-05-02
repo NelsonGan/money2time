@@ -1,12 +1,12 @@
 import type { TextProps } from 'react-native';
 
 import { Text } from '~/components/ui/text';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { cn } from '~/utils';
 
 interface CategoryEmojiProps extends Omit<TextProps, 'children'> {
   icon?: string | null;
   parentIcon?: string | null;
-  name?: string | null;
   className?: string;
 }
 
@@ -17,15 +17,11 @@ function normalize(value?: string | null) {
 
 /**
  * Renders a category's icon. When no emoji is set (and no parent icon to inherit),
- * falls back to the uppercase first letter of the name as a muted monogram.
+ * falls back to a black/white circle placeholder that contrasts with the theme.
+ * The placeholder uses a generous line-height so the emoji glyph isn't clipped.
  */
-export function CategoryEmoji({
-  icon,
-  parentIcon,
-  name,
-  className,
-  ...textProps
-}: CategoryEmojiProps) {
+export function CategoryEmoji({ icon, parentIcon, className, ...textProps }: CategoryEmojiProps) {
+  const theme = useResolvedTheme();
   const resolved = normalize(icon) ?? normalize(parentIcon);
   if (resolved) {
     return (
@@ -34,10 +30,9 @@ export function CategoryEmoji({
       </Text>
     );
   }
-  const initial = (normalize(name)?.charAt(0) ?? '·').toUpperCase();
   return (
-    <Text {...textProps} className={cn('text-muted-foreground font-semibold', className)}>
-      {initial}
+    <Text {...textProps} className={cn(className, 'leading-7')}>
+      {theme === 'dark' ? '⚪' : '⚫'}
     </Text>
   );
 }

@@ -1077,23 +1077,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const nextUpdatedAt = nowIso();
       setTransactions((prev) =>
-        prev.map((tx) => {
-          const input = inputById.get(tx.id);
-          if (!input) return tx;
-          const relations = relationById.get(tx.id);
-          const updated = { ...tx, ...input, updatedAt: nextUpdatedAt };
-          if ('accountId' in input && relations) updated.accountName = relations.accountName;
-          if ('fromAccountId' in input && relations) {
-            updated.fromAccountName = relations.fromAccountName;
-          }
-          if ('toAccountId' in input && relations) updated.toAccountName = relations.toAccountName;
-          if ('categoryId' in input && relations) {
-            updated.categoryName = relations.categoryName;
-            updated.categoryIcon = relations.categoryIcon;
-            updated.categoryParentName = relations.categoryParentName;
-          }
-          return updated;
-        }),
+        sortTransactions(
+          prev.map((tx) => {
+            const input = inputById.get(tx.id);
+            if (!input) return tx;
+            const relations = relationById.get(tx.id);
+            const updated = { ...tx, ...input, updatedAt: nextUpdatedAt };
+            if ('accountId' in input && relations) updated.accountName = relations.accountName;
+            if ('fromAccountId' in input && relations) {
+              updated.fromAccountName = relations.fromAccountName;
+            }
+            if ('toAccountId' in input && relations) updated.toAccountName = relations.toAccountName;
+            if ('categoryId' in input && relations) {
+              updated.categoryName = relations.categoryName;
+              updated.categoryIcon = relations.categoryIcon;
+              updated.categoryParentName = relations.categoryParentName;
+            }
+            return updated;
+          }),
+          'date_desc',
+        ),
       );
       InteractionManager.runAfterInteractions(() => {
         try {
@@ -1303,12 +1306,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         splits: optimisticSplits,
         splitsSummary: summarizeSplits(optimisticSplits),
       };
-      setTransactions((prev) => {
-        const next = [optimisticParent, ...prev];
-        return optimisticTransfers.length > 0
-          ? sortTransactions([...optimisticTransfers, ...next], 'date_desc')
-          : next;
-      });
+      setTransactions((prev) =>
+        sortTransactions([optimisticParent, ...optimisticTransfers, ...prev], 'date_desc'),
+      );
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(txId, normalizedInput);
@@ -1444,40 +1444,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       splitId: string,
       options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
     ) => {
-      // Pre-allocate everything we might need so the setTransactions updater
-      // can be a pure function of `prev`. Reading the parent from `prev`
-      // (instead of the `transactions` closure) makes this safe to call
-      // immediately after another setter that just inserted a new split
-      // (e.g. updateTransactionSplits during Save), since React batches the
-      // updaters and the second one sees the first one's result.
       const transferTxId = newId();
       const paidAtIso = nowIso();
       const date = options?.date ?? dayKeyFromDateLocal(new Date());
       const note = options?.note?.trim() || null;
+      const optionPaybackAccountId = options?.paybackAccountId;
 
-      type Collected = {
-        parentId: string;
-        parentAccountId: string;
-        parentCurrency: string;
-        sameAccount: boolean;
-        splitAmount: number;
-        usedTransferTxId: string | null;
-        resolvedPaybackAccountId: string;
-      };
-      let collected: Collected | null = null;
-
+      // Optimistic state update. Reads parent from `prev` so it sees splits
+      // inserted by an earlier setter in the same batch (e.g. when Save calls
+      // updateTransactionSplits then markSplitPaid for a brand-new paid row).
       setTransactions((prev) => {
         const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
         const split = parent?.splits?.find((s) => s.id === splitId);
         if (!parent || !split || split.isSelf) return prev;
-        if (split.paidAt) return prev; // already paid
-
+        if (split.paidAt) return prev;
         const paybackAccountId =
-          options?.paybackAccountId !== undefined
-            ? options.paybackAccountId
+          optionPaybackAccountId !== undefined
+            ? optionPaybackAccountId
             : (split.paybackAccountId ?? parent.accountId ?? null);
-        if (!parent.accountId) return prev;
-        if (!paybackAccountId) return prev;
+        if (!parent.accountId || !paybackAccountId) return prev;
 
         const sameAccount = paybackAccountId === parent.accountId;
         const splitAmount = split.amount;
@@ -1486,8 +1471,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // For cross-account paybacks we model the friend's repayment as a
         // transfer from the original-paying account to the destination
         // account, and reduce the parent expense so its account balance
-        // reflects only the user's net outlay. Same-account paybacks just
-        // reduce the parent expense — no transfer needed.
+        // reflects only the user's net outlay.
         const optimisticTransfer: TransactionWithRelations | null = sameAccount
           ? null
           : {
@@ -1515,16 +1499,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               }),
             };
 
-        collected = {
-          parentId: parent.id,
-          parentAccountId: parent.accountId,
-          parentCurrency: parent.currency,
-          sameAccount,
-          splitAmount,
-          usedTransferTxId,
-          resolvedPaybackAccountId: paybackAccountId,
-        };
-
         const next = prev.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const reducedAmount = normalizeMoneyAmount(tx.amount - splitAmount);
@@ -1551,28 +1525,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           : next;
       });
 
-      if (!collected) return;
-      const c = collected as Collected;
-
+      // Always queue the persistence step. Earlier we tried to populate
+      // `collected` inside the updater and short-circuit if the updater bailed,
+      // but React 19 batches setState calls in event handlers so the updater
+      // runs *after* the synchronous code — `collected` would always be null
+      // and the write would never happen. Instead, the IM reads the split from
+      // DB. By the time this runs, updateTransactionSplits' own IM has already
+      // written any brand-new rows, so this works for both existing and newly
+      // inserted paid splits.
       InteractionManager.runAfterInteractions(() => {
         try {
-          // Re-read parent from DB so cumulative reductions don't clobber
-          // each other when several markSplitPaid calls are queued.
-          const currentParent = transactionsRepository.getById(c.parentId);
-          if (currentParent) {
-            const persistedReducedAmount = normalizeMoneyAmount(
-              currentParent.amount - c.splitAmount,
-            );
-            transactionsRepository.update(c.parentId, { amount: persistedReducedAmount });
-          }
-          if (!c.sameAccount && c.usedTransferTxId) {
-            transactionsRepository.createWithId(c.usedTransferTxId, {
+          const split = transactionSplitsRepository.findById(splitId);
+          if (!split || split.isSelf || split.paidAt) return;
+          const parent = transactionsRepository.getById(split.transactionId);
+          if (!parent || !parent.accountId) return;
+          const paybackAccountId =
+            optionPaybackAccountId !== undefined
+              ? optionPaybackAccountId
+              : (split.paybackAccountId ?? parent.accountId ?? null);
+          if (!paybackAccountId) return;
+          const sameAccount = paybackAccountId === parent.accountId;
+          const usedTransferTxId = sameAccount ? null : transferTxId;
+          transactionsRepository.update(parent.id, {
+            amount: normalizeMoneyAmount(parent.amount - split.amount),
+          });
+          if (!sameAccount && usedTransferTxId) {
+            transactionsRepository.createWithId(usedTransferTxId, {
               type: 'transfer',
-              amount: c.splitAmount,
-              currency: c.parentCurrency,
+              amount: split.amount,
+              currency: parent.currency,
               date,
-              fromAccountId: c.parentAccountId,
-              toAccountId: c.resolvedPaybackAccountId,
+              fromAccountId: parent.accountId,
+              toAccountId: paybackAccountId,
               accountId: null,
               categoryId: null,
               note,
@@ -1580,13 +1564,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           transactionSplitsRepository.update(splitId, {
-            paybackAccountId: c.resolvedPaybackAccountId,
+            paybackAccountId,
             paidAt: paidAtIso,
-            paidTransactionId: c.usedTransferTxId,
+            paidTransactionId: usedTransferTxId,
           });
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_PAID, {
-            payback_account_changed: !c.sameAccount,
-            same_account: c.sameAccount,
+            payback_account_changed: !sameAccount,
+            same_account: sameAccount,
           });
         } catch {
           // ignore; refresh below restores truth
@@ -1599,25 +1583,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const markSplitUnpaid = useCallback(
     (splitId: string) => {
-      // Pre-allocate so the setTransactions updater can read parent from
-      // `prev` (kept in sync with batched setters from the same handler).
       const now = nowIso();
 
-      type Collected = {
-        parentId: string;
-        splitAmount: number;
-        transferTxId: string | null;
-      };
-      let collected: Collected | null = null;
-
+      // Optimistic state update.
       setTransactions((prev) => {
         const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
         const split = parent?.splits?.find((s) => s.id === splitId);
         if (!parent || !split || !split.paidAt) return prev;
         const transferTxId = split.paidTransactionId;
         const splitAmount = split.amount;
-        collected = { parentId: parent.id, splitAmount, transferTxId };
-
         const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
@@ -1635,20 +1609,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
-      if (!collected) return;
-      const c = collected as Collected;
-
+      // Always queue persistence; read from DB to avoid the React 19 batching
+      // race where setTransactions updaters run after this synchronous code.
       InteractionManager.runAfterInteractions(() => {
         try {
-          const currentParent = transactionsRepository.getById(c.parentId);
-          if (currentParent) {
-            const persistedRestoredAmount = normalizeMoneyAmount(
-              currentParent.amount + c.splitAmount,
-            );
-            transactionsRepository.update(c.parentId, { amount: persistedRestoredAmount });
+          const split = transactionSplitsRepository.findById(splitId);
+          if (!split || !split.paidAt) return;
+          const parent = transactionsRepository.getById(split.transactionId);
+          if (parent) {
+            transactionsRepository.update(parent.id, {
+              amount: normalizeMoneyAmount(parent.amount + split.amount),
+            });
           }
-          if (c.transferTxId) {
-            transactionsRepository.softDelete(c.transferTxId);
+          if (split.paidTransactionId) {
+            transactionsRepository.softDelete(split.paidTransactionId);
           }
           transactionSplitsRepository.markUnpaid(splitId);
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_UNPAID, {});

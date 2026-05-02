@@ -253,7 +253,6 @@ function TransactionItemView({
           ) : hasCategoryRef ? (
             <CategoryEmoji
               icon={transaction.categoryIcon}
-              name={transaction.categoryName}
               className={compact ? 'text-[15px]' : 'text-[18px]'}
             />
           ) : (
