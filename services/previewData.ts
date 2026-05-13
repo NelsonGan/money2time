@@ -16,7 +16,7 @@ import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import type { TransactionSentiment, WageConfig } from '~/types';
 
-export type PreviewSeedProfile = 'american' | 'chinese';
+export type PreviewSeedProfile = 'american' | 'chinese' | 'malaysian_en' | 'malaysian_zh';
 
 export interface PreviewSeedSummary {
   profile: PreviewSeedProfile;
@@ -215,6 +215,34 @@ interface PreviewTransactionNotes {
   cardPayment: string;
 }
 
+interface PreviewExtrasConfig {
+  weekendBrunchCount: number;
+  weekendBrunchBase: number;
+  weekendBrunchSpread: number;
+  weekendBrunchMerchants: string[];
+  weekendBrunchNote: string;
+  bubbleTeaCount: number;
+  bubbleTeaBase: number;
+  bubbleTeaSpread: number;
+  bubbleTeaMerchants: string[];
+  hangoutBase: number;
+  hangoutSpread: number;
+  hangoutMerchants: string[];
+  hangoutNote: string;
+  deliveryCount: number;
+  deliveryBase: number;
+  deliverySpread: number;
+  deliveryMerchants: string[];
+  deliveryNote: string;
+  rideshareExtraCount: number;
+  rideshareExtraBase: number;
+  rideshareExtraSpread: number;
+  convenienceCount: number;
+  convenienceBase: number;
+  convenienceSpread: number;
+  convenienceMerchants: string[];
+}
+
 interface PreviewTransactionsConfig {
   merchants: {
     grocery: string[];
@@ -236,6 +264,7 @@ interface PreviewTransactionsConfig {
   lifestyle: PreviewLifestyleAmounts;
   transfers: PreviewTransferAmounts;
   travel: PreviewTravelAmounts;
+  extras?: PreviewExtrasConfig;
 }
 
 interface PreviewRecurringRuleConfig {
@@ -416,6 +445,84 @@ const CHINESE_CATEGORIES: CategoryNames = {
   invest_root: '投资',
   dividends: '分红',
   interest: '利息',
+};
+
+const MALAYSIAN_EN_CATEGORIES: CategoryNames = {
+  home: 'Rumah',
+  rent: 'Sewa',
+  utilities: 'Letrik & Air',
+  internet: 'Unifi',
+  home_supplies: 'Barang Rumah',
+  food: 'Makan',
+  groceries: 'Pasar & Grocer',
+  dining: 'Makan Outside',
+  coffee: 'Kopi & Teh',
+  transport: 'Jalan-Jalan',
+  fuel: 'Minyak',
+  rideshare: 'Grab',
+  parking: 'Tol & Parking',
+  lifestyle: 'Lifestyle',
+  shopping: 'Shopping',
+  entertainment: 'Hiburan',
+  subscriptions: 'Subscriptions',
+  health: 'Kesihatan',
+  healthcare: 'Klinik & Farmasi',
+  fitness: 'Gym',
+  travel_root: 'Cuti-Cuti',
+  flights: 'Tiket Kapal Terbang',
+  hotels: 'Hotel',
+  local_travel: 'Local Transit',
+  family: 'Family',
+  gifts: 'Duit Raya & Angpow',
+  education: 'Kursus',
+  salary_root: 'Gaji',
+  salary: 'Gaji Masuk',
+  bonus: 'Bonus',
+  side_root: 'Side Hustle',
+  freelance: 'Freelance',
+  consulting: 'Consulting',
+  invest_root: 'Pelaburan',
+  dividends: 'Dividen',
+  interest: 'FD Interest',
+};
+
+const MALAYSIAN_ZH_CATEGORIES: CategoryNames = {
+  home: '屋企',
+  rent: '屋租',
+  utilities: '水电费',
+  internet: 'Unifi 上网',
+  home_supplies: '家用',
+  food: '吃喝',
+  groceries: '巴刹买菜',
+  dining: '出外食',
+  coffee: 'Kopi 茶水',
+  transport: '出门',
+  fuel: '入油',
+  rideshare: 'Grab 召车',
+  parking: '过路费 / 泊车',
+  lifestyle: '生活',
+  shopping: '购物',
+  entertainment: '娱乐',
+  subscriptions: '订阅',
+  health: '健康',
+  healthcare: '诊所药房',
+  fitness: '健身',
+  travel_root: 'Cuti 旅游',
+  flights: '机票',
+  hotels: '酒店',
+  local_travel: '当地交通',
+  family: '家人',
+  gifts: '青包礼物',
+  education: '上课',
+  salary_root: '薪水',
+  salary: 'Gaji 入账',
+  bonus: '花红',
+  side_root: '副业',
+  freelance: '自由接案',
+  consulting: '顾问',
+  invest_root: '投资',
+  dividends: '股息',
+  interest: '定期利息',
 };
 
 const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
@@ -761,6 +868,529 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       },
     },
   },
+  malaysian_en: {
+    seed: 20260411,
+    locale: 'en',
+    currencyCode: 'MYR',
+    currencySymbol: 'RM',
+    accountGroups: {
+      everyday: 'Everyday',
+      goals: 'Goals',
+      credit: 'Credit',
+      investing: 'Investing',
+    },
+    accounts: {
+      checking: { name: 'Maybank2u', startingBalance: 4850 },
+      savings: { name: 'CIMB Savings', startingBalance: 28600 },
+      travel: { name: 'Cuti Tabung', startingBalance: 2400 },
+      card: { name: 'Maybank 2 Card', startingBalance: 320 },
+      cash: { name: 'Wallet Cash', startingBalance: 180 },
+      brokerage: { name: 'ASB', startingBalance: 16800 },
+    },
+    categories: MALAYSIAN_EN_CATEGORIES,
+    wageHistory: {
+      baseAmount: 5800,
+      monthlyGrowth: 22,
+      yearlyStep: 180,
+      hoursBase: 45,
+      commuteBase: 50,
+      commuteStep: 8,
+    },
+    recurring: {
+      salary: { name: 'Gaji Masuk', amount: 6800, note: 'Gaji bulan ni' },
+      rent: { name: 'Sewa Rumah', amount: 1850, note: 'Sewa kondo' },
+      fitness: { name: 'Gym Bulanan', amount: 158, note: 'Anytime Fitness' },
+      subscription: { name: 'Astro + Spotify', amount: 89.9, note: 'Astro pakej family' },
+      investment: { name: 'ASB Auto-Debit', amount: 600, note: 'ASB top-up bulanan' },
+    },
+    transactions: {
+      merchants: {
+        grocery: [
+          "Lotus's Damansara",
+          'Mydin USJ',
+          'Jaya Grocer',
+          'Village Grocer',
+          '99 Speedmart',
+          'AEON Big',
+          'Cold Storage',
+        ],
+        dining: [
+          'Mamak Pelita',
+          'Devi\'s Corner mamak',
+          'Nasi Kandar Pelita',
+          'Restoran Yut Kee',
+          'Old Town White Coffee',
+          'The Chicken Rice Shop',
+          'Bak Kut Teh Klang',
+          'Char Kway Teow PJ',
+          'Pavilion Food Republic',
+          'Sushi King',
+        ],
+        coffee: [
+          'ZUS Coffee drive-thru',
+          'Starbucks KLCC',
+          'Coffee Bean Pavilion',
+          'Gigi Coffee',
+          'Old Town kopitiam',
+        ],
+        fuel: ['Petronas pump', 'Shell Select', 'Petron RON95', 'BHPetrol'],
+        shopping: [
+          'Pavilion KL',
+          'Mid Valley Megamall',
+          '1 Utama',
+          'Sunway Pyramid',
+          'IKEA Damansara',
+          'Uniqlo Mid Valley',
+          'Mr DIY',
+        ],
+        entertainment: [
+          'GSC Mid Valley',
+          'TGV 1 Utama',
+          'Sunway Lagoon',
+          'Genting SkyWorlds',
+          'Karaoke Manhattan',
+          'Aquaria KLCC',
+        ],
+        rideshare: ['Grab Car', 'Grab Bike', 'AirAsia Ride', 'inDrive'],
+        healthcare: [
+          'Klinik Mediviron',
+          'Watsons Pharmacy',
+          'Guardian Pharmacy',
+          'Caring Pharmacy',
+          'KPJ checkup',
+        ],
+        hotels: ['Hilton KL', 'Berjaya Times Square', 'Sunway Resort', 'Genting First World'],
+        flights: ['AirAsia', 'Malaysia Airlines', 'Batik Air', 'Firefly'],
+      },
+      notes: {
+        salary: 'Gaji masuk dah',
+        bonus: 'Year-end bonus',
+        freelance: 'Side project',
+        consulting: 'Advisory retainer',
+        dividends: 'ASB dividend',
+        interest: 'FD interest',
+        rent: 'Sewa kondo bulan ni',
+        utilities: 'Letrik + air',
+        internet: 'Unifi 500Mbps',
+        fitness: 'Gym bulanan',
+        homeSupplies: 'Tesco run, restock barang',
+        subscriptions: ['Astro pakej family', 'Spotify Family', 'iCloud 200GB'],
+        education: 'Udemy course, kepala panas',
+        atmWithdrawal: 'ATM Maybank tarik tunai',
+        parkingPrimary: 'Mall parking',
+        parkingAlternate: 'TnG tol',
+        savingsTransfer: 'Pindah masuk CIMB',
+        investmentTransfer: 'ASB top-up bulanan',
+        travelTopUp: 'Tabung cuti-cuti',
+        localTravel: 'KLIA Ekspres ke airport',
+        tripDining: 'Trip makan-makan',
+        holidayGifts: 'Duit raya bagi sedara',
+        familyCelebration: 'CNY reunion makan',
+        cardPayment: 'Bayar credit card',
+      },
+      subscriptions: [69.9, 19.9, 12],
+      income: {
+        salaryBase: 6700,
+        salaryGrowth: 25,
+        salaryCycleBump: 18,
+        bonusBase: 1850,
+        bonusGrowth: 28,
+        bonusSpread: 240,
+        freelanceBase: 620,
+        freelanceGrowth: 14,
+        freelanceSpread: 160,
+        consultingBase: 380,
+        consultingStep: 70,
+        consultingSpread: 110,
+        dividendsBase: 78,
+        dividendsGrowth: 3,
+        dividendsSpread: 22,
+        interestBase: 26,
+        interestGrowth: 0.8,
+        interestSpread: 7,
+      },
+      housing: {
+        rentBase: 1850,
+        rentGrowth: 2,
+        rentSpread: 25,
+        utilitiesBase: 168,
+        utilitiesSpread: 32,
+        internetBase: 139,
+        internetSpread: 8,
+        fitnessBase: 158,
+        fitnessSpread: 6,
+        homeSuppliesBase: 78,
+        homeSuppliesSpread: 28,
+        healthcareBase: 145,
+        healthcareSpread: 50,
+        educationBase: 180,
+        educationSpread: 60,
+      },
+      weekly: {
+        cashTopUpFourWeek: 360,
+        cashTopUpFiveWeek: 440,
+        cashTopUpSpread: 40,
+        groceryBase: 165,
+        groceryWeekStep: 8,
+        grocerySpread: 32,
+        diningBase: 95,
+        diningWeekStep: 6,
+        diningSpread: 28,
+        coffeeBase: 13.5,
+        coffeeSpread: 4,
+        fuelBase: 110,
+        fuelSpread: 22,
+        parkingPrimaryBase: 14,
+        parkingPrimarySpread: 5,
+        parkingAlternateBase: 6.5,
+        parkingAlternateSpread: 2.5,
+      },
+      lifestyle: {
+        shoppingBase: 145,
+        shoppingTripStep: 55,
+        shoppingSpread: 60,
+        entertainmentBase: 78,
+        entertainmentTripStep: 36,
+        entertainmentSpread: 28,
+        rideshareBase: 32,
+        rideshareSpread: 12,
+      },
+      transfers: {
+        savingsBase: 850,
+        savingsGrowth: 22,
+        savingsSpread: 80,
+        investmentBase: 600,
+        investmentGrowth: 18,
+        investmentSpread: 60,
+        travelBase: 220,
+        travelPeak: 620,
+        travelSpread: 70,
+        cardPaymentRatio: 0.96,
+      },
+      travel: {
+        months: [3, 11],
+        giftMonth: 1,
+        flightsBase: 720,
+        flightsSpread: 180,
+        hotelsBase: 980,
+        hotelsSpread: 220,
+        localTransitBase: 96,
+        localTransitSpread: 28,
+        diningBase: 165,
+        diningSpread: 45,
+        holidayGiftsBase: 680,
+        holidayGiftsSpread: 180,
+        familyCelebrationBase: 420,
+        familyCelebrationSpread: 110,
+      },
+      extras: {
+        weekendBrunchCount: 3,
+        weekendBrunchBase: 48,
+        weekendBrunchSpread: 18,
+        weekendBrunchMerchants: [
+          'PappaRich brunch',
+          'Old Town kopitiam',
+          'Yut Kee weekend',
+          'Devi\'s Corner roti',
+          'Antipodean Bangsar',
+        ],
+        weekendBrunchNote: 'Sunday brunch session',
+        bubbleTeaCount: 5,
+        bubbleTeaBase: 14.5,
+        bubbleTeaSpread: 4,
+        bubbleTeaMerchants: ['Tealive', 'Chagee', 'Gong Cha', 'Sharetea', 'Coco Fresh'],
+        hangoutBase: 95,
+        hangoutSpread: 35,
+        hangoutMerchants: [
+          'Bangsar yumcha',
+          'TREC KL lepak',
+          'PJ Mamak supper',
+          'Jalan Alor street food',
+          'Cheras kopitiam lim teh',
+        ],
+        hangoutNote: 'Yumcha lepak session',
+        deliveryCount: 4,
+        deliveryBase: 32,
+        deliverySpread: 12,
+        deliveryMerchants: [
+          'GrabFood tapau',
+          'foodpanda',
+          'ShopeeFood promo',
+          'McDelivery midnight',
+        ],
+        deliveryNote: 'Tapau supper, malas masak',
+        rideshareExtraCount: 3,
+        rideshareExtraBase: 22,
+        rideshareExtraSpread: 9,
+        convenienceCount: 6,
+        convenienceBase: 18,
+        convenienceSpread: 7,
+        convenienceMerchants: ['7-Eleven', 'Family Mart', 'KK Super Mart', 'MyNews', 'Speedmart 99'],
+      },
+    },
+  },
+  malaysian_zh: {
+    seed: 20260424,
+    locale: 'zh',
+    currencyCode: 'MYR',
+    currencySymbol: 'RM',
+    accountGroups: {
+      everyday: '日常',
+      goals: '目标',
+      credit: '信用',
+      investing: '投资',
+    },
+    accounts: {
+      checking: { name: '马银行', startingBalance: 4850 },
+      savings: { name: '联昌定期', startingBalance: 28600 },
+      travel: { name: 'Cuti 基金', startingBalance: 2400 },
+      card: { name: '马银行信用卡', startingBalance: 320 },
+      cash: { name: '钱包现金', startingBalance: 180 },
+      brokerage: { name: 'ASB 户口', startingBalance: 16800 },
+    },
+    categories: MALAYSIAN_ZH_CATEGORIES,
+    wageHistory: {
+      baseAmount: 5800,
+      monthlyGrowth: 22,
+      yearlyStep: 180,
+      hoursBase: 45,
+      commuteBase: 50,
+      commuteStep: 8,
+    },
+    recurring: {
+      salary: { name: 'Gaji 入账', amount: 6800, note: '这个月 gaji' },
+      rent: { name: '屋租', amount: 1850, note: '公寓屋租' },
+      fitness: { name: '健身月费', amount: 158, note: 'Anytime Fitness' },
+      subscription: { name: 'Astro + Spotify', amount: 89.9, note: 'Astro 家庭配套' },
+      investment: { name: 'ASB 月供', amount: 600, note: 'ASB 每月供款' },
+    },
+    transactions: {
+      merchants: {
+        grocery: [
+          '永旺 AEON',
+          'Lotus\'s 莲花',
+          '巨人 Giant',
+          'Mydin 美丹',
+          'Jaya Grocer',
+          '99 速达',
+          '巴刹买菜',
+        ],
+        dining: [
+          '茨厂街云吞面',
+          '巴生肉骨茶',
+          '海南鸡饭档',
+          '槟城炒粿条',
+          '嘛嘛档 Mamak',
+          'Devi 印度煎饼',
+          '旧街场白咖啡',
+          '茶餐室经济饭',
+          '寿司王',
+          'PJ 大牌档',
+        ],
+        coffee: [
+          'ZUS 咖啡',
+          '星巴克 KLCC',
+          'Coffee Bean',
+          '茶餐室 lim kopi',
+          '老街场早茶',
+        ],
+        fuel: ['Petronas 国油', 'Shell 壳牌', 'Petron 95', 'BHPetrol'],
+        shopping: [
+          'Pavilion 柏威年',
+          'Mid Valley 谷中城',
+          '1 Utama 万达广场',
+          'Sunway Pyramid 双威',
+          'IKEA 宜家',
+          '屈臣氏 Watsons',
+          'Uniqlo',
+          'Mr DIY',
+        ],
+        entertainment: [
+          'GSC 金狮戏院',
+          'TGV 戏院',
+          '云顶 Genting',
+          'Sunway Lagoon 水上乐园',
+          'Aquaria 水族馆',
+          'KTV 包厢',
+        ],
+        rideshare: ['Grab 召车', 'Grab Bike 摩多', 'AirAsia Ride', '德士'],
+        healthcare: [
+          '私人诊所',
+          '屈臣氏药房',
+          'Guardian 药房',
+          'Caring 康宁药剂',
+          'KPJ 检查',
+        ],
+        hotels: ['希尔顿 KL', '云顶第一酒店', 'Sunway 度假村', 'Berjaya 时代广场'],
+        flights: ['亚航 AirAsia', '马航 MAS', '萤火虫 Firefly', 'Batik Air'],
+      },
+      notes: {
+        salary: 'Gaji 入账啦',
+        bonus: '年终花红',
+        freelance: '副业进账',
+        consulting: '顾问 fee',
+        dividends: 'ASB 派息',
+        interest: '定期利息',
+        rent: '公寓屋租',
+        utilities: 'TNB + 水费',
+        internet: 'Unifi 500Mbps',
+        fitness: 'Anytime Fitness 月费',
+        homeSupplies: '巴刹补货 + 日用品',
+        subscriptions: ['Astro 家庭配套', 'Spotify 家庭', 'iCloud 200GB'],
+        education: 'Udemy 课程',
+        atmWithdrawal: '马银行 ATM 提款',
+        parkingPrimary: '商场泊车',
+        parkingAlternate: 'TnG 过路费',
+        savingsTransfer: '过账去 CIMB 储蓄',
+        investmentTransfer: 'ASB 月供款',
+        travelTopUp: 'Cuti-cuti 基金',
+        localTravel: 'KLIA Ekspres 快铁',
+        tripDining: '旅行 yumcha',
+        holidayGifts: 'Hari Raya duit raya',
+        familyCelebration: '新年团圆饭',
+        cardPayment: '还信用卡',
+      },
+      subscriptions: [69.9, 19.9, 12],
+      income: {
+        salaryBase: 6700,
+        salaryGrowth: 25,
+        salaryCycleBump: 18,
+        bonusBase: 1850,
+        bonusGrowth: 28,
+        bonusSpread: 240,
+        freelanceBase: 620,
+        freelanceGrowth: 14,
+        freelanceSpread: 160,
+        consultingBase: 380,
+        consultingStep: 70,
+        consultingSpread: 110,
+        dividendsBase: 78,
+        dividendsGrowth: 3,
+        dividendsSpread: 22,
+        interestBase: 26,
+        interestGrowth: 0.8,
+        interestSpread: 7,
+      },
+      housing: {
+        rentBase: 1850,
+        rentGrowth: 2,
+        rentSpread: 25,
+        utilitiesBase: 168,
+        utilitiesSpread: 32,
+        internetBase: 139,
+        internetSpread: 8,
+        fitnessBase: 158,
+        fitnessSpread: 6,
+        homeSuppliesBase: 78,
+        homeSuppliesSpread: 28,
+        healthcareBase: 145,
+        healthcareSpread: 50,
+        educationBase: 180,
+        educationSpread: 60,
+      },
+      weekly: {
+        cashTopUpFourWeek: 360,
+        cashTopUpFiveWeek: 440,
+        cashTopUpSpread: 40,
+        groceryBase: 165,
+        groceryWeekStep: 8,
+        grocerySpread: 32,
+        diningBase: 95,
+        diningWeekStep: 6,
+        diningSpread: 28,
+        coffeeBase: 13.5,
+        coffeeSpread: 4,
+        fuelBase: 110,
+        fuelSpread: 22,
+        parkingPrimaryBase: 14,
+        parkingPrimarySpread: 5,
+        parkingAlternateBase: 6.5,
+        parkingAlternateSpread: 2.5,
+      },
+      lifestyle: {
+        shoppingBase: 145,
+        shoppingTripStep: 55,
+        shoppingSpread: 60,
+        entertainmentBase: 78,
+        entertainmentTripStep: 36,
+        entertainmentSpread: 28,
+        rideshareBase: 32,
+        rideshareSpread: 12,
+      },
+      transfers: {
+        savingsBase: 850,
+        savingsGrowth: 22,
+        savingsSpread: 80,
+        investmentBase: 600,
+        investmentGrowth: 18,
+        investmentSpread: 60,
+        travelBase: 220,
+        travelPeak: 620,
+        travelSpread: 70,
+        cardPaymentRatio: 0.96,
+      },
+      travel: {
+        months: [3, 11],
+        giftMonth: 1,
+        flightsBase: 720,
+        flightsSpread: 180,
+        hotelsBase: 980,
+        hotelsSpread: 220,
+        localTransitBase: 96,
+        localTransitSpread: 28,
+        diningBase: 165,
+        diningSpread: 45,
+        holidayGiftsBase: 680,
+        holidayGiftsSpread: 180,
+        familyCelebrationBase: 420,
+        familyCelebrationSpread: 110,
+      },
+      extras: {
+        weekendBrunchCount: 3,
+        weekendBrunchBase: 48,
+        weekendBrunchSpread: 18,
+        weekendBrunchMerchants: [
+          'PappaRich 早茶',
+          '旧街场早餐',
+          '点心餐室',
+          'Devi 印度煎饼',
+          '茶餐室 brunch',
+        ],
+        weekendBrunchNote: '周末 yumcha',
+        bubbleTeaCount: 5,
+        bubbleTeaBase: 14.5,
+        bubbleTeaSpread: 4,
+        bubbleTeaMerchants: ['Tealive', '霸王茶姬 Chagee', '贡茶', 'Sharetea', 'Coco 都可'],
+        hangoutBase: 95,
+        hangoutSpread: 35,
+        hangoutMerchants: [
+          '孟沙 Bangsar bar',
+          'TREC KL lepak',
+          'PJ 嘛嘛档宵夜',
+          '茨厂街夜市',
+          'Cheras 茶餐室',
+        ],
+        hangoutNote: 'Yumcha lepak 时间',
+        deliveryCount: 4,
+        deliveryBase: 32,
+        deliverySpread: 12,
+        deliveryMerchants: [
+          'GrabFood 打包',
+          'foodpanda',
+          'ShopeeFood 优惠',
+          'McDelivery 宵夜',
+        ],
+        deliveryNote: 'Tapau 宵夜，懒得煮',
+        rideshareExtraCount: 3,
+        rideshareExtraBase: 22,
+        rideshareExtraSpread: 9,
+        convenienceCount: 6,
+        convenienceBase: 18,
+        convenienceSpread: 7,
+        convenienceMerchants: ['7-Eleven', 'Family Mart', 'KK 超市', 'MyNews', '99 速达'],
+      },
+    },
+  },
 };
 
 const PREVIEW_START_YEAR = 2025;
@@ -997,8 +1627,18 @@ function randomSentiment(type: string, random: RandomFn): TransactionSentiment {
 function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, categories: CategoryRefs) {
   const random = createSeededRandom(profile.seed);
   const previewMonths = getPreviewMonths();
-  const { merchants, notes, subscriptions, income, housing, weekly, lifestyle, transfers, travel } =
-    profile.transactions;
+  const {
+    merchants,
+    notes,
+    subscriptions,
+    income,
+    housing,
+    weekly,
+    lifestyle,
+    transfers,
+    travel,
+    extras,
+  } = profile.transactions;
   const subscriptionTotal = subscriptions.reduce((sum, amount) => sum + amount, 0);
 
   let transactionCount = 0;
@@ -1485,6 +2125,92 @@ function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, catego
         categoryId: categories.gifts,
         note: notes.familyCelebration,
       });
+    }
+
+    if (extras) {
+      for (let n = 0; n < extras.weekendBrunchCount; n += 1) {
+        const brunchAmount = jitter(extras.weekendBrunchBase, extras.weekendBrunchSpread, random);
+        add({
+          type: 'expense',
+          amount: brunchAmount,
+          currency: profile.currencySymbol,
+          date: monthIso(monthDate, 6 + n * 7, 11),
+          accountId: accounts.card,
+          categoryId: categories.dining,
+          note:
+            pick(extras.weekendBrunchMerchants, random) +
+            (extras.weekendBrunchNote ? ` · ${extras.weekendBrunchNote}` : ''),
+        });
+        creditSpend += brunchAmount;
+      }
+
+      for (let n = 0; n < extras.bubbleTeaCount; n += 1) {
+        add({
+          type: 'expense',
+          amount: jitter(extras.bubbleTeaBase, extras.bubbleTeaSpread, random),
+          currency: profile.currencySymbol,
+          date: monthIso(monthDate, 3 + n * 5, 15),
+          accountId: accounts.cash,
+          categoryId: categories.coffee,
+          note: pick(extras.bubbleTeaMerchants, random),
+        });
+      }
+
+      const hangoutAmount = jitter(extras.hangoutBase, extras.hangoutSpread, random);
+      add({
+        type: 'expense',
+        amount: hangoutAmount,
+        currency: profile.currencySymbol,
+        date: monthIso(monthDate, 14 + (index % 4), 22),
+        accountId: accounts.card,
+        categoryId: categories.entertainment,
+        note:
+          pick(extras.hangoutMerchants, random) +
+          (extras.hangoutNote ? ` · ${extras.hangoutNote}` : ''),
+      });
+      creditSpend += hangoutAmount;
+
+      for (let n = 0; n < extras.deliveryCount; n += 1) {
+        const deliveryAmount = jitter(extras.deliveryBase, extras.deliverySpread, random);
+        add({
+          type: 'expense',
+          amount: deliveryAmount,
+          currency: profile.currencySymbol,
+          date: monthIso(monthDate, 5 + n * 6, 22),
+          accountId: accounts.card,
+          categoryId: categories.dining,
+          note:
+            pick(extras.deliveryMerchants, random) +
+            (extras.deliveryNote ? ` · ${extras.deliveryNote}` : ''),
+        });
+        creditSpend += deliveryAmount;
+      }
+
+      for (let n = 0; n < extras.rideshareExtraCount; n += 1) {
+        const rideAmount = jitter(extras.rideshareExtraBase, extras.rideshareExtraSpread, random);
+        add({
+          type: 'expense',
+          amount: rideAmount,
+          currency: profile.currencySymbol,
+          date: monthIso(monthDate, 9 + n * 7, 22),
+          accountId: accounts.card,
+          categoryId: categories.rideshare,
+          note: pick(merchants.rideshare, random),
+        });
+        creditSpend += rideAmount;
+      }
+
+      for (let n = 0; n < extras.convenienceCount; n += 1) {
+        add({
+          type: 'expense',
+          amount: jitter(extras.convenienceBase, extras.convenienceSpread, random),
+          currency: profile.currencySymbol,
+          date: monthIso(monthDate, 2 + n * 5, 21),
+          accountId: accounts.cash,
+          categoryId: categories.home_supplies,
+          note: pick(extras.convenienceMerchants, random),
+        });
+      }
     }
 
     add({
