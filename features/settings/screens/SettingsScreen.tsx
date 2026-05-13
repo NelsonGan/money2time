@@ -52,6 +52,7 @@ import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tu
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { PreviewSeedProfile } from '~/services/previewData';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
@@ -60,12 +61,14 @@ const PREVIEW_SCREEN_COPY = {
   en: {
     sectionTitle: 'Preview Data',
     rowLabel: 'Generate preview data',
-    rowSubtitle: 'Load American or Chinese sample data for screenshots and previews',
+    rowSubtitle: 'Load American, Chinese, or Malaysian sample data for screenshots',
     confirmTitle: 'Generate preview data?',
     confirmMessage:
       'Choose a profile. This replaces your local accounts, categories, transactions, recurring rules, and wage history with screenshot-ready sample data.',
     americanProfile: 'American',
     chineseProfile: 'Chinese',
+    malaysianEnProfile: 'Malaysian (EN)',
+    malaysianZhProfile: 'Malaysian (中文)',
     failedMessage: 'Unable to generate preview data. Please try again.',
     doneTitle: 'Preview data ready',
     doneMessage:
@@ -74,12 +77,14 @@ const PREVIEW_SCREEN_COPY = {
   zh: {
     sectionTitle: '预览数据',
     rowLabel: '生成预览数据',
-    rowSubtitle: '加载美式或中文样例数据，方便截图和预览',
+    rowSubtitle: '加载美式、中文或马来西亚样例数据，方便截图和预览',
     confirmTitle: '生成预览数据？',
     confirmMessage:
       '请选择一个配置。这会用适合截图的样例数据替换你当前的本地账户、分类、交易、循环规则和收入历史。',
     americanProfile: '美式',
     chineseProfile: '中文',
+    malaysianEnProfile: '马来西亚 (EN)',
+    malaysianZhProfile: '马来西亚 (中文)',
     failedMessage: '无法生成预览数据，请重试。',
     doneTitle: '预览数据已准备好',
     doneMessage:
@@ -345,15 +350,20 @@ export function SettingsScreen({
   );
 
   const handleGeneratePreviewData = useCallback(() => {
-    const runPreviewSeed = (profile: 'american' | 'chinese') => {
+    const profileLabels: Record<PreviewSeedProfile, string> = {
+      american: previewCopy.americanProfile,
+      chinese: previewCopy.chineseProfile,
+      malaysian_en: previewCopy.malaysianEnProfile,
+      malaysian_zh: previewCopy.malaysianZhProfile,
+    };
+
+    const runPreviewSeed = (profile: PreviewSeedProfile) => {
       try {
         const summary = generatePreviewData(profile);
-        const profileLabel =
-          profile === 'chinese' ? previewCopy.chineseProfile : previewCopy.americanProfile;
         Alert.alert(
           previewCopy.doneTitle,
           formatPreviewDoneMessage(previewCopy.doneMessage, {
-            profile: profileLabel,
+            profile: profileLabels[profile],
             accounts: summary.accounts,
             categories: summary.categories,
             recurringRules: summary.recurringRules,
@@ -369,21 +379,13 @@ export function SettingsScreen({
       }
     };
 
-    Alert.alert(
-      previewCopy.confirmTitle,
-      previewCopy.confirmMessage,
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: previewCopy.americanProfile,
-          onPress: () => runPreviewSeed('american'),
-        },
-        {
-          text: previewCopy.chineseProfile,
-          onPress: () => runPreviewSeed('chinese'),
-        },
-      ],
-    );
+    Alert.alert(previewCopy.confirmTitle, previewCopy.confirmMessage, [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      { text: previewCopy.americanProfile, onPress: () => runPreviewSeed('american') },
+      { text: previewCopy.chineseProfile, onPress: () => runPreviewSeed('chinese') },
+      { text: previewCopy.malaysianEnProfile, onPress: () => runPreviewSeed('malaysian_en') },
+      { text: previewCopy.malaysianZhProfile, onPress: () => runPreviewSeed('malaysian_zh') },
+    ]);
   }, [generatePreviewData, previewCopy]);
 
   return (
