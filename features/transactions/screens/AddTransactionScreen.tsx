@@ -24,7 +24,7 @@ export function AddTransactionScreen({
   initialAccountId,
   initialValues,
 }: AddTransactionScreenProps) {
-  const { createTransaction, createTransactionWithSplits } = useApp();
+  const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
   const resolvedInitialAccountId =
     isSimpleMode && simpleWalletId ? simpleWalletId : initialAccountId;
   const restrictedTypes: TransactionType[] | undefined = isSimpleMode
@@ -33,9 +33,40 @@ export function AddTransactionScreen({
 
   const handleSubmitWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
-      createTransactionWithSplits(input, splitsHelpers.toSplitDraftInputs(splits, input.accountId));
+      // Stage the locally-marked-paid friends so we can flush them via
+      // markSplitPaid AFTER the parent + splits are created. This mirrors
+      // EditTransactionScreen — the markSplitPaid path is the one that
+      // correctly reduces the parent amount, creates the payback transfer for
+      // cross-account paybacks, and writes paidAt/paidTransactionId.
+      const pendingMarkPaid: { id: string; paybackAccountId: string | null }[] = [];
+      splits.forEach((s) => {
+        if (!s.id || s.isSelf || !s.paid) return;
+        pendingMarkPaid.push({
+          id: s.id,
+          paybackAccountId: s.paybackAccountId ?? input.accountId ?? null,
+        });
+      });
+
+      // Editor `input.amount` has already been reduced by each Mark Paid
+      // toggle. Reconstruct the original bill total (sum of every split,
+      // paid and unpaid) so the parent starts at the full amount; markSplitPaid
+      // will then back the paid splits out, matching EDIT mode's final state.
+      const originalTotal = splits.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
+
+      // Drop the local `paid` flag so createTransactionWithSplits inserts
+      // every split unpaid. The markSplitPaid calls below flip the paid ones.
+      const unpaidDrafts = splits.map((s) => ({ ...s, paid: undefined }));
+
+      createTransactionWithSplits(
+        { ...input, amount: originalTotal },
+        splitsHelpers.toSplitDraftInputs(unpaidDrafts, input.accountId),
+      );
+
+      pendingMarkPaid.forEach(({ id, paybackAccountId }) => {
+        markSplitPaid(id, { paybackAccountId });
+      });
     },
-    [createTransactionWithSplits],
+    [createTransactionWithSplits, markSplitPaid],
   );
 
   return (
