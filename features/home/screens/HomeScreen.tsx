@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native';
 import Animated, {
-  FadeIn,
   type SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -612,10 +611,7 @@ export function HomeScreen({
     >
       <TabletContentContainer>
         {/* Mini insight cards */}
-        <Animated.View
-          entering={FadeIn.delay(100).duration(400)}
-          className="flex-row gap-3 mx-5 mt-3"
-        >
+        <View className="flex-row gap-3 mx-5 mt-3">
           {/* Sentiment card */}
           <Pressable
             onPress={() => {
@@ -680,20 +676,18 @@ export function HomeScreen({
               })}
             </View>
           </Pressable>
-        </Animated.View>
+        </View>
 
         <View ref={converterRef} onLayout={handleConverterLayout}>
-          <Animated.View entering={FadeIn.delay(150).duration(500)}>
-            <HeroAmountConverter
-              amount={estimatorAmount}
-              currencySymbol={settings.currencySymbol}
-              hasRate={hasHourlyRate}
-              hours={estimatorHours}
-              workdays={estimatorWorkdays}
-              workdaysPerWeek={estimatorWorkdaysPerWeek}
-              onChangeAmount={setEstimatorAmount}
-            />
-          </Animated.View>
+          <HeroAmountConverter
+            amount={estimatorAmount}
+            currencySymbol={settings.currencySymbol}
+            hasRate={hasHourlyRate}
+            hours={estimatorHours}
+            workdays={estimatorWorkdays}
+            workdaysPerWeek={estimatorWorkdaysPerWeek}
+            onChangeAmount={setEstimatorAmount}
+          />
         </View>
       </TabletContentContainer>
     </ScrollView>
@@ -785,14 +779,13 @@ export function HomeScreen({
               <Card variant="default" style={styles.recurringCard}>
                 {section.rows.map((item, index) => {
                   const isLast = index === section.rows.length - 1;
-                  const animationDelay = sectionIndex * 60 + index * 40;
                   return (
-                    <Animated.View
+                    <RecurringRuleRow
                       key={item.id}
-                      entering={FadeIn.delay(animationDelay).duration(350)}
-                    >
-                      <RecurringRuleRow item={item} isLast={isLast} themeColors={themeColors} />
-                    </Animated.View>
+                      item={item}
+                      isLast={isLast}
+                      themeColors={themeColors}
+                    />
                   );
                 })}
               </Card>
