@@ -1,3 +1,4 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { Calendar, Check, History, Maximize2, Mic, Settings2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -475,6 +476,27 @@ export function QuickAddSheet({
     };
   }, []);
 
+  // When the user returns from a pushed screen (e.g. Quick Entry Settings),
+  // re-arm the sheet. `closingRef` is set when the settings button is tapped
+  // to guard against double-taps during navigation, and the keyboard is
+  // dismissed — both must be reset on focus return or the sheet stays inert.
+  useFocusEffect(
+    useCallback(() => {
+      closingRef.current = false;
+      setIsClosing(false);
+      const focusInput = () => inputRef.current?.focus();
+      focusInput();
+      const t1 = setTimeout(focusInput, 80);
+      const t2 = setTimeout(focusInput, 240);
+      const t3 = setTimeout(focusInput, 480);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    }, []),
+  );
+
   useEffect(() => {
     const timer = setTimeout(() => setSettledText(text), 400);
     return () => clearTimeout(timer);
@@ -615,12 +637,7 @@ export function QuickAddSheet({
     );
     if (keywordMatch) return keywordMatch.categoryId;
     return null;
-  }, [
-    candidateCategories,
-    historyInference,
-    parsedLive.note,
-    quickEntryPrefs.categoryMap,
-  ]);
+  }, [candidateCategories, historyInference, parsedLive.note, quickEntryPrefs.categoryMap]);
 
   const inferredAccountId = useMemo(() => {
     if (!historyInference?.accountId) return null;
@@ -1071,11 +1088,7 @@ export function QuickAddSheet({
                   <Text style={styles.summaryIcon}>
                     {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
                   </Text>
-                  <Text
-                    className="text-foreground"
-                    style={styles.summaryText}
-                    numberOfLines={1}
-                  >
+                  <Text className="text-foreground" style={styles.summaryText} numberOfLines={1}>
                     {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
                   </Text>
                 </Pressable>
@@ -1087,9 +1100,7 @@ export function QuickAddSheet({
                       style={styles.summarySegment}
                       hitSlop={6}
                     >
-                      <Text style={styles.summaryIcon}>
-                        {activeCategory?.icon || '🏷️'}
-                      </Text>
+                      <Text style={styles.summaryIcon}>{activeCategory?.icon || '🏷️'}</Text>
                       <Text
                         className="text-foreground"
                         style={styles.summaryText}
@@ -1104,68 +1115,62 @@ export function QuickAddSheet({
 
               <View style={styles.amountSentenceRow}>
                 {timeEquivalent ? (
-                    <Text
-                      style={[styles.timeSentence, { color: themeColors.textSoft }]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.75}
-                    >
-                      {(() => {
-                        const AMOUNT_TOKEN = '__M2T_AMOUNT__';
-                        const HOURS_TOKEN = '__M2T_HOURS__';
-                        const template = I18n.t('transactions.quick_add.time_sentence', {
-                          amount: AMOUNT_TOKEN,
-                          hours: HOURS_TOKEN,
-                        });
-                        const accentStyle = {
-                          color: inputAccentColor,
-                          fontWeight: '700' as const,
-                        };
-                        const amountValue = formatMoneyOnly(displayAmount, settings);
-                        // Defensive fallback: if the locale's template is
-                        // missing one or both tokens, render the parts we
-                        // know about so the user never sees the raw
-                        // __M2T_*__ sentinels.
-                        const hasAmount = template.includes(AMOUNT_TOKEN);
-                        const hasHours = template.includes(HOURS_TOKEN);
-                        if (!hasAmount || !hasHours) {
-                          // Malformed locale template — render both values
-                          // explicitly so neither is silently dropped,
-                          // regardless of which token the template happened
-                          // to include.
-                          return (
-                            <>
-                              <Text style={accentStyle}>{amountValue}</Text>
-                              {' · '}
-                              <Text style={accentStyle}>{timeEquivalent}</Text>
-                            </>
-                          );
-                        }
-                        const valueByToken: Record<string, string> = {
-                          [AMOUNT_TOKEN]: amountValue,
-                          [HOURS_TOKEN]: timeEquivalent,
-                        };
-                        const tokenPattern = new RegExp(
-                          `(${AMOUNT_TOKEN}|${HOURS_TOKEN})`,
-                          'g',
-                        );
-                        const parts = template.split(tokenPattern);
-                        return parts.map((part, idx) =>
-                          valueByToken[part] ? (
-                            <Text key={idx} style={accentStyle}>
-                              {valueByToken[part]}
-                            </Text>
-                          ) : (
-                            <Text key={idx}>{part}</Text>
-                          ),
-                        );
-                      })()}
-                    </Text>
-                ) : (
                   <Text
-                    style={[styles.amountValue, { color: inputAccentColor }]}
+                    style={[styles.timeSentence, { color: themeColors.textSoft }]}
                     numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
                   >
+                    {(() => {
+                      const AMOUNT_TOKEN = '__M2T_AMOUNT__';
+                      const HOURS_TOKEN = '__M2T_HOURS__';
+                      const template = I18n.t('transactions.quick_add.time_sentence', {
+                        amount: AMOUNT_TOKEN,
+                        hours: HOURS_TOKEN,
+                      });
+                      const accentStyle = {
+                        color: inputAccentColor,
+                        fontWeight: '700' as const,
+                      };
+                      const amountValue = formatMoneyOnly(displayAmount, settings);
+                      // Defensive fallback: if the locale's template is
+                      // missing one or both tokens, render the parts we
+                      // know about so the user never sees the raw
+                      // __M2T_*__ sentinels.
+                      const hasAmount = template.includes(AMOUNT_TOKEN);
+                      const hasHours = template.includes(HOURS_TOKEN);
+                      if (!hasAmount || !hasHours) {
+                        // Malformed locale template — render both values
+                        // explicitly so neither is silently dropped,
+                        // regardless of which token the template happened
+                        // to include.
+                        return (
+                          <>
+                            <Text style={accentStyle}>{amountValue}</Text>
+                            {' · '}
+                            <Text style={accentStyle}>{timeEquivalent}</Text>
+                          </>
+                        );
+                      }
+                      const valueByToken: Record<string, string> = {
+                        [AMOUNT_TOKEN]: amountValue,
+                        [HOURS_TOKEN]: timeEquivalent,
+                      };
+                      const tokenPattern = new RegExp(`(${AMOUNT_TOKEN}|${HOURS_TOKEN})`, 'g');
+                      const parts = template.split(tokenPattern);
+                      return parts.map((part, idx) =>
+                        valueByToken[part] ? (
+                          <Text key={idx} style={accentStyle}>
+                            {valueByToken[part]}
+                          </Text>
+                        ) : (
+                          <Text key={idx}>{part}</Text>
+                        ),
+                      );
+                    })()}
+                  </Text>
+                ) : (
+                  <Text style={[styles.amountValue, { color: inputAccentColor }]} numberOfLines={1}>
                     {formatMoneyOnly(displayAmount, settings)}
                   </Text>
                 )}
