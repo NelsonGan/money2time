@@ -63,6 +63,11 @@ export function AddFab({
 
   const handleLongPressEnd = useCallback(() => {
     if (longPressActiveRef.current) {
+      // Reset BEFORE invoking onLongPressEnd so a synchronous re-press (or
+      // the synthetic onPress that some Pressable variants emit on release)
+      // sees a clean state. Leaving this true caused the next short tap to
+      // be swallowed by handlePress's "suppress synthetic onPress" branch.
+      longPressActiveRef.current = false;
       onLongPressEnd?.();
     }
   }, [onLongPressEnd]);

@@ -90,6 +90,12 @@ export interface QuickEntryPrefs {
   /** Fallback category id used when no keyword/history match. */
   defaultExpenseCategoryId: string | null;
   defaultIncomeCategoryId: string | null;
+  /**
+   * Account to use as the default for new quick-entry transactions (both
+   * voice and text). Falls back to the user's last-used / first account
+   * when null.
+   */
+  defaultAccountId: string | null;
   /** When true, holding the + button on iOS opens the voice dictation flow. */
   voiceInputEnabled: boolean;
   /**
@@ -98,23 +104,21 @@ export interface QuickEntryPrefs {
    * device that supports speech recognition. Prevents re-prompting.
    */
   voicePromptDismissed: boolean;
-  /**
-   * Account to charge voice entries against when no per-utterance history
-   * hint applies. Falls back to the user's first account if null.
-   */
-  voiceDefaultAccountId: string | null;
   /** When true, voice entries are saved immediately without a confirmation sheet. */
   voiceSkipConfirmation: boolean;
+  /** Total lifetime number of voice sessions the user has started. Free-tier limit. */
+  voiceUsageCount: number;
 }
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   categoryMap: {},
   defaultExpenseCategoryId: null,
   defaultIncomeCategoryId: null,
+  defaultAccountId: null,
   voiceInputEnabled: false,
   voicePromptDismissed: false,
-  voiceDefaultAccountId: null,
   voiceSkipConfirmation: false,
+  voiceUsageCount: 0,
 };
 
 export interface Account {

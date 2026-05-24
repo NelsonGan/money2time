@@ -605,9 +605,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ? { ...DEFAULT_NOTIFICATION_PREFS, ...JSON.parse(nextNotificationPrefsJson) }
         : DEFAULT_NOTIFICATION_PREFS;
       const nextQuickEntryPrefsJson = settingsRepository.getQuickEntryPrefsJson();
-      const nextQuickEntryPrefs: QuickEntryPrefs = nextQuickEntryPrefsJson
-        ? { ...DEFAULT_QUICK_ENTRY_PREFS, ...JSON.parse(nextQuickEntryPrefsJson) }
-        : DEFAULT_QUICK_ENTRY_PREFS;
+      const nextQuickEntryPrefs: QuickEntryPrefs = (() => {
+        if (!nextQuickEntryPrefsJson) return DEFAULT_QUICK_ENTRY_PREFS;
+        const parsed = JSON.parse(nextQuickEntryPrefsJson) as Partial<QuickEntryPrefs> & {
+          voiceDefaultAccountId?: string | null;
+          voiceUsageDayKey?: string | null;
+        };
+        // Migrate the field-rename: voiceDefaultAccountId → defaultAccountId.
+        // The default now applies to both voice and text entry.
+        if (parsed.voiceDefaultAccountId != null && parsed.defaultAccountId == null) {
+          parsed.defaultAccountId = parsed.voiceDefaultAccountId;
+        }
+        delete parsed.voiceDefaultAccountId;
+        // Drop the per-day key — voice limit is now lifetime, not per-day.
+        // Existing voiceUsageCount carries over so prior uses count toward
+        // the new 15-use cap.
+        delete parsed.voiceUsageDayKey;
+        return { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
+      })();
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
@@ -1790,14 +1805,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.voicePromptDismissed !== undefined
             ? updates.voicePromptDismissed
             : previous.voicePromptDismissed,
-        voiceDefaultAccountId:
-          updates.voiceDefaultAccountId !== undefined
-            ? updates.voiceDefaultAccountId
-            : previous.voiceDefaultAccountId,
+        defaultAccountId:
+          updates.defaultAccountId !== undefined
+            ? updates.defaultAccountId
+            : previous.defaultAccountId,
         voiceSkipConfirmation:
           updates.voiceSkipConfirmation !== undefined
             ? updates.voiceSkipConfirmation
             : previous.voiceSkipConfirmation,
+        voiceUsageCount:
+          updates.voiceUsageCount !== undefined
+            ? updates.voiceUsageCount
+            : previous.voiceUsageCount,
       };
       settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;

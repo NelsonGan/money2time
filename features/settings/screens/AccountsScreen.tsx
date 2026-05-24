@@ -150,6 +150,7 @@ type AccountsSummaryThemeColors = {
   success: string;
   error: string;
   primary: string;
+  text: string;
 };
 
 function AccountsSummaryBlock({
@@ -166,9 +167,13 @@ function AccountsSummaryBlock({
   renderValue: AccountsSummaryRenderValue;
 }) {
   const netIsNegative = net < 0;
-  const netAccent = netIsNegative ? themeColors.error : themeColors.primary;
-  const netLabelClass = netIsNegative ? 'text-destructive' : 'text-primary';
-  const netValueClass = netIsNegative ? 'text-destructive' : 'text-primary';
+  // Positive/zero net uses the neutral foreground tone instead of the user's
+  // theme accent — the net-assets readout is a factual number, not a brand
+  // moment, and the foreground reads consistently across all theme colors.
+  // Negative net keeps destructive red as a clear bad signal.
+  const netAccent = netIsNegative ? themeColors.error : themeColors.text;
+  const netLabelClass = netIsNegative ? 'text-destructive' : 'text-foreground';
+  const netValueClass = netIsNegative ? 'text-destructive' : 'text-foreground';
 
   return (
     <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">

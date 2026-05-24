@@ -131,8 +131,6 @@ export function VoicePreviewSheet({
           </Text>
         </View>
 
-        <View style={styles.divider} />
-
         <View style={styles.row}>
           <Text variant="caption" tone="muted" style={styles.rowLabel}>
             {I18n.t('settings.quick_entry.voice.preview_amount')}
@@ -147,19 +145,25 @@ export function VoicePreviewSheet({
             void triggerHaptic('selection');
             setActivePicker('category');
           }}
-          style={({ pressed }) => [styles.rowPressable, { opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           accessibilityRole="button"
           accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_category')}
         >
-          <Text variant="caption" tone="muted" style={styles.rowLabel}>
-            {I18n.t('settings.quick_entry.voice.preview_category')}
-          </Text>
-          <View style={styles.rowValueRow}>
-            <Text style={styles.emoji}>{data.category?.icon || '🏷️'}</Text>
-            <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
-              {data.category?.name ?? I18n.t('common.uncategorized')}
+          <View style={styles.row}>
+            <Text variant="caption" tone="muted" style={styles.rowLabel}>
+              {I18n.t('settings.quick_entry.voice.preview_category')}
             </Text>
-            <ChevronRight size={14} color={themeColors.textMuted} />
+            <View style={styles.rowValueRow}>
+              <Text style={styles.emoji}>{data.category?.icon || '🏷️'}</Text>
+              <Text
+                variant="body"
+                style={[styles.rowValue, { color: themeColors.text }]}
+                numberOfLines={1}
+              >
+                {data.category?.name ?? I18n.t('common.uncategorized')}
+              </Text>
+              <ChevronRight size={14} color={themeColors.textMuted} />
+            </View>
           </View>
         </Pressable>
 
@@ -169,18 +173,24 @@ export function VoicePreviewSheet({
               void triggerHaptic('selection');
               setActivePicker('account');
             }}
-            style={({ pressed }) => [styles.rowPressable, { opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_account')}
           >
-            <Text variant="caption" tone="muted" style={styles.rowLabel}>
-              {I18n.t('settings.quick_entry.voice.preview_account')}
-            </Text>
-            <View style={styles.rowValueRow}>
-              <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
-                {data.account?.name ?? I18n.t('common.no_account')}
+            <View style={styles.row}>
+              <Text variant="caption" tone="muted" style={styles.rowLabel}>
+                {I18n.t('settings.quick_entry.voice.preview_account')}
               </Text>
-              <ChevronRight size={14} color={themeColors.textMuted} />
+              <View style={styles.rowValueRow}>
+                <Text
+                  variant="body"
+                  style={[styles.rowValue, { color: themeColors.text }]}
+                  numberOfLines={1}
+                >
+                  {data.account?.name ?? I18n.t('common.no_account')}
+                </Text>
+                <ChevronRight size={14} color={themeColors.textMuted} />
+              </View>
             </View>
           </Pressable>
         ) : (
@@ -188,7 +198,11 @@ export function VoicePreviewSheet({
             <Text variant="caption" tone="muted" style={styles.rowLabel}>
               {I18n.t('settings.quick_entry.voice.preview_account')}
             </Text>
-            <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
+            <Text
+              variant="body"
+              style={[styles.rowValue, { color: themeColors.text }]}
+              numberOfLines={1}
+            >
               {data.account?.name ?? I18n.t('common.no_account')}
             </Text>
           </View>
@@ -285,23 +299,12 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 12,
   },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    marginVertical: 4,
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
     minHeight: 28,
-  },
-  rowPressable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 28,
-    paddingVertical: 2,
   },
   rowLabel: {
     fontSize: 12,
@@ -319,6 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 1,
   },
   emoji: {
     fontSize: 16,

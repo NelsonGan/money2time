@@ -202,12 +202,23 @@ const styles = StyleSheet.create({
 });
 
 function MountedTab({ active, children }: { active: boolean; children: React.ReactNode }) {
+  // Lazy-mount: each tab renders nothing until it first becomes active.
+  // Without this, all 5 tab screens (Transactions, Accounts, Calendar,
+  // Insights, Settings) would mount on the first render after data loads
+  // and compete for the JS thread — producing a visible stagger on the
+  // home tab as the others' FlashList measurements, useEffects, and theme
+  // resolution work happen in parallel. Once a tab has been visited, we
+  // keep it mounted so re-activating it stays instant.
+  const hasBeenActiveRef = useRef(active);
+  if (active) hasBeenActiveRef.current = true;
+  const shouldMount = hasBeenActiveRef.current;
+
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
       style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
-      {children}
+      {shouldMount ? children : null}
     </View>
   );
 }
