@@ -1,0 +1,88 @@
+name: Build Local (Android)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: EAS build profile
+        type: choice
+        default: production
+        options:
+          - production
+          - preview
+          - development
+
+jobs:
+  build:
+    name: Build Android Locally (${{ inputs.profile }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Check branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "This workflow can only be run on main (got ${{ github.ref }})."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Cache eas-build-local
+        uses: actions/cache@v4
+        with:
+          path: ~/.eas-build-local
+          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-eas-build-local-
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine output extension
+        id: ext
+        run: |
+          if [ "${{ inputs.profile }}" = "production" ]; then
+            echo "ext=aab" >> "$GITHUB_OUTPUT"
+          else
+            echo "ext=apk" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Android (local)
+        run: |
+          mkdir -p build
+          eas build --platform android --profile ${{ inputs.profile }} --local --non-interactive --output=./build/money2time-android-${{ inputs.profile }}.${{ steps.ext.outputs.ext }}
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: money2time-android-${{ inputs.profile }}-${{ github.run_number }}
+          path: ./build/money2time-android-${{ inputs.profile }}.${{ steps.ext.outputs.ext }}
+          retention-days: 14
