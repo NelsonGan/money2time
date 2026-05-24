@@ -24,12 +24,19 @@ export type SettingsStackParamList = {
   StatementImport: undefined;
   StatementImportList: {
     section: 'expense' | 'income';
-    transactions: { date: string; description: string; amount: number; category?: string; account?: string }[];
+    transactions: {
+      date: string;
+      description: string;
+      amount: number;
+      category?: string;
+      account?: string;
+    }[];
     indices: number[];
     excludedIndices: number[];
     onToggle: (index: number) => void;
   };
   ProManagement: undefined;
+  QuickEntrySettings: undefined;
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;

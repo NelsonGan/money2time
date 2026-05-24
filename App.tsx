@@ -35,11 +35,6 @@ import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
-import { AI_CHAT_MODEL } from '~/features/ai-chat/constants/models';
-import { buildSystemPrompt } from '~/features/ai-chat/constants/prompts';
-import { AIChatScreen } from '~/features/ai-chat/screens/AIChatScreen';
-import * as aiChatLlamaService from '~/features/ai-chat/services/llamaService';
-import * as aiChatModelManager from '~/features/ai-chat/services/modelManager';
 import { HomeScreen } from '~/features/home/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -47,14 +42,21 @@ import {
   AccountsScreen,
   HourlyValueScreen,
   ProPaywallScreen,
+  QuickEntrySettingsScreen,
   RecurringScreen,
   SettingsStack,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import {
+  VoiceQuickAddOverlay,
+  type VoiceQuickAddHandle,
+} from '~/features/transactions/components/VoiceQuickAddOverlay';
+import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import {
   AddTransactionScreen,
   EditTransactionScreen,
+  QuickAddScreen,
   SimpleActivityScreen,
   TransactionsScreen,
 } from '~/features/transactions/screens';
@@ -258,49 +260,6 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AIChatStartupPreloader() {
-  const { accounts, categories, isLoading, isSimpleMode, settings } = useApp();
-
-  useEffect(() => {
-    if (isLoading || !settings.onboardingCompleted || !settings.aiChatEnabled) return;
-    if (!aiChatModelManager.isModelDownloaded(AI_CHAT_MODEL.fileName)) return;
-
-    const preloadModel = async () => {
-      try {
-        await aiChatLlamaService.loadModel(aiChatModelManager.getModelPath(AI_CHAT_MODEL.fileName));
-
-        const today = dayKeyFromDateLocal(new Date());
-        await aiChatLlamaService.primeTransactionParser(
-          buildSystemPrompt(
-            accounts,
-            categories,
-            settings.currencyCode,
-            settings.currencySymbol,
-            today,
-            !isSimpleMode,
-          ),
-          '30 for breakfast',
-        );
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : String(error);
-        console.warn('[App] AI chat startup preload failed:', detail);
-      }
-    };
-
-    void preloadModel();
-  }, [
-    accounts,
-    categories,
-    isLoading,
-    isSimpleMode,
-    settings.aiChatEnabled,
-    settings.currencyCode,
-    settings.currencySymbol,
-    settings.onboardingCompleted,
-  ]);
-
-  return null;
-}
 
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
@@ -313,7 +272,27 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, settings } = useApp();
+  const { isSimpleMode, settings, quickEntryPrefs } = useApp();
+  const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'ios') {
+      setVoiceSupported(false);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const ok = await isSpeechRecognitionAvailable();
+      if (!cancelled) setVoiceSupported(ok);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  // The whole voice-input surface (settings row, long-press, capture overlay)
+  // is gated on this single flag so unsupported devices show no trace of it.
+  const voiceEnabled =
+    Platform.OS === 'ios' && voiceSupported && quickEntryPrefs.voiceInputEnabled;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on
@@ -480,16 +459,9 @@ function MainShellScreen({
     [navigation],
   );
 
-  const openAIChat = useCallback(() => {
-    navigation.navigate('AIChat');
-  }, [navigation]);
   const openBottomNavPrimaryAction = useCallback(() => {
-    if (settings.centerAddButtonOpensAiChat) {
-      openAIChat();
-      return;
-    }
     openAddTransaction();
-  }, [openAIChat, openAddTransaction, settings.centerAddButtonOpensAiChat]);
+  }, [openAddTransaction]);
 
   const shouldHideBottomNav = activeTab === 'transactions' && isTransactionsSelectionMode;
 
@@ -764,7 +736,6 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
-            onOpenAIChat={openAIChat}
             onScreenChange={setSettingsCurrentScreen}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
@@ -779,11 +750,10 @@ function MainShellScreen({
             activeTab={activeTab}
             onTabChange={handleTabChange}
             onPressAdd={openBottomNavPrimaryAction}
-            addButtonAccessibilityLabel={
-              settings.centerAddButtonOpensAiChat
-                ? I18n.t('settings.ai_chat')
-                : I18n.t('onboarding.checklist.add_transaction')
-            }
+            onLongPressAdd={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
+            onLongPressAddEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
+            addButtonShowsVoiceHint={voiceEnabled}
+            addButtonAccessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             onTutorialTabLayout={handleTutorialTabLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -791,6 +761,27 @@ function MainShellScreen({
             tutorialMeasureToken={tutorialSpotlightRequest.token}
           />
         </>
+      ) : null}
+
+      {voiceEnabled ? (
+        <VoiceQuickAddOverlay
+          handleRef={voiceHandleRef}
+          onEditDetailed={(input) => {
+            navigation.navigate('AddTransactionDetailed', {
+              initialAccountId: input.accountId ?? undefined,
+              initialValues: {
+                type: input.type,
+                amount: String(input.amount),
+                date: input.date,
+                accountId: input.accountId ?? null,
+                fromAccountId: null,
+                toAccountId: null,
+                categoryId: input.categoryId ?? null,
+                note: input.note ?? '',
+              },
+            });
+          }}
+        />
       ) : null}
 
       <TutorialCoachmarkOverlay
@@ -813,6 +804,32 @@ function MainShellScreen({
 }
 
 function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'AddTransaction'>) {
+  const { isSimpleMode, simpleWalletId } = useApp();
+  return (
+    <QuickAddScreen
+      onClose={() => navigation.goBack()}
+      onSubmitReady={(input) => {
+        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+      }}
+      onExpandToDetailed={(initialValues, initialAccountId) => {
+        navigation.replace('AddTransactionDetailed', {
+          initialAccountId,
+          initialValues,
+        });
+      }}
+      onOpenQuickEntrySettings={() => navigation.replace('SettingsQuickEntry')}
+      isSimpleMode={isSimpleMode}
+      simpleWalletId={simpleWalletId}
+      initialAccountId={route.params?.initialAccountId}
+      initialValues={route.params?.initialValues}
+    />
+  );
+}
+
+function AddTransactionDetailedRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'AddTransactionDetailed'>) {
   const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <AddTransactionScreen
@@ -889,10 +906,6 @@ function ProPaywallRouteScreen({ route, navigation }: RootStackRouteProps<'ProPa
   );
 }
 
-function AIChatRouteScreen({ navigation }: RootStackRouteProps<'AIChat'>) {
-  return <AIChatScreen onBack={() => navigation.goBack()} />;
-}
-
 function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
   return <AccountsScreen onBack={() => navigation.goBack()} managementOnly useNativeBackGesture />;
 }
@@ -924,6 +937,12 @@ function SettingsHourlyValueRouteScreen({
       }
     />
   );
+}
+
+function SettingsQuickEntryRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsQuickEntry'>) {
+  return <QuickEntrySettingsScreen onBack={() => navigation.goBack()} />;
 }
 
 function SettingsWageCalculatorRouteScreen({
@@ -1183,7 +1202,6 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <AIChatStartupPreloader />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}
@@ -1203,12 +1221,34 @@ function AppContent() {
               />
             )}
           </RootStack.Screen>
-          <RootStack.Screen name="AddTransaction" component={AddTransactionRouteScreen} />
+          <RootStack.Screen
+            name="AddTransaction"
+            component={AddTransactionRouteScreen}
+            options={{
+              presentation: 'transparentModal',
+              // QuickAddSheet handles its own enter/exit animation (backdrop fade +
+              // slide). Letting the navigator add its own fade on top stacks a
+              // ~300ms tail on dismiss, which looks like a "lingering grey" lag
+              // after submit. 'none' makes the route appear/disappear instantly
+              // so the only visible animation is the sheet's own.
+              animation: 'none',
+              gestureEnabled: false,
+              contentStyle: { backgroundColor: 'transparent' },
+            }}
+          />
+          <RootStack.Screen
+            name="AddTransactionDetailed"
+            component={AddTransactionDetailedRouteScreen}
+          />
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
           <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
           <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
+          <RootStack.Screen
+            name="SettingsQuickEntry"
+            component={SettingsQuickEntryRouteScreen}
+          />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}
@@ -1216,7 +1256,6 @@ function AppContent() {
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
           <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />
-          <RootStack.Screen name="AIChat" component={AIChatRouteScreen} />
         </RootStack.Navigator>
       </NavigationContainer>
 

@@ -24,6 +24,9 @@ export type RootStackParamList = {
   AddTransaction:
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
+  AddTransactionDetailed:
+    | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
+    | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   AccountDetail: { accountId: string };
   InsightsDrilldown: InsightsDrilldownPayload;
@@ -31,9 +34,9 @@ export type RootStackParamList = {
   SettingsRecurring: undefined;
   SettingsAccounts: undefined;
   SettingsHourlyValue: undefined;
+  SettingsQuickEntry: undefined;
   SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
   ProPaywall: { source?: string; flashMessage?: string } | undefined;
-  AIChat: undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

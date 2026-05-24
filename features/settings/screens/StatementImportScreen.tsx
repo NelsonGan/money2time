@@ -98,47 +98,11 @@ function buildPrompt(accounts: Account[], categories: Category[]): string {
   const expenseTree = formatCategoryTree(categories, 'expense');
   const incomeTree = formatCategoryTree(categories, 'income');
 
-  return `Parse the uploaded bank statement(s) into JSON. One or more files may be attached.
-
-For each transaction row found:
-- date: YYYY-MM-DD
-- description: clean merchant/payee name (remove codes, reference numbers, trailing digits)
-- amount: NEGATIVE for expenses/debits, POSITIVE for income/credits
-- category: best match from my categories below using "Parent > Subcategory" when a subcategory fits, just parent name otherwise, "Other" if unsure
-- account: specific account name as printed on the statement (e.g. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), not generic labels
-
-Skip only: balance lines, statement totals, disclosures, headers/footers.
-
-## My Accounts
-${accountNames}
-
-## My Expense Categories
-${expenseTree}
-
-## My Income Categories
-${incomeTree}
-
-Reply with ONLY a json code block, no other text:
-
-\`\`\`json
-{
-  "statement": {
-    "issuer": "<name or 'Multiple'>",
-    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }
-  },
-  "transactions": [
-    { "date": "YYYY-MM-DD", "description": "...", "amount": -0.00, "category": "...", "account": "..." }
-  ]
-}
-\`\`\`
-
-## Rules
-- NEVER fabricate or hallucinate transactions. Only output what is in the document.
-- NEVER skip, truncate, or omit transactions. Read every page of every file from start to finish. Output every single transaction row.
-- If multiple files are uploaded, process each file fully then merge all transactions into the single "transactions" array.
-- If the statement spans a year boundary and only shows month/day, infer the year from the statement period.
-- Do not ask questions, do not refuse, do not offer to split into multiple responses.
-- If your output gets cut off, stop mid-JSON and I will reply "continue" so you can finish. Do not stop early to avoid being cut off — just keep going.`;
+  return I18n.t('statement_import.prompt_template', {
+    accounts: accountNames,
+    expenses: expenseTree,
+    incomes: incomeTree,
+  });
 }
 
 function stripCodeFences(text: string): string {

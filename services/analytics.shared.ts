@@ -77,11 +77,6 @@ export const AnalyticsEvents = {
 
   // Statement import
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
-
-  // AI chat
-  AI_CHAT_ENABLED: 'AI Chat Enabled',
-  AI_CHAT_MESSAGE_SENT: 'AI Chat Message Sent',
-  AI_CHAT_TRANSACTION_ACCEPTED: 'AI Chat Transaction Accepted',
 } as const;
 
 // ---------------------------------------------------------------------------

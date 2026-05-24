@@ -22,8 +22,11 @@ const zh = {
     not_now: '暂不',
     today: '今天',
     yesterday: '昨天',
+    active: '生效中',
     ungrouped: '未分组',
     other: '其他',
+    hour_unit: '小时',
+    minute_unit: '分',
     unknown: '未知',
     none: '无',
     no_account: '无账户',
@@ -240,6 +243,19 @@ const zh = {
       power_title: '专业',
       power_description: '多账户、转账，以及更多控制。',
     },
+    notifications: {
+      title: '保持节奏',
+      subtitle: '温和的提醒让你记录支出，留意时间的去向。',
+      enable: '开启通知',
+      not_now: '暂不开启',
+      can_change_later: '随时可以在「设置」中调整。',
+      bullet_daily_title: '每日打卡',
+      bullet_daily_subtitle: '每天提醒一次，记录当天的支出。',
+      bullet_recurring_title: '周期性交易',
+      bullet_recurring_subtitle: '自动生成的交易会及时通知你。',
+      bullet_weekly_title: '每周总结',
+      bullet_weekly_subtitle: '查看过去 7 天的支出情况。',
+    },
   },
   transactions: {
     title: '交易',
@@ -292,6 +308,12 @@ const zh = {
     calculator: {
       set_hourly_for_time: '设置时薪以查看时间换算',
       enter: '确认',
+    },
+    quick_add: {
+      expand: '打开详细编辑器',
+      time_sentence: '{{amount}} ≈ {{hours}} 工时',
+      placeholder_expense: '试试 "星巴克 30"，"咖啡 18"，"麦当劳 25"。',
+      placeholder_income: '试试 "工资 5000"，"奖金 1000"，"退款 30"。',
     },
     editor: {
       title_create: '添加',
@@ -619,6 +641,59 @@ const zh = {
     section_personal: '偏好',
     section_money: '资金',
     section_support: '支持与数据',
+    quick_entry: {
+      title: '快速录入',
+      subtitle: '将关键词分组映射到你的分类。',
+      row_subtitle: '将关键词映射到分类',
+      section_expense: '支出',
+      section_income: '收入',
+      default_row: '默认',
+      no_default: '自动 · 默认为"其他"',
+      unmapped: '未映射',
+      custom_badge: '自定义',
+      bucket_labels: {
+        food: '餐饮',
+        groceries: '日用品',
+        transport: '交通',
+        housing: '住房',
+        bills: '账单与水电',
+        healthcare: '医疗',
+        shopping: '购物',
+        entertainment: '娱乐',
+        education: '教育',
+        pets: '宠物',
+        travel: '旅行',
+        fitness: '健身',
+        gifts: '礼物与捐赠',
+        salary: '工资',
+        investment: '投资',
+        refund: '退款',
+      },
+      voice: {
+        row_label: '语音输入',
+        row_subtitle: '长按"+"号即可口述交易',
+        suggest_title: '试试语音输入？',
+        suggest_message: '长按"+"号即可口述交易，例如「星巴克 30」。随时可在「快速录入」设置中关闭。',
+        suggest_enable: '开启',
+        suggest_later: '暂不',
+        listening: '正在聆听…',
+        release_hint: '松开识别',
+        permission_denied_title: '需要麦克风权限',
+        permission_denied_message: '请在设置中允许 Money2Time 使用麦克风与语音识别。',
+        open_settings: '前往设置',
+        error_title: '语音输入失败',
+        error_message: '无法识别语音，请再试一次。',
+        no_amount_title: '未识别到金额',
+        no_amount_message: '听到「{{transcript}}」，但找不到金额。请尝试加上数字，例如「星巴克 30」。',
+        preview_heard: '听到内容',
+        preview_amount: '金额',
+        preview_category: '分类',
+        preview_account: '账户',
+        discard: '取消',
+        edit: '编辑',
+        save: '保存',
+      },
+    },
     hourly_value: '时薪',
     hourly_value_latest: '最新 {{value}}',
     hourly_value_subtitle: '查看并更新你的真实时薪',
@@ -629,6 +704,8 @@ const zh = {
     categories_subtitle: '编辑分类和子分类',
     recurring: '固定交易',
     recurring_subtitle: '创建自动记录未来交易的规则',
+    notifications: '通知',
+    notifications_subtitle: '提醒与提示',
     start_tutorial: '开始教程',
     start_tutorial_subtitle: '重新了解核心功能',
     importing_backup: '正在导入备份...',
@@ -703,8 +780,6 @@ const zh = {
     user_mode_power: '专业模式',
     haptics: '触感反馈',
     haptics_subtitle: '开启或关闭整个应用中的触感反馈。',
-    center_add_button_ai_chat: '快速启动智能录入',
-    center_add_button_ai_chat_subtitle: '点击 + 按钮打开智能录入，而不是手动录入表单。',
     user_mode_subtitle_simple: '当前：简单 — 点击切换到专业',
     user_mode_subtitle_power: '当前：专业 — 点击切换到简单',
     user_mode_simple_description: '单钱包设置。',
@@ -720,6 +795,70 @@ const zh = {
     remove: '删除',
     data_management: '数据管理',
     data_management_subtitle: '导出和导入数据',
+    statement_import: '账单导入',
+    statement_import_subtitle: '从银行账单导入',
+  },
+  statement_import: {
+    title: '账单导入',
+    step1_title: '复制提示词',
+    copy_prompt: '复制提示词',
+    step1_instructions: '粘贴提示词并附上银行账单（PDF/图片）。可同时附多个文件。',
+    step1_recommended: '附件较多或体积较大时，建议开启 AI 的「思考/推理」模式以获得更好的结果。',
+    open_in: '在以下应用打开',
+    step2_title: '导入结果',
+    step2_description: '从 AI 回复中复制 JSON 并粘贴到此处。',
+    paste_json: '从剪贴板粘贴',
+    preview_title: '预览',
+    expenses: '支出',
+    income: '收入',
+    import_action: '导入 %{count} 笔交易',
+    importing: '正在导入...',
+    import_success_title: '导入完成',
+    import_success_message: '已成功导入 %{count} 笔交易。',
+    import_error_title: '导入失败',
+    import_error_empty_clipboard: '剪贴板为空，请先复制 AI 回复中的 JSON。',
+    import_error_invalid_json: '这不是有效的 JSON。请仅复制 AI 回复中的 JSON 对象，不要包含其他文字。',
+    import_error_no_transactions: 'JSON 格式正确，但没有任何交易记录。',
+    import_error_invalid_transaction: '部分交易缺少日期或金额。请让 AI 重新生成。',
+    import_error_generic: '无法导入交易，请重试。',
+    clear: '清除',
+    account_label: '导入到账户',
+    account_placeholder: '选择账户',
+    account_required: '导入前请选择一个账户。',
+    account_mapping_required: '导入前请为所有账单中的账户建立映射。',
+    selected: '已选',
+    how_to_video: '查看使用教程',
+    prompt_template:
+      '请将上传的银行账单解析为 JSON。可能会附上多个文件。\n\n' +
+      '对找到的每一笔交易:\n' +
+      '- date: YYYY-MM-DD\n' +
+      '- description: 干净的商家/收款方名称(去除编号、参考号、尾部数字)\n' +
+      '- amount: 支出/扣账为负数,收入/入账为正数\n' +
+      '- category: 从下列我的类别中选择最匹配的,使用「父类 > 子类」格式;若无子类则只填父类名;不确定时填「其他」\n' +
+      '- account: 账单上显示的具体账户名称(例如「招商银行信用卡」「OCBC 365 信用卡」),不要使用通用标签\n\n' +
+      '只跳过:余额行、账单汇总、披露声明、页眉/页脚。\n\n' +
+      '## 我的账户\n{{accounts}}\n\n' +
+      '## 我的支出类别\n{{expenses}}\n\n' +
+      '## 我的收入类别\n{{incomes}}\n\n' +
+      '仅以 json 代码块格式回复,不要任何其他文字:\n\n' +
+      '```json\n' +
+      '{\n' +
+      '  "statement": {\n' +
+      '    "issuer": "<名称或 \'Multiple\'>",\n' +
+      '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
+      '  },\n' +
+      '  "transactions": [\n' +
+      '    { "date": "YYYY-MM-DD", "description": "...", "amount": -0.00, "category": "...", "account": "..." }\n' +
+      '  ]\n' +
+      '}\n' +
+      '```\n\n' +
+      '## 规则\n' +
+      '- 绝不要凭空捏造交易。只输出文档中实际存在的内容。\n' +
+      '- 绝不要跳过、截断或省略交易。从头到尾读完每个文件的每一页,输出每一条交易。\n' +
+      '- 若上传了多个文件,先逐个完整处理,再将所有交易合并到同一个 "transactions" 数组中。\n' +
+      '- 若账单跨年但只显示月日,根据账单期间推断年份。\n' +
+      '- 不要提问、不要拒绝、不要建议分多次回复。\n' +
+      '- 若输出被截断,在 JSON 中途停下,我会回复「继续」让你接着输出。不要因为担心被截断就提前停止 — 继续输出即可。',
   },
   data_management: {
     title: '数据管理',
@@ -776,7 +915,7 @@ const zh = {
       converter_title: '买前算一算',
       converter_body: '输入任意价格，立即看到它花费你多少小时。',
       add_title: '添加交易',
-      add_body: '随时点击 + 快速记录支出、收入或转账。',
+      add_body: '点击 +，直接输入「星巴克 30」之类的内容，金额、分类和账户都会自动填好。',
       insights_title: '洞察类型',
       insights_body: '打开此菜单切换不同的洞察和分析视图。',
       management_title: '数据管理',
@@ -822,6 +961,7 @@ const zh = {
     expense: '支出',
     income: '收入',
     subcategories: '子分类',
+    delete_confirm: '将永久删除此分类，此操作不可撤销。',
   },
   accounts: {
     new_account: '新建账户',
@@ -858,6 +998,7 @@ const zh = {
     outstanding: '未还余额',
     pay_this_card: '还这张卡',
     delete_account: '删除账户',
+    delete_account_confirm: '将永久删除此账户及其所有交易，此操作不可撤销。',
     cc: '信用卡',
     type_credit: '信用',
     type_debit: '借记',
@@ -982,6 +1123,10 @@ const zh = {
     recurring_description: '把订阅和每月固定支出管理得更清楚。',
     hourly_income_label: '时薪记录',
     hourly_income_description: '保存历史工资参数，让时间价值长期保持准确。',
+    trends_label: '长期趋势',
+    trends_description: '长期追踪支出、收入、心情、资产和时薪的变化。',
+    feature_trends_free: '5 项基础洞察',
+    feature_trends_pro: '10 项洞察 + 趋势',
     feature_unlimited_transactions: '无限交易',
     feature_accounts: '{{count}} 个账户',
     feature_unlimited_accounts: '无限账户',
@@ -1008,6 +1153,60 @@ const zh = {
     limit_categories: '免费版最多可创建 {{count}} 个分类。升级到 Pro 即可不限数量。',
     limit_recurring: '免费版最多可创建 {{count}} 条固定规则。升级到 Pro 即可不限数量。',
     limit_wage_entries: '免费版最多可创建 {{count}} 条时薪记录。升级到 Pro 即可不限数量。',
+    badge: 'PRO',
+    trend_preview_title: '解锁长期趋势',
+    trend_preview_message: '解锁趋势功能，追踪规律、洞察变化，长期看清你的金钱走向。',
+    trend_preview_cta: '升级到 Pro',
+  },
+  notifications: {
+    title: '通知',
+    subtitle: '通过及时提醒掌握自己的支出节奏。',
+    permission_required: '通知已停用',
+    permission_required_message: '请在设备设置中开启通知以接收提醒。',
+    permission_denied_title: '通知被阻止',
+    permission_denied_message: '请打开设备设置，允许 Money2Time 发送通知，以便接收提醒。',
+    open_settings: '前往设置',
+    daily_checkin: {
+      title: '每日打卡',
+      label: '每日提醒',
+      description: '每天提醒你记录当天的支出。',
+      time: '提醒时间',
+    },
+    recurring: {
+      title: '周期性交易',
+      label: '自动扣款提醒',
+      description: '周期性交易自动创建时通知你。',
+    },
+    weekly_summary: {
+      title: '每周总结',
+      label: '周回顾',
+      description: '查看过去 7 天的支出。',
+      day: '星期',
+      time: '时间',
+      display_mode: '显示方式',
+      show_money: '金额',
+      show_hours: '工时',
+    },
+    days: {
+      monday: '星期一',
+      tuesday: '星期二',
+      wednesday: '星期三',
+      thursday: '星期四',
+      friday: '星期五',
+      saturday: '星期六',
+      sunday: '星期日',
+    },
+    customize: '自定义',
+    send_test: '发送测试通知',
+    content: {
+      daily_title: '今天的支出怎么样？',
+      daily_body: '花点时间记录一下你的交易。',
+      recurring_title: '周期性交易已处理',
+      recurring_body: '{{name}} — {{amount}}',
+      recurring_body_with_hours: '{{name}} — {{amount}} · {{hours}}',
+      weekly_title: '本周回顾',
+      weekly_body: '点击查看过去 7 天的支出。',
+    },
   },
 };
 

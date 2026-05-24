@@ -21,6 +21,7 @@ import { ProManagementScreen } from './ProManagementScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
+import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
@@ -31,7 +32,6 @@ interface SettingsStackProps {
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
   onOpenProPaywall: () => void;
-  onOpenAIChat: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -60,14 +60,12 @@ function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
   onOpenProPaywall,
-  onOpenAIChat,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: () => void;
-  onOpenAIChat: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
     targetId:
@@ -91,7 +89,7 @@ function SettingsHomeRoute({
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
-      onOpenAIChat={onOpenAIChat}
+      onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onStartTutorial={onStartTutorial}
@@ -124,7 +122,6 @@ export function SettingsStack({
   scrollToTopToken = 0,
   onOpenRecurringEditor,
   onOpenProPaywall,
-  onOpenAIChat,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -187,7 +184,6 @@ export function SettingsStack({
               {...props}
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
-              onOpenAIChat={onOpenAIChat}
               onStartTutorial={onStartTutorial}
               onTutorialTargetLayout={onTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -310,9 +306,7 @@ export function SettingsStack({
           return (
             <StatementImportScreen
               onBack={() => props.navigation.goBack()}
-              onOpenList={(params) =>
-                props.navigation.navigate('StatementImportList', params)
-              }
+              onOpenList={(params) => props.navigation.navigate('StatementImportList', params)}
             />
           );
         }}
@@ -342,6 +336,12 @@ export function SettingsStack({
               onOpenPaywall={onOpenProPaywall}
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="QuickEntrySettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <QuickEntrySettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
     </SettingsStackNavigator.Navigator>
