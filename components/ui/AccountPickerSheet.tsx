@@ -109,7 +109,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     if (ungrouped && ungrouped.length > 0) {
       out.push({
         key: '__ungrouped__',
-        label: out.length > 0 ? I18n.t('common.other') : '',
+        label: out.length > 0 ? String(I18n.t('common.ungrouped')) : '',
         accounts: ungrouped,
       });
     }

@@ -1,6 +1,5 @@
 import {
   Bell,
-  BotMessageSquare,
   ChevronRight,
   Clock3,
   Crown,
@@ -13,6 +12,7 @@ import {
   Repeat2,
   SlidersHorizontal,
   Sparkles,
+  Zap,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
@@ -75,7 +75,7 @@ interface SettingsScreenProps {
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onOpenStatementImport: () => void;
-  onOpenAIChat: () => void;
+  onOpenQuickEntry: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onStartTutorial: () => void;
@@ -94,7 +94,7 @@ export function SettingsScreen({
   onOpenNotifications,
   onOpenDataManagement,
   onOpenStatementImport,
-  onOpenAIChat,
+  onOpenQuickEntry,
   onOpenProPaywall,
   onOpenProManagement,
   onStartTutorial,
@@ -416,6 +416,12 @@ export function SettingsScreen({
                   onPress={onOpenRecurring}
                 />
               </View>
+              <SettingsRowItem
+                icon={<Zap size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.quick_entry.title')}
+                subtitle={I18n.t('settings.quick_entry.row_subtitle')}
+                onPress={onOpenQuickEntry}
+              />
             </View>
           </SettingsSection>
 
@@ -425,12 +431,6 @@ export function SettingsScreen({
             showAccent={false}
           >
             <View style={styles.rowsGroup}>
-              <SettingsRowItem
-                icon={<BotMessageSquare size={18} color={themeColors.primary} />}
-                label={I18n.t('settings.ai_chat')}
-                subtitle={I18n.t('settings.ai_chat_subtitle')}
-                onPress={onOpenAIChat}
-              />
               <View
                 ref={statementImportRowRef}
                 onLayout={() => {

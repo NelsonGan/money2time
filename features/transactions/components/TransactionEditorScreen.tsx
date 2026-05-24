@@ -131,6 +131,11 @@ const styles = StyleSheet.create({
   inlineSummaryInput: {
     fontSize: 16,
     textAlign: 'right',
+    // Without a right pad, iOS clips trailing spaces flush against the input
+    // edge — typing "uber " looks identical to "uber" until the next
+    // character lands. A small inset gives the cursor and trailing
+    // whitespace visible breathing room.
+    paddingRight: 2,
   },
   summaryDismissLayout: {
     flexDirection: 'row',
@@ -1980,6 +1985,9 @@ export function TransactionEditorScreen({
                                     returnKeyType="done"
                                     onFocus={handleNoteFocus}
                                     onBlur={handleNoteBlur}
+                                    autoCorrect={false}
+                                    autoComplete="off"
+                                    spellCheck={false}
                                     style={[
                                       SINGLE_LINE_TEXT_INPUT_STYLE,
                                       styles.inlineSummaryInput,

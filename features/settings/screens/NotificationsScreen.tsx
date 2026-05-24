@@ -33,16 +33,11 @@ import {
   type PermissionStatus,
   requestPermissions,
 } from '~/services/notifications';
+import { formatTimeOfDay } from '~/utils/formatters';
 
 interface NotificationsScreenProps {
   onBack: () => void;
   onOpenDetail: (type: NotificationDetailType) => void;
-}
-
-function formatTime(hour: number, minute: number): string {
-  const period = hour < 12 ? 'AM' : 'PM';
-  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-  return `${display}:${minute === 0 ? '00' : '30'} ${period}`;
 }
 
 function getDayName(day: number): string {
@@ -126,12 +121,12 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
     [ensurePermissions, notificationPrefs.weeklySummary, updateNotificationPrefs],
   );
 
-  const dailySubtitle = formatTime(
+  const dailySubtitle = formatTimeOfDay(
     notificationPrefs.dailyCheckin.hour,
     notificationPrefs.dailyCheckin.minute,
   );
 
-  const weeklySubtitle = `${getDayName(notificationPrefs.weeklySummary.dayOfWeek)} ${formatTime(notificationPrefs.weeklySummary.hour, notificationPrefs.weeklySummary.minute)}`;
+  const weeklySubtitle = `${getDayName(notificationPrefs.weeklySummary.dayOfWeek)} ${formatTimeOfDay(notificationPrefs.weeklySummary.hour, notificationPrefs.weeklySummary.minute)}`;
 
   return (
     <SettingsPageLayout>

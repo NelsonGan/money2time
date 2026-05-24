@@ -235,16 +235,53 @@ export function formatCompactCurrency(amount: number, currencySymbol = '$'): str
   return `${currencySymbol}${formatCompactNumber(amount)}`;
 }
 
+const timeOfDayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function getTimeOfDayFormatter(locale: string): Intl.DateTimeFormat | null {
+  const cached = timeOfDayFormatterByLocale.get(locale);
+  if (cached) return cached;
+  try {
+    const formatter = new Intl.DateTimeFormat(locale, {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    timeOfDayFormatterByLocale.set(locale, formatter);
+    return formatter;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Format a wall-clock time (e.g. notification reminder time) using the active
+ * app locale's conventions — "10:30 AM" in English, "上午10:30" in Chinese, etc.
+ * Falls back to a manual 12-hour format if `Intl.DateTimeFormat` isn't usable
+ * for the requested locale on the current runtime.
+ */
+export function formatTimeOfDay(hour: number, minute: number): string {
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  const locale = I18n.locale || 'en';
+  const formatter = getTimeOfDayFormatter(locale);
+  if (formatter) return formatter.format(date);
+  const period = hour < 12 ? 'AM' : 'PM';
+  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const min = minute < 10 ? `0${minute}` : String(minute);
+  return `${display}:${min} ${period}`;
+}
+
 export function formatHours(hours: number): string {
   const absHours = Math.abs(hours);
-  if (absHours < 0.01) return '0m';
+  const h = String(I18n.t('common.hour_unit'));
+  const m = String(I18n.t('common.minute_unit'));
+  if (absHours < 0.01) return `0${m}`;
 
   const wholeHours = Math.floor(absHours);
   const minutes = Math.round((absHours - wholeHours) * 60);
 
-  if (wholeHours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${wholeHours}h`;
-  return `${wholeHours}h ${minutes}m`;
+  if (wholeHours === 0) return `${minutes}${m}`;
+  if (minutes === 0) return `${wholeHours}${h}`;
+  return `${wholeHours}${h} ${minutes}${m}`;
 }
 
 export function formatAmount(

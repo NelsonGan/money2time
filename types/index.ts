@@ -77,17 +77,36 @@ export interface UserSettings {
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
-  centerAddButtonOpensAiChat: boolean;
-  aiChatEnabled: boolean;
-  aiChatDefaultAccountId: string | null;
-  aiChatDefaultIncomeCategoryId: string | null;
-  aiChatDefaultExpenseCategoryId: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
 }
+
+export interface QuickEntryPrefs {
+  /** Override which user category to use for each keyword bucket. */
+  categoryMap: Partial<Record<string, string>>;
+  /** Fallback category id used when no keyword/history match. */
+  defaultExpenseCategoryId: string | null;
+  defaultIncomeCategoryId: string | null;
+  /** When true, holding the + button on iOS opens the voice dictation flow. */
+  voiceInputEnabled: boolean;
+  /**
+   * True once the user has been prompted (and either enabled or dismissed)
+   * the voice-input suggestion that appears when tapping the + button on a
+   * device that supports speech recognition. Prevents re-prompting.
+   */
+  voicePromptDismissed: boolean;
+}
+
+export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
+  categoryMap: {},
+  defaultExpenseCategoryId: null,
+  defaultIncomeCategoryId: null,
+  voiceInputEnabled: false,
+  voicePromptDismissed: false,
+};
 
 export interface Account {
   id: string;

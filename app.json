@@ -47,7 +47,21 @@
       "expo-localization",
       "expo-notifications",
       "expo-screen-orientation",
-      "llama.rn"
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.4"
+          }
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Money2Time uses your microphone to convert your spoken transactions into entries.",
+          "speechRecognitionPermission": "Money2Time transcribes your spoken transactions on device, so you can log spending hands-free."
+        }
+      ]
     ],
     "extra": {
       "eas": {
