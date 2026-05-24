@@ -14,6 +14,7 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
+import { formatTimeOfDay } from '~/utils/formatters';
 
 interface NotificationDetailScreenProps {
   type: NotificationDetailType;
@@ -24,10 +25,7 @@ function buildTimeOptions(): { value: string; label: string }[] {
   const options: { value: string; label: string }[] = [];
   for (let h = 0; h < 24; h++) {
     for (const m of [0, 30]) {
-      const period = h < 12 ? 'AM' : 'PM';
-      const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
-      const label = `${display}:${m === 0 ? '00' : '30'} ${period}`;
-      options.push({ value: `${h}:${m}`, label });
+      options.push({ value: `${h}:${m}`, label: formatTimeOfDay(h, m) });
     }
   }
   return options;

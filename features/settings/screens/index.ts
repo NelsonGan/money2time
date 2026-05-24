@@ -5,6 +5,7 @@ export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { HourlyValueScreen } from './HourlyValueScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';
+export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';

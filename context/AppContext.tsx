@@ -70,8 +70,10 @@ import {
   type CashflowSummary,
   type Category,
   type DateRange,
+  DEFAULT_QUICK_ENTRY_PREFS,
   type MonthlyWageSettings,
   type NotificationPreferences,
+  type QuickEntryPrefs,
   type RecurringTransactionRule,
   type TransactionFilters,
   type TransactionSplit,
@@ -167,11 +169,6 @@ interface AppContextValue extends AppState {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
-        | 'centerAddButtonOpensAiChat'
-        | 'aiChatEnabled'
-        | 'aiChatDefaultAccountId'
-        | 'aiChatDefaultIncomeCategoryId'
-        | 'aiChatDefaultExpenseCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -207,6 +204,8 @@ interface AppContextValue extends AppState {
   updateInsightsPreferencesJson: (value: string | null) => void;
   notificationPrefs: NotificationPreferences;
   updateNotificationPrefs: (updates: Partial<NotificationPreferences>) => void;
+  quickEntryPrefs: QuickEntryPrefs;
+  updateQuickEntryPrefs: (updates: Partial<QuickEntryPrefs>) => void;
 
   isSimpleMode: boolean;
   simpleWalletId: string | null;
@@ -580,6 +579,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFS,
   );
+  const [quickEntryPrefs, setQuickEntryPrefs] =
+    useState<QuickEntryPrefs>(DEFAULT_QUICK_ENTRY_PREFS);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const refreshAll = useCallback(() => {
@@ -598,6 +599,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextNotificationPrefs: NotificationPreferences = nextNotificationPrefsJson
         ? { ...DEFAULT_NOTIFICATION_PREFS, ...JSON.parse(nextNotificationPrefsJson) }
         : DEFAULT_NOTIFICATION_PREFS;
+      const nextQuickEntryPrefsJson = settingsRepository.getQuickEntryPrefsJson();
+      const nextQuickEntryPrefs: QuickEntryPrefs = nextQuickEntryPrefsJson
+        ? { ...DEFAULT_QUICK_ENTRY_PREFS, ...JSON.parse(nextQuickEntryPrefsJson) }
+        : DEFAULT_QUICK_ENTRY_PREFS;
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
@@ -646,6 +651,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSettings(nextSettings);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
       setNotificationPrefs(nextNotificationPrefs);
+      setQuickEntryPrefs(nextQuickEntryPrefs);
       setAccountGroups(nextAccountGroups);
       setRecurringRules(nextRecurringRules);
       setAccounts(nextAccounts);
@@ -760,10 +766,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         accountsRepository.softDelete(id);
-        const currentSettings = settingsRepository.get();
-        if (currentSettings.aiChatDefaultAccountId === id) {
-          settingsRepository.updateSettings({ aiChatDefaultAccountId: null });
-        }
       });
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
@@ -865,17 +867,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ) => {
       runMutation(() => {
         categoriesRepository.update(id, updates);
-        const currentSettings = settingsRepository.get();
-        if (updates.type === 'expense') {
-          if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
-            settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
-          }
-        }
-        if (updates.type === 'income') {
-          if (currentSettings.aiChatDefaultExpenseCategoryId === id) {
-            settingsRepository.updateSettings({ aiChatDefaultExpenseCategoryId: null });
-          }
-        }
       });
     },
     [runMutation],
@@ -885,13 +876,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       runMutation(() => {
         categoriesRepository.softDelete(id);
-        const currentSettings = settingsRepository.get();
-        if (currentSettings.aiChatDefaultIncomeCategoryId === id) {
-          settingsRepository.updateSettings({ aiChatDefaultIncomeCategoryId: null });
-        }
-        if (currentSettings.aiChatDefaultExpenseCategoryId === id) {
-          settingsRepository.updateSettings({ aiChatDefaultExpenseCategoryId: null });
-        }
       });
       void trackEvent(AnalyticsEvents.CATEGORY_DELETED);
     },
@@ -1087,7 +1071,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if ('fromAccountId' in input && relations) {
               updated.fromAccountName = relations.fromAccountName;
             }
-            if ('toAccountId' in input && relations) updated.toAccountName = relations.toAccountName;
+            if ('toAccountId' in input && relations)
+              updated.toAccountName = relations.toAccountName;
             if ('categoryId' in input && relations) {
               updated.categoryName = relations.categoryName;
               updated.categoryIcon = relations.categoryIcon;
@@ -1654,11 +1639,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'hapticsEnabled'
           | 'themeMode'
           | 'themeColor'
-          | 'centerAddButtonOpensAiChat'
-          | 'aiChatEnabled'
-          | 'aiChatDefaultAccountId'
-          | 'aiChatDefaultIncomeCategoryId'
-          | 'aiChatDefaultExpenseCategoryId'
           | 'onboardingCompleted'
           | 'userMode'
         >
@@ -1781,6 +1761,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
       settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
       void syncScheduledNotifications(merged);
+      return merged;
+    });
+  }, []);
+
+  const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
+    setQuickEntryPrefs((previous) => {
+      const merged: QuickEntryPrefs = {
+        categoryMap: updates.categoryMap !== undefined ? updates.categoryMap : previous.categoryMap,
+        defaultExpenseCategoryId:
+          updates.defaultExpenseCategoryId !== undefined
+            ? updates.defaultExpenseCategoryId
+            : previous.defaultExpenseCategoryId,
+        defaultIncomeCategoryId:
+          updates.defaultIncomeCategoryId !== undefined
+            ? updates.defaultIncomeCategoryId
+            : previous.defaultIncomeCategoryId,
+        voiceInputEnabled:
+          updates.voiceInputEnabled !== undefined
+            ? updates.voiceInputEnabled
+            : previous.voiceInputEnabled,
+        voicePromptDismissed:
+          updates.voicePromptDismissed !== undefined
+            ? updates.voicePromptDismissed
+            : previous.voicePromptDismissed,
+      };
+      settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;
     });
   }, []);
@@ -2058,22 +2064,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         let shouldRefreshAccounts = false;
         let shouldRefreshCategories = false;
 
+        // Always make sure the user finishes onboarding with at least the
+        // minimal category set. `seedMinimalCategoriesIfMissing` is
+        // idempotent (it no-ops for any category that already exists by
+        // name), so this is safe to call on every path — including the
+        // "Skip setup" exit, the power-mode-no-seed path, and a returning
+        // user who somehow lands back in this flow.
+        createdCategories = seedMinimalCategoriesIfMissing();
+        if (createdCategories > 0) shouldRefreshCategories = true;
+
         if (options?.userMode === 'simple') {
           ensureSimpleWalletExists(preferredCurrency);
           shouldRefreshAccounts = true;
-          if (options.seedSimpleDefaults) {
-            createdCategories = seedMinimalCategoriesIfMissing();
-            shouldRefreshCategories = true;
-          }
         }
 
         if (options?.userMode === 'power' && options.seedPowerDefaults) {
-          createdCategories = seedMinimalCategoriesIfMissing();
           const powerPreferredCurrency =
             accountsRepository.list()[0]?.currency ?? preferredCurrency;
           createdAccounts = seedPowerAccountsIfMissing(powerPreferredCurrency);
           shouldRefreshAccounts = true;
-          shouldRefreshCategories = true;
         }
 
         settingsRepository.updateSettings({
@@ -2131,10 +2140,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       transactionsRepository.softDeleteByAccountId(walletId);
       accountsRepository.softDelete(walletId);
-      const currentSettings = settingsRepository.get();
-      if (currentSettings.aiChatDefaultAccountId === walletId) {
-        settingsRepository.updateSettings({ aiChatDefaultAccountId: null });
-      }
     });
   }, [runMutation]);
 
@@ -2218,6 +2223,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateInsightsPreferencesJson,
             notificationPrefs,
             updateNotificationPrefs,
+            quickEntryPrefs,
+            updateQuickEntryPrefs,
             isSimpleMode,
             simpleWalletId,
             completeOnboarding,
@@ -2292,6 +2299,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateInsightsPreferencesJson,
       notificationPrefs,
       updateNotificationPrefs,
+      quickEntryPrefs,
+      updateQuickEntryPrefs,
       isSimpleMode,
       simpleWalletId,
       completeOnboarding,

@@ -26,6 +26,8 @@ const en = {
     ungrouped: 'Ungrouped',
     other: 'Other',
     unknown: 'Unknown',
+    hour_unit: 'h',
+    minute_unit: 'm',
     none: 'None',
     no_account: 'No account',
     uncategorized: 'Uncategorized',
@@ -313,6 +315,12 @@ const en = {
     calculator: {
       set_hourly_for_time: 'Set hourly value to see time equivalent',
       enter: 'Enter',
+    },
+    quick_add: {
+      expand: 'Open detailed editor',
+      time_sentence: '{{amount}} ≈ {{hours}} of work',
+      placeholder_expense: 'Try "Uber 30", "Coffee 5", "Dominos 25".',
+      placeholder_income: 'Try "Salary 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
       title_create: 'Add',
@@ -651,6 +659,62 @@ const en = {
     section_personal: 'Preferences',
     section_money: 'Money',
     section_support: 'Support & Data',
+    quick_entry: {
+      title: 'Quick Entry',
+      subtitle: 'Map keyword groups to your categories.',
+      row_subtitle: 'Map keywords to categories',
+      section_expense: 'Expense',
+      section_income: 'Income',
+      default_row: 'Default',
+      no_default: 'Auto · falls back to Other',
+      unmapped: 'Unmapped',
+      custom_badge: 'Custom',
+      bucket_labels: {
+        food: 'Food & Drinks',
+        groceries: 'Groceries',
+        transport: 'Transport',
+        housing: 'Housing',
+        bills: 'Bills & Utilities',
+        healthcare: 'Healthcare',
+        shopping: 'Shopping',
+        entertainment: 'Entertainment',
+        education: 'Education',
+        pets: 'Pets',
+        travel: 'Travel',
+        fitness: 'Fitness',
+        gifts: 'Gifts & Donations',
+        salary: 'Salary',
+        investment: 'Investment',
+        refund: 'Refund',
+      },
+      voice: {
+        row_label: 'Voice input',
+        row_subtitle: 'Hold + to dictate transactions',
+        suggest_title: 'Try voice input?',
+        suggest_message:
+          'Hold the + button and speak transactions like "uber 30". You can turn this off any time in Quick Entry settings.',
+        suggest_enable: 'Enable',
+        suggest_later: 'Not now',
+        listening: 'Listening…',
+        release_hint: 'Release to recognize',
+        permission_denied_title: 'Microphone access needed',
+        permission_denied_message:
+          'Allow microphone and speech recognition in Settings to dictate transactions.',
+        open_settings: 'Open Settings',
+        error_title: 'Voice input failed',
+        error_message: 'Couldn’t process voice input. Please try again.',
+        no_amount_title: 'No amount detected',
+        no_amount_message:
+          'I heard "{{transcript}}" but couldn’t find an amount. Try saying the amount, e.g. "uber 30".',
+        preview_heard: 'I heard',
+        preview_amount: 'Amount',
+        preview_category: 'Category',
+        preview_account: 'Account',
+        discard: 'Discard',
+        edit: 'Edit',
+        save: 'Save',
+      },
+    },
     hourly_value: 'Hourly value',
     hourly_value_latest: '{{value}} latest',
     hourly_value_subtitle: 'See and update your true hourly value',
@@ -665,8 +729,6 @@ const en = {
     recurring_subtitle: 'Create rules for automatic future entries',
     start_tutorial: 'Start tutorial',
     start_tutorial_subtitle: 'Learn core features again',
-    ai_chat: 'Smart Entry',
-    ai_chat_subtitle: 'Create transactions with natural language',
     importing_backup: 'Importing backup...',
     import_backup: 'Import .mmbak backup',
     import_backup_subtitle: 'Money Manager backup import',
@@ -748,9 +810,6 @@ const en = {
     user_mode_power: 'Power Mode',
     haptics: 'Haptics',
     haptics_subtitle: 'Turn touch feedback on or off across the app.',
-    center_add_button_ai_chat: 'Quick-launch Smart Entry',
-    center_add_button_ai_chat_subtitle:
-      'Tap the + button to open Smart Entry instead of the manual entry form.',
     user_mode_subtitle_simple: 'Currently: Simple — tap to switch to Power',
     user_mode_subtitle_power: 'Currently: Power — tap to switch to Simple',
     user_mode_simple_description: 'Single wallet setup.',
@@ -806,6 +865,37 @@ const en = {
     account_mapping_required: 'Please map all statement accounts before importing.',
     selected: 'Selected',
     how_to_video: 'See how it works',
+    prompt_template:
+      'Parse the uploaded bank statement(s) into JSON. One or more files may be attached.\n\n' +
+      'For each transaction row found:\n' +
+      '- date: YYYY-MM-DD\n' +
+      '- description: clean merchant/payee name (remove codes, reference numbers, trailing digits)\n' +
+      '- amount: NEGATIVE for expenses/debits, POSITIVE for income/credits\n' +
+      '- category: best match from my categories below using "Parent > Subcategory" when a subcategory fits, just parent name otherwise, "Other" if unsure\n' +
+      '- account: specific account name as printed on the statement (e.g. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), not generic labels\n\n' +
+      'Skip only: balance lines, statement totals, disclosures, headers/footers.\n\n' +
+      '## My Accounts\n{{accounts}}\n\n' +
+      '## My Expense Categories\n{{expenses}}\n\n' +
+      '## My Income Categories\n{{incomes}}\n\n' +
+      'Reply with ONLY a json code block, no other text:\n\n' +
+      '```json\n' +
+      '{\n' +
+      '  "statement": {\n' +
+      '    "issuer": "<name or \'Multiple\'>",\n' +
+      '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
+      '  },\n' +
+      '  "transactions": [\n' +
+      '    { "date": "YYYY-MM-DD", "description": "...", "amount": -0.00, "category": "...", "account": "..." }\n' +
+      '  ]\n' +
+      '}\n' +
+      '```\n\n' +
+      '## Rules\n' +
+      '- NEVER fabricate or hallucinate transactions. Only output what is in the document.\n' +
+      '- NEVER skip, truncate, or omit transactions. Read every page of every file from start to finish. Output every single transaction row.\n' +
+      '- If multiple files are uploaded, process each file fully then merge all transactions into the single "transactions" array.\n' +
+      '- If the statement spans a year boundary and only shows month/day, infer the year from the statement period.\n' +
+      '- Do not ask questions, do not refuse, do not offer to split into multiple responses.\n' +
+      "- If your output gets cut off, stop mid-JSON and I will reply 'continue' so you can finish. Do not stop early to avoid being cut off — just keep going.",
   },
   data_management: {
     title: 'Data Management',
@@ -868,7 +958,7 @@ const en = {
       converter_title: 'Before You Buy',
       converter_body: 'Enter any price to instantly see how many hours of your life it costs.',
       add_title: 'Add transaction',
-      add_body: 'Tap + any time to quickly log an expense, income, or transfer.',
+      add_body: 'Tap + and just type something like "Uber 30" — we\'ll fill in the amount, category, and account for you.',
       insights_title: 'Insight type',
       insights_body: 'Open this to switch between different insights and analysis views.',
       management_title: 'Data Management',
@@ -1171,65 +1261,6 @@ const en = {
       weekly_title: 'Your week in review',
       weekly_body: 'Tap to see your spending from the last 7 days.',
     },
-  },
-  aiChat: {
-    title: 'Smart Entry',
-    open_settings: 'Open Smart Entry settings',
-    settings_title: 'Smart Entry Settings',
-    settings_description: "Used when your message doesn't mention specifics.",
-    enable_chip_private: 'Private',
-    enable_chip_local: 'On-device',
-    enable_title: 'On-Device AI',
-    enable_description_intro: 'Your data never leaves your device.',
-    enable_description_download_prefix: 'A one-time',
-    enable_description_once: 'download',
-    enable_description_download_suffix: 'is needed to get started.',
-    enable_stay_on_screen: 'You can leave this screen while it downloads.',
-    download_local_ai: 'Download',
-    enable_local_ai: 'Download now',
-    downloading_local_ai: 'Downloading AI Model...',
-    downloading_local_ai_progress: 'Downloading AI Model... {{progress}}%',
-    preparing_local_ai: 'Preparing AI Model...',
-    prepare_failed: 'Could not prepare AI Model. Try again.',
-    account_section_title: 'Default account',
-    expense_category_section_title: 'Default expense category',
-    income_category_section_title: 'Default income category',
-    disable_section_title: 'Disable AI Feature',
-    disable_section_subtitle: 'Delete the local AI model to free up storage.',
-    disable_button: 'Disable Feature',
-    account_section_subtitle: 'Used when a message does not mention an account.',
-    default_account_label: 'Account',
-    default_account_helper: "If you don't specify an account, Smart Entry will use this one.",
-    no_default_account: 'No default account',
-    no_default_expense_category: 'No default expense category',
-    no_default_income_category: 'No default income category',
-    no_default_account_description: 'Leave account empty unless the user mentions one.',
-    simple_mode_account_helper: 'Simple mode always uses your Simple Wallet.',
-    loading_model: 'Loading model...',
-    model_ready: 'Model ready',
-    no_model_status: 'No model downloaded',
-    no_model: 'Open settings to download a model first',
-    model_loading: 'Loading AI model...',
-    busy_title: 'Getting ready',
-    busy_description:
-      'Smart Entry is finishing another task. Please wait a moment before sending your message.',
-    busy_placeholder: 'Smart Entry is busy. Please wait...',
-    placeholder: 'eg: 20 for lunch',
-    placeholder_expense_with_account: 'eg: 20 for lunch from {{account}}',
-    placeholder_transfer_with_accounts: 'eg: transfer 20 from {{fromAccount}} to {{toAccount}}',
-    placeholder_income_with_account: 'eg: earned 50 Salary to {{account}}',
-    accept: 'Accept',
-    reject: 'Reject',
-    edit: 'Edit',
-    accepted: 'Added',
-    empty_state_title: 'Type a transaction in plain text',
-    empty_state_subtitle: 'Use @ to tag accounts and categories',
-    no_transactions:
-      'I couldn\'t parse any transactions from that. Try something like "50 for groceries" or "earned 3000 salary".',
-    error: 'Something went wrong. Try again.',
-    generation_cancelled: 'Cancelled.',
-    model_section_title: 'AI Model',
-    download: 'Download',
   },
 };
 

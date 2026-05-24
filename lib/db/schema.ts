@@ -90,15 +90,9 @@ export const settingsTable = sqliteTable('settings', {
   hapticsEnabled: integer('haptics_enabled', { mode: 'boolean' }).notNull().default(true),
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
-  centerAddButtonOpensAiChat: integer('center_add_button_opens_ai_chat', { mode: 'boolean' })
-    .notNull()
-    .default(false),
-  aiChatEnabled: integer('ai_chat_enabled', { mode: 'boolean' }).notNull().default(false),
-  aiChatDefaultAccountId: text('ai_chat_default_account_id'),
-  aiChatDefaultIncomeCategoryId: text('ai_chat_default_income_category_id'),
-  aiChatDefaultExpenseCategoryId: text('ai_chat_default_expense_category_id'),
   insightsPrefsJson: text('insights_prefs_json'),
   notificationPrefsJson: text('notification_prefs_json'),
+  quickEntryPrefsJson: text('quick_entry_prefs_json'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),

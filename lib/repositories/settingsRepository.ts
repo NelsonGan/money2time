@@ -38,11 +38,6 @@ class SettingsRepository {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
-        | 'centerAddButtonOpensAiChat'
-        | 'aiChatEnabled'
-        | 'aiChatDefaultAccountId'
-        | 'aiChatDefaultIncomeCategoryId'
-        | 'aiChatDefaultExpenseCategoryId'
         | 'onboardingCompleted'
         | 'userMode'
       >
@@ -99,6 +94,24 @@ class SettingsRepository {
       .run();
   }
 
+  getQuickEntryPrefsJson(): string | null {
+    const db = getDb();
+    const row = db
+      .select({ quickEntryPrefsJson: settingsTable.quickEntryPrefsJson })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return row?.quickEntryPrefsJson ?? null;
+  }
+
+  updateQuickEntryPrefsJson(value: string | null) {
+    const db = getDb();
+    db.update(settingsTable)
+      .set({ quickEntryPrefsJson: value, updatedAt: nowIso() })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
   reset() {
     const db = getDb();
     const now = nowIso();
@@ -113,13 +126,9 @@ class SettingsRepository {
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
-        centerAddButtonOpensAiChat: false,
-        aiChatEnabled: false,
-        aiChatDefaultAccountId: null,
-        aiChatDefaultIncomeCategoryId: null,
-        aiChatDefaultExpenseCategoryId: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
+        quickEntryPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
         updatedAt: now,

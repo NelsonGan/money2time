@@ -1,3 +1,4 @@
+import { Mic } from 'lucide-react-native';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { InteractionManager, Platform, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -25,6 +26,18 @@ interface BottomNavProps {
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
   onPressAdd?: () => void;
+  /**
+   * Triggered when the user holds the + button. When set, a short tap still
+   * fires `onPressAdd`; the long-press fires this instead. `onLongPressAddEnd`
+   * fires when the user releases the finger after a long-press.
+   */
+  onLongPressAdd?: () => void;
+  onLongPressAddEnd?: () => void;
+  /**
+   * When true, the + button widens into a pill that shows a small mic next
+   * to the +. Indicates that long-press launches voice input.
+   */
+  addButtonShowsVoiceHint?: boolean;
   addButtonAccessibilityLabel?: string;
   onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
@@ -143,6 +156,9 @@ export function BottomNav({
   onTabChange,
   hideTabs,
   onPressAdd,
+  onLongPressAdd,
+  onLongPressAddEnd,
+  addButtonShowsVoiceHint = false,
   addButtonAccessibilityLabel,
   onTutorialTargetLayout,
   onTutorialTabLayout,
@@ -166,10 +182,28 @@ export function BottomNav({
     },
     [onTabChange],
   );
+  const longPressActiveRef = useRef(false);
   const handlePressAdd = useCallback(() => {
+    // If a long-press just fired, suppress the synthetic onPress that
+    // Pressable also emits when the finger lifts.
+    if (longPressActiveRef.current) {
+      longPressActiveRef.current = false;
+      return;
+    }
     void triggerHaptic('medium');
     onPressAdd?.();
   }, [onPressAdd]);
+  const handleLongPressAdd = useCallback(() => {
+    if (!onLongPressAdd) return;
+    longPressActiveRef.current = true;
+    void triggerHaptic('warning');
+    onLongPressAdd();
+  }, [onLongPressAdd]);
+  const handleLongPressAddEnd = useCallback(() => {
+    if (longPressActiveRef.current) {
+      onLongPressAddEnd?.();
+    }
+  }, [onLongPressAddEnd]);
   const measureAddButton = useCallback(() => {
     if (!onTutorialTargetLayout) return;
     addButtonRef.current?.measureInWindow((x, y, width, height) => {
@@ -261,14 +295,19 @@ export function BottomNav({
                 <Pressable
                   ref={addButtonRef}
                   onPress={handlePressAdd}
+                  onLongPress={onLongPressAdd ? handleLongPressAdd : undefined}
+                  delayLongPress={350}
                   onPressIn={fabPressIn}
-                  onPressOut={fabPressOut}
+                  onPressOut={() => {
+                    fabPressOut();
+                    handleLongPressAddEnd();
+                  }}
                   onLayout={handleAddButtonLayout}
                   accessibilityRole="button"
                   accessibilityLabel={
                     addButtonAccessibilityLabel ?? I18n.t('onboarding.checklist.add_transaction')
                   }
-                  className="items-center justify-center rounded-full"
+                  className="items-center justify-center"
                   style={{
                     width: ADD_BUTTON_SIZE,
                     height: ADD_BUTTON_SIZE,
@@ -276,7 +315,30 @@ export function BottomNav({
                     backgroundColor: themeColors.primary,
                   }}
                 >
-                  <PlusIcon size={22} color="#FFFFFF" strokeWidth={2.8} />
+                  {addButtonShowsVoiceHint ? (
+                    <>
+                      <Mic size={24} color="#FFFFFF" strokeWidth={2.4} />
+                      <View
+                        style={{
+                          position: 'absolute',
+                          right: -2,
+                          bottom: -2,
+                          width: 18,
+                          height: 18,
+                          borderRadius: 9,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#FFFFFF',
+                          borderWidth: 2,
+                          borderColor: themeColors.primary,
+                        }}
+                      >
+                        <PlusIcon size={10} color={themeColors.primary} strokeWidth={3.6} />
+                      </View>
+                    </>
+                  ) : (
+                    <PlusIcon size={22} color="#FFFFFF" strokeWidth={2.8} />
+                  )}
                 </Pressable>
               </Animated.View>
             </View>
