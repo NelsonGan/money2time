@@ -1,12 +1,17 @@
-import { Check, Pencil, X } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import { Check, ChevronRight, Pencil, X } from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import {
+  AccountPickerSheet,
+  CategoryPickerSheet,
+  type CategoryPickerOption,
+  Text,
+} from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, Category, UserSettings } from '~/types';
+import type { Account, AccountGroup, Category, UserSettings } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
 export interface VoicePreviewData {
@@ -23,35 +28,83 @@ interface VoicePreviewSheetProps {
   visible: boolean;
   data: VoicePreviewData | null;
   settings: UserSettings;
+  accounts: Account[];
+  accountGroups: AccountGroup[];
+  categories: Category[];
+  /** When false (simple mode), the account row is non-interactive. */
+  allowAccountEdit: boolean;
   onDiscard: () => void;
   onApprove: () => void;
   onEdit: () => void;
+  onUpdateCategory: (category: Category | null) => void;
+  onUpdateAccount: (account: Account | null) => void;
 }
 
 const HEADER_EXPENSE_COLOR = '#E25A6A';
 const HEADER_INCOME_COLOR = '#16A34A';
 
+function buildCategoryPickerOptions(categories: Category[]): {
+  parents: CategoryPickerOption[];
+  childByParent: Map<string, CategoryPickerOption[]>;
+} {
+  const parents: CategoryPickerOption[] = [];
+  const childByParent = new Map<string, CategoryPickerOption[]>();
+  const parentIds = new Set<string>();
+  categories.forEach((category) => {
+    if (!category.parentId) {
+      parents.push({ id: category.id, name: category.name, icon: category.icon });
+      parentIds.add(category.id);
+    }
+  });
+  categories.forEach((category) => {
+    if (category.parentId && parentIds.has(category.parentId)) {
+      const list = childByParent.get(category.parentId) ?? [];
+      list.push({ id: category.id, name: category.name, icon: category.icon });
+      childByParent.set(category.parentId, list);
+    }
+  });
+  return { parents, childByParent };
+}
+
 export function VoicePreviewSheet({
   visible,
   data,
   settings,
+  accounts,
+  accountGroups,
+  categories,
+  allowAccountEdit,
   onDiscard,
   onApprove,
   onEdit,
+  onUpdateCategory,
+  onUpdateAccount,
 }: VoicePreviewSheetProps) {
   const themeColors = useThemeColors();
   const accent = useMemo(() => {
     if (!data) return themeColors.primary;
     return data.type === 'income' ? HEADER_INCOME_COLOR : HEADER_EXPENSE_COLOR;
   }, [data, themeColors.primary]);
+  const [activePicker, setActivePicker] = useState<'category' | 'account' | null>(null);
+
+  // Voice entries are always expense, so we never want a minus sign on the
+  // amount — the destructive red color already communicates "money out".
+  const eligibleCategories = useMemo(
+    () => categories.filter((c) => (data ? c.type === data.type : false)),
+    [categories, data],
+  );
+  const categoryPickerOptions = useMemo(
+    () => buildCategoryPickerOptions(eligibleCategories),
+    [eligibleCategories],
+  );
 
   if (!visible || !data) return null;
 
-  const amountLabel = formatAmount(
-    data.type === 'income' ? data.amount : -data.amount,
-    settings,
-    { showSign: true },
-  );
+  const amountLabel = formatAmount(Math.abs(data.amount), settings, { showSign: false });
+  const noteText =
+    data.note.trim().length > 0
+      ? data.note
+      : I18n.t('settings.quick_entry.voice.preview_note_empty');
 
   return (
     <View style={styles.backdrop}>
@@ -65,12 +118,18 @@ export function VoicePreviewSheet({
           },
         ]}
       >
-        <Text variant="caption" tone="muted" style={styles.heardLabel}>
-          {I18n.t('settings.quick_entry.voice.preview_heard')}
-        </Text>
-        <Text variant="bodyStrong" style={styles.transcript} numberOfLines={3}>
-          {data.rawTranscript || '—'}
-        </Text>
+        <View style={styles.row}>
+          <Text variant="caption" tone="muted" style={styles.rowLabel}>
+            {I18n.t('settings.quick_entry.voice.preview_note')}
+          </Text>
+          <Text
+            variant="bodyStrong"
+            style={[styles.rowValue, styles.noteValue, { color: themeColors.text }]}
+            numberOfLines={2}
+          >
+            {noteText}
+          </Text>
+        </View>
 
         <View style={styles.divider} />
 
@@ -83,7 +142,15 @@ export function VoicePreviewSheet({
           </Text>
         </View>
 
-        <View style={styles.row}>
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setActivePicker('category');
+          }}
+          style={({ pressed }) => [styles.rowPressable, { opacity: pressed ? 0.7 : 1 }]}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_category')}
+        >
           <Text variant="caption" tone="muted" style={styles.rowLabel}>
             {I18n.t('settings.quick_entry.voice.preview_category')}
           </Text>
@@ -92,17 +159,40 @@ export function VoicePreviewSheet({
             <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
               {data.category?.name ?? I18n.t('common.uncategorized')}
             </Text>
+            <ChevronRight size={14} color={themeColors.textMuted} />
           </View>
-        </View>
+        </Pressable>
 
-        <View style={styles.row}>
-          <Text variant="caption" tone="muted" style={styles.rowLabel}>
-            {I18n.t('settings.quick_entry.voice.preview_account')}
-          </Text>
-          <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
-            {data.account?.name ?? I18n.t('common.no_account')}
-          </Text>
-        </View>
+        {allowAccountEdit ? (
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setActivePicker('account');
+            }}
+            style={({ pressed }) => [styles.rowPressable, { opacity: pressed ? 0.7 : 1 }]}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_account')}
+          >
+            <Text variant="caption" tone="muted" style={styles.rowLabel}>
+              {I18n.t('settings.quick_entry.voice.preview_account')}
+            </Text>
+            <View style={styles.rowValueRow}>
+              <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
+                {data.account?.name ?? I18n.t('common.no_account')}
+              </Text>
+              <ChevronRight size={14} color={themeColors.textMuted} />
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.row}>
+            <Text variant="caption" tone="muted" style={styles.rowLabel}>
+              {I18n.t('settings.quick_entry.voice.preview_account')}
+            </Text>
+            <Text variant="body" style={[styles.rowValue, { color: themeColors.text }]}>
+              {data.account?.name ?? I18n.t('common.no_account')}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.actions}>
           <Pressable
@@ -110,11 +200,7 @@ export function VoicePreviewSheet({
               void triggerHaptic('selection');
               onDiscard();
             }}
-            style={[
-              styles.actionButton,
-              styles.actionGhost,
-              { borderColor: themeColors.border },
-            ]}
+            style={[styles.actionButton, styles.actionGhost, { borderColor: themeColors.border }]}
             accessibilityLabel={I18n.t('settings.quick_entry.voice.discard')}
           >
             <X size={18} color={themeColors.text} />
@@ -127,11 +213,7 @@ export function VoicePreviewSheet({
               void triggerHaptic('selection');
               onEdit();
             }}
-            style={[
-              styles.actionButton,
-              styles.actionGhost,
-              { borderColor: themeColors.border },
-            ]}
+            style={[styles.actionButton, styles.actionGhost, { borderColor: themeColors.border }]}
             accessibilityLabel={I18n.t('settings.quick_entry.voice.edit')}
           >
             <Pencil size={18} color={themeColors.text} />
@@ -154,6 +236,35 @@ export function VoicePreviewSheet({
           </Pressable>
         </View>
       </View>
+
+      <CategoryPickerSheet
+        visible={activePicker === 'category'}
+        parents={categoryPickerOptions.parents}
+        childByParent={categoryPickerOptions.childByParent}
+        selectedCategoryId={data.category?.id ?? null}
+        onSelect={(id) => {
+          const next = categories.find((c) => c.id === id) ?? null;
+          onUpdateCategory(next);
+          setActivePicker(null);
+        }}
+        onClose={() => setActivePicker(null)}
+        allowParentSelection
+        overlay
+      />
+
+      <AccountPickerSheet
+        visible={activePicker === 'account'}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={data.account?.id ?? null}
+        onSelect={(id) => {
+          const next = accounts.find((a) => a.id === id) ?? null;
+          onUpdateAccount(next);
+          setActivePicker(null);
+        }}
+        onClose={() => setActivePicker(null)}
+        overlay
+      />
     </View>
   );
 }
@@ -174,15 +285,6 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 12,
   },
-  heardLabel: {
-    textTransform: 'uppercase',
-    fontSize: 10,
-    letterSpacing: 0.6,
-  },
-  transcript: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
   divider: {
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
@@ -194,12 +296,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 28,
   },
+  rowPressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 28,
+    paddingVertical: 2,
+  },
   rowLabel: {
     fontSize: 12,
   },
   rowValue: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  noteValue: {
+    flexShrink: 1,
+    textAlign: 'right',
+    maxWidth: '70%',
   },
   rowValueRow: {
     flexDirection: 'row',
