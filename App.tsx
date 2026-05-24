@@ -30,12 +30,13 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
-import { HomeScreen } from '~/features/home/screens';
+import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import {
@@ -86,7 +87,6 @@ import {
 } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations } from '~/types';
 import {
-  dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
@@ -143,20 +143,6 @@ interface GuidedTutorialStep {
 const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   {
     tab: 'home',
-    targetId: 'home.display_toggle',
-    titleKey: 'tutorial.coach_steps.home_title',
-    bodyKey: 'tutorial.coach_steps.home_body',
-    mascot: 'wink',
-  },
-  {
-    tab: 'home',
-    targetId: 'home.converter',
-    titleKey: 'tutorial.coach_steps.converter_title',
-    bodyKey: 'tutorial.coach_steps.converter_body',
-    mascot: 'working',
-  },
-  {
-    tab: 'transactions',
     targetId: 'nav.add',
     titleKey: 'tutorial.coach_steps.add_title',
     bodyKey: 'tutorial.coach_steps.add_body',
@@ -199,9 +185,10 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   },
 ];
 
-const MemoHomeScreen = React.memo(HomeScreen);
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
 const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
+const MemoAccountsScreen = React.memo(AccountsScreen);
+const MemoCalendarScreen = React.memo(CalendarScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 
@@ -225,7 +212,13 @@ function MountedTab({ active, children }: { active: boolean; children: React.Rea
   );
 }
 
-const MAIN_TAB_SCREEN_NAMES = new Set<string>(['home', 'transactions', 'insights', 'settings']);
+const MAIN_TAB_SCREEN_NAMES = new Set<string>([
+  'home',
+  'accounts',
+  'calendar',
+  'insights',
+  'settings',
+]);
 
 function isMainTabScreen(screen: string): boolean {
   return MAIN_TAB_SCREEN_NAMES.has(screen);
@@ -260,7 +253,6 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   );
 }
 
-
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
   onVisibleScreenChange?: (screen: string) => void;
@@ -291,8 +283,7 @@ function MainShellScreen({
   }, []);
   // The whole voice-input surface (settings row, long-press, capture overlay)
   // is gated on this single flag so unsupported devices show no trace of it.
-  const voiceEnabled =
-    Platform.OS === 'ios' && voiceSupported && quickEntryPrefs.voiceInputEnabled;
+  const voiceEnabled = Platform.OS === 'ios' && voiceSupported && quickEntryPrefs.voiceInputEnabled;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on
@@ -316,8 +307,11 @@ function MainShellScreen({
   const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [isTransactionsSelectionMode, setIsTransactionsSelectionMode] = useState(false);
-  const [homeScrollTopToken, setHomeScrollTopToken] = useState(0);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
+  const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
+  const [accountsResetToken, setAccountsResetToken] = useState(0);
+  const [calendarScrollTopToken, setCalendarScrollTopToken] = useState(0);
+  const [calendarResetToken, setCalendarResetToken] = useState(0);
   const [transactionsTutorialResetToken, setTransactionsTutorialResetToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
@@ -349,7 +343,7 @@ function MainShellScreen({
 
   useEffect(() => {
     return subscribeOpenTransactionsRequest(({ monthKey }) => {
-      setActiveTab('transactions');
+      setActiveTab('home');
       jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()));
     });
   }, [jumpTransactionsToMonth]);
@@ -404,16 +398,9 @@ function MainShellScreen({
     [],
   );
 
-  const openSettingsScreen = useCallback(
-    (screen: 'Accounts' | 'Recurring') => {
-      if (screen === 'Recurring') {
-        navigation.navigate('SettingsRecurring');
-      } else {
-        navigation.navigate('SettingsAccounts');
-      }
-    },
-    [navigation],
-  );
+  const openAccountSettings = useCallback(() => {
+    navigation.navigate('SettingsAccounts');
+  }, [navigation]);
 
   const openRecurringEditor = useCallback(
     (ruleId?: string) => {
@@ -426,32 +413,6 @@ function MainShellScreen({
     [navigation],
   );
 
-  const openExpenseTrend = useCallback(() => {
-    const now = new Date();
-    const rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    rangeStart.setDate(rangeStart.getDate() - 6);
-    const rangeEndKey = dayKeyFromDateLocal(now);
-    openActivityBreakdownInsight('expense_trend', monthKeyFromDateLocal(now), {
-      anchorDateKey: rangeEndKey,
-      customEnd: rangeEndKey,
-      customStart: dayKeyFromDateLocal(rangeStart),
-      periodPreset: 'custom',
-    });
-  }, [openActivityBreakdownInsight]);
-
-  const openExpenseSentiment = useCallback(() => {
-    const now = new Date();
-    const rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    rangeStart.setDate(rangeStart.getDate() - 6);
-    const rangeEndKey = dayKeyFromDateLocal(now);
-    openActivityBreakdownInsight('expense_sentiment', monthKeyFromDateLocal(now), {
-      anchorDateKey: rangeEndKey,
-      customEnd: rangeEndKey,
-      customStart: dayKeyFromDateLocal(rangeStart),
-      periodPreset: 'custom',
-    });
-  }, [openActivityBreakdownInsight]);
-
   const openProPaywall = useCallback(
     (source?: string) => {
       navigation.navigate('ProPaywall', source ? { source } : undefined);
@@ -463,16 +424,21 @@ function MainShellScreen({
     openAddTransaction();
   }, [openAddTransaction]);
 
-  const shouldHideBottomNav = activeTab === 'transactions' && isTransactionsSelectionMode;
+  const shouldHideBottomNav = activeTab === 'home' && isTransactionsSelectionMode;
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
       if (tab === 'home' && activeTab === 'home') {
-        setHomeScrollTopToken((prev) => prev + 1);
-      }
-      if (tab === 'transactions' && activeTab === 'transactions') {
         jumpTransactionsToMonth(monthKeyFromDateLocal(new Date()));
         setTransactionsScrollTopToken((prev) => prev + 1);
+      }
+      if (tab === 'accounts' && activeTab === 'accounts') {
+        setAccountsResetToken((prev) => prev + 1);
+        setAccountsScrollTopToken((prev) => prev + 1);
+      }
+      if (tab === 'calendar' && activeTab === 'calendar') {
+        setCalendarResetToken((prev) => prev + 1);
+        setCalendarScrollTopToken((prev) => prev + 1);
       }
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
@@ -683,18 +649,6 @@ function MainShellScreen({
     <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'home'}>
-          <MemoHomeScreen
-            scrollToTopToken={homeScrollTopToken}
-            onOpenAccount={openAccountDetail}
-            onOpenTransaction={openTransactionEditor}
-            onOpenSettingsScreen={openSettingsScreen}
-            onOpenExpenseTrend={openExpenseTrend}
-            onOpenExpenseSentiment={openExpenseSentiment}
-            onTutorialTargetLayout={handleTutorialTargetLayout}
-            tutorialSpotlightRequest={tutorialSpotlightRequest}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'transactions'}>
           {isSimpleMode ? (
             <MemoSimpleActivityScreen
               scrollToTopToken={transactionsScrollTopToken}
@@ -717,6 +671,28 @@ function MainShellScreen({
               tutorialResetToken={transactionsTutorialResetToken}
             />
           )}
+        </MountedTab>
+        <MountedTab active={activeTab === 'accounts'}>
+          <MemoAccountsScreen
+            safeAreaEdges={['top']}
+            resetToRootToken={accountsResetToken}
+            scrollToTopToken={accountsScrollTopToken}
+            onOpenAccount={openAccountDetail}
+            onOpenAddTransaction={(accountId) =>
+              navigation.navigate('AddTransaction', { initialAccountId: accountId })
+            }
+            onOpenTransaction={openTransactionEditor}
+            onOpenTransactionSplitBadge={openTransactionSplitBill}
+            onOpenSettings={openAccountSettings}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'calendar'}>
+          <MemoCalendarScreen
+            scrollToTopToken={calendarScrollTopToken}
+            resetToCurrentMonthToken={calendarResetToken}
+            onOpenTransaction={openTransactionEditor}
+            onOpenTransactionSplitBadge={openTransactionSplitBill}
+          />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'}>
           <MemoInsightsScreen
@@ -749,17 +725,22 @@ function MainShellScreen({
           <BottomNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            onPressAdd={openBottomNavPrimaryAction}
-            onLongPressAdd={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
-            onLongPressAddEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
-            addButtonShowsVoiceHint={voiceEnabled}
-            addButtonAccessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
-            onTutorialTargetLayout={handleTutorialTargetLayout}
+            hideTabs={isSimpleMode ? ['accounts'] : undefined}
             onTutorialTabLayout={handleTutorialTabLayout}
-            tutorialSpotlightRequest={tutorialSpotlightRequest}
             tutorialFocusedTab={currentTutorialFocusedTab}
             tutorialMeasureToken={tutorialSpotlightRequest.token}
           />
+          {activeTab === 'home' ? (
+            <AddFab
+              onPress={openBottomNavPrimaryAction}
+              onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
+              onLongPressEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
+              showVoiceHint={voiceEnabled}
+              accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
+              onTutorialTargetLayout={handleTutorialTargetLayout}
+              tutorialSpotlightRequest={tutorialSpotlightRequest}
+            />
+          ) : null}
         </>
       ) : null}
 
@@ -817,7 +798,7 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
           initialValues,
         });
       }}
-      onOpenQuickEntrySettings={() => navigation.replace('SettingsQuickEntry')}
+      onOpenQuickEntrySettings={() => navigation.push('SettingsQuickEntry')}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
@@ -939,9 +920,7 @@ function SettingsHourlyValueRouteScreen({
   );
 }
 
-function SettingsQuickEntryRouteScreen({
-  navigation,
-}: RootStackRouteProps<'SettingsQuickEntry'>) {
+function SettingsQuickEntryRouteScreen({ navigation }: RootStackRouteProps<'SettingsQuickEntry'>) {
   return <QuickEntrySettingsScreen onBack={() => navigation.goBack()} />;
 }
 
@@ -1245,10 +1224,7 @@ function AppContent() {
           <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
-          <RootStack.Screen
-            name="SettingsQuickEntry"
-            component={SettingsQuickEntryRouteScreen}
-          />
+          <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}

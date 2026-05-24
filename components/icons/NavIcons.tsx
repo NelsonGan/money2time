@@ -39,62 +39,119 @@ export function HomeIcon({ size = 24, color = '#000', strokeWidth = 1.8, filled 
   );
 }
 
-export function ActivityIcon({ size = 24, color = '#000', strokeWidth = 1.8, filled }: IconProps) {
+export function WalletIcon({ size = 24, color = '#000', strokeWidth = 1.8, filled }: IconProps) {
   if (filled) {
     return (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <Rect x="3" y="3" width="7" height="7" rx="1.5" fill={color} />
-        <Rect x="14" y="3" width="7" height="7" rx="1.5" fill={color} />
-        <Rect x="3" y="14" width="7" height="7" rx="1.5" fill={color} />
-        <Rect x="14" y="14" width="7" height="7" rx="1.5" fill={color} />
+        <Path
+          d="M4 7.5A2.5 2.5 0 016.5 5h11A2.5 2.5 0 0120 7.5V9h-1.5A3.5 3.5 0 0015 12.5 3.5 3.5 0 0018.5 16H20v1.5a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 014 17.5v-10z"
+          fill={color}
+        />
+        <Circle cx="18.5" cy="12.5" r="1.4" fill={color} />
       </Svg>
     );
   }
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Rect
-        x="3"
-        y="3"
-        width="7"
-        height="7"
-        rx="1.5"
+      <Path
+        d="M4 7.5A2.5 2.5 0 016.5 5h11A2.5 2.5 0 0120 7.5V9"
         stroke={color}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Rect
-        x="14"
-        y="3"
-        width="7"
-        height="7"
-        rx="1.5"
+      <Path
+        d="M20 16v1.5a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 014 17.5v-10"
         stroke={color}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Rect
-        x="3"
-        y="14"
-        width="7"
-        height="7"
-        rx="1.5"
+      <Path
+        d="M21 9.5h-2.5A3 3 0 0015.5 12.5 3 3 0 0018.5 15.5H21a.5.5 0 00.5-.5v-5a.5.5 0 00-.5-.5z"
         stroke={color}
         strokeWidth={strokeWidth}
-        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Rect
-        x="14"
-        y="14"
-        width="7"
-        height="7"
-        rx="1.5"
+      <Circle cx="18.5" cy="12.5" r="1" fill={color} />
+    </Svg>
+  );
+}
+
+export function CalendarIcon({ size = 24, color = '#000', strokeWidth = 1.8, filled }: IconProps) {
+  if (filled) {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Rect x="3" y="5" width="18" height="16" rx="2.5" fill={color} opacity={0.2} />
+        <Rect
+          x="3"
+          y="5"
+          width="18"
+          height="16"
+          rx="2.5"
+          stroke={color}
+          strokeWidth={strokeWidth}
+        />
+        <Line
+          x1="3"
+          y1="10"
+          x2="21"
+          y2="10"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Line
+          x1="8"
+          y1="3"
+          x2="8"
+          y2="7"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Line
+          x1="16"
+          y1="3"
+          x2="16"
+          y2="7"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+        <Circle cx="12" cy="15.5" r="1.6" fill={color} />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="5" width="18" height="16" rx="2.5" stroke={color} strokeWidth={strokeWidth} />
+      <Line
+        x1="3"
+        y1="10"
+        x2="21"
+        y2="10"
         stroke={color}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
-        strokeLinejoin="round"
+      />
+      <Line
+        x1="8"
+        y1="3"
+        x2="8"
+        y2="7"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
+      <Line
+        x1="16"
+        y1="3"
+        x2="16"
+        y2="7"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
       />
     </Svg>
   );

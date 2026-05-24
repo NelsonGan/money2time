@@ -1,19 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import {
   type ExpandToDetailedValues,
   QuickAddSheet,
 } from '~/features/transactions/components/QuickAddSheet';
-import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
-import {
-  getSpeechPermissions,
-  isSpeechRecognitionAvailable,
-  requestSpeechPermissions,
-} from '~/services/speechRecognition';
+import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 interface QuickAddScreenProps {
@@ -85,36 +80,12 @@ export function QuickAddScreen({
     updateQuickEntryPrefs({ voicePromptDismissed: true });
   }, [updateQuickEntryPrefs]);
 
-  const handleEnableVoice = useCallback(async () => {
-    // Mark dismissed unconditionally — whether or not the user accepts the
-    // OS permission prompt, we don't want to ask again from here.
-    updateQuickEntryPrefs({ voicePromptDismissed: true });
-    try {
-      const current = await getSpeechPermissions();
-      let granted = current.granted;
-      if (!granted && current.canAskAgain) {
-        const requested = await requestSpeechPermissions();
-        granted = requested.granted;
-      }
-      if (granted) {
-        updateQuickEntryPrefs({ voiceInputEnabled: true });
-      } else {
-        Alert.alert(
-          I18n.t('settings.quick_entry.voice.permission_denied_title'),
-          I18n.t('settings.quick_entry.voice.permission_denied_message'),
-          [
-            { text: I18n.t('common.cancel'), style: 'cancel' },
-            {
-              text: I18n.t('settings.quick_entry.voice.open_settings'),
-              onPress: () => void Linking.openSettings(),
-            },
-          ],
-        );
-      }
-    } catch {
-      // ignore — user can retry from settings
-    }
-  }, [updateQuickEntryPrefs]);
+  const handleEnableVoice = useCallback(() => {
+    onOpenQuickEntrySettings?.();
+    requestAnimationFrame(() => {
+      updateQuickEntryPrefs({ voicePromptDismissed: true });
+    });
+  }, [onOpenQuickEntrySettings, updateQuickEntryPrefs]);
 
   const handleSubmit = useCallback(
     (input: CreateTransactionInput) => {

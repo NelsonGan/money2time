@@ -1,4 +1,6 @@
 import {
+  ArrowDownRight,
+  ArrowUpRight,
   ChevronRight,
   Eye,
   EyeOff,
@@ -7,6 +9,7 @@ import {
   Plus,
   Settings,
   Trash2,
+  Wallet,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -69,7 +72,6 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
-import { getNetAssetContribution } from '~/utils/accountBalances';
 import {
   addMonthsAtMonthStart,
   formatAmount,
@@ -133,6 +135,107 @@ const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
 const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
 const DEFAULT_CREDIT_STATEMENT_DAY = 25;
+
+type AccountsSummaryRenderValue = (
+  amount: number,
+  options?: {
+    variant?: React.ComponentProps<typeof Text>['variant'];
+    tone?: React.ComponentProps<typeof Text>['tone'];
+    textClassName?: string;
+    iconColor?: string;
+  },
+) => React.ReactNode;
+
+type AccountsSummaryThemeColors = {
+  success: string;
+  error: string;
+  primary: string;
+};
+
+function AccountsSummaryBlock({
+  assets,
+  debt,
+  net,
+  themeColors,
+  renderValue,
+}: {
+  assets: number;
+  debt: number;
+  net: number;
+  themeColors: AccountsSummaryThemeColors;
+  renderValue: AccountsSummaryRenderValue;
+}) {
+  const netIsNegative = net < 0;
+  const netAccent = netIsNegative ? themeColors.error : themeColors.primary;
+  const netLabelClass = netIsNegative ? 'text-destructive' : 'text-primary';
+  const netValueClass = netIsNegative ? 'text-destructive' : 'text-primary';
+
+  return (
+    <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
+      {/* Decorative accent blob */}
+      <View
+        pointerEvents="none"
+        className="absolute -top-8 -right-8 h-28 w-28 rounded-full"
+        style={{ backgroundColor: netAccent, opacity: 0.1 }}
+      />
+
+      {/* Hero: Net Assets */}
+      <View className="px-4 pt-3.5 pb-3">
+        <View className="flex-row items-center gap-1.5">
+          <Wallet size={12} color={netAccent} strokeWidth={2.4} />
+          <Text variant="label" className={cn('text-[10px]', netLabelClass)}>
+            {I18n.t('accounts.net_assets')}
+          </Text>
+        </View>
+        <View className="mt-1.5">
+          {renderValue(net, {
+            variant: 'monoLg',
+            textClassName: netValueClass,
+            iconColor: netAccent,
+          })}
+        </View>
+      </View>
+
+      {/* Divider */}
+      <View className="h-px bg-border/40" />
+
+      {/* Footer: Assets / Debt side-by-side */}
+      <View className="flex-row">
+        <View className="flex-1 px-4 py-2.5">
+          <View className="flex-row items-center gap-1.5">
+            <ArrowUpRight size={12} color={themeColors.success} strokeWidth={2.4} />
+            <Text variant="label" className="text-[10px] text-success">
+              {I18n.t('accounts.assets')}
+            </Text>
+          </View>
+          <View className="mt-1">
+            {renderValue(assets, {
+              variant: 'mono',
+              textClassName: 'text-success',
+              iconColor: themeColors.success,
+            })}
+          </View>
+        </View>
+        <View className="w-px bg-border/40" />
+        <View className="flex-1 px-4 py-2.5">
+          <View className="flex-row items-center gap-1.5">
+            <ArrowDownRight size={12} color={themeColors.error} strokeWidth={2.4} />
+            <Text variant="label" className="text-[10px] text-destructive">
+              {I18n.t('accounts.debt')}
+            </Text>
+          </View>
+          <View className="mt-1">
+            {renderValue(debt, {
+              variant: 'mono',
+              textClassName: 'text-destructive',
+              iconColor: themeColors.error,
+            })}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 function withColorAlpha(hex: string, alpha: number) {
   const value = hex.replace('#', '');
@@ -703,8 +806,8 @@ function PayCreditCardSheet({
               >
                 <Text variant="body" tone={fromAccountId ? undefined : 'muted'}>
                   {fromAccountId
-                    ? fromAccounts.find((a) => a.id === fromAccountId)?.name ??
-                      I18n.t('common.none')
+                    ? (fromAccounts.find((a) => a.id === fromAccountId)?.name ??
+                      I18n.t('common.none'))
                     : I18n.t('common.none')}
                 </Text>
                 <ChevronRight size={16} color={themeColors.textMuted} />
@@ -1266,7 +1369,6 @@ export function AccountsScreen({
       ),
     [normalizedSelectedTransactionTotal, settings.currencySymbol],
   );
-  const selectedTransactionTotalToneClass = 'text-foreground';
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const isManagementGroupsView = managementOnly && managementView === 'groups';
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -1449,15 +1551,24 @@ export function AccountsScreen({
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
   }, [accountBalances]);
 
-  const total = useMemo(() => {
-    if (managementOnly) return 0;
-    const sum = accounts.reduce((runningTotal, account) => {
-      if (!account.includeInTotals) return runningTotal;
+  const { total, assetsTotal, debtTotal } = useMemo(() => {
+    if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };
+    let assets = 0;
+    let debt = 0;
+    for (const account of accounts) {
+      if (!account.includeInTotals) continue;
       const balance = balanceMap.get(account.id) ?? account.startingBalance;
-      const signedBalance = getNetAssetContribution(account.type, balance);
-      return runningTotal + signedBalance;
-    }, 0);
-    return normalizeMoneyAmount(sum);
+      if (account.type === 'credit') {
+        debt += balance;
+      } else {
+        assets += balance;
+      }
+    }
+    return {
+      total: normalizeMoneyAmount(assets - debt),
+      assetsTotal: normalizeMoneyAmount(assets),
+      debtTotal: normalizeMoneyAmount(debt),
+    };
   }, [accounts, balanceMap, managementOnly]);
   const creditSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, CreditSummary>();
@@ -1954,7 +2065,7 @@ export function AccountsScreen({
                           })}
                         </Text>
                         <View className="rounded-full border border-border/35 bg-card px-2 py-[3px]">
-                          <Text variant="label" className={selectedTransactionTotalToneClass}>
+                          <Text variant="label" className="text-foreground">
                             {selectedTransactionTotalLabel}
                           </Text>
                         </View>
@@ -2351,13 +2462,44 @@ export function AccountsScreen({
         </Animated.ScrollView>
       ) : (
         <>
+          <MonthControlsHeader
+            title={I18n.t('accounts.title')}
+            monthLabel=""
+            onPrevMonth={() => {}}
+            onNextMonth={() => {}}
+            hideNavigation
+            showAccent={false}
+            actions={
+              <>
+                {onOpenSettings ? (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    haptic="selection"
+                    className="h-10 w-10 rounded-full"
+                    onPress={onOpenSettings}
+                  >
+                    <Settings size={18} color={themeColors.textMuted} />
+                  </Button>
+                ) : null}
+                {renderBalanceToggleButton()}
+              </>
+            }
+          >
+            <AccountsSummaryBlock
+              assets={assetsTotal}
+              debt={debtTotal}
+              net={total}
+              themeColors={themeColors}
+              renderValue={renderVisibleBalanceNode}
+            />
+          </MonthControlsHeader>
           <AccountCardStack
             accounts={accounts}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
             scrollViewRef={accountsOverviewScrollRef}
-            total={total}
             settings={settings}
             trueHourlyRate={trueHourlyRate}
             hideBalances={hideAccountBalances}
@@ -2378,22 +2520,6 @@ export function AccountsScreen({
               void triggerHaptic('medium');
               setPayCardAccountId(id);
             }}
-            headerAccessory={
-              <>
-                {onOpenSettings ? (
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    haptic="selection"
-                    className="h-10 w-10 rounded-full"
-                    onPress={onOpenSettings}
-                  >
-                    <Settings size={18} color={themeColors.textMuted} />
-                  </Button>
-                ) : null}
-                {renderBalanceToggleButton()}
-              </>
-            }
             onRenderBalanceNode={renderVisibleBalanceNode}
           />
         </>
