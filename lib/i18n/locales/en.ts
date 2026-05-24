@@ -606,6 +606,9 @@ const en = {
       row_subtitle: 'Map keywords to categories',
       section_expense: 'Expense',
       section_income: 'Income',
+      default_account_section: 'Default Account',
+      default_account_label: 'Default account',
+      default_account_subtitle: 'Used by voice and text entry when no history match applies',
       default_row: 'Default',
       no_default: 'Auto · falls back to Other',
       unmapped: 'Unmapped',
@@ -632,8 +635,6 @@ const en = {
         section_title: 'Voice Input',
         row_label: 'Voice input',
         row_subtitle: 'Hold + to dictate transactions',
-        default_account_label: 'Default account',
-        default_account_subtitle: 'Account used when no history match applies',
         skip_confirmation_label: 'Skip confirmation',
         skip_confirmation_subtitle: 'Save voice entries instantly without preview',
         suggest_title: 'Try voice input?',
@@ -1150,6 +1151,8 @@ const en = {
       'You can have up to {{count}} recurring rules on the free plan. Upgrade to Pro for unlimited.',
     limit_wage_entries:
       'You can have up to {{count}} hourly rate entries on the free plan. Upgrade to Pro for unlimited.',
+    limit_voice:
+      'Free plan includes {{count}} voice entries. Upgrade to Pro for unlimited voice input.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:

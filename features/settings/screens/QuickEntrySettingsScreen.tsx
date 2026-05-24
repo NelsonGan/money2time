@@ -172,7 +172,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
 
   const [activeBucket, setActiveBucket] = useState<KeywordCategoryKey | null>(null);
   const [activeDefault, setActiveDefault] = useState<'expense' | 'income' | null>(null);
-  const [voiceAccountPickerVisible, setVoiceAccountPickerVisible] = useState(false);
+  const [defaultAccountPickerVisible, setDefaultAccountPickerVisible] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
     if (Platform.OS !== 'ios') return;
@@ -250,16 +250,16 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     [activeDefault, updateQuickEntryPrefs],
   );
 
-  const handlePickVoiceAccount = useCallback(
+  const handlePickDefaultAccount = useCallback(
     (accountId: string) => {
-      updateQuickEntryPrefs({ voiceDefaultAccountId: accountId });
-      setVoiceAccountPickerVisible(false);
+      updateQuickEntryPrefs({ defaultAccountId: accountId });
+      setDefaultAccountPickerVisible(false);
     },
     [updateQuickEntryPrefs],
   );
 
-  // When no explicit voice default has been chosen, surface the same fallback
-  // the voice flow uses at runtime — the user's first account — so the row
+  // When no explicit default account has been chosen, surface the same fallback
+  // the entry flows use at runtime — the user's first account — so the row
   // displays the actual account that will be charged.
   const firstAccountByOrder = useMemo(() => {
     if (accounts.length === 0) return null;
@@ -267,13 +267,13 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
       (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
     )[0];
   }, [accounts]);
-  const voiceDefaultAccount = useMemo(() => {
-    if (quickEntryPrefs.voiceDefaultAccountId) {
-      const explicit = accounts.find((a) => a.id === quickEntryPrefs.voiceDefaultAccountId);
+  const defaultAccount = useMemo(() => {
+    if (quickEntryPrefs.defaultAccountId) {
+      const explicit = accounts.find((a) => a.id === quickEntryPrefs.defaultAccountId);
       if (explicit) return explicit;
     }
     return firstAccountByOrder;
-  }, [accounts, firstAccountByOrder, quickEntryPrefs.voiceDefaultAccountId]);
+  }, [accounts, firstAccountByOrder, quickEntryPrefs.defaultAccountId]);
 
   const defaultExpenseCategory = quickEntryPrefs.defaultExpenseCategoryId
     ? (categoryById.get(quickEntryPrefs.defaultExpenseCategoryId) ?? null)
@@ -333,6 +333,42 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
             subtitle={I18n.t('settings.quick_entry.subtitle')}
           />
 
+          <View className="mt-4">
+            <Text variant="caption" tone="muted" className="mb-2 px-1">
+              {I18n.t('settings.quick_entry.default_account_section')}
+            </Text>
+            <View style={styles.card} className="bg-card border border-border/30">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setDefaultAccountPickerVisible(true);
+                }}
+                android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <View style={styles.row}>
+                  <View
+                    style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                  >
+                    <Text style={styles.iconBubbleEmoji}>
+                      {defaultAccount?.type === 'credit' ? '💳' : '🏦'}
+                    </Text>
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text variant="body" className="text-foreground" numberOfLines={1}>
+                      {I18n.t('settings.quick_entry.default_account_label')}
+                    </Text>
+                    <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                      {defaultAccount?.name ??
+                        I18n.t('settings.quick_entry.default_account_subtitle')}
+                    </Text>
+                  </View>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </View>
+              </Pressable>
+            </View>
+          </View>
+
           {Platform.OS === 'ios' && voiceSupported ? (
             <View className="mt-4">
               <Text variant="caption" tone="muted" className="mb-2 px-1">
@@ -362,43 +398,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
 
                 {quickEntryPrefs.voiceInputEnabled ? (
                   <>
-                    <View style={styles.rowDivider} />
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setVoiceAccountPickerVisible(true);
-                      }}
-                      android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                    >
-                      <View style={styles.row}>
-                        <View
-                          style={[
-                            styles.iconBubble,
-                            { backgroundColor: `${themeColors.primary}14` },
-                          ]}
-                        >
-                          <Text style={styles.iconBubbleEmoji}>
-                            {voiceDefaultAccount?.type === 'credit' ? '💳' : '🏦'}
-                          </Text>
-                        </View>
-                        <View style={styles.rowText}>
-                          <Text variant="body" className="text-foreground" numberOfLines={1}>
-                            {I18n.t('settings.quick_entry.voice.default_account_label')}
-                          </Text>
-                          <Text
-                            variant="caption"
-                            className="text-muted-foreground"
-                            numberOfLines={2}
-                          >
-                            {voiceDefaultAccount?.name ??
-                              I18n.t('settings.quick_entry.voice.default_account_subtitle')}
-                          </Text>
-                        </View>
-                        <ChevronRight size={16} color={themeColors.textMuted} />
-                      </View>
-                    </Pressable>
-
                     <View style={styles.rowDivider} />
                     <View style={styles.voiceRow}>
                       <View
@@ -516,12 +515,12 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
       />
 
       <AccountPickerSheet
-        visible={voiceAccountPickerVisible}
+        visible={defaultAccountPickerVisible}
         accounts={accounts}
         accountGroups={accountGroups}
-        selectedAccountId={voiceDefaultAccount?.id ?? null}
-        onSelect={handlePickVoiceAccount}
-        onClose={() => setVoiceAccountPickerVisible(false)}
+        selectedAccountId={defaultAccount?.id ?? null}
+        onSelect={handlePickDefaultAccount}
+        onClose={() => setDefaultAccountPickerVisible(false)}
       />
     </SettingsPageLayout>
   );
