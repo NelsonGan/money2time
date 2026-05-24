@@ -432,9 +432,26 @@ export function QuickAddSheet({
 
   const defaultAccountId = useMemo(() => {
     if (isSimpleMode && simpleWalletId) return simpleWalletId;
+    // Priority: caller-supplied initial > user's saved default > last-used > first by sort order.
+    if (initialAccountId && accounts.some((a) => a.id === initialAccountId)) {
+      return initialAccountId;
+    }
+    if (
+      quickEntryPrefs.defaultAccountId &&
+      accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId)
+    ) {
+      return quickEntryPrefs.defaultAccountId;
+    }
     const lastUsed = lastUsedAccountId(transactions);
-    return pickDefaultAccount(accounts, initialAccountId ?? lastUsed);
-  }, [accounts, initialAccountId, isSimpleMode, simpleWalletId, transactions]);
+    return pickDefaultAccount(accounts, lastUsed);
+  }, [
+    accounts,
+    initialAccountId,
+    isSimpleMode,
+    quickEntryPrefs.defaultAccountId,
+    simpleWalletId,
+    transactions,
+  ]);
 
   const [accountId, setAccountId] = useState<string | null>(defaultAccountId);
 

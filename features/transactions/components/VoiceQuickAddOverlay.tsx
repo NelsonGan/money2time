@@ -2,10 +2,14 @@ import { useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AppState, Linking, Platform } from 'react-native';
 
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
 import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { requestOpenPaywall } from '~/services/paywallNavigation';
 import {
   abortListening,
   getSpeechPermissions,
@@ -66,9 +70,11 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     transactions,
     createTransaction,
     quickEntryPrefs,
+    updateQuickEntryPrefs,
     isSimpleMode,
     simpleWalletId,
   } = useApp();
+  const { isPro } = usePro();
 
   const [recording, setRecording] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
@@ -83,6 +89,15 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   // stale `end`/`error` events from a previously-aborted session that may
   // fire after a brand-new session has been kicked off.
   const lastStartAtRef = useRef(0);
+  // When the previous session ended. iOS's SFSpeechRecognizer needs a brief
+  // settle window between teardown and the next start, otherwise the next
+  // startListening can silently no-op or get torn down by stale events.
+  const lastSessionEndAtRef = useRef(0);
+  // Monotonic session counter. Each start() bumps this; an in-flight start
+  // that finds a newer generation after its async waits bails out.
+  // Also used to reject the user releasing the button while we're waiting
+  // for the inter-session gap (stop() bumps it).
+  const sessionGenRef = useRef(0);
 
   const buildPreviewData = useCallback(
     (transcript: string): VoicePreviewData | null => {
@@ -119,11 +134,9 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       if (isSimpleMode && simpleWalletId) {
         accountId = simpleWalletId;
       } else {
-        if (!accountId && quickEntryPrefs.voiceDefaultAccountId) {
-          const defaultExists = accounts.some(
-            (a) => a.id === quickEntryPrefs.voiceDefaultAccountId,
-          );
-          if (defaultExists) accountId = quickEntryPrefs.voiceDefaultAccountId;
+        if (!accountId && quickEntryPrefs.defaultAccountId) {
+          const defaultExists = accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId);
+          if (defaultExists) accountId = quickEntryPrefs.defaultAccountId;
         }
         if (!accountId) {
           accountId = pickDefaultAccount(accounts)?.id ?? null;
@@ -148,8 +161,8 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       categories,
       isSimpleMode,
       quickEntryPrefs.categoryMap,
+      quickEntryPrefs.defaultAccountId,
       quickEntryPrefs.defaultExpenseCategoryId,
-      quickEntryPrefs.voiceDefaultAccountId,
       simpleWalletId,
       transactions,
     ],
@@ -188,11 +201,13 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
           categoryId: data.category?.id ?? null,
         };
         // Clear capture UI immediately; the corresponding `end` event may be
-        // suppressed by the staleness guard if it fires within 150ms of the
-        // most recent start, which would otherwise leave the overlay stuck.
+        // suppressed by the staleness guard if it fires within the guard
+        // window of the most recent start, which would otherwise leave the
+        // overlay stuck.
         setLiveTranscript('');
         recordingRef.current = false;
         setRecording(false);
+        lastSessionEndAtRef.current = Date.now();
         void triggerHaptic('success');
         createTransaction(input);
         return;
@@ -209,13 +224,16 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
 
   // Native speech events come via the library's hook. The hook handles
   // attach/detach internally, so we just describe what to do with each event.
-  // The 150ms windows below filter out events that belong to a session we
-  // already aborted in start() — the native side can deliver them after the
-  // new session has begun and we'd otherwise clobber its state.
+  //
+  // Stale-event guard: iOS can deliver `end`, `error('aborted'|'no-speech')`,
+  // and late isFinal `result` events from a previous session up to a few
+  // hundred ms after we've kicked off a new one. The guards reject events
+  // whose timestamp falls in the suspect window of the most recent start.
+  // The result handler intentionally does NOT gate on `recordingRef.current`
+  // because `stop()` already clears it before iOS finishes delivering the
+  // current session's isFinal — gating there would drop legit transcripts
+  // for short utterances.
   useSpeechRecognitionEvent('result', (event) => {
-    // A stale isFinal from the previous session can otherwise fire
-    // finalizeTranscript on old audio and (with skip-confirmation) silently
-    // create a phantom transaction.
     if (Date.now() - lastStartAtRef.current < 150) return;
     const transcript = event.results?.[0]?.transcript ?? '';
     // Trim before checking — iOS often emits a single-space interim before
@@ -229,25 +247,40 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     }
   });
   useSpeechRecognitionEvent('end', () => {
-    // Only suppress when there's an active session that a stale end could
-    // tear down. With recordingRef already false (stop() ran), processing is
-    // a no-op for recording state anyway.
-    if (recordingRef.current && Date.now() - lastStartAtRef.current < 150) return;
+    // The end of the *current* session always has recordingRef=false by the
+    // time it fires (stop() sets it). So when recordingRef is still true and
+    // an end fires, it's a stale signal from the previous session (possibly
+    // delayed by hundreds of ms from our pre-start abort). Suppress it for a
+    // wide window — wider than the gap we wait in start() — so a stale end
+    // never tears down a freshly-started session.
+    if (recordingRef.current && Date.now() - lastStartAtRef.current < 1200) return;
     recordingRef.current = false;
     setRecording(false);
     setLiveTranscript('');
+    lastSessionEndAtRef.current = Date.now();
   });
   useSpeechRecognitionEvent('error', (event) => {
     const code = event?.error ?? 'unknown';
+    const sinceStart = Date.now() - lastStartAtRef.current;
+    // The very first ms after our startListening is a danger zone: the
+    // abort+start sequence can make iOS fire a delayed 'aborted' or even a
+    // generic transient error against the brand-new task. Suppress
+    // everything in this window while recording is active — if the session
+    // is truly dead, no real audio events will follow and the user can
+    // release to retry.
+    if (recordingRef.current && sinceStart < 350) {
+      return;
+    }
     // 'aborted' and 'no-speech' are routine session-end signals. If they fire
     // shortly after a new start, they're from the previously-aborted session
     // and must not tear down the new one. Real errors are always processed.
-    if ((code === 'aborted' || code === 'no-speech') && Date.now() - lastStartAtRef.current < 150) {
+    if ((code === 'aborted' || code === 'no-speech') && sinceStart < 800) {
       return;
     }
     setRecording(false);
     recordingRef.current = false;
     setLiveTranscript('');
+    lastSessionEndAtRef.current = Date.now();
     if (code !== 'aborted' && code !== 'no-speech') {
       // Belt-and-braces for real failures: tear down the native recognizer so
       // it doesn't sit half-alive holding the mic until the user retries.
@@ -263,11 +296,18 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     if (Platform.OS !== 'ios') return;
     if (recordingRef.current) return;
 
+    // Claim a session id up-front. Any wait below re-checks this — if the
+    // user released during the wait (stop() bumps the gen) or another start
+    // beat us to it, we bail out without flipping the listening overlay on.
+    const myGen = ++sessionGenRef.current;
+
     // Permission gate: if not granted, prompt once then bail (caller can retry).
     const current = await getSpeechPermissions();
+    if (myGen !== sessionGenRef.current) return;
     let granted = current.granted;
     if (!granted && current.canAskAgain) {
       const requested = await requestSpeechPermissions();
+      if (myGen !== sessionGenRef.current) return;
       granted = requested.granted;
     }
     if (!granted) {
@@ -285,18 +325,52 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       return;
     }
 
-    // Stamp lastStartAtRef BEFORE the abort so any synchronous end/error
-    // event the abort emits is correctly recognized as belonging to the new
-    // session window (and gets suppressed by the 150ms guards above).
-    lastStartAtRef.current = Date.now();
+    // Free-tier lifetime-uses gate. Pro is always unlimited. Holding without
+    // speaking still counts — the paywall fires on the (limit+1)th hold.
+    if (!isPro) {
+      const used = quickEntryPrefs.voiceUsageCount;
+      if (used >= PRO_LIMITS.FREE_VOICE_TOTAL_USES) {
+        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'voice' });
+        requestOpenPaywall(
+          'voice',
+          I18n.t('pro.limit_voice', { count: PRO_LIMITS.FREE_VOICE_TOTAL_USES }),
+        );
+        // Roll back our session-gen claim so a follow-up press isn't stuck
+        // behind a stale "in-flight" gen.
+        sessionGenRef.current--;
+        return;
+      }
+      updateQuickEntryPrefs({ voiceUsageCount: used + 1 });
+    }
+
     hasReceivedResultRef.current = false;
 
-    // Belt-and-braces: forcibly tear down any zombie native session before
-    // starting a fresh one. Without this, a previous quick cancel can leave
-    // SFSpeechRecognizer in a "starting" state where the next start silently
-    // no-ops.
-    abortListening();
+    // Tear down any lingering native session FIRST, then wait for iOS to
+    // fully settle before the next startListening. The two-phase approach is
+    // what fixes "subsequent listening flashes and disappears": calling
+    // abort + start back-to-back leaves SFSpeechRecognizer in a transient
+    // state that fires a delayed 'aborted' or generic error against our
+    // brand-new task, which would otherwise tear down the new session.
+    //
+    // For the very first session of an app lifetime we have nothing to
+    // drain, so we skip both the abort and the wait — keeps the first press
+    // snappy. Subsequent sessions always pay the settle window.
+    if (lastSessionEndAtRef.current > 0) {
+      abortListening();
+      // Events emitted by the abort fire during the wait below while
+      // recordingRef is still false, so the handlers no-op. The wait absorbs
+      // both the abort settle time AND any residual gap from the previous
+      // session's teardown.
+      const sinceLastEnd = Date.now() - lastSessionEndAtRef.current;
+      const MIN_PRESTART_WAIT_MS = 250;
+      const settleMs = Math.max(MIN_PRESTART_WAIT_MS, 500 - sinceLastEnd);
+      await new Promise((resolve) => setTimeout(resolve, settleMs));
+      if (myGen !== sessionGenRef.current) return;
+    }
 
+    // Stamp lastStartAtRef now — events the new startListening() emits will
+    // be measured against this. The guards above are tuned around this base.
+    lastStartAtRef.current = Date.now();
     setLiveTranscript('');
     recordingRef.current = true;
     setRecording(true);
@@ -307,20 +381,33 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       setRecording(false);
       // Roll back the start markers too — otherwise the failed attempt's
       // timestamp would suppress legit events from the user's retry within
-      // the next 150ms.
+      // the guard window.
       lastStartAtRef.current = 0;
       hasReceivedResultRef.current = false;
+      sessionGenRef.current++;
       Alert.alert(
         I18n.t('settings.quick_entry.voice.error_title'),
         err instanceof Error ? err.message : I18n.t('settings.quick_entry.voice.error_message'),
       );
     }
-  }, [settings.locale]);
+  }, [
+    isPro,
+    quickEntryPrefs.voiceUsageCount,
+    settings.locale,
+    updateQuickEntryPrefs,
+  ]);
 
   const stop = useCallback(() => {
+    // Bump the session gen even when not yet recording — this cancels an
+    // in-flight start() that's waiting on permissions or the inter-session
+    // gap. Without this, a fast tap-and-release would let the deferred
+    // startListening() fire after the user has already let go, leaving a
+    // phantom listening overlay until iOS's no-speech timeout.
+    sessionGenRef.current++;
     if (!recordingRef.current) return;
     recordingRef.current = false;
     setRecording(false);
+    lastSessionEndAtRef.current = Date.now();
     // If the user released without speaking, abort instead of stop. Abort
     // tears the recognizer down immediately, sidestepping the slow no-speech
     // error path that's the usual culprit for "next long-press doesn't work".
@@ -397,9 +484,11 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next) => {
       if (next !== 'active' && recordingRef.current) {
+        sessionGenRef.current++;
         recordingRef.current = false;
         setRecording(false);
         setLiveTranscript('');
+        lastSessionEndAtRef.current = Date.now();
         abortListening();
       }
     });
