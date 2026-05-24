@@ -482,6 +482,12 @@ export function QuickAddSheet({
   // dismissed — both must be reset on focus return or the sheet stays inert.
   useFocusEffect(
     useCallback(() => {
+      // Skip re-arming when a close animation is already in flight —
+      // `closeTimerRef` is set the moment closeWithAnimation runs and only
+      // cleared after onClose fires. A transient focus loss/regain during
+      // that window would otherwise clear closingRef while the unmount
+      // timer is still pending, exposing the sheet to a double-submit.
+      if (closeTimerRef.current !== null) return;
       closingRef.current = false;
       setIsClosing(false);
       const focusInput = () => inputRef.current?.focus();
