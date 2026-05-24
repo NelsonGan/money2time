@@ -132,38 +132,13 @@ export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Other', type: 'income', parentId: null, icon: '🏷️', isDefault: true },
 ];
 
+export const ONBOARDING_POWER_DEFAULT_GROUPS = ['Cash', 'Bank Accounts', 'Credit Cards'] as const;
+
 export const ONBOARDING_POWER_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [
   {
     name: 'Cash Wallet',
     type: 'debit',
-    accountGroup: null,
-    creditStatementDay: null,
-    creditDueDay: null,
-    startingBalance: 0,
-    includeInTotals: true,
-  },
-  {
-    name: 'Checking Account',
-    type: 'debit',
-    accountGroup: null,
-    creditStatementDay: null,
-    creditDueDay: null,
-    startingBalance: 0,
-    includeInTotals: true,
-  },
-  {
-    name: 'Savings Account',
-    type: 'debit',
-    accountGroup: null,
-    creditStatementDay: null,
-    creditDueDay: null,
-    startingBalance: 0,
-    includeInTotals: true,
-  },
-  {
-    name: 'Credit Card',
-    type: 'credit',
-    accountGroup: null,
+    accountGroup: 'Cash',
     creditStatementDay: null,
     creditDueDay: null,
     startingBalance: 0,
@@ -172,7 +147,34 @@ export const ONBOARDING_POWER_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [
   {
     name: 'Digital Wallet',
     type: 'debit',
-    accountGroup: null,
+    accountGroup: 'Cash',
+    creditStatementDay: null,
+    creditDueDay: null,
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Checking Account',
+    type: 'debit',
+    accountGroup: 'Bank Accounts',
+    creditStatementDay: null,
+    creditDueDay: null,
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Savings Account',
+    type: 'debit',
+    accountGroup: 'Bank Accounts',
+    creditStatementDay: null,
+    creditDueDay: null,
+    startingBalance: 0,
+    includeInTotals: true,
+  },
+  {
+    name: 'Credit Card',
+    type: 'credit',
+    accountGroup: 'Credit Cards',
     creditStatementDay: null,
     creditDueDay: null,
     startingBalance: 0,

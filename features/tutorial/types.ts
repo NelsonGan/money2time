@@ -6,8 +6,6 @@ export interface TutorialTargetRect {
 }
 
 export type TutorialTargetId =
-  | 'home.display_toggle'
-  | 'home.converter'
   | 'nav.add'
   | 'insights.type_selector'
   | 'settings.management'

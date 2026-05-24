@@ -880,8 +880,7 @@ export function InsightsDrilldownScreen({
       item.name.length <= pieLabelMaxChars
         ? item.name
         : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
-    const sliceColor =
-      hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
+    const sliceColor = hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
     const labelStroke = isSelected
       ? withColorAlpha(item.color, 0.72)
       : hasSelection
@@ -1158,10 +1157,7 @@ export function InsightsDrilldownScreen({
                         width: 36,
                         height: 3,
                         borderRadius: 2,
-                        backgroundColor: withColorAlpha(
-                          totalRowAccentColor,
-                          isDark ? 0.38 : 0.28,
-                        ),
+                        backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
                         marginTop: 1,
                       }}
                     />
@@ -1192,10 +1188,7 @@ export function InsightsDrilldownScreen({
                             setActiveBreakdownSlice(nextId, true);
                           }}
                         >
-                          <View
-                            pointerEvents="none"
-                            style={{ marginTop: -pieStageVerticalInset }}
-                          >
+                          <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
                             <PieChart
                               data={interactivePieData}
                               radius={pieRadius}
@@ -1275,7 +1268,7 @@ export function InsightsDrilldownScreen({
                               </View>
                             </View>
                             <Text variant="label" tone="muted" className="mt-0.5">
-                              {item.count} {I18n.t('insights.calendar.transactions')}
+                              {item.count} {I18n.t('calendar.transactions')}
                             </Text>
                           </View>
                         </View>
@@ -1294,7 +1287,7 @@ export function InsightsDrilldownScreen({
                   <Pressable
                     onPress={() => handleTypeFilterChange('income')}
                     accessibilityRole="tab"
-                    accessibilityLabel={I18n.t('insights.calendar.income')}
+                    accessibilityLabel={I18n.t('calendar.income')}
                     accessibilityState={{ selected: drilldownTypeFilter === 'income' }}
                     className="flex-1 items-center py-2.5 active:opacity-85"
                   >
@@ -1306,7 +1299,7 @@ export function InsightsDrilldownScreen({
                           : 'text-muted-foreground',
                       )}
                     >
-                      {I18n.t('insights.calendar.income')}
+                      {I18n.t('calendar.income')}
                     </Text>
                     <View
                       className={cn(
@@ -1318,7 +1311,7 @@ export function InsightsDrilldownScreen({
                   <Pressable
                     onPress={() => handleTypeFilterChange('expense')}
                     accessibilityRole="tab"
-                    accessibilityLabel={I18n.t('insights.calendar.expense')}
+                    accessibilityLabel={I18n.t('calendar.expense')}
                     accessibilityState={{ selected: drilldownTypeFilter === 'expense' }}
                     className="flex-1 items-center py-2.5 active:opacity-85"
                   >
@@ -1330,7 +1323,7 @@ export function InsightsDrilldownScreen({
                           : 'text-muted-foreground',
                       )}
                     >
-                      {I18n.t('insights.calendar.expense')}
+                      {I18n.t('calendar.expense')}
                     </Text>
                     <View
                       className={cn(

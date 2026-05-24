@@ -33,7 +33,6 @@ const SECONDARY_HIGHLIGHT_PADDING = 5;
 const TOOLTIP_ESTIMATED_HEIGHT = 285;
 const SPOTLIGHT_EDGE_MARGIN = 8;
 const DEFAULT_TOOLTIP_BOTTOM_CLEARANCE = 16;
-const FAB_TOOLTIP_BOTTOM_CLEARANCE = 132;
 
 function roundedRectPath(
   x: number,
@@ -187,18 +186,11 @@ export function TutorialCoachmarkOverlay({
 
   const tooltipTop = useMemo(() => {
     const isAddStep = targetId === 'nav.add';
-    const isConverterStep = targetId === 'home.converter';
     const minTop = isAddStep ? 24 : 16;
-    const tooltipBottomClearance = isConverterStep
-      ? FAB_TOOLTIP_BOTTOM_CLEARANCE
-      : DEFAULT_TOOLTIP_BOTTOM_CLEARANCE;
     const maxTop = Math.max(
       minTop,
-      backdropHeight - TOOLTIP_ESTIMATED_HEIGHT - tooltipBottomClearance,
+      backdropHeight - TOOLTIP_ESTIMATED_HEIGHT - DEFAULT_TOOLTIP_BOTTOM_CLEARANCE,
     );
-    if (isConverterStep) {
-      return maxTop;
-    }
     if (!highlightFrame) {
       return Math.min(maxTop, Math.max(96, backdropHeight - TOOLTIP_ESTIMATED_HEIGHT - 32));
     }
@@ -322,12 +314,7 @@ export function TutorialCoachmarkOverlay({
         </>
       ) : (
         <>
-          <View
-            style={[
-              StyleSheet.absoluteFillObject,
-              { backgroundColor: palette.backdrop },
-            ]}
-          />
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: palette.backdrop }]} />
           <View
             style={[
               styles.loadingHighlight,
