@@ -1,47 +1,29 @@
-import { Mic } from 'lucide-react-native';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { InteractionManager, Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  ActivityIcon,
+  CalendarIcon,
   HomeIcon,
   InsightsIcon,
-  PlusIcon,
   SettingsIcon,
+  WalletIcon,
 } from '~/components/icons/NavIcons';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
+import type { TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-export type TabName = 'transactions' | 'home' | 'insights' | 'settings';
+export type TabName = 'home' | 'accounts' | 'calendar' | 'insights' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
-  onPressAdd?: () => void;
-  /**
-   * Triggered when the user holds the + button. When set, a short tap still
-   * fires `onPressAdd`; the long-press fires this instead. `onLongPressAddEnd`
-   * fires when the user releases the finger after a long-press.
-   */
-  onLongPressAdd?: () => void;
-  onLongPressAddEnd?: () => void;
-  /**
-   * When true, the + button widens into a pill that shows a small mic next
-   * to the +. Indicates that long-press launches voice input.
-   */
-  addButtonShowsVoiceHint?: boolean;
-  addButtonAccessibilityLabel?: string;
-  onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
   onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
   tutorialFocusedTab?: TabName | null;
   tutorialMeasureToken?: number;
 }
@@ -50,13 +32,12 @@ type NavIconComponent = typeof HomeIcon;
 
 const TABS: { name: TabName; icon: NavIconComponent }[] = [
   { name: 'home', icon: HomeIcon },
-  { name: 'transactions', icon: ActivityIcon },
+  { name: 'accounts', icon: WalletIcon },
+  { name: 'calendar', icon: CalendarIcon },
   { name: 'insights', icon: InsightsIcon },
   { name: 'settings', icon: SettingsIcon },
 ];
 
-const ADD_BUTTON_SIZE = 44;
-const ADD_BUTTON_SLOT_WIDTH = 60;
 const NAV_ROW_HEIGHT = 58;
 const ICON_SIZE = 26;
 
@@ -155,25 +136,12 @@ export function BottomNav({
   activeTab,
   onTabChange,
   hideTabs,
-  onPressAdd,
-  onLongPressAdd,
-  onLongPressAddEnd,
-  addButtonShowsVoiceHint = false,
-  addButtonAccessibilityLabel,
-  onTutorialTargetLayout,
   onTutorialTabLayout,
-  tutorialSpotlightRequest,
   tutorialFocusedTab,
   tutorialMeasureToken,
 }: BottomNavProps) {
   const themeColors = useThemeColors();
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const addButtonRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
-  const {
-    animatedStyle: fabAnimatedStyle,
-    handlePressIn: fabPressIn,
-    handlePressOut: fabPressOut,
-  } = usePressScale({ depth: 0.9 });
 
   const handleTabPress = useCallback(
     (tab: TabName) => {
@@ -182,90 +150,11 @@ export function BottomNav({
     },
     [onTabChange],
   );
-  const longPressActiveRef = useRef(false);
-  const handlePressAdd = useCallback(() => {
-    // If a long-press just fired, suppress the synthetic onPress that
-    // Pressable also emits when the finger lifts.
-    if (longPressActiveRef.current) {
-      longPressActiveRef.current = false;
-      return;
-    }
-    void triggerHaptic('medium');
-    onPressAdd?.();
-  }, [onPressAdd]);
-  const handleLongPressAdd = useCallback(() => {
-    if (!onLongPressAdd) return;
-    longPressActiveRef.current = true;
-    void triggerHaptic('warning');
-    onLongPressAdd();
-  }, [onLongPressAdd]);
-  const handleLongPressAddEnd = useCallback(() => {
-    if (longPressActiveRef.current) {
-      onLongPressAddEnd?.();
-    }
-  }, [onLongPressAddEnd]);
-  const measureAddButton = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    addButtonRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTargetLayout('nav.add', { x, y, width, height });
-    });
-  }, [onTutorialTargetLayout]);
-
-  const handleAddButtonLayout = useCallback(() => {
-    measureAddButton();
-  }, [measureAddButton]);
-
-  useEffect(() => {
-    if (!tutorialSpotlightRequest?.active) return;
-    if (tutorialSpotlightRequest.targetId !== 'nav.add') return;
-
-    const interactionHandle = InteractionManager.runAfterInteractions(() => {
-      measureAddButton();
-    });
-    const firstPass = setTimeout(() => {
-      measureAddButton();
-    }, 40);
-    const secondPass = setTimeout(() => {
-      measureAddButton();
-    }, 220);
-    const androidExtraPass =
-      Platform.OS === 'android'
-        ? setTimeout(() => {
-            measureAddButton();
-          }, 500)
-        : null;
-
-    return () => {
-      interactionHandle.cancel();
-      clearTimeout(firstPass);
-      clearTimeout(secondPass);
-      if (androidExtraPass) clearTimeout(androidExtraPass);
-    };
-  }, [measureAddButton, tutorialSpotlightRequest]);
 
   const { isTablet } = useDeviceLayout();
   const visibleTabs = hideTabs?.length ? TABS.filter((t) => !hideTabs.includes(t.name)) : TABS;
-  const midIndex = Math.floor(visibleTabs.length / 2);
-  const showAddButton = !!onPressAdd;
 
   const bottomPad = getBottomNavSafePadding(safeBottom);
-
-  const renderTabs = (tabs: typeof visibleTabs) =>
-    tabs.map((tab) => (
-      <NavItem
-        key={tab.name}
-        tab={tab.name}
-        Icon={tab.icon}
-        isActive={activeTab === tab.name}
-        isTutorialFocused={tutorialFocusedTab === tab.name}
-        tintActive={themeColors.primary}
-        tintInactive={themeColors.textMuted}
-        onPressTab={handleTabPress}
-        onTutorialTabLayout={onTutorialTabLayout}
-        tutorialMeasureToken={tutorialMeasureToken}
-      />
-    ));
 
   return (
     <View
@@ -280,73 +169,21 @@ export function BottomNav({
       ]}
       className="border-t border-border/30 bg-card"
     >
-      <View
-        className="flex-row items-center px-2"
-        style={{ minHeight: NAV_ROW_HEIGHT }}
-      >
-        {showAddButton ? (
-          <>
-            {renderTabs(visibleTabs.slice(0, midIndex))}
-            <View
-              className="items-center justify-center"
-              style={{ width: ADD_BUTTON_SLOT_WIDTH, height: NAV_ROW_HEIGHT }}
-            >
-              <Animated.View style={fabAnimatedStyle}>
-                <Pressable
-                  ref={addButtonRef}
-                  onPress={handlePressAdd}
-                  onLongPress={onLongPressAdd ? handleLongPressAdd : undefined}
-                  delayLongPress={350}
-                  onPressIn={fabPressIn}
-                  onPressOut={() => {
-                    fabPressOut();
-                    handleLongPressAddEnd();
-                  }}
-                  onLayout={handleAddButtonLayout}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    addButtonAccessibilityLabel ?? I18n.t('onboarding.checklist.add_transaction')
-                  }
-                  className="items-center justify-center"
-                  style={{
-                    width: ADD_BUTTON_SIZE,
-                    height: ADD_BUTTON_SIZE,
-                    borderRadius: ADD_BUTTON_SIZE / 2,
-                    backgroundColor: themeColors.primary,
-                  }}
-                >
-                  {addButtonShowsVoiceHint ? (
-                    <>
-                      <Mic size={24} color="#FFFFFF" strokeWidth={2.4} />
-                      <View
-                        style={{
-                          position: 'absolute',
-                          right: -2,
-                          bottom: -2,
-                          width: 18,
-                          height: 18,
-                          borderRadius: 9,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: '#FFFFFF',
-                          borderWidth: 2,
-                          borderColor: themeColors.primary,
-                        }}
-                      >
-                        <PlusIcon size={10} color={themeColors.primary} strokeWidth={3.6} />
-                      </View>
-                    </>
-                  ) : (
-                    <PlusIcon size={22} color="#FFFFFF" strokeWidth={2.8} />
-                  )}
-                </Pressable>
-              </Animated.View>
-            </View>
-            {renderTabs(visibleTabs.slice(midIndex))}
-          </>
-        ) : (
-          renderTabs(visibleTabs)
-        )}
+      <View className="flex-row items-center px-2" style={{ minHeight: NAV_ROW_HEIGHT }}>
+        {visibleTabs.map((tab) => (
+          <NavItem
+            key={tab.name}
+            tab={tab.name}
+            Icon={tab.icon}
+            isActive={activeTab === tab.name}
+            isTutorialFocused={tutorialFocusedTab === tab.name}
+            tintActive={themeColors.primary}
+            tintInactive={themeColors.textMuted}
+            onPressTab={handleTabPress}
+            onTutorialTabLayout={onTutorialTabLayout}
+            tutorialMeasureToken={tutorialMeasureToken}
+          />
+        ))}
       </View>
     </View>
   );

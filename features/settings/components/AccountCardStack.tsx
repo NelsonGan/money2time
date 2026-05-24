@@ -8,7 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Text, TimeValueInline } from '~/components/ui';
+import { Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -37,19 +37,17 @@ interface AccountCardStackProps {
   balanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
   scrollViewRef?: React.RefObject<ScrollView | null>;
-  total: number;
   settings: UserSettings;
   trueHourlyRate: number;
   hideBalances: boolean;
   onOpenAccount: (accountId: string) => void;
   onEditAccount: (accountId: string) => void;
   onPayAccount: (accountId: string) => void;
-  headerAccessory?: React.ReactNode;
   onRenderBalanceNode: (
     amount: number,
     options?: {
-      variant?: 'caption' | 'heading' | 'bodyStrong' | 'label' | 'body';
-      tone?: 'default' | 'muted';
+      variant?: React.ComponentProps<typeof Text>['variant'];
+      tone?: React.ComponentProps<typeof Text>['tone'];
       textClassName?: string;
       iconColor?: string;
     },
@@ -652,14 +650,12 @@ export function AccountCardStack({
   balanceMap,
   creditSummaryByAccountId,
   scrollViewRef,
-  total,
   settings,
   trueHourlyRate,
   hideBalances,
   onOpenAccount,
   onEditAccount,
   onPayAccount,
-  headerAccessory,
   onRenderBalanceNode,
 }: AccountCardStackProps) {
   const resolvedTheme = useResolvedTheme();
@@ -711,57 +707,12 @@ export function AccountCardStack({
     return result;
   }, [accounts, accountGroups]);
 
-  const totalLabel = useMemo(() => {
-    if (hideBalances) return MASKED_BALANCE_VALUE;
-    return formatAmount(normalizeMoneyAmount(total), settings, {
-      showSign: false,
-      trueHourlyRate,
-    });
-  }, [hideBalances, settings, total, trueHourlyRate]);
-
-  const normalizedTotal = normalizeMoneyAmount(total);
-
   return (
     <ScrollView
       ref={scrollViewRef}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.totalHeader}>
-        <View style={styles.totalHeaderContent}>
-          <Text
-            variant="label"
-            tone="muted"
-            style={{ letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}
-          >
-            {I18n.t('accounts.net_worth')}
-          </Text>
-          {hideBalances || settings.displayMode !== 'time' ? (
-            <Text
-              variant="heading"
-              style={{
-                color: isNegativeForDisplay(normalizedTotal)
-                  ? themeColors.error
-                  : themeColors.success,
-                marginTop: 2,
-              }}
-            >
-              {totalLabel}
-            </Text>
-          ) : (
-            <TimeValueInline
-              value={totalLabel}
-              variant="heading"
-              textClassName={normalizedTotal >= 0 ? 'text-success' : 'text-destructive'}
-              iconColor={normalizedTotal >= 0 ? themeColors.success : themeColors.error}
-            />
-          )}
-        </View>
-        {headerAccessory ? (
-          <View style={styles.totalHeaderAccessory}>{headerAccessory}</View>
-        ) : null}
-      </View>
-
       {sections.map((section, sectionIndex) => {
         const sectionTotal = normalizeMoneyAmount(
           section.accounts.reduce((sum, a) => {
@@ -844,25 +795,8 @@ function AnimatedContainer({
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
     paddingBottom: 100,
-  },
-  totalHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.md,
-    paddingHorizontal: spacing.xxs,
-  },
-  totalHeaderContent: {
-    flex: 1,
-    paddingRight: spacing.md,
-  },
-  totalHeaderAccessory: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: spacing.xs,
   },
   sectionGap: {
     marginTop: spacing.lg,

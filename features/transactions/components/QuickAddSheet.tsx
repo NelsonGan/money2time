@@ -100,8 +100,10 @@ const SUBMIT_CLOSE_DURATION = 140;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'flex-end',
+  },
+  backdropFill: {
+    backgroundColor: 'rgba(0,0,0,0.55)',
   },
   kav: {
     width: '100%',
@@ -817,7 +819,7 @@ export function QuickAddSheet({
   return (
     <View style={styles.root}>
       <Animated.View
-        style={[StyleSheet.absoluteFill, backdropAnimatedStyle]}
+        style={[StyleSheet.absoluteFill, styles.backdropFill, backdropAnimatedStyle]}
         pointerEvents="none"
       />
       <Pressable
@@ -834,6 +836,62 @@ export function QuickAddSheet({
         <Animated.View
           style={[styles.cardWrap, { paddingBottom: cardBottomMargin }, sheetAnimatedStyle]}
         >
+          {voicePromptVisible ? (
+            <View
+              style={[
+                styles.voiceBanner,
+                { backgroundColor: themeColors.card, borderColor: themeColors.border },
+              ]}
+            >
+              <View
+                style={[styles.voiceBannerIcon, { backgroundColor: `${themeColors.primary}1F` }]}
+              >
+                <Mic size={16} color={themeColors.primary} />
+              </View>
+              <View style={styles.voiceBannerText}>
+                <Text
+                  variant="bodyStrong"
+                  className="text-foreground"
+                  style={styles.voiceBannerTitle}
+                  numberOfLines={1}
+                >
+                  {I18n.t('settings.quick_entry.voice.suggest_title')}
+                </Text>
+                <Text
+                  variant="caption"
+                  className="text-foreground/70"
+                  style={styles.voiceBannerBody}
+                  numberOfLines={2}
+                >
+                  {I18n.t('settings.quick_entry.voice.suggest_message')}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onEnableVoice?.();
+                }}
+                hitSlop={6}
+                style={[styles.voiceBannerCta, { backgroundColor: themeColors.primary }]}
+                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_enable')}
+              >
+                <Text style={[styles.voiceBannerCtaLabel, { color: '#FFFFFF' }]}>
+                  {I18n.t('settings.quick_entry.voice.suggest_enable')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onDismissVoicePrompt?.();
+                }}
+                hitSlop={10}
+                style={styles.voiceBannerClose}
+                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_later')}
+              >
+                <X size={14} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+          ) : null}
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>
               {SHEET_TYPES.map((option) => {
@@ -906,62 +964,6 @@ export function QuickAddSheet({
               ) : null}
             </View>
           </View>
-          {voicePromptVisible ? (
-            <View
-              style={[
-                styles.voiceBanner,
-                { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              ]}
-            >
-              <View
-                style={[styles.voiceBannerIcon, { backgroundColor: `${themeColors.primary}1F` }]}
-              >
-                <Mic size={16} color={themeColors.primary} />
-              </View>
-              <View style={styles.voiceBannerText}>
-                <Text
-                  variant="bodyStrong"
-                  className="text-foreground"
-                  style={styles.voiceBannerTitle}
-                  numberOfLines={1}
-                >
-                  {I18n.t('settings.quick_entry.voice.suggest_title')}
-                </Text>
-                <Text
-                  variant="caption"
-                  className="text-foreground/70"
-                  style={styles.voiceBannerBody}
-                  numberOfLines={2}
-                >
-                  {I18n.t('settings.quick_entry.voice.suggest_message')}
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onEnableVoice?.();
-                }}
-                hitSlop={6}
-                style={[styles.voiceBannerCta, { backgroundColor: themeColors.primary }]}
-                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_enable')}
-              >
-                <Text style={[styles.voiceBannerCtaLabel, { color: '#FFFFFF' }]}>
-                  {I18n.t('settings.quick_entry.voice.suggest_enable')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onDismissVoicePrompt?.();
-                }}
-                hitSlop={10}
-                style={styles.voiceBannerClose}
-                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_later')}
-              >
-                <X size={14} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          ) : null}
           <View style={styles.card} className="bg-card">
             <View className="px-4 pt-5 pb-4">
               <View className="flex-row items-stretch gap-3">

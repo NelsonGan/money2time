@@ -102,13 +102,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           onPress: () => {
             void triggerHaptic('selection');
             void trackEvent(AnalyticsEvents.ONBOARDING_SKIPPED, { at_step: step });
-            completeOnboarding();
+            try {
+              completeOnboarding({
+                userMode: 'power',
+                seedPowerDefaults: accounts.length === 0 && categories.length === 0,
+              });
+            } catch (error) {
+              void triggerHaptic('error');
+              Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+              return;
+            }
             onComplete();
           },
         },
       ],
     );
-  }, [completeOnboarding, onComplete, step]);
+  }, [accounts.length, categories.length, completeOnboarding, onComplete, step]);
 
   const handleImport = useCallback(async () => {
     if (isImporting) return;
@@ -154,7 +163,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }, [isImporting, importMoneyManagerBackup]);
 
   const completePowerOnboarding = useCallback(() => {
-    completeOnboarding({ userMode: 'power' });
+    try {
+      completeOnboarding({ userMode: 'power' });
+    } catch (error) {
+      void triggerHaptic('error');
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+      return;
+    }
     onComplete();
   }, [completeOnboarding, onComplete]);
 
@@ -176,6 +191,28 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [accounts.length, categories.length, completeOnboarding, onComplete]);
+
+  const handleSelectSimple = useCallback(() => {
+    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
+    setIsSimpleUser(true);
+    try {
+      completeOnboarding({
+        userMode: 'simple',
+        seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
+      });
+    } catch (error) {
+      void triggerHaptic('error');
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+      return;
+    }
+    onComplete();
+  }, [accounts.length, categories.length, completeOnboarding, onComplete]);
+
+  const handleSelectPower = useCallback(() => {
+    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
+    setIsSimpleUser(false);
+    setStep(6);
+  }, []);
 
   const renderProgressHeader = () => (
     <View
@@ -288,20 +325,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
             <OnboardingModeStep
               onBack={() => setStep(4)}
-              onSelectSimple={() => {
-                void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
-                setIsSimpleUser(true);
-                completeOnboarding({
-                  userMode: 'simple',
-                  seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
-                });
-                onComplete();
-              }}
-              onSelectPower={() => {
-                void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
-                setIsSimpleUser(false);
-                setStep(6);
-              }}
+              onSelectSimple={handleSelectSimple}
+              onSelectPower={handleSelectPower}
             />
           </Animated.View>
         )}

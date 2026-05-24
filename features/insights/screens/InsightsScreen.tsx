@@ -97,7 +97,6 @@ type PeriodPreset = (typeof PERIOD_TABS)[number];
 const INSIGHT_TYPES = [
   'expense_breakdown',
   'income_breakdown',
-  'calendar_view',
   'time_cost_leaderboard',
   'savings_rate',
   'expense_trend',
@@ -107,29 +106,6 @@ const INSIGHT_TYPES = [
   'income_rate_history',
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
-const INSIGHT_TYPE_GROUPS = [
-  {
-    id: 'breakdowns',
-    insightTypes: ['expense_breakdown', 'income_breakdown'],
-  },
-  {
-    id: 'activity',
-    insightTypes: ['calendar_view', 'time_cost_leaderboard', 'savings_rate'],
-  },
-  {
-    id: 'trends',
-    insightTypes: [
-      'expense_trend',
-      'income_trend',
-      'expense_sentiment',
-      'asset_history',
-      'income_rate_history',
-    ],
-  },
-] as const satisfies readonly {
-  id: string;
-  insightTypes: readonly InsightType[];
-}[];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
 type NavigableInsightType = BreakdownInsightType | 'expense_trend' | 'expense_sentiment';
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
@@ -150,12 +126,6 @@ const INSIGHT_TYPE_VISUALS = {
     tint: '#1D9B63',
     background: '#E3F7EB',
     border: '#B5E5CA',
-  },
-  calendar_view: {
-    Icon: CalendarDays,
-    tint: '#2D78DA',
-    background: '#E4EEFF',
-    border: '#B8CCF6',
   },
   time_cost_leaderboard: {
     Icon: TimerReset,
@@ -293,10 +263,8 @@ const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   gap: spacing.sm,
 } as const;
 const EMPTY_ASSET_HISTORY_MONTHLY_DELTAS = new Map<string, Map<string, number>>();
-const WEEKDAY_LABELS_CACHE = new Map<string, string[]>();
 const YEAR_MONTH_LABELS_CACHE = new Map<string, string[]>();
 const MONTH_LABEL_BY_KEY_CACHE = new Map<string, string>();
-const CALENDAR_DATE_LABEL_CACHE = new Map<string, string>();
 const PERIOD_MONTH_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_MONTH_DAY_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
@@ -363,43 +331,6 @@ const styles = StyleSheet.create({
   },
   breakdownPercentBadge: {
     borderRadius: 999,
-  },
-  calendarWeekdayCell: {
-    alignItems: 'center',
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  calendarDayCell: {
-    borderRadius: 12,
-    alignItems: 'center',
-    paddingTop: 6,
-  },
-  calendarActivityDot: {
-    marginTop: 4,
-    borderRadius: 999,
-  },
-  calendarEmojiCircle: {
-    marginTop: 2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarEmojiLabel: {
-    fontSize: 10,
-    lineHeight: 12,
-    textAlign: 'center',
-  },
-  calendarNetLabel: {
-    marginTop: 2,
-    fontSize: 9,
-    lineHeight: 11,
-    fontWeight: '600',
-    textAlign: 'center',
-    paddingHorizontal: 2,
   },
   progressFill: {
     height: '100%',
@@ -577,10 +508,6 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
     fixedPeriodPreset: null,
     allowAccountFilter: false,
   },
-  calendar_view: {
-    fixedPeriodPreset: 'month',
-    allowAccountFilter: false,
-  },
   time_cost_leaderboard: {
     fixedPeriodPreset: null,
     allowAccountFilter: false,
@@ -657,64 +584,6 @@ type BreakdownPageData = InsightBasePageData & {
   categoryRows: InsightCategoryRow[];
   breakdownTransactionsById: Map<string, TransactionWithRelations[]>;
   transactionType: BreakdownTransactionType;
-};
-
-type CalendarDayAggregate = {
-  dayKey: string;
-  income: number;
-  expense: number;
-  net: number;
-  transactions: TransactionWithRelations[];
-};
-
-type CalendarDayCell = {
-  kind: 'day';
-  id: string;
-  dayKey: string;
-  dayNumber: number;
-  income: number;
-  expense: number;
-  net: number;
-  transactionCount: number;
-  isOutsideRange: boolean;
-  isFuture: boolean;
-  expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5;
-  topCategoryEmoji: string | null;
-};
-
-function clampCalendarExpenseDotTier(tier: number): 1 | 2 | 3 | 4 | 5 {
-  if (tier <= 1) return 1;
-  if (tier >= 5) return 5;
-  if (tier < 2.5) return 2;
-  if (tier < 3.5) return 3;
-  if (tier < 4.5) return 4;
-  return 5;
-}
-
-type CalendarSpacerCell = {
-  kind: 'spacer';
-  id: string;
-};
-
-type CalendarGridCell = CalendarDayCell | CalendarSpacerCell;
-
-type CalendarMonthSection = {
-  monthKey: string;
-  label: string;
-  activeDayCount: number;
-  cells: CalendarGridCell[];
-};
-
-type CalendarPageData = InsightBasePageData & {
-  kind: 'calendar';
-  dailyTotalsByDayKey: Map<string, CalendarDayAggregate>;
-  monthSections: CalendarMonthSection[];
-  rangeStartDayKey: string;
-  rangeEndDayKey: string;
-  defaultSelectedDayKey: string;
-  totalIncome: number;
-  totalExpense: number;
-  totalNet: number;
 };
 
 type TimeCostCategoryRow = {
@@ -920,7 +789,6 @@ type IncomeRateHistoryPageData = InsightBasePageData & {
 
 type InsightPageData =
   | BreakdownPageData
-  | CalendarPageData
   | TimeCostPageData
   | AnalyticsPageData
   | ExpenseTrendPageData
@@ -1233,20 +1101,6 @@ function resolveWeekAnchorDateFromRange(range: { start: string; end: string }) {
   return rangeEndDate.getTime() > today.getTime() ? today : rangeEndDate;
 }
 
-function getCalendarWeekdayLabels(locale: string) {
-  const cached = WEEKDAY_LABELS_CACHE.get(locale);
-  if (cached) return cached;
-  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
-  const monday = new Date(Date.UTC(2024, 0, 1)); // Monday
-  const labels = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setUTCDate(monday.getUTCDate() + index);
-    return formatter.format(date);
-  });
-  WEEKDAY_LABELS_CACHE.set(locale, labels);
-  return labels;
-}
-
 function dayKeyToUtcDate(dayKey: string): Date | null {
   const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
   const year = Number(yearRaw);
@@ -1255,10 +1109,6 @@ function dayKeyToUtcDate(dayKey: string): Date | null {
   if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
   const date = new Date(Date.UTC(year, month - 1, day));
   return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function monthKeyFromDayKey(dayKey: string) {
-  return dayKey.slice(0, 7);
 }
 
 function monthStartUtcDateFromMonthKey(monthKey: string): Date | null {
@@ -1365,38 +1215,6 @@ function generateDayKeysForRange(startIso: string, endIso: string): string[] {
     cursor.setDate(cursor.getDate() + 1);
   }
   return keys;
-}
-
-function weekdayColumnIndexMonday(dayKey: string) {
-  const date = dayKeyToUtcDate(dayKey);
-  if (!date) return 0;
-  const sundayFirst = date.getUTCDay();
-  return (sundayFirst + 6) % 7;
-}
-
-function monthKeyFromUtcDate(date: Date) {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
-}
-
-function formatCalendarDate(dayKey: string, locale: string) {
-  const currentUtcYear = new Date().getUTCFullYear();
-  const cacheKey = `${locale}|${currentUtcYear}|${dayKey}`;
-  const cached = CALENDAR_DATE_LABEL_CACHE.get(cacheKey);
-  if (cached) return cached;
-
-  const dayDate = dayKeyToUtcDate(dayKey);
-  if (!dayDate) return dayKey;
-  const label = dayDate.toLocaleDateString(locale, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: dayDate.getUTCFullYear() !== currentUtcYear ? 'numeric' : undefined,
-    timeZone: 'UTC',
-  });
-  CALENDAR_DATE_LABEL_CACHE.set(cacheKey, label);
-  return label;
 }
 
 function withColorAlpha(hex: string, alpha: number) {
@@ -2669,9 +2487,7 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isChartScrubbing, setIsChartScrubbing] = useState(false);
-  const [selectedCalendarDayKey, setSelectedCalendarDayKey] = useState<string | null>(null);
   const [timeCostViewMode, setTimeCostViewMode] = useState<TimeCostViewMode>('category');
-  const calendarDetailAnimRef = useRef(new RNAnimated.Value(1));
   const breakdownHeaderDotPulse = useRef(new RNAnimated.Value(0)).current;
   const insightsTypeSelectorRef = useRef<View | null>(null);
   const periodPickerTriggerRef = useRef<View | null>(null);
@@ -2737,24 +2553,6 @@ export function InsightsScreen({
       })),
     [visibleInsightTypes, isPro, proTrendTypeSet],
   );
-  const insightTypeOptionGroups = useMemo(() => {
-    const visibleInsightTypeSet = new Set(visibleInsightTypes);
-    return INSIGHT_TYPE_GROUPS.map((group) => {
-      const optionValues = group.insightTypes.filter((type) => visibleInsightTypeSet.has(type));
-      if (!optionValues.length) return null;
-      return {
-        id: group.id,
-        label: String(I18n.t(`insights.groups.${group.id}.title`)),
-        optionValues,
-        defaultExpanded: optionValues.includes(selectedInsightType),
-      };
-    }).filter((group): group is NonNullable<typeof group> => !!group);
-  }, [selectedInsightType, visibleInsightTypes]);
-  const calendarWeekdayLabels = useMemo(
-    () => getCalendarWeekdayLabels(activeLocale),
-    [activeLocale],
-  );
-
   useEffect(() => {
     if (isSimpleMode && selectedInsightType === 'asset_history') {
       setSelectedInsightType('expense_breakdown');
@@ -2843,7 +2641,6 @@ export function InsightsScreen({
     setActiveCustomDateField('start');
     activeBreakdownSliceIdRef.current = null;
     setActiveBreakdownSliceId(null);
-    setSelectedCalendarDayKey(null);
     setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
     setSelectedInsightType(targetInsightType);
@@ -2885,7 +2682,6 @@ export function InsightsScreen({
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setAssetHistoryScrubMonthByYear({});
-    setSelectedCalendarDayKey(null);
     setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3719,185 +3515,6 @@ export function InsightsScreen({
         };
       }
 
-      if (insightType === 'calendar_view') {
-        const filteredForRange: TransactionWithRelations[] = [];
-        const dailyTotalsByDayKey = new Map<string, CalendarDayAggregate>();
-        let totalExpense = 0;
-
-        inRangeTransactions.forEach((tx) => {
-          if (tx.type !== 'expense') return;
-          filteredForRange.push(tx);
-
-          const dayKey = transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date);
-          const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
-          const current = dailyTotalsByDayKey.get(dayKey) ?? {
-            dayKey,
-            income: 0,
-            expense: 0,
-            net: 0,
-            transactions: [],
-          };
-          current.expense += value;
-          totalExpense += value;
-          current.net = current.income - current.expense;
-          current.transactions.push(tx);
-          dailyTotalsByDayKey.set(dayKey, current);
-        });
-
-        dailyTotalsByDayKey.forEach((entry) => {
-          if (entry.transactions.length < 2) return;
-          entry.transactions.sort((a, b) => {
-            const dateDelta = b.date.localeCompare(a.date);
-            if (dateDelta !== 0) return dateDelta;
-            return b.createdAt.localeCompare(a.createdAt);
-          });
-        });
-
-        const topEmojiByDayKey = new Map<string, string>();
-        dailyTotalsByDayKey.forEach((entry, dayKey) => {
-          if (entry.transactions.length === 0) return;
-          const amountByCategory = new Map<string, { amount: number; emoji: string }>();
-          for (const tx of entry.transactions) {
-            const catId = tx.categoryId ?? 'uncategorized';
-            const emoji = tx.categoryIcon ?? null;
-            if (!emoji) continue;
-            const existing = amountByCategory.get(catId);
-            if (existing) {
-              existing.amount += tx.amount;
-            } else {
-              amountByCategory.set(catId, { amount: tx.amount, emoji });
-            }
-          }
-          let topEmoji: string | null = null;
-          let topAmount = 0;
-          amountByCategory.forEach(({ amount, emoji }) => {
-            if (amount > topAmount) {
-              topAmount = amount;
-              topEmoji = emoji;
-            }
-          });
-          if (topEmoji) topEmojiByDayKey.set(dayKey, topEmoji);
-        });
-
-        const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
-        const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
-        const todayDayKey = dayKeyFromDateLocal(new Date());
-        let minDailyExpense = Number.POSITIVE_INFINITY;
-        let maxDailyExpense = 0;
-        let latestPastOrTodayActivityDay: string | null = null;
-        dailyTotalsByDayKey.forEach((entry, dayKey) => {
-          if (dayKey < rangeStartDayKey || dayKey > rangeEndDayKey) return;
-          if (entry.expense <= 0) return;
-          if (entry.expense < minDailyExpense) minDailyExpense = entry.expense;
-          if (entry.expense > maxDailyExpense) maxDailyExpense = entry.expense;
-          if (
-            dayKey <= todayDayKey &&
-            (!latestPastOrTodayActivityDay || dayKey > latestPastOrTodayActivityDay)
-          ) {
-            latestPastOrTodayActivityDay = dayKey;
-          }
-        });
-
-        const monthSections: CalendarMonthSection[] = [];
-        const firstMonthDate = monthStartUtcDateFromMonthKey(monthKeyFromDayKey(rangeStartDayKey));
-        const endMonthKey = monthKeyFromDayKey(rangeEndDayKey);
-        if (firstMonthDate) {
-          const cursor = new Date(firstMonthDate);
-          while (monthKeyFromUtcDate(cursor) <= endMonthKey) {
-            const monthKey = monthKeyFromUtcDate(cursor);
-            const monthLabel = monthLabelFromMonthKey(monthKey, activeLocale);
-            const daysInMonth = new Date(
-              Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 0),
-            ).getUTCDate();
-            const leadingSpacers = weekdayColumnIndexMonday(`${monthKey}-01`);
-            const cells: CalendarGridCell[] = [];
-
-            for (let spacer = 0; spacer < leadingSpacers; spacer += 1) {
-              cells.push({ kind: 'spacer', id: `${monthKey}-spacer-${spacer}` });
-            }
-
-            let activeDayCount = 0;
-            for (let day = 1; day <= daysInMonth; day += 1) {
-              const dayNumber = String(day).padStart(2, '0');
-              const dayKey = `${monthKey}-${dayNumber}`;
-              const totals = dailyTotalsByDayKey.get(dayKey);
-              const income = totals?.income ?? 0;
-              const expense = totals?.expense ?? 0;
-              const net = totals?.net ?? 0;
-              const isOutsideRange = dayKey < rangeStartDayKey || dayKey > rangeEndDayKey;
-              const isFuture = dayKey > todayDayKey;
-              const hasExpense = expense > 0 && !isOutsideRange;
-              const hasRange = Number.isFinite(minDailyExpense) && maxDailyExpense > 0;
-              const hasSpread = hasRange && maxDailyExpense > minDailyExpense;
-              let expenseDotTier: 0 | 1 | 2 | 3 | 4 | 5 = 0;
-              if (hasExpense) {
-                if (!hasSpread) {
-                  expenseDotTier = 3;
-                } else {
-                  const normalized =
-                    (expense - minDailyExpense) / (maxDailyExpense - minDailyExpense);
-                  const quantized = Math.round(normalized * 4) + 1;
-                  expenseDotTier = clampCalendarExpenseDotTier(quantized);
-                }
-              }
-
-              if (!isOutsideRange) activeDayCount += 1;
-              cells.push({
-                kind: 'day',
-                id: dayKey,
-                dayKey,
-                dayNumber: day,
-                income,
-                expense,
-                net,
-                transactionCount: totals?.transactions.length ?? 0,
-                isOutsideRange,
-                isFuture,
-                expenseDotTier,
-                topCategoryEmoji: totals ? (topEmojiByDayKey.get(dayKey) ?? null) : null,
-              });
-            }
-
-            const trailingSpacers = cells.length % 7 === 0 ? 0 : 7 - (cells.length % 7);
-            for (let spacer = 0; spacer < trailingSpacers; spacer += 1) {
-              cells.push({ kind: 'spacer', id: `${monthKey}-end-spacer-${spacer}` });
-            }
-
-            monthSections.push({
-              monthKey,
-              label: monthLabel,
-              activeDayCount,
-              cells,
-            });
-            cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-          }
-        }
-
-        let defaultSelectedDayKey = rangeEndDayKey;
-        if (latestPastOrTodayActivityDay) {
-          defaultSelectedDayKey = latestPastOrTodayActivityDay;
-        } else if (todayDayKey >= rangeStartDayKey && todayDayKey <= rangeEndDayKey) {
-          defaultSelectedDayKey = todayDayKey;
-        } else if (todayDayKey < rangeStartDayKey) {
-          defaultSelectedDayKey = rangeStartDayKey;
-        }
-
-        return {
-          kind: 'calendar',
-          range,
-          filteredForRange,
-          dailyTotalsByDayKey,
-          monthSections,
-          rangeStartDayKey,
-          rangeEndDayKey,
-          defaultSelectedDayKey,
-          totalIncome: 0,
-          totalExpense,
-          totalNet: -totalExpense,
-        };
-      }
-
       if (insightType === 'time_cost_leaderboard') {
         const filteredForRange: TransactionWithRelations[] = [];
         const categoryTotals = new Map<string, TimeCostCategoryRow>();
@@ -4155,22 +3772,6 @@ export function InsightsScreen({
         };
       }
 
-      if (!isBreakdownInsightType(insightType)) {
-        return {
-          kind: 'calendar',
-          range,
-          filteredForRange: [],
-          dailyTotalsByDayKey: new Map<string, CalendarDayAggregate>(),
-          monthSections: [],
-          rangeStartDayKey: dayKeyFromIsoLocal(range.start),
-          rangeEndDayKey: dayKeyFromIsoLocal(range.end),
-          defaultSelectedDayKey: dayKeyFromIsoLocal(range.start),
-          totalIncome: 0,
-          totalExpense: 0,
-          totalNet: 0,
-        };
-      }
-
       const transactionType = transactionTypeFromInsightType(insightType);
       const breakdownExclusionSet =
         transactionType === 'expense'
@@ -4187,10 +3788,7 @@ export function InsightsScreen({
         if (breakdownExclusionSet.size > 0 && tx.categoryId) {
           const category = categoryById.get(tx.categoryId);
           const rootId = category?.parentId ?? tx.categoryId;
-          if (
-            breakdownExclusionSet.has(tx.categoryId) ||
-            breakdownExclusionSet.has(rootId)
-          ) {
+          if (breakdownExclusionSet.has(tx.categoryId) || breakdownExclusionSet.has(rootId)) {
             return;
           }
         }
@@ -4328,8 +3926,6 @@ export function InsightsScreen({
       ),
     [displayPeriodPreset, headerPreviewPeriodState],
   );
-  const currentCalendarDefaultDayKey =
-    currentPage.kind === 'calendar' ? currentPage.defaultSelectedDayKey : '';
   const activePeriodLabel = useMemo(
     () => periodLabel(displayPeriodPreset, headerPreviewRange, activeLocale),
     [activeLocale, displayPeriodPreset, headerPreviewRange],
@@ -4430,21 +4026,6 @@ export function InsightsScreen({
   const renderMoneyAmount = useCallback(
     (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
     [settings],
-  );
-  const formatCalendarCellNet = useCallback(
-    (value: number): string => {
-      if (value === 0) return '';
-      const absValue = Math.abs(value);
-      if (settings.displayMode === 'time') {
-        if (absValue < 1) {
-          const minutes = Math.round(absValue * 60);
-          return `${minutes}m`;
-        }
-        return `${formatCompactNumber(absValue)}h`;
-      }
-      return formatCompactNumber(absValue);
-    },
-    [settings.displayMode],
   );
   const formatAxisCurrencyValue = useCallback(
     (value: number) =>
@@ -4644,30 +4225,6 @@ export function InsightsScreen({
   }, [selectedInsightType, unlockChartScrub]);
   useEffect(() => () => unlockChartScrub(), [unlockChartScrub]);
 
-  useEffect(() => {
-    if (selectedInsightType !== 'calendar_view') return;
-    if (currentPage.kind !== 'calendar') return;
-    setSelectedCalendarDayKey((previous) => {
-      if (
-        previous &&
-        previous >= currentPage.rangeStartDayKey &&
-        previous <= currentPage.rangeEndDayKey
-      ) {
-        return previous;
-      }
-      return currentPage.defaultSelectedDayKey;
-    });
-  }, [currentPage, selectedInsightType]);
-
-  useEffect(() => {
-    if (selectedInsightType !== 'calendar_view') return;
-    calendarDetailAnimRef.current.setValue(0.68);
-    RNAnimated.timing(calendarDetailAnimRef.current, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }, [currentCalendarDefaultDayKey, selectedCalendarDayKey, selectedInsightType]);
   useEffect(() => {
     const pulse = RNAnimated.loop(
       RNAnimated.sequence([
@@ -4971,249 +4528,6 @@ export function InsightsScreen({
     );
   };
 
-  const renderCalendarPane = (pageData: CalendarPageData) => {
-    if (pageData.filteredForRange.length === 0) {
-      return (
-        <EmptyState
-          title={I18n.t('insights.empty.title')}
-          message={I18n.t('insights.empty.message')}
-          mascotMood="curious"
-          animateIn={false}
-        />
-      );
-    }
-
-    const todayDayKey = dayKeyFromDateLocal(new Date());
-    const fallbackDayKey = pageData.defaultSelectedDayKey;
-    const selectedDayKey =
-      selectedCalendarDayKey &&
-      selectedCalendarDayKey >= pageData.rangeStartDayKey &&
-      selectedCalendarDayKey <= pageData.rangeEndDayKey
-        ? selectedCalendarDayKey
-        : fallbackDayKey;
-    const selectedDayData = pageData.dailyTotalsByDayKey.get(selectedDayKey) ?? {
-      dayKey: selectedDayKey,
-      income: 0,
-      expense: 0,
-      net: 0,
-      transactions: [],
-    };
-    const selectedDayTransactions = selectedDayData.transactions;
-    const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
-    const isFutureDay = selectedDayKey > todayDayKey;
-    const dayCellGap = 5;
-    const dayCellSize = Math.max(40, Math.floor((chartWidth - dayCellGap * 6) / 7));
-    const dayCellHeight = dayCellSize + 22;
-    const calendarGridWidth = dayCellSize * 7 + dayCellGap * 6;
-    const dayDetailScale = calendarDetailAnimRef.current.interpolate({
-      inputRange: [0.68, 1],
-      outputRange: [0.985, 1],
-    });
-    const dayDetailAnimatedStyle = {
-      opacity: calendarDetailAnimRef.current,
-      transform: [{ scale: dayDetailScale }],
-    };
-
-    return (
-      <View className="mt-2 gap-3">
-        <View className="gap-2.5">
-          {pageData.monthSections.map((month) => (
-            <Card key={month.monthKey} className="items-center py-5">
-              <View style={{ width: calendarGridWidth }}>
-                <View className="flex-row mb-1.5" style={{ gap: dayCellGap }}>
-                  {calendarWeekdayLabels.map((weekday) => (
-                    <View
-                      key={`${month.monthKey}-${weekday}`}
-                      style={[styles.calendarWeekdayCell, buildWidthStyle(dayCellSize)]}
-                    >
-                      <Text variant="label" tone="muted">
-                        {weekday}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-
-                <View style={[styles.calendarGrid, { gap: dayCellGap }]}>
-                  {month.cells.map((cell) => {
-                    if (cell.kind === 'spacer') {
-                      return (
-                        <View key={cell.id} style={buildSizeStyle(dayCellSize, dayCellHeight)} />
-                      );
-                    }
-
-                    const isSelected = cell.dayKey === selectedDayKey;
-                    const hasActivity = cell.transactionCount > 0;
-                    const inactiveOpacity = cell.isOutsideRange ? 0.28 : 1;
-                    const baseIntensity =
-                      cell.expenseDotTier > 0 ? (cell.expenseDotTier - 1) / 4 : 0;
-                    const toneColor = themeColors.error;
-                    const dotSizeByTier = [3, 4, 5, 6, 7] as const;
-                    const dotSize =
-                      cell.expenseDotTier > 0 ? dotSizeByTier[cell.expenseDotTier - 1] : 0;
-                    const bgColor = isSelected
-                      ? withColorAlpha(themeColors.primary, 0.24)
-                      : hasActivity
-                        ? withColorAlpha(toneColor, 0.08 + baseIntensity * 0.24)
-                        : cell.isFuture
-                          ? withColorAlpha(themeColors.sky, 0.08)
-                          : withColorAlpha(themeColors.surfaceMuted, 0.6);
-                    const borderColor = isSelected
-                      ? withColorAlpha(themeColors.primary, 0.9)
-                      : hasActivity
-                        ? withColorAlpha(toneColor, 0.2 + baseIntensity * 0.3)
-                        : withColorAlpha(themeColors.textMuted, 0.18);
-
-                    return (
-                      <Pressable
-                        key={cell.id}
-                        disabled={cell.isOutsideRange}
-                        onPress={() => {
-                          if (cell.isOutsideRange) return;
-                          void triggerHaptic('selection');
-                          setSelectedCalendarDayKey(cell.dayKey);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={formatCalendarDate(cell.dayKey, activeLocale)}
-                        accessibilityState={{ selected: isSelected, disabled: cell.isOutsideRange }}
-                        className={cn('rounded-xl items-center border active:opacity-85')}
-                        style={[
-                          styles.calendarDayCell,
-                          {
-                            width: dayCellSize,
-                            height: dayCellHeight,
-                            backgroundColor: bgColor,
-                            borderColor,
-                            borderWidth: isSelected ? 2 : 1,
-                            opacity: inactiveOpacity,
-                          },
-                        ]}
-                      >
-                        <Text
-                          variant="caption"
-                          className={cn(
-                            isSelected
-                              ? 'text-primary font-bold'
-                              : hasActivity
-                                ? 'text-destructive'
-                                : 'text-muted-foreground',
-                          )}
-                        >
-                          {cell.dayNumber}
-                        </Text>
-                        {hasActivity ? (
-                          cell.topCategoryEmoji ? (
-                            <View
-                              style={[
-                                styles.calendarEmojiCircle,
-                                {
-                                  backgroundColor: isSelected
-                                    ? withColorAlpha(themeColors.primary, 0.18)
-                                    : withColorAlpha(toneColor, 0.12 + baseIntensity * 0.12),
-                                },
-                              ]}
-                            >
-                              <RNText allowFontScaling={false} style={styles.calendarEmojiLabel}>
-                                {cell.topCategoryEmoji}
-                              </RNText>
-                            </View>
-                          ) : dotSize > 0 ? (
-                            <View
-                              style={[
-                                styles.calendarActivityDot,
-                                { width: dotSize, height: dotSize, backgroundColor: toneColor },
-                              ]}
-                            />
-                          ) : null
-                        ) : null}
-                        {hasActivity && cell.net !== 0 ? (
-                          <RNText
-                            allowFontScaling={false}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.7}
-                            style={[
-                              styles.calendarNetLabel,
-                              {
-                                color:
-                                  cell.net > 0 ? themeColors.success : themeColors.error,
-                                maxWidth: dayCellSize - 4,
-                              },
-                            ]}
-                          >
-                            {formatCalendarCellNet(cell.net)}
-                          </RNText>
-                        ) : null}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            </Card>
-          ))}
-        </View>
-
-        <RNAnimated.View style={dayDetailAnimatedStyle}>
-          <Card className="p-4">
-            <Pressable
-              disabled={selectedDayTransactions.length === 0}
-              onPress={() => {
-                const targetDayKey = selectedDayKey;
-                openDrilldown({
-                  label: selectedDayLabel,
-                  transactions: selectedDayTransactions,
-                  triggerSelectionHaptic: true,
-                  scopeMatcher: (transaction) =>
-                    transaction.type === 'expense' &&
-                    (transactionDayKeyById.get(transaction.id) ??
-                      dayKeyFromIsoLocal(transaction.date)) === targetDayKey,
-                });
-              }}
-              className="flex-row items-center justify-between active:opacity-80"
-            >
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <View
-                    className="rounded-full px-2.5 py-1"
-                    style={{
-                      backgroundColor: withColorAlpha(themeColors.error, isDark ? 0.2 : 0.12),
-                    }}
-                  >
-                    <Text
-                      variant="label"
-                      style={{
-                        color: themeColors.error,
-                        fontFamily: FONT.semibold,
-                        fontWeight: '600',
-                      }}
-                    >
-                      {selectedDayLabel}
-                    </Text>
-                  </View>
-                  <Text variant="label" tone="muted">
-                    {isFutureDay
-                      ? I18n.t('insights.calendar.future_day')
-                      : `${selectedDayTransactions.length} ${I18n.t('insights.calendar.transactions').toLowerCase()}`}
-                  </Text>
-                </View>
-
-                <View className="mt-1.5">
-                  {renderValueNode(selectedDayData.expense, {
-                    variant: 'heading',
-                    textClassName: 'text-destructive',
-                    iconColor: themeColors.error,
-                  })}
-                </View>
-              </View>
-              {selectedDayTransactions.length > 0 ? (
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              ) : null}
-            </Pressable>
-          </Card>
-        </RNAnimated.View>
-      </View>
-    );
-  };
-
   const renderTimeCostPane = (pageData: TimeCostPageData) => {
     if (pageData.filteredForRange.length === 0) {
       return (
@@ -5272,8 +4586,7 @@ export function InsightsScreen({
               emoji: categoryRow.emoji,
               accentColor,
               onPress: () => {
-                const targetCategoryId = categoryRow.id;
-                const rootCategory = categoryById.get(targetCategoryId) ?? null;
+                const rootCategory = categoryById.get(categoryRow.id) ?? null;
                 openDrilldown({
                   label: `${categoryRow.emoji} ${categoryRow.label}`,
                   transactions: categoryRow.transactions,
@@ -5281,16 +4594,6 @@ export function InsightsScreen({
                   categoryRootLabel: rootCategory?.name ?? categoryRow.label,
                   categoryRootEmoji: rootCategory?.icon ?? categoryRow.emoji,
                   categoryRootColor: accentColor,
-                  scopeMatcher: (transaction) => {
-                    if (transaction.type !== 'expense') return false;
-                    const cat = transaction.categoryId
-                      ? categoryById.get(transaction.categoryId)
-                      : null;
-                    const rootId = cat?.parentId ?? transaction.categoryId ?? null;
-                    return (
-                      rootId === targetCategoryId || transaction.categoryId === targetCategoryId
-                    );
-                  },
                 });
               },
             };
@@ -6261,7 +5564,7 @@ export function InsightsScreen({
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
               <View className="flex-1">
                 <Text variant="label" tone="muted">
-                  {I18n.t('insights.calendar.income')}
+                  {I18n.t('calendar.income')}
                 </Text>
                 {renderValueNode(pageData.totalIncome, {
                   variant: 'caption',
@@ -6272,7 +5575,7 @@ export function InsightsScreen({
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
                 <Text variant="label" tone="muted">
-                  {I18n.t('insights.calendar.expense')}
+                  {I18n.t('calendar.expense')}
                 </Text>
                 {renderValueNode(pageData.totalExpense, {
                   variant: 'caption',
@@ -6283,7 +5586,7 @@ export function InsightsScreen({
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
                 <Text variant="label" tone="muted">
-                  {I18n.t('insights.calendar.net')}
+                  {I18n.t('calendar.net')}
                 </Text>
                 {renderValueNode(Math.abs(pageData.totalNet), {
                   variant: 'caption',
@@ -6339,42 +5642,11 @@ export function InsightsScreen({
                 <Pressable
                   key={row.monthKey}
                   onPress={() => {
-                    const targetMonthKey = row.monthKey;
-                    const rangeStart = pageData.range.start;
-                    const rangeEnd = pageData.range.end;
                     openDrilldown({
                       label: row.label,
                       transactions: row.transactions,
                       showTypeFilter: true,
                       triggerSelectionHaptic: true,
-                      scopeMatcher: (transaction) => {
-                        if (transaction.type !== 'income' && transaction.type !== 'expense') {
-                          return false;
-                        }
-                        if (transaction.date < rangeStart || transaction.date > rangeEnd) {
-                          return false;
-                        }
-                        if (
-                          (transactionMonthKeyById.get(transaction.id) ??
-                            monthKeyFromIsoLocal(transaction.date)) !== targetMonthKey
-                        ) {
-                          return false;
-                        }
-                        const categoryId = transaction.categoryId;
-                        if (!categoryId) return true;
-                        const category = categoryById.get(categoryId);
-                        const rootCategoryId = category?.parentId ?? categoryId;
-                        if (transaction.type === 'income') {
-                          return (
-                            !excludedSavingsIncomeCategorySet.has(categoryId) &&
-                            !excludedSavingsIncomeCategorySet.has(rootCategoryId)
-                          );
-                        }
-                        return (
-                          !excludedSavingsExpenseCategorySet.has(categoryId) &&
-                          !excludedSavingsExpenseCategorySet.has(rootCategoryId)
-                        );
-                      },
                     });
                   }}
                   accessibilityRole="button"
@@ -6446,9 +5718,6 @@ export function InsightsScreen({
     if (!isPro && proTrendTypeSet.has(pageData.kind)) {
       return <ProTrendPreviewOverlay onUpgrade={handleTrendUpgrade} />;
     }
-    if (pageData.kind === 'calendar') {
-      return renderCalendarPane(pageData);
-    }
     if (pageData.kind === 'expense_trend') {
       return renderExpenseTrendPane(pageData);
     }
@@ -6484,7 +5753,6 @@ export function InsightsScreen({
     () =>
       [
         activeBreakdownSliceId ?? '',
-        selectedCalendarDayKey ?? '',
         timeCostViewMode,
         selectedIncomeRatePointIndex === null ? '' : String(selectedIncomeRatePointIndex),
         incomeRateDisplayUnit,
@@ -6506,7 +5774,6 @@ export function InsightsScreen({
       incomeRateDisplayUnit,
       incomeTrendScrubMonthByYear,
       isDark,
-      selectedCalendarDayKey,
       selectedIncomeRatePointIndex,
       settings.currencySymbol,
       settings.displayMode,
@@ -6846,7 +6113,6 @@ export function InsightsScreen({
       }
 
       setActiveBreakdownSlice(null, false);
-      setSelectedCalendarDayKey(null);
       setSelectedIncomeRatePointIndex(null);
       setSelectedInsightType(nextInsightType);
     },
@@ -6943,7 +6209,6 @@ export function InsightsScreen({
               triggerVariant="header-plain"
               value={displaySelectedInsightType}
               options={insightTypeOptions}
-              optionGroups={insightTypeOptionGroups}
               optionsLayout="icon-grid"
               sheetTitle={I18n.t('insights.insight_type')}
               onChange={handleInsightTypeChange}
@@ -7214,7 +6479,10 @@ export function InsightsScreen({
                   onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={excludedAssetHistoryAccountIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={excludedAssetHistoryAccountIds.length > 0 ? undefined : 'muted'}
+                  >
                     {excludedAssetHistoryAccountIds.length > 0
                       ? `${excludedAssetHistoryAccountIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -7234,7 +6502,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedExpenseTrendAccountIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedExpenseTrendAccountIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedExpenseTrendAccountIds.length > 0
                         ? `${excludedExpenseTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7251,7 +6522,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedExpenseTrendExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedExpenseTrendExpenseCategoryIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedExpenseTrendExpenseCategoryIds.length > 0
                         ? `${excludedExpenseTrendExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7272,7 +6546,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedIncomeTrendAccountIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedIncomeTrendAccountIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedIncomeTrendAccountIds.length > 0
                         ? `${excludedIncomeTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7289,7 +6566,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedIncomeTrendIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedIncomeTrendIncomeCategoryIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedIncomeTrendIncomeCategoryIds.length > 0
                         ? `${excludedIncomeTrendIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7309,7 +6589,10 @@ export function InsightsScreen({
                   onPress={() => setActiveInsightsFilterPicker('timeCostExpenseCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={excludedTimeCostExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={excludedTimeCostExpenseCategoryIds.length > 0 ? undefined : 'muted'}
+                  >
                     {excludedTimeCostExpenseCategoryIds.length > 0
                       ? `${excludedTimeCostExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -7328,7 +6611,10 @@ export function InsightsScreen({
                   onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={excludedExpenseBreakdownCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={excludedExpenseBreakdownCategoryIds.length > 0 ? undefined : 'muted'}
+                  >
                     {excludedExpenseBreakdownCategoryIds.length > 0
                       ? `${excludedExpenseBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -7347,7 +6633,10 @@ export function InsightsScreen({
                   onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={excludedIncomeBreakdownCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={excludedIncomeBreakdownCategoryIds.length > 0 ? undefined : 'muted'}
+                  >
                     {excludedIncomeBreakdownCategoryIds.length > 0
                       ? `${excludedIncomeBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -7367,7 +6656,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedSavingsIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedSavingsIncomeCategoryIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedSavingsIncomeCategoryIds.length > 0
                         ? `${excludedSavingsIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7384,7 +6676,10 @@ export function InsightsScreen({
                     onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
                     className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                   >
-                    <Text variant="body" tone={excludedSavingsExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                    <Text
+                      variant="body"
+                      tone={excludedSavingsExpenseCategoryIds.length > 0 ? undefined : 'muted'}
+                    >
                       {excludedSavingsExpenseCategoryIds.length > 0
                         ? `${excludedSavingsExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                         : I18n.t('common.none')}
@@ -7403,9 +6698,7 @@ export function InsightsScreen({
             accountGroups={accountGroups}
             selectedIds={excludedAssetHistoryAccountIds}
             onToggleSelect={(accountId) =>
-              setExcludedAssetHistoryAccountIds((previous) =>
-                toggleStringId(previous, accountId),
-              )
+              setExcludedAssetHistoryAccountIds((previous) => toggleStringId(previous, accountId))
             }
             onClear={() => setExcludedAssetHistoryAccountIds([])}
           />
@@ -7417,9 +6710,7 @@ export function InsightsScreen({
             accountGroups={accountGroups}
             selectedIds={excludedExpenseTrendAccountIds}
             onToggleSelect={(accountId) =>
-              setExcludedExpenseTrendAccountIds((previous) =>
-                toggleStringId(previous, accountId),
-              )
+              setExcludedExpenseTrendAccountIds((previous) => toggleStringId(previous, accountId))
             }
             onClear={() => setExcludedExpenseTrendAccountIds([])}
           />
@@ -7446,9 +6737,7 @@ export function InsightsScreen({
             accountGroups={accountGroups}
             selectedIds={excludedIncomeTrendAccountIds}
             onToggleSelect={(accountId) =>
-              setExcludedIncomeTrendAccountIds((previous) =>
-                toggleStringId(previous, accountId),
-              )
+              setExcludedIncomeTrendAccountIds((previous) => toggleStringId(previous, accountId))
             }
             onClear={() => setExcludedIncomeTrendAccountIds([])}
           />
@@ -7476,9 +6765,7 @@ export function InsightsScreen({
             childByParent={savingsExpenseCategoryPicker.childByParent}
             selectedCategoryIds={excludedTimeCostExpenseCategoryIds}
             onToggleSelect={(categoryId) =>
-              setExcludedTimeCostExpenseCategoryIds((prev) =>
-                toggleStringId(prev, categoryId),
-              )
+              setExcludedTimeCostExpenseCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedTimeCostExpenseCategoryIds([])}
           />
@@ -7491,9 +6778,7 @@ export function InsightsScreen({
             childByParent={savingsExpenseCategoryPicker.childByParent}
             selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
             onToggleSelect={(categoryId) =>
-              setExcludedExpenseBreakdownCategoryIds((prev) =>
-                toggleStringId(prev, categoryId),
-              )
+              setExcludedExpenseBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedExpenseBreakdownCategoryIds([])}
           />
@@ -7506,9 +6791,7 @@ export function InsightsScreen({
             childByParent={savingsIncomeCategoryPicker.childByParent}
             selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
             onToggleSelect={(categoryId) =>
-              setExcludedIncomeBreakdownCategoryIds((prev) =>
-                toggleStringId(prev, categoryId),
-              )
+              setExcludedIncomeBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedIncomeBreakdownCategoryIds([])}
           />
@@ -7521,9 +6804,7 @@ export function InsightsScreen({
             childByParent={savingsIncomeCategoryPicker.childByParent}
             selectedCategoryIds={excludedSavingsIncomeCategoryIds}
             onToggleSelect={(categoryId) =>
-              setExcludedSavingsIncomeCategoryIds((prev) =>
-                toggleStringId(prev, categoryId),
-              )
+              setExcludedSavingsIncomeCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedSavingsIncomeCategoryIds([])}
           />
@@ -7536,9 +6817,7 @@ export function InsightsScreen({
             childByParent={savingsExpenseCategoryPicker.childByParent}
             selectedCategoryIds={excludedSavingsExpenseCategoryIds}
             onToggleSelect={(categoryId) =>
-              setExcludedSavingsExpenseCategoryIds((prev) =>
-                toggleStringId(prev, categoryId),
-              )
+              setExcludedSavingsExpenseCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedSavingsExpenseCategoryIds([])}
           />
@@ -7595,7 +6874,6 @@ export function InsightsScreen({
           </View>
         </View>
       </ThemeModal>
-
     </SafeAreaView>
   );
 }

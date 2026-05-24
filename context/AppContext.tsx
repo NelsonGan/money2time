@@ -14,6 +14,7 @@ import {
   DEFAULT_TRANSACTION_FILTERS,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
+  ONBOARDING_POWER_DEFAULT_GROUPS,
   ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
@@ -283,6 +284,10 @@ function seedMinimalCategoriesIfMissing() {
 }
 
 function seedPowerAccountsIfMissing(preferredCurrency: string) {
+  ONBOARDING_POWER_DEFAULT_GROUPS.forEach((groupName, index) => {
+    accountGroupsRepository.create(groupName, index);
+  });
+
   const existingAccounts = accountsRepository.list();
   const existing = new Set(existingAccounts.map((account) => accountNameSeedKey(account.name)));
   let createdAccounts = 0;
@@ -2092,6 +2097,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         if (shouldRefreshAccounts) {
           setAccounts(accountsRepository.list());
+          setAccountGroups(accountGroupsRepository.list());
         }
         if (shouldRefreshCategories) {
           setCategories(categoriesRepository.list());
