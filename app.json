@@ -27,7 +27,8 @@
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"]
+        "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
+        "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction."
       }
     },
     "android": {
