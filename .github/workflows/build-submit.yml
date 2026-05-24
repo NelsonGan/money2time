@@ -1,8 +1,16 @@
-name: Build & Submit Android
+name: Build & Submit
 
 on:
   workflow_dispatch:
     inputs:
+      platform:
+        description: Platform to build & submit
+        type: choice
+        required: true
+        default: ios
+        options:
+          - ios
+          - android
       profile:
         description: EAS build profile
         type: choice
@@ -14,7 +22,7 @@ on:
 
 jobs:
   build-submit:
-    name: Build & Submit Android
+    name: Build & Submit (${{ inputs.platform }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -43,5 +51,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build & Submit Android
-        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --auto-submit
+      - name: Build & Submit
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --auto-submit
