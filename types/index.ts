@@ -98,6 +98,13 @@ export interface QuickEntryPrefs {
    * device that supports speech recognition. Prevents re-prompting.
    */
   voicePromptDismissed: boolean;
+  /**
+   * Account to charge voice entries against when no per-utterance history
+   * hint applies. Falls back to the user's first account if null.
+   */
+  voiceDefaultAccountId: string | null;
+  /** When true, voice entries are saved immediately without a confirmation sheet. */
+  voiceSkipConfirmation: boolean;
 }
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
@@ -106,6 +113,8 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   defaultIncomeCategoryId: null,
   voiceInputEnabled: false,
   voicePromptDismissed: false,
+  voiceDefaultAccountId: null,
+  voiceSkipConfirmation: false,
 };
 
 export interface Account {
