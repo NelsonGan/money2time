@@ -1790,6 +1790,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.voicePromptDismissed !== undefined
             ? updates.voicePromptDismissed
             : previous.voicePromptDismissed,
+        voiceDefaultAccountId:
+          updates.voiceDefaultAccountId !== undefined
+            ? updates.voiceDefaultAccountId
+            : previous.voiceDefaultAccountId,
+        voiceSkipConfirmation:
+          updates.voiceSkipConfirmation !== undefined
+            ? updates.voiceSkipConfirmation
+            : previous.voiceSkipConfirmation,
       };
       settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;
