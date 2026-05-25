@@ -1,5 +1,5 @@
 import { ChevronRight, Pencil, Trash2 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -125,6 +125,7 @@ export interface CalendarScreenProps {
     insightType: 'expense_breakdown' | 'income_breakdown',
     monthKey: string,
   ) => void;
+  onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
 
 function monthOffsetFromAnchor(anchor: Date, target: Date): number {
@@ -141,6 +142,7 @@ export function CalendarScreen({
   onOpenTransaction,
   onOpenTransactionSplitBadge,
   onOpenBreakdownInsight,
+  onSelectionModeChange,
 }: CalendarScreenProps) {
   const {
     transactions,
@@ -367,6 +369,30 @@ export function CalendarScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [filteredTransactions, selectedTransactionIds.length]);
+
+  // Selection is scoped to the day the user is looking at — the day-detail list
+  // only shows one day at a time, so navigating to another day (or swiping to a
+  // new month, which re-picks the day) drops the selection. Without this, the
+  // toolbar would keep a count for transactions that are no longer on screen and
+  // a bulk delete could remove rows the user can't see.
+  useEffect(() => {
+    setSelectedTransactionIds([]);
+  }, [selectedDayKey]);
+
+  // Close the bulk-update sheet if selection mode exits underneath it (e.g. the
+  // last selected transaction was pruned away).
+  useEffect(() => {
+    if (!isSelectionMode) setShowBulkUpdate(false);
+  }, [isSelectionMode]);
+
+  // Report selection mode up so the shell can hide the bottom nav during a
+  // multi-select, matching the transactions screen.
+  useLayoutEffect(() => {
+    onSelectionModeChange?.(isSelectionMode);
+    return () => {
+      onSelectionModeChange?.(false);
+    };
+  }, [isSelectionMode, onSelectionModeChange]);
 
   // When the active month changes, default-pick a day inside it for the
   // lifted selection — today if it falls inside, else the 1st.
