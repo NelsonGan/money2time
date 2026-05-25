@@ -492,6 +492,12 @@ function applyTransactionFilters(
     );
   };
 
+  // Selecting a parent category includes its child sub-categories: a transaction
+  // matches when filed directly under the selected category or under one of its
+  // children (i.e. its category's parent is the selected category).
+  const matchesIncludedCategory = (transaction: TransactionWithRelations, categoryId: string) =>
+    transaction.categoryId === categoryId || transaction.categoryParentId === categoryId;
+
   for (let index = 0; index < transactions.length; index += 1) {
     const transaction = transactions[index];
     const isLegacyBalanceAdjustmentTransfer =
@@ -538,10 +544,10 @@ function applyTransactionFilters(
     }
 
     if (transaction.type === 'income' && hasIncomeCategoryFilter) {
-      if (transaction.categoryId !== filters.incomeCategoryId) continue;
+      if (!matchesIncludedCategory(transaction, filters.incomeCategoryId as string)) continue;
     }
     if (transaction.type === 'expense' && hasExpenseCategoryFilter) {
-      if (transaction.categoryId !== filters.expenseCategoryId) continue;
+      if (!matchesIncludedCategory(transaction, filters.expenseCategoryId as string)) continue;
     }
     if (
       transaction.type === 'income' &&
@@ -562,7 +568,7 @@ function applyTransactionFilters(
       !hasExpenseCategoryFilter &&
       hasCategoryFilter &&
       (transaction.type === 'income' || transaction.type === 'expense') &&
-      transaction.categoryId !== filters.categoryId
+      !matchesIncludedCategory(transaction, filters.categoryId as string)
     ) {
       continue;
     }
@@ -617,6 +623,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         allWages[0] ??
         null;
       const nextSettings = settingsRepository.get();
+      // Apply the persisted locale synchronously before the state batch commits so
+      // the first paint of the real UI already renders in the stored language —
+      // otherwise it briefly shows the device locale and flashes to the correct
+      // one once the post-paint locale effect runs.
+      setAppLocale(nextSettings.locale);
       const nextInsightsPreferencesJson = settingsRepository.getInsightsPreferencesJson();
       const nextNotificationPrefsJson = settingsRepository.getNotificationPreferencesJson();
       const nextNotificationPrefs: NotificationPreferences = nextNotificationPrefsJson
@@ -1852,6 +1863,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
     setQuickEntryPrefs((previous) => {
       const merged: QuickEntryPrefs = {
+        quickEntryEnabled:
+          updates.quickEntryEnabled !== undefined
+            ? updates.quickEntryEnabled
+            : previous.quickEntryEnabled,
         categoryMap: updates.categoryMap !== undefined ? updates.categoryMap : previous.categoryMap,
         defaultExpenseCategoryId:
           updates.defaultExpenseCategoryId !== undefined

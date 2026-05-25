@@ -188,7 +188,13 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         {onOpenAutoBackup ? (
           <Card style={{ marginBottom: 14 }}>
             <CardContent className="py-4">
-              <Pressable onPress={onOpenAutoBackup} style={styles.autoBackupRow}>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenAutoBackup();
+                }}
+                style={styles.autoBackupRow}
+              >
                 <View
                   style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
                 >

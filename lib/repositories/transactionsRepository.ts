@@ -206,6 +206,13 @@ function matchesExcludedCategory(
   );
 }
 
+// Selecting a parent category includes its child sub-categories: a transaction
+// matches when it is filed directly under the selected category or under one of
+// its children (i.e. its category's parent is the selected category).
+function matchesIncludedCategory(transaction: TransactionWithRelations, categoryId: string) {
+  return transaction.categoryId === categoryId || transaction.categoryParentId === categoryId;
+}
+
 class TransactionsRepository {
   list(filters: Partial<TransactionFilters> = {}): TransactionWithRelations[] {
     const db = getDb();
@@ -232,7 +239,6 @@ class TransactionsRepository {
             eq(transactionsTable.toAccountId, normalized.accountId),
           )
         : undefined,
-      normalized.categoryId ? eq(transactionsTable.categoryId, normalized.categoryId) : undefined,
       normalized.minAmount !== null
         ? gte(transactionsTable.amount, normalized.minAmount)
         : undefined,
@@ -259,6 +265,7 @@ class TransactionsRepository {
     const excludedExpenseCategoryIdSet = new Set(normalized.excludedExpenseCategoryIds);
     const hasIncomeCategoryFilter = normalized.incomeCategoryId !== null;
     const hasExpenseCategoryFilter = normalized.expenseCategoryId !== null;
+    const hasCategoryFilter = normalized.categoryId !== null;
     const hasExcludedAccountFilter = excludedAccountIdSet.size > 0;
     const hasExcludedIncomeCategoryFilter = excludedIncomeCategoryIdSet.size > 0;
     const hasExcludedExpenseCategoryFilter = excludedExpenseCategoryIdSet.size > 0;
@@ -294,10 +301,23 @@ class TransactionsRepository {
       }
 
       if (transaction.type === 'income' && hasIncomeCategoryFilter) {
-        if (transaction.categoryId !== normalized.incomeCategoryId) return false;
+        if (!matchesIncludedCategory(transaction, normalized.incomeCategoryId as string)) {
+          return false;
+        }
       }
       if (transaction.type === 'expense' && hasExpenseCategoryFilter) {
-        if (transaction.categoryId !== normalized.expenseCategoryId) return false;
+        if (!matchesIncludedCategory(transaction, normalized.expenseCategoryId as string)) {
+          return false;
+        }
+      }
+      if (
+        !hasIncomeCategoryFilter &&
+        !hasExpenseCategoryFilter &&
+        hasCategoryFilter &&
+        (transaction.type === 'income' || transaction.type === 'expense') &&
+        !matchesIncludedCategory(transaction, normalized.categoryId as string)
+      ) {
+        return false;
       }
       if (
         transaction.type === 'income' &&

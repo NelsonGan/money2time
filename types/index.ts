@@ -90,6 +90,12 @@ export interface UserSettings {
 }
 
 export interface QuickEntryPrefs {
+  /**
+   * Master switch for the quick-entry feature. When false the + button opens
+   * the full transaction form directly (and voice dictation is disabled),
+   * bypassing the quick-add sheet. Enabled by default.
+   */
+  quickEntryEnabled: boolean;
   /** Override which user category to use for each keyword bucket. */
   categoryMap: Partial<Record<string, string>>;
   /** Fallback category id used when no keyword/history match. */
@@ -116,6 +122,7 @@ export interface QuickEntryPrefs {
 }
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
+  quickEntryEnabled: true,
   categoryMap: {},
   defaultExpenseCategoryId: null,
   defaultIncomeCategoryId: null,

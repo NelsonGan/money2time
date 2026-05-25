@@ -223,6 +223,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   };
 
   const handleSignOutGoogle = () => {
+    void triggerHaptic('selection');
     Alert.alert(
       I18n.t('auto_backup.google_drive_sign_out_title'),
       I18n.t('auto_backup.google_drive_sign_out_message'),
@@ -281,6 +282,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   };
 
   const handleRowPress = (record: BackupRecord) => {
+    void triggerHaptic('selection');
     Alert.alert(
       formatRelative(record.createdAt),
       `${targetLabel(record.target)} · ${formatSize(record.sizeBytes)}`,
@@ -523,9 +525,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
               disabled={backingUp || restoring || pickingTarget !== null}
             >
               <View style={styles.buttonInner}>
-                {backingUp ? (
-                  <ActivityIndicator size="small" color={themeColors.primary} />
-                ) : null}
+                {backingUp ? <ActivityIndicator size="small" color={themeColors.primary} /> : null}
                 <Text>
                   {backingUp ? I18n.t('auto_backup.backing_up') : I18n.t('auto_backup.back_up_now')}
                 </Text>
@@ -539,7 +539,13 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
           <Text variant="caption" tone="muted">
             {I18n.t('auto_backup.list_title')}
           </Text>
-          <Pressable onPress={() => void reloadRecords()} disabled={refreshing}>
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              void reloadRecords();
+            }}
+            disabled={refreshing}
+          >
             <RefreshCw size={14} color={themeColors.muted} />
           </Pressable>
         </View>

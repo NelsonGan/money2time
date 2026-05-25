@@ -586,6 +586,8 @@ const zh = {
       title: '快速录入',
       subtitle: '将关键词分组映射到你的分类。',
       row_subtitle: '将关键词映射到分类',
+      enabled_label: '快速录入',
+      enabled_subtitle: '点击 + 打开快捷键盘。关闭后将始终打开完整表单。',
       section_expense: '支出',
       section_income: '收入',
       default_account_section: '默认账户',
