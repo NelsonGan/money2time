@@ -66,10 +66,10 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            echo 'include=[{"platform":"ios","label":"iOS","os":"macos-latest","profile":"production"},{"platform":"android","label":"Android","os":"ubuntu-latest","profile":"production"}]' >> "$GITHUB_OUTPUT"
+            echo 'include=[{"platform":"ios","label":"iOS","os":"macos-15","profile":"production"},{"platform":"android","label":"Android","os":"ubuntu-latest","profile":"production"}]' >> "$GITHUB_OUTPUT"
           else
             if [ "${{ inputs.platform }}" = "ios" ]; then
-              os="macos-latest"
+              os="macos-15"
               label="iOS"
             else
               os="ubuntu-latest"
@@ -99,6 +99,12 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Select Xcode
+        if: matrix.platform == 'ios'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
