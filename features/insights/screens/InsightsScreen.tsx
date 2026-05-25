@@ -107,7 +107,11 @@ const INSIGHT_TYPES = [
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
-type NavigableInsightType = BreakdownInsightType | 'expense_trend' | 'expense_sentiment';
+type NavigableInsightType =
+  | BreakdownInsightType
+  | 'expense_trend'
+  | 'expense_sentiment'
+  | 'asset_history';
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
 type TimeCostViewMode = 'category' | 'transaction';

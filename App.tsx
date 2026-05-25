@@ -101,7 +101,8 @@ type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
   | 'expense_trend'
-  | 'expense_sentiment';
+  | 'expense_sentiment'
+  | 'asset_history';
 type ActivityInsightPeriodPreset = 'week' | 'month' | 'year' | 'custom';
 
 type FontScalingNativeComponent = {
@@ -748,6 +749,9 @@ function MainShellScreen({
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
             onOpenSettings={openAccountSettings}
+            onOpenNetAssetsInsight={() =>
+              openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
+            }
           />
         </MountedTab>
         <MountedTab active={activeTab === 'calendar'} shouldPreload={preloadedTabs.has('calendar')}>
@@ -756,6 +760,7 @@ function MainShellScreen({
             resetToCurrentMonthToken={calendarResetToken}
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
+            onOpenBreakdownInsight={openActivityBreakdownInsight}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>

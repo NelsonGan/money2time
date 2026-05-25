@@ -37,6 +37,9 @@ interface CalendarMonthPageProps {
   onSelectDay: (dayKey: string) => void;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
+  onLongPressTransaction?: (tx: TransactionWithRelations) => void;
+  selectionMode?: boolean;
+  selectedTransactionIds?: string[];
 }
 
 export const CalendarMonthPage = memo(function CalendarMonthPage({
@@ -61,9 +64,17 @@ export const CalendarMonthPage = memo(function CalendarMonthPage({
   onSelectDay,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
+  onLongPressTransaction,
+  selectionMode = false,
+  selectedTransactionIds,
 }: CalendarMonthPageProps) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
+
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds ?? []),
+    [selectedTransactionIds],
+  );
 
   const monthData = useMemo(
     () =>
@@ -219,6 +230,9 @@ export const CalendarMonthPage = memo(function CalendarMonthPage({
                   transaction={tx}
                   onPressTransaction={onOpenTransaction}
                   onPressSplitBadge={onOpenTransactionSplitBadge}
+                  onLongPressTransaction={onLongPressTransaction}
+                  selectionMode={selectionMode}
+                  selected={selectedTransactionIdSet.has(tx.id)}
                   settings={displaySettings}
                   getTrueHourlyRateForDate={getTrueHourlyRateForDate}
                   compact

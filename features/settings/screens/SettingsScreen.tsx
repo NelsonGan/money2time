@@ -45,6 +45,7 @@ import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import { FONT } from '~/utils/fonts';
 
 type SettingsTutorialTargetId =
@@ -305,7 +306,10 @@ export function SettingsScreen({
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
           <Pressable
-            onPress={isPro ? onOpenProManagement : onOpenProPaywall}
+            onPress={() => {
+              void triggerHaptic('selection');
+              (isPro ? onOpenProManagement : onOpenProPaywall)();
+            }}
             className="mt-6 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
             style={!isPro ? styles.proButtonHighlight : undefined}
           >
