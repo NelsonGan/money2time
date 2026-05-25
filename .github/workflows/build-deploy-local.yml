@@ -1,8 +1,16 @@
-name: Build Local (Android)
+name: Build & Deploy (Local Runner)
 
 on:
   workflow_dispatch:
     inputs:
+      platform:
+        description: Platform to build & deploy
+        type: choice
+        required: true
+        default: ios
+        options:
+          - ios
+          - android
       profile:
         description: EAS build profile
         type: choice
@@ -13,10 +21,10 @@ on:
           - development
 
 jobs:
-  build:
-    name: Build Android Locally (${{ inputs.profile }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+  build-deploy:
+    name: Build & Deploy ${{ inputs.platform }} (${{ inputs.profile }})
+    runs-on: ${{ inputs.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
+    timeout-minutes: 90
     permissions:
       contents: read
     steps:
@@ -36,6 +44,7 @@ jobs:
           cache: npm
 
       - name: Setup Java
+        if: inputs.platform == 'android'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -54,7 +63,16 @@ jobs:
           key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-eas-build-local-
 
+      - name: Cache CocoaPods
+        if: inputs.platform == 'ios'
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
       - name: Cache Gradle
+        if: inputs.platform == 'android'
         uses: actions/cache@v4
         with:
           path: |
@@ -66,23 +84,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Determine output extension
-        id: ext
+      - name: Resolve output path
+        id: out
+        shell: bash
         run: |
-          if [ "${{ inputs.profile }}" = "production" ]; then
-            echo "ext=aab" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.platform }}" = "ios" ]; then
+            ext=ipa
+          elif [ "${{ inputs.profile }}" = "production" ]; then
+            ext=aab
           else
-            echo "ext=apk" >> "$GITHUB_OUTPUT"
+            ext=apk
           fi
+          echo "file=./build/money2time-${{ inputs.platform }}-${{ inputs.profile }}.$ext" >> "$GITHUB_OUTPUT"
 
-      - name: Build Android (local)
+      - name: Build (local)
         run: |
           mkdir -p build
-          eas build --platform android --profile ${{ inputs.profile }} --local --non-interactive --output=./build/money2time-android-${{ inputs.profile }}.${{ steps.ext.outputs.ext }}
+          eas build \
+            --platform ${{ inputs.platform }} \
+            --profile ${{ inputs.profile }} \
+            --local \
+            --non-interactive \
+            --output=${{ steps.out.outputs.file }}
 
-      - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: money2time-android-${{ inputs.profile }}-${{ github.run_number }}
-          path: ./build/money2time-android-${{ inputs.profile }}.${{ steps.ext.outputs.ext }}
-          retention-days: 14
+      - name: Submit to store
+        run: |
+          eas submit \
+            --platform ${{ inputs.platform }} \
+            --profile ${{ inputs.profile }} \
+            --path ${{ steps.out.outputs.file }} \
+            --non-interactive

@@ -1,10 +1,10 @@
-name: Build & Submit
+name: Build & Deploy (Expo Cloud)
 
 on:
   workflow_dispatch:
     inputs:
       platform:
-        description: Platform to build & submit
+        description: Platform to build & deploy
         type: choice
         required: true
         default: ios
@@ -21,8 +21,8 @@ on:
           - development
 
 jobs:
-  build-submit:
-    name: Build & Submit (${{ inputs.platform }})
+  build-deploy:
+    name: Build & Deploy ${{ inputs.platform }} (${{ inputs.profile }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,5 +51,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build & Submit
-        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --auto-submit
+      - name: Build & Submit (cloud)
+        run: |
+          eas build \
+            --platform ${{ inputs.platform }} \
+            --profile ${{ inputs.profile }} \
+            --non-interactive \
+            --auto-submit
