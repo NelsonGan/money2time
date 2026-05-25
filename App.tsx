@@ -306,7 +306,11 @@ function MainShellScreen({
   }, []);
   // The whole voice-input surface (settings row, long-press, capture overlay)
   // is gated on this single flag so unsupported devices show no trace of it.
-  const voiceEnabled = Platform.OS === 'ios' && voiceSupported && quickEntryPrefs.voiceInputEnabled;
+  const voiceEnabled =
+    Platform.OS === 'ios' &&
+    voiceSupported &&
+    quickEntryPrefs.voiceInputEnabled &&
+    quickEntryPrefs.quickEntryEnabled;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on
@@ -845,7 +849,23 @@ function MainShellScreen({
 }
 
 function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'AddTransaction'>) {
-  const { isSimpleMode, simpleWalletId } = useApp();
+  const { isSimpleMode, simpleWalletId, quickEntryPrefs } = useApp();
+  // When quick entry is turned off, every + button routes straight to the full
+  // transaction form instead of the quick-add sheet.
+  if (!quickEntryPrefs.quickEntryEnabled) {
+    return (
+      <AddTransactionScreen
+        onClose={() => navigation.goBack()}
+        onSubmitReady={(input) => {
+          requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+        }}
+        isSimpleMode={isSimpleMode}
+        simpleWalletId={simpleWalletId}
+        initialAccountId={route.params?.initialAccountId}
+        initialValues={route.params?.initialValues}
+      />
+    );
+  }
   return (
     <QuickAddScreen
       onClose={() => navigation.goBack()}
