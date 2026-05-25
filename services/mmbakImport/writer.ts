@@ -180,10 +180,7 @@ function recurrencePatternFromRepeatType(
   }
 }
 
-export function writeImportedData(
-  data: MMBackupData,
-  currencySymbol: string,
-): MMImportSummary {
+export function writeImportedData(data: MMBackupData, currencySymbol: string): MMImportSummary {
   const { assetRows, assetGroupRows, categoryRows, txRows, recurringRows } = data;
 
   const summary: MMImportSummary = {
@@ -323,9 +320,7 @@ export function writeImportedData(
     }
 
     const createdId = accountsRepository.create({
-      name: fallbackSourceKey
-        ? `${fallbackName} (${fallbackSourceKey.slice(0, 4)})`
-        : fallbackName,
+      name: fallbackSourceKey ? `${fallbackName} (${fallbackSourceKey.slice(0, 4)})` : fallbackName,
       type: inferAccountType(fallbackName, null, null, null),
       accountGroup: null,
       currency: currencySymbol,
@@ -588,9 +583,7 @@ export function writeImportedData(
             )
           : null) ??
         (parsedPath.leafName
-          ? activeCategoryIdByLeafAndType.get(
-              buildCategoryLeafKey(typed.type, parsedPath.leafName),
-            )
+          ? activeCategoryIdByLeafAndType.get(buildCategoryLeafKey(typed.type, parsedPath.leafName))
           : null) ??
         null;
     }

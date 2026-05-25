@@ -66,9 +66,27 @@ const CLAUDE_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 const GEMINI_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81" fill="currentColor"/></svg>`;
 
 const AI_LINKS = [
-  { svg: CLAUDE_SVG, appUrl: 'claude://', webUrl: 'https://claude.ai', label: 'Claude', color: '#D97757' },
-  { svg: CHATGPT_SVG, appUrl: 'chatgpt://', webUrl: 'https://chat.openai.com', label: 'GPT', color: null },
-  { svg: GEMINI_SVG, appUrl: null, webUrl: 'https://gemini.google.com', label: 'Gemini', color: '#4285F4' },
+  {
+    svg: CLAUDE_SVG,
+    appUrl: 'claude://',
+    webUrl: 'https://claude.ai',
+    label: 'Claude',
+    color: '#D97757',
+  },
+  {
+    svg: CHATGPT_SVG,
+    appUrl: 'chatgpt://',
+    webUrl: 'https://chat.openai.com',
+    label: 'GPT',
+    color: null,
+  },
+  {
+    svg: GEMINI_SVG,
+    appUrl: null,
+    webUrl: 'https://gemini.google.com',
+    label: 'Gemini',
+    color: '#4285F4',
+  },
 ] as const;
 
 function formatCategoryTree(categories: Category[], type: 'expense' | 'income'): string {
@@ -337,7 +355,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       }
 
       const resolvedCategoryId = tx.category
-        ? categoryNameToId.get(tx.category.toLowerCase()) ?? null
+        ? (categoryNameToId.get(tx.category.toLowerCase()) ?? null)
         : null;
 
       const input: CreateTransactionInput = {
@@ -368,7 +386,21 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setImportIncome(true);
     setExcludedIndices(new Set());
     setAccountMapping({});
-  }, [parsed, selectedAccountId, isSimpleMode, isMultiAccount, uniqueAccounts, accountMapping, simpleWalletId, categoryNameToId, settings.currencyCode, createTransaction, excludedIndices, importExpenses, importIncome]);
+  }, [
+    parsed,
+    selectedAccountId,
+    isSimpleMode,
+    isMultiAccount,
+    uniqueAccounts,
+    accountMapping,
+    simpleWalletId,
+    categoryNameToId,
+    settings.currencyCode,
+    createTransaction,
+    excludedIndices,
+    importExpenses,
+    importIncome,
+  ]);
 
   const expenseIndices = useMemo(() => {
     if (!parsed) return [];
@@ -424,7 +456,11 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     <SettingsPageLayout>
       <SettingsHeader onBack={onBack} title={I18n.t('statement_import.title')} />
 
-      <ScrollView ref={scrollViewRef} className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        contentContainerStyle={styles.scrollContent}
+      >
         <View className="items-center pt-1 pb-4">
           <Mascot size={88} name={isImporting ? 'working' : 'announce'} animate />
         </View>
@@ -478,7 +514,12 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                     onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
                     className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
                   >
-                    <SvgXml xml={link.svg} width={22} height={22} color={link.color ?? themeColors.text} />
+                    <SvgXml
+                      xml={link.svg}
+                      width={22}
+                      height={22}
+                      color={link.color ?? themeColors.text}
+                    />
                   </Pressable>
                 ))}
               </View>
@@ -562,9 +603,16 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                       </Text>
                       {parsed.statement?.period?.start && parsed.statement?.period?.end ? (
                         <Text variant="caption" tone="muted" className="mt-1">
-                          {new Date(parsed.statement.period.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          {new Date(parsed.statement.period.start).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                           {' — '}
-                          {new Date(parsed.statement.period.end).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {new Date(parsed.statement.period.end).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
                         </Text>
                       ) : null}
                     </View>
@@ -700,7 +748,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
               </Card>
 
               {/* Import button */}
-              <Button onPress={() => void handleImport()} disabled={isImporting || totalImportCount === 0}>
+              <Button
+                onPress={() => void handleImport()}
+                disabled={isImporting || totalImportCount === 0}
+              >
                 <Text>
                   {isImporting
                     ? I18n.t('statement_import.importing')
@@ -713,7 +764,6 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
           )}
         </View>
       </ScrollView>
-
     </SettingsPageLayout>
   );
 }
@@ -741,9 +791,7 @@ export function StatementImportListScreen({
   const isExpense = section === 'expense';
   const accentColor = isExpense ? themeColors.error : themeColors.success;
   const selectedCount = indices.filter((i) => !excludedSet.has(i)).length;
-  const title = isExpense
-    ? I18n.t('statement_import.expenses')
-    : I18n.t('statement_import.income');
+  const title = isExpense ? I18n.t('statement_import.expenses') : I18n.t('statement_import.income');
 
   const handleToggle = useCallback(
     (idx: number) => {

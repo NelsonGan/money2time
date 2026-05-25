@@ -2,7 +2,7 @@ export { AccountPickerSheet } from './AccountPickerSheet';
 export { Button } from './button';
 export { Card, CardContent } from './card';
 export { CategoryEmoji } from './CategoryEmoji';
-export { type CategoryPickerOption,CategoryPickerSheet } from './CategoryPickerSheet';
+export { type CategoryPickerOption, CategoryPickerSheet } from './CategoryPickerSheet';
 export { Input } from './input';
 export { SelectField } from './select';
 export {

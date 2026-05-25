@@ -14,7 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { CategoryPickerSheet, Input, SelectField, Text, ThemeModal, TimeValueInline } from '~/components/ui';
+import {
+  CategoryPickerSheet,
+  Input,
+  SelectField,
+  Text,
+  ThemeModal,
+  TimeValueInline,
+} from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
@@ -844,7 +851,12 @@ export function SimpleActivityScreen({
                   onPress={() => setActiveFilterPicker('incomeCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={transactionFilters.excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={
+                      transactionFilters.excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'
+                    }
+                  >
                     {transactionFilters.excludedIncomeCategoryIds.length > 0
                       ? `${transactionFilters.excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -863,7 +875,12 @@ export function SimpleActivityScreen({
                   onPress={() => setActiveFilterPicker('expenseCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={transactionFilters.excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={
+                      transactionFilters.excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'
+                    }
+                  >
                     {transactionFilters.excludedExpenseCategoryIds.length > 0
                       ? `${transactionFilters.excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}

@@ -14,6 +14,7 @@ import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHap
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
+import { AutoBackupScreen } from './AutoBackupScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
@@ -297,7 +298,18 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="DataManagement">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <DataManagementScreen onBack={() => props.navigation.goBack()} />;
+          return (
+            <DataManagementScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenAutoBackup={() => props.navigation.navigate('AutoBackupSettings')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AutoBackupSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="StatementImport">

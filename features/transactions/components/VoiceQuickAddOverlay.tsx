@@ -390,12 +390,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         err instanceof Error ? err.message : I18n.t('settings.quick_entry.voice.error_message'),
       );
     }
-  }, [
-    isPro,
-    quickEntryPrefs.voiceUsageCount,
-    settings.locale,
-    updateQuickEntryPrefs,
-  ]);
+  }, [isPro, quickEntryPrefs.voiceUsageCount, settings.locale, updateQuickEntryPrefs]);
 
   const stop = useCallback(() => {
     // Bump the session gen even when not yet recording — this cancels an

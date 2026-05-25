@@ -43,9 +43,7 @@ describe('createNativeStackSwipeHapticListeners', () => {
   });
 
   it('skips when the route is not the top of the stack', () => {
-    const listeners = createNativeStackSwipeHapticListeners()(
-      makeContext('a', 'Main', 'b'),
-    );
+    const listeners = createNativeStackSwipeHapticListeners()(makeContext('a', 'Main', 'b'));
     expect(() => listeners.transitionStart(makeEvent(true))).not.toThrow();
   });
 

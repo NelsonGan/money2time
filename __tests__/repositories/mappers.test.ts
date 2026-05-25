@@ -36,13 +36,37 @@ describe('toAccount', () => {
   it.each(['cash', 'bank', 'wallet', 'savings', 'other', 'invalid'])(
     'maps legacy/unknown type %s → debit',
     (legacy) => {
-      const row: any = { id: 'x', name: 'x', type: legacy, currency: 'USD', startingBalance: 0, includeInTotals: true, accountGroup: null, creditStatementDay: null, creditDueDay: null, sortOrder: null, ...STAMPS };
+      const row: any = {
+        id: 'x',
+        name: 'x',
+        type: legacy,
+        currency: 'USD',
+        startingBalance: 0,
+        includeInTotals: true,
+        accountGroup: null,
+        creditStatementDay: null,
+        creditDueDay: null,
+        sortOrder: null,
+        ...STAMPS,
+      };
       expect(toAccount(row).type).toBe('debit');
     },
   );
 
   it('defaults sortOrder to 0 when null', () => {
-    const row: any = { id: 'a', name: 'a', type: 'debit', sortOrder: null, accountGroup: null, creditStatementDay: null, creditDueDay: null, currency: 'USD', startingBalance: 0, includeInTotals: true, ...STAMPS };
+    const row: any = {
+      id: 'a',
+      name: 'a',
+      type: 'debit',
+      sortOrder: null,
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 0,
+      includeInTotals: true,
+      ...STAMPS,
+    };
     expect(toAccount(row).sortOrder).toBe(0);
   });
 });
@@ -66,12 +90,30 @@ describe('toAccountGroup', () => {
 
 describe('toCategory', () => {
   it('maps income type correctly', () => {
-    const row: any = { id: 'c1', name: 'Salary', sortOrder: 1, type: 'income', parentId: null, icon: '💼', isDefault: false, ...STAMPS };
+    const row: any = {
+      id: 'c1',
+      name: 'Salary',
+      sortOrder: 1,
+      type: 'income',
+      parentId: null,
+      icon: '💼',
+      isDefault: false,
+      ...STAMPS,
+    };
     expect(toCategory(row).type).toBe('income');
   });
 
   it('defaults unknown type to expense', () => {
-    const row: any = { id: 'c1', name: 'Misc', sortOrder: 0, type: 'unknown', parentId: null, icon: '🧾', isDefault: false, ...STAMPS };
+    const row: any = {
+      id: 'c1',
+      name: 'Misc',
+      sortOrder: 0,
+      type: 'unknown',
+      parentId: null,
+      icon: '🧾',
+      isDefault: false,
+      ...STAMPS,
+    };
     expect(toCategory(row).type).toBe('expense');
   });
 });

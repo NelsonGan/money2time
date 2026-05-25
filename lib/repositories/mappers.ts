@@ -11,6 +11,7 @@ import type {
 import type {
   Account,
   AccountGroup,
+  BackupTarget,
   Category,
   MonthlyWageSettings,
   RecurringTransactionRule,
@@ -109,6 +110,17 @@ function asThemeColor(value: string | null | undefined): ThemeColor {
 
 function asUserMode(value: string | null | undefined): UserMode {
   return value === 'simple' ? 'simple' : 'power';
+}
+
+function asBackupTarget(value: string | null | undefined): BackupTarget {
+  switch (value) {
+    case 'icloud':
+    case 'googleDrive':
+    case 'local':
+      return value;
+    default:
+      return 'local';
+  }
 }
 
 function asWageType(value: string): MonthlyWageSettings['wageType'] {
@@ -249,6 +261,10 @@ export function toSettings(row: SettingsRow): UserSettings {
     themeColor: asThemeColor(row.themeColor),
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
+    autoBackupEnabled: row.autoBackupEnabled ?? true,
+    autoBackupTarget: asBackupTarget(row.autoBackupTarget),
+    lastAutoBackupAt: row.lastAutoBackupAt,
+    lastAutoBackupError: row.lastAutoBackupError,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

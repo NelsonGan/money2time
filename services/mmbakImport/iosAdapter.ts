@@ -39,8 +39,7 @@ interface IosTxSourceRow extends Omit<MMTxRow, 'dateIso'> {
   dateRaw: number | null;
 }
 
-interface IosRecurringSourceRow
-  extends Omit<MMRecurringRow, 'nextDateIso' | 'endDateIso'> {
+interface IosRecurringSourceRow extends Omit<MMRecurringRow, 'nextDateIso' | 'endDateIso'> {
   nextDate: number | null;
   endDate: number | null;
 }

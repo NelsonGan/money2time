@@ -267,9 +267,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                             ) : null}
                           </Pressable>
                           {showChildren ? (
-                            <View
-                              className={cn('h-2', isExpanded && 'bg-primary/[0.06]')}
-                            />
+                            <View className={cn('h-2', isExpanded && 'bg-primary/[0.06]')} />
                           ) : null}
                         </View>
                       );
@@ -300,9 +298,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                         : 'bg-card border-border/30',
                                     )}
                                   >
-                                    {showChildIcon ? (
-                                      <CategoryEmoji icon={child.icon} />
-                                    ) : null}
+                                    {showChildIcon ? <CategoryEmoji icon={child.icon} /> : null}
                                     <Text
                                       variant="body"
                                       numberOfLines={1}

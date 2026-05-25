@@ -1,17 +1,29 @@
+import { ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
+import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { TimeValueInline } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
 import {
-  DisplayModeToggle,
-  MonthJumpPopover,
-} from '~/features/transactions/components';
+  AccountPickerSheet,
+  CategoryPickerSheet,
+  Text,
+  ThemeModal,
+  TimeValueInline,
+} from '~/components/ui';
+import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
+import { DisplayModeToggle, MonthJumpPopover } from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -22,7 +34,8 @@ import { useMonthPager } from '~/hooks/useMonthPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionWithRelations } from '~/types';
+import type { Category, CategoryType, TransactionWithRelations } from '~/types';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addMonthsAtMonthStart,
   dayKeyFromDateLocal,
@@ -39,6 +52,63 @@ import { buildCalendarMonth, getCalendarWeekdayLabels } from '../lib/calendarBui
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 
+const FILTER_MODAL_CONTENT_STYLE = {
+  padding: spacing.screenHorizontal,
+  paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
+  gap: spacing.sm,
+} as const;
+
+function toggleStringId(previous: string[], targetId: string): string[] {
+  return previous.includes(targetId)
+    ? previous.filter((id) => id !== targetId)
+    : [...previous, targetId];
+}
+
+interface CategoryPickerData {
+  parents: { id: string; name: string; icon: string }[];
+  childByParent: Map<string, { id: string; name: string; icon: string }[]>;
+}
+
+function buildCategoryPickerData(
+  categories: Category[],
+  categoryType: CategoryType,
+): CategoryPickerData {
+  const parentCategories = categories.filter(
+    (category) => category.type === categoryType && category.parentId === null,
+  );
+  const parentIds = new Set(parentCategories.map((parent) => parent.id));
+  const parentIconById = new Map<string, string>();
+  parentCategories.forEach((category) => {
+    parentIconById.set(category.id, category.icon);
+  });
+  const parents = parentCategories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    icon: resolveCategoryIcon(category.icon),
+  }));
+  const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
+
+  categories.forEach((category) => {
+    const parentId = category.parentId;
+    if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
+    const child = {
+      id: category.id,
+      name: category.name,
+      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
+    };
+    const existing = childByParent.get(parentId);
+    if (existing) {
+      existing.push(child);
+    } else {
+      childByParent.set(parentId, [child]);
+    }
+  });
+
+  return { parents, childByParent };
+}
+
+type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
+
 export interface CalendarScreenProps {
   scrollToTopToken?: number;
   resetToCurrentMonthToken?: number;
@@ -49,7 +119,9 @@ export interface CalendarScreenProps {
 function monthOffsetFromAnchor(anchor: Date, target: Date): number {
   // year*12 + month delta — independent of variable month length so the
   // round-trip from index → month → index is exact.
-  return (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth());
+  return (
+    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
+  );
 }
 
 export function CalendarScreen({
@@ -63,6 +135,9 @@ export function CalendarScreen({
     settings,
     isSimpleMode,
     simpleWalletId,
+    accounts,
+    accountGroups,
+    categories,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
@@ -83,6 +158,17 @@ export function CalendarScreen({
     width: number;
     height: number;
   } | null>(null);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilterPicker, setActiveFilterPicker] = useState<FilterPickerKind | null>(null);
+  const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
+  const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
+  const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
+
+  const closeFilterPicker = useCallback(() => setActiveFilterPicker(null), []);
+  useEffect(() => {
+    if (!showFilters) setActiveFilterPicker(null);
+  }, [showFilters]);
 
   const monthPickerTriggerRef = useRef<View>(null);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
@@ -118,6 +204,77 @@ export function CalendarScreen({
     [transactions, isSimpleMode, simpleWalletId],
   );
 
+  const excludedAccountIdSet = useMemo(() => new Set(excludedAccountIds), [excludedAccountIds]);
+  const excludedIncomeCategoryIdSet = useMemo(
+    () => new Set(excludedIncomeCategoryIds),
+    [excludedIncomeCategoryIds],
+  );
+  const excludedExpenseCategoryIdSet = useMemo(
+    () => new Set(excludedExpenseCategoryIds),
+    [excludedExpenseCategoryIds],
+  );
+
+  const filteredTransactions = useMemo(() => {
+    return scopedTransactions.filter((tx) => {
+      if (tx.accountId && excludedAccountIdSet.has(tx.accountId)) return false;
+      if (tx.type === 'income' && tx.categoryId && excludedIncomeCategoryIdSet.has(tx.categoryId)) {
+        return false;
+      }
+      if (
+        tx.type === 'expense' &&
+        tx.categoryId &&
+        excludedExpenseCategoryIdSet.has(tx.categoryId)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [
+    scopedTransactions,
+    excludedAccountIdSet,
+    excludedIncomeCategoryIdSet,
+    excludedExpenseCategoryIdSet,
+  ]);
+
+  const incomeCategoryPickerData = useMemo(
+    () => buildCategoryPickerData(categories, 'income'),
+    [categories],
+  );
+  const expenseCategoryPickerData = useMemo(
+    () => buildCategoryPickerData(categories, 'expense'),
+    [categories],
+  );
+
+  const activeFilterCount =
+    excludedAccountIds.length +
+    excludedIncomeCategoryIds.length +
+    excludedExpenseCategoryIds.length;
+
+  const handleResetFilters = useCallback(() => {
+    void triggerHaptic('selection');
+    setExcludedAccountIds([]);
+    setExcludedIncomeCategoryIds([]);
+    setExcludedExpenseCategoryIds([]);
+  }, []);
+
+  const handleOpenFilters = useCallback(() => {
+    setIsMonthPickerOpen(false);
+    setShowFilters(true);
+  }, []);
+
+  const handleCloseFilters = useCallback(() => {
+    if (activeFilterPicker) {
+      setActiveFilterPicker(null);
+      return;
+    }
+    setShowFilters(false);
+  }, [activeFilterPicker]);
+
+  const handleDoneFilters = useCallback(() => {
+    void triggerHaptic('selection');
+    setShowFilters(false);
+  }, []);
+
   const todayDayKey = dayKeyFromDateLocal(new Date());
 
   // Build month data for the *active* month so the header summary always
@@ -129,7 +286,7 @@ export function CalendarScreen({
     () =>
       buildCalendarMonth({
         monthAnchor: activeMonthDate,
-        transactions: scopedTransactions,
+        transactions: filteredTransactions,
         locale: activeLocale,
         isTimeMode,
         getDisplayValueForTransaction,
@@ -137,7 +294,7 @@ export function CalendarScreen({
       }),
     [
       activeMonthDate,
-      scopedTransactions,
+      filteredTransactions,
       activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
@@ -156,11 +313,7 @@ export function CalendarScreen({
   // lifted selection — today if it falls inside, else the 1st.
   useEffect(() => {
     setSelectedDayKey((prev) => {
-      if (
-        prev &&
-        prev >= activeMonthData.firstDayKey &&
-        prev <= activeMonthData.lastDayKey
-      ) {
+      if (prev && prev >= activeMonthData.firstDayKey && prev <= activeMonthData.lastDayKey) {
         return prev;
       }
       const inMonth =
@@ -261,7 +414,7 @@ export function CalendarScreen({
         <CalendarMonthPage
           pageWidth={pageWidth}
           monthAnchor={pageMonth}
-          transactions={scopedTransactions}
+          transactions={filteredTransactions}
           locale={activeLocale}
           isTimeMode={isTimeMode}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
@@ -296,7 +449,7 @@ export function CalendarScreen({
       onOpenTransaction,
       onOpenTransactionSplitBadge,
       pageWidth,
-      scopedTransactions,
+      filteredTransactions,
       scrollToTopToken,
       selectedDayKey,
       settings,
@@ -317,7 +470,12 @@ export function CalendarScreen({
         onMonthPress={handleOpenMonthPicker}
         monthTriggerRef={monthPickerTriggerRef}
         onMonthTriggerLayout={handleMonthTriggerLayout}
-        actions={<DisplayModeToggle />}
+        actions={
+          <>
+            <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+            <DisplayModeToggle />
+          </>
+        }
       >
         <InOutHeader
           incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
@@ -351,6 +509,143 @@ export function CalendarScreen({
         onSelectMonth={handleJumpToMonth}
         onClose={handleCloseMonthPicker}
       />
+
+      <ThemeModal
+        visible={showFilters}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseFilters}
+      >
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+          <View style={styles.modalHeaderRow}>
+            <View>
+              <Text variant="subheading">{I18n.t('insights.filters.title')}</Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={handleResetFilters}
+                className="rounded-full bg-secondary/70"
+                style={styles.modalActionButton}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.reset')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.reset')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleDoneFilters}
+                className="rounded-full bg-secondary"
+                style={styles.modalActionButton}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.done')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.done')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('insights.filters.exclude_accounts')}
+              </Text>
+              <Pressable
+                onPress={() => setActiveFilterPicker('accounts')}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+              >
+                <Text variant="body" tone={excludedAccountIds.length > 0 ? undefined : 'muted'}>
+                  {excludedAccountIds.length > 0
+                    ? `${excludedAccountIds.length} ${I18n.t('insights.filters.excluded')}`
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('insights.filters.exclude_income_categories')}
+              </Text>
+              <Pressable
+                onPress={() => setActiveFilterPicker('incomeCategories')}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+              >
+                <Text
+                  variant="body"
+                  tone={excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}
+                >
+                  {excludedIncomeCategoryIds.length > 0
+                    ? `${excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('insights.filters.exclude_expense_categories')}
+              </Text>
+              <Pressable
+                onPress={() => setActiveFilterPicker('expenseCategories')}
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+              >
+                <Text
+                  variant="body"
+                  tone={excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}
+                >
+                  {excludedExpenseCategoryIds.length > 0
+                    ? `${excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
+                    : I18n.t('common.none')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+          </ScrollView>
+
+          <AccountPickerSheet
+            overlay
+            visible={activeFilterPicker === 'accounts'}
+            onClose={closeFilterPicker}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedIds={excludedAccountIds}
+            onToggleSelect={(accountId) =>
+              setExcludedAccountIds((previous) => toggleStringId(previous, accountId))
+            }
+            onClear={() => setExcludedAccountIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeFilterPicker === 'incomeCategories'}
+            onClose={closeFilterPicker}
+            parents={incomeCategoryPickerData.parents}
+            childByParent={incomeCategoryPickerData.childByParent}
+            selectedCategoryIds={excludedIncomeCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
+            }
+            onClear={() => setExcludedIncomeCategoryIds([])}
+          />
+          <CategoryPickerSheet
+            overlay
+            allowParentSelection
+            visible={activeFilterPicker === 'expenseCategories'}
+            onClose={closeFilterPicker}
+            parents={expenseCategoryPickerData.parents}
+            childByParent={expenseCategoryPickerData.childByParent}
+            selectedCategoryIds={excludedExpenseCategoryIds}
+            onToggleSelect={(categoryId) =>
+              setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
+            }
+            onClear={() => setExcludedExpenseCategoryIds([])}
+          />
+        </SafeAreaView>
+      </ThemeModal>
     </SafeAreaView>
   );
 }
@@ -358,5 +653,17 @@ export function CalendarScreen({
 const styles = StyleSheet.create({
   flexOne: {
     flex: 1,
+  },
+  modalHeaderRow: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.xl + spacing.xs,
+    paddingBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  modalActionButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
 });
