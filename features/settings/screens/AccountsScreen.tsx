@@ -159,12 +159,14 @@ function AccountsSummaryBlock({
   net,
   themeColors,
   renderValue,
+  onPressNetAssets,
 }: {
   assets: number;
   debt: number;
   net: number;
   themeColors: AccountsSummaryThemeColors;
   renderValue: AccountsSummaryRenderValue;
+  onPressNetAssets?: () => void;
 }) {
   const netIsNegative = net < 0;
   // Positive/zero net uses the neutral foreground tone instead of the user's
@@ -185,12 +187,26 @@ function AccountsSummaryBlock({
       />
 
       {/* Hero: Net Assets */}
-      <View className="px-4 pt-3.5 pb-3">
+      <Pressable
+        onPress={
+          onPressNetAssets
+            ? () => {
+                void triggerHaptic('selection');
+                onPressNetAssets();
+              }
+            : undefined
+        }
+        disabled={!onPressNetAssets}
+        className="px-4 pt-3.5 pb-3 active:opacity-85"
+        accessibilityRole={onPressNetAssets ? 'button' : undefined}
+        accessibilityLabel={I18n.t('accounts.net_assets')}
+      >
         <View className="flex-row items-center gap-1.5">
           <Wallet size={12} color={netAccent} strokeWidth={2.4} />
           <Text variant="label" className={cn('text-[10px]', netLabelClass)}>
             {I18n.t('accounts.net_assets')}
           </Text>
+          {onPressNetAssets ? <ChevronRight size={12} color={netAccent} strokeWidth={2.4} /> : null}
         </View>
         <View className="mt-1.5">
           {renderValue(net, {
@@ -199,7 +215,7 @@ function AccountsSummaryBlock({
             iconColor: netAccent,
           })}
         </View>
-      </View>
+      </Pressable>
 
       {/* Divider */}
       <View className="h-px bg-border/40" />
@@ -1121,6 +1137,7 @@ interface AccountsScreenProps {
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
+  onOpenNetAssetsInsight?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
 }
@@ -1136,6 +1153,7 @@ export function AccountsScreen({
   onOpenTransaction,
   onOpenTransactionSplitBadge,
   onOpenSettings,
+  onOpenNetAssetsInsight,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
@@ -2497,6 +2515,7 @@ export function AccountsScreen({
               net={total}
               themeColors={themeColors}
               renderValue={renderVisibleBalanceNode}
+              onPressNetAssets={onOpenNetAssetsInsight}
             />
           </MonthControlsHeader>
           <AccountCardStack

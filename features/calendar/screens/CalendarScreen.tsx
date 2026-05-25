@@ -1,6 +1,7 @@
-import { ChevronRight } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronRight, Pencil, Trash2 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
   ScrollView,
@@ -17,6 +18,7 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import {
   AccountPickerSheet,
   CategoryPickerSheet,
+  Input,
   Text,
   ThemeModal,
   TimeValueInline,
@@ -24,6 +26,7 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle, MonthJumpPopover } from '~/features/transactions/components';
+import { DatePanel } from '~/features/transactions/components/editor';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -35,13 +38,16 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType, TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addMonthsAtMonthStart,
   dayKeyFromDateLocal,
   formatAmount,
+  formatDateInput,
   formatHours,
   formatMonthYearLabel,
+  monthKeyFromDateLocal,
   startOfMonthDate,
 } from '~/utils/formatters';
 import { filterTransactionsByWallet } from '~/utils/transactions';
@@ -51,6 +57,7 @@ import { buildCalendarMonth, getCalendarWeekdayLabels } from '../lib/calendarBui
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
+const BULK_DATE_PANEL_HEIGHT = 360;
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -114,6 +121,11 @@ export interface CalendarScreenProps {
   resetToCurrentMonthToken?: number;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
+  onOpenBreakdownInsight?: (
+    insightType: 'expense_breakdown' | 'income_breakdown',
+    monthKey: string,
+  ) => void;
+  onSelectionModeChange?: (isSelectionMode: boolean) => void;
 }
 
 function monthOffsetFromAnchor(anchor: Date, target: Date): number {
@@ -129,6 +141,8 @@ export function CalendarScreen({
   resetToCurrentMonthToken = 0,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
+  onOpenBreakdownInsight,
+  onSelectionModeChange,
 }: CalendarScreenProps) {
   const {
     transactions,
@@ -140,6 +154,8 @@ export function CalendarScreen({
     categories,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
+    updateTransactionsBulk,
+    deleteTransactionsBulk,
   } = useApp();
   const themeColors = useThemeColors();
   const { contentWidth } = useDeviceLayout();
@@ -164,6 +180,16 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
+
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
+  const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkNote, setBulkNote] = useState('');
+  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
+  const isSelectionMode = selectedTransactionIds.length > 0;
+  const selectedTransactionCount = selectedTransactionIds.length;
+  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
 
   const closeFilterPicker = useCallback(() => setActiveFilterPicker(null), []);
   useEffect(() => {
@@ -316,6 +342,57 @@ export function CalendarScreen({
     () => formatMonthYearLabel(activeMonthDate, activeLocale),
     [activeMonthDate, activeLocale],
   );
+  const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
+
+  const selectedTransactionTotalLabel = useMemo(() => {
+    if (selectedTransactionIds.length === 0) return '';
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let total = 0;
+    filteredTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      total += transaction.amount;
+    });
+    return formatAmount(
+      Math.abs(total),
+      { currencySymbol: settings.currencySymbol, displayMode: 'money' },
+      { showSign: false, trueHourlyRate: 0 },
+    );
+  }, [filteredTransactions, selectedTransactionIds, settings.currencySymbol]);
+
+  // Drop any selected ids that are no longer present (e.g. after a delete or a
+  // filter change) so the toolbar count and bulk actions stay accurate.
+  useEffect(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const availableIds = new Set(filteredTransactions.map((transaction) => transaction.id));
+    setSelectedTransactionIds((previous) => {
+      const next = previous.filter((id) => availableIds.has(id));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [filteredTransactions, selectedTransactionIds.length]);
+
+  // Selection is scoped to the day the user is looking at — the day-detail list
+  // only shows one day at a time, so navigating to another day (or swiping to a
+  // new month, which re-picks the day) drops the selection. Without this, the
+  // toolbar would keep a count for transactions that are no longer on screen and
+  // a bulk delete could remove rows the user can't see.
+  useEffect(() => {
+    setSelectedTransactionIds([]);
+  }, [selectedDayKey]);
+
+  // Close the bulk-update sheet if selection mode exits underneath it (e.g. the
+  // last selected transaction was pruned away).
+  useEffect(() => {
+    if (!isSelectionMode) setShowBulkUpdate(false);
+  }, [isSelectionMode]);
+
+  // Report selection mode up so the shell can hide the bottom nav during a
+  // multi-select, matching the transactions screen.
+  useLayoutEffect(() => {
+    onSelectionModeChange?.(isSelectionMode);
+    return () => {
+      onSelectionModeChange?.(false);
+    };
+  }, [isSelectionMode, onSelectionModeChange]);
 
   // When the active month changes, default-pick a day inside it for the
   // lifted selection — today if it falls inside, else the 1st.
@@ -366,6 +443,129 @@ export function CalendarScreen({
   const handleSelectDay = useCallback((dayKey: string) => {
     setSelectedDayKey(dayKey);
   }, []);
+
+  const handleOpenIncomeBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('income_breakdown', activeMonthKey);
+  }, [activeMonthKey, onOpenBreakdownInsight]);
+
+  const handleOpenExpenseBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('expense_breakdown', activeMonthKey);
+  }, [activeMonthKey, onOpenBreakdownInsight]);
+
+  const clearSelection = useCallback(() => {
+    void triggerHaptic('selection');
+    setSelectedTransactionIds([]);
+  }, []);
+
+  const toggleTransactionSelection = useCallback((transactionId: string) => {
+    setSelectedTransactionIds((previous) => {
+      const index = previous.indexOf(transactionId);
+      if (index === -1) return [...previous, transactionId];
+      if (previous.length === 1) return [];
+      const next = [...previous];
+      next.splice(index, 1);
+      return next;
+    });
+  }, []);
+
+  const handleTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      onOpenTransaction(transaction);
+    },
+    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+  );
+
+  const handleTransactionSplitBadgePress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      onOpenTransactionSplitBadge?.(transaction);
+    },
+    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+  );
+
+  const handleTransactionLongPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedTransactionIds([transaction.id]);
+    },
+    [isSelectionMode, toggleTransactionSelection],
+  );
+
+  const handleOpenBulkUpdate = useCallback(() => {
+    if (selectedTransactionCount === 0) return;
+    setBulkDate(formatDateInput(new Date()));
+    setBulkDateTouched(false);
+    setBulkNote('');
+    setBulkNoteTouched(false);
+    setShowBulkUpdate(true);
+  }, [selectedTransactionCount]);
+
+  const handleCloseBulkUpdate = useCallback(() => {
+    setShowBulkUpdate(false);
+  }, []);
+
+  const handleApplyBulkUpdate = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    if (!hasBulkChanges) return;
+
+    const updates: { date?: string; note?: string | null } = {};
+    if (bulkDateTouched) updates.date = bulkDate;
+    if (bulkNoteTouched) {
+      const normalizedNote = bulkNote.trim();
+      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
+    }
+    if (Object.keys(updates).length === 0) return;
+
+    updateTransactionsBulk(
+      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
+    );
+    void triggerHaptic('success');
+    setShowBulkUpdate(false);
+    setSelectedTransactionIds([]);
+  }, [
+    bulkDate,
+    bulkDateTouched,
+    bulkNote,
+    bulkNoteTouched,
+    hasBulkChanges,
+    selectedTransactionIds,
+    updateTransactionsBulk,
+  ]);
+
+  const handleDeleteSelectedTransactions = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const idsToDelete = [...selectedTransactionIds];
+    Alert.alert(
+      I18n.t('transactions.selection.delete_title'),
+      I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            deleteTransactionsBulk(idsToDelete);
+            setShowBulkUpdate(false);
+            setSelectedTransactionIds([]);
+          },
+        },
+      ],
+    );
+  }, [deleteTransactionsBulk, selectedTransactionIds]);
 
   const handleMonthTriggerLayout = useCallback(() => {
     monthPickerTriggerRef.current?.measureInWindow((x, y, width, height) => {
@@ -439,8 +639,11 @@ export function CalendarScreen({
           isActive={isActive}
           scrollToTopToken={scrollToTopToken}
           onSelectDay={handleSelectDay}
-          onOpenTransaction={onOpenTransaction}
-          onOpenTransactionSplitBadge={onOpenTransactionSplitBadge}
+          onOpenTransaction={handleTransactionPress}
+          onOpenTransactionSplitBadge={handleTransactionSplitBadgePress}
+          onLongPressTransaction={handleTransactionLongPress}
+          selectionMode={isSelectionMode}
+          selectedTransactionIds={selectedTransactionIds}
         />
       );
     },
@@ -452,14 +655,17 @@ export function CalendarScreen({
       getTrueHourlyRateForDate,
       gridChartWidth,
       handleSelectDay,
+      handleTransactionLongPress,
+      handleTransactionPress,
+      handleTransactionSplitBadgePress,
+      isSelectionMode,
       isTimeMode,
       monthPagerAnchorDate,
-      onOpenTransaction,
-      onOpenTransactionSplitBadge,
       pageWidth,
       filteredTransactions,
       scrollToTopToken,
       selectedDayKey,
+      selectedTransactionIds,
       settings,
       todayDayKey,
       transactionDisplaySettings,
@@ -485,10 +691,65 @@ export function CalendarScreen({
           </>
         }
       >
-        <InOutHeader
-          incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-          expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
-        />
+        <View style={styles.summarySlot}>
+          {isSelectionMode ? (
+            <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+              <Pressable
+                onPress={clearSelection}
+                className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.cancel')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.cancel')}
+                </Text>
+              </Pressable>
+
+              <View className="flex-1 items-center px-1">
+                <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                  <Text variant="caption" className="text-foreground">
+                    {I18n.t('transactions.selection.selected_count', {
+                      count: selectedTransactionCount,
+                    })}
+                  </Text>
+                  <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                    <Text variant="label" className="text-foreground">
+                      {selectedTransactionTotalLabel}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View className="flex-row items-center gap-1.5">
+                <Pressable
+                  onPress={handleOpenBulkUpdate}
+                  className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.selection.update')}
+                  hitSlop={8}
+                >
+                  <Pencil size={14} color={themeColors.primary} />
+                </Pressable>
+                <Pressable
+                  onPress={handleDeleteSelectedTransactions}
+                  className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.delete')}
+                  hitSlop={8}
+                >
+                  <Trash2 size={14} color={themeColors.coral} />
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <InOutHeader
+              incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
+              expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+              onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
+              onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+            />
+          )}
+        </View>
       </MonthControlsHeader>
 
       <View className="flex-1 overflow-hidden bg-background">
@@ -517,6 +778,88 @@ export function CalendarScreen({
         onSelectMonth={handleJumpToMonth}
         onClose={handleCloseMonthPicker}
       />
+
+      <ThemeModal
+        visible={showBulkUpdate}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseBulkUpdate}
+      >
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+          <View style={styles.modalHeaderRow}>
+            <View className="flex-1 pr-3">
+              <Text variant="subheading">
+                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
+              </Text>
+              <Text variant="friendly" tone="muted">
+                {I18n.t('transactions.selection.update_subtitle')}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={handleCloseBulkUpdate}
+                className="px-3 py-2 rounded-full bg-secondary/70"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.cancel')}
+              >
+                <Text variant="caption" tone="muted">
+                  {I18n.t('common.cancel')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleApplyBulkUpdate}
+                disabled={!hasBulkChanges}
+                className={cn(
+                  'px-3 py-2 rounded-full',
+                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+                )}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.save')}
+                accessibilityState={{ disabled: !hasBulkChanges }}
+              >
+                <Text
+                  variant="caption"
+                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
+                >
+                  {I18n.t('common.save')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.editor.date')}
+              </Text>
+              <View
+                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
+                style={styles.bulkDatePanel}
+              >
+                <DatePanel
+                  value={bulkDate}
+                  onSelect={(value) => {
+                    setBulkDate(value);
+                    setBulkDateTouched(true);
+                  }}
+                />
+              </View>
+            </View>
+
+            <View className="gap-2.5">
+              <Input
+                label={I18n.t('transaction_detail.note')}
+                placeholder={I18n.t('transactions.editor.optional')}
+                value={bulkNote}
+                onChangeText={(value) => {
+                  setBulkNote(value);
+                  setBulkNoteTouched(true);
+                }}
+              />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </ThemeModal>
 
       <ThemeModal
         visible={showFilters}
@@ -661,6 +1004,13 @@ export function CalendarScreen({
 const styles = StyleSheet.create({
   flexOne: {
     flex: 1,
+  },
+  summarySlot: {
+    minHeight: 56,
+    justifyContent: 'center',
+  },
+  bulkDatePanel: {
+    height: BULK_DATE_PANEL_HEIGHT,
   },
   modalHeaderRow: {
     paddingHorizontal: spacing.screenHorizontal,
