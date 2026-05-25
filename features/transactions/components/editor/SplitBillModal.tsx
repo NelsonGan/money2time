@@ -522,7 +522,6 @@ export function SplitBillModal({
                           },
                         ]}
                       />
-
                     </View>
 
                     {!row.isSelf ? (
@@ -670,9 +669,7 @@ export function SplitBillModal({
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={
-          accountPickerSplit
-            ? (splits[accountPickerSplit.index]?.paybackAccountId ?? null)
-            : null
+          accountPickerSplit ? (splits[accountPickerSplit.index]?.paybackAccountId ?? null) : null
         }
         onSelect={(accountId) => {
           if (!accountPickerSplit) return;

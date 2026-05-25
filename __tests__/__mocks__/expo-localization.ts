@@ -16,5 +16,12 @@ export function getLocales() {
 }
 
 export function getCalendars() {
-  return [{ calendar: 'gregorian', timeZone: 'America/Los_Angeles', uses24hourClock: false, firstWeekday: 1 }];
+  return [
+    {
+      calendar: 'gregorian',
+      timeZone: 'America/Los_Angeles',
+      uses24hourClock: false,
+      firstWeekday: 1,
+    },
+  ];
 }

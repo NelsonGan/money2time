@@ -1,5 +1,6 @@
 export { AccountSettingsScreen } from './AccountSettingsScreen';
 export { AccountsScreen } from './AccountsScreen';
+export { AutoBackupScreen } from './AutoBackupScreen';
 export { CategoriesScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';

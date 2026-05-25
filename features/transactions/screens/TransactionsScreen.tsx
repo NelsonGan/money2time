@@ -1163,7 +1163,10 @@ export function TransactionsScreen({
                 onPress={() => setActiveFilterPicker('accounts')}
                 className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
               >
-                <Text variant="body" tone={transactionFilters.excludedAccountIds.length > 0 ? undefined : 'muted'}>
+                <Text
+                  variant="body"
+                  tone={transactionFilters.excludedAccountIds.length > 0 ? undefined : 'muted'}
+                >
                   {transactionFilters.excludedAccountIds.length > 0
                     ? `${transactionFilters.excludedAccountIds.length} ${I18n.t('insights.filters.excluded')}`
                     : I18n.t('common.none')}
@@ -1181,7 +1184,12 @@ export function TransactionsScreen({
                   onPress={() => setActiveFilterPicker('incomeCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={transactionFilters.excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={
+                      transactionFilters.excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'
+                    }
+                  >
                     {transactionFilters.excludedIncomeCategoryIds.length > 0
                       ? `${transactionFilters.excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}
@@ -1200,7 +1208,12 @@ export function TransactionsScreen({
                   onPress={() => setActiveFilterPicker('expenseCategories')}
                   className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  <Text variant="body" tone={transactionFilters.excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}>
+                  <Text
+                    variant="body"
+                    tone={
+                      transactionFilters.excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'
+                    }
+                  >
                     {transactionFilters.excludedExpenseCategoryIds.length > 0
                       ? `${transactionFilters.excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
                       : I18n.t('common.none')}

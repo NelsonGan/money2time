@@ -1,7 +1,4 @@
-import {
-  requestOpenPaywall,
-  subscribeOpenPaywallRequest,
-} from '~/services/paywallNavigation';
+import { requestOpenPaywall, subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 
 describe('paywallNavigation pub/sub', () => {
   it('sends the source and flashMessage to listeners', () => {

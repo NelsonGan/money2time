@@ -40,6 +40,10 @@ class SettingsRepository {
         | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
+        | 'autoBackupEnabled'
+        | 'autoBackupTarget'
+        | 'lastAutoBackupAt'
+        | 'lastAutoBackupError'
       >
     >,
   ) {
@@ -131,6 +135,10 @@ class SettingsRepository {
         quickEntryPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
+        autoBackupEnabled: true,
+        autoBackupTarget: 'local',
+        lastAutoBackupAt: null,
+        lastAutoBackupError: null,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

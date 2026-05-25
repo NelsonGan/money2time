@@ -29,8 +29,7 @@ interface AndroidTxSourceRow extends Omit<MMTxRow, 'dateIso' | 'amount'> {
   amountRaw: string | null;
 }
 
-interface AndroidRecurringSourceRow
-  extends Omit<MMRecurringRow, 'nextDateIso' | 'endDateIso'> {
+interface AndroidRecurringSourceRow extends Omit<MMRecurringRow, 'nextDateIso' | 'endDateIso'> {
   nextDate: number | null;
   endDate: number | null;
 }

@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
-import { Download, Trash2, Upload } from 'lucide-react-native';
+import { ChevronRight, CloudUpload, Download, Trash2, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -22,12 +22,13 @@ import { triggerHaptic } from '~/services/haptics';
 
 interface DataManagementScreenProps {
   onBack: () => void;
+  onOpenAutoBackup?: () => void;
 }
 
 type ImportSource = 'money2time' | 'money_manager';
 
-export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
-  const { importMoneyManagerBackup, refreshAll, resetAllData } = useApp();
+export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
+  const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
   const themeColors = useThemeColors();
   const [isExporting, setIsExporting] = useState(false);
   // `activeFlow` covers the whole picker + import lifecycle and drives button
@@ -184,6 +185,30 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+        {onOpenAutoBackup ? (
+          <Card style={{ marginBottom: 14 }}>
+            <CardContent className="py-4">
+              <Pressable onPress={onOpenAutoBackup} style={styles.autoBackupRow}>
+                <View
+                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
+                >
+                  <CloudUpload size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.sectionTextWrap}>
+                  <Text variant="caption" className="text-foreground">
+                    {I18n.t('auto_backup.entry_title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {settings.autoBackupEnabled
+                      ? I18n.t('auto_backup.entry_enabled')
+                      : I18n.t('auto_backup.entry_disabled')}
+                  </Text>
+                </View>
+                <ChevronRight size={16} color={themeColors.muted} />
+              </Pressable>
+            </CardContent>
+          </Card>
+        ) : null}
         <Card>
           <CardContent className="py-5 gap-5">
             <View style={styles.section}>
@@ -253,10 +278,7 @@ export function DataManagementScreen({ onBack }: DataManagementScreenProps) {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${themeColors.primary}14` },
-                  ]}
+                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
                 >
                   <Upload size={18} color={themeColors.primary} />
                 </View>
@@ -355,5 +377,10 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'rgba(148, 163, 184, 0.15)',
+  },
+  autoBackupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
 });

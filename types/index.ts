@@ -11,6 +11,7 @@ export type ThemeColor =
   | 'rosewood';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 export type UserMode = 'power' | 'simple';
+export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
 
 export interface NotificationPreferences {
   dailyCheckin: {
@@ -79,6 +80,10 @@ export interface UserSettings {
   themeColor: ThemeColor;
   onboardingCompleted: boolean;
   userMode: UserMode;
+  autoBackupEnabled: boolean;
+  autoBackupTarget: BackupTarget;
+  lastAutoBackupAt: string | null;
+  lastAutoBackupError: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

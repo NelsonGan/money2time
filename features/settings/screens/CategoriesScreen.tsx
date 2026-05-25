@@ -512,11 +512,7 @@ function SubcategoryRow({
           },
         ]}
       >
-        <CategoryEmoji
-          style={styles.rowIconText}
-          icon={item.icon}
-          parentIcon={parentIcon}
-        />
+        <CategoryEmoji style={styles.rowIconText} icon={item.icon} parentIcon={parentIcon} />
       </View>
       <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>
         {item.name}
