@@ -1,0 +1,185 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform
+        type: choice
+        required: true
+        default: ios
+        options:
+          - ios
+          - android
+      profile:
+        description: EAS profile
+        type: choice
+        default: production
+        options:
+          - production
+          - preview
+          - development
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run checks
+        run: npm run check
+
+      - name: Run tests
+        run: npm test
+
+  plan:
+    name: Plan
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      include: ${{ steps.matrix.outputs.include }}
+    steps:
+      - name: Resolve build matrix
+        id: matrix
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo 'include=[{"platform":"ios","label":"iOS","os":"macos-15","profile":"production"},{"platform":"android","label":"Android","os":"ubuntu-latest","profile":"production"}]' >> "$GITHUB_OUTPUT"
+          else
+            if [ "${{ inputs.platform }}" = "ios" ]; then
+              os="macos-15"
+              label="iOS"
+            else
+              os="ubuntu-latest"
+              label="Android"
+            fi
+            echo "include=[{\"platform\":\"${{ inputs.platform }}\",\"label\":\"$label\",\"os\":\"$os\",\"profile\":\"${{ inputs.profile }}\"}]" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Deploy ${{ matrix.label }} (${{ matrix.profile }})
+    needs: plan
+    if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.include) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Verify branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Deploy can only run on main (got ${{ github.ref }})."
+          exit 1
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        if: matrix.platform == 'ios'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Java
+        if: matrix.platform == 'android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Cache eas-build-local
+        uses: actions/cache@v4
+        with:
+          path: ~/.eas-build-local
+          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-eas-build-local-
+
+      - name: Cache CocoaPods
+        if: matrix.platform == 'ios'
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Cache Gradle
+        if: matrix.platform == 'android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve output path
+        id: output
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "ios" ]; then
+            ext=ipa
+          elif [ "${{ matrix.profile }}" = "production" ]; then
+            ext=aab
+          else
+            ext=apk
+          fi
+          echo "file=./build/money2time-${{ matrix.platform }}-${{ matrix.profile }}.$ext" >> "$GITHUB_OUTPUT"
+
+      - name: Build app
+        run: |
+          mkdir -p build
+          eas build \
+            --platform ${{ matrix.platform }} \
+            --profile ${{ matrix.profile }} \
+            --local \
+            --non-interactive \
+            --output=${{ steps.output.outputs.file }}
+
+      - name: Submit build
+        run: |
+          eas submit \
+            --platform ${{ matrix.platform }} \
+            --profile ${{ matrix.profile }} \
+            --path ${{ steps.output.outputs.file }} \
+            --non-interactive

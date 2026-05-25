@@ -25,21 +25,24 @@ npm run format:check
 
 # All checks together
 npm run check
+
+# Tests (Jest + ts-jest, node env)
+npm test
 ```
 
-There is no test suite — no Jest, Vitest, or test files exist in this project.
+Tests live in `__tests__/` (18 suites covering utils, repositories, services, navigation). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
 
 ## Architecture
 
 ### Navigation
 
-`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` (5 tabs: home, activity, insights, accounts, settings) overlaying a tab-based content area. Modal/push screens (editors, drilldowns, flows) are registered at the root stack level.
+`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` (5 tabs: **home, accounts, calendar, insights, settings**) overlaying a tab-based content area. The `home` tab renders `TransactionsScreen` (power mode) or `SimpleActivityScreen` (simple mode); `accounts` is hidden in simple mode. Modal/push screens (editors, drilldowns, flows) are registered at the root stack level.
 
 **Root stack screens** (defined in `navigation/rootStack.ts`):
-`Main`, `AddTransaction`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsWageCalculator`, `ProPaywall`, `AIChat`.
+`Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsQuickEntry`, `SettingsWageCalculator`, `ProPaywall`.
 
 **Settings has its own nested stack** (`navigation/settingsStack.ts`):
-`SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `Categories`, `CategoriesSubcategories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `StatementImport`, `StatementImportList`, `ProManagement`.
+`SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `Categories`, `CategoriesSubcategories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `QuickEntrySettings`.
 
 Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide animations, gesture-enabled back).
 
@@ -58,7 +61,7 @@ Key properties from `useApp()`:
 - **Queries**: `getAccountById`, `getCategoryById`, `getTransactionsByAccount`, `queryTransactions`, `getCashflowSummary`, `getExpenseBreakdownByCategory`, `getExpenseBreakdownBySubcategory`, `getIncomeBreakdown`, `getTransfersBetweenAccounts`, `getTrueHourlyRateForDate`, `getDisplayValueForTransaction`
 - **Data management**: `resetTransactionsOnly`, `resetAllData`, `importMoneyManagerBackup`
 - **Mode helpers**: `isSimpleMode`, `simpleWalletId`, `completeOnboarding`, `switchToSimpleMode`, `switchToPowerMode`, `deleteSimpleWalletAndTransactions`
-- **Preferences**: `insightsPreferencesJson`, `updateInsightsPreferencesJson`, `notificationPrefs`, `updateNotificationPrefs`
+- **Preferences**: `insightsPreferencesJson`, `updateInsightsPreferencesJson`, `notificationPrefs`, `updateNotificationPrefs`, `quickEntryPrefs`, `updateQuickEntryPrefs`
 
 Other contexts:
 
@@ -67,55 +70,59 @@ Other contexts:
 
 ### Database
 
-SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, 15 migrations, `SIMPLE_WALLET_NAME` constant defined there).
+SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, 18 migrations, `SIMPLE_WALLET_NAME` constant defined there).
 
 **Tables** (all use soft-deletes via `deletedAt`):
 
-| Table                      | Key columns                                                                                                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accountsTable`            | id, name, sortOrder, type (debit/credit), accountGroup, currency, startingBalance, includeInTotals                                                               |
-| `accountGroupsTable`       | id, name, sortOrder                                                                                                                                              |
-| `categoriesTable`          | id, name, sortOrder, type (expense/income), parentId, icon, isDefault                                                                                            |
-| `transactionsTable`        | id, type (expense/income/transfer/balance_adjustment), amount, currency, date, accountId, categoryId, note, recurrence fields, sentiment                         |
-| `recurringRulesTable`      | id, name, type, amount, accountId, categoryId, recurrencePattern, recurrenceInterval, nextRunDate, isActive                                                      |
-| `settingsTable`            | id, appUserId, locale, currencyCode, displayMode, themeMode, themeColor, userMode, ai-chat fields, insightsPrefsJson, notificationPrefsJson, onboardingCompleted |
-| `monthlyWageSettingsTable` | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                         |
+| Table                      | Key columns                                                                                                                                                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accountsTable`            | id, name, sortOrder, type (debit/credit), accountGroup, currency, startingBalance, includeInTotals                                                                                                                                           |
+| `accountGroupsTable`       | id, name, sortOrder                                                                                                                                                                                                                          |
+| `categoriesTable`          | id, name, sortOrder, type (expense/income), parentId, icon, isDefault                                                                                                                                                                        |
+| `transactionsTable`        | id, type (expense/income/transfer/balance_adjustment), amount, currency, date, accountId, categoryId, note, recurrence fields, sentiment                                                                                                     |
+| `transactionSplitsTable`   | id, transactionId, payerName, shareAmount, sortOrder                                                                                                                                                                                         |
+| `recurringRulesTable`      | id, name, type, amount, accountId, categoryId, recurrencePattern, recurrenceInterval, nextRunDate, isActive                                                                                                                                  |
+| `settingsTable`            | id, appUserId, locale, currencyCode, displayMode, themeMode, themeColor, userMode, hapticsEnabled, insightsPrefsJson, notificationPrefsJson, quickEntryPrefsJson, autoBackupEnabled, autoBackupTarget, lastAutoBackupAt, onboardingCompleted |
+| `monthlyWageSettingsTable` | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                                                                                                     |
 
-Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, plus `mappers.ts` for DB row → domain type transformations.
+Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, plus `mappers.ts` for DB row → domain type transformations.
 
 ### Feature Structure
 
 Features live under `features/` in domain folders. Each has `screens/` and sometimes `components/`, `services/`, `constants/`.
 
-| Feature         | Purpose                                                               | Key screens                                                                                                                                                                                                                                     |
-| --------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `home/`         | Dashboard with balance, income/expense summary, sentiment             | `HomeScreen`                                                                                                                                                                                                                                    |
-| `transactions/` | Transaction CRUD, month-paged activity list, search, bulk edit        | `TransactionsScreen`, `AddTransactionScreen`, `EditTransactionScreen`, `SimpleActivityScreen`                                                                                                                                                   |
-| `settings/`     | All configuration, account/category management, data import/export    | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `StatementImportScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen` |
-| `insights/`     | Analytics charts — expense trends, category breakdown, sentiment      | `InsightsScreen`, `InsightsDrilldownScreen`                                                                                                                                                                                                     |
-| `onboarding/`   | First-time setup flow: mode, wage, preferences, notifications         | `OnboardingFlow` + step screens                                                                                                                                                                                                                 |
-| `ai-chat/`      | Local LLM chat for natural-language transaction creation via llama.rn | `AIChatScreen`                                                                                                                                                                                                                                  |
-| `tutorial/`     | Coach-mark overlays for first-use guidance                            | `TutorialCoachmarkOverlay`                                                                                                                                                                                                                      |
+| Feature         | Purpose                                                                           | Key screens / components                                                                                                                                                                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactions/` | Transaction CRUD, month-paged activity list, search, bulk edit, voice quick-entry | `TransactionsScreen`, `SimpleActivityScreen`, `AddTransactionScreen`, `EditTransactionScreen`, `QuickAddScreen`, `QuickAddSheet`, `VoiceQuickAddOverlay`, `VoiceCaptureOverlay`, `VoicePreviewSheet`, `TransactionEditorScreen`                                                                                        |
+| `calendar/`     | Calendar tab — month grid of daily totals                                         | `CalendarScreen`, `CalendarMonthGrid`, `CalendarMonthPage`                                                                                                                                                                                                                                                             |
+| `insights/`     | Analytics charts — expense trends, category breakdown, sentiment                  | `InsightsScreen`, `InsightsDrilldownScreen`                                                                                                                                                                                                                                                                            |
+| `settings/`     | All configuration, account/category management, data import/export, auto-backup   | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen` |
+| `onboarding/`   | First-time setup flow: value-prop, mode, wage, preferences, notifications         | `OnboardingFlow` + 6 step screens (`OnboardingValuePropStep`, `OnboardingModeStep`, `OnboardingWageStep`, `OnboardingPreferencesStep`, `OnboardingNotificationsStep`, `OnboardingBootstrapStep`)                                                                                                                       |
+| `tutorial/`     | Coach-mark overlays for first-use guidance                                        | `TutorialCoachmarkOverlay`                                                                                                                                                                                                                                                                                             |
+| `voice/`        | (reserved — voice components currently live under `transactions/components/`)     | —                                                                                                                                                                                                                                                                                                                      |
 
-Shared UI primitives are in `components/ui/` (button, text, input, select, card, toggle, theme-modal, settings, SentimentIcons, time-value-inline).
+Shared UI primitives in `components/ui/`: `button`, `card`, `input`, `select`, `settings`, `text`, `textInputStyles`, `theme-modal`, `time-value-inline`, `toggle`, plus the cross-feature sheets `AccountPickerSheet`, `CategoryPickerSheet`, and icon helpers `CategoryEmoji`, `SentimentIcons`.
 
 Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, Mascot), `components/navigation/` (BottomNav, MonthControlsHeader, InOutHeader, FilterIconButton), `components/icons/` (NavIcons via Lucide), `components/layout/` (TabletContentContainer).
 
 ### Services
 
-| Service                                           | Purpose                                                                                                                                   |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `analytics.ts` (+ `.native.ts`, `.shared.ts`)     | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`, `flushAnalytics`                                                              |
-| `notifications.ts` (+ `.native.ts`, `.shared.ts`) | Expo Notifications: `scheduleDailyCheckin`, `scheduleWeeklySummary`, `fireRecurringTransactionNotification`, `syncScheduledNotifications` |
-| `haptics.ts`                                      | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                                                                        |
-| `revenueCat.ts` (+ `.native.ts`, `.shared.ts`)    | RevenueCat SDK: subscription state, purchase, restore                                                                                     |
-| `mmbakImportService.ts`                           | Money Manager .mmbackup file import                                                                                                       |
-| `dataManagementService.ts`                        | Export/backup functionality                                                                                                               |
-| `hourlyValueNavigation.ts`                        | Navigation helper for hourly value settings                                                                                               |
-| `paywallNavigation.ts`                            | Navigation helper for pro paywall                                                                                                         |
-| `transactionsNavigation.ts`                       | Navigation helper for transactions/activity                                                                                               |
+| Service                                                                 | Purpose                                                                                                                                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `analytics.ts` (+ `.native.ts`, `.shared.ts`)                           | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`, `flushAnalytics`                                                                                 |
+| `notifications.ts` (+ `.native.ts`, `.shared.ts`)                       | Expo Notifications: `scheduleDailyCheckin`, `scheduleWeeklySummary`, `fireRecurringTransactionNotification`, `syncScheduledNotifications`                    |
+| `haptics.ts`                                                            | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                                                                                           |
+| `revenueCat.ts` (+ `.native.ts`, `.shared.ts`)                          | RevenueCat SDK: subscription state, purchase, restore                                                                                                        |
+| `speechRecognition.ts` (+ `.native.ts`, `.shared.ts`)                   | On-device speech-to-text for voice quick-entry (`expo-speech-recognition`)                                                                                   |
+| `autoBackup.ts` (+ `.native.ts`, `.shared.ts`) + `autoBackupProviders/` | Daily auto-backup: `runAutoBackupIfDue`, `listAllBackups`, `restoreFromBackup`, `previewBackup`, `deleteBackup`, `isTargetAvailable`, Google Sign-In helpers |
+| `autoBackupTaskRegistration.ts`                                         | Registers the `expo-background-task` task for periodic backup runs                                                                                           |
+| `mmbakImportService.ts` + `mmbakImport/`                                | Money Manager `.mmbackup` file import                                                                                                                        |
+| `dataManagementService.ts`                                              | Export, JSON backup/restore                                                                                                                                  |
+| `hourlyValueNavigation.ts`                                              | Navigation helper for hourly value settings                                                                                                                  |
+| `paywallNavigation.ts`                                                  | Navigation helper for pro paywall                                                                                                                            |
+| `transactionsNavigation.ts`                                             | Navigation helper for transactions/activity                                                                                                                  |
 
-Platform-split services (`.native.ts` / `.shared.ts`) use the `.native.ts` implementation on iOS/Android and `.shared.ts` as web fallback.
+Platform-split services (`.native.ts` / `.shared.ts`) use the `.native.ts` implementation on iOS/Android and `.shared.ts` as web/test fallback.
 
 ### Custom Hooks
 
@@ -141,10 +148,10 @@ NativeWind (Tailwind CSS for React Native). Custom colors and theming defined in
 
 All shared types are in `types/index.ts`:
 
-- **Display**: `DisplayMode` ('money' | 'time'), `ThemeMode` ('system' | 'light' | 'dark'), `ThemeColor` (8 options), `UserMode` ('power' | 'simple'), `WageType` ('hourly' | 'monthly' | 'yearly')
-- **Domain**: `Account`, `AccountGroup`, `Category`, `Transaction`, `TransactionWithRelations`, `RecurringTransactionRule`, `MonthlyWageSettings`, `UserSettings`
-- **Enums**: `TransactionSentiment` ('happy' | 'neutral' | 'sad'), `AccountType` ('debit' | 'credit'), `CategoryType` ('expense' | 'income'), `RecurrencePattern` ('none' | 'daily' | 'weekly' | 'monthly' | 'yearly')
-- **Queries**: `TransactionFilters`, `AccountBalance`, `CashflowSummary`, `BreakdownItem`, `DateRange`, `NotificationPreferences`
+- **Display**: `DisplayMode` ('money' | 'time'), `ThemeMode` ('system' | 'light' | 'dark'), `ThemeColor` (8 options), `UserMode` ('power' | 'simple'), `WageType` ('hourly' | 'monthly' | 'yearly'), `BackupTarget` ('local' | 'icloud' | 'googleDrive')
+- **Domain**: `Account`, `AccountGroup`, `Category`, `Transaction`, `TransactionWithRelations`, `TransactionSplit`, `TransactionSplitsSummary`, `RecurringTransactionRule`, `ProcessedRecurringRule`, `MonthlyWageSettings`, `WageConfig`, `UserSettings`, `QuickEntryPrefs`
+- **Enums**: `TransactionSentiment` ('happy' | 'neutral' | 'sad'), `AccountType` ('debit' | 'credit'), `TransactionType` ('expense' | 'income' | 'transfer' | 'balance_adjustment'), `RecurringTransactionType` (TransactionType minus balance_adjustment), `CategoryType` ('expense' | 'income'), `RecurrencePattern` ('none' | 'daily' | 'weekly' | 'monthly' | 'yearly')
+- **Queries / state**: `TransactionFilters`, `AccountBalance`, `CashflowSummary`, `BreakdownItem`, `DateRange`, `NotificationPreferences`, `AppState`
 
 ### Constants
 
@@ -175,6 +182,16 @@ All shared types are in `types/index.ts`:
 - **IDs**: Use `newId()` from `~/utils/id` for generating unique identifiers (UUID-based).
 - **Error handling**: Use `getErrorMessage()` from `~/utils/errorHandling` to safely extract error messages.
 - **Tablet layout**: Use `useDeviceLayout()` hook and `TabletContentContainer` for responsive layouts.
+
+### CI / Deploy
+
+Single workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml) with three jobs gated `test → plan → deploy`:
+
+- **Test** — runs on every push, PR, and dispatch. Executes `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A failure here blocks `plan` and `deploy`.
+- **Plan** — push-to-main and manual-dispatch only. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
+- **Deploy** — push-to-main and manual-dispatch only. `eas build --local` on the matched runner (macos-latest for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build.
+
+Concurrency group `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true` — a new push to `main` cancels the in-flight run; new commits to a PR cancel previous test runs. Requires repo secret `EXPO_TOKEN`. Push to `main` auto-submits to TestFlight + Play Internal.
 
 ### ESLint Rules Worth Knowing
 

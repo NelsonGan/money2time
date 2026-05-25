@@ -14,8 +14,6 @@
  * That keeps the JS bundle resilient on devices where the speech framework
  * fails to initialize (older iOS, locked-down profiles, etc.).
  */
-import { Platform } from 'react-native';
-
 import type {
   SpeechRecognitionPermissionResult,
   StartListeningOptions,
@@ -61,7 +59,6 @@ function getModule(): ExpoSpeechRecognitionModuleShape | null {
 let availabilityCache: Promise<boolean> | null = null;
 
 export async function isSpeechRecognitionAvailable(): Promise<boolean> {
-  if (Platform.OS !== 'ios') return false;
   if (availabilityCache) return availabilityCache;
   const mod = getModule();
   if (!mod) return false;

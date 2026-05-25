@@ -57,6 +57,7 @@
       "favicon": "./assets/android/play_store_512.png"
     },
     "plugins": [
+      "./plugins/withGradleMemory",
       "expo-localization",
       "expo-notifications",
       "expo-screen-orientation",

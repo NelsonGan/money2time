@@ -3,6 +3,8 @@ type Translations = Record<string, string>;
 const translations: Translations = {
   'common.today': 'Today',
   'common.yesterday': 'Yesterday',
+  'common.hour_unit': 'h',
+  'common.minute_unit': 'm',
   'errors.generic_operation_failed': 'Operation failed',
   'errors.recurring_fallback_name': 'Recurring rule',
 };
