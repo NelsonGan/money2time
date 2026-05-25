@@ -335,6 +335,7 @@ function MainShellScreen({
   const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [isTransactionsSelectionMode, setIsTransactionsSelectionMode] = useState(false);
+  const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
   const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToken, setAccountsResetToken] = useState(0);
@@ -489,7 +490,9 @@ function MainShellScreen({
     openAddTransaction();
   }, [openAddTransaction]);
 
-  const shouldHideBottomNav = activeTab === 'home' && isTransactionsSelectionMode;
+  const shouldHideBottomNav =
+    (activeTab === 'home' && isTransactionsSelectionMode) ||
+    (activeTab === 'calendar' && isCalendarSelectionMode);
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
@@ -761,6 +764,7 @@ function MainShellScreen({
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
             onOpenBreakdownInsight={openActivityBreakdownInsight}
+            onSelectionModeChange={setIsCalendarSelectionMode}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
