@@ -171,9 +171,7 @@ export async function listAllBackups(): Promise<BackupRecord[]> {
   // Run all providers in parallel — Drive and iCloud are network-bound and
   // can each take 1–2s. Serializing them was the cause of the previously
   // sluggish list refresh after a backup.
-  const tasks: Promise<BackupRecord[]>[] = [
-    localProvider.list().catch(() => []),
-  ];
+  const tasks: Promise<BackupRecord[]>[] = [localProvider.list().catch(() => [])];
   if (Platform.OS === 'ios') {
     tasks.push(
       iCloudProvider
