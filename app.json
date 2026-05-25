@@ -20,15 +20,27 @@
       "icon": "./assets/ios/AppIcon~ios-marketing.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.nelsongan.money2time",
+      "usesIcloudStorage": true,
       "entitlements": {
         "com.apple.developer.kernel.extended-virtual-addressing": true,
-        "com.apple.developer.kernel.increased-memory-limit": true
+        "com.apple.developer.kernel.increased-memory-limit": true,
+        "com.apple.developer.icloud-container-identifiers": ["iCloud.com.nelsongan.money2time"],
+        "com.apple.developer.icloud-services": ["CloudDocuments"],
+        "com.apple.developer.ubiquity-container-identifiers": ["iCloud.com.nelsongan.money2time"]
       },
       "infoPlist": {
         "CFBundleDisplayName": "Money2Time",
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
-        "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction."
+        "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
+        "BGTaskSchedulerPermittedIdentifiers": ["money2time-auto-backup"],
+        "NSUbiquitousContainers": {
+          "iCloud.com.nelsongan.money2time": {
+            "NSUbiquitousContainerIsDocumentScopePublic": true,
+            "NSUbiquitousContainerSupportedFolderLevels": "Any",
+            "NSUbiquitousContainerName": "Money2Time"
+          }
+        }
       }
     },
     "android": {
@@ -48,6 +60,7 @@
       "expo-localization",
       "expo-notifications",
       "expo-screen-orientation",
+      "expo-background-task",
       [
         "expo-build-properties",
         {
@@ -61,6 +74,12 @@
         {
           "microphonePermission": "Money2Time uses your microphone to convert your spoken transactions into entries.",
           "speechRecognitionPermission": "Money2Time transcribes your spoken transactions on device, so you can log spending hands-free."
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.229377044166-7hkgkf8se5duonne5tgbph71ld6to3pg"
         }
       ]
     ],

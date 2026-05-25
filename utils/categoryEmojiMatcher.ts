@@ -55,7 +55,8 @@ const CATEGORY_EMOJI_PATTERNS: { emoji: string; pattern: RegExp }[] = [
   },
   {
     emoji: '💊',
-    pattern: /(medicine|pharmacy|drug|prescription|vitamin|supplement|药|药店|药品|维生素|补品|处方)/i,
+    pattern:
+      /(medicine|pharmacy|drug|prescription|vitamin|supplement|药|药店|药品|维生素|补品|处方)/i,
   },
   {
     emoji: '👶',

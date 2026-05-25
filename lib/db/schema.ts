@@ -97,6 +97,10 @@ export const settingsTable = sqliteTable('settings', {
     .notNull()
     .default(false),
   userMode: text('user_mode').notNull().default('power'),
+  autoBackupEnabled: integer('auto_backup_enabled', { mode: 'boolean' }).notNull().default(true),
+  autoBackupTarget: text('auto_backup_target').notNull().default('local'),
+  lastAutoBackupAt: text('last_auto_backup_at'),
+  lastAutoBackupError: text('last_auto_backup_error'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

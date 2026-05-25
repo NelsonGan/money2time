@@ -73,10 +73,7 @@ describe('summarizeTransactions', () => {
   });
 
   it('uses the provided resolveValue function', () => {
-    const txs = [
-      makeTx({ type: 'income', amount: 10 }),
-      makeTx({ type: 'expense', amount: 10 }),
-    ];
+    const txs = [makeTx({ type: 'income', amount: 10 }), makeTx({ type: 'expense', amount: 10 })];
     expect(summarizeTransactions(txs, () => 2)).toEqual({ count: 2, income: 2, expense: 2 });
   });
 });

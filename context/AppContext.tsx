@@ -7,7 +7,15 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  AppState as RNAppState,
+  type AppStateStatus,
+  InteractionManager,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import {
   DEFAULT_CURRENCY_SYMBOL,
@@ -50,6 +58,11 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
+import {
+  registerBackgroundTask,
+  runAutoBackupIfDue,
+  unregisterBackgroundTask,
+} from '~/services/autoBackup';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
   importMoneyManagerBackupFromUri,
@@ -120,6 +133,7 @@ interface AppContextValue extends AppState {
   setTransactionFilters: (filters: Partial<TransactionFilters>) => void;
   resetTransactionFilters: () => void;
   refreshAll: () => void;
+  refreshSettings: () => void;
 
   createAccount: (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => string;
   updateAccount: (
@@ -172,6 +186,10 @@ interface AppContextValue extends AppState {
         | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
+        | 'autoBackupEnabled'
+        | 'autoBackupTarget'
+        | 'lastAutoBackupAt'
+        | 'lastAutoBackupError'
       >
     >,
   ) => void;
@@ -686,6 +704,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshTransactions = useCallback(() => {
     try {
       setTransactions(transactionsRepository.list());
+    } catch (error) {
+      setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
+    }
+  }, []);
+
+  // Lightweight settings refetch — used after auto-backup writes when nothing
+  // else in the app state has changed. Avoids the full refreshAll() reload
+  // which is expensive (re-reads every table + re-runs derived selectors).
+  const refreshSettings = useCallback(() => {
+    try {
+      setSettings(settingsRepository.get());
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }
@@ -1661,6 +1690,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'themeColor'
           | 'onboardingCompleted'
           | 'userMode'
+          | 'autoBackupEnabled'
+          | 'autoBackupTarget'
+          | 'lastAutoBackupAt'
+          | 'lastAutoBackupError'
         >
       >,
     ) => {
@@ -1696,6 +1729,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!settings?.appUserId) return;
     void identifyUser(settings.appUserId);
   }, [settings?.appUserId]);
+
+  // Auto-backup: register/unregister background task when the toggle changes.
+  const autoBackupEnabled = settings?.autoBackupEnabled ?? true;
+  useEffect(() => {
+    if (autoBackupEnabled) {
+      void registerBackgroundTask();
+    } else {
+      void unregisterBackgroundTask();
+    }
+  }, [autoBackupEnabled]);
+
+  // Auto-backup: foreground trigger. The background task is best-effort on iOS;
+  // this is the reliable path that fires on every cold start and every return
+  // to foreground when the last backup is stale (>24h). Only the `settings`
+  // row changes after a backup (lastAutoBackupAt / lastAutoBackupError) so we
+  // use the lightweight refreshSettings instead of a full refreshAll.
+  useEffect(() => {
+    if (!autoBackupEnabled) return;
+    void runAutoBackupIfDue().then((result) => {
+      if (!result.skipped) refreshSettings();
+    });
+    const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state !== 'active') return;
+      void runAutoBackupIfDue().then((result) => {
+        if (!result.skipped) refreshSettings();
+      });
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [autoBackupEnabled, refreshSettings]);
 
   const superPropUserMode = settings?.userMode ?? 'power';
   const superPropCurrencyCode = settings?.currencyCode;
@@ -2208,6 +2272,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setTransactionFilters,
             resetTransactionFilters,
             refreshAll,
+            refreshSettings,
             createAccount,
             updateAccount,
             deleteAccount,
@@ -2284,6 +2349,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactionFilters,
       resetTransactionFilters,
       refreshAll,
+      refreshSettings,
       createAccount,
       updateAccount,
       deleteAccount,

@@ -37,9 +37,7 @@ interface AccountPickerSheetMultiProps extends AccountPickerSheetBaseProps {
   onSelect?: never;
 }
 
-export type AccountPickerSheetProps =
-  | AccountPickerSheetSingleProps
-  | AccountPickerSheetMultiProps;
+export type AccountPickerSheetProps = AccountPickerSheetSingleProps | AccountPickerSheetMultiProps;
 
 const styles = StyleSheet.create({
   backdrop: {
@@ -196,9 +194,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
                           >
                             {acct.name}
                           </Text>
-                          {isSelected ? (
-                            <Check size={14} color={themeColors.primary} />
-                          ) : null}
+                          {isSelected ? <Check size={14} color={themeColors.primary} /> : null}
                         </Pressable>
                       </View>
                     );

@@ -1,5 +1,9 @@
 import './global.css';
 
+// Register the background task handler before anything else mounts — the
+// OS may invoke it before any React component renders.
+import './services/autoBackupTaskRegistration';
+
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import {
   WorkSans_400Regular,
@@ -201,17 +205,25 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
-function MountedTab({ active, children }: { active: boolean; children: React.ReactNode }) {
-  // Lazy-mount: each tab renders nothing until it first becomes active.
-  // Without this, all 5 tab screens (Transactions, Accounts, Calendar,
-  // Insights, Settings) would mount on the first render after data loads
-  // and compete for the JS thread — producing a visible stagger on the
-  // home tab as the others' FlashList measurements, useEffects, and theme
-  // resolution work happen in parallel. Once a tab has been visited, we
-  // keep it mounted so re-activating it stays instant.
+function MountedTab({
+  active,
+  shouldPreload = false,
+  children,
+}: {
+  active: boolean;
+  shouldPreload?: boolean;
+  children: React.ReactNode;
+}) {
+  // Each tab renders nothing until it either becomes active or is flagged
+  // for preload by the shell. Mounting all 5 tabs on the first render after
+  // data loads would stagger the home tab as the others run FlashList
+  // measurements, effects, and theme resolution in parallel — so the shell
+  // mounts home first, then progressively flips `shouldPreload` per tab via
+  // InteractionManager, paying each mount cost in the background instead of
+  // on the user's first tap. Once mounted, the tab stays mounted.
   const hasBeenActiveRef = useRef(active);
   if (active) hasBeenActiveRef.current = true;
-  const shouldMount = hasBeenActiveRef.current;
+  const shouldMount = hasBeenActiveRef.current || shouldPreload;
 
   return (
     <View
@@ -334,6 +346,43 @@ function MainShellScreen({
   const [settingsResetToken, setSettingsResetToken] = useState(0);
   const tutorialStartTokenRef = useRef(0);
   const previousActiveTabRef = useRef<MainTab | null>(null);
+  const [preloadedTabs, setPreloadedTabs] = useState<Set<MainTab>>(() => new Set());
+
+  useEffect(() => {
+    // Progressively pre-mount the non-home tabs after home has rendered, so
+    // the first tap on each tab doesn't pay its mount cost on the JS thread
+    // (visible as lag + a one-frame layout shift on Settings, whose nested
+    // NativeStack only resolves window insets once mounted). Staggering one
+    // tab per InteractionManager pass keeps them from competing with home.
+    const order: MainTab[] = ['settings', 'insights', 'calendar', 'accounts'];
+    let cancelled = false;
+    let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
+    let pendingInteraction: ReturnType<typeof InteractionManager.runAfterInteractions> | null =
+      null;
+
+    const preloadAt = (index: number) => {
+      if (cancelled || index >= order.length) return;
+      pendingInteraction = InteractionManager.runAfterInteractions(() => {
+        if (cancelled) return;
+        const tab = order[index];
+        setPreloadedTabs((prev) => {
+          if (prev.has(tab)) return prev;
+          const next = new Set(prev);
+          next.add(tab);
+          return next;
+        });
+        pendingTimeout = setTimeout(() => preloadAt(index + 1), 120);
+      });
+    };
+
+    pendingTimeout = setTimeout(() => preloadAt(0), 250);
+
+    return () => {
+      cancelled = true;
+      if (pendingTimeout) clearTimeout(pendingTimeout);
+      if (pendingInteraction) pendingInteraction.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     return subscribeOpenHourlyValueRequest(() => {
@@ -683,7 +732,7 @@ function MainShellScreen({
             />
           )}
         </MountedTab>
-        <MountedTab active={activeTab === 'accounts'}>
+        <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
           <MemoAccountsScreen
             safeAreaEdges={['top']}
             resetToRootToken={accountsResetToken}
@@ -697,7 +746,7 @@ function MainShellScreen({
             onOpenSettings={openAccountSettings}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'calendar'}>
+        <MountedTab active={activeTab === 'calendar'} shouldPreload={preloadedTabs.has('calendar')}>
           <MemoCalendarScreen
             scrollToTopToken={calendarScrollTopToken}
             resetToCurrentMonthToken={calendarResetToken}
@@ -705,7 +754,7 @@ function MainShellScreen({
             onOpenTransactionSplitBadge={openTransactionSplitBill}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'insights'}>
+        <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
           <MemoInsightsScreen
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
@@ -717,7 +766,7 @@ function MainShellScreen({
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'settings'}>
+        <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
