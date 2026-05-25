@@ -604,6 +604,8 @@ const en = {
       title: 'Quick Entry',
       subtitle: 'Map keyword groups to your categories.',
       row_subtitle: 'Map keywords to categories',
+      enabled_label: 'Quick entry',
+      enabled_subtitle: 'Tap + for the fast keypad. Turn off to always open the full form.',
       section_expense: 'Expense',
       section_income: 'Income',
       default_account_section: 'Default Account',
