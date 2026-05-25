@@ -217,13 +217,21 @@ export function CalendarScreen({
   const filteredTransactions = useMemo(() => {
     return scopedTransactions.filter((tx) => {
       if (tx.accountId && excludedAccountIdSet.has(tx.accountId)) return false;
-      if (tx.type === 'income' && tx.categoryId && excludedIncomeCategoryIdSet.has(tx.categoryId)) {
+      // Excluding a parent category also excludes its child sub-categories, so
+      // match the transaction's own category id or its parent's id.
+      if (
+        tx.type === 'income' &&
+        tx.categoryId &&
+        (excludedIncomeCategoryIdSet.has(tx.categoryId) ||
+          (tx.categoryParentId && excludedIncomeCategoryIdSet.has(tx.categoryParentId)))
+      ) {
         return false;
       }
       if (
         tx.type === 'expense' &&
         tx.categoryId &&
-        excludedExpenseCategoryIdSet.has(tx.categoryId)
+        (excludedExpenseCategoryIdSet.has(tx.categoryId) ||
+          (tx.categoryParentId && excludedExpenseCategoryIdSet.has(tx.categoryParentId)))
       ) {
         return false;
       }
