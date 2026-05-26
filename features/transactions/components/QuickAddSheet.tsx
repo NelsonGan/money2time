@@ -1130,23 +1130,27 @@ export function QuickAddSheet({
                     {formatDateChipLabel(date)}
                   </Text>
                 </Pressable>
-                <Text style={styles.summarySep}>·</Text>
-                <Pressable
-                  onPress={() => openPicker('account')}
-                  style={styles.summarySegmentFlexible}
-                  hitSlop={6}
-                >
-                  <Text style={styles.summaryIcon}>
-                    {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
-                  </Text>
-                  <Text
-                    className="text-foreground"
-                    style={[styles.summaryText, styles.summaryTextFlexible]}
-                    numberOfLines={1}
-                  >
-                    {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
-                  </Text>
-                </Pressable>
+                {isSimpleMode ? null : (
+                  <>
+                    <Text style={styles.summarySep}>·</Text>
+                    <Pressable
+                      onPress={() => openPicker('account')}
+                      style={styles.summarySegmentFlexible}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.summaryIcon}>
+                        {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
+                      </Text>
+                      <Text
+                        className="text-foreground"
+                        style={[styles.summaryText, styles.summaryTextFlexible]}
+                        numberOfLines={1}
+                      >
+                        {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
                 {showAmountChip ? (
                   <>
                     <Text style={styles.summarySep}>·</Text>
