@@ -116,6 +116,24 @@ class SettingsRepository {
       .run();
   }
 
+  getCalendarPrefsJson(): string | null {
+    const db = getDb();
+    const row = db
+      .select({ calendarPrefsJson: settingsTable.calendarPrefsJson })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return row?.calendarPrefsJson ?? null;
+  }
+
+  updateCalendarPrefsJson(value: string | null) {
+    const db = getDb();
+    db.update(settingsTable)
+      .set({ calendarPrefsJson: value, updatedAt: nowIso() })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
   reset() {
     const db = getDb();
     const now = nowIso();
@@ -133,6 +151,7 @@ class SettingsRepository {
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
+        calendarPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
         autoBackupEnabled: true,

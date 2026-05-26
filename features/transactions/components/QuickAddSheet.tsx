@@ -40,6 +40,7 @@ import type {
   TransactionType,
   UserSettings,
 } from '~/types';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -186,11 +187,10 @@ const styles = StyleSheet.create({
   },
   summaryRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     alignItems: 'center',
     marginTop: 10,
     columnGap: 6,
-    rowGap: 4,
     minHeight: 22,
   },
   summarySegment: {
@@ -198,6 +198,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     height: 18,
+  },
+  summarySegmentFlexible: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 18,
+    flexShrink: 1,
+    minWidth: 0,
   },
   summaryIcon: {
     fontSize: 13,
@@ -208,6 +216,9 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: 12,
     lineHeight: 18,
+  },
+  summaryTextFlexible: {
+    flexShrink: 1,
   },
   summarySep: {
     fontSize: 11,
@@ -677,6 +688,23 @@ export function QuickAddSheet({
     () => categories.find((category) => category.id === activeCategoryId) ?? null,
     [activeCategoryId, categories],
   );
+  const activeCategoryParent = useMemo(
+    () =>
+      activeCategory?.parentId
+        ? (categories.find((category) => category.id === activeCategory.parentId) ?? null)
+        : null,
+    [activeCategory, categories],
+  );
+  const activeCategoryIcon = resolveCategoryIcon(
+    activeCategory?.icon,
+    activeCategoryParent?.icon,
+    '🏷️',
+  );
+  const activeCategoryLabel = activeCategory
+    ? activeCategoryParent
+      ? `${activeCategoryParent.name} • ${activeCategory.name}`
+      : activeCategory.name
+    : I18n.t('transactions.editor.category');
 
   const accountsById = useMemo(() => {
     const map = new Map<string, Account>();
@@ -1102,34 +1130,42 @@ export function QuickAddSheet({
                     {formatDateChipLabel(date)}
                   </Text>
                 </Pressable>
-                <Text style={styles.summarySep}>·</Text>
-                <Pressable
-                  onPress={() => openPicker('account')}
-                  style={styles.summarySegment}
-                  hitSlop={6}
-                >
-                  <Text style={styles.summaryIcon}>
-                    {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
-                  </Text>
-                  <Text className="text-foreground" style={styles.summaryText} numberOfLines={1}>
-                    {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
-                  </Text>
-                </Pressable>
+                {isSimpleMode ? null : (
+                  <>
+                    <Text style={styles.summarySep}>·</Text>
+                    <Pressable
+                      onPress={() => openPicker('account')}
+                      style={styles.summarySegmentFlexible}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.summaryIcon}>
+                        {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
+                      </Text>
+                      <Text
+                        className="text-foreground"
+                        style={[styles.summaryText, styles.summaryTextFlexible]}
+                        numberOfLines={1}
+                      >
+                        {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
                 {showAmountChip ? (
                   <>
                     <Text style={styles.summarySep}>·</Text>
                     <Pressable
                       onPress={() => openPicker('category')}
-                      style={styles.summarySegment}
+                      style={styles.summarySegmentFlexible}
                       hitSlop={6}
                     >
-                      <Text style={styles.summaryIcon}>{activeCategory?.icon || '🏷️'}</Text>
+                      <Text style={styles.summaryIcon}>{activeCategoryIcon}</Text>
                       <Text
                         className="text-foreground"
-                        style={styles.summaryText}
+                        style={[styles.summaryText, styles.summaryTextFlexible]}
                         numberOfLines={1}
                       >
-                        {activeCategory?.name ?? I18n.t('transactions.editor.category')}
+                        {activeCategoryLabel}
                       </Text>
                     </Pressable>
                   </>
