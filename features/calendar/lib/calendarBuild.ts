@@ -1,5 +1,6 @@
 import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 export type CalendarDayAggregate = {
   dayKey: string;
@@ -175,9 +176,7 @@ export function buildCalendarMonth({
     const absNet = Math.abs(agg.net);
     if (absNet > maxAbsNet) maxAbsNet = absNet;
     if (agg.transactions.length > 1) {
-      agg.transactions.sort(
-        (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt),
-      );
+      agg.transactions.sort((a, b) => compareTransactionsByDateDesc(a, b));
     }
   });
 

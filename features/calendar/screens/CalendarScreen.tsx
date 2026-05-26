@@ -34,6 +34,7 @@ import {
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
+import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -69,6 +70,47 @@ function toggleStringId(previous: string[], targetId: string): string[] {
   return previous.includes(targetId)
     ? previous.filter((id) => id !== targetId)
     : [...previous, targetId];
+}
+
+type CalendarPreferencesSnapshot = {
+  version: 1;
+  excludedAccountIds: string[];
+  excludedIncomeCategoryIds: string[];
+  excludedExpenseCategoryIds: string[];
+};
+
+const CALENDAR_PREFERENCES_VERSION = 1;
+
+function toUniqueStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const next: string[] = [];
+  const seen = new Set<string>();
+  value.forEach((entry) => {
+    if (typeof entry !== 'string') return;
+    const trimmed = entry.trim();
+    if (!trimmed || seen.has(trimmed)) return;
+    seen.add(trimmed);
+    next.push(trimmed);
+  });
+  return next;
+}
+
+function parseCalendarPreferencesPayload(
+  rawValue: string | null,
+): Partial<CalendarPreferencesSnapshot> | null {
+  if (!rawValue) return null;
+  try {
+    const parsed: unknown = JSON.parse(rawValue);
+    if (!parsed || typeof parsed !== 'object') return null;
+    const record = parsed as Record<string, unknown>;
+    return {
+      excludedAccountIds: toUniqueStringList(record.excludedAccountIds),
+      excludedIncomeCategoryIds: toUniqueStringList(record.excludedIncomeCategoryIds),
+      excludedExpenseCategoryIds: toUniqueStringList(record.excludedExpenseCategoryIds),
+    };
+  } catch {
+    return null;
+  }
 }
 
 interface CategoryPickerData {
@@ -147,6 +189,7 @@ export function CalendarScreen({
   const {
     transactions,
     settings,
+    isLoading,
     isSimpleMode,
     simpleWalletId,
     accounts,
@@ -156,6 +199,8 @@ export function CalendarScreen({
     getTrueHourlyRateForDate,
     updateTransactionsBulk,
     deleteTransactionsBulk,
+    calendarPreferencesJson,
+    updateCalendarPreferencesJson,
   } = useApp();
   const themeColors = useThemeColors();
   const { contentWidth } = useDeviceLayout();
@@ -195,6 +240,38 @@ export function CalendarScreen({
   useEffect(() => {
     if (!showFilters) setActiveFilterPicker(null);
   }, [showFilters]);
+
+  const applyCalendarPreferencesSnapshot = useCallback(
+    (saved: Partial<CalendarPreferencesSnapshot>) => {
+      if (saved.excludedAccountIds) setExcludedAccountIds(saved.excludedAccountIds);
+      if (saved.excludedIncomeCategoryIds) {
+        setExcludedIncomeCategoryIds(saved.excludedIncomeCategoryIds);
+      }
+      if (saved.excludedExpenseCategoryIds) {
+        setExcludedExpenseCategoryIds(saved.excludedExpenseCategoryIds);
+      }
+    },
+    [],
+  );
+
+  const calendarPreferencesSnapshot = useMemo<CalendarPreferencesSnapshot>(
+    () => ({
+      version: CALENDAR_PREFERENCES_VERSION,
+      excludedAccountIds,
+      excludedIncomeCategoryIds,
+      excludedExpenseCategoryIds,
+    }),
+    [excludedAccountIds, excludedIncomeCategoryIds, excludedExpenseCategoryIds],
+  );
+
+  usePersistedJsonSnapshot<CalendarPreferencesSnapshot, Partial<CalendarPreferencesSnapshot>>({
+    isLoading,
+    storedJson: calendarPreferencesJson,
+    snapshot: calendarPreferencesSnapshot,
+    parseStoredJson: parseCalendarPreferencesPayload,
+    applyParsedSnapshot: applyCalendarPreferencesSnapshot,
+    writeStoredJson: updateCalendarPreferencesJson,
+  });
 
   const monthPickerTriggerRef = useRef<View>(null);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
