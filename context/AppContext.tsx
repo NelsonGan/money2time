@@ -221,6 +221,8 @@ interface AppContextValue extends AppState {
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
+  calendarPreferencesJson: string | null;
+  updateCalendarPreferencesJson: (value: string | null) => void;
   notificationPrefs: NotificationPreferences;
   updateNotificationPrefs: (updates: Partial<NotificationPreferences>) => void;
   quickEntryPrefs: QuickEntryPrefs;
@@ -605,6 +607,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
   const [activeAccountFilter, setActiveAccountFilter] = useState<string | null>(null);
   const [insightsPreferencesJson, setInsightsPreferencesJson] = useState<string | null>(null);
+  const [calendarPreferencesJson, setCalendarPreferencesJson] = useState<string | null>(null);
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFS,
   );
@@ -629,6 +632,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // one once the post-paint locale effect runs.
       setAppLocale(nextSettings.locale);
       const nextInsightsPreferencesJson = settingsRepository.getInsightsPreferencesJson();
+      const nextCalendarPreferencesJson = settingsRepository.getCalendarPrefsJson();
       const nextNotificationPrefsJson = settingsRepository.getNotificationPreferencesJson();
       const nextNotificationPrefs: NotificationPreferences = nextNotificationPrefsJson
         ? { ...DEFAULT_NOTIFICATION_PREFS, ...JSON.parse(nextNotificationPrefsJson) }
@@ -699,6 +703,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setMonthlyWages(allWages);
       setSettings(nextSettings);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
+      setCalendarPreferencesJson(nextCalendarPreferencesJson);
       setNotificationPrefs(nextNotificationPrefs);
       setQuickEntryPrefs(nextQuickEntryPrefs);
       setAccountGroups(nextAccountGroups);
@@ -1847,6 +1852,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateCalendarPreferencesJson = useCallback((value: string | null) => {
+    const normalized = value && value.trim().length > 0 ? value : null;
+    setCalendarPreferencesJson((previous) => {
+      if (previous === normalized) return previous;
+      settingsRepository.updateCalendarPrefsJson(normalized);
+      return normalized;
+    });
+  }, []);
+
   const updateNotificationPrefs = useCallback((updates: Partial<NotificationPreferences>) => {
     setNotificationPrefs((previous) => {
       const merged = {
@@ -2334,6 +2348,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             importMoneyManagerBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
+            calendarPreferencesJson,
+            updateCalendarPreferencesJson,
             notificationPrefs,
             updateNotificationPrefs,
             quickEntryPrefs,
@@ -2411,6 +2427,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       importMoneyManagerBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
+      calendarPreferencesJson,
+      updateCalendarPreferencesJson,
       notificationPrefs,
       updateNotificationPrefs,
       quickEntryPrefs,

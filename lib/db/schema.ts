@@ -93,6 +93,7 @@ export const settingsTable = sqliteTable('settings', {
   insightsPrefsJson: text('insights_prefs_json'),
   notificationPrefsJson: text('notification_prefs_json'),
   quickEntryPrefsJson: text('quick_entry_prefs_json'),
+  calendarPrefsJson: text('calendar_prefs_json'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),
