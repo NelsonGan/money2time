@@ -42,6 +42,7 @@ function ensureCoreData() {
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
+        calendarPrefsJson: null,
         onboardingCompleted: false,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
