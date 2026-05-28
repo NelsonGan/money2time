@@ -29,6 +29,7 @@ import {
   View,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
@@ -1375,18 +1376,20 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.flex}>
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <AppErrorBoundary>
-          <AppProvider>
-            <ProProvider>
-              <ThemeGate>
-                <AppContent />
-              </ThemeGate>
-            </ProProvider>
-          </AppProvider>
-        </AppErrorBoundary>
-        <MascotWarmup />
-      </SafeAreaProvider>
+      <KeyboardProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+          <AppErrorBoundary>
+            <AppProvider>
+              <ProProvider>
+                <ThemeGate>
+                  <AppContent />
+                </ThemeGate>
+              </ProProvider>
+            </AppProvider>
+          </AppErrorBoundary>
+          <MascotWarmup />
+        </SafeAreaProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }
