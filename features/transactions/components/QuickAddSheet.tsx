@@ -2,7 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Calendar, Check, History, Maximize2, Mic, Settings2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -572,6 +572,15 @@ export function QuickAddSheet({
   const backdropAnimatedStyle = useAnimatedStyle(() => ({
     opacity: backdropOpacity.value,
   }));
+  // Lift the sheet by the keyboard height directly. Using KeyboardAvoidingView
+  // here races on first open: its padding depends on the view's measured
+  // onLayout, which on Android lands after autoFocus has already triggered the
+  // keyboard — so the first show computes padding against a zero frame and the
+  // keyboard covers the sheet.
+  const keyboard = useReanimatedKeyboardAnimation();
+  const keyboardAvoidStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: keyboard.height.value }],
+  }));
 
   const parsedLive = useMemo(() => parseQuickInput(text), [text]);
   const parsedSettled = useMemo(() => parseQuickInput(settledText), [settledText]);
@@ -888,7 +897,7 @@ export function QuickAddSheet({
         accessibilityLabel={I18n.t('common.close')}
       />
 
-      <KeyboardAvoidingView behavior="padding" style={styles.kav} pointerEvents="box-none">
+      <Animated.View style={[styles.kav, keyboardAvoidStyle]} pointerEvents="box-none">
         <Animated.View
           style={[styles.cardWrap, { paddingBottom: cardBottomMargin }, sheetAnimatedStyle]}
         >
@@ -1165,8 +1174,6 @@ export function QuickAddSheet({
                   <Text
                     style={[styles.timeSentence, { color: themeColors.textSoft }]}
                     numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
                   >
                     {(() => {
                       const AMOUNT_TOKEN = '__M2T_AMOUNT__';
@@ -1225,7 +1232,7 @@ export function QuickAddSheet({
             </View>
           </View>
         </Animated.View>
-      </KeyboardAvoidingView>
+      </Animated.View>
 
       <CategoryPickerSheet
         visible={activePicker === 'category'}
