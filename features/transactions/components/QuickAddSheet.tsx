@@ -1,14 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Calendar, Check, History, Maximize2, Mic, Settings2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Keyboard,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, {
   Easing,
@@ -895,11 +888,7 @@ export function QuickAddSheet({
         accessibilityLabel={I18n.t('common.close')}
       />
 
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.kav}
-        pointerEvents="box-none"
-      >
+      <KeyboardAvoidingView behavior="padding" style={styles.kav} pointerEvents="box-none">
         <Animated.View
           style={[styles.cardWrap, { paddingBottom: cardBottomMargin }, sheetAnimatedStyle]}
         >
