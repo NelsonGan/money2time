@@ -124,6 +124,14 @@ export interface SplitDraftInput {
   paid?: { paidAt: string; paidTransactionId: string | null };
 }
 
+/** How a transaction was entered. Drives which analytics event fires on
+ *  create — voice entries are tracked separately from manual adds. */
+export type TransactionSource = 'manual' | 'voice';
+
+export interface CreateTransactionMeta {
+  source?: TransactionSource;
+}
+
 interface AppContextValue extends AppState {
   filteredTransactions: TransactionWithRelations[];
   monthlyWages: MonthlyWageSettings[];
@@ -158,7 +166,7 @@ interface AppContextValue extends AppState {
   deleteCategory: (id: string) => void;
   reorderCategories: (ids: string[]) => void;
 
-  createTransaction: (input: CreateTransactionInput) => void;
+  createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
@@ -1048,7 +1056,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createTransaction = useCallback(
-    (input: CreateTransactionInput) => {
+    (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const normalizedInput = {
         ...input,
         amount: normalizeMoneyAmount(input.amount),
@@ -1080,7 +1088,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(id, normalizedInput);
-          void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
+          // Voice entries fire a dedicated event so voice adoption can be
+          // measured separately from manual transaction creation.
+          const createdEvent =
+            meta?.source === 'voice'
+              ? AnalyticsEvents.VOICE_TRANSACTION_CREATED
+              : AnalyticsEvents.TRANSACTION_CREATED;
+          void trackEvent(createdEvent, {
             type: normalizedInput.type,
             has_category: !!normalizedInput.categoryId,
             has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
