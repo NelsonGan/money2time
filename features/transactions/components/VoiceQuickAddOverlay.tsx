@@ -209,7 +209,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         setRecording(false);
         lastSessionEndAtRef.current = Date.now();
         void triggerHaptic('success');
-        createTransaction(input);
+        createTransaction(input, { source: 'voice' });
         return;
       }
       setPreview(data);
@@ -440,7 +440,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       categoryId: preview.category?.id ?? null,
     };
     setPreview(null);
-    createTransaction(input);
+    createTransaction(input, { source: 'voice' });
   }, [createTransaction, preview, settings.currencyCode]);
 
   const handleEdit = useCallback(() => {
