@@ -20,7 +20,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { ThemeColor, ThemeMode } from '~/types';
+import type { ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
@@ -213,6 +213,24 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     updateSettings({ themeColor: nextThemeColor });
   };
 
+  const weekStartsOnOptions = useMemo(
+    () => [
+      { value: '1', label: I18n.t('settings.first_day_monday') },
+      { value: '0', label: I18n.t('settings.first_day_sunday') },
+      { value: '6', label: I18n.t('settings.first_day_saturday') },
+    ],
+    [],
+  );
+
+  const handleWeekStartsOnChange = (value: string) => {
+    const parsed = Number(value);
+    if (parsed !== 0 && parsed !== 1 && parsed !== 6) return;
+    const next = parsed as WeekStartsOn;
+    if (next === settings.weekStartsOn) return;
+    void triggerHaptic('selection');
+    updateSettings({ weekStartsOn: next });
+  };
+
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -294,6 +312,12 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 optionsLayout="list"
                 listItemAlignment="center"
                 onChange={handleThemeColorChange}
+              />
+              <SelectField
+                label={I18n.t('settings.first_day_of_week')}
+                value={String(settings.weekStartsOn)}
+                options={weekStartsOnOptions}
+                onChange={handleWeekStartsOnChange}
               />
             </CardContent>
           </Card>

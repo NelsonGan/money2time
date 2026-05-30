@@ -26,7 +26,7 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { DisplayModeToggle, MonthJumpPopover } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -58,7 +58,6 @@ import { buildCalendarMonth, getCalendarWeekdayLabels } from '../lib/calendarBui
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
-const BULK_DATE_PANEL_HEIGHT = 360;
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -230,6 +229,7 @@ export function CalendarScreen({
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const isSelectionMode = selectedTransactionIds.length > 0;
@@ -402,6 +402,7 @@ export function CalendarScreen({
         isTimeMode,
         getDisplayValueForTransaction,
         todayDayKey,
+        weekStartsOn: settings.weekStartsOn,
       }),
     [
       activeMonthDate,
@@ -410,10 +411,14 @@ export function CalendarScreen({
       isTimeMode,
       getDisplayValueForTransaction,
       todayDayKey,
+      settings.weekStartsOn,
     ],
   );
 
-  const weekdayLabels = useMemo(() => getCalendarWeekdayLabels(activeLocale), [activeLocale]);
+  const weekdayLabels = useMemo(
+    () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
+    [activeLocale, settings.weekStartsOn],
+  );
 
   const activeMonthLabel = useMemo(
     () => formatMonthYearLabel(activeMonthDate, activeLocale),
@@ -909,18 +914,17 @@ export function CalendarScreen({
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.editor.date')}
               </Text>
-              <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={styles.bulkDatePanel}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setBulkDateModalVisible(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.editor.date')}
+                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
               >
-                <DatePanel
-                  value={bulkDate}
-                  onSelect={(value) => {
-                    setBulkDate(value);
-                    setBulkDateTouched(true);
-                  }}
-                />
-              </View>
+                <Text variant="caption">{bulkDate}</Text>
+              </Pressable>
             </View>
 
             <View className="gap-2.5">
@@ -935,6 +939,17 @@ export function CalendarScreen({
               />
             </View>
           </ScrollView>
+          <DatePickerModal
+            visible={bulkDateModalVisible}
+            value={bulkDate}
+            overlay
+            onSelect={(value) => {
+              setBulkDate(value);
+              setBulkDateTouched(true);
+              setBulkDateModalVisible(false);
+            }}
+            onClose={() => setBulkDateModalVisible(false)}
+          />
         </SafeAreaView>
       </ThemeModal>
 
@@ -1085,9 +1100,6 @@ const styles = StyleSheet.create({
   summarySlot: {
     minHeight: 56,
     justifyContent: 'center',
-  },
-  bulkDatePanel: {
-    height: BULK_DATE_PANEL_HEIGHT,
   },
   modalHeaderRow: {
     paddingHorizontal: spacing.screenHorizontal,

@@ -1,4 +1,4 @@
-import type { TransactionWithRelations } from '~/types';
+import type { TransactionWithRelations, WeekStartsOn } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
@@ -47,23 +47,26 @@ export interface BuildCalendarMonthInput {
   isTimeMode: boolean;
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number;
   todayDayKey: string;
+  weekStartsOn: WeekStartsOn;
 }
 
 const WEEKDAY_LABELS_CACHE = new Map<string, string[]>();
 const MONTH_LABEL_CACHE = new Map<string, string>();
 const CALENDAR_DATE_LABEL_CACHE = new Map<string, string>();
 
-export function getCalendarWeekdayLabels(locale: string): string[] {
-  const cached = WEEKDAY_LABELS_CACHE.get(locale);
+export function getCalendarWeekdayLabels(locale: string, weekStartsOn: WeekStartsOn): string[] {
+  const cacheKey = `${locale}|${weekStartsOn}`;
+  const cached = WEEKDAY_LABELS_CACHE.get(cacheKey);
   if (cached) return cached;
   const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
-  const monday = new Date(Date.UTC(2024, 0, 1));
+  // 2024-01-07 is a Sunday (UTC); shift by weekStartsOn to get the configured first day.
+  const sunday = new Date(Date.UTC(2024, 0, 7));
   const labels = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setUTCDate(monday.getUTCDate() + index);
+    const date = new Date(sunday);
+    date.setUTCDate(sunday.getUTCDate() + weekStartsOn + index);
     return formatter.format(date);
   });
-  WEEKDAY_LABELS_CACHE.set(locale, labels);
+  WEEKDAY_LABELS_CACHE.set(cacheKey, labels);
   return labels;
 }
 
@@ -77,11 +80,15 @@ export function dayKeyToUtcDate(dayKey: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function weekdayColumnIndexMonday(dayKey: string): number {
+/**
+ * Column index in a calendar grid where weekStartsOn is the leftmost column.
+ * Result is in [0, 6].
+ */
+export function weekdayColumnIndex(dayKey: string, weekStartsOn: WeekStartsOn): number {
   const date = dayKeyToUtcDate(dayKey);
   if (!date) return 0;
   const sundayFirst = date.getUTCDay();
-  return (sundayFirst + 6) % 7;
+  return (sundayFirst - weekStartsOn + 7) % 7;
 }
 
 export function monthLabelFromMonthKey(monthKey: string, locale: string): string {
@@ -129,6 +136,7 @@ export function buildCalendarMonth({
   isTimeMode,
   getDisplayValueForTransaction,
   todayDayKey,
+  weekStartsOn,
 }: BuildCalendarMonthInput): CalendarMonthData {
   const year = monthAnchor.getFullYear();
   const monthIndex = monthAnchor.getMonth();
@@ -181,7 +189,7 @@ export function buildCalendarMonth({
   });
 
   const cells: CalendarGridCell[] = [];
-  const leading = weekdayColumnIndexMonday(firstDayKey);
+  const leading = weekdayColumnIndex(firstDayKey, weekStartsOn);
   for (let i = 0; i < leading; i += 1) {
     cells.push({ kind: 'spacer', id: `${monthKey}-pre-${i}` });
   }

@@ -60,14 +60,21 @@ import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendP
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { DatePickerModal } from '~/components/datePicker';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, Category, CategoryType, TransactionWithRelations, WageType } from '~/types';
+import type {
+  Account,
+  Category,
+  CategoryType,
+  TransactionWithRelations,
+  WageType,
+  WeekStartsOn,
+} from '~/types';
 import { cn } from '~/utils';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -362,9 +369,6 @@ const styles = StyleSheet.create({
   insightsFilterPillsContent: {
     gap: spacing.xs,
   },
-  insightsFilterDatePanel: {
-    height: 360,
-  },
   incomeRateUnitPickerSheet: {
     marginHorizontal: spacing.screenHorizontal,
     marginBottom: spacing.xl + spacing.xs,
@@ -434,12 +438,12 @@ function yearPickerPageStartFromYear(year: number) {
   return Math.floor(year / MONTHS_PER_YEAR) * MONTHS_PER_YEAR;
 }
 
-function buildWeekPickerOptions(monthDate: Date): WeekPickerOption[] {
+function buildWeekPickerOptions(monthDate: Date, weekStartsOn: WeekStartsOn): WeekPickerOption[] {
   const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
   const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
-  const lastWeekStart = startOfWeekMondayDate(monthEnd);
+  const lastWeekStart = startOfWeekDate(monthEnd, weekStartsOn);
   const rows: WeekPickerOption[] = [];
-  const cursor = startOfWeekMondayDate(monthStart);
+  const cursor = startOfWeekDate(monthStart, weekStartsOn);
 
   while (cursor.getTime() <= lastWeekStart.getTime()) {
     const weekStart = new Date(cursor);
@@ -806,9 +810,9 @@ function startOfDayDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function startOfWeekMondayDate(date: Date): Date {
+function startOfWeekDate(date: Date, weekStartsOn: WeekStartsOn): Date {
   const day = startOfDayDate(date);
-  const offset = (day.getDay() + 6) % 7;
+  const offset = (day.getDay() - weekStartsOn + 7) % 7;
   day.setDate(day.getDate() - offset);
   return day;
 }
@@ -1038,6 +1042,7 @@ function getPeriodRange(
   anchorDate: Date,
   customStart: string,
   customEnd: string,
+  weekStartsOn: WeekStartsOn,
 ) {
   if (preset === 'custom') {
     const startDate = parseDateInput(customStart);
@@ -1045,7 +1050,7 @@ function getPeriodRange(
     if (startDate && endDate && startDate <= endDate) return toRange(startDate, endDate);
   }
   if (preset === 'week') {
-    const start = startOfWeekMondayDate(anchorDate);
+    const start = startOfWeekDate(anchorDate, weekStartsOn);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
     return toRange(start, end);
@@ -1806,6 +1811,7 @@ function PeriodPickerPopover({
   screenWidth,
   screenHeight,
   locale,
+  weekStartsOn,
   currentPreset,
   currentAnchorDate,
   currentCustomStart,
@@ -1819,6 +1825,7 @@ function PeriodPickerPopover({
   screenWidth: number;
   screenHeight: number;
   locale: string;
+  weekStartsOn: WeekStartsOn;
   currentPreset: PeriodPreset;
   currentAnchorDate: Date;
   currentCustomStart: string;
@@ -1834,6 +1841,7 @@ function PeriodPickerPopover({
   const [draftCustomDateField, setDraftCustomDateField] = useState<'start' | 'end'>(
     currentCustomDateField,
   );
+  const [customDateModalVisible, setCustomDateModalVisible] = useState(false);
   const [visibleYearPageStart, setVisibleYearPageStart] = useState(() =>
     yearPickerPageStartFromYear(currentAnchorDate.getFullYear()),
   );
@@ -1862,8 +1870,15 @@ function PeriodPickerPopover({
   ]);
 
   const previewRange = useMemo(
-    () => getPeriodRange(currentPreset, draftAnchorDate, draftCustomStart, draftCustomEnd),
-    [currentPreset, draftAnchorDate, draftCustomEnd, draftCustomStart],
+    () =>
+      getPeriodRange(
+        currentPreset,
+        draftAnchorDate,
+        draftCustomStart,
+        draftCustomEnd,
+        weekStartsOn,
+      ),
+    [currentPreset, draftAnchorDate, draftCustomEnd, draftCustomStart, weekStartsOn],
   );
   const previewLabel = useMemo(
     () => periodLabel(currentPreset, previewRange, locale),
@@ -1880,7 +1895,10 @@ function PeriodPickerPopover({
     () => !!buildCustomPeriodState(draftCustomStart, draftCustomEnd),
     [draftCustomEnd, draftCustomStart],
   );
-  const weekOptions = useMemo(() => buildWeekPickerOptions(visibleWeekMonth), [visibleWeekMonth]);
+  const weekOptions = useMemo(
+    () => buildWeekPickerOptions(visibleWeekMonth, weekStartsOn),
+    [visibleWeekMonth, weekStartsOn],
+  );
   const yearPage = useMemo(
     () => Array.from({ length: MONTHS_PER_YEAR }, (_, index) => visibleYearPageStart + index),
     [visibleYearPageStart],
@@ -2207,16 +2225,11 @@ function PeriodPickerPopover({
                       onPress={() => {
                         void triggerHaptic('selection');
                         setDraftCustomDateField('start');
+                        setCustomDateModalVisible(true);
                       }}
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('insights.filters.start')}
-                      accessibilityState={{ selected: draftCustomDateField === 'start' }}
-                      className={cn(
-                        'flex-1 rounded-2xl border px-3 py-2.5',
-                        draftCustomDateField === 'start'
-                          ? 'border-primary/50 bg-primary/10'
-                          : 'border-border/30 bg-card',
-                      )}
+                      className="flex-1 rounded-2xl border border-border/30 bg-card px-3 py-2.5"
                     >
                       <Text variant="label" tone="muted">
                         {I18n.t('insights.filters.start')}
@@ -2229,16 +2242,11 @@ function PeriodPickerPopover({
                       onPress={() => {
                         void triggerHaptic('selection');
                         setDraftCustomDateField('end');
+                        setCustomDateModalVisible(true);
                       }}
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('insights.filters.end')}
-                      accessibilityState={{ selected: draftCustomDateField === 'end' }}
-                      className={cn(
-                        'flex-1 rounded-2xl border px-3 py-2.5',
-                        draftCustomDateField === 'end'
-                          ? 'border-primary/50 bg-primary/10'
-                          : 'border-border/30 bg-card',
-                      )}
+                      className="flex-1 rounded-2xl border border-border/30 bg-card px-3 py-2.5"
                     >
                       <Text variant="label" tone="muted">
                         {I18n.t('insights.filters.end')}
@@ -2247,13 +2255,6 @@ function PeriodPickerPopover({
                         {draftCustomEnd}
                       </Text>
                     </Pressable>
-                  </View>
-                  <View className="overflow-hidden rounded-[22px] border border-border/30 bg-card/35">
-                    <DatePanel
-                      value={draftCustomDateField === 'start' ? draftCustomStart : draftCustomEnd}
-                      onSelect={(value) => handleCustomDateSelect(draftCustomDateField, value)}
-                      showQuickDates={false}
-                    />
                   </View>
                   <Pressable
                     onPress={applyCustomSelection}
@@ -2280,6 +2281,17 @@ function PeriodPickerPopover({
           </ScrollView>
         </View>
       </View>
+      <DatePickerModal
+        visible={customDateModalVisible}
+        value={draftCustomDateField === 'start' ? draftCustomStart : draftCustomEnd}
+        showQuickDays={false}
+        overlay
+        onSelect={(value) => {
+          handleCustomDateSelect(draftCustomDateField, value);
+          setCustomDateModalVisible(false);
+        }}
+        onClose={() => setCustomDateModalVisible(false)}
+      />
     </ThemeModal>
   );
 }
@@ -2395,6 +2407,7 @@ export function InsightsScreen({
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
+  const weekStartsOn = settings.weekStartsOn;
 
   const [periodPresetByInsight, setPeriodPresetByInsight] = useState<
     Partial<Record<InsightType, PeriodPreset>>
@@ -2409,6 +2422,7 @@ export function InsightsScreen({
   );
   const [customEnd, setCustomEnd] = useState(() => formatDateInput(new Date()));
   const [activeCustomDateField, setActiveCustomDateField] = useState<'start' | 'end'>('start');
+  const [filterCustomDateModalVisible, setFilterCustomDateModalVisible] = useState(false);
   const [selectedInsightType, setSelectedInsightType] = useState<InsightType>('expense_breakdown');
   const persistedPeriodPreset =
     periodPresetByInsight[selectedInsightType] ?? getDefaultPeriodPreset(selectedInsightType);
@@ -3097,6 +3111,7 @@ export function InsightsScreen({
         state.anchorDate,
         state.customStart,
         state.customEnd,
+        weekStartsOn,
       );
       const rangeStartMs = Date.parse(range.start);
       const rangeEndMs = Date.parse(range.end);
@@ -3858,6 +3873,7 @@ export function InsightsScreen({
       settings.displayMode,
       transactionDayKeyById,
       transactionMonthKeyById,
+      weekStartsOn,
     ],
   );
   const prevBuildPageDataRef = useRef(buildPageData);
@@ -3927,8 +3943,9 @@ export function InsightsScreen({
         headerPreviewPeriodState.anchorDate,
         headerPreviewPeriodState.customStart,
         headerPreviewPeriodState.customEnd,
+        weekStartsOn,
       ),
-    [displayPeriodPreset, headerPreviewPeriodState],
+    [displayPeriodPreset, headerPreviewPeriodState, weekStartsOn],
   );
   const activePeriodLabel = useMemo(
     () => periodLabel(displayPeriodPreset, headerPreviewRange, activeLocale),
@@ -6291,6 +6308,7 @@ export function InsightsScreen({
         screenWidth={width}
         screenHeight={height}
         locale={activeLocale}
+        weekStartsOn={weekStartsOn}
         currentPreset={effectivePeriodPreset}
         currentAnchorDate={currentPeriodState.anchorDate}
         currentCustomStart={customStart}
@@ -6375,6 +6393,7 @@ export function InsightsScreen({
                             currentPeriodState.anchorDate,
                             currentPeriodState.customStart,
                             currentPeriodState.customEnd,
+                            weekStartsOn,
                           );
                           setAnchorDate(resolveWeekAnchorDateFromRange(currentRange));
                         }
@@ -6391,16 +6410,11 @@ export function InsightsScreen({
                         onPress={() => {
                           void triggerHaptic('selection');
                           setActiveCustomDateField('start');
+                          setFilterCustomDateModalVisible(true);
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('insights.filters.start')}
-                        accessibilityState={{ selected: activeCustomDateField === 'start' }}
-                        className={cn(
-                          'flex-1 rounded-xl border px-3 py-2.5',
-                          activeCustomDateField === 'start'
-                            ? 'border-primary/50 bg-primary/10'
-                            : 'border-border/30 bg-card',
-                        )}
+                        className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
                       >
                         <Text variant="label" tone="muted">
                           {I18n.t('insights.filters.start')}
@@ -6413,16 +6427,11 @@ export function InsightsScreen({
                         onPress={() => {
                           void triggerHaptic('selection');
                           setActiveCustomDateField('end');
+                          setFilterCustomDateModalVisible(true);
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('insights.filters.end')}
-                        accessibilityState={{ selected: activeCustomDateField === 'end' }}
-                        className={cn(
-                          'flex-1 rounded-xl border px-3 py-2.5',
-                          activeCustomDateField === 'end'
-                            ? 'border-primary/50 bg-primary/10'
-                            : 'border-border/30 bg-card',
-                        )}
+                        className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
                       >
                         <Text variant="label" tone="muted">
                           {I18n.t('insights.filters.end')}
@@ -6431,16 +6440,6 @@ export function InsightsScreen({
                           {customEnd}
                         </Text>
                       </Pressable>
-                    </View>
-                    <View
-                      className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                      style={styles.insightsFilterDatePanel}
-                    >
-                      <DatePanel
-                        value={activeCustomDateField === 'start' ? customStart : customEnd}
-                        onSelect={(value) => handleCustomDateSelect(activeCustomDateField, value)}
-                        showQuickDates={false}
-                      />
                     </View>
                   </View>
                 ) : null}
@@ -6824,6 +6823,17 @@ export function InsightsScreen({
               setExcludedSavingsExpenseCategoryIds((prev) => toggleStringId(prev, categoryId))
             }
             onClear={() => setExcludedSavingsExpenseCategoryIds([])}
+          />
+          <DatePickerModal
+            visible={filterCustomDateModalVisible}
+            value={activeCustomDateField === 'start' ? customStart : customEnd}
+            showQuickDays={false}
+            overlay
+            onSelect={(value) => {
+              handleCustomDateSelect(activeCustomDateField, value);
+              setFilterCustomDateModalVisible(false);
+            }}
+            onClose={() => setFilterCustomDateModalVisible(false)}
           />
         </SafeAreaView>
       </ThemeModal>

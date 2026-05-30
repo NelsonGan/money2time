@@ -68,6 +68,12 @@ export interface MonthlyWageSettings {
   deletedAt: string | null;
 }
 
+/**
+ * Day index used by `Date.getDay()` — 0 = Sunday, 1 = Monday, …, 6 = Saturday.
+ * We only expose Sunday or Monday in the UI today; other values are reserved.
+ */
+export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 export interface UserSettings {
   id: string;
   appUserId: string;
@@ -80,6 +86,7 @@ export interface UserSettings {
   themeColor: ThemeColor;
   onboardingCompleted: boolean;
   userMode: UserMode;
+  weekStartsOn: WeekStartsOn;
   autoBackupEnabled: boolean;
   autoBackupTarget: BackupTarget;
   lastAutoBackupAt: string | null;

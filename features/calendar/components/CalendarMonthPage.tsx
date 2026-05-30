@@ -85,8 +85,17 @@ export const CalendarMonthPage = memo(function CalendarMonthPage({
         isTimeMode,
         getDisplayValueForTransaction,
         todayDayKey,
+        weekStartsOn: fullSettings.weekStartsOn,
       }),
-    [monthAnchor, transactions, locale, isTimeMode, getDisplayValueForTransaction, todayDayKey],
+    [
+      monthAnchor,
+      transactions,
+      locale,
+      isTimeMode,
+      getDisplayValueForTransaction,
+      todayDayKey,
+      fullSettings.weekStartsOn,
+    ],
   );
 
   // Each page keeps its own "preview" day so off-screen pages render a

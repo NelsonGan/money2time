@@ -22,6 +22,7 @@ import type {
   TransactionSplit,
   UserMode,
   UserSettings,
+  WeekStartsOn,
 } from '~/types';
 
 function asAccountType(value: string): Account['type'] {
@@ -110,6 +111,14 @@ function asThemeColor(value: string | null | undefined): ThemeColor {
 
 function asUserMode(value: string | null | undefined): UserMode {
   return value === 'simple' ? 'simple' : 'power';
+}
+
+function asWeekStartsOn(value: number | null | undefined): WeekStartsOn {
+  if (value === 0 || value === 6) return value;
+  if (value === 1 || value === 2 || value === 3 || value === 4 || value === 5) {
+    return value;
+  }
+  return 1;
 }
 
 function asBackupTarget(value: string | null | undefined): BackupTarget {
@@ -261,6 +270,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     themeColor: asThemeColor(row.themeColor),
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
+    weekStartsOn: asWeekStartsOn(row.weekStartsOn),
     autoBackupEnabled: row.autoBackupEnabled ?? true,
     autoBackupTarget: asBackupTarget(row.autoBackupTarget),
     lastAutoBackupAt: row.lastAutoBackupAt,

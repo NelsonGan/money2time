@@ -40,7 +40,7 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 
-import { QuickAddDateModalPicker } from './quickAdd';
+import { DatePickerModal } from '~/components/datePicker';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, replaceNoteInQuickInput } from '../utils/parseQuickInput';
@@ -1255,7 +1255,7 @@ export function QuickAddSheet({
         overlay
       />
 
-      <QuickAddDateModalPicker
+      <DatePickerModal
         visible={activePicker === 'date'}
         value={date}
         onSelect={handleDateSelect}

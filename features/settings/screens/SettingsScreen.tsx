@@ -6,6 +6,7 @@ import {
   DatabaseBackup,
   FileText,
   FolderTree,
+  Heart,
   Landmark,
   Palette,
   RefreshCcw,
@@ -46,6 +47,7 @@ import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tu
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { FONT } from '~/utils/fonts';
 
 type SettingsTutorialTargetId =
@@ -488,6 +490,14 @@ export function SettingsScreen({
                       },
                     },
                   ]);
+                }}
+              />
+              <SettingsRowItem
+                icon={<Heart size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.rate_app')}
+                subtitle={I18n.t('settings.rate_app_subtitle')}
+                onPress={() => {
+                  void openStoreReviewManually();
                 }}
               />
             </View>

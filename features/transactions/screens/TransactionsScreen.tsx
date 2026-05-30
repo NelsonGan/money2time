@@ -33,7 +33,7 @@ import {
   MonthJumpPopover,
   MonthPagerPage,
 } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -77,7 +77,6 @@ const FILTER_SCROLL_CONTENT_STYLE = {
   gap: spacing.sm,
 } as const;
 const FILTER_CHIPS_CONTENT_STYLE = { gap: spacing.xs, paddingRight: spacing.sm } as const;
-const BULK_DATE_PANEL_HEIGHT = 360;
 const EMPTY_MONTH_BUCKETS: MonthTransactionBuckets = {
   transactionsMap: new Map<string, TransactionWithRelations[]>(),
   summaries: new Map(),
@@ -290,6 +289,7 @@ export function TransactionsScreen({
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const hasActiveSearch = transactionFilters.search.trim().length > 0;
@@ -1067,18 +1067,17 @@ export function TransactionsScreen({
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.editor.date')}
               </Text>
-              <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={styles.bulkDatePanel}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setBulkDateModalVisible(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.editor.date')}
+                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
               >
-                <DatePanel
-                  value={bulkDate}
-                  onSelect={(value) => {
-                    setBulkDate(value);
-                    setBulkDateTouched(true);
-                  }}
-                />
-              </View>
+                <Text variant="caption">{bulkDate}</Text>
+              </Pressable>
             </View>
 
             <View className="gap-2.5">
@@ -1093,6 +1092,17 @@ export function TransactionsScreen({
               />
             </View>
           </ScrollView>
+          <DatePickerModal
+            visible={bulkDateModalVisible}
+            value={bulkDate}
+            overlay
+            onSelect={(value) => {
+              setBulkDate(value);
+              setBulkDateTouched(true);
+              setBulkDateModalVisible(false);
+            }}
+            onClose={() => setBulkDateModalVisible(false)}
+          />
         </SafeAreaView>
       </ThemeModal>
 
@@ -1309,8 +1319,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  bulkDatePanel: {
-    height: BULK_DATE_PANEL_HEIGHT,
   },
 });

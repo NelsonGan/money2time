@@ -35,6 +35,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { isRevenueCatCustomerStateActive, type RevenueCatPackage } from '~/services/revenueCat';
+import { recordProPurchase } from '~/services/reviewPrompt';
 import { FONT } from '~/utils/fonts';
 
 interface ProPaywallScreenProps {
@@ -702,6 +703,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         const result = await purchasePackage(pkgId);
         if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
+          recordProPurchase();
           onClose();
         } else if (result.status === 'pending') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, { package: pkgId });

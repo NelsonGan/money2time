@@ -40,6 +40,7 @@ class SettingsRepository {
         | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
+        | 'weekStartsOn'
         | 'autoBackupEnabled'
         | 'autoBackupTarget'
         | 'lastAutoBackupAt'
@@ -154,6 +155,7 @@ class SettingsRepository {
         calendarPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
+        weekStartsOn: 1,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,

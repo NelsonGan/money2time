@@ -41,8 +41,8 @@ import {
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
+import { DatePickerModal } from '~/components/datePicker';
 import {
-  DatePanel,
   NumpadPanel,
   SplitBillModal,
   type SplitDraft,
@@ -99,13 +99,7 @@ type TypeCardOption = {
   borderClass: string;
 };
 
-const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = [
-  'amount',
-  'date',
-  'repeat',
-  'ends',
-  'endDate',
-];
+const TOOL_ZONE_FIELDS: readonly NonNullActiveField[] = ['amount', 'repeat', 'ends'];
 
 // These fields render as a modal sheet over the editor — no inline tool zone.
 const SHEET_FIELDS: readonly NonNullActiveField[] = [
@@ -114,6 +108,9 @@ const SHEET_FIELDS: readonly NonNullActiveField[] = [
   'toAccount',
   'category',
 ];
+
+// These fields open a popup modal calendar — no inline tool zone.
+const MODAL_FIELDS: readonly NonNullActiveField[] = ['date', 'endDate'];
 
 const styles = StyleSheet.create({
   screenContainer: {
@@ -1200,7 +1197,8 @@ export function TransactionEditorScreen({
     activeField !== null &&
     activeField !== 'note' &&
     !inlineRecurringFields.includes(activeField) &&
-    !SHEET_FIELDS.includes(activeField);
+    !SHEET_FIELDS.includes(activeField) &&
+    !MODAL_FIELDS.includes(activeField);
   const noteSuggestionsVisible = noteSuggestions.length > 0 && activeField === 'note';
   const noteSuggestionsTop = noteFieldFrame ? noteFieldFrame.y + noteFieldFrame.height : null;
   const effectiveSummaryFlex =
@@ -1482,8 +1480,6 @@ export function TransactionEditorScreen({
             onConfirm={handleAmountConfirm}
           />
         );
-      case 'date':
-        return <DatePanel value={date} onSelect={handleDateSelect} />;
       case 'repeat':
         return (
           <View className="flex-1 px-5 pt-3">
@@ -1569,10 +1565,6 @@ export function TransactionEditorScreen({
               style={styles.summaryDismissFiller}
             />
           </View>
-        );
-      case 'endDate':
-        return (
-          <DatePanel value={recurrenceEndDate || date} onSelect={handleRecurrenceEndDateSelect} />
         );
       default:
         return null;
@@ -2416,6 +2408,19 @@ export function TransactionEditorScreen({
         allowParentSelection
         selectedCategoryId={categoryId}
         onSelect={handleCategorySelect}
+      />
+      <DatePickerModal
+        visible={activeField === 'date'}
+        value={date}
+        onSelect={handleDateSelect}
+        onClose={clearActiveField}
+      />
+      <DatePickerModal
+        visible={activeField === 'endDate'}
+        value={recurrenceEndDate || date}
+        title={I18n.t('transactions.editor.end_date')}
+        onSelect={handleRecurrenceEndDateSelect}
+        onClose={clearActiveField}
       />
     </SafeAreaView>
   );
