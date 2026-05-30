@@ -24,7 +24,7 @@ import { VoiceCaptureOverlay } from './VoiceCaptureOverlay';
 import { VoicePreviewSheet, type VoicePreviewData } from './VoicePreviewSheet';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
-import { parseQuickInput } from '../utils/parseQuickInput';
+import { parseQuickInput, stripCurrencyTokens } from '../utils/parseQuickInput';
 
 export interface VoiceQuickAddHandle {
   /** Start listening. Caller should also call stop() in onPressOut. */
@@ -107,7 +107,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       if (!parsed.amount || parsed.amount <= 0) return null;
       const type: TransactionType = 'expense';
 
-      const note = parsed.note.trim();
+      const note = stripCurrencyTokens(parsed.note);
       const historyMatch = note ? categorizeFromHistory(note, transactions, { type }) : null;
 
       let categoryId: string | null = historyMatch?.categoryId ?? null;
