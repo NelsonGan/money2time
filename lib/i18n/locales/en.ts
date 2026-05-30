@@ -927,7 +927,7 @@ const en = {
   },
   recurring: {
     title: 'Recurring commitments',
-    subtitle: 'Expense-only recurring rules',
+    subtitle: 'Automate your regular transactions',
     delete_rule: 'Delete rule',
     edit_rule: 'Edit recurring rule',
     new_rule: 'New recurring rule',
