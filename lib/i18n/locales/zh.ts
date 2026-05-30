@@ -884,8 +884,8 @@ const zh = {
     },
   },
   recurring: {
-    title: '固定支出',
-    subtitle: '仅支出类型的循环规则',
+    title: '固定交易',
+    subtitle: '自动记录定期交易',
     delete_rule: '删除规则',
     edit_rule: '编辑循环规则',
     new_rule: '新建循环规则',
