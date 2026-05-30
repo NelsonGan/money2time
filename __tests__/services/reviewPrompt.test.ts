@@ -28,7 +28,6 @@ function eligibleState(): ReviewPromptState {
     lastActiveDayKey: '2026-05-01',
     transactionCount: MIN_TRANSACTIONS,
     insightsViewsCount: 0,
-    backupSuccessCount: 0,
     lastPromptAt: null,
     lastPromptVersion: null,
   };
@@ -196,14 +195,12 @@ describe('reviewPrompt.parseStoredState', () => {
       ...eligibleState(),
       transactionCount: 'twenty',
       activeDaysCount: 'three',
-      insightsViewsCount: -5,
-      backupSuccessCount: NaN,
+      insightsViewsCount: NaN,
     };
     const parsed = parseStoredState(JSON.stringify(tampered));
     expect(parsed?.transactionCount).toBe(0);
     expect(parsed?.activeDaysCount).toBe(0);
     expect(parsed?.insightsViewsCount).toBe(0);
-    expect(parsed?.backupSuccessCount).toBe(0);
   });
 
   it('rejects payloads whose installedAt is not a parseable ISO date', () => {

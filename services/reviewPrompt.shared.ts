@@ -26,11 +26,7 @@ export const MIN_TRANSACTIONS = 20;
 /** Distinct calendar days of app activity required. */
 export const MIN_ACTIVE_DAYS = 3;
 
-export type ReviewPromptTrigger =
-  | 'transaction_milestone'
-  | 'insights_view'
-  | 'backup_success'
-  | 'pro_purchase';
+export type ReviewPromptTrigger = 'transaction_milestone' | 'insights_view' | 'pro_purchase';
 
 /** Wider trigger set used by the pre-prompt sheet — adds the user-initiated
  *  'manual' path (Settings → Rate Money2Time) on top of the automatic-trigger
@@ -55,7 +51,6 @@ export interface ReviewPromptState {
   lastActiveDayKey: string | null;
   transactionCount: number;
   insightsViewsCount: number;
-  backupSuccessCount: number;
   lastPromptAt: string | null;
   lastPromptVersion: string | null;
 }
@@ -81,7 +76,6 @@ export function createInitialState(now: Date, appVersion: string): ReviewPromptS
     lastActiveDayKey: null,
     transactionCount: 0,
     insightsViewsCount: 0,
-    backupSuccessCount: 0,
     lastPromptAt: null,
     lastPromptVersion: null,
   };
@@ -125,7 +119,6 @@ export function parseStoredState(raw: string | null): ReviewPromptState | null {
       lastActiveDayKey: optionalStringField(value.lastActiveDayKey),
       transactionCount: numericField(value.transactionCount),
       insightsViewsCount: numericField(value.insightsViewsCount),
-      backupSuccessCount: numericField(value.backupSuccessCount),
       lastPromptAt: optionalIsoField(value.lastPromptAt),
       lastPromptVersion: optionalStringField(value.lastPromptVersion),
     };

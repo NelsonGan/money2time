@@ -21,7 +21,6 @@ import {
   parseBackupJson,
   summarizeBackup,
 } from '~/services/dataManagementService';
-import { recordBackupSuccess } from '~/services/reviewPrompt';
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
@@ -125,9 +124,6 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         target: settings.autoBackupTarget,
         message: errors.join('; '),
       });
-    }
-    if (success && errors.length === 0) {
-      recordBackupSuccess();
     }
 
     return { skipped: false, written, errors };

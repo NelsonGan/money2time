@@ -138,14 +138,6 @@ export function recordInsightsView(): void {
   );
 }
 
-export function recordBackupSuccess(): void {
-  void bumpAndMaybeRequest(
-    'backup_success',
-    (state) => ({ ...state, backupSuccessCount: state.backupSuccessCount + 1 }),
-    (state) => state.backupSuccessCount >= 2,
-  );
-}
-
 export function recordProPurchase(): void {
   void bumpAndMaybeRequest(
     'pro_purchase',

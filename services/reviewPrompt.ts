@@ -15,8 +15,6 @@ export function recordTransactionLogged(_count: number = 1): void {}
 
 export function recordInsightsView(): void {}
 
-export function recordBackupSuccess(): void {}
-
 export function recordProPurchase(): void {}
 
 export async function maybeRequestReview(_trigger: ReviewPromptTrigger): Promise<void> {}
