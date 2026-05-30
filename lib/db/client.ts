@@ -44,6 +44,7 @@ function ensureCoreData() {
         quickEntryPrefsJson: null,
         calendarPrefsJson: null,
         onboardingCompleted: false,
+        weekStartsOn: 1,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,

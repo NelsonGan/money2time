@@ -63,6 +63,7 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
+import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
   importMoneyManagerBackupFromUri,
@@ -186,6 +187,7 @@ interface AppContextValue extends AppState {
         | 'themeColor'
         | 'onboardingCompleted'
         | 'userMode'
+        | 'weekStartsOn'
         | 'autoBackupEnabled'
         | 'autoBackupTarget'
         | 'lastAutoBackupAt'
@@ -1086,6 +1088,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
             sentiment: normalizedInput.sentiment ?? 'neutral',
           });
+          recordTransactionLogged();
         } catch {
           // rollback on failure
         }
@@ -1398,6 +1401,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             split_count: optimisticSplits.filter((s) => !s.isSelf).length,
             split_total: normalizedInput.amount,
           });
+          recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
         }
@@ -1706,6 +1710,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'themeColor'
           | 'onboardingCompleted'
           | 'userMode'
+          | 'weekStartsOn'
           | 'autoBackupEnabled'
           | 'autoBackupTarget'
           | 'lastAutoBackupAt'
@@ -1919,6 +1924,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Initialize notification handler and sync on mount
   useEffect(() => {
     initNotificationHandler();
+    void initReviewPrompt();
   }, []);
 
   useEffect(() => {

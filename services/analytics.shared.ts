@@ -85,6 +85,17 @@ export const AnalyticsEvents = {
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
   AUTO_BACKUP_FAILED: 'Auto Backup Failed',
+
+  // Review prompt
+  REVIEW_PROMPT_REQUESTED: 'Review Prompt Requested',
+  REVIEW_PROMPT_SKIPPED: 'Review Prompt Skipped',
+  REVIEW_PROMPT_MANUAL_OPENED: 'Review Prompt Manual Opened',
+  REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
+  REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',
+  REVIEW_PREPROMPT_UNHAPPY: 'Review Preprompt Unhappy',
+  REVIEW_PREPROMPT_DISMISSED: 'Review Preprompt Dismissed',
+  REVIEW_PREPROMPT_FEEDBACK_OPENED: 'Review Preprompt Feedback Opened',
+  REVIEW_PREPROMPT_FEEDBACK_DECLINED: 'Review Preprompt Feedback Declined',
 } as const;
 
 // ---------------------------------------------------------------------------

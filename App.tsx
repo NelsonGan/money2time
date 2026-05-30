@@ -44,6 +44,7 @@ import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { OnboardingFlow } from '~/features/onboarding/screens';
+import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import {
   AccountsScreen,
   HourlyValueScreen,
@@ -84,6 +85,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
+import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import {
@@ -530,6 +532,9 @@ function MainShellScreen({
 
     if (previousTab === activeTab) return;
     void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab: activeTab });
+    if (activeTab === 'insights') {
+      recordInsightsView();
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -1349,6 +1354,7 @@ function AppContent() {
           </View>
         </View>
       </ThemeModal>
+      <ReviewPrePromptSheet />
     </View>
   );
 }

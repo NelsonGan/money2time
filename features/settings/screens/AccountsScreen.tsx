@@ -51,7 +51,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -129,7 +129,6 @@ const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING + spacing.xs,
   gap: spacing.sm,
 } as const;
-const ACCOUNT_BULK_DATE_PANEL_HEIGHT = 360;
 const FLOATING_ACTION_SIZE = 56;
 const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
@@ -384,9 +383,6 @@ const styles = StyleSheet.create({
   },
   groupedSectionLabel: {
     fontSize: 11,
-  },
-  bulkDatePanel: {
-    height: ACCOUNT_BULK_DATE_PANEL_HEIGHT,
   },
   floatingAddButtonContainer: {
     position: 'absolute',
@@ -1232,6 +1228,7 @@ export function AccountsScreen({
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const accountsOverviewScrollRef = useRef<ScrollView | null>(null);
@@ -2281,18 +2278,17 @@ export function AccountsScreen({
                 <Text variant="caption" tone="muted">
                   {I18n.t('transactions.editor.date')}
                 </Text>
-                <View
-                  className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                  style={styles.bulkDatePanel}
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setBulkDateModalVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.date')}
+                  className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
                 >
-                  <DatePanel
-                    value={bulkDate}
-                    onSelect={(value) => {
-                      setBulkDate(value);
-                      setBulkDateTouched(true);
-                    }}
-                  />
-                </View>
+                  <Text variant="caption">{bulkDate}</Text>
+                </Pressable>
               </View>
 
               <View className="gap-2.5">
@@ -2307,6 +2303,17 @@ export function AccountsScreen({
                 />
               </View>
             </ScrollView>
+            <DatePickerModal
+              visible={bulkDateModalVisible}
+              value={bulkDate}
+              overlay
+              onSelect={(value) => {
+                setBulkDate(value);
+                setBulkDateTouched(true);
+                setBulkDateModalVisible(false);
+              }}
+              onClose={() => setBulkDateModalVisible(false)}
+            />
           </SafeAreaView>
         </ThemeModal>
       </SettingsPageLayout>,
