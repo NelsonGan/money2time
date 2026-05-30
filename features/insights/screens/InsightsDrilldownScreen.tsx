@@ -26,7 +26,7 @@ import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { DatePanel } from '~/features/transactions/components/editor';
+import { DatePickerModal } from '~/components/datePicker';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -109,9 +109,6 @@ function pieSliceIdFromTouch(
 }
 
 const styles = StyleSheet.create({
-  bulkDatePanelContainer: {
-    height: 360,
-  },
   headerContainer: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   },
@@ -238,6 +235,7 @@ export function InsightsDrilldownScreen({
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
+  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
   const [bulkType, setBulkType] = useState<EditableTransactionType | null>(null);
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
@@ -1009,18 +1007,17 @@ export function InsightsDrilldownScreen({
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.editor.date')}
               </Text>
-              <View
-                className="rounded-[18px] border border-border/30 bg-card/35 overflow-hidden"
-                style={styles.bulkDatePanelContainer}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setBulkDateModalVisible(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.editor.date')}
+                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
               >
-                <DatePanel
-                  value={bulkDate}
-                  onSelect={(value) => {
-                    setBulkDate(value);
-                    setBulkDateTouched(true);
-                  }}
-                />
-              </View>
+                <Text variant="caption">{bulkDate}</Text>
+              </Pressable>
             </View>
 
             <View className="gap-2.5">
@@ -1360,6 +1357,16 @@ export function InsightsDrilldownScreen({
           ) : null}
         </>
       )}
+      <DatePickerModal
+        visible={bulkDateModalVisible}
+        value={bulkDate}
+        onSelect={(value) => {
+          setBulkDate(value);
+          setBulkDateTouched(true);
+          setBulkDateModalVisible(false);
+        }}
+        onClose={() => setBulkDateModalVisible(false)}
+      />
     </SettingsPageLayout>
   );
 }
