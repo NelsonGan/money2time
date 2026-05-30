@@ -1,3 +1,5 @@
+import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+
 export interface ParsedQuickInput {
   amount: number | null;
   note: string;
@@ -46,6 +48,42 @@ export function parseQuickInput(raw: string): ParsedQuickInput {
   }
 
   return { amount: null, note: trimmed };
+}
+
+function escapeRegex(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const CURRENCY_SYMBOLS = Array.from(new Set(MAJOR_CURRENCIES.map((c) => c.symbol)));
+// Letter-bearing symbols (RM, Rp, HK$, kr …) are stripped only as whole tokens
+// so real words survive. Precompiled longest-first so a multi-char symbol is
+// tried before any shorter symbol that overlaps it.
+const ALPHA_CURRENCY_RES = CURRENCY_SYMBOLS.filter((s) => s.length >= 2 && /[a-z]/i.test(s))
+  .sort((a, b) => b.length - a.length)
+  .map((s) => new RegExp(`(?:^|\\s)${escapeRegex(s)}(?=\\s|$)`, 'gi'));
+// Pure glyphs ($, ¥, €, ₹ …) are safe to remove anywhere, including when the
+// speech engine glues them to the amount or note ("¥16", "茶¥").
+const PURE_CURRENCY_SYMBOL_RE = new RegExp(
+  CURRENCY_SYMBOLS.filter((s) => !/[a-z]/i.test(s))
+    .map(escapeRegex)
+    .join('|'),
+  'g',
+);
+
+/**
+ * Strip currency symbols that speech recognition prepends to a spoken amount
+ * (e.g. "$30", "RM20", "¥16.90"). parseQuickInput removes the number but leaves
+ * the currency glyph dangling in the note; voice entry runs the note through
+ * this so notes and keyword categorization stay clean. (Reusing the global
+ * regexes across calls is safe — String.replace resets lastIndex each time.)
+ */
+export function stripCurrencyTokens(note: string): string {
+  let out = note;
+  for (const re of ALPHA_CURRENCY_RES) {
+    out = out.replace(re, ' ');
+  }
+  out = out.replace(PURE_CURRENCY_SYMBOL_RE, ' ');
+  return out.replace(/\s+/g, ' ').trim();
 }
 
 /**
