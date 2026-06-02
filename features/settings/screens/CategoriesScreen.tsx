@@ -563,8 +563,12 @@ export function CategoriesScreen({
     () => categories.filter((c) => !c.parentId).length,
     [categories],
   );
+  const routedParentCategory = useMemo(
+    () => (parentId ? (categories.find((category) => category.id === parentId) ?? null) : null),
+    [categories, parentId],
+  );
   const { contentWidth: windowWidth } = useDeviceLayout();
-  const [type, setType] = useState<CategoryType>('expense');
+  const [type, setType] = useState<CategoryType>(routedParentCategory?.type ?? 'expense');
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
@@ -612,13 +616,17 @@ export function CategoriesScreen({
 
   useEffect(() => {
     if (!activeParentId) return;
+    if (routedParentCategory && routedParentCategory.type !== type) {
+      setType(routedParentCategory.type);
+      return;
+    }
     if (topLevelById.has(activeParentId)) return;
     if (parentId) {
       onBack?.();
       return;
     }
     setSelectedParentId(null);
-  }, [activeParentId, onBack, parentId, topLevelById]);
+  }, [activeParentId, onBack, parentId, routedParentCategory, topLevelById, type]);
 
   const rowThemeColors = useMemo<CategoryRowThemeColors>(
     () => ({
@@ -857,6 +865,7 @@ export function CategoriesScreen({
           className="my-2"
           onChange={(value) => {
             if (!isCategoryType(value)) return;
+            setSelectedParentId(null);
             setType(value);
           }}
           options={[

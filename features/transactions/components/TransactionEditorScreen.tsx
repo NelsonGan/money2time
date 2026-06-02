@@ -1000,9 +1000,7 @@ export function TransactionEditorScreen({
     const amountDraft = amount.trim();
     const normalizedNote = note.trim();
     const fallbackDefaultNote =
-      mode === 'create'
-        ? autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || ''
-        : '';
+      autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || '';
     const resolvedNote = normalizedNote.length > 0 ? normalizedNote : fallbackDefaultNote || null;
     if (!amountDraft || !Number.isFinite(numericAmount)) {
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
