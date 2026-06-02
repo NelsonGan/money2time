@@ -1057,6 +1057,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [accountNameById, categoryRelationInfoById],
   );
 
+  const resolveCategoryDefaultNote = useCallback(
+    (categoryId?: string | null) => {
+      if (!categoryId) return null;
+      return categoryRelationInfoById.get(categoryId)?.name.trim() || null;
+    },
+    [categoryRelationInfoById],
+  );
+
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const normalizedInput = {
@@ -1118,8 +1126,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const normalizedUpdates: { id: string; input: Partial<CreateTransactionInput> }[] = [];
       const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
       const inputById = new Map<string, Partial<CreateTransactionInput>>();
+      const transactionById = new Map(
+        transactions.map((transaction) => [transaction.id, transaction]),
+      );
       updates.forEach(({ id, input }) => {
-        const normalizedInput =
+        let normalizedInput =
           input.amount === undefined
             ? input
             : {
@@ -1127,6 +1138,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 amount: normalizeMoneyAmount(input.amount),
               };
         if (id.trim().length === 0) return;
+        const currentTransaction = transactionById.get(id);
+        if ('note' in normalizedInput && normalizedInput.note === null) {
+          const categoryId =
+            'categoryId' in normalizedInput
+              ? normalizedInput.categoryId
+              : currentTransaction?.categoryId;
+          normalizedInput = {
+            ...normalizedInput,
+            note: resolveCategoryDefaultNote(categoryId),
+          };
+        }
         if (Object.keys(normalizedInput).length === 0) return;
         normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
@@ -1175,7 +1197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, resolveRelationNames],
+    [scheduleRefreshTransactions, resolveCategoryDefaultNote, resolveRelationNames, transactions],
   );
 
   const deleteTransactionsBulk = useCallback(
