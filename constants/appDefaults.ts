@@ -108,6 +108,10 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
   { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
   { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
   { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
+  { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+  { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
+  { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
 ];
 
 type OnboardingCategorySeed = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
