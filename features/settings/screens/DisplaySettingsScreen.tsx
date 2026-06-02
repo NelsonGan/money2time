@@ -18,7 +18,7 @@ import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/d
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { getLocaleLabel, I18n, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
+import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
 
@@ -38,11 +38,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
 
   const languageOptions = useMemo(
     () =>
-      SUPPORTED_LOCALES.map((item) => ({
+      orderedLocales(currentLocaleSelection).map((item) => ({
         value: item,
         label: `${getLocaleLabel(item)} (${item})`,
       })),
-    [],
+    [currentLocaleSelection],
   );
   const currencyOptions = [
     ...MAJOR_CURRENCIES.map((item) => ({
