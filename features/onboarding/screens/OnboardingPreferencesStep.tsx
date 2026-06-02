@@ -14,7 +14,7 @@ import {
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
-import { getLocaleLabel, I18n, SUPPORTED_LOCALES } from '~/lib/i18n';
+import { getLocaleLabel, I18n, orderedLocales, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor } from '~/types';
 
@@ -51,11 +51,11 @@ export function OnboardingPreferencesStep({
   const resolvedTheme = useResolvedTheme();
   const languageOptions = useMemo(
     () =>
-      SUPPORTED_LOCALES.map((item) => ({
+      orderedLocales(locale).map((item) => ({
         value: item,
         label: `${getLocaleLabel(item)} (${item})`,
       })),
-    [],
+    [locale],
   );
   const currencyOptions = useMemo(
     () =>

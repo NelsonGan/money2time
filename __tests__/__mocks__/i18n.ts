@@ -23,8 +23,56 @@ export const I18n = {
   },
 };
 
-export const SUPPORTED_LOCALES = ['en', 'zh'];
-export const LOCALE_LABELS: Record<string, string> = { en: 'English', zh: '中文' };
+export const SUPPORTED_LOCALES = [
+  'da',
+  'de',
+  'en',
+  'es',
+  'fil',
+  'fr',
+  'hi',
+  'id',
+  'it',
+  'ja',
+  'ko',
+  'ms',
+  'nb',
+  'nl',
+  'pl',
+  'pt',
+  'ru',
+  'sv',
+  'th',
+  'tr',
+  'uk',
+  'vi',
+  'zh',
+];
+export const LOCALE_LABELS: Record<string, string> = {
+  da: 'Dansk',
+  de: 'Deutsch',
+  en: 'English',
+  es: 'Español',
+  fil: 'Filipino',
+  fr: 'Français',
+  hi: 'हिन्दी',
+  id: 'Bahasa Indonesia',
+  it: 'Italiano',
+  ja: '日本語',
+  ko: '한국어',
+  ms: 'Bahasa Melayu',
+  nb: 'Norsk',
+  nl: 'Nederlands',
+  pl: 'Polski',
+  pt: 'Português',
+  ru: 'Русский',
+  sv: 'Svenska',
+  th: 'ภาษาไทย',
+  tr: 'Türkçe',
+  uk: 'Українська',
+  vi: 'Tiếng Việt',
+  zh: '中文',
+};
 export function getDeviceLocale() {
   return 'en';
 }
@@ -33,4 +81,14 @@ export function getLocaleLabel(locale: string) {
 }
 export function setAppLocale(locale: string) {
   I18n.locale = locale;
+}
+export function orderedLocales(currentLocale: string): string[] {
+  const pinned: string[] = [];
+  if (SUPPORTED_LOCALES.includes(currentLocale)) {
+    pinned.push(currentLocale);
+  }
+  if (currentLocale !== 'en') {
+    pinned.push('en');
+  }
+  return [...pinned, ...SUPPORTED_LOCALES.filter((locale) => !pinned.includes(locale))];
 }
