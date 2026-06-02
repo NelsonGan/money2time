@@ -1,5 +1,5 @@
 import { Check, ChevronDown } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated as RNAnimated,
   PanResponder,
@@ -84,6 +84,7 @@ export function SelectField({
   const isSmallScreen = screenWidth < 380;
   const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
+  const scrollAtTop = useRef(true);
   const hiddenOffset = Math.max(sheetHeight + 24, windowHeight + 40);
   const selected = options.find((opt) => opt.value === value);
   const selectedLabel = selected ? selected.label : placeholder;
@@ -171,9 +172,15 @@ export function SelectField({
         onStartShouldSetPanResponder: () => false,
         onStartShouldSetPanResponderCapture: () => false,
         onMoveShouldSetPanResponder: (_, gesture) =>
-          open && gesture.dy > 4 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
+          open &&
+          scrollAtTop.current &&
+          gesture.dy > 4 &&
+          Math.abs(gesture.dy) > Math.abs(gesture.dx),
         onMoveShouldSetPanResponderCapture: (_, gesture) =>
-          open && gesture.dy > 4 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
+          open &&
+          scrollAtTop.current &&
+          gesture.dy > 4 &&
+          Math.abs(gesture.dy) > Math.abs(gesture.dx),
         onPanResponderTerminationRequest: () => false,
         onPanResponderMove: (_, gesture) => {
           translateY.setValue(Math.max(0, gesture.dy));
@@ -496,6 +503,10 @@ export function SelectField({
             <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 26 }}
+              onScroll={(e) => {
+                scrollAtTop.current = e.nativeEvent.contentOffset.y <= 0;
+              }}
+              scrollEventThrottle={16}
             >
               {hasGroupedListLayout ? (
                 <View className="gap-2">
