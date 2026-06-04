@@ -88,7 +88,19 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e"
+        "projectId": "27dec73c-197f-4b74-87ae-542e75fc549e",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "Money2TimeWidget",
+                  "bundleIdentifier": "com.nelsongan.money2time.Money2TimeWidget"
+                }
+              ]
+            }
+          }
+        }
       }
     },
     "runtimeVersion": {
