@@ -99,6 +99,9 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   );
   const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
+  // Only the last 4 characters of the user id are ever shown or copied.
+  const appUserIdLast4 = appUserId ? appUserId.slice(-4) : null;
+  const maskedUserId = appUserIdLast4 ? `••••${appUserIdLast4}` : null;
 
   useEffect(() => {
     setCustomCurrency(currentCurrencySelection === '__custom__' ? settings.currencySymbol : '');
@@ -119,11 +122,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const isCustomCurrencyMode = currentCurrencySelection === '__custom__';
 
   const handleCopyRevenueCatUserId = () => {
-    if (!appUserId) {
+    if (!appUserIdLast4) {
       return;
     }
 
-    Clipboard.setString(appUserId);
+    Clipboard.setString(appUserIdLast4);
     setDidCopyRevenueCatUserId(true);
     void triggerHaptic('selection');
   };
@@ -257,14 +260,14 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                     numberOfLines={1}
                     ellipsizeMode="middle"
                   >
-                    {appUserId ?? I18n.t('settings.user_id_unavailable')}
+                    {maskedUserId ?? I18n.t('settings.user_id_unavailable')}
                   </Text>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={I18n.t(
                       didCopyRevenueCatUserId ? 'common.copied' : 'common.copy',
                     )}
-                    disabled={!appUserId}
+                    disabled={!appUserIdLast4}
                     onPress={handleCopyRevenueCatUserId}
                     style={styles.copyIconButton}
                   >
