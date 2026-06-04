@@ -2567,7 +2567,7 @@ function ensureIosWidgetXcodeTarget(config) {
       buildSettings.APPLICATION_EXTENSION_API_ONLY = 'YES';
       buildSettings.CODE_SIGN_ENTITLEMENTS = 'Money2TimeWidget/Money2TimeWidget.entitlements';
       buildSettings.CURRENT_PROJECT_VERSION = buildSettings.CURRENT_PROJECT_VERSION || '1';
-      buildSettings.DEVELOPMENT_TEAM = buildSettings.DEVELOPMENT_TEAM || '""';
+      buildSettings.DEVELOPMENT_TEAM = 'A9QF26PBRS';
       buildSettings.GENERATE_INFOPLIST_FILE = 'NO';
       buildSettings.INFOPLIST_FILE = 'Money2TimeWidget/Info.plist';
       // contentMarginsDisabled() requires iOS 17; the widget extension targets
@@ -2582,7 +2582,7 @@ function ensureIosWidgetXcodeTarget(config) {
     });
 
     project.addTargetAttribute('CreatedOnToolsVersion', '15.0', widgetTarget);
-    project.addTargetAttribute('ProvisioningStyle', 'Automatic', widgetTarget);
+    project.addTargetAttribute('ProvisioningStyle', 'Manual', widgetTarget);
     project.addTargetAttribute(
       'SystemCapabilities',
       {
