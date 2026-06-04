@@ -607,7 +607,7 @@ const en = {
     section_data: 'Data',
     section_support: 'Help & About',
     news: "What's New",
-    news_subtitle: "New features and improvements",
+    news_subtitle: 'New features and improvements',
     quick_entry: {
       title: 'Quick Entry',
       subtitle: 'Map keyword groups to your categories.',
