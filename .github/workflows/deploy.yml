@@ -106,13 +106,6 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Install widget provisioning profile
-        if: matrix.platform == 'ios'
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "${{ secrets.WIDGET_PROVISIONING_PROFILE }}" | base64 --decode \
-            > ~/Library/MobileDevice/Provisioning\ Profiles/Money2TimeWidget.mobileprovision
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
