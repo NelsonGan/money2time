@@ -610,7 +610,10 @@ const nl = {
     management: 'Beheer',
     section_personal: 'Voorkeuren',
     section_money: 'Geld',
-    section_support: 'Ondersteuning & gegevens',
+    section_data: 'Gegevens',
+    section_support: 'Help en info',
+    news: 'Nieuws',
+    news_subtitle: 'Nieuwe functies en verbeteringen',
     quick_entry: {
       title: 'Snelle invoer',
       subtitle: 'Koppel trefwoordgroepen aan je categorieën.',

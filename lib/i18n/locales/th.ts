@@ -593,7 +593,10 @@ const th = {
     management: 'จัดการ',
     section_personal: 'ค่ากำหนด',
     section_money: 'การเงิน',
-    section_support: 'ข้อมูลและความช่วยเหลือ',
+    section_data: 'ข้อมูล',
+    section_support: 'ความช่วยเหลือและเกี่ยวกับ',
+    news: 'ข่าวสาร',
+    news_subtitle: 'ฟีเจอร์ใหม่และการปรับปรุง',
     quick_entry: {
       title: 'บันทึกด่วน',
       subtitle: 'จับคู่กลุ่มคีย์เวิร์ดกับหมวดหมู่ของคุณ',

@@ -39,10 +39,12 @@ import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
-import { ProProvider } from '~/context/ProContext';
+import { ProProvider, usePro } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
+import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import {
@@ -85,6 +87,11 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
+import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
+import {
+  getLatestUnseenAnnouncementForUser,
+  markFeatureAnnouncementSeen,
+} from '~/services/featureAnnouncementState';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
@@ -92,6 +99,11 @@ import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
+import {
+  buildMoney2TimeWidgetSnapshot,
+  reloadMoney2TimeWidgets,
+  writeMoney2TimeWidgetSnapshot,
+} from '~/services/widgetSnapshot';
 import type { TransactionWithRelations } from '~/types';
 import {
   dayKeyFromIsoLocal,
@@ -921,6 +933,24 @@ function AddTransactionDetailedRouteScreen({
   );
 }
 
+function WidgetSnapshotSync() {
+  const { transactions, settings, getTrueHourlyRateForDate } = useApp();
+  const { isPro } = usePro();
+
+  useEffect(() => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions,
+      settings,
+      isPro,
+      getTrueHourlyRateForDate,
+    });
+
+    void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
+  }, [getTrueHourlyRateForDate, isPro, settings, transactions]);
+
+  return null;
+}
+
 function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'EditTransaction'>) {
   const { transactions, isSimpleMode, simpleWalletId } = useApp();
   const transaction = useMemo(
@@ -1181,12 +1211,15 @@ function AppContent() {
   const themeStyle = useThemeVars();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
+  const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
+  const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
   const [tutorialStartToken, setTutorialStartToken] = useState(0);
   const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('home');
   const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
   const previousVisibleScreenRef = useRef<string | null>(null);
+  const checkedFeatureAnnouncementUserRef = useRef<string | null>(null);
 
   const syncRootActiveScreen = useCallback(() => {
     const rootState = navigationRef.getRootState();
@@ -1232,6 +1265,32 @@ function AppContent() {
     void syncOrientationLock();
   }, [isTablet]);
 
+  useEffect(() => {
+    if (isLoading || !settings.onboardingCompleted) return undefined;
+    return subscribeMoney2TimeDeepLinks(navigationRef);
+  }, [isLoading, navigationRef, settings.onboardingCompleted]);
+
+  useEffect(() => {
+    if (isLoading || !settings.onboardingCompleted || showTutorialPrompt) return undefined;
+    if (checkedFeatureAnnouncementUserRef.current === settings.appUserId) return undefined;
+    checkedFeatureAnnouncementUserRef.current = settings.appUserId;
+
+    let cancelled = false;
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      void (async () => {
+        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(settings.appUserId);
+        if (cancelled || !nextAnnouncement) return;
+        setFeatureAnnouncement(nextAnnouncement);
+        setFeatureAnnouncementVisible(true);
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+      interactionHandle.cancel();
+    };
+  }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
+
   const handleOnboardingComplete = useCallback(() => {
     setTutorialStartToken(0);
     InteractionManager.runAfterInteractions(() => {
@@ -1248,6 +1307,14 @@ function AppContent() {
   const handleSkipTutorialPrompt = useCallback(() => {
     setShowTutorialPrompt(false);
   }, []);
+
+  const handleDismissFeatureAnnouncement = useCallback(() => {
+    const announcementId = featureAnnouncement?.id;
+    setFeatureAnnouncementVisible(false);
+    if (announcementId) {
+      void markFeatureAnnouncementSeen(settings.appUserId, announcementId);
+    }
+  }, [featureAnnouncement?.id, settings.appUserId]);
 
   if (isLoading) {
     return (
@@ -1276,6 +1343,7 @@ function AppContent() {
   return (
     <View className="flex-1 bg-background" style={themeStyle}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+      <WidgetSnapshotSync />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}
@@ -1354,6 +1422,11 @@ function AppContent() {
           </View>
         </View>
       </ThemeModal>
+      <FeatureAnnouncementModal
+        announcement={featureAnnouncement}
+        visible={featureAnnouncementVisible}
+        onDismiss={handleDismissFeatureAnnouncement}
+      />
       <ReviewPrePromptSheet />
     </View>
   );

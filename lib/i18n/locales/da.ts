@@ -607,7 +607,10 @@ const da = {
     management: 'Administration',
     section_personal: 'Præferencer',
     section_money: 'Økonomi',
-    section_support: 'Support og data',
+    section_data: 'Data',
+    section_support: 'Hjælp og om',
+    news: 'Nyheder',
+    news_subtitle: 'Nye funktioner og forbedringer',
     quick_entry: {
       title: 'Hurtig postering',
       subtitle: 'Tilknyt nøgleordsgrupper til dine kategorier.',

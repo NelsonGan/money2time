@@ -586,7 +586,10 @@ const zh = {
     management: '管理',
     section_personal: '偏好',
     section_money: '资金',
-    section_support: '支持与数据',
+    section_data: '数据',
+    section_support: '帮助与关于',
+    news: '最新动态',
+    news_subtitle: '新功能与改进',
     quick_entry: {
       title: '快速录入',
       subtitle: '将关键词分组映射到你的分类。',

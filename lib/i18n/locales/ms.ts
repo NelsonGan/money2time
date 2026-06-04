@@ -606,7 +606,10 @@ const ms = {
     management: 'Pengurusan',
     section_personal: 'Keutamaan',
     section_money: 'Wang',
-    section_support: 'Sokongan & Data',
+    section_data: 'Data',
+    section_support: 'Bantuan & Tentang',
+    news: 'Berita',
+    news_subtitle: 'Ciri-ciri baru dan penambahbaikan',
     quick_entry: {
       title: 'Entri Cepat',
       subtitle: 'Petakan kumpulan kata kunci ke kategori anda.',

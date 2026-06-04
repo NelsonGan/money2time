@@ -603,7 +603,10 @@ const sv = {
     management: 'Hantering',
     section_personal: 'Inställningar',
     section_money: 'Pengar',
-    section_support: 'Support & data',
+    section_data: 'Data',
+    section_support: 'Hjälp och om',
+    news: 'Nyheter',
+    news_subtitle: 'Nya funktioner och förbättringar',
     quick_entry: {
       title: 'Snabbinmatning',
       subtitle: 'Koppla nyckelordgrupper till dina kategorier.',

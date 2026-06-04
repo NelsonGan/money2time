@@ -605,7 +605,10 @@ const fr = {
     management: 'Gestion',
     section_personal: 'Préférences',
     section_money: 'Finances',
-    section_support: 'Support & données',
+    section_data: 'Données',
+    section_support: 'Aide & À propos',
+    news: 'Nouveautés',
+    news_subtitle: 'Nouvelles fonctionnalités et améliorations',
     quick_entry: {
       title: 'Saisie rapide',
       subtitle: 'Associez des groupes de mots-clés à vos catégories.',

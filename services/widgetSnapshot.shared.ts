@@ -1,0 +1,422 @@
+import type { TransactionWithRelations, UserSettings, WeekStartsOn } from '~/types';
+import {
+  amountToHoursByRate,
+  dayKeyFromDateLocal,
+  dayKeyFromIsoLocal,
+  formatCompactCurrency,
+  formatCompactNumber,
+  formatHours,
+  monthKeyFromDateLocal,
+  monthKeyFromIsoLocal,
+  normalizeMoneyAmount,
+} from '~/utils/formatters';
+
+import {
+  buildQuickAddWidgetUrl,
+  buildWidgetProUrl,
+  WIDGET_DEFINITIONS,
+  WIDGET_IDS,
+  type WidgetDefinition,
+} from './widgetRegistry';
+
+export interface MonthlyExpenseQuickLogSnapshot {
+  widgetId: typeof WIDGET_IDS.monthlyExpenseQuickLog;
+  title: string;
+  monthKey: string;
+  expenseAmount: number;
+  expenseLabel: string;
+  timeEquivalentLabel: string;
+  hasHourlyRate: boolean;
+  incomeUrl: string;
+  expenseUrl: string;
+}
+
+export interface WeeklyExpenseDay {
+  dayKey: string;
+  weekdayLabel: string;
+  amount: number;
+  /** Compact, currency-symbol-free label for the tiny per-bar value (e.g. "42", "1.2K"). */
+  barLabel: string;
+  isToday: boolean;
+}
+
+export interface WeeklyExpenseSnapshot {
+  widgetId: typeof WIDGET_IDS.weeklyExpense;
+  title: string;
+  days: WeeklyExpenseDay[];
+  totalAmount: number;
+  totalLabel: string;
+  maxAmount: number;
+}
+
+export interface CalendarDaySnapshot {
+  dayKey: string;
+  dayNumber: number;
+  income: number;
+  expense: number;
+  incomeLabel: string;
+  expenseLabel: string;
+  hasActivity: boolean;
+  incomeStronger: boolean;
+  intensity: number;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+export interface CalendarMonthSnapshot {
+  widgetId: typeof WIDGET_IDS.calendarMonth;
+  title: string;
+  monthKey: string;
+  monthLabel: string;
+  weekdayLabels: string[];
+  leadingSpacers: number;
+  days: CalendarDaySnapshot[];
+  totalIncome: number;
+  totalExpense: number;
+  incomeLabel: string;
+  expenseLabel: string;
+}
+
+export interface Money2TimeWidgetSnapshot {
+  schemaVersion: 1;
+  generatedAt: string;
+  isPro: boolean;
+  locale: string;
+  currencySymbol: string;
+  widgets: WidgetDefinition[];
+  monthlyExpenseQuickLog: MonthlyExpenseQuickLogSnapshot;
+  weeklyExpense: WeeklyExpenseSnapshot;
+  calendarMonth: CalendarMonthSnapshot;
+  proUnlockUrlByWidgetId: Record<string, string>;
+}
+
+function buildTimeEquivalentLabel(amount: number, trueHourlyRate: number) {
+  if (trueHourlyRate <= 0) return 'Set hourly value in app';
+  return `${formatHours(amountToHoursByRate(amount, trueHourlyRate))} of work`;
+}
+
+function startOfDayLocal(date: Date): Date {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function addDays(date: Date, amount: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+const weekdayNarrowFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function getWeekdayNarrowFormatter(locale: string): Intl.DateTimeFormat {
+  const cached = weekdayNarrowFormatterByLocale.get(locale);
+  if (cached) return cached;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(locale, { weekday: 'narrow' });
+  } catch {
+    formatter = new Intl.DateTimeFormat('en', { weekday: 'narrow' });
+  }
+  weekdayNarrowFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+const monthLabelFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function getMonthLabelFormatter(locale: string): Intl.DateTimeFormat {
+  const cached = monthLabelFormatterByLocale.get(locale);
+  if (cached) return cached;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
+  } catch {
+    formatter = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
+  }
+  monthLabelFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function buildWeeklyExpenseSnapshot(
+  transactions: TransactionWithRelations[],
+  settings: UserSettings,
+): WeeklyExpenseSnapshot {
+  const today = startOfDayLocal(new Date());
+  const dayBuckets = new Map<string, number>();
+  const orderedDayKeys: string[] = [];
+
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const dayKey = dayKeyFromDateLocal(addDays(today, -offset));
+    orderedDayKeys.push(dayKey);
+    dayBuckets.set(dayKey, 0);
+  }
+
+  const firstDayKey = orderedDayKeys[0];
+  const lastDayKey = orderedDayKeys[orderedDayKeys.length - 1];
+
+  for (const transaction of transactions) {
+    if (transaction.deletedAt) continue;
+    if (transaction.type !== 'expense') continue;
+    const dayKey = dayKeyFromIsoLocal(transaction.date);
+    if (dayKey < firstDayKey || dayKey > lastDayKey) continue;
+    dayBuckets.set(dayKey, (dayBuckets.get(dayKey) ?? 0) + transaction.amount);
+  }
+
+  const narrowFormatter = getWeekdayNarrowFormatter(settings.locale);
+  const todayDayKey = dayKeyFromDateLocal(today);
+
+  let totalAmount = 0;
+  let maxAmount = 0;
+  const days: WeeklyExpenseDay[] = orderedDayKeys.map((dayKey, index) => {
+    const amount = normalizeMoneyAmount(dayBuckets.get(dayKey) ?? 0);
+    totalAmount += amount;
+    if (amount > maxAmount) maxAmount = amount;
+    return {
+      dayKey,
+      weekdayLabel: narrowFormatter.format(addDays(today, index - 6)),
+      amount,
+      barLabel: amount > 0 ? formatCompactNumber(amount) : '',
+      isToday: dayKey === todayDayKey,
+    };
+  });
+
+  totalAmount = normalizeMoneyAmount(totalAmount);
+
+  return {
+    widgetId: WIDGET_IDS.weeklyExpense,
+    title: 'Past 7 Days',
+    days,
+    totalAmount,
+    totalLabel: formatCompactCurrency(totalAmount, settings.currencySymbol),
+    maxAmount,
+  };
+}
+
+function buildCalendarMonthSnapshot(
+  transactions: TransactionWithRelations[],
+  settings: UserSettings,
+): CalendarMonthSnapshot {
+  const today = startOfDayLocal(new Date());
+  const todayDayKey = dayKeyFromDateLocal(today);
+  const year = today.getFullYear();
+  const monthIndex = today.getMonth();
+  const monthKey = monthKeyFromDateLocal(today);
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const weekStartsOn: WeekStartsOn = settings.weekStartsOn ?? 1;
+
+  const incomeByDay = new Map<string, number>();
+  const expenseByDay = new Map<string, number>();
+  let totalIncome = 0;
+  let totalExpense = 0;
+
+  for (const transaction of transactions) {
+    if (transaction.deletedAt) continue;
+    if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
+    const dayKey = dayKeyFromIsoLocal(transaction.date);
+    if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
+    if (transaction.type === 'income') {
+      incomeByDay.set(dayKey, (incomeByDay.get(dayKey) ?? 0) + transaction.amount);
+      totalIncome += transaction.amount;
+    } else {
+      expenseByDay.set(dayKey, (expenseByDay.get(dayKey) ?? 0) + transaction.amount);
+      totalExpense += transaction.amount;
+    }
+  }
+
+  let maxAbsNet = 0;
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+    const net = Math.abs((incomeByDay.get(dayKey) ?? 0) - (expenseByDay.get(dayKey) ?? 0));
+    if (net > maxAbsNet) maxAbsNet = net;
+  }
+
+  const days: CalendarDaySnapshot[] = [];
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+    const income = normalizeMoneyAmount(incomeByDay.get(dayKey) ?? 0);
+    const expense = normalizeMoneyAmount(expenseByDay.get(dayKey) ?? 0);
+    const hasActivity = income > 0 || expense > 0;
+    const net = income - expense;
+    const intensity =
+      hasActivity && maxAbsNet > 0 ? Math.max(0.18, Math.min(0.85, Math.abs(net) / maxAbsNet)) : 0;
+    days.push({
+      dayKey,
+      dayNumber: day,
+      income,
+      expense,
+      incomeLabel: income > 0 ? formatCompactNumber(income) : '',
+      expenseLabel: expense > 0 ? formatCompactNumber(expense) : '',
+      hasActivity,
+      incomeStronger: income > expense,
+      intensity,
+      isToday: dayKey === todayDayKey,
+      isFuture: dayKey > todayDayKey,
+    });
+  }
+
+  // Column index of the 1st (weekStartsOn is the leftmost column).
+  const firstWeekday = new Date(year, monthIndex, 1).getDay();
+  const leadingSpacers = (firstWeekday - weekStartsOn + 7) % 7;
+
+  const narrowFormatter = getWeekdayNarrowFormatter(settings.locale);
+  // 2024-01-07 is a Sunday; shift by weekStartsOn to order from the first column.
+  const sunday = new Date(2024, 0, 7);
+  const weekdayLabels = Array.from({ length: 7 }, (_, index) =>
+    narrowFormatter.format(addDays(sunday, weekStartsOn + index)),
+  );
+
+  totalIncome = normalizeMoneyAmount(totalIncome);
+  totalExpense = normalizeMoneyAmount(totalExpense);
+
+  return {
+    widgetId: WIDGET_IDS.calendarMonth,
+    title: 'Calendar',
+    monthKey,
+    monthLabel: getMonthLabelFormatter(settings.locale).format(today),
+    weekdayLabels,
+    leadingSpacers,
+    days,
+    totalIncome,
+    totalExpense,
+    incomeLabel: formatCompactCurrency(totalIncome, settings.currencySymbol),
+    expenseLabel: formatCompactCurrency(totalExpense, settings.currencySymbol),
+  };
+}
+
+export function buildMoney2TimeWidgetSnapshot({
+  transactions,
+  settings,
+  isPro,
+  getTrueHourlyRateForDate,
+}: {
+  transactions: TransactionWithRelations[];
+  settings: UserSettings;
+  isPro: boolean;
+  getTrueHourlyRateForDate: (dateIso: string) => number;
+}): Money2TimeWidgetSnapshot {
+  const monthKey = monthKeyFromDateLocal(new Date());
+  const expenseAmount = normalizeMoneyAmount(
+    transactions.reduce((total, transaction) => {
+      if (transaction.deletedAt) return total;
+      if (transaction.type !== 'expense') return total;
+      if (monthKeyFromIsoLocal(transaction.date) !== monthKey) return total;
+      return total + transaction.amount;
+    }, 0),
+  );
+  const hourlyRate = getTrueHourlyRateForDate(`${monthKey}-15T12:00:00`);
+
+  return {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    isPro,
+    locale: settings.locale,
+    currencySymbol: settings.currencySymbol,
+    widgets: WIDGET_DEFINITIONS,
+    monthlyExpenseQuickLog: {
+      widgetId: WIDGET_IDS.monthlyExpenseQuickLog,
+      title: 'Monthly Spend',
+      monthKey,
+      expenseAmount,
+      expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
+      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      hasHourlyRate: hourlyRate > 0,
+      incomeUrl: buildQuickAddWidgetUrl('income'),
+      expenseUrl: buildQuickAddWidgetUrl('expense'),
+    },
+    weeklyExpense: buildWeeklyExpenseSnapshot(transactions, settings),
+    calendarMonth: buildCalendarMonthSnapshot(transactions, settings),
+    proUnlockUrlByWidgetId: Object.fromEntries(
+      WIDGET_DEFINITIONS.filter((definition) => definition.access === 'pro').map((definition) => [
+        definition.id,
+        buildWidgetProUrl(definition.id),
+      ]),
+    ),
+  };
+}
+
+const SAMPLE_BAR_AMOUNTS = [42, 18, 67, 9, 88, 124, 53];
+const SAMPLE_INCOME_BY_DAY: Record<number, number> = { 3: 1200, 10: 60, 17: 30, 24: 2400 };
+const SAMPLE_EXPENSE_BY_DAY: Record<number, number> = {
+  2: 24,
+  5: 88,
+  6: 132,
+  12: 9,
+  15: 210,
+  18: 64,
+  22: 77,
+  25: 53,
+  27: 119,
+};
+
+function sampleTransaction(
+  id: string,
+  type: 'income' | 'expense',
+  amount: number,
+  date: Date,
+): TransactionWithRelations {
+  return {
+    id,
+    type,
+    amount,
+    currency: 'USD',
+    date: date.toISOString(),
+    accountId: null,
+    fromAccountId: null,
+    toAccountId: null,
+    categoryId: null,
+    note: null,
+    recurrencePattern: 'none',
+    recurrenceInterval: 1,
+    recurrenceEndDate: null,
+    recurrenceParentId: null,
+    sentiment: 'neutral',
+    createdAt: date.toISOString(),
+    updatedAt: date.toISOString(),
+    deletedAt: null,
+  } as TransactionWithRelations;
+}
+
+/**
+ * Illustrative snapshot used by the preview screen (when the user has no data
+ * yet) and as the native widget-gallery placeholder, so the widgets always
+ * render populated instead of an empty "set up" state.
+ */
+export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWidgetSnapshot {
+  const today = startOfDayLocal(new Date());
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const transactions: TransactionWithRelations[] = [];
+
+  SAMPLE_BAR_AMOUNTS.forEach((amount, index) => {
+    transactions.push(
+      sampleTransaction(`sample-bar-${index}`, 'expense', amount, addDays(today, index - 6)),
+    );
+  });
+  Object.entries(SAMPLE_INCOME_BY_DAY).forEach(([day, amount]) => {
+    transactions.push(
+      sampleTransaction(
+        `sample-inc-${day}`,
+        'income',
+        amount,
+        new Date(year, month, Number(day), 12),
+      ),
+    );
+  });
+  Object.entries(SAMPLE_EXPENSE_BY_DAY).forEach(([day, amount]) => {
+    transactions.push(
+      sampleTransaction(
+        `sample-exp-${day}`,
+        'expense',
+        amount,
+        new Date(year, month, Number(day), 12),
+      ),
+    );
+  });
+
+  return buildMoney2TimeWidgetSnapshot({
+    transactions,
+    settings,
+    isPro: true,
+    getTrueHourlyRateForDate: () => 15,
+  });
+}

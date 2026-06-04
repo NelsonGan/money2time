@@ -610,7 +610,10 @@ const de = {
     management: 'Verwaltung',
     section_personal: 'Präferenzen',
     section_money: 'Finanzen',
-    section_support: 'Support & Daten',
+    section_data: 'Daten',
+    section_support: 'Hilfe & Info',
+    news: 'Neuigkeiten',
+    news_subtitle: 'Neue Funktionen und Verbesserungen',
     quick_entry: {
       title: 'Schnelleingabe',
       subtitle: 'Schlüsselwortgruppen deinen Kategorien zuordnen.',

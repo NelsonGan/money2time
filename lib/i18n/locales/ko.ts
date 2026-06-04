@@ -595,7 +595,10 @@ const ko = {
     management: '관리',
     section_personal: '환경설정',
     section_money: '금융',
-    section_support: '지원 및 데이터',
+    section_data: '데이터',
+    section_support: '도움말 및 정보',
+    news: '새소식',
+    news_subtitle: '새로운 기능 및 개선사항',
     quick_entry: {
       title: '빠른 입력',
       subtitle: '키워드 그룹을 카테고리에 매핑하세요.',

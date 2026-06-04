@@ -605,7 +605,10 @@ const pl = {
     management: 'Zarządzanie',
     section_personal: 'Preferencje',
     section_money: 'Finanse',
-    section_support: 'Wsparcie i dane',
+    section_data: 'Dane',
+    section_support: 'Pomoc i informacje',
+    news: 'Nowości',
+    news_subtitle: 'Nowe funkcje i ulepszenia',
     quick_entry: {
       title: 'Szybki wpis',
       subtitle: 'Przypisz grupy słów kluczowych do kategorii.',

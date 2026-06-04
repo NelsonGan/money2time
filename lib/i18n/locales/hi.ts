@@ -600,7 +600,10 @@ const hi = {
     management: 'प्रबंधन',
     section_personal: 'प्राथमिकताएं',
     section_money: 'पैसा',
-    section_support: 'सहायता और डेटा',
+    section_data: 'डेटा',
+    section_support: 'सहायता और जानकारी',
+    news: 'समाचार',
+    news_subtitle: 'नई सुविधाएं और सुधार',
     quick_entry: {
       title: 'त्वरित एंट्री',
       subtitle: 'कीवर्ड समूहों को अपनी श्रेणियों से मैप करें।',

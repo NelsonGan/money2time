@@ -605,7 +605,10 @@ const pt = {
     management: 'Gerenciamento',
     section_personal: 'Preferências',
     section_money: 'Dinheiro',
-    section_support: 'Suporte e dados',
+    section_data: 'Dados',
+    section_support: 'Ajuda e sobre',
+    news: 'Novidades',
+    news_subtitle: 'Novos recursos e melhorias',
     quick_entry: {
       title: 'Entrada rápida',
       subtitle: 'Mapeie grupos de palavras-chave para suas categorias.',

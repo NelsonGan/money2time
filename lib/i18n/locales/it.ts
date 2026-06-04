@@ -604,7 +604,10 @@ const it = {
     management: 'Gestione',
     section_personal: 'Preferenze',
     section_money: 'Denaro',
-    section_support: 'Supporto e dati',
+    section_data: 'Dati',
+    section_support: 'Aiuto e informazioni',
+    news: 'Novità',
+    news_subtitle: 'Nuove funzionalità e miglioramenti',
     quick_entry: {
       title: 'Inserimento rapido',
       subtitle: 'Mappa gruppi di parole chiave alle tue categorie.',

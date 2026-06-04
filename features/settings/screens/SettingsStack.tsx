@@ -2,6 +2,7 @@ import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import {
   type SettingsStackNavigationProp,
@@ -27,6 +28,7 @@ import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
+import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
 
 interface SettingsStackProps {
   resetToRootToken?: number;
@@ -89,8 +91,10 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
+      onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onStartTutorial={onStartTutorial}
@@ -306,6 +310,12 @@ export function SettingsStack({
           );
         }}
       </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="News">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <NewsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="AutoBackupSettings">
         {(props) => {
           stackNavigationRef.current = props.navigation;
@@ -356,6 +366,14 @@ export function SettingsStack({
           return <QuickEntrySettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
+      {__DEV__ ? (
+        <SettingsStackNavigator.Screen name="WidgetPreviews">
+          {(props) => {
+            stackNavigationRef.current = props.navigation;
+            return <WidgetPreviewsScreen onBack={() => props.navigation.goBack()} />;
+          }}
+        </SettingsStackNavigator.Screen>
+      ) : null}
     </SettingsStackNavigator.Navigator>
   );
 }

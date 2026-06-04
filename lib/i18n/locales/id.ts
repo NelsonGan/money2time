@@ -610,7 +610,10 @@ const id = {
     management: 'Manajemen',
     section_personal: 'Preferensi',
     section_money: 'Keuangan',
-    section_support: 'Dukungan & Data',
+    section_data: 'Data',
+    section_support: 'Bantuan & Tentang',
+    news: 'Berita',
+    news_subtitle: 'Fitur baru dan peningkatan',
     quick_entry: {
       title: 'Entri Cepat',
       subtitle: 'Petakan grup kata kunci ke kategorimu.',
