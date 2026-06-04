@@ -43,7 +43,11 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader onBack={onBack} title={I18n.t('settings.news')} subtitle={I18n.t('settings.news_subtitle')} />
+      <SettingsHeader
+        onBack={onBack}
+        title={I18n.t('settings.news')}
+        subtitle={I18n.t('settings.news_subtitle')}
+      />
       <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentBody}>
           <View style={styles.list}>
