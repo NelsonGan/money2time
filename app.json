@@ -2,6 +2,7 @@
   "expo": {
     "name": "Money2Time",
     "slug": "money2time",
+    "scheme": "money2time",
     "version": "1.1.6",
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon~ios-marketing.png",
@@ -58,6 +59,7 @@
     },
     "plugins": [
       "./plugins/withGradleMemory",
+      "./plugins/withMoney2TimeWidgets",
       "expo-localization",
       "expo-notifications",
       "expo-screen-orientation",

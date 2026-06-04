@@ -21,6 +21,7 @@ export type SettingsStackParamList = {
   Notifications: undefined;
   NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;
+  News: undefined;
   AutoBackupSettings: undefined;
   StatementImport: undefined;
   StatementImportList: {
@@ -38,6 +39,7 @@ export type SettingsStackParamList = {
   };
   ProManagement: undefined;
   QuickEntrySettings: undefined;
+  WidgetPreviews: undefined;
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;

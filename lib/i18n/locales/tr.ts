@@ -608,7 +608,10 @@ const tr = {
     management: 'Yönetim',
     section_personal: 'Tercihler',
     section_money: 'Para',
-    section_support: 'Destek ve Veri',
+    section_data: 'Veri',
+    section_support: 'Yardım ve hakkında',
+    news: 'Haberler',
+    news_subtitle: 'Yeni özellikler ve iyileştirmeler',
     quick_entry: {
       title: 'Hızlı Giriş',
       subtitle: 'Anahtar kelime gruplarını kategorilerinizle eşleştirin.',

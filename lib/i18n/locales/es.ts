@@ -609,7 +609,10 @@ const es = {
     management: 'Administración',
     section_personal: 'Preferencias',
     section_money: 'Dinero',
-    section_support: 'Soporte y datos',
+    section_data: 'Datos',
+    section_support: 'Ayuda y acerca de',
+    news: 'Novedades',
+    news_subtitle: 'Nuevas funciones y mejoras',
     quick_entry: {
       title: 'Entrada rápida',
       subtitle: 'Asigna grupos de palabras clave a tus categorías.',

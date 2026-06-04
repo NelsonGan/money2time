@@ -605,7 +605,10 @@ const nb = {
     management: 'Administrasjon',
     section_personal: 'Preferanser',
     section_money: 'Penger',
-    section_support: 'Støtte og data',
+    section_data: 'Data',
+    section_support: 'Hjelp og om',
+    news: 'Nyheter',
+    news_subtitle: 'Nye funksjoner og forbedringer',
     quick_entry: {
       title: 'Hurtigregistrering',
       subtitle: 'Tilordne nøkkelordgrupper til kategoriene dine.',

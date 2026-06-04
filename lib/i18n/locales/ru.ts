@@ -602,7 +602,10 @@ const ru = {
     management: 'Управление',
     section_personal: 'Настройки',
     section_money: 'Деньги',
-    section_support: 'Поддержка и данные',
+    section_data: 'Данные',
+    section_support: 'Помощь и о приложении',
+    news: 'Новости',
+    news_subtitle: 'Новые функции и улучшения',
     quick_entry: {
       title: 'Быстрый ввод',
       subtitle: 'Сопоставьте группы ключевых слов с категориями.',

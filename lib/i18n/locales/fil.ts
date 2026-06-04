@@ -612,7 +612,10 @@ const fil = {
     management: 'Pamamahala',
     section_personal: 'Mga Kagustuhan',
     section_money: 'Pera',
-    section_support: 'Suporta at Data',
+    section_data: 'Data',
+    section_support: 'Tulong at Tungkol sa',
+    news: 'Mga Balita',
+    news_subtitle: 'Mga bagong tampok at pagpapabuti',
     quick_entry: {
       title: 'Quick Entry',
       subtitle: 'I-map ang mga keyword group sa iyong mga kategorya.',

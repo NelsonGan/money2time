@@ -2,12 +2,14 @@ import {
   Bell,
   ChevronRight,
   Clock3,
+  Code2,
   Crown,
   DatabaseBackup,
   FileText,
   FolderTree,
   Heart,
   Landmark,
+  Newspaper,
   Palette,
   RefreshCcw,
   Repeat2,
@@ -77,10 +79,12 @@ interface SettingsScreenProps {
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
+  onOpenNews: () => void;
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
+  onOpenWidgetPreviews?: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
@@ -96,10 +100,12 @@ export function SettingsScreen({
   onOpenRecurring,
   onOpenNotifications,
   onOpenDataManagement,
+  onOpenNews,
   onOpenStatementImport,
   onOpenQuickEntry,
   onOpenProPaywall,
   onOpenProManagement,
+  onOpenWidgetPreviews,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
@@ -433,7 +439,7 @@ export function SettingsScreen({
 
           <SettingsSection
             className="mt-6 gap-2"
-            title={I18n.t('settings.section_support')}
+            title={I18n.t('settings.section_data')}
             showAccent={false}
           >
             <View style={styles.rowsGroup}>
@@ -463,6 +469,15 @@ export function SettingsScreen({
                   onPress={onOpenDataManagement}
                 />
               </View>
+            </View>
+          </SettingsSection>
+
+          <SettingsSection
+            className="mt-6 gap-2"
+            title={I18n.t('settings.section_support')}
+            showAccent={false}
+          >
+            <View style={styles.rowsGroup}>
               <View
                 ref={startTutorialRowRef}
                 onLayout={() => {
@@ -493,6 +508,12 @@ export function SettingsScreen({
                 }}
               />
               <SettingsRowItem
+                icon={<Newspaper size={18} color={themeColors.primary} />}
+                label={I18n.t('settings.news')}
+                subtitle={I18n.t('settings.news_subtitle')}
+                onPress={onOpenNews}
+              />
+              <SettingsRowItem
                 icon={<Heart size={18} color={themeColors.primary} />}
                 label={I18n.t('settings.rate_app')}
                 subtitle={I18n.t('settings.rate_app_subtitle')}
@@ -502,6 +523,19 @@ export function SettingsScreen({
               />
             </View>
           </SettingsSection>
+
+          {__DEV__ && onOpenWidgetPreviews ? (
+            <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
+              <View style={styles.rowsGroup}>
+                <SettingsRowItem
+                  icon={<Code2 size={18} color={themeColors.primary} />}
+                  label="Widget previews"
+                  subtitle="Preview all widgets and supported sizes"
+                  onPress={onOpenWidgetPreviews}
+                />
+              </View>
+            </SettingsSection>
+          ) : null}
         </Animated.View>
       </ScrollView>
     </SettingsPageLayout>

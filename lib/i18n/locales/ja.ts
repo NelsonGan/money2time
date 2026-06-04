@@ -596,7 +596,10 @@ const ja = {
     management: '管理',
     section_personal: '設定',
     section_money: 'お金',
-    section_support: 'サポートとデータ',
+    section_data: 'データ',
+    section_support: 'ヘルプと情報',
+    news: '最新情報',
+    news_subtitle: '新機能とアップデート',
     quick_entry: {
       title: 'クイック入力',
       subtitle: 'キーワードグループをカテゴリにマッピングします。',

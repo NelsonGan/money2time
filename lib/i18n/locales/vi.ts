@@ -597,7 +597,10 @@ const vi = {
     management: 'Quản lý',
     section_personal: 'Tùy chọn',
     section_money: 'Tài chính',
-    section_support: 'Hỗ trợ & Dữ liệu',
+    section_data: 'Dữ liệu',
+    section_support: 'Hỗ trợ & Giới thiệu',
+    news: 'Tin tức',
+    news_subtitle: 'Tính năng mới và cải tiến',
     quick_entry: {
       title: 'Nhập nhanh',
       subtitle: 'Ánh xạ nhóm từ khóa tới danh mục của bạn.',

@@ -604,7 +604,10 @@ const en = {
     management: 'Management',
     section_personal: 'Preferences',
     section_money: 'Money',
-    section_support: 'Support & Data',
+    section_data: 'Data',
+    section_support: 'Help & About',
+    news: "What's New",
+    news_subtitle: "New features and improvements",
     quick_entry: {
       title: 'Quick Entry',
       subtitle: 'Map keyword groups to your categories.',

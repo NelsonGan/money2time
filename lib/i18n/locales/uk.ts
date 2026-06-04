@@ -600,7 +600,10 @@ const uk = {
     management: 'Управління',
     section_personal: 'Налаштування',
     section_money: 'Фінанси',
-    section_support: 'Підтримка та дані',
+    section_data: 'Дані',
+    section_support: 'Допомога та про додаток',
+    news: 'Новини',
+    news_subtitle: 'Нові функції та покращення',
     quick_entry: {
       title: 'Швидкий запис',
       subtitle: 'Призначте ключові слова категоріям.',
