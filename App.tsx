@@ -1,5 +1,4 @@
 import './global.css';
-
 // Register the background task handler before anything else mounts — the
 // OS may invoke it before any React component renders.
 import './services/autoBackupTaskRegistration';
@@ -58,10 +57,9 @@ import {
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import {
-  VoiceQuickAddOverlay,
   type VoiceQuickAddHandle,
+  VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
-import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
@@ -92,9 +90,10 @@ import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
-import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
+import { recordInsightsView } from '~/services/reviewPrompt';
+import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
@@ -303,14 +302,10 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, settings, quickEntryPrefs } = useApp();
+  const { isSimpleMode, quickEntryPrefs } = useApp();
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
-    if (Platform.OS !== 'ios') {
-      setVoiceSupported(false);
-      return;
-    }
     let cancelled = false;
     void (async () => {
       const ok = await isSpeechRecognitionAvailable();
@@ -322,11 +317,10 @@ function MainShellScreen({
   }, []);
   // The whole voice-input surface (settings row, long-press, capture overlay)
   // is gated on this single flag so unsupported devices show no trace of it.
+  // Availability is probed on every platform; the native module reports
+  // support (iOS + Android), while web/unsupported devices report false.
   const voiceEnabled =
-    Platform.OS === 'ios' &&
-    voiceSupported &&
-    quickEntryPrefs.voiceInputEnabled &&
-    quickEntryPrefs.quickEntryEnabled;
+    voiceSupported && quickEntryPrefs.voiceInputEnabled && quickEntryPrefs.quickEntryEnabled;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on

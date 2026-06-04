@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Platform } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import {
@@ -59,7 +58,6 @@ export function QuickAddScreen({
   // enabled it or dismissed the suggestion yet.
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
     let cancelled = false;
     void (async () => {
       const ok = await isSpeechRecognitionAvailable();
@@ -71,10 +69,7 @@ export function QuickAddScreen({
   }, []);
 
   const voicePromptVisible =
-    Platform.OS === 'ios' &&
-    voiceSupported &&
-    !quickEntryPrefs.voiceInputEnabled &&
-    !quickEntryPrefs.voicePromptDismissed;
+    voiceSupported && !quickEntryPrefs.voiceInputEnabled && !quickEntryPrefs.voicePromptDismissed;
 
   const handleDismissVoicePrompt = useCallback(() => {
     updateQuickEntryPrefs({ voicePromptDismissed: true });
