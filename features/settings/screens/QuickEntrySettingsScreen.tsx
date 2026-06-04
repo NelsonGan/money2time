@@ -1,20 +1,11 @@
 import { ChevronRight, Mic, Zap } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   AccountPickerSheet,
-  CategoryPickerSheet,
   type CategoryPickerOption,
+  CategoryPickerSheet,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -175,7 +166,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   const [defaultAccountPickerVisible, setDefaultAccountPickerVisible] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
     let cancelled = false;
     void (async () => {
       const ok = await isSpeechRecognitionAvailable();
@@ -402,7 +392,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
                 </View>
               </View>
 
-              {Platform.OS === 'ios' && voiceSupported ? (
+              {voiceSupported ? (
                 <View className="mt-4">
                   <Text variant="caption" tone="muted" className="mb-2 px-1">
                     {I18n.t('settings.quick_entry.voice.section_title')}
