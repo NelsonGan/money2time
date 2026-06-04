@@ -97,7 +97,9 @@
                   "targetName": "Money2TimeWidget",
                   "bundleIdentifier": "com.nelsongan.money2time.Money2TimeWidget",
                   "entitlements": {
-                    "com.apple.security.application-groups": ["group.com.nelsongan.money2time.widgets"]
+                    "com.apple.security.application-groups": [
+                      "group.com.nelsongan.money2time.widgets"
+                    ]
                   }
                 }
               ]
