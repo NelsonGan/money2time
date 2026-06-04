@@ -1,6 +1,6 @@
 import { useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Linking, Platform } from 'react-native';
+import { Alert, AppState, Linking } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
@@ -20,11 +20,11 @@ import {
 import type { Account, Category, TransactionType } from '~/types';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
-import { VoiceCaptureOverlay } from './VoiceCaptureOverlay';
-import { VoicePreviewSheet, type VoicePreviewData } from './VoicePreviewSheet';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, stripCurrencyTokens } from '../utils/parseQuickInput';
+import { VoiceCaptureOverlay } from './VoiceCaptureOverlay';
+import { type VoicePreviewData, VoicePreviewSheet } from './VoicePreviewSheet';
 
 export interface VoiceQuickAddHandle {
   /** Start listening. Caller should also call stop() in onPressOut. */
@@ -293,7 +293,6 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   });
 
   const start = useCallback(async () => {
-    if (Platform.OS !== 'ios') return;
     if (recordingRef.current) return;
 
     // Claim a session id up-front. Any wait below re-checks this — if the
