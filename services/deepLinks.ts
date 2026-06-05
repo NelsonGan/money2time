@@ -1,5 +1,5 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
-import { Keyboard, Linking } from 'react-native';
+import { InteractionManager, Keyboard, Linking } from 'react-native';
 
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -59,17 +59,14 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   const parsed = parseMoney2TimeUrl(url);
   if (!parsed) return false;
 
-  // A deep link can arrive while the quick-entry sheet is open with the
-  // keyboard up. On iOS, popping that modal (navigate('Main') below) while a
-  // TextInput is focused races with the keyboard dismissal and the pop gets
-  // cancelled, leaving the sheet stuck on screen. Dismiss the keyboard first.
-  Keyboard.dismiss();
-
   if (parsed.action === 'quick-add') {
     const type = normalizeQuickEntryType(parsed.params.type);
     if (!type) return false;
 
-    navigationRef.navigate('AddTransaction', { initialValues: { type } });
+    runDeepLinkNavigation(navigationRef, {
+      name: 'AddTransaction',
+      params: { initialValues: { type } },
+    });
     void trackEvent(AnalyticsEvents.SCREEN_VIEWED, {
       screen: 'widget_quick_add',
       type,
@@ -79,19 +76,19 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
 
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
-    navigationRef.navigate('ProPaywall', { source });
+    runDeepLinkNavigation(navigationRef, { name: 'ProPaywall', params: { source } });
     return true;
   }
 
   if (parsed.action === 'insights' || parsed.action === 'calendar') {
-    // Pop any modal/pushed root screen so the tab is actually visible.
-    if (navigationRef.canGoBack()) navigationRef.navigate('Main');
     const tab = parsed.action === 'calendar' ? 'calendar' : 'insights';
-    requestOpenTab(tab);
-    // `money2time://insights?focus=savings_rate` selects a specific insight.
-    if (tab === 'insights' && parsed.params.focus) {
-      requestFocusInsight(parsed.params.focus);
-    }
+    runDeepLinkNavigation(navigationRef, null, () => {
+      requestOpenTab(tab);
+      // `money2time://insights?focus=savings_rate` selects a specific insight.
+      if (tab === 'insights' && parsed.params.focus) {
+        requestFocusInsight(parsed.params.focus);
+      }
+    });
     void trackEvent(AnalyticsEvents.SCREEN_VIEWED, {
       screen: `widget_open_${parsed.action}`,
       ...(parsed.params.focus ? { focus: parsed.params.focus } : {}),
@@ -100,6 +97,37 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   }
 
   return false;
+}
+
+type DeepLinkModal = { name: keyof RootStackParamList; params?: object };
+
+// A deep link can arrive while a modal (e.g. the quick-entry sheet) is open —
+// often with the keyboard up after backgrounding the app mid-entry, and a
+// second widget tap can stack another modal on top. A widget tap should always
+// land on a clean root, so we rebuild the stack as exactly [Main] (+ the target
+// modal) rather than popping/pushing, which is non-deterministic while a modal
+// is animating. The existing Main route is reused so its tab state — and the
+// `requestOpenTab` listener — survive the reset instead of remounting.
+//
+// On iOS, mutating the stack while a TextInput is focused races with the
+// keyboard dismissal and can leave the old sheet stuck, so we dismiss the
+// keyboard first and defer the reset until in-flight interactions settle.
+function runDeepLinkNavigation(
+  navigationRef: RootNavigationRef,
+  modal: DeepLinkModal | null,
+  afterReset?: () => void,
+) {
+  Keyboard.dismiss();
+  InteractionManager.runAfterInteractions(() => {
+    const rootState = navigationRef.getRootState();
+    const existingMain = rootState?.routes.find((route) => route.name === 'Main');
+    const mainRoute = existingMain
+      ? { name: 'Main', key: existingMain.key, params: existingMain.params }
+      : { name: 'Main' };
+    const routes = modal ? [mainRoute, { name: modal.name, params: modal.params }] : [mainRoute];
+    navigationRef.reset({ index: routes.length - 1, routes });
+    afterReset?.();
+  });
 }
 
 export function subscribeMoney2TimeDeepLinks(navigationRef: RootNavigationRef) {

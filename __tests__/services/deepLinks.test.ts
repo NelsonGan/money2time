@@ -5,6 +5,7 @@ import { requestOpenTab } from '~/services/tabNavigation';
 jest.mock('react-native', () => ({
   Linking: { addEventListener: jest.fn(), getInitialURL: jest.fn() },
   Keyboard: { dismiss: jest.fn() },
+  InteractionManager: { runAfterInteractions: (cb: () => void) => cb() },
 }));
 
 jest.mock('~/services/analytics', () => ({
@@ -20,11 +21,25 @@ jest.mock('~/services/insightsNavigation', () => ({
   requestFocusInsight: jest.fn(),
 }));
 
-function makeNavigationRef(canGoBack = false) {
+function makeNavigationRef(modalOpen = false) {
+  // Mimics the root stack: just [Main] at rest, or [Main, AddTransaction] when a
+  // modal (e.g. the quick-entry sheet) is already open from a prior widget tap.
+  const routes = modalOpen
+    ? [
+        { name: 'Main', key: 'main-1' },
+        { name: 'AddTransaction', key: 'add-1' },
+      ]
+    : [{ name: 'Main', key: 'main-1' }];
   return {
     navigate: jest.fn(),
-    canGoBack: jest.fn(() => canGoBack),
+    reset: jest.fn(),
+    canGoBack: jest.fn(() => modalOpen),
+    getRootState: jest.fn(() => ({ index: routes.length - 1, routes })),
   } as never;
+}
+
+function resetMock(ref: unknown) {
+  return (ref as { reset: jest.Mock }).reset;
 }
 
 describe('handleMoney2TimeDeepLink', () => {
@@ -59,10 +74,13 @@ describe('handleMoney2TimeDeepLink', () => {
     expect(requestFocusInsight).not.toHaveBeenCalled();
   });
 
-  it('pops back to Main before switching tabs when a screen is pushed', () => {
+  it('resets the stack to Main before switching tabs when a modal is open', () => {
     const ref = makeNavigationRef(true);
     handleMoney2TimeDeepLink('money2time://calendar', ref);
-    expect((ref as unknown as { navigate: jest.Mock }).navigate).toHaveBeenCalledWith('Main');
+    expect(resetMock(ref)).toHaveBeenCalledWith({
+      index: 0,
+      routes: [{ name: 'Main', key: 'main-1', params: undefined }],
+    });
   });
 
   it('still routes quick-add and pro deep links', () => {
@@ -70,6 +88,19 @@ describe('handleMoney2TimeDeepLink', () => {
     expect(handleMoney2TimeDeepLink('money2time://quick-add?type=income', ref)).toBe(true);
     expect(handleMoney2TimeDeepLink('money2time://pro?source=widget_x', ref)).toBe(true);
     expect(requestOpenTab).not.toHaveBeenCalled();
+  });
+
+  it('replaces an open modal with a single fresh quick-add modal', () => {
+    const ref = makeNavigationRef(true);
+    handleMoney2TimeDeepLink('money2time://quick-add?type=expense', ref);
+    // Exactly [Main, AddTransaction] — the prior modal is dropped, not stacked.
+    expect(resetMock(ref)).toHaveBeenCalledWith({
+      index: 1,
+      routes: [
+        { name: 'Main', key: 'main-1', params: undefined },
+        { name: 'AddTransaction', params: { initialValues: { type: 'expense' } } },
+      ],
+    });
   });
 
   it('returns false for unknown actions', () => {
