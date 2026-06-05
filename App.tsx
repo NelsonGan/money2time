@@ -94,6 +94,7 @@ import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigatio
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import { subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
@@ -422,6 +423,12 @@ function MainShellScreen({
       jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()));
     });
   }, [jumpTransactionsToMonth]);
+
+  useEffect(() => {
+    return subscribeOpenTabRequest(({ tab }) => {
+      setActiveTab(tab);
+    });
+  }, []);
 
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');

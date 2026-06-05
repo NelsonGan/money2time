@@ -28,5 +28,12 @@ export const homeWidgetsAnnouncement: FeatureAnnouncement = {
       accent: 'lavender',
       visual: 'calendar',
     },
+    {
+      eyebrow: 'Pro',
+      title: 'How much you keep',
+      body: 'Your savings rate this month at a glance — what you kept versus what you spent, in money and hours of work.',
+      accent: 'success',
+      visual: 'savings',
+    },
   ],
 };

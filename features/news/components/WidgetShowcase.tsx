@@ -5,12 +5,13 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
+import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { buildSampleWidgetSnapshot } from '~/services/widgetSnapshot.shared';
 import { FONT } from '~/utils/fonts';
 
-export type WidgetShowcaseKind = 'monthly' | 'weekly' | 'calendar';
+export type WidgetShowcaseKind = 'monthly' | 'weekly' | 'calendar' | 'savings';
 
 const BANNER_SOURCE = require('../../../assets/banner.png');
 
@@ -18,6 +19,7 @@ const RATIO: Record<WidgetShowcaseKind, number> = {
   monthly: 338 / 158,
   weekly: 338 / 158,
   calendar: 338 / 354,
+  savings: 338 / 158,
 };
 
 const WIDGET_PADDING = 16;
@@ -332,6 +334,12 @@ function CalendarContent({ snapshot }: { snapshot: ReturnType<typeof buildSample
   );
 }
 
+function SavingsContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleWidgetSnapshot> }) {
+  return (
+    <SavingsRateWidgetContent data={snapshot.savingsRate} gradientId="newsSavingsRateGradient" />
+  );
+}
+
 export function WidgetShowcase({
   kind,
   width,
@@ -369,6 +377,8 @@ export function WidgetShowcase({
         <MonthlyContent snapshot={snapshot} />
       ) : kind === 'weekly' ? (
         <WeeklyContent snapshot={snapshot} />
+      ) : kind === 'savings' ? (
+        <SavingsContent snapshot={snapshot} />
       ) : (
         <CalendarContent snapshot={snapshot} />
       )}

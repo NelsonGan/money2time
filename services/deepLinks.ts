@@ -3,6 +3,8 @@ import { Linking } from 'react-native';
 
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestOpenTab } from '~/services/tabNavigation';
 
 type RootNavigationRef = NavigationContainerRefWithCurrent<RootStackParamList>;
 
@@ -72,6 +74,22 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
     navigationRef.navigate('ProPaywall', { source });
+    return true;
+  }
+
+  if (parsed.action === 'insights' || parsed.action === 'calendar') {
+    // Pop any modal/pushed root screen so the tab is actually visible.
+    if (navigationRef.canGoBack()) navigationRef.navigate('Main');
+    const tab = parsed.action === 'calendar' ? 'calendar' : 'insights';
+    requestOpenTab(tab);
+    // `money2time://insights?focus=savings_rate` selects a specific insight.
+    if (tab === 'insights' && parsed.params.focus) {
+      requestFocusInsight(parsed.params.focus);
+    }
+    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, {
+      screen: `widget_open_${parsed.action}`,
+      ...(parsed.params.focus ? { focus: parsed.params.focus } : {}),
+    });
     return true;
   }
 

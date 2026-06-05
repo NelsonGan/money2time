@@ -57,6 +57,8 @@ function visualToKind(visual: FeatureAnnouncementPage['visual']): WidgetShowcase
       return 'weekly';
     case 'calendar':
       return 'calendar';
+    case 'savings':
+      return 'savings';
     case 'monthly':
     default:
       return 'monthly';

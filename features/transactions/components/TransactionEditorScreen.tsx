@@ -19,17 +19,24 @@ import {
   InteractionManager,
   Keyboard,
   type LayoutChangeEvent,
+  Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  initialWindowMetrics,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   AccountPickerSheet,
@@ -41,7 +48,6 @@ import {
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
-import { DatePickerModal } from '~/components/datePicker';
 import {
   NumpadPanel,
   SplitBillModal,
@@ -66,13 +72,13 @@ import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { newId } from '~/utils/id';
 import {
   amountToHoursByRate,
   dayKeyFromIsoLocal,
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
+import { newId } from '~/utils/id';
 
 type ActiveField =
   | 'amount'
@@ -393,6 +399,19 @@ export function TransactionEditorScreen({
   const { accounts, accountGroups, categories, settings, currentMonthWage } = useApp();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
+  const safeAreaInsets = useSafeAreaInsets();
+  // This screen is presented as a transparentModal. When opened via a widget
+  // deep link on a cold launch, the modal mounts before safe-area insets are
+  // measured, so SafeAreaView's `top` edge can resolve to 0 and tuck the
+  // header under the status bar / Dynamic Island. Use every synchronous source
+  // available so at least one is non-zero: initialWindowMetrics (populated at
+  // module init), StatusBar.currentHeight (Android only, always synchronous),
+  // and the live context insets as a final fallback.
+  const topInset = Math.max(
+    safeAreaInsets.top,
+    initialWindowMetrics?.insets.top ?? 0,
+    Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
+  );
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const initialType = initialValues?.type ?? 'expense';
@@ -765,7 +784,6 @@ export function TransactionEditorScreen({
   useEffect(() => {
     if (initialValues?.amount === undefined) return;
     setAmount(initialValues.amount);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues?.amount]);
 
   useEffect(() => {
@@ -1570,7 +1588,7 @@ export function TransactionEditorScreen({
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <View
         style={styles.screenContainer}
         onStartShouldSetResponder={shouldHandleBackgroundPress}
@@ -1578,10 +1596,8 @@ export function TransactionEditorScreen({
       >
         <TabletContentContainer style={{ flex: 1 }}>
           <View
-            className={cn(
-              'px-5 pb-2 flex-row items-start justify-between',
-              windowHeight < 700 ? 'pt-2' : 'pt-4',
-            )}
+            className="px-5 pb-2 flex-row items-start justify-between"
+            style={{ paddingTop: topInset + (windowHeight < 700 ? 8 : 16) }}
             onStartShouldSetResponder={shouldHandleBackgroundPress}
             onResponderRelease={clearActiveField}
           >

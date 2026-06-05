@@ -85,6 +85,15 @@ function buildSampleSnapshotJson() {
   }));
   const weeklyTotal = barAmounts.reduce((sum, value) => sum + value, 0);
 
+  // Savings rate over the sample month (income vs all expenses, incl. the bars).
+  const savingsIncome = totalIncome;
+  const savingsExpense = totalExpense + weeklyTotal;
+  const saved = savingsIncome - savingsExpense;
+  const savingsRate = savingsIncome > 0 ? saved / savingsIncome : 0;
+  const savedHours = Math.abs(saved) / 15;
+  const savedWholeHours = Math.floor(savedHours);
+  const savedMinutes = Math.round((savedHours - savedWholeHours) * 60);
+
   return JSON.stringify({
     schemaVersion: 1,
     generatedAt: now.toISOString(),
@@ -124,9 +133,28 @@ function buildSampleSnapshotJson() {
       incomeLabel: `$${shortNum(totalIncome)}`,
       expenseLabel: `$${shortNum(totalExpense)}`,
     },
+    savingsRate: {
+      widgetId: 'savings_rate',
+      title: 'Savings Rate',
+      monthKey,
+      monthLabel,
+      income: savingsIncome,
+      expense: savingsExpense,
+      saved,
+      savingsRate,
+      rateLabel: `${savingsRate < 0 ? '−' : ''}${Math.abs(Math.round(savingsRate * 100))}%`,
+      incomeLabel: `$${shortNum(savingsIncome)}`,
+      expenseLabel: `$${shortNum(savingsExpense)}`,
+      savedLabel: `$${shortNum(Math.abs(saved))}`,
+      savedCaption: saved >= 0 ? 'Saved' : 'Overspent',
+      isPositive: saved >= 0,
+      hasIncome: savingsIncome > 0,
+      timeEquivalentLabel: `≈ ${savedWholeHours}h ${savedMinutes}m of work ${saved >= 0 ? 'kept' : 'behind'}`,
+    },
     proUnlockUrlByWidgetId: {
       weekly_expense: 'money2time://pro?source=widget_weekly_expense',
       calendar_month: 'money2time://pro?source=widget_calendar_month',
+      savings_rate: 'money2time://pro?source=widget_savings_rate',
     },
   });
 }
@@ -203,6 +231,10 @@ const ANDROID_WIDGET_RECEIVERS = [
   {
     name: '.widgets.Money2TimeCalendarWidgetProvider',
     resource: '@xml/money2time_calendar_widget',
+  },
+  {
+    name: '.widgets.Money2TimeSavingsRateWidgetProvider',
+    resource: '@xml/money2time_savings_rate_widget',
   },
 ];
 
@@ -545,7 +577,7 @@ public class Money2TimeWeeklyExpenseWidgetProvider extends AppWidgetProvider {
       } else {
         views.setViewVisibility(R.id.weekly_locked, View.GONE);
         views.setViewVisibility(R.id.weekly_content, View.VISIBLE);
-        views.setOnClickPendingIntent(R.id.weekly_root, linkIntent(context, "money2time://open", 302));
+        views.setOnClickPendingIntent(R.id.weekly_root, linkIntent(context, "money2time://insights", 302));
         JSONObject weekly = root.getJSONObject("weeklyExpense");
         views.setTextViewText(R.id.weekly_total, weekly.optString("totalLabel", "$0"));
         double max = weekly.optDouble("maxAmount", 0);
@@ -673,7 +705,7 @@ public class Money2TimeCalendarWidgetProvider extends AppWidgetProvider {
 
       views.setViewVisibility(R.id.calendar_locked, View.GONE);
       views.setViewVisibility(R.id.calendar_content, View.VISIBLE);
-      views.setOnClickPendingIntent(R.id.calendar_root, linkIntent(context, "money2time://open", 402));
+      views.setOnClickPendingIntent(R.id.calendar_root, linkIntent(context, "money2time://calendar", 402));
 
       JSONObject calendar = root.getJSONObject("calendarMonth");
       views.setTextViewText(R.id.cal_month, calendar.optString("monthLabel", ""));
@@ -752,6 +784,131 @@ public class Money2TimeCalendarWidgetProvider extends AppWidgetProvider {
 `,
       );
 
+      // --- Savings rate provider (pro) -------------------------------------
+      writeFileIfChanged(
+        path.join(widgetRoot, 'Money2TimeSavingsRateWidgetProvider.java'),
+        `package com.nelsongan.money2time.widgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.view.View;
+import android.widget.RemoteViews;
+
+import com.nelsongan.money2time.R;
+
+import org.json.JSONObject;
+
+public class Money2TimeSavingsRateWidgetProvider extends AppWidgetProvider {
+  static final String PREFS_NAME = "${SNAPSHOT_PREFS}";
+  static final String SNAPSHOT_KEY = "${SNAPSHOT_KEY}";
+
+  @Override
+  public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
+    for (int appWidgetId : appWidgetIds) {
+      updateWidget(context, manager, appWidgetId);
+    }
+  }
+
+  static void updateAll(Context context) {
+    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+    ComponentName provider = new ComponentName(context, Money2TimeSavingsRateWidgetProvider.class);
+    int[] ids = manager.getAppWidgetIds(provider);
+    for (int id : ids) {
+      updateWidget(context, manager, id);
+    }
+  }
+
+  private static PendingIntent linkIntent(Context context, String url, int code) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+    intent.setPackage(context.getPackageName());
+    return PendingIntent.getActivity(
+      context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+  }
+
+  private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
+    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_savings_rate_widget);
+    views.setViewVisibility(R.id.savings_pro_badge, View.GONE);
+    SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    String json = prefs.getString(SNAPSHOT_KEY, null);
+
+    try {
+      if (json == null) json = Money2TimeWidgetSampleData.JSON;
+      JSONObject root = new JSONObject(json);
+      boolean isPro = root.optBoolean("isPro", false);
+
+      if (!isPro) {
+        views.setViewVisibility(R.id.savings_content, View.GONE);
+        views.setViewVisibility(R.id.savings_locked, View.VISIBLE);
+        views.setTextViewText(R.id.savings_locked_text, "Available with Money2Time Pro");
+        String url = "money2time://pro";
+        JSONObject unlock = root.optJSONObject("proUnlockUrlByWidgetId");
+        if (unlock != null) url = unlock.optString("savings_rate", url);
+        views.setOnClickPendingIntent(R.id.savings_root, linkIntent(context, url, 501));
+      } else {
+        views.setViewVisibility(R.id.savings_locked, View.GONE);
+        views.setViewVisibility(R.id.savings_content, View.VISIBLE);
+        views.setOnClickPendingIntent(
+          R.id.savings_root,
+          linkIntent(context, "money2time://insights?focus=savings_rate", 502));
+
+        JSONObject sr = root.getJSONObject("savingsRate");
+        boolean hasIncome = sr.optBoolean("hasIncome", false);
+        boolean isPositive = sr.optBoolean("isPositive", true);
+        double rate = sr.optDouble("savingsRate", 0);
+
+        int heroColor = !hasIncome
+          ? Color.parseColor("#94A39F")
+          : (isPositive ? Color.parseColor("#1E9468") : Color.parseColor("#F37D57"));
+
+        String rateLabel = sr.optString("rateLabel", "—");
+        String numberPart = rateLabel;
+        boolean hasPercent = rateLabel.endsWith("%");
+        if (hasPercent) numberPart = rateLabel.substring(0, rateLabel.length() - 1);
+        views.setTextViewText(R.id.savings_rate_num, numberPart);
+        views.setTextColor(R.id.savings_rate_num, heroColor);
+        views.setViewVisibility(R.id.savings_rate_pct, hasPercent ? View.VISIBLE : View.GONE);
+        views.setTextColor(R.id.savings_rate_pct, heroColor);
+
+        String month = sr.optString("monthLabel", "");
+        views.setTextViewText(R.id.savings_month, month);
+
+        String time = sr.optString("timeEquivalentLabel", "");
+        String subtitle = !hasIncome
+          ? "Add income to see your rate"
+          : (time.isEmpty() ? "of income saved" : time);
+        views.setTextViewText(R.id.savings_subtitle, subtitle);
+
+        int progress = isPositive ? (int) Math.round(Math.max(0, Math.min(1, rate)) * 100) : 0;
+        views.setProgressBar(R.id.savings_bar, 100, progress, false);
+
+        views.setInt(
+          R.id.savings_saved_dot,
+          "setBackgroundResource",
+          isPositive ? R.drawable.money2time_dot_saved : R.drawable.money2time_dot_overspent);
+        views.setTextViewText(
+          R.id.savings_saved,
+          sr.optString("savedCaption", "Saved") + " " + sr.optString("savedLabel", "$0"));
+        views.setTextViewText(R.id.savings_spent, "Spent " + sr.optString("expenseLabel", "$0"));
+      }
+    } catch (Exception e) {
+      views.setViewVisibility(R.id.savings_content, View.GONE);
+      views.setViewVisibility(R.id.savings_locked, View.VISIBLE);
+      views.setTextViewText(R.id.savings_locked_text, "Open Money2Time to get started.");
+    }
+
+    manager.updateAppWidget(appWidgetId, views);
+  }
+}
+`,
+      );
+
       // --- Native module + package ----------------------------------------
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetModule.java'),
@@ -781,6 +938,7 @@ public class Money2TimeWidgetModule extends ReactContextBaseJavaModule {
     Money2TimeWidgetProvider.updateAll(context);
     Money2TimeWeeklyExpenseWidgetProvider.updateAll(context);
     Money2TimeCalendarWidgetProvider.updateAll(context);
+    Money2TimeSavingsRateWidgetProvider.updateAll(context);
   }
 
   @ReactMethod
@@ -885,6 +1043,22 @@ public class Money2TimeWidgetPackage implements ReactPackage {
 `,
       );
 
+      writeFileIfChanged(
+        path.join(resRoot, 'xml/money2time_savings_rate_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="250dp"
+  android:minHeight="110dp"
+  android:targetCellWidth="4"
+  android:targetCellHeight="2"
+  android:updatePeriodMillis="0"
+  android:initialLayout="@layout/money2time_savings_rate_widget"
+  android:previewLayout="@layout/money2time_savings_rate_widget"
+  android:resizeMode="none"
+  android:widgetCategory="home_screen" />
+`,
+      );
+
       // --- Layouts ----------------------------------------------------------
       writeFileIfChanged(
         path.join(resRoot, 'layout/money2time_monthly_expense_widget.xml'),
@@ -893,79 +1067,80 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/money2time_widget_background"
-  android:gravity="center_vertical"
-  android:orientation="horizontal"
-  android:padding="16dp">
+  android:orientation="vertical"
+  android:padding="18dp">
+
+  <ImageView
+    android:layout_width="124dp"
+    android:layout_height="32dp"
+    android:adjustViewBounds="true"
+    android:contentDescription="Money2Time"
+    android:scaleType="fitStart"
+    android:src="@drawable/banner" />
+
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1" />
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:letterSpacing="0.12"
+    android:text="THIS MONTH"
+    android:textColor="#94A39F"
+    android:textSize="11sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/money2time_widget_amount"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:includeFontPadding="false"
+    android:maxLines="1"
+    android:text="$1,284"
+    android:textColor="#D45F57"
+    android:textSize="40sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/money2time_widget_time"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:maxLines="1"
+    android:text="85h 36m of work"
+    android:textColor="#6B7A77"
+    android:textSize="13sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/money2time_widget_locked"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Unlock Pro"
+    android:textColor="#1F8A6F"
+    android:textStyle="bold"
+    android:visibility="gone" />
+
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1" />
 
   <LinearLayout
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:orientation="vertical">
-
-    <ImageView
-      android:layout_width="116dp"
-      android:layout_height="30dp"
-      android:adjustViewBounds="true"
-      android:contentDescription="Money2Time"
-      android:scaleType="fitStart"
-      android:src="@drawable/banner" />
-
-    <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="14dp"
-      android:letterSpacing="0.12"
-      android:text="THIS MONTH"
-      android:textColor="#94A39F"
-      android:textSize="10sp"
-      android:textStyle="bold" />
-
-    <TextView
-      android:id="@+id/money2time_widget_amount"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="3dp"
-      android:maxLines="1"
-      android:text="$1,284"
-      android:textColor="#D45F57"
-      android:textSize="28sp"
-      android:textStyle="bold" />
-
-    <TextView
-      android:id="@+id/money2time_widget_time"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
-      android:maxLines="1"
-      android:text="85h 36m of work"
-      android:textColor="#6B7A77"
-      android:textSize="12sp"
-      android:textStyle="bold" />
-
-    <TextView
-      android:id="@+id/money2time_widget_locked"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="Unlock Pro"
-      android:textColor="#1F8A6F"
-      android:textStyle="bold"
-      android:visibility="gone" />
-  </LinearLayout>
-
-  <LinearLayout
-    android:layout_width="120dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="12dp"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <LinearLayout
       android:id="@+id/money2time_widget_income"
-      android:layout_width="match_parent"
-      android:layout_height="44dp"
+      android:layout_width="0dp"
+      android:layout_height="50dp"
+      android:layout_weight="1"
       android:background="@drawable/money2time_widget_income_button"
-      android:gravity="center_vertical"
+      android:gravity="center"
       android:orientation="horizontal"
       android:paddingHorizontal="12dp">
       <ImageView
@@ -982,17 +1157,18 @@ public class Money2TimeWidgetPackage implements ReactPackage {
         android:maxLines="1"
         android:text="Income"
         android:textColor="#1E9468"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
       android:id="@+id/money2time_widget_expense"
-      android:layout_width="match_parent"
-      android:layout_height="44dp"
-      android:layout_marginTop="10dp"
+      android:layout_width="0dp"
+      android:layout_height="50dp"
+      android:layout_weight="1"
+      android:layout_marginStart="12dp"
       android:background="@drawable/money2time_widget_expense_button"
-      android:gravity="center_vertical"
+      android:gravity="center"
       android:orientation="horizontal"
       android:paddingHorizontal="12dp">
       <ImageView
@@ -1009,7 +1185,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
         android:maxLines="1"
         android:text="Expense"
         android:textColor="#D45F57"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
     </LinearLayout>
   </LinearLayout>
@@ -1338,6 +1514,237 @@ ${calRows}
 `,
       );
 
+      // Android medium widgets are taller/more square than iOS; the hero row is
+      // weighted so it absorbs the extra height with header pinned top, footer bottom.
+      writeFileIfChanged(
+        path.join(resRoot, 'layout/money2time_savings_rate_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/savings_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/money2time_widget_background"
+  android:clipToPadding="false"
+  android:clipToOutline="true"
+  android:padding="16dp">
+
+  <LinearLayout
+    android:id="@+id/savings_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+      <ImageView
+        android:layout_width="104dp"
+        android:layout_height="28dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Money2Time"
+        android:scaleType="fitStart"
+        android:src="@drawable/banner" />
+      <TextView
+        android:id="@+id/savings_month"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="end"
+        android:maxLines="1"
+        android:text="June 2026"
+        android:textColor="#1A2E2A"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1" />
+
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:baselineAligned="true"
+      android:gravity="bottom"
+      android:orientation="horizontal">
+      <TextView
+        android:id="@+id/savings_rate_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:text="68"
+        android:textColor="#1E9468"
+        android:textSize="56sp"
+        android:textStyle="bold" />
+      <TextView
+        android:id="@+id/savings_rate_pct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginBottom="7dp"
+        android:includeFontPadding="false"
+        android:text="%"
+        android:textColor="#1E9468"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+      android:id="@+id/savings_subtitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="2dp"
+      android:maxLines="2"
+      android:text="≈ 167h 32m of work kept"
+      android:textColor="#6B7A77"
+      android:textSize="13sp"
+      android:textStyle="bold" />
+
+    <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1" />
+
+    <ProgressBar
+      android:id="@+id/savings_bar"
+      style="@android:style/Widget.ProgressBar.Horizontal"
+      android:layout_width="match_parent"
+      android:layout_height="12dp"
+      android:max="100"
+      android:progress="68"
+      android:progressDrawable="@drawable/money2time_savings_progress" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+      <FrameLayout
+        android:id="@+id/savings_saved_dot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:background="@drawable/money2time_dot_saved" />
+      <TextView
+        android:id="@+id/savings_saved"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:maxLines="1"
+        android:text="Saved $2.5K"
+        android:textColor="#6B7A77"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+      <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+      <FrameLayout
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:background="@drawable/money2time_dot_spent" />
+      <TextView
+        android:id="@+id/savings_spent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:maxLines="1"
+        android:text="Spent $1.2K"
+        android:textColor="#6B7A77"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+    </LinearLayout>
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/savings_locked"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:visibility="gone">
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+      <ImageView
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Money2Time Pro"
+        android:src="@drawable/widget_mascot" />
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text="Savings Rate"
+          android:textColor="#1A2E2A"
+          android:textSize="16sp"
+          android:textStyle="bold" />
+        <TextView
+          android:id="@+id/savings_locked_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="2dp"
+          android:maxLines="1"
+          android:text="Available with Money2Time Pro"
+          android:textColor="#6B7A77"
+          android:textSize="11sp"
+          android:textStyle="bold" />
+      </LinearLayout>
+    </LinearLayout>
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:background="@drawable/money2time_cta_pill"
+      android:gravity="center"
+      android:paddingVertical="10dp"
+      android:text="✨ Unlock Pro"
+      android:textColor="#FFFFFF"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <FrameLayout
+    android:id="@+id/savings_pro_badge"
+    android:layout_width="58dp"
+    android:layout_height="58dp"
+    android:layout_gravity="top|end"
+    android:layout_marginTop="-16dp"
+    android:layout_marginEnd="-16dp"
+    android:clipChildren="true">
+    <TextView
+      android:layout_width="120dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:background="#F6B750"
+      android:gravity="center"
+      android:includeFontPadding="false"
+      android:paddingVertical="3dp"
+      android:rotation="45"
+      android:text="PRO"
+      android:textColor="#FFFFFF"
+      android:textSize="9sp"
+      android:textStyle="bold"
+      android:translationX="15dp"
+      android:translationY="-15dp" />
+  </FrameLayout>
+</FrameLayout>
+`,
+      );
+
       // --- Drawables --------------------------------------------------------
       writeFileIfChanged(
         path.join(resRoot, 'drawable/money2time_widget_background.xml'),
@@ -1516,6 +1923,56 @@ ${calRows}
       );
 
       writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_dot_saved.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+  <solid android:color="#1E9468" />
+</shape>
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_dot_overspent.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+  <solid android:color="#F37D57" />
+</shape>
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_dot_spent.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+  <solid android:color="#D45F57" />
+</shape>
+`,
+      );
+
+      // Horizontal progress bar: light-red track with a rounded green fill.
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_savings_progress.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@android:id/background">
+    <shape>
+      <solid android:color="#F4D6D2" />
+      <corners android:radius="999dp" />
+    </shape>
+  </item>
+  <item android:id="@android:id/progress">
+    <clip>
+      <shape>
+        <solid android:color="#1E9468" />
+        <corners android:radius="999dp" />
+      </shape>
+    </clip>
+  </item>
+</layer-list>
+`,
+      );
+
+      writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetSampleData.java'),
         `package com.nelsongan.money2time.widgets;
 
@@ -1598,11 +2055,24 @@ private struct CalendarMonthData: Decodable {
   let days: [CalendarDayData]
 }
 
+private struct SavingsRateData: Decodable {
+  let monthLabel: String
+  let savingsRate: Double
+  let rateLabel: String
+  let expenseLabel: String
+  let savedLabel: String
+  let savedCaption: String
+  let isPositive: Bool
+  let hasIncome: Bool
+  let timeEquivalentLabel: String
+}
+
 private struct WidgetSnapshot: Decodable {
   let isPro: Bool
   let monthlyExpenseQuickLog: MonthlySpendData
   let weeklyExpense: WeeklyExpenseData
   let calendarMonth: CalendarMonthData
+  let savingsRate: SavingsRateData
   let proUnlockUrlByWidgetId: [String: String]
 }
 
@@ -1976,6 +2446,97 @@ private struct WeeklyExpenseView: View {
   }
 }
 
+// MARK: - Savings rate (pro)
+
+private struct SavingsRateView: View {
+  let data: SavingsRateData
+  let palette: Palette
+
+  private var gradientColors: [Color] {
+    if !data.hasIncome { return [palette.textMuted, palette.textMuted] }
+    return data.isPositive
+      ? [Color(hex: 0x3FD9A6), palette.success]
+      : [palette.coral, palette.error]
+  }
+  private var savedFraction: CGFloat {
+    guard data.isPositive else { return 0 }
+    return CGFloat(max(0, min(1, data.savingsRate)))
+  }
+  private var subtitle: String {
+    if !data.hasIncome { return "Add income to see your rate" }
+    return data.timeEquivalentLabel.isEmpty ? "of income saved" : data.timeEquivalentLabel
+  }
+
+  var body: some View {
+    let hasPercent = data.rateLabel.hasSuffix("%")
+    let numberPart = hasPercent ? String(data.rateLabel.dropLast()) : data.rateLabel
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .top) {
+        Wordmark()
+        Spacer()
+        Text(data.monthLabel)
+          .font(.system(size: 14, weight: .bold, design: .rounded))
+          .foregroundStyle(palette.text)
+          .lineLimit(1)
+      }
+      Spacer(minLength: 6)
+      HStack(alignment: .lastTextBaseline, spacing: 12) {
+        (
+          Text(numberPart)
+            .font(.system(size: 44, weight: .bold, design: .rounded))
+          + Text(hasPercent ? "%" : "")
+            .font(.system(size: 24, weight: .bold, design: .rounded))
+        )
+        .foregroundStyle(
+          LinearGradient(colors: gradientColors, startPoint: .top, endPoint: .bottom))
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        HStack(spacing: 5) {
+          if data.hasIncome && !data.timeEquivalentLabel.isEmpty {
+            Image(systemName: "clock")
+              .font(.system(size: 11, weight: .bold))
+              .foregroundStyle(palette.primary)
+          }
+          Text(subtitle)
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textSoft)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+      }
+      Spacer(minLength: 8)
+      GeometryReader { geo in
+        ZStack(alignment: .leading) {
+          Capsule().fill(palette.error.opacity(0.22))
+          Capsule().fill(palette.success)
+            .frame(width: max(0, geo.size.width * savedFraction))
+        }
+      }
+      .frame(height: 10)
+      HStack(spacing: 0) {
+        HStack(spacing: 6) {
+          Circle().fill(data.isPositive ? palette.success : palette.coral).frame(width: 8, height: 8)
+          Text("\\(data.savedCaption) \\(data.savedLabel)")
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textSoft)
+            .lineLimit(1)
+        }
+        Spacer()
+        HStack(spacing: 6) {
+          Circle().fill(palette.error).frame(width: 8, height: 8)
+          Text("Spent \\(data.expenseLabel)")
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textSoft)
+            .lineLimit(1)
+        }
+      }
+      .padding(.top, 8)
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+}
+
 // MARK: - Calendar (pro)
 
 private struct IoChip: View {
@@ -2181,6 +2742,7 @@ private struct WeeklyRoot: View {
         if snapshot.isPro {
           WeeklyExpenseView(data: snapshot.weeklyExpense, palette: palette)
             .proCornerRibbon(entry.isPreview, palette: palette)
+            .widgetURL(URL(string: "money2time://insights"))
         } else {
           ProLockView(
             title: "Past 7 Days",
@@ -2206,12 +2768,39 @@ private struct CalendarRoot: View {
         if snapshot.isPro {
           CalendarView(data: snapshot.calendarMonth, palette: palette)
             .proCornerRibbon(entry.isPreview, palette: palette)
+            .widgetURL(URL(string: "money2time://calendar"))
         } else {
           ProLockView(
             title: "Calendar",
             url: snapshot.proUnlockUrlByWidgetId["calendar_month"] ?? "money2time://pro",
             palette: palette,
             compact: false)
+        }
+      } else {
+        EmptyStateView(palette: palette)
+      }
+    }
+    .money2TimeWidgetBackground(palette.background)
+  }
+}
+
+private struct SavingsRoot: View {
+  var entry: SnapshotEntry
+  @Environment(\\.colorScheme) private var scheme
+  var body: some View {
+    let palette = Palette.current(scheme)
+    Group {
+      if let snapshot = entry.snapshot {
+        if snapshot.isPro {
+          SavingsRateView(data: snapshot.savingsRate, palette: palette)
+            .proCornerRibbon(entry.isPreview, palette: palette)
+            .widgetURL(URL(string: "money2time://insights?focus=savings_rate"))
+        } else {
+          ProLockView(
+            title: "Savings Rate",
+            url: snapshot.proUnlockUrlByWidgetId["savings_rate"] ?? "money2time://pro",
+            palette: palette,
+            compact: true)
         }
       } else {
         EmptyStateView(palette: palette)
@@ -2265,12 +2854,27 @@ struct Money2TimeCalendarWidget: Widget {
   }
 }
 
+struct Money2TimeSavingsRateWidget: Widget {
+  let kind = "Money2TimeSavingsRate"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: SnapshotProvider()) { entry in
+      SavingsRoot(entry: entry)
+    }
+    .configurationDisplayName("Savings Rate")
+    .description("How much of this month's income you have kept.")
+    .supportedFamilies([.systemMedium])
+    .contentMarginsDisabled()
+  }
+}
+
 @main
 struct Money2TimeWidgetBundle: WidgetBundle {
   var body: some Widget {
     Money2TimeMonthlyWidget()
     Money2TimeWeeklyWidget()
     Money2TimeCalendarWidget()
+    Money2TimeSavingsRateWidget()
   }
 }
 `,
