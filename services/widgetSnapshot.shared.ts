@@ -518,6 +518,46 @@ export function parseSavingsExclusions(insightsPrefsJson: string | null | undefi
   }
 }
 
+export interface WidgetPrefs {
+  showTimeEquivalent: boolean;
+}
+
+export const DEFAULT_WIDGET_PREFS: WidgetPrefs = {
+  showTimeEquivalent: true,
+};
+
+export function parseWidgetPrefs(insightsPrefsJson: string | null | undefined): WidgetPrefs {
+  if (!insightsPrefsJson) return { ...DEFAULT_WIDGET_PREFS };
+  try {
+    const parsed = JSON.parse(insightsPrefsJson) as Record<string, unknown>;
+    const wp = parsed.widgetPrefs as Record<string, unknown> | undefined;
+    if (!wp || typeof wp !== 'object') return { ...DEFAULT_WIDGET_PREFS };
+    return {
+      showTimeEquivalent:
+        typeof wp.showTimeEquivalent === 'boolean'
+          ? wp.showTimeEquivalent
+          : DEFAULT_WIDGET_PREFS.showTimeEquivalent,
+    };
+  } catch {
+    return { ...DEFAULT_WIDGET_PREFS };
+  }
+}
+
+export function serializeWidgetPrefs(
+  insightsPrefsJson: string | null | undefined,
+  prefs: WidgetPrefs,
+): string {
+  let base: Record<string, unknown> = {};
+  if (insightsPrefsJson) {
+    try {
+      base = JSON.parse(insightsPrefsJson) as Record<string, unknown>;
+    } catch {
+      // ignore
+    }
+  }
+  return JSON.stringify({ ...base, widgetPrefs: prefs });
+}
+
 function buildSavingsRateSnapshot(
   transactions: TransactionWithRelations[],
   settings: UserSettings,
@@ -587,6 +627,7 @@ export function buildMoney2TimeWidgetSnapshot({
   categories = [],
   excludedSavingsIncomeCategoryIds = [],
   excludedSavingsExpenseCategoryIds = [],
+  widgetPrefs = DEFAULT_WIDGET_PREFS,
 }: {
   transactions: TransactionWithRelations[];
   settings: UserSettings;
@@ -597,6 +638,7 @@ export function buildMoney2TimeWidgetSnapshot({
   /** Insights "Savings rate" category exclusions; applied to the savings widgets. */
   excludedSavingsIncomeCategoryIds?: string[];
   excludedSavingsExpenseCategoryIds?: string[];
+  widgetPrefs?: WidgetPrefs;
 }): Money2TimeWidgetSnapshot {
   const includeInSavings = buildSavingsIncludePredicate(
     categories,
@@ -627,7 +669,9 @@ export function buildMoney2TimeWidgetSnapshot({
       monthKey,
       expenseAmount,
       expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
-      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      timeEquivalentLabel: widgetPrefs.showTimeEquivalent
+        ? buildTimeEquivalentLabel(expenseAmount, hourlyRate)
+        : '',
       hasHourlyRate: hourlyRate > 0,
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),
@@ -638,7 +682,9 @@ export function buildMoney2TimeWidgetSnapshot({
       monthKey,
       expenseAmount,
       expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
-      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      timeEquivalentLabel: widgetPrefs.showTimeEquivalent
+        ? buildTimeEquivalentLabel(expenseAmount, hourlyRate)
+        : '',
       hasHourlyRate: hourlyRate > 0,
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),

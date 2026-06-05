@@ -101,6 +101,7 @@ import {
 import {
   buildMoney2TimeWidgetSnapshot,
   parseSavingsExclusions,
+  parseWidgetPrefs,
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
@@ -941,6 +942,7 @@ function WidgetSnapshotSync() {
 
   useEffect(() => {
     const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
+    const widgetPrefs = parseWidgetPrefs(insightsPreferencesJson);
     const snapshot = buildMoney2TimeWidgetSnapshot({
       transactions,
       settings,
@@ -949,6 +951,7 @@ function WidgetSnapshotSync() {
       categories,
       excludedSavingsIncomeCategoryIds: savingsExclusions.income,
       excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+      widgetPrefs,
     });
 
     void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
