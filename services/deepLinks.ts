@@ -1,5 +1,5 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
-import { Linking } from 'react-native';
+import { Keyboard, Linking } from 'react-native';
 
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -58,6 +58,12 @@ function normalizeQuickEntryType(value: string | undefined) {
 export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigationRef): boolean {
   const parsed = parseMoney2TimeUrl(url);
   if (!parsed) return false;
+
+  // A deep link can arrive while the quick-entry sheet is open with the
+  // keyboard up. On iOS, popping that modal (navigate('Main') below) while a
+  // TextInput is focused races with the keyboard dismissal and the pop gets
+  // cancelled, leaving the sheet stuck on screen. Dismiss the keyboard first.
+  Keyboard.dismiss();
 
   if (parsed.action === 'quick-add') {
     const type = normalizeQuickEntryType(parsed.params.type);
