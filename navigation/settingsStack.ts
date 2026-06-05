@@ -39,6 +39,7 @@ export type SettingsStackParamList = {
   };
   ProManagement: undefined;
   QuickEntrySettings: undefined;
+  WidgetSettings: undefined;
   WidgetPreviews: undefined;
 };
 

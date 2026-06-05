@@ -3,9 +3,13 @@ import { NativeModules, Platform } from 'react-native';
 
 export {
   buildMoney2TimeWidgetSnapshot,
+  DEFAULT_WIDGET_PREFS,
   type Money2TimeWidgetSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
   parseSavingsExclusions,
+  parseWidgetPrefs,
+  serializeWidgetPrefs,
+  type WidgetPrefs,
 } from './widgetSnapshot.shared';
 import type { Money2TimeWidgetSnapshot } from './widgetSnapshot.shared';
 

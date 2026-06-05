@@ -1302,6 +1302,32 @@ const pt = {
     feedback_open: 'Enviar feedback',
     feedback_skip: 'Não, obrigado',
   },
+  widgets: {
+    page_title: 'Home Screen Widgets',
+    page_subtitle: 'Preview and customize your widgets',
+    row_label: 'Widgets',
+    row_subtitle: 'Preview and customize home screen widgets',
+    badge_free: 'Free',
+    badge_pro: 'Pro',
+    badge_medium: 'Medium',
+    badge_small: 'Small',
+    badge_large: 'Large',
+    sample_data: 'Sample',
+    my_data: 'My data',
+    customization_section: 'Customization',
+    show_time_equivalent: 'Show time equivalent',
+    show_time_equivalent_subtitle:
+      'Display the hours of work row below the spend amount on spend widgets',
+    savings_source_label: 'Savings categories',
+    savings_source_subtitle: 'Shared with the Insights tab settings',
+    how_to_add_title: 'How to add to home screen',
+    how_to_add_body:
+      'Long-press a blank area of your home screen → tap  +  → search for Money2Time',
+    pro_required_title: 'Pro required',
+    pro_required_body: 'Upgrade to Money2Time Pro to unlock this widget',
+    unlock_customization: 'Upgrade to customize',
+    unlock_customization_subtitle: 'Pro members can personalize each widget',
+  },
 };
 
 export default pt;

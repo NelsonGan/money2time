@@ -14,6 +14,7 @@ import {
   RefreshCcw,
   Repeat2,
   SlidersHorizontal,
+  Smartphone,
   Sparkles,
   Zap,
 } from 'lucide-react-native';
@@ -84,6 +85,7 @@ interface SettingsScreenProps {
   onOpenQuickEntry: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
+  onOpenWidgets: () => void;
   onOpenWidgetPreviews?: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
@@ -105,6 +107,7 @@ export function SettingsScreen({
   onOpenQuickEntry,
   onOpenProPaywall,
   onOpenProManagement,
+  onOpenWidgets,
   onOpenWidgetPreviews,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -385,6 +388,12 @@ export function SettingsScreen({
                 label={I18n.t('settings.notifications')}
                 subtitle={I18n.t('settings.notifications_subtitle')}
                 onPress={onOpenNotifications}
+              />
+              <SettingsRowItem
+                icon={<Smartphone size={18} color={themeColors.primary} />}
+                label={I18n.t('widgets.row_label')}
+                subtitle={I18n.t('widgets.row_subtitle')}
+                onPress={onOpenWidgets}
               />
             </View>
           </SettingsSection>

@@ -29,6 +29,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
+import { WidgetSettingsScreen } from './WidgetSettingsScreen';
 
 interface SettingsStackProps {
   resetToRootToken?: number;
@@ -94,6 +95,7 @@ function SettingsHomeRoute({
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
+      onOpenWidgets={() => navigation.navigate('WidgetSettings')}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -364,6 +366,17 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <QuickEntrySettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="WidgetSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <WidgetSettingsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenProPaywall={onOpenProPaywall}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (
