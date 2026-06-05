@@ -53,12 +53,16 @@ function resolveAccentColor(
 
 function visualToKind(visual: FeatureAnnouncementPage['visual']): WidgetShowcaseKind {
   switch (visual) {
+    case 'quickAdd':
+      return 'quickAdd';
     case 'weekly':
       return 'weekly';
     case 'calendar':
       return 'calendar';
     case 'savings':
       return 'savings';
+    case 'savingsHistory':
+      return 'savingsHistory';
     case 'monthly':
     default:
       return 'monthly';

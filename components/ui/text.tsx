@@ -105,6 +105,9 @@ const Text = React.forwardRef<
       style={[
         { fontFamily: config.fontFamily },
         Platform.OS === 'ios' ? { fontWeight: config.fontWeight } : null,
+        Platform.OS === 'android' && (variant === 'mono' || variant === 'monoLg')
+          ? { fontVariant: ['tabular-nums'] }
+          : null,
         style,
       ]}
       {...props}
