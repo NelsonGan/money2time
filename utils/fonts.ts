@@ -34,8 +34,8 @@ const ANDROID_FONTS: FontMap = {
   bold: 'WorkSans_700Bold',
   extrabold: 'WorkSans_800ExtraBold',
   black: 'WorkSans_900Black',
-  mono: 'SpaceMono_400Regular',
-  monoBold: 'SpaceMono_700Bold',
+  mono: 'WorkSans_600SemiBold',
+  monoBold: 'WorkSans_700Bold',
 };
 
 export const FONT: FontMap = Platform.select({

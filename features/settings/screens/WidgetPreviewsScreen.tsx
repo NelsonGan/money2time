@@ -1,8 +1,8 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownRight, ArrowUpRight, Clock, Minus, Plus } from 'lucide-react-native';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -21,8 +21,11 @@ import { WIDGET_DEFINITIONS, WIDGET_IDS, type WidgetSize } from '~/services/widg
 import {
   buildMoney2TimeWidgetSnapshot,
   buildSampleWidgetSnapshot,
+  parseSavingsExclusions,
   type CalendarMonthSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
+  type QuickAddSmallSnapshot,
+  type SavingsHistorySnapshot,
   type SavingsRateSnapshot,
   type WeeklyExpenseSnapshot,
 } from '~/services/widgetSnapshot.shared';
@@ -96,7 +99,9 @@ function WidgetFrame({
   const themeColors = useThemeColors();
   const { width } = useWindowDimensions();
   const availableWidth = width - SETTINGS_HORIZONTAL_PADDING * 2;
-  const previewWidth = Math.min(338, availableWidth);
+  // A small widget is a 158pt square on-device; medium/large span the 338pt grid width.
+  const targetWidth = size === 'small' ? 158 : 338;
+  const previewWidth = Math.min(targetWidth, availableWidth);
   const previewHeight = previewWidth / SIZE_RATIOS[size];
 
   return (
@@ -196,6 +201,148 @@ function MonthlySpendWidgetPreview({ data }: { data: MonthlyExpenseQuickLogSnaps
               <ActionPill tone="income" />
               <ActionPill tone="expense" />
             </View>
+          </View>
+        </View>
+      )}
+    </WidgetFrame>
+  );
+}
+
+function SmallActionButton({ tone }: { tone: 'income' | 'expense' }) {
+  const themeColors = useThemeColors();
+  const isIncome = tone === 'income';
+  const accent = isIncome ? themeColors.success : themeColors.error;
+  return (
+    <View
+      style={[
+        styles.smallButton,
+        {
+          backgroundColor: withColorAlpha(accent, 0.12),
+          borderColor: withColorAlpha(accent, 0.26),
+        },
+      ]}
+    >
+      {isIncome ? (
+        <Plus size={20} color={accent} strokeWidth={3.2} />
+      ) : (
+        <Minus size={20} color={accent} strokeWidth={3.2} />
+      )}
+    </View>
+  );
+}
+
+function QuickAddSmallWidgetPreview({ data }: { data: QuickAddSmallSnapshot }) {
+  const themeColors = useThemeColors();
+
+  return (
+    <WidgetFrame size="small">
+      {() => (
+        <View style={styles.pad}>
+          <View style={styles.smallTop}>
+            <Text variant="label" tone="muted" style={styles.eyebrow}>
+              This month
+            </Text>
+            <Text
+              style={[styles.smallAmount, { color: themeColors.error }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {data.expenseLabel}
+            </Text>
+            <View style={styles.timeRow}>
+              <Clock size={11} color={themeColors.primary} strokeWidth={2.4} />
+              <Text variant="caption" style={{ color: themeColors.textSoft }} numberOfLines={1}>
+                {data.timeEquivalentLabel}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.smallButtonRow}>
+            <SmallActionButton tone="income" />
+            <SmallActionButton tone="expense" />
+          </View>
+        </View>
+      )}
+    </WidgetFrame>
+  );
+}
+
+function SavingsHistoryRow({ month }: { month: SavingsHistorySnapshot['months'][number] }) {
+  const themeColors = useThemeColors();
+  const accent = !month.hasIncome
+    ? themeColors.textMuted
+    : month.isPositive
+      ? themeColors.success
+      : themeColors.error;
+  // Positive rate fills proportionally; overspend shows a small coral bar.
+  const fillPct = !month.hasIncome
+    ? 0
+    : month.isPositive
+      ? Math.max(4, Math.min(1, month.savingsRate) * 100)
+      : Math.max(8, Math.min(1, Math.abs(month.savingsRate)) * 100);
+
+  return (
+    <View style={styles.histRow}>
+      <Text variant="caption" style={[styles.histMonth, { color: themeColors.textSoft }]}>
+        {month.monthLabel}
+      </Text>
+      <View style={[styles.histTrack, { backgroundColor: withColorAlpha(themeColors.text, 0.06) }]}>
+        <View
+          style={[
+            styles.histFill,
+            {
+              width: `${fillPct}%`,
+              backgroundColor: month.hasActivity ? accent : withColorAlpha(themeColors.text, 0.08),
+            },
+          ]}
+        />
+      </View>
+      <View style={styles.histValues}>
+        <Text
+          allowFontScaling={false}
+          style={[styles.histRate, { color: month.hasActivity ? accent : themeColors.textMuted }]}
+          numberOfLines={1}
+        >
+          {month.rateLabel}
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={[styles.histSaved, { color: themeColors.textMuted }]}
+          numberOfLines={1}
+        >
+          {month.savedLabel}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function SavingsHistoryWidgetPreview({ data }: { data: SavingsHistorySnapshot }) {
+  const themeColors = useThemeColors();
+  const totalColor = data.totalIsPositive ? themeColors.success : themeColors.error;
+
+  return (
+    <WidgetFrame size="large" pro>
+      {() => (
+        <View style={styles.pad}>
+          <View style={styles.headerRow}>
+            <WordmarkBanner />
+            <View style={styles.headerRight}>
+              <Text variant="label" tone="muted" style={styles.eyebrow}>
+                Saved · 6 mo
+              </Text>
+              <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
+                {data.totalSavedLabel}
+              </Text>
+              <Text variant="caption" tone="muted" numberOfLines={1}>
+                Avg rate {data.averageRateLabel}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.histRows}>
+            {data.months.map((month) => (
+              <SavingsHistoryRow key={month.monthKey} month={month} />
+            ))}
           </View>
         </View>
       )}
@@ -448,26 +595,69 @@ function CalendarWidgetPreview({ data }: { data: CalendarMonthSnapshot }) {
   );
 }
 
-export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
-  const { settings, transactions, getTrueHourlyRateForDate } = useApp();
-  const { isPro } = usePro();
+function DataSourceToggle({
+  value,
+  onChange,
+}: {
+  value: 'sample' | 'real';
+  onChange: (next: 'sample' | 'real') => void;
+}) {
+  const themeColors = useThemeColors();
+  const options: { key: 'sample' | 'real'; label: string }[] = [
+    { key: 'sample', label: 'Sample (gallery)' },
+    { key: 'real', label: 'My data' },
+  ];
+  return (
+    <View style={[styles.segment, { backgroundColor: themeColors.surfaceMuted }]}>
+      {options.map((option) => {
+        const active = option.key === value;
+        return (
+          <Pressable
+            key={option.key}
+            onPress={() => onChange(option.key)}
+            style={[styles.segmentItem, active && { backgroundColor: themeColors.background }]}
+          >
+            <Text
+              variant="caption"
+              style={{ color: active ? themeColors.text : themeColors.textMuted }}
+            >
+              {option.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
-  const { snapshot, usingSample } = useMemo(() => {
-    const real = buildMoney2TimeWidgetSnapshot({
+export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
+  const { settings, transactions, categories, insightsPreferencesJson, getTrueHourlyRateForDate } =
+    useApp();
+  const { isPro } = usePro();
+  // Default to the sample snapshot — this is exactly what the OS widget gallery shows.
+  const [dataSource, setDataSource] = useState<'sample' | 'real'>('sample');
+
+  const snapshot = useMemo(() => {
+    if (dataSource === 'sample') return buildSampleWidgetSnapshot(settings);
+    const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
+    return buildMoney2TimeWidgetSnapshot({
       transactions,
       settings,
       isPro,
       getTrueHourlyRateForDate,
+      categories,
+      excludedSavingsIncomeCategoryIds: savingsExclusions.income,
+      excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
     });
-    const isEmpty =
-      real.monthlyExpenseQuickLog.expenseAmount === 0 &&
-      real.weeklyExpense.totalAmount === 0 &&
-      real.calendarMonth.totalIncome === 0 &&
-      real.calendarMonth.totalExpense === 0;
-    return isEmpty
-      ? { snapshot: buildSampleWidgetSnapshot(settings), usingSample: true }
-      : { snapshot: real, usingSample: false };
-  }, [getTrueHourlyRateForDate, isPro, settings, transactions]);
+  }, [
+    categories,
+    dataSource,
+    getTrueHourlyRateForDate,
+    insightsPreferencesJson,
+    isPro,
+    settings,
+    transactions,
+  ]);
 
   return (
     <SettingsPageLayout>
@@ -475,13 +665,16 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
         onBack={onBack}
         title="Widget previews"
         subtitle={
-          usingSample
-            ? 'Dev-only previews — showing sample data.'
-            : 'Dev-only previews of every home-screen widget.'
+          dataSource === 'sample'
+            ? 'Dev-only — sample data, as shown in the widget gallery.'
+            : 'Dev-only — built from your real transactions.'
         }
       />
       <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentBody}>
+          <View style={styles.toggleWrap}>
+            <DataSourceToggle value={dataSource} onChange={setDataSource} />
+          </View>
           {WIDGET_DEFINITIONS.map((widget) => (
             <SettingsSection
               key={widget.id}
@@ -491,10 +684,14 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
             >
               {widget.id === WIDGET_IDS.monthlyExpenseQuickLog ? (
                 <MonthlySpendWidgetPreview data={snapshot.monthlyExpenseQuickLog} />
+              ) : widget.id === WIDGET_IDS.quickAddSmall ? (
+                <QuickAddSmallWidgetPreview data={snapshot.quickAddSmall} />
               ) : widget.id === WIDGET_IDS.weeklyExpense ? (
                 <WeeklyExpenseWidgetPreview data={snapshot.weeklyExpense} />
               ) : widget.id === WIDGET_IDS.savingsRate ? (
                 <SavingsRateWidgetPreview data={snapshot.savingsRate} />
+              ) : widget.id === WIDGET_IDS.savingsHistory ? (
+                <SavingsHistoryWidgetPreview data={snapshot.savingsHistory} />
               ) : (
                 <CalendarWidgetPreview data={snapshot.calendarMonth} />
               )}
@@ -513,6 +710,22 @@ const styles = StyleSheet.create({
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: spacing.lg,
+  },
+  toggleWrap: {
+    paddingBottom: spacing.md,
+  },
+  segment: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 3,
+    gap: 3,
+  },
+  segmentItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 9,
   },
   previewBlock: {
     gap: spacing.sm,
@@ -617,6 +830,72 @@ const styles = StyleSheet.create({
   },
   pillLabel: {
     fontSize: 13.5,
+  },
+  // ----- Quick Add (small) -----
+  smallTop: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  smallAmount: {
+    fontFamily: FONT.monoBold,
+    fontSize: 26,
+    lineHeight: 30,
+    letterSpacing: -0.5,
+    marginTop: 4,
+  },
+  smallButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  smallButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // ----- Savings history (large) -----
+  histRows: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: 10,
+  },
+  histRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  histMonth: {
+    width: 34,
+    fontFamily: FONT.bold,
+  },
+  histTrack: {
+    flex: 1,
+    height: 12,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  histFill: {
+    height: '100%',
+    borderRadius: 999,
+    minWidth: 4,
+  },
+  histValues: {
+    width: 64,
+    alignItems: 'flex-end',
+  },
+  histRate: {
+    textAlign: 'right',
+    fontFamily: FONT.monoBold,
+    fontSize: 15,
+    lineHeight: 18,
+  },
+  histSaved: {
+    textAlign: 'right',
+    fontFamily: FONT.bold,
+    fontSize: 10,
+    lineHeight: 12,
   },
   // ----- Weekly expense -----
   headerRow: {

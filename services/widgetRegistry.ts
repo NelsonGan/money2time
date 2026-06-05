@@ -5,9 +5,11 @@ export const WIDGET_DEEP_LINK_SCHEME = 'money2time';
 
 export const WIDGET_IDS = {
   monthlyExpenseQuickLog: 'monthly_expense_quick_log',
+  quickAddSmall: 'quick_add_small',
   weeklyExpense: 'weekly_expense',
   calendarMonth: 'calendar_month',
   savingsRate: 'savings_rate',
+  savingsHistory: 'savings_history',
 } as const;
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS];
@@ -28,6 +30,13 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     access: 'free',
     supportedSizes: ['medium'],
     snapshotKey: 'monthlyExpenseQuickLog',
+  },
+  {
+    id: WIDGET_IDS.quickAddSmall,
+    title: 'Quick Add',
+    access: 'free',
+    supportedSizes: ['small'],
+    snapshotKey: 'quickAddSmall',
   },
   {
     id: WIDGET_IDS.weeklyExpense,
@@ -52,6 +61,14 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     supportedSizes: ['medium'],
     snapshotKey: 'savingsRate',
     proSource: 'widget_savings_rate',
+  },
+  {
+    id: WIDGET_IDS.savingsHistory,
+    title: 'Savings History',
+    access: 'pro',
+    supportedSizes: ['large'],
+    snapshotKey: 'savingsHistory',
+    proSource: 'widget_savings_history',
   },
 ];
 

@@ -1,5 +1,6 @@
-import type { TransactionWithRelations, UserSettings, WeekStartsOn } from '~/types';
+import type { Category, TransactionWithRelations, UserSettings, WeekStartsOn } from '~/types';
 import {
+  addMonthsAtMonthStart,
   amountToHoursByRate,
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
@@ -9,6 +10,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
   normalizeMoneyAmount,
+  startOfMonthDate,
 } from '~/utils/formatters';
 
 import {
@@ -21,6 +23,18 @@ import {
 
 export interface MonthlyExpenseQuickLogSnapshot {
   widgetId: typeof WIDGET_IDS.monthlyExpenseQuickLog;
+  title: string;
+  monthKey: string;
+  expenseAmount: number;
+  expenseLabel: string;
+  timeEquivalentLabel: string;
+  hasHourlyRate: boolean;
+  incomeUrl: string;
+  expenseUrl: string;
+}
+
+export interface QuickAddSmallSnapshot {
+  widgetId: typeof WIDGET_IDS.quickAddSmall;
   title: string;
   monthKey: string;
   expenseAmount: number;
@@ -104,6 +118,40 @@ export interface SavingsRateSnapshot {
   timeEquivalentLabel: string;
 }
 
+export interface SavingsHistoryMonth {
+  monthKey: string;
+  /** Short month label, e.g. "Jun". */
+  monthLabel: string;
+  income: number;
+  expense: number;
+  /** income − expense; negative when overspent. */
+  saved: number;
+  /** saved / income as a fraction; 0 when there is no income. */
+  savingsRate: number;
+  /** "68%", "−24%", or "—" when there is no income. */
+  rateLabel: string;
+  /** Compact saved amount, always non-negative; "—" when the month has no activity. */
+  savedLabel: string;
+  isPositive: boolean;
+  hasIncome: boolean;
+  hasActivity: boolean;
+}
+
+export interface SavingsHistorySnapshot {
+  widgetId: typeof WIDGET_IDS.savingsHistory;
+  title: string;
+  /** Most-recent month first. */
+  months: SavingsHistoryMonth[];
+  /** Average rate across months that have income; "—" when none. */
+  averageRateLabel: string;
+  /** Net saved across the whole window (income − expense); can be negative. */
+  totalSaved: number;
+  /** Compact total saved, always non-negative; color conveys the sign. */
+  totalSavedLabel: string;
+  /** Whether the window total is net-positive. */
+  totalIsPositive: boolean;
+}
+
 export interface Money2TimeWidgetSnapshot {
   schemaVersion: 1;
   generatedAt: string;
@@ -112,9 +160,11 @@ export interface Money2TimeWidgetSnapshot {
   currencySymbol: string;
   widgets: WidgetDefinition[];
   monthlyExpenseQuickLog: MonthlyExpenseQuickLogSnapshot;
+  quickAddSmall: QuickAddSmallSnapshot;
   weeklyExpense: WeeklyExpenseSnapshot;
   calendarMonth: CalendarMonthSnapshot;
   savingsRate: SavingsRateSnapshot;
+  savingsHistory: SavingsHistorySnapshot;
   proUnlockUrlByWidgetId: Record<string, string>;
 }
 
@@ -163,6 +213,113 @@ function getMonthLabelFormatter(locale: string): Intl.DateTimeFormat {
   }
   monthLabelFormatterByLocale.set(locale, formatter);
   return formatter;
+}
+
+const shortMonthFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+function getShortMonthFormatter(locale: string): Intl.DateTimeFormat {
+  const cached = shortMonthFormatterByLocale.get(locale);
+  if (cached) return cached;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(locale, { month: 'short' });
+  } catch {
+    formatter = new Intl.DateTimeFormat('en', { month: 'short' });
+  }
+  shortMonthFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+const SAVINGS_HISTORY_MONTHS = 6;
+
+function buildSavingsHistorySnapshot(
+  transactions: TransactionWithRelations[],
+  settings: UserSettings,
+  includeInSavings: SavingsIncludePredicate,
+): SavingsHistorySnapshot {
+  const anchor = startOfMonthDate(new Date());
+  const incomeByMonth = new Map<string, number>();
+  const expenseByMonth = new Map<string, number>();
+
+  // Month keys for the window, most-recent first.
+  const monthDates = Array.from({ length: SAVINGS_HISTORY_MONTHS }, (_, index) =>
+    addMonthsAtMonthStart(anchor, -index),
+  );
+  const monthKeys = new Set(monthDates.map((date) => monthKeyFromDateLocal(date)));
+
+  for (const transaction of transactions) {
+    if (transaction.deletedAt) continue;
+    if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
+    const monthKey = monthKeyFromIsoLocal(transaction.date);
+    if (!monthKeys.has(monthKey)) continue;
+    if (!includeInSavings(transaction)) continue;
+    if (transaction.type === 'income') {
+      incomeByMonth.set(monthKey, (incomeByMonth.get(monthKey) ?? 0) + transaction.amount);
+    } else {
+      expenseByMonth.set(monthKey, (expenseByMonth.get(monthKey) ?? 0) + transaction.amount);
+    }
+  }
+
+  const shortMonthFormatter = getShortMonthFormatter(settings.locale);
+
+  let rateSum = 0;
+  let rateCount = 0;
+  let totalSaved = 0;
+  const months: SavingsHistoryMonth[] = monthDates.map((date) => {
+    const monthKey = monthKeyFromDateLocal(date);
+    const income = normalizeMoneyAmount(incomeByMonth.get(monthKey) ?? 0);
+    const expense = normalizeMoneyAmount(expenseByMonth.get(monthKey) ?? 0);
+    const saved = normalizeMoneyAmount(income - expense);
+    const hasIncome = income > 0;
+    const hasActivity = income > 0 || expense > 0;
+    const savingsRate = hasIncome ? saved / income : 0;
+    const isPositive = saved >= 0;
+    totalSaved += saved;
+
+    let rateLabel: string;
+    if (!hasIncome) {
+      rateLabel = '—';
+    } else {
+      // No sign — the text color (green/red) conveys positive vs negative.
+      rateLabel = `${Math.abs(Math.round(savingsRate * 100))}%`;
+      rateSum += savingsRate;
+      rateCount += 1;
+    }
+
+    return {
+      monthKey,
+      monthLabel: shortMonthFormatter.format(date),
+      income,
+      expense,
+      saved,
+      savingsRate,
+      rateLabel,
+      savedLabel: hasActivity
+        ? formatCompactCurrency(Math.abs(saved), settings.currencySymbol)
+        : '—',
+      isPositive,
+      hasIncome,
+      hasActivity,
+    };
+  });
+
+  let averageRateLabel = '—';
+  if (rateCount > 0) {
+    const avgPercent = Math.round((rateSum / rateCount) * 100);
+    averageRateLabel = `${avgPercent < 0 ? '−' : ''}${Math.abs(avgPercent)}%`;
+  }
+
+  totalSaved = normalizeMoneyAmount(totalSaved);
+
+  return {
+    widgetId: WIDGET_IDS.savingsHistory,
+    title: 'Savings History',
+    months,
+    averageRateLabel,
+    totalSaved,
+    totalSavedLabel: formatCompactCurrency(Math.abs(totalSaved), settings.currencySymbol),
+    totalIsPositive: totalSaved >= 0,
+  };
 }
 
 function buildWeeklyExpenseSnapshot(
@@ -311,11 +468,62 @@ function buildCalendarMonthSnapshot(
   };
 }
 
+/** Predicate: returns true when a transaction should count toward savings. */
+export type SavingsIncludePredicate = (transaction: TransactionWithRelations) => boolean;
+
+/**
+ * Mirrors the Insights "Savings rate" filter: income/expense transactions whose
+ * category (or its parent/root category) is excluded are dropped from the
+ * savings calculation. Other categories and uncategorized transactions count.
+ */
+export function buildSavingsIncludePredicate(
+  categories: Pick<Category, 'id' | 'parentId'>[],
+  excludedSavingsIncomeCategoryIds: string[],
+  excludedSavingsExpenseCategoryIds: string[],
+): SavingsIncludePredicate {
+  const incomeSet = new Set(excludedSavingsIncomeCategoryIds);
+  const expenseSet = new Set(excludedSavingsExpenseCategoryIds);
+  if (incomeSet.size === 0 && expenseSet.size === 0) return () => true;
+
+  const rootById = new Map(
+    categories.map((category) => [category.id, category.parentId ?? category.id]),
+  );
+  return (transaction) => {
+    const categoryId = transaction.categoryId;
+    if (!categoryId) return true;
+    const rootId = rootById.get(categoryId) ?? categoryId;
+    if (transaction.type === 'income') {
+      return !(incomeSet.has(categoryId) || incomeSet.has(rootId));
+    }
+    return !(expenseSet.has(categoryId) || expenseSet.has(rootId));
+  };
+}
+
+/** Reads the two savings-exclusion lists out of `settings.insightsPrefsJson`. */
+export function parseSavingsExclusions(insightsPrefsJson: string | null | undefined): {
+  income: string[];
+  expense: string[];
+} {
+  if (!insightsPrefsJson) return { income: [], expense: [] };
+  try {
+    const parsed = JSON.parse(insightsPrefsJson) as Record<string, unknown>;
+    const toList = (value: unknown) =>
+      Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    return {
+      income: toList(parsed.excludedSavingsIncomeCategoryIds),
+      expense: toList(parsed.excludedSavingsExpenseCategoryIds),
+    };
+  } catch {
+    return { income: [], expense: [] };
+  }
+}
+
 function buildSavingsRateSnapshot(
   transactions: TransactionWithRelations[],
   settings: UserSettings,
   monthKey: string,
   hourlyRate: number,
+  includeInSavings: SavingsIncludePredicate,
 ): SavingsRateSnapshot {
   let income = 0;
   let expense = 0;
@@ -323,6 +531,7 @@ function buildSavingsRateSnapshot(
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
     if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
+    if (!includeInSavings(transaction)) continue;
     if (transaction.type === 'income') income += transaction.amount;
     else expense += transaction.amount;
   }
@@ -375,12 +584,25 @@ export function buildMoney2TimeWidgetSnapshot({
   settings,
   isPro,
   getTrueHourlyRateForDate,
+  categories = [],
+  excludedSavingsIncomeCategoryIds = [],
+  excludedSavingsExpenseCategoryIds = [],
 }: {
   transactions: TransactionWithRelations[];
   settings: UserSettings;
   isPro: boolean;
   getTrueHourlyRateForDate: (dateIso: string) => number;
+  /** Used to resolve a transaction's root category for the savings filter. */
+  categories?: Pick<Category, 'id' | 'parentId'>[];
+  /** Insights "Savings rate" category exclusions; applied to the savings widgets. */
+  excludedSavingsIncomeCategoryIds?: string[];
+  excludedSavingsExpenseCategoryIds?: string[];
 }): Money2TimeWidgetSnapshot {
+  const includeInSavings = buildSavingsIncludePredicate(
+    categories,
+    excludedSavingsIncomeCategoryIds,
+    excludedSavingsExpenseCategoryIds,
+  );
   const monthKey = monthKeyFromDateLocal(new Date());
   const expenseAmount = normalizeMoneyAmount(
     transactions.reduce((total, transaction) => {
@@ -410,9 +632,27 @@ export function buildMoney2TimeWidgetSnapshot({
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),
     },
+    quickAddSmall: {
+      widgetId: WIDGET_IDS.quickAddSmall,
+      title: 'Quick Add',
+      monthKey,
+      expenseAmount,
+      expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
+      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      hasHourlyRate: hourlyRate > 0,
+      incomeUrl: buildQuickAddWidgetUrl('income'),
+      expenseUrl: buildQuickAddWidgetUrl('expense'),
+    },
     weeklyExpense: buildWeeklyExpenseSnapshot(transactions, settings),
     calendarMonth: buildCalendarMonthSnapshot(transactions, settings),
-    savingsRate: buildSavingsRateSnapshot(transactions, settings, monthKey, hourlyRate),
+    savingsRate: buildSavingsRateSnapshot(
+      transactions,
+      settings,
+      monthKey,
+      hourlyRate,
+      includeInSavings,
+    ),
+    savingsHistory: buildSavingsHistorySnapshot(transactions, settings, includeInSavings),
     proUnlockUrlByWidgetId: Object.fromEntries(
       WIDGET_DEFINITIONS.filter((definition) => definition.access === 'pro').map((definition) => [
         definition.id,
@@ -497,6 +737,34 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
         'expense',
         amount,
         new Date(year, month, Number(day), 12),
+      ),
+    );
+  });
+
+  // Prior months so the savings-history widget renders a populated multi-row trend.
+  const SAMPLE_PRIOR_MONTHS: { income: number; expense: number }[] = [
+    { income: 3200, expense: 2100 },
+    { income: 3000, expense: 2750 },
+    { income: 3000, expense: 3900 }, // overspent — negative savings rate
+    { income: 2900, expense: 1450 },
+    { income: 3100, expense: 2480 },
+  ];
+  SAMPLE_PRIOR_MONTHS.forEach(({ income, expense }, index) => {
+    const offset = -(index + 1);
+    transactions.push(
+      sampleTransaction(
+        `sample-hist-inc-${index}`,
+        'income',
+        income,
+        new Date(year, month + offset, 15, 12),
+      ),
+    );
+    transactions.push(
+      sampleTransaction(
+        `sample-hist-exp-${index}`,
+        'expense',
+        expense,
+        new Date(year, month + offset, 16, 12),
       ),
     );
   });
