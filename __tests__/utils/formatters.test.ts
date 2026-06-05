@@ -199,6 +199,12 @@ describe('formatCurrency', () => {
   it('defaults the symbol to $', () => {
     expect(formatCurrency(1)).toBe('$1.00');
   });
+
+  it('groups thousands with commas', () => {
+    expect(formatCurrency(1000)).toBe('$1,000.00');
+    expect(formatCurrency(1284.5, '$')).toBe('$1,284.50');
+    expect(formatCurrency(-1234567.89, '€')).toBe('€1,234,567.89');
+  });
 });
 
 describe('normalizeMoneyAmount', () => {

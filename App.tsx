@@ -3,7 +3,6 @@ import './global.css';
 // OS may invoke it before any React component renders.
 import './services/autoBackupTaskRegistration';
 
-import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import {
   WorkSans_400Regular,
   WorkSans_500Medium,
@@ -101,6 +100,7 @@ import {
 } from '~/services/transactionsNavigation';
 import {
   buildMoney2TimeWidgetSnapshot,
+  parseSavingsExclusions,
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
@@ -935,19 +935,31 @@ function AddTransactionDetailedRouteScreen({
 }
 
 function WidgetSnapshotSync() {
-  const { transactions, settings, getTrueHourlyRateForDate } = useApp();
+  const { transactions, settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } =
+    useApp();
   const { isPro } = usePro();
 
   useEffect(() => {
+    const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
     const snapshot = buildMoney2TimeWidgetSnapshot({
       transactions,
       settings,
       isPro,
       getTrueHourlyRateForDate,
+      categories,
+      excludedSavingsIncomeCategoryIds: savingsExclusions.income,
+      excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
     });
 
     void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
-  }, [getTrueHourlyRateForDate, isPro, settings, transactions]);
+  }, [
+    categories,
+    getTrueHourlyRateForDate,
+    insightsPreferencesJson,
+    isPro,
+    settings,
+    transactions,
+  ]);
 
   return null;
 }
@@ -1206,7 +1218,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { isLoading, settings } = useApp();
+  const { isLoading, settings, quickEntryPrefs } = useApp();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
@@ -1367,17 +1379,23 @@ function AppContent() {
           <RootStack.Screen
             name="AddTransaction"
             component={AddTransactionRouteScreen}
-            options={{
-              presentation: 'transparentModal',
-              // QuickAddSheet handles its own enter/exit animation (backdrop fade +
-              // slide). Letting the navigator add its own fade on top stacks a
-              // ~300ms tail on dismiss, which looks like a "lingering grey" lag
-              // after submit. 'none' makes the route appear/disappear instantly
-              // so the only visible animation is the sheet's own.
-              animation: 'none',
-              gestureEnabled: false,
-              contentStyle: { backgroundColor: 'transparent' },
-            }}
+            options={
+              quickEntryPrefs.quickEntryEnabled
+                ? {
+                    presentation: 'transparentModal',
+                    // QuickAddSheet handles its own enter/exit animation (backdrop fade +
+                    // slide). Letting the navigator add its own fade on top stacks a
+                    // ~300ms tail on dismiss, which looks like a "lingering grey" lag
+                    // after submit. 'none' makes the route appear/disappear instantly
+                    // so the only visible animation is the sheet's own.
+                    animation: 'none',
+                    gestureEnabled: false,
+                    contentStyle: { backgroundColor: 'transparent' },
+                  }
+                : // With quick entry off, this route renders the full editor as a
+                  // normal card so the slide animation and edge-swipe-back work.
+                  SHARED_NATIVE_STACK_OPTIONS
+            }
           />
           <RootStack.Screen
             name="AddTransactionDetailed"
@@ -1444,8 +1462,6 @@ export default function App() {
           WorkSans_700Bold,
           WorkSans_800ExtraBold,
           WorkSans_900Black,
-          SpaceMono_400Regular,
-          SpaceMono_700Bold,
         }
       : {},
   );

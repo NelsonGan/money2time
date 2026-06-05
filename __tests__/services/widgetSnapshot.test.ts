@@ -236,4 +236,31 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
     expect(snapshot.savingsRate.hasIncome).toBe(false);
     expect(snapshot.savingsRate.savingsRate).toBe(0);
   });
+
+  it('excludes savings-filtered categories (and their children) from the savings widgets', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        transaction({ id: 'inc', type: 'income', amount: 1000, categoryId: 'salary' }),
+        transaction({ id: 'exp-keep', amount: 300, categoryId: 'food' }),
+        // Excluded directly by id, and via a child of an excluded parent.
+        transaction({ id: 'exp-drop', amount: 200, categoryId: 'rent' }),
+        transaction({ id: 'exp-drop-child', amount: 150, categoryId: 'rent-sub' }),
+      ],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 20,
+      categories: [
+        { id: 'salary', parentId: null },
+        { id: 'food', parentId: null },
+        { id: 'rent', parentId: null },
+        { id: 'rent-sub', parentId: 'rent' },
+      ],
+      excludedSavingsExpenseCategoryIds: ['rent'],
+    });
+
+    // Only the $300 food expense counts → saved 700, rate 70%.
+    expect(snapshot.savingsRate).toMatchObject({ income: 1000, expense: 300, saved: 700 });
+    const currentMonth = snapshot.savingsHistory.months[0];
+    expect(currentMonth).toMatchObject({ income: 1000, expense: 300, saved: 700 });
+  });
 });

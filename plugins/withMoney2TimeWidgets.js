@@ -94,6 +94,48 @@ function buildSampleSnapshotJson() {
   const savedWholeHours = Math.floor(savedHours);
   const savedMinutes = Math.round((savedHours - savedWholeHours) * 60);
 
+  // Multi-month savings history (most recent first), including one overspent month.
+  const historySource = [
+    { income: savingsIncome, expense: savingsExpense },
+    { income: 3200, expense: 2100 },
+    { income: 3000, expense: 2750 },
+    { income: 3000, expense: 3900 },
+    { income: 2900, expense: 1450 },
+    { income: 3100, expense: 2480 },
+  ];
+  let historyTotalSaved = 0;
+  let historyRateSum = 0;
+  let historyRateCount = 0;
+  const historyMonths = historySource.map((m, i) => {
+    const d = new Date(year, month - i, 1);
+    const monthSaved = m.income - m.expense;
+    historyTotalSaved += monthSaved;
+    const monthHasIncome = m.income > 0;
+    const monthHasActivity = m.income > 0 || m.expense > 0;
+    const monthRate = monthHasIncome ? monthSaved / m.income : 0;
+    if (monthHasIncome) {
+      historyRateSum += monthRate;
+      historyRateCount += 1;
+    }
+    return {
+      monthKey: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      monthLabel: d.toLocaleDateString('en-US', { month: 'short' }),
+      income: m.income,
+      expense: m.expense,
+      saved: monthSaved,
+      savingsRate: monthRate,
+      rateLabel: monthHasIncome ? `${Math.abs(Math.round(monthRate * 100))}%` : '—',
+      savedLabel: monthHasActivity ? `$${shortNum(Math.abs(monthSaved))}` : '—',
+      isPositive: monthSaved >= 0,
+      hasIncome: monthHasIncome,
+      hasActivity: monthHasActivity,
+    };
+  });
+  const historyAvgRate =
+    historyRateCount > 0
+      ? `${historyRateSum / historyRateCount < 0 ? '−' : ''}${Math.abs(Math.round((historyRateSum / historyRateCount) * 100))}%`
+      : '—';
+
   return JSON.stringify({
     schemaVersion: 1,
     generatedAt: now.toISOString(),
@@ -104,6 +146,17 @@ function buildSampleSnapshotJson() {
     monthlyExpenseQuickLog: {
       widgetId: 'monthly_expense_quick_log',
       title: 'Monthly Spend',
+      monthKey,
+      expenseAmount: 1284,
+      expenseLabel: '$1,284',
+      timeEquivalentLabel: '85h 36m of work',
+      hasHourlyRate: true,
+      incomeUrl: 'money2time://quick-add?type=income',
+      expenseUrl: 'money2time://quick-add?type=expense',
+    },
+    quickAddSmall: {
+      widgetId: 'quick_add_small',
+      title: 'Quick Add',
       monthKey,
       expenseAmount: 1284,
       expenseLabel: '$1,284',
@@ -151,10 +204,20 @@ function buildSampleSnapshotJson() {
       hasIncome: savingsIncome > 0,
       timeEquivalentLabel: `≈ ${savedWholeHours}h ${savedMinutes}m of work ${saved >= 0 ? 'kept' : 'behind'}`,
     },
+    savingsHistory: {
+      widgetId: 'savings_history',
+      title: 'Savings History',
+      months: historyMonths,
+      averageRateLabel: historyAvgRate,
+      totalSaved: historyTotalSaved,
+      totalSavedLabel: `$${shortNum(Math.abs(historyTotalSaved))}`,
+      totalIsPositive: historyTotalSaved >= 0,
+    },
     proUnlockUrlByWidgetId: {
       weekly_expense: 'money2time://pro?source=widget_weekly_expense',
       calendar_month: 'money2time://pro?source=widget_calendar_month',
       savings_rate: 'money2time://pro?source=widget_savings_rate',
+      savings_history: 'money2time://pro?source=widget_savings_history',
     },
   });
 }
@@ -225,6 +288,10 @@ const ANDROID_WIDGET_RECEIVERS = [
     resource: '@xml/money2time_monthly_expense_widget',
   },
   {
+    name: '.widgets.Money2TimeQuickAddWidgetProvider',
+    resource: '@xml/money2time_quick_add_widget',
+  },
+  {
     name: '.widgets.Money2TimeWeeklyExpenseWidgetProvider',
     resource: '@xml/money2time_weekly_expense_widget',
   },
@@ -235,6 +302,10 @@ const ANDROID_WIDGET_RECEIVERS = [
   {
     name: '.widgets.Money2TimeSavingsRateWidgetProvider',
     resource: '@xml/money2time_savings_rate_widget',
+  },
+  {
+    name: '.widgets.Money2TimeSavingsHistoryWidgetProvider',
+    resource: '@xml/money2time_savings_history_widget',
   },
 ];
 
@@ -394,10 +465,13 @@ function addAndroidWidgetFiles(config) {
         </LinearLayout>`;
       };
 
+      // Weighted rows fill the (taller-than-iOS) Android widget height so the
+      // grid spreads evenly. The provider collapses fully-empty trailing rows
+      // (GONE) so months needing <6 rows still fill the height, no blank band.
       const calRows = Array.from(
         { length: 6 },
         (_, r) =>
-          `      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">\n${Array.from(
+          `      <LinearLayout android:id="@+id/cal_row_${r}" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">\n${Array.from(
             { length: 7 },
             (__, c) => calCell(r * 7 + c),
           ).join('\n')}\n      </LinearLayout>`,
@@ -413,6 +487,48 @@ function addAndroidWidgetFiles(config) {
       const calIncIds = joinIds('cal_inc_', 42);
       const calExpIds = joinIds('cal_exp_', 42);
       const calWdIds = joinIds('cal_wd_', 7);
+      const calRowIds = joinIds('cal_row_', 6);
+
+      // --- Savings history rows (6 months) ---------------------------------
+      const HIST_MONTHS = 6;
+      const histMonthIds = joinIds('hist_month_', HIST_MONTHS);
+      const histBarPosIds = joinIds('hist_bar_pos_', HIST_MONTHS);
+      const histBarNegIds = joinIds('hist_bar_neg_', HIST_MONTHS);
+      const histRateIds = joinIds('hist_rate_', HIST_MONTHS);
+      const histSavedIds = joinIds('hist_saved_', HIST_MONTHS);
+
+      // Sample rows baked into the static layout so the widget picker shows a
+      // populated trend (provider overrides every row with real data on placement).
+      const HIST_SAMPLE = [
+        { rate: 68, saved: '$2.5K', positive: true },
+        { rate: 34, saved: '$1.1K', positive: true },
+        { rate: 8, saved: '$250', positive: true },
+        { rate: 30, saved: '$900', positive: false },
+        { rate: 50, saved: '$1.5K', positive: true },
+        { rate: 20, saved: '$620', positive: true },
+      ];
+      const histNow = new Date();
+      const historyRows = HIST_SAMPLE.map((row, i) => {
+        const d = new Date(histNow.getFullYear(), histNow.getMonth() - i, 1);
+        const label = d.toLocaleDateString('en-US', { month: 'short' });
+        const color = row.positive ? '#1E9468' : '#D45F57';
+        return `      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <TextView android:id="@+id/hist_month_${i}" android:layout_width="34dp" android:layout_height="wrap_content" android:textSize="12sp" android:textStyle="bold" android:textColor="#6B7A77" android:text="${label}" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="12dp" android:layout_weight="1" android:layout_marginStart="10dp" android:layout_marginEnd="10dp">
+          <ProgressBar android:id="@+id/hist_bar_pos_${i}" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="12dp" android:max="100" android:progress="${row.rate}" android:progressDrawable="@drawable/money2time_savings_progress" android:visibility="${row.positive ? 'visible' : 'gone'}" />
+          <ProgressBar android:id="@+id/hist_bar_neg_${i}" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="12dp" android:max="100" android:progress="${row.rate}" android:progressDrawable="@drawable/money2time_savings_progress_neg" android:visibility="${row.positive ? 'gone' : 'visible'}" />
+        </FrameLayout>
+        <LinearLayout android:layout_width="64dp" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="end">
+          <TextView android:id="@+id/hist_rate_${i}" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="15sp" android:textStyle="bold" android:textColor="${color}" android:text="${row.rate}%" />
+          <TextView android:id="@+id/hist_saved_${i}" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#94A39F" android:text="${row.saved}" />
+        </LinearLayout>
+      </LinearLayout>`;
+      }).join('\n');
 
       // --- Monthly spend provider (free) -----------------------------------
       writeFileIfChanged(
@@ -499,6 +615,84 @@ public class Money2TimeWidgetProvider extends AppWidgetProvider {
 `,
       );
 
+      // --- Quick add provider (free, small) --------------------------------
+      writeFileIfChanged(
+        path.join(widgetRoot, 'Money2TimeQuickAddWidgetProvider.java'),
+        `package com.nelsongan.money2time.widgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.widget.RemoteViews;
+
+import com.nelsongan.money2time.R;
+
+import org.json.JSONObject;
+
+public class Money2TimeQuickAddWidgetProvider extends AppWidgetProvider {
+  static final String PREFS_NAME = "${SNAPSHOT_PREFS}";
+  static final String SNAPSHOT_KEY = "${SNAPSHOT_KEY}";
+
+  @Override
+  public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
+    for (int appWidgetId : appWidgetIds) {
+      updateWidget(context, manager, appWidgetId);
+    }
+  }
+
+  static void updateAll(Context context) {
+    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+    ComponentName provider = new ComponentName(context, Money2TimeQuickAddWidgetProvider.class);
+    int[] ids = manager.getAppWidgetIds(provider);
+    for (int id : ids) {
+      updateWidget(context, manager, id);
+    }
+  }
+
+  private static PendingIntent linkIntent(Context context, String url, int code) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+    intent.setPackage(context.getPackageName());
+    return PendingIntent.getActivity(
+      context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+  }
+
+  private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
+    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_quick_add_widget);
+    SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    String json = prefs.getString(SNAPSHOT_KEY, null);
+
+    String amount = "$0";
+    String time = "Set hourly value in app";
+    String incomeUrl = "money2time://quick-add?type=income";
+    String expenseUrl = "money2time://quick-add?type=expense";
+    try {
+      if (json == null) json = Money2TimeWidgetSampleData.JSON;
+      JSONObject root = new JSONObject(json);
+      JSONObject widget = root.getJSONObject("quickAddSmall");
+      amount = widget.optString("expenseLabel", amount);
+      time = widget.optString("timeEquivalentLabel", time);
+      incomeUrl = widget.optString("incomeUrl", incomeUrl);
+      expenseUrl = widget.optString("expenseUrl", expenseUrl);
+    } catch (Exception ignored) {}
+
+    views.setTextViewText(R.id.quickadd_amount, amount);
+    views.setTextColor(R.id.quickadd_amount, Color.parseColor("#D45F57"));
+    views.setTextViewText(R.id.quickadd_time, time);
+    views.setOnClickPendingIntent(R.id.quickadd_income, linkIntent(context, incomeUrl, 201));
+    views.setOnClickPendingIntent(R.id.quickadd_expense, linkIntent(context, expenseUrl, 202));
+
+    manager.updateAppWidget(appWidgetId, views);
+  }
+}
+`,
+      );
+
       // --- Past 7 days provider (pro) --------------------------------------
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWeeklyExpenseWidgetProvider.java'),
@@ -577,7 +771,7 @@ public class Money2TimeWeeklyExpenseWidgetProvider extends AppWidgetProvider {
       } else {
         views.setViewVisibility(R.id.weekly_locked, View.GONE);
         views.setViewVisibility(R.id.weekly_content, View.VISIBLE);
-        views.setOnClickPendingIntent(R.id.weekly_root, linkIntent(context, "money2time://insights", 302));
+        views.setOnClickPendingIntent(R.id.weekly_root, linkIntent(context, "money2time://insights?focus=expense_breakdown", 302));
         JSONObject weekly = root.getJSONObject("weeklyExpense");
         views.setTextViewText(R.id.weekly_total, weekly.optString("totalLabel", "$0"));
         double max = weekly.optDouble("maxAmount", 0);
@@ -655,6 +849,7 @@ public class Money2TimeCalendarWidgetProvider extends AppWidgetProvider {
   private static final int[] INC_IDS = { ${calIncIds} };
   private static final int[] EXP_IDS = { ${calExpIds} };
   private static final int[] WD_IDS = { ${calWdIds} };
+  private static final int[] ROW_IDS = { ${calRowIds} };
 
   @Override
   public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
@@ -721,6 +916,12 @@ public class Money2TimeCalendarWidgetProvider extends AppWidgetProvider {
 
       int leading = calendar.optInt("leadingSpacers", 0);
       JSONArray days = calendar.getJSONArray("days");
+
+      // Collapse fully-empty trailing rows so the used rows fill the height.
+      int rowsUsed = (int) Math.ceil((leading + days.length()) / 7.0);
+      for (int r = 0; r < ROW_IDS.length; r++) {
+        views.setViewVisibility(ROW_IDS[r], r < rowsUsed ? View.VISIBLE : View.GONE);
+      }
 
       for (int i = 0; i < CELL_IDS.length; i++) {
         int dayIndex = i - leading;
@@ -909,6 +1110,147 @@ public class Money2TimeSavingsRateWidgetProvider extends AppWidgetProvider {
 `,
       );
 
+      // --- Savings history provider (pro, large) ---------------------------
+      writeFileIfChanged(
+        path.join(widgetRoot, 'Money2TimeSavingsHistoryWidgetProvider.java'),
+        `package com.nelsongan.money2time.widgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.view.View;
+import android.widget.RemoteViews;
+
+import com.nelsongan.money2time.R;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class Money2TimeSavingsHistoryWidgetProvider extends AppWidgetProvider {
+  static final String PREFS_NAME = "${SNAPSHOT_PREFS}";
+  static final String SNAPSHOT_KEY = "${SNAPSHOT_KEY}";
+
+  private static final int[] MONTH_IDS = { ${histMonthIds} };
+  private static final int[] BAR_POS_IDS = { ${histBarPosIds} };
+  private static final int[] BAR_NEG_IDS = { ${histBarNegIds} };
+  private static final int[] RATE_IDS = { ${histRateIds} };
+  private static final int[] SAVED_IDS = { ${histSavedIds} };
+
+  @Override
+  public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
+    for (int appWidgetId : appWidgetIds) {
+      updateWidget(context, manager, appWidgetId);
+    }
+  }
+
+  static void updateAll(Context context) {
+    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+    ComponentName provider = new ComponentName(context, Money2TimeSavingsHistoryWidgetProvider.class);
+    int[] ids = manager.getAppWidgetIds(provider);
+    for (int id : ids) {
+      updateWidget(context, manager, id);
+    }
+  }
+
+  private static PendingIntent linkIntent(Context context, String url, int code) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+    intent.setPackage(context.getPackageName());
+    return PendingIntent.getActivity(
+      context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+  }
+
+  private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
+    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_savings_history_widget);
+    views.setViewVisibility(R.id.hist_pro_badge, View.GONE);
+    SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    String json = prefs.getString(SNAPSHOT_KEY, null);
+
+    try {
+      if (json == null) json = Money2TimeWidgetSampleData.JSON;
+      JSONObject root = new JSONObject(json);
+      boolean isPro = root.optBoolean("isPro", false);
+
+      if (!isPro) {
+        views.setViewVisibility(R.id.hist_content, View.GONE);
+        views.setViewVisibility(R.id.hist_locked, View.VISIBLE);
+        views.setTextViewText(R.id.hist_locked_text, "Available with Money2Time Pro");
+        String url = "money2time://pro";
+        JSONObject unlock = root.optJSONObject("proUnlockUrlByWidgetId");
+        if (unlock != null) url = unlock.optString("savings_history", url);
+        views.setOnClickPendingIntent(R.id.hist_root, linkIntent(context, url, 601));
+        manager.updateAppWidget(appWidgetId, views);
+        return;
+      }
+
+      views.setViewVisibility(R.id.hist_locked, View.GONE);
+      views.setViewVisibility(R.id.hist_content, View.VISIBLE);
+      views.setOnClickPendingIntent(
+        R.id.hist_root, linkIntent(context, "money2time://insights?focus=savings_rate", 602));
+
+      JSONObject sh = root.getJSONObject("savingsHistory");
+      boolean totalPositive = sh.optBoolean("totalIsPositive", true);
+      views.setTextViewText(R.id.hist_total, sh.optString("totalSavedLabel", "$0"));
+      views.setTextColor(
+        R.id.hist_total,
+        totalPositive ? Color.parseColor("#1E9468") : Color.parseColor("#D45F57"));
+      views.setTextViewText(R.id.hist_avg, "Avg rate " + sh.optString("averageRateLabel", "—"));
+
+      JSONArray months = sh.getJSONArray("months");
+      for (int i = 0; i < MONTH_IDS.length; i++) {
+        if (i >= months.length()) {
+          views.setTextViewText(MONTH_IDS[i], "");
+          views.setTextViewText(RATE_IDS[i], "");
+          views.setTextViewText(SAVED_IDS[i], "");
+          views.setViewVisibility(BAR_POS_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_NEG_IDS[i], View.GONE);
+          continue;
+        }
+        JSONObject m = months.getJSONObject(i);
+        boolean hasIncome = m.optBoolean("hasIncome", false);
+        boolean hasActivity = m.optBoolean("hasActivity", false);
+        boolean isPositive = m.optBoolean("isPositive", true);
+        double rate = m.optDouble("savingsRate", 0);
+        int color = !hasIncome
+          ? Color.parseColor("#94A39F")
+          : (isPositive ? Color.parseColor("#1E9468") : Color.parseColor("#D45F57"));
+
+        views.setTextViewText(MONTH_IDS[i], m.optString("monthLabel", ""));
+        views.setTextViewText(RATE_IDS[i], m.optString("rateLabel", "—"));
+        views.setTextColor(RATE_IDS[i], hasActivity ? color : Color.parseColor("#94A39F"));
+        views.setTextViewText(SAVED_IDS[i], m.optString("savedLabel", "—"));
+
+        int pct = (int) Math.round(Math.min(1.0, Math.abs(rate)) * 100);
+        if (!hasActivity) {
+          views.setViewVisibility(BAR_POS_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_NEG_IDS[i], View.GONE);
+        } else if (isPositive) {
+          views.setViewVisibility(BAR_NEG_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_POS_IDS[i], View.VISIBLE);
+          views.setProgressBar(BAR_POS_IDS[i], 100, Math.max(4, pct), false);
+        } else {
+          views.setViewVisibility(BAR_POS_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_NEG_IDS[i], View.VISIBLE);
+          views.setProgressBar(BAR_NEG_IDS[i], 100, Math.max(8, pct), false);
+        }
+      }
+    } catch (Exception e) {
+      views.setViewVisibility(R.id.hist_content, View.GONE);
+      views.setViewVisibility(R.id.hist_locked, View.VISIBLE);
+      views.setTextViewText(R.id.hist_locked_text, "Open Money2Time to get started.");
+    }
+
+    manager.updateAppWidget(appWidgetId, views);
+  }
+}
+`,
+      );
+
       // --- Native module + package ----------------------------------------
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetModule.java'),
@@ -936,9 +1278,11 @@ public class Money2TimeWidgetModule extends ReactContextBaseJavaModule {
 
   private void reloadWidgets(Context context) {
     Money2TimeWidgetProvider.updateAll(context);
+    Money2TimeQuickAddWidgetProvider.updateAll(context);
     Money2TimeWeeklyExpenseWidgetProvider.updateAll(context);
     Money2TimeCalendarWidgetProvider.updateAll(context);
     Money2TimeSavingsRateWidgetProvider.updateAll(context);
+    Money2TimeSavingsHistoryWidgetProvider.updateAll(context);
   }
 
   @ReactMethod
@@ -1054,6 +1398,38 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_savings_rate_widget"
   android:previewLayout="@layout/money2time_savings_rate_widget"
+  android:resizeMode="none"
+  android:widgetCategory="home_screen" />
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'xml/money2time_quick_add_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="110dp"
+  android:minHeight="110dp"
+  android:targetCellWidth="2"
+  android:targetCellHeight="2"
+  android:updatePeriodMillis="0"
+  android:initialLayout="@layout/money2time_quick_add_widget"
+  android:previewLayout="@layout/money2time_quick_add_widget"
+  android:resizeMode="none"
+  android:widgetCategory="home_screen" />
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'xml/money2time_savings_history_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="250dp"
+  android:minHeight="250dp"
+  android:targetCellWidth="4"
+  android:targetCellHeight="4"
+  android:updatePeriodMillis="0"
+  android:initialLayout="@layout/money2time_savings_history_widget"
+  android:previewLayout="@layout/money2time_savings_history_widget"
   android:resizeMode="none"
   android:widgetCategory="home_screen" />
 `,
@@ -1561,8 +1937,7 @@ ${calRows}
 
     <FrameLayout
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1" />
+      android:layout_height="16dp" />
 
     <LinearLayout
       android:layout_width="wrap_content"
@@ -1745,6 +2120,244 @@ ${calRows}
 `,
       );
 
+      // Quick add (free, small): compact spend + two icon-only add buttons.
+      writeFileIfChanged(
+        path.join(resRoot, 'layout/money2time_quick_add_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/money2time_widget_background"
+  android:orientation="vertical"
+  android:padding="16dp">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:letterSpacing="0.12"
+      android:text="THIS MONTH"
+      android:textColor="#94A39F"
+      android:textSize="11sp"
+      android:textStyle="bold" />
+    <TextView
+      android:id="@+id/quickadd_amount"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:includeFontPadding="false"
+      android:maxLines="1"
+      android:text="$1,284"
+      android:textColor="#D45F57"
+      android:textSize="34sp"
+      android:textStyle="bold" />
+    <TextView
+      android:id="@+id/quickadd_time"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:maxLines="1"
+      android:text="85h 36m of work"
+      android:textColor="#6B7A77"
+      android:textSize="12sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="58dp"
+    android:orientation="horizontal">
+    <LinearLayout
+      android:id="@+id/quickadd_income"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/money2time_widget_income_button"
+      android:gravity="center"
+      android:orientation="horizontal">
+      <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="Add income"
+        android:scaleType="fitCenter"
+        android:src="@drawable/money2time_ic_plus_income" />
+    </LinearLayout>
+    <LinearLayout
+      android:id="@+id/quickadd_expense"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:layout_marginStart="10dp"
+      android:background="@drawable/money2time_widget_expense_button"
+      android:gravity="center"
+      android:orientation="horizontal">
+      <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="Add expense"
+        android:scaleType="fitCenter"
+        android:src="@drawable/money2time_ic_minus_expense" />
+    </LinearLayout>
+  </LinearLayout>
+</LinearLayout>
+`,
+      );
+
+      // Savings history (pro, large): month-by-month savings-rate rows.
+      writeFileIfChanged(
+        path.join(resRoot, 'layout/money2time_savings_history_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/hist_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/money2time_widget_background"
+  android:clipToPadding="false"
+  android:clipToOutline="true"
+  android:padding="16dp">
+
+  <LinearLayout
+    android:id="@+id/hist_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="top">
+      <ImageView
+        android:layout_width="116dp"
+        android:layout_height="32dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Money2Time"
+        android:scaleType="fitStart"
+        android:src="@drawable/banner" />
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="end"
+        android:orientation="vertical">
+        <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:letterSpacing="0.12"
+          android:text="SAVED · 6 MO"
+          android:textColor="#94A39F"
+          android:textSize="10sp"
+          android:textStyle="bold" />
+        <TextView
+          android:id="@+id/hist_total"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text="$2.4K"
+          android:textColor="#1E9468"
+          android:textSize="22sp"
+          android:textStyle="bold" />
+        <TextView
+          android:id="@+id/hist_avg"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text="Avg rate 35%"
+          android:textColor="#94A39F"
+          android:textSize="12sp"
+          android:textStyle="bold" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:layout_marginTop="10dp"
+      android:orientation="vertical">
+${historyRows}
+    </LinearLayout>
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/hist_locked"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:visibility="gone">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <ImageView
+      android:layout_width="104dp"
+      android:layout_height="104dp"
+      android:adjustViewBounds="true"
+      android:contentDescription="Money2Time Pro"
+      android:src="@drawable/widget_mascot" />
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:text="Savings History"
+      android:textColor="#1A2E2A"
+      android:textSize="21sp"
+      android:textStyle="bold" />
+    <TextView
+      android:id="@+id/hist_locked_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="3dp"
+      android:gravity="center"
+      android:text="Available with Money2Time Pro"
+      android:textColor="#6B7A77"
+      android:textSize="13sp"
+      android:textStyle="bold" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/money2time_cta_pill"
+      android:gravity="center"
+      android:paddingVertical="12dp"
+      android:text="✨ Unlock Pro"
+      android:textColor="#FFFFFF"
+      android:textSize="15sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <FrameLayout
+    android:id="@+id/hist_pro_badge"
+    android:layout_width="58dp"
+    android:layout_height="58dp"
+    android:layout_gravity="top|end"
+    android:layout_marginTop="-16dp"
+    android:layout_marginEnd="-16dp"
+    android:clipChildren="true">
+    <TextView
+      android:layout_width="120dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:background="#F6B750"
+      android:gravity="center"
+      android:includeFontPadding="false"
+      android:paddingVertical="3dp"
+      android:rotation="45"
+      android:text="PRO"
+      android:textColor="#FFFFFF"
+      android:textSize="9sp"
+      android:textStyle="bold"
+      android:translationX="15dp"
+      android:translationY="-15dp" />
+  </FrameLayout>
+</FrameLayout>
+`,
+      );
+
       // --- Drawables --------------------------------------------------------
       writeFileIfChanged(
         path.join(resRoot, 'drawable/money2time_widget_background.xml'),
@@ -1823,6 +2436,41 @@ ${calRows}
   <path
     android:fillColor="#00000000"
     android:strokeColor="#FFFFFF"
+    android:strokeWidth="3.2"
+    android:strokeLineCap="round"
+    android:pathData="M5,12 L19,12" />
+</vector>
+`,
+      );
+
+      // Accent-colored icons for the small quick-add buttons (no badge circle).
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_ic_plus_income.xml'),
+        `<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="24dp"
+  android:height="24dp"
+  android:viewportWidth="24"
+  android:viewportHeight="24">
+  <path
+    android:fillColor="#00000000"
+    android:strokeColor="#1E9468"
+    android:strokeWidth="3.2"
+    android:strokeLineCap="round"
+    android:pathData="M12,5 L12,19 M5,12 L19,12" />
+</vector>
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_ic_minus_expense.xml'),
+        `<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="24dp"
+  android:height="24dp"
+  android:viewportWidth="24"
+  android:viewportHeight="24">
+  <path
+    android:fillColor="#00000000"
+    android:strokeColor="#D45F57"
     android:strokeWidth="3.2"
     android:strokeLineCap="round"
     android:pathData="M5,12 L19,12" />
@@ -1972,6 +2620,29 @@ ${calRows}
 `,
       );
 
+      // Overspent variant: faint track with a rounded red fill (savings history).
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_savings_progress_neg.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@android:id/background">
+    <shape>
+      <solid android:color="#ECE7DC" />
+      <corners android:radius="999dp" />
+    </shape>
+  </item>
+  <item android:id="@android:id/progress">
+    <clip>
+      <shape>
+        <solid android:color="#D45F57" />
+        <corners android:radius="999dp" />
+      </shape>
+    </clip>
+  </item>
+</layer-list>
+`,
+      );
+
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetSampleData.java'),
         `package com.nelsongan.money2time.widgets;
@@ -2023,6 +2694,13 @@ private struct MonthlySpendData: Decodable {
   let expenseUrl: String
 }
 
+private struct QuickAddSmallData: Decodable {
+  let expenseLabel: String
+  let timeEquivalentLabel: String
+  let incomeUrl: String
+  let expenseUrl: String
+}
+
 private struct WeeklyDayData: Decodable {
   let weekdayLabel: String
   let amount: Double
@@ -2067,12 +2745,31 @@ private struct SavingsRateData: Decodable {
   let timeEquivalentLabel: String
 }
 
+private struct SavingsHistoryMonthData: Decodable {
+  let monthLabel: String
+  let savingsRate: Double
+  let rateLabel: String
+  let savedLabel: String
+  let isPositive: Bool
+  let hasIncome: Bool
+  let hasActivity: Bool
+}
+
+private struct SavingsHistoryData: Decodable {
+  let months: [SavingsHistoryMonthData]
+  let averageRateLabel: String
+  let totalSavedLabel: String
+  let totalIsPositive: Bool
+}
+
 private struct WidgetSnapshot: Decodable {
   let isPro: Bool
   let monthlyExpenseQuickLog: MonthlySpendData
+  let quickAddSmall: QuickAddSmallData
   let weeklyExpense: WeeklyExpenseData
   let calendarMonth: CalendarMonthData
   let savingsRate: SavingsRateData
+  let savingsHistory: SavingsHistoryData
   let proUnlockUrlByWidgetId: [String: String]
 }
 
@@ -2357,6 +3054,66 @@ private struct MonthlySpendView: View {
   }
 }
 
+// MARK: - Quick add (free, small)
+
+private struct SmallActionButton: View {
+  let isIncome: Bool
+  let url: String
+  let palette: Palette
+
+  var body: some View {
+    let accent = isIncome ? palette.success : palette.error
+    Link(destination: URL(string: url) ?? URL(string: "money2time://")!) {
+      Image(systemName: isIncome ? "plus" : "minus")
+        .font(.system(size: 20, weight: .heavy))
+        .foregroundStyle(accent)
+        .frame(maxWidth: .infinity)
+        .frame(height: 42)
+        .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(
+          RoundedRectangle(cornerRadius: 14).strokeBorder(accent.opacity(0.26), lineWidth: 1.5))
+    }
+  }
+}
+
+private struct QuickAddSmallView: View {
+  let data: QuickAddSmallData
+  let palette: Palette
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: 4) {
+        Text("THIS MONTH")
+          .font(.system(size: 10, weight: .heavy))
+          .tracking(1.4)
+          .foregroundStyle(palette.textMuted)
+        Text(data.expenseLabel)
+          .font(.system(size: 26, weight: .bold, design: .rounded))
+          .foregroundStyle(palette.error)
+          .lineLimit(1)
+          .minimumScaleFactor(0.5)
+        HStack(spacing: 5) {
+          Image(systemName: "clock")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(palette.primary)
+          Text(data.timeEquivalentLabel)
+            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textSoft)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        }
+      }
+      Spacer(minLength: 8)
+      HStack(spacing: 8) {
+        SmallActionButton(isIncome: true, url: data.incomeUrl, palette: palette)
+        SmallActionButton(isIncome: false, url: data.expenseUrl, palette: palette)
+      }
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+}
+
 // MARK: - Past 7 days (pro)
 
 // Diagonal "PRO" corner ribbon — absolutely overlaid (never pushes content),
@@ -2531,6 +3288,92 @@ private struct SavingsRateView: View {
         }
       }
       .padding(.top, 8)
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+}
+
+// MARK: - Savings history (pro, large)
+
+private struct SavingsHistoryRow: View {
+  let month: SavingsHistoryMonthData
+  let palette: Palette
+
+  private var accent: Color {
+    if !month.hasIncome { return palette.textMuted }
+    return month.isPositive ? palette.success : palette.error
+  }
+  private var fillFraction: CGFloat {
+    if !month.hasIncome { return 0 }
+    let magnitude = min(1, abs(month.savingsRate))
+    return CGFloat(month.isPositive ? max(0.04, magnitude) : max(0.08, magnitude))
+  }
+
+  var body: some View {
+    HStack(spacing: 10) {
+      Text(month.monthLabel)
+        .font(.system(size: 12, weight: .heavy, design: .rounded))
+        .foregroundStyle(palette.textSoft)
+        .frame(width: 34, alignment: .leading)
+      GeometryReader { geo in
+        ZStack(alignment: .leading) {
+          Capsule().fill(palette.text.opacity(0.06))
+          Capsule()
+            .fill(month.hasActivity ? accent : palette.text.opacity(0.08))
+            .frame(width: max(4, geo.size.width * fillFraction))
+        }
+      }
+      .frame(height: 12)
+      VStack(alignment: .trailing, spacing: 0) {
+        Text(month.rateLabel)
+          .font(.system(size: 15, weight: .bold, design: .rounded))
+          .foregroundStyle(month.hasActivity ? accent : palette.textMuted)
+          .lineLimit(1)
+        Text(month.savedLabel)
+          .font(.system(size: 10, weight: .heavy, design: .rounded))
+          .foregroundStyle(palette.textMuted)
+          .lineLimit(1)
+      }
+      .frame(width: 64, alignment: .trailing)
+    }
+  }
+}
+
+private struct SavingsHistoryView: View {
+  let data: SavingsHistoryData
+  let palette: Palette
+
+  var body: some View {
+    let totalColor = data.totalIsPositive ? palette.success : palette.error
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .top) {
+        Wordmark()
+        Spacer()
+        VStack(alignment: .trailing, spacing: 0) {
+          Text("SAVED · 6 MO")
+            .font(.system(size: 10, weight: .heavy))
+            .tracking(1.4)
+            .foregroundStyle(palette.textMuted)
+          Text(data.totalSavedLabel)
+            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .foregroundStyle(totalColor)
+            .lineLimit(1)
+          Text("Avg rate \\(data.averageRateLabel)")
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textMuted)
+            .lineLimit(1)
+        }
+      }
+      Spacer(minLength: 10)
+      VStack(spacing: 0) {
+        ForEach(Array(data.months.enumerated()), id: \\.offset) { index, month in
+          SavingsHistoryRow(month: month, palette: palette)
+          if index < data.months.count - 1 {
+            Spacer(minLength: 0)
+          }
+        }
+      }
     }
     .padding(16)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -2732,6 +3575,22 @@ private struct MonthlyRoot: View {
   }
 }
 
+private struct QuickAddSmallRoot: View {
+  var entry: SnapshotEntry
+  @Environment(\\.colorScheme) private var scheme
+  var body: some View {
+    let palette = Palette.current(scheme)
+    Group {
+      if let snapshot = entry.snapshot {
+        QuickAddSmallView(data: snapshot.quickAddSmall, palette: palette)
+      } else {
+        EmptyStateView(palette: palette)
+      }
+    }
+    .money2TimeWidgetBackground(palette.background)
+  }
+}
+
 private struct WeeklyRoot: View {
   var entry: SnapshotEntry
   @Environment(\\.colorScheme) private var scheme
@@ -2742,7 +3601,7 @@ private struct WeeklyRoot: View {
         if snapshot.isPro {
           WeeklyExpenseView(data: snapshot.weeklyExpense, palette: palette)
             .proCornerRibbon(entry.isPreview, palette: palette)
-            .widgetURL(URL(string: "money2time://insights"))
+            .widgetURL(URL(string: "money2time://insights?focus=expense_breakdown"))
         } else {
           ProLockView(
             title: "Past 7 Days",
@@ -2810,6 +3669,32 @@ private struct SavingsRoot: View {
   }
 }
 
+private struct SavingsHistoryRoot: View {
+  var entry: SnapshotEntry
+  @Environment(\\.colorScheme) private var scheme
+  var body: some View {
+    let palette = Palette.current(scheme)
+    Group {
+      if let snapshot = entry.snapshot {
+        if snapshot.isPro {
+          SavingsHistoryView(data: snapshot.savingsHistory, palette: palette)
+            .proCornerRibbon(entry.isPreview, palette: palette)
+            .widgetURL(URL(string: "money2time://insights?focus=savings_rate"))
+        } else {
+          ProLockView(
+            title: "Savings History",
+            url: snapshot.proUnlockUrlByWidgetId["savings_history"] ?? "money2time://pro",
+            palette: palette,
+            compact: false)
+        }
+      } else {
+        EmptyStateView(palette: palette)
+      }
+    }
+    .money2TimeWidgetBackground(palette.background)
+  }
+}
+
 // MARK: - Widgets
 
 struct Money2TimeMonthlyWidget: Widget {
@@ -2822,6 +3707,20 @@ struct Money2TimeMonthlyWidget: Widget {
     .configurationDisplayName("Monthly Spend")
     .description("Log income or expenses and see this month's spending as time.")
     .supportedFamilies([.systemMedium])
+    .contentMarginsDisabled()
+  }
+}
+
+struct Money2TimeQuickAddWidget: Widget {
+  let kind = "Money2TimeQuickAddSmall"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: SnapshotProvider()) { entry in
+      QuickAddSmallRoot(entry: entry)
+    }
+    .configurationDisplayName("Quick Add")
+    .description("Add an expense or income in one tap.")
+    .supportedFamilies([.systemSmall])
     .contentMarginsDisabled()
   }
 }
@@ -2868,13 +3767,29 @@ struct Money2TimeSavingsRateWidget: Widget {
   }
 }
 
+struct Money2TimeSavingsHistoryWidget: Widget {
+  let kind = "Money2TimeSavingsHistory"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: SnapshotProvider()) { entry in
+      SavingsHistoryRoot(entry: entry)
+    }
+    .configurationDisplayName("Savings History")
+    .description("Your savings rate over the last several months.")
+    .supportedFamilies([.systemLarge])
+    .contentMarginsDisabled()
+  }
+}
+
 @main
 struct Money2TimeWidgetBundle: WidgetBundle {
   var body: some Widget {
     Money2TimeMonthlyWidget()
+    Money2TimeQuickAddWidget()
     Money2TimeWeeklyWidget()
     Money2TimeCalendarWidget()
     Money2TimeSavingsRateWidget()
+    Money2TimeSavingsHistoryWidget()
   }
 }
 `,

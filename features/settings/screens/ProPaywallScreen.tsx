@@ -156,7 +156,7 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
           ]
         : []),
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
-      { label: I18n.t('pro.widgets_label'), free: '1', pro: '3' },
+      { label: I18n.t('pro.widgets_label'), free: '2', pro: '4' },
     ],
     [voiceSupported],
   );

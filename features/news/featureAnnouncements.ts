@@ -6,7 +6,7 @@ export interface FeatureAnnouncementPage {
   body: string;
   bullets?: string[];
   accent: 'primary' | 'success' | 'warning' | 'error' | 'lavender' | 'sky';
-  visual?: 'monthly' | 'weekly' | 'calendar' | 'savings';
+  visual?: 'monthly' | 'quickAdd' | 'weekly' | 'calendar' | 'savings' | 'savingsHistory';
 }
 
 export interface FeatureAnnouncement {

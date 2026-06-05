@@ -15,6 +15,13 @@ export const homeWidgetsAnnouncement: FeatureAnnouncement = {
       visual: 'monthly',
     },
     {
+      eyebrow: 'New',
+      title: 'Log in one tap',
+      body: 'A pocket-sized widget with quick buttons to add an expense or income the moment it happens.',
+      accent: 'primary',
+      visual: 'quickAdd',
+    },
+    {
       eyebrow: 'Pro',
       title: 'Your week at a glance',
       body: 'A bar for each of the last seven days, so a heavy spending day stands out instantly.',
@@ -34,6 +41,13 @@ export const homeWidgetsAnnouncement: FeatureAnnouncement = {
       body: 'Your savings rate this month at a glance — what you kept versus what you spent, in money and hours of work.',
       accent: 'success',
       visual: 'savings',
+    },
+    {
+      eyebrow: 'Pro',
+      title: 'Your savings trend',
+      body: 'The last six months of savings rates in one view, so you can see whether you are heading the right way.',
+      accent: 'success',
+      visual: 'savingsHistory',
     },
   ],
 };

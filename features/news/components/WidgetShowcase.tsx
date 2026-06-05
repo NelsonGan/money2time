@@ -11,15 +11,23 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { buildSampleWidgetSnapshot } from '~/services/widgetSnapshot.shared';
 import { FONT } from '~/utils/fonts';
 
-export type WidgetShowcaseKind = 'monthly' | 'weekly' | 'calendar' | 'savings';
+export type WidgetShowcaseKind =
+  | 'monthly'
+  | 'quickAdd'
+  | 'weekly'
+  | 'calendar'
+  | 'savings'
+  | 'savingsHistory';
 
 const BANNER_SOURCE = require('../../../assets/banner.png');
 
 const RATIO: Record<WidgetShowcaseKind, number> = {
   monthly: 338 / 158,
+  quickAdd: 1,
   weekly: 338 / 158,
   calendar: 338 / 354,
   savings: 338 / 158,
+  savingsHistory: 338 / 354,
 };
 
 const WIDGET_PADDING = 16;
@@ -114,6 +122,61 @@ function MonthlyContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleW
           <ActionPill tone="income" />
           <ActionPill tone="expense" />
         </View>
+      </View>
+    </View>
+  );
+}
+
+function SmallIconButton({ tone }: { tone: 'income' | 'expense' }) {
+  const themeColors = useThemeColors();
+  const isIncome = tone === 'income';
+  const accent = isIncome ? themeColors.success : themeColors.error;
+  return (
+    <View
+      style={[
+        styles.smallButton,
+        {
+          backgroundColor: withColorAlpha(accent, 0.12),
+          borderColor: withColorAlpha(accent, 0.26),
+        },
+      ]}
+    >
+      {isIncome ? (
+        <Plus size={18} color={accent} strokeWidth={3.2} />
+      ) : (
+        <Minus size={18} color={accent} strokeWidth={3.2} />
+      )}
+    </View>
+  );
+}
+
+function QuickAddContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleWidgetSnapshot> }) {
+  const themeColors = useThemeColors();
+  const data = snapshot.quickAddSmall;
+  return (
+    <View style={styles.pad}>
+      <View style={styles.flexCenter}>
+        <Text variant="label" tone="muted" style={styles.eyebrow}>
+          This month
+        </Text>
+        <Text
+          style={[styles.smallAmount, { color: themeColors.error }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.5}
+        >
+          {data.expenseLabel}
+        </Text>
+        <View style={styles.timeRow}>
+          <Clock size={11} color={themeColors.primary} strokeWidth={2.4} />
+          <Text variant="caption" style={{ color: themeColors.textSoft }} numberOfLines={1}>
+            {data.timeEquivalentLabel}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.smallButtonRow}>
+        <SmallIconButton tone="income" />
+        <SmallIconButton tone="expense" />
       </View>
     </View>
   );
@@ -340,6 +403,91 @@ function SavingsContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleW
   );
 }
 
+function SavingsHistoryRow({
+  month,
+}: {
+  month: ReturnType<typeof buildSampleWidgetSnapshot>['savingsHistory']['months'][number];
+}) {
+  const themeColors = useThemeColors();
+  const accent = !month.hasIncome
+    ? themeColors.textMuted
+    : month.isPositive
+      ? themeColors.success
+      : themeColors.error;
+  const fillPct = !month.hasIncome
+    ? 0
+    : month.isPositive
+      ? Math.max(4, Math.min(1, month.savingsRate) * 100)
+      : Math.max(8, Math.min(1, Math.abs(month.savingsRate)) * 100);
+  return (
+    <View style={styles.histRow}>
+      <Text variant="caption" style={[styles.histMonth, { color: themeColors.textSoft }]}>
+        {month.monthLabel}
+      </Text>
+      <View style={[styles.histTrack, { backgroundColor: withColorAlpha(themeColors.text, 0.06) }]}>
+        <View
+          style={[
+            styles.histFill,
+            {
+              width: `${fillPct}%`,
+              backgroundColor: month.hasActivity ? accent : withColorAlpha(themeColors.text, 0.08),
+            },
+          ]}
+        />
+      </View>
+      <View style={styles.histValues}>
+        <Text
+          allowFontScaling={false}
+          style={[styles.histRate, { color: month.hasActivity ? accent : themeColors.textMuted }]}
+          numberOfLines={1}
+        >
+          {month.rateLabel}
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={[styles.histSaved, { color: themeColors.textMuted }]}
+          numberOfLines={1}
+        >
+          {month.savedLabel}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function SavingsHistoryContent({
+  snapshot,
+}: {
+  snapshot: ReturnType<typeof buildSampleWidgetSnapshot>;
+}) {
+  const themeColors = useThemeColors();
+  const data = snapshot.savingsHistory;
+  const totalColor = data.totalIsPositive ? themeColors.success : themeColors.error;
+  return (
+    <View style={styles.pad}>
+      <View style={styles.rowBetween}>
+        <Banner />
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text variant="label" tone="muted" style={styles.eyebrow}>
+            Saved · 6 mo
+          </Text>
+          <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
+            {data.totalSavedLabel}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            Avg rate {data.averageRateLabel}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.histRows}>
+        {data.months.map((month) => (
+          <SavingsHistoryRow key={month.monthKey} month={month} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export function WidgetShowcase({
   kind,
   width,
@@ -352,9 +500,11 @@ export function WidgetShowcase({
   const themeColors = useThemeColors();
   const { settings } = useApp();
   const snapshot = useMemo(() => buildSampleWidgetSnapshot(settings), [settings]);
-  const isPro = kind !== 'monthly';
+  const isPro = kind !== 'monthly' && kind !== 'quickAdd';
 
-  let frameWidth = width;
+  // The small widget is a 158pt square on-device; cap it so it doesn't blow up
+  // to the full panel width like the medium/large showcases.
+  let frameWidth = kind === 'quickAdd' ? Math.min(width, 168) : width;
   let frameHeight = frameWidth / RATIO[kind];
   if (maxHeight && frameHeight > maxHeight) {
     frameHeight = maxHeight;
@@ -375,10 +525,14 @@ export function WidgetShowcase({
     >
       {kind === 'monthly' ? (
         <MonthlyContent snapshot={snapshot} />
+      ) : kind === 'quickAdd' ? (
+        <QuickAddContent snapshot={snapshot} />
       ) : kind === 'weekly' ? (
         <WeeklyContent snapshot={snapshot} />
       ) : kind === 'savings' ? (
         <SavingsContent snapshot={snapshot} />
+      ) : kind === 'savingsHistory' ? (
+        <SavingsHistoryContent snapshot={snapshot} />
       ) : (
         <CalendarContent snapshot={snapshot} />
       )}
@@ -406,6 +560,72 @@ const styles = StyleSheet.create({
   flexMin: {
     flex: 1,
     minWidth: 0,
+  },
+  flexCenter: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  // quick add (small)
+  smallAmount: {
+    fontFamily: FONT.monoBold,
+    fontSize: 26,
+    lineHeight: 30,
+    letterSpacing: -0.5,
+    marginTop: 4,
+  },
+  smallButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  smallButton: {
+    flex: 1,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // savings history (large)
+  histRows: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: 10,
+  },
+  histRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  histMonth: {
+    width: 34,
+    fontFamily: FONT.bold,
+  },
+  histTrack: {
+    flex: 1,
+    height: 12,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  histFill: {
+    height: '100%',
+    borderRadius: 999,
+    minWidth: 4,
+  },
+  histValues: {
+    width: 64,
+    alignItems: 'flex-end',
+  },
+  histRate: {
+    textAlign: 'right',
+    fontFamily: FONT.monoBold,
+    fontSize: 15,
+    lineHeight: 18,
+  },
+  histSaved: {
+    textAlign: 'right',
+    fontFamily: FONT.bold,
+    fontSize: 10,
+    lineHeight: 12,
   },
   eyebrow: {
     fontSize: 10,

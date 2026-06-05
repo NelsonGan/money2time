@@ -5,6 +5,7 @@ export {
   buildMoney2TimeWidgetSnapshot,
   type Money2TimeWidgetSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
+  parseSavingsExclusions,
 } from './widgetSnapshot.shared';
 import type { Money2TimeWidgetSnapshot } from './widgetSnapshot.shared';
 

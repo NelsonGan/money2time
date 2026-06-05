@@ -191,7 +191,9 @@ export function amountToHoursByRate(amount: number, trueHourlyRate: number): num
 }
 
 export function formatCurrency(amount: number, currencySymbol = '$'): string {
-  return `${currencySymbol}${Math.abs(amount).toFixed(2)}`;
+  const [intPart, decPart] = Math.abs(amount).toFixed(2).split('.');
+  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return `${currencySymbol}${grouped}.${decPart}`;
 }
 
 export function normalizeMoneyAmount(amount: number): number {
