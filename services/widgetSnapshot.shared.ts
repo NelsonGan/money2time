@@ -77,6 +77,33 @@ export interface CalendarMonthSnapshot {
   expenseLabel: string;
 }
 
+export interface SavingsRateSnapshot {
+  widgetId: typeof WIDGET_IDS.savingsRate;
+  title: string;
+  monthKey: string;
+  monthLabel: string;
+  income: number;
+  expense: number;
+  /** income − expense; negative when the month is overspent. */
+  saved: number;
+  /** saved / income as a fraction; 0 when there is no income. */
+  savingsRate: number;
+  /** "68%", "−24%", or "—" when there is no income yet. */
+  rateLabel: string;
+  incomeLabel: string;
+  expenseLabel: string;
+  /** Compact saved amount, always non-negative (paired with savedCaption). */
+  savedLabel: string;
+  /** "Saved" or "Overspent". */
+  savedCaption: string;
+  /** Whether the month is net-positive (saved ≥ 0). */
+  isPositive: boolean;
+  /** Whether any income exists this month (rate is meaningful). */
+  hasIncome: boolean;
+  /** "≈ 167h of work kept" / "behind"; empty when no hourly rate is set. */
+  timeEquivalentLabel: string;
+}
+
 export interface Money2TimeWidgetSnapshot {
   schemaVersion: 1;
   generatedAt: string;
@@ -87,6 +114,7 @@ export interface Money2TimeWidgetSnapshot {
   monthlyExpenseQuickLog: MonthlyExpenseQuickLogSnapshot;
   weeklyExpense: WeeklyExpenseSnapshot;
   calendarMonth: CalendarMonthSnapshot;
+  savingsRate: SavingsRateSnapshot;
   proUnlockUrlByWidgetId: Record<string, string>;
 }
 
@@ -283,6 +311,65 @@ function buildCalendarMonthSnapshot(
   };
 }
 
+function buildSavingsRateSnapshot(
+  transactions: TransactionWithRelations[],
+  settings: UserSettings,
+  monthKey: string,
+  hourlyRate: number,
+): SavingsRateSnapshot {
+  let income = 0;
+  let expense = 0;
+  for (const transaction of transactions) {
+    if (transaction.deletedAt) continue;
+    if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
+    if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
+    if (transaction.type === 'income') income += transaction.amount;
+    else expense += transaction.amount;
+  }
+
+  income = normalizeMoneyAmount(income);
+  expense = normalizeMoneyAmount(expense);
+  const saved = normalizeMoneyAmount(income - expense);
+  const hasIncome = income > 0;
+  const savingsRate = hasIncome ? saved / income : 0;
+  const isPositive = saved >= 0;
+
+  let rateLabel: string;
+  if (!hasIncome) {
+    rateLabel = '—';
+  } else {
+    const percent = Math.round(savingsRate * 100);
+    rateLabel = `${percent < 0 ? '−' : ''}${Math.abs(percent)}%`;
+  }
+
+  let timeEquivalentLabel = '';
+  if (hourlyRate > 0 && saved !== 0) {
+    const hours = formatHours(amountToHoursByRate(Math.abs(saved), hourlyRate));
+    timeEquivalentLabel = `≈ ${hours} of work ${isPositive ? 'kept' : 'behind'}`;
+  }
+
+  return {
+    widgetId: WIDGET_IDS.savingsRate,
+    title: 'Savings Rate',
+    monthKey,
+    monthLabel: getMonthLabelFormatter(settings.locale).format(
+      new Date(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 1, 1),
+    ),
+    income,
+    expense,
+    saved,
+    savingsRate,
+    rateLabel,
+    incomeLabel: formatCompactCurrency(income, settings.currencySymbol),
+    expenseLabel: formatCompactCurrency(expense, settings.currencySymbol),
+    savedLabel: formatCompactCurrency(Math.abs(saved), settings.currencySymbol),
+    savedCaption: isPositive ? 'Saved' : 'Overspent',
+    isPositive,
+    hasIncome,
+    timeEquivalentLabel,
+  };
+}
+
 export function buildMoney2TimeWidgetSnapshot({
   transactions,
   settings,
@@ -325,6 +412,7 @@ export function buildMoney2TimeWidgetSnapshot({
     },
     weeklyExpense: buildWeeklyExpenseSnapshot(transactions, settings),
     calendarMonth: buildCalendarMonthSnapshot(transactions, settings),
+    savingsRate: buildSavingsRateSnapshot(transactions, settings, monthKey, hourlyRate),
     proUnlockUrlByWidgetId: Object.fromEntries(
       WIDGET_DEFINITIONS.filter((definition) => definition.access === 'pro').map((definition) => [
         definition.id,

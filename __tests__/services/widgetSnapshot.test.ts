@@ -165,4 +165,75 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
     expect(calendar.totalIncome).toBe(200);
     expect(calendar.totalExpense).toBe(30);
   });
+
+  it('builds the savings-rate snapshot from current-month income and expense', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        transaction({ id: 'inc', type: 'income', amount: 1000 }),
+        transaction({ id: 'exp-1', amount: 200 }),
+        transaction({ id: 'exp-2', amount: 120 }),
+        transaction({
+          id: 'other-month',
+          type: 'income',
+          amount: 5000,
+          date: '2026-05-10T12:00:00.000Z',
+        }),
+        transaction({ id: 'deleted', amount: 999, deletedAt: '2026-06-03T12:00:00.000Z' }),
+      ],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 20,
+    });
+
+    expect(snapshot.savingsRate).toMatchObject({
+      widgetId: WIDGET_IDS.savingsRate,
+      monthKey: '2026-06',
+      income: 1000,
+      expense: 320,
+      saved: 680,
+      rateLabel: '68%',
+      savedCaption: 'Saved',
+      savedLabel: '$680',
+      expenseLabel: '$320',
+      isPositive: true,
+      hasIncome: true,
+    });
+    expect(snapshot.proUnlockUrlByWidgetId[WIDGET_IDS.savingsRate]).toBe(
+      'money2time://pro?source=widget_savings_rate',
+    );
+  });
+
+  it('marks the savings-rate snapshot as overspent when expenses exceed income', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        transaction({ id: 'inc', type: 'income', amount: 100 }),
+        transaction({ id: 'exp', amount: 124 }),
+      ],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 20,
+    });
+
+    expect(snapshot.savingsRate).toMatchObject({
+      saved: -24,
+      rateLabel: '−24%',
+      savedCaption: 'Overspent',
+      savedLabel: '$24',
+      isPositive: false,
+      hasIncome: true,
+    });
+  });
+
+  it('shows a placeholder savings rate when there is no income', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [transaction({ id: 'exp', amount: 50 })],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 20,
+    });
+
+    expect(snapshot.savingsRate.rateLabel).toBe('—');
+    expect(snapshot.savingsRate.hasIncome).toBe(false);
+    expect(snapshot.savingsRate.savingsRate).toBe(0);
+  });
 });

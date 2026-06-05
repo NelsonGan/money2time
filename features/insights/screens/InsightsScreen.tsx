@@ -34,6 +34,7 @@ import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { G, Text as SvgText } from 'react-native-svg';
 
+import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
@@ -60,13 +61,16 @@ import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendP
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { DisplayModeToggle } from '~/features/transactions/components';
-import { DatePickerModal } from '~/components/datePicker';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import {
+  consumePendingFocusInsight,
+  subscribeFocusInsightRequest,
+} from '~/services/insightsNavigation';
 import type {
   Account,
   Category,
@@ -2674,6 +2678,20 @@ export function InsightsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken]);
+
+  // Focus a specific insight when requested externally (e.g. the savings-rate
+  // widget deep link: money2time://insights?focus=savings_rate). Consumes any
+  // request that fired before this tab mounted, then listens for live ones.
+  useEffect(() => {
+    const focus = (insightType: string) => {
+      if (!isInsightType(insightType)) return;
+      setIsFilterModalOpen(false);
+      setSelectedInsightType(insightType);
+    };
+    const pending = consumePendingFocusInsight();
+    if (pending) focus(pending);
+    return subscribeFocusInsightRequest(({ insightType }) => focus(insightType));
+  }, []);
 
   useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
