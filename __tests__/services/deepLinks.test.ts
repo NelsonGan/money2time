@@ -4,6 +4,7 @@ import { requestOpenTab } from '~/services/tabNavigation';
 
 jest.mock('react-native', () => ({
   Linking: { addEventListener: jest.fn(), getInitialURL: jest.fn() },
+  Keyboard: { dismiss: jest.fn() },
 }));
 
 jest.mock('~/services/analytics', () => ({
