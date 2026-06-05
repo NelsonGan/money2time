@@ -7,6 +7,7 @@ export const WIDGET_IDS = {
   monthlyExpenseQuickLog: 'monthly_expense_quick_log',
   weeklyExpense: 'weekly_expense',
   calendarMonth: 'calendar_month',
+  savingsRate: 'savings_rate',
 } as const;
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS];
@@ -43,6 +44,14 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     supportedSizes: ['large'],
     snapshotKey: 'calendarMonth',
     proSource: 'widget_calendar_month',
+  },
+  {
+    id: WIDGET_IDS.savingsRate,
+    title: 'Savings Rate',
+    access: 'pro',
+    supportedSizes: ['medium'],
+    snapshotKey: 'savingsRate',
+    proSource: 'widget_savings_rate',
   },
 ];
 

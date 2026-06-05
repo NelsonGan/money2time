@@ -16,12 +16,14 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { WIDGET_DEFINITIONS, WIDGET_IDS, type WidgetSize } from '~/services/widgetRegistry';
 import {
   buildMoney2TimeWidgetSnapshot,
   buildSampleWidgetSnapshot,
   type CalendarMonthSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
+  type SavingsRateSnapshot,
   type WeeklyExpenseSnapshot,
 } from '~/services/widgetSnapshot.shared';
 import { FONT } from '~/utils/fonts';
@@ -278,6 +280,14 @@ function WeeklyExpenseWidgetPreview({ data }: { data: WeeklyExpenseSnapshot }) {
   );
 }
 
+function SavingsRateWidgetPreview({ data }: { data: SavingsRateSnapshot }) {
+  return (
+    <WidgetFrame size="medium" pro>
+      {() => <SavingsRateWidgetContent data={data} gradientId="savingsRateGradient" />}
+    </WidgetFrame>
+  );
+}
+
 function IoChip({ tone, label }: { tone: 'income' | 'expense'; label: string }) {
   const themeColors = useThemeColors();
   const isIncome = tone === 'income';
@@ -483,6 +493,8 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
                 <MonthlySpendWidgetPreview data={snapshot.monthlyExpenseQuickLog} />
               ) : widget.id === WIDGET_IDS.weeklyExpense ? (
                 <WeeklyExpenseWidgetPreview data={snapshot.weeklyExpense} />
+              ) : widget.id === WIDGET_IDS.savingsRate ? (
+                <SavingsRateWidgetPreview data={snapshot.savingsRate} />
               ) : (
                 <CalendarWidgetPreview data={snapshot.calendarMonth} />
               )}
