@@ -12,19 +12,19 @@ export const REVIEW_PROMPT_STORAGE_KEY = '@m2t/review_prompt_state/v1';
 export const REVIEW_PROMPT_SCHEMA_VERSION = 1;
 
 /** Minimum days between the install date and the first prompt. */
-export const MIN_DAYS_SINCE_INSTALL = 7;
+export const MIN_DAYS_SINCE_INSTALL = 5;
 
 /** Don't prompt within this many days of an app-version change. */
-export const MIN_DAYS_SINCE_VERSION_CHANGE = 3;
+export const MIN_DAYS_SINCE_VERSION_CHANGE = 2;
 
 /** Cooldown between successive prompts (Apple's hard cap is ~122 days; we stay well below). */
-export const MIN_DAYS_BETWEEN_PROMPTS = 90;
+export const MIN_DAYS_BETWEEN_PROMPTS = 60;
 
 /** Intentional transactions logged before the first prompt becomes eligible. */
-export const MIN_TRANSACTIONS = 20;
+export const MIN_TRANSACTIONS = 15;
 
 /** Distinct calendar days of app activity required. */
-export const MIN_ACTIVE_DAYS = 3;
+export const MIN_ACTIVE_DAYS = 2;
 
 export type ReviewPromptTrigger = 'transaction_milestone' | 'insights_view' | 'pro_purchase';
 
