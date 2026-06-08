@@ -897,7 +897,7 @@ export function TransactionsScreen({
         <View className="gap-2">
           <ActivitySearchRow
             inputRef={searchInputRef}
-            visible={isSearchBoxOpen}
+            visible={isSearchBoxOpen || hasActiveSearch}
             value={searchDraft}
             onChangeText={handleSearchChange}
             onClose={handleCloseSearch}
