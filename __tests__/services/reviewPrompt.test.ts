@@ -117,11 +117,11 @@ describe('reviewPrompt.checkEligibility', () => {
   });
 
   it('boundary constants match expectations', () => {
-    expect(MIN_DAYS_SINCE_INSTALL).toBe(7);
-    expect(MIN_DAYS_SINCE_VERSION_CHANGE).toBe(3);
-    expect(MIN_DAYS_BETWEEN_PROMPTS).toBe(90);
-    expect(MIN_TRANSACTIONS).toBe(20);
-    expect(MIN_ACTIVE_DAYS).toBe(3);
+    expect(MIN_DAYS_SINCE_INSTALL).toBe(5);
+    expect(MIN_DAYS_SINCE_VERSION_CHANGE).toBe(2);
+    expect(MIN_DAYS_BETWEEN_PROMPTS).toBe(60);
+    expect(MIN_TRANSACTIONS).toBe(15);
+    expect(MIN_ACTIVE_DAYS).toBe(2);
   });
 });
 

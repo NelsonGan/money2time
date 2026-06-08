@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
@@ -205,6 +205,7 @@ function TransactionItemView({
       <Pressable
         onPress={onPress}
         onLongPress={onLongPress}
+        delayLongPress={400}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         className={cn(
@@ -371,7 +372,7 @@ function AnimatedTransactionItem({
 
   return (
     <Animated.View
-      layout={Layout.springify().damping(18).stiffness(260)}
+      layout={Platform.OS === 'android' ? undefined : Layout.springify().damping(18).stiffness(260)}
       entering={FadeIn.duration(motionDurations.fast)}
       exiting={FadeOut.duration(motionDurations.fast)}
       style={animatedStyle}

@@ -125,8 +125,16 @@ export function recordTransactionLogged(count: number = 1): void {
   void bumpAndMaybeRequest(
     'transaction_milestone',
     (state) => ({ ...state, transactionCount: state.transactionCount + count }),
-    (state) =>
-      state.transactionCount >= MIN_TRANSACTIONS && state.transactionCount % MIN_TRANSACTIONS === 0,
+    // Fire once per checkpoint crossing rather than on exact multiples, so a
+    // bulk jump (e.g. an import from 14 → 16) still trips the 15 checkpoint
+    // instead of skipping it.
+    (state) => {
+      const previous = state.transactionCount - count;
+      const crossedCheckpoint =
+        Math.floor(state.transactionCount / MIN_TRANSACTIONS) >
+        Math.floor(previous / MIN_TRANSACTIONS);
+      return state.transactionCount >= MIN_TRANSACTIONS && crossedCheckpoint;
+    },
   );
 }
 
