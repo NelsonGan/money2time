@@ -60,6 +60,8 @@ interface ActivityTransactionListProps {
   disableVirtualization?: boolean;
   groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
+  /** Scrolls the list to a given day's section header (YYYY-MM-DD). */
+  scrollToDayRef?: React.MutableRefObject<((dayKey: string) => void) | null>;
   locale?: string;
   /**
    * Set when this list is a tab screen's main scrollable behind the floating
@@ -229,6 +231,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   disableVirtualization = false,
   groupByDate = true,
   scrollToTopRef,
+  scrollToDayRef,
   locale = I18n.locale ?? 'en',
   extendUnderBottomNav = false,
 }: ActivityTransactionListProps) {
@@ -402,6 +405,22 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       scrollToTopRef.current = null;
     };
   }, [disableVirtualization, scrollToTopRef]);
+
+  useEffect(() => {
+    if (!scrollToDayRef) return;
+    scrollToDayRef.current = (dayKey: string) => {
+      const index = rows.findIndex((row) => row.kind === 'header' && row.id === `header-${dayKey}`);
+      if (index < 0) {
+        // The day has no transactions in this month — fall back to the top.
+        flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        return;
+      }
+      flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
+    };
+    return () => {
+      scrollToDayRef.current = null;
+    };
+  }, [rows, scrollToDayRef]);
 
   if (disableVirtualization) {
     return (

@@ -923,6 +923,9 @@ const es = {
       add_title: 'Añadir movimiento',
       add_body:
         'Toca + y escribe algo como "Uber 30" — nosotros completaremos el monto, la categoría y la cuenta por ti.',
+      tabs_title: 'Muévete con facilidad',
+      tabs_body:
+        'Usa estas pestañas para cambiar entre actividad, calendario, estadísticas y ajustes.',
       insights_title: 'Tipo de análisis',
       insights_body: 'Abre esto para cambiar entre diferentes vistas de análisis.',
       management_title: 'Gestión de datos',

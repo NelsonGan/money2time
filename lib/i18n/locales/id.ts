@@ -924,6 +924,9 @@ const id = {
       add_title: 'Tambah transaksi',
       add_body:
         'Ketuk + dan ketik sesuatu seperti "Grab 30" — kami akan mengisi jumlah, kategori, dan akun untukmu.',
+      tabs_title: 'Navigasi',
+      tabs_body:
+        'Gunakan tab ini untuk berpindah antara aktivitas, kalender, wawasan, dan pengaturan.',
       insights_title: 'Jenis wawasan',
       insights_body: 'Buka ini untuk beralih antara berbagai tampilan wawasan dan analisis.',
       management_title: 'Manajemen Data',

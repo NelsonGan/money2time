@@ -916,6 +916,9 @@ const sv = {
       add_title: 'Lägg till transaktion',
       add_body:
         'Tryck på + och skriv något som "Uber 30" — vi fyller i belopp, kategori och konto åt dig.',
+      tabs_title: 'Hitta runt',
+      tabs_body:
+        'Använd dessa flikar för att växla mellan aktivitet, kalender, insikter och inställningar.',
       insights_title: 'Insiktstyp',
       insights_body: 'Öppna detta för att växla mellan olika insikter och analysvyer.',
       management_title: 'Datahantering',

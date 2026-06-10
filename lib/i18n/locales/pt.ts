@@ -919,6 +919,9 @@ const pt = {
       add_title: 'Adicionar transação',
       add_body:
         'Toque em + e digite algo como "Uber 30" — preenchemos o valor, categoria e conta para você.',
+      tabs_title: 'Navegue com facilidade',
+      tabs_body:
+        'Use estas abas para alternar entre atividade, calendário, insights e configurações.',
       insights_title: 'Tipo de insight',
       insights_body:
         'Abra este menu para alternar entre diferentes visualizações de insights e análises.',

@@ -7,6 +7,7 @@ export interface TutorialTargetRect {
 
 export type TutorialTargetId =
   | 'nav.add'
+  | 'nav.tabs'
   | 'insights.type_selector'
   | 'settings.management'
   | 'settings.recurring'

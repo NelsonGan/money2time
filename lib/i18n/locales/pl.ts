@@ -922,6 +922,9 @@ const pl = {
       add_title: 'Dodaj transakcję',
       add_body:
         'Dotknij + i po prostu wpisz coś w stylu "Uber 30" — uzupełnimy kwotę, kategorię i konto za ciebie.',
+      tabs_title: 'Poruszaj się',
+      tabs_body:
+        'Użyj tych kart, aby przełączać się między aktywnością, kalendarzem, statystykami i ustawieniami.',
       insights_title: 'Typ analizy',
       insights_body: 'Otwórz to, by przełączać między różnymi widokami analiz.',
       management_title: 'Zarządzanie danymi',
