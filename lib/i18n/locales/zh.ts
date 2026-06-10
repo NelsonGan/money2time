@@ -874,6 +874,8 @@ const zh = {
     coach_steps: {
       add_title: '添加交易',
       add_body: '点击 +，直接输入「星巴克 30」之类的内容，金额、分类和账户都会自动填好。',
+      tabs_title: '快速导航',
+      tabs_body: '点按这些标签，在活动、日历、洞察和设置之间切换。',
       insights_title: '洞察类型',
       insights_body: '打开此菜单切换不同的洞察和分析视图。',
       management_title: '数据管理',

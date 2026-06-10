@@ -920,6 +920,9 @@ const nb = {
       add_title: 'Legg til transaksjon',
       add_body:
         'Trykk + og skriv noe som "Uber 30" — vi fyller inn beløp, kategori og konto for deg.',
+      tabs_title: 'Finn frem',
+      tabs_body:
+        'Bruk disse fanene for å bytte mellom aktivitet, kalender, innsikt og innstillinger.',
       insights_title: 'Innsiktstype',
       insights_body: 'Åpne dette for å bytte mellom ulike innsikts- og analysevisninger.',
       management_title: 'Dataadministrasjon',

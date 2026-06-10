@@ -14,6 +14,7 @@ import {
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -31,8 +32,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
-import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import {
@@ -116,6 +116,7 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
+const MAIN_TAB_ORDER: MainTab[] = ['home', 'accounts', 'calendar', 'insights', 'settings'];
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -127,6 +128,10 @@ type ActivityInsightPeriodPreset = 'week' | 'month' | 'year' | 'custom';
 type FontScalingNativeComponent = {
   defaultProps?: Record<string, unknown>;
 };
+
+// Hold the native splash until the first page is fully ready (fonts + data +
+// theme), so no intermediate loading UI flashes before real content paints.
+void SplashScreen.preventAutoHideAsync();
 
 function disableDynamicType(component: FontScalingNativeComponent) {
   component.defaultProps = {
@@ -171,6 +176,13 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
     titleKey: 'tutorial.coach_steps.add_title',
     bodyKey: 'tutorial.coach_steps.add_body',
     mascot: 'excited',
+  },
+  {
+    tab: 'home',
+    targetId: 'nav.tabs',
+    titleKey: 'tutorial.coach_steps.tabs_title',
+    bodyKey: 'tutorial.coach_steps.tabs_body',
+    mascot: 'happy',
   },
   {
     tab: 'insights',
@@ -357,6 +369,7 @@ function MainShellScreen({
   const [calendarResetToken, setCalendarResetToken] = useState(0);
   const [transactionsTutorialResetToken, setTransactionsTutorialResetToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
+  const [transactionsFocusDayKey, setTransactionsFocusDayKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
@@ -416,15 +429,16 @@ function MainShellScreen({
     });
   }, [navigation]);
 
-  const jumpTransactionsToMonth = useCallback((monthKey: string) => {
+  const jumpTransactionsToMonth = useCallback((monthKey: string, dayKey: string | null = null) => {
     setTransactionsFocusMonthKey(monthKey);
+    setTransactionsFocusDayKey(dayKey);
     setTransactionsFocusMonthToken((prev) => prev + 1);
   }, []);
 
   useEffect(() => {
-    return subscribeOpenTransactionsRequest(({ monthKey }) => {
+    return subscribeOpenTransactionsRequest(({ monthKey, dayKey }) => {
       setActiveTab('home');
-      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()));
+      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()), dayKey ?? null);
     });
   }, [jumpTransactionsToMonth]);
 
@@ -715,11 +729,32 @@ function MainShellScreen({
   const currentGuidedStep = isGuidedTutorialActive
     ? (GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex] ?? null)
     : null;
+  // The whole bottom nav bar, derived as the bounding box of the per-tab rects
+  // the BottomNav reports. This adapts to whichever nav layout is active
+  // (floating liquid-glass pill vs. classic bar) without measuring it directly.
+  const navTabsBoundingRect = useMemo<TutorialTargetRect | null>(() => {
+    const visibleTabs = isSimpleMode
+      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts')
+      : MAIN_TAB_ORDER;
+    const rects = visibleTabs
+      .map((tab) => tutorialNavTabRects[tab])
+      .filter((rect): rect is TutorialTargetRect => rect != null);
+    if (rects.length === 0) return null;
+    const minX = Math.min(...rects.map((rect) => rect.x));
+    const minY = Math.min(...rects.map((rect) => rect.y));
+    const maxX = Math.max(...rects.map((rect) => rect.x + rect.width));
+    const maxY = Math.max(...rects.map((rect) => rect.y + rect.height));
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  }, [isSimpleMode, tutorialNavTabRects]);
   const rawGuidedTargetRect = currentGuidedStep
-    ? (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
+    ? currentGuidedStep.targetId === 'nav.tabs'
+      ? navTabsBoundingRect
+      : (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
     : null;
   const rawGuidedTabRect =
-    currentGuidedStep && currentGuidedStep.targetId !== 'nav.add'
+    currentGuidedStep &&
+    currentGuidedStep.targetId !== 'nav.add' &&
+    currentGuidedStep.targetId !== 'nav.tabs'
       ? (tutorialNavTabRects[currentGuidedStep.tab] ?? null)
       : null;
   const currentGuidedTargetRect = useMemo<TutorialTargetRect | null>(() => {
@@ -739,7 +774,9 @@ function MainShellScreen({
     };
   }, [rawGuidedTabRect, shellWindowOrigin.x, shellWindowOrigin.y]);
   const currentTutorialFocusedTab =
-    isGuidedTutorialActive && currentGuidedStep?.targetId !== 'nav.add'
+    isGuidedTutorialActive &&
+    currentGuidedStep?.targetId !== 'nav.add' &&
+    currentGuidedStep?.targetId !== 'nav.tabs'
       ? (currentGuidedStep?.tab ?? null)
       : null;
   const tutorialSpotlightRequest = useMemo<TutorialSpotlightRequest>(
@@ -758,6 +795,7 @@ function MainShellScreen({
             <MemoSimpleActivityScreen
               scrollToTopToken={transactionsScrollTopToken}
               focusMonthKey={transactionsFocusMonthKey}
+              focusDayKey={transactionsFocusDayKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
               onOpenTransactionSplitBadge={openTransactionSplitBill}
@@ -768,6 +806,7 @@ function MainShellScreen({
             <MemoTransactionsScreen
               scrollToTopToken={transactionsScrollTopToken}
               focusMonthKey={transactionsFocusMonthKey}
+              focusDayKey={transactionsFocusDayKey}
               focusMonthToken={transactionsFocusMonthToken}
               onOpenTransaction={openTransactionEditor}
               onOpenTransactionSplitBadge={openTransactionSplitBill}
@@ -784,7 +823,7 @@ function MainShellScreen({
             scrollToTopToken={accountsScrollTopToken}
             onOpenAccount={openAccountDetail}
             onOpenAddTransaction={(accountId) =>
-              navigation.navigate('AddTransaction', { initialAccountId: accountId })
+              navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId })
             }
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
@@ -903,7 +942,10 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
       <AddTransactionScreen
         onClose={() => navigation.goBack()}
         onSubmitReady={(input) => {
-          requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+          requestOpenTransactions({
+            monthKey: monthKeyFromIsoLocal(input.date),
+            dayKey: dayKeyFromIsoLocal(input.date),
+          });
         }}
         isSimpleMode={isSimpleMode}
         simpleWalletId={simpleWalletId}
@@ -916,7 +958,10 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
     <QuickAddScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+        requestOpenTransactions({
+          monthKey: monthKeyFromIsoLocal(input.date),
+          dayKey: dayKeyFromIsoLocal(input.date),
+        });
       }}
       onExpandToDetailed={(initialValues, initialAccountId) => {
         navigation.replace('AddTransactionDetailed', {
@@ -942,7 +987,10 @@ function AddTransactionDetailedRouteScreen({
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+        requestOpenTransactions({
+          monthKey: monthKeyFromIsoLocal(input.date),
+          dayKey: dayKeyFromIsoLocal(input.date),
+        });
       }}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
@@ -1016,7 +1064,7 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       accountId={route.params.accountId}
       useNativeBackGesture
       onOpenAddTransaction={(accountId) =>
-        navigation.push('AddTransaction', { initialAccountId: accountId })
+        navigation.push('AddTransactionDetailed', { initialAccountId: accountId })
       }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', {
@@ -1322,6 +1370,12 @@ function AppContent() {
     };
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
 
+  const handleContentLayout = useCallback(() => {
+    // First real page has laid out — hide the native splash now so the
+    // transition goes straight from splash to content with no flash.
+    void SplashScreen.hideAsync();
+  }, []);
+
   const handleOnboardingComplete = useCallback(() => {
     setTutorialStartToken(0);
     InteractionManager.runAfterInteractions(() => {
@@ -1347,32 +1401,22 @@ function AppContent() {
     }
   }, [featureAnnouncement?.id, settings.appUserId]);
 
+  // Keep the native splash up while data loads — render nothing so no
+  // intermediate UI flashes before the first page is ready.
   if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background" style={themeStyle}>
-        <View className="items-center rounded-[28px] border border-border/40 bg-card px-8 py-8 shadow-soft">
-          <Mascot size={130} mood="sleepy" animate />
-          <Text variant="friendly" tone="muted" className="mt-4">
-            {I18n.t('app.loading_world')}
-          </Text>
-        </View>
-        <View className="mt-4">
-          <LoadingDots size="large" />
-        </View>
-      </View>
-    );
+    return null;
   }
 
   if (!settings.onboardingCompleted) {
     return (
-      <View style={[styles.flex, themeStyle]}>
+      <View style={[styles.flex, themeStyle]} onLayout={handleContentLayout}>
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background" style={themeStyle}>
+    <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <WidgetSnapshotSync />
       <NavigationContainer
@@ -1473,7 +1517,7 @@ function AppContent() {
 
 export default function App() {
   const shouldLoadCustomFonts = Platform.OS !== 'ios';
-  const [fontsLoaded] = useFonts(
+  const [fontsLoaded, fontError] = useFonts(
     shouldLoadCustomFonts
       ? {
           WorkSans_400Regular,
@@ -1486,7 +1530,9 @@ export default function App() {
       : {},
   );
 
-  if (shouldLoadCustomFonts && !fontsLoaded) {
+  // Splash stays up (prevented from auto-hiding) while fonts resolve, so this
+  // null render is never visible. Proceed on error so we can't get stuck.
+  if (shouldLoadCustomFonts && !fontsLoaded && !fontError) {
     return null;
   }
 

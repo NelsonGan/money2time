@@ -915,6 +915,8 @@ const en = {
       add_title: 'Add transaction',
       add_body:
         'Tap + and just type something like "Uber 30" — we\'ll fill in the amount, category, and account for you.',
+      tabs_title: 'Get around',
+      tabs_body: 'Use these tabs to jump between your activity, calendar, insights, and settings.',
       insights_title: 'Insight type',
       insights_body: 'Open this to switch between different insights and analysis views.',
       management_title: 'Data Management',

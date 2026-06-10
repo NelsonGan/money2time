@@ -922,6 +922,9 @@ const it = {
       add_title: 'Aggiungi transazione',
       add_body:
         'Tocca + e scrivi qualcosa come "Uber 30" — compileremo importo, categoria e conto per te.',
+      tabs_title: 'Spostarti tra le sezioni',
+      tabs_body:
+        'Usa queste schede per passare tra attività, calendario, statistiche e impostazioni.',
       insights_title: 'Tipo di analisi',
       insights_body: 'Apri questo per passare tra diverse analisi e viste.',
       management_title: 'Gestione dati',
