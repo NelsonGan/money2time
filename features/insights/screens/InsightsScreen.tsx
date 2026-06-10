@@ -38,6 +38,8 @@ import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNav';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -2318,6 +2320,15 @@ const InsightsWindowPage = React.memo(
     getPageScrollRef: (index: number) => { current: ScrollView | null };
     renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
   }) {
+    const bottomNavInset = useBottomNavContentInset();
+    const reportBottomNavScroll = useBottomNavScrollReporter();
+    const contentStyle = useMemo(
+      () => ({
+        ...INSIGHTS_SCROLL_CONTENT_STYLE,
+        paddingBottom: INSIGHTS_SCROLL_CONTENT_STYLE.paddingBottom + bottomNavInset,
+      }),
+      [bottomNavInset],
+    );
     return (
       <View style={pageStyle} className="flex-1 bg-background">
         <ScrollView
@@ -2326,7 +2337,9 @@ const InsightsWindowPage = React.memo(
           }}
           className="flex-1"
           scrollEnabled={!isChartScrubbing}
-          contentContainerStyle={INSIGHTS_SCROLL_CONTENT_STYLE}
+          contentContainerStyle={contentStyle}
+          onScroll={reportBottomNavScroll}
+          scrollEventThrottle={32}
         >
           <TabletContentContainer>{renderInsightsPane(pageData)}</TabletContentContainer>
         </ScrollView>

@@ -981,6 +981,7 @@ export function TransactionsScreen({
             emptyMessage={I18n.t('transactions.empty_search_message')}
             contentPaddingBottom={LIST_BOTTOM_PADDING}
             contentPaddingHorizontal={listHorizontalPadding}
+            extendUnderBottomNav
             disableItemAnimations
             compactItems
             listKey="search-results"

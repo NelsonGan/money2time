@@ -4,6 +4,8 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNav';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
@@ -57,6 +59,12 @@ interface ActivityTransactionListProps {
   groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
   locale?: string;
+  /**
+   * Set when this list is a tab screen's main scrollable behind the floating
+   * liquid-glass nav bar: adds the bar's reserved inset to the bottom padding
+   * and reports scroll so the bar can minimize. No-op in fallback mode.
+   */
+  extendUnderBottomNav?: boolean;
 }
 
 interface DayHeaderRowProps {
@@ -220,9 +228,15 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   groupByDate = true,
   scrollToTopRef,
   locale = I18n.locale ?? 'en',
+  extendUnderBottomNav = false,
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const bottomNavInset = useBottomNavContentInset();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
+  const navScrollProps = extendUnderBottomNav
+    ? ({ onScroll: reportBottomNavScroll, scrollEventThrottle: 32 } as const)
+    : undefined;
   const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
@@ -292,11 +306,17 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: contentPaddingBottom,
+      paddingBottom: contentPaddingBottom + (extendUnderBottomNav ? bottomNavInset : 0),
       paddingHorizontal: contentPaddingHorizontal,
       paddingTop: contentPaddingTop,
     }),
-    [contentPaddingBottom, contentPaddingHorizontal, contentPaddingTop],
+    [
+      bottomNavInset,
+      contentPaddingBottom,
+      contentPaddingHorizontal,
+      contentPaddingTop,
+      extendUnderBottomNav,
+    ],
   );
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
@@ -390,6 +410,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
+        {...navScrollProps}
       >
         {listHeader}
         {rows.length === 0
@@ -418,6 +439,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}
+      {...navScrollProps}
     />
   );
 });
