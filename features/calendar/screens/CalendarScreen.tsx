@@ -12,6 +12,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
+import { useBottomNavContentInset } from '~/components/navigation/bottomNavInset';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -690,9 +691,15 @@ export function CalendarScreen({
     return Math.max(280, contentWidth - horizontal);
   }, [contentWidth]);
 
+  // Inside the native tab view (iOS) pad past the measured bar height so
+  // content scrolls under the translucent bar; on Android fall back to the
+  // flow-layout reserved inset.
+  const bottomNavInset = useBottomNavContentInset();
   const bottomPad = useMemo(
-    () => getBottomNavReservedInset(safeAreaInsets.bottom) + spacing.lg,
-    [safeAreaInsets.bottom],
+    () =>
+      (bottomNavInset > 0 ? bottomNavInset : getBottomNavReservedInset(safeAreaInsets.bottom)) +
+      spacing.lg,
+    [bottomNavInset, safeAreaInsets.bottom],
   );
 
   const renderMonthPage = useCallback(

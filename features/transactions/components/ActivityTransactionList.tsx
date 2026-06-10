@@ -4,10 +4,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import {
-  useBottomNavContentInset,
-  useBottomNavScrollReporter,
-} from '~/components/navigation/BottomNavMinimize';
+import { useBottomNavContentInset } from '~/components/navigation/bottomNavInset';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
@@ -62,9 +59,9 @@ interface ActivityTransactionListProps {
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
   locale?: string;
   /**
-   * Set when this list is a tab screen's main scrollable behind the floating
-   * liquid-glass nav bar: adds the bar's reserved inset to the bottom padding
-   * and reports scroll so the bar can minimize. No-op in fallback mode.
+   * Set when this list is a tab screen's main scrollable that extends under
+   * the translucent native tab bar (iOS): adds the bar's height to the bottom
+   * padding. No-op on Android and outside the tab shell.
    */
   extendUnderBottomNav?: boolean;
 }
@@ -235,10 +232,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const bottomNavInset = useBottomNavContentInset();
-  const reportBottomNavScroll = useBottomNavScrollReporter();
-  const navScrollProps = extendUnderBottomNav
-    ? ({ onScroll: reportBottomNavScroll, scrollEventThrottle: 32 } as const)
-    : undefined;
   const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
@@ -412,7 +405,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
-        {...navScrollProps}
       >
         {listHeader}
         {rows.length === 0
@@ -441,7 +433,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}
-      {...navScrollProps}
     />
   );
 });
