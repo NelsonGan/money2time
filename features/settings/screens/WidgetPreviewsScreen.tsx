@@ -11,6 +11,7 @@ import {
   SettingsPageLayout,
   SettingsSection,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -634,6 +635,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
   const { settings, transactions, categories, insightsPreferencesJson, getTrueHourlyRateForDate } =
     useApp();
   const { isPro } = usePro();
+  const bottomNavInset = useSettingsBottomNavInset();
   // Default to the sample snapshot — this is exactly what the OS widget gallery shows.
   const [dataSource, setDataSource] = useState<'sample' | 'real'>('sample');
 
@@ -670,7 +672,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
             : 'Dev-only — built from your real transactions.'
         }
       />
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <View style={styles.toggleWrap}>
             <DataSourceToggle value={dataSource} onChange={setDataSource} />

@@ -34,11 +34,7 @@ import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { AddFab } from '~/components/navigation/AddFab';
-import {
-  BottomNav,
-  type TabName,
-  useBottomNavContentInset,
-} from '~/components/navigation/BottomNav';
+import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
@@ -519,7 +515,6 @@ function MainShellScreen({
     (activeTab === 'calendar' && isCalendarSelectionMode);
 
   const { resetMinimize } = useBottomNavMinimize();
-  const bottomNavContentInset = useBottomNavContentInset();
 
   const handleTabChange = useCallback(
     (tab: TabName) => {
@@ -772,24 +767,21 @@ function MainShellScreen({
           )}
         </MountedTab>
         <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
-          {/* Same container-level inset strategy as the settings stack. */}
-          <View style={{ flex: 1, paddingBottom: bottomNavContentInset }}>
-            <MemoAccountsScreen
-              safeAreaEdges={['top']}
-              resetToRootToken={accountsResetToken}
-              scrollToTopToken={accountsScrollTopToken}
-              onOpenAccount={openAccountDetail}
-              onOpenAddTransaction={(accountId) =>
-                navigation.navigate('AddTransaction', { initialAccountId: accountId })
-              }
-              onOpenTransaction={openTransactionEditor}
-              onOpenTransactionSplitBadge={openTransactionSplitBill}
-              onOpenSettings={openAccountSettings}
-              onOpenNetAssetsInsight={() =>
-                openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
-              }
-            />
-          </View>
+          <MemoAccountsScreen
+            safeAreaEdges={['top']}
+            resetToRootToken={accountsResetToken}
+            scrollToTopToken={accountsScrollTopToken}
+            onOpenAccount={openAccountDetail}
+            onOpenAddTransaction={(accountId) =>
+              navigation.navigate('AddTransaction', { initialAccountId: accountId })
+            }
+            onOpenTransaction={openTransactionEditor}
+            onOpenTransactionSplitBadge={openTransactionSplitBill}
+            onOpenSettings={openAccountSettings}
+            onOpenNetAssetsInsight={() =>
+              openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
+            }
+          />
         </MountedTab>
         <MountedTab active={activeTab === 'calendar'} shouldPreload={preloadedTabs.has('calendar')}>
           <MemoCalendarScreen
@@ -814,21 +806,16 @@ function MainShellScreen({
           />
         </MountedTab>
         <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
-          {/* Settings screens are numerous and form-like; pad the whole stack
-              above the floating glass bar instead of threading the inset into
-              every screen. No-op (0) in fallback mode. */}
-          <View style={{ flex: 1, paddingBottom: bottomNavContentInset }}>
-            <MemoSettingsStack
-              resetToRootToken={settingsResetToken}
-              scrollToTopToken={settingsScrollTopToken}
-              onOpenRecurringEditor={openRecurringEditor}
-              onOpenProPaywall={() => openProPaywall('settings')}
-              onScreenChange={setSettingsCurrentScreen}
-              onStartTutorial={startGuidedTutorial}
-              onTutorialTargetLayout={handleTutorialTargetLayout}
-              tutorialSpotlightRequest={tutorialSpotlightRequest}
-            />
-          </View>
+          <MemoSettingsStack
+            resetToRootToken={settingsResetToken}
+            scrollToTopToken={settingsScrollTopToken}
+            onOpenRecurringEditor={openRecurringEditor}
+            onOpenProPaywall={() => openProPaywall('settings')}
+            onScreenChange={setSettingsCurrentScreen}
+            onStartTutorial={startGuidedTutorial}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+          />
         </MountedTab>
       </View>
 

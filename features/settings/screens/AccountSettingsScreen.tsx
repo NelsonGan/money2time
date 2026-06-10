@@ -8,6 +8,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -26,6 +27,7 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
   const { isSimpleMode, settings, switchToSimpleMode, switchToPowerMode, updateSettings } =
     useApp();
   const themeColors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset();
   const currentMode: UserModeValue = isSimpleMode ? 'simple' : 'power';
 
   const handleModeToggle = useCallback(
@@ -88,7 +90,7 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
         />
       </View>
 
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.cardList}>
           <View
             className="rounded-2xl border border-border/30 bg-card shadow-soft"

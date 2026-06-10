@@ -12,7 +12,12 @@ import {
   WalletIcon,
 } from '~/components/icons/NavIcons';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
-import { isLiquidGlassNavEnabled } from '~/components/navigation/liquidGlass';
+import {
+  getGlassNavBottomGap,
+  getGlassNavReservedInset,
+  GLASS_NAV_HEIGHT,
+  isLiquidGlassNavEnabled,
+} from '~/components/navigation/liquidGlass';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import type { TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -45,10 +50,8 @@ const TABS: { name: TabName; icon: NavIconComponent }[] = [
 const NAV_ROW_HEIGHT = 58;
 const ICON_SIZE = 26;
 
-const GLASS_NAV_HEIGHT = 62;
 const GLASS_NAV_MARGIN_H = 20;
 const GLASS_NAV_MAX_WIDTH = 520;
-const GLASS_NAV_CLEARANCE = 10;
 // How far the bar shrinks/sinks when minimized on scroll.
 const GLASS_MINIMIZE_SCALE = 0.88;
 const GLASS_MINIMIZE_TRANSLATE_Y = 12;
@@ -58,13 +61,9 @@ export function getBottomNavSafePadding(safeBottom: number) {
   return Platform.OS === 'ios' ? Math.max(safeBottom - 12, 8) : Math.max(safeBottom, 10);
 }
 
-function getGlassNavBottomGap(safeBottom: number) {
-  return Math.max(safeBottom - 12, 12);
-}
-
 export function getBottomNavReservedInset(safeBottom: number) {
   if (isLiquidGlassNavEnabled()) {
-    return getGlassNavBottomGap(safeBottom) + GLASS_NAV_HEIGHT + GLASS_NAV_CLEARANCE;
+    return getGlassNavReservedInset(safeBottom);
   }
   return NAV_ROW_HEIGHT + getBottomNavSafePadding(safeBottom);
 }
@@ -152,15 +151,7 @@ const NavItem = memo(function NavItem({
   );
 });
 
-/**
- * Extra bottom padding a tab screen's scroll content needs so it isn't hidden
- * behind the floating glass bar. Zero in fallback mode, where the bar sits in
- * normal layout flow below the content.
- */
-export function useBottomNavContentInset() {
-  const { bottom: safeBottom } = useSafeAreaInsets();
-  return isLiquidGlassNavEnabled() ? getBottomNavReservedInset(safeBottom) : 0;
-}
+export { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 
 export function BottomNav({
   activeTab,

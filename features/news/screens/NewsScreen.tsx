@@ -8,6 +8,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -36,6 +37,7 @@ function formatAnnouncementDate(dateString: string): string {
 
 export function NewsScreen({ onBack }: NewsScreenProps) {
   const colors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset();
   const announcements = useMemo(() => getFeatureAnnouncementsNewestFirst(), []);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<FeatureAnnouncement | null>(
     null,
@@ -48,7 +50,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
         title={I18n.t('settings.news')}
         subtitle={I18n.t('settings.news_subtitle')}
       />
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <View style={styles.list}>
             {announcements.map((announcement) => (

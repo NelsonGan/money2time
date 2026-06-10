@@ -45,6 +45,7 @@ import {
   Text,
   ThemeModal,
   TimeValueInline,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
@@ -1154,6 +1155,7 @@ export function AccountsScreen({
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
+  const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { contentWidth: windowWidth } = useDeviceLayout();
   const accountRowThemeColors = useMemo(
     () => ({
@@ -2272,7 +2274,7 @@ export function AccountsScreen({
 
             <ScrollView
               className="flex-1"
-              contentContainerStyle={ACCOUNT_BULK_SCROLL_CONTENT_STYLE}
+              contentContainerStyle={[ACCOUNT_BULK_SCROLL_CONTENT_STYLE, listNavInset]}
             >
               <View className="gap-2.5">
                 <Text variant="caption" tone="muted">
@@ -2415,7 +2417,7 @@ export function AccountsScreen({
               style={styles.flexContainer}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE}
+              contentContainerStyle={[ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE, listNavInset]}
             >
               <Sortable.Flex
                 activeItemScale={1.02}
@@ -2447,7 +2449,7 @@ export function AccountsScreen({
         <Animated.ScrollView
           ref={managementAccountsScrollRef}
           style={styles.flexContainer}
-          contentContainerStyle={ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE}
+          contentContainerStyle={[ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE, listNavInset]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
