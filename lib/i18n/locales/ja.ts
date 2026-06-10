@@ -902,6 +902,8 @@ const ja = {
       add_title: '取引を追加',
       add_body:
         '+ をタップして「Uber 30」のように入力するだけ — 金額・カテゴリ・口座を自動で入力します。',
+      tabs_title: '画面を移動',
+      tabs_body: 'これらのタブで、アクティビティ・カレンダー・分析・設定を切り替えられます。',
       insights_title: '分析の種類',
       insights_body: 'これを開いて異なる分析・解析ビューに切り替えます。',
       management_title: 'データ管理',

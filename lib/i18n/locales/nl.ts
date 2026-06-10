@@ -930,6 +930,9 @@ const nl = {
       add_title: 'Transactie toevoegen',
       add_body:
         'Tik op + en typ gewoon iets als "Uber 30" — we vullen het bedrag, de categorie en de rekening voor je in.',
+      tabs_title: 'Navigeren',
+      tabs_body:
+        'Gebruik deze tabbladen om te wisselen tussen activiteit, agenda, inzichten en instellingen.',
       insights_title: 'Type inzicht',
       insights_body: 'Open dit om te schakelen tussen verschillende inzicht- en analyseweergaven.',
       management_title: 'Gegevensbeheer',

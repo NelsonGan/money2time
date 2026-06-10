@@ -1,5 +1,7 @@
 type OpenTransactionsRequest = {
   monthKey: string | null;
+  /** Day (YYYY-MM-DD) to scroll to within the focused month, if any. */
+  dayKey?: string | null;
 };
 
 type Listener = (request: OpenTransactionsRequest) => void;

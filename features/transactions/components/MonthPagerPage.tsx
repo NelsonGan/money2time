@@ -12,6 +12,7 @@ import {
 } from './ActivityTransactionList';
 
 type ScrollToTopHandler = (() => void) | null;
+type ScrollToDayHandler = ((dayKey: string) => void) | null;
 
 interface MonthPagerPageProps {
   item: number;
@@ -29,6 +30,7 @@ interface MonthPagerPageProps {
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
+  getScrollToDayRef?: (index: number) => MutableRefObject<ScrollToDayHandler>;
   contentPaddingHorizontal?: number;
 }
 
@@ -50,6 +52,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   selectedTransactionIds = [],
   selectionMode = false,
   getScrollToTopRef,
+  getScrollToDayRef,
   contentPaddingHorizontal,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
@@ -81,6 +84,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         compactItems
         listKey={`${pageMonthKey}-${localeKey}`}
         scrollToTopRef={getScrollToTopRef(item)}
+        scrollToDayRef={getScrollToDayRef?.(item)}
       />
     </View>
   );

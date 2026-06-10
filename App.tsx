@@ -14,6 +14,7 @@ import {
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -24,19 +25,20 @@ import {
   StyleSheet,
   Text as RNText,
   TextInput as RNTextInput,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import TabView, { type AppleIcon, BottomTabBarHeightContext } from 'react-native-bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
-import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
+import {
+  BottomNavMinimizeProvider,
+  useBottomNavMinimize,
+} from '~/components/navigation/BottomNavMinimize';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
@@ -75,7 +77,6 @@ import type {
   TutorialTargetRect,
 } from '~/features/tutorial/types';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -115,6 +116,7 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
+const MAIN_TAB_ORDER: MainTab[] = ['home', 'accounts', 'calendar', 'insights', 'settings'];
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -126,6 +128,10 @@ type ActivityInsightPeriodPreset = 'week' | 'month' | 'year' | 'custom';
 type FontScalingNativeComponent = {
   defaultProps?: Record<string, unknown>;
 };
+
+// Hold the native splash until the first page is fully ready (fonts + data +
+// theme), so no intermediate loading UI flashes before real content paints.
+void SplashScreen.preventAutoHideAsync();
 
 function disableDynamicType(component: FontScalingNativeComponent) {
   component.defaultProps = {
@@ -172,6 +178,13 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
     mascot: 'excited',
   },
   {
+    tab: 'home',
+    targetId: 'nav.tabs',
+    titleKey: 'tutorial.coach_steps.tabs_title',
+    bodyKey: 'tutorial.coach_steps.tabs_body',
+    mascot: 'happy',
+  },
+  {
     tab: 'insights',
     targetId: 'insights.type_selector',
     titleKey: 'tutorial.coach_steps.insights_title',
@@ -207,32 +220,6 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
     mascot: 'celebrate',
   },
 ];
-
-// iOS renders the real UITabBarController via react-native-bottom-tabs:
-// standard translucent UITabBar on iOS < 26, Liquid Glass with the system
-// minimize-on-scroll behavior on iOS 26+. Android keeps the original custom
-// flow-layout bar.
-const USE_NATIVE_TABS = Platform.OS === 'ios';
-
-interface ShellTabRoute {
-  key: MainTab;
-  title: string;
-  focusedIcon: AppleIcon;
-  hidden?: boolean;
-}
-
-/**
- * Bridges the native tab bar's measured height (only available via context
- * inside TabView scenes) up to the shell, which needs it to synthesize
- * tutorial coachmark rects over the native bar.
- */
-function NativeTabBarHeightReporter({ onHeight }: { onHeight: (height: number) => void }) {
-  const height = React.useContext(BottomTabBarHeightContext) ?? 0;
-  useEffect(() => {
-    if (height > 0) onHeight(height);
-  }, [height, onHeight]);
-  return null;
-}
 
 const MemoTransactionsScreen = React.memo(TransactionsScreen);
 const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
@@ -332,10 +319,7 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs, settings } = useApp();
-  const themeColors = useThemeColors();
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const [nativeTabBarHeight, setNativeTabBarHeight] = useState(0);
+  const { isSimpleMode, quickEntryPrefs } = useApp();
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
@@ -385,6 +369,7 @@ function MainShellScreen({
   const [calendarResetToken, setCalendarResetToken] = useState(0);
   const [transactionsTutorialResetToken, setTransactionsTutorialResetToken] = useState(0);
   const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
+  const [transactionsFocusDayKey, setTransactionsFocusDayKey] = useState<string | null>(null);
   const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
@@ -444,15 +429,16 @@ function MainShellScreen({
     });
   }, [navigation]);
 
-  const jumpTransactionsToMonth = useCallback((monthKey: string) => {
+  const jumpTransactionsToMonth = useCallback((monthKey: string, dayKey: string | null = null) => {
     setTransactionsFocusMonthKey(monthKey);
+    setTransactionsFocusDayKey(dayKey);
     setTransactionsFocusMonthToken((prev) => prev + 1);
   }, []);
 
   useEffect(() => {
-    return subscribeOpenTransactionsRequest(({ monthKey }) => {
+    return subscribeOpenTransactionsRequest(({ monthKey, dayKey }) => {
       setActiveTab('home');
-      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()));
+      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()), dayKey ?? null);
     });
   }, [jumpTransactionsToMonth]);
 
@@ -542,8 +528,22 @@ function MainShellScreen({
     (activeTab === 'home' && isTransactionsSelectionMode) ||
     (activeTab === 'calendar' && isCalendarSelectionMode);
 
+  const { resetMinimize } = useBottomNavMinimize();
+
+  // Restore the minimized glass bar when navigating within the settings stack,
+  // matching the restore on tab change — otherwise a short sub-screen with no
+  // scrollable would leave the bar stuck minimized.
+  const handleSettingsScreenChange = useCallback(
+    (screen: string) => {
+      resetMinimize();
+      setSettingsCurrentScreen(screen);
+    },
+    [resetMinimize],
+  );
+
   const handleTabChange = useCallback(
     (tab: TabName) => {
+      resetMinimize();
       if (tab === 'home' && activeTab === 'home') {
         jumpTransactionsToMonth(monthKeyFromDateLocal(new Date()));
         setTransactionsScrollTopToken((prev) => prev + 1);
@@ -568,55 +568,7 @@ function MainShellScreen({
       }
       setActiveTab(tab);
     },
-    [activeTab, jumpTransactionsToMonth],
-  );
-
-  const nativeTabRoutes = useMemo<ShellTabRoute[]>(
-    () => [
-      { key: 'home', title: String(I18n.t('nav.home')), focusedIcon: { sfSymbol: 'house' } },
-      {
-        key: 'accounts',
-        title: String(I18n.t('nav.account')),
-        focusedIcon: { sfSymbol: 'wallet.pass' },
-        hidden: isSimpleMode,
-      },
-      {
-        key: 'calendar',
-        title: String(I18n.t('nav.calendar')),
-        focusedIcon: { sfSymbol: 'calendar' },
-      },
-      {
-        key: 'insights',
-        title: String(I18n.t('nav.insights')),
-        focusedIcon: { sfSymbol: 'clock' },
-      },
-      {
-        key: 'settings',
-        title: String(I18n.t('nav.settings')),
-        focusedIcon: { sfSymbol: 'gearshape' },
-      },
-    ],
-    [isSimpleMode],
-  );
-
-  const nativeTabIndex = Math.max(
-    nativeTabRoutes.findIndex((route) => route.key === activeTab),
-    0,
-  );
-
-  const handleNativeTabIndexChange = useCallback(
-    (index: number) => {
-      const route = nativeTabRoutes[index];
-      if (route) handleTabChange(route.key);
-    },
-    [handleTabChange, nativeTabRoutes],
-  );
-
-  // Scenes lazy-mount on first focus unless the shell has already flagged them
-  // for background preload (same staggering MountedTab uses on Android).
-  const getNativeTabLazy = useCallback(
-    ({ route }: { route: ShellTabRoute }) => !preloadedTabs.has(route.key),
-    [preloadedTabs],
+    [activeTab, jumpTransactionsToMonth, resetMinimize],
   );
 
   useEffect(() => {
@@ -777,11 +729,32 @@ function MainShellScreen({
   const currentGuidedStep = isGuidedTutorialActive
     ? (GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex] ?? null)
     : null;
+  // The whole bottom nav bar, derived as the bounding box of the per-tab rects
+  // the BottomNav reports. This adapts to whichever nav layout is active
+  // (floating liquid-glass pill vs. classic bar) without measuring it directly.
+  const navTabsBoundingRect = useMemo<TutorialTargetRect | null>(() => {
+    const visibleTabs = isSimpleMode
+      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts')
+      : MAIN_TAB_ORDER;
+    const rects = visibleTabs
+      .map((tab) => tutorialNavTabRects[tab])
+      .filter((rect): rect is TutorialTargetRect => rect != null);
+    if (rects.length === 0) return null;
+    const minX = Math.min(...rects.map((rect) => rect.x));
+    const minY = Math.min(...rects.map((rect) => rect.y));
+    const maxX = Math.max(...rects.map((rect) => rect.x + rect.width));
+    const maxY = Math.max(...rects.map((rect) => rect.y + rect.height));
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  }, [isSimpleMode, tutorialNavTabRects]);
   const rawGuidedTargetRect = currentGuidedStep
-    ? (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
+    ? currentGuidedStep.targetId === 'nav.tabs'
+      ? navTabsBoundingRect
+      : (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
     : null;
   const rawGuidedTabRect =
-    currentGuidedStep && currentGuidedStep.targetId !== 'nav.add'
+    currentGuidedStep &&
+    currentGuidedStep.targetId !== 'nav.add' &&
+    currentGuidedStep.targetId !== 'nav.tabs'
       ? (tutorialNavTabRects[currentGuidedStep.tab] ?? null)
       : null;
   const currentGuidedTargetRect = useMemo<TutorialTargetRect | null>(() => {
@@ -793,45 +766,17 @@ function MainShellScreen({
     };
   }, [rawGuidedTargetRect, shellWindowOrigin.x, shellWindowOrigin.y]);
   const currentGuidedTabRect = useMemo<TutorialTargetRect | null>(() => {
-    if (rawGuidedTabRect) {
-      return {
-        ...rawGuidedTabRect,
-        x: rawGuidedTabRect.x - shellWindowOrigin.x,
-        y: rawGuidedTabRect.y - shellWindowOrigin.y,
-      };
-    }
-    // Native tab bar items can't be measured from JS, so approximate the
-    // focused tab's slot from the measured bar height and even item widths.
-    if (
-      !USE_NATIVE_TABS ||
-      !currentGuidedStep ||
-      currentGuidedStep.targetId === 'nav.add' ||
-      nativeTabBarHeight <= 0
-    ) {
-      return null;
-    }
-    const visibleRoutes = nativeTabRoutes.filter((route) => !route.hidden);
-    const tabIndex = visibleRoutes.findIndex((route) => route.key === currentGuidedStep.tab);
-    if (tabIndex < 0) return null;
-    const slotWidth = windowWidth / visibleRoutes.length;
+    if (!rawGuidedTabRect) return null;
     return {
-      x: tabIndex * slotWidth,
-      y: windowHeight - nativeTabBarHeight,
-      width: slotWidth,
-      height: nativeTabBarHeight,
+      ...rawGuidedTabRect,
+      x: rawGuidedTabRect.x - shellWindowOrigin.x,
+      y: rawGuidedTabRect.y - shellWindowOrigin.y,
     };
-  }, [
-    currentGuidedStep,
-    nativeTabBarHeight,
-    nativeTabRoutes,
-    rawGuidedTabRect,
-    shellWindowOrigin.x,
-    shellWindowOrigin.y,
-    windowHeight,
-    windowWidth,
-  ]);
+  }, [rawGuidedTabRect, shellWindowOrigin.x, shellWindowOrigin.y]);
   const currentTutorialFocusedTab =
-    isGuidedTutorialActive && currentGuidedStep?.targetId !== 'nav.add'
+    isGuidedTutorialActive &&
+    currentGuidedStep?.targetId !== 'nav.add' &&
+    currentGuidedStep?.targetId !== 'nav.tabs'
       ? (currentGuidedStep?.tab ?? null)
       : null;
   const tutorialSpotlightRequest = useMemo<TutorialSpotlightRequest>(
@@ -842,174 +787,111 @@ function MainShellScreen({
     }),
     [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
   );
-  const homeTabContent = isSimpleMode ? (
-    <MemoSimpleActivityScreen
-      scrollToTopToken={transactionsScrollTopToken}
-      focusMonthKey={transactionsFocusMonthKey}
-      focusMonthToken={transactionsFocusMonthToken}
-      onOpenTransaction={openTransactionEditor}
-      onOpenTransactionSplitBadge={openTransactionSplitBill}
-      onOpenBreakdownInsight={openActivityBreakdownInsight}
-      tutorialResetToken={transactionsTutorialResetToken}
-    />
-  ) : (
-    <MemoTransactionsScreen
-      scrollToTopToken={transactionsScrollTopToken}
-      focusMonthKey={transactionsFocusMonthKey}
-      focusMonthToken={transactionsFocusMonthToken}
-      onOpenTransaction={openTransactionEditor}
-      onOpenTransactionSplitBadge={openTransactionSplitBill}
-      onOpenBreakdownInsight={openActivityBreakdownInsight}
-      onSelectionModeChange={setIsTransactionsSelectionMode}
-      tutorialResetToken={transactionsTutorialResetToken}
-    />
-  );
-  const accountsTabContent = (
-    <MemoAccountsScreen
-      safeAreaEdges={['top']}
-      resetToRootToken={accountsResetToken}
-      scrollToTopToken={accountsScrollTopToken}
-      onOpenAccount={openAccountDetail}
-      onOpenAddTransaction={(accountId) =>
-        navigation.navigate('AddTransaction', { initialAccountId: accountId })
-      }
-      onOpenTransaction={openTransactionEditor}
-      onOpenTransactionSplitBadge={openTransactionSplitBill}
-      onOpenSettings={openAccountSettings}
-      onOpenNetAssetsInsight={() =>
-        openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
-      }
-    />
-  );
-  const calendarTabContent = (
-    <MemoCalendarScreen
-      scrollToTopToken={calendarScrollTopToken}
-      resetToCurrentMonthToken={calendarResetToken}
-      onOpenTransaction={openTransactionEditor}
-      onOpenTransactionSplitBadge={openTransactionSplitBill}
-      onOpenBreakdownInsight={openActivityBreakdownInsight}
-      onSelectionModeChange={setIsCalendarSelectionMode}
-    />
-  );
-  const insightsTabContent = (
-    <MemoInsightsScreen
-      resetToCurrentMonthToken={insightsResetToMonthToken}
-      onOpenDrilldown={openInsightsDrilldown}
-      onOpenTransaction={openTransactionEditor}
-      onOpenProPaywall={() => openProPaywall('insights_trend')}
-      activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-      isSimpleMode={isSimpleMode}
-      onTutorialTargetLayout={handleTutorialTargetLayout}
-      tutorialSpotlightRequest={tutorialSpotlightRequest}
-    />
-  );
-  const settingsTabContent = (
-    <MemoSettingsStack
-      resetToRootToken={settingsResetToken}
-      scrollToTopToken={settingsScrollTopToken}
-      onOpenRecurringEditor={openRecurringEditor}
-      onOpenProPaywall={() => openProPaywall('settings')}
-      onScreenChange={setSettingsCurrentScreen}
-      onStartTutorial={startGuidedTutorial}
-      onTutorialTargetLayout={handleTutorialTargetLayout}
-      tutorialSpotlightRequest={tutorialSpotlightRequest}
-    />
-  );
-  const addFab =
-    activeTab === 'home' && !shouldHideBottomNav ? (
-      <AddFab
-        onPress={openBottomNavPrimaryAction}
-        onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
-        onLongPressEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
-        showVoiceHint={voiceEnabled}
-        accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
-        onTutorialTargetLayout={handleTutorialTargetLayout}
-        tutorialSpotlightRequest={tutorialSpotlightRequest}
-      />
-    ) : null;
-
-  // The FAB lives inside the home scene on iOS so it can read the native tab
-  // bar height from context and float above the bar.
-  const renderNativeTabScene = ({ route }: { route: ShellTabRoute }) => {
-    switch (route.key) {
-      case 'home':
-        return (
-          <View style={styles.flex}>
-            <NativeTabBarHeightReporter onHeight={setNativeTabBarHeight} />
-            {homeTabContent}
-            {addFab}
-          </View>
-        );
-      case 'accounts':
-        return accountsTabContent;
-      case 'calendar':
-        return calendarTabContent;
-      case 'insights':
-        return insightsTabContent;
-      case 'settings':
-        return settingsTabContent;
-      default:
-        return null;
-    }
-  };
-
   return (
     <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
-      {USE_NATIVE_TABS ? (
-        <TabView
-          navigationState={{ index: nativeTabIndex, routes: nativeTabRoutes }}
-          onIndexChange={handleNativeTabIndexChange}
-          renderScene={renderNativeTabScene}
-          getLazy={getNativeTabLazy}
-          tabBarHidden={shouldHideBottomNav}
-          minimizeBehavior="onScrollDown"
-          hapticFeedbackEnabled={settings.hapticsEnabled}
-          tabBarActiveTintColor={themeColors.primary}
-          tabBarInactiveTintColor={themeColors.textMuted}
-        />
-      ) : (
-        <>
-          <View style={styles.flex}>
-            <MountedTab active={activeTab === 'home'}>{homeTabContent}</MountedTab>
-            <MountedTab
-              active={activeTab === 'accounts'}
-              shouldPreload={preloadedTabs.has('accounts')}
-            >
-              {accountsTabContent}
-            </MountedTab>
-            <MountedTab
-              active={activeTab === 'calendar'}
-              shouldPreload={preloadedTabs.has('calendar')}
-            >
-              {calendarTabContent}
-            </MountedTab>
-            <MountedTab
-              active={activeTab === 'insights'}
-              shouldPreload={preloadedTabs.has('insights')}
-            >
-              {insightsTabContent}
-            </MountedTab>
-            <MountedTab
-              active={activeTab === 'settings'}
-              shouldPreload={preloadedTabs.has('settings')}
-            >
-              {settingsTabContent}
-            </MountedTab>
-          </View>
+      <View style={styles.flex}>
+        <MountedTab active={activeTab === 'home'}>
+          {isSimpleMode ? (
+            <MemoSimpleActivityScreen
+              scrollToTopToken={transactionsScrollTopToken}
+              focusMonthKey={transactionsFocusMonthKey}
+              focusDayKey={transactionsFocusDayKey}
+              focusMonthToken={transactionsFocusMonthToken}
+              onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
+              onOpenBreakdownInsight={openActivityBreakdownInsight}
+              tutorialResetToken={transactionsTutorialResetToken}
+            />
+          ) : (
+            <MemoTransactionsScreen
+              scrollToTopToken={transactionsScrollTopToken}
+              focusMonthKey={transactionsFocusMonthKey}
+              focusDayKey={transactionsFocusDayKey}
+              focusMonthToken={transactionsFocusMonthToken}
+              onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
+              onOpenBreakdownInsight={openActivityBreakdownInsight}
+              onSelectionModeChange={setIsTransactionsSelectionMode}
+              tutorialResetToken={transactionsTutorialResetToken}
+            />
+          )}
+        </MountedTab>
+        <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
+          <MemoAccountsScreen
+            safeAreaEdges={['top']}
+            resetToRootToken={accountsResetToken}
+            scrollToTopToken={accountsScrollTopToken}
+            onOpenAccount={openAccountDetail}
+            onOpenAddTransaction={(accountId) =>
+              navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId })
+            }
+            onOpenTransaction={openTransactionEditor}
+            onOpenTransactionSplitBadge={openTransactionSplitBill}
+            onOpenSettings={openAccountSettings}
+            onOpenNetAssetsInsight={() =>
+              openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
+            }
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'calendar'} shouldPreload={preloadedTabs.has('calendar')}>
+          <MemoCalendarScreen
+            scrollToTopToken={calendarScrollTopToken}
+            resetToCurrentMonthToken={calendarResetToken}
+            onOpenTransaction={openTransactionEditor}
+            onOpenTransactionSplitBadge={openTransactionSplitBill}
+            onOpenBreakdownInsight={openActivityBreakdownInsight}
+            onSelectionModeChange={setIsCalendarSelectionMode}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
+          <MemoInsightsScreen
+            resetToCurrentMonthToken={insightsResetToMonthToken}
+            onOpenDrilldown={openInsightsDrilldown}
+            onOpenTransaction={openTransactionEditor}
+            onOpenProPaywall={() => openProPaywall('insights_trend')}
+            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
+            isSimpleMode={isSimpleMode}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+          />
+        </MountedTab>
+        <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
+          <MemoSettingsStack
+            resetToRootToken={settingsResetToken}
+            scrollToTopToken={settingsScrollTopToken}
+            onOpenRecurringEditor={openRecurringEditor}
+            onOpenProPaywall={() => openProPaywall('settings')}
+            onScreenChange={handleSettingsScreenChange}
+            onStartTutorial={startGuidedTutorial}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+          />
+        </MountedTab>
+      </View>
 
-          {!shouldHideBottomNav ? (
-            <BottomNav
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              hideTabs={isSimpleMode ? ['accounts'] : undefined}
-              onTutorialTabLayout={handleTutorialTabLayout}
-              tutorialFocusedTab={currentTutorialFocusedTab}
-              tutorialMeasureToken={tutorialSpotlightRequest.token}
+      {!shouldHideBottomNav ? (
+        <>
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            hideTabs={isSimpleMode ? ['accounts'] : undefined}
+            onTutorialTabLayout={handleTutorialTabLayout}
+            tutorialFocusedTab={currentTutorialFocusedTab}
+            tutorialMeasureToken={tutorialSpotlightRequest.token}
+          />
+          {activeTab === 'home' ? (
+            <AddFab
+              onPress={openBottomNavPrimaryAction}
+              onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
+              onLongPressEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
+              showVoiceHint={voiceEnabled}
+              accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
+              onTutorialTargetLayout={handleTutorialTargetLayout}
+              tutorialSpotlightRequest={tutorialSpotlightRequest}
             />
           ) : null}
-          {addFab}
         </>
-      )}
+      ) : null}
 
       {voiceEnabled ? (
         <VoiceQuickAddOverlay
@@ -1060,7 +942,10 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
       <AddTransactionScreen
         onClose={() => navigation.goBack()}
         onSubmitReady={(input) => {
-          requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+          requestOpenTransactions({
+            monthKey: monthKeyFromIsoLocal(input.date),
+            dayKey: dayKeyFromIsoLocal(input.date),
+          });
         }}
         isSimpleMode={isSimpleMode}
         simpleWalletId={simpleWalletId}
@@ -1073,7 +958,10 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
     <QuickAddScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+        requestOpenTransactions({
+          monthKey: monthKeyFromIsoLocal(input.date),
+          dayKey: dayKeyFromIsoLocal(input.date),
+        });
       }}
       onExpandToDetailed={(initialValues, initialAccountId) => {
         navigation.replace('AddTransactionDetailed', {
@@ -1099,7 +987,10 @@ function AddTransactionDetailedRouteScreen({
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        requestOpenTransactions({ monthKey: monthKeyFromIsoLocal(input.date) });
+        requestOpenTransactions({
+          monthKey: monthKeyFromIsoLocal(input.date),
+          dayKey: dayKeyFromIsoLocal(input.date),
+        });
       }}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
@@ -1173,7 +1064,7 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       accountId={route.params.accountId}
       useNativeBackGesture
       onOpenAddTransaction={(accountId) =>
-        navigation.push('AddTransaction', { initialAccountId: accountId })
+        navigation.push('AddTransactionDetailed', { initialAccountId: accountId })
       }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', {
@@ -1479,6 +1370,12 @@ function AppContent() {
     };
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
 
+  const handleContentLayout = useCallback(() => {
+    // First real page has laid out — hide the native splash now so the
+    // transition goes straight from splash to content with no flash.
+    void SplashScreen.hideAsync();
+  }, []);
+
   const handleOnboardingComplete = useCallback(() => {
     setTutorialStartToken(0);
     InteractionManager.runAfterInteractions(() => {
@@ -1504,32 +1401,22 @@ function AppContent() {
     }
   }, [featureAnnouncement?.id, settings.appUserId]);
 
+  // Keep the native splash up while data loads — render nothing so no
+  // intermediate UI flashes before the first page is ready.
   if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background" style={themeStyle}>
-        <View className="items-center rounded-[28px] border border-border/40 bg-card px-8 py-8 shadow-soft">
-          <Mascot size={130} mood="sleepy" animate />
-          <Text variant="friendly" tone="muted" className="mt-4">
-            {I18n.t('app.loading_world')}
-          </Text>
-        </View>
-        <View className="mt-4">
-          <LoadingDots size="large" />
-        </View>
-      </View>
-    );
+    return null;
   }
 
   if (!settings.onboardingCompleted) {
     return (
-      <View style={[styles.flex, themeStyle]}>
+      <View style={[styles.flex, themeStyle]} onLayout={handleContentLayout}>
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background" style={themeStyle}>
+    <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <WidgetSnapshotSync />
       <NavigationContainer
@@ -1544,11 +1431,13 @@ function AppContent() {
         >
           <RootStack.Screen name="Main">
             {(props) => (
-              <MainShellScreen
-                navigation={props.navigation}
-                onVisibleScreenChange={setMainShellCurrentScreen}
-                tutorialStartToken={tutorialStartToken}
-              />
+              <BottomNavMinimizeProvider>
+                <MainShellScreen
+                  navigation={props.navigation}
+                  onVisibleScreenChange={setMainShellCurrentScreen}
+                  tutorialStartToken={tutorialStartToken}
+                />
+              </BottomNavMinimizeProvider>
             )}
           </RootStack.Screen>
           <RootStack.Screen
@@ -1628,7 +1517,7 @@ function AppContent() {
 
 export default function App() {
   const shouldLoadCustomFonts = Platform.OS !== 'ios';
-  const [fontsLoaded] = useFonts(
+  const [fontsLoaded, fontError] = useFonts(
     shouldLoadCustomFonts
       ? {
           WorkSans_400Regular,
@@ -1641,7 +1530,9 @@ export default function App() {
       : {},
   );
 
-  if (shouldLoadCustomFonts && !fontsLoaded) {
+  // Splash stays up (prevented from auto-hiding) while fonts resolve, so this
+  // null render is never visible. Proceed on error so we can't get stuck.
+  if (shouldLoadCustomFonts && !fontsLoaded && !fontError) {
     return null;
   }
 

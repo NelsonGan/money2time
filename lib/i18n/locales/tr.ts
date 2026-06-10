@@ -920,6 +920,8 @@ const tr = {
       add_title: 'İşlem ekle',
       add_body:
         '+ düğmesine dokunun ve "Uber 30" gibi bir şey yazın — tutar, kategori ve hesabı sizin için dolduracağız.',
+      tabs_title: 'Gezinme',
+      tabs_body: 'Bu sekmelerle etkinlik, takvim, analizler ve ayarlar arasında geçiş yapın.',
       insights_title: 'Analiz türü',
       insights_body: 'Farklı analiz ve inceleme görünümleri arasında geçiş yapmak için bunu açın.',
       management_title: 'Veri Yönetimi',

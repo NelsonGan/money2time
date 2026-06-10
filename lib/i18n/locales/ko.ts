@@ -896,6 +896,8 @@ const ko = {
     coach_steps: {
       add_title: '거래 추가',
       add_body: '+를 탭하고 "우버 30" 같이 입력하면 금액, 카테고리, 계좌가 자동으로 채워집니다.',
+      tabs_title: '둘러보기',
+      tabs_body: '이 탭으로 활동, 캘린더, 인사이트, 설정 사이를 이동하세요.',
       insights_title: '분석 유형',
       insights_body: '다른 분석 및 분석 보기로 전환하려면 여기를 여세요.',
       management_title: '데이터 관리',

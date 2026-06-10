@@ -932,6 +932,9 @@ const fil = {
       add_title: 'Magdagdag ng transaksyon',
       add_body:
         'Pindutin ang + at mag-type ng tulad ng "Grab 30" — pupunan namin ang halaga, kategorya, at account para sa iyo.',
+      tabs_title: 'Maghanap-hanap',
+      tabs_body:
+        'Gamitin ang mga tab na ito para lumipat sa pagitan ng aktibidad, kalendaryo, insights, at mga setting.',
       insights_title: 'Uri ng insight',
       insights_body: "Buksan ito para lumipat sa iba't ibang insights at analysis view.",
       management_title: 'Data Management',

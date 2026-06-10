@@ -905,6 +905,8 @@ const vi = {
       add_title: 'Thêm giao dịch',
       add_body:
         'Nhấn + và nhập thứ như "Grab 30" — chúng tôi sẽ tự điền số tiền, danh mục và tài khoản.',
+      tabs_title: 'Điều hướng',
+      tabs_body: 'Dùng các thẻ này để chuyển giữa hoạt động, lịch, thống kê và cài đặt.',
       insights_title: 'Loại phân tích',
       insights_body: 'Mở mục này để chuyển đổi giữa các chế độ phân tích khác nhau.',
       management_title: 'Quản lý dữ liệu',

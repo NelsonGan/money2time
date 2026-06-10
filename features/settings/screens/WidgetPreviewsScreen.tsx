@@ -329,14 +329,11 @@ function SavingsHistoryWidgetPreview({ data }: { data: SavingsHistorySnapshot })
           <View style={styles.headerRow}>
             <WordmarkBanner />
             <View style={styles.headerRight}>
-              <Text variant="label" tone="muted" style={styles.eyebrow}>
-                Saved · 6 mo
-              </Text>
               <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
                 {data.totalSavedLabel}
               </Text>
               <Text variant="caption" tone="muted" numberOfLines={1}>
-                Avg rate {data.averageRateLabel}
+                {data.averageRateLabel}
               </Text>
             </View>
           </View>

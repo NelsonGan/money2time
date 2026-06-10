@@ -1199,7 +1199,7 @@ public class Money2TimeSavingsHistoryWidgetProvider extends AppWidgetProvider {
       views.setTextColor(
         R.id.hist_total,
         totalPositive ? Color.parseColor("#1E9468") : Color.parseColor("#D45F57"));
-      views.setTextViewText(R.id.hist_avg, "Avg rate " + sh.optString("averageRateLabel", "—"));
+      views.setTextViewText(R.id.hist_avg, sh.optString("averageRateLabel", "—"));
 
       JSONArray months = sh.getJSONArray("months");
       for (int i = 0; i < MONTH_IDS.length; i++) {
@@ -2246,30 +2246,22 @@ ${calRows}
         android:gravity="end"
         android:orientation="vertical">
         <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:letterSpacing="0.12"
-          android:text="SAVED · 6 MO"
-          android:textColor="#94A39F"
-          android:textSize="10sp"
-          android:textStyle="bold" />
-        <TextView
           android:id="@+id/hist_total"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:maxLines="1"
           android:text="$2.4K"
           android:textColor="#1E9468"
-          android:textSize="22sp"
+          android:textSize="24sp"
           android:textStyle="bold" />
         <TextView
           android:id="@+id/hist_avg"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:maxLines="1"
-          android:text="Avg rate 35%"
+          android:text="35%"
           android:textColor="#94A39F"
-          android:textSize="12sp"
+          android:textSize="13sp"
           android:textStyle="bold" />
       </LinearLayout>
     </LinearLayout>
@@ -3351,16 +3343,12 @@ private struct SavingsHistoryView: View {
         Wordmark()
         Spacer()
         VStack(alignment: .trailing, spacing: 0) {
-          Text("SAVED · 6 MO")
-            .font(.system(size: 10, weight: .heavy))
-            .tracking(1.4)
-            .foregroundStyle(palette.textMuted)
           Text(data.totalSavedLabel)
-            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .font(.system(size: 24, weight: .bold, design: .rounded))
             .foregroundStyle(totalColor)
             .lineLimit(1)
-          Text("Avg rate \\(data.averageRateLabel)")
-            .font(.system(size: 12, weight: .semibold, design: .rounded))
+          Text(data.averageRateLabel)
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
             .foregroundStyle(palette.textMuted)
             .lineLimit(1)
         }
