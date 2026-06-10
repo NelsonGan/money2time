@@ -919,6 +919,8 @@ const ms = {
       add_title: 'Tambah transaksi',
       add_body:
         'Ketik + dan taip seperti "Grab 30" — kami akan isi jumlah, kategori, dan akaun untuk anda.',
+      tabs_title: 'Cari arah',
+      tabs_body: 'Gunakan tab ini untuk beralih antara aktiviti, kalendar, cerapan dan tetapan.',
       insights_title: 'Jenis analitik',
       insights_body: 'Buka ini untuk tukar antara paparan analitik dan analisis berbeza.',
       management_title: 'Pengurusan Data',

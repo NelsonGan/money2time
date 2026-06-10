@@ -926,6 +926,9 @@ const fr = {
       add_title: 'Ajouter une transaction',
       add_body:
         'Appuyez sur + et tapez quelque chose comme « Uber 30 » — nous remplirons le montant, la catégorie et le compte pour vous.',
+      tabs_title: 'Naviguer',
+      tabs_body:
+        'Utilise ces onglets pour passer de l’activité au calendrier, aux analyses et aux réglages.',
       insights_title: "Type d'analyse",
       insights_body: "Ouvrez ceci pour basculer entre différentes vues d'analyses.",
       management_title: 'Gestion des données',

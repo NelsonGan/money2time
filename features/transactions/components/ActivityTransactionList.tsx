@@ -4,7 +4,10 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { useBottomNavContentInset } from '~/components/navigation/bottomNavInset';
+import {
+  useBottomNavContentInset,
+  useBottomNavScrollReporter,
+} from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
@@ -57,11 +60,13 @@ interface ActivityTransactionListProps {
   disableVirtualization?: boolean;
   groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
+  /** Scrolls the list to a given day's section header (YYYY-MM-DD). */
+  scrollToDayRef?: React.MutableRefObject<((dayKey: string) => void) | null>;
   locale?: string;
   /**
-   * Set when this list is a tab screen's main scrollable that extends under
-   * the translucent native tab bar (iOS): adds the bar's height to the bottom
-   * padding. No-op on Android and outside the tab shell.
+   * Set when this list is a tab screen's main scrollable behind the floating
+   * liquid-glass nav bar: adds the bar's reserved inset to the bottom padding
+   * and reports scroll so the bar can minimize. No-op in fallback mode.
    */
   extendUnderBottomNav?: boolean;
 }
@@ -226,12 +231,17 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   disableVirtualization = false,
   groupByDate = true,
   scrollToTopRef,
+  scrollToDayRef,
   locale = I18n.locale ?? 'en',
   extendUnderBottomNav = false,
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const bottomNavInset = useBottomNavContentInset();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
+  const navScrollProps = extendUnderBottomNav
+    ? ({ onScroll: reportBottomNavScroll, scrollEventThrottle: 32 } as const)
+    : undefined;
   const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
@@ -396,6 +406,22 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [disableVirtualization, scrollToTopRef]);
 
+  useEffect(() => {
+    if (!scrollToDayRef) return;
+    scrollToDayRef.current = (dayKey: string) => {
+      const index = rows.findIndex((row) => row.kind === 'header' && row.id === `header-${dayKey}`);
+      if (index < 0) {
+        // The day has no transactions in this month — fall back to the top.
+        flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        return;
+      }
+      flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
+    };
+    return () => {
+      scrollToDayRef.current = null;
+    };
+  }, [rows, scrollToDayRef]);
+
   if (disableVirtualization) {
     return (
       <ScrollView
@@ -405,6 +431,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
+        {...navScrollProps}
       >
         {listHeader}
         {rows.length === 0
@@ -433,6 +460,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}
+      {...navScrollProps}
     />
   );
 });

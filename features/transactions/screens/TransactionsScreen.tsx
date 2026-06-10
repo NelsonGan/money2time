@@ -41,7 +41,10 @@ import {
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useFocusMonthNavigation } from '~/hooks/useFocusMonthNavigation';
-import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
+import {
+  useIndexedHandlerRefs,
+  useIndexedScrollToTopRefs,
+} from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useScrollToTopTokenNavigation } from '~/hooks/useScrollToTopTokenNavigation';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -234,6 +237,7 @@ interface TransactionsScreenProps {
   scrollToTopToken?: number;
   focusMonthKey?: string | null;
   focusMonthToken?: number;
+  focusDayKey?: string | null;
   tutorialResetToken?: number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
@@ -245,6 +249,7 @@ export function TransactionsScreen({
   scrollToTopToken = 0,
   focusMonthKey = null,
   focusMonthToken = 0,
+  focusDayKey = null,
   tutorialResetToken = 0,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
@@ -329,6 +334,7 @@ export function TransactionsScreen({
     initialIndex: MONTH_PAGER_CENTER_INDEX,
   });
   const getPageScrollToTopRef = useIndexedScrollToTopRefs();
+  const getPageScrollToDayRef = useIndexedHandlerRefs<(dayKey: string) => void>();
   const activeMonthDate = useMemo(
     () => addMonthsAtMonthStart(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
     [activeMonthIndex, monthPagerAnchorDate],
@@ -441,12 +447,14 @@ export function TransactionsScreen({
   useFocusMonthNavigation({
     focusMonthToken,
     focusMonthKey,
+    focusDayKey,
     monthPagerAnchorDate,
     centerIndex: MONTH_PAGER_CENTER_INDEX,
     clampIndex: clampMonthIndex,
     setActiveIndex: setActiveMonthIndex,
     listRef: horizontalListRef,
     getScrollToTopRef: getPageScrollToTopRef,
+    getScrollToDayRef: getPageScrollToDayRef,
   });
 
   const monthSummary = useMemo(() => {
@@ -834,12 +842,14 @@ export function TransactionsScreen({
           selectedTransactionIds={selectedTransactionIds}
           selectionMode={isSelectionMode}
           getScrollToTopRef={getPageScrollToTopRef}
+          getScrollToDayRef={getPageScrollToDayRef}
           contentPaddingHorizontal={listHorizontalPadding}
         />
       );
     },
     [
       getPageScrollToTopRef,
+      getPageScrollToDayRef,
       handleTransactionLongPress,
       handleTransactionPress,
       handleTransactionSplitBadgePress,

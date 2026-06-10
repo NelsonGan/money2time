@@ -919,6 +919,9 @@ const da = {
     coach_steps: {
       add_title: 'Tilføj transaktion',
       add_body: 'Tryk + og skriv f.eks. "Uber 30" — vi udfylder beløb, kategori og konto for dig.',
+      tabs_title: 'Find rundt',
+      tabs_body:
+        'Brug disse faner til at skifte mellem aktivitet, kalender, indsigter og indstillinger.',
       insights_title: 'Indsigtstype',
       insights_body: 'Åbn dette for at skifte mellem forskellige indsigts- og analysevisninger.',
       management_title: 'Datastyring',

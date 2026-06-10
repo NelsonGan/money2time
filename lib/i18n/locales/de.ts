@@ -932,6 +932,9 @@ const de = {
       add_title: 'Transaktion hinzufügen',
       add_body:
         'Tippe auf + und gib einfach z. B. "Uber 30" ein – wir tragen Betrag, Kategorie und Konto für dich ein.',
+      tabs_title: 'Navigation',
+      tabs_body:
+        'Mit diesen Tabs wechselst du zwischen Aktivität, Kalender, Auswertungen und Einstellungen.',
       insights_title: 'Einblick-Typ',
       insights_body:
         'Öffne dies, um zwischen verschiedenen Einblicken und Analyseansichten zu wechseln.',
