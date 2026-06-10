@@ -516,6 +516,17 @@ function MainShellScreen({
 
   const { resetMinimize } = useBottomNavMinimize();
 
+  // Restore the minimized glass bar when navigating within the settings stack,
+  // matching the restore on tab change — otherwise a short sub-screen with no
+  // scrollable would leave the bar stuck minimized.
+  const handleSettingsScreenChange = useCallback(
+    (screen: string) => {
+      resetMinimize();
+      setSettingsCurrentScreen(screen);
+    },
+    [resetMinimize],
+  );
+
   const handleTabChange = useCallback(
     (tab: TabName) => {
       resetMinimize();
@@ -811,7 +822,7 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
-            onScreenChange={setSettingsCurrentScreen}
+            onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}

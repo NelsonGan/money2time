@@ -4,8 +4,10 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { useBottomNavContentInset } from '~/components/navigation/BottomNav';
-import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
+import {
+  useBottomNavContentInset,
+  useBottomNavScrollReporter,
+} from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';

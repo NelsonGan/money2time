@@ -151,8 +151,6 @@ const NavItem = memo(function NavItem({
   );
 });
 
-export { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
-
 export function BottomNav({
   activeTab,
   onTabChange,
