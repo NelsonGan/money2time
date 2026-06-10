@@ -8,7 +8,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Text } from '~/components/ui';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
+import { Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -661,6 +662,10 @@ export function AccountCardStack({
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
   const themeColors = useThemeColors();
+  // Base spacing.lg, not the full 100px flow-mode clearance — the glass inset
+  // already covers the bar, so stacking both over-pads the scroll end.
+  const bottomNavInset = useSettingsBottomNavInset(spacing.lg);
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const [expandedAccountId, setExpandedAccountId] = useState<string | null>(null);
 
   const handleToggle = useCallback((accountId: string) => {
@@ -710,8 +715,10 @@ export function AccountCardStack({
   return (
     <ScrollView
       ref={scrollViewRef}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       showsVerticalScrollIndicator={false}
+      onScroll={reportBottomNavScroll}
+      scrollEventThrottle={32}
     >
       {sections.map((section, sectionIndex) => {
         const sectionTotal = normalizeMoneyAmount(
@@ -790,13 +797,15 @@ function AnimatedContainer({
   return <Animated.View style={[styles.stackContainer, animatedStyle]}>{children}</Animated.View>;
 }
 
+const SCROLL_CONTENT_BOTTOM_PADDING = 100;
+
 // ── Styles ─────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: 100,
+    paddingBottom: SCROLL_CONTENT_BOTTOM_PADDING,
   },
   sectionGap: {
     marginTop: spacing.lg,

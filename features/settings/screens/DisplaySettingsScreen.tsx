@@ -12,6 +12,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
@@ -28,6 +29,7 @@ interface DisplaySettingsScreenProps {
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   const { settings, updateSettings } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const currentLocaleSelection = SUPPORTED_LOCALES.includes(
@@ -244,7 +246,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
           subtitle={I18n.t('settings.display_subtitle')}
         />
       </View>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View>
           <Card>
             <CardContent className="py-5 gap-3.5">

@@ -22,6 +22,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -175,6 +176,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const { accounts, categories, settings, isSimpleMode, simpleWalletId, createTransaction } =
     useApp();
   const themeColors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset();
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);
   const [parsed, setParsed] = useState<ParsedStatement | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -459,7 +461,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       >
         <View className="items-center pt-1 pb-4">
           <Mascot size={88} name={isImporting ? 'working' : 'announce'} animate />
@@ -787,6 +789,7 @@ export function StatementImportListScreen({
 }: StatementImportListScreenProps) {
   const { settings } = useApp();
   const themeColors = useThemeColors();
+  const listNavInset = useSettingsBottomNavInset();
   const [excludedSet, setExcludedSet] = useState(() => new Set(initialExcluded));
   const isExpense = section === 'expense';
   const accentColor = isExpense ? themeColors.error : themeColors.success;
@@ -816,7 +819,7 @@ export function StatementImportListScreen({
         title={title}
         subtitle={`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
       />
-      <ScrollView className="flex-1" contentContainerStyle={styles.listContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.listContent, listNavInset]}>
         {indices.map((idx) => {
           const tx = transactions[idx];
           const isSelected = !excludedSet.has(idx);

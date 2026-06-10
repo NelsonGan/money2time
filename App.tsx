@@ -35,6 +35,10 @@ import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
+import {
+  BottomNavMinimizeProvider,
+  useBottomNavMinimize,
+} from '~/components/navigation/BottomNavMinimize';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
@@ -510,8 +514,22 @@ function MainShellScreen({
     (activeTab === 'home' && isTransactionsSelectionMode) ||
     (activeTab === 'calendar' && isCalendarSelectionMode);
 
+  const { resetMinimize } = useBottomNavMinimize();
+
+  // Restore the minimized glass bar when navigating within the settings stack,
+  // matching the restore on tab change — otherwise a short sub-screen with no
+  // scrollable would leave the bar stuck minimized.
+  const handleSettingsScreenChange = useCallback(
+    (screen: string) => {
+      resetMinimize();
+      setSettingsCurrentScreen(screen);
+    },
+    [resetMinimize],
+  );
+
   const handleTabChange = useCallback(
     (tab: TabName) => {
+      resetMinimize();
       if (tab === 'home' && activeTab === 'home') {
         jumpTransactionsToMonth(monthKeyFromDateLocal(new Date()));
         setTransactionsScrollTopToken((prev) => prev + 1);
@@ -536,7 +554,7 @@ function MainShellScreen({
       }
       setActiveTab(tab);
     },
-    [activeTab, jumpTransactionsToMonth],
+    [activeTab, jumpTransactionsToMonth, resetMinimize],
   );
 
   useEffect(() => {
@@ -804,7 +822,7 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
-            onScreenChange={setSettingsCurrentScreen}
+            onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
             tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -1369,11 +1387,13 @@ function AppContent() {
         >
           <RootStack.Screen name="Main">
             {(props) => (
-              <MainShellScreen
-                navigation={props.navigation}
-                onVisibleScreenChange={setMainShellCurrentScreen}
-                tutorialStartToken={tutorialStartToken}
-              />
+              <BottomNavMinimizeProvider>
+                <MainShellScreen
+                  navigation={props.navigation}
+                  onVisibleScreenChange={setMainShellCurrentScreen}
+                  tutorialStartToken={tutorialStartToken}
+                />
+              </BottomNavMinimizeProvider>
             )}
           </RootStack.Screen>
           <RootStack.Screen

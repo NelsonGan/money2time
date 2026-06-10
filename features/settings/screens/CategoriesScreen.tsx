@@ -19,6 +19,7 @@ import {
   SettingsPageLayout,
   Text,
   ThemeModal,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
@@ -558,6 +559,7 @@ export function CategoriesScreen({
   const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
     useApp();
   const { checkLimit } = useProGate();
+  const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const themeColors = useThemeColors();
   const topLevelCategoryCount = useMemo(
     () => categories.filter((c) => !c.parentId).length,
@@ -759,7 +761,7 @@ export function CategoriesScreen({
           <Animated.ScrollView
             ref={subcategoriesScrollRef}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
+            contentContainerStyle={[CATEGORY_LIST_CONTENT_STYLE, bottomNavInset]}
             keyboardShouldPersistTaps="handled"
           >
             <Sortable.Flex
@@ -880,7 +882,7 @@ export function CategoriesScreen({
         <Animated.ScrollView
           ref={topLevelScrollRef}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={CATEGORY_LIST_CONTENT_STYLE}
+          contentContainerStyle={[CATEGORY_LIST_CONTENT_STYLE, bottomNavInset]}
           keyboardShouldPersistTaps="handled"
         >
           <Sortable.Flex

@@ -32,6 +32,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -40,6 +41,7 @@ import {
   SettingsRowItem,
   SettingsSection,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -114,6 +116,8 @@ export function SettingsScreen({
   const { isPro } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
+  const bottomNavInset = useSettingsBottomNavInset();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
   const scrollMeasureFrameRef = useRef<number | null>(null);
@@ -287,10 +291,11 @@ export function SettingsScreen({
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      reportBottomNavScroll(event);
       if (!activeTutorialTargetId) return;
       scheduleTutorialTargetMeasurement(activeTutorialTargetId);
     },
-    [activeTutorialTargetId, scheduleTutorialTargetMeasurement],
+    [activeTutorialTargetId, reportBottomNavScroll, scheduleTutorialTargetMeasurement],
   );
 
   return (
@@ -308,7 +313,7 @@ export function SettingsScreen({
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, bottomNavInset]}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >

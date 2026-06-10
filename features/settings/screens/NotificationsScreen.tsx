@@ -19,6 +19,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -55,6 +56,7 @@ function getDayName(day: number): string {
 
 export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScreenProps) {
   const { notificationPrefs, updateNotificationPrefs } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
 
@@ -130,7 +132,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
 
   return (
     <SettingsPageLayout>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <SettingsHeader
             className="px-0 pt-5 pb-3"

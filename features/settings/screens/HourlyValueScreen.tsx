@@ -12,6 +12,7 @@ import {
   SettingsPageLayout,
   Text,
   ThemeModal,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
@@ -113,6 +114,7 @@ function formatMonthLabel(monthKey: string, locale: string) {
 
 export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
@@ -300,7 +302,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
       <FlatList
         data={historyDesc}
         keyExtractor={keyExtractor}
-        contentContainerStyle={HISTORY_LIST_CONTENT_STYLE}
+        contentContainerStyle={[HISTORY_LIST_CONTENT_STYLE, bottomNavInset]}
         renderItem={renderHistoryItem}
         ListEmptyComponent={
           <View style={styles.listEmptyContainer}>

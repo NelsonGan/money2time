@@ -5,6 +5,7 @@ import { GestureDetector, type GestureType } from 'react-native-gesture-handler'
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -17,6 +18,20 @@ import { Text } from './text';
 export const SETTINGS_HORIZONTAL_PADDING = spacing.screenHorizontal;
 export const SETTINGS_FORM_BOTTOM_PADDING = spacing.formBottom;
 export const SETTINGS_LIST_BOTTOM_PADDING = LIST_BOTTOM_PADDING;
+
+/**
+ * Style-array override that extends a scrollable's bottom padding past the
+ * floating liquid-glass nav bar so content scrolls under it. Returns undefined
+ * (no override) in fallback mode and on screens pushed outside the tab shell.
+ * Append after the static content style: `[styles.scrollContent, navInset]`.
+ */
+export function useSettingsBottomNavInset(basePadding: number = SETTINGS_FORM_BOTTOM_PADDING) {
+  const inset = useBottomNavContentInset();
+  return React.useMemo(
+    () => (inset > 0 ? { paddingBottom: basePadding + inset } : undefined),
+    [basePadding, inset],
+  );
+}
 
 interface SettingsPageLayoutProps extends ViewProps {
   children: React.ReactNode;

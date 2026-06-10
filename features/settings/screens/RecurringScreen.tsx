@@ -12,6 +12,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
@@ -163,6 +164,7 @@ export function RecurringScreen({
   useNativeBackGesture = false,
 }: RecurringScreenProps) {
   const themeColors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { settings, recurringRules, deleteRecurringRule, isSimpleMode, simpleWalletId } = useApp();
   const { checkLimit } = useProGate();
   const allRules = useMemo(() => {
@@ -227,7 +229,7 @@ export function RecurringScreen({
       <FlatList
         data={allRules}
         keyExtractor={keyExtractor}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, bottomNavInset]}
         renderItem={renderRule}
         initialNumToRender={10}
         maxToRenderPerBatch={10}

@@ -9,6 +9,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
@@ -136,6 +137,7 @@ function buildPickerOptions(categories: Category[]): {
 
 export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenProps) {
   const themeColors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset();
   const { accounts, accountGroups, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const expenseCategories = useMemo(
     () => categories.filter((c) => c.type === 'expense'),
@@ -322,7 +324,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
 
   return (
     <SettingsPageLayout>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View className="px-5">
           <SettingsHeader
             className="px-0 pt-5 pb-3"

@@ -8,6 +8,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -46,6 +47,7 @@ function buildDayOptions(): { value: string; label: string }[] {
 
 export function NotificationDetailScreen({ type, onBack }: NotificationDetailScreenProps) {
   const { notificationPrefs, updateNotificationPrefs } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset();
 
   const timeOptions = useMemo(buildTimeOptions, []);
   const dayOptions = useMemo(buildDayOptions, []);
@@ -110,7 +112,7 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
 
   return (
     <SettingsPageLayout>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={title} />
 

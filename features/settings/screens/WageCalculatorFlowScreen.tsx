@@ -11,6 +11,7 @@ import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { spacing } from '~/constants/designSystem';
@@ -213,6 +214,7 @@ export function WageCalculatorFlowScreen({
   onComplete,
 }: WageCalculatorFlowScreenProps) {
   const themeColors = useThemeColors();
+  const bottomNavInset = useSettingsBottomNavInset();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [step, setStep] = useState<(typeof WAGE_FLOW_STEPS)[number]>(1);
   const [wageType, setWageType] = useState<WageType>(initialConfig.wageType);
@@ -304,7 +306,7 @@ export function WageCalculatorFlowScreen({
     <SettingsPageLayout>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, bottomNavInset]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
