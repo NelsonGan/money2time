@@ -38,10 +38,7 @@ import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import {
-  useBottomNavContentInset,
-  useBottomNavScrollReporter,
-} from '~/components/navigation/BottomNavMinimize';
+import { useBottomNavContentInset } from '~/components/navigation/bottomNavInset';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -2323,7 +2320,6 @@ const InsightsWindowPage = React.memo(
     renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
   }) {
     const bottomNavInset = useBottomNavContentInset();
-    const reportBottomNavScroll = useBottomNavScrollReporter();
     const contentStyle = useMemo(
       () => ({
         ...INSIGHTS_SCROLL_CONTENT_STYLE,
@@ -2340,8 +2336,6 @@ const InsightsWindowPage = React.memo(
           className="flex-1"
           scrollEnabled={!isChartScrubbing}
           contentContainerStyle={contentStyle}
-          onScroll={reportBottomNavScroll}
-          scrollEventThrottle={32}
         >
           <TabletContentContainer>{renderInsightsPane(pageData)}</TabletContentContainer>
         </ScrollView>

@@ -2,7 +2,6 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components';
@@ -71,7 +70,6 @@ export const CalendarMonthPage = memo(function CalendarMonthPage({
 }: CalendarMonthPageProps) {
   const themeColors = useThemeColors();
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const reportBottomNavScroll = useBottomNavScrollReporter();
 
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds ?? []),
@@ -191,8 +189,6 @@ export const CalendarMonthPage = memo(function CalendarMonthPage({
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        onScroll={reportBottomNavScroll}
-        scrollEventThrottle={32}
       >
         <View style={[styles.calendarWrapper, { paddingHorizontal: gridPaddingHorizontal }]}>
           <CalendarMonthGrid

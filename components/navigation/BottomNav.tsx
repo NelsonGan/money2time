@@ -1,7 +1,6 @@
-import { GlassView } from 'expo-glass-effect';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -11,14 +10,6 @@ import {
   SettingsIcon,
   WalletIcon,
 } from '~/components/icons/NavIcons';
-import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
-import {
-  getGlassNavBottomGap,
-  getGlassNavReservedInset,
-  GLASS_NAV_HEIGHT,
-  isLiquidGlassNavEnabled,
-} from '~/components/navigation/liquidGlass';
-import { useResolvedTheme } from '~/context/ThemeContext';
 import type { TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
@@ -50,21 +41,11 @@ const TABS: { name: TabName; icon: NavIconComponent }[] = [
 const NAV_ROW_HEIGHT = 58;
 const ICON_SIZE = 26;
 
-const GLASS_NAV_MARGIN_H = 20;
-const GLASS_NAV_MAX_WIDTH = 520;
-// How far the bar shrinks/sinks when minimized on scroll.
-const GLASS_MINIMIZE_SCALE = 0.88;
-const GLASS_MINIMIZE_TRANSLATE_Y = 12;
-const GLASS_MINIMIZE_OPACITY = 0.8;
-
 export function getBottomNavSafePadding(safeBottom: number) {
   return Platform.OS === 'ios' ? Math.max(safeBottom - 12, 8) : Math.max(safeBottom, 10);
 }
 
 export function getBottomNavReservedInset(safeBottom: number) {
-  if (isLiquidGlassNavEnabled()) {
-    return getGlassNavReservedInset(safeBottom);
-  }
   return NAV_ROW_HEIGHT + getBottomNavSafePadding(safeBottom);
 }
 
@@ -161,18 +142,6 @@ export function BottomNav({
 }: BottomNavProps) {
   const themeColors = useThemeColors();
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const resolvedTheme = useResolvedTheme();
-  const { minimizeProgress } = useBottomNavMinimize();
-  const staticProgress = useSharedValue(0);
-  const progress = minimizeProgress ?? staticProgress;
-
-  const minimizeStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: progress.value * GLASS_MINIMIZE_TRANSLATE_Y },
-      { scale: 1 - progress.value * (1 - GLASS_MINIMIZE_SCALE) },
-    ],
-    opacity: 1 - progress.value * (1 - GLASS_MINIMIZE_OPACITY),
-  }));
 
   const handleTabPress = useCallback(
     (tab: TabName) => {
@@ -184,61 +153,6 @@ export function BottomNav({
 
   const { isTablet } = useDeviceLayout();
   const visibleTabs = hideTabs?.length ? TABS.filter((t) => !hideTabs.includes(t.name)) : TABS;
-
-  if (isLiquidGlassNavEnabled()) {
-    return (
-      <View
-        pointerEvents="box-none"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: getGlassNavBottomGap(safeBottom),
-          alignItems: 'center',
-        }}
-      >
-        <Animated.View
-          style={[
-            minimizeStyle,
-            {
-              width: '100%',
-              maxWidth: isTablet ? GLASS_NAV_MAX_WIDTH : undefined,
-              paddingHorizontal: GLASS_NAV_MARGIN_H,
-            },
-          ]}
-        >
-          <GlassView
-            glassEffectStyle="regular"
-            isInteractive
-            colorScheme={resolvedTheme}
-            style={{
-              height: GLASS_NAV_HEIGHT,
-              borderRadius: GLASS_NAV_HEIGHT / 2,
-              overflow: 'hidden',
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 8,
-            }}
-          >
-            {visibleTabs.map((tab) => (
-              <NavItem
-                key={tab.name}
-                tab={tab.name}
-                Icon={tab.icon}
-                isActive={activeTab === tab.name}
-                isTutorialFocused={tutorialFocusedTab === tab.name}
-                tintActive={themeColors.primary}
-                tintInactive={themeColors.textMuted}
-                onPressTab={handleTabPress}
-                onTutorialTabLayout={onTutorialTabLayout}
-                tutorialMeasureToken={tutorialMeasureToken}
-              />
-            ))}
-          </GlassView>
-        </Animated.View>
-      </View>
-    );
-  }
 
   const bottomPad = getBottomNavSafePadding(safeBottom);
 
