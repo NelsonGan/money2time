@@ -32,6 +32,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -116,6 +117,7 @@ export function SettingsScreen({
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const bottomNavInset = useSettingsBottomNavInset();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
   const scrollMeasureFrameRef = useRef<number | null>(null);
@@ -289,10 +291,11 @@ export function SettingsScreen({
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      reportBottomNavScroll(event);
       if (!activeTutorialTargetId) return;
       scheduleTutorialTargetMeasurement(activeTutorialTargetId);
     },
-    [activeTutorialTargetId, scheduleTutorialTargetMeasurement],
+    [activeTutorialTargetId, reportBottomNavScroll, scheduleTutorialTargetMeasurement],
   );
 
   return (
