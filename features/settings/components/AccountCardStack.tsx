@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
@@ -664,6 +665,7 @@ export function AccountCardStack({
   // Base spacing.lg, not the full 100px flow-mode clearance — the glass inset
   // already covers the bar, so stacking both over-pads the scroll end.
   const bottomNavInset = useSettingsBottomNavInset(spacing.lg);
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const [expandedAccountId, setExpandedAccountId] = useState<string | null>(null);
 
   const handleToggle = useCallback((accountId: string) => {
@@ -715,6 +717,8 @@ export function AccountCardStack({
       ref={scrollViewRef}
       contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       showsVerticalScrollIndicator={false}
+      onScroll={reportBottomNavScroll}
+      scrollEventThrottle={32}
     >
       {sections.map((section, sectionIndex) => {
         const sectionTotal = normalizeMoneyAmount(

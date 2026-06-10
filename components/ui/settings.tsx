@@ -5,7 +5,7 @@ import { GestureDetector, type GestureType } from 'react-native-gesture-handler'
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { useBottomNavContentInset } from '~/components/navigation/bottomNavInset';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';

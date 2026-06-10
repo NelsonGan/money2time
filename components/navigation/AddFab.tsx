@@ -1,7 +1,6 @@
 import { Mic } from 'lucide-react-native';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { InteractionManager, Platform, Pressable, View } from 'react-native';
-import { BottomTabBarHeightContext } from 'react-native-bottom-tabs';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -113,12 +112,7 @@ export function AddFab({
     };
   }, [measureFab, tutorialSpotlightRequest]);
 
-  // Inside the native tab view (iOS) the context carries the measured bar
-  // height; outside it (Android custom bar shell) fall back to the flow-layout
-  // reserved inset.
-  const nativeTabBarHeight = useContext(BottomTabBarHeightContext);
-  const bottomOffset =
-    (nativeTabBarHeight ?? getBottomNavReservedInset(safeBottom)) + FAB_BOTTOM_GAP;
+  const bottomOffset = getBottomNavReservedInset(safeBottom) + FAB_BOTTOM_GAP;
 
   return (
     <View
