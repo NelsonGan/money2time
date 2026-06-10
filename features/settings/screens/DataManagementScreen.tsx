@@ -12,6 +12,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { useApp } from '~/context/AppContext';
@@ -29,6 +30,7 @@ type ImportSource = 'money2time' | 'money_manager';
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
   const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [isExporting, setIsExporting] = useState(false);
   // `activeFlow` covers the whole picker + import lifecycle and drives button
@@ -184,7 +186,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           subtitle={I18n.t('data_management.subtitle')}
         />
       </View>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         {onOpenAutoBackup ? (
           <Card style={{ marginBottom: 14 }}>
             <CardContent className="py-4">

@@ -76,6 +76,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         emptyMessage={I18n.t('transactions.empty_month_message')}
         contentPaddingBottom={LIST_BOTTOM_PADDING}
         contentPaddingHorizontal={contentPaddingHorizontal}
+        extendUnderBottomNav
         disableItemAnimations
         compactItems
         listKey={`${pageMonthKey}-${localeKey}`}

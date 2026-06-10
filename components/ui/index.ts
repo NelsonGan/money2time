@@ -14,6 +14,7 @@ export {
   SettingsPageLayout,
   SettingsRowItem,
   SettingsSection,
+  useSettingsBottomNavInset,
 } from './settings';
 export { Text, TextClassContext } from './text';
 export { ThemeModal } from './theme-modal';

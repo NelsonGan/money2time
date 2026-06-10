@@ -32,6 +32,7 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
+  useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -106,6 +107,7 @@ function formatSize(bytes: number): string {
 
 export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   const { settings, updateSettings, refreshAll, refreshSettings } = useApp();
+  const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
 
   const [records, setRecords] = useState<BackupRecord[]>([]);
@@ -400,7 +402,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
           subtitle={I18n.t('auto_backup.subtitle')}
         />
       </View>
-      <ScrollView className="flex-1" contentContainerStyle={styles.scrollContent}>
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <Card>
           <CardContent className="py-5 gap-5">
             {/* Toggle */}
