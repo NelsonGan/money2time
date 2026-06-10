@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Start development server (always use tunnel)
-EXPO_TUNNEL_SUBDOMAIN=nikia-nonadaptive-hugeously npx expo start --tunnel --clear
+# Start development server (use --localhost; tunnel mode no longer needed)
+npx expo start --localhost
 
 # Run on iOS/Android (syncs icons first)
 npm run ios
@@ -25,6 +25,13 @@ npm run format:check
 
 # All checks together
 npm run check
+
+# Simulator/emulator control, debugging, profiling — use the Argent MCP tools
+# (mcp__argent__*: boot-device, launch-app, describe, gesture-tap, screenshot,
+# debugger-*, profile-*). Prefer them over raw xcrun simctl / adb. Skills are in
+# .claude/skills/argent-*. Argent may offer to start Metro itself — always start
+# the dev server with `npx expo start --localhost` instead (network issue on this
+# machine; tunnel/LAN modes don't work).
 
 # Tests (Jest + ts-jest, node env)
 npm test
