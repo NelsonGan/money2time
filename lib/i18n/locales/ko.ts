@@ -67,6 +67,66 @@ const ko = {
       placeholder: '선택',
     },
   },
+  news: {
+    cta: {
+      enable_voice: '음성 입력 켜기',
+    },
+    showcase: {
+      this_month: '이번 달',
+      past_7_days: '지난 7일',
+      income: '수입',
+      expense: '지출',
+      voice_heard: '인식됨',
+      voice_category: '교통',
+      voice_logged: '음성으로 기록됨',
+      voice_example: '택시 30',
+    },
+    home_widgets: {
+      title: '홈 화면 위젯',
+      overview: {
+        title: '홈 화면의 Money2Time',
+        body: '앱을 열지 않고도 이번 달에 얼마를 썼는지, 그리고 노동 시간으로 얼마인지 확인하세요.',
+      },
+      quick_log: {
+        title: '한 번의 탭으로 기록',
+        body: '지출이나 수입이 생기는 순간 바로 추가할 수 있는 빠른 버튼이 있는 작은 위젯.',
+      },
+      week: {
+        title: '한눈에 보는 이번 주',
+        body: '지난 7일 각각에 막대가 표시되어 지출이 많은 날이 바로 눈에 띕니다.',
+      },
+      month: {
+        title: '한 달 전체를 한눈에',
+        body: '앱 내 캘린더처럼 한 달의 매일 수입과 지출을 보여줍니다.',
+      },
+      savings: {
+        title: '얼마나 남겼는지',
+        body: '이번 달 저축률을 한눈에 — 남긴 금액과 쓴 금액을 돈과 노동 시간으로 보여줍니다.',
+      },
+      trend: {
+        title: '저축 추세',
+        body: '지난 6개월의 저축률을 한 화면에서 보여주어 올바른 방향으로 가고 있는지 확인할 수 있습니다.',
+      },
+    },
+    voice_transactions: {
+      title: '음성으로 거래 추가',
+      say_it: {
+        title: '그냥 말하세요',
+        body: '+ 버튼을 길게 누르고 "택시 30" 또는 "커피 4.50"처럼 말하세요. 금액과 카테고리를 자동으로 인식하며, 모두 휴대폰에서 처리됩니다.',
+      },
+    },
+  },
+  widgets: {
+    saved: '저축',
+    overspent: '초과 지출',
+    spent: '지출',
+    of_income_saved: '수입에서 저축',
+    add_income_hint: '저축률을 보려면 수입을 추가하세요',
+    set_hourly_value: '앱에서 시간당 가치 설정',
+    of_work: '노동 {{hours}}',
+    of_work_kept: '≈ 노동 {{hours}} 확보',
+    of_work_behind: '≈ 노동 {{hours}} 부족',
+  },
   home: {
     converter: {
       of_work_suffix: '의 근무 시간',

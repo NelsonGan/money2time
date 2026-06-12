@@ -67,6 +67,66 @@ const ja = {
       placeholder: '選択',
     },
   },
+  news: {
+    cta: {
+      enable_voice: '音声入力を有効にする',
+    },
+    showcase: {
+      this_month: '今月',
+      past_7_days: '過去7日間',
+      income: '収入',
+      expense: '支出',
+      voice_heard: '認識結果',
+      voice_category: '交通',
+      voice_logged: '音声で記録',
+      voice_example: 'タクシー 30',
+    },
+    home_widgets: {
+      title: 'ホーム画面ウィジェット',
+      overview: {
+        title: 'ホーム画面のMoney2Time',
+        body: 'アプリを開かずに、今月いくら使ったか、そして労働時間でいくらに相当するかを確認できます。',
+      },
+      quick_log: {
+        title: 'ワンタップで記録',
+        body: 'その瞬間に支出や収入を追加できる、クイックボタン付きの小さなウィジェット。',
+      },
+      week: {
+        title: '今週がひと目でわかる',
+        body: '過去7日間それぞれにバーが表示され、使いすぎた日がすぐにわかります。',
+      },
+      month: {
+        title: '今月まるごとを一覧表示',
+        body: 'アプリ内のカレンダーと同じく、月の毎日の収入と支出を表示します。',
+      },
+      savings: {
+        title: 'いくら残せたか',
+        body: '今月の貯蓄率がひと目で分かります。残した分と使った分を、金額と労働時間で表示します。',
+      },
+      trend: {
+        title: '貯蓄の推移',
+        body: '直近6か月の貯蓄率を1つのビューで表示。正しい方向に進んでいるか確認できます。',
+      },
+    },
+    voice_transactions: {
+      title: '音声で取引を追加',
+      say_it: {
+        title: '話すだけ',
+        body: '+ボタンを長押しして、「タクシー 30」や「コーヒー 4.50」のように話してください。金額とカテゴリーを自動で読み取ります。すべて端末内で処理されます。',
+      },
+    },
+  },
+  widgets: {
+    saved: '貯蓄',
+    overspent: '使いすぎ',
+    spent: '支出',
+    of_income_saved: 'を収入から貯蓄',
+    add_income_hint: '収入を追加すると貯蓄率が表示されます',
+    set_hourly_value: 'アプリで時給を設定',
+    of_work: '労働{{hours}}',
+    of_work_kept: '≈ 労働{{hours}}を確保',
+    of_work_behind: '≈ 労働{{hours}}の不足',
+  },
   home: {
     converter: {
       of_work_suffix: 'の労働時間',

@@ -67,6 +67,66 @@ const es = {
       placeholder: 'Seleccionar',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Activar entrada por voz',
+    },
+    showcase: {
+      this_month: 'Este mes',
+      past_7_days: 'Últimos 7 días',
+      income: 'Ingreso',
+      expense: 'Gasto',
+      voice_heard: 'ESCUCHADO',
+      voice_category: 'Transporte',
+      voice_logged: 'Registrado por voz',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widgets en la pantalla de inicio',
+      overview: {
+        title: 'Money2Time en tu pantalla de inicio',
+        body: 'Mira cuánto has gastado este mes y lo que cuesta en horas de trabajo, sin abrir la app.',
+      },
+      quick_log: {
+        title: 'Registra con un toque',
+        body: 'Un widget de bolsillo con botones rápidos para añadir un gasto o ingreso en el momento en que ocurre.',
+      },
+      week: {
+        title: 'Tu semana de un vistazo',
+        body: 'Una barra por cada uno de los últimos siete días, para que un día de gasto alto destaque al instante.',
+      },
+      month: {
+        title: 'Todo tu mes, en un mapa',
+        body: 'Ingresos y gastos de cada día del mes, igual que el calendario de la app.',
+      },
+      savings: {
+        title: 'Cuánto conservas',
+        body: 'Tu tasa de ahorro de este mes de un vistazo: lo que conservaste frente a lo que gastaste, en dinero y horas de trabajo.',
+      },
+      trend: {
+        title: 'Tu tendencia de ahorro',
+        body: 'Las tasas de ahorro de los últimos seis meses en una sola vista, para ver si vas por buen camino.',
+      },
+    },
+    voice_transactions: {
+      title: 'Añade transacciones por voz',
+      say_it: {
+        title: 'Solo dilo',
+        body: 'Mantén el botón + y dilo, como "taxi 30" o "café 4.50". Detectamos el importe y la categoría por ti, todo en tu teléfono.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Ahorrado',
+    overspent: 'Gastado de más',
+    spent: 'Gastado',
+    of_income_saved: 'de los ingresos ahorrado',
+    add_income_hint: 'Añade ingresos para ver tu tasa',
+    set_hourly_value: 'Configura el valor por hora en la app',
+    of_work: '{{hours}} de trabajo',
+    of_work_kept: '≈ {{hours}} de trabajo conservadas',
+    of_work_behind: '≈ {{hours}} de trabajo de déficit',
+  },
   home: {
     converter: {
       of_work_suffix: 'de tu tiempo',

@@ -67,6 +67,66 @@ const tr = {
       placeholder: 'Seçin',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Sesli girişi etkinleştir',
+    },
+    showcase: {
+      this_month: 'Bu ay',
+      past_7_days: 'Son 7 gün',
+      income: 'Gelir',
+      expense: 'Gider',
+      voice_heard: 'DUYULAN',
+      voice_category: 'Ulaşım',
+      voice_logged: 'Sesle kaydedildi',
+      voice_example: 'taksi 30',
+    },
+    home_widgets: {
+      title: "Ana Ekran Widget'ları",
+      overview: {
+        title: 'Ana ekranında Money2Time',
+        body: 'Uygulamayı açmadan bu ay ne kadar harcadığını ve bunun çalışma saati olarak karşılığını gör.',
+      },
+      quick_log: {
+        title: 'Tek dokunuşla kaydet',
+        body: 'Bir gideri ya da geliri tam olduğu anda eklemek için hızlı düğmeleri olan cep boyutunda bir widget.',
+      },
+      week: {
+        title: 'Haftan bir bakışta',
+        body: 'Son yedi günün her biri için bir çubuk; böylece çok harcadığın bir gün anında öne çıkar.',
+      },
+      month: {
+        title: 'Tüm ayın, haritalanmış',
+        body: 'Uygulamadaki takvim gibi, ayın her günü için gelir ve giderler.',
+      },
+      savings: {
+        title: 'Ne kadar biriktirdiğin',
+        body: 'Bu ayki tasarruf oranın bir bakışta — para ve çalışma saati olarak, biriktirdiğine karşılık harcadığın.',
+      },
+      trend: {
+        title: 'Tasarruf eğilimin',
+        body: 'Son altı ayın tasarruf oranları tek bir görünümde; böylece doğru yolda olup olmadığını görürsün.',
+      },
+    },
+    voice_transactions: {
+      title: 'İşlemleri Sesle Ekle',
+      say_it: {
+        title: 'Sadece söyle',
+        body: '+ düğmesini basılı tut ve söyle, örneğin "taksi 30" ya da "kahve 4.50". Tutarı ve kategoriyi senin için algılarız, hepsi telefonunda.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Biriktirildi',
+    overspent: 'Fazla harcandı',
+    spent: 'Harcandı',
+    of_income_saved: 'gelirin biriktirildi',
+    add_income_hint: 'Oranını görmek için gelir ekle',
+    set_hourly_value: 'Uygulamada saatlik değeri ayarla',
+    of_work: '{{hours}} çalışma',
+    of_work_kept: '≈ {{hours}} çalışma korundu',
+    of_work_behind: '≈ {{hours}} çalışma açık',
+  },
   home: {
     converter: {
       of_work_suffix: 'çalışma süreniz',

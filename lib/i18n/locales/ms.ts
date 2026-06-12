@@ -67,6 +67,66 @@ const ms = {
       placeholder: 'Pilih',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Dayakan input suara',
+    },
+    showcase: {
+      this_month: 'Bulan ini',
+      past_7_days: '7 hari lepas',
+      income: 'Pendapatan',
+      expense: 'Perbelanjaan',
+      voice_heard: 'DIDENGAR',
+      voice_category: 'Pengangkutan',
+      voice_logged: 'Direkod melalui suara',
+      voice_example: 'teksi 30',
+    },
+    home_widgets: {
+      title: 'Widget Skrin Utama',
+      overview: {
+        title: 'Money2Time pada skrin utama anda',
+        body: 'Lihat berapa yang anda belanjakan bulan ini, dan nilainya dalam jam kerja, tanpa membuka aplikasi.',
+      },
+      quick_log: {
+        title: 'Rekod dengan satu ketikan',
+        body: 'Widget kecil dengan butang pantas untuk menambah perbelanjaan atau pendapatan pada saat ia berlaku.',
+      },
+      week: {
+        title: 'Minggu anda sepintas lalu',
+        body: 'Satu bar bagi setiap tujuh hari lepas, supaya hari berbelanja tinggi terus menonjol.',
+      },
+      month: {
+        title: 'Seluruh bulan anda, dipetakan',
+        body: 'Pendapatan dan perbelanjaan bagi setiap hari dalam bulan, seperti kalendar dalam aplikasi.',
+      },
+      savings: {
+        title: 'Berapa yang anda simpan',
+        body: 'Kadar simpanan anda bulan ini sepintas lalu — yang anda simpan berbanding yang anda belanjakan, dalam wang dan jam kerja.',
+      },
+      trend: {
+        title: 'Trend simpanan anda',
+        body: 'Kadar simpanan enam bulan lepas dalam satu paparan, supaya anda nampak sama ada anda menuju arah yang betul.',
+      },
+    },
+    voice_transactions: {
+      title: 'Tambah Transaksi dengan Suara',
+      say_it: {
+        title: 'Cuma sebut sahaja',
+        body: 'Tahan butang + dan sebutkan, seperti "teksi 30" atau "kopi 4.50". Kami kesan jumlah dan kategori untuk anda, semuanya pada telefon anda.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Disimpan',
+    overspent: 'Terlebih belanja',
+    spent: 'Dibelanjakan',
+    of_income_saved: 'daripada pendapatan disimpan',
+    add_income_hint: 'Tambah pendapatan untuk lihat kadar anda',
+    set_hourly_value: 'Tetapkan nilai sejam dalam apl',
+    of_work: '{{hours}} kerja',
+    of_work_kept: '≈ {{hours}} kerja disimpan',
+    of_work_behind: '≈ {{hours}} kerja tertunggak',
+  },
   home: {
     converter: {
       of_work_suffix: 'masa anda',

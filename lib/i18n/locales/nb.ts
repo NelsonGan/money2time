@@ -67,6 +67,66 @@ const nb = {
       placeholder: 'Velg',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Slå på taleinndata',
+    },
+    showcase: {
+      this_month: 'Denne måneden',
+      past_7_days: 'Siste 7 dager',
+      income: 'Inntekt',
+      expense: 'Utgift',
+      voice_heard: 'HØRT',
+      voice_category: 'Transport',
+      voice_logged: 'Registrert med stemme',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widgeter på startskjermen',
+      overview: {
+        title: 'Money2Time på startskjermen',
+        body: 'Se hva du har brukt denne måneden, og hva det koster i arbeidstimer, uten å åpne appen.',
+      },
+      quick_log: {
+        title: 'Registrer med ett trykk',
+        body: 'En lommevennlig widget med hurtigknapper for å legge til en utgift eller inntekt i det øyeblikket den skjer.',
+      },
+      week: {
+        title: 'Uken din med ett blikk',
+        body: 'En søyle for hver av de siste sju dagene, slik at en dag med høyt forbruk skiller seg ut umiddelbart.',
+      },
+      month: {
+        title: 'Hele måneden din, kartlagt',
+        body: 'Inntekter og utgifter for hver dag i måneden, akkurat som kalenderen i appen.',
+      },
+      savings: {
+        title: 'Hvor mye du beholder',
+        body: 'Sparraten din denne måneden med ett blikk – hva du beholdt mot hva du brukte, i penger og arbeidstimer.',
+      },
+      trend: {
+        title: 'Sparetrenden din',
+        body: 'Sparratene for de siste seks månedene i én visning, så du kan se om du er på rett vei.',
+      },
+    },
+    voice_transactions: {
+      title: 'Legg til transaksjoner med stemmen',
+      say_it: {
+        title: 'Bare si det',
+        body: 'Hold inne +-knappen og si det, som "taxi 30" eller "kaffe 4.50". Vi fanger opp beløpet og kategorien for deg, alt på telefonen din.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Spart',
+    overspent: 'Brukt for mye',
+    spent: 'Brukt',
+    of_income_saved: 'av inntekten spart',
+    add_income_hint: 'Legg til inntekt for å se raten din',
+    set_hourly_value: 'Angi timeverdi i appen',
+    of_work: '{{hours}} arbeid',
+    of_work_kept: '≈ {{hours}} arbeid beholdt',
+    of_work_behind: '≈ {{hours}} arbeid bak',
+  },
   home: {
     converter: {
       of_work_suffix: 'av tiden din',

@@ -67,6 +67,66 @@ const sv = {
       placeholder: 'Välj',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Aktivera röstinmatning',
+    },
+    showcase: {
+      this_month: 'Den här månaden',
+      past_7_days: 'Senaste 7 dagarna',
+      income: 'Inkomst',
+      expense: 'Utgift',
+      voice_heard: 'HÖRT',
+      voice_category: 'Transport',
+      voice_logged: 'Registrerat med röst',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widgetar på hemskärmen',
+      overview: {
+        title: 'Money2Time på din hemskärm',
+        body: 'Se vad du har spenderat den här månaden, och vad det kostar i arbetstimmar, utan att öppna appen.',
+      },
+      quick_log: {
+        title: 'Registrera med ett tryck',
+        body: 'En fickvänlig widget med snabbknappar för att lägga till en utgift eller inkomst i samma stund den sker.',
+      },
+      week: {
+        title: 'Din vecka i ett ögonkast',
+        body: 'En stapel för var och en av de senaste sju dagarna, så att en dag med höga utgifter sticker ut direkt.',
+      },
+      month: {
+        title: 'Hela din månad, kartlagd',
+        body: 'Inkomster och utgifter för varje dag i månaden, precis som kalendern i appen.',
+      },
+      savings: {
+        title: 'Hur mycket du behåller',
+        body: 'Din sparkvot den här månaden i ett ögonkast – vad du behöll mot vad du spenderade, i pengar och arbetstimmar.',
+      },
+      trend: {
+        title: 'Din spartrend',
+        body: 'De senaste sex månadernas sparkvoter i en vy, så att du ser om du är på rätt väg.',
+      },
+    },
+    voice_transactions: {
+      title: 'Lägg till transaktioner med rösten',
+      say_it: {
+        title: 'Säg det bara',
+        body: 'Håll in +-knappen och säg det, som "taxi 30" eller "kaffe 4.50". Vi fångar upp beloppet och kategorin åt dig, allt på din telefon.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Sparat',
+    overspent: 'Spenderat för mycket',
+    spent: 'Spenderat',
+    of_income_saved: 'av inkomsten sparat',
+    add_income_hint: 'Lägg till inkomst för att se din kvot',
+    set_hourly_value: 'Ange timvärde i appen',
+    of_work: '{{hours}} arbete',
+    of_work_kept: '≈ {{hours}} arbete behållet',
+    of_work_behind: '≈ {{hours}} arbete back',
+  },
   home: {
     converter: {
       of_work_suffix: 'av din tid',

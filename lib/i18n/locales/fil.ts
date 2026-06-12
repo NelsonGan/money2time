@@ -67,6 +67,66 @@ const fil = {
       placeholder: 'Pumili',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'I-enable ang voice input',
+    },
+    showcase: {
+      this_month: 'Ngayong buwan',
+      past_7_days: 'Nakaraang 7 araw',
+      income: 'Kita',
+      expense: 'Gastos',
+      voice_heard: 'NARINIG',
+      voice_category: 'Transportasyon',
+      voice_logged: 'Naitala sa boses',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Mga Widget sa Home Screen',
+      overview: {
+        title: 'Money2Time sa iyong home screen',
+        body: 'Tingnan kung magkano ang nagastos mo ngayong buwan, at kung magkano ito sa oras ng trabaho, nang hindi binubuksan ang app.',
+      },
+      quick_log: {
+        title: 'Itala sa isang tap',
+        body: 'Isang maliit na widget na may mabilisang button para magdagdag ng gastos o kita sa mismong sandali nito.',
+      },
+      week: {
+        title: 'Ang iyong linggo sa isang sulyap',
+        body: 'Isang bar para sa bawat isa sa nakaraang pitong araw, para agad na makita ang araw na malaki ang gastos.',
+      },
+      month: {
+        title: 'Ang buong buwan mo, nakamapa',
+        body: 'Kita at gastos sa bawat araw ng buwan, gaya ng kalendaryo sa app.',
+      },
+      savings: {
+        title: 'Kung magkano ang naiipon mo',
+        body: 'Ang iyong savings rate ngayong buwan sa isang sulyap — kung magkano ang naitabi laban sa nagastos, sa pera at oras ng trabaho.',
+      },
+      trend: {
+        title: 'Ang trend ng iyong ipon',
+        body: 'Ang savings rate ng nakaraang anim na buwan sa isang view, para makita kung tama ang takbo mo.',
+      },
+    },
+    voice_transactions: {
+      title: 'Magdagdag ng Transaksyon sa Boses',
+      say_it: {
+        title: 'Sabihin mo lang',
+        body: 'Pindutin nang matagal ang + button at sabihin, gaya ng "taxi 30" o "kape 4.50". Kukunin namin ang halaga at kategorya para sa iyo, lahat sa iyong telepono.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Naipon',
+    overspent: 'Lumampas sa gastos',
+    spent: 'Nagastos',
+    of_income_saved: 'ng kita ang naipon',
+    add_income_hint: 'Magdagdag ng kita para makita ang iyong rate',
+    set_hourly_value: 'Itakda ang halaga kada oras sa app',
+    of_work: '{{hours}} trabaho',
+    of_work_kept: '≈ {{hours}} trabaho ang naitabi',
+    of_work_behind: '≈ {{hours}} trabaho ang kulang',
+  },
   home: {
     converter: {
       of_work_suffix: 'ng iyong oras',

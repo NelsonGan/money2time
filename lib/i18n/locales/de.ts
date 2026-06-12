@@ -67,6 +67,66 @@ const de = {
       placeholder: 'Auswählen',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Spracheingabe aktivieren',
+    },
+    showcase: {
+      this_month: 'Diesen Monat',
+      past_7_days: 'Letzte 7 Tage',
+      income: 'Einnahme',
+      expense: 'Ausgabe',
+      voice_heard: 'GEHÖRT',
+      voice_category: 'Transport',
+      voice_logged: 'Per Sprache erfasst',
+      voice_example: 'Taxi 30',
+    },
+    home_widgets: {
+      title: 'Startbildschirm-Widgets',
+      overview: {
+        title: 'Money2Time auf deinem Startbildschirm',
+        body: 'Sieh, was du diesen Monat ausgegeben hast und was es an Arbeitsstunden kostet – ohne die App zu öffnen.',
+      },
+      quick_log: {
+        title: 'Mit einem Tipp erfassen',
+        body: 'Ein kompaktes Widget mit Schnelltasten, um eine Ausgabe oder Einnahme im Moment ihres Entstehens hinzuzufügen.',
+      },
+      week: {
+        title: 'Deine Woche auf einen Blick',
+        body: 'Ein Balken für jeden der letzten sieben Tage, sodass ein Tag mit hohen Ausgaben sofort auffällt.',
+      },
+      month: {
+        title: 'Dein ganzer Monat im Überblick',
+        body: 'Einnahmen und Ausgaben für jeden Tag des Monats, genau wie im Kalender der App.',
+      },
+      savings: {
+        title: 'Wie viel du behältst',
+        body: 'Deine Sparquote diesen Monat auf einen Blick – was du behalten hast gegenüber dem, was du ausgegeben hast, in Geld und Arbeitsstunden.',
+      },
+      trend: {
+        title: 'Dein Spartrend',
+        body: 'Die Sparquoten der letzten sechs Monate in einer Ansicht, damit du siehst, ob du auf dem richtigen Weg bist.',
+      },
+    },
+    voice_transactions: {
+      title: 'Transaktionen per Sprache hinzufügen',
+      say_it: {
+        title: 'Sag es einfach',
+        body: 'Halte die +-Taste gedrückt und sprich, z. B. "Taxi 30" oder "Kaffee 4.50". Wir erkennen Betrag und Kategorie für dich – alles auf deinem Handy.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Gespart',
+    overspent: 'Zu viel ausgegeben',
+    spent: 'Ausgegeben',
+    of_income_saved: 'des Einkommens gespart',
+    add_income_hint: 'Einnahme hinzufügen, um deine Quote zu sehen',
+    set_hourly_value: 'Stundenwert in der App festlegen',
+    of_work: '{{hours}} Arbeit',
+    of_work_kept: '≈ {{hours}} Arbeit behalten',
+    of_work_behind: '≈ {{hours}} Arbeit im Minus',
+  },
   home: {
     converter: {
       of_work_suffix: 'deiner Zeit',

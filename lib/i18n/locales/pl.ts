@@ -67,6 +67,66 @@ const pl = {
       placeholder: 'Wybierz',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Włącz wprowadzanie głosowe',
+    },
+    showcase: {
+      this_month: 'W tym miesiącu',
+      past_7_days: 'Ostatnie 7 dni',
+      income: 'Przychód',
+      expense: 'Wydatek',
+      voice_heard: 'USŁYSZANO',
+      voice_category: 'Transport',
+      voice_logged: 'Zapisano głosem',
+      voice_example: 'taksówka 30',
+    },
+    home_widgets: {
+      title: 'Widżety na ekranie głównym',
+      overview: {
+        title: 'Money2Time na Twoim ekranie głównym',
+        body: 'Zobacz, ile wydałeś w tym miesiącu i ile to kosztuje w godzinach pracy, bez otwierania aplikacji.',
+      },
+      quick_log: {
+        title: 'Zapisz jednym dotknięciem',
+        body: 'Niewielki widżet z szybkimi przyciskami do dodania wydatku lub przychodu w chwili, gdy się pojawia.',
+      },
+      week: {
+        title: 'Twój tydzień w skrócie',
+        body: 'Słupek dla każdego z ostatnich siedmiu dni, dzięki czemu dzień z dużymi wydatkami od razu się wyróżnia.',
+      },
+      month: {
+        title: 'Cały miesiąc na mapie',
+        body: 'Przychody i wydatki na każdy dzień miesiąca, tak jak w kalendarzu w aplikacji.',
+      },
+      savings: {
+        title: 'Ile odkładasz',
+        body: 'Twoja stopa oszczędności w tym miesiącu w skrócie — ile odłożyłeś w stosunku do tego, ile wydałeś, w pieniądzach i godzinach pracy.',
+      },
+      trend: {
+        title: 'Trend Twoich oszczędności',
+        body: 'Stopy oszczędności z ostatnich sześciu miesięcy w jednym widoku, abyś widział, czy zmierzasz we właściwym kierunku.',
+      },
+    },
+    voice_transactions: {
+      title: 'Dodawaj transakcje głosem',
+      say_it: {
+        title: 'Po prostu powiedz',
+        body: 'Przytrzymaj przycisk + i powiedz, na przykład "taksówka 30" lub "kawa 4.50". Rozpoznamy kwotę i kategorię za Ciebie — wszystko na Twoim telefonie.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Zaoszczędzono',
+    overspent: 'Przekroczono budżet',
+    spent: 'Wydano',
+    of_income_saved: 'dochodu zaoszczędzone',
+    add_income_hint: 'Dodaj przychód, aby zobaczyć swoją stopę',
+    set_hourly_value: 'Ustaw wartość godziny w aplikacji',
+    of_work: '{{hours}} pracy',
+    of_work_kept: '≈ {{hours}} pracy zachowane',
+    of_work_behind: '≈ {{hours}} pracy na minusie',
+  },
   home: {
     converter: {
       of_work_suffix: 'twojego czasu',

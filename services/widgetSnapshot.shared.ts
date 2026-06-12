@@ -1,3 +1,4 @@
+import { I18n } from '~/lib/i18n';
 import type { Category, TransactionWithRelations, UserSettings, WeekStartsOn } from '~/types';
 import {
   addMonthsAtMonthStart,
@@ -169,8 +170,10 @@ export interface Money2TimeWidgetSnapshot {
 }
 
 function buildTimeEquivalentLabel(amount: number, trueHourlyRate: number) {
-  if (trueHourlyRate <= 0) return 'Set hourly value in app';
-  return `${formatHours(amountToHoursByRate(amount, trueHourlyRate))} of work`;
+  if (trueHourlyRate <= 0) return I18n.t('widgets.set_hourly_value');
+  return I18n.t('widgets.of_work', {
+    hours: formatHours(amountToHoursByRate(amount, trueHourlyRate)),
+  });
 }
 
 function startOfDayLocal(date: Date): Date {
@@ -554,7 +557,9 @@ function buildSavingsRateSnapshot(
   let timeEquivalentLabel = '';
   if (hourlyRate > 0 && saved !== 0) {
     const hours = formatHours(amountToHoursByRate(Math.abs(saved), hourlyRate));
-    timeEquivalentLabel = `≈ ${hours} of work ${isPositive ? 'kept' : 'behind'}`;
+    timeEquivalentLabel = I18n.t(isPositive ? 'widgets.of_work_kept' : 'widgets.of_work_behind', {
+      hours,
+    });
   }
 
   return {
@@ -572,7 +577,7 @@ function buildSavingsRateSnapshot(
     incomeLabel: formatCompactCurrency(income, settings.currencySymbol),
     expenseLabel: formatCompactCurrency(expense, settings.currencySymbol),
     savedLabel: formatCompactCurrency(Math.abs(saved), settings.currencySymbol),
-    savedCaption: isPositive ? 'Saved' : 'Overspent',
+    savedCaption: isPositive ? I18n.t('widgets.saved') : I18n.t('widgets.overspent'),
     isPositive,
     hasIncome,
     timeEquivalentLabel,
