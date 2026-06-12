@@ -1,15 +1,19 @@
-import { X } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Mic, X } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Switch, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
 
 import type { FeatureAnnouncement, FeatureAnnouncementPage } from '../featureAnnouncements';
+import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 
 interface FeatureAnnouncementModalProps {
@@ -77,7 +81,10 @@ export function FeatureAnnouncementModal({
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
+  const { quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const [pageIndex, setPageIndex] = useState(0);
+  const [voiceSupported, setVoiceSupported] = useState<boolean | null>(null);
+  const [enablingVoice, setEnablingVoice] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -93,6 +100,45 @@ export function FeatureAnnouncementModal({
     [colors, page],
   );
 
+  const pageCta = page?.cta;
+
+  // Probe device support so the enable-voice CTA only appears where it works.
+  // Announcements are always listed in News regardless of device capability, so
+  // on an unsupported device the CTA falls back to a plain dismiss button.
+  useEffect(() => {
+    if (pageCta !== 'enableVoice' || !visible) return undefined;
+    let active = true;
+    void isSpeechRecognitionAvailable().then((ok) => {
+      if (active) setVoiceSupported(ok);
+    });
+    return () => {
+      active = false;
+    };
+  }, [pageCta, visible]);
+
+  const handleToggleVoice = useCallback(
+    async (next: boolean) => {
+      void triggerHaptic('selection');
+      if (!next) {
+        updateQuickEntryPrefs({ voiceInputEnabled: false });
+        return;
+      }
+      setEnablingVoice(true);
+      try {
+        if (!(await ensureVoiceInputPermission())) return;
+        updateQuickEntryPrefs({
+          quickEntryEnabled: true,
+          voiceInputEnabled: true,
+          voicePromptDismissed: true,
+        });
+        void triggerHaptic('success');
+      } finally {
+        setEnablingVoice(false);
+      }
+    },
+    [updateQuickEntryPrefs],
+  );
+
   if (!announcement || !page) {
     return null;
   }
@@ -100,6 +146,8 @@ export function FeatureAnnouncementModal({
   // Match the dev preview width so the calendar grid renders full (7 columns,
   // all rows, income + expense) instead of being squished.
   const showcaseWidth = Math.min(338, windowWidth - MODAL_HORIZONTAL * 2 - PANEL_PADDING * 2);
+
+  const showEnableVoiceCta = page.cta === 'enableVoice' && voiceSupported === true;
 
   const handlePrevious = () => {
     if (pageIndex <= 0) return;
@@ -148,7 +196,11 @@ export function FeatureAnnouncementModal({
               ))}
             </View>
             <View style={styles.showcaseSlot}>
-              <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
+              {page.visual === 'voice' ? (
+                <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
+              ) : (
+                <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
+              )}
             </View>
           </View>
 
@@ -175,16 +227,51 @@ export function FeatureAnnouncementModal({
               </Text>
             </View>
 
-            <View style={styles.footer}>
-              {pageIndex > 0 ? (
-                <Button variant="ghost" size="sm" className="flex-1" onPress={handlePrevious}>
-                  <Text>{I18n.t('common.back')}</Text>
+            {showEnableVoiceCta ? (
+              <View
+                style={[
+                  styles.toggleRow,
+                  {
+                    backgroundColor: withColorAlpha(accentColor, 0.08),
+                    borderColor: withColorAlpha(accentColor, 0.22),
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.toggleIcon,
+                    { backgroundColor: withColorAlpha(accentColor, 0.14) },
+                  ]}
+                >
+                  <Mic size={18} color={accentColor} strokeWidth={2.4} />
+                </View>
+                <View style={styles.toggleText}>
+                  <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.text }}>
+                    {page.ctaLabel ?? I18n.t('settings.quick_entry.voice.suggest_enable')}
+                  </Text>
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {quickEntryPrefs.voiceInputEnabled ? I18n.t('common.on') : I18n.t('common.off')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.voiceInputEnabled}
+                  disabled={enablingVoice}
+                  onValueChange={(next) => void handleToggleVoice(next)}
+                  trackColor={{ false: colors.border, true: accentColor }}
+                />
+              </View>
+            ) : (
+              <View style={styles.footer}>
+                {pageIndex > 0 ? (
+                  <Button variant="ghost" size="sm" className="flex-1" onPress={handlePrevious}>
+                    <Text>{I18n.t('common.back')}</Text>
+                  </Button>
+                ) : null}
+                <Button size="sm" className="flex-[2]" onPress={handleNext}>
+                  <Text>{isLastPage ? I18n.t('common.done') : I18n.t('common.next')}</Text>
                 </Button>
-              ) : null}
-              <Button size="sm" className="flex-[2]" onPress={handleNext}>
-                <Text>{isLastPage ? I18n.t('common.done') : I18n.t('common.next')}</Text>
-              </Button>
-            </View>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -234,6 +321,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     marginTop: 18,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 18,
+  },
+  toggleIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toggleText: {
+    flex: 1,
+    minWidth: 0,
   },
   dot: {
     height: 7,
