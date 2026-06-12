@@ -1,6 +1,6 @@
 import { ChevronRight, Mic, Zap } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   AccountPickerSheet,
@@ -19,11 +19,8 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import {
-  getSpeechPermissions,
-  isSpeechRecognitionAvailable,
-  requestSpeechPermissions,
-} from '~/services/speechRecognition';
+import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
 import type { Category } from '~/types';
 
 interface QuickEntrySettingsScreenProps {
@@ -203,26 +200,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
       }
       // Turning ON — make sure mic + speech permissions are granted before we
       // flip the pref. Otherwise the long-press flow would fail at first use.
-      const current = await getSpeechPermissions();
-      let granted = current.granted;
-      if (!granted && current.canAskAgain) {
-        const requested = await requestSpeechPermissions();
-        granted = requested.granted;
-      }
-      if (!granted) {
-        Alert.alert(
-          I18n.t('settings.quick_entry.voice.permission_denied_title'),
-          I18n.t('settings.quick_entry.voice.permission_denied_message'),
-          [
-            { text: I18n.t('common.cancel'), style: 'cancel' },
-            {
-              text: I18n.t('settings.quick_entry.voice.open_settings'),
-              onPress: () => void Linking.openSettings(),
-            },
-          ],
-        );
-        return;
-      }
+      if (!(await ensureVoiceInputPermission())) return;
       updateQuickEntryPrefs({ voiceInputEnabled: true });
     },
     [updateQuickEntryPrefs],
