@@ -67,6 +67,66 @@ const nl = {
       placeholder: 'Selecteer',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Spraakinvoer inschakelen',
+    },
+    showcase: {
+      this_month: 'Deze maand',
+      past_7_days: 'Afgelopen 7 dagen',
+      income: 'Inkomsten',
+      expense: 'Uitgave',
+      voice_heard: 'GEHOORD',
+      voice_category: 'Vervoer',
+      voice_logged: 'Vastgelegd via spraak',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widgets op het beginscherm',
+      overview: {
+        title: 'Money2Time op je beginscherm',
+        body: 'Zie hoeveel je deze maand hebt uitgegeven, en wat het kost in werkuren, zonder de app te openen.',
+      },
+      quick_log: {
+        title: 'Leg vast met één tik',
+        body: 'Een compacte widget met snelknoppen om een uitgave of inkomst toe te voegen op het moment dat het gebeurt.',
+      },
+      week: {
+        title: 'Je week in één oogopslag',
+        body: 'Een balk voor elk van de afgelopen zeven dagen, zodat een dag met hoge uitgaven meteen opvalt.',
+      },
+      month: {
+        title: 'Je hele maand in kaart',
+        body: 'Inkomsten en uitgaven voor elke dag van de maand, net als de kalender in de app.',
+      },
+      savings: {
+        title: 'Hoeveel je overhoudt',
+        body: 'Je spaarquote van deze maand in één oogopslag — wat je overhield versus wat je uitgaf, in geld en werkuren.',
+      },
+      trend: {
+        title: 'Je spaartrend',
+        body: 'De spaarquotes van de afgelopen zes maanden in één weergave, zodat je ziet of je de goede kant op gaat.',
+      },
+    },
+    voice_transactions: {
+      title: 'Transacties toevoegen met je stem',
+      say_it: {
+        title: 'Zeg het gewoon',
+        body: 'Houd de +-knop ingedrukt en zeg het, zoals "taxi 30" of "koffie 4.50". Wij halen het bedrag en de categorie er voor je uit, allemaal op je telefoon.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Gespaard',
+    overspent: 'Te veel uitgegeven',
+    spent: 'Uitgegeven',
+    of_income_saved: 'van het inkomen gespaard',
+    add_income_hint: 'Voeg inkomsten toe om je percentage te zien',
+    set_hourly_value: 'Stel uurwaarde in de app in',
+    of_work: '{{hours}} werk',
+    of_work_kept: '≈ {{hours}} werk behouden',
+    of_work_behind: '≈ {{hours}} werk achterstand',
+  },
   home: {
     converter: {
       of_work_suffix: 'van je tijd',

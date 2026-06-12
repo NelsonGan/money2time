@@ -17,6 +17,7 @@ import { triggerHaptic } from '~/services/haptics';
 
 import { FeatureAnnouncementModal } from '../components/FeatureAnnouncementModal';
 import {
+  announcementTitle,
   type FeatureAnnouncement,
   getFeatureAnnouncementsNewestFirst,
 } from '../featureAnnouncements';
@@ -68,7 +69,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
                 </View>
                 <View className="flex-1">
                   <Text variant="bodyStrong" numberOfLines={1}>
-                    {announcement.title}
+                    {announcementTitle(announcement)}
                   </Text>
                   <Text variant="caption" tone="muted" className="mt-0.5">
                     {formatAnnouncementDate(announcement.releaseDate)}

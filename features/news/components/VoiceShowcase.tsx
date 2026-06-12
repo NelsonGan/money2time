@@ -12,8 +12,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Text } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { FONT } from '~/utils/fonts';
+import { formatCurrency } from '~/utils/formatters';
 
 // Card aspect ratio — tall enough to fit the mic hero, the spoken phrase, and
 // the resulting transaction card without crowding.
@@ -77,6 +80,7 @@ function PulseRing({ color, delay }: { color: string; delay: number }) {
 
 export function VoiceShowcase({ width }: { width: number }) {
   const colors = useThemeColors();
+  const { settings } = useApp();
   const height = width / RATIO;
 
   return (
@@ -130,9 +134,11 @@ export function VoiceShowcase({ width }: { width: number }) {
             ]}
           >
             <Text variant="label" tone="muted" style={styles.heard}>
-              HEARD
+              {I18n.t('news.showcase.voice_heard')}
             </Text>
-            <Text style={[styles.phrase, { color: colors.text }]}>“uber 30”</Text>
+            <Text style={[styles.phrase, { color: colors.text }]}>
+              “{I18n.t('news.showcase.voice_example')}”
+            </Text>
           </View>
         </View>
 
@@ -159,15 +165,15 @@ export function VoiceShowcase({ width }: { width: number }) {
           </View>
           <View style={styles.txnMid}>
             <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.text }}>
-              Transport
+              {I18n.t('news.showcase.voice_category')}
             </Text>
             <Text variant="caption" tone="muted" numberOfLines={1}>
-              Logged by voice
+              {I18n.t('news.showcase.voice_logged')}
             </Text>
           </View>
           <View style={styles.txnRight}>
             <Text style={[styles.amount, { color: colors.error }]} numberOfLines={1}>
-              -$30.00
+              -{formatCurrency(30, settings.currencySymbol)}
             </Text>
             <View style={styles.timeRow}>
               <Clock size={11} color={colors.primary} strokeWidth={2.4} />

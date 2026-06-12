@@ -7,6 +7,15 @@ const translations: Translations = {
   'common.minute_unit': 'm',
   'errors.generic_operation_failed': 'Operation failed',
   'errors.recurring_fallback_name': 'Recurring rule',
+  'widgets.saved': 'Saved',
+  'widgets.overspent': 'Overspent',
+  'widgets.spent': 'Spent',
+  'widgets.of_income_saved': 'of income saved',
+  'widgets.add_income_hint': 'Add income to see your rate',
+  'widgets.set_hourly_value': 'Set hourly value in app',
+  'widgets.of_work': '{hours} of work',
+  'widgets.of_work_kept': '≈ {hours} of work kept',
+  'widgets.of_work_behind': '≈ {hours} of work behind',
 };
 
 export const I18n = {

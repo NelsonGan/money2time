@@ -67,6 +67,66 @@ const pt = {
       placeholder: 'Selecionar',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Ativar entrada por voz',
+    },
+    showcase: {
+      this_month: 'Este mês',
+      past_7_days: 'Últimos 7 dias',
+      income: 'Receita',
+      expense: 'Despesa',
+      voice_heard: 'OUVIDO',
+      voice_category: 'Transporte',
+      voice_logged: 'Registrado por voz',
+      voice_example: 'táxi 30',
+    },
+    home_widgets: {
+      title: 'Widgets na tela inicial',
+      overview: {
+        title: 'Money2Time na sua tela inicial',
+        body: 'Veja quanto você gastou neste mês e quanto isso custa em horas de trabalho, sem abrir o app.',
+      },
+      quick_log: {
+        title: 'Registre com um toque',
+        body: 'Um widget de bolso com botões rápidos para adicionar uma despesa ou receita no momento em que acontece.',
+      },
+      week: {
+        title: 'Sua semana num relance',
+        body: 'Uma barra para cada um dos últimos sete dias, para que um dia de gastos altos se destaque na hora.',
+      },
+      month: {
+        title: 'Seu mês inteiro, mapeado',
+        body: 'Receitas e despesas em cada dia do mês, igual ao calendário do app.',
+      },
+      savings: {
+        title: 'Quanto você guarda',
+        body: 'Sua taxa de economia deste mês num relance — o que você guardou em relação ao que gastou, em dinheiro e horas de trabalho.',
+      },
+      trend: {
+        title: 'Sua tendência de economia',
+        body: 'As taxas de economia dos últimos seis meses em uma só visão, para você ver se está no caminho certo.',
+      },
+    },
+    voice_transactions: {
+      title: 'Adicione transações por voz',
+      say_it: {
+        title: 'É só falar',
+        body: 'Segure o botão + e fale, como "táxi 30" ou "café 4.50". Identificamos o valor e a categoria para você, tudo no seu telefone.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Economizado',
+    overspent: 'Gasto a mais',
+    spent: 'Gasto',
+    of_income_saved: 'da receita economizada',
+    add_income_hint: 'Adicione receita para ver sua taxa',
+    set_hourly_value: 'Defina o valor por hora no app',
+    of_work: '{{hours}} de trabalho',
+    of_work_kept: '≈ {{hours}} de trabalho guardadas',
+    of_work_behind: '≈ {{hours}} de trabalho no vermelho',
+  },
   home: {
     converter: {
       of_work_suffix: 'do seu tempo',

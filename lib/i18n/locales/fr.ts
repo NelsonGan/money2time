@@ -67,6 +67,66 @@ const fr = {
       placeholder: 'Sélectionner',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Activer la saisie vocale',
+    },
+    showcase: {
+      this_month: 'Ce mois-ci',
+      past_7_days: '7 derniers jours',
+      income: 'Revenu',
+      expense: 'Dépense',
+      voice_heard: 'ENTENDU',
+      voice_category: 'Transport',
+      voice_logged: 'Enregistré à la voix',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: "Widgets sur l'écran d'accueil",
+      overview: {
+        title: "Money2Time sur votre écran d'accueil",
+        body: "Voyez ce que vous avez dépensé ce mois-ci, et ce que cela coûte en heures de travail, sans ouvrir l'application.",
+      },
+      quick_log: {
+        title: 'Enregistrez en un geste',
+        body: 'Un widget de poche avec des boutons rapides pour ajouter une dépense ou un revenu au moment même.',
+      },
+      week: {
+        title: "Votre semaine en un coup d'œil",
+        body: "Une barre pour chacun des sept derniers jours, pour qu'une journée de fortes dépenses ressorte aussitôt.",
+      },
+      month: {
+        title: 'Tout votre mois, cartographié',
+        body: "Revenus et dépenses pour chaque jour du mois, comme le calendrier de l'application.",
+      },
+      savings: {
+        title: 'Ce que vous gardez',
+        body: "Votre taux d'épargne du mois en un coup d'œil : ce que vous avez gardé par rapport à ce que vous avez dépensé, en argent et en heures de travail.",
+      },
+      trend: {
+        title: "Votre tendance d'épargne",
+        body: "Les taux d'épargne des six derniers mois dans une seule vue, pour voir si vous allez dans le bon sens.",
+      },
+    },
+    voice_transactions: {
+      title: 'Ajouter des transactions à la voix',
+      say_it: {
+        title: 'Dites-le, tout simplement',
+        body: 'Maintenez le bouton + et dites-le, comme "taxi 30" ou "café 4.50". Nous détectons le montant et la catégorie pour vous, le tout sur votre téléphone.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Épargné',
+    overspent: 'Trop dépensé',
+    spent: 'Dépensé',
+    of_income_saved: 'du revenu épargné',
+    add_income_hint: 'Ajoutez un revenu pour voir votre taux',
+    set_hourly_value: "Définir la valeur horaire dans l'app",
+    of_work: '{{hours}} de travail',
+    of_work_kept: '≈ {{hours}} de travail gardées',
+    of_work_behind: '≈ {{hours}} de travail en déficit',
+  },
   home: {
     converter: {
       of_work_suffix: 'de votre temps',

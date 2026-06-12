@@ -12,6 +12,7 @@ import Svg, {
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import type { SavingsRateSnapshot } from '~/services/widgetSnapshot.shared';
 import { FONT } from '~/utils/fonts';
 
@@ -99,8 +100,8 @@ export function SavingsRateWidgetContent({
       : themeColors.coral;
   const savedFillPct = data.isPositive ? Math.max(0, Math.min(1, data.savingsRate)) * 100 : 0;
   const subtitle = !data.hasIncome
-    ? 'Add income to see your rate'
-    : data.timeEquivalentLabel || 'of income saved';
+    ? I18n.t('widgets.add_income_hint')
+    : data.timeEquivalentLabel || I18n.t('widgets.of_income_saved');
 
   return (
     <View style={styles.pad}>
@@ -162,7 +163,7 @@ export function SavingsRateWidgetContent({
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: themeColors.error }]} />
             <Text variant="caption" tone="muted" numberOfLines={1}>
-              Spent {data.expenseLabel}
+              {I18n.t('widgets.spent')} {data.expenseLabel}
             </Text>
           </View>
         </View>

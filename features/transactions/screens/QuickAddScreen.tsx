@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
+import { getFeatureAnnouncementById } from '~/features/news/featureAnnouncements';
 import {
   type ExpandToDetailedValues,
   QuickAddSheet,
@@ -71,16 +73,23 @@ export function QuickAddScreen({
   const voicePromptVisible =
     voiceSupported && !quickEntryPrefs.voiceInputEnabled && !quickEntryPrefs.voicePromptDismissed;
 
+  // Enabling from the prompt opens the voice announcement (which carries the
+  // showcase and an in-place enable toggle) rather than sending the user off to
+  // settings.
+  const voiceAnnouncement = useMemo(
+    () => getFeatureAnnouncementById('voice_transactions_2026_06'),
+    [],
+  );
+  const [voiceAnnouncementVisible, setVoiceAnnouncementVisible] = useState(false);
+
   const handleDismissVoicePrompt = useCallback(() => {
     updateQuickEntryPrefs({ voicePromptDismissed: true });
   }, [updateQuickEntryPrefs]);
 
   const handleEnableVoice = useCallback(() => {
-    onOpenQuickEntrySettings?.();
-    requestAnimationFrame(() => {
-      updateQuickEntryPrefs({ voicePromptDismissed: true });
-    });
-  }, [onOpenQuickEntrySettings, updateQuickEntryPrefs]);
+    setVoiceAnnouncementVisible(true);
+    updateQuickEntryPrefs({ voicePromptDismissed: true });
+  }, [updateQuickEntryPrefs]);
 
   const handleSubmit = useCallback(
     (input: CreateTransactionInput) => {
@@ -111,29 +120,38 @@ export function QuickAddScreen({
   );
 
   return (
-    <QuickAddSheet
-      settings={settings}
-      accounts={accounts}
-      accountGroups={accountGroups}
-      categories={categories}
-      transactions={transactions}
-      isSimpleMode={!!isSimpleMode}
-      simpleWalletId={simpleWalletId ?? null}
-      initialAccountId={initialAccountId}
-      initialType={initialValues?.type}
-      initialDate={initialDate}
-      initialAmount={initialValues?.amount}
-      initialNote={initialValues?.note}
-      initialCategoryId={initialValues?.categoryId ?? null}
-      trueHourlyRate={trueHourlyRate}
-      quickEntryPrefs={quickEntryPrefs}
-      onClose={onClose}
-      onSubmit={handleSubmit}
-      onExpandToDetailed={onExpandToDetailed ? handleExpand : undefined}
-      onOpenQuickEntrySettings={onOpenQuickEntrySettings}
-      voicePromptVisible={voicePromptVisible}
-      onEnableVoice={handleEnableVoice}
-      onDismissVoicePrompt={handleDismissVoicePrompt}
-    />
+    <>
+      <QuickAddSheet
+        settings={settings}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        categories={categories}
+        transactions={transactions}
+        isSimpleMode={!!isSimpleMode}
+        simpleWalletId={simpleWalletId ?? null}
+        initialAccountId={initialAccountId}
+        initialType={initialValues?.type}
+        initialDate={initialDate}
+        initialAmount={initialValues?.amount}
+        initialNote={initialValues?.note}
+        initialCategoryId={initialValues?.categoryId ?? null}
+        trueHourlyRate={trueHourlyRate}
+        quickEntryPrefs={quickEntryPrefs}
+        onClose={onClose}
+        onSubmit={handleSubmit}
+        onExpandToDetailed={onExpandToDetailed ? handleExpand : undefined}
+        onOpenQuickEntrySettings={onOpenQuickEntrySettings}
+        voicePromptVisible={voicePromptVisible}
+        onEnableVoice={handleEnableVoice}
+        onDismissVoicePrompt={handleDismissVoicePrompt}
+      />
+      {voiceAnnouncement ? (
+        <FeatureAnnouncementModal
+          announcement={voiceAnnouncement}
+          visible={voiceAnnouncementVisible}
+          onDismiss={() => setVoiceAnnouncementVisible(false)}
+        />
+      ) : null}
+    </>
   );
 }

@@ -12,7 +12,13 @@ import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
 
-import type { FeatureAnnouncement, FeatureAnnouncementPage } from '../featureAnnouncements';
+import {
+  announcementCtaLabel,
+  announcementPageBody,
+  announcementPageTitle,
+  type FeatureAnnouncement,
+  type FeatureAnnouncementPage,
+} from '../featureAnnouncements';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 
@@ -183,7 +189,7 @@ export function FeatureAnnouncementModal({
             <View style={styles.dotsRow}>
               {announcement.pages.map((item, index) => (
                 <View
-                  key={item.title}
+                  key={item.key}
                   style={[
                     styles.dot,
                     {
@@ -206,7 +212,7 @@ export function FeatureAnnouncementModal({
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Dismiss"
+            accessibilityLabel={I18n.t('common.close')}
             onPress={onDismiss}
             hitSlop={8}
             style={[
@@ -220,10 +226,10 @@ export function FeatureAnnouncementModal({
           <View style={styles.body}>
             <View style={styles.textArea}>
               <Text variant="heading" style={{ color: colors.text }}>
-                {page.title}
+                {announcementPageTitle(announcement, page)}
               </Text>
               <Text variant="friendly" tone="muted" className="mt-2">
-                {page.body}
+                {announcementPageBody(announcement, page)}
               </Text>
             </View>
 
@@ -247,7 +253,9 @@ export function FeatureAnnouncementModal({
                 </View>
                 <View style={styles.toggleText}>
                   <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.text }}>
-                    {page.ctaLabel ?? I18n.t('settings.quick_entry.voice.suggest_enable')}
+                    {page.cta
+                      ? announcementCtaLabel(page.cta)
+                      : I18n.t('settings.quick_entry.voice.suggest_enable')}
                   </Text>
                   <Text variant="caption" tone="muted" numberOfLines={1}>
                     {quickEntryPrefs.voiceInputEnabled ? I18n.t('common.on') : I18n.t('common.off')}

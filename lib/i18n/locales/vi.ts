@@ -67,6 +67,66 @@ const vi = {
       placeholder: 'Chọn',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Bật nhập bằng giọng nói',
+    },
+    showcase: {
+      this_month: 'Tháng này',
+      past_7_days: '7 ngày qua',
+      income: 'Thu nhập',
+      expense: 'Chi tiêu',
+      voice_heard: 'ĐÃ NGHE',
+      voice_category: 'Di chuyển',
+      voice_logged: 'Ghi bằng giọng nói',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Tiện ích trên màn hình chính',
+      overview: {
+        title: 'Money2Time trên màn hình chính',
+        body: 'Xem bạn đã chi bao nhiêu trong tháng này, và nó tốn bao nhiêu giờ làm việc, mà không cần mở ứng dụng.',
+      },
+      quick_log: {
+        title: 'Ghi lại chỉ với một chạm',
+        body: 'Một tiện ích nhỏ gọn với các nút nhanh để thêm khoản chi hoặc thu ngay khoảnh khắc nó xảy ra.',
+      },
+      week: {
+        title: 'Tuần của bạn trong nháy mắt',
+        body: 'Một cột cho mỗi ngày trong bảy ngày qua, để ngày chi tiêu nhiều nổi bật ngay lập tức.',
+      },
+      month: {
+        title: 'Cả tháng của bạn, trên một bản đồ',
+        body: 'Thu nhập và chi tiêu của mỗi ngày trong tháng, giống như lịch trong ứng dụng.',
+      },
+      savings: {
+        title: 'Bạn giữ lại được bao nhiêu',
+        body: 'Tỷ lệ tiết kiệm tháng này trong nháy mắt — số bạn giữ lại so với số bạn chi, tính bằng tiền và giờ làm việc.',
+      },
+      trend: {
+        title: 'Xu hướng tiết kiệm của bạn',
+        body: 'Tỷ lệ tiết kiệm của sáu tháng gần nhất trong một khung nhìn, để bạn thấy mình có đang đi đúng hướng hay không.',
+      },
+    },
+    voice_transactions: {
+      title: 'Thêm giao dịch bằng giọng nói',
+      say_it: {
+        title: 'Cứ nói ra thôi',
+        body: 'Giữ nút + và nói, như "taxi 30" hoặc "cà phê 4.50". Chúng tôi nhận ra số tiền và danh mục cho bạn, tất cả ngay trên điện thoại của bạn.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Đã tiết kiệm',
+    overspent: 'Chi vượt mức',
+    spent: 'Đã chi',
+    of_income_saved: 'thu nhập đã tiết kiệm',
+    add_income_hint: 'Thêm thu nhập để xem tỷ lệ của bạn',
+    set_hourly_value: 'Đặt giá trị mỗi giờ trong ứng dụng',
+    of_work: '{{hours}} làm việc',
+    of_work_kept: '≈ {{hours}} làm việc giữ lại',
+    of_work_behind: '≈ {{hours}} làm việc thiếu hụt',
+  },
   home: {
     converter: {
       of_work_suffix: 'thời gian làm việc',
