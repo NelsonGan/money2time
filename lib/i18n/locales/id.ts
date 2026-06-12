@@ -67,6 +67,66 @@ const id = {
       placeholder: 'Pilih',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Aktifkan input suara',
+    },
+    showcase: {
+      this_month: 'Bulan ini',
+      past_7_days: '7 hari terakhir',
+      income: 'Pemasukan',
+      expense: 'Pengeluaran',
+      voice_heard: 'TERDENGAR',
+      voice_category: 'Transportasi',
+      voice_logged: 'Dicatat lewat suara',
+      voice_example: 'taksi 30',
+    },
+    home_widgets: {
+      title: 'Widget Layar Beranda',
+      overview: {
+        title: 'Money2Time di layar beranda Anda',
+        body: 'Lihat berapa yang sudah Anda belanjakan bulan ini, dan berapa nilainya dalam jam kerja, tanpa membuka aplikasi.',
+      },
+      quick_log: {
+        title: 'Catat dengan satu ketukan',
+        body: 'Widget mungil dengan tombol cepat untuk menambah pengeluaran atau pemasukan saat itu juga.',
+      },
+      week: {
+        title: 'Minggu Anda sekilas',
+        body: 'Satu batang untuk masing-masing tujuh hari terakhir, sehingga hari dengan pengeluaran besar langsung terlihat.',
+      },
+      month: {
+        title: 'Seluruh bulan Anda, terpetakan',
+        body: 'Pemasukan dan pengeluaran setiap hari dalam sebulan, seperti kalender di aplikasi.',
+      },
+      savings: {
+        title: 'Berapa yang Anda sisihkan',
+        body: 'Tingkat tabungan Anda bulan ini sekilas — yang Anda sisihkan dibanding yang Anda belanjakan, dalam uang dan jam kerja.',
+      },
+      trend: {
+        title: 'Tren tabungan Anda',
+        body: 'Tingkat tabungan enam bulan terakhir dalam satu tampilan, agar Anda tahu apakah arahnya sudah benar.',
+      },
+    },
+    voice_transactions: {
+      title: 'Tambah Transaksi dengan Suara',
+      say_it: {
+        title: 'Cukup ucapkan',
+        body: 'Tahan tombol + dan ucapkan, seperti "taksi 30" atau "kopi 4.50". Kami menangkap nominal dan kategorinya untuk Anda, semua di ponsel Anda.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Ditabung',
+    overspent: 'Boros',
+    spent: 'Dibelanjakan',
+    of_income_saved: 'dari pemasukan ditabung',
+    add_income_hint: 'Tambahkan pemasukan untuk melihat tingkat Anda',
+    set_hourly_value: 'Atur nilai per jam di aplikasi',
+    of_work: '{{hours}} kerja',
+    of_work_kept: '≈ {{hours}} kerja disisihkan',
+    of_work_behind: '≈ {{hours}} kerja tekor',
+  },
   home: {
     converter: {
       of_work_suffix: 'waktu kerjamu',

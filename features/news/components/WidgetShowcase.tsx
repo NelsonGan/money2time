@@ -8,6 +8,7 @@ import { Text } from '~/components/ui';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { buildSampleWidgetSnapshot } from '~/services/widgetSnapshot.shared';
 import { FONT } from '~/utils/fonts';
 
@@ -86,7 +87,7 @@ function ActionPill({ tone }: { tone: 'income' | 'expense' }) {
         )}
       </View>
       <Text variant="caption" style={[styles.pillLabel, { color: accent }]}>
-        {isIncome ? 'Income' : 'Expense'}
+        {isIncome ? I18n.t('news.showcase.income') : I18n.t('news.showcase.expense')}
       </Text>
     </View>
   );
@@ -101,7 +102,7 @@ function MonthlyContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleW
       <View style={styles.monthlyBody}>
         <View style={styles.flexMin}>
           <Text variant="label" tone="muted" style={styles.eyebrow}>
-            This month
+            {I18n.t('news.showcase.this_month')}
           </Text>
           <Text
             style={[styles.bigAmount, { color: themeColors.error }]}
@@ -157,7 +158,7 @@ function QuickAddContent({ snapshot }: { snapshot: ReturnType<typeof buildSample
     <View style={styles.pad}>
       <View style={styles.flexCenter}>
         <Text variant="label" tone="muted" style={styles.eyebrow}>
-          This month
+          {I18n.t('news.showcase.this_month')}
         </Text>
         <Text
           style={[styles.smallAmount, { color: themeColors.error }]}
@@ -191,7 +192,7 @@ function WeeklyContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleWi
         <Banner />
         <View style={{ alignItems: 'flex-end' }}>
           <Text variant="label" tone="muted" style={styles.eyebrow}>
-            Past 7 days
+            {I18n.t('news.showcase.past_7_days')}
           </Text>
           <Text style={[styles.totalAmount, { color: themeColors.error }]} numberOfLines={1}>
             {data.totalLabel}

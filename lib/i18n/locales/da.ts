@@ -67,6 +67,66 @@ const da = {
       placeholder: 'Vælg',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Aktivér stemmeinput',
+    },
+    showcase: {
+      this_month: 'Denne måned',
+      past_7_days: 'Sidste 7 dage',
+      income: 'Indtægt',
+      expense: 'Udgift',
+      voice_heard: 'HØRT',
+      voice_category: 'Transport',
+      voice_logged: 'Registreret via stemme',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widgets på startskærmen',
+      overview: {
+        title: 'Money2Time på din startskærm',
+        body: 'Se, hvad du har brugt denne måned, og hvad det koster i arbejdstimer – uden at åbne appen.',
+      },
+      quick_log: {
+        title: 'Registrér med ét tryk',
+        body: 'En lommevenlig widget med hurtige knapper til at tilføje en udgift eller indtægt i samme øjeblik, den sker.',
+      },
+      week: {
+        title: 'Din uge på et øjeblik',
+        body: 'En søjle for hver af de seneste syv dage, så en dag med højt forbrug straks springer i øjnene.',
+      },
+      month: {
+        title: 'Hele din måned, kortlagt',
+        body: 'Indtægter og udgifter for hver dag i måneden, ligesom kalenderen i appen.',
+      },
+      savings: {
+        title: 'Hvor meget du beholder',
+        body: 'Din opsparingsrate denne måned på et øjeblik – hvad du beholdt mod hvad du brugte, i penge og arbejdstimer.',
+      },
+      trend: {
+        title: 'Din opsparingstendens',
+        body: 'De seneste seks måneders opsparingsrater i én visning, så du kan se, om du er på rette vej.',
+      },
+    },
+    voice_transactions: {
+      title: 'Tilføj transaktioner med stemmen',
+      say_it: {
+        title: 'Bare sig det',
+        body: 'Hold +-knappen nede og sig det, f.eks. "taxi 30" eller "kaffe 4.50". Vi finder beløbet og kategorien for dig – alt sammen på din telefon.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Sparet',
+    overspent: 'Overforbrug',
+    spent: 'Brugt',
+    of_income_saved: 'af indtægten sparet',
+    add_income_hint: 'Tilføj indtægt for at se din rate',
+    set_hourly_value: 'Angiv timeløn i appen',
+    of_work: '{{hours}} arbejde',
+    of_work_kept: '≈ {{hours}} arbejde beholdt',
+    of_work_behind: '≈ {{hours}} arbejde bagud',
+  },
   home: {
     converter: {
       of_work_suffix: 'af din tid',

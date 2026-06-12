@@ -67,6 +67,66 @@ const zh = {
       placeholder: '选择',
     },
   },
+  news: {
+    cta: {
+      enable_voice: '开启语音输入',
+    },
+    showcase: {
+      this_month: '本月',
+      past_7_days: '过去 7 天',
+      income: '收入',
+      expense: '支出',
+      voice_heard: '已听到',
+      voice_category: '交通',
+      voice_logged: '语音记录',
+      voice_example: '打车 30',
+    },
+    home_widgets: {
+      title: '主屏幕小组件',
+      overview: {
+        title: '主屏幕上的 Money2Time',
+        body: '无需打开应用，即可查看本月已花多少，以及它相当于多少工作小时。',
+      },
+      quick_log: {
+        title: '一键记账',
+        body: '小巧的小组件，带有快捷按钮，让你在花钱或收入发生的那一刻立即添加。',
+      },
+      week: {
+        title: '一眼看清你的一周',
+        body: '过去七天每天一根柱状图，让花得多的那天一眼就突出。',
+      },
+      month: {
+        title: '整月一览无余',
+        body: '和应用内日历一样，显示当月每一天的收入和支出。',
+      },
+      savings: {
+        title: '你留住了多少',
+        body: '一眼看清本月储蓄率——你留下的与花掉的对比，以金额和工作小时呈现。',
+      },
+      trend: {
+        title: '你的储蓄趋势',
+        body: '在一个视图中查看最近六个月的储蓄率，看看你是否走在正确的方向上。',
+      },
+    },
+    voice_transactions: {
+      title: '用语音添加交易',
+      say_it: {
+        title: '说出来就行',
+        body: '按住 + 按钮说出来，例如“打车 30”或“咖啡 4.50”。我们会为你识别金额和分类，全部在你的手机上完成。',
+      },
+    },
+  },
+  widgets: {
+    saved: '已存',
+    overspent: '超支',
+    spent: '已花',
+    of_income_saved: '的收入已存下',
+    add_income_hint: '添加收入以查看你的储蓄率',
+    set_hourly_value: '在应用中设置时薪',
+    of_work: '{{hours}}的工作',
+    of_work_kept: '≈ 保住{{hours}}的工作',
+    of_work_behind: '≈ 透支{{hours}}的工作',
+  },
   home: {
     converter: {
       of_work_suffix: '工作时间',

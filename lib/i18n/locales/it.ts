@@ -67,6 +67,66 @@ const it = {
       placeholder: 'Seleziona',
     },
   },
+  news: {
+    cta: {
+      enable_voice: "Attiva l'input vocale",
+    },
+    showcase: {
+      this_month: 'Questo mese',
+      past_7_days: 'Ultimi 7 giorni',
+      income: 'Entrata',
+      expense: 'Spesa',
+      voice_heard: 'SENTITO',
+      voice_category: 'Trasporti',
+      voice_logged: 'Registrato a voce',
+      voice_example: 'taxi 30',
+    },
+    home_widgets: {
+      title: 'Widget nella schermata Home',
+      overview: {
+        title: 'Money2Time nella tua schermata Home',
+        body: "Vedi quanto hai speso questo mese e quanto costa in ore di lavoro, senza aprire l'app.",
+      },
+      quick_log: {
+        title: 'Registra con un tocco',
+        body: "Un widget tascabile con pulsanti rapidi per aggiungere una spesa o un'entrata nel momento stesso in cui accade.",
+      },
+      week: {
+        title: "La tua settimana a colpo d'occhio",
+        body: "Una barra per ciascuno degli ultimi sette giorni, così una giornata di spese elevate salta subito all'occhio.",
+      },
+      month: {
+        title: 'Tutto il tuo mese, mappato',
+        body: "Entrate e spese per ogni giorno del mese, proprio come il calendario nell'app.",
+      },
+      savings: {
+        title: 'Quanto metti da parte',
+        body: "Il tuo tasso di risparmio di questo mese a colpo d'occhio: quanto hai conservato rispetto a quanto hai speso, in denaro e ore di lavoro.",
+      },
+      trend: {
+        title: 'Il tuo andamento di risparmio',
+        body: "I tassi di risparmio degli ultimi sei mesi in un'unica vista, per capire se stai andando nella giusta direzione.",
+      },
+    },
+    voice_transactions: {
+      title: 'Aggiungi transazioni con la voce',
+      say_it: {
+        title: 'Basta dirlo',
+        body: 'Tieni premuto il pulsante + e dillo, come "taxi 30" o "caffè 4.50". Rileviamo importo e categoria per te, tutto sul tuo telefono.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Risparmiato',
+    overspent: 'Speso troppo',
+    spent: 'Speso',
+    of_income_saved: 'del reddito risparmiato',
+    add_income_hint: "Aggiungi un'entrata per vedere il tuo tasso",
+    set_hourly_value: "Imposta il valore orario nell'app",
+    of_work: '{{hours}} di lavoro',
+    of_work_kept: '≈ {{hours}} di lavoro conservate',
+    of_work_behind: '≈ {{hours}} di lavoro in deficit',
+  },
   home: {
     converter: {
       of_work_suffix: 'del tuo tempo',

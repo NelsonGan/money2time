@@ -67,6 +67,66 @@ const en = {
       placeholder: 'Select',
     },
   },
+  news: {
+    cta: {
+      enable_voice: 'Enable voice input',
+    },
+    showcase: {
+      this_month: 'This month',
+      past_7_days: 'Past 7 days',
+      income: 'Income',
+      expense: 'Expense',
+      voice_heard: 'HEARD',
+      voice_category: 'Transport',
+      voice_logged: 'Logged by voice',
+      voice_example: 'uber 30',
+    },
+    home_widgets: {
+      title: 'Home Screen Widgets',
+      overview: {
+        title: 'Money2Time on your home screen',
+        body: 'See what you have spent this month, and what it costs in hours of work, without opening the app.',
+      },
+      quick_log: {
+        title: 'Log in one tap',
+        body: 'A pocket-sized widget with quick buttons to add an expense or income the moment it happens.',
+      },
+      week: {
+        title: 'Your week at a glance',
+        body: 'A bar for each of the last seven days, so a heavy spending day stands out instantly.',
+      },
+      month: {
+        title: 'Your whole month, mapped',
+        body: 'Income and expenses on every day of the month, just like the in-app calendar.',
+      },
+      savings: {
+        title: 'How much you keep',
+        body: 'Your savings rate this month at a glance — what you kept versus what you spent, in money and hours of work.',
+      },
+      trend: {
+        title: 'Your savings trend',
+        body: 'The last six months of savings rates in one view, so you can see whether you are heading the right way.',
+      },
+    },
+    voice_transactions: {
+      title: 'Add Transactions by Voice',
+      say_it: {
+        title: 'Just say it',
+        body: 'Hold the + button and say it, like "uber 30" or "coffee 4.50". We pick up the amount and category for you, all on your phone.',
+      },
+    },
+  },
+  widgets: {
+    saved: 'Saved',
+    overspent: 'Overspent',
+    spent: 'Spent',
+    of_income_saved: 'of income saved',
+    add_income_hint: 'Add income to see your rate',
+    set_hourly_value: 'Set hourly value in app',
+    of_work: '{{hours}} of work',
+    of_work_kept: '≈ {{hours}} of work kept',
+    of_work_behind: '≈ {{hours}} of work behind',
+  },
   home: {
     converter: {
       of_work_suffix: 'of your time',
