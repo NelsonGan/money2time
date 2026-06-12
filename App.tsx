@@ -1357,7 +1357,12 @@ function AppContent() {
     let cancelled = false;
     const interactionHandle = InteractionManager.runAfterInteractions(() => {
       void (async () => {
-        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(settings.appUserId);
+        const voiceSupported = await isSpeechRecognitionAvailable();
+        if (cancelled) return;
+        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(
+          settings.appUserId,
+          voiceSupported ? ['voice'] : [],
+        );
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
         setFeatureAnnouncementVisible(true);

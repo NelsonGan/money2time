@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
-  getLatestUnseenFeatureAnnouncement,
+  type AnnouncementCapability,
   type FeatureAnnouncement,
+  getLatestUnseenFeatureAnnouncement,
 } from '~/features/news/featureAnnouncements';
 
 const FEATURE_ANNOUNCEMENT_STORAGE_PREFIX = 'money2time.featureAnnouncements.seenIds';
@@ -35,9 +36,10 @@ export async function markFeatureAnnouncementSeen(appUserId: string, announcemen
 
 export async function getLatestUnseenAnnouncementForUser(
   appUserId: string,
+  availableCapabilities: readonly AnnouncementCapability[] = [],
 ): Promise<FeatureAnnouncement | null> {
   const seenIds = await getSeenFeatureAnnouncementIds(appUserId);
-  return getLatestUnseenFeatureAnnouncement(seenIds);
+  return getLatestUnseenFeatureAnnouncement(seenIds, { availableCapabilities });
 }
 
 export const featureAnnouncementStateTestUtils = {
