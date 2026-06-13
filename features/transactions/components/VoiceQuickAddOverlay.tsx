@@ -329,11 +329,14 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     if (!isPro) {
       const used = quickEntryPrefs.voiceUsageCount;
       if (used >= PRO_LIMITS.FREE_VOICE_TOTAL_USES) {
-        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'voice' });
-        requestOpenPaywall(
-          'voice',
-          I18n.t('pro.limit_voice', { count: PRO_LIMITS.FREE_VOICE_TOTAL_USES }),
-        );
+        const message = I18n.t('pro.limit_voice', { count: PRO_LIMITS.FREE_VOICE_TOTAL_USES });
+        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, {
+          type: 'voice',
+          limit: PRO_LIMITS.FREE_VOICE_TOTAL_USES,
+          current_count: used,
+          message,
+        });
+        requestOpenPaywall('voice', message);
         // Roll back our session-gen claim so a follow-up press isn't stuck
         // behind a stale "in-flight" gen.
         sessionGenRef.current--;

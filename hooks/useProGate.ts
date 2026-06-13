@@ -24,10 +24,17 @@ export function useProGate() {
       const limit = LIMIT_MAP[type];
       if (currentCount < limit) return true;
 
-      void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type });
-
       const messageKey = `pro.limit_${type}` as const;
-      requestOpenPaywall(type, I18n.t(messageKey, { count: limit }));
+      const message = I18n.t(messageKey, { count: limit });
+
+      void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, {
+        type,
+        limit,
+        current_count: currentCount,
+        message,
+      });
+
+      requestOpenPaywall(type, message);
       return false;
     },
     [isPro],
