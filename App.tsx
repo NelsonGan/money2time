@@ -1514,6 +1514,7 @@ function AppContent() {
         announcement={featureAnnouncement}
         visible={featureAnnouncementVisible}
         onDismiss={handleDismissFeatureAnnouncement}
+        source="auto_popup"
       />
       <ReviewPrePromptSheet />
     </View>
