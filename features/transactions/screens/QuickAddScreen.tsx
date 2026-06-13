@@ -150,6 +150,7 @@ export function QuickAddScreen({
           announcement={voiceAnnouncement}
           visible={voiceAnnouncementVisible}
           onDismiss={() => setVoiceAnnouncementVisible(false)}
+          source="voice_prompt"
         />
       ) : null}
     </>

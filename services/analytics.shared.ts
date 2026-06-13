@@ -52,6 +52,12 @@ export const AnalyticsEvents = {
   // Insights
   INSIGHTS_DRILLDOWN_OPENED: 'Insights Drilldown Opened',
 
+  // News / feature announcements
+  NEWS_VIEWED: 'News Viewed',
+  ANNOUNCEMENT_VIEWED: 'Announcement Viewed',
+  ANNOUNCEMENT_DISMISSED: 'Announcement Dismissed',
+  ANNOUNCEMENT_CTA_TAPPED: 'Announcement CTA Tapped',
+
   // Settings
   SETTINGS_UPDATED: 'Settings Updated',
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',

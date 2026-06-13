@@ -1,5 +1,5 @@
 import { ChevronRight, Newspaper } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
@@ -13,6 +13,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 
 import { FeatureAnnouncementModal } from '../components/FeatureAnnouncementModal';
@@ -43,6 +44,13 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<FeatureAnnouncement | null>(
     null,
   );
+
+  useEffect(() => {
+    void trackEvent(AnalyticsEvents.NEWS_VIEWED, {
+      screen: 'News',
+      announcement_count: announcements.length,
+    });
+  }, [announcements.length]);
 
   return (
     <SettingsPageLayout>
@@ -88,6 +96,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
         announcement={selectedAnnouncement}
         visible={!!selectedAnnouncement}
         onDismiss={() => setSelectedAnnouncement(null)}
+        source="news_list"
       />
     </SettingsPageLayout>
   );

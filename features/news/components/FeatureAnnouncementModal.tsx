@@ -8,6 +8,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
@@ -22,10 +23,16 @@ import {
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 
+/** Where the announcement modal was opened from — distinguishes the
+ *  startup auto-popup, a manual open in the News list, and the voice prompt
+ *  shortcut surfaced from quick-add. */
+export type FeatureAnnouncementSource = 'auto_popup' | 'news_list' | 'voice_prompt';
+
 interface FeatureAnnouncementModalProps {
   announcement: FeatureAnnouncement | null;
   visible: boolean;
   onDismiss: () => void;
+  source: FeatureAnnouncementSource;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -83,6 +90,7 @@ export function FeatureAnnouncementModal({
   announcement,
   visible,
   onDismiss,
+  source,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -97,6 +105,18 @@ export function FeatureAnnouncementModal({
       setPageIndex(0);
     }
   }, [announcement?.id, visible]);
+
+  // Record one "viewed" event each time the modal opens (or swaps to a new
+  // announcement while open), regardless of which entry point surfaced it.
+  useEffect(() => {
+    if (!visible || !announcement) return;
+    void trackEvent(AnalyticsEvents.ANNOUNCEMENT_VIEWED, {
+      announcement_id: announcement.id,
+      announcement_number: announcement.announcementNumber,
+      page_count: announcement.pages.length,
+      source,
+    });
+  }, [announcement, visible, source]);
 
   const page = announcement?.pages[pageIndex] ?? null;
   const pageCount = announcement?.pages.length ?? 0;
@@ -122,9 +142,32 @@ export function FeatureAnnouncementModal({
     };
   }, [pageCta, visible]);
 
+  const handleDismiss = useCallback(() => {
+    if (announcement) {
+      void trackEvent(AnalyticsEvents.ANNOUNCEMENT_DISMISSED, {
+        announcement_id: announcement.id,
+        announcement_number: announcement.announcementNumber,
+        page_index: pageIndex,
+        page_count: announcement.pages.length,
+        completed: pageIndex >= announcement.pages.length - 1,
+        source,
+      });
+    }
+    onDismiss();
+  }, [announcement, onDismiss, pageIndex, source]);
+
   const handleToggleVoice = useCallback(
     async (next: boolean) => {
       void triggerHaptic('selection');
+      if (announcement) {
+        void trackEvent(AnalyticsEvents.ANNOUNCEMENT_CTA_TAPPED, {
+          announcement_id: announcement.id,
+          announcement_number: announcement.announcementNumber,
+          cta: 'enableVoice',
+          enabled: next,
+          source,
+        });
+      }
       if (!next) {
         updateQuickEntryPrefs({ voiceInputEnabled: false });
         return;
@@ -142,7 +185,7 @@ export function FeatureAnnouncementModal({
         setEnablingVoice(false);
       }
     },
-    [updateQuickEntryPrefs],
+    [announcement, source, updateQuickEntryPrefs],
   );
 
   if (!announcement || !page) {
@@ -164,7 +207,7 @@ export function FeatureAnnouncementModal({
   const handleNext = () => {
     void triggerHaptic('selection');
     if (isLastPage) {
-      onDismiss();
+      handleDismiss();
       return;
     }
     setPageIndex((prev) => Math.min(pageCount - 1, prev + 1));
@@ -176,7 +219,7 @@ export function FeatureAnnouncementModal({
       transparent
       animationType="fade"
       presentationStyle="overFullScreen"
-      onRequestClose={onDismiss}
+      onRequestClose={handleDismiss}
     >
       <View
         className="flex-1 justify-end bg-black/50 px-4"
@@ -213,7 +256,7 @@ export function FeatureAnnouncementModal({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
-            onPress={onDismiss}
+            onPress={handleDismiss}
             hitSlop={8}
             style={[
               styles.closeBtn,
