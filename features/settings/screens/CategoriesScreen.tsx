@@ -22,6 +22,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
+import { CATEGORY_ICON_PICKER_VALUES } from '~/constants/categoryIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -255,9 +256,9 @@ function CategoryEditor({
                     {I18n.t('categories.none')}
                   </Text>
                 </Pressable>
-                {(icon && !DEFAULT_CATEGORY_EMOJIS.includes(icon)
-                  ? [icon, ...DEFAULT_CATEGORY_EMOJIS]
-                  : DEFAULT_CATEGORY_EMOJIS
+                {(icon && !CATEGORY_ICON_PICKER_VALUES.includes(icon)
+                  ? [icon, ...CATEGORY_ICON_PICKER_VALUES]
+                  : CATEGORY_ICON_PICKER_VALUES
                 ).map((emoji) => (
                   <Pressable
                     key={emoji}
@@ -276,7 +277,11 @@ function CategoryEditor({
                         : 'bg-card border-border/40',
                     )}
                   >
-                    <Text className={cn(icon === emoji ? '' : 'opacity-80')}>{emoji}</Text>
+                    <CategoryEmoji
+                      icon={emoji}
+                      size={24}
+                      className={cn(icon === emoji ? '' : 'opacity-80')}
+                    />
                   </Pressable>
                 ))}
               </View>
@@ -436,7 +441,7 @@ function TopLevelRow({
           },
         ]}
       >
-        <CategoryEmoji style={styles.rowIconText} icon={item.icon} />
+        <CategoryEmoji style={styles.rowIconText} size={22} icon={item.icon} />
       </View>
       <Pressable
         onPress={() => onNavigate(item)}
@@ -513,7 +518,12 @@ function SubcategoryRow({
           },
         ]}
       >
-        <CategoryEmoji style={styles.rowIconText} icon={item.icon} parentIcon={parentIcon} />
+        <CategoryEmoji
+          style={styles.rowIconText}
+          size={22}
+          icon={item.icon}
+          parentIcon={parentIcon}
+        />
       </View>
       <Text style={[styles.rowTitle, styles.rowPrimaryPressable, { color: tc.text }]}>
         {item.name}

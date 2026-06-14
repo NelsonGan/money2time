@@ -462,6 +462,7 @@ const pt = {
       savings_rate: 'Poupança',
       expense_trend: 'Tend. despesa',
       income_trend: 'Tend. receita',
+      category_trend: 'Tendência por categoria',
       expense_sentiment: 'Humor',
       asset_history: 'Ativos',
       income_rate_history: 'Valor/hora',
@@ -484,6 +485,9 @@ const pt = {
     income_trend: 'Tendência de receitas',
     income_trend_description:
       'Acompanhe a receita mensal ao longo do ano e identifique seus meses mais fortes.',
+    category_trend: 'Tendência por categoria',
+    category_trend_description:
+      'Escolha uma categoria e acompanhe como os gastos evoluem ao longo do tempo.',
     expense_sentiment: 'Humor nas despesas',
     expense_sentiment_description:
       'Veja o humor por trás dos seus gastos — feliz, neutro ou arrependido — dia a dia.',
@@ -556,6 +560,11 @@ const pt = {
         transactions: '{{count}} transações',
         no_data_title: 'Sem tendência de receitas ainda',
         no_data_message: 'Adicione receitas para ver a tendência.',
+      },
+      category_trend: {
+        no_data_title: 'Sem gastos nesta categoria',
+        no_data_message:
+          'Escolha outra categoria ou período, ou adicione despesas para ver a tendência.',
       },
       expense_sentiment: {
         summary_title: 'Distribuição de humor',

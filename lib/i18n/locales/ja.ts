@@ -461,6 +461,7 @@ const ja = {
       savings_rate: '貯蓄率',
       expense_trend: '支出トレンド',
       income_trend: '収入トレンド',
+      category_trend: 'カテゴリ傾向',
       expense_sentiment: '気分',
       asset_history: '資産',
       income_rate_history: '時給',
@@ -478,6 +479,8 @@ const ja = {
     expense_trend_description: '年間の月別支出を追跡し、出費が多い月をすぐに把握できます。',
     income_trend: '収入トレンド',
     income_trend_description: '年間の月別収入を追跡し、収入が最も多い月をすぐに確認できます。',
+    category_trend: 'カテゴリ傾向',
+    category_trend_description: 'カテゴリを選び、支出の推移を時系列で確認できます。',
     expense_sentiment: '支出の気分',
     expense_sentiment_description: '支出時の気分（ハッピー・普通・後悔）を日別に確認できます。',
     asset_history: '資産履歴',
@@ -547,6 +550,10 @@ const ja = {
         transactions: '{{count}} 件の取引',
         no_data_title: '収入トレンドがありません',
         no_data_message: '収入を追加するとトレンドが表示されます。',
+      },
+      category_trend: {
+        no_data_title: 'このカテゴリの支出はありません',
+        no_data_message: '別のカテゴリや期間を選ぶか、支出を追加して傾向を確認してください。',
       },
       expense_sentiment: {
         summary_title: '気分の内訳',

@@ -462,6 +462,7 @@ const fr = {
       savings_rate: 'Épargne',
       expense_trend: 'Tendance dépenses',
       income_trend: 'Tendance revenus',
+      category_trend: 'Tendance par catégorie',
       expense_sentiment: 'Humeur',
       asset_history: 'Actifs',
       income_rate_history: 'Taux horaire',
@@ -483,6 +484,9 @@ const fr = {
     income_trend: 'Tendance des revenus',
     income_trend_description:
       "Suivez les revenus mensuels sur l'année et repérez vos meilleurs mois.",
+    category_trend: 'Tendance par catégorie',
+    category_trend_description:
+      "Choisissez une catégorie et suivez l'évolution de ses dépenses au fil du temps.",
     expense_sentiment: 'Sentiment des dépenses',
     expense_sentiment_description:
       "Visualisez l'humeur derrière vos dépenses — heureux, neutre ou regret — jour par jour.",
@@ -555,6 +559,11 @@ const fr = {
         transactions: '{{count}} transactions',
         no_data_title: 'Aucune tendance de revenus',
         no_data_message: 'Ajoutez des transactions de revenus pour voir la tendance.',
+      },
+      category_trend: {
+        no_data_title: 'Aucune dépense dans cette catégorie',
+        no_data_message:
+          'Choisissez une autre catégorie ou période, ou ajoutez des dépenses pour voir la tendance.',
       },
       expense_sentiment: {
         summary_title: "Répartition de l'humeur",

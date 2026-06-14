@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import {
   AccountPickerSheet,
+  CategoryEmoji,
   CategoryPickerSheet,
   type CategoryPickerOption,
   Text,
@@ -154,7 +155,7 @@ export function VoicePreviewSheet({
               {I18n.t('settings.quick_entry.voice.preview_category')}
             </Text>
             <View style={styles.rowValueRow}>
-              <Text style={styles.emoji}>{data.category?.icon || '🏷️'}</Text>
+              <CategoryEmoji icon={data.category?.icon || '🏷️'} size={16} style={styles.emoji} />
               <Text
                 variant="body"
                 style={[styles.rowValue, { color: themeColors.text }]}

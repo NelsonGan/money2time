@@ -462,6 +462,7 @@ const en = {
       savings_rate: 'Savings',
       expense_trend: 'Expense trend',
       income_trend: 'Income trend',
+      category_trend: 'Category trend',
       expense_sentiment: 'Mood',
       asset_history: 'Assets',
       income_rate_history: 'Hourly rate',
@@ -484,6 +485,9 @@ const en = {
     income_trend: 'Income trend',
     income_trend_description:
       'Track monthly income across the year and spot your strongest months fast.',
+    category_trend: 'Category trend',
+    category_trend_description:
+      'Pick a category and track how its spending trends over the month or year.',
     expense_sentiment: 'Expense sentiment',
     expense_sentiment_description:
       'See the mood behind your spending — happy, neutral, or regretful — day by day.',
@@ -555,6 +559,10 @@ const en = {
         transactions: '{{count}} transactions',
         no_data_title: 'No income trend yet',
         no_data_message: 'Add income transactions to see the trend.',
+      },
+      category_trend: {
+        no_data_title: 'No spending in this category',
+        no_data_message: 'Pick another category or period, or add expenses to see the trend.',
       },
       expense_sentiment: {
         summary_title: 'Mood breakdown',

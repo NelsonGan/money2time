@@ -463,6 +463,7 @@ const nl = {
       savings_rate: 'Spaarquote',
       expense_trend: 'Uitgaventrend',
       income_trend: 'Inkomstentrend',
+      category_trend: 'Categorietrend',
       expense_sentiment: 'Stemming',
       asset_history: 'Vermogen',
       income_rate_history: 'Uurtarief',
@@ -485,6 +486,9 @@ const nl = {
     income_trend: 'Inkomstentrend',
     income_trend_description:
       'Volg de maandelijkse inkomsten over het jaar en ontdek je sterkste maanden.',
+    category_trend: 'Categorietrend',
+    category_trend_description:
+      'Kies een categorie en volg hoe de uitgaven zich in de loop van de tijd ontwikkelen.',
     expense_sentiment: 'Uitgavengevoel',
     expense_sentiment_description:
       'Zie de stemming achter je uitgaven — blij, neutraal of spijt — dag voor dag.',
@@ -557,6 +561,11 @@ const nl = {
         transactions: '{{count}} transacties',
         no_data_title: 'Nog geen inkomstentrend',
         no_data_message: 'Voeg inkomstentransacties toe om de trend te zien.',
+      },
+      category_trend: {
+        no_data_title: 'Geen uitgaven in deze categorie',
+        no_data_message:
+          'Kies een andere categorie of periode, of voeg uitgaven toe om de trend te zien.',
       },
       expense_sentiment: {
         summary_title: 'Stemmingsverdeling',

@@ -461,6 +461,7 @@ const ko = {
       savings_rate: '저축률',
       expense_trend: '지출 추세',
       income_trend: '수입 추세',
+      category_trend: '카테고리 추세',
       expense_sentiment: '감정',
       asset_history: '자산',
       income_rate_history: '시급',
@@ -477,6 +478,8 @@ const ko = {
     expense_trend_description: '연간 월별 지출을 추적하고 압박이 큰 달을 빠르게 파악하세요.',
     income_trend: '수입 추세',
     income_trend_description: '연간 월별 수입을 추적하고 가장 좋은 달을 빠르게 파악하세요.',
+    category_trend: '카테고리 추세',
+    category_trend_description: '카테고리를 선택하고 지출 추세를 시간 흐름에 따라 확인하세요.',
     expense_sentiment: '지출 감정',
     expense_sentiment_description: '날별 지출 감정(기쁨, 보통, 후회)을 확인하세요.',
     asset_history: '자산 내역',
@@ -546,6 +549,10 @@ const ko = {
         transactions: '{{count}}건',
         no_data_title: '수입 추세 없음',
         no_data_message: '추세를 보려면 수입 거래를 추가하세요.',
+      },
+      category_trend: {
+        no_data_title: '이 카테고리에 지출이 없습니다',
+        no_data_message: '다른 카테고리나 기간을 선택하거나 지출을 추가하면 추세를 볼 수 있습니다.',
       },
       expense_sentiment: {
         summary_title: '감정 분포',

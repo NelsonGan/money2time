@@ -239,7 +239,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                     : '',
                             )}
                           >
-                            <CategoryEmoji icon={parent.icon} />
+                            <CategoryEmoji icon={parent.icon} size={20} />
                             <Text
                               variant="body"
                               numberOfLines={1}
@@ -298,7 +298,9 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                         : 'bg-card border-border/30',
                                     )}
                                   >
-                                    {showChildIcon ? <CategoryEmoji icon={child.icon} /> : null}
+                                    {showChildIcon ? (
+                                      <CategoryEmoji icon={child.icon} size={20} />
+                                    ) : null}
                                     <Text
                                       variant="body"
                                       numberOfLines={1}
