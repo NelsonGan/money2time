@@ -3,7 +3,7 @@
     "name": "Money2Time",
     "slug": "money2time",
     "scheme": "money2time",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
@@ -59,6 +59,7 @@
     },
     "plugins": [
       "./plugins/withGradleMemory",
+      "./plugins/withAndroidReleaseLint",
       "./plugins/withMoney2TimeWidgets",
       "expo-localization",
       "expo-notifications",
