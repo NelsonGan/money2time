@@ -454,6 +454,7 @@ const zh = {
       savings_rate: '储蓄率',
       expense_trend: '支出趋势',
       income_trend: '收入趋势',
+      category_trend: '分类趋势',
       expense_sentiment: '情绪',
       asset_history: '资产',
       income_rate_history: '时薪',
@@ -470,6 +471,8 @@ const zh = {
     expense_trend_description: '追踪全年每月支出，快速发现高压月份。',
     income_trend: '收入趋势',
     income_trend_description: '追踪全年每月收入，快速发现表现最强的月份。',
+    category_trend: '分类趋势',
+    category_trend_description: '选择一个分类，追踪其支出随时间的变化趋势。',
     expense_sentiment: '支出情绪',
     expense_sentiment_description: '按天查看支出时的情绪分布，例如开心、平静或后悔。',
     asset_history: '资产历史',
@@ -537,6 +540,10 @@ const zh = {
         transactions: '{{count}} 笔交易',
         no_data_title: '暂无收入趋势',
         no_data_message: '添加收入交易以查看趋势。',
+      },
+      category_trend: {
+        no_data_title: '该分类暂无支出',
+        no_data_message: '选择其他分类或时间段，或添加支出以查看趋势。',
       },
       expense_sentiment: {
         summary_title: '情绪分布',

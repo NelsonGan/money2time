@@ -15,6 +15,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { G, Text as SvgText } from 'react-native-svg';
 
 import {
+  CategoryEmoji,
   Input,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -1246,9 +1247,12 @@ export function InsightsDrilldownScreen({
                         ]}
                       >
                         <View className="flex-row items-center justify-between gap-2">
-                          <Text variant="caption" className="flex-1 pr-2" numberOfLines={2}>
-                            {item.emoji} {item.name}
-                          </Text>
+                          <View className="flex-1 flex-row items-center gap-1.5 pr-2">
+                            <CategoryEmoji icon={item.emoji} size={16} />
+                            <Text variant="caption" className="flex-1" numberOfLines={2}>
+                              {item.name}
+                            </Text>
+                          </View>
                           <View className="items-end">
                             <View className="flex-row items-center gap-1.5">
                               {renderSubcategoryValue(item.totalValue)}

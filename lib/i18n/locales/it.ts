@@ -463,6 +463,7 @@ const it = {
       savings_rate: 'Risparmio',
       expense_trend: 'Trend uscite',
       income_trend: 'Trend entrate',
+      category_trend: 'Andamento categoria',
       expense_sentiment: 'Umore',
       asset_history: 'Patrimonio',
       income_rate_history: 'Tariffa oraria',
@@ -483,6 +484,8 @@ const it = {
     expense_trend_description: "Monitora le spese mensili nell'anno e identifica i mesi critici.",
     income_trend: 'Trend entrate',
     income_trend_description: "Monitora le entrate mensili nell'anno e identifica i mesi migliori.",
+    category_trend: 'Andamento categoria',
+    category_trend_description: "Scegli una categoria e osserva l'andamento della spesa nel tempo.",
     expense_sentiment: 'Umore delle spese',
     expense_sentiment_description:
       "Vedi l'umore dietro le tue spese — felice, neutro o rimpianto — giorno per giorno.",
@@ -555,6 +558,11 @@ const it = {
         transactions: '{{count}} transazioni',
         no_data_title: 'Nessun trend entrate',
         no_data_message: 'Aggiungi transazioni di entrata per vedere il trend.',
+      },
+      category_trend: {
+        no_data_title: 'Nessuna spesa in questa categoria',
+        no_data_message:
+          "Scegli un'altra categoria o periodo, o aggiungi spese per vedere l'andamento.",
       },
       expense_sentiment: {
         summary_title: 'Ripartizione umore',

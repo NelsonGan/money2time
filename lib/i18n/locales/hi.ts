@@ -461,6 +461,7 @@ const hi = {
       savings_rate: 'बचत',
       expense_trend: 'खर्च ट्रेंड',
       income_trend: 'आय ट्रेंड',
+      category_trend: 'श्रेणी रुझान',
       expense_sentiment: 'मूड',
       asset_history: 'संपत्ति',
       income_rate_history: 'प्रति घंटा दर',
@@ -481,6 +482,8 @@ const hi = {
     expense_trend_description: 'साल भर मासिक खर्च ट्रैक करें और दबाव वाले महीने जल्दी पहचानें।',
     income_trend: 'आय ट्रेंड',
     income_trend_description: 'साल भर मासिक आय ट्रैक करें और अपने सबसे मजबूत महीने जल्दी पहचानें।',
+    category_trend: 'श्रेणी रुझान',
+    category_trend_description: 'एक श्रेणी चुनें और देखें कि समय के साथ उसका खर्च कैसे बदलता है।',
     expense_sentiment: 'खर्च भावना',
     expense_sentiment_description:
       'अपने खर्च के पीछे का मूड देखें — खुश, तटस्थ, या पछतावा — दिन-दर-दिन।',
@@ -551,6 +554,10 @@ const hi = {
         transactions: '{{count}} लेनदेन',
         no_data_title: 'अभी कोई आय ट्रेंड नहीं',
         no_data_message: 'ट्रेंड देखने के लिए आय लेनदेन जोड़ें।',
+      },
+      category_trend: {
+        no_data_title: 'इस श्रेणी में कोई खर्च नहीं',
+        no_data_message: 'दूसरी श्रेणी या अवधि चुनें, या रुझान देखने के लिए खर्च जोड़ें।',
       },
       expense_sentiment: {
         summary_title: 'मूड ब्रेकडाउन',

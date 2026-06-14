@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   AccountPickerSheet,
+  CategoryEmoji,
   type CategoryPickerOption,
   CategoryPickerSheet,
   SettingsHeader,
@@ -26,6 +27,9 @@ import type { Category } from '~/types';
 interface QuickEntrySettingsScreenProps {
   onBack: () => void;
 }
+
+// Icon shown in a default-category row when no category has been chosen yet.
+const QUICK_ENTRY_DEFAULT_ICON = 'question-mark';
 
 const BUCKET_KEYS: KeywordCategoryKey[] = [
   'food',
@@ -266,39 +270,52 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     fallbackLabel: string,
     onPress: () => void,
     badge?: string,
-  ) => (
-    <Pressable
-      onPress={onPress}
-      android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <View style={styles.row}>
-        <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-          <Text style={styles.iconBubbleEmoji}>{mapped?.icon || '🏷️'}</Text>
+  ) => {
+    const parent = mapped?.parentId ? (categoryById.get(mapped.parentId) ?? null) : null;
+    const categoryLabel = mapped
+      ? parent
+        ? `${parent.name} • ${mapped.name}`
+        : mapped.name
+      : fallbackLabel;
+    return (
+      <Pressable
+        onPress={onPress}
+        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <View style={styles.row}>
+          <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+            <CategoryEmoji
+              icon={mapped?.icon || QUICK_ENTRY_DEFAULT_ICON}
+              parentIcon={parent?.icon}
+              size={18}
+              style={styles.iconBubbleEmoji}
+            />
+          </View>
+          <View style={styles.rowText}>
+            <Text variant="body" className="text-foreground" numberOfLines={1}>
+              {title}
+            </Text>
+            <Text
+              variant="caption"
+              className={mapped ? 'text-foreground/70' : 'text-muted-foreground'}
+              numberOfLines={1}
+            >
+              {categoryLabel}
+            </Text>
+          </View>
+          <View style={styles.trailing}>
+            {badge ? (
+              <View style={[styles.badge, { backgroundColor: `${themeColors.primary}24` }]}>
+                <Text style={[styles.badgeText, { color: themeColors.primary }]}>{badge}</Text>
+              </View>
+            ) : null}
+            <ChevronRight size={16} color={themeColors.textMuted} />
+          </View>
         </View>
-        <View style={styles.rowText}>
-          <Text variant="body" className="text-foreground" numberOfLines={1}>
-            {title}
-          </Text>
-          <Text
-            variant="caption"
-            className={mapped ? 'text-foreground/70' : 'text-muted-foreground'}
-            numberOfLines={1}
-          >
-            {mapped?.name ?? fallbackLabel}
-          </Text>
-        </View>
-        <View style={styles.trailing}>
-          {badge ? (
-            <View style={[styles.badge, { backgroundColor: `${themeColors.primary}24` }]}>
-              <Text style={[styles.badgeText, { color: themeColors.primary }]}>{badge}</Text>
-            </View>
-          ) : null}
-          <ChevronRight size={16} color={themeColors.textMuted} />
-        </View>
-      </View>
-    </Pressable>
-  );
+      </Pressable>
+    );
+  };
 
   return (
     <SettingsPageLayout>
@@ -350,13 +367,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
                     style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                   >
                     <View style={styles.row}>
-                      <View
-                        style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
-                      >
-                        <Text style={styles.iconBubbleEmoji}>
-                          {defaultAccount?.type === 'credit' ? '💳' : '🏦'}
-                        </Text>
-                      </View>
                       <View style={styles.rowText}>
                         <Text variant="body" className="text-foreground" numberOfLines={1}>
                           {I18n.t('settings.quick_entry.default_account_label')}

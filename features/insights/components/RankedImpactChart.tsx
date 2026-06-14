@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import { CategoryEmoji, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -91,10 +91,12 @@ export function RankedImpactChart({ rows, accentColor }: RankedImpactChartProps)
                   </Text>
                 </View>
                 <View className="flex-1 min-w-0">
-                  <Text variant="caption" numberOfLines={1}>
-                    {row.emoji ? `${row.emoji} ` : ''}
-                    {row.title}
-                  </Text>
+                  <View className="flex-row items-center gap-1">
+                    {row.emoji ? <CategoryEmoji icon={row.emoji} size={14} /> : null}
+                    <Text variant="caption" numberOfLines={1} className="flex-1 min-w-0">
+                      {row.title}
+                    </Text>
+                  </View>
                   {row.subtitle ? (
                     <Text variant="label" tone="muted" numberOfLines={1}>
                       {row.subtitle}

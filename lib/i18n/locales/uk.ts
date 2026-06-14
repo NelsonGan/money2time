@@ -462,6 +462,7 @@ const uk = {
       savings_rate: 'Заощадження',
       expense_trend: 'Тренд витрат',
       income_trend: 'Тренд доходів',
+      category_trend: 'Тренд категорії',
       expense_sentiment: 'Настрій',
       asset_history: 'Активи',
       income_rate_history: 'Ставка',
@@ -480,6 +481,9 @@ const uk = {
     expense_trend_description: 'Відстежуйте щомісячні витрати та знаходьте напружені місяці.',
     income_trend: 'Тренд доходів',
     income_trend_description: 'Відстежуйте щомісячні доходи та знаходьте найкращі місяці.',
+    category_trend: 'Тренд категорії',
+    category_trend_description:
+      'Виберіть категорію й відстежуйте, як змінюються її витрати з часом.',
     expense_sentiment: 'Настрій витрат',
     expense_sentiment_description:
       'Емоції за кожною витратою — радість, нейтральність чи жаль — день за днем.',
@@ -551,6 +555,11 @@ const uk = {
         transactions: '{{count}} операцій',
         no_data_title: 'Тренду доходів ще немає',
         no_data_message: 'Додайте операції доходів, щоб побачити тренд.',
+      },
+      category_trend: {
+        no_data_title: 'Немає витрат у цій категорії',
+        no_data_message:
+          'Виберіть іншу категорію чи період або додайте витрати, щоб побачити тренд.',
       },
       expense_sentiment: {
         summary_title: 'Розподіл настрою',

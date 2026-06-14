@@ -463,6 +463,7 @@ const es = {
       savings_rate: 'Ahorro',
       expense_trend: 'Tendencia gastos',
       income_trend: 'Tendencia ingresos',
+      category_trend: 'Tendencia por categoría',
       expense_sentiment: 'Estado de ánimo',
       asset_history: 'Activos',
       income_rate_history: 'Tarifa hora',
@@ -485,6 +486,9 @@ const es = {
     income_trend: 'Tendencia de ingresos',
     income_trend_description:
       'Rastrea los ingresos mensuales durante el año e identifica tus mejores meses.',
+    category_trend: 'Tendencia por categoría',
+    category_trend_description:
+      'Elige una categoría y observa cómo evoluciona su gasto a lo largo del tiempo.',
     expense_sentiment: 'Estado de ánimo en gastos',
     expense_sentiment_description:
       'Ve el estado de ánimo detrás de tus gastos — feliz, neutral o con arrepentimiento — día a día.',
@@ -558,6 +562,10 @@ const es = {
         transactions: '{{count}} movimientos',
         no_data_title: 'Sin tendencia de ingresos aún',
         no_data_message: 'Añade movimientos de ingreso para ver la tendencia.',
+      },
+      category_trend: {
+        no_data_title: 'Sin gastos en esta categoría',
+        no_data_message: 'Elige otra categoría o período, o añade gastos para ver la tendencia.',
       },
       expense_sentiment: {
         summary_title: 'Desglose de estado de ánimo',
