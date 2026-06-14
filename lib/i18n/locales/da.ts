@@ -462,6 +462,7 @@ const da = {
       savings_rate: 'Opsparing',
       expense_trend: 'Udgiftstrend',
       income_trend: 'Indtægtstrend',
+      category_trend: 'Kategoritrend',
       expense_sentiment: 'Stemning',
       asset_history: 'Aktiver',
       income_rate_history: 'Timesats',
@@ -484,6 +485,9 @@ const da = {
     income_trend: 'Indtægtstrend',
     income_trend_description:
       'Følg månedlige indtægter hen over året, og find hurtigt dine stærkeste måneder.',
+    category_trend: 'Kategoritrend',
+    category_trend_description:
+      'Vælg en kategori og følg, hvordan dens forbrug udvikler sig over tid.',
     expense_sentiment: 'Udgiftsstemning',
     expense_sentiment_description:
       'Se stemningen bag dine udgifter — glad, neutral eller fortrydende — dag for dag.',
@@ -556,6 +560,11 @@ const da = {
         transactions: '{{count}} transaktioner',
         no_data_title: 'Ingen indtægtstrend endnu',
         no_data_message: 'Tilføj indtægtstransaktioner for at se trenden.',
+      },
+      category_trend: {
+        no_data_title: 'Intet forbrug i denne kategori',
+        no_data_message:
+          'Vælg en anden kategori eller periode, eller tilføj udgifter for at se tendensen.',
       },
       expense_sentiment: {
         summary_title: 'Stemningsopdeling',

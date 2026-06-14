@@ -113,7 +113,7 @@ export function SettingsScreen({
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const { settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
-  const { isPro } = usePro();
+  const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -529,15 +529,39 @@ export function SettingsScreen({
             </View>
           </SettingsSection>
 
-          {__DEV__ && onOpenWidgetPreviews ? (
+          {__DEV__ ? (
             <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
               <View style={styles.rowsGroup}>
                 <SettingsRowItem
-                  icon={<Code2 size={18} color={themeColors.primary} />}
-                  label="Widget previews"
-                  subtitle="Preview all widgets and supported sizes"
-                  onPress={onOpenWidgetPreviews}
+                  icon={<Crown size={18} color={themeColors.primary} />}
+                  label="Pro status"
+                  subtitle="Override RevenueCat for testing gated features"
+                  showChevron={false}
+                  onPress={() => setDevProOverride(!isPro)}
+                  rightAccessory={
+                    <View
+                      className={`rounded-full px-2.5 py-1 ${
+                        isPro ? 'bg-primary/15' : 'bg-muted-foreground/15'
+                      }`}
+                    >
+                      <Text
+                        variant="label"
+                        className={isPro ? 'text-primary' : 'text-muted-foreground'}
+                        style={{ fontFamily: FONT.semibold, fontWeight: '600' }}
+                      >
+                        {isPro ? 'PRO' : 'FREE'}
+                      </Text>
+                    </View>
+                  }
                 />
+                {onOpenWidgetPreviews ? (
+                  <SettingsRowItem
+                    icon={<Code2 size={18} color={themeColors.primary} />}
+                    label="Widget previews"
+                    subtitle="Preview all widgets and supported sizes"
+                    onPress={onOpenWidgetPreviews}
+                  />
+                ) : null}
               </View>
             </SettingsSection>
           ) : null}

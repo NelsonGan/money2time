@@ -460,6 +460,7 @@ const vi = {
       savings_rate: 'Tiết kiệm',
       expense_trend: 'Xu hướng chi',
       income_trend: 'Xu hướng thu',
+      category_trend: 'Xu hướng danh mục',
       expense_sentiment: 'Cảm xúc',
       asset_history: 'Tài sản',
       income_rate_history: 'Lương giờ',
@@ -478,6 +479,8 @@ const vi = {
       'Theo dõi chi tiêu hàng tháng trong năm và nhanh chóng phát hiện tháng căng thẳng.',
     income_trend: 'Xu hướng thu nhập',
     income_trend_description: 'Theo dõi thu nhập hàng tháng trong năm và tìm ra tháng mạnh nhất.',
+    category_trend: 'Xu hướng danh mục',
+    category_trend_description: 'Chọn một danh mục và theo dõi xu hướng chi tiêu theo thời gian.',
     expense_sentiment: 'Cảm xúc chi tiêu',
     expense_sentiment_description:
       'Xem cảm xúc đằng sau chi tiêu — vui, bình thường hay hối tiếc — theo từng ngày.',
@@ -548,6 +551,11 @@ const vi = {
         transactions: '{{count}} giao dịch',
         no_data_title: 'Chưa có xu hướng thu nhập',
         no_data_message: 'Thêm giao dịch thu nhập để xem xu hướng.',
+      },
+      category_trend: {
+        no_data_title: 'Không có chi tiêu trong danh mục này',
+        no_data_message:
+          'Chọn danh mục hoặc khoảng thời gian khác, hoặc thêm chi tiêu để xem xu hướng.',
       },
       expense_sentiment: {
         summary_title: 'Phân tích cảm xúc',

@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {
   AccountPickerSheet,
+  CategoryEmoji,
   CategoryPickerSheet,
   type CategoryPickerOption,
   Text,
@@ -1135,9 +1136,6 @@ export function QuickAddSheet({
                       style={styles.summarySegmentFlexible}
                       hitSlop={6}
                     >
-                      <Text style={styles.summaryIcon}>
-                        {selectedAccount?.type === 'credit' ? '💳' : '🏦'}
-                      </Text>
                       <Text
                         className="text-foreground"
                         style={[styles.summaryText, styles.summaryTextFlexible]}
@@ -1156,7 +1154,11 @@ export function QuickAddSheet({
                       style={styles.summarySegmentFlexible}
                       hitSlop={6}
                     >
-                      <Text style={styles.summaryIcon}>{activeCategoryIcon}</Text>
+                      <CategoryEmoji
+                        icon={activeCategoryIcon}
+                        size={16}
+                        style={styles.summaryIcon}
+                      />
                       <Text
                         className="text-foreground"
                         style={[styles.summaryText, styles.summaryTextFlexible]}

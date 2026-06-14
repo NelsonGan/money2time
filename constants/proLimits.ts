@@ -10,6 +10,7 @@ export const PRO_LIMITS = {
 export const PRO_TREND_TYPES = [
   'expense_trend',
   'income_trend',
+  'category_trend',
   'expense_sentiment',
   'asset_history',
   'income_rate_history',

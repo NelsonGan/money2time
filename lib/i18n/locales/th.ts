@@ -459,6 +459,7 @@ const th = {
       savings_rate: 'ออม',
       expense_trend: 'แนวโน้มรายจ่าย',
       income_trend: 'แนวโน้มรายรับ',
+      category_trend: 'แนวโน้มหมวดหมู่',
       expense_sentiment: 'อารมณ์',
       asset_history: 'ทรัพย์สิน',
       income_rate_history: 'อัตรารายชั่วโมง',
@@ -475,6 +476,8 @@ const th = {
     expense_trend_description: 'ติดตามรายจ่ายรายเดือนตลอดปีและค้นหาเดือนที่ตึงตัวได้อย่างรวดเร็ว',
     income_trend: 'แนวโน้มรายรับ',
     income_trend_description: 'ติดตามรายรับรายเดือนตลอดปีและค้นหาเดือนที่ดีที่สุดได้อย่างรวดเร็ว',
+    category_trend: 'แนวโน้มหมวดหมู่',
+    category_trend_description: 'เลือกหมวดหมู่แล้วติดตามแนวโน้มการใช้จ่ายเมื่อเวลาผ่านไป',
     expense_sentiment: 'อารมณ์รายจ่าย',
     expense_sentiment_description: 'ดูอารมณ์เบื้องหลังการใช้จ่าย ดีใจ เฉย ๆ หรือเสียใจ ทีละวัน',
     asset_history: 'ประวัติทรัพย์สิน',
@@ -544,6 +547,10 @@ const th = {
         transactions: '{{count}} รายการ',
         no_data_title: 'ยังไม่มีแนวโน้มรายรับ',
         no_data_message: 'เพิ่มรายการรายรับเพื่อดูแนวโน้ม',
+      },
+      category_trend: {
+        no_data_title: 'ไม่มีการใช้จ่ายในหมวดหมู่นี้',
+        no_data_message: 'เลือกหมวดหมู่หรือช่วงเวลาอื่น หรือเพิ่มค่าใช้จ่ายเพื่อดูแนวโน้ม',
       },
       expense_sentiment: {
         summary_title: 'การแจกแจงอารมณ์',

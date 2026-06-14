@@ -464,6 +464,7 @@ const id = {
       savings_rate: 'Tabungan',
       expense_trend: 'Tren pengeluaran',
       income_trend: 'Tren pemasukan',
+      category_trend: 'Tren kategori',
       expense_sentiment: 'Mood',
       asset_history: 'Aset',
       income_rate_history: 'Tarif/jam',
@@ -486,6 +487,9 @@ const id = {
     income_trend: 'Tren pemasukan',
     income_trend_description:
       'Lacak pemasukan bulanan sepanjang tahun dan temukan bulan terkuat dengan cepat.',
+    category_trend: 'Tren kategori',
+    category_trend_description:
+      'Pilih kategori dan pantau tren pengeluarannya dari waktu ke waktu.',
     expense_sentiment: 'Sentimen pengeluaran',
     expense_sentiment_description:
       'Lihat mood di balik pengeluaranmu — senang, biasa, atau menyesal — hari demi hari.',
@@ -558,6 +562,11 @@ const id = {
         transactions: '{{count}} transaksi',
         no_data_title: 'Belum ada tren pemasukan',
         no_data_message: 'Tambahkan transaksi pemasukan untuk melihat trennya.',
+      },
+      category_trend: {
+        no_data_title: 'Tidak ada pengeluaran di kategori ini',
+        no_data_message:
+          'Pilih kategori atau periode lain, atau tambahkan pengeluaran untuk melihat trennya.',
       },
       expense_sentiment: {
         summary_title: 'Rincian mood',

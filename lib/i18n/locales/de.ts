@@ -464,6 +464,7 @@ const de = {
       savings_rate: 'Sparquote',
       expense_trend: 'Ausgabentrend',
       income_trend: 'Einnahmentrend',
+      category_trend: 'Kategorie-Trend',
       expense_sentiment: 'Stimmung',
       asset_history: 'Vermögen',
       income_rate_history: 'Stundenlohn',
@@ -486,6 +487,9 @@ const de = {
     income_trend: 'Einnahmentrend',
     income_trend_description:
       'Monatliche Einnahmen im Jahresverlauf verfolgen und stärkste Monate erkennen.',
+    category_trend: 'Kategorie-Trend',
+    category_trend_description:
+      'Wähle eine Kategorie und verfolge, wie sich ihre Ausgaben im Zeitverlauf entwickeln.',
     expense_sentiment: 'Ausgabenstimmung',
     expense_sentiment_description:
       'Sieh die Stimmung hinter deinen Ausgaben – glücklich, neutral oder bereut – Tag für Tag.',
@@ -559,6 +563,11 @@ const de = {
         transactions: '{{count}} Transaktionen',
         no_data_title: 'Noch kein Einnahmentrend',
         no_data_message: 'Füge Einnahmentransaktionen hinzu, um den Trend zu sehen.',
+      },
+      category_trend: {
+        no_data_title: 'Keine Ausgaben in dieser Kategorie',
+        no_data_message:
+          'Wähle eine andere Kategorie oder Periode oder füge Ausgaben hinzu, um den Trend zu sehen.',
       },
       expense_sentiment: {
         summary_title: 'Stimmungsverteilung',

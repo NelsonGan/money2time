@@ -1,4 +1,4 @@
-import { CreditCard, Landmark, Settings } from 'lucide-react-native';
+import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
-import { Text, useSettingsBottomNavInset } from '~/components/ui';
+import { CategoryEmoji, Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -58,7 +58,7 @@ interface AccountCardStackProps {
 const PEEK_HEIGHT = 54;
 const CARD_BODY_HEIGHT = 80;
 const EXPANDED_DEBIT_HEIGHT = 195;
-const EXPANDED_CREDIT_HEIGHT = 290;
+const EXPANDED_CREDIT_HEIGHT = 302;
 const CARD_BORDER_RADIUS = 18;
 const MASKED_BALANCE_VALUE = '••••';
 
@@ -390,11 +390,7 @@ function StackCard({
         {/* Peek row */}
         <View style={styles.peekRow}>
           <View style={[styles.iconBadge, { backgroundColor: `${palette.accent}22` }]}>
-            {isCredit ? (
-              <CreditCard size={17} color={palette.accent} />
-            ) : (
-              <Landmark size={17} color={palette.accent} />
-            )}
+            <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={24} />
           </View>
           <View style={styles.peekNameCol}>
             <Text
@@ -492,7 +488,7 @@ function StackCard({
                 </>
               ) : null}
 
-              <View style={styles.ctaRow}>
+              <View style={[styles.ctaRow, isCredit && styles.ctaRowCredit]}>
                 <Pressable
                   onPress={(event) => {
                     event.stopPropagation();
@@ -924,6 +920,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginTop: 4,
+  },
+  ctaRowCredit: {
+    marginBottom: 12,
   },
   ctaButton: {
     flexDirection: 'row',

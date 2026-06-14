@@ -461,6 +461,7 @@ const ru = {
       savings_rate: 'Сбережения',
       expense_trend: 'Тренд расходов',
       income_trend: 'Тренд доходов',
+      category_trend: 'Тренд категории',
       expense_sentiment: 'Настроение',
       asset_history: 'Активы',
       income_rate_history: 'Ставка',
@@ -482,6 +483,9 @@ const ru = {
     income_trend: 'Тренд доходов',
     income_trend_description:
       'Отслеживайте ежемесячные доходы за год и быстро находите лучшие месяцы.',
+    category_trend: 'Тренд категории',
+    category_trend_description:
+      'Выберите категорию и отслеживайте, как меняются её расходы со временем.',
     expense_sentiment: 'Настроение расходов',
     expense_sentiment_description:
       'Смотрите настроение при тратах — радость, нейтраль или сожаление — по дням.',
@@ -553,6 +557,11 @@ const ru = {
         transactions: '{{count}} транзакций',
         no_data_title: 'Нет тренда доходов',
         no_data_message: 'Добавьте доходы для просмотра тренда.',
+      },
+      category_trend: {
+        no_data_title: 'Нет расходов в этой категории',
+        no_data_message:
+          'Выберите другую категорию или период либо добавьте расходы, чтобы увидеть тренд.',
       },
       expense_sentiment: {
         summary_title: 'Распределение настроения',

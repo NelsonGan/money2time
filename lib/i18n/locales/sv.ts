@@ -461,6 +461,7 @@ const sv = {
       savings_rate: 'Sparande',
       expense_trend: 'Utgiftstrend',
       income_trend: 'Inkomsttrend',
+      category_trend: 'Kategoritrend',
       expense_sentiment: 'Känsla',
       asset_history: 'Tillgångar',
       income_rate_history: 'Timlön',
@@ -482,6 +483,8 @@ const sv = {
     income_trend: 'Inkomsttrend',
     income_trend_description:
       'Spåra månadsinkomster under året och hitta dina starkaste månader snabbt.',
+    category_trend: 'Kategoritrend',
+    category_trend_description: 'Välj en kategori och följ hur dess utgifter utvecklas över tid.',
     expense_sentiment: 'Utgiftskänsla',
     expense_sentiment_description:
       'Se känslan bakom dina utgifter — nöjd, neutral eller ångerfull — dag för dag.',
@@ -553,6 +556,11 @@ const sv = {
         transactions: '{{count}} transaktioner',
         no_data_title: 'Ingen inkomsttrend ännu',
         no_data_message: 'Lägg till inkomsttransaktioner för att se trenden.',
+      },
+      category_trend: {
+        no_data_title: 'Inga utgifter i den här kategorin',
+        no_data_message:
+          'Välj en annan kategori eller period, eller lägg till utgifter för att se trenden.',
       },
       expense_sentiment: {
         summary_title: 'Känslouppdelning',

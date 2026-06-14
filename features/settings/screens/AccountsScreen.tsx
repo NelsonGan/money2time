@@ -33,6 +33,7 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import {
   AccountPickerSheet,
   Button,
+  CategoryEmoji,
   Input,
   SegmentedToggle,
   SelectField,
@@ -302,14 +303,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-  },
-  rowLeadingText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-  },
-  rowLeadingEmoji: {
-    fontSize: 18,
   },
   rowTitleWrap: {
     flex: 1,
@@ -587,10 +580,14 @@ function AccountEditorSheet({
                     (item) => (
                       <View
                         key={item.value}
-                        className="px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
+                        className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
                       >
+                        <CategoryEmoji
+                          icon={item.value === 'credit' ? 'credit-card' : 'bank'}
+                          size={16}
+                        />
                         <Text variant="caption" className="text-primary">
-                          {item.icon} {item.label}
+                          {item.label}
                         </Text>
                       </View>
                     ),
@@ -609,19 +606,23 @@ function AccountEditorSheet({
                       accessibilityLabel={item.label}
                       accessibilityState={{ selected: type === item.value }}
                       className={cn(
-                        'px-4 py-2.5 rounded-full border',
+                        'flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border',
                         type === item.value
                           ? 'bg-primary/15 border-primary/50'
                           : 'bg-card border-border/40',
                       )}
                     >
+                      <CategoryEmoji
+                        icon={item.value === 'credit' ? 'credit-card' : 'bank'}
+                        size={16}
+                      />
                       <Text
                         variant="caption"
                         className={cn(
                           type === item.value ? 'text-primary' : 'text-muted-foreground',
                         )}
                       >
-                        {item.icon} {item.label}
+                        {item.label}
                       </Text>
                     </Pressable>
                   ))}
@@ -900,13 +901,6 @@ interface AccountMgmtRowItemProps {
   account: Account;
 }
 
-function getBadgeLabel(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '#';
-  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
-  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
-}
-
 function DragHandleButton({
   backgroundColor,
   borderColor,
@@ -977,19 +971,6 @@ function GroupRowItem({ item }: GroupRowItemProps) {
           </View>
         ) : (
           <View style={styles.rowDisplay}>
-            <View
-              style={[
-                styles.rowLeadingBadge,
-                {
-                  backgroundColor: tc.primarySoft,
-                  borderColor: tc.primaryMuted,
-                },
-              ]}
-            >
-              <Text style={[styles.rowLeadingText, { color: tc.primary }]}>
-                {getBadgeLabel(item.name)}
-              </Text>
-            </View>
             <View style={styles.rowTitleWrap}>
               <Text style={[styles.rowTitle, { color: tc.text }]}>{item.name}</Text>
               <Text style={[styles.rowSubtitle, { color: tc.textMuted }]}>
@@ -1081,7 +1062,7 @@ function AccountMgmtRowItem({ account }: AccountMgmtRowItemProps) {
               },
             ]}
           >
-            <Text style={styles.rowLeadingEmoji}>{isCredit ? '💳' : '🏦'}</Text>
+            <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={22} />
           </View>
           <View style={styles.rowTitleWrap}>
             <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>

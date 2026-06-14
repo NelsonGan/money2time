@@ -463,6 +463,7 @@ const ms = {
       savings_rate: 'Simpanan',
       expense_trend: 'Trend belanja',
       income_trend: 'Trend pendapatan',
+      category_trend: 'Aliran kategori',
       expense_sentiment: 'Mood',
       asset_history: 'Aset',
       income_rate_history: 'Kadar jam',
@@ -485,6 +486,9 @@ const ms = {
     income_trend: 'Trend pendapatan',
     income_trend_description:
       'Jejak pendapatan bulanan sepanjang tahun dan kenal pasti bulan terkuat dengan cepat.',
+    category_trend: 'Aliran kategori',
+    category_trend_description:
+      'Pilih kategori dan jejaki aliran perbelanjaannya dari semasa ke semasa.',
     expense_sentiment: 'Sentimen perbelanjaan',
     expense_sentiment_description:
       'Lihat mood di sebalik perbelanjaan anda — gembira, neutral, atau menyesal — hari demi hari.',
@@ -555,6 +559,11 @@ const ms = {
         transactions: '{{count}} transaksi',
         no_data_title: 'Tiada trend pendapatan lagi',
         no_data_message: 'Tambah transaksi pendapatan untuk lihat trend.',
+      },
+      category_trend: {
+        no_data_title: 'Tiada perbelanjaan dalam kategori ini',
+        no_data_message:
+          'Pilih kategori atau tempoh lain, atau tambah perbelanjaan untuk melihat aliran.',
       },
       expense_sentiment: {
         summary_title: 'Pecahan mood',

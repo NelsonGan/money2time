@@ -24,6 +24,9 @@ interface ProContextValue {
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
   restorePurchases: () => Promise<RevenueCatActionResult>;
   refresh: () => Promise<void>;
+  /** Dev-only override of Pro status. `null` means use the real RevenueCat state. No-op outside __DEV__. */
+  devProOverride: boolean | null;
+  setDevProOverride: (value: boolean | null) => void;
 }
 
 const ProContext = createContext<ProContextValue | null>(null);
@@ -33,6 +36,11 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [devProOverride, setDevProOverrideState] = useState<boolean | null>(null);
+  const setDevProOverride = useCallback((value: boolean | null) => {
+    if (!__DEV__) return;
+    setDevProOverrideState(value);
+  }, []);
   const [customerState, setCustomerState] = useState<RevenueCatCustomerState | null>(null);
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
@@ -150,17 +158,30 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, [applyCustomerState, refresh]);
 
+  const effectiveIsPro = __DEV__ && devProOverride !== null ? devProOverride : isPro;
   const value = useMemo<ProContextValue>(
     () => ({
-      isPro,
+      isPro: effectiveIsPro,
       isLoading,
       customerState,
       offering,
       purchasePackage,
       restorePurchases,
       refresh,
+      devProOverride,
+      setDevProOverride,
     }),
-    [isPro, isLoading, customerState, offering, purchasePackage, refresh, restorePurchases],
+    [
+      effectiveIsPro,
+      isLoading,
+      customerState,
+      offering,
+      purchasePackage,
+      refresh,
+      restorePurchases,
+      devProOverride,
+      setDevProOverride,
+    ],
   );
 
   return <ProContext.Provider value={value}>{children}</ProContext.Provider>;

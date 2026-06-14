@@ -464,6 +464,7 @@ const tr = {
       savings_rate: 'Tasarruf',
       expense_trend: 'Gider eğilimi',
       income_trend: 'Gelir eğilimi',
+      category_trend: 'Kategori trendi',
       expense_sentiment: 'Duygu',
       asset_history: 'Varlıklar',
       income_rate_history: 'Saatlik ücret',
@@ -486,6 +487,9 @@ const tr = {
     income_trend: 'Gelir eğilimi',
     income_trend_description:
       'Yıl boyunca aylık gelirleri takip edin ve en güçlü aylarınızı hızlıca keşfedin.',
+    category_trend: 'Kategori trendi',
+    category_trend_description:
+      'Bir kategori seçin ve harcamasının zaman içinde nasıl değiştiğini izleyin.',
     expense_sentiment: 'Gider duygu analizi',
     expense_sentiment_description:
       'Harcamalarınızın arkasındaki duyguyu — mutlu, nötr veya pişman — gün gün görün.',
@@ -558,6 +562,11 @@ const tr = {
         transactions: '{{count}} işlem',
         no_data_title: 'Henüz gelir eğilimi yok',
         no_data_message: 'Eğilimi görmek için gelir işlemleri ekleyin.',
+      },
+      category_trend: {
+        no_data_title: 'Bu kategoride harcama yok',
+        no_data_message:
+          'Başka bir kategori veya dönem seçin ya da eğilimi görmek için harcama ekleyin.',
       },
       expense_sentiment: {
         summary_title: 'Duygu dağılımı',

@@ -465,6 +465,7 @@ const fil = {
       savings_rate: 'Savings',
       expense_trend: 'Trend ng gastos',
       income_trend: 'Trend ng kita',
+      category_trend: 'Trend ng kategorya',
       expense_sentiment: 'Mood',
       asset_history: 'Assets',
       income_rate_history: 'Hourly rate',
@@ -487,6 +488,9 @@ const fil = {
     income_trend: 'Trend ng kita',
     income_trend_description:
       'I-track ang buwanang kita sa buong taon at mabilis na makita ang iyong pinakamalakas na buwan.',
+    category_trend: 'Trend ng kategorya',
+    category_trend_description:
+      'Pumili ng kategorya at subaybayan kung paano nagba-trend ang gastos nito sa paglipas ng panahon.',
     expense_sentiment: 'Sentiment ng gastos',
     expense_sentiment_description:
       'Tingnan ang mood sa likod ng iyong gastos — masaya, neutral, o nagsisisi — araw-araw.',
@@ -559,6 +563,11 @@ const fil = {
         transactions: '{{count}} transaksyon',
         no_data_title: 'Wala pang trend ng kita',
         no_data_message: 'Magdagdag ng income transactions para makita ang trend.',
+      },
+      category_trend: {
+        no_data_title: 'Walang gastos sa kategoryang ito',
+        no_data_message:
+          'Pumili ng ibang kategorya o panahon, o magdagdag ng gastos para makita ang trend.',
       },
       expense_sentiment: {
         summary_title: 'Breakdown ng mood',

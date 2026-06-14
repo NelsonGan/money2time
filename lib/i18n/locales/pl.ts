@@ -463,6 +463,7 @@ const pl = {
       savings_rate: 'Oszczędności',
       expense_trend: 'Trend wydatków',
       income_trend: 'Trend przychodów',
+      category_trend: 'Trend kategorii',
       expense_sentiment: 'Nastrój',
       asset_history: 'Aktywa',
       income_rate_history: 'Stawka godz.',
@@ -484,6 +485,9 @@ const pl = {
     income_trend: 'Trend przychodów',
     income_trend_description:
       'Śledź miesięczne przychody przez cały rok i szybko znajdź najlepsze miesiące.',
+    category_trend: 'Trend kategorii',
+    category_trend_description:
+      'Wybierz kategorię i śledź, jak zmieniają się jej wydatki w czasie.',
     expense_sentiment: 'Nastrój przy wydatkach',
     expense_sentiment_description:
       'Zobacz nastrój za wydatkami — radość, obojętność lub żal — dzień po dniu.',
@@ -556,6 +560,10 @@ const pl = {
         transactions: '{{count}} transakcji',
         no_data_title: 'Brak trendu przychodów',
         no_data_message: 'Dodaj transakcje przychodów, by zobaczyć trend.',
+      },
+      category_trend: {
+        no_data_title: 'Brak wydatków w tej kategorii',
+        no_data_message: 'Wybierz inną kategorię lub okres albo dodaj wydatki, aby zobaczyć trend.',
       },
       expense_sentiment: {
         summary_title: 'Rozkład nastroju',
