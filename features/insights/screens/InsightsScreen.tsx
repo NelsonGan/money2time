@@ -1611,6 +1611,7 @@ const ChartLoadingSkeleton = React.memo(function ChartLoadingSkeleton({
 });
 
 const TREND_TRANSACTIONS_INITIAL = 5;
+const TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME = 7;
 const TREND_TRANSACTIONS_PAGE = 10;
 
 // Renders a selected month's transaction list capped at `visibleCount` rows. The cap
@@ -4973,7 +4974,7 @@ export function InsightsScreen({
           transactions={selectedMonthRow.transactions}
           visibleCount={
             trendListVisibleCounts[`expense|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
-            TREND_TRANSACTIONS_INITIAL
+            TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
           }
           accentColor={trendAccentColor}
           isDark={isDark}
@@ -5080,7 +5081,7 @@ export function InsightsScreen({
           transactions={selectedMonthRow.transactions}
           visibleCount={
             trendListVisibleCounts[`income|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
-            TREND_TRANSACTIONS_INITIAL
+            TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
           }
           accentColor={trendAccentColor}
           isDark={isDark}
@@ -5888,7 +5889,11 @@ export function InsightsScreen({
       const context = resolveTrendListContext(pageData);
       if (!context) return;
       setTrendListVisibleCounts((previous) => {
-        const current = previous[context.key] ?? TREND_TRANSACTIONS_INITIAL;
+        const initial =
+          context.key.startsWith('expense|') || context.key.startsWith('income|')
+            ? TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
+            : TREND_TRANSACTIONS_INITIAL;
+        const current = previous[context.key] ?? initial;
         if (current >= context.total) return previous;
         return { ...previous, [context.key]: current + TREND_TRANSACTIONS_PAGE };
       });

@@ -285,7 +285,10 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                           <View className="flex-row flex-wrap -mx-1">
                             {expandedChildren.map((child) => {
                               const isChildSelected = selectedCategorySet.has(child.id);
-                              const showChildIcon = child.icon !== expandedInRow?.icon;
+                              const childOwnIcon = child.icon?.trim() ?? '';
+                              const showChildIcon =
+                                childOwnIcon.length > 0 &&
+                                childOwnIcon !== (expandedInRow?.icon?.trim() ?? '');
                               return (
                                 <View key={child.id} className="w-1/2 px-1 mb-2">
                                   <Pressable
@@ -299,7 +302,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
                                     )}
                                   >
                                     {showChildIcon ? (
-                                      <CategoryEmoji icon={child.icon} size={20} />
+                                      <CategoryEmoji icon={child.icon} size={20} hidePlaceholder />
                                     ) : null}
                                     <Text
                                       variant="body"

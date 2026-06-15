@@ -12,6 +12,8 @@ interface CategoryEmojiProps extends Omit<TextProps, 'children'> {
   className?: string;
   /** Width/height in px when a hand-drawn icon is rendered. Defaults to 20. */
   size?: number;
+  /** When true, render nothing (instead of the circle placeholder) if no icon resolves. */
+  hidePlaceholder?: boolean;
 }
 
 function normalize(value?: string | null) {
@@ -30,6 +32,7 @@ export function CategoryEmoji({
   parentIcon,
   className,
   size,
+  hidePlaceholder,
   ...textProps
 }: CategoryEmojiProps) {
   const theme = useResolvedTheme();
@@ -49,6 +52,9 @@ export function CategoryEmoji({
         {resolved}
       </Text>
     );
+  }
+  if (hidePlaceholder) {
+    return null;
   }
   return (
     <Text {...textProps} className={cn(className, 'leading-7')}>
