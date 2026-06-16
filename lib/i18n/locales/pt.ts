@@ -68,8 +68,16 @@ const pt = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Compartilhe e ganhe Pro',
+      rewards: {
+        title: 'Poste e ganhe Pro grátis',
+        body: 'Poste sobre o Money2Time no Instagram, 小红书, Reddit ou Facebook. Postar dá 1 mês de Pro, 100+ curtidas um ano inteiro e 500+ curtidas Pro vitalício. Abra os Ajustes para resgatar sua recompensa.',
+      },
+    },
     cta: {
       enable_voice: 'Ativar entrada por voz',
+      open_share_earn: 'Ganhe o Pro grátis',
     },
     showcase: {
       this_month: 'Este mês',
@@ -1257,6 +1265,35 @@ const pt = {
     trend_preview_message:
       'Desbloqueie tendências para rastrear padrões, identificar mudanças e entender seu dinheiro ao longo do tempo.',
     trend_preview_cta: 'Assinar Pro',
+  },
+  shareEarn: {
+    row_label: 'Compartilhe e ganhe Pro',
+    row_subtitle: 'Poste sobre nós e desbloqueie o Pro grátis',
+    title: 'Compartilhe e ganhe Pro',
+    subtitle: 'Poste sobre o Money2Time e desbloqueamos o Pro para você, é por nossa conta.',
+    hero_title: 'Espalhe a notícia, ganhe Pro 🎁',
+    hero_body:
+      'Conte aos seus seguidores como você mede os gastos em horas de trabalho. Quanto mais curtidas o seu post receber, maior a recompensa.',
+    rewards_title: 'Níveis de recompensa',
+    tier1_badge: 'Só postar',
+    tier1_reward: '1 mês de Pro',
+    tier1_desc: 'Qualquer post público conta no Instagram, 小红书, Facebook e mais.',
+    tier2_badge: '100+ curtidas',
+    tier2_reward: '1 ano de Pro',
+    tier2_desc: 'Seu post tocou as pessoas.',
+    tier3_badge: '500+ curtidas',
+    tier3_reward: 'Pro vitalício',
+    tier3_desc: 'Você viralizou. O Pro é seu para sempre.',
+    how_title: 'Como funciona',
+    step1_body: 'Poste sobre o Money2Time no Instagram, 小红书, Reddit, Facebook ou onde quiser.',
+    step2_body: 'Deixe acumular curtidas. Mais curtidas significam uma recompensa maior.',
+    step3_body: 'Envie o link do seu post e mandaremos um código Pro grátis por e-mail.',
+    platforms_title: 'Postar em',
+    claim_title: 'Já postou?',
+    claim_body: 'Envie o link do seu post e responderemos com o seu código Pro grátis.',
+    claim_button: 'Resgatar minha recompensa',
+    fine_print:
+      'As recompensas são concedidas manualmente após confirmarmos que seu post é público. Uma recompensa por pessoa. As curtidas são verificadas no momento do resgate.',
   },
   notifications: {
     title: 'Notificações',

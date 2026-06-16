@@ -68,8 +68,16 @@ const fil = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Mag-share, kumita ng Pro',
+      rewards: {
+        title: 'Mag-post, libreng Pro',
+        body: 'Mag-post tungkol sa Money2Time sa Instagram, 小红书, Reddit o Facebook. Ang pag-post ay 1 buwang Pro, 100+ likes ay isang taon, at 500+ likes ay habambuhay na Pro. Buksan ang Settings para kunin ang reward.',
+      },
+    },
     cta: {
       enable_voice: 'I-enable ang voice input',
+      open_share_earn: 'Kunin ang Pro nang libre',
     },
     showcase: {
       this_month: 'Ngayong buwan',
@@ -1273,6 +1281,36 @@ const fil = {
     trend_preview_message:
       'I-unlock ang mga trend para ma-track ang mga pattern, makita ang mga pagbabago, at maunawaan ang iyong pera sa paglipas ng panahon.',
     trend_preview_cta: 'Mag-upgrade sa Pro',
+  },
+  shareEarn: {
+    row_label: 'Mag-share, kumita ng Pro',
+    row_subtitle: 'Mag-post tungkol sa amin, libre ang Pro',
+    title: 'Mag-share, kumita ng Pro',
+    subtitle: 'Mag-post tungkol sa Money2Time at i-unlock namin ang Pro para sa iyo, libre.',
+    hero_title: 'Ikalat ito, kumita ng Pro 🎁',
+    hero_body:
+      'Sabihin sa mga follower mo kung paano mo sinusukat ang gastos sa oras ng trabaho. Mas maraming likes, mas malaking reward.',
+    rewards_title: 'Mga antas ng reward',
+    tier1_badge: 'Mag-post lang',
+    tier1_reward: '1 buwang Pro',
+    tier1_desc: 'Bilang ang anumang public post sa Instagram, 小红书, Facebook at iba pa.',
+    tier2_badge: '100+ likes',
+    tier2_reward: '1 taóng Pro',
+    tier2_desc: 'Umugat sa mga tao ang post mo.',
+    tier3_badge: '500+ likes',
+    tier3_reward: 'Habambuhay na Pro',
+    tier3_desc: 'Naging viral ka. Sa iyo na ang Pro habambuhay.',
+    how_title: 'Paano ito gumagana',
+    step1_body:
+      'Mag-post tungkol sa Money2Time sa Instagram, 小红书, Reddit, Facebook o kahit saan.',
+    step2_body: 'Hayaang dumami ang likes. Mas maraming likes, mas malaking reward.',
+    step3_body: 'Ipadala sa amin ang link ng post mo at i-eemail namin ang libreng Pro code.',
+    platforms_title: 'Mag-post sa',
+    claim_title: 'Nakapag-post na?',
+    claim_body: 'Ipadala ang link ng post mo at sasagutin ka namin ng libreng Pro code.',
+    claim_button: 'Kunin ang reward',
+    fine_print:
+      'Manu-manong ibinibigay ang reward matapos naming kumpirmahin na public ang post mo. Isang reward kada tao. Ang bilang ng likes ay tinitingnan sa oras ng pag-claim.',
   },
   notifications: {
     title: 'Mga Notipikasyon',

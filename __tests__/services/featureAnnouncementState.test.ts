@@ -36,21 +36,20 @@ describe('feature announcement state', () => {
   it('only auto-selects the latest eligible announcement, not older unseen announcements', () => {
     const latest = getLatestFeatureAnnouncement();
     expect(latest).not.toBeNull();
-    // The newest announcement requires the 'voice' capability — grant it so it is eligible.
+    // Grant every capability so the newest announcement is eligible regardless of gating.
     const caps = { availableCapabilities: ['voice'] as const };
     expect(getLatestUnseenFeatureAnnouncement([], caps)?.id).toBe(latest?.id);
     expect(getLatestUnseenFeatureAnnouncement([latest!.id], caps)).toBeNull();
   });
 
   it('skips capability-gated announcements on devices without the capability', () => {
-    const latest = getLatestFeatureAnnouncement();
-    expect(latest?.requiresCapability).toBe('voice');
-    // No capabilities available — the voice announcement is shadowed, so the
-    // newest non-gated announcement surfaces instead.
-    const fallback = getLatestUnseenFeatureAnnouncement([]);
-    expect(fallback).not.toBeNull();
-    expect(fallback?.id).not.toBe(latest?.id);
-    expect(fallback?.requiresCapability).toBeUndefined();
+    // The catalog contains a capability-gated announcement (voice).
+    const gated = getFeatureAnnouncementsNewestFirst().find((a) => a.requiresCapability);
+    expect(gated?.requiresCapability).toBe('voice');
+    // With no capabilities available, the auto-popup never surfaces a gated announcement.
+    const surfaced = getLatestUnseenFeatureAnnouncement([]);
+    expect(surfaced).not.toBeNull();
+    expect(surfaced?.requiresCapability).toBeUndefined();
   });
 
   it('stores seen announcement ids per app user', async () => {

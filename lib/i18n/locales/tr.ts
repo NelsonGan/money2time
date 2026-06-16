@@ -68,8 +68,16 @@ const tr = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Paylaş ve Pro kazan',
+      rewards: {
+        title: 'Paylaş, Pro’yu ücretsiz al',
+        body: 'Money2Time hakkında Instagram, 小红书, Reddit veya Facebook’ta paylaşım yap. Paylaşım 1 ay Pro, 100+ beğeni tam bir yıl, 500+ beğeni ömür boyu Pro kazandırır. Ödülünü almak için Ayarlar’ı aç.',
+      },
+    },
     cta: {
       enable_voice: 'Sesli girişi etkinleştir',
+      open_share_earn: 'Pro’yu ücretsiz al',
     },
     showcase: {
       this_month: 'Bu ay',
@@ -1258,6 +1266,38 @@ const tr = {
     trend_preview_message:
       'Kalıpları izlemek, değişimleri tespit etmek ve paranızı zamanla anlamak için eğilimlerin kilidini açın.',
     trend_preview_cta: "Pro'ya Yükselt",
+  },
+  shareEarn: {
+    row_label: 'Paylaş ve Pro kazan',
+    row_subtitle: 'Bizden bahset, Pro’yu ücretsiz aç',
+    title: 'Paylaş ve Pro kazan',
+    subtitle: 'Money2Time hakkında paylaşım yap, Pro’yu senin için açalım, bizden olsun.',
+    hero_title: 'Yay, Pro kazan 🎁',
+    hero_body:
+      'Takipçilerine harcamalarını çalışma saatleriyle nasıl ölçtüğünü anlat. Paylaşımın ne kadar çok beğeni alırsa ödül o kadar büyük.',
+    rewards_title: 'Ödül seviyeleri',
+    tier1_badge: 'Sadece paylaş',
+    tier1_reward: '1 ay Pro',
+    tier1_desc:
+      'Instagram, 小红书, Facebook ve daha fazlasındaki her herkese açık paylaşım sayılır.',
+    tier2_badge: '100+ beğeni',
+    tier2_reward: '1 yıl Pro',
+    tier2_desc: 'Paylaşımın insanlara dokundu.',
+    tier3_badge: '500+ beğeni',
+    tier3_reward: 'Ömür boyu Pro',
+    tier3_desc: 'Viral oldun. Pro sonsuza dek senin.',
+    how_title: 'Nasıl çalışır',
+    step1_body:
+      'Money2Time hakkında Instagram, 小红书, Reddit, Facebook veya istediğin yerde paylaşım yap.',
+    step2_body: 'Beğeni toplamasına izin ver. Daha çok beğeni, daha büyük ödül.',
+    step3_body:
+      'Paylaşımının bağlantısını gönder, sana ücretsiz bir Pro kodunu e-postayla iletelim.',
+    platforms_title: 'Şurada paylaş',
+    claim_title: 'Zaten paylaştın mı?',
+    claim_body: 'Paylaşımının bağlantısını gönder, ücretsiz Pro kodunla yanıt verelim.',
+    claim_button: 'Ödülümü al',
+    fine_print:
+      'Ödüller, paylaşımının herkese açık olduğunu doğruladıktan sonra elle verilir. Kişi başı bir ödül. Beğeni sayısı talep anında kontrol edilir.',
   },
   notifications: {
     title: 'Bildirimler',

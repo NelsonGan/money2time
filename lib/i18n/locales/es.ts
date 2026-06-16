@@ -68,8 +68,16 @@ const es = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Comparte y gana Pro',
+      rewards: {
+        title: 'Publica y gana Pro gratis',
+        body: 'Publica sobre Money2Time en Instagram, 小红书, Reddit o Facebook. Publicar te da 1 mes de Pro, 100+ likes un año entero y 500+ likes Pro de por vida. Abre Ajustes para reclamar tu recompensa.',
+      },
+    },
     cta: {
       enable_voice: 'Activar entrada por voz',
+      open_share_earn: 'Consigue Pro gratis',
     },
     showcase: {
       this_month: 'Este mes',
@@ -1261,6 +1269,36 @@ const es = {
     trend_preview_message:
       'Desbloquea tendencias para rastrear patrones, detectar cambios y entender tu dinero a lo largo del tiempo.',
     trend_preview_cta: 'Actualizar a Pro',
+  },
+  shareEarn: {
+    row_label: 'Comparte y gana Pro',
+    row_subtitle: 'Publica sobre nosotros y desbloquea Pro gratis',
+    title: 'Comparte y gana Pro',
+    subtitle: 'Publica sobre Money2Time y te desbloqueamos Pro, gratis.',
+    hero_title: 'Corre la voz y gana Pro 🎁',
+    hero_body:
+      'Cuéntales a tus seguidores cómo mides tus gastos en horas de trabajo. Cuantos más likes reciba tu publicación, mayor será la recompensa.',
+    rewards_title: 'Niveles de recompensa',
+    tier1_badge: 'Solo publica',
+    tier1_reward: '1 mes de Pro',
+    tier1_desc: 'Cualquier publicación pública cuenta en Instagram, 小红书, Facebook y más.',
+    tier2_badge: '100+ likes',
+    tier2_reward: '1 año de Pro',
+    tier2_desc: 'Tu publicación conectó con la gente.',
+    tier3_badge: '500+ likes',
+    tier3_reward: 'Pro de por vida',
+    tier3_desc: 'Te hiciste viral. Pro es tuyo para siempre.',
+    how_title: 'Cómo funciona',
+    step1_body: 'Publica sobre Money2Time en Instagram, 小红书, Reddit, Facebook o donde quieras.',
+    step2_body: 'Deja que sume likes. Más likes significa una recompensa mayor.',
+    step3_body:
+      'Envíanos el enlace de tu publicación y te mandaremos por correo un código Pro gratis.',
+    platforms_title: 'Publica en',
+    claim_title: '¿Ya publicaste?',
+    claim_body: 'Envíanos el enlace de tu publicación y te responderemos con tu código Pro gratis.',
+    claim_button: 'Reclamar mi recompensa',
+    fine_print:
+      'Las recompensas se otorgan manualmente tras verificar que tu publicación es pública. Una recompensa por persona. Los likes se revisan al momento de reclamar.',
   },
   notifications: {
     title: 'Notificaciones',

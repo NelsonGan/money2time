@@ -24,6 +24,7 @@ import {
 
 interface NewsScreenProps {
   onBack: () => void;
+  onOpenShareEarn?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -36,7 +37,7 @@ function formatAnnouncementDate(dateString: string): string {
   });
 }
 
-export function NewsScreen({ onBack }: NewsScreenProps) {
+export function NewsScreen({ onBack, onOpenShareEarn }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const announcements = useMemo(() => getFeatureAnnouncementsNewestFirst(), []);
@@ -88,6 +89,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
         announcement={selectedAnnouncement}
         visible={!!selectedAnnouncement}
         onDismiss={() => setSelectedAnnouncement(null)}
+        onOpenShareEarn={onOpenShareEarn}
       />
     </SettingsPageLayout>
   );
