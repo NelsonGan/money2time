@@ -1273,7 +1273,7 @@ const pl = {
     subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro, za darmo.',
     hero_title: 'Rozgłoś to, zdobądź Pro 🎁',
     hero_body:
-      'Powiedz obserwującym, jak mierzysz wydatki w godzinach pracy. Im więcej polubień zbierze Twój post, tym większa nagroda.',
+      'Udostępnij zrzut ekranu aplikacji wraz z własnymi poradami o pieniądzach. Im więcej polubień zbierze Twój post, tym większa nagroda.',
     rewards_title: 'Poziomy nagród',
     tier1_badge: 'Po prostu opublikuj',
     tier1_reward: '1 miesiąc Pro',
@@ -1286,7 +1286,7 @@ const pl = {
     tier3_desc: 'Zrobiło się wiralowo. Pro jest Twoje na zawsze.',
     how_title: 'Jak to działa',
     step1_body:
-      'Napisz o Money2Time na Instagram, 小红书, Reddit, Facebook lub gdziekolwiek chcesz.',
+      'Po prostu opublikuj zrzut ekranu aplikacji ze swoimi poradami o pieniądzach na Instagram, 小红书, Reddit, Facebook lub gdziekolwiek. Nie musisz wymieniać nazwy aplikacji.',
     step2_body: 'Niech zbiera polubienia. Więcej polubień to większa nagroda.',
     step3_body: 'Wyślij nam link do swojego posta, a my mailowo prześlemy darmowy kod Pro.',
     platforms_title: 'Opublikuj na',

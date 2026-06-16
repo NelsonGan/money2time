@@ -1251,7 +1251,7 @@ const vi = {
     subtitle: 'Đăng bài về Money2Time và chúng tôi sẽ mở khóa Pro cho bạn, hoàn toàn miễn phí.',
     hero_title: 'Lan tỏa, nhận Pro 🎁',
     hero_body:
-      'Kể cho người theo dõi nghe cách bạn đo chi tiêu bằng số giờ làm việc. Bài đăng càng nhiều lượt thích, phần thưởng càng lớn.',
+      'Chia sẻ ảnh chụp màn hình ứng dụng kèm theo mẹo tiền bạc của riêng bạn. Bài đăng càng nhiều lượt thích, phần thưởng càng lớn.',
     rewards_title: 'Các mức thưởng',
     tier1_badge: 'Chỉ cần đăng',
     tier1_reward: '1 tháng Pro',
@@ -1263,7 +1263,8 @@ const vi = {
     tier3_reward: 'Pro trọn đời',
     tier3_desc: 'Bạn đã viral. Pro là của bạn mãi mãi.',
     how_title: 'Cách hoạt động',
-    step1_body: 'Đăng bài về Money2Time trên Instagram, 小红书, Reddit, Facebook hoặc bất cứ đâu.',
+    step1_body:
+      'Chỉ cần đăng ảnh chụp màn hình ứng dụng kèm mẹo tiền bạc của bạn lên Instagram, 小红书, Reddit, Facebook hoặc bất cứ đâu. Không cần nhắc tên ứng dụng.',
     step2_body: 'Để bài thu thập lượt thích. Càng nhiều lượt thích, phần thưởng càng lớn.',
     step3_body:
       'Gửi cho chúng tôi liên kết bài đăng và chúng tôi sẽ email cho bạn mã Pro miễn phí.',

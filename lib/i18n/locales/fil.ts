@@ -1289,7 +1289,7 @@ const fil = {
     subtitle: 'Mag-post tungkol sa Money2Time at i-unlock namin ang Pro para sa iyo, libre.',
     hero_title: 'Ikalat ito, kumita ng Pro 🎁',
     hero_body:
-      'Sabihin sa mga follower mo kung paano mo sinusukat ang gastos sa oras ng trabaho. Mas maraming likes, mas malaking reward.',
+      'Mag-share ng screenshot ng app kasama ang sarili mong money tips. Mas maraming likes, mas malaking reward.',
     rewards_title: 'Mga antas ng reward',
     tier1_badge: 'Mag-post lang',
     tier1_reward: '1 buwang Pro',
@@ -1302,7 +1302,7 @@ const fil = {
     tier3_desc: 'Naging viral ka. Sa iyo na ang Pro habambuhay.',
     how_title: 'Paano ito gumagana',
     step1_body:
-      'Mag-post tungkol sa Money2Time sa Instagram, 小红书, Reddit, Facebook o kahit saan.',
+      'Mag-post lang ng screenshot ng app kasama ang money tips mo sa Instagram, 小红书, Reddit, Facebook o kahit saan. Hindi mo kailangang banggitin ang pangalan ng app.',
     step2_body: 'Hayaang dumami ang likes. Mas maraming likes, mas malaking reward.',
     step3_body: 'Ipadala sa amin ang link ng post mo at i-eemail namin ang libreng Pro code.',
     platforms_title: 'Mag-post sa',

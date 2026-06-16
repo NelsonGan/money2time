@@ -1248,7 +1248,7 @@ const ja = {
     subtitle: 'Money2Timeについて投稿すると、Proを無料でアンロックします。',
     hero_title: '広めてProをゲット 🎁',
     hero_body:
-      '支出を労働時間で測る方法をフォロワーに教えましょう。投稿のいいねが多いほど報酬も大きくなります。',
+      'アプリのスクリーンショットを自分のお金の豆知識と一緒にシェアしましょう。投稿のいいねが多いほど報酬も大きくなります。',
     rewards_title: '報酬レベル',
     tier1_badge: '投稿するだけ',
     tier1_reward: 'Pro 1か月',
@@ -1261,7 +1261,7 @@ const ja = {
     tier3_desc: 'バズりました。Proはずっとあなたのものです。',
     how_title: '使い方',
     step1_body:
-      'Instagram、小红书、Reddit、Facebookなどお好きな場所でMoney2Timeについて投稿しましょう。',
+      'アプリのスクリーンショットを自分のお金の豆知識と一緒にInstagram、小红书、Reddit、Facebookなどに投稿するだけ。アプリ名を出す必要はありません。',
     step2_body: 'いいねを集めましょう。いいねが多いほど報酬が大きくなります。',
     step3_body: '投稿のリンクを送っていただければ、無料のProコードをメールでお送りします。',
     platforms_title: '投稿先',
