@@ -1274,7 +1274,7 @@ const it = {
     subtitle: 'Pubblica su Money2Time e ti sblocchiamo Pro, gratis.',
     hero_title: 'Spargi la voce, guadagna Pro 🎁',
     hero_body:
-      'Racconta ai tuoi follower come misuri le spese in ore di lavoro. Più piace il tuo post, più grande è la ricompensa.',
+      'Condividi uno screenshot dell’app insieme ai tuoi consigli sui soldi. Più piace il tuo post, più grande è la ricompensa.',
     rewards_title: 'Livelli di ricompensa',
     tier1_badge: 'Pubblica',
     tier1_reward: '1 mese di Pro',
@@ -1286,7 +1286,8 @@ const it = {
     tier3_reward: 'Pro a vita',
     tier3_desc: 'Sei diventato virale. Pro è tuo per sempre.',
     how_title: 'Come funziona',
-    step1_body: 'Pubblica su Money2Time su Instagram, 小红书, Reddit, Facebook o dove vuoi.',
+    step1_body:
+      'Pubblica semplicemente uno screenshot dell’app con i tuoi consigli sui soldi su Instagram, 小红书, Reddit, Facebook o dove vuoi. Non serve citare l’app per nome.',
     step2_body: 'Lascia che accumuli like. Più like, ricompensa più grande.',
     step3_body: 'Inviaci il link del tuo post e ti spediamo via email un codice Pro gratuito.',
     platforms_title: 'Pubblica su',

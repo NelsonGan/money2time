@@ -1274,7 +1274,7 @@ const tr = {
     subtitle: 'Money2Time hakkında paylaşım yap, Pro’yu senin için açalım, bizden olsun.',
     hero_title: 'Yay, Pro kazan 🎁',
     hero_body:
-      'Takipçilerine harcamalarını çalışma saatleriyle nasıl ölçtüğünü anlat. Paylaşımın ne kadar çok beğeni alırsa ödül o kadar büyük.',
+      'Uygulamanın ekran görüntüsünü kendi para ipuçlarınla birlikte paylaş. Paylaşımın ne kadar çok beğeni alırsa ödül o kadar büyük.',
     rewards_title: 'Ödül seviyeleri',
     tier1_badge: 'Sadece paylaş',
     tier1_reward: '1 ay Pro',
@@ -1288,7 +1288,7 @@ const tr = {
     tier3_desc: 'Viral oldun. Pro sonsuza dek senin.',
     how_title: 'Nasıl çalışır',
     step1_body:
-      'Money2Time hakkında Instagram, 小红书, Reddit, Facebook veya istediğin yerde paylaşım yap.',
+      'Sadece uygulamanın ekran görüntüsünü kendi para ipuçlarınla Instagram, 小红书, Reddit, Facebook veya istediğin yerde paylaş. Uygulamanın adını anmana gerek yok.',
     step2_body: 'Beğeni toplamasına izin ver. Daha çok beğeni, daha büyük ödül.',
     step3_body:
       'Paylaşımının bağlantısını gönder, sana ücretsiz bir Pro kodunu e-postayla iletelim.',

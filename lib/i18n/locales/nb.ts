@@ -1273,7 +1273,7 @@ const nb = {
     subtitle: 'Post om Money2Time, så låser vi opp Pro for deg, helt gratis.',
     hero_title: 'Spre ordet, tjen Pro 🎁',
     hero_body:
-      'Fortell følgerne dine hvordan du måler forbruket i arbeidstimer. Jo flere liker innlegget ditt, jo større belønning.',
+      'Del et skjermbilde av appen sammen med dine egne pengetips. Jo flere liker innlegget ditt, jo større belønning.',
     rewards_title: 'Belønningsnivåer',
     tier1_badge: 'Bare post',
     tier1_reward: '1 måned Pro',
@@ -1285,7 +1285,8 @@ const nb = {
     tier3_reward: 'Pro for livet',
     tier3_desc: 'Du ble viral. Pro er ditt for alltid.',
     how_title: 'Slik fungerer det',
-    step1_body: 'Post om Money2Time på Instagram, 小红书, Reddit, Facebook eller hvor du vil.',
+    step1_body:
+      'Bare legg ut et skjermbilde av appen med dine egne pengetips på Instagram, 小红书, Reddit, Facebook eller hvor du vil. Du trenger ikke nevne appen ved navn.',
     step2_body: 'La det samle likes. Flere likes betyr større belønning.',
     step3_body:
       'Send oss lenken til innlegget ditt, så sender vi deg en gratis Pro-kode på e-post.',
