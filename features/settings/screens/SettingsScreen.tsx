@@ -7,6 +7,7 @@ import {
   DatabaseBackup,
   FileText,
   FolderTree,
+  Gift,
   Heart,
   Landmark,
   Newspaper,
@@ -86,6 +87,7 @@ interface SettingsScreenProps {
   onOpenQuickEntry: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
+  onOpenShareAndEarn: () => void;
   onOpenWidgetPreviews?: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
@@ -107,6 +109,7 @@ export function SettingsScreen({
   onOpenQuickEntry,
   onOpenProPaywall,
   onOpenProManagement,
+  onOpenShareAndEarn,
   onOpenWidgetPreviews,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -318,17 +321,16 @@ export function SettingsScreen({
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              (isPro ? onOpenProManagement : onOpenProPaywall)();
-            }}
-            className="mt-6 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
-            style={!isPro ? styles.proButtonHighlight : undefined}
-          >
-            <Crown size={20} color={themeColors.primary} />
-            <View className="flex-1">
-              {isPro ? (
+          {isPro ? (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenProManagement();
+              }}
+              className="mt-3 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
+            >
+              <Crown size={20} color={themeColors.primary} />
+              <View className="flex-1">
                 <View className="flex-row items-center gap-1.5">
                   <Text variant="subheading" className="text-sm">
                     Money2Time
@@ -345,21 +347,65 @@ export function SettingsScreen({
                     </Text>
                   </View>
                 </View>
-              ) : (
+                <Text variant="friendly" tone="muted" className="text-xs">
+                  {I18n.t('pro.manage')}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenProPaywall();
+              }}
+              className="mt-3 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+              style={[styles.ctaShadow, { backgroundColor: themeColors.primary }]}
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <Crown size={20} color="#fff" fill="#fff" />
+              </View>
+              <View className="flex-1">
                 <Text
-                  variant="subheading"
-                  className="text-sm"
-                  style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  className="text-[15px]"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
                 >
                   {I18n.t('pro.upgrade')}
                 </Text>
-              )}
-              <Text variant="friendly" tone="muted" className="text-xs">
-                {isPro ? I18n.t('pro.manage') : I18n.t('pro.upgrade_subtitle')}
-              </Text>
-            </View>
-            {isPro ? <ChevronRight size={18} color={themeColors.textMuted} /> : null}
-          </Pressable>
+                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {I18n.t('pro.upgrade_subtitle')}
+                </Text>
+              </View>
+              <ChevronRight size={20} color="#fff" />
+            </Pressable>
+          )}
+
+          {!isPro ? (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenShareAndEarn();
+              }}
+              className="mt-3 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+              style={[styles.ctaShadow, { backgroundColor: '#F5A623' }]}
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <Gift size={20} color="#fff" />
+              </View>
+              <View className="flex-1">
+                <Text
+                  className="text-[15px]"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
+                  {I18n.t('shareEarn.row_label')}
+                </Text>
+                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                  {I18n.t('shareEarn.row_subtitle')}
+                </Text>
+              </View>
+              <ChevronRight size={20} color="#fff" />
+            </Pressable>
+          ) : null}
 
           <SettingsSection
             className="mt-6 gap-2"
@@ -582,14 +628,14 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     gap: spacing.xs,
   },
-  proButtonHighlight: {
+  ctaShadow: {
     ...(Platform.OS === 'ios'
       ? {
           shadowColor: '#0F172A',
-          shadowOpacity: 0.08,
+          shadowOpacity: 0.12,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 4 },
         }
-      : {}),
+      : { elevation: 2 }),
   },
 });

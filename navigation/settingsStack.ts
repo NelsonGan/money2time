@@ -38,6 +38,7 @@ export type SettingsStackParamList = {
     onToggle: (index: number) => void;
   };
   ProManagement: undefined;
+  ShareAndEarn: undefined;
   QuickEntrySettings: undefined;
   WidgetPreviews: undefined;
 };

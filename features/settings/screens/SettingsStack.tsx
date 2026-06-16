@@ -26,6 +26,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
+import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
@@ -97,6 +98,7 @@ function SettingsHomeRoute({
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
+      onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -313,7 +315,12 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="News">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <NewsScreen onBack={() => props.navigation.goBack()} />;
+          return (
+            <NewsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenShareEarn={() => props.navigation.navigate('ShareAndEarn')}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="AutoBackupSettings">
@@ -358,6 +365,12 @@ export function SettingsStack({
               onOpenPaywall={onOpenProPaywall}
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="ShareAndEarn">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <ShareAndEarnScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="QuickEntrySettings">

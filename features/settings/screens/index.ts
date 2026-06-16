@@ -11,6 +11,7 @@ export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
+export { ShareAndEarnScreen } from './ShareAndEarnScreen';
 export { StatementImportScreen } from './StatementImportScreen';
 export { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 export { WidgetPreviewsScreen } from './WidgetPreviewsScreen';

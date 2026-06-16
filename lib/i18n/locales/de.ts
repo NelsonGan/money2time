@@ -68,8 +68,16 @@ const de = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Teilen & Pro verdienen',
+      rewards: {
+        title: 'Posten, Pro gratis erhalten',
+        body: 'Poste über Money2Time auf Instagram, 小红书, Reddit oder Facebook. Ein Beitrag bringt 1 Monat Pro, 100+ Likes ein ganzes Jahr und 500+ Likes Pro für immer. Öffne die Einstellungen, um deine Belohnung einzulösen.',
+      },
+    },
     cta: {
       enable_voice: 'Spracheingabe aktivieren',
+      open_share_earn: 'Pro gratis sichern',
     },
     showcase: {
       this_month: 'Diesen Monat',
@@ -1271,6 +1279,37 @@ const de = {
     trend_preview_message:
       'Schalte Trends frei, um Muster zu verfolgen, Verschiebungen zu erkennen und dein Geld langfristig zu verstehen.',
     trend_preview_cta: 'Auf Pro upgraden',
+  },
+  shareEarn: {
+    row_label: 'Teilen & Pro verdienen',
+    row_subtitle: 'Poste über uns, schalte Pro gratis frei',
+    title: 'Teilen & Pro verdienen',
+    subtitle: 'Poste über Money2Time und wir schalten Pro für dich frei, kostenlos.',
+    hero_title: 'Verbreite es, verdiene Pro 🎁',
+    hero_body:
+      'Erzähl deinen Followern, wie du Ausgaben in Arbeitsstunden misst. Je mehr Likes dein Beitrag bekommt, desto größer die Belohnung.',
+    rewards_title: 'Belohnungsstufen',
+    tier1_badge: 'Nur posten',
+    tier1_reward: '1 Monat Pro',
+    tier1_desc: 'Jeder öffentliche Beitrag zählt auf Instagram, 小红书, Facebook und mehr.',
+    tier2_badge: '100+ Likes',
+    tier2_reward: '1 Jahr Pro',
+    tier2_desc: 'Dein Beitrag kam bei den Leuten an.',
+    tier3_badge: '500+ Likes',
+    tier3_reward: 'Pro für immer',
+    tier3_desc: 'Du bist viral gegangen. Pro gehört für immer dir.',
+    how_title: 'So funktioniert es',
+    step1_body: 'Poste über Money2Time auf Instagram, 小红书, Reddit, Facebook oder wo du willst.',
+    step2_body: 'Lass Likes sammeln. Mehr Likes bedeuten eine größere Belohnung.',
+    step3_body:
+      'Schick uns den Link zu deinem Beitrag und wir mailen dir einen kostenlosen Pro-Code.',
+    platforms_title: 'Posten auf',
+    claim_title: 'Schon gepostet?',
+    claim_body:
+      'Schick uns den Link zu deinem Beitrag und wir antworten mit deinem kostenlosen Pro-Code.',
+    claim_button: 'Belohnung einlösen',
+    fine_print:
+      'Belohnungen werden manuell vergeben, nachdem wir bestätigt haben, dass dein Beitrag öffentlich ist. Eine Belohnung pro Person. Die Like-Zahl wird beim Einlösen geprüft.',
   },
   notifications: {
     title: 'Benachrichtigungen',

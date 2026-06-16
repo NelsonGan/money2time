@@ -68,8 +68,16 @@ const sv = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Dela & tjäna Pro',
+      rewards: {
+        title: 'Posta, få Pro gratis',
+        body: 'Posta om Money2Time på Instagram, 小红书, Reddit eller Facebook. Ett inlägg ger 1 månad Pro, 100+ gillningar ett helt år och 500+ gillningar Pro för livet. Öppna Inställningar för att hämta din belöning.',
+      },
+    },
     cta: {
       enable_voice: 'Aktivera röstinmatning',
+      open_share_earn: 'Få Pro gratis',
     },
     showcase: {
       this_month: 'Den här månaden',
@@ -1251,6 +1259,35 @@ const sv = {
     trend_preview_message:
       'Lås upp trender för att spåra mönster, hitta förändringar och förstå dina pengar över tid.',
     trend_preview_cta: 'Uppgradera till Pro',
+  },
+  shareEarn: {
+    row_label: 'Dela & tjäna Pro',
+    row_subtitle: 'Posta om oss, lås upp Pro gratis',
+    title: 'Dela & tjäna Pro',
+    subtitle: 'Posta om Money2Time så låser vi upp Pro åt dig, helt gratis.',
+    hero_title: 'Sprid ordet, tjäna Pro 🎁',
+    hero_body:
+      'Berätta för dina följare hur du mäter utgifter i arbetstimmar. Ju fler gillningar ditt inlägg får, desto större belöning.',
+    rewards_title: 'Belöningsnivåer',
+    tier1_badge: 'Bara posta',
+    tier1_reward: '1 månad Pro',
+    tier1_desc: 'Varje offentligt inlägg räknas på Instagram, 小红书, Facebook med mera.',
+    tier2_badge: '100+ gillningar',
+    tier2_reward: '1 år Pro',
+    tier2_desc: 'Ditt inlägg träffade rätt hos folk.',
+    tier3_badge: '500+ gillningar',
+    tier3_reward: 'Pro för livet',
+    tier3_desc: 'Du blev viral. Pro är ditt för alltid.',
+    how_title: 'Så fungerar det',
+    step1_body: 'Posta om Money2Time på Instagram, 小红书, Reddit, Facebook eller var du vill.',
+    step2_body: 'Låt det samla gillningar. Fler gillningar betyder större belöning.',
+    step3_body: 'Skicka oss länken till ditt inlägg så mejlar vi dig en gratis Pro-kod.',
+    platforms_title: 'Posta på',
+    claim_title: 'Redan postat?',
+    claim_body: 'Skicka oss länken till ditt inlägg så svarar vi med din gratis Pro-kod.',
+    claim_button: 'Hämta min belöning',
+    fine_print:
+      'Belöningar ges manuellt efter att vi bekräftat att ditt inlägg är offentligt. En belöning per person. Antalet gillningar kontrolleras när du gör anspråk.',
   },
   notifications: {
     title: 'Notiser',

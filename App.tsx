@@ -56,6 +56,7 @@ import {
   QuickEntrySettingsScreen,
   RecurringScreen,
   SettingsStack,
+  ShareAndEarnScreen,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
@@ -1128,6 +1129,10 @@ function SettingsQuickEntryRouteScreen({ navigation }: RootStackRouteProps<'Sett
   return <QuickEntrySettingsScreen onBack={() => navigation.goBack()} />;
 }
 
+function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEarn'>) {
+  return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
+}
+
 function SettingsWageCalculatorRouteScreen({
   route,
   navigation,
@@ -1476,6 +1481,7 @@ function AppContent() {
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
           <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
+          <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}
@@ -1514,6 +1520,7 @@ function AppContent() {
         announcement={featureAnnouncement}
         visible={featureAnnouncementVisible}
         onDismiss={handleDismissFeatureAnnouncement}
+        onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
       />
       <ReviewPrePromptSheet />
     </View>

@@ -68,8 +68,16 @@ const ko = {
     },
   },
   news: {
+    share_earn: {
+      title: '공유하고 Pro 받기',
+      rewards: {
+        title: '게시하고 Pro 무료로',
+        body: 'Instagram, 小红书, Reddit, Facebook에 Money2Time에 대해 게시하세요. 게시만 해도 Pro 1개월, 좋아요 100+면 1년, 500+면 평생 Pro. 설정을 열어 보상을 받으세요.',
+      },
+    },
     cta: {
       enable_voice: '음성 입력 켜기',
+      open_share_earn: 'Pro 무료로 받기',
     },
     showcase: {
       this_month: '이번 달',
@@ -1224,6 +1232,35 @@ const ko = {
     trend_preview_message:
       '추세를 잠금 해제하여 패턴을 추적하고, 변화를 파악하고, 시간에 걸쳐 자금을 이해하세요.',
     trend_preview_cta: 'Pro로 업그레이드',
+  },
+  shareEarn: {
+    row_label: '공유하고 Pro 받기',
+    row_subtitle: '우리 앱을 게시하고 Pro를 무료로 잠금 해제',
+    title: '공유하고 Pro 받기',
+    subtitle: 'Money2Time에 대해 게시하면 Pro를 무료로 잠금 해제해 드려요.',
+    hero_title: '널리 알리고 Pro 받기 🎁',
+    hero_body:
+      '지출을 노동 시간으로 측정하는 방법을 팔로워에게 알려주세요. 게시물에 좋아요가 많을수록 보상이 커집니다.',
+    rewards_title: '보상 단계',
+    tier1_badge: '게시만 해도',
+    tier1_reward: 'Pro 1개월',
+    tier1_desc: 'Instagram, 小红书, Facebook 등 공개 게시물이면 무엇이든 인정돼요.',
+    tier2_badge: '좋아요 100+',
+    tier2_reward: 'Pro 1년',
+    tier2_desc: '게시물이 사람들의 공감을 얻었어요.',
+    tier3_badge: '좋아요 500+',
+    tier3_reward: '평생 Pro',
+    tier3_desc: '화제가 되었어요. Pro는 영원히 당신의 것입니다.',
+    how_title: '이용 방법',
+    step1_body: 'Instagram, 小红书, Reddit, Facebook 등 원하는 곳에 Money2Time에 대해 게시하세요.',
+    step2_body: '좋아요가 쌓이게 두세요. 좋아요가 많을수록 보상이 커집니다.',
+    step3_body: '게시물 링크를 보내주시면 무료 Pro 코드를 이메일로 보내드립니다.',
+    platforms_title: '게시할 곳',
+    claim_title: '이미 게시했나요?',
+    claim_body: '게시물 링크를 보내주시면 무료 Pro 코드로 답장해 드릴게요.',
+    claim_button: '보상 받기',
+    fine_print:
+      '보상은 게시물이 공개 상태임을 확인한 후 수동으로 지급됩니다. 1인당 1회. 좋아요 수는 신청 시점에 확인합니다.',
   },
   notifications: {
     title: '알림',
