@@ -1278,7 +1278,7 @@ const id = {
     subtitle: 'Posting tentang Money2Time dan kami buka Pro untukmu, gratis.',
     hero_title: 'Sebarkan, dapatkan Pro 🎁',
     hero_body:
-      'Beri tahu pengikutmu cara kamu mengukur pengeluaran dalam jam kerja. Makin banyak suka di postinganmu, makin besar hadiahnya.',
+      'Bagikan tangkapan layar aplikasi bersama tips keuanganmu sendiri. Makin banyak suka di postinganmu, makin besar hadiahnya.',
     rewards_title: 'Tingkat hadiah',
     tier1_badge: 'Cukup posting',
     tier1_reward: 'Pro 1 bulan',
@@ -1291,7 +1291,7 @@ const id = {
     tier3_desc: 'Kamu viral. Pro jadi milikmu selamanya.',
     how_title: 'Cara kerjanya',
     step1_body:
-      'Posting tentang Money2Time di Instagram, 小红书, Reddit, Facebook, atau di mana saja.',
+      'Cukup posting tangkapan layar aplikasi dengan tips keuanganmu di Instagram, 小红书, Reddit, Facebook, atau di mana saja. Tidak perlu menyebut nama aplikasi.',
     step2_body: 'Biarkan terkumpul suka. Makin banyak suka, makin besar hadiah.',
     step3_body: 'Kirimkan tautan postinganmu dan kami akan mengirim kode Pro gratis lewat email.',
     platforms_title: 'Posting di',
