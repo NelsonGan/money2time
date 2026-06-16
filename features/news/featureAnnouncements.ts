@@ -9,9 +9,17 @@ export interface FeatureAnnouncementPage {
   /** Page content key — copy resolves from `news.<announcement.i18nKey>.<key>`. */
   key: string;
   accent: 'primary' | 'success' | 'warning' | 'error' | 'lavender' | 'sky';
-  visual?: 'monthly' | 'quickAdd' | 'weekly' | 'calendar' | 'savings' | 'savingsHistory' | 'voice';
+  visual?:
+    | 'monthly'
+    | 'quickAdd'
+    | 'weekly'
+    | 'calendar'
+    | 'savings'
+    | 'savingsHistory'
+    | 'voice'
+    | 'shareEarn';
   /** Optional call-to-action that replaces the primary button on this page. */
-  cta?: 'enableVoice';
+  cta?: 'enableVoice' | 'openShareEarn';
 }
 
 export interface FeatureAnnouncement {
@@ -52,6 +60,8 @@ export function announcementPageBody(
 /** Localized label for a page call-to-action button. */
 export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['cta']>): string {
   switch (cta) {
+    case 'openShareEarn':
+      return I18n.t('news.cta.open_share_earn');
     case 'enableVoice':
     default:
       return I18n.t('news.cta.enable_voice');

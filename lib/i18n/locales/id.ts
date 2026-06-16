@@ -68,8 +68,16 @@ const id = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Bagikan & Dapatkan Pro',
+      rewards: {
+        title: 'Posting, dapat Pro gratis',
+        body: 'Posting tentang Money2Time di Instagram, 小红书, Reddit, atau Facebook. Posting memberi Pro 1 bulan, 100+ suka satu tahun penuh, dan 500+ suka Pro seumur hidup. Buka Pengaturan untuk klaim hadiahmu.',
+      },
+    },
     cta: {
       enable_voice: 'Aktifkan input suara',
+      open_share_earn: 'Dapatkan Pro gratis',
     },
     showcase: {
       this_month: 'Bulan ini',
@@ -1262,6 +1270,36 @@ const id = {
     trend_preview_message:
       'Buka tren untuk melacak pola, menemukan perubahan, dan memahami uangmu dari waktu ke waktu.',
     trend_preview_cta: 'Upgrade ke Pro',
+  },
+  shareEarn: {
+    row_label: 'Bagikan & Dapatkan Pro',
+    row_subtitle: 'Posting tentang kami, buka Pro gratis',
+    title: 'Bagikan & Dapatkan Pro',
+    subtitle: 'Posting tentang Money2Time dan kami buka Pro untukmu, gratis.',
+    hero_title: 'Sebarkan, dapatkan Pro 🎁',
+    hero_body:
+      'Beri tahu pengikutmu cara kamu mengukur pengeluaran dalam jam kerja. Makin banyak suka di postinganmu, makin besar hadiahnya.',
+    rewards_title: 'Tingkat hadiah',
+    tier1_badge: 'Cukup posting',
+    tier1_reward: 'Pro 1 bulan',
+    tier1_desc: 'Postingan publik apa pun dihitung di Instagram, 小红书, Facebook, dan lainnya.',
+    tier2_badge: '100+ suka',
+    tier2_reward: 'Pro 1 tahun',
+    tier2_desc: 'Postinganmu mengena di hati orang.',
+    tier3_badge: '500+ suka',
+    tier3_reward: 'Pro seumur hidup',
+    tier3_desc: 'Kamu viral. Pro jadi milikmu selamanya.',
+    how_title: 'Cara kerjanya',
+    step1_body:
+      'Posting tentang Money2Time di Instagram, 小红书, Reddit, Facebook, atau di mana saja.',
+    step2_body: 'Biarkan terkumpul suka. Makin banyak suka, makin besar hadiah.',
+    step3_body: 'Kirimkan tautan postinganmu dan kami akan mengirim kode Pro gratis lewat email.',
+    platforms_title: 'Posting di',
+    claim_title: 'Sudah posting?',
+    claim_body: 'Kirimkan tautan postinganmu dan kami balas dengan kode Pro gratis.',
+    claim_button: 'Klaim hadiahku',
+    fine_print:
+      'Hadiah diberikan secara manual setelah kami memverifikasi postinganmu bersifat publik. Satu hadiah per orang. Jumlah suka diperiksa saat kamu klaim.',
   },
   notifications: {
     title: 'Notifikasi',

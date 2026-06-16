@@ -68,8 +68,16 @@ const ms = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Kongsi & Dapat Pro',
+      rewards: {
+        title: 'Hantar pos, dapat Pro percuma',
+        body: 'Hantar pos tentang Money2Time di Instagram, 小红书, Reddit atau Facebook. Hantar pos dapat Pro 1 bulan, 100+ suka setahun penuh, dan 500+ suka Pro seumur hidup. Buka Tetapan untuk menuntut ganjaran.',
+      },
+    },
     cta: {
       enable_voice: 'Dayakan input suara',
+      open_share_earn: 'Dapatkan Pro percuma',
     },
     showcase: {
       this_month: 'Bulan ini',
@@ -1255,6 +1263,36 @@ const ms = {
     trend_preview_message:
       'Buka kunci trend untuk jejak corak, kesan perubahan, dan fahami wang anda dari masa ke masa.',
     trend_preview_cta: 'Naik Taraf ke Pro',
+  },
+  shareEarn: {
+    row_label: 'Kongsi & Dapat Pro',
+    row_subtitle: 'Hantar pos tentang kami, buka Pro percuma',
+    title: 'Kongsi & Dapat Pro',
+    subtitle: 'Hantar pos tentang Money2Time dan kami buka Pro untuk anda, percuma.',
+    hero_title: 'Sebarkan, dapat Pro 🎁',
+    hero_body:
+      'Beritahu pengikut anda cara anda mengukur perbelanjaan dalam jam kerja. Lebih banyak suka pada pos anda, lebih besar ganjaran.',
+    rewards_title: 'Tahap ganjaran',
+    tier1_badge: 'Hantar pos sahaja',
+    tier1_reward: 'Pro 1 bulan',
+    tier1_desc: 'Mana-mana pos awam dikira di Instagram, 小红书, Facebook dan lain-lain.',
+    tier2_badge: '100+ suka',
+    tier2_reward: 'Pro 1 tahun',
+    tier2_desc: 'Pos anda menyentuh hati ramai orang.',
+    tier3_badge: '500+ suka',
+    tier3_reward: 'Pro seumur hidup',
+    tier3_desc: 'Anda jadi tular. Pro milik anda selamanya.',
+    how_title: 'Cara ia berfungsi',
+    step1_body:
+      'Hantar pos tentang Money2Time di Instagram, 小红书, Reddit, Facebook atau mana-mana sahaja.',
+    step2_body: 'Biar ia kumpul suka. Lebih banyak suka, lebih besar ganjaran.',
+    step3_body: 'Hantar pautan pos anda dan kami akan e-mel kod Pro percuma.',
+    platforms_title: 'Hantar pos di',
+    claim_title: 'Sudah hantar pos?',
+    claim_body: 'Hantar pautan pos anda dan kami akan balas dengan kod Pro percuma.',
+    claim_button: 'Tuntut ganjaran saya',
+    fine_print:
+      'Ganjaran diberi secara manual selepas kami sahkan pos anda bersifat awam. Satu ganjaran setiap orang. Jumlah suka disemak ketika anda menuntut.',
   },
   notifications: {
     title: 'Pemberitahuan',

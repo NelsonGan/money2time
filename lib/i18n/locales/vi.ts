@@ -68,8 +68,16 @@ const vi = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Chia sẻ & Nhận Pro',
+      rewards: {
+        title: 'Đăng bài, nhận Pro miễn phí',
+        body: 'Đăng bài về Money2Time trên Instagram, 小红书, Reddit hoặc Facebook. Chỉ cần đăng được 1 tháng Pro, 100+ lượt thích được trọn năm, và 500+ lượt thích được Pro trọn đời. Mở Cài đặt để nhận thưởng.',
+      },
+    },
     cta: {
       enable_voice: 'Bật nhập bằng giọng nói',
+      open_share_earn: 'Nhận Pro miễn phí',
     },
     showcase: {
       this_month: 'Tháng này',
@@ -1235,6 +1243,36 @@ const vi = {
     trend_preview_message:
       'Mở khóa xu hướng để theo dõi quy luật, phát hiện thay đổi và hiểu rõ tài chính theo thời gian.',
     trend_preview_cta: 'Nâng cấp lên Pro',
+  },
+  shareEarn: {
+    row_label: 'Chia sẻ & Nhận Pro',
+    row_subtitle: 'Đăng bài về chúng tôi, mở khóa Pro miễn phí',
+    title: 'Chia sẻ & Nhận Pro',
+    subtitle: 'Đăng bài về Money2Time và chúng tôi sẽ mở khóa Pro cho bạn, hoàn toàn miễn phí.',
+    hero_title: 'Lan tỏa, nhận Pro 🎁',
+    hero_body:
+      'Kể cho người theo dõi nghe cách bạn đo chi tiêu bằng số giờ làm việc. Bài đăng càng nhiều lượt thích, phần thưởng càng lớn.',
+    rewards_title: 'Các mức thưởng',
+    tier1_badge: 'Chỉ cần đăng',
+    tier1_reward: '1 tháng Pro',
+    tier1_desc: 'Mọi bài đăng công khai trên Instagram, 小红书, Facebook và hơn nữa đều tính.',
+    tier2_badge: '100+ lượt thích',
+    tier2_reward: '1 năm Pro',
+    tier2_desc: 'Bài đăng của bạn chạm đến nhiều người.',
+    tier3_badge: '500+ lượt thích',
+    tier3_reward: 'Pro trọn đời',
+    tier3_desc: 'Bạn đã viral. Pro là của bạn mãi mãi.',
+    how_title: 'Cách hoạt động',
+    step1_body: 'Đăng bài về Money2Time trên Instagram, 小红书, Reddit, Facebook hoặc bất cứ đâu.',
+    step2_body: 'Để bài thu thập lượt thích. Càng nhiều lượt thích, phần thưởng càng lớn.',
+    step3_body:
+      'Gửi cho chúng tôi liên kết bài đăng và chúng tôi sẽ email cho bạn mã Pro miễn phí.',
+    platforms_title: 'Đăng trên',
+    claim_title: 'Đã đăng rồi?',
+    claim_body: 'Gửi liên kết bài đăng và chúng tôi sẽ phản hồi kèm mã Pro miễn phí.',
+    claim_button: 'Nhận thưởng',
+    fine_print:
+      'Phần thưởng được cấp thủ công sau khi chúng tôi xác minh bài đăng của bạn ở chế độ công khai. Mỗi người một phần thưởng. Số lượt thích được kiểm tra tại thời điểm nhận.',
   },
   notifications: {
     title: 'Thông báo',

@@ -68,8 +68,16 @@ const nl = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Deel & verdien Pro',
+      rewards: {
+        title: 'Post en krijg Pro gratis',
+        body: 'Post over Money2Time op Instagram, 小红书, Reddit of Facebook. Posten geeft 1 maand Pro, 100+ likes een heel jaar en 500+ likes Pro voor het leven. Open Instellingen om je beloning te claimen.',
+      },
+    },
     cta: {
       enable_voice: 'Spraakinvoer inschakelen',
+      open_share_earn: 'Pro gratis krijgen',
     },
     showcase: {
       this_month: 'Deze maand',
@@ -1269,6 +1277,35 @@ const nl = {
     trend_preview_message:
       'Ontgrendel trends om patronen bij te houden, verschuivingen te spotten en je geld in de loop van de tijd te begrijpen.',
     trend_preview_cta: 'Upgraden naar Pro',
+  },
+  shareEarn: {
+    row_label: 'Deel & verdien Pro',
+    row_subtitle: 'Post over ons, ontgrendel Pro gratis',
+    title: 'Deel & verdien Pro',
+    subtitle: 'Post over Money2Time en wij ontgrendelen Pro voor je, gratis.',
+    hero_title: 'Verspreid het, verdien Pro 🎁',
+    hero_body:
+      'Vertel je volgers hoe je uitgaven meet in werkuren. Hoe meer likes je post krijgt, hoe groter de beloning.',
+    rewards_title: 'Beloningsniveaus',
+    tier1_badge: 'Gewoon posten',
+    tier1_reward: '1 maand Pro',
+    tier1_desc: 'Elke openbare post telt op Instagram, 小红书, Facebook en meer.',
+    tier2_badge: '100+ likes',
+    tier2_reward: '1 jaar Pro',
+    tier2_desc: 'Je post raakte een snaar bij mensen.',
+    tier3_badge: '500+ likes',
+    tier3_reward: 'Pro voor het leven',
+    tier3_desc: 'Je ging viraal. Pro is voor altijd van jou.',
+    how_title: 'Zo werkt het',
+    step1_body: 'Post over Money2Time op Instagram, 小红书, Reddit, Facebook of waar je maar wilt.',
+    step2_body: 'Laat het likes verzamelen. Meer likes betekent een grotere beloning.',
+    step3_body: 'Stuur ons de link naar je post en we mailen je een gratis Pro-code.',
+    platforms_title: 'Posten op',
+    claim_title: 'Al gepost?',
+    claim_body: 'Stuur ons de link naar je post en we antwoorden met je gratis Pro-code.',
+    claim_button: 'Mijn beloning claimen',
+    fine_print:
+      'Beloningen worden handmatig toegekend nadat we hebben bevestigd dat je post openbaar is. Eén beloning per persoon. Het aantal likes wordt gecontroleerd op het moment van claimen.',
   },
   notifications: {
     title: 'Meldingen',

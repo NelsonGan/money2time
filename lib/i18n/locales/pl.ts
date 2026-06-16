@@ -68,8 +68,16 @@ const pl = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Udostępnij i zdobądź Pro',
+      rewards: {
+        title: 'Opublikuj, zdobądź Pro za darmo',
+        body: 'Napisz o Money2Time na Instagram, 小红书, Reddit lub Facebook. Sam post daje 1 miesiąc Pro, 100+ polubień cały rok, a 500+ polubień Pro na zawsze. Otwórz Ustawienia, aby odebrać nagrodę.',
+      },
+    },
     cta: {
       enable_voice: 'Włącz wprowadzanie głosowe',
+      open_share_earn: 'Zdobądź Pro za darmo',
     },
     showcase: {
       this_month: 'W tym miesiącu',
@@ -1257,6 +1265,36 @@ const pl = {
     trend_preview_message:
       'Odblokuj trendy, by śledzić wzorce, wykrywać zmiany i rozumieć swoje pieniądze w czasie.',
     trend_preview_cta: 'Przejdź na Pro',
+  },
+  shareEarn: {
+    row_label: 'Udostępnij i zdobądź Pro',
+    row_subtitle: 'Napisz o nas, odblokuj Pro za darmo',
+    title: 'Udostępnij i zdobądź Pro',
+    subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro, za darmo.',
+    hero_title: 'Rozgłoś to, zdobądź Pro 🎁',
+    hero_body:
+      'Powiedz obserwującym, jak mierzysz wydatki w godzinach pracy. Im więcej polubień zbierze Twój post, tym większa nagroda.',
+    rewards_title: 'Poziomy nagród',
+    tier1_badge: 'Po prostu opublikuj',
+    tier1_reward: '1 miesiąc Pro',
+    tier1_desc: 'Liczy się każdy publiczny post na Instagram, 小红书, Facebook i innych.',
+    tier2_badge: '100+ polubień',
+    tier2_reward: '1 rok Pro',
+    tier2_desc: 'Twój post trafił do ludzi.',
+    tier3_badge: '500+ polubień',
+    tier3_reward: 'Pro na zawsze',
+    tier3_desc: 'Zrobiło się wiralowo. Pro jest Twoje na zawsze.',
+    how_title: 'Jak to działa',
+    step1_body:
+      'Napisz o Money2Time na Instagram, 小红书, Reddit, Facebook lub gdziekolwiek chcesz.',
+    step2_body: 'Niech zbiera polubienia. Więcej polubień to większa nagroda.',
+    step3_body: 'Wyślij nam link do swojego posta, a my mailowo prześlemy darmowy kod Pro.',
+    platforms_title: 'Opublikuj na',
+    claim_title: 'Już opublikowałeś?',
+    claim_body: 'Wyślij nam link do swojego posta, a odpowiemy z Twoim darmowym kodem Pro.',
+    claim_button: 'Odbierz nagrodę',
+    fine_print:
+      'Nagrody przyznajemy ręcznie po potwierdzeniu, że Twój post jest publiczny. Jedna nagroda na osobę. Liczbę polubień sprawdzamy w momencie zgłoszenia.',
   },
   notifications: {
     title: 'Powiadomienia',

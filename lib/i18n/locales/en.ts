@@ -68,8 +68,16 @@ const en = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Share & Earn Pro',
+      rewards: {
+        title: 'Post, get Pro free',
+        body: 'Post about Money2Time on Instagram, 小红书, Reddit or Facebook. Just posting earns 1 month of Pro, 100+ likes earns a full year, and 500+ likes earns Pro for life. Open Settings to claim your reward.',
+      },
+    },
     cta: {
       enable_voice: 'Enable voice input',
+      open_share_earn: 'Get Pro for free',
     },
     showcase: {
       this_month: 'This month',
@@ -1246,6 +1254,36 @@ const en = {
     trend_preview_message:
       'Unlock trends to track patterns, spot shifts, and understand your money over time.',
     trend_preview_cta: 'Upgrade to Pro',
+  },
+  shareEarn: {
+    row_label: 'Share & Earn Pro',
+    row_subtitle: 'Post about us, unlock Pro for free',
+    title: 'Share & Earn Pro',
+    subtitle: 'Post about Money2Time and we’ll unlock Pro for you, on the house.',
+    hero_title: 'Spread the word, earn Pro 🎁',
+    hero_body:
+      'Tell your followers how you track spending in hours of work. The more love your post gets, the bigger your reward.',
+    rewards_title: 'Reward tiers',
+    tier1_badge: 'Just post',
+    tier1_reward: '1 month of Pro',
+    tier1_desc: 'Any public post counts on Instagram, 小红书, Facebook, and more.',
+    tier2_badge: '100+ likes',
+    tier2_reward: '1 year of Pro',
+    tier2_desc: 'Your post struck a chord with people.',
+    tier3_badge: '500+ likes',
+    tier3_reward: 'Lifetime Pro',
+    tier3_desc: 'You went viral. Pro is yours forever.',
+    how_title: 'How it works',
+    step1_body:
+      'Post about Money2Time on Instagram, 小红书, Reddit, Facebook, or anywhere you like.',
+    step2_body: 'Let it gather likes. More likes means a bigger reward.',
+    step3_body: 'Send us your post link and we’ll email you a free Pro code.',
+    platforms_title: 'Post on',
+    claim_title: 'Already posted?',
+    claim_body: 'Send us the link to your post and we’ll reply with your free Pro code.',
+    claim_button: 'Claim my reward',
+    fine_print:
+      'Rewards are granted manually after we verify your post is public. One reward per person. Like counts are checked at the time you claim.',
   },
   notifications: {
     title: 'Notifications',

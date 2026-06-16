@@ -68,8 +68,16 @@ const it = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Condividi e guadagna Pro',
+      rewards: {
+        title: 'Pubblica, Pro gratis',
+        body: 'Pubblica su Money2Time su Instagram, 小红书, Reddit o Facebook. Un post dà 1 mese di Pro, 100+ like un anno intero e 500+ like Pro a vita. Apri le Impostazioni per richiedere la ricompensa.',
+      },
+    },
     cta: {
       enable_voice: "Attiva l'input vocale",
+      open_share_earn: 'Ottieni Pro gratis',
     },
     showcase: {
       this_month: 'Questo mese',
@@ -1258,6 +1266,35 @@ const it = {
     trend_preview_message:
       'Sblocca le tendenze per monitorare pattern, individuare cambiamenti e capire il tuo denaro nel tempo.',
     trend_preview_cta: 'Passa a Pro',
+  },
+  shareEarn: {
+    row_label: 'Condividi e guadagna Pro',
+    row_subtitle: 'Pubblica su di noi, sblocca Pro gratis',
+    title: 'Condividi e guadagna Pro',
+    subtitle: 'Pubblica su Money2Time e ti sblocchiamo Pro, gratis.',
+    hero_title: 'Spargi la voce, guadagna Pro 🎁',
+    hero_body:
+      'Racconta ai tuoi follower come misuri le spese in ore di lavoro. Più piace il tuo post, più grande è la ricompensa.',
+    rewards_title: 'Livelli di ricompensa',
+    tier1_badge: 'Pubblica',
+    tier1_reward: '1 mese di Pro',
+    tier1_desc: 'Vale qualsiasi post pubblico su Instagram, 小红书, Facebook e altri.',
+    tier2_badge: '100+ like',
+    tier2_reward: '1 anno di Pro',
+    tier2_desc: 'Il tuo post ha colpito le persone.',
+    tier3_badge: '500+ like',
+    tier3_reward: 'Pro a vita',
+    tier3_desc: 'Sei diventato virale. Pro è tuo per sempre.',
+    how_title: 'Come funziona',
+    step1_body: 'Pubblica su Money2Time su Instagram, 小红书, Reddit, Facebook o dove vuoi.',
+    step2_body: 'Lascia che accumuli like. Più like, ricompensa più grande.',
+    step3_body: 'Inviaci il link del tuo post e ti spediamo via email un codice Pro gratuito.',
+    platforms_title: 'Pubblica su',
+    claim_title: 'Hai già pubblicato?',
+    claim_body: 'Inviaci il link del tuo post e ti risponderemo con il tuo codice Pro gratuito.',
+    claim_button: 'Richiedi la ricompensa',
+    fine_print:
+      'Le ricompense vengono assegnate manualmente dopo aver verificato che il tuo post sia pubblico. Una ricompensa a persona. I like vengono controllati al momento della richiesta.',
   },
   notifications: {
     title: 'Notifiche',

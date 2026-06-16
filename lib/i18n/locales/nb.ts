@@ -68,8 +68,16 @@ const nb = {
     },
   },
   news: {
+    share_earn: {
+      title: 'Del & tjen Pro',
+      rewards: {
+        title: 'Post og få Pro gratis',
+        body: 'Post om Money2Time på Instagram, 小红书, Reddit eller Facebook. Et innlegg gir 1 måned Pro, 100+ likes et helt år, og 500+ likes Pro for livet. Åpne Innstillinger for å hente belønningen.',
+      },
+    },
     cta: {
       enable_voice: 'Slå på taleinndata',
+      open_share_earn: 'Få Pro gratis',
     },
     showcase: {
       this_month: 'Denne måneden',
@@ -1257,6 +1265,36 @@ const nb = {
     trend_preview_message:
       'Lås opp trender for å spore mønstre, oppdage endringer og forstå pengene dine over tid.',
     trend_preview_cta: 'Oppgrader til Pro',
+  },
+  shareEarn: {
+    row_label: 'Del & tjen Pro',
+    row_subtitle: 'Post om oss, lås opp Pro gratis',
+    title: 'Del & tjen Pro',
+    subtitle: 'Post om Money2Time, så låser vi opp Pro for deg, helt gratis.',
+    hero_title: 'Spre ordet, tjen Pro 🎁',
+    hero_body:
+      'Fortell følgerne dine hvordan du måler forbruket i arbeidstimer. Jo flere liker innlegget ditt, jo større belønning.',
+    rewards_title: 'Belønningsnivåer',
+    tier1_badge: 'Bare post',
+    tier1_reward: '1 måned Pro',
+    tier1_desc: 'Ethvert offentlig innlegg teller på Instagram, 小红书, Facebook med mer.',
+    tier2_badge: '100+ likes',
+    tier2_reward: '1 år Pro',
+    tier2_desc: 'Innlegget ditt traff folk.',
+    tier3_badge: '500+ likes',
+    tier3_reward: 'Pro for livet',
+    tier3_desc: 'Du ble viral. Pro er ditt for alltid.',
+    how_title: 'Slik fungerer det',
+    step1_body: 'Post om Money2Time på Instagram, 小红书, Reddit, Facebook eller hvor du vil.',
+    step2_body: 'La det samle likes. Flere likes betyr større belønning.',
+    step3_body:
+      'Send oss lenken til innlegget ditt, så sender vi deg en gratis Pro-kode på e-post.',
+    platforms_title: 'Post på',
+    claim_title: 'Allerede postet?',
+    claim_body: 'Send oss lenken til innlegget ditt, så svarer vi med din gratis Pro-kode.',
+    claim_button: 'Hent belønningen min',
+    fine_print:
+      'Belønninger gis manuelt etter at vi har bekreftet at innlegget ditt er offentlig. Én belønning per person. Antall likes sjekkes når du henter belønningen.',
   },
   notifications: {
     title: 'Varsler',

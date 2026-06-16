@@ -19,6 +19,7 @@ import {
   type FeatureAnnouncement,
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
+import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 
@@ -26,6 +27,8 @@ interface FeatureAnnouncementModalProps {
   announcement: FeatureAnnouncement | null;
   visible: boolean;
   onDismiss: () => void;
+  /** Invoked when a page with the `openShareEarn` CTA is confirmed. */
+  onOpenShareEarn?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -83,6 +86,7 @@ export function FeatureAnnouncementModal({
   announcement,
   visible,
   onDismiss,
+  onOpenShareEarn,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -154,6 +158,13 @@ export function FeatureAnnouncementModal({
   const showcaseWidth = Math.min(338, windowWidth - MODAL_HORIZONTAL * 2 - PANEL_PADDING * 2);
 
   const showEnableVoiceCta = page.cta === 'enableVoice' && voiceSupported === true;
+  const showShareEarnCta = isLastPage && page.cta === 'openShareEarn' && !!onOpenShareEarn;
+
+  const handleOpenShareEarn = () => {
+    void triggerHaptic('selection');
+    onDismiss();
+    onOpenShareEarn?.();
+  };
 
   const handlePrevious = () => {
     if (pageIndex <= 0) return;
@@ -186,24 +197,28 @@ export function FeatureAnnouncementModal({
           {/* Hero panel — progress dots and the real widget preview sit on the
               tinted panel so there is no white bar at the top. */}
           <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
-            <View style={styles.dotsRow}>
-              {announcement.pages.map((item, index) => (
-                <View
-                  key={item.key}
-                  style={[
-                    styles.dot,
-                    {
-                      width: index === pageIndex ? 18 : 7,
-                      backgroundColor:
-                        index === pageIndex ? accentColor : withColorAlpha(colors.text, 0.16),
-                    },
-                  ]}
-                />
-              ))}
-            </View>
+            {pageCount > 1 ? (
+              <View style={styles.dotsRow}>
+                {announcement.pages.map((item, index) => (
+                  <View
+                    key={item.key}
+                    style={[
+                      styles.dot,
+                      {
+                        width: index === pageIndex ? 18 : 7,
+                        backgroundColor:
+                          index === pageIndex ? accentColor : withColorAlpha(colors.text, 0.16),
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+            ) : null}
             <View style={styles.showcaseSlot}>
               {page.visual === 'voice' ? (
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
+              ) : page.visual === 'shareEarn' ? (
+                <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : (
                 <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
               )}
@@ -275,8 +290,18 @@ export function FeatureAnnouncementModal({
                     <Text>{I18n.t('common.back')}</Text>
                   </Button>
                 ) : null}
-                <Button size="sm" className="flex-[2]" onPress={handleNext}>
-                  <Text>{isLastPage ? I18n.t('common.done') : I18n.t('common.next')}</Text>
+                <Button
+                  size="sm"
+                  className="flex-[2]"
+                  onPress={showShareEarnCta ? handleOpenShareEarn : handleNext}
+                >
+                  <Text>
+                    {showShareEarnCta
+                      ? announcementCtaLabel('openShareEarn')
+                      : isLastPage
+                        ? I18n.t('common.done')
+                        : I18n.t('common.next')}
+                  </Text>
                 </Button>
               </View>
             )}
