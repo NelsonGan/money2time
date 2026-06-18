@@ -16,7 +16,6 @@ export type SettingsStackParamList = {
   AccountSettings: undefined;
   Accounts: undefined;
   Categories: undefined;
-  CategoriesSubcategories: { parentId: string };
   Recurring: undefined;
   Notifications: undefined;
   NotificationDetail: { type: NotificationDetailType };

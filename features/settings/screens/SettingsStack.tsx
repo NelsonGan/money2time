@@ -19,10 +19,10 @@ import { AutoBackupScreen } from './AutoBackupScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
-import { ProManagementScreen } from './ProManagementScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
+import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
@@ -53,8 +53,6 @@ function getSettingsAnalyticsScreen(routeName: keyof SettingsStackParamList): st
   switch (routeName) {
     case 'SettingsHome':
       return 'settings';
-    case 'CategoriesSubcategories':
-      return 'Categories';
     default:
       return routeName;
   }
@@ -244,27 +242,7 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="Categories">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return (
-            <CategoriesScreen
-              onBack={() => props.navigation.goBack()}
-              useNativeBackGesture
-              onOpenParent={(parentId) =>
-                props.navigation.navigate('CategoriesSubcategories', { parentId })
-              }
-            />
-          );
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="CategoriesSubcategories">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return (
-            <CategoriesScreen
-              onBack={() => props.navigation.goBack()}
-              useNativeBackGesture
-              parentId={props.route.params.parentId}
-            />
-          );
+          return <CategoriesScreen onBack={() => props.navigation.goBack()} useNativeBackGesture />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="Recurring">
