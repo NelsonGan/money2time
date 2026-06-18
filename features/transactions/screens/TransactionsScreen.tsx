@@ -29,11 +29,13 @@ import { useApp } from '~/context/AppContext';
 import {
   ActivitySearchRow,
   ActivityTransactionList,
+  type BulkTransactionChanges,
+  BulkEditTransactionsSheet,
+  buildBulkUpdateInputs,
   DisplayModeToggle,
   MonthJumpPopover,
   MonthPagerPage,
 } from '~/features/transactions/components';
-import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -50,13 +52,12 @@ import { useScrollToTopTokenNavigation } from '~/hooks/useScrollToTopTokenNaviga
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, CategoryType, TransactionType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addMonthsAtMonthStart,
   formatAmount,
-  formatDateInput,
   formatHours,
   formatMonthYearLabel,
   monthKeyFromDateLocal,
@@ -292,11 +293,6 @@ export function TransactionsScreen({
   const [searchDraft, setSearchDraft] = useState(() => transactionFilters.search);
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
-  const [bulkDateTouched, setBulkDateTouched] = useState(false);
-  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
-  const [bulkNote, setBulkNote] = useState('');
-  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const hasActiveSearch = transactionFilters.search.trim().length > 0;
   const searchInputRef = useRef<TextInput | null>(null);
   const searchResultsScrollToTopRef = useRef<(() => void) | null>(null);
@@ -366,7 +362,20 @@ export function TransactionsScreen({
     [selectedTransactionTotal, settings.currencySymbol],
   );
   const selectedTransactionTotalToneClass = 'text-foreground';
-  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
+  const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let hasIncome = false;
+    let hasExpense = false;
+    filteredTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      if (transaction.type === 'income') hasIncome = true;
+      else if (transaction.type === 'expense') hasExpense = true;
+    });
+    const types: CategoryType[] = [];
+    if (hasIncome) types.push('income');
+    if (hasExpense) types.push('expense');
+    return types;
+  }, [filteredTransactions, selectedTransactionIds]);
   const resolveTransactionValue = useCallback(
     (transaction: TransactionWithRelations) =>
       settings.displayMode === 'time'
@@ -668,42 +677,29 @@ export function TransactionsScreen({
   );
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
-    setBulkDate(formatDateInput(new Date()));
-    setBulkDateTouched(false);
-    setBulkNote('');
-    setBulkNoteTouched(false);
     setShowBulkUpdate(true);
   }, [selectedTransactionCount]);
   const handleCloseBulkUpdate = useCallback(() => {
     setShowBulkUpdate(false);
   }, []);
-  const handleApplyBulkUpdate = useCallback(() => {
-    if (selectedTransactionIds.length === 0) return;
-    if (!hasBulkChanges) return;
-
-    const updates: { date?: string; note?: string | null } = {};
-    if (bulkDateTouched) updates.date = bulkDate;
-    if (bulkNoteTouched) {
-      const normalizedNote = bulkNote.trim();
-      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-    if (Object.keys(updates).length === 0) return;
-
-    updateTransactionsBulk(
-      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
-    );
-    void triggerHaptic('success');
-    setShowBulkUpdate(false);
-    setSelectedTransactionIds([]);
-  }, [
-    bulkDate,
-    bulkDateTouched,
-    bulkNote,
-    bulkNoteTouched,
-    hasBulkChanges,
-    selectedTransactionIds,
-    updateTransactionsBulk,
-  ]);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      const typeById = new Map(
+        filteredTransactions.map((transaction) => [transaction.id, transaction.type]),
+      );
+      const updates = buildBulkUpdateInputs(selectedTransactionIds, changes, (id) =>
+        typeById.get(id),
+      );
+      if (updates.length > 0) {
+        updateTransactionsBulk(updates);
+        void triggerHaptic('success');
+      }
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [filteredTransactions, selectedTransactionIds, updateTransactionsBulk],
+  );
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
     const idsToDelete = [...selectedTransactionIds];
@@ -1025,97 +1021,13 @@ export function TransactionsScreen({
         onSelectMonth={jumpToMonthDate}
       />
 
-      <ThemeModal
+      <BulkEditTransactionsSheet
         visible={showBulkUpdate}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseBulkUpdate}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View style={styles.modalHeaderRow}>
-            <View className="flex-1 pr-3">
-              <Text variant="subheading">
-                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('transactions.selection.update_subtitle')}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={handleCloseBulkUpdate}
-                className="px-3 py-2 rounded-full bg-secondary/70"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.cancel')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleApplyBulkUpdate}
-                disabled={!hasBulkChanges}
-                className={cn(
-                  'px-3 py-2 rounded-full',
-                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                )}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.save')}
-                accessibilityState={{ disabled: !hasBulkChanges }}
-              >
-                <Text
-                  variant="caption"
-                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
-                >
-                  {I18n.t('common.save')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <ScrollView className="flex-1" contentContainerStyle={FILTER_SCROLL_CONTENT_STYLE}>
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.date')}
-              </Text>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setBulkDateModalVisible(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.editor.date')}
-                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
-              >
-                <Text variant="caption">{bulkDate}</Text>
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Input
-                label={I18n.t('transaction_detail.note')}
-                placeholder={I18n.t('transactions.editor.optional')}
-                value={bulkNote}
-                onChangeText={(value) => {
-                  setBulkNote(value);
-                  setBulkNoteTouched(true);
-                }}
-              />
-            </View>
-          </ScrollView>
-          <DatePickerModal
-            visible={bulkDateModalVisible}
-            value={bulkDate}
-            overlay
-            onSelect={(value) => {
-              setBulkDate(value);
-              setBulkDateTouched(true);
-              setBulkDateModalVisible(false);
-            }}
-            onClose={() => setBulkDateModalVisible(false)}
-          />
-        </SafeAreaView>
-      </ThemeModal>
+        selectedCount={selectedTransactionCount}
+        categoryTypes={selectionCategoryTypes}
+        onClose={handleCloseBulkUpdate}
+        onApply={handleApplyBulkUpdate}
+      />
 
       <ThemeModal
         visible={showFilters}

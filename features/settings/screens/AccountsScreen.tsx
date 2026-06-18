@@ -12,16 +12,7 @@ import {
   Wallet,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -1277,8 +1268,7 @@ export function AccountsScreen({
     [activeAccountId, getTransactionsByAccount],
   );
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
-  const { width: windowFullWidth } = useWindowDimensions();
-  const pagerPageWidth = Math.max(1, windowFullWidth);
+  const pagerPageWidth = Math.max(1, windowWidth);
   const pagerPageStyle = useMemo(() => ({ width: pagerPageWidth }), [pagerPageWidth]);
   const pagerListRef = useRef<FlatList<number> | null>(null);
   const selectedAccountStatementDay =
@@ -1344,6 +1334,19 @@ export function AccountsScreen({
     selectedAccountStatementDay,
     usesStatementPeriods,
   ]);
+  const activePeriodCreditTotals = useMemo(() => {
+    if (!selectedAccount || selectedAccount.type !== 'credit') return null;
+    const periodTransactions = accountPeriodTransactionsMap.get(activePagerPeriod.key);
+    if (!periodTransactions) return { debit: 0, credit: 0 };
+    let debit = 0;
+    let credit = 0;
+    periodTransactions.forEach((tx) => {
+      const delta = creditDeltaForAccountTransaction(tx, selectedAccount.id);
+      if (delta > 0) debit += delta;
+      else if (delta < 0) credit += -delta;
+    });
+    return { debit, credit };
+  }, [accountPeriodTransactionsMap, activePagerPeriod.key, selectedAccount]);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const selectedTransactionTotal = useMemo(() => {
@@ -2011,6 +2014,32 @@ export function AccountsScreen({
     const cyclePayable = isCredit
       ? computeCreditCycleSummary(account, txns, balance, new Date()).payable
       : 0;
+    const creditTotalsSummaryNode = activePeriodCreditTotals ? (
+      <>
+        <View className="flex-1 rounded-[18px] border border-destructive/15 bg-destructive/6 px-3 py-2.5">
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
+            <Text variant="label" className="text-[10px] text-destructive">
+              {I18n.t('accounts.type_debit')}
+            </Text>
+          </View>
+          <View className="mt-1">
+            {renderVisibleBalanceNode(activePeriodCreditTotals.debit, { variant: 'mono' })}
+          </View>
+        </View>
+        <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-1.5 w-1.5 rounded-full bg-success" />
+            <Text variant="label" className="text-[10px] text-success">
+              {I18n.t('accounts.type_credit')}
+            </Text>
+          </View>
+          <View className="mt-1">
+            {renderVisibleBalanceNode(activePeriodCreditTotals.credit, { variant: 'mono' })}
+          </View>
+        </View>
+      </>
+    ) : undefined;
     return withBackGesture(
       <SettingsPageLayout edges={safeAreaEdges}>
         <View className="flex-1">
@@ -2044,7 +2073,7 @@ export function AccountsScreen({
           {isSelectionMode ? (
             <View className="bg-background pb-1.5 pt-1">
               <TabletContentContainer>
-                <View className="px-5 pt-1.5">
+                <View className="px-5 pt-1.5 gap-2.5">
                   <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5 flex-row items-center justify-between gap-1.5">
                     <Pressable
                       onPress={() => {
@@ -2096,6 +2125,9 @@ export function AccountsScreen({
                       </Pressable>
                     </View>
                   </View>
+                  {creditTotalsSummaryNode ? (
+                    <View className="flex-row flex-wrap gap-2">{creditTotalsSummaryNode}</View>
+                  ) : null}
                 </View>
               </TabletContentContainer>
             </View>
@@ -2105,6 +2137,7 @@ export function AccountsScreen({
               onPrevMonth={() => scrollToRelativePage(-1)}
               onNextMonth={() => scrollToRelativePage(1)}
               hideTitleRow
+              summary={creditTotalsSummaryNode}
             />
           )}
           <View className="flex-1 overflow-hidden bg-background">
