@@ -14,6 +14,7 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Animated as RNAnimated,
   FlatList,
   Image,
@@ -68,7 +69,14 @@ import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/com
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
-import { ActivityTransactionList, DisplayModeToggle } from '~/features/transactions/components';
+import {
+  ActivityTransactionList,
+  type BulkTransactionChanges,
+  BulkEditTransactionsSheet,
+  buildBulkUpdateInputs,
+  DisplayModeToggle,
+  TransactionSelectionToolbar,
+} from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
@@ -1629,6 +1637,9 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
   onOpenTransaction,
+  onTransactionLongPress,
+  selectedTransactionIds,
+  selectionMode,
   emptyTitle,
   emptyMessage,
 }: {
@@ -1643,6 +1654,9 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
+  selectedTransactionIds?: string[];
+  selectionMode?: boolean;
   emptyTitle: string;
   emptyMessage: string;
 }) {
@@ -1685,6 +1699,9 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         onTransactionPress={onOpenTransaction}
+        onTransactionLongPress={onTransactionLongPress}
+        selectedTransactionIds={selectedTransactionIds}
+        selectionMode={selectionMode}
         emptyTitle={emptyTitle}
         emptyMessage={emptyMessage}
         contentPaddingTop={0}
@@ -2655,6 +2672,8 @@ export function InsightsScreen({
     updateInsightsPreferencesJson,
     simpleWalletId,
     monthlyWages,
+    updateTransactionsBulk,
+    deleteTransactionsBulk,
   } = useApp();
   const { isPro } = usePro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
@@ -4157,9 +4176,7 @@ export function InsightsScreen({
           breakdownTransactionsById.set(id, [tx]);
         }
       });
-      const categoryRows = Array.from(breakdownTotals.values())
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 8);
+      const categoryRows = Array.from(breakdownTotals.values()).sort((a, b) => b.amount - a.amount);
       return {
         kind: 'breakdown',
         range,
@@ -4982,7 +4999,10 @@ export function InsightsScreen({
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onOpenTransaction={onOpenTransaction}
+          onOpenTransaction={handleTransactionPress}
+          onTransactionLongPress={handleTransactionLongPress}
+          selectedTransactionIds={selectedTransactionIds}
+          selectionMode={isSelectionMode}
           emptyTitle={I18n.t('insights.analytics.expense_trend.no_data_title')}
           emptyMessage={I18n.t('insights.analytics.expense_trend.no_data_message')}
         />
@@ -5089,7 +5109,10 @@ export function InsightsScreen({
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onOpenTransaction={onOpenTransaction}
+          onOpenTransaction={handleTransactionPress}
+          onTransactionLongPress={handleTransactionLongPress}
+          selectedTransactionIds={selectedTransactionIds}
+          selectionMode={isSelectionMode}
           emptyTitle={I18n.t('insights.analytics.income_trend.no_data_title')}
           emptyMessage={I18n.t('insights.analytics.income_trend.no_data_message')}
         />
@@ -5184,7 +5207,10 @@ export function InsightsScreen({
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onTransactionPress={onOpenTransaction}
+          onTransactionPress={handleTransactionPress}
+          onTransactionLongPress={handleTransactionLongPress}
+          selectedTransactionIds={selectedTransactionIds}
+          selectionMode={isSelectionMode}
           emptyTitle={I18n.t('insights.analytics.category_trend.no_data_title')}
           emptyMessage={I18n.t('insights.analytics.category_trend.no_data_message')}
           contentPaddingTop={0}
@@ -5805,6 +5831,138 @@ export function InsightsScreen({
     (pageData: InsightPageData) => renderInsightsPaneRef.current(pageData),
     [],
   );
+  // --- Inline bulk-edit selection for the trend transaction lists ---
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+
+  const isSelectionMode = selectedTransactionIds.length > 0;
+  const selectedTransactionCount = selectedTransactionIds.length;
+
+  const transactionById = useMemo(() => {
+    const map = new Map<string, TransactionWithRelations>();
+    rawTransactions.forEach((transaction) => map.set(transaction.id, transaction));
+    return map;
+  }, [rawTransactions]);
+
+  const selectedTransactionTotal = useMemo(() => {
+    let total = 0;
+    selectedTransactionIds.forEach((id) => {
+      const transaction = transactionById.get(id);
+      if (!transaction) return;
+      total +=
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(transaction)
+          : transaction.amount;
+    });
+    return total;
+  }, [
+    getDisplayValueForTransaction,
+    selectedTransactionIds,
+    settings.displayMode,
+    transactionById,
+  ]);
+  const selectedTransactionTotalLabel =
+    settings.displayMode === 'time'
+      ? formatHours(Math.abs(selectedTransactionTotal))
+      : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false });
+  const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
+    let hasIncome = false;
+    let hasExpense = false;
+    selectedTransactionIds.forEach((id) => {
+      const type = transactionById.get(id)?.type;
+      if (type === 'income') hasIncome = true;
+      else if (type === 'expense') hasExpense = true;
+    });
+    const types: CategoryType[] = [];
+    if (hasIncome) types.push('income');
+    if (hasExpense) types.push('expense');
+    return types;
+  }, [selectedTransactionIds, transactionById]);
+
+  const toggleTransactionSelection = useCallback((transactionId: string) => {
+    setSelectedTransactionIds((previous) => {
+      const index = previous.indexOf(transactionId);
+      if (index === -1) return [...previous, transactionId];
+      const next = [...previous];
+      next.splice(index, 1);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => {
+    setSelectedTransactionIds([]);
+    setShowBulkUpdate(false);
+  }, []);
+  const handleTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      onOpenTransaction(transaction);
+    },
+    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+  );
+  const handleTransactionLongPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleTransactionSelection(transaction.id);
+        return;
+      }
+      setSelectedTransactionIds([transaction.id]);
+    },
+    [isSelectionMode, toggleTransactionSelection],
+  );
+  const handleOpenBulkUpdate = useCallback(() => {
+    if (selectedTransactionCount === 0) return;
+    setShowBulkUpdate(true);
+  }, [selectedTransactionCount]);
+  const handleCloseBulkUpdate = useCallback(() => {
+    setShowBulkUpdate(false);
+  }, []);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      const updates = buildBulkUpdateInputs(
+        selectedTransactionIds,
+        changes,
+        (id) => transactionById.get(id)?.type,
+      );
+      if (updates.length > 0) {
+        updateTransactionsBulk(updates);
+        void triggerHaptic('success');
+      }
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, transactionById, updateTransactionsBulk],
+  );
+  const handleDeleteSelectedTransactions = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const idsToDelete = [...selectedTransactionIds];
+    Alert.alert(
+      I18n.t('transactions.selection.delete_title'),
+      I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            deleteTransactionsBulk(idsToDelete);
+            setShowBulkUpdate(false);
+            setSelectedTransactionIds([]);
+          },
+        },
+      ],
+    );
+  }, [deleteTransactionsBulk, selectedTransactionIds]);
+
+  // Leaving the current trend (type or period change) drops any active selection.
+  useEffect(() => {
+    setSelectedTransactionIds([]);
+    setShowBulkUpdate(false);
+  }, [displaySelectedInsightType, activePeriodLabel]);
+
   const paneRenderVersion = useMemo(
     () =>
       [
@@ -5816,6 +5974,10 @@ export function InsightsScreen({
         settings.displayMode,
         isPro ? 'pro' : 'free',
         isDark ? 'dark' : 'light',
+        // Selection state must invalidate the memoized pages so the trend lists
+        // re-render with the current selection highlight.
+        isSelectionMode ? 'sel' : 'nosel',
+        selectedTransactionIds.join(','),
         serializeRecordForSignature(expenseTrendScrubMonthByYear),
         serializeRecordForSignature(incomeTrendScrubMonthByYear),
         serializeRecordForSignature(assetHistoryScrubMonthByYear),
@@ -5834,7 +5996,9 @@ export function InsightsScreen({
       incomeRateDisplayUnit,
       incomeTrendScrubMonthByYear,
       isDark,
+      isSelectionMode,
       selectedIncomeRatePointIndex,
+      selectedTransactionIds,
       settings.currencySymbol,
       settings.displayMode,
       trendListVisibleCounts,
@@ -6299,7 +6463,6 @@ export function InsightsScreen({
     },
     [onOpenDrilldown],
   );
-
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
@@ -6357,7 +6520,9 @@ export function InsightsScreen({
             pagingEnabled
             disableIntervalMomentum
             scrollEnabled={
-              !isChartScrubbing && displaySelectedInsightType !== 'income_rate_history'
+              !isChartScrubbing &&
+              !isSelectionMode &&
+              displaySelectedInsightType !== 'income_rate_history'
             }
             bounces={false}
             directionalLockEnabled
@@ -6380,7 +6545,37 @@ export function InsightsScreen({
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
           />
         )}
+
+        {isSelectionMode ? (
+          <TransactionSelectionToolbar
+            selectedCount={selectedTransactionCount}
+            totalNode={
+              settings.displayMode === 'time' ? (
+                <TimeValueInline
+                  value={selectedTransactionTotalLabel}
+                  variant="label"
+                  iconColor={themeColors.text}
+                />
+              ) : (
+                <Text variant="label" className="text-foreground">
+                  {selectedTransactionTotalLabel}
+                </Text>
+              )
+            }
+            onCancel={clearSelection}
+            onEdit={handleOpenBulkUpdate}
+            onDelete={handleDeleteSelectedTransactions}
+          />
+        ) : null}
       </View>
+
+      <BulkEditTransactionsSheet
+        visible={showBulkUpdate}
+        selectedCount={selectedTransactionCount}
+        categoryTypes={selectionCategoryTypes}
+        onClose={handleCloseBulkUpdate}
+        onApply={handleApplyBulkUpdate}
+      />
 
       <PeriodPickerPopover
         visible={isPeriodPickerOpen && displaySelectedInsightType !== 'income_rate_history'}

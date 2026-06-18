@@ -386,7 +386,7 @@ export function SettingsScreen({
                 void triggerHaptic('selection');
                 onOpenShareAndEarn();
               }}
-              className="mt-3 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+              className="mt-2 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
               style={[styles.ctaShadow, { backgroundColor: '#F5A623' }]}
             >
               <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
   },
   rowsGroup: {
     marginTop: spacing.xs,
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   ctaShadow: {
     ...(Platform.OS === 'ios'
