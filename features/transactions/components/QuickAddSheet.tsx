@@ -732,12 +732,13 @@ export function QuickAddSheet({
     void triggerHaptic('success');
 
     const noteTrimmed = parsedLive.note.trim();
+    const fallbackNote = activeCategory?.name?.trim() ?? null;
     const submission: CreateTransactionInput = {
       type,
       amount: parsedLive.amount,
       currency: settings.currencyCode,
       date,
-      note: noteTrimmed.length > 0 ? noteTrimmed : null,
+      note: noteTrimmed.length > 0 ? noteTrimmed : fallbackNote,
       sentiment: 'neutral',
       accountId: isSimpleMode ? simpleWalletId : effectiveAccountId,
       categoryId: activeCategoryId,
@@ -750,6 +751,7 @@ export function QuickAddSheet({
     setTimeout(() => onSubmit(submission), 0);
   }, [
     effectiveAccountId,
+    activeCategory,
     activeCategoryId,
     closeWithAnimation,
     date,

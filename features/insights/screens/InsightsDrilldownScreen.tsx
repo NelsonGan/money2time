@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -26,7 +25,10 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import { ActivityTransactionList } from '~/features/transactions/components';
+import {
+  ActivityTransactionList,
+  TransactionSelectionToolbar,
+} from '~/features/transactions/components';
 import { DatePickerModal } from '~/components/datePicker';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -112,13 +114,6 @@ function pieSliceIdFromTouch(
 const styles = StyleSheet.create({
   headerContainer: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  },
-  selectionOverlay: {
-    position: 'absolute',
-    top: spacing.xs,
-    left: 0,
-    right: 0,
-    zIndex: 20,
   },
   sortControlsContent: {
     gap: spacing.xs,
@@ -1045,63 +1040,17 @@ export function InsightsDrilldownScreen({
           </View>
 
           {isSelectionMode ? (
-            <View pointerEvents="box-none" style={styles.selectionOverlay}>
-              <View style={styles.headerContainer}>
-                <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      clearSelection();
-                    }}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
-                  </Pressable>
-
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
-                      </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        {renderDisplayValueNode(selectedTransactionTotalLabel, {
-                          variant: 'label',
-                          textClassName: selectedTransactionTotalToneClass,
-                          iconColor: themeColors.text,
-                        })}
-                      </View>
-                    </View>
-                  </View>
-
-                  <View className="flex-row items-center gap-2">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
-                  </View>
-                </View>
-              </View>
-            </View>
+            <TransactionSelectionToolbar
+              selectedCount={selectedTransactionCount}
+              totalNode={renderDisplayValueNode(selectedTransactionTotalLabel, {
+                variant: 'label',
+                textClassName: selectedTransactionTotalToneClass,
+                iconColor: themeColors.text,
+              })}
+              onCancel={clearSelection}
+              onEdit={handleOpenBulkUpdate}
+              onDelete={handleDeleteSelectedTransactions}
+            />
           ) : null}
 
           {shouldShowSortControls ? (
