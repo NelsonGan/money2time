@@ -1,6 +1,7 @@
 import {
   ArrowDownRight,
   ArrowUpRight,
+  ChevronDown,
   ChevronRight,
   Eye,
   EyeOff,
@@ -13,10 +14,12 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import type { AnimatedRef } from 'react-native-reanimated';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
+import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -26,7 +29,6 @@ import {
   Button,
   CategoryEmoji,
   Input,
-  SegmentedToggle,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -44,7 +46,6 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import { ActivityTransactionList } from '~/features/transactions/components';
-import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -65,6 +66,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
+import { withColorAlpha } from '~/utils/color';
 import {
   addMonthsAtMonthStart,
   formatAmount,
@@ -103,8 +105,6 @@ interface CreditSummary {
   outstanding: number;
 }
 
-type AccountManagementView = 'accounts' | 'groups';
-
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
@@ -112,10 +112,6 @@ const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
 const ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-} as const;
-const ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE = {
-  paddingTop: 6,
-  ...ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE,
 } as const;
 const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
   padding: SETTINGS_HORIZONTAL_PADDING,
@@ -250,88 +246,7 @@ function AccountsSummaryBlock({
   );
 }
 
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
-}
-
 const styles = StyleSheet.create({
-  rowContainer: {
-    paddingBottom: 0,
-    width: '100%',
-  },
-  rowCard: {
-    borderRadius: 22,
-    borderWidth: 1,
-    width: '100%',
-    paddingLeft: spacing.sm,
-    paddingRight: spacing.xs,
-    paddingVertical: spacing.sm,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    elevation: 2,
-  },
-  rowDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  rowLeadingBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  rowTitleWrap: {
-    flex: 1,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  rowTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: -0.2,
-  },
-  rowSubtitle: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  rowActionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowEditModeStack: {
-    gap: spacing.xs,
-    paddingRight: spacing.xxs,
-  },
-  rowEditModeActions: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  accountRowPressable: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 44,
-  },
   rowTypePill: {
     paddingHorizontal: 8,
     paddingVertical: 5,
@@ -346,6 +261,124 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.2,
   },
+  groupCard: {
+    width: '100%',
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    elevation: 2,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm + 2,
+    paddingLeft: spacing.xs,
+    paddingRight: spacing.sm,
+    gap: spacing.xs,
+  },
+  groupChevron: {
+    width: 28,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  groupNamePressable: {
+    flex: 1,
+    minHeight: 40,
+    justifyContent: 'center',
+    paddingLeft: 2,
+  },
+  groupName: {
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  groupCircleButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  groupHandle: {
+    width: 30,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  groupEditStack: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    gap: spacing.xs,
+  },
+  groupEditActions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  accountsPanel: {
+    marginTop: 2,
+    paddingHorizontal: spacing.xs,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
+    gap: spacing.xs,
+  },
+  accountChildRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 52,
+    paddingVertical: spacing.xs,
+    paddingLeft: 2,
+    paddingRight: spacing.sm,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: spacing.xs,
+  },
+  accountChildHandle: {
+    width: 26,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  accountChildBody: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: 40,
+  },
+  accountChildTextWrap: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  accountChildName: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  accountChildSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  accountsEmptyText: {
+    fontSize: 12,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
+  },
+  staticCardsStack: {
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
   headerContainer: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   },
@@ -354,20 +387,6 @@ const styles = StyleSheet.create({
   },
   flexContainer: {
     flex: 1,
-  },
-  groupedSectionHeader: {
-    paddingLeft: spacing.xxs,
-    paddingRight: spacing.sm,
-    paddingBottom: spacing.xxs,
-  },
-  groupedSectionHeaderFirst: {
-    paddingTop: 6,
-  },
-  groupedSectionHeaderRest: {
-    paddingTop: spacing.sm,
-  },
-  groupedSectionLabel: {
-    fontSize: 11,
   },
   floatingAddButtonContainer: {
     position: 'absolute',
@@ -405,6 +424,7 @@ function toBalanceInputValue(value: number) {
 function AccountEditorSheet({
   visible,
   account,
+  presetGroupName = null,
   currentBalance,
   currencySymbol,
   accountGroups,
@@ -414,6 +434,7 @@ function AccountEditorSheet({
 }: {
   visible: boolean;
   account: Account | null;
+  presetGroupName?: string | null;
   currentBalance: number;
   currencySymbol: string;
   accountGroups: AccountGroup[];
@@ -463,13 +484,15 @@ function AccountEditorSheet({
     } else {
       setName('');
       setType('debit');
-      setAccountGroupId('none');
+      setAccountGroupId(
+        presetGroupName ? (accountGroupIdByName.get(presetGroupName) ?? 'none') : 'none',
+      );
       setIncludeInTotals(true);
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
     }
-  }, [account, accountGroupIdByName, currentBalance, visible]);
+  }, [account, accountGroupIdByName, currentBalance, presetGroupName, visible]);
 
   const normalizedName = name.trim();
   const parsedBalance = Number(balanceInput);
@@ -857,12 +880,13 @@ function PayCreditCardSheet({
 }
 
 // Module-level callbacks for Row — avoids hooks/closures inside renderItem
-let _acctThemeColors: {
+type AccountRowTheme = {
   accent: string;
   accentBorder: string;
   accentSoft: string;
   border: string;
   card: string;
+  cardMuted: string;
   deleteBorder: string;
   deleteSurface: string;
   error: string;
@@ -870,155 +894,32 @@ let _acctThemeColors: {
   primaryMuted: string;
   primarySoft: string;
   textMuted: string;
+  textFaint: string;
   text: string;
-} | null = null;
-let _acctEditingGroupId: string | null = null;
-let _acctEditingGroupName: string = '';
-let _acctOnEditingNameChange: ((v: string) => void) | null = null;
-let _acctOnSaveGroup: ((id: string) => void) | null = null;
-let _acctOnCancelEditGroup: (() => void) | null = null;
-let _acctOnStartEditGroup: ((item: AccountGroup) => void) | null = null;
-let _acctOnDeleteGroup: ((item: AccountGroup) => void) | null = null;
-let _acctAccountCountByGroupName: Map<string, number> = new Map();
-let _acctOnAccountPress: ((account: Account) => void) | null = null;
-let _acctCreditLabel: string = '';
-let _acctRowWidth: number | null = null;
+};
 
-interface GroupRowItemProps {
-  item: AccountGroup;
-}
+// A parent row in the merged Accounts management list. Real groups are editable
+// and draggable; `named` (a group name referenced by an account but with no
+// matching group record) and `ungrouped` cards are static buckets.
+type GroupCard =
+  | { kind: 'group'; id: string; group: AccountGroup; label: string; accounts: Account[] }
+  | { kind: 'named'; id: string; group: null; label: string; accounts: Account[] }
+  | { kind: 'ungrouped'; id: string; group: null; label: string; accounts: Account[] };
 
-interface AccountMgmtRowItemProps {
-  account: Account;
-}
-
-function DragHandleButton({
-  backgroundColor,
-  borderColor,
-  iconColor,
-  label,
+function AccountChildRow({
+  account,
+  theme,
+  width,
+  creditLabel,
+  onPress,
 }: {
-  backgroundColor: string;
-  borderColor: string;
-  iconColor: string;
-  label: string;
+  account: Account;
+  theme: AccountRowTheme;
+  width: number;
+  creditLabel: string;
+  onPress: (account: Account) => void;
 }) {
-  return (
-    <Sortable.Handle>
-      <View
-        accessible
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        style={[
-          styles.rowActionButton,
-          {
-            backgroundColor,
-            borderColor,
-          },
-        ]}
-      >
-        <GripVertical size={14} color={iconColor} />
-      </View>
-    </Sortable.Handle>
-  );
-}
-
-function GroupRowItem({ item }: GroupRowItemProps) {
-  const tc = _acctThemeColors!;
-  const isEditing = _acctEditingGroupId === item.id;
-  const groupAccountCount = _acctAccountCountByGroupName.get(item.name.trim()) ?? 0;
-
-  return (
-    <View style={[styles.rowContainer, _acctRowWidth ? { width: _acctRowWidth } : null]}>
-      <View
-        style={[
-          styles.rowCard,
-          {
-            borderColor: tc.border,
-            backgroundColor: tc.card,
-          },
-        ]}
-      >
-        {isEditing ? (
-          <View style={styles.rowEditModeStack}>
-            <Input
-              value={_acctEditingGroupName}
-              onChangeText={_acctOnEditingNameChange ?? (() => {})}
-              placeholder={I18n.t('accounts.group_name')}
-            />
-            <View style={styles.rowEditModeActions}>
-              <Button size="sm" className="flex-1" onPress={() => _acctOnSaveGroup?.(item.id)}>
-                <Text>{I18n.t('common.save')}</Text>
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="flex-1"
-                onPress={() => _acctOnCancelEditGroup?.()}
-              >
-                <Text>{I18n.t('common.cancel')}</Text>
-              </Button>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.rowDisplay}>
-            <View style={styles.rowTitleWrap}>
-              <Text style={[styles.rowTitle, { color: tc.text }]}>{item.name}</Text>
-              <Text style={[styles.rowSubtitle, { color: tc.textMuted }]}>
-                {I18n.t('accounts.group_accounts_count', { count: groupAccountCount })}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                _acctOnStartEditGroup?.(item);
-              }}
-              hitSlop={4}
-              style={[
-                styles.rowActionButton,
-                {
-                  backgroundColor: tc.primarySoft,
-                  borderColor: tc.primaryMuted,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.edit')}
-            >
-              <Pencil size={13} color={tc.primary} />
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('warning');
-                _acctOnDeleteGroup?.(item);
-              }}
-              hitSlop={4}
-              style={[
-                styles.rowActionButton,
-                {
-                  backgroundColor: tc.deleteSurface,
-                  borderColor: tc.deleteBorder,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.delete')}
-            >
-              <Trash2 size={13} color={tc.error} />
-            </Pressable>
-            <DragHandleButton
-              backgroundColor={tc.primarySoft}
-              borderColor={tc.primaryMuted}
-              iconColor={tc.textMuted}
-              label={`${I18n.t('common.reorder')} ${item.name}`}
-            />
-          </View>
-        )}
-      </View>
-    </View>
-  );
-}
-
-function AccountMgmtRowItem({ account }: AccountMgmtRowItemProps) {
-  const tc = _acctThemeColors!;
+  const tc = theme;
   const isCredit = account.type === 'credit';
   const accountTypeLabel =
     ACCOUNT_TYPE_OPTIONS.find((option) => option.value === account.type)?.label ?? account.type;
@@ -1027,70 +928,234 @@ function AccountMgmtRowItem({ account }: AccountMgmtRowItemProps) {
     : I18n.t('accounts.include_option_hide');
 
   return (
-    <View style={[styles.rowContainer, _acctRowWidth ? { width: _acctRowWidth } : null]}>
-      <View
-        style={[
-          styles.rowCard,
-          styles.rowDisplay,
-          {
-            borderColor: tc.border,
-            backgroundColor: tc.card,
-          },
-        ]}
-      >
-        <Pressable
-          onPress={() => _acctOnAccountPress?.(account)}
-          style={styles.accountRowPressable}
+    <View
+      style={[styles.accountChildRow, { width, borderColor: tc.border, backgroundColor: tc.card }]}
+    >
+      <Sortable.Handle>
+        <View
+          accessible
           accessibilityRole="button"
-          accessibilityLabel={account.name}
+          accessibilityLabel={`${I18n.t('common.reorder')} ${account.name}`}
+          style={styles.accountChildHandle}
         >
-          <View
-            style={[
-              styles.rowLeadingBadge,
-              {
-                backgroundColor: isCredit ? tc.accentSoft : tc.primarySoft,
-                borderColor: isCredit ? tc.accentBorder : tc.primaryMuted,
-              },
-            ]}
-          >
-            <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={22} />
+          <GripVertical size={15} color={tc.textFaint} />
+        </View>
+      </Sortable.Handle>
+      <Pressable
+        onPress={() => onPress(account)}
+        style={styles.accountChildBody}
+        accessibilityRole="button"
+        accessibilityLabel={account.name}
+      >
+        <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={22} />
+        <View style={styles.accountChildTextWrap}>
+          <Text style={[styles.accountChildName, { color: tc.text }]} numberOfLines={1}>
+            {account.name}
+          </Text>
+          <Text style={[styles.accountChildSubtitle, { color: tc.textMuted }]} numberOfLines={1}>
+            {accountVisibilityLabel}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.rowTypePill,
+            {
+              backgroundColor: isCredit ? tc.accentSoft : tc.primarySoft,
+              borderColor: isCredit ? tc.accentBorder : tc.primaryMuted,
+            },
+          ]}
+        >
+          <Text style={[styles.rowTypeText, { color: isCredit ? tc.accent : tc.primary }]}>
+            {isCredit ? creditLabel : accountTypeLabel}
+          </Text>
+        </View>
+      </Pressable>
+    </View>
+  );
+}
+
+function GroupCollapsibleCard({
+  card,
+  theme,
+  rowWidth,
+  expanded,
+  creditLabel,
+  isEditing,
+  editingName,
+  scrollableRef,
+  onToggle,
+  onEditingNameChange,
+  onSaveName,
+  onCancelEdit,
+  onStartEdit,
+  onDelete,
+  onAddAccount,
+  onAccountPress,
+  onReorderAccounts,
+}: {
+  card: GroupCard;
+  theme: AccountRowTheme;
+  rowWidth: number;
+  expanded: boolean;
+  creditLabel: string;
+  isEditing: boolean;
+  editingName: string;
+  scrollableRef: AnimatedRef<Animated.ScrollView>;
+  onToggle: (id: string) => void;
+  onEditingNameChange: (value: string) => void;
+  onSaveName: (groupId: string) => void;
+  onCancelEdit: () => void;
+  onStartEdit: (group: AccountGroup) => void;
+  onDelete: (group: AccountGroup) => void;
+  onAddAccount: (card: GroupCard) => void;
+  onAccountPress: (account: Account) => void;
+  onReorderAccounts: (sectionId: string, ordered: Account[]) => void;
+}) {
+  const tc = theme;
+  const ChevronIcon = expanded ? ChevronDown : ChevronRight;
+  const editableGroup = card.kind === 'group' ? card.group : null;
+  const accounts = card.accounts;
+  // Child rows live inside a flex column that sizes items to content, so give
+  // them an explicit width to span the card (minus the panel's side padding).
+  const childWidth = Math.max(rowWidth - spacing.xs * 2, 0);
+
+  return (
+    <View
+      style={[
+        styles.groupCard,
+        { width: rowWidth },
+        {
+          borderColor: expanded ? tc.primaryMuted : tc.border,
+          backgroundColor: tc.card,
+        },
+      ]}
+    >
+      {isEditing && editableGroup ? (
+        <View style={styles.groupEditStack}>
+          <Input
+            value={editingName}
+            onChangeText={onEditingNameChange}
+            placeholder={I18n.t('accounts.group_name')}
+          />
+          <View style={styles.groupEditActions}>
+            <Button size="sm" className="flex-1" onPress={() => onSaveName(editableGroup.id)}>
+              <Text>{I18n.t('common.save')}</Text>
+            </Button>
+            <Button size="sm" variant="secondary" className="flex-1" onPress={onCancelEdit}>
+              <Text>{I18n.t('common.cancel')}</Text>
+            </Button>
           </View>
-          <View style={styles.rowTitleWrap}>
-            <Text style={[styles.rowTitle, { color: tc.text }]} numberOfLines={1}>
-              {account.name}
-            </Text>
-            <Text style={[styles.rowSubtitle, { color: tc.textMuted }]} numberOfLines={1}>
-              {accountVisibilityLabel}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.rowTypePill,
-              {
-                backgroundColor: isCredit ? tc.accentSoft : tc.primarySoft,
-                borderColor: isCredit ? tc.accentBorder : tc.primaryMuted,
-              },
-            ]}
+        </View>
+      ) : (
+        <View style={styles.groupHeader}>
+          <Pressable
+            onPress={() => onToggle(card.id)}
+            hitSlop={6}
+            style={styles.groupChevron}
+            accessibilityRole="button"
+            accessibilityLabel={expanded ? I18n.t('accounts.collapse') : I18n.t('accounts.expand')}
+            accessibilityState={{ expanded }}
           >
-            <Text
-              style={[
-                styles.rowTypeText,
-                {
-                  color: isCredit ? tc.accent : tc.primary,
-                },
-              ]}
+            <ChevronIcon size={18} color={expanded ? tc.primary : tc.textMuted} />
+          </Pressable>
+          {editableGroup ? (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onStartEdit(editableGroup);
+              }}
+              style={styles.groupNamePressable}
+              accessibilityRole="button"
+              accessibilityLabel={card.label}
             >
-              {isCredit ? _acctCreditLabel : accountTypeLabel}
+              <Text style={[styles.groupName, { color: tc.text }]} numberOfLines={1}>
+                {card.label}
+              </Text>
+            </Pressable>
+          ) : (
+            <View style={styles.groupNamePressable}>
+              <Text style={[styles.groupName, { color: tc.textMuted }]} numberOfLines={1}>
+                {card.label}
+              </Text>
+            </View>
+          )}
+          <Pressable
+            onPress={() => onAddAccount(card)}
+            hitSlop={4}
+            style={[styles.groupCircleButton, { backgroundColor: tc.primarySoft }]}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('accounts.add_account_to_group')}
+          >
+            <Plus size={16} color={tc.primary} />
+          </Pressable>
+          {editableGroup ? (
+            <>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('warning');
+                  onDelete(editableGroup);
+                }}
+                hitSlop={4}
+                style={[styles.groupCircleButton, { backgroundColor: tc.deleteSurface }]}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.delete')}
+              >
+                <Trash2 size={15} color={tc.error} />
+              </Pressable>
+              <Sortable.Handle>
+                <View
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel={`${I18n.t('common.reorder')} ${card.label}`}
+                  style={styles.groupHandle}
+                >
+                  <GripVertical size={16} color={tc.textFaint} />
+                </View>
+              </Sortable.Handle>
+            </>
+          ) : null}
+        </View>
+      )}
+
+      {expanded && !isEditing ? (
+        <View style={[styles.accountsPanel, { backgroundColor: tc.cardMuted }]}>
+          {accounts.length > 0 ? (
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.08}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={spacing.xs}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, order, toIndex }) => {
+                if (fromIndex === toIndex) return;
+                const ordered = order(accounts);
+                onReorderAccounts(card.id, ordered);
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={scrollableRef}
+              width="fill"
+            >
+              {accounts.map((account) => (
+                <AccountChildRow
+                  key={account.id}
+                  account={account}
+                  theme={tc}
+                  width={childWidth}
+                  creditLabel={creditLabel}
+                  onPress={onAccountPress}
+                />
+              ))}
+            </Sortable.Flex>
+          ) : (
+            <Text style={[styles.accountsEmptyText, { color: tc.textMuted }]}>
+              {I18n.t('accounts.empty_group_accounts')}
             </Text>
-          </View>
-        </Pressable>
-        <DragHandleButton
-          backgroundColor={tc.primarySoft}
-          borderColor={tc.primaryMuted}
-          iconColor={tc.textMuted}
-          label={`${I18n.t('common.reorder')} ${account.name}`}
-        />
-      </View>
+          )}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -1136,6 +1201,7 @@ export function AccountsScreen({
       accentSoft: themeColors.accentSoft,
       border: withColorAlpha(themeColors.primary, 0.18),
       card: themeColors.card,
+      cardMuted: withColorAlpha(themeColors.primary, 0.06),
       deleteBorder: withColorAlpha(themeColors.error, 0.28),
       deleteSurface: themeColors.errorSoft,
       error: themeColors.error,
@@ -1144,6 +1210,7 @@ export function AccountsScreen({
       primarySoft: themeColors.primarySoft,
       text: themeColors.text,
       textMuted: themeColors.textMuted,
+      textFaint: withColorAlpha(themeColors.textMuted, 0.55),
     }),
     [
       themeColors.accent,
@@ -1185,12 +1252,16 @@ export function AccountsScreen({
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
   const [hideAccountBalances, setHideAccountBalances] = useState(false);
-  const [managementView, setManagementView] = useState<AccountManagementView>('accounts');
   const [showCreate, setShowCreate] = useState(false);
+  // Group name pre-selected when adding an account via a group card's "+".
+  const [createAccountGroupName, setCreateAccountGroupName] = useState<string | null>(null);
   const [showGroupComposer, setShowGroupComposer] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
+  // Track collapsed (not expanded) groups so cards stay expanded by default,
+  // including newly created ones.
+  const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(() => new Set());
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [payCardAccountId, setPayCardAccountId] = useState<string | null>(null);
   const [showEditAccount, setShowEditAccount] = useState(false);
@@ -1206,9 +1277,7 @@ export function AccountsScreen({
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const accountsOverviewScrollRef = useRef<ScrollView | null>(null);
-  const managementAccountsScrollRef =
-    useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
-  const managementGroupsScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
+  const managementScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -1376,7 +1445,6 @@ export function AccountsScreen({
     [normalizedSelectedTransactionTotal, settings.currencySymbol],
   );
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
-  const isManagementGroupsView = managementOnly && managementView === 'groups';
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
   const balanceToggleLabel = hideAccountBalances
     ? I18n.t('accounts.show_balances')
@@ -1447,14 +1515,17 @@ export function AccountsScreen({
     [balanceToggleLabel, handleToggleAccountBalances, hideAccountBalances, themeColors.textMuted],
   );
 
-  const handleManagementViewChange = useCallback((nextView: AccountManagementView) => {
-    setManagementView(nextView);
-    setShowGroupComposer(false);
-    setNewGroupName('');
-    setEditingGroupId(null);
-    setEditingGroupName('');
-    setEditingAccountId(null);
-    setShowEditAccount(false);
+  const handleToggleGroup = useCallback((cardId: string) => {
+    void triggerHaptic('selection');
+    setCollapsedGroupIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(cardId)) {
+        next.delete(cardId);
+      } else {
+        next.add(cardId);
+      }
+      return next;
+    });
   }, []);
 
   useEffect(() => {
@@ -1525,7 +1596,6 @@ export function AccountsScreen({
   useEffect(() => {
     if (resetToRootToken <= 0) return;
     setSelectedAccountId(accountId ?? null);
-    setManagementView('accounts');
     setShowCreate(false);
     setShowGroupComposer(false);
     setNewGroupName('');
@@ -1545,13 +1615,23 @@ export function AccountsScreen({
         getPagerScrollToTopRef(currentIndex).current?.();
         return;
       }
-      if (isManagementGroupsView) {
+      if (managementOnly) {
+        managementScrollRef.current?.scrollTo({ y: 0, animated: false });
         return;
       }
       accountsOverviewScrollRef.current?.scrollTo({ y: 0, animated: false });
     });
     return () => cancelAnimationFrame(frame);
-  }, [isManagementGroupsView, managementOnly, scrollToTopToken, activeAccountId, selectedAccount]);
+  }, [
+    getPagerScrollToTopRef,
+    managementScrollRef,
+    managementOnly,
+    pagerActiveIndexRef,
+    pagerListRef,
+    scrollToTopToken,
+    activeAccountId,
+    selectedAccount,
+  ]);
 
   const balanceMap = useMemo(() => {
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
@@ -1590,21 +1670,15 @@ export function AccountsScreen({
     });
     return next;
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly]);
-  const { accountGroupSections, accountCountByGroupName } = useMemo(() => {
-    const groupNames = new Set<string>();
+  const { accountGroupSections, groupCards, staticCards } = useMemo(() => {
+    const knownNames = new Set<string>();
     accountGroups.forEach((group) => {
-      groupNames.add(group.name);
+      knownNames.add(group.name);
     });
 
     const buckets = new Map<string, Account[]>();
-    const counts = new Map<string, number>();
-
     accounts.forEach((account) => {
       const groupName = account.accountGroup?.trim() ?? '';
-      if (groupName) {
-        counts.set(groupName, (counts.get(groupName) ?? 0) + 1);
-      }
-
       const bucketKey = groupName || '__ungrouped__';
       const bucket = buckets.get(bucketKey);
       if (bucket) {
@@ -1613,22 +1687,20 @@ export function AccountsScreen({
         buckets.set(bucketKey, [account]);
       }
     });
+    const ungrouped = buckets.get('__ungrouped__');
 
+    // Sections drive global account reordering (non-empty only, in display order).
     const sections: AccountGroupSection[] = [];
-    // Named groups in accountGroups sort order
     for (const group of accountGroups) {
       const list = buckets.get(group.name);
       if (list && list.length > 0) {
         sections.push({ id: group.id, label: group.name, accounts: list });
       }
     }
-    // Unknown group names (not in accountGroups)
     for (const [key, list] of buckets) {
-      if (key === '__ungrouped__' || groupNames.has(key)) continue;
+      if (key === '__ungrouped__' || knownNames.has(key)) continue;
       sections.push({ id: `group-${key}`, label: key, accounts: list });
     }
-    // Ungrouped last
-    const ungrouped = buckets.get('__ungrouped__');
     if (ungrouped && ungrouped.length > 0) {
       sections.push({
         id: 'group-ungrouped',
@@ -1637,10 +1709,32 @@ export function AccountsScreen({
       });
     }
 
-    return {
-      accountGroupSections: sections,
-      accountCountByGroupName: counts,
-    };
+    // Parent cards for the collapsible UI. Real groups (draggable/editable) are
+    // shown first — including empty ones — then unknown-name and ungrouped
+    // buckets as static cards.
+    const groups: GroupCard[] = accountGroups.map((group) => ({
+      kind: 'group',
+      id: group.id,
+      group,
+      label: group.name,
+      accounts: buckets.get(group.name) ?? [],
+    }));
+    const statics: GroupCard[] = [];
+    for (const [key, list] of buckets) {
+      if (key === '__ungrouped__' || knownNames.has(key)) continue;
+      statics.push({ kind: 'named', id: `group-${key}`, group: null, label: key, accounts: list });
+    }
+    if (ungrouped && ungrouped.length > 0) {
+      statics.push({
+        kind: 'ungrouped',
+        id: 'group-ungrouped',
+        group: null,
+        label: String(I18n.t('common.ungrouped')),
+        accounts: ungrouped,
+      });
+    }
+
+    return { accountGroupSections: sections, groupCards: groups, staticCards: statics };
   }, [accounts, accountGroups]);
   const buildReorderedAccountIds = useCallback(
     (sectionId: string, orderedAccounts: Account[]) => {
@@ -1654,6 +1748,12 @@ export function AccountsScreen({
       return nextIds;
     },
     [accountGroupSections],
+  );
+  const handleReorderAccountsInSection = useCallback(
+    (sectionId: string, orderedAccounts: Account[]) => {
+      reorderAccounts(buildReorderedAccountIds(sectionId, orderedAccounts));
+    },
+    [buildReorderedAccountIds, reorderAccounts],
   );
 
   const canCreateGroup = newGroupName.trim().length > 0;
@@ -1900,6 +2000,15 @@ export function AccountsScreen({
     setEditingAccountId(account.id);
     setShowEditAccount(true);
   }, []);
+  const handleAddAccountToGroup = useCallback(
+    (card: GroupCard) => {
+      if (!checkLimit('accounts', accounts.length)) return;
+      void triggerHaptic('selection');
+      setCreateAccountGroupName(card.kind === 'ungrouped' ? null : card.label);
+      setShowCreate(true);
+    },
+    [accounts.length, checkLimit],
+  );
   const handleAddTransactionForAccount = useCallback(
     (targetAccountId: string) => {
       if (onOpenAddTransaction) {
@@ -2337,19 +2446,31 @@ export function AccountsScreen({
     );
   }
 
-  // Set module-level callbacks for row components
-  _acctThemeColors = accountRowThemeColors;
-  _acctEditingGroupId = editingGroupId;
-  _acctEditingGroupName = editingGroupName;
-  _acctOnEditingNameChange = setEditingGroupName;
-  _acctOnSaveGroup = saveEditedGroup;
-  _acctOnCancelEditGroup = cancelEditGroup;
-  _acctOnStartEditGroup = startEditGroup;
-  _acctOnDeleteGroup = handleDeleteGroup;
-  _acctAccountCountByGroupName = accountCountByGroupName;
-  _acctOnAccountPress = handleAccountManagementPress;
-  _acctCreditLabel = creditLabel;
-  _acctRowWidth = managementRowWidth;
+  // Shared between the draggable group cards and the static (ungrouped/unknown)
+  // cards. `isEditing` only ever matches a real group id, so static cards
+  // naturally render in display mode.
+  const renderGroupCard = (card: GroupCard) => (
+    <GroupCollapsibleCard
+      key={card.id}
+      card={card}
+      theme={accountRowThemeColors}
+      rowWidth={managementRowWidth}
+      expanded={!collapsedGroupIds.has(card.id)}
+      creditLabel={creditLabel}
+      isEditing={editingGroupId === card.id}
+      editingName={editingGroupName}
+      scrollableRef={managementScrollRef}
+      onToggle={handleToggleGroup}
+      onEditingNameChange={setEditingGroupName}
+      onSaveName={saveEditedGroup}
+      onCancelEdit={cancelEditGroup}
+      onStartEdit={startEditGroup}
+      onDelete={handleDeleteGroup}
+      onAddAccount={handleAddAccountToGroup}
+      onAccountPress={handleAccountManagementPress}
+      onReorderAccounts={handleReorderAccountsInSection}
+    />
+  );
 
   return withBackGesture(
     <SettingsPageLayout edges={safeAreaEdges}>
@@ -2361,152 +2482,58 @@ export function AccountsScreen({
             title={I18n.t('accounts.title')}
             subtitle={I18n.t('accounts.manage_accounts_subtitle')}
             rightAccessory={
-              <Button
-                size="icon"
-                onPress={() => {
-                  if (isManagementGroupsView) {
-                    startCreateGroup();
-                  } else {
-                    if (!checkLimit('accounts', accounts.length)) return;
-                    setShowCreate(true);
-                  }
-                }}
-              >
+              <Button size="icon" onPress={startCreateGroup}>
                 <Plus size={18} color="#fff" />
               </Button>
             }
           />
-          <SegmentedToggle
-            value={managementView}
-            variant="home"
-            className="my-2"
-            onChange={handleManagementViewChange}
-            options={[
-              { value: 'accounts', label: I18n.t('accounts.title') },
-              { value: 'groups', label: I18n.t('accounts.groups') },
-            ]}
-          />
-          {isManagementGroupsView && showGroupComposer ? (
-            <View className="rounded-2xl border border-border/35 bg-card p-3 gap-2.5 mt-2">
-              <Input
-                label={I18n.t('accounts.create_group')}
-                value={newGroupName}
-                onChangeText={setNewGroupName}
-                placeholder={I18n.t('accounts.create_group_placeholder')}
-              />
-              <View className="flex-row items-center gap-2">
-                <Button
-                  size="sm"
-                  className="flex-1"
-                  onPress={handleCreateGroup}
-                  disabled={!canCreateGroup}
-                >
-                  <Text>{I18n.t('accounts.create_group')}</Text>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="flex-1"
-                  onPress={cancelCreateGroup}
-                >
-                  <Text>{I18n.t('common.cancel')}</Text>
-                </Button>
-              </View>
-            </View>
-          ) : null}
           <View style={styles.headerSpacer} />
         </View>
       ) : null}
 
-      {isManagementGroupsView ? (
-        <>
-          {accountGroups.length === 0 ? (
-            <EmptyState
-              title={I18n.t('accounts.empty_groups_title')}
-              message={I18n.t('accounts.empty_groups_message')}
-              mascotMood="curious"
-            />
-          ) : (
-            <Animated.ScrollView
-              ref={managementGroupsScrollRef}
-              style={styles.flexContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={[ACCOUNT_MANAGEMENT_GROUP_LIST_CONTENT_STYLE, listNavInset]}
+      {managementOnly ? (
+        groupCards.length === 0 && staticCards.length === 0 ? (
+          <EmptyState
+            title={I18n.t('accounts.empty_groups_title')}
+            message={I18n.t('accounts.empty_groups_message')}
+            mascotMood="curious"
+          />
+        ) : (
+          <Animated.ScrollView
+            ref={managementScrollRef}
+            style={styles.flexContainer}
+            contentContainerStyle={[ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE, listNavInset]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.08}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={spacing.xs}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, order, toIndex }) => {
+                if (fromIndex === toIndex) return;
+                const orderedIds = order(groupCards)
+                  .map((card) => (card.kind === 'group' ? card.group.id : null))
+                  .filter((id): id is string => id !== null);
+                reorderAccountGroups(orderedIds);
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={managementScrollRef}
+              sortEnabled={editingGroupId === null}
+              width="fill"
             >
-              <Sortable.Flex
-                activeItemScale={1.02}
-                activeItemShadowOpacity={0.08}
-                customHandle
-                dragActivationDelay={0}
-                flexDirection="column"
-                flexWrap="nowrap"
-                gap={spacing.xs}
-                inactiveItemOpacity={1}
-                onDragEnd={({ fromIndex, order, toIndex }) => {
-                  if (fromIndex === toIndex) return;
-                  const orderedGroups = order(accountGroups);
-                  reorderAccountGroups(orderedGroups.map((group) => group.id));
-                  void triggerHaptic('selection');
-                }}
-                scrollableRef={managementGroupsScrollRef}
-                sortEnabled={editingGroupId === null}
-                width="fill"
-              >
-                {accountGroups.map((group) => (
-                  <GroupRowItem key={group.id} item={group} />
-                ))}
-              </Sortable.Flex>
-            </Animated.ScrollView>
-          )}
-        </>
-      ) : managementOnly ? (
-        <Animated.ScrollView
-          ref={managementAccountsScrollRef}
-          style={styles.flexContainer}
-          contentContainerStyle={[ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE, listNavInset]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {accountGroupSections.map((section, sectionIndex) => (
-            <View key={section.id}>
-              <View
-                style={[
-                  styles.groupedSectionHeader,
-                  sectionIndex === 0
-                    ? styles.groupedSectionHeaderFirst
-                    : styles.groupedSectionHeaderRest,
-                ]}
-              >
-                <Text style={[styles.groupedSectionLabel, { color: themeColors.textMuted }]}>
-                  {section.label}
-                </Text>
-              </View>
-              <Sortable.Flex
-                activeItemScale={1.02}
-                activeItemShadowOpacity={0.08}
-                customHandle
-                dragActivationDelay={0}
-                flexDirection="column"
-                flexWrap="nowrap"
-                gap={spacing.xs}
-                inactiveItemOpacity={1}
-                onDragEnd={({ fromIndex, order, toIndex }) => {
-                  if (fromIndex === toIndex) return;
-                  const orderedAccounts = order(section.accounts);
-                  reorderAccounts(buildReorderedAccountIds(section.id, orderedAccounts));
-                  void triggerHaptic('selection');
-                }}
-                scrollableRef={managementAccountsScrollRef}
-                width="fill"
-              >
-                {section.accounts.map((account) => (
-                  <AccountMgmtRowItem key={account.id} account={account} />
-                ))}
-              </Sortable.Flex>
-            </View>
-          ))}
-        </Animated.ScrollView>
+              {groupCards.map(renderGroupCard)}
+            </Sortable.Flex>
+            {staticCards.length > 0 ? (
+              <View style={styles.staticCardsStack}>{staticCards.map(renderGroupCard)}</View>
+            ) : null}
+          </Animated.ScrollView>
+        )
       ) : (
         <>
           <MonthControlsHeader
@@ -2636,18 +2663,55 @@ export function AccountsScreen({
       <AccountEditorSheet
         visible={showCreate}
         account={null}
+        presetGroupName={createAccountGroupName}
         currentBalance={0}
         currencySymbol={settings.currencySymbol}
         accountGroups={accountGroups}
-        onClose={() => setShowCreate(false)}
+        onClose={() => {
+          setShowCreate(false);
+          setCreateAccountGroupName(null);
+        }}
         onSave={(input) => {
           createAccount({
             ...input,
             currency: DEFAULT_CURRENCY,
           });
           setShowCreate(false);
+          setCreateAccountGroupName(null);
         }}
       />
+
+      <ThemeModal
+        visible={showGroupComposer}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={cancelCreateGroup}
+      >
+        <SafeAreaView className="flex-1 bg-background">
+          <SettingsHeader
+            className="px-5 pt-5 pb-2"
+            title={I18n.t('accounts.create_group')}
+            onClose={cancelCreateGroup}
+          />
+          <ScrollView
+            contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Input
+              label={I18n.t('accounts.group_name')}
+              value={newGroupName}
+              onChangeText={setNewGroupName}
+              placeholder={I18n.t('accounts.create_group_placeholder')}
+            />
+          </ScrollView>
+          <SettingsActionBar
+            onCancel={cancelCreateGroup}
+            onSave={handleCreateGroup}
+            saveDisabled={!canCreateGroup}
+          />
+        </SafeAreaView>
+      </ThemeModal>
     </SettingsPageLayout>,
   );
 }
