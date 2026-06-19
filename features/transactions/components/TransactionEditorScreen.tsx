@@ -39,8 +39,10 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
+  AccountLogo,
   AccountPickerSheet,
   Button,
+  CategoryEmoji,
   CategoryPickerSheet,
   SegmentedToggle,
   Text,
@@ -767,13 +769,16 @@ export function TransactionEditorScreen({
     return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
   }, [amount, currentMonthWage?.trueHourlyRate, type]);
 
-  const accountNameById = useMemo(
-    () => new Map(accounts.map((account) => [account.id, account.name])),
+  const accountById = useMemo(
+    () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
   );
-  const accountName = accountId ? (accountNameById.get(accountId) ?? null) : null;
-  const fromAccountName = fromAccountId ? (accountNameById.get(fromAccountId) ?? null) : null;
-  const toAccountName = toAccountId ? (accountNameById.get(toAccountId) ?? null) : null;
+  const selectedAccount = accountId ? (accountById.get(accountId) ?? null) : null;
+  const selectedFromAccount = fromAccountId ? (accountById.get(fromAccountId) ?? null) : null;
+  const selectedToAccount = toAccountId ? (accountById.get(toAccountId) ?? null) : null;
+  const accountName = selectedAccount?.name ?? null;
+  const fromAccountName = selectedFromAccount?.name ?? null;
+  const toAccountName = selectedToAccount?.name ?? null;
 
   useEffect(() => {
     Keyboard.dismiss();
@@ -1827,17 +1832,27 @@ export function TransactionEditorScreen({
                                     {I18n.t('transactions.editor.from')}
                                   </Text>
                                 </View>
-                                <Text
-                                  variant="body"
-                                  numberOfLines={1}
-                                  ellipsizeMode="tail"
-                                  className={cn(
-                                    'max-w-[58%] text-right',
-                                    fromAccountName ? '' : 'text-muted-foreground/60',
-                                  )}
-                                >
-                                  {fromAccountName ?? I18n.t('transactions.editor.choose_account')}
-                                </Text>
+                                <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                  {selectedFromAccount ? (
+                                    <AccountLogo
+                                      logoId={selectedFromAccount.logoId}
+                                      type={selectedFromAccount.type}
+                                      size={20}
+                                    />
+                                  ) : null}
+                                  <Text
+                                    variant="body"
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                    className={cn(
+                                      'text-right shrink',
+                                      fromAccountName ? '' : 'text-muted-foreground/60',
+                                    )}
+                                  >
+                                    {fromAccountName ??
+                                      I18n.t('transactions.editor.choose_account')}
+                                  </Text>
+                                </View>
                               </View>
                             </SummaryRow>
                           </View>
@@ -1872,17 +1887,26 @@ export function TransactionEditorScreen({
                                     {I18n.t('transactions.editor.to')}
                                   </Text>
                                 </View>
-                                <Text
-                                  variant="body"
-                                  numberOfLines={1}
-                                  ellipsizeMode="tail"
-                                  className={cn(
-                                    'max-w-[58%] text-right',
-                                    toAccountName ? '' : 'text-muted-foreground/60',
-                                  )}
-                                >
-                                  {toAccountName ?? I18n.t('transactions.editor.choose_account')}
-                                </Text>
+                                <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                  {selectedToAccount ? (
+                                    <AccountLogo
+                                      logoId={selectedToAccount.logoId}
+                                      type={selectedToAccount.type}
+                                      size={20}
+                                    />
+                                  ) : null}
+                                  <Text
+                                    variant="body"
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                    className={cn(
+                                      'text-right shrink',
+                                      toAccountName ? '' : 'text-muted-foreground/60',
+                                    )}
+                                  >
+                                    {toAccountName ?? I18n.t('transactions.editor.choose_account')}
+                                  </Text>
+                                </View>
                               </View>
                             </SummaryRow>
                           </View>
@@ -1905,17 +1929,26 @@ export function TransactionEditorScreen({
                                   {I18n.t('transactions.editor.account')}
                                 </Text>
                               </View>
-                              <Text
-                                variant="body"
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                                className={cn(
-                                  'max-w-[58%] text-right',
-                                  accountName ? '' : 'text-muted-foreground/60',
-                                )}
-                              >
-                                {accountName ?? I18n.t('transactions.editor.choose_account')}
-                              </Text>
+                              <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                {selectedAccount ? (
+                                  <AccountLogo
+                                    logoId={selectedAccount.logoId}
+                                    type={selectedAccount.type}
+                                    size={20}
+                                  />
+                                ) : null}
+                                <Text
+                                  variant="body"
+                                  numberOfLines={1}
+                                  ellipsizeMode="tail"
+                                  className={cn(
+                                    'text-right shrink',
+                                    accountName ? '' : 'text-muted-foreground/60',
+                                  )}
+                                >
+                                  {accountName ?? I18n.t('transactions.editor.choose_account')}
+                                </Text>
+                              </View>
                             </View>
                           </SummaryRow>
                         </View>
@@ -1942,18 +1975,23 @@ export function TransactionEditorScreen({
                                     {I18n.t('transactions.editor.category')}
                                   </Text>
                                 </View>
-                                <Text
-                                  variant="body"
-                                  numberOfLines={1}
-                                  ellipsizeMode="tail"
-                                  className={cn(
-                                    'max-w-[58%] text-right',
-                                    categoryPreview ? '' : 'text-muted-foreground/60',
-                                  )}
-                                >
-                                  {categoryPreview?.name ??
-                                    I18n.t('transactions.editor.choose_category')}
-                                </Text>
+                                <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                  {categoryPreview ? (
+                                    <CategoryEmoji icon={categoryPreview.icon} size={20} />
+                                  ) : null}
+                                  <Text
+                                    variant="body"
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                    className={cn(
+                                      'text-right shrink',
+                                      categoryPreview ? '' : 'text-muted-foreground/60',
+                                    )}
+                                  >
+                                    {categoryPreview?.name ??
+                                      I18n.t('transactions.editor.choose_category')}
+                                  </Text>
+                                </View>
                               </View>
                             </SummaryRow>
                           </View>

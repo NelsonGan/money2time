@@ -17,7 +17,8 @@ export interface FeatureAnnouncementPage {
     | 'savings'
     | 'savingsHistory'
     | 'voice'
-    | 'shareEarn';
+    | 'shareEarn'
+    | 'accountLogos';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'enableVoice' | 'openShareEarn';
 }

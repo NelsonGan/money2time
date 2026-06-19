@@ -12,6 +12,7 @@ const baseSettings: UserSettings = {
   hapticsEnabled: true,
   themeMode: 'system',
   themeColor: 'sage',
+  accountLogoCountry: null,
   onboardingCompleted: true,
   userMode: 'power',
   weekStartsOn: 1,

@@ -88,7 +88,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       return { skipped: true, reason: 'fresh', written: [], errors: [] };
     }
 
-    const { json } = buildBackupJson();
+    const { json } = await buildBackupJson();
     const name = buildAutoBackupName();
 
     const targets = await pickActiveTargets(settings.autoBackupTarget);

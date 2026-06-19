@@ -12,6 +12,7 @@ interface CreateAccountInput {
   sortOrder?: number;
   type: Account['type'];
   accountGroup?: string | null;
+  logoId?: string | null;
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
   currency: string;

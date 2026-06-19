@@ -68,6 +68,13 @@ const ja = {
     },
   },
   news: {
+    account_logos: {
+      title: '口座ロゴ',
+      intro: {
+        title: '口座にロゴを付けよう',
+        body: 'どの口座にも銀行や電子ウォレットのロゴを追加できます。世界中の470以上から選ぶか、自分の画像をアップロード。口座を開いて選びましょう。',
+      },
+    },
     share_earn: {
       title: 'シェアしてProを獲得',
       rewards: {
@@ -1030,6 +1037,25 @@ const ja = {
     subcategories: 'サブカテゴリ',
   },
   accounts: {
+    logo: {
+      label: 'ロゴ',
+      add: 'ロゴを追加',
+      choose_title: 'ロゴを選択',
+      choose_subtitle: '検索または国別に表示',
+      search_placeholder: '銀行・ウォレットを検索',
+      none: 'ロゴなし',
+      no_results: '一致する結果がありません',
+      country: '国',
+      tab_library: 'ライブラリ',
+      tab_custom: 'カスタム',
+      upload: 'アップロード',
+      permission_title: '写真へのアクセスが必要',
+      permission_message:
+        'カスタムロゴをアップロードするには写真ライブラリへのアクセスを許可してください。',
+      upload_failed: 'この画像は使用できません。別の画像をお試しください。',
+      delete_title: 'ロゴを削除しますか？',
+      delete_message: 'このカスタムロゴは削除されます。',
+    },
     new_account: '新規口座',
     edit_account: '口座を編集',
     account_name: '口座名',
@@ -1146,6 +1172,9 @@ const ja = {
     save_for_month: '{{month}} に保存',
   },
   pro: {
+    custom_logos_label: 'カスタム口座ロゴ',
+    limit_custom_logos:
+      '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
     title: 'Money2Time Pro',
     upgrade: 'Pro にアップグレード',
     upgrade_subtitle: '無制限機能を解放',

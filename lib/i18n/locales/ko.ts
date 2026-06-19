@@ -68,6 +68,13 @@ const ko = {
     },
   },
   news: {
+    account_logos: {
+      title: '계정 로고',
+      intro: {
+        title: '계정에 로고를 더하세요',
+        body: '어떤 계정에도 은행 또는 전자지갑 로고를 추가하세요. 전 세계 470개 이상 중에서 고르거나 직접 업로드하세요. 계정을 열어 선택하세요.',
+      },
+    },
     share_earn: {
       title: '공유하고 Pro 받기',
       rewards: {
@@ -1023,6 +1030,24 @@ const ko = {
     subcategories: '하위 카테고리',
   },
   accounts: {
+    logo: {
+      label: '로고',
+      add: '로고 추가',
+      choose_title: '로고 선택',
+      choose_subtitle: '검색 또는 국가별 보기',
+      search_placeholder: '은행·지갑 검색',
+      none: '로고 없음',
+      no_results: '검색 결과 없음',
+      country: '국가',
+      tab_library: '라이브러리',
+      tab_custom: '사용자 지정',
+      upload: '업로드',
+      permission_title: '사진 접근 권한 필요',
+      permission_message: '사용자 지정 로고를 업로드하려면 사진 라이브러리 접근을 허용하세요.',
+      upload_failed: '이 이미지를 사용할 수 없습니다. 다른 이미지를 선택하세요.',
+      delete_title: '로고를 삭제할까요?',
+      delete_message: '이 사용자 지정 로고가 삭제됩니다.',
+    },
     new_account: '새 계좌',
     edit_account: '계좌 편집',
     account_name: '계좌 이름',
@@ -1139,6 +1164,9 @@ const ko = {
     save_for_month: '{{month}}에 저장',
   },
   pro: {
+    custom_logos_label: '사용자 지정 계정 로고',
+    limit_custom_logos:
+      '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     title: 'Money2Time Pro',
     upgrade: 'Pro로 업그레이드',
     upgrade_subtitle: '무제한 기능 잠금 해제',

@@ -3,11 +3,16 @@ import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
+import {
+  collectUserAssetsForBackup,
+  restoreUserAssetsFromBackup,
+  type UserAssetBackupEntry,
+} from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
 
-const BACKUP_VERSION = 2;
-const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2]);
+const BACKUP_VERSION = 3;
+const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3]);
 
 interface BackupTables {
   accounts: Record<string, unknown>[];
@@ -24,6 +29,8 @@ export interface BackupData {
   version: number;
   exportedAt: string;
   tables: BackupTables;
+  /** User-uploaded assets (custom logos, …) embedded as base64. Added in v3. */
+  userAssets?: UserAssetBackupEntry[];
 }
 
 export interface BackupSummary {
@@ -54,13 +61,14 @@ function withPreservedAppUserId(
   }));
 }
 
-export function buildBackupData(): BackupData {
+export async function buildBackupData(): Promise<BackupData> {
   const sqlite = getSQLite();
   const now = nowIso();
 
   return {
     version: BACKUP_VERSION,
     exportedAt: now,
+    userAssets: await collectUserAssetsForBackup(),
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<
@@ -97,8 +105,10 @@ function tryReadTable(
   }
 }
 
-export function buildBackupJson(opts?: { pretty?: boolean }): { json: string; data: BackupData } {
-  const data = buildBackupData();
+export async function buildBackupJson(opts?: {
+  pretty?: boolean;
+}): Promise<{ json: string; data: BackupData }> {
+  const data = await buildBackupData();
   // Auto-backups call with the default (compact) since they're machine-read
   // only — pretty-printing roughly doubles file size and serialization cost.
   // The user-facing export passes { pretty: true } so a curious user can
@@ -127,7 +137,7 @@ export function parseBackupJson(json: string): BackupData {
 }
 
 export async function exportDatabase(): Promise<void> {
-  const { json, data } = buildBackupJson({ pretty: true });
+  const { json, data } = await buildBackupJson({ pretty: true });
   const fileName = `money2time-backup-${data.exportedAt.replace(/[:.]/g, '-').slice(0, 19)}.json`;
   const file = new File(Paths.document, fileName);
   file.write(json);
@@ -220,6 +230,13 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
     sqlite.execSync('COMMIT');
+
+    // Restore user-uploaded assets (custom logos, …) outside the DB transaction.
+    try {
+      restoreUserAssetsFromBackup(backup.userAssets);
+    } catch {
+      // Asset restore is best-effort — a failure here shouldn't fail the import.
+    }
     return { canceled: false, success: true };
   } catch (e) {
     try {

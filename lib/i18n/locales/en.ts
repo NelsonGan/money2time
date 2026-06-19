@@ -68,6 +68,13 @@ const en = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Account Logos',
+      intro: {
+        title: 'Give your accounts a face',
+        body: 'Add a bank or e-wallet logo to any account. Pick from 470+ worldwide, or upload your own. Open an account to choose one.',
+      },
+    },
     share_earn: {
       title: 'Share & Earn Pro',
       rewards: {
@@ -1044,6 +1051,24 @@ const en = {
     subcategories: 'Subcategories',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Add a logo',
+      choose_title: 'Choose logo',
+      choose_subtitle: 'Search or browse by country',
+      search_placeholder: 'Search banks & wallets',
+      none: 'No logo',
+      no_results: 'No matches found',
+      country: 'Country',
+      tab_library: 'Library',
+      tab_custom: 'Custom',
+      upload: 'Upload',
+      permission_title: 'Photo access needed',
+      permission_message: 'Allow photo library access to upload a custom logo.',
+      upload_failed: 'Could not use that image. Please try another.',
+      delete_title: 'Delete logo?',
+      delete_message: 'This custom logo will be removed.',
+    },
     new_account: 'New Account',
     edit_account: 'Edit Account',
     account_name: 'Account name',
@@ -1160,6 +1185,9 @@ const en = {
     save_for_month: 'Save for {{month}}',
   },
   pro: {
+    custom_logos_label: 'Custom account logos',
+    limit_custom_logos:
+      'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
     title: 'Money2Time Pro',
     upgrade: 'Upgrade to Pro',
     upgrade_subtitle: 'Unlock unlimited features',

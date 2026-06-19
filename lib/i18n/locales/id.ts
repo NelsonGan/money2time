@@ -68,6 +68,13 @@ const id = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logo akun',
+      intro: {
+        title: 'Beri wajah pada akun Anda',
+        body: 'Tambahkan logo bank atau e-wallet ke akun mana pun. Pilih dari 470+ di seluruh dunia, atau unggah milik Anda. Buka akun untuk memilih.',
+      },
+    },
     share_earn: {
       title: 'Bagikan & Dapatkan Pro',
       rewards: {
@@ -1058,6 +1065,24 @@ const id = {
     subcategories: 'Subkategori',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Tambahkan logo',
+      choose_title: 'Pilih logo',
+      choose_subtitle: 'Cari atau jelajahi per negara',
+      search_placeholder: 'Cari bank & dompet',
+      none: 'Tanpa logo',
+      no_results: 'Tidak ada hasil',
+      country: 'Negara',
+      tab_library: 'Pustaka',
+      tab_custom: 'Khusus',
+      upload: 'Unggah',
+      permission_title: 'Perlu akses foto',
+      permission_message: 'Izinkan akses galeri foto untuk mengunggah logo khusus.',
+      upload_failed: 'Tidak dapat menggunakan gambar itu. Coba yang lain.',
+      delete_title: 'Hapus logo?',
+      delete_message: 'Logo khusus ini akan dihapus.',
+    },
     new_account: 'Akun Baru',
     edit_account: 'Edit Akun',
     account_name: 'Nama akun',
@@ -1174,6 +1199,9 @@ const id = {
     save_for_month: 'Simpan untuk {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logo akun khusus',
+    limit_custom_logos:
+      'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
     title: 'Money2Time Pro',
     upgrade: 'Upgrade ke Pro',
     upgrade_subtitle: 'Buka fitur tanpa batas',

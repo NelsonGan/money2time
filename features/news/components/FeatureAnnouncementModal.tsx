@@ -19,6 +19,7 @@ import {
   type FeatureAnnouncement,
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
+import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
@@ -219,6 +220,8 @@ export function FeatureAnnouncementModal({
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
               ) : page.visual === 'shareEarn' ? (
                 <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />
+              ) : page.visual === 'accountLogos' ? (
+                <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : (
                 <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
               )}

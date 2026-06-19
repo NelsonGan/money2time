@@ -68,6 +68,13 @@ const zh = {
     },
   },
   news: {
+    account_logos: {
+      title: '账户标志',
+      intro: {
+        title: '给账户加上标志',
+        body: '为任意账户添加银行或电子钱包标志，从全球 470+ 个中选择，或上传你自己的。打开账户即可选择。',
+      },
+    },
     share_earn: {
       title: '分享赚 Pro',
       rewards: {
@@ -1001,6 +1008,24 @@ const zh = {
     delete_confirm: '将永久删除此分类，此操作不可撤销。',
   },
   accounts: {
+    logo: {
+      label: '标志',
+      add: '添加标志',
+      choose_title: '选择标志',
+      choose_subtitle: '搜索或按国家/地区浏览',
+      search_placeholder: '搜索银行和钱包',
+      none: '无标志',
+      no_results: '未找到匹配项',
+      country: '国家/地区',
+      tab_library: '图库',
+      tab_custom: '自定义',
+      upload: '上传',
+      permission_title: '需要照片访问权限',
+      permission_message: '允许访问照片库以上传自定义标志。',
+      upload_failed: '无法使用该图片，请换一张试试。',
+      delete_title: '删除标志？',
+      delete_message: '此自定义标志将被移除。',
+    },
     new_account: '新建账户',
     edit_account: '编辑账户',
     account_name: '账户名称',
@@ -1116,6 +1141,8 @@ const zh = {
     save_for_month: '保存至 {{month}}',
   },
   pro: {
+    custom_logos_label: '自定义账户标志',
+    limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
     title: 'Money2Time Pro',
     upgrade: '升级到 Pro',
     upgrade_subtitle: '解锁无限功能',
