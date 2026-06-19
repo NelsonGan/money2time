@@ -60,6 +60,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
+import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
@@ -381,6 +382,9 @@ function MainShellScreen({
   const tutorialStartTokenRef = useRef(0);
   const previousActiveTabRef = useRef<MainTab | null>(null);
   const [preloadedTabs, setPreloadedTabs] = useState<Set<MainTab>>(() => new Set());
+  // Drives the off-screen quick-add warm-up: mounted briefly during idle so the
+  // first FAB tap doesn't pay the sheet's one-time module/view init cost.
+  const [warmupQuickAdd, setWarmupQuickAdd] = useState(false);
 
   useEffect(() => {
     // Progressively pre-mount the non-home tabs after home has rendered, so
@@ -415,6 +419,32 @@ function MainShellScreen({
       cancelled = true;
       if (pendingTimeout) clearTimeout(pendingTimeout);
       if (pendingInteraction) pendingInteraction.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Warm up the quick-add sheet off-screen once the app is idle (after the
+    // tabs have pre-loaded). This evaluates its lazy module graph and registers
+    // the cold TextInput/keyboard-controller view classes so the first FAB tap
+    // is as smooth as later ones. Unmount after a beat — the registrations stay
+    // warm for the session.
+    let cancelled = false;
+    let unmountTimer: ReturnType<typeof setTimeout> | null = null;
+    let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+
+    const mountTimer = setTimeout(() => {
+      interaction = InteractionManager.runAfterInteractions(() => {
+        if (cancelled) return;
+        setWarmupQuickAdd(true);
+        unmountTimer = setTimeout(() => setWarmupQuickAdd(false), 3000);
+      });
+    }, 1200);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(mountTimer);
+      if (unmountTimer) clearTimeout(unmountTimer);
+      if (interaction) interaction.cancel();
     };
   }, []);
 
@@ -914,6 +944,8 @@ function MainShellScreen({
           }}
         />
       ) : null}
+
+      {warmupQuickAdd ? <QuickAddWarmup /> : null}
 
       <TutorialCoachmarkOverlay
         visible={isGuidedTutorialActive && currentGuidedStep !== null}
