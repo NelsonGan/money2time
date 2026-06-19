@@ -84,6 +84,8 @@ export interface UserSettings {
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
+  /** Persisted country filter for the account-logo picker (country slug), or null. */
+  accountLogoCountry: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   weekStartsOn: WeekStartsOn;
@@ -146,6 +148,8 @@ export interface Account {
   sortOrder?: number;
   type: AccountType;
   accountGroup: string | null;
+  /** Bundled bank/institution logo id (`<countrySlug>/<brandSlug>`), or null. */
+  logoId?: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   currency: string;

@@ -68,6 +68,13 @@ const it = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logo dei conti',
+      intro: {
+        title: 'Dai un volto ai tuoi conti',
+        body: 'Aggiungi il logo di una banca o di un wallet a qualsiasi conto. Scegli tra oltre 470 in tutto il mondo o carica il tuo. Apri un conto per sceglierne uno.',
+      },
+    },
     share_earn: {
       title: 'Condividi e guadagna Pro',
       rewards: {
@@ -1055,6 +1062,25 @@ const it = {
     subcategories: 'Sottocategorie',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Aggiungi un logo',
+      choose_title: 'Scegli logo',
+      choose_subtitle: 'Cerca o sfoglia per paese',
+      search_placeholder: 'Cerca banche e wallet',
+      none: 'Nessun logo',
+      no_results: 'Nessun risultato',
+      country: 'Paese',
+      tab_library: 'Libreria',
+      tab_custom: 'Personalizzato',
+      upload: 'Carica',
+      permission_title: 'Serve l’accesso alle foto',
+      permission_message:
+        'Consenti l’accesso alla libreria foto per caricare un logo personalizzato.',
+      upload_failed: 'Impossibile usare questa immagine. Provane un’altra.',
+      delete_title: 'Eliminare il logo?',
+      delete_message: 'Questo logo personalizzato sarà rimosso.',
+    },
     new_account: 'Nuovo conto',
     edit_account: 'Modifica conto',
     account_name: 'Nome conto',
@@ -1171,6 +1197,9 @@ const it = {
     save_for_month: 'Salva per {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logo conto personalizzati',
+    limit_custom_logos:
+      'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
     title: 'Money2Time Pro',
     upgrade: 'Passa a Pro',
     upgrade_subtitle: 'Sblocca funzionalità illimitate',

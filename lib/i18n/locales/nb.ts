@@ -68,6 +68,13 @@ const nb = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Kontologoer',
+      intro: {
+        title: 'Gi kontoene dine et ansikt',
+        body: 'Legg til en bank- eller lommebok-logo på enhver konto. Velg blant 470+ verden over, eller last opp din egen. Åpne en konto for å velge.',
+      },
+    },
     share_earn: {
       title: 'Del & tjen Pro',
       rewards: {
@@ -1053,6 +1060,24 @@ const nb = {
     subcategories: 'Underkategorier',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Legg til en logo',
+      choose_title: 'Velg logo',
+      choose_subtitle: 'Søk eller bla etter land',
+      search_placeholder: 'Søk banker og lommebøker',
+      none: 'Ingen logo',
+      no_results: 'Ingen treff',
+      country: 'Land',
+      tab_library: 'Bibliotek',
+      tab_custom: 'Egendefinert',
+      upload: 'Last opp',
+      permission_title: 'Trenger tilgang til bilder',
+      permission_message: 'Gi tilgang til bildebiblioteket for å laste opp en egendefinert logo.',
+      upload_failed: 'Kunne ikke bruke det bildet. Prøv et annet.',
+      delete_title: 'Slette logo?',
+      delete_message: 'Denne egendefinerte logoen fjernes.',
+    },
     new_account: 'Ny konto',
     edit_account: 'Rediger konto',
     account_name: 'Kontonavn',
@@ -1169,6 +1194,9 @@ const nb = {
     save_for_month: 'Lagre for {{month}}',
   },
   pro: {
+    custom_logos_label: 'Egendefinerte kontologoer',
+    limit_custom_logos:
+      'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     title: 'Money2Time Pro',
     upgrade: 'Oppgrader til Pro',
     upgrade_subtitle: 'Lås opp ubegrensede funksjoner',

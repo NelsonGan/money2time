@@ -68,6 +68,13 @@ const ms = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logo akaun',
+      intro: {
+        title: 'Berikan wajah pada akaun anda',
+        body: 'Tambah logo bank atau e-dompet pada mana-mana akaun. Pilih daripada 470+ di seluruh dunia, atau muat naik sendiri. Buka akaun untuk memilih.',
+      },
+    },
     share_earn: {
       title: 'Kongsi & Dapat Pro',
       rewards: {
@@ -1050,6 +1057,24 @@ const ms = {
     subcategories: 'Subkategori',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Tambah logo',
+      choose_title: 'Pilih logo',
+      choose_subtitle: 'Cari atau semak ikut negara',
+      search_placeholder: 'Cari bank & dompet',
+      none: 'Tiada logo',
+      no_results: 'Tiada padanan',
+      country: 'Negara',
+      tab_library: 'Pustaka',
+      tab_custom: 'Tersuai',
+      upload: 'Muat naik',
+      permission_title: 'Akses foto diperlukan',
+      permission_message: 'Benarkan akses pustaka foto untuk memuat naik logo tersuai.',
+      upload_failed: 'Tidak dapat menggunakan imej itu. Sila cuba yang lain.',
+      delete_title: 'Padam logo?',
+      delete_message: 'Logo tersuai ini akan dialih keluar.',
+    },
     new_account: 'Akaun Baharu',
     edit_account: 'Edit Akaun',
     account_name: 'Nama akaun',
@@ -1167,6 +1192,9 @@ const ms = {
     save_for_month: 'Simpan untuk {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logo akaun tersuai',
+    limit_custom_logos:
+      'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
     title: 'Money2Time Pro',
     upgrade: 'Naik taraf ke Pro',
     upgrade_subtitle: 'Buka kunci ciri tanpa had',

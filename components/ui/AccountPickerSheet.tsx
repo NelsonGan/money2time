@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AccountLogo } from '~/components/ui/AccountLogo';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -175,7 +176,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
                             opacity: isDisabled ? 0.45 : pressed ? 0.6 : 1,
                           })}
                           className={cn(
-                            'rounded-2xl px-3 py-3 flex-row items-center justify-between gap-2',
+                            'rounded-2xl px-3 py-3 flex-row items-center gap-2',
                             isSelected
                               ? 'bg-primary/15 border border-primary/30'
                               : isDisabled
@@ -183,6 +184,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
                                 : 'bg-secondary/40 border border-transparent',
                           )}
                         >
+                          <AccountLogo logoId={acct.logoId} type={acct.type} size={28} />
                           <Text
                             variant="body"
                             numberOfLines={1}

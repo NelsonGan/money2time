@@ -1,3 +1,5 @@
+export { AccountLogo } from './AccountLogo';
+export { AccountLogoPickerSheet } from './AccountLogoPickerSheet';
 export { AccountPickerSheet } from './AccountPickerSheet';
 export { Button } from './button';
 export { Card, CardContent } from './card';

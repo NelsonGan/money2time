@@ -68,6 +68,13 @@ const nl = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Rekeninglogo’s',
+      intro: {
+        title: 'Geef je rekeningen een gezicht',
+        body: 'Voeg een bank- of wallet-logo toe aan elke rekening. Kies uit 470+ wereldwijd of upload je eigen. Open een rekening om er een te kiezen.',
+      },
+    },
     share_earn: {
       title: 'Deel & verdien Pro',
       rewards: {
@@ -1065,6 +1072,24 @@ const nl = {
     subcategories: 'Subcategorieën',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Logo toevoegen',
+      choose_title: 'Logo kiezen',
+      choose_subtitle: 'Zoek of blader per land',
+      search_placeholder: 'Zoek banken en wallets',
+      none: 'Geen logo',
+      no_results: 'Geen resultaten',
+      country: 'Land',
+      tab_library: 'Bibliotheek',
+      tab_custom: 'Aangepast',
+      upload: 'Uploaden',
+      permission_title: 'Toegang tot foto’s nodig',
+      permission_message: 'Geef toegang tot de fotobibliotheek om een eigen logo te uploaden.',
+      upload_failed: 'Kan die afbeelding niet gebruiken. Probeer een andere.',
+      delete_title: 'Logo verwijderen?',
+      delete_message: 'Dit aangepaste logo wordt verwijderd.',
+    },
     new_account: 'Nieuwe rekening',
     edit_account: 'Rekening bewerken',
     account_name: 'Rekeningnaam',
@@ -1181,6 +1206,9 @@ const nl = {
     save_for_month: 'Opslaan voor {{month}}',
   },
   pro: {
+    custom_logos_label: 'Aangepaste rekeninglogo’s',
+    limit_custom_logos:
+      'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     title: 'Money2Time Pro',
     upgrade: 'Upgraden naar Pro',
     upgrade_subtitle: 'Onbeperkte functies ontgrendelen',

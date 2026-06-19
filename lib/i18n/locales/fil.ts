@@ -68,6 +68,13 @@ const fil = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Mga logo ng account',
+      intro: {
+        title: 'Bigyan ng mukha ang iyong mga account',
+        body: 'Magdagdag ng logo ng bangko o e-wallet sa kahit anong account. Pumili sa 470+ sa buong mundo, o mag-upload ng sarili mo. Magbukas ng account para pumili.',
+      },
+    },
     share_earn: {
       title: 'Mag-share, kumita ng Pro',
       rewards: {
@@ -1066,6 +1073,24 @@ const fil = {
     subcategories: 'Mga Subcategory',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Magdagdag ng logo',
+      choose_title: 'Pumili ng logo',
+      choose_subtitle: 'Maghanap o mag-browse ayon sa bansa',
+      search_placeholder: 'Maghanap ng bangko at wallet',
+      none: 'Walang logo',
+      no_results: 'Walang nahanap',
+      country: 'Bansa',
+      tab_library: 'Library',
+      tab_custom: 'Custom',
+      upload: 'Mag-upload',
+      permission_title: 'Kailangan ng access sa photos',
+      permission_message: 'Payagan ang access sa photo library para mag-upload ng custom na logo.',
+      upload_failed: 'Hindi magamit ang larawang iyon. Subukan ang iba.',
+      delete_title: 'Tanggalin ang logo?',
+      delete_message: 'Aalisin ang custom na logo na ito.',
+    },
     new_account: 'Bagong Account',
     edit_account: 'I-edit ang Account',
     account_name: 'Pangalan ng account',
@@ -1182,6 +1207,9 @@ const fil = {
     save_for_month: 'I-save para sa {{month}}',
   },
   pro: {
+    custom_logos_label: 'Custom na logo ng account',
+    limit_custom_logos:
+      'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
     title: 'Money2Time Pro',
     upgrade: 'Mag-upgrade sa Pro',
     upgrade_subtitle: 'I-unlock ang unlimited na mga feature',

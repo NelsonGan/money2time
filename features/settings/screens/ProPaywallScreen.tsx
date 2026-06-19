@@ -144,6 +144,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_WAGE_ENTRIES),
         pro: UNLIMITED,
       },
+      {
+        label: I18n.t('pro.custom_logos_label'),
+        free: String(PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS),
+        pro: UNLIMITED,
+      },
       // Voice entry only appears when the device actually supports speech
       // recognition — no point advertising it otherwise.
       ...(voiceSupported
@@ -156,7 +161,7 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
           ]
         : []),
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
-      { label: I18n.t('pro.widgets_label'), free: '2', pro: '4' },
+      { label: I18n.t('pro.widgets_label'), free: '2', pro: '6' },
     ],
     [voiceSupported],
   );

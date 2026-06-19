@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   list: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
 });
