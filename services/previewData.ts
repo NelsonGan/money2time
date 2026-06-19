@@ -40,43 +40,45 @@ interface CategoryBlueprintItem {
   parentKey?: string;
 }
 
+// Icons are hand-drawn custom-icon names (see constants/categoryIcons.ts), not raw
+// emoji, so every category renders a real icon rather than an emoji glyph.
 const CATEGORY_BLUEPRINT: CategoryBlueprintItem[] = [
-  { key: 'home', type: 'expense', icon: '🏠' },
-  { key: 'rent', type: 'expense', icon: '🧾', parentKey: 'home' },
-  { key: 'utilities', type: 'expense', icon: '💡', parentKey: 'home' },
-  { key: 'internet', type: 'expense', icon: '📶', parentKey: 'home' },
-  { key: 'home_supplies', type: 'expense', icon: '🧻', parentKey: 'home' },
-  { key: 'food', type: 'expense', icon: '🍽️' },
-  { key: 'groceries', type: 'expense', icon: '🛒', parentKey: 'food' },
-  { key: 'dining', type: 'expense', icon: '🍜', parentKey: 'food' },
-  { key: 'coffee', type: 'expense', icon: '☕', parentKey: 'food' },
-  { key: 'transport', type: 'expense', icon: '🚗' },
-  { key: 'fuel', type: 'expense', icon: '⛽', parentKey: 'transport' },
-  { key: 'rideshare', type: 'expense', icon: '🚕', parentKey: 'transport' },
-  { key: 'parking', type: 'expense', icon: '🅿️', parentKey: 'transport' },
-  { key: 'lifestyle', type: 'expense', icon: '🛍️' },
-  { key: 'shopping', type: 'expense', icon: '🛍️', parentKey: 'lifestyle' },
-  { key: 'entertainment', type: 'expense', icon: '🎬', parentKey: 'lifestyle' },
-  { key: 'subscriptions', type: 'expense', icon: '📺', parentKey: 'lifestyle' },
-  { key: 'health', type: 'expense', icon: '💊' },
-  { key: 'healthcare', type: 'expense', icon: '🩺', parentKey: 'health' },
-  { key: 'fitness', type: 'expense', icon: '🏋️', parentKey: 'health' },
-  { key: 'travel_root', type: 'expense', icon: '✈️' },
-  { key: 'flights', type: 'expense', icon: '🛫', parentKey: 'travel_root' },
-  { key: 'hotels', type: 'expense', icon: '🏨', parentKey: 'travel_root' },
-  { key: 'local_travel', type: 'expense', icon: '🚆', parentKey: 'travel_root' },
-  { key: 'family', type: 'expense', icon: '🎁' },
-  { key: 'gifts', type: 'expense', icon: '🎁', parentKey: 'family' },
-  { key: 'education', type: 'expense', icon: '📚', parentKey: 'family' },
-  { key: 'salary_root', type: 'income', icon: '💼' },
-  { key: 'salary', type: 'income', icon: '💰', parentKey: 'salary_root' },
-  { key: 'bonus', type: 'income', icon: '🏆', parentKey: 'salary_root' },
-  { key: 'side_root', type: 'income', icon: '🧑‍💻' },
-  { key: 'freelance', type: 'income', icon: '💻', parentKey: 'side_root' },
-  { key: 'consulting', type: 'income', icon: '🧠', parentKey: 'side_root' },
-  { key: 'invest_root', type: 'income', icon: '📈' },
-  { key: 'dividends', type: 'income', icon: '📈', parentKey: 'invest_root' },
-  { key: 'interest', type: 'income', icon: '🏦', parentKey: 'invest_root' },
+  { key: 'home', type: 'expense', icon: 'house' },
+  { key: 'rent', type: 'expense', icon: 'invoice', parentKey: 'home' },
+  { key: 'utilities', type: 'expense', icon: 'light-bulb', parentKey: 'home' },
+  { key: 'internet', type: 'expense', icon: 'laptop', parentKey: 'home' },
+  { key: 'home_supplies', type: 'expense', icon: 'faucet', parentKey: 'home' },
+  { key: 'food', type: 'expense', icon: 'meal' },
+  { key: 'groceries', type: 'expense', icon: 'grocery-basket', parentKey: 'food' },
+  { key: 'dining', type: 'expense', icon: 'meal', parentKey: 'food' },
+  { key: 'coffee', type: 'expense', icon: 'coffee', parentKey: 'food' },
+  { key: 'transport', type: 'expense', icon: 'car' },
+  { key: 'fuel', type: 'expense', icon: 'gas-pump', parentKey: 'transport' },
+  { key: 'rideshare', type: 'expense', icon: 'car', parentKey: 'transport' },
+  { key: 'parking', type: 'expense', icon: 'keys', parentKey: 'transport' },
+  { key: 'lifestyle', type: 'expense', icon: 'shopping-bag' },
+  { key: 'shopping', type: 'expense', icon: 'price-tag', parentKey: 'lifestyle' },
+  { key: 'entertainment', type: 'expense', icon: 'clapperboard', parentKey: 'lifestyle' },
+  { key: 'subscriptions', type: 'expense', icon: 'bill-calendar', parentKey: 'lifestyle' },
+  { key: 'health', type: 'expense', icon: 'medicine' },
+  { key: 'healthcare', type: 'expense', icon: 'stethoscope', parentKey: 'health' },
+  { key: 'fitness', type: 'expense', icon: 'dumbbell', parentKey: 'health' },
+  { key: 'travel_root', type: 'expense', icon: 'plane' },
+  { key: 'flights', type: 'expense', icon: 'plane', parentKey: 'travel_root' },
+  { key: 'hotels', type: 'expense', icon: 'house', parentKey: 'travel_root' },
+  { key: 'local_travel', type: 'expense', icon: 'bus', parentKey: 'travel_root' },
+  { key: 'family', type: 'expense', icon: 'gift' },
+  { key: 'gifts', type: 'expense', icon: 'gift', parentKey: 'family' },
+  { key: 'education', type: 'expense', icon: 'graduation-cap', parentKey: 'family' },
+  { key: 'salary_root', type: 'income', icon: 'briefcase' },
+  { key: 'salary', type: 'income', icon: 'cash', parentKey: 'salary_root' },
+  { key: 'bonus', type: 'income', icon: 'coins-checkmark', parentKey: 'salary_root' },
+  { key: 'side_root', type: 'income', icon: 'laptop' },
+  { key: 'freelance', type: 'income', icon: 'laptop', parentKey: 'side_root' },
+  { key: 'consulting', type: 'income', icon: 'work-bag', parentKey: 'side_root' },
+  { key: 'invest_root', type: 'income', icon: 'coins' },
+  { key: 'dividends', type: 'income', icon: 'piggy-bank', parentKey: 'invest_root' },
+  { key: 'interest', type: 'income', icon: 'bank', parentKey: 'invest_root' },
 ];
 
 type CategoryKey = (typeof CATEGORY_BLUEPRINT)[number]['key'];
@@ -305,7 +307,8 @@ interface PreviewProfile {
     salary: PreviewRecurringRuleConfig;
     rent: PreviewRecurringRuleConfig;
     fitness: PreviewRecurringRuleConfig;
-    subscription: PreviewRecurringRuleConfig;
+    // Famous local subscription services, each seeded as its own recurring expense.
+    subscriptions: PreviewRecurringRuleConfig[];
     investment: PreviewRecurringRuleConfig;
   };
   transactions: PreviewTransactionsConfig;
@@ -557,7 +560,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         logoId: 'united-states/marcus-by-goldman-sachs',
       },
       travel: { name: 'Travel Fund', startingBalance: 900, logoId: 'united-states/capital-one' },
-      card: { name: 'Rewards Card', startingBalance: 185, logoId: 'united-states/discover' },
+      card: { name: 'Discover it', startingBalance: 185, logoId: 'united-states/discover' },
       cash: { name: 'Cash Wallet', startingBalance: 120, logoId: 'united-states/cash-app' },
       brokerage: { name: 'Brokerage', startingBalance: 5200, logoId: 'united-states/fidelity' },
     },
@@ -597,6 +600,34 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         logoId: 'global/coinbase',
         groupKey: 'investing',
       },
+      {
+        name: 'Chase Sapphire Preferred',
+        type: 'credit',
+        startingBalance: 1240,
+        logoId: 'united-states/chase',
+        groupKey: 'credit',
+      },
+      {
+        name: 'Amex Gold Card',
+        type: 'credit',
+        startingBalance: 860,
+        logoId: 'global/american-express',
+        groupKey: 'credit',
+      },
+      {
+        name: 'Capital One Venture',
+        type: 'credit',
+        startingBalance: 540,
+        logoId: 'united-states/capital-one',
+        groupKey: 'credit',
+      },
+      {
+        name: 'Apple Card',
+        type: 'credit',
+        startingBalance: 320,
+        logoId: 'global/apple-pay',
+        groupKey: 'credit',
+      },
     ],
     categories: AMERICAN_CATEGORIES,
     wageHistory: {
@@ -610,22 +641,28 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
     recurring: {
       salary: { name: 'Monthly Paycheck', amount: 4485, note: 'Payroll' },
       rent: { name: 'Apartment Rent', amount: 1495, note: 'Riverside Apartments' },
-      fitness: { name: 'Gym Membership', amount: 42, note: 'North Studio' },
-      subscription: { name: 'Streaming Bundle', amount: 19.99, note: 'StreamBox' },
+      fitness: { name: 'Gym Membership', amount: 42, note: 'Crunch Fitness' },
+      subscriptions: [
+        { name: 'Netflix', amount: 22.99, note: 'Netflix Premium' },
+        { name: 'Spotify', amount: 11.99, note: 'Spotify Premium' },
+        { name: 'Disney+', amount: 13.99, note: 'Disney+' },
+        { name: 'Amazon Prime', amount: 14.99, note: 'Amazon Prime' },
+        { name: 'ChatGPT Plus', amount: 20, note: 'ChatGPT Plus' },
+      ],
       investment: { name: 'Brokerage Auto-Invest', amount: 225, note: 'Auto-invest' },
     },
     transactions: {
       merchants: {
-        grocery: ['Whole Market', 'Fresh Basket', 'Daily Grocer', 'Green Cart'],
-        dining: ['Noodle House', 'Harbor Grill', 'Midtown Sushi', 'Garden Cafe'],
-        coffee: ['Sunrise Coffee', 'Daily Brew', 'Corner Beans', 'Roast Lab'],
-        fuel: ['City Fuel', 'Shell Point', 'Highway Fuel'],
-        shopping: ['North Mall', 'Home Goods', 'Tech Corner', 'Studio Market'],
-        entertainment: ['Cinema Night', 'Concert Hall', 'Arcade Club', 'Weekend Show'],
-        rideshare: ['City Ride', 'Metro Cab', 'QuickLift'],
-        healthcare: ['Family Clinic', 'Dental Care', 'Pharmacy Express'],
-        hotels: ['Harbor Hotel', 'Skyline Suites', 'Atlas Stay'],
-        flights: ['Coastal Air', 'Blue Skies', 'MetroJet'],
+        grocery: ["Trader Joe's", 'Whole Foods', 'Safeway', 'Costco', 'Kroger'],
+        dining: ['Chipotle', 'Shake Shack', 'Olive Garden', 'Panera Bread', 'Chick-fil-A'],
+        coffee: ['Starbucks', "Dunkin'", 'Blue Bottle', "Peet's Coffee"],
+        fuel: ['Shell', 'Chevron', 'Costco Gas', 'ExxonMobil'],
+        shopping: ['Target', 'Amazon', 'Best Buy', 'IKEA', 'Walmart'],
+        entertainment: ['AMC Theatres', 'Regal Cinemas', "Dave & Buster's", 'Ticketmaster'],
+        rideshare: ['Uber', 'Lyft'],
+        healthcare: ['CVS Pharmacy', 'Walgreens', 'One Medical'],
+        hotels: ['Marriott', 'Hilton', 'Airbnb'],
+        flights: ['Delta', 'United Airlines', 'Southwest'],
       },
       notes: {
         salary: 'Payroll',
@@ -635,14 +672,14 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         dividends: 'Quarterly dividends',
         interest: 'Savings interest',
         rent: 'Riverside Apartments',
-        utilities: 'City Utilities',
-        internet: 'FiberNet',
-        fitness: 'North Studio',
-        homeSupplies: 'Household restock',
-        subscriptions: ['StreamBox', 'Music+', 'Cloud Vault'],
-        education: 'Course platform',
+        utilities: 'PG&E bill',
+        internet: 'Xfinity',
+        fitness: 'Crunch Fitness',
+        homeSupplies: 'Target run',
+        subscriptions: ['Netflix', 'Spotify', 'iCloud+'],
+        education: 'Coursera',
         atmWithdrawal: 'ATM withdrawal',
-        parkingPrimary: 'City parking',
+        parkingPrimary: 'Downtown parking',
         parkingAlternate: 'Station parking',
         savingsTransfer: 'Savings transfer',
         investmentTransfer: 'Auto-invest',
@@ -653,7 +690,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         familyCelebration: 'Family celebration',
         cardPayment: 'Card payment',
       },
-      subscriptions: [19.99, 12.99, 6.99],
+      subscriptions: [22.99, 11.99, 2.99],
       income: {
         salaryBase: 4425,
         salaryGrowth: 18,
@@ -765,7 +802,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       checking: { name: '工资卡', startingBalance: 18600, logoId: 'china/china-merchants-bank' },
       savings: { name: '活期储蓄', startingBalance: 64800, logoId: 'china/icbc' },
       travel: { name: '旅行基金', startingBalance: 5200, logoId: 'china/bank-of-china' },
-      card: { name: '信用卡', startingBalance: 680, logoId: 'china/china-construction-bank' },
+      card: { name: '建行信用卡', startingBalance: 680, logoId: 'china/china-construction-bank' },
       cash: { name: '现金', startingBalance: 280, logoId: 'china/unionpay' },
       brokerage: { name: '基金账户', startingBalance: 22800, logoId: 'china/ping-an-bank' },
     },
@@ -798,6 +835,34 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         logoId: 'global/binance',
         groupKey: 'investing',
       },
+      {
+        name: '招商银行信用卡',
+        type: 'credit',
+        startingBalance: 2400,
+        logoId: 'china/china-merchants-bank',
+        groupKey: 'credit',
+      },
+      {
+        name: '蚂蚁花呗',
+        type: 'credit',
+        startingBalance: 860,
+        logoId: 'china/alipay',
+        groupKey: 'credit',
+      },
+      {
+        name: '京东白条',
+        type: 'credit',
+        startingBalance: 430,
+        logoId: 'china/jdcom',
+        groupKey: 'credit',
+      },
+      {
+        name: '交通银行信用卡',
+        type: 'credit',
+        startingBalance: 1500,
+        logoId: 'china/bank-of-communications',
+        groupKey: 'credit',
+      },
     ],
     categories: CHINESE_CATEGORIES,
     wageHistory: {
@@ -811,8 +876,14 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
     recurring: {
       salary: { name: '每月工资', amount: 16800, note: '工资入账' },
       rent: { name: '房租', amount: 4900, note: '青年公寓' },
-      fitness: { name: '健身月卡', amount: 199, note: '健身工作室' },
-      subscription: { name: '视频会员', amount: 25, note: '视频会员' },
+      fitness: { name: '健身月卡', amount: 199, note: '乐刻运动' },
+      subscriptions: [
+        { name: '腾讯视频VIP', amount: 30, note: '腾讯视频会员' },
+        { name: '爱奇艺黄金会员', amount: 25, note: '爱奇艺会员' },
+        { name: '网易云音乐黑胶VIP', amount: 18, note: '网易云音乐' },
+        { name: '哔哩哔哩大会员', amount: 25, note: 'B站大会员' },
+        { name: '百度网盘超级会员', amount: 30, note: '百度网盘' },
+      ],
       investment: { name: '基金定投', amount: 1200, note: '自动定投' },
     },
     transactions: {
@@ -838,9 +909,9 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         rent: '青年公寓',
         utilities: '水电燃气',
         internet: '家庭宽带',
-        fitness: '健身工作室',
+        fitness: '乐刻运动',
         homeSupplies: '日用品补货',
-        subscriptions: ['视频会员', '音乐会员', '云盘会员'],
+        subscriptions: ['腾讯视频VIP', '网易云音乐', '百度网盘会员'],
         education: '线上课程',
         atmWithdrawal: '取现',
         parkingPrimary: '商场停车',
@@ -999,6 +1070,34 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         logoId: 'malaysia/rakuten-trade',
         groupKey: 'investing',
       },
+      {
+        name: 'CIMB Cash Rebate',
+        type: 'credit',
+        startingBalance: 640,
+        logoId: 'malaysia/cimb',
+        groupKey: 'credit',
+      },
+      {
+        name: 'UOB One Card',
+        type: 'credit',
+        startingBalance: 920,
+        logoId: 'malaysia/uob-malaysia',
+        groupKey: 'credit',
+      },
+      {
+        name: 'Hong Leong Wise Card',
+        type: 'credit',
+        startingBalance: 410,
+        logoId: 'malaysia/hong-leong-bank',
+        groupKey: 'credit',
+      },
+      {
+        name: 'AEON Visa Card',
+        type: 'credit',
+        startingBalance: 280,
+        logoId: 'malaysia/aeon-bank',
+        groupKey: 'credit',
+      },
     ],
     categories: MALAYSIAN_EN_CATEGORIES,
     wageHistory: {
@@ -1013,7 +1112,13 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       salary: { name: 'Gaji Masuk', amount: 6800, note: 'Gaji bulan ni' },
       rent: { name: 'Sewa Rumah', amount: 1850, note: 'Sewa kondo' },
       fitness: { name: 'Gym Bulanan', amount: 158, note: 'Anytime Fitness' },
-      subscription: { name: 'Astro + Spotify', amount: 89.9, note: 'Astro pakej family' },
+      subscriptions: [
+        { name: 'Astro Family Pack', amount: 89.9, note: 'Astro pakej family' },
+        { name: 'Netflix', amount: 54.9, note: 'Netflix Premium' },
+        { name: 'Spotify Family', amount: 23.9, note: 'Spotify Family' },
+        { name: 'Disney+ Hotstar', amount: 19.9, note: 'Disney+ Hotstar' },
+        { name: 'iCloud+', amount: 11.9, note: 'iCloud 200GB' },
+      ],
       investment: { name: 'StashAway Auto-Debit', amount: 600, note: 'StashAway top-up bulanan' },
     },
     transactions: {
@@ -1296,6 +1401,34 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         logoId: 'malaysia/rakuten-trade',
         groupKey: 'investing',
       },
+      {
+        name: '联昌现金回扣卡',
+        type: 'credit',
+        startingBalance: 640,
+        logoId: 'malaysia/cimb',
+        groupKey: 'credit',
+      },
+      {
+        name: 'UOB One 卡',
+        type: 'credit',
+        startingBalance: 920,
+        logoId: 'malaysia/uob-malaysia',
+        groupKey: 'credit',
+      },
+      {
+        name: '丰隆 Wise 卡',
+        type: 'credit',
+        startingBalance: 410,
+        logoId: 'malaysia/hong-leong-bank',
+        groupKey: 'credit',
+      },
+      {
+        name: 'AEON 信用卡',
+        type: 'credit',
+        startingBalance: 280,
+        logoId: 'malaysia/aeon-bank',
+        groupKey: 'credit',
+      },
     ],
     categories: MALAYSIAN_ZH_CATEGORIES,
     wageHistory: {
@@ -1310,8 +1443,14 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       salary: { name: 'Gaji 入账', amount: 6800, note: '这个月 gaji' },
       rent: { name: '屋租', amount: 1850, note: '公寓屋租' },
       fitness: { name: '健身月费', amount: 158, note: 'Anytime Fitness' },
-      subscription: { name: 'Astro + Spotify', amount: 89.9, note: 'Astro 家庭配套' },
-      investment: { name: 'ASB 月供', amount: 600, note: 'ASB 每月供款' },
+      subscriptions: [
+        { name: 'Astro 家庭配套', amount: 89.9, note: 'Astro 家庭配套' },
+        { name: 'Netflix', amount: 54.9, note: 'Netflix 高级版' },
+        { name: 'Spotify 家庭版', amount: 23.9, note: 'Spotify Family' },
+        { name: 'Disney+ Hotstar', amount: 19.9, note: 'Disney+ Hotstar' },
+        { name: 'iCloud+', amount: 11.9, note: 'iCloud 200GB' },
+      ],
+      investment: { name: 'StashAway 月供', amount: 600, note: 'StashAway 每月供款' },
     },
     transactions: {
       merchants: {
@@ -1366,7 +1505,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         bonus: '年终花红',
         freelance: '副业进账',
         consulting: '顾问 fee',
-        dividends: 'ASB 派息',
+        dividends: 'StashAway 派息',
         interest: '定期利息',
         rent: '公寓屋租',
         utilities: 'TNB + 水费',
@@ -1379,7 +1518,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         parkingPrimary: '商场泊车',
         parkingAlternate: 'TnG 过路费',
         savingsTransfer: '过账去 CIMB 储蓄',
-        investmentTransfer: 'ASB 月供款',
+        investmentTransfer: 'StashAway 月供款',
         travelTopUp: 'Cuti-cuti 基金',
         localTravel: 'KLIA Ekspres 快铁',
         tripDining: '旅行 yumcha',
@@ -1528,7 +1667,6 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
 const PREVIEW_START_YEAR = 2025;
 const PREVIEW_START_MONTH_INDEX = 0;
 const WAGE_HISTORY_MONTHS = 48;
-const RECURRING_RULE_COUNT = 5;
 
 function createSeededRandom(seed: number): RandomFn {
   let state = seed >>> 0;
@@ -1739,16 +1877,18 @@ function seedRecurringRules(
     nextRunDate: monthIso(nextMonth, 12, 9),
   });
 
-  recurringRulesRepository.create({
-    name: recurring.subscription.name,
-    type: 'expense',
-    amount: recurring.subscription.amount,
-    currency: profile.currencySymbol,
-    accountId: accounts.card,
-    categoryId: categories.subscriptions,
-    note: recurring.subscription.note,
-    recurrencePattern: 'monthly',
-    nextRunDate: monthIso(nextMonth, 14, 9),
+  recurring.subscriptions.forEach((subscription, index) => {
+    recurringRulesRepository.create({
+      name: subscription.name,
+      type: 'expense',
+      amount: subscription.amount,
+      currency: profile.currencySymbol,
+      accountId: accounts.card,
+      categoryId: categories.subscriptions,
+      note: subscription.note,
+      recurrencePattern: 'monthly',
+      nextRunDate: monthIso(nextMonth, 5 + index * 2, 9),
+    });
   });
 
   recurringRulesRepository.create({
@@ -1762,6 +1902,9 @@ function seedRecurringRules(
     recurrencePattern: 'monthly',
     nextRunDate: monthIso(nextMonth, 18, 9),
   });
+
+  // salary + rent + fitness + investment + one rule per subscription service
+  return 4 + recurring.subscriptions.length;
 }
 
 function randomSentiment(type: string, random: RandomFn): TransactionSentiment {
@@ -2394,7 +2537,7 @@ export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSum
     const categories = createCategories(profile);
     seedWageHistory(profile);
     const transactions = seedTransactions(profile, accounts, categories);
-    seedRecurringRules(profile, accounts, categories);
+    const recurringRules = seedRecurringRules(profile, accounts, categories);
 
     sqlite.execSync('COMMIT');
 
@@ -2403,7 +2546,7 @@ export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSum
       locale: profile.locale,
       accounts: Object.keys(accounts).length + profile.extraAccounts.length,
       categories: Object.keys(categories).length,
-      recurringRules: RECURRING_RULE_COUNT,
+      recurringRules,
       transactions,
       wageMonths: WAGE_HISTORY_MONTHS,
     };
