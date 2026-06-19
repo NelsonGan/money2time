@@ -94,7 +94,10 @@ const PREVIEW_SCREEN_COPY = {
 
 function formatPreviewDoneMessage(
   template: string,
-  values: Record<'profile' | 'transactions' | 'accounts' | 'categories' | 'recurringRules' | 'wageMonths', string | number>,
+  values: Record<
+    'profile' | 'transactions' | 'accounts' | 'categories' | 'recurringRules' | 'wageMonths',
+    string | number
+  >,
 ) {
   return template.replace(
     /\{\{(profile|transactions|accounts|categories|recurringRules|wageMonths)\}\}/g,
