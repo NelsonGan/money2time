@@ -86,6 +86,7 @@ type CategoryNames = Record<CategoryKey, string>;
 interface PreviewAccountSeed {
   name: string;
   startingBalance: number;
+  logoId: string;
 }
 
 interface PreviewIncomeAmounts {
@@ -538,12 +539,16 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       investing: 'Investing',
     },
     accounts: {
-      checking: { name: 'Daily Checking', startingBalance: 2650 },
-      savings: { name: 'High Yield Savings', startingBalance: 7400 },
-      travel: { name: 'Travel Fund', startingBalance: 900 },
-      card: { name: 'Rewards Card', startingBalance: 185 },
-      cash: { name: 'Cash Wallet', startingBalance: 120 },
-      brokerage: { name: 'Brokerage', startingBalance: 5200 },
+      checking: { name: 'Daily Checking', startingBalance: 2650, logoId: 'united-states/chase' },
+      savings: {
+        name: 'High Yield Savings',
+        startingBalance: 7400,
+        logoId: 'united-states/marcus-by-goldman-sachs',
+      },
+      travel: { name: 'Travel Fund', startingBalance: 900, logoId: 'united-states/capital-one' },
+      card: { name: 'Rewards Card', startingBalance: 185, logoId: 'united-states/discover' },
+      cash: { name: 'Cash Wallet', startingBalance: 120, logoId: 'united-states/cash-app' },
+      brokerage: { name: 'Brokerage', startingBalance: 5200, logoId: 'united-states/fidelity' },
     },
     categories: AMERICAN_CATEGORIES,
     wageHistory: {
@@ -709,12 +714,12 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       investing: '投资',
     },
     accounts: {
-      checking: { name: '工资卡', startingBalance: 18600 },
-      savings: { name: '活期储蓄', startingBalance: 64800 },
-      travel: { name: '旅行基金', startingBalance: 5200 },
-      card: { name: '信用卡', startingBalance: 680 },
-      cash: { name: '现金', startingBalance: 280 },
-      brokerage: { name: '基金账户', startingBalance: 22800 },
+      checking: { name: '工资卡', startingBalance: 18600, logoId: 'china/china-merchants-bank' },
+      savings: { name: '活期储蓄', startingBalance: 64800, logoId: 'china/icbc' },
+      travel: { name: '旅行基金', startingBalance: 5200, logoId: 'china/bank-of-china' },
+      card: { name: '信用卡', startingBalance: 680, logoId: 'china/china-construction-bank' },
+      cash: { name: '现金', startingBalance: 280, logoId: 'china/alipay' },
+      brokerage: { name: '基金账户', startingBalance: 22800, logoId: 'china/ping-an-bank' },
     },
     categories: CHINESE_CATEGORIES,
     wageHistory: {
@@ -880,12 +885,12 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       investing: 'Investing',
     },
     accounts: {
-      checking: { name: 'Maybank2u', startingBalance: 4850 },
-      savings: { name: 'CIMB Savings', startingBalance: 28600 },
-      travel: { name: 'Cuti Tabung', startingBalance: 2400 },
-      card: { name: 'Maybank 2 Card', startingBalance: 320 },
-      cash: { name: 'Wallet Cash', startingBalance: 180 },
-      brokerage: { name: 'ASB', startingBalance: 16800 },
+      checking: { name: 'Maybank2u', startingBalance: 4850, logoId: 'malaysia/maybank' },
+      savings: { name: 'CIMB Savings', startingBalance: 28600, logoId: 'malaysia/cimb' },
+      travel: { name: 'Cuti Tabung', startingBalance: 2400, logoId: 'malaysia/hsbc-malaysia' },
+      card: { name: 'Maybank 2 Card', startingBalance: 320, logoId: 'malaysia/maybank' },
+      cash: { name: 'Wallet Cash', startingBalance: 180, logoId: 'malaysia/touch-n-go-ewallet' },
+      brokerage: { name: 'ASB', startingBalance: 16800, logoId: 'malaysia/stashaway' },
     },
     categories: MALAYSIAN_EN_CATEGORIES,
     wageHistory: {
@@ -916,7 +921,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         ],
         dining: [
           'Mamak Pelita',
-          'Devi\'s Corner mamak',
+          "Devi's Corner mamak",
           'Nasi Kandar Pelita',
           'Restoran Yut Kee',
           'Old Town White Coffee',
@@ -1091,7 +1096,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
           'PappaRich brunch',
           'Old Town kopitiam',
           'Yut Kee weekend',
-          'Devi\'s Corner roti',
+          "Devi's Corner roti",
           'Antipodean Bangsar',
         ],
         weekendBrunchNote: 'Sunday brunch session',
@@ -1125,7 +1130,13 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         convenienceCount: 6,
         convenienceBase: 18,
         convenienceSpread: 7,
-        convenienceMerchants: ['7-Eleven', 'Family Mart', 'KK Super Mart', 'MyNews', 'Speedmart 99'],
+        convenienceMerchants: [
+          '7-Eleven',
+          'Family Mart',
+          'KK Super Mart',
+          'MyNews',
+          'Speedmart 99',
+        ],
       },
     },
   },
@@ -1141,12 +1152,12 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       investing: '投资',
     },
     accounts: {
-      checking: { name: '马银行', startingBalance: 4850 },
-      savings: { name: '联昌定期', startingBalance: 28600 },
-      travel: { name: 'Cuti 基金', startingBalance: 2400 },
-      card: { name: '马银行信用卡', startingBalance: 320 },
-      cash: { name: '钱包现金', startingBalance: 180 },
-      brokerage: { name: 'ASB 户口', startingBalance: 16800 },
+      checking: { name: '马银行', startingBalance: 4850, logoId: 'malaysia/maybank' },
+      savings: { name: '联昌定期', startingBalance: 28600, logoId: 'malaysia/cimb' },
+      travel: { name: 'Cuti 基金', startingBalance: 2400, logoId: 'malaysia/hsbc-malaysia' },
+      card: { name: '马银行信用卡', startingBalance: 320, logoId: 'malaysia/maybank' },
+      cash: { name: '钱包现金', startingBalance: 180, logoId: 'malaysia/touch-n-go-ewallet' },
+      brokerage: { name: 'ASB 户口', startingBalance: 16800, logoId: 'malaysia/stashaway' },
     },
     categories: MALAYSIAN_ZH_CATEGORIES,
     wageHistory: {
@@ -1168,7 +1179,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       merchants: {
         grocery: [
           '永旺 AEON',
-          'Lotus\'s 莲花',
+          "Lotus's 莲花",
           '巨人 Giant',
           'Mydin 美丹',
           'Jaya Grocer',
@@ -1187,13 +1198,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
           '寿司王',
           'PJ 大牌档',
         ],
-        coffee: [
-          'ZUS 咖啡',
-          '星巴克 KLCC',
-          'Coffee Bean',
-          '茶餐室 lim kopi',
-          '老街场早茶',
-        ],
+        coffee: ['ZUS 咖啡', '星巴克 KLCC', 'Coffee Bean', '茶餐室 lim kopi', '老街场早茶'],
         fuel: ['Petronas 国油', 'Shell 壳牌', 'Petron 95', 'BHPetrol'],
         shopping: [
           'Pavilion 柏威年',
@@ -1214,13 +1219,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
           'KTV 包厢',
         ],
         rideshare: ['Grab 召车', 'Grab Bike 摩多', 'AirAsia Ride', '德士'],
-        healthcare: [
-          '私人诊所',
-          '屈臣氏药房',
-          'Guardian 药房',
-          'Caring 康宁药剂',
-          'KPJ 检查',
-        ],
+        healthcare: ['私人诊所', '屈臣氏药房', 'Guardian 药房', 'Caring 康宁药剂', 'KPJ 检查'],
         hotels: ['希尔顿 KL', '云顶第一酒店', 'Sunway 度假村', 'Berjaya 时代广场'],
         flights: ['亚航 AirAsia', '马航 MAS', '萤火虫 Firefly', 'Batik Air'],
       },
@@ -1374,12 +1373,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         deliveryCount: 4,
         deliveryBase: 32,
         deliverySpread: 12,
-        deliveryMerchants: [
-          'GrabFood 打包',
-          'foodpanda',
-          'ShopeeFood 优惠',
-          'McDelivery 宵夜',
-        ],
+        deliveryMerchants: ['GrabFood 打包', 'foodpanda', 'ShopeeFood 优惠', 'McDelivery 宵夜'],
         deliveryNote: 'Tapau 宵夜，懒得煮',
         rideshareExtraCount: 3,
         rideshareExtraBase: 22,
@@ -1502,6 +1496,7 @@ function createAccount(profile: PreviewProfile, key: AccountKey) {
     creditStatementDay: meta.creditStatementDay,
     creditDueDay: meta.creditDueDay,
     sortOrder: meta.sortOrder,
+    logoId: account.logoId,
   });
 }
 
@@ -1513,7 +1508,7 @@ function createCategories(profile: PreviewProfile): CategoryRefs {
       name: profile.categories[item.key as CategoryKey],
       type: item.type,
       icon: item.icon,
-      parentId: item.parentKey ? ids[item.parentKey as CategoryKey] ?? null : null,
+      parentId: item.parentKey ? (ids[item.parentKey as CategoryKey] ?? null) : null,
       isDefault: false,
     });
   });
@@ -1531,11 +1526,11 @@ function seedWageHistory(profile: PreviewProfile) {
     const config: WageConfig = {
       wageType: 'monthly',
       wageAmount: roundAmount(
-        wageHistory.baseAmount + index * wageHistory.monthlyGrowth + yearlyStep * wageHistory.yearlyStep,
+        wageHistory.baseAmount +
+          index * wageHistory.monthlyGrowth +
+          yearlyStep * wageHistory.yearlyStep,
       ),
-      hoursWorkedPerWeek: roundAmount(
-        wageHistory.hoursBase + ((index % 4) - 1.5) * 0.75,
-      ),
+      hoursWorkedPerWeek: roundAmount(wageHistory.hoursBase + ((index % 4) - 1.5) * 0.75),
       workdaysPerWeek: 5,
       commuteMinutesPerWorkday: wageHistory.commuteBase + (index % 3) * wageHistory.commuteStep,
     };
@@ -1544,7 +1539,11 @@ function seedWageHistory(profile: PreviewProfile) {
   }
 }
 
-function seedRecurringRules(profile: PreviewProfile, accounts: AccountRefs, categories: CategoryRefs) {
+function seedRecurringRules(
+  profile: PreviewProfile,
+  accounts: AccountRefs,
+  categories: CategoryRefs,
+) {
   const nextMonth = monthStart(new Date(), 1);
   const recurring = profile.recurring;
 
@@ -1618,13 +1617,17 @@ function randomSentiment(type: string, random: RandomFn): TransactionSentiment {
   }
   if (type === 'expense') {
     if (r < 0.25) return 'happy';
-    if (r < 0.60) return 'neutral';
+    if (r < 0.6) return 'neutral';
     return 'sad';
   }
   return 'neutral';
 }
 
-function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, categories: CategoryRefs) {
+function seedTransactions(
+  profile: PreviewProfile,
+  accounts: AccountRefs,
+  categories: CategoryRefs,
+) {
   const random = createSeededRandom(profile.seed);
   const previewMonths = getPreviewMonths();
   const {
@@ -1685,11 +1688,7 @@ function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, catego
     if (index % 6 === 2 || index % 6 === 5) {
       add({
         type: 'income',
-        amount: jitter(
-          income.bonusBase + index * income.bonusGrowth,
-          income.bonusSpread,
-          random,
-        ),
+        amount: jitter(income.bonusBase + index * income.bonusGrowth, income.bonusSpread, random),
         currency: profile.currencySymbol,
         date: monthIso(monthDate, 15, 10),
         accountId: accounts.checking,
@@ -1752,11 +1751,7 @@ function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, catego
 
     add({
       type: 'expense',
-      amount: jitter(
-        housing.rentBase + index * housing.rentGrowth,
-        housing.rentSpread,
-        random,
-      ),
+      amount: jitter(housing.rentBase + index * housing.rentGrowth, housing.rentSpread, random),
       currency: profile.currencySymbol,
       date: monthIso(monthDate, 2, 9),
       accountId: accounts.checking,
@@ -2114,11 +2109,7 @@ function seedTransactions(profile: PreviewProfile, accounts: AccountRefs, catego
 
       add({
         type: 'expense',
-        amount: jitter(
-          travel.familyCelebrationBase,
-          travel.familyCelebrationSpread,
-          random,
-        ),
+        amount: jitter(travel.familyCelebrationBase, travel.familyCelebrationSpread, random),
         currency: profile.currencySymbol,
         date: monthIso(monthDate, 22, 18),
         accountId: accounts.checking,

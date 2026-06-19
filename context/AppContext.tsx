@@ -2884,16 +2884,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
   }, [resetTransactionFilters, runMutation]);
 
-  const generatePreviewData = useCallback((profile: PreviewSeedProfile) => {
-    const summary = runMutation(
-      () => seedPreviewData(profile),
-      I18n.t('errors.generic_operation_failed'),
-    );
-    setAppLocale(summary.locale);
-    setActiveAccountFilter(null);
-    resetTransactionFilters();
-    return summary;
-  }, [resetTransactionFilters, runMutation]);
+  const generatePreviewData = useCallback(
+    (profile: PreviewSeedProfile) => {
+      const summary = runMutation(
+        () => seedPreviewData(profile),
+        I18n.t('errors.generic_operation_failed'),
+      );
+      setAppLocale(summary.locale);
+      setActiveAccountFilter(null);
+      resetTransactionFilters();
+      return summary;
+    },
+    [resetTransactionFilters, runMutation],
+  );
 
   const importMoneyManagerBackup = useCallback(
     async (uri: string, fileName?: string) => {
