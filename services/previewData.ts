@@ -89,6 +89,16 @@ interface PreviewAccountSeed {
   logoId: string;
 }
 
+// Display-only accounts (popular banks / e-wallets / international) shown in the
+// accounts list for richer screenshots. Not referenced by seeded transactions.
+interface PreviewExtraAccount {
+  name: string;
+  type: 'debit' | 'credit';
+  startingBalance: number;
+  logoId: string;
+  groupKey: AccountGroupKey;
+}
+
 interface PreviewIncomeAmounts {
   salaryBase: number;
   salaryGrowth: number;
@@ -281,6 +291,7 @@ interface PreviewProfile {
   currencySymbol: string;
   accountGroups: Record<AccountGroupKey, string>;
   accounts: Record<AccountKey, PreviewAccountSeed>;
+  extraAccounts: PreviewExtraAccount[];
   categories: CategoryNames;
   wageHistory: {
     baseAmount: number;
@@ -550,6 +561,43 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       cash: { name: 'Cash Wallet', startingBalance: 120, logoId: 'united-states/cash-app' },
       brokerage: { name: 'Brokerage', startingBalance: 5200, logoId: 'united-states/fidelity' },
     },
+    extraAccounts: [
+      {
+        name: 'Venmo',
+        type: 'debit',
+        startingBalance: 240,
+        logoId: 'united-states/venmo',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'PayPal',
+        type: 'debit',
+        startingBalance: 310,
+        logoId: 'global/paypal',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Wise',
+        type: 'debit',
+        startingBalance: 1450,
+        logoId: 'global/wise',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Robinhood',
+        type: 'debit',
+        startingBalance: 3800,
+        logoId: 'united-states/robinhood',
+        groupKey: 'investing',
+      },
+      {
+        name: 'Coinbase',
+        type: 'debit',
+        startingBalance: 2100,
+        logoId: 'global/coinbase',
+        groupKey: 'investing',
+      },
+    ],
     categories: AMERICAN_CATEGORIES,
     wageHistory: {
       baseAmount: 3950,
@@ -718,9 +766,39 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       savings: { name: '活期储蓄', startingBalance: 64800, logoId: 'china/icbc' },
       travel: { name: '旅行基金', startingBalance: 5200, logoId: 'china/bank-of-china' },
       card: { name: '信用卡', startingBalance: 680, logoId: 'china/china-construction-bank' },
-      cash: { name: '现金', startingBalance: 280, logoId: 'china/alipay' },
+      cash: { name: '现金', startingBalance: 280, logoId: 'china/unionpay' },
       brokerage: { name: '基金账户', startingBalance: 22800, logoId: 'china/ping-an-bank' },
     },
+    extraAccounts: [
+      {
+        name: '支付宝',
+        type: 'debit',
+        startingBalance: 1860,
+        logoId: 'china/alipay',
+        groupKey: 'everyday',
+      },
+      {
+        name: '微信钱包',
+        type: 'debit',
+        startingBalance: 1240,
+        logoId: 'china/wechat-pay',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Wise',
+        type: 'debit',
+        startingBalance: 5200,
+        logoId: 'global/wise',
+        groupKey: 'everyday',
+      },
+      {
+        name: '币安',
+        type: 'debit',
+        startingBalance: 9800,
+        logoId: 'global/binance',
+        groupKey: 'investing',
+      },
+    ],
     categories: CHINESE_CATEGORIES,
     wageHistory: {
       baseAmount: 15200,
@@ -890,8 +968,38 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       travel: { name: 'Cuti Tabung', startingBalance: 2400, logoId: 'malaysia/hsbc-malaysia' },
       card: { name: 'Maybank 2 Card', startingBalance: 320, logoId: 'malaysia/maybank' },
       cash: { name: 'Wallet Cash', startingBalance: 180, logoId: 'malaysia/touch-n-go-ewallet' },
-      brokerage: { name: 'ASB', startingBalance: 16800, logoId: 'malaysia/stashaway' },
+      brokerage: { name: 'StashAway', startingBalance: 16800, logoId: 'malaysia/stashaway' },
     },
+    extraAccounts: [
+      {
+        name: 'GrabPay',
+        type: 'debit',
+        startingBalance: 220,
+        logoId: 'malaysia/grabpay',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Boost',
+        type: 'debit',
+        startingBalance: 140,
+        logoId: 'malaysia/boost-bank',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Wise',
+        type: 'debit',
+        startingBalance: 1900,
+        logoId: 'global/wise',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Rakuten Trade',
+        type: 'debit',
+        startingBalance: 7400,
+        logoId: 'malaysia/rakuten-trade',
+        groupKey: 'investing',
+      },
+    ],
     categories: MALAYSIAN_EN_CATEGORIES,
     wageHistory: {
       baseAmount: 5800,
@@ -906,7 +1014,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       rent: { name: 'Sewa Rumah', amount: 1850, note: 'Sewa kondo' },
       fitness: { name: 'Gym Bulanan', amount: 158, note: 'Anytime Fitness' },
       subscription: { name: 'Astro + Spotify', amount: 89.9, note: 'Astro pakej family' },
-      investment: { name: 'ASB Auto-Debit', amount: 600, note: 'ASB top-up bulanan' },
+      investment: { name: 'StashAway Auto-Debit', amount: 600, note: 'StashAway top-up bulanan' },
     },
     transactions: {
       merchants: {
@@ -972,7 +1080,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         bonus: 'Year-end bonus',
         freelance: 'Side project',
         consulting: 'Advisory retainer',
-        dividends: 'ASB dividend',
+        dividends: 'StashAway dividend',
         interest: 'FD interest',
         rent: 'Sewa kondo bulan ni',
         utilities: 'Letrik + air',
@@ -985,7 +1093,7 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         parkingPrimary: 'Mall parking',
         parkingAlternate: 'TnG tol',
         savingsTransfer: 'Pindah masuk CIMB',
-        investmentTransfer: 'ASB top-up bulanan',
+        investmentTransfer: 'StashAway top-up bulanan',
         travelTopUp: 'Tabung cuti-cuti',
         localTravel: 'KLIA Ekspres ke airport',
         tripDining: 'Trip makan-makan',
@@ -1157,8 +1265,38 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
       travel: { name: 'Cuti 基金', startingBalance: 2400, logoId: 'malaysia/hsbc-malaysia' },
       card: { name: '马银行信用卡', startingBalance: 320, logoId: 'malaysia/maybank' },
       cash: { name: '钱包现金', startingBalance: 180, logoId: 'malaysia/touch-n-go-ewallet' },
-      brokerage: { name: 'ASB 户口', startingBalance: 16800, logoId: 'malaysia/stashaway' },
+      brokerage: { name: 'StashAway', startingBalance: 16800, logoId: 'malaysia/stashaway' },
     },
+    extraAccounts: [
+      {
+        name: 'GrabPay',
+        type: 'debit',
+        startingBalance: 220,
+        logoId: 'malaysia/grabpay',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Boost',
+        type: 'debit',
+        startingBalance: 140,
+        logoId: 'malaysia/boost-bank',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Wise',
+        type: 'debit',
+        startingBalance: 1900,
+        logoId: 'global/wise',
+        groupKey: 'everyday',
+      },
+      {
+        name: 'Rakuten Trade',
+        type: 'debit',
+        startingBalance: 7400,
+        logoId: 'malaysia/rakuten-trade',
+        groupKey: 'investing',
+      },
+    ],
     categories: MALAYSIAN_ZH_CATEGORIES,
     wageHistory: {
       baseAmount: 5800,
@@ -1473,7 +1611,7 @@ function createAccounts(profile: PreviewProfile): AccountRefs {
     accountGroupsRepository.create(profile.accountGroups[groupKey], index);
   });
 
-  return {
+  const refs = {
     checking: createAccount(profile, 'checking'),
     savings: createAccount(profile, 'savings'),
     travel: createAccount(profile, 'travel'),
@@ -1481,6 +1619,24 @@ function createAccounts(profile: PreviewProfile): AccountRefs {
     cash: createAccount(profile, 'cash'),
     brokerage: createAccount(profile, 'brokerage'),
   };
+
+  const baseSortOrder = Object.keys(ACCOUNT_META).length;
+  profile.extraAccounts.forEach((extra, index) => {
+    accountsRepository.create({
+      name: extra.name,
+      type: extra.type,
+      currency: profile.currencySymbol,
+      startingBalance: extra.startingBalance,
+      includeInTotals: true,
+      accountGroup: profile.accountGroups[extra.groupKey],
+      creditStatementDay: null,
+      creditDueDay: null,
+      sortOrder: baseSortOrder + index,
+      logoId: extra.logoId,
+    });
+  });
+
+  return refs;
 }
 
 function createAccount(profile: PreviewProfile, key: AccountKey) {
@@ -2245,7 +2401,7 @@ export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSum
     return {
       profile: profileName,
       locale: profile.locale,
-      accounts: Object.keys(accounts).length,
+      accounts: Object.keys(accounts).length + profile.extraAccounts.length,
       categories: Object.keys(categories).length,
       recurringRules: RECURRING_RULE_COUNT,
       transactions,
