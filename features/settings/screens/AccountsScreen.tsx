@@ -11,6 +11,7 @@ import {
   Settings,
   Trash2,
   Wallet,
+  X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
@@ -610,7 +611,22 @@ function AccountEditorSheet({
                 >
                   {logoMeta ? logoMeta.name : I18n.t('accounts.logo.add')}
                 </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
+                {logoId ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setLogoId(null);
+                    }}
+                    hitSlop={10}
+                    className="h-7 w-7 items-center justify-center rounded-full bg-secondary/70"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('accounts.logo.clear')}
+                  >
+                    <X size={14} color={themeColors.textMuted} />
+                  </Pressable>
+                ) : (
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                )}
               </Pressable>
             </View>
             <SelectField

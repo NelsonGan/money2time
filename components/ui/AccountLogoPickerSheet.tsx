@@ -14,7 +14,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
-import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -55,7 +54,6 @@ interface AccountLogoPickerSheetProps {
 }
 
 const NUM_COLUMNS = 3;
-const NONE_ITEM_ID = '__none__';
 const UPLOAD_ITEM_ID = '__upload__';
 // Insets read 0 inside a native Modal, so reserve a fixed band that clears the
 // home indicator at the end of the grid.
@@ -322,11 +320,7 @@ export function AccountLogoPickerSheet({
     [onSelect, refreshCustomLogos, selectedLogoId],
   );
 
-  // "None" is a synthetic first cell so it lays out within the same grid.
-  const data: (AccountLogoMeta | { id: typeof NONE_ITEM_ID })[] = useMemo(
-    () => (isSearching ? results : [{ id: NONE_ITEM_ID }, ...results]),
-    [isSearching, results],
-  );
+  const data = results;
 
   return (
     <ThemeModal
@@ -478,60 +472,14 @@ export function AccountLogoPickerSheet({
                   <Text tone="muted">{I18n.t('accounts.logo.no_results')}</Text>
                 </View>
               }
-              renderItem={({ item }) => {
-                if (item.id === NONE_ITEM_ID) {
-                  const selected = !selectedLogoId;
-                  return (
-                    <Pressable
-                      style={styles.cell}
-                      onPress={() => handlePickLogo(null)}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('accounts.logo.none')}
-                    >
-                      <View
-                        style={[
-                          styles.logoWrap,
-                          {
-                            borderColor: selected ? themeColors.primary : 'transparent',
-                            backgroundColor: selected
-                              ? withColorAlpha(themeColors.primary, 0.1)
-                              : 'transparent',
-                          },
-                        ]}
-                      >
-                        <View
-                          style={{
-                            width: 52,
-                            height: 52,
-                            borderRadius: 14,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: withColorAlpha(themeColors.textMuted, 0.1),
-                          }}
-                        >
-                          <CategoryEmoji icon="question-mark" size={30} />
-                        </View>
-                      </View>
-                      <Text
-                        variant="caption"
-                        numberOfLines={2}
-                        className={cn('text-center', selected && 'text-primary')}
-                      >
-                        {I18n.t('accounts.logo.none')}
-                      </Text>
-                    </Pressable>
-                  );
-                }
-                const meta = item as AccountLogoMeta;
-                return (
-                  <LogoCell
-                    meta={meta}
-                    selected={meta.id === selectedLogoId}
-                    themeColors={themeColors}
-                    onPress={() => handlePickLogo(meta.id)}
-                  />
-                );
-              }}
+              renderItem={({ item }) => (
+                <LogoCell
+                  meta={item}
+                  selected={item.id === selectedLogoId}
+                  themeColors={themeColors}
+                  onPress={() => handlePickLogo(item.id)}
+                />
+              )}
             />
 
             <View
