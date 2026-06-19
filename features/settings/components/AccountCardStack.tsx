@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
-import { CategoryEmoji, Text, useSettingsBottomNavInset } from '~/components/ui';
+import { AccountLogo, Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -389,8 +389,8 @@ function StackCard({
       >
         {/* Peek row */}
         <View style={styles.peekRow}>
-          <View style={[styles.iconBadge, { backgroundColor: `${palette.accent}22` }]}>
-            <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={24} />
+          <View style={styles.iconBadge}>
+            <AccountLogo logoId={account.logoId} type={account.type} size={34} />
           </View>
           <View style={styles.peekNameCol}>
             <Text

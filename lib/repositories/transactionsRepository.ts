@@ -145,7 +145,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     parentCategoryName: string | null;
   }>(
     `
-    SELECT 
+    SELECT
       t.id as txId,
       t.account_id as accountId,
       a.name as accountName,

@@ -68,6 +68,13 @@ const ru = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Логотипы счетов',
+      intro: {
+        title: 'Добавьте логотипы своим счетам',
+        body: 'Добавьте логотип банка или кошелька к любому счёту. Выберите из 470+ по всему миру или загрузите свой. Откройте счёт, чтобы выбрать.',
+      },
+    },
     share_earn: {
       title: 'Поделись и получи Pro',
       rewards: {
@@ -1051,6 +1058,24 @@ const ru = {
     subcategories: 'Подкатегории',
   },
   accounts: {
+    logo: {
+      label: 'Логотип',
+      add: 'Добавить логотип',
+      choose_title: 'Выбрать логотип',
+      choose_subtitle: 'Поиск или просмотр по стране',
+      search_placeholder: 'Поиск банков и кошельков',
+      none: 'Без логотипа',
+      no_results: 'Ничего не найдено',
+      country: 'Страна',
+      tab_library: 'Галерея',
+      tab_custom: 'Свой',
+      upload: 'Загрузить',
+      permission_title: 'Нужен доступ к фото',
+      permission_message: 'Разрешите доступ к фотогалерее, чтобы загрузить свой логотип.',
+      upload_failed: 'Не удалось использовать это изображение. Попробуйте другое.',
+      delete_title: 'Удалить логотип?',
+      delete_message: 'Этот пользовательский логотип будет удалён.',
+    },
     new_account: 'Новый счёт',
     edit_account: 'Изменить счёт',
     account_name: 'Название счёта',
@@ -1167,6 +1192,9 @@ const ru = {
     save_for_month: 'Сохранить для {{month}}',
   },
   pro: {
+    custom_logos_label: 'Свои логотипы счетов',
+    limit_custom_logos:
+      'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
     title: 'Money2Time Pro',
     upgrade: 'Обновиться до Pro',
     upgrade_subtitle: 'Разблокировать все функции',

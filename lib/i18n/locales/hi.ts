@@ -68,6 +68,13 @@ const hi = {
     },
   },
   news: {
+    account_logos: {
+      title: 'खाता लोगो',
+      intro: {
+        title: 'अपने खातों को एक पहचान दें',
+        body: 'किसी भी खाते में बैंक या ई-वॉलेट लोगो जोड़ें। दुनिया भर के 470+ में से चुनें, या अपना अपलोड करें। चुनने के लिए कोई खाता खोलें।',
+      },
+    },
     share_earn: {
       title: 'शेयर करें और Pro पाएं',
       rewards: {
@@ -1038,6 +1045,24 @@ const hi = {
     subcategories: 'उपश्रेणियां',
   },
   accounts: {
+    logo: {
+      label: 'लोगो',
+      add: 'लोगो जोड़ें',
+      choose_title: 'लोगो चुनें',
+      choose_subtitle: 'देश के अनुसार खोजें या ब्राउज़ करें',
+      search_placeholder: 'बैंक और वॉलेट खोजें',
+      none: 'कोई लोगो नहीं',
+      no_results: 'कोई मिलान नहीं मिला',
+      country: 'देश',
+      tab_library: 'लाइब्रेरी',
+      tab_custom: 'कस्टम',
+      upload: 'अपलोड',
+      permission_title: 'फ़ोटो एक्सेस आवश्यक',
+      permission_message: 'कस्टम लोगो अपलोड करने के लिए फ़ोटो लाइब्रेरी एक्सेस की अनुमति दें।',
+      upload_failed: 'उस छवि का उपयोग नहीं हो सका। कृपया दूसरी आज़माएँ।',
+      delete_title: 'लोगो हटाएँ?',
+      delete_message: 'यह कस्टम लोगो हटा दिया जाएगा।',
+    },
     new_account: 'नया खाता',
     edit_account: 'खाता संपादित करें',
     account_name: 'खाते का नाम',
@@ -1154,6 +1179,9 @@ const hi = {
     save_for_month: '{{month}} के लिए सेव करें',
   },
   pro: {
+    custom_logos_label: 'कस्टम खाता लोगो',
+    limit_custom_logos:
+      'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
     title: 'Money2Time Pro',
     upgrade: 'Pro में अपग्रेड करें',
     upgrade_subtitle: 'असीमित सुविधाएं अनलॉक करें',

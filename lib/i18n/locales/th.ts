@@ -68,6 +68,13 @@ const th = {
     },
   },
   news: {
+    account_logos: {
+      title: 'โลโก้บัญชี',
+      intro: {
+        title: 'ใส่โลโก้ให้บัญชีของคุณ',
+        body: 'เพิ่มโลโก้ธนาคารหรือกระเป๋าเงินให้กับบัญชีใดก็ได้ เลือกจากกว่า 470 รายการทั่วโลก หรืออัปโหลดของคุณเอง เปิดบัญชีเพื่อเลือก',
+      },
+    },
     share_earn: {
       title: 'แชร์แล้วรับ Pro',
       rewards: {
@@ -1020,6 +1027,24 @@ const th = {
     subcategories: 'หมวดหมู่ย่อย',
   },
   accounts: {
+    logo: {
+      label: 'โลโก้',
+      add: 'เพิ่มโลโก้',
+      choose_title: 'เลือกโลโก้',
+      choose_subtitle: 'ค้นหาหรือเรียกดูตามประเทศ',
+      search_placeholder: 'ค้นหาธนาคารและกระเป๋าเงิน',
+      none: 'ไม่มีโลโก้',
+      no_results: 'ไม่พบรายการที่ตรงกัน',
+      country: 'ประเทศ',
+      tab_library: 'คลัง',
+      tab_custom: 'กำหนดเอง',
+      upload: 'อัปโหลด',
+      permission_title: 'ต้องการสิทธิ์เข้าถึงรูปภาพ',
+      permission_message: 'อนุญาตการเข้าถึงคลังรูปภาพเพื่ออัปโหลดโลโก้ที่กำหนดเอง',
+      upload_failed: 'ใช้รูปภาพนี้ไม่ได้ โปรดลองรูปอื่น',
+      delete_title: 'ลบโลโก้?',
+      delete_message: 'โลโก้ที่กำหนดเองนี้จะถูกลบออก',
+    },
     new_account: 'บัญชีใหม่',
     edit_account: 'แก้ไขบัญชี',
     account_name: 'ชื่อบัญชี',
@@ -1136,6 +1161,9 @@ const th = {
     save_for_month: 'บันทึกสำหรับ {{month}}',
   },
   pro: {
+    custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
+    limit_custom_logos:
+      'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
     title: 'Money2Time Pro',
     upgrade: 'อัปเกรดเป็น Pro',
     upgrade_subtitle: 'ปลดล็อกฟีเจอร์ไม่จำกัด',

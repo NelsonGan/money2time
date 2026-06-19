@@ -25,6 +25,8 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
+  AccountLogo,
+  AccountLogoPickerSheet,
   AccountPickerSheet,
   Button,
   CategoryEmoji,
@@ -41,6 +43,7 @@ import {
   TimeValueInline,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -94,6 +97,7 @@ interface AccountEditorInput {
   name: string;
   type: AccountType;
   accountGroup: string | null;
+  logoId: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   includeInTotals: boolean;
@@ -448,6 +452,8 @@ function AccountEditorSheet({
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
+  const [logoId, setLogoId] = useState<string | null>(null);
+  const [showLogoPicker, setShowLogoPicker] = useState(false);
   const [includeInTotals, setIncludeInTotals] = useState(true);
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -473,6 +479,7 @@ function AccountEditorSheet({
     if (account) {
       setName(account.name);
       setType(account.type);
+      setLogoId(account.logoId ?? null);
       const matchedGroupId = account.accountGroup
         ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
         : 'none';
@@ -484,6 +491,7 @@ function AccountEditorSheet({
     } else {
       setName('');
       setType('debit');
+      setLogoId(null);
       setAccountGroupId(
         presetGroupName ? (accountGroupIdByName.get(presetGroupName) ?? 'none') : 'none',
       );
@@ -494,6 +502,7 @@ function AccountEditorSheet({
     }
   }, [account, accountGroupIdByName, currentBalance, presetGroupName, visible]);
 
+  const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
   const parsedBalance = Number(balanceInput);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
@@ -516,6 +525,7 @@ function AccountEditorSheet({
     onSave({
       name: normalizedName,
       type: resolvedType,
+      logoId,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
@@ -578,6 +588,31 @@ function AccountEditorSheet({
               onChangeText={setName}
               placeholder={I18n.t('accounts.account_name_placeholder')}
             />
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('accounts.logo.label')}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setShowLogoPicker(true);
+                }}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('accounts.logo.label')}
+              >
+                <AccountLogo logoId={logoId} type={isEdit ? account.type : type} size={36} />
+                <Text
+                  variant="body"
+                  tone={logoMeta ? undefined : 'muted'}
+                  numberOfLines={1}
+                  className="flex-1"
+                >
+                  {logoMeta ? logoMeta.name : I18n.t('accounts.logo.add')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
             <SelectField
               label={I18n.t('accounts.account_group')}
               value={accountGroupId}
@@ -693,6 +728,13 @@ function AccountEditorSheet({
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </SafeAreaView>
+      <AccountLogoPickerSheet
+        visible={showLogoPicker}
+        onClose={() => setShowLogoPicker(false)}
+        selectedLogoId={logoId}
+        onSelect={setLogoId}
+        onLimitReached={onClose}
+      />
     </ThemeModal>
   );
 }
@@ -947,7 +989,7 @@ function AccountChildRow({
         accessibilityRole="button"
         accessibilityLabel={account.name}
       >
-        <CategoryEmoji icon={isCredit ? 'credit-card' : 'bank'} size={22} />
+        <AccountLogo logoId={account.logoId} type={account.type} size={32} />
         <View style={styles.accountChildTextWrap}>
           <Text style={[styles.accountChildName, { color: tc.text }]} numberOfLines={1}>
             {account.name}
@@ -1929,6 +1971,7 @@ export function AccountsScreen({
       const accountUpdates = {
         name: updates.name,
         accountGroup: updates.accountGroup,
+        logoId: updates.logoId,
         creditStatementDay: updates.creditStatementDay,
         creditDueDay: updates.creditDueDay,
         includeInTotals: updates.includeInTotals,
@@ -2159,9 +2202,12 @@ export function AccountsScreen({
               reserveActionRow
               title={I18n.t('accounts.title')}
               subtitleNode={
-                <Text variant="friendly" tone="muted" numberOfLines={1}>
-                  {account.name}
-                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <AccountLogo logoId={account.logoId} type={account.type} size={20} />
+                  <Text variant="friendly" tone="muted" numberOfLines={1}>
+                    {account.name}
+                  </Text>
+                </View>
               }
               rightAccessory={
                 !isSelectionMode ? (

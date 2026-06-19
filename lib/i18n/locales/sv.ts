@@ -68,6 +68,13 @@ const sv = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Kontologotyper',
+      intro: {
+        title: 'Ge dina konton ett ansikte',
+        body: 'Lägg till en bank- eller plånbokslogga på valfritt konto. Välj bland 470+ världen över, eller ladda upp din egen. Öppna ett konto för att välja.',
+      },
+    },
     share_earn: {
       title: 'Dela & tjäna Pro',
       rewards: {
@@ -1049,6 +1056,24 @@ const sv = {
     subcategories: 'Underkategorier',
   },
   accounts: {
+    logo: {
+      label: 'Logga',
+      add: 'Lägg till en logga',
+      choose_title: 'Välj logga',
+      choose_subtitle: 'Sök eller bläddra efter land',
+      search_placeholder: 'Sök banker och plånböcker',
+      none: 'Ingen logga',
+      no_results: 'Inga träffar',
+      country: 'Land',
+      tab_library: 'Bibliotek',
+      tab_custom: 'Anpassad',
+      upload: 'Ladda upp',
+      permission_title: 'Åtkomst till foton krävs',
+      permission_message: 'Tillåt åtkomst till fotobiblioteket för att ladda upp en egen logga.',
+      upload_failed: 'Kunde inte använda den bilden. Prova en annan.',
+      delete_title: 'Ta bort logga?',
+      delete_message: 'Den här anpassade loggan tas bort.',
+    },
     new_account: 'Nytt konto',
     edit_account: 'Redigera konto',
     account_name: 'Kontonamn',
@@ -1165,6 +1190,9 @@ const sv = {
     save_for_month: 'Spara för {{month}}',
   },
   pro: {
+    custom_logos_label: 'Anpassade kontologotyper',
+    limit_custom_logos:
+      'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
     title: 'Money2Time Pro',
     upgrade: 'Uppgradera till Pro',
     upgrade_subtitle: 'Lås upp obegränsade funktioner',

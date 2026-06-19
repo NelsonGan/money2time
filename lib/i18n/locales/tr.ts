@@ -68,6 +68,13 @@ const tr = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Hesap logoları',
+      intro: {
+        title: 'Hesaplarınıza bir yüz kazandırın',
+        body: 'Herhangi bir hesaba banka veya cüzdan logosu ekleyin. Dünya genelinde 470+ arasından seçin ya da kendinizinkini yükleyin. Seçmek için bir hesabı açın.',
+      },
+    },
     share_earn: {
       title: 'Paylaş ve Pro kazan',
       rewards: {
@@ -1053,6 +1060,24 @@ const tr = {
     subcategories: 'Alt Kategoriler',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Logo ekle',
+      choose_title: 'Logo seç',
+      choose_subtitle: 'Ülkeye göre ara veya göz at',
+      search_placeholder: 'Banka ve cüzdan ara',
+      none: 'Logo yok',
+      no_results: 'Eşleşme bulunamadı',
+      country: 'Ülke',
+      tab_library: 'Kitaplık',
+      tab_custom: 'Özel',
+      upload: 'Yükle',
+      permission_title: 'Fotoğraf erişimi gerekli',
+      permission_message: 'Özel logo yüklemek için fotoğraf kitaplığına erişime izin verin.',
+      upload_failed: 'Bu görsel kullanılamadı. Lütfen başka birini deneyin.',
+      delete_title: 'Logo silinsin mi?',
+      delete_message: 'Bu özel logo kaldırılacak.',
+    },
     new_account: 'Yeni Hesap',
     edit_account: 'Hesap Düzenle',
     account_name: 'Hesap adı',
@@ -1169,6 +1194,9 @@ const tr = {
     save_for_month: '{{month}} için kaydet',
   },
   pro: {
+    custom_logos_label: 'Özel hesap logoları',
+    limit_custom_logos:
+      'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     title: 'Money2Time Pro',
     upgrade: "Pro'ya Yükselt",
     upgrade_subtitle: 'Sınırsız özellikleri açın',

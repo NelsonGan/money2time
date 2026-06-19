@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {
+  AccountLogo,
   AccountPickerSheet,
   CategoryEmoji,
   CategoryPickerSheet,
@@ -1138,6 +1139,13 @@ export function QuickAddSheet({
                       style={styles.summarySegmentFlexible}
                       hitSlop={6}
                     >
+                      {selectedAccount ? (
+                        <AccountLogo
+                          logoId={selectedAccount.logoId}
+                          type={selectedAccount.type}
+                          size={16}
+                        />
+                      ) : null}
                       <Text
                         className="text-foreground"
                         style={[styles.summaryText, styles.summaryTextFlexible]}

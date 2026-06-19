@@ -68,6 +68,13 @@ const fr = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logos de compte',
+      intro: {
+        title: 'Donnez un visage à vos comptes',
+        body: 'Ajoutez le logo d’une banque ou d’un portefeuille à n’importe quel compte. Choisissez parmi plus de 470 dans le monde, ou importez le vôtre. Ouvrez un compte pour en choisir un.',
+      },
+    },
     share_earn: {
       title: 'Partagez et gagnez Pro',
       rewards: {
@@ -1061,6 +1068,24 @@ const fr = {
     subcategories: 'Sous-catégories',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Ajouter un logo',
+      choose_title: 'Choisir un logo',
+      choose_subtitle: 'Rechercher ou parcourir par pays',
+      search_placeholder: 'Rechercher banques et portefeuilles',
+      none: 'Aucun logo',
+      no_results: 'Aucun résultat',
+      country: 'Pays',
+      tab_library: 'Bibliothèque',
+      tab_custom: 'Personnalisé',
+      upload: 'Importer',
+      permission_title: 'Accès aux photos requis',
+      permission_message: 'Autorisez l’accès à la photothèque pour importer un logo personnalisé.',
+      upload_failed: 'Impossible d’utiliser cette image. Essayez-en une autre.',
+      delete_title: 'Supprimer le logo ?',
+      delete_message: 'Ce logo personnalisé sera supprimé.',
+    },
     new_account: 'Nouveau compte',
     edit_account: 'Modifier le compte',
     account_name: 'Nom du compte',
@@ -1177,6 +1202,9 @@ const fr = {
     save_for_month: 'Enregistrer pour {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logos de compte personnalisés',
+    limit_custom_logos:
+      'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
     title: 'Money2Time Pro',
     upgrade: 'Passer à Pro',
     upgrade_subtitle: 'Débloquez les fonctionnalités illimitées',

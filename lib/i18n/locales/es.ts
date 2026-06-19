@@ -68,6 +68,13 @@ const es = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logos de cuenta',
+      intro: {
+        title: 'Dale rostro a tus cuentas',
+        body: 'Añade el logo de un banco o monedero a cualquier cuenta. Elige entre más de 470 de todo el mundo o sube el tuyo. Abre una cuenta para elegir.',
+      },
+    },
     share_earn: {
       title: 'Comparte y gana Pro',
       rewards: {
@@ -1057,6 +1064,24 @@ const es = {
     subcategories: 'Subcategorías',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Añadir un logo',
+      choose_title: 'Elegir logo',
+      choose_subtitle: 'Busca o explora por país',
+      search_placeholder: 'Buscar bancos y monederos',
+      none: 'Sin logo',
+      no_results: 'Sin coincidencias',
+      country: 'País',
+      tab_library: 'Biblioteca',
+      tab_custom: 'Personalizado',
+      upload: 'Subir',
+      permission_title: 'Se necesita acceso a fotos',
+      permission_message: 'Permite el acceso a la galería para subir un logo personalizado.',
+      upload_failed: 'No se pudo usar esa imagen. Prueba con otra.',
+      delete_title: '¿Eliminar logo?',
+      delete_message: 'Este logo personalizado se eliminará.',
+    },
     new_account: 'Nueva cuenta',
     edit_account: 'Editar cuenta',
     account_name: 'Nombre de la cuenta',
@@ -1173,6 +1198,9 @@ const es = {
     save_for_month: 'Guardar para {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logos de cuenta personalizados',
+    limit_custom_logos:
+      'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
     title: 'Money2Time Pro',
     upgrade: 'Actualizar a Pro',
     upgrade_subtitle: 'Desbloquea funciones ilimitadas',

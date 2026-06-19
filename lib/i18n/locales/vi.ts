@@ -68,6 +68,13 @@ const vi = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Logo tài khoản',
+      intro: {
+        title: 'Cho tài khoản của bạn một logo',
+        body: 'Thêm logo ngân hàng hoặc ví điện tử cho bất kỳ tài khoản nào. Chọn từ hơn 470 logo toàn cầu, hoặc tải lên của riêng bạn. Mở một tài khoản để chọn.',
+      },
+    },
     share_earn: {
       title: 'Chia sẻ & Nhận Pro',
       rewards: {
@@ -1034,6 +1041,24 @@ const vi = {
     subcategories: 'Danh mục con',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Thêm logo',
+      choose_title: 'Chọn logo',
+      choose_subtitle: 'Tìm kiếm hoặc duyệt theo quốc gia',
+      search_placeholder: 'Tìm ngân hàng & ví',
+      none: 'Không có logo',
+      no_results: 'Không tìm thấy kết quả',
+      country: 'Quốc gia',
+      tab_library: 'Thư viện',
+      tab_custom: 'Tùy chỉnh',
+      upload: 'Tải lên',
+      permission_title: 'Cần quyền truy cập ảnh',
+      permission_message: 'Cho phép truy cập thư viện ảnh để tải lên logo tùy chỉnh.',
+      upload_failed: 'Không thể dùng ảnh đó. Vui lòng thử ảnh khác.',
+      delete_title: 'Xóa logo?',
+      delete_message: 'Logo tùy chỉnh này sẽ bị xóa.',
+    },
     new_account: 'Tài khoản mới',
     edit_account: 'Sửa tài khoản',
     account_name: 'Tên tài khoản',
@@ -1150,6 +1175,9 @@ const vi = {
     save_for_month: 'Lưu cho {{month}}',
   },
   pro: {
+    custom_logos_label: 'Logo tài khoản tùy chỉnh',
+    limit_custom_logos:
+      'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
     title: 'Money2Time Pro',
     upgrade: 'Nâng cấp lên Pro',
     upgrade_subtitle: 'Mở khóa tính năng không giới hạn',

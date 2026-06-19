@@ -110,6 +110,11 @@ function getDeviceLocale() {
   return normalizeLocale(locale?.languageTag ?? locale?.languageCode ?? 'en');
 }
 
+/** Device ISO 3166-1 alpha-2 region code (e.g. "US", "MY"), or null. */
+function getDeviceRegionCode(): string | null {
+  return getLocales()[0]?.regionCode ?? null;
+}
+
 function setAppLocale(locale: string) {
   I18n.locale = normalizeLocale(locale);
 }
@@ -136,6 +141,7 @@ setAppLocale(getDeviceLocale());
 
 export {
   getDeviceLocale,
+  getDeviceRegionCode,
   getLocaleLabel,
   I18n,
   LOCALE_LABELS,

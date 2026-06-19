@@ -68,6 +68,13 @@ const da = {
     },
   },
   news: {
+    account_logos: {
+      title: 'Kontologoer',
+      intro: {
+        title: 'Giv dine konti et ansigt',
+        body: 'Tilføj et bank- eller wallet-logo til enhver konto. Vælg blandt 470+ verden over, eller upload dit eget. Åbn en konto for at vælge.',
+      },
+    },
     share_earn: {
       title: 'Del & optjen Pro',
       rewards: {
@@ -1052,6 +1059,24 @@ const da = {
     subcategories: 'Underkategorier',
   },
   accounts: {
+    logo: {
+      label: 'Logo',
+      add: 'Tilføj et logo',
+      choose_title: 'Vælg logo',
+      choose_subtitle: 'Søg eller gennemse efter land',
+      search_placeholder: 'Søg banker og wallets',
+      none: 'Intet logo',
+      no_results: 'Ingen resultater',
+      country: 'Land',
+      tab_library: 'Bibliotek',
+      tab_custom: 'Tilpasset',
+      upload: 'Upload',
+      permission_title: 'Adgang til fotos kræves',
+      permission_message: 'Tillad adgang til fotobiblioteket for at uploade et tilpasset logo.',
+      upload_failed: 'Kunne ikke bruge det billede. Prøv et andet.',
+      delete_title: 'Slet logo?',
+      delete_message: 'Dette tilpassede logo fjernes.',
+    },
     new_account: 'Ny konto',
     edit_account: 'Rediger konto',
     account_name: 'Kontonavn',
@@ -1168,6 +1193,9 @@ const da = {
     save_for_month: 'Gem for {{month}}',
   },
   pro: {
+    custom_logos_label: 'Tilpassede kontologoer',
+    limit_custom_logos:
+      'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
     title: 'Money2Time Pro',
     upgrade: 'Opgrader til Pro',
     upgrade_subtitle: 'Lås ubegrænsede funktioner op',

@@ -38,6 +38,7 @@ class SettingsRepository {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
+        | 'accountLogoCountry'
         | 'onboardingCompleted'
         | 'userMode'
         | 'weekStartsOn'
@@ -149,6 +150,7 @@ class SettingsRepository {
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
+        accountLogoCountry: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
