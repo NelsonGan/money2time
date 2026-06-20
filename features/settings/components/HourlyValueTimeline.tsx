@@ -28,10 +28,14 @@ export interface HourlyTimelineRow {
 interface HourlyValueTimelineProps {
   /** Rows ordered newest first. */
   rows: HourlyTimelineRow[];
-  /** True hourly rates ordered oldest → newest, for the sparkline. */
+  /** Rate values ordered oldest → newest, for the sparkline. */
   sparklineValues: number[];
   currencySymbol: string;
   themeColors: ColorPalette;
+  /** Suffix shown after each amount, e.g. "/hr" or "/mo". */
+  rateSuffix: string;
+  /** Caption above the hero figure, varies with the selected period. */
+  nowLabel: string;
   onEdit: (item: MonthlyWageSettings) => void;
   onDelete: (item: MonthlyWageSettings) => void;
 }
@@ -158,11 +162,13 @@ function HeroSummary({
   sparklineValues,
   currencySymbol,
   themeColors,
+  nowLabel,
 }: {
   rows: HourlyTimelineRow[];
   sparklineValues: number[];
   currencySymbol: string;
   themeColors: ColorPalette;
+  nowLabel: string;
 }) {
   const [width, setWidth] = useState(0);
   const onLayout = useCallback((event: LayoutChangeEvent) => {
@@ -189,7 +195,7 @@ function HeroSummary({
   return (
     <View className="overflow-hidden rounded-3xl border border-border/40 bg-card px-4 pb-3 pt-4">
       <Text variant="caption" tone="muted">
-        {I18n.t('settings.hourly_now_label')}
+        {nowLabel}
       </Text>
       <View className="mt-0.5 flex-row items-center gap-2.5">
         <Text variant="title" className="text-primary">
@@ -223,6 +229,7 @@ function TimelineRow({
   isListLast,
   currencySymbol,
   themeColors,
+  rateSuffix,
   onEdit,
   onDelete,
 }: {
@@ -232,6 +239,7 @@ function TimelineRow({
   isListLast: boolean;
   currencySymbol: string;
   themeColors: ColorPalette;
+  rateSuffix: string;
   onEdit: (item: MonthlyWageSettings) => void;
   onDelete: (item: MonthlyWageSettings) => void;
 }) {
@@ -277,7 +285,7 @@ function TimelineRow({
           <Text variant="subheading">
             {formatCurrency(row.rate, currencySymbol)}
             <Text variant="caption" tone="muted">
-              /hr
+              {rateSuffix}
             </Text>
           </Text>
           {!isListFirst && row.delta !== null && previousRate !== null ? (
@@ -308,6 +316,8 @@ export function HourlyValueTimeline({
   sparklineValues,
   currencySymbol,
   themeColors,
+  rateSuffix,
+  nowLabel,
   onEdit,
   onDelete,
 }: HourlyValueTimelineProps) {
@@ -318,6 +328,7 @@ export function HourlyValueTimeline({
         sparklineValues={sparklineValues}
         currencySymbol={currencySymbol}
         themeColors={themeColors}
+        nowLabel={nowLabel}
       />
 
       <View>
@@ -333,6 +344,7 @@ export function HourlyValueTimeline({
             isListLast={index === rows.length - 1}
             currencySymbol={currencySymbol}
             themeColors={themeColors}
+            rateSuffix={rateSuffix}
             onEdit={onEdit}
             onDelete={onDelete}
           />
