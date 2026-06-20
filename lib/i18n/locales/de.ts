@@ -842,6 +842,8 @@ const de = {
     hourly_current_month_locked:
       'Der Eintrag für den aktuellen Monat ist Pflicht und kann nicht gelöscht werden.',
     hourly_history_empty: 'Noch keine Stundenwert-Verlaufsdaten.',
+    hourly_now_label: 'Dein echter Stundenwert jetzt',
+    hourly_timeline: 'Zeitachse',
     hourly_delete_title: 'Monatlichen Stundenwert löschen?',
     hourly_delete_message:
       'Stundenwert für {{month}} löschen? Monate, die davon abhängen, fallen auf den vorherigen verfügbaren Monat zurück.',

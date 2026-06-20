@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronDown,
   ChevronRight,
-  HandCoins,
   Landmark,
   PiggyBank,
   Smile,
@@ -93,7 +92,6 @@ import type {
   CategoryType,
   TransactionWithRelations,
   UserSettings,
-  WageType,
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
@@ -131,7 +129,6 @@ const INSIGHT_TYPES = [
   'category_trend',
   'expense_sentiment',
   'asset_history',
-  'income_rate_history',
 ] as const;
 type InsightType = (typeof INSIGHT_TYPES)[number];
 type BreakdownInsightType = Extract<InsightType, 'expense_breakdown' | 'income_breakdown'>;
@@ -142,7 +139,6 @@ type NavigableInsightType =
   | 'asset_history';
 type AnalyticsInsightType = Extract<InsightType, 'savings_rate'>;
 type BreakdownTransactionType = 'expense' | 'income';
-type IncomeRateDisplayUnit = 'hourly' | 'monthly' | 'yearly';
 type DrilldownScopeMatcher = (transaction: TransactionWithRelations) => boolean;
 
 const INSIGHT_TYPE_VISUALS = {
@@ -194,12 +190,6 @@ const INSIGHT_TYPE_VISUALS = {
     background: '#E9E7FF',
     border: '#C9C2FA',
   },
-  income_rate_history: {
-    Icon: HandCoins,
-    tint: '#B86A16',
-    background: '#FDEFD9',
-    border: '#F0CDA0',
-  },
 } as const satisfies Record<
   InsightType,
   {
@@ -219,7 +209,6 @@ const INSIGHT_TYPE_ICON_NAME: Record<InsightType, string> = {
   category_trend: 'pie-chart',
   expense_sentiment: 'mood-faces',
   asset_history: 'home-savings',
-  income_rate_history: 'time-money',
 };
 
 function renderInsightTypeIcon(insightType: InsightType) {
@@ -276,8 +265,6 @@ const CATEGORY_TREND_TARGET_X_LABELS = 6;
 const SENTIMENT_CHART_HEIGHT = 200;
 const SENTIMENT_CHART_PADDING_RIGHT = 16;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
-const INCOME_RATE_CHART_HEIGHT = 200;
-const INCOME_RATE_CHART_PADDING_RIGHT = 64;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
@@ -286,9 +273,7 @@ const GRAPH_VERTICAL_PADDING = 14;
 const Y_AXIS_LABEL_BASE_FONT_SIZE = 9.5;
 const Y_AXIS_LABEL_MIN_FONT_SIZE = 7.5;
 const CHART_SKELETON_READY_DELAY_MS = 180;
-const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
-const DEFAULT_HOURS_PER_WEEK = 40;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
@@ -402,12 +387,6 @@ const styles = StyleSheet.create({
   },
   insightsFilterPillsContent: {
     gap: spacing.xs,
-  },
-  incomeRateUnitPickerSheet: {
-    marginHorizontal: spacing.screenHorizontal,
-    marginBottom: spacing.xl + spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
   },
   periodPickerCard: {
     position: 'absolute',
@@ -562,10 +541,6 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   },
   asset_history: {
     fixedPeriodPreset: 'year',
-    allowAccountFilter: false,
-  },
-  income_rate_history: {
-    fixedPeriodPreset: null,
     allowAccountFilter: false,
   },
 };
@@ -829,19 +804,6 @@ type ExpenseSentimentPageData = InsightBasePageData & {
   totals: { happy: number; neutral: number; sad: number };
 };
 
-type IncomeRatePoint = {
-  monthKey: string;
-  label: string;
-  wageAmount: number;
-  wageType: WageType;
-  hoursWorkedPerWeek: number;
-};
-
-type IncomeRateHistoryPageData = InsightBasePageData & {
-  kind: 'income_rate_history';
-  points: IncomeRatePoint[];
-};
-
 type InsightPageData =
   | BreakdownPageData
   | AnalyticsPageData
@@ -849,8 +811,7 @@ type InsightPageData =
   | CategoryTrendPageData
   | IncomeTrendPageData
   | ExpenseSentimentPageData
-  | AssetHistoryPageData
-  | IncomeRateHistoryPageData;
+  | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 
 function startOfDayDate(date: Date): Date {
@@ -1325,44 +1286,6 @@ function pieSliceIdFromTouch(
     if (normalizedAngle <= cursor) return slice.id;
   }
   return slices[slices.length - 1]?.id ?? null;
-}
-
-function normalizeHoursPerWeek(hoursWorkedPerWeek: number) {
-  if (!Number.isFinite(hoursWorkedPerWeek) || hoursWorkedPerWeek <= 0) {
-    return DEFAULT_HOURS_PER_WEEK;
-  }
-  return hoursWorkedPerWeek;
-}
-
-function wageAmountToYearly(wageAmount: number, wageType: WageType, hoursWorkedPerWeek: number) {
-  if (wageAmount <= 0) return 0;
-  if (wageType === 'yearly') return wageAmount;
-  if (wageType === 'monthly') return wageAmount * MONTHS_PER_YEAR;
-
-  const safeHoursPerWeek = normalizeHoursPerWeek(hoursWorkedPerWeek);
-  return wageAmount * safeHoursPerWeek * WEEKS_PER_YEAR;
-}
-
-function convertIncomeRateByUnit(
-  wageAmount: number,
-  wageType: WageType,
-  hoursWorkedPerWeek: number,
-  unit: IncomeRateDisplayUnit,
-) {
-  const yearlyAmount = wageAmountToYearly(wageAmount, wageType, hoursWorkedPerWeek);
-  if (unit === 'yearly') return yearlyAmount;
-  if (unit === wageType) return wageAmount;
-  if (unit === 'hourly') {
-    const safeHoursPerWeek = normalizeHoursPerWeek(hoursWorkedPerWeek);
-    return yearlyAmount / (safeHoursPerWeek * WEEKS_PER_YEAR);
-  }
-  return yearlyAmount / MONTHS_PER_YEAR;
-}
-
-function incomeRateUnitSuffix(unit: IncomeRateDisplayUnit) {
-  if (unit === 'hourly') return '/hr';
-  if (unit === 'monthly') return '/mo';
-  return '/yr';
 }
 
 function monthDateFromMonthKey(monthKey: string): Date {
@@ -1945,101 +1868,6 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
 });
 
 // ExpenseTrendLineChart and IncomeTrendLineChart replaced by TrendBarChart
-
-const IncomeRateLineChart = React.memo(function IncomeRateLineChart({
-  points,
-  rates,
-  chartWidth,
-  primaryColor,
-  onSelectPointIndex,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  points: IncomeRatePoint[];
-  rates: number[];
-  chartWidth: number;
-  primaryColor: string;
-  onSelectPointIndex: (index: number) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      points.map((point, index) => ({
-        value: rates[index] ?? 0,
-        date: monthDateFromMonthKey(point.monthKey),
-      })),
-    [points, rates],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const indexByTime = useMemo(
-    () => new Map(graphPoints.map((point, index) => [point.date.getTime(), index])),
-    [graphPoints],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const index = indexByTime.get(point.date.getTime());
-      if (index === undefined) return;
-      onSelectPointIndex(index);
-    },
-    [indexByTime, onSelectPointIndex],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  if (IS_EXPO_GO) {
-    return (
-      <View
-        style={[
-          buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT),
-          styles.chartRuntimeFallback,
-          {
-            borderColor: withColorAlpha(primaryColor, 0.18),
-            backgroundColor: withColorAlpha(primaryColor, 0.06),
-          },
-        ]}
-      >
-        <Text variant="label" tone="muted" className="text-center">
-          {I18n.t('insights.charts.expo_go_fallback')}
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, INCOME_RATE_CHART_HEIGHT)}
-          />
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={INCOME_RATE_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
 
 function FilterPill({
   label,
@@ -2773,12 +2601,6 @@ export function InsightsScreen({
     string | null
   >(null);
   const [isCategoryTrendPickerOpen, setIsCategoryTrendPickerOpen] = useState(false);
-  const [selectedIncomeRatePointIndex, setSelectedIncomeRatePointIndex] = useState<number | null>(
-    null,
-  );
-  const [incomeRateDisplayUnit, setIncomeRateDisplayUnit] =
-    useState<IncomeRateDisplayUnit>('hourly');
-  const [isIncomeRateUnitPickerOpen, setIsIncomeRateUnitPickerOpen] = useState(false);
   const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] = useState<
     | 'assetHistoryAccounts'
     | 'expenseTrendAccounts'
@@ -2803,7 +2625,6 @@ export function InsightsScreen({
   const breakdownHeaderDotPulse = useRef(new RNAnimated.Value(0)).current;
   const insightsTypeSelectorRef = useRef<View | null>(null);
   const periodPickerTriggerRef = useRef<View | null>(null);
-  const selectedIncomeRatePointIndexRef = useRef<number | null>(selectedIncomeRatePointIndex);
   const expenseTrendScrubMonthByYearRef = useRef<Record<string, string>>(
     expenseTrendScrubMonthByYear,
   );
@@ -2835,25 +2656,6 @@ export function InsightsScreen({
     lastScrubHapticAtRef.current = now;
     void triggerHaptic('selection');
   }, []);
-  const incomeRateUnitOptions = useMemo(
-    () =>
-      [
-        {
-          value: 'hourly' as const,
-          label: I18n.t('wage.type.hourly'),
-        },
-        {
-          value: 'monthly' as const,
-          label: I18n.t('wage.type.monthly'),
-        },
-        {
-          value: 'yearly' as const,
-          label: I18n.t('wage.type.yearly'),
-        },
-      ] satisfies { value: IncomeRateDisplayUnit; label: string }[],
-    [],
-  );
-
   const insightTypeOptions = useMemo(
     () =>
       visibleInsightTypes.map((type) => ({
@@ -2953,7 +2755,6 @@ export function InsightsScreen({
     setActiveCustomDateField('start');
     activeBreakdownSliceIdRef.current = null;
     setActiveBreakdownSliceId(null);
-    setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
     setSelectedInsightType(targetInsightType);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3008,7 +2809,6 @@ export function InsightsScreen({
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setAssetHistoryScrubMonthByYear({});
-    setSelectedIncomeRatePointIndex(null);
     setIsFilterModalOpen(false);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3370,40 +3170,6 @@ export function InsightsScreen({
     hasExpenseBreakdownExclusionFilter ||
     hasIncomeBreakdownExclusionFilter ||
     hasAssetHistoryAccountExclusionFilter;
-  const incomeRateHistoryPoints = useMemo<IncomeRatePoint[]>(() => {
-    const byMonth = new Map<
-      string,
-      {
-        wageAmount: number;
-        wageType: WageType;
-        hoursWorkedPerWeek: number;
-        updatedAt: string;
-      }
-    >();
-    monthlyWages.forEach((item) => {
-      const key = normalizeMonthKey(item.month);
-      const existing = byMonth.get(key);
-      if (!existing || item.updatedAt > existing.updatedAt) {
-        byMonth.set(key, {
-          wageAmount: item.wageAmount,
-          wageType: item.wageType,
-          hoursWorkedPerWeek: item.hoursWorkedPerWeek,
-          updatedAt: item.updatedAt,
-        });
-      }
-    });
-
-    return Array.from(byMonth.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, { wageAmount, wageType, hoursWorkedPerWeek }]) => ({
-        monthKey: month,
-        label: `${parseInt(month.slice(5, 7), 10)}/${month.slice(2, 4)}`,
-        wageAmount,
-        wageType,
-        hoursWorkedPerWeek,
-      }));
-  }, [monthlyWages]);
-
   const shiftPeriodStateBySteps = useCallback(
     (state: PeriodState, steps: number, preset: PeriodPreset): PeriodState => {
       if (steps === 0) return state;
@@ -3983,15 +3749,6 @@ export function InsightsScreen({
         };
       }
 
-      if (insightType === 'income_rate_history') {
-        return {
-          kind: 'income_rate_history',
-          range,
-          filteredForRange: [],
-          points: incomeRateHistoryPoints,
-        };
-      }
-
       if (isAnalyticsInsightType(insightType)) {
         const rangeStartDayKey = dayKeyFromIsoLocal(range.start);
         const rangeEndDayKey = dayKeyFromIsoLocal(range.end);
@@ -4204,7 +3961,6 @@ export function InsightsScreen({
       excludedIncomeBreakdownCategorySet,
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
-      incomeRateHistoryPoints,
       includedAssetHistoryAccounts,
       activeLocale,
       settings.displayMode,
@@ -4556,19 +4312,6 @@ export function InsightsScreen({
       setIsFilterModalOpen(false);
     }
   }, [hasInsightsFilters]);
-  useEffect(() => {
-    if (selectedInsightType === 'income_rate_history' && isPeriodPickerOpen) {
-      setIsPeriodPickerOpen(false);
-    }
-  }, [isPeriodPickerOpen, selectedInsightType]);
-  useEffect(() => {
-    if (selectedInsightType !== 'income_rate_history' && isIncomeRateUnitPickerOpen) {
-      setIsIncomeRateUnitPickerOpen(false);
-    }
-  }, [isIncomeRateUnitPickerOpen, selectedInsightType]);
-  useEffect(() => {
-    selectedIncomeRatePointIndexRef.current = selectedIncomeRatePointIndex;
-  }, [selectedIncomeRatePointIndex]);
   useEffect(() => {
     expenseTrendScrubMonthByYearRef.current = expenseTrendScrubMonthByYear;
   }, [expenseTrendScrubMonthByYear]);
@@ -5432,130 +5175,6 @@ export function InsightsScreen({
     );
   };
 
-  const renderIncomeRateHistoryPane = (pageData: IncomeRateHistoryPageData) => {
-    if (pageData.points.length < 2) {
-      return (
-        <EmptyState
-          title={I18n.t('insights.analytics.income_rate_history.no_data_title')}
-          message={I18n.t('insights.analytics.income_rate_history.no_data_message')}
-          mascotMood="curious"
-          animateIn={false}
-        />
-      );
-    }
-
-    const rates = pageData.points.map((point) =>
-      convertIncomeRateByUnit(
-        point.wageAmount,
-        point.wageType,
-        point.hoursWorkedPerWeek,
-        incomeRateDisplayUnit,
-      ),
-    );
-    const incomeGraphWidth = Math.max(140, lineChartWidth - INCOME_RATE_CHART_PADDING_RIGHT);
-    const incomeAxisTicks = buildGraphAxisTicks(rates, INCOME_RATE_CHART_HEIGHT);
-    const fallbackIndex = Math.max(0, pageData.points.length - 1);
-    const selectedIndex =
-      selectedIncomeRatePointIndex !== null && selectedIncomeRatePointIndex < pageData.points.length
-        ? selectedIncomeRatePointIndex
-        : fallbackIndex;
-    const selectedPoint = pageData.points[selectedIndex] ?? null;
-    const selectedRate = rates[selectedIndex] ?? rates[fallbackIndex] ?? 0;
-    const selectedRateDisplay = selectedRate.toLocaleString(activeLocale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    const selectedRateSuffix = incomeRateUnitSuffix(incomeRateDisplayUnit);
-    const selectedRateLabel = selectedPoint?.label ?? '—';
-    const incomeRateResetKey = `${pageData.range.start}-${pageData.range.end}-${incomeRateDisplayUnit}`;
-
-    const selectPoint = (index: number) => {
-      if (selectedIncomeRatePointIndexRef.current === index) return;
-      triggerScrubHaptic();
-      selectedIncomeRatePointIndexRef.current = index;
-      setSelectedIncomeRatePointIndex(index);
-    };
-
-    return (
-      <View className="mt-2 gap-2.5">
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[
-              styles.chartSizeCenter,
-              buildSizeStyle(lineChartWidth, INCOME_RATE_CHART_HEIGHT),
-            ]}
-            onTouchStart={lockChartScrub}
-            onTouchEnd={unlockChartScrub}
-            onTouchCancel={unlockChartScrub}
-          >
-            <GraphYAxisGrid
-              ticks={incomeAxisTicks}
-              chartWidth={incomeGraphWidth}
-              chartHeight={INCOME_RATE_CHART_HEIGHT}
-              labelWidth={INCOME_RATE_CHART_PADDING_RIGHT}
-              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisCurrencyValue}
-            />
-            <IncomeRateLineChart
-              points={pageData.points}
-              rates={rates}
-              chartWidth={incomeGraphWidth}
-              primaryColor={themeColors.primary}
-              onSelectPointIndex={selectPoint}
-              onGestureStart={lockChartScrub}
-              onGestureEnd={unlockChartScrub}
-            />
-          </View>
-        </View>
-
-        <Card className="p-4">
-          <View className="flex-row items-center gap-2">
-            <View
-              className="rounded-full px-2.5 py-1"
-              style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
-            >
-              <Text
-                variant="label"
-                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
-              >
-                {selectedRateLabel}
-              </Text>
-            </View>
-          </View>
-          <View className="mt-1.5 flex-row items-center">
-            <Text variant="heading" className="text-primary">
-              {settings.currencySymbol}
-            </Text>
-            <ScrubRollingNumber
-              value={selectedRate}
-              formattedText={selectedRateDisplay}
-              color={themeColors.primary}
-              resetKey={`income-rate-${incomeRateResetKey}`}
-              containerClassName="ml-1"
-            />
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setIsIncomeRateUnitPickerOpen(true);
-              }}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('insights.analytics.income_rate_history.rate_title')}
-              className="ml-1 flex-row items-center active:opacity-80"
-            >
-              <Text variant="heading" className="text-primary">
-                {selectedRateSuffix}
-              </Text>
-              <Text variant="label" tone="muted" className="ml-1">
-                ▾
-              </Text>
-            </Pressable>
-          </View>
-        </Card>
-      </View>
-    );
-  };
-
   const renderAnalyticsPane = (pageData: AnalyticsPageData) => {
     if (pageData.insightType === 'savings_rate') {
       const savingsRate =
@@ -5815,9 +5434,6 @@ export function InsightsScreen({
     if (pageData.kind === 'asset_history') {
       return renderAssetHistoryPane(pageData);
     }
-    if (pageData.kind === 'income_rate_history') {
-      return renderIncomeRateHistoryPane(pageData);
-    }
     if (pageData.kind === 'analytics') {
       return renderAnalyticsPane(pageData);
     }
@@ -5967,8 +5583,6 @@ export function InsightsScreen({
     () =>
       [
         activeBreakdownSliceId ?? '',
-        selectedIncomeRatePointIndex === null ? '' : String(selectedIncomeRatePointIndex),
-        incomeRateDisplayUnit,
         activeLocale,
         settings.currencySymbol,
         settings.displayMode,
@@ -5993,11 +5607,9 @@ export function InsightsScreen({
       assetHistoryScrubMonthByYear,
       expenseTrendScrubMonthByYear,
       isPro,
-      incomeRateDisplayUnit,
       incomeTrendScrubMonthByYear,
       isDark,
       isSelectionMode,
-      selectedIncomeRatePointIndex,
       selectedTransactionIds,
       settings.currencySymbol,
       settings.displayMode,
@@ -6378,7 +5990,6 @@ export function InsightsScreen({
       }
 
       setActiveBreakdownSlice(null, false);
-      setSelectedIncomeRatePointIndex(null);
       setSelectedInsightType(nextInsightType);
     },
     [effectivePeriodPreset, periodPresetByInsight, selectedInsightType, setActiveBreakdownSlice],
@@ -6483,12 +6094,9 @@ export function InsightsScreen({
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
-        onMonthPress={
-          displaySelectedInsightType === 'income_rate_history' ? undefined : handleOpenPeriodPicker
-        }
+        onMonthPress={handleOpenPeriodPicker}
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
-        hideNavigation={displaySelectedInsightType === 'income_rate_history'}
         actions={
           <View className="flex-row items-center gap-2">
             {displayHasInsightsFilters && (
@@ -6519,11 +6127,7 @@ export function InsightsScreen({
             horizontal
             pagingEnabled
             disableIntervalMomentum
-            scrollEnabled={
-              !isChartScrubbing &&
-              !isSelectionMode &&
-              displaySelectedInsightType !== 'income_rate_history'
-            }
+            scrollEnabled={!isChartScrubbing && !isSelectionMode}
             bounces={false}
             directionalLockEnabled
             decelerationRate="fast"
@@ -6578,7 +6182,7 @@ export function InsightsScreen({
       />
 
       <PeriodPickerPopover
-        visible={isPeriodPickerOpen && displaySelectedInsightType !== 'income_rate_history'}
+        visible={isPeriodPickerOpen}
         anchorRect={periodPickerAnchorRect}
         screenWidth={width}
         screenHeight={height}
@@ -7076,57 +6680,6 @@ export function InsightsScreen({
             onClose={() => setFilterCustomDateModalVisible(false)}
           />
         </SafeAreaView>
-      </ThemeModal>
-
-      <ThemeModal
-        visible={isIncomeRateUnitPickerOpen}
-        transparent
-        animationType="fade"
-        presentationStyle="overFullScreen"
-        onRequestClose={() => setIsIncomeRateUnitPickerOpen(false)}
-      >
-        <View className="flex-1 justify-end" pointerEvents="box-none">
-          <Pressable
-            className="absolute inset-0 bg-black/20"
-            onPress={() => setIsIncomeRateUnitPickerOpen(false)}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
-          />
-          <View
-            style={styles.incomeRateUnitPickerSheet}
-            className="rounded-[24px] border border-border/45 bg-background"
-          >
-            <View className="pb-2">
-              <Text variant="subheading">
-                {I18n.t('insights.analytics.income_rate_history.rate_title')}
-              </Text>
-            </View>
-            <View className="gap-2">
-              {incomeRateUnitOptions.map((option) => {
-                const isSelected = incomeRateDisplayUnit === option.value;
-                return (
-                  <Pressable
-                    key={option.value}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setIncomeRateDisplayUnit(option.value);
-                      setIsIncomeRateUnitPickerOpen(false);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={option.label}
-                    accessibilityState={{ selected: isSelected }}
-                    className={cn(
-                      'rounded-2xl border px-3.5 py-3',
-                      isSelected ? 'border-primary/50 bg-primary/10' : 'border-border/40 bg-card',
-                    )}
-                  >
-                    <Text variant="caption">{option.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        </View>
       </ThemeModal>
 
       <CategoryPickerSheet

@@ -818,6 +818,8 @@ const vi = {
     hourly_badge_source: 'Nguồn',
     hourly_current_month_locked: 'Mục tháng hiện tại là bắt buộc và không thể xóa.',
     hourly_history_empty: 'Chưa có lịch sử giá trị giờ.',
+    hourly_now_label: 'Giá trị mỗi giờ thực sự của bạn hiện tại',
+    hourly_timeline: 'Dòng thời gian',
     hourly_delete_title: 'Xóa giá trị giờ tháng?',
     hourly_delete_message:
       'Xóa mức lương cho {{month}}? Các tháng phụ thuộc vào nó sẽ dùng tháng trước đó.',

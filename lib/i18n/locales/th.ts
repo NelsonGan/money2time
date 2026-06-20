@@ -809,6 +809,8 @@ const th = {
     hourly_badge_source: 'ต้นทาง',
     hourly_current_month_locked: 'รายการเดือนปัจจุบันจำเป็นและไม่สามารถลบได้',
     hourly_history_empty: 'ยังไม่มีประวัติมูลค่าต่อชั่วโมง',
+    hourly_now_label: 'มูลค่าต่อชั่วโมงที่แท้จริงของคุณตอนนี้',
+    hourly_timeline: 'ไทม์ไลน์',
     hourly_delete_title: 'ลบมูลค่าต่อชั่วโมงรายเดือน?',
     hourly_delete_message:
       'ลบอัตราสำหรับ {{month}}? เดือนที่ขึ้นอยู่กับอัตรานี้จะย้อนกลับไปใช้เดือนก่อนหน้าที่มี',

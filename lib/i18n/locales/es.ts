@@ -834,6 +834,8 @@ const es = {
     hourly_badge_source: 'Fuente',
     hourly_current_month_locked: 'La entrada del mes actual es obligatoria y no se puede eliminar.',
     hourly_history_empty: 'Sin historial de valor por hora aún.',
+    hourly_now_label: 'Tu valor real por hora ahora',
+    hourly_timeline: 'Cronología',
     hourly_delete_title: '¿Eliminar valor por hora mensual?',
     hourly_delete_message:
       '¿Eliminar la tarifa de {{month}}? Los meses que dependan de ella usarán el mes anterior disponible.',

@@ -814,6 +814,8 @@ const ja = {
     hourly_badge_source: 'ソース',
     hourly_current_month_locked: '現在月の記録は必須のため削除できません。',
     hourly_history_empty: '時給の履歴がありません。',
+    hourly_now_label: '現在のあなたの実質時給',
+    hourly_timeline: 'タイムライン',
     hourly_delete_title: '月次時給を削除しますか？',
     hourly_delete_message:
       '{{month}} の時給を削除しますか？依存する月は直前の利用可能な月にフォールバックします。',

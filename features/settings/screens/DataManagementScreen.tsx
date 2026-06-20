@@ -1,12 +1,9 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { ChevronRight, CloudUpload, Download, Trash2, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
-  Button,
-  Card,
-  CardContent,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -20,6 +17,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 
 interface DataManagementScreenProps {
   onBack: () => void;
@@ -27,6 +25,55 @@ interface DataManagementScreenProps {
 }
 
 type ImportSource = 'money2time' | 'money_manager';
+
+interface DataRowProps {
+  icon: React.ReactNode;
+  iconColor: string;
+  title: string;
+  description: string;
+  onPress: () => void;
+  disabled?: boolean;
+  busy?: boolean;
+  trailingColor: string;
+}
+
+function DataRow({
+  icon,
+  iconColor,
+  title,
+  description,
+  onPress,
+  disabled = false,
+  busy = false,
+  trailingColor,
+}: DataRowProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className={cn(
+        'flex-row items-center gap-3 rounded-3xl border border-border/50 bg-card px-4 py-4 shadow-soft-lg',
+        disabled && 'opacity-50',
+      )}
+      accessibilityRole="button"
+    >
+      <View style={[styles.iconContainer, { backgroundColor: `${iconColor}14` }]}>{icon}</View>
+      <View style={styles.sectionTextWrap}>
+        <Text variant="caption" className="text-foreground">
+          {title}
+        </Text>
+        <Text variant="caption" tone="muted" className="mt-0.5">
+          {description}
+        </Text>
+      </View>
+      {busy ? (
+        <ActivityIndicator size="small" color={trailingColor} />
+      ) : (
+        <ChevronRight size={16} color={trailingColor} />
+      )}
+    </Pressable>
+  );
+}
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
   const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
@@ -187,159 +234,72 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
-        {onOpenAutoBackup ? (
-          <Card style={{ marginBottom: 14 }}>
-            <CardContent className="py-4">
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenAutoBackup();
-                }}
-                style={styles.autoBackupRow}
-              >
-                <View
-                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
-                >
-                  <CloudUpload size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('auto_backup.entry_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {settings.autoBackupEnabled
-                      ? I18n.t('auto_backup.entry_enabled')
-                      : I18n.t('auto_backup.entry_disabled')}
-                  </Text>
-                </View>
-                <ChevronRight size={16} color={themeColors.muted} />
-              </Pressable>
-            </CardContent>
-          </Card>
-        ) : null}
-        <Card>
-          <CardContent className="py-5 gap-5">
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
-                >
-                  <Download size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('data_management.export_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('data_management.export_description')}
-                  </Text>
-                </View>
-              </View>
-              <Button
-                variant="outline"
-                className="mt-3"
-                onPress={() => void handleExport()}
-                disabled={isExporting || activeFlow !== null}
-              >
-                <Text>
-                  {isExporting
-                    ? I18n.t('data_management.exporting')
-                    : I18n.t('data_management.export_action')}
-                </Text>
-              </Button>
-            </View>
+        <View style={styles.list}>
+          {onOpenAutoBackup ? (
+            <DataRow
+              icon={<CloudUpload size={18} color={themeColors.primary} />}
+              iconColor={themeColors.primary}
+              title={I18n.t('auto_backup.entry_title')}
+              description={
+                settings.autoBackupEnabled
+                  ? I18n.t('auto_backup.entry_enabled')
+                  : I18n.t('auto_backup.entry_disabled')
+              }
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenAutoBackup();
+              }}
+              trailingColor={themeColors.muted}
+            />
+          ) : null}
 
-            <View style={styles.divider} />
+          <DataRow
+            icon={<Download size={18} color={themeColors.primary} />}
+            iconColor={themeColors.primary}
+            title={I18n.t('data_management.export_title')}
+            description={
+              isExporting
+                ? I18n.t('data_management.exporting')
+                : I18n.t('data_management.export_description')
+            }
+            onPress={() => void handleExport()}
+            disabled={isExporting || activeFlow !== null}
+            busy={isExporting}
+            trailingColor={themeColors.muted}
+          />
 
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
-                >
-                  <Upload size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('data_management.import_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('data_management.import_description')}
-                  </Text>
-                </View>
-              </View>
-              <Button
-                variant="outline"
-                className="mt-3"
-                onPress={handleImport}
-                disabled={activeFlow !== null}
-              >
-                <Text>
-                  {importingSource === 'money2time'
-                    ? I18n.t('data_management.importing')
-                    : I18n.t('data_management.import_action')}
-                </Text>
-              </Button>
-            </View>
+          <DataRow
+            icon={<Upload size={18} color={themeColors.primary} />}
+            iconColor={themeColors.primary}
+            title={I18n.t('data_management.import_title')}
+            description={I18n.t('data_management.import_description')}
+            onPress={handleImport}
+            disabled={activeFlow !== null}
+            busy={importingSource === 'money2time'}
+            trailingColor={themeColors.muted}
+          />
 
-            <View style={styles.divider} />
+          <DataRow
+            icon={<Upload size={18} color={themeColors.primary} />}
+            iconColor={themeColors.primary}
+            title={I18n.t('data_management.import_money_manager_title')}
+            description={I18n.t('data_management.import_money_manager_description')}
+            onPress={handleMoneyManagerImport}
+            disabled={activeFlow !== null}
+            busy={importingSource === 'money_manager'}
+            trailingColor={themeColors.muted}
+          />
 
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}
-                >
-                  <Upload size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('data_management.import_money_manager_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('data_management.import_money_manager_description')}
-                  </Text>
-                </View>
-              </View>
-              <Button
-                variant="outline"
-                className="mt-3"
-                onPress={handleMoneyManagerImport}
-                disabled={activeFlow !== null}
-              >
-                <Text>
-                  {importingSource === 'money_manager'
-                    ? I18n.t('data_management.import_money_manager_importing')
-                    : I18n.t('data_management.import_money_manager_action')}
-                </Text>
-              </Button>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.iconContainer, { backgroundColor: `${themeColors.coral}14` }]}>
-                  <Trash2 size={18} color={themeColors.coral} />
-                </View>
-                <View style={styles.sectionTextWrap}>
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('settings.reset_data_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('data_management.reset_data_description')}
-                  </Text>
-                </View>
-              </View>
-              <Button
-                variant="outline"
-                className="mt-3 border-coral/30 bg-coral/8"
-                onPress={handleResetAllData}
-                disabled={isExporting || activeFlow !== null}
-              >
-                <Text className="text-destructive">{I18n.t('settings.reset_all_data')}</Text>
-              </Button>
-            </View>
-          </CardContent>
-        </Card>
+          <DataRow
+            icon={<Trash2 size={18} color={themeColors.coral} />}
+            iconColor={themeColors.coral}
+            title={I18n.t('settings.reset_data_title')}
+            description={I18n.t('data_management.reset_data_description')}
+            onPress={handleResetAllData}
+            disabled={isExporting || activeFlow !== null}
+            trailingColor={themeColors.coral}
+          />
+        </View>
       </ScrollView>
 
       <ImportingOverlay
@@ -362,12 +322,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  section: {
-    gap: 0,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  list: {
     gap: 12,
   },
   iconContainer: {
@@ -380,15 +335,5 @@ const styles = StyleSheet.create({
   },
   sectionTextWrap: {
     flex: 1,
-    paddingTop: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  autoBackupRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
 });

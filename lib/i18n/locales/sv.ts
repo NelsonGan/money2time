@@ -828,6 +828,8 @@ const sv = {
     hourly_current_month_locked:
       'Den aktuella månadens post är obligatorisk och kan inte tas bort.',
     hourly_history_empty: 'Ingen timlönehistorik ännu.',
+    hourly_now_label: 'Ditt verkliga timvärde nu',
+    hourly_timeline: 'Tidslinje',
     hourly_delete_title: 'Ta bort månadstimlön?',
     hourly_delete_message:
       'Ta bort timlönen för {{month}}? Månader som är beroende av den faller tillbaka till föregående tillgängliga månad.',

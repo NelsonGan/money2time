@@ -49,8 +49,8 @@ const buttonTextVariants = cva('web:whitespace-nowrap font-extrabold web:transit
     variant: {
       default: 'text-white',
       destructive: 'text-white',
-      outline: 'text-white',
-      secondary: 'text-white',
+      outline: 'text-primary',
+      secondary: 'text-primary',
       ghost: 'text-foreground',
       link: 'text-primary group-active:underline',
       warm: 'text-accent-foreground',
@@ -82,12 +82,6 @@ const FAT_VARIANTS = new Set<ButtonVariant>([
 ]);
 const FAT_LEDGE = 4;
 const FAT_SINK = FAT_LEDGE - 1;
-// Neutral face shared by secondary/outline so their white label reads on both
-// backgrounds: a dark charcoal on the light cream UI, a lighter slate on the
-// dark UI so the button still stands out.
-const NEUTRAL_FACE_LIGHT = '#3A3A3C';
-const NEUTRAL_FACE_DARK = '#4A5263';
-
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
   VariantProps<typeof buttonVariants> & {
     bouncy?: boolean;
@@ -116,7 +110,8 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
           return themeColors.accent;
         case 'secondary':
         case 'outline':
-          return isDark ? NEUTRAL_FACE_DARK : NEUTRAL_FACE_LIGHT;
+          // Tonal: a soft tint of the theme primary, paired with a primary label.
+          return themeColors.primarySoft;
         default:
           return isDark ? darkenColor(themeColors.primary, 0.32) : themeColors.primary;
       }

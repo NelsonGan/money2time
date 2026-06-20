@@ -823,6 +823,8 @@ const hi = {
     hourly_badge_source: 'स्रोत',
     hourly_current_month_locked: 'वर्तमान महीने की एंट्री जरूरी है और हटाई नहीं जा सकती।',
     hourly_history_empty: 'अभी कोई प्रति घंटा दर इतिहास नहीं।',
+    hourly_now_label: 'अभी आपका असली प्रति घंटा मूल्य',
+    hourly_timeline: 'टाइमलाइन',
     hourly_delete_title: 'मासिक प्रति घंटा दर हटाएं?',
     hourly_delete_message:
       '{{month}} की दर हटाएं? इस पर निर्भर महीने पिछली उपलब्ध महीने पर वापस जाएंगे।',
