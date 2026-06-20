@@ -39,6 +39,8 @@ class SettingsRepository {
         | 'themeMode'
         | 'themeColor'
         | 'accountLogoCountry'
+        | 'profileName'
+        | 'profileAvatarUri'
         | 'onboardingCompleted'
         | 'userMode'
         | 'weekStartsOn'

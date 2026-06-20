@@ -18,6 +18,7 @@ const ROOT = 'user-assets';
 const ACCOUNT_LOGOS_KIND = 'account-logos';
 export const CUSTOM_LOGO_PREFIX = 'custom:';
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
+const AVATARS_KIND = 'avatars';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -63,6 +64,30 @@ export function saveCustomAccountLogo(sourceUri: string): string {
   const dest = new File(Paths.document, ROOT, ACCOUNT_LOGOS_KIND, fileName);
   new File(sourceUri).copy(dest);
   return `${CUSTOM_LOGO_PREFIX}${ACCOUNT_LOGOS_KIND}/${fileName}`;
+}
+
+/** Copies a picked image into the avatar store, returning its relative path
+ *  (e.g. `avatars/9f3c.jpg`) for persistence in settings. */
+export function saveProfileAvatar(sourceUri: string): string {
+  ensureDir(kindDir(AVATARS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, AVATARS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  return `${AVATARS_KIND}/${fileName}`;
+}
+
+/** Resolves a stored avatar relative path to an on-disk file uri, or null. */
+export function getProfileAvatarUri(relativePath?: string | null): string | null {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  return file.exists ? file.uri : null;
+}
+
+/** Deletes a stored avatar file, e.g. when replacing or clearing it. */
+export function deleteProfileAvatar(relativePath?: string | null) {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (file.exists) file.delete();
 }
 
 /** Resolves a `custom:` logo id to an on-disk file uri, or null if missing. */
