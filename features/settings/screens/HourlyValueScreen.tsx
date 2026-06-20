@@ -33,6 +33,42 @@ interface HourlyValueScreenProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
 }
 
+type DisplayPeriod = 'hourly' | 'weekly' | 'monthly' | 'yearly';
+
+const WEEKS_PER_MONTH = 4.33;
+const WEEKS_PER_YEAR = 52;
+
+/**
+ * Weekly take-home is the same number whether derived from the true or base rate,
+ * so weekly/monthly/yearly all scale a single weekly income figure.
+ */
+function periodValueForEntry(item: MonthlyWageSettings, period: DisplayPeriod): number {
+  if (period === 'hourly') return item.trueHourlyRate;
+  const weeklyIncome = item.baseHourlyRate * item.hoursWorkedPerWeek;
+  switch (period) {
+    case 'weekly':
+      return weeklyIncome;
+    case 'monthly':
+      return weeklyIncome * WEEKS_PER_MONTH;
+    case 'yearly':
+      return weeklyIncome * WEEKS_PER_YEAR;
+  }
+}
+
+const PERIOD_SUFFIX_KEY: Record<DisplayPeriod, string> = {
+  hourly: 'settings.hourly_suffix_hourly',
+  weekly: 'settings.hourly_suffix_weekly',
+  monthly: 'settings.hourly_suffix_monthly',
+  yearly: 'settings.hourly_suffix_yearly',
+};
+
+const PERIOD_NOW_LABEL_KEY: Record<DisplayPeriod, string> = {
+  hourly: 'settings.hourly_now_label',
+  weekly: 'settings.hourly_now_weekly',
+  monthly: 'settings.hourly_now_monthly',
+  yearly: 'settings.hourly_now_yearly',
+};
+
 const HISTORY_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
@@ -70,6 +106,16 @@ const styles = StyleSheet.create({
   },
   addSheetConfirmRow: {
     marginTop: spacing.md,
+  },
+  periodRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  periodSelect: {
+    width: 150,
   },
 });
 
@@ -117,6 +163,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('hourly');
   const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
   const [pickerMonth, setPickerMonth] = useState(() =>
     String(new Date().getMonth() + 1).padStart(2, '0'),
@@ -133,19 +180,34 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
   );
 
   const timelineRows = useMemo<HourlyTimelineRow[]>(() => {
-    const ascRows = historyAsc.map((item, index) => ({
-      item,
-      monthLabel: formatMonthLabel(item.month, activeLocale),
-      rate: item.trueHourlyRate,
-      delta: index === 0 ? null : item.trueHourlyRate - historyAsc[index - 1].trueHourlyRate,
-      isCurrentMonth: item.month === currentMonthKey,
-    }));
+    const ascRows = historyAsc.map((item, index) => {
+      const rate = periodValueForEntry(item, displayPeriod);
+      const prevRate =
+        index === 0 ? null : periodValueForEntry(historyAsc[index - 1], displayPeriod);
+      return {
+        item,
+        monthLabel: formatMonthLabel(item.month, activeLocale),
+        rate,
+        delta: prevRate === null ? null : rate - prevRate,
+        isCurrentMonth: item.month === currentMonthKey,
+      };
+    });
     return ascRows.reverse();
-  }, [activeLocale, currentMonthKey, historyAsc]);
+  }, [activeLocale, currentMonthKey, displayPeriod, historyAsc]);
 
   const sparklineValues = useMemo(
-    () => historyAsc.map((item) => item.trueHourlyRate),
-    [historyAsc],
+    () => historyAsc.map((item) => periodValueForEntry(item, displayPeriod)),
+    [displayPeriod, historyAsc],
+  );
+
+  const periodOptions = useMemo(
+    () => [
+      { value: 'hourly', label: I18n.t('settings.hourly_period_hourly') },
+      { value: 'weekly', label: I18n.t('settings.hourly_period_weekly') },
+      { value: 'monthly', label: I18n.t('settings.hourly_period_monthly') },
+      { value: 'yearly', label: I18n.t('settings.hourly_period_yearly') },
+    ],
+    [],
   );
 
   const yearOptions = useMemo(() => {
@@ -260,14 +322,32 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
         showsVerticalScrollIndicator={false}
       >
         {timelineRows.length > 0 ? (
-          <HourlyValueTimeline
-            rows={timelineRows}
-            sparklineValues={sparklineValues}
-            currencySymbol={settings.currencySymbol}
-            themeColors={themeColors}
-            onEdit={handleEditEntry}
-            onDelete={handleDeleteEntry}
-          />
+          <>
+            <View style={styles.periodRow}>
+              <Text variant="label" tone="muted">
+                {I18n.t('settings.hourly_show_as')}
+              </Text>
+              <View style={styles.periodSelect}>
+                <SelectField
+                  triggerSize="header"
+                  sheetTitle={I18n.t('settings.hourly_show_as')}
+                  value={displayPeriod}
+                  options={periodOptions}
+                  onChange={(value) => setDisplayPeriod(value as DisplayPeriod)}
+                />
+              </View>
+            </View>
+            <HourlyValueTimeline
+              rows={timelineRows}
+              sparklineValues={sparklineValues}
+              currencySymbol={settings.currencySymbol}
+              themeColors={themeColors}
+              rateSuffix={I18n.t(PERIOD_SUFFIX_KEY[displayPeriod])}
+              nowLabel={I18n.t(PERIOD_NOW_LABEL_KEY[displayPeriod])}
+              onEdit={handleEditEntry}
+              onDelete={handleDeleteEntry}
+            />
+          </>
         ) : (
           <View style={styles.listEmptyContainer}>
             <Text variant="friendly" tone="muted">
