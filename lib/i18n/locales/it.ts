@@ -833,6 +833,8 @@ const it = {
     hourly_current_month_locked:
       'La voce del mese attuale è obbligatoria e non può essere eliminata.',
     hourly_history_empty: 'Nessuno storico valore orario.',
+    hourly_now_label: 'Il tuo valore orario reale ora',
+    hourly_timeline: 'Cronologia',
     hourly_delete_title: 'Eliminare il valore orario mensile?',
     hourly_delete_message:
       'Eliminare la tariffa per {{month}}? I mesi che dipendono da essa torneranno al mese disponibile precedente.',

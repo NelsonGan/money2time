@@ -833,6 +833,8 @@ const da = {
     hourly_badge_source: 'Kilde',
     hourly_current_month_locked: 'Nuværende måneds postering er påkrævet og kan ikke slettes.',
     hourly_history_empty: 'Ingen timeværdihistorik endnu.',
+    hourly_now_label: 'Din reelle timeløn nu',
+    hourly_timeline: 'Tidslinje',
     hourly_delete_title: 'Slet månedlig timeværdi?',
     hourly_delete_message:
       'Slet satsen for {{month}}? Måneder, der afhænger af den, falder tilbage til den forrige tilgængelige måned.',

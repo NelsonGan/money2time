@@ -843,6 +843,8 @@ const fil = {
     hourly_current_month_locked:
       'Ang entry ng kasalukuyang buwan ay kinakailangan at hindi mabubura.',
     hourly_history_empty: 'Wala pang kasaysayan ng hourly value.',
+    hourly_now_label: 'Ang totoong halaga mo kada oras ngayon',
+    hourly_timeline: 'Timeline',
     hourly_delete_title: 'Burahin ang buwanang hourly value?',
     hourly_delete_message:
       'Burahin ang rate para sa {{month}}? Ang mga buwang nakasalalay dito ay babalik sa nakaraang available na buwan.',

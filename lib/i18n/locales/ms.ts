@@ -832,6 +832,8 @@ const ms = {
     hourly_badge_source: 'Sumber',
     hourly_current_month_locked: 'Entri bulan semasa diperlukan dan tidak boleh dipadam.',
     hourly_history_empty: 'Tiada sejarah nilai jam lagi.',
+    hourly_now_label: 'Nilai sebenar sejam anda sekarang',
+    hourly_timeline: 'Garis masa',
     hourly_delete_title: 'Padam nilai jam bulanan?',
     hourly_delete_message:
       'Padam kadar untuk {{month}}? Bulan yang bergantung padanya akan kembali ke bulan tersedia sebelumnya.',

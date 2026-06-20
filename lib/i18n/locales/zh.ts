@@ -800,6 +800,8 @@ const zh = {
     hourly_badge_source: '来源',
     hourly_current_month_locked: '当前月份的记录为必填项，不可删除。',
     hourly_history_empty: '暂无时薪历史记录。',
+    hourly_now_label: '你现在的真实时薪',
+    hourly_timeline: '时间线',
     hourly_delete_title: '删除月度时薪？',
     hourly_delete_message: '删除 {{month}} 的时薪？依赖此时薪的月份将回退到前一个可用月份。',
     hourly_add_title: '添加时薪记录',

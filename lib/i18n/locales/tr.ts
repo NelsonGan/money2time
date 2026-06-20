@@ -834,6 +834,8 @@ const tr = {
     hourly_badge_source: 'Kaynak',
     hourly_current_month_locked: 'Mevcut ay girişi zorunludur ve silinemez.',
     hourly_history_empty: 'Henüz saatlik değer geçmişi yok.',
+    hourly_now_label: 'Şu anki gerçek saatlik değerin',
+    hourly_timeline: 'Zaman çizelgesi',
     hourly_delete_title: 'Aylık saatlik değer silinsin mi?',
     hourly_delete_message:
       '{{month}} oranı silinsin mi? Buna bağlı aylar önceki mevcut aya geri döner.',

@@ -1,6 +1,6 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, type ListRenderItem, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -14,6 +14,10 @@ import {
   ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import {
+  HourlyValueTimeline,
+  type HourlyTimelineRow,
+} from '~/features/settings/components/HourlyValueTimeline';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -41,13 +45,6 @@ const styles = StyleSheet.create({
   listEmptyContainer: {
     alignItems: 'center',
     paddingVertical: spacing.xl * 2,
-  },
-  rowActionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   addSheetHeader: {
     paddingHorizontal: spacing.screenHorizontal,
@@ -130,9 +127,25 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
 
   const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
 
-  const historyDesc = useMemo(
-    () => [...normalizedHistory].sort((a, b) => b.month.localeCompare(a.month)),
+  const historyAsc = useMemo(
+    () => [...normalizedHistory].sort((a, b) => a.month.localeCompare(b.month)),
     [normalizedHistory],
+  );
+
+  const timelineRows = useMemo<HourlyTimelineRow[]>(() => {
+    const ascRows = historyAsc.map((item, index) => ({
+      item,
+      monthLabel: formatMonthLabel(item.month, activeLocale),
+      rate: item.trueHourlyRate,
+      delta: index === 0 ? null : item.trueHourlyRate - historyAsc[index - 1].trueHourlyRate,
+      isCurrentMonth: item.month === currentMonthKey,
+    }));
+    return ascRows.reverse();
+  }, [activeLocale, currentMonthKey, historyAsc]);
+
+  const sparklineValues = useMemo(
+    () => historyAsc.map((item) => item.trueHourlyRate),
+    [historyAsc],
   );
 
   const yearOptions = useMemo(() => {
@@ -218,63 +231,6 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     pickerYear,
   ]);
 
-  const keyExtractor = useCallback((item: MonthlyWageSettings) => item.id, []);
-
-  const renderHistoryItem = useCallback<ListRenderItem<MonthlyWageSettings>>(
-    ({ item }) => {
-      const isCurrentMonth = item.month === currentMonthKey;
-      return (
-        <View
-          className={`flex-row items-center gap-2.5 mb-2 rounded-2xl border px-3.5 py-3 ${
-            isCurrentMonth ? 'border-success/35 bg-success/8' : 'border-border/35 bg-card'
-          }`}
-        >
-          <View className="flex-1 gap-0.5">
-            <Text variant="caption">{formatMonthLabel(item.month, activeLocale)}</Text>
-            {isCurrentMonth ? (
-              <Text variant="label" className="text-success">
-                {I18n.t('settings.hourly_badge_current')}
-              </Text>
-            ) : null}
-            <Text variant="subheading" className="text-primary mt-1">
-              {settings.currencySymbol}
-              {item.trueHourlyRate.toFixed(2)}/hr
-            </Text>
-          </View>
-          <Pressable
-            onPress={() => handleEditEntry(item)}
-            className="h-9 w-9 rounded-full items-center justify-center border border-border/40 bg-secondary"
-            style={styles.rowActionButton}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.edit')}
-            hitSlop={8}
-          >
-            <Pencil size={14} color={themeColors.textMuted} />
-          </Pressable>
-          <Pressable
-            onPress={() => handleDeleteEntry(item)}
-            className="h-9 w-9 rounded-full items-center justify-center border border-destructive/20 bg-destructive/10"
-            style={styles.rowActionButton}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.delete')}
-            hitSlop={8}
-          >
-            <Trash2 size={14} color={themeColors.coral} />
-          </Pressable>
-        </View>
-      );
-    },
-    [
-      currentMonthKey,
-      handleDeleteEntry,
-      handleEditEntry,
-      activeLocale,
-      settings.currencySymbol,
-      themeColors.coral,
-      themeColors.textMuted,
-    ],
-  );
-
   return (
     <SettingsPageLayout>
       <View style={styles.headerContainer}>
@@ -299,19 +255,27 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
         />
       </View>
 
-      <FlatList
-        data={historyDesc}
-        keyExtractor={keyExtractor}
+      <ScrollView
         contentContainerStyle={[HISTORY_LIST_CONTENT_STYLE, bottomNavInset]}
-        renderItem={renderHistoryItem}
-        ListEmptyComponent={
+        showsVerticalScrollIndicator={false}
+      >
+        {timelineRows.length > 0 ? (
+          <HourlyValueTimeline
+            rows={timelineRows}
+            sparklineValues={sparklineValues}
+            currencySymbol={settings.currencySymbol}
+            themeColors={themeColors}
+            onEdit={handleEditEntry}
+            onDelete={handleDeleteEntry}
+          />
+        ) : (
           <View style={styles.listEmptyContainer}>
             <Text variant="friendly" tone="muted">
               {I18n.t('settings.hourly_history_empty')}
             </Text>
           </View>
-        }
-      />
+        )}
+      </ScrollView>
 
       <ThemeModal
         visible={showAddModal}

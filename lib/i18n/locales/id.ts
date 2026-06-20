@@ -837,6 +837,8 @@ const id = {
     hourly_badge_source: 'Sumber',
     hourly_current_month_locked: 'Entri bulan saat ini wajib ada dan tidak bisa dihapus.',
     hourly_history_empty: 'Belum ada riwayat nilai per jam.',
+    hourly_now_label: 'Nilai per jam sebenarnya sekarang',
+    hourly_timeline: 'Lini masa',
     hourly_delete_title: 'Hapus nilai per jam bulanan?',
     hourly_delete_message:
       'Hapus tarif untuk {{month}}? Bulan yang bergantung padanya akan kembali ke bulan sebelumnya yang tersedia.',
