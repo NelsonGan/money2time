@@ -13,6 +13,8 @@ const baseSettings: UserSettings = {
   themeMode: 'system',
   themeColor: 'sage',
   accountLogoCountry: null,
+  profileName: null,
+  profileAvatarUri: null,
   onboardingCompleted: true,
   userMode: 'power',
   weekStartsOn: 1,

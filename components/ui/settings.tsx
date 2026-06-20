@@ -1,16 +1,30 @@
-import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
+import { ChevronLeft, X } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, View, type ViewProps } from 'react-native';
+import {
+  type LayoutChangeEvent,
+  Platform,
+  Pressable,
+  StatusBar,
+  View,
+  type ViewProps,
+} from 'react-native';
 import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
-import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
+import {
+  type Edge,
+  initialWindowMetrics,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { darkenColor, withColorAlpha } from '~/utils/color';
 
 import { Button } from './button';
 import { Text } from './text';
@@ -48,15 +62,33 @@ export function SettingsPageLayout({
   className,
   ...props
 }: SettingsPageLayoutProps) {
+  const insets = useSafeAreaInsets();
+  // Native-stack screens can report 0 insets on their first frame, which makes
+  // the header flash flush against the top before snapping down. Fall back to
+  // the metrics captured at module init so the inset is correct immediately.
+  const edgeInset = (edge: Edge, live: number) =>
+    edges.includes(edge)
+      ? Math.max(
+          live,
+          initialWindowMetrics?.insets[edge] ?? 0,
+          edge === 'top' && Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
+        )
+      : 0;
+  const insetStyle = {
+    paddingTop: edgeInset('top', insets.top),
+    paddingBottom: edgeInset('bottom', insets.bottom),
+    paddingLeft: edgeInset('left', insets.left),
+    paddingRight: edgeInset('right', insets.right),
+  };
   const content = (
-    <SafeAreaView className="flex-1 bg-background" edges={edges}>
+    <View className="flex-1 bg-background" style={insetStyle}>
       <TabletContentContainer style={{ flex: 1 }}>
         <View className={cn('flex-1', className)} {...props}>
           {children}
           {actionBar}
         </View>
       </TabletContentContainer>
-    </SafeAreaView>
+    </View>
   );
 
   if (swipeBackGesture) {
@@ -278,31 +310,80 @@ export function SettingsActionBar({
   );
 }
 
-interface SettingsRowItemProps {
+interface SettingsGridProps {
+  children: React.ReactNode;
+  columns?: number;
+  gap?: number;
+}
+
+/**
+ * Lays out compact tiles in an evenly sized N-column grid. Measures its own
+ * width once so tiles share an exact pixel width regardless of label length.
+ */
+export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: SettingsGridProps) {
+  const [width, setWidth] = React.useState(0);
+  const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
+    setWidth(event.nativeEvent.layout.width);
+  }, []);
+
+  const tileWidth = width > 0 ? (width - gap * (columns - 1)) / columns : 0;
+  const items = React.Children.toArray(children);
+
+  return (
+    <View onLayout={handleLayout} style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}>
+      {tileWidth > 0
+        ? items.map((child, index) => (
+            // Bottom-anchor so a tile that shrinks on press drops from the top.
+            <View key={index} style={{ width: tileWidth, justifyContent: 'flex-end' }}>
+              {child}
+            </View>
+          ))
+        : null}
+    </View>
+  );
+}
+
+interface SettingsGridTileProps {
   label: string;
-  subtitle?: string;
   onPress: () => void;
   haptic?: HapticKind;
   icon?: React.ReactNode;
   emoji?: string;
-  className?: string;
-  rightAccessory?: React.ReactNode;
-  showChevron?: boolean;
+  badge?: React.ReactNode;
+  tone?: 'default' | 'danger';
 }
 
-export function SettingsRowItem({
+/**
+ * Compact square button used in the settings grid. Sits on a chunky "fat-button"
+ * ledge (a darker bottom border) that compresses on press for a tactile feel.
+ */
+export function SettingsGridTile({
   label,
-  subtitle,
   onPress,
   haptic = 'selection',
   icon,
   emoji,
-  className,
-  rightAccessory,
-  showChevron = true,
-}: SettingsRowItemProps) {
+  badge,
+  tone = 'default',
+}: SettingsGridTileProps) {
   const themeColors = useThemeColors();
-  const leading = icon ?? (emoji ? <Text style={{ fontSize: 18 }}>{emoji}</Text> : null);
+  const isDark = useResolvedTheme() === 'dark';
+  const [pressed, setPressed] = React.useState(false);
+  const leading = icon ?? (emoji ? <Text style={{ fontSize: 20 }}>{emoji}</Text> : null);
+  const danger = tone === 'danger';
+  // Light mode: a soft translucent tint of the theme primary so the ledge
+  // matches the active theme without the warm/olive cast of the raw border.
+  // Dark mode keeps the darkened theme border.
+  const edgeColor = danger
+    ? darkenColor(themeColors.error, 0.18)
+    : isDark
+      ? darkenColor(themeColors.border, 0.22)
+      : withColorAlpha(themeColors.primary, 0.32);
+
+  // Fat-button "press-through": on press the ledge collapses and the tile gets
+  // shorter from the top (it is bottom-anchored in the grid), so the face drops
+  // onto the base. Content area stays constant across states so nothing jumps.
+  const LEDGE = 5;
 
   return (
     <Pressable
@@ -310,32 +391,82 @@ export function SettingsRowItem({
         void triggerHaptic(haptic);
         onPress();
       }}
-      className={cn(
-        'flex-row items-center gap-4 rounded-[24px] border border-border/30 bg-card px-4 py-4 shadow-soft active:scale-[0.98] active:opacity-90',
-        className,
-      )}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      // Press is driven by state below — a render-prop style function is not
+      // forwarded here, so all styling must be a static style object.
+      className="items-center justify-center"
+      style={{
+        // Fixed height so one- and two-line labels produce equal-size tiles;
+        // shrinks by the ledge delta on press to look pressed down from the top.
+        height: pressed ? 116 - (LEDGE - 1) : 116,
+        width: '100%',
+        paddingHorizontal: 6,
+        paddingVertical: 12,
+        borderRadius: 22,
+        backgroundColor: themeColors.card,
+        borderWidth: 1,
+        borderColor: edgeColor,
+        // Chunky ledge that collapses on press.
+        borderBottomWidth: pressed ? 1 : LEDGE,
+        borderBottomColor: edgeColor,
+        // Lift off the very low-contrast warm background with a neutral soft
+        // drop shadow (a colored shadow reads as a glow). The theme-matched
+        // ledge supplies the color; the shadow just adds depth.
+        shadowColor: isDark ? '#05070D' : '#1F2530',
+        shadowOpacity: pressed ? 0.05 : isDark ? 0.32 : 0.1,
+        shadowRadius: pressed ? 2 : 5,
+        shadowOffset: { width: 0, height: pressed ? 1 : 2 },
+        elevation: pressed ? 1 : 3,
+      }}
     >
       {leading ? (
-        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primary/8 border border-primary/10">
+        <View
+          className={cn(
+            'h-11 w-11 items-center justify-center rounded-2xl border',
+            danger ? 'border-destructive/15 bg-destructive/10' : 'border-primary/10 bg-primary/10',
+          )}
+        >
           {leading}
+          {badge ? <View className="absolute -right-1.5 -top-1.5">{badge}</View> : null}
         </View>
       ) : null}
-      <View className="flex-1">
-        <Text variant="bodyStrong" className="text-foreground">
-          {label}
-        </Text>
-        {subtitle ? (
-          <Text variant="caption" tone="muted" className="mt-0.5">
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
-      {rightAccessory ??
-        (showChevron ? (
-          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/50">
-            <ChevronRight size={14} color={themeColors.textMuted} />
-          </View>
-        ) : null)}
+      <Text
+        variant="caption"
+        numberOfLines={2}
+        className={cn(
+          'mt-2 text-center leading-[15px]',
+          danger ? 'text-destructive' : 'text-foreground',
+        )}
+      >
+        {label}
+      </Text>
     </Pressable>
+  );
+}
+
+interface SettingsStatTileProps {
+  value: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+/** Single metric tile for the profile stats strip. */
+export function SettingsStatTile({ value, label, icon }: SettingsStatTileProps) {
+  return (
+    <View className="flex-1 items-center">
+      {icon ? <View className="mb-1.5">{icon}</View> : null}
+      <Text variant="heading" className="text-[20px] tracking-tight">
+        {value}
+      </Text>
+      <Text
+        variant="caption"
+        tone="muted"
+        numberOfLines={1}
+        className="mt-0.5 text-center text-[11px]"
+      >
+        {label}
+      </Text>
+    </View>
   );
 }

@@ -37,6 +37,15 @@ interface VariantConfig {
   fontWeight?: TextStyle['fontWeight'];
 }
 
+const FONT_WEIGHT_CLASS: Record<string, string> = {
+  '400': 'font-normal',
+  '500': 'font-medium',
+  '600': 'font-semibold',
+  '700': 'font-bold',
+  '800': 'font-extrabold',
+  '900': 'font-black',
+};
+
 const variantMap: Record<TextVariant, VariantConfig> = {
   hero: {
     className: 'text-[48px] leading-[54px] tracking-tighter',
@@ -98,13 +107,22 @@ const Text = React.forwardRef<
   const textClass = React.useContext(TextClassContext);
   const Component = asChild ? Slot.Text : RNText;
   const config = variantMap[variant];
+  // Apply the variant weight as a class rather than inline, so a weight coming
+  // from TextClassContext/className (e.g. a button's font-extrabold) can win.
+  const weightClass = FONT_WEIGHT_CLASS[String(config.fontWeight ?? '400')] ?? '';
   return (
     <Component
-      className={cn('web:select-text', config.className, toneMap[tone], textClass, className)}
+      className={cn(
+        'web:select-text',
+        config.className,
+        weightClass,
+        toneMap[tone],
+        textClass,
+        className,
+      )}
       ref={ref}
       style={[
         { fontFamily: config.fontFamily },
-        Platform.OS === 'ios' ? { fontWeight: config.fontWeight } : null,
         Platform.OS === 'android' && (variant === 'mono' || variant === 'monoLg')
           ? { fontVariant: ['tabular-nums'] }
           : null,

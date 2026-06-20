@@ -92,6 +92,8 @@ export const settingsTable = sqliteTable('settings', {
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
   accountLogoCountry: text('account_logo_country'),
+  profileName: text('profile_name'),
+  profileAvatarUri: text('profile_avatar_uri'),
   insightsPrefsJson: text('insights_prefs_json'),
   notificationPrefsJson: text('notification_prefs_json'),
   quickEntryPrefsJson: text('quick_entry_prefs_json'),

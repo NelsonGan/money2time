@@ -24,13 +24,12 @@ import {
   type BootstrapView,
   OnboardingBootstrapStep,
 } from './OnboardingBootstrapStep';
-import { OnboardingModeStep } from './OnboardingModeStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -62,14 +61,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const themeColors = useThemeColors();
 
   const [step, setStep] = useState<OnboardingStep>(1);
-  const [isSimpleUser, setIsSimpleUser] = useState(false);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
   const [importResult, setImportResult] = useState<MMImportSummary | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
   const visualStep = step;
-  const totalVisualSteps = isSimpleUser ? 5 : 6;
+  const totalVisualSteps = 5;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -192,28 +190,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [accounts.length, categories.length, completeOnboarding, onComplete]);
 
-  const handleSelectSimple = useCallback(() => {
-    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'simple' });
-    setIsSimpleUser(true);
-    try {
-      completeOnboarding({
-        userMode: 'simple',
-        seedSimpleDefaults: accounts.length === 0 && categories.length === 0,
-      });
-    } catch (error) {
-      void triggerHaptic('error');
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-      return;
-    }
-    onComplete();
-  }, [accounts.length, categories.length, completeOnboarding, onComplete]);
-
-  const handleSelectPower = useCallback(() => {
-    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'power' });
-    setIsSimpleUser(false);
-    setStep(6);
-  }, []);
-
   const renderProgressHeader = () => (
     <View
       className="px-5 pt-3 pb-2"
@@ -323,18 +299,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
         {step === 5 && (
           <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
-            <OnboardingModeStep
-              onBack={() => setStep(4)}
-              onSelectSimple={handleSelectSimple}
-              onSelectPower={handleSelectPower}
-            />
-          </Animated.View>
-        )}
-
-        {step === 6 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
             <OnboardingBootstrapStep
-              onBack={() => setStep(5)}
+              onBack={() => setStep(4)}
               onImport={() => {
                 void handleImport();
               }}

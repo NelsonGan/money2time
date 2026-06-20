@@ -1,11 +1,14 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { Pressable } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { darkenColor } from '~/utils/color';
 
 import { TextClassContext } from './text';
 
@@ -41,13 +44,13 @@ const buttonVariants = cva(
   },
 );
 
-const buttonTextVariants = cva('web:whitespace-nowrap font-bold web:transition-colors', {
+const buttonTextVariants = cva('web:whitespace-nowrap font-extrabold web:transition-colors', {
   variants: {
     variant: {
-      default: 'text-primary-foreground',
-      destructive: 'text-destructive-foreground',
-      outline: 'text-foreground',
-      secondary: 'text-secondary-foreground',
+      default: 'text-white',
+      destructive: 'text-white',
+      outline: 'text-white',
+      secondary: 'text-white',
       ghost: 'text-foreground',
       link: 'text-primary group-active:underline',
       warm: 'text-accent-foreground',
@@ -66,6 +69,25 @@ const buttonTextVariants = cva('web:whitespace-nowrap font-bold web:transition-c
   },
 });
 
+type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
+
+// Solid/raised variants get the 3D "fat-button" ledge; transparent/text-like
+// ones (ghost, link, glass) and round icon buttons stay flat.
+const FAT_VARIANTS = new Set<ButtonVariant>([
+  'default',
+  'destructive',
+  'warm',
+  'secondary',
+  'outline',
+]);
+const FAT_LEDGE = 4;
+const FAT_SINK = FAT_LEDGE - 1;
+// Neutral face shared by secondary/outline so their white label reads on both
+// backgrounds: a dark charcoal on the light cream UI, a lighter slate on the
+// dark UI so the button still stands out.
+const NEUTRAL_FACE_LIGHT = '#3A3A3C';
+const NEUTRAL_FACE_DARK = '#4A5263';
+
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
   VariantProps<typeof buttonVariants> & {
     bouncy?: boolean;
@@ -77,12 +99,46 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
   ({ className, variant, size, bouncy = true, haptic, ...props }, ref) => {
     const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.95 });
+    const themeColors = useThemeColors();
+    const isDark = useResolvedTheme() === 'dark';
     const hapticKind = haptic ?? 'light';
+
+    const resolvedVariant = variant ?? 'default';
+    const isFat = size !== 'icon' && FAT_VARIANTS.has(resolvedVariant);
+    // Face color is resolved per-variant and per-mode so the white label always
+    // has enough contrast: theme colors are darkened in dark mode (where they're
+    // lightened for accents), and the neutral face flips light/dark.
+    const faceColor = React.useMemo(() => {
+      switch (resolvedVariant) {
+        case 'destructive':
+          return isDark ? darkenColor(themeColors.error, 0.18) : themeColors.error;
+        case 'warm':
+          return themeColors.accent;
+        case 'secondary':
+        case 'outline':
+          return isDark ? NEUTRAL_FACE_DARK : NEUTRAL_FACE_LIGHT;
+        default:
+          return isDark ? darkenColor(themeColors.primary, 0.32) : themeColors.primary;
+      }
+    }, [resolvedVariant, isDark, themeColors]);
+    const ledgeColor = React.useMemo(() => darkenColor(faceColor, 0.28), [faceColor]);
+
+    // Press-through: sink the face onto the base while the ledge collapses.
+    const fat = useSharedValue(0);
+    const fatStyle = useAnimatedStyle(() => ({
+      backgroundColor: faceColor,
+      // Hide the side/top borders some variants carry (e.g. outline/secondary)
+      // so only the colored face and the bottom ledge show.
+      borderColor: 'transparent',
+      transform: [{ translateY: fat.value * FAT_SINK }],
+      borderBottomWidth: FAT_LEDGE - fat.value * FAT_SINK,
+      borderBottomColor: ledgeColor,
+    }));
 
     return (
       <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
         <AnimatedPressable
-          style={bouncy ? animatedStyle : undefined}
+          style={isFat ? fatStyle : bouncy ? animatedStyle : undefined}
           className={cn(
             props.disabled && 'opacity-45 web:pointer-events-none',
             buttonVariants({ variant, size, className }),
@@ -90,12 +146,20 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
           ref={ref}
           role="button"
           onPressIn={(e) => {
-            handlePressIn();
+            if (isFat) {
+              fat.value = withTiming(1, { duration: 70 });
+            } else {
+              handlePressIn();
+            }
             void triggerHaptic(hapticKind);
             props.onPressIn?.(e);
           }}
           onPressOut={(e) => {
-            handlePressOut();
+            if (isFat) {
+              fat.value = withTiming(0, { duration: 120 });
+            } else {
+              handlePressOut();
+            }
             props.onPressOut?.(e);
           }}
           {...props}
