@@ -831,6 +831,8 @@ const pt = {
     hourly_badge_source: 'Origem',
     hourly_current_month_locked: 'A entrada do mês atual é obrigatória e não pode ser excluída.',
     hourly_history_empty: 'Sem histórico de valor/hora ainda.',
+    hourly_now_label: 'Seu valor real por hora agora',
+    hourly_timeline: 'Linha do tempo',
     hourly_delete_title: 'Excluir valor/hora mensal?',
     hourly_delete_message:
       'Excluir a taxa de {{month}}? Meses que dependem dela vão usar o mês anterior disponível.',

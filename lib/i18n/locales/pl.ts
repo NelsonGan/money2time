@@ -833,6 +833,8 @@ const pl = {
     hourly_badge_source: 'Źródłowy',
     hourly_current_month_locked: 'Wpis bieżącego miesiąca jest wymagany i nie może być usunięty.',
     hourly_history_empty: 'Brak historii stawki godzinowej.',
+    hourly_now_label: 'Twoja prawdziwa stawka godzinowa teraz',
+    hourly_timeline: 'Oś czasu',
     hourly_delete_title: 'Usunąć miesięczną stawkę godzinową?',
     hourly_delete_message:
       'Usunąć stawkę za {{month}}? Miesiące zależne od niej przejdą na poprzednią dostępną.',

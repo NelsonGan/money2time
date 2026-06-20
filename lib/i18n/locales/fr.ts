@@ -837,6 +837,8 @@ const fr = {
     hourly_current_month_locked:
       "L'entrée du mois en cours est obligatoire et ne peut pas être supprimée.",
     hourly_history_empty: 'Aucun historique de taux horaire pour le moment.',
+    hourly_now_label: 'Ta vraie valeur horaire maintenant',
+    hourly_timeline: 'Chronologie',
     hourly_delete_title: 'Supprimer le taux horaire mensuel ?',
     hourly_delete_message:
       'Supprimer le taux pour {{month}} ? Les mois qui en dépendent reviendront au mois disponible précédent.',

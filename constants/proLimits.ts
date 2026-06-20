@@ -15,7 +15,6 @@ export const PRO_TREND_TYPES = [
   'category_trend',
   'expense_sentiment',
   'asset_history',
-  'income_rate_history',
 ] as const;
 
 export type ProTrendType = (typeof PRO_TREND_TYPES)[number];

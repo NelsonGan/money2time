@@ -830,6 +830,8 @@ const nb = {
     hourly_badge_source: 'Kilde',
     hourly_current_month_locked: 'Gjeldende måneds oppføring er påkrevd og kan ikke slettes.',
     hourly_history_empty: 'Ingen timesverdhistorikk ennå.',
+    hourly_now_label: 'Din virkelige timeverdi nå',
+    hourly_timeline: 'Tidslinje',
     hourly_delete_title: 'Slett månedlig timeverdi?',
     hourly_delete_message:
       'Slette satsen for {{month}}? Måneder som er avhengige av den, vil falle tilbake til forrige tilgjengelige måned.',

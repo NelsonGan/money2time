@@ -831,6 +831,8 @@ const ru = {
     hourly_badge_source: 'Источник',
     hourly_current_month_locked: 'Запись текущего месяца обязательна и не может быть удалена.',
     hourly_history_empty: 'История почасовой ставки отсутствует.',
+    hourly_now_label: 'Ваша реальная ставка в час сейчас',
+    hourly_timeline: 'Хронология',
     hourly_delete_title: 'Удалить ежемесячную ставку?',
     hourly_delete_message:
       'Удалить ставку за {{month}}? Месяцы, зависящие от неё, перейдут к предыдущему доступному месяцу.',

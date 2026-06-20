@@ -841,6 +841,8 @@ const nl = {
     hourly_current_month_locked:
       'De vermelding voor de huidige maand is verplicht en kan niet worden verwijderd.',
     hourly_history_empty: 'Nog geen uurtarief-geschiedenis.',
+    hourly_now_label: 'Je echte uurwaarde nu',
+    hourly_timeline: 'Tijdlijn',
     hourly_delete_title: 'Maandelijks uurtarief verwijderen?',
     hourly_delete_message:
       'Tarief voor {{month}} verwijderen? Maanden die hiervan afhankelijk zijn, vallen terug op de vorige beschikbare maand.',

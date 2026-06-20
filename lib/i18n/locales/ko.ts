@@ -812,6 +812,8 @@ const ko = {
     hourly_badge_source: '소스',
     hourly_current_month_locked: '현재 월 항목은 필수이며 삭제할 수 없습니다.',
     hourly_history_empty: '시급 내역이 없습니다.',
+    hourly_now_label: '현재 실제 시급',
+    hourly_timeline: '타임라인',
     hourly_delete_title: '월별 시급을 삭제하시겠어요?',
     hourly_delete_message:
       '{{month}}의 시급을 삭제하시겠어요? 이 시급에 의존하는 월은 이전 이용 가능한 월로 폴백됩니다.',

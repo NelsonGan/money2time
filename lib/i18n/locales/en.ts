@@ -826,6 +826,8 @@ const en = {
     hourly_badge_source: 'Source',
     hourly_current_month_locked: 'Current month entry is required and cannot be deleted.',
     hourly_history_empty: 'No hourly value history yet.',
+    hourly_now_label: 'Your true hourly value now',
+    hourly_timeline: 'Timeline',
     hourly_delete_title: 'Delete monthly hourly value?',
     hourly_delete_message:
       'Delete the rate for {{month}}? Months that depend on it will fall back to the prior available month.',
