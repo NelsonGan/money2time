@@ -1,5 +1,9 @@
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import {
   Bell,
+  CalendarDays,
+  Camera,
   ChevronRight,
   Clock3,
   Code2,
@@ -12,13 +16,17 @@ import {
   Landmark,
   Newspaper,
   Palette,
+  Pencil,
+  ReceiptText,
   RefreshCcw,
   Repeat2,
   SlidersHorizontal,
   Sparkles,
+  TrendingUp,
+  UserRound,
   Zap,
 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   InteractionManager,
@@ -28,6 +36,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -38,9 +47,11 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
+  SettingsGrid,
+  SettingsGridTile,
   SettingsPageLayout,
-  SettingsRowItem,
   SettingsSection,
+  SettingsStatTile,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
@@ -53,7 +64,10 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
+import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
+import { getErrorMessage } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
+import { monthKeyFromDateIso, monthKeyFromDateLocal } from '~/utils/formatters';
 
 type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
@@ -115,7 +129,7 @@ export function SettingsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
-  const { settings, monthlyWages, updateSettings, isSimpleMode } = useApp();
+  const { settings, transactions, updateSettings, isSimpleMode } = useApp();
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
@@ -130,7 +144,85 @@ export function SettingsScreen({
   const statementImportRowRef = useRef<View | null>(null);
   const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
-  const latestWage = monthlyWages[0] ?? null;
+  const profileStats = useMemo(() => {
+    // Anchor "days tracking" on the earliest transaction, falling back to the
+    // account creation date when nothing has been logged yet.
+    let earliestMs = Number.POSITIVE_INFINITY;
+    const currentMonthKey = monthKeyFromDateLocal(new Date());
+    let thisMonthCount = 0;
+    for (const tx of transactions) {
+      const ms = new Date(tx.date).getTime();
+      if (!Number.isNaN(ms) && ms < earliestMs) earliestMs = ms;
+      if (monthKeyFromDateIso(tx.date) === currentMonthKey) thisMonthCount += 1;
+    }
+
+    if (!Number.isFinite(earliestMs)) {
+      const created = new Date(settings.createdAt).getTime();
+      if (!Number.isNaN(created)) earliestMs = created;
+    }
+
+    const hasAnchor = Number.isFinite(earliestMs);
+    const anchor = hasAnchor ? new Date(earliestMs) : null;
+    const daysTracking = anchor
+      ? Math.max(1, Math.floor((Date.now() - earliestMs) / 86_400_000) + 1)
+      : 1;
+    const memberSince = anchor
+      ? anchor.toLocaleDateString(settings.locale, { month: 'short', year: 'numeric' })
+      : null;
+
+    return {
+      daysTracking,
+      memberSince,
+      totalCount: transactions.length,
+      thisMonthCount,
+    };
+  }, [settings.createdAt, settings.locale, transactions]);
+
+  const avatarUri = useMemo(
+    () => getProfileAvatarUri(settings.profileAvatarUri),
+    [settings.profileAvatarUri],
+  );
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+
+  const handleEditName = useCallback(() => {
+    void triggerHaptic('selection');
+    setNameDraft(settings.profileName ?? '');
+    setEditingName(true);
+  }, [settings.profileName]);
+
+  const handleCommitName = useCallback(() => {
+    const trimmed = nameDraft.trim();
+    updateSettings({ profileName: trimmed.length > 0 ? trimmed : null });
+    setEditingName(false);
+  }, [nameDraft, updateSettings]);
+
+  const handlePickAvatar = useCallback(async () => {
+    void triggerHaptic('selection');
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        I18n.t('accounts.logo.permission_title'),
+        I18n.t('accounts.logo.permission_message'),
+      );
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+    try {
+      const previous = settings.profileAvatarUri;
+      const relativePath = saveProfileAvatar(result.assets[0].uri);
+      updateSettings({ profileAvatarUri: relativePath });
+      if (previous) deleteProfileAvatar(previous);
+    } catch (error) {
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+    }
+  }, [settings.profileAvatarUri, updateSettings]);
 
   useEffect(() => {
     if (scrollToTopToken <= 0) return;
@@ -321,46 +413,157 @@ export function SettingsScreen({
         scrollEventThrottle={16}
       >
         <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
-          {isPro ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenProManagement();
-              }}
-              className="mt-3 flex-row items-center gap-3 rounded-2xl border border-border/45 bg-surface px-4 py-3.5"
-            >
-              <Crown size={20} color={themeColors.primary} />
-              <View className="flex-1">
-                <View className="flex-row items-center gap-1.5">
-                  <Text variant="subheading" className="text-sm">
-                    Money2Time
-                  </Text>
-                  <View
-                    className="rounded-md px-1.5 py-0.5"
-                    style={{ backgroundColor: themeColors.primary }}
-                  >
-                    <Text
-                      className="text-[10px] font-extrabold tracking-wide"
-                      style={{ color: '#fff' }}
-                    >
-                      PRO
-                    </Text>
-                  </View>
+          <View className="mt-3 rounded-[28px] border border-border/40 bg-card p-5 shadow-soft">
+            <View className="flex-row items-center gap-4">
+              <Pressable
+                onPress={() => void handlePickAvatar()}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('settings.profile_edit_photo')}
+                className="h-16 w-16 items-center justify-center rounded-full border border-primary/15 bg-primary/10 active:opacity-80"
+                style={styles.ctaShadow}
+              >
+                {avatarUri ? (
+                  <Image
+                    source={{ uri: avatarUri }}
+                    style={{ height: 64, width: 64, borderRadius: 32 }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <UserRound size={30} color={themeColors.primary} />
+                )}
+                <View
+                  className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-card"
+                  style={{ backgroundColor: themeColors.primary }}
+                >
+                  <Camera size={12} color="#fff" />
                 </View>
-                <Text variant="friendly" tone="muted" className="text-xs">
-                  {I18n.t('pro.manage')}
+              </Pressable>
+              <View className="flex-1">
+                <View className="flex-row items-center gap-2">
+                  {editingName ? (
+                    <TextInput
+                      autoFocus
+                      value={nameDraft}
+                      onChangeText={setNameDraft}
+                      onBlur={handleCommitName}
+                      onSubmitEditing={handleCommitName}
+                      returnKeyType="done"
+                      maxLength={40}
+                      placeholder={I18n.t('settings.profile_name_add')}
+                      placeholderTextColor={themeColors.textMuted}
+                      selectionColor={themeColors.primary}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 0,
+                        color: themeColors.text,
+                        fontFamily: FONT.bold,
+                        fontSize: 19,
+                      }}
+                    />
+                  ) : (
+                    <Pressable
+                      onPress={handleEditName}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('settings.profile_edit_name')}
+                      className="flex-1 flex-row items-center gap-1.5 active:opacity-70"
+                    >
+                      {settings.profileName ? (
+                        <Text
+                          variant="heading"
+                          numberOfLines={1}
+                          className="text-[19px] tracking-tight"
+                        >
+                          {settings.profileName}
+                        </Text>
+                      ) : (
+                        <>
+                          <Text
+                            variant="heading"
+                            tone="muted"
+                            numberOfLines={1}
+                            className="text-[19px] tracking-tight"
+                          >
+                            {I18n.t('settings.profile_name_add')}
+                          </Text>
+                          <Pencil size={14} color={themeColors.textMuted} />
+                        </>
+                      )}
+                    </Pressable>
+                  )}
+                  {!editingName ? (
+                    isPro ? (
+                      <View
+                        className="rounded-full px-2 py-[3px]"
+                        style={{ backgroundColor: themeColors.primary }}
+                      >
+                        <Text
+                          className="text-[10px] tracking-[1.5px]"
+                          style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                        >
+                          PRO
+                        </Text>
+                      </View>
+                    ) : (
+                      <View
+                        className="rounded-full border px-2 py-[3px]"
+                        style={{ borderColor: themeColors.border, backgroundColor: 'transparent' }}
+                      >
+                        <Text
+                          className="text-[10px] tracking-[1.5px]"
+                          style={{
+                            color: themeColors.textMuted,
+                            fontFamily: FONT.semibold,
+                            fontWeight: '600',
+                          }}
+                        >
+                          FREE
+                        </Text>
+                      </View>
+                    )
+                  ) : null}
+                </View>
+                <Text variant="friendly" tone="muted" className="mt-0.5 text-xs">
+                  {profileStats.memberSince
+                    ? I18n.t('settings.profile_member_since', { date: profileStats.memberSince })
+                    : I18n.t('settings.profile_member_new')}
                 </Text>
               </View>
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            </Pressable>
-          ) : (
+            </View>
+
+            <View className="my-4 h-px bg-border/40" />
+
+            <View className="flex-row items-center">
+              <SettingsStatTile
+                icon={<CalendarDays size={16} color={themeColors.textMuted} />}
+                value={String(profileStats.daysTracking)}
+                label={I18n.t('settings.stat_days')}
+              />
+              <View className="h-9 w-px bg-border/40" />
+              <SettingsStatTile
+                icon={<ReceiptText size={16} color={themeColors.textMuted} />}
+                value={String(profileStats.totalCount)}
+                label={I18n.t('settings.stat_transactions')}
+              />
+              <View className="h-9 w-px bg-border/40" />
+              <SettingsStatTile
+                icon={<TrendingUp size={16} color={themeColors.textMuted} />}
+                value={String(profileStats.thisMonthCount)}
+                label={I18n.t('settings.stat_this_month')}
+              />
+            </View>
+          </View>
+
+          {!isPro ? (
             <Pressable
               onPress={() => {
                 void triggerHaptic('selection');
                 onOpenProPaywall();
               }}
-              className="mt-3 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[styles.ctaShadow, { backgroundColor: themeColors.primary }]}
+              className="mt-3 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+              style={[
+                { backgroundColor: themeColors.primary },
+                coloredCtaShadow(themeColors.primary),
+              ]}
             >
               <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
                 <Crown size={20} color="#fff" fill="#fff" />
@@ -378,7 +581,7 @@ export function SettingsScreen({
               </View>
               <ChevronRight size={20} color="#fff" />
             </Pressable>
-          )}
+          ) : null}
 
           {!isPro ? (
             <Pressable
@@ -386,8 +589,8 @@ export function SettingsScreen({
                 void triggerHaptic('selection');
                 onOpenShareAndEarn();
               }}
-              className="mt-2 flex-row items-center gap-3 rounded-2xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[styles.ctaShadow, { backgroundColor: '#F5A623' }]}
+              className="mt-2 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+              style={[{ backgroundColor: '#F5A623' }, coloredCtaShadow('#F5A623')]}
             >
               <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
                 <Gift size={20} color="#fff" />
@@ -412,32 +615,23 @@ export function SettingsScreen({
             title={I18n.t('settings.section_personal')}
             showAccent={false}
           >
-            <View style={styles.rowsGroup}>
-              <SettingsRowItem
-                icon={<Palette size={18} color={themeColors.primary} />}
+            <SettingsGrid>
+              <SettingsGridTile
+                icon={<Palette size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.display')}
-                subtitle={I18n.t('settings.display_subtitle')}
                 onPress={onOpenDisplay}
               />
-              <SettingsRowItem
-                icon={<Clock3 size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<Clock3 size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.hourly_value')}
-                subtitle={
-                  latestWage
-                    ? I18n.t('settings.hourly_value_latest', {
-                        value: `${settings.currencySymbol}${latestWage.trueHourlyRate.toFixed(2)}/hr`,
-                      })
-                    : I18n.t('settings.hourly_value_subtitle')
-                }
                 onPress={onOpenHourlyValue}
               />
-              <SettingsRowItem
-                icon={<Bell size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<Bell size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.notifications')}
-                subtitle={I18n.t('settings.notifications_subtitle')}
                 onPress={onOpenNotifications}
               />
-            </View>
+            </SettingsGrid>
           </SettingsSection>
 
           <SettingsSection
@@ -445,47 +639,37 @@ export function SettingsScreen({
             title={I18n.t('settings.section_money')}
             showAccent={false}
           >
-            <View style={styles.rowsGroup}>
-              <SettingsRowItem
-                icon={<SlidersHorizontal size={18} color={themeColors.primary} />}
+            <SettingsGrid>
+              <SettingsGridTile
+                icon={<SlidersHorizontal size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.account_settings')}
-                subtitle={I18n.t('settings.account_settings_subtitle')}
                 onPress={onOpenAccountSettings}
               />
               {!isSimpleMode ? (
-                <SettingsRowItem
-                  icon={<Landmark size={18} color={themeColors.primary} />}
+                <SettingsGridTile
+                  icon={<Landmark size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.accounts')}
-                  subtitle={I18n.t('settings.accounts_subtitle')}
                   onPress={onOpenAccounts}
                 />
               ) : null}
-              <SettingsRowItem
-                icon={<FolderTree size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<FolderTree size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.categories')}
-                subtitle={I18n.t('settings.categories_subtitle')}
                 onPress={onOpenCategories}
               />
-              <View
-                ref={recurringRowRef}
-                onLayout={() => {
-                  handleRecurringRowLayout();
-                }}
-              >
-                <SettingsRowItem
-                  icon={<Repeat2 size={18} color={themeColors.primary} />}
+              <View ref={recurringRowRef} onLayout={handleRecurringRowLayout}>
+                <SettingsGridTile
+                  icon={<Repeat2 size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.recurring')}
-                  subtitle={I18n.t('settings.recurring_subtitle')}
                   onPress={onOpenRecurring}
                 />
               </View>
-              <SettingsRowItem
-                icon={<Zap size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<Zap size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.quick_entry.title')}
-                subtitle={I18n.t('settings.quick_entry.row_subtitle')}
                 onPress={onOpenQuickEntry}
               />
-            </View>
+            </SettingsGrid>
           </SettingsSection>
 
           <SettingsSection
@@ -493,34 +677,22 @@ export function SettingsScreen({
             title={I18n.t('settings.section_data')}
             showAccent={false}
           >
-            <View style={styles.rowsGroup}>
-              <View
-                ref={statementImportRowRef}
-                onLayout={() => {
-                  handleStatementImportRowLayout();
-                }}
-              >
-                <SettingsRowItem
-                  icon={<FileText size={18} color={themeColors.primary} />}
+            <SettingsGrid>
+              <View ref={statementImportRowRef} onLayout={handleStatementImportRowLayout}>
+                <SettingsGridTile
+                  icon={<FileText size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.statement_import')}
-                  subtitle={I18n.t('settings.statement_import_subtitle')}
                   onPress={onOpenStatementImport}
                 />
               </View>
-              <View
-                ref={managementRowRef}
-                onLayout={() => {
-                  handleManagementRowLayout();
-                }}
-              >
-                <SettingsRowItem
-                  icon={<DatabaseBackup size={18} color={themeColors.primary} />}
+              <View ref={managementRowRef} onLayout={handleManagementRowLayout}>
+                <SettingsGridTile
+                  icon={<DatabaseBackup size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.data_management')}
-                  subtitle={I18n.t('settings.data_management_subtitle')}
                   onPress={onOpenDataManagement}
                 />
               </View>
-            </View>
+            </SettingsGrid>
           </SettingsSection>
 
           <SettingsSection
@@ -528,24 +700,22 @@ export function SettingsScreen({
             title={I18n.t('settings.section_support')}
             showAccent={false}
           >
-            <View style={styles.rowsGroup}>
-              <View
-                ref={startTutorialRowRef}
-                onLayout={() => {
-                  handleStartTutorialRowLayout();
-                }}
-              >
-                <SettingsRowItem
-                  icon={<Sparkles size={18} color={themeColors.primary} />}
+            <SettingsGrid>
+              <SettingsGridTile
+                icon={<Crown size={20} color={themeColors.primary} />}
+                label={I18n.t('pro.manage_subscription')}
+                onPress={isPro ? onOpenProManagement : onOpenProPaywall}
+              />
+              <View ref={startTutorialRowRef} onLayout={handleStartTutorialRowLayout}>
+                <SettingsGridTile
+                  icon={<Sparkles size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.start_tutorial')}
-                  subtitle={I18n.t('settings.start_tutorial_subtitle')}
                   onPress={onStartTutorial}
                 />
               </View>
-              <SettingsRowItem
-                icon={<RefreshCcw size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<RefreshCcw size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.replay_onboarding')}
-                subtitle={I18n.t('settings.replay_onboarding_subtitle')}
                 onPress={() => {
                   Alert.alert(I18n.t('settings.replay_title'), I18n.t('settings.replay_message'), [
                     { text: I18n.t('common.cancel'), style: 'cancel' },
@@ -558,57 +728,39 @@ export function SettingsScreen({
                   ]);
                 }}
               />
-              <SettingsRowItem
-                icon={<Newspaper size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<Newspaper size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.news')}
-                subtitle={I18n.t('settings.news_subtitle')}
                 onPress={onOpenNews}
               />
-              <SettingsRowItem
-                icon={<Heart size={18} color={themeColors.primary} />}
+              <SettingsGridTile
+                icon={<Heart size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.rate_app')}
-                subtitle={I18n.t('settings.rate_app_subtitle')}
                 onPress={() => {
                   void openStoreReviewManually();
                 }}
               />
-            </View>
+            </SettingsGrid>
           </SettingsSection>
 
           {__DEV__ ? (
             <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
-              <View style={styles.rowsGroup}>
-                <SettingsRowItem
-                  icon={<Crown size={18} color={themeColors.primary} />}
-                  label="Pro status"
-                  subtitle="Override RevenueCat for testing gated features"
-                  showChevron={false}
-                  onPress={() => setDevProOverride(!isPro)}
-                  rightAccessory={
-                    <View
-                      className={`rounded-full px-2.5 py-1 ${
-                        isPro ? 'bg-primary/15' : 'bg-muted-foreground/15'
-                      }`}
-                    >
-                      <Text
-                        variant="label"
-                        className={isPro ? 'text-primary' : 'text-muted-foreground'}
-                        style={{ fontFamily: FONT.semibold, fontWeight: '600' }}
-                      >
-                        {isPro ? 'PRO' : 'FREE'}
-                      </Text>
-                    </View>
+              <SettingsGrid>
+                <SettingsGridTile
+                  icon={
+                    <Crown size={20} color={isPro ? themeColors.primary : themeColors.textMuted} />
                   }
+                  label={isPro ? 'Pro: ON' : 'Pro: OFF'}
+                  onPress={() => setDevProOverride(!isPro)}
                 />
                 {onOpenWidgetPreviews ? (
-                  <SettingsRowItem
-                    icon={<Code2 size={18} color={themeColors.primary} />}
+                  <SettingsGridTile
+                    icon={<Code2 size={20} color={themeColors.primary} />}
                     label="Widget previews"
-                    subtitle="Preview all widgets and supported sizes"
                     onPress={onOpenWidgetPreviews}
                   />
                 ) : null}
-              </View>
+              </SettingsGrid>
             </SettingsSection>
           ) : null}
         </Animated.View>
@@ -617,16 +769,25 @@ export function SettingsScreen({
   );
 }
 
+/** Soft shadow tinted to a CTA's own color — reads far nicer on the warm UI
+ *  than a generic dark drop shadow. */
+function coloredCtaShadow(color: string) {
+  return Platform.OS === 'ios'
+    ? {
+        shadowColor: color,
+        shadowOpacity: 0.35,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+      }
+    : { elevation: 5 };
+}
+
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  },
-  rowsGroup: {
-    marginTop: spacing.xs,
-    gap: spacing.xxs,
   },
   ctaShadow: {
     ...(Platform.OS === 'ios'

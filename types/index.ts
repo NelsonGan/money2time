@@ -86,6 +86,10 @@ export interface UserSettings {
   themeColor: ThemeColor;
   /** Persisted country filter for the account-logo picker (country slug), or null. */
   accountLogoCountry: string | null;
+  /** User-chosen display name, or null when unset. */
+  profileName: string | null;
+  /** Relative path of the user's avatar within the user-assets store, or null. */
+  profileAvatarUri: string | null;
   onboardingCompleted: boolean;
   userMode: UserMode;
   weekStartsOn: WeekStartsOn;

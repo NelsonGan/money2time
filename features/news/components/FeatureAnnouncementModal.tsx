@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Text, ThemeModal } from '~/components/ui';
+import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -293,19 +293,18 @@ export function FeatureAnnouncementModal({
                     <Text>{I18n.t('common.back')}</Text>
                   </Button>
                 ) : null}
-                <Button
-                  size="sm"
+                <FatButton
                   className="flex-[2]"
-                  onPress={showShareEarnCta ? handleOpenShareEarn : handleNext}
-                >
-                  <Text>
-                    {showShareEarnCta
+                  color={accentColor}
+                  label={
+                    showShareEarnCta
                       ? announcementCtaLabel('openShareEarn')
                       : isLastPage
                         ? I18n.t('common.done')
-                        : I18n.t('common.next')}
-                  </Text>
-                </Button>
+                        : I18n.t('common.next')
+                  }
+                  onPress={showShareEarnCta ? handleOpenShareEarn : handleNext}
+                />
               </View>
             )}
           </View>

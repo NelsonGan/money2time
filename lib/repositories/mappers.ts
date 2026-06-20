@@ -270,6 +270,8 @@ export function toSettings(row: SettingsRow): UserSettings {
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
     accountLogoCountry: row.accountLogoCountry ?? null,
+    profileName: row.profileName ?? null,
+    profileAvatarUri: row.profileAvatarUri ?? null,
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),

@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import { Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
@@ -54,6 +55,63 @@ function roundedRectPath(
     `A${radius} ${radius} 0 0 1 ${x + radius} ${y}`,
     'Z',
   ].join(' ');
+}
+
+/** Time to wait for the measurement burst to go quiet before showing a target
+ *  whose position never stabilized across two consecutive measurements. */
+const RECT_SETTLE_DELAY = 320;
+
+function rectsApproxEqual(
+  a: TutorialTargetRect | null | undefined,
+  b: TutorialTargetRect | null | undefined,
+  tolerance = 1.5,
+): boolean {
+  if (!a || !b) return false;
+  return (
+    Math.abs(a.x - b.x) < tolerance &&
+    Math.abs(a.y - b.y) < tolerance &&
+    Math.abs(a.width - b.width) < tolerance &&
+    Math.abs(a.height - b.height) < tolerance
+  );
+}
+
+/**
+ * Stabilizes a target rect that is measured in several passes per step.
+ * `measureInWindow` reports pre-layout / pre-scroll positions before settling,
+ * which makes the spotlight jump. This commits a rect only once it has settled
+ * — either two consecutive measurements agree, or the burst goes quiet — so the
+ * spotlight appears once at its final position instead of chasing each pass.
+ */
+function useSettledRect(rect: TutorialTargetRect | null | undefined): TutorialTargetRect | null {
+  const [settled, setSettled] = useState<TutorialTargetRect | null>(rect ?? null);
+  const lastIncomingRef = useRef<TutorialTargetRect | null>(rect ?? null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (!rect) {
+      lastIncomingRef.current = null;
+      setSettled(null);
+      return;
+    }
+    const previous = lastIncomingRef.current;
+    lastIncomingRef.current = rect;
+    if (rectsApproxEqual(previous, rect)) {
+      setSettled(rect);
+    } else {
+      timerRef.current = setTimeout(() => {
+        setSettled(lastIncomingRef.current);
+      }, RECT_SETTLE_DELAY);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [rect]);
+
+  return settled;
 }
 
 function resolveSpotlightFrame(
@@ -117,20 +175,26 @@ export function TutorialCoachmarkOverlay({
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
 
+  // Gate the measured rects so the spotlight only appears once its position has
+  // settled, instead of jumping through the intermediate measurement passes.
+  const settledTargetRect = useSettledRect(targetRect);
+  const settledSecondaryRect = useSettledRect(secondaryTargetRect);
+
   const highlightFrame = useMemo(
-    () => resolveSpotlightFrame(targetRect, HIGHLIGHT_PADDING, backdropWidth, backdropHeight),
-    [targetRect, backdropHeight, backdropWidth],
+    () =>
+      resolveSpotlightFrame(settledTargetRect, HIGHLIGHT_PADDING, backdropWidth, backdropHeight),
+    [settledTargetRect, backdropHeight, backdropWidth],
   );
   const secondaryHighlightFrame = useMemo(
     () =>
       resolveSpotlightFrame(
-        secondaryTargetRect,
+        settledSecondaryRect,
         SECONDARY_HIGHLIGHT_PADDING,
         backdropWidth,
         backdropHeight,
         0,
       ),
-    [secondaryTargetRect, backdropHeight, backdropWidth],
+    [settledSecondaryRect, backdropHeight, backdropWidth],
   );
 
   const highlightRadius = useMemo(() => {
@@ -364,12 +428,14 @@ export function TutorialCoachmarkOverlay({
           </View>
         </View>
 
-        <Text variant="subheading" style={[styles.title, { color: palette.titleText }]}>
-          {title}
-        </Text>
-        <Text variant="friendly" style={[styles.body, { color: palette.bodyText }]}>
-          {body}
-        </Text>
+        <Animated.View key={stepIndex} entering={FadeIn.duration(240)}>
+          <Text variant="subheading" style={[styles.title, { color: palette.titleText }]}>
+            {title}
+          </Text>
+          <Text variant="friendly" style={[styles.body, { color: palette.bodyText }]}>
+            {body}
+          </Text>
+        </Animated.View>
 
         {!highlightFrame ? (
           <View style={styles.loadingRow}>
