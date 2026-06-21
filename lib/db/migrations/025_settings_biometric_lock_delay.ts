@@ -9,7 +9,7 @@ export const migration025SettingsBiometricLockDelay: DbMigration = {
 
     if (!hasColumn) {
       db.execSync(
-        'ALTER TABLE settings ADD COLUMN biometric_lock_delay_seconds INTEGER NOT NULL DEFAULT 0;',
+        'ALTER TABLE settings ADD COLUMN biometric_lock_delay_seconds INTEGER NOT NULL DEFAULT 900;',
       );
     }
   },

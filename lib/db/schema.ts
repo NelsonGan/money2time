@@ -106,7 +106,7 @@ export const settingsTable = sqliteTable('settings', {
   biometricLockEnabled: integer('biometric_lock_enabled', { mode: 'boolean' })
     .notNull()
     .default(false),
-  biometricLockDelaySeconds: integer('biometric_lock_delay_seconds').notNull().default(0),
+  biometricLockDelaySeconds: integer('biometric_lock_delay_seconds').notNull().default(900),
   autoBackupEnabled: integer('auto_backup_enabled', { mode: 'boolean' }).notNull().default(true),
   autoBackupTarget: text('auto_backup_target').notNull().default('local'),
   lastAutoBackupAt: text('last_auto_backup_at'),

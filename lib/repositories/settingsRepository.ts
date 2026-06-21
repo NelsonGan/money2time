@@ -163,7 +163,7 @@ class SettingsRepository {
         userMode: 'power',
         weekStartsOn: 1,
         biometricLockEnabled: false,
-        biometricLockDelaySeconds: 0,
+        biometricLockDelaySeconds: 900,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,
