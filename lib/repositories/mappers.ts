@@ -275,6 +275,8 @@ export function toSettings(row: SettingsRow): UserSettings {
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),
+    biometricLockEnabled: row.biometricLockEnabled ?? false,
+    biometricLockDelaySeconds: row.biometricLockDelaySeconds ?? 900,
     autoBackupEnabled: row.autoBackupEnabled ?? true,
     autoBackupTarget: asBackupTarget(row.autoBackupTarget),
     lastAutoBackupAt: row.lastAutoBackupAt,

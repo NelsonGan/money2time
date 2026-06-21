@@ -93,6 +93,14 @@ export interface UserSettings {
   onboardingCompleted: boolean;
   userMode: UserMode;
   weekStartsOn: WeekStartsOn;
+  /** When true (Pro-only), the app requires biometric/device auth to open. */
+  biometricLockEnabled: boolean;
+  /**
+   * Grace period in seconds before the app re-locks after going to the
+   * background. `0` means lock immediately. Only relevant when
+   * `biometricLockEnabled` is true.
+   */
+  biometricLockDelaySeconds: number;
   autoBackupEnabled: boolean;
   autoBackupTarget: BackupTarget;
   lastAutoBackupAt: string | null;

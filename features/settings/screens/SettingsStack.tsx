@@ -15,6 +15,7 @@ import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHap
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
+import { AppLockScreen } from './AppLockScreen';
 import { AutoBackupScreen } from './AutoBackupScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
@@ -93,6 +94,7 @@ function SettingsHomeRoute({
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
+      onOpenAppLock={() => navigation.navigate('AppLock')}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -355,6 +357,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <QuickEntrySettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AppLock">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <AppLockScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (
