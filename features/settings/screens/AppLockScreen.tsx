@@ -1,6 +1,7 @@
 import { Check, Fingerprint, ShieldCheck } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
 import {
   SettingsHeader,
@@ -14,11 +15,12 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import {
   authenticateWithBiometrics,
-  type BiometricAvailability,
   getBiometricAvailability,
   getBiometricLabel,
 } from '~/services/biometricAuth';
 import { triggerHaptic } from '~/services/haptics';
+
+const TOAST_DURATION_MS = 3200;
 
 interface AppLockScreenProps {
   onBack: () => void;
@@ -70,6 +72,20 @@ const styles = StyleSheet.create({
     height: 1,
     marginLeft: 16,
   },
+  toast: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
 });
 
 export function AppLockScreen({ onBack }: AppLockScreenProps) {
@@ -78,27 +94,34 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
   const { settings, updateSettings } = useApp();
   const { isPro } = usePro();
 
-  // `null` until the first probe resolves, so the unavailable note never flashes
-  // before we actually know the device's capability.
-  const [availability, setAvailability] = useState<BiometricAvailability | null>(null);
   const [biometricLabel, setBiometricLabel] = useState('Biometrics');
   const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((message: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(message);
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_DURATION_MS);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [nextAvailability, nextLabel] = await Promise.all([
-        getBiometricAvailability(),
-        getBiometricLabel(),
-      ]);
-      if (cancelled) return;
-      setAvailability(nextAvailability);
-      setBiometricLabel(nextLabel);
+      const nextLabel = await getBiometricLabel();
+      if (!cancelled) setBiometricLabel(nextLabel);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    [],
+  );
 
   const enabled = settings.biometricLockEnabled;
 
@@ -122,10 +145,9 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
         // from a stale probe (e.g. the user enrolled/removed a biometric, or
         // tapped before the initial async check resolved).
         const current = await getBiometricAvailability();
-        setAvailability(current);
         if (!current.available) {
-          Alert.alert(
-            I18n.t('settings.app_lock.unavailable_title'),
+          void triggerHaptic('warning');
+          showToast(
             current.hardwareWithoutEnrollment
               ? I18n.t('settings.app_lock.not_enrolled_message')
               : I18n.t('settings.app_lock.no_hardware_message'),
@@ -144,7 +166,7 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
         setBusy(false);
       }
     },
-    [busy, isPro, updateSettings],
+    [busy, isPro, showToast, updateSettings],
   );
 
   const delaySeconds = settings.biometricLockDelaySeconds;
@@ -156,8 +178,6 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
     },
     [delaySeconds, updateSettings],
   );
-
-  const unavailable = availability != null && !availability.available;
 
   return (
     <SettingsPageLayout>
@@ -186,7 +206,7 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
                 </View>
                 <Switch
                   value={enabled}
-                  disabled={busy || !isPro || (unavailable && !enabled)}
+                  disabled={busy || !isPro}
                   onValueChange={(v) => void handleToggle(v)}
                   trackColor={{ false: themeColors.border, true: themeColors.primary }}
                 />
@@ -240,17 +260,29 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
                 </Text>
               </View>
             </>
-          ) : unavailable ? (
-            <View className="mt-3 px-1">
-              <Text variant="caption" tone="muted">
-                {availability?.hardwareWithoutEnrollment
-                  ? I18n.t('settings.app_lock.not_enrolled_message')
-                  : I18n.t('settings.app_lock.no_hardware_message')}
-              </Text>
-            </View>
           ) : null}
         </View>
       </ScrollView>
+
+      {toast ? (
+        <Animated.View
+          entering={FadeInUp.duration(220)}
+          exiting={FadeOutUp.duration(180)}
+          pointerEvents="none"
+          style={[
+            styles.toast,
+            {
+              top: 12,
+              backgroundColor: themeColors.card,
+              borderColor: themeColors.border,
+            },
+          ]}
+        >
+          <Text variant="caption" className="text-foreground">
+            {toast}
+          </Text>
+        </Animated.View>
+      ) : null}
     </SettingsPageLayout>
   );
 }
