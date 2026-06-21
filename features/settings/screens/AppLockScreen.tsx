@@ -272,7 +272,8 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
           style={[
             styles.toast,
             {
-              top: 12,
+              // Sit below the header's back-button row so it never covers it.
+              top: 64,
               backgroundColor: themeColors.card,
               borderColor: themeColors.border,
             },

@@ -4,6 +4,7 @@
  * back this surface on web and in tests.
  */
 import * as LocalAuthentication from 'expo-local-authentication';
+import { Platform } from 'react-native';
 
 import type { BiometricAvailability } from './biometricAuth.shared';
 
@@ -23,13 +24,15 @@ export const getBiometricAvailability = async (): Promise<BiometricAvailability>
 };
 
 export const getBiometricLabel = async (): Promise<string> => {
+  const isIOS = Platform.OS === 'ios';
   try {
     const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
     if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-      return 'Face ID';
+      return isIOS ? 'Face ID' : 'Face Unlock';
     }
     if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-      return 'Fingerprint';
+      // Apple brands fingerprint auth "Touch ID"; Android calls it "Fingerprint".
+      return isIOS ? 'Touch ID' : 'Fingerprint';
     }
     if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
       return 'Iris';
