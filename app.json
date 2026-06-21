@@ -66,6 +66,12 @@
       "expo-screen-orientation",
       "expo-background-task",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Money2Time uses Face ID to unlock the app and keep your finances private."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {

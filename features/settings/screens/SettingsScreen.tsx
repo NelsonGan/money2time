@@ -10,6 +10,7 @@ import {
   Crown,
   DatabaseBackup,
   FileText,
+  Fingerprint,
   FolderTree,
   Gift,
   Heart,
@@ -99,6 +100,7 @@ interface SettingsScreenProps {
   onOpenNews: () => void;
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
+  onOpenAppLock: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
@@ -121,6 +123,7 @@ export function SettingsScreen({
   onOpenNews,
   onOpenStatementImport,
   onOpenQuickEntry,
+  onOpenAppLock,
   onOpenProPaywall,
   onOpenProManagement,
   onOpenShareAndEarn,
@@ -692,6 +695,12 @@ export function SettingsScreen({
                   onPress={onOpenDataManagement}
                 />
               </View>
+              <SettingsGridTile
+                icon={<Fingerprint size={20} color={themeColors.primary} />}
+                label={I18n.t('settings.app_lock.title')}
+                pro
+                onPress={isPro ? onOpenAppLock : onOpenProPaywall}
+              />
             </SettingsGrid>
           </SettingsSection>
 

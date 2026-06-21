@@ -49,6 +49,7 @@ import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnno
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
+import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import {
   AccountsScreen,
   HourlyValueScreen,
@@ -1555,6 +1556,7 @@ function AppContent() {
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
       />
       <ReviewPrePromptSheet />
+      <BiometricLockGate />
     </View>
   );
 }
