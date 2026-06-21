@@ -25,6 +25,7 @@ import { I18n } from '~/lib/i18n';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { darkenColor, withColorAlpha } from '~/utils/color';
+import { FONT } from '~/utils/fonts';
 
 import { Button } from './button';
 import { Text } from './text';
@@ -351,6 +352,53 @@ interface SettingsGridTileProps {
   emoji?: string;
   badge?: React.ReactNode;
   tone?: 'default' | 'danger';
+  /** Renders a diagonal "PRO" corner ribbon, matching the widget previews. */
+  pro?: boolean;
+}
+
+/** Diagonal "PRO" corner ribbon, clipped to the tile's rounded corner. */
+function ProCornerRibbon() {
+  const themeColors = useThemeColors();
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        borderRadius: 22,
+        overflow: 'hidden',
+      }}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: -22,
+          width: 84,
+          alignItems: 'center',
+          paddingVertical: 2,
+          backgroundColor: themeColors.accent,
+          transform: [{ rotate: '45deg' }],
+        }}
+      >
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontSize: 9,
+            lineHeight: 12,
+            color: '#fff',
+            fontFamily: FONT.bold,
+            letterSpacing: 1,
+          }}
+        >
+          PRO
+        </Text>
+      </View>
+    </View>
+  );
 }
 
 /**
@@ -365,6 +413,7 @@ export function SettingsGridTile({
   emoji,
   badge,
   tone = 'default',
+  pro = false,
 }: SettingsGridTileProps) {
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
@@ -441,6 +490,7 @@ export function SettingsGridTile({
       >
         {label}
       </Text>
+      {pro ? <ProCornerRibbon /> : null}
     </Pressable>
   );
 }

@@ -44,6 +44,8 @@ class SettingsRepository {
         | 'onboardingCompleted'
         | 'userMode'
         | 'weekStartsOn'
+        | 'biometricLockEnabled'
+        | 'biometricLockDelaySeconds'
         | 'autoBackupEnabled'
         | 'autoBackupTarget'
         | 'lastAutoBackupAt'
@@ -160,6 +162,8 @@ class SettingsRepository {
         onboardingCompleted: false,
         userMode: 'power',
         weekStartsOn: 1,
+        biometricLockEnabled: false,
+        biometricLockDelaySeconds: 0,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,
