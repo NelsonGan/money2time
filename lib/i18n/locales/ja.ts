@@ -661,7 +661,6 @@ const ja = {
       unlock_action: 'ロック解除',
       locked_title: 'Money2Time はロックされています',
       locked_subtitle: '続けるには%{method}を使用してください。',
-      unavailable_title: '生体認証を利用できません',
       not_enrolled_message:
         'この端末には生体認証が設定されていません。端末の設定で Face ID、Touch ID、または指紋を追加してから、もう一度お試しください。',
       no_hardware_message: 'この端末は生体認証に対応していません。',

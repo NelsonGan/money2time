@@ -673,7 +673,6 @@ const ms = {
       unlock_action: 'Buka kunci',
       locked_title: 'Money2Time dikunci',
       locked_subtitle: 'Guna %{method} untuk meneruskan.',
-      unavailable_title: 'Biometrik tidak tersedia',
       not_enrolled_message:
         'Tiada biometrik disediakan pada peranti ini. Tambah Face ID, Touch ID atau cap jari dalam tetapan peranti, kemudian cuba lagi.',
       no_hardware_message: 'Peranti ini tidak menyokong pengesahan biometrik.',

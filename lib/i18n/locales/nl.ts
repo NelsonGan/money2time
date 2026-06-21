@@ -677,7 +677,6 @@ const nl = {
       unlock_action: 'Ontgrendelen',
       locked_title: 'Money2Time is vergrendeld',
       locked_subtitle: 'Gebruik %{method} om door te gaan.',
-      unavailable_title: 'Biometrie niet beschikbaar',
       not_enrolled_message:
         'Er is geen biometrie ingesteld op dit apparaat. Voeg Face ID, Touch ID of een vingerafdruk toe in de apparaatinstellingen en probeer het opnieuw.',
       no_hardware_message: 'Dit apparaat ondersteunt geen biometrische authenticatie.',

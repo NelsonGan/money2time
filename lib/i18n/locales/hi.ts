@@ -665,7 +665,6 @@ const hi = {
       unlock_action: 'अनलॉक करें',
       locked_title: 'Money2Time लॉक है',
       locked_subtitle: 'जारी रखने के लिए %{method} का उपयोग करें।',
-      unavailable_title: 'बायोमेट्रिक उपलब्ध नहीं',
       not_enrolled_message:
         'इस डिवाइस पर कोई बायोमेट्रिक सेट नहीं है। डिवाइस सेटिंग में Face ID, Touch ID या फ़िंगरप्रिंट जोड़ें, फिर पुनः प्रयास करें।',
       no_hardware_message: 'यह डिवाइस बायोमेट्रिक प्रमाणीकरण का समर्थन नहीं करता।',

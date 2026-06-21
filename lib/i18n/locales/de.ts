@@ -677,7 +677,6 @@ const de = {
       unlock_action: 'Entsperren',
       locked_title: 'Money2Time ist gesperrt',
       locked_subtitle: '%{method} verwenden, um fortzufahren.',
-      unavailable_title: 'Biometrie nicht verfügbar',
       not_enrolled_message:
         'Auf diesem Gerät ist keine Biometrie eingerichtet. Füge in den Geräteeinstellungen Face ID, Touch ID oder einen Fingerabdruck hinzu und versuche es erneut.',
       no_hardware_message: 'Dieses Gerät unterstützt keine biometrische Authentifizierung.',

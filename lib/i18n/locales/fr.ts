@@ -673,7 +673,6 @@ const fr = {
       unlock_action: 'Déverrouiller',
       locked_title: 'Money2Time est verrouillée',
       locked_subtitle: 'Utilisez %{method} pour continuer.',
-      unavailable_title: 'Biométrie indisponible',
       not_enrolled_message:
         "Aucune biométrie n'est configurée sur cet appareil. Ajoutez Face ID, Touch ID ou une empreinte dans les réglages de l'appareil, puis réessayez.",
       no_hardware_message: "Cet appareil ne prend pas en charge l'authentification biométrique.",

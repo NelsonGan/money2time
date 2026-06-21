@@ -663,7 +663,6 @@ const vi = {
       unlock_action: 'Mở khóa',
       locked_title: 'Money2Time đang bị khóa',
       locked_subtitle: 'Dùng %{method} để tiếp tục.',
-      unavailable_title: 'Không có sinh trắc học',
       not_enrolled_message:
         'Chưa thiết lập sinh trắc học trên thiết bị này. Hãy thêm Face ID, Touch ID hoặc vân tay trong cài đặt thiết bị rồi thử lại.',
       no_hardware_message: 'Thiết bị này không hỗ trợ xác thực sinh trắc học.',

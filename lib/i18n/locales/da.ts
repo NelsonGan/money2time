@@ -674,7 +674,6 @@ const da = {
       unlock_action: 'Lås op',
       locked_title: 'Money2Time er låst',
       locked_subtitle: 'Brug %{method} for at fortsætte.',
-      unavailable_title: 'Biometri ikke tilgængelig',
       not_enrolled_message:
         'Der er ikke konfigureret biometri på denne enhed. Tilføj Face ID, Touch ID eller et fingeraftryk i enhedens indstillinger, og prøv igen.',
       no_hardware_message: 'Denne enhed understøtter ikke biometrisk godkendelse.',

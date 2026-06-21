@@ -673,7 +673,6 @@ const pt = {
       unlock_action: 'Desbloquear',
       locked_title: 'O Money2Time está bloqueado',
       locked_subtitle: 'Use %{method} para continuar.',
-      unavailable_title: 'Biometria indisponível',
       not_enrolled_message:
         'Nenhuma biometria configurada neste dispositivo. Adicione Face ID, Touch ID ou uma impressão digital nas configurações do dispositivo e tente novamente.',
       no_hardware_message: 'Este dispositivo não oferece suporte à autenticação biométrica.',

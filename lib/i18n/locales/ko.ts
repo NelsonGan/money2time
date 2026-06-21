@@ -660,7 +660,6 @@ const ko = {
       unlock_action: '잠금 해제',
       locked_title: 'Money2Time이 잠겨 있습니다',
       locked_subtitle: '계속하려면 %{method}을(를) 사용하세요.',
-      unavailable_title: '생체 인증을 사용할 수 없음',
       not_enrolled_message:
         '이 기기에 설정된 생체 인증이 없습니다. 기기 설정에서 Face ID, Touch ID 또는 지문을 추가한 후 다시 시도하세요.',
       no_hardware_message: '이 기기는 생체 인증을 지원하지 않습니다.',

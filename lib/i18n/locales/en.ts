@@ -670,7 +670,6 @@ const en = {
       unlock_action: 'Unlock',
       locked_title: 'Money2Time is locked',
       locked_subtitle: 'Use %{method} to continue.',
-      unavailable_title: 'Biometrics unavailable',
       not_enrolled_message:
         'No biometrics are set up on this device. Add Face ID, Touch ID, or a fingerprint in your device settings, then try again.',
       no_hardware_message: 'This device does not support biometric authentication.',

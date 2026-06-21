@@ -658,7 +658,6 @@ const th = {
       unlock_action: 'ปลดล็อก',
       locked_title: 'Money2Time ถูกล็อกอยู่',
       locked_subtitle: 'ใช้ %{method} เพื่อดำเนินการต่อ',
-      unavailable_title: 'ใช้ไบโอเมตริกไม่ได้',
       not_enrolled_message:
         'ยังไม่ได้ตั้งค่าไบโอเมตริกบนอุปกรณ์นี้ เพิ่ม Face ID, Touch ID หรือลายนิ้วมือในการตั้งค่าอุปกรณ์ แล้วลองอีกครั้ง',
       no_hardware_message: 'อุปกรณ์นี้ไม่รองรับการยืนยันตัวตนด้วยไบโอเมตริก',

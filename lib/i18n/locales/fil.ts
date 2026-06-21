@@ -679,7 +679,6 @@ const fil = {
       unlock_action: 'I-unlock',
       locked_title: 'Naka-lock ang Money2Time',
       locked_subtitle: 'Gamitin ang %{method} para magpatuloy.',
-      unavailable_title: 'Hindi available ang biometrics',
       not_enrolled_message:
         'Walang naka-set up na biometrics sa device na ito. Magdagdag ng Face ID, Touch ID, o fingerprint sa mga setting ng device, pagkatapos ay subukan ulit.',
       no_hardware_message: 'Hindi sinusuportahan ng device na ito ang biometric authentication.',

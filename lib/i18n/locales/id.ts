@@ -677,7 +677,6 @@ const id = {
       unlock_action: 'Buka kunci',
       locked_title: 'Money2Time terkunci',
       locked_subtitle: 'Gunakan %{method} untuk melanjutkan.',
-      unavailable_title: 'Biometrik tidak tersedia',
       not_enrolled_message:
         'Tidak ada biometrik yang disiapkan di perangkat ini. Tambahkan Face ID, Touch ID, atau sidik jari di pengaturan perangkat, lalu coba lagi.',
       no_hardware_message: 'Perangkat ini tidak mendukung autentikasi biometrik.',

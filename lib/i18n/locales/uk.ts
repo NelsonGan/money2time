@@ -667,7 +667,6 @@ const uk = {
       unlock_action: 'Розблокувати',
       locked_title: 'Money2Time заблоковано',
       locked_subtitle: 'Використовуйте %{method}, щоб продовжити.',
-      unavailable_title: 'Біометрія недоступна',
       not_enrolled_message:
         'На цьому пристрої не налаштовано біометрію. Додайте Face ID, Touch ID або відбиток пальця в налаштуваннях пристрою та повторіть спробу.',
       no_hardware_message: 'Цей пристрій не підтримує біометричну автентифікацію.',

@@ -651,7 +651,6 @@ const zh = {
       unlock_action: '解锁',
       locked_title: 'Money2Time 已锁定',
       locked_subtitle: '使用%{method}以继续。',
-      unavailable_title: '无法使用生物识别',
       not_enrolled_message:
         '此设备尚未设置生物识别。请在设备设置中添加面容 ID、触控 ID 或指纹，然后重试。',
       no_hardware_message: '此设备不支持生物识别验证。',

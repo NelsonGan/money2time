@@ -675,7 +675,6 @@ const tr = {
       unlock_action: 'Kilidi aç',
       locked_title: 'Money2Time kilitli',
       locked_subtitle: 'Devam etmek için %{method} kullanın.',
-      unavailable_title: 'Biyometri kullanılamıyor',
       not_enrolled_message:
         'Bu cihazda biyometri ayarlanmamış. Cihaz ayarlarından Face ID, Touch ID veya parmak izi ekleyin ve tekrar deneyin.',
       no_hardware_message: 'Bu cihaz biyometrik kimlik doğrulamayı desteklemiyor.',

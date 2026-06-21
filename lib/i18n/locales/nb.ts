@@ -671,7 +671,6 @@ const nb = {
       unlock_action: 'Lås opp',
       locked_title: 'Money2Time er låst',
       locked_subtitle: 'Bruk %{method} for å fortsette.',
-      unavailable_title: 'Biometri utilgjengelig',
       not_enrolled_message:
         'Ingen biometri er konfigurert på denne enheten. Legg til Face ID, Touch ID eller et fingeravtrykk i enhetsinnstillingene, og prøv igjen.',
       no_hardware_message: 'Denne enheten støtter ikke biometrisk autentisering.',
