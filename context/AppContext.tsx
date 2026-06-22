@@ -965,7 +965,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateAccount(accountId, { ...otherUpdates, currency: toCurrency });
         return;
       }
-      const rate = resolveRate(acct.currency, toCurrency, rateTableRef.current) ?? 1;
+      // Resolve the rate from a freshly-built table (the in-memory one can be
+      // stale right after a restore/import) so the lump conversion actually
+      // applies an exchange rate rather than silently relabelling.
+      const reporting = reportingCurrencyRef.current;
+      const freshTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
+      const rate = resolveRate(acct.currency, toCurrency, freshTable) ?? 1;
       runMutation(() => {
         accountsRepository.update(accountId, {
           ...otherUpdates,

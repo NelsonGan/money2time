@@ -2233,6 +2233,7 @@ export function AccountsScreen({
             transactions={pageTransactions}
             locale={activeLocale}
             displaySettings={transactionDisplaySettings}
+            subtotalCurrencyCode={selectedAccount?.currency ?? null}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
@@ -2274,6 +2275,7 @@ export function AccountsScreen({
       isSelectionMode,
       pagerAnchorDate,
       pagerPageStyle,
+      selectedAccount?.currency,
       selectedAccountIdForPager,
       selectedAccountStatementDay,
       selectedTransactionIds,

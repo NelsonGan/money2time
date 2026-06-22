@@ -795,19 +795,14 @@ export function TransactionEditorScreen({
 
   const nudgeMessageParts = useMemo(() => {
     if (type !== 'expense') return null;
+    // For a subcurrency entry we surface the main-currency equivalent instead of
+    // the worktime nudge, so skip the nudge here.
+    if (effectiveEntryCurrency !== settings.currencyCode) return null;
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) return null;
     const rate = currentMonthWage?.trueHourlyRate ?? 0;
     if (rate <= 0) return null;
-    // The hourly rate is in the reporting currency, so convert the entered
-    // amount to reporting before computing the time equivalent.
-    const reportingAmount = convert(
-      numericAmount,
-      effectiveEntryCurrency,
-      settings.currencyCode,
-      rateTable,
-    ).value;
-    const hours = amountToHoursByRate(reportingAmount, rate);
+    const hours = amountToHoursByRate(numericAmount, rate);
     const formattedHours = formatHours(hours);
     if (hours < 0.25)
       return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
@@ -818,7 +813,6 @@ export function TransactionEditorScreen({
     amount,
     currentMonthWage?.trueHourlyRate,
     effectiveEntryCurrency,
-    rateTable,
     settings.currencyCode,
     type,
   ]);
@@ -1098,11 +1092,14 @@ export function TransactionEditorScreen({
     return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
   }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
-  // For an expense/income entered in a subcurrency, the main-currency
-  // equivalent (snapshot rate), shown as a suffix under the amount.
+  // The main-currency equivalent of the entered amount, shown as a suffix under
+  // the amount for any subcurrency entry. For transfers the received amount
+  // already covers the destination currency, so only add this when neither side
+  // is the main currency (e.g. a same-subcurrency transfer).
   const reportingEquivLabel = useMemo(() => {
-    if (isTransferType || isBalanceAdjustmentType) return null;
+    if (isBalanceAdjustmentType) return null;
     if (effectiveEntryCurrency === settings.currencyCode) return null;
+    if (isTransferType && selectedToAccount?.currency === settings.currencyCode) return null;
     const num = Number(amount);
     if (!num || !Number.isFinite(num)) return null;
     const { value } = convert(num, effectiveEntryCurrency, settings.currencyCode, rateTable);
@@ -1112,6 +1109,7 @@ export function TransactionEditorScreen({
     effectiveEntryCurrency,
     isBalanceAdjustmentType,
     isTransferType,
+    selectedToAccount,
     rateTable,
     settings.currencyCode,
   ]);

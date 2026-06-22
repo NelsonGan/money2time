@@ -14,6 +14,7 @@ import { TransactionItem } from '~/features/transactions/components/TransactionI
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations, UserSettings } from '~/types';
+import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
 export type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
@@ -38,6 +39,12 @@ const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
   displaySettings: TransactionDisplaySettings;
+  /**
+   * When set (single-account view), day subtotals are summed in this account's
+   * native currency and shown with its symbol, rather than converted to the
+   * reporting currency.
+   */
+  subtotalCurrencyCode?: string | null;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
@@ -211,6 +218,7 @@ function formatDayHeaderParts(
 export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
   displaySettings,
+  subtotalCurrencyCode,
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
   onTransactionPress,
@@ -268,13 +276,17 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       if (transaction.type === 'income') {
         const value = isTimeMode
           ? getDisplayValueForTransaction(transaction)
-          : (transaction.reportingAmount ?? transaction.amount);
+          : subtotalCurrencyCode
+            ? transaction.amount
+            : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.income += value;
       }
       if (transaction.type === 'expense') {
         const value = isTimeMode
           ? getDisplayValueForTransaction(transaction)
-          : (transaction.reportingAmount ?? transaction.amount);
+          : subtotalCurrencyCode
+            ? transaction.amount
+            : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.expense += value;
       }
       dailyTotals.set(dayKey, dayTotals);
@@ -311,7 +323,24 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     });
 
     return nextRows;
-  }, [getDisplayValueForTransaction, groupByDate, isTimeMode, locale, transactions]);
+  }, [
+    getDisplayValueForTransaction,
+    groupByDate,
+    isTimeMode,
+    locale,
+    subtotalCurrencyCode,
+    transactions,
+  ]);
+
+  // Day subtotals in a single-account view use that account's symbol; otherwise
+  // the reporting-currency symbol from displaySettings.
+  const subtotalSettings = useMemo<TransactionDisplaySettings>(
+    () =>
+      subtotalCurrencyCode
+        ? { ...displaySettings, currencySymbol: currencySymbolForCode(subtotalCurrencyCode) }
+        : displaySettings,
+    [displaySettings, subtotalCurrencyCode],
+  );
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -341,7 +370,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             incomeSubtotal={item.incomeSubtotal}
             expenseSubtotal={item.expenseSubtotal}
             isTimeMode={isTimeMode}
-            settings={displaySettings}
+            settings={subtotalSettings}
           />
         );
       }
@@ -374,6 +403,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       selectedTransactionIdSet,
       selectionMode,
       displaySettings,
+      subtotalSettings,
     ],
   );
   const renderListItem = useCallback(
