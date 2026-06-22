@@ -1,6 +1,41 @@
 # Multi-Currency — Design & Implementation Plan
 
-Status: **Design / proposal (decisions locked)** · Branch: `claude/multi-currency-design-ana50m`
+Status: **Implemented** · Branch: `claude/multi-currency-design-ana50m`
+
+## Implementation status
+
+Built across all four phases:
+
+- **Data** — `exchange_rates` table; `transactions` snapshot columns
+  (`reporting_currency`, `reporting_amount`, `fx_rate`) + `to_amount`;
+  `recurring_rules.to_amount`; settings FX fields. Migrations 026–029 with a
+  backfill of existing rows. `exchangeRatesRepository`, mapper + type updates.
+- **FX service** — `services/exchangeRates.ts`: Frankfurter daily fetch +
+  `refreshRatesNow`, staleness guard, offline-safe cache, manual overrides,
+  `fetchHistoricalRate`. Pure `utils/currency.ts` (`convert`, `buildRateTable`,
+  coverage helpers).
+- **Context** — in-memory rate table, frozen snapshots on create/update,
+  snapshot-aware cashflow/insights/time-mode, reporting-currency conversion for
+  net worth, `changeReportingCurrency` with historical re-snapshot, exposed FX
+  API.
+- **UI** — Settings → Exchange Rates screen (update button, per-currency rates,
+  auto/manual badges, manual overrides), account currency picker, native-currency
+  display on account cards & transaction rows, converted net-worth totals,
+  cross-currency transfer received-amount field, `formatAmount` currency override.
+- **Tests** — `utils/currency`, `services/exchangeRates`; full suite green
+  (305 tests), typecheck + lint clean.
+
+Known limitations: cross-currency **recurring** transfers don't yet snapshot a
+reporting value or compute `to_amount` at generation time (same-currency works;
+multi-currency falls back to the native amount until a reporting-currency change
+re-snapshots). The transfer received-amount field is a plain input (no inline
+rate-vs-amount toggle); the global manual-rate override covers the rate path.
+
+---
+
+Original design / decisions below.
+
+
 
 This document describes how to add real multi-currency support to money2time —
 a local-first budget tracker. Goals:

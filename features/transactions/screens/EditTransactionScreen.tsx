@@ -190,6 +190,7 @@ export function EditTransactionScreen({
         accountId: transaction.accountId,
         fromAccountId: transaction.fromAccountId,
         toAccountId: transaction.toAccountId,
+        toAmount: transaction.toAmount,
         categoryId: transaction.categoryId,
         note: transaction.note ?? '',
         sentiment: transaction.sentiment ?? 'neutral',
