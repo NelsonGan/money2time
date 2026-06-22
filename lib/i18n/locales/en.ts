@@ -1143,6 +1143,10 @@ const en = {
     due_day: 'Due day',
     current_balance: 'Current balance',
     current_balance_hint: 'Set the latest actual balance for this account.',
+    currency_change_title: 'Change account currency?',
+    currency_change_message:
+      'Past entries in this account will be converted from {{from}} to {{to}} at the latest exchange rate, all at once. This changes how earlier entries are recorded.',
+    currency_change_action: 'Convert & change',
     balance_adjustment_prompt_title: 'How should this balance change be recorded?',
     balance_adjustment_prompt_message:
       'Balance changed by {{amount}}. Record as income/expense or keep as account difference (excluded from insights totals).',
@@ -1446,6 +1450,12 @@ const en = {
     no_currency_match: 'No matching currency',
     edit_rate_title: 'Edit rate',
     remove_currency: 'Remove',
+    reset_title: 'Change main currency?',
+    reset_message:
+      'Switching to {{code}} will permanently delete all your accounts, transactions, and settings. This cannot be undone.',
+    reset_prompt: 'Type {{word}} to confirm',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Delete & switch',
   },
   auto_backup: {
     title: 'Auto-backup',

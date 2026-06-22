@@ -113,6 +113,7 @@ import {
   currencySymbolForCode,
   emptyRateTable,
   isAutoRateSupported,
+  resolveRate,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
@@ -167,6 +168,8 @@ interface AppContextValue extends AppState {
   setManualExchangeRate: (quoteCurrency: string, rate: number) => void;
   /** Change the reporting currency, refetch rates, and re-snapshot history. */
   changeReportingCurrency: (code: string) => Promise<RateRefreshResult>;
+  /** Wipe all data and restart in `code` (destructive main-currency change). */
+  resetAndChangeMainCurrency: (code: string) => void;
   /** Currency codes the user has added on the Multi currency page. */
   fxCurrencies: string[];
   /** Add a sub-currency; auto-populates its latest rate from the cache/feed. */
@@ -183,6 +186,12 @@ interface AppContextValue extends AppState {
   updateAccount: (
     id: string,
     input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
+  ) => void;
+  /** Change an existing account's currency, re-denominating its history in a lump. */
+  changeAccountCurrency: (
+    accountId: string,
+    toCurrency: string,
+    otherUpdates?: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
   deleteAccount: (id: string) => void;
   reorderAccounts: (ids: string[]) => void;
@@ -938,6 +947,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [runMutation],
+  );
+
+  // Change an existing account's currency, re-denominating its starting balance
+  // and prior entries at the latest rate in a lump. `otherUpdates` carries any
+  // non-currency field edits made in the same save.
+  const changeAccountCurrency = useCallback(
+    (
+      accountId: string,
+      toCurrency: string,
+      otherUpdates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>> = {},
+    ) => {
+      const acct = accounts.find((a) => a.id === accountId);
+      if (!acct) return;
+      if (acct.currency === toCurrency) {
+        updateAccount(accountId, { ...otherUpdates, currency: toCurrency });
+        return;
+      }
+      const rate = resolveRate(acct.currency, toCurrency, rateTableRef.current) ?? 1;
+      runMutation(() => {
+        accountsRepository.update(accountId, {
+          ...otherUpdates,
+          currency: toCurrency,
+          startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
+        });
+        transactionsRepository.redenominateAccount(accountId, toCurrency, rate);
+      });
+    },
+    [accounts, runMutation, updateAccount],
   );
 
   const deleteAccount = useCallback(
@@ -2110,6 +2147,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [reloadRateTable, resnapshotAllTransactions, refreshAll],
   );
 
+  // Changing the main currency wipes all data and starts fresh in the new
+  // currency (historical entries can't be re-based reliably). Gated behind a
+  // typed confirmation in the UI.
+  const resetAndChangeMainCurrency = useCallback(
+    (code: string) => {
+      runMutation(() => {
+        purgeAllData();
+        settingsRepository.updateSettings({
+          currencyCode: code,
+          currencySymbol: currencySymbolForCode(code),
+          onboardingCompleted: true,
+        });
+        exchangeRatesRepository.clearAll();
+      });
+      reportingCurrencyRef.current = code;
+      void runRateRefreshIfDue({ force: true }).then((result) => {
+        if (result.ok) reloadRateTable(code);
+      });
+      void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, { changed_fields: 'currencyCode_reset' });
+    },
+    [reloadRateTable, runMutation],
+  );
+
   // Refresh FX rates once on load (and when the reporting currency changes),
   // subject to the daily staleness guard inside the service.
   const fxReportingCurrency = settings?.currencyCode;
@@ -2712,6 +2772,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             refreshExchangeRates,
             setManualExchangeRate,
             changeReportingCurrency,
+            resetAndChangeMainCurrency,
             fxCurrencies,
             addFxCurrency,
             removeFxCurrency,
@@ -2722,6 +2783,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             refreshSettings,
             createAccount,
             updateAccount,
+            changeAccountCurrency,
             deleteAccount,
             reorderAccounts,
             createAccountGroup,
@@ -2800,6 +2862,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshExchangeRates,
       setManualExchangeRate,
       changeReportingCurrency,
+      resetAndChangeMainCurrency,
       fxCurrencies,
       addFxCurrency,
       removeFxCurrency,
@@ -2810,6 +2873,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshSettings,
       createAccount,
       updateAccount,
+      changeAccountCurrency,
       deleteAccount,
       reorderAccounts,
       createAccountGroup,

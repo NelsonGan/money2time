@@ -43,7 +43,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     listExchangeRates,
     refreshExchangeRates,
     setManualExchangeRate,
-    changeReportingCurrency,
+    resetAndChangeMainCurrency,
     fxCurrencies,
     addFxCurrency,
     removeFxCurrency,
@@ -53,11 +53,12 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
 
   const reporting = settings.currencyCode;
   const [refreshing, setRefreshing] = useState(false);
-  const [changingCurrency, setChangingCurrency] = useState(false);
   const [rateVersion, setRateVersion] = useState(0);
   const [mainPickerVisible, setMainPickerVisible] = useState(false);
   const [addPickerVisible, setAddPickerVisible] = useState(false);
   const [editCode, setEditCode] = useState<string | null>(null);
+  // Pending destructive main-currency change, awaiting typed confirmation.
+  const [pendingMainCurrency, setPendingMainCurrency] = useState<string | null>(null);
 
   const rateRows = useMemo(() => listExchangeRates(), [listExchangeRates, rateVersion]);
   const rateByQuote = useMemo(() => new Map(rateRows.map((r) => [r.quoteCurrency, r])), [rateRows]);
@@ -105,20 +106,13 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     else void triggerHaptic('warning');
   }, [refreshExchangeRates]);
 
-  const handleChangeMainCurrency = useCallback(
-    async (code: string) => {
-      if (code === reporting || changingCurrency) return;
-      setChangingCurrency(true);
-      void triggerHaptic('selection');
-      try {
-        await changeReportingCurrency(code);
-        setRateVersion((v) => v + 1);
-        void triggerHaptic('success');
-      } finally {
-        setChangingCurrency(false);
-      }
+  const handlePickMainCurrency = useCallback(
+    (code: string) => {
+      if (code === reporting) return;
+      // Defer to a typed-confirmation modal — this wipes all data.
+      setPendingMainCurrency(code);
     },
-    [changeReportingCurrency, changingCurrency, reporting],
+    [reporting],
   );
 
   const handleAddCurrency = useCallback(
@@ -163,7 +157,6 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
           <CardContent style={styles.summaryCard}>
             <Pressable
               onPress={() => setMainPickerVisible(true)}
-              disabled={changingCurrency}
               style={[styles.mainCurrencyRow, { borderColor: themeColors.border }]}
             >
               <View>
@@ -178,15 +171,13 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
             </Pressable>
             <View style={styles.summaryRow}>
               <Text variant="caption" tone="muted">
-                {changingCurrency
-                  ? I18n.t('exchange_rates.updating')
-                  : asOfDate
-                    ? I18n.t('exchange_rates.as_of', { date: asOfDate })
-                    : I18n.t('exchange_rates.never_updated')}
+                {asOfDate
+                  ? I18n.t('exchange_rates.as_of', { date: asOfDate })
+                  : I18n.t('exchange_rates.never_updated')}
               </Text>
               <Pressable
                 onPress={() => void handleRefresh()}
-                disabled={refreshing || changingCurrency}
+                disabled={refreshing}
                 style={[styles.refreshButton, { borderColor: themeColors.border }]}
               >
                 {refreshing ? (
@@ -210,7 +201,6 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
-              <View style={[styles.sectionDot, { backgroundColor: themeColors.primary }]} />
               <Text variant="label" className="text-[12px] tracking-widest text-muted-foreground">
                 {I18n.t('exchange_rates.subcurrencies_title')}
               </Text>
@@ -280,7 +270,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
       <CurrencyPickerSheet
         visible={mainPickerVisible}
         onClose={() => setMainPickerVisible(false)}
-        onSelect={(code) => void handleChangeMainCurrency(code)}
+        onSelect={handlePickMainCurrency}
         selectedCode={reporting}
         title={I18n.t('exchange_rates.main_currency')}
       />
@@ -300,7 +290,95 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
         onSave={handleSaveRate}
         onRemove={handleRemoveCurrency}
       />
+      <MainCurrencyResetModal
+        code={pendingMainCurrency}
+        onClose={() => setPendingMainCurrency(null)}
+        onConfirm={(c) => {
+          setPendingMainCurrency(null);
+          setMainPickerVisible(false);
+          resetAndChangeMainCurrency(c);
+          void triggerHaptic('success');
+        }}
+      />
     </SettingsPageLayout>
+  );
+}
+
+interface MainCurrencyResetModalProps {
+  code: string | null;
+  onClose: () => void;
+  onConfirm: (code: string) => void;
+}
+
+function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetModalProps) {
+  const themeColors = useThemeColors();
+  const [text, setText] = useState('');
+  const confirmWord = I18n.t('exchange_rates.reset_confirm_word');
+
+  useEffect(() => {
+    if (code) setText('');
+  }, [code]);
+
+  const matches = text.trim().toUpperCase() === confirmWord.toUpperCase();
+
+  return (
+    <ThemeModal visible={!!code} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable className="flex-1 items-center justify-center bg-black/40 px-6" onPress={onClose}>
+        <Pressable
+          className="w-full max-w-[360px] rounded-[28px] border border-border/30 bg-card p-5"
+          onPress={(e) => e.stopPropagation()}
+        >
+          <Text variant="heading">{I18n.t('exchange_rates.reset_title')}</Text>
+          <Text variant="body" tone="muted" className="mt-2">
+            {I18n.t('exchange_rates.reset_message', { code: code ?? '' })}
+          </Text>
+          <Text variant="caption" tone="muted" className="mt-4 mb-1.5">
+            {I18n.t('exchange_rates.reset_prompt', { word: confirmWord })}
+          </Text>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            allowFontScaling={false}
+            placeholder={confirmWord}
+            placeholderTextColor={themeColors.textMuted}
+            style={{
+              color: themeColors.text,
+              borderColor: themeColors.border,
+              backgroundColor: themeColors.card,
+              borderWidth: 1,
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              fontSize: 16,
+            }}
+          />
+          <View className="mt-5 flex-row items-center justify-end gap-2.5">
+            <Pressable
+              onPress={onClose}
+              className="rounded-pill bg-secondary/60 px-5 py-2.5"
+              accessibilityRole="button"
+            >
+              <Text variant="caption" tone="muted">
+                {I18n.t('common.cancel')}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => code && matches && onConfirm(code)}
+              disabled={!matches}
+              style={{ backgroundColor: themeColors.error, opacity: matches ? 1 : 0.4 }}
+              className="rounded-pill px-5 py-2.5"
+              accessibilityRole="button"
+            >
+              <Text variant="caption" tone="inverse">
+                {I18n.t('exchange_rates.reset_action')}
+              </Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </ThemeModal>
   );
 }
 
@@ -456,7 +534,6 @@ const styles = StyleSheet.create({
   section: { marginTop: 28, gap: 12 },
   sectionHeader: { paddingHorizontal: 4 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#C0476B', opacity: 0.6 },
   rateCode: { width: 48 },
   flex1: { flex: 1, minWidth: 0 },
   rateValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },

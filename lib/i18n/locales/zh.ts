@@ -1100,6 +1100,10 @@ const zh = {
     due_day: '还款日',
     current_balance: '当前余额',
     current_balance_hint: '设置该账户的最新实际余额。',
+    currency_change_title: '更改账户货币？',
+    currency_change_message:
+      '此账户的过往记录将按最新汇率从 {{from}} 一次性换算为 {{to}}。这会改变早前记录的记账方式。',
+    currency_change_action: '换算并更改',
     balance_adjustment_prompt_title: '如何记录此余额变动？',
     balance_adjustment_prompt_message:
       '余额变动 {{amount}}。记录为收入/支出，还是仅作为账户差额（不计入洞察总额）？',
@@ -1389,6 +1393,11 @@ const zh = {
     no_currency_match: '没有匹配的货币',
     edit_rate_title: '编辑汇率',
     remove_currency: '移除',
+    reset_title: '更改主货币？',
+    reset_message: '切换为 {{code}} 将永久删除你的所有账户、交易和设置。此操作无法撤销。',
+    reset_prompt: '输入 {{word}} 以确认',
+    reset_confirm_word: 'DELETE',
+    reset_action: '删除并切换',
   },
   auto_backup: {
     title: '自动备份',

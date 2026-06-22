@@ -1378,6 +1378,7 @@ export function AccountsScreen({
     reorderAccountGroups,
     renameAccountGroup,
     updateAccount,
+    changeAccountCurrency,
     updateTransactionsBulk,
   } = useApp();
   const { checkLimit } = useProGate();
@@ -2083,6 +2084,38 @@ export function AccountsScreen({
         includeInTotals: updates.includeInTotals,
         currency: updates.currency,
       };
+
+      // Currency change on an existing account re-denominates prior entries at
+      // the latest rate in a lump — warn, then run it as its own operation.
+      if (updates.currency && updates.currency !== account.currency) {
+        Alert.alert(
+          I18n.t('accounts.currency_change_title'),
+          I18n.t('accounts.currency_change_message', {
+            from: account.currency,
+            to: updates.currency,
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.currency_change_action'),
+              style: 'destructive',
+              onPress: () => {
+                changeAccountCurrency(account.id, updates.currency, {
+                  name: updates.name,
+                  accountGroup: updates.accountGroup,
+                  logoId: updates.logoId,
+                  creditStatementDay: updates.creditStatementDay,
+                  creditDueDay: updates.creditDueDay,
+                  includeInTotals: updates.includeInTotals,
+                });
+                onComplete();
+              },
+            },
+          ],
+        );
+        return;
+      }
+
       const delta = updates.startingBalance - currentBalance;
       const adjustmentAmount = Math.abs(delta);
       const hasBalanceChange = adjustmentAmount > 0.000001;
@@ -2143,7 +2176,13 @@ export function AccountsScreen({
         ],
       );
     },
-    [createTransaction, currentMonthWage?.trueHourlyRate, settings, updateAccount],
+    [
+      changeAccountCurrency,
+      createTransaction,
+      currentMonthWage?.trueHourlyRate,
+      settings,
+      updateAccount,
+    ],
   );
   const handleAccountManagementPress = useCallback((account: Account) => {
     void triggerHaptic('selection');

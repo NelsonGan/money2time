@@ -363,6 +363,67 @@ class TransactionsRepository {
     return this.list({ accountId, sortBy: 'date_desc' });
   }
 
+  /**
+   * Re-denominate every transaction touching `accountId` into `toCurrency` by
+   * applying `rate` (1 old-currency = `rate` toCurrency) in a lump — used when
+   * the user changes an existing account's currency. Native entries switch
+   * currency and scale their amount (keeping the frozen reporting value);
+   * foreign entries only scale their frozen account-currency amount; transfer
+   * legs touching the account scale accordingly.
+   */
+  redenominateAccount(accountId: string, toCurrency: string, rate: number): void {
+    const sqlite = getSQLite();
+    const now = nowIso();
+    sqlite.execSync('BEGIN');
+    try {
+      // Foreign-entry rows in this account: only the frozen account-currency value moves.
+      sqlite.runSync(
+        `UPDATE transactions SET account_amount = account_amount * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND account_id = ?
+           AND type IN ('income','expense','balance_adjustment') AND account_amount IS NOT NULL`,
+        [rate, now, accountId],
+      );
+      // Native-entry rows: scale the amount, switch currency, keep the reporting value.
+      sqlite.runSync(
+        `UPDATE transactions SET amount = amount * ?, currency = ?,
+           fx_rate = CASE WHEN reporting_amount IS NOT NULL AND amount * ? != 0
+             THEN reporting_amount / (amount * ?) ELSE fx_rate END,
+           updated_at = ?
+         WHERE deleted_at IS NULL AND account_id = ?
+           AND type IN ('income','expense','balance_adjustment') AND account_amount IS NULL`,
+        [rate, toCurrency, rate, rate, now, accountId],
+      );
+      // Transfers out of this account (amount is in the from-currency). A
+      // previously same-currency transfer becomes cross-currency, so freeze the
+      // destination's value before scaling the sent amount.
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = amount
+         WHERE deleted_at IS NULL AND from_account_id = ? AND type = 'transfer' AND to_amount IS NULL`,
+        [accountId],
+      );
+      sqlite.runSync(
+        `UPDATE transactions SET amount = amount * ?, currency = ?, updated_at = ?
+         WHERE deleted_at IS NULL AND from_account_id = ? AND type = 'transfer'`,
+        [rate, toCurrency, now, accountId],
+      );
+      // Transfers into this account (to_amount is in this account's currency).
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = to_amount * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND to_account_id = ? AND type = 'transfer' AND to_amount IS NOT NULL`,
+        [rate, now, accountId],
+      );
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = amount * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND to_account_id = ? AND type = 'transfer' AND to_amount IS NULL`,
+        [rate, now, accountId],
+      );
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
   getById(id: string): TransactionWithRelations | null {
     const db = getDb();
     const row = db
