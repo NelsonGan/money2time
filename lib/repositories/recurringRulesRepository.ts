@@ -1,10 +1,12 @@
 import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
-import { recurringRulesTable } from '~/lib/db/schema';
+import { accountsTable, recurringRulesTable, settingsTable } from '~/lib/db/schema';
 import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
+import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
 
+import { exchangeRatesRepository } from './exchangeRatesRepository';
 import { toRecurringRule } from './mappers';
 import { transactionsRepository } from './transactionsRepository';
 
@@ -163,6 +165,21 @@ class RecurringRulesRepository {
 
     if (dueRules.length === 0) return [];
 
+    // Build the FX context so generated transactions carry the same frozen
+    // reporting snapshot / account-currency value / cross-currency to-amount
+    // that the editor would produce — otherwise foreign-currency rules would
+    // be counted at face value in main-currency totals.
+    const reporting =
+      db.select({ c: settingsTable.currencyCode }).from(settingsTable).get()?.c ?? 'USD';
+    const rateTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
+    const accountCurrencyById = new Map(
+      db
+        .select({ id: accountsTable.id, currency: accountsTable.currency })
+        .from(accountsTable)
+        .all()
+        .map((row) => [row.id, row.currency]),
+    );
+
     const processed: ProcessedRecurringRule[] = [];
 
     dueRules.forEach((rule) => {
@@ -172,10 +189,16 @@ class RecurringRulesRepository {
         if (!rule.endDate || cursor <= rule.endDate) {
           if (rule.type === 'transfer') {
             if (rule.fromAccountId && rule.toAccountId && rule.fromAccountId !== rule.toAccountId) {
+              const toCurrency = accountCurrencyById.get(rule.toAccountId) ?? rule.currency;
+              const crossCurrency = toCurrency !== rule.currency;
               transactionsRepository.create({
                 type: 'transfer',
                 amount: rule.amount,
                 currency: rule.currency,
+                // Credit the destination in its own currency for cross-currency rules.
+                toAmount: crossCurrency
+                  ? convert(rule.amount, rule.currency, toCurrency, rateTable).value
+                  : null,
                 date: cursor,
                 fromAccountId: rule.fromAccountId,
                 toAccountId: rule.toAccountId,
@@ -183,10 +206,25 @@ class RecurringRulesRepository {
               });
             }
           } else if (rule.accountId && rule.categoryId) {
+            const accountCurrency = accountCurrencyById.get(rule.accountId) ?? reporting;
+            const { value: reportingAmount, rateUsed } = convert(
+              rule.amount,
+              rule.currency,
+              reporting,
+              rateTable,
+            );
             transactionsRepository.create({
               type: rule.type,
               amount: rule.amount,
               currency: rule.currency,
+              reportingCurrency: reporting,
+              reportingAmount,
+              fxRate: rateUsed ?? (rule.currency === reporting ? 1 : null),
+              // Freeze the account-currency value when the rule's currency differs.
+              accountAmount:
+                rule.currency !== accountCurrency
+                  ? convert(rule.amount, rule.currency, accountCurrency, rateTable).value
+                  : null,
               date: cursor,
               accountId: rule.accountId,
               categoryId: rule.categoryId,
