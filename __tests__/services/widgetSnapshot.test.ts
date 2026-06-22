@@ -27,6 +27,7 @@ const baseSettings: UserSettings = {
   autoFxRefreshEnabled: true,
   lastRateFetchAt: null,
   lastRateFetchError: null,
+  fxCurrenciesJson: null,
   createdAt: '2026-06-01T00:00:00.000Z',
   updatedAt: '2026-06-01T00:00:00.000Z',
   deletedAt: null,

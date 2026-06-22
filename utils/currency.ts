@@ -1,4 +1,4 @@
-import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { ALL_CURRENCIES } from '~/constants/appDefaults';
 import type { ExchangeRate, RateTable } from '~/types';
 
 import { normalizeMoneyAmount } from './formatters';
@@ -72,7 +72,7 @@ export function convert(amount: number, from: string, to: string, table: RateTab
   return { value: normalizeMoneyAmount(amount * rate), rateUsed: rate };
 }
 
-const currencyByCode = new Map(MAJOR_CURRENCIES.map((c) => [c.code, c]));
+const currencyByCode = new Map(ALL_CURRENCIES.map((c) => [c.code, c]));
 
 /** Currency codes supported by the Frankfurter (ECB) feed. */
 export const FRANKFURTER_SUPPORTED = new Set<string>([

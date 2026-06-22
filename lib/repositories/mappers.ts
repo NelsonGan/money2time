@@ -292,6 +292,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     autoFxRefreshEnabled: row.autoFxRefreshEnabled ?? true,
     lastRateFetchAt: row.lastRateFetchAt ?? null,
     lastRateFetchError: row.lastRateFetchError ?? null,
+    fxCurrenciesJson: row.fxCurrenciesJson ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

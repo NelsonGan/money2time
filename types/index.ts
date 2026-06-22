@@ -142,6 +142,8 @@ export interface UserSettings {
   /** ISO timestamp of the last successful FX rate refresh, or null. */
   lastRateFetchAt: string | null;
   lastRateFetchError: string | null;
+  /** JSON array of currency codes the user has added on the Multi currency page. */
+  fxCurrenciesJson: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

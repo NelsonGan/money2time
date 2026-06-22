@@ -53,6 +53,7 @@ class SettingsRepository {
         | 'autoFxRefreshEnabled'
         | 'lastRateFetchAt'
         | 'lastRateFetchError'
+        | 'fxCurrenciesJson'
       >
     >,
   ) {

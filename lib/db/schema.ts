@@ -125,6 +125,7 @@ export const settingsTable = sqliteTable('settings', {
     .default(true),
   lastRateFetchAt: text('last_rate_fetch_at'),
   lastRateFetchError: text('last_rate_fetch_error'),
+  fxCurrenciesJson: text('fx_currencies_json'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

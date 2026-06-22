@@ -167,6 +167,12 @@ interface AppContextValue extends AppState {
   setManualExchangeRate: (quoteCurrency: string, rate: number) => void;
   /** Change the reporting currency, refetch rates, and re-snapshot history. */
   changeReportingCurrency: (code: string) => Promise<RateRefreshResult>;
+  /** Currency codes the user has added on the Multi currency page. */
+  fxCurrencies: string[];
+  /** Add a sub-currency; auto-populates its latest rate from the cache/feed. */
+  addFxCurrency: (code: string) => Promise<void>;
+  /** Remove a previously added sub-currency. */
+  removeFxCurrency: (code: string) => void;
   setActiveAccountFilter: (accountId: string | null) => void;
   setTransactionFilters: (filters: Partial<TransactionFilters>) => void;
   resetTransactionFilters: () => void;
@@ -289,6 +295,17 @@ const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 
 function categorySeedKey(type: Category['type'], name: string) {
   return `${type}:${name.trim().toLowerCase()}`;
+}
+
+/** Parse the persisted JSON array of added sub-currency codes (defensive). */
+function parseFxCurrencies(json: string | null): string[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed.filter((c): c is string => typeof c === 'string') : [];
+  } catch {
+    return [];
+  }
 }
 
 function accountNameSeedKey(name: string) {
@@ -1958,6 +1975,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [reloadRateTable],
   );
 
+  const persistFxCurrencies = useCallback((codes: string[]) => {
+    settingsRepository.updateSettings({ fxCurrenciesJson: JSON.stringify(codes) });
+    setSettings(settingsRepository.get());
+  }, []);
+
+  const addFxCurrency = useCallback(
+    async (code: string) => {
+      const base = reportingCurrencyRef.current;
+      if (!code || code === base) return;
+      const current = parseFxCurrencies(settingsRepository.get().fxCurrenciesJson);
+      if (!current.includes(code)) persistFxCurrencies([...current, code]);
+      // Auto-populate the latest rate on first add. The daily cache usually
+      // already holds it; otherwise force a fetch when both legs are auto-rated.
+      const hasRate = exchangeRatesRepository.getRate(base, code) != null;
+      if (!hasRate && isAutoRateSupported(code) && isAutoRateSupported(base)) {
+        await refreshRatesNow();
+        setSettings(settingsRepository.get());
+      }
+      reloadRateTable(base);
+    },
+    [persistFxCurrencies, reloadRateTable],
+  );
+
+  const removeFxCurrency = useCallback(
+    (code: string) => {
+      const current = parseFxCurrencies(settingsRepository.get().fxCurrenciesJson);
+      persistFxCurrencies(current.filter((c) => c !== code));
+    },
+    [persistFxCurrencies],
+  );
+
+  const fxCurrencies = useMemo(
+    () => parseFxCurrencies(settings?.fxCurrenciesJson ?? null),
+    [settings?.fxCurrenciesJson],
+  );
+
   /**
    * Re-freeze every transaction's reporting snapshot into `nextReporting`, using
    * the historical FX rate for each transaction's date where available (falling
@@ -2637,6 +2690,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             refreshExchangeRates,
             setManualExchangeRate,
             changeReportingCurrency,
+            fxCurrencies,
+            addFxCurrency,
+            removeFxCurrency,
             setActiveAccountFilter,
             setTransactionFilters,
             resetTransactionFilters,
@@ -2722,6 +2778,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshExchangeRates,
       setManualExchangeRate,
       changeReportingCurrency,
+      fxCurrencies,
+      addFxCurrency,
+      removeFxCurrency,
       setActiveAccountFilter,
       setTransactionFilters,
       resetTransactionFilters,
