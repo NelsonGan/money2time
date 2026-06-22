@@ -65,11 +65,7 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
-import {
-  fetchHistoricalRate,
-  refreshRatesNow,
-  runRateRefreshIfDue,
-} from '~/services/exchangeRates';
+import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
@@ -167,8 +163,6 @@ interface AppContextValue extends AppState {
   refreshExchangeRates: () => Promise<RateRefreshResult>;
   /** Set/override a manual rate (1 reporting = `rate` quoteCurrency). */
   setManualExchangeRate: (quoteCurrency: string, rate: number) => void;
-  /** Change the reporting currency, refetch rates, and re-snapshot history. */
-  changeReportingCurrency: (code: string) => Promise<RateRefreshResult>;
   /** Wipe all data and restart in `code` (destructive main-currency change). */
   resetAndChangeMainCurrency: (code: string) => void;
   /** Currency codes the user has added on the Multi currency page. */
@@ -2076,83 +2070,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [settings?.fxCurrenciesJson],
   );
 
-  /**
-   * Re-freeze every transaction's reporting snapshot into `nextReporting`, using
-   * the historical FX rate for each transaction's date where available (falling
-   * back to the latest cached rate). Runs once when the reporting currency
-   * changes so frozen history stays consistent with the new currency.
-   */
-  const resnapshotAllTransactions = useCallback(async (nextReporting: string) => {
-    const rows = transactionsRepository.listForSnapshot();
-    if (rows.length === 0) return;
-
-    const table = buildRateTable(nextReporting, exchangeRatesRepository.listByBase(nextReporting));
-
-    // Cache historical lookups per (currency|date) to avoid duplicate requests.
-    const historicalCache = new Map<string, number | null>();
-    const snapshots: {
-      id: string;
-      reportingCurrency: string;
-      reportingAmount: number;
-      fxRate: number;
-    }[] = [];
-
-    for (const row of rows) {
-      if (row.currency === nextReporting) {
-        snapshots.push({
-          id: row.id,
-          reportingCurrency: nextReporting,
-          reportingAmount: row.amount,
-          fxRate: 1,
-        });
-        continue;
-      }
-
-      let rate: number | null = null;
-      const cacheKey = `${row.currency}|${row.date}`;
-      if (historicalCache.has(cacheKey)) {
-        rate = historicalCache.get(cacheKey) ?? null;
-      } else if (isAutoRateSupported(row.currency) && isAutoRateSupported(nextReporting)) {
-        rate = await fetchHistoricalRate(row.currency, nextReporting, row.date.slice(0, 10));
-        historicalCache.set(cacheKey, rate);
-      }
-      if (rate === null) {
-        // Fall back to the latest cached rate.
-        rate = convert(1, row.currency, nextReporting, table).rateUsed;
-      }
-      const effectiveRate = rate ?? 1;
-      snapshots.push({
-        id: row.id,
-        reportingCurrency: nextReporting,
-        reportingAmount: row.amount * effectiveRate,
-        fxRate: effectiveRate,
-      });
-    }
-
-    transactionsRepository.bulkSetSnapshots(snapshots);
-  }, []);
-
-  const changeReportingCurrency = useCallback(
-    async (code: string): Promise<RateRefreshResult> => {
-      settingsRepository.updateSettings({
-        currencyCode: code,
-        currencySymbol: currencySymbolForCode(code),
-      });
-      reportingCurrencyRef.current = code;
-      const result = await refreshRatesNow();
-      reloadRateTable(code);
-      try {
-        await resnapshotAllTransactions(code);
-      } catch (error) {
-        setLoadError(getErrorMessage(error, I18n.t('errors.generic_operation_failed')));
-      }
-      void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, { changed_fields: 'currencyCode' });
-      refreshAll();
-      return result;
-    },
-    [reloadRateTable, resnapshotAllTransactions, refreshAll],
-  );
-
   // Changing the main currency wipes all data and starts fresh in the new
   // currency (historical entries can't be re-based reliably). Gated behind a
   // typed confirmation in the UI.
@@ -2166,6 +2083,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           onboardingCompleted: true,
         });
         exchangeRatesRepository.clearAll();
+        // Re-seed the default categories and accounts in the new currency so the
+        // user lands in a usable (not empty) app rather than re-onboarding.
+        seedMinimalCategoriesIfMissing();
+        seedPowerAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
       void runRateRefreshIfDue({ force: true }).then((result) => {
@@ -2780,7 +2701,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             listExchangeRates,
             refreshExchangeRates,
             setManualExchangeRate,
-            changeReportingCurrency,
             resetAndChangeMainCurrency,
             fxCurrencies,
             addFxCurrency,
@@ -2870,7 +2790,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       listExchangeRates,
       refreshExchangeRates,
       setManualExchangeRate,
-      changeReportingCurrency,
       resetAndChangeMainCurrency,
       fxCurrencies,
       addFxCurrency,

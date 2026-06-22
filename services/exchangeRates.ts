@@ -102,25 +102,3 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
 export function refreshRatesNow(): Promise<RateRefreshResult> {
   return runRateRefreshIfDue({ force: true });
 }
-
-/**
- * Historical rate `from -> to` for a specific date (YYYY-MM-DD). Used when
- * snapshotting back-dated transactions. Returns null when unavailable.
- */
-export async function fetchHistoricalRate(
-  from: string,
-  to: string,
-  date: string,
-): Promise<number | null> {
-  if (from === to) return 1;
-  if (!isAutoRateSupported(from) || !isAutoRateSupported(to)) return null;
-  try {
-    const data = await fetchJson(
-      `${FRANKFURTER_BASE_URL}/${date}?base=${encodeURIComponent(from)}&symbols=${encodeURIComponent(to)}`,
-    );
-    const rate = data.rates?.[to];
-    return Number.isFinite(rate) && rate > 0 ? rate : null;
-  } catch {
-    return null;
-  }
-}

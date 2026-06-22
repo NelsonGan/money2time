@@ -6,10 +6,10 @@ import { normalizeMoneyAmount } from './formatters';
 const EMPTY_RATE_TABLE: RateTable = { base: 'USD', rates: { USD: 1 }, asOfDate: null };
 
 /**
- * Build an in-memory {@link RateTable} from cached exchange-rate rows. Rates are
- * normalized so every entry is expressed relative to a single `base` currency
- * (`1 base = rate quote`). If rows use multiple bases, the most common base is
- * chosen and cross-base rows are converted where possible.
+ * Build an in-memory {@link RateTable} relative to `base` from cached rows.
+ * Rows already keyed to `base` are used directly (`1 base = rate quote`); rows
+ * keyed the other way (`quote === base`) are inverted. Rows for other bases are
+ * ignored.
  */
 export function buildRateTable(base: string, rows: ExchangeRate[]): RateTable {
   const rates: Record<string, number> = { [base]: 1 };
@@ -22,8 +22,7 @@ export function buildRateTable(base: string, rows: ExchangeRate[]): RateTable {
     if (row.baseCurrency === base) {
       rates[row.quoteCurrency] = row.rate;
     } else if (row.quoteCurrency === base && row.rate !== 0) {
-      // Inverse: 1 quote(base) = rate base? No — row says 1 row.base = rate base.
-      // So 1 base = 1/rate row.base.
+      // Row stores `1 row.base = rate base`, so `1 base = 1/rate row.base`.
       rates[row.baseCurrency] = 1 / row.rate;
     }
   }
@@ -54,8 +53,7 @@ export function resolveRate(from: string, to: string, table: RateTable): number 
   const fromRate = from === table.base ? 1 : table.rates[from];
   const toRate = to === table.base ? 1 : table.rates[to];
   if (fromRate === undefined || toRate === undefined || fromRate === 0) return null;
-  // 1 from = fromRate base? No. table: 1 base = rates[x] x.
-  // So 1 from costs (1/fromRate) base; 1 base = toRate to.
+  // `1 from = (1/fromRate) base` and `1 base = toRate to`.
   return (1 / fromRate) * toRate;
 }
 

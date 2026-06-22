@@ -1,6 +1,7 @@
 import { getLocales } from 'expo-localization';
 
 import {
+  ALL_CURRENCIES,
   DEFAULT_CURRENCY,
   DEFAULT_CURRENCY_SYMBOL,
   MAJOR_CURRENCIES,
@@ -9,6 +10,7 @@ import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+const SYMBOL_BY_CODE = new Map(ALL_CURRENCIES.map((c) => [c.code, c.symbol]));
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -307,7 +309,7 @@ export function formatAmount(
   const amountSign = normalizedAmount > 0 ? '+' : normalizedAmount < 0 ? '-' : '';
   const sign = showSign ? (neutralSign ? '' : amountSign) : normalizedAmount < 0 ? '-' : '';
   const symbol = currencyCode
-    ? (MAJOR_CURRENCIES.find((c) => c.code === currencyCode)?.symbol ?? settings.currencySymbol)
+    ? (SYMBOL_BY_CODE.get(currencyCode) ?? settings.currencySymbol)
     : settings.currencySymbol;
 
   if (settings.displayMode === 'time') {

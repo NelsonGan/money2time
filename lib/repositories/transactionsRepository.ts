@@ -518,42 +518,6 @@ class TransactionsRepository {
     }
   }
 
-  /** All non-deleted, non-transfer transactions' id/amount/currency/date — for re-snapshotting. */
-  listForSnapshot(): { id: string; amount: number; currency: string; date: string }[] {
-    const sqlite = getSQLite();
-    return sqlite.getAllSync<{ id: string; amount: number; currency: string; date: string }>(
-      "SELECT id, amount, currency, date FROM transactions WHERE deleted_at IS NULL AND type != 'transfer'",
-    );
-  }
-
-  /** Bulk-write frozen reporting snapshots (used when the reporting currency changes). */
-  bulkSetSnapshots(
-    rows: { id: string; reportingCurrency: string; reportingAmount: number; fxRate: number }[],
-  ) {
-    if (rows.length === 0) return;
-    const sqlite = getSQLite();
-    const db = getDb();
-    const now = nowIso();
-    sqlite.execSync('BEGIN');
-    try {
-      for (const row of rows) {
-        db.update(transactionsTable)
-          .set({
-            reportingCurrency: row.reportingCurrency,
-            reportingAmount: normalizeMoneyAmount(row.reportingAmount),
-            fxRate: row.fxRate,
-            updatedAt: now,
-          })
-          .where(eq(transactionsTable.id, row.id))
-          .run();
-      }
-      sqlite.execSync('COMMIT');
-    } catch (error) {
-      sqlite.execSync('ROLLBACK');
-      throw error;
-    }
-  }
-
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();
