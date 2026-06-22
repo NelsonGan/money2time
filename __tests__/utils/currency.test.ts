@@ -80,6 +80,32 @@ describe('convert', () => {
   });
 });
 
+describe('multi-currency model invariant (entry -> account -> reporting)', () => {
+  // Reporting currency = MYR. A transaction's frozen account-currency value
+  // (account_amount) and reporting value (reporting_amount) must stay consistent
+  // so per-account balances converted to reporting match the reporting snapshot
+  // (no drift / double counting in group sums).
+  const table = buildRateTable('MYR', [
+    rate({ baseCurrency: 'MYR', quoteCurrency: 'USD', rate: 0.21 }),
+    rate({ baseCurrency: 'MYR', quoteCurrency: 'EUR', rate: 0.2 }),
+  ]);
+  const reporting = 'MYR';
+
+  const check = (amount: number, entry: string, account: string) => {
+    const accountAmount = convert(amount, entry, account, table).value;
+    const reportingAmount = convert(amount, entry, reporting, table).value;
+    // Converting the frozen account-currency value to reporting (what group
+    // sums do) must equal the direct reporting snapshot.
+    const viaAccount = convert(accountAmount, account, reporting, table).value;
+    expect(viaAccount).toBeCloseTo(reportingAmount, 6);
+  };
+
+  it('MYR (primary) entry in a USD (sub) account', () => check(100, 'MYR', 'USD'));
+  it('USD (sub) entry in a MYR (primary) account', () => check(100, 'USD', 'MYR'));
+  it('EUR (sub) entry in a USD (sub) account (triple-currency)', () => check(100, 'EUR', 'USD'));
+  it('USD (sub) entry in a USD (sub) account', () => check(100, 'USD', 'USD'));
+});
+
 describe('isAutoRateSupported', () => {
   it('recognizes ECB currencies and rejects uncovered ones', () => {
     expect(isAutoRateSupported('USD')).toBe(true);
