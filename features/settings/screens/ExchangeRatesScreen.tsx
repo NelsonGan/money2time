@@ -16,7 +16,6 @@ import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
   ThemeModal,
   useSettingsBottomNavInset,
@@ -208,69 +207,74 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
           </CardContent>
         </Card>
 
-        <SettingsSection title={I18n.t('exchange_rates.rates_title')}>
-          <Card>
-            <CardContent style={styles.list}>
-              {displayCodes.map((code, index) => {
-                const row = rateByQuote.get(code);
-                const isManual = row?.source === 'manual';
-                return (
-                  <Pressable
-                    key={code}
-                    onPress={() => setEditCode(code)}
-                    style={({ pressed }) => [
-                      styles.rateRow,
-                      index > 0 ? { borderTopColor: themeColors.border, borderTopWidth: 1 } : null,
-                      { opacity: pressed ? 0.6 : 1 },
-                    ]}
-                  >
-                    <View style={styles.rateInfo}>
-                      <Text variant="bodyStrong">{code}</Text>
-                      <Text
-                        variant="caption"
-                        tone="muted"
-                        numberOfLines={1}
-                        style={styles.rateName}
-                      >
-                        {isManual
-                          ? I18n.t('exchange_rates.manual_badge')
-                          : currencyNameForCode(code)}
-                      </Text>
-                    </View>
-                    <View style={styles.rateValue}>
-                      <Text variant="body">
-                        {row ? `1 ${reporting} = ${formatRate(row.rate)}` : '—'}
-                      </Text>
-                      <ChevronRight size={16} color={themeColors.textMuted} />
-                    </View>
-                  </Pressable>
-                );
-              })}
-
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleRow}>
+              <View style={[styles.sectionDot, { backgroundColor: themeColors.primary }]} />
+              <Text variant="label" className="text-[12px] tracking-widest text-muted-foreground">
+                {I18n.t('exchange_rates.subcurrencies_title')}
+              </Text>
               <Pressable
                 onPress={() => setAddPickerVisible(true)}
-                style={({ pressed }) => [
-                  styles.addRow,
-                  displayCodes.length > 0
-                    ? { borderTopColor: themeColors.border, borderTopWidth: 1 }
-                    : null,
-                  { opacity: pressed ? 0.6 : 1 },
-                ]}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('exchange_rates.add_currency')}
+                hitSlop={8}
+                className="flex-row items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 active:opacity-80"
               >
-                <Plus size={18} color={themeColors.primary} />
-                <Text variant="body" style={{ color: themeColors.primary }}>
-                  {I18n.t('exchange_rates.add_currency')}
+                <Plus size={13} color={themeColors.primary} />
+                <Text variant="caption" style={{ color: themeColors.primary }}>
+                  {I18n.t('exchange_rates.add')}
                 </Text>
               </Pressable>
-            </CardContent>
-          </Card>
-
+            </View>
+          </View>
           {displayCodes.length === 0 ? (
-            <Text variant="caption" tone="muted" style={styles.hint}>
-              {I18n.t('exchange_rates.no_foreign_accounts')}
-            </Text>
-          ) : null}
-        </SettingsSection>
+            <Card>
+              <CardContent>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('exchange_rates.no_foreign_accounts')}
+                </Text>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent style={styles.list}>
+                {displayCodes.map((code, index) => {
+                  const row = rateByQuote.get(code);
+                  const isManual = row?.source === 'manual';
+                  return (
+                    <Pressable
+                      key={code}
+                      onPress={() => setEditCode(code)}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                    >
+                      <View
+                        style={[
+                          styles.rateRow,
+                          index > 0
+                            ? { borderTopColor: themeColors.border, borderTopWidth: 1 }
+                            : null,
+                        ]}
+                      >
+                        <Text variant="bodyStrong" style={styles.rateCode}>
+                          {code}
+                        </Text>
+                        <Text variant="caption" tone="muted" numberOfLines={1} style={styles.flex1}>
+                          {currencyNameForCode(code)}
+                        </Text>
+                        <View style={styles.rateValue}>
+                          {isManual ? <View style={styles.manualDot} /> : null}
+                          <Text variant="body">{row ? formatRate(row.rate) : '—'}</Text>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </View>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+        </View>
       </ScrollView>
 
       <CurrencyPickerSheet
@@ -442,21 +446,19 @@ const styles = StyleSheet.create({
   },
   list: { gap: 0 },
   rateRow: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
     gap: 12,
   },
-  rateInfo: { flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  rateName: { flexShrink: 1 },
-  rateValue: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  addRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-  },
-  hint: { marginTop: 12, paddingHorizontal: 4 },
+  section: { marginTop: 28, gap: 12 },
+  sectionHeader: { paddingHorizontal: 4 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sectionDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#C0476B', opacity: 0.6 },
+  rateCode: { width: 48 },
+  flex1: { flex: 1, minWidth: 0 },
+  rateValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  manualDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#C99A3A' },
 });

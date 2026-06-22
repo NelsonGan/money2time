@@ -10,6 +10,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { isAutoRateSupported } from '~/utils/currency';
 
 interface CurrencyPickerSheetProps {
   visible: boolean;
@@ -18,6 +19,10 @@ interface CurrencyPickerSheetProps {
   selectedCode?: string | null;
   /** Codes to hide (e.g. already-added currencies, the reporting currency). */
   excludeCodes?: string[];
+  /** When set, show only these codes (e.g. the account-currency picker). */
+  restrictToCodes?: string[];
+  /** Footer action rendered below the list (e.g. "Add subcurrency"). */
+  footer?: React.ReactNode;
   title?: string;
 }
 
@@ -32,6 +37,8 @@ export function CurrencyPickerSheet({
   onSelect,
   selectedCode,
   excludeCodes,
+  restrictToCodes,
+  footer,
   title,
 }: CurrencyPickerSheetProps) {
   const themeColors = useThemeColors();
@@ -39,11 +46,18 @@ export function CurrencyPickerSheet({
   const [query, setQuery] = useState('');
 
   const excludeSet = useMemo(() => new Set(excludeCodes ?? []), [excludeCodes]);
+  const restrictSet = useMemo(
+    () => (restrictToCodes ? new Set(restrictToCodes) : null),
+    [restrictToCodes],
+  );
 
   const sections = useMemo<CurrencySection[]>(() => {
     const q = query.trim().toLowerCase();
     const matches = ALL_CURRENCIES.filter((c) => {
       if (excludeSet.has(c.code)) return false;
+      // Restrict to an explicit set (account picker) or, by default, to the
+      // currencies the auto-conversion feed supports.
+      if (restrictSet ? !restrictSet.has(c.code) : !isAutoRateSupported(c.code)) return false;
       if (!q) return true;
       return c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q);
     }).sort((a, b) => a.code.localeCompare(b.code));
@@ -58,7 +72,7 @@ export function CurrencyPickerSheet({
     return Array.from(buckets.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([letter, data]) => ({ title: letter, data }));
-  }, [excludeSet, query]);
+  }, [excludeSet, query, restrictSet]);
 
   const handleSelect = (code: string) => {
     void triggerHaptic('selection');
@@ -163,6 +177,7 @@ export function CurrencyPickerSheet({
                   {I18n.t('exchange_rates.no_currency_match')}
                 </Text>
               }
+              ListFooterComponent={footer ? <View className="mt-2">{footer}</View> : null}
             />
           </View>
         </Pressable>

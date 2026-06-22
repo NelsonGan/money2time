@@ -1098,6 +1098,24 @@ export function TransactionEditorScreen({
     return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
   }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
+  // For an expense/income entered in a subcurrency, the main-currency
+  // equivalent (snapshot rate), shown as a suffix under the amount.
+  const reportingEquivLabel = useMemo(() => {
+    if (isTransferType || isBalanceAdjustmentType) return null;
+    if (effectiveEntryCurrency === settings.currencyCode) return null;
+    const num = Number(amount);
+    if (!num || !Number.isFinite(num)) return null;
+    const { value } = convert(num, effectiveEntryCurrency, settings.currencyCode, rateTable);
+    return `≈ ${currencySymbolForCode(settings.currencyCode)}${formatMoney(value)}`;
+  }, [
+    amount,
+    effectiveEntryCurrency,
+    isBalanceAdjustmentType,
+    isTransferType,
+    rateTable,
+    settings.currencyCode,
+  ]);
+
   const amountTone = useMemo(() => {
     if (isBalanceAdjustmentType) {
       const numericAmount = Number(amount);
@@ -1609,44 +1627,47 @@ export function TransactionEditorScreen({
         return (
           <View className="flex-1">
             {!isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                style={{ flexGrow: 0, maxHeight: 48 }}
-                contentContainerStyle={{
-                  gap: 8,
-                  paddingHorizontal: 16,
-                  paddingTop: 8,
-                  alignItems: 'center',
-                }}
-              >
-                {enabledCurrencies.map((code) => {
-                  const selected = code === entryCurrency;
-                  return (
-                    <Pressable
-                      key={code}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setEntryCurrency(code);
-                      }}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full border',
-                        selected
-                          ? 'bg-primary/15 border-primary/50'
-                          : 'bg-secondary/40 border-transparent',
-                      )}
-                    >
-                      <Text
-                        variant="caption"
-                        className={selected ? 'text-primary' : 'text-muted-foreground'}
+              <>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  style={{ flexGrow: 0, maxHeight: 52 }}
+                  contentContainerStyle={{
+                    gap: 8,
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    alignItems: 'center',
+                  }}
+                >
+                  {enabledCurrencies.map((code) => {
+                    const selected = code === entryCurrency;
+                    return (
+                      <Pressable
+                        key={code}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setEntryCurrency(code);
+                        }}
+                        className={cn(
+                          'px-3.5 py-1.5 rounded-full border',
+                          selected
+                            ? 'bg-primary/15 border-primary/50'
+                            : 'bg-secondary/40 border-transparent',
+                        )}
                       >
-                        {currencySymbolForCode(code)} {code}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                        <Text
+                          variant="caption"
+                          className={selected ? 'text-primary' : 'text-muted-foreground'}
+                        >
+                          {code}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+                <View className="mb-1 h-[1px] bg-border/40" />
+              </>
             ) : null}
             <View className="flex-1">
               <NumpadPanel
@@ -1963,6 +1984,16 @@ export function TransactionEditorScreen({
                                   </Text>
                                   <Pencil size={11} color={themeColors.primary} />
                                 </Pressable>
+                              ) : null}
+                              {reportingEquivLabel ? (
+                                <Text
+                                  variant="caption"
+                                  tone="muted"
+                                  numberOfLines={1}
+                                  className="mt-0.5"
+                                >
+                                  {reportingEquivLabel}
+                                </Text>
                               ) : null}
                             </View>
                           </View>

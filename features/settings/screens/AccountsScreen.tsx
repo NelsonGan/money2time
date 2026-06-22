@@ -31,6 +31,7 @@ import {
   AccountPickerSheet,
   Button,
   CategoryEmoji,
+  CurrencyPickerSheet,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -45,8 +46,8 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
-import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY, MAJOR_CURRENCIES } from '~/constants/appDefaults';
-import { currencySymbolForCode } from '~/utils/currency';
+import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
+import { currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
@@ -463,15 +464,19 @@ function AccountEditorSheet({
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [showAddSubcurrency, setShowAddSubcurrency] = useState(false);
 
-  const currencyOptions = useMemo(
-    () =>
-      MAJOR_CURRENCIES.map((item) => ({
-        value: item.code,
-        label: `${item.code} (${item.symbol}) · ${item.name}`,
-      })),
-    [],
-  );
+  const { settings: appSettings, accounts: appAccounts, fxCurrencies, addFxCurrency } = useApp();
+  // Account currency choices = the main currency + the user's subcurrencies
+  // (added ones plus any already used by an account).
+  const accountCurrencyCodes = useMemo(() => {
+    const set = new Set<string>([appSettings.currencyCode, ...fxCurrencies, currency]);
+    for (const a of appAccounts) {
+      if (a.currency) set.add(a.currency);
+    }
+    return Array.from(set);
+  }, [appSettings.currencyCode, appAccounts, fxCurrencies, currency]);
 
   const accountGroupNameById = useMemo(
     () => new Map(accountGroups.map((group) => [group.id, group.name])),
@@ -658,12 +663,20 @@ function AccountEditorSheet({
               onChange={setAccountGroupId}
               options={accountGroupOptions}
             />
-            <SelectField
-              label={I18n.t('accounts.currency')}
-              value={currency}
-              onChange={setCurrency}
-              options={currencyOptions}
-            />
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('accounts.currency')}
+              </Text>
+              <Pressable
+                onPress={() => setShowCurrencyPicker(true)}
+                className="flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
+              >
+                <Text variant="body">
+                  {currency} · {currencyNameForCode(currency)}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
             <View>
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('accounts.type')}
@@ -779,6 +792,38 @@ function AccountEditorSheet({
         selectedLogoId={logoId}
         onSelect={setLogoId}
         onLimitReached={onClose}
+      />
+      <CurrencyPickerSheet
+        visible={showCurrencyPicker}
+        onClose={() => setShowCurrencyPicker(false)}
+        onSelect={setCurrency}
+        selectedCode={currency}
+        restrictToCodes={accountCurrencyCodes}
+        title={I18n.t('accounts.currency')}
+        footer={
+          <Pressable
+            onPress={() => {
+              setShowCurrencyPicker(false);
+              setShowAddSubcurrency(true);
+            }}
+            className="mt-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-3 active:opacity-80"
+          >
+            <Plus size={16} color={themeColors.primary} />
+            <Text variant="body" style={{ color: themeColors.primary }}>
+              {I18n.t('exchange_rates.add_currency')}
+            </Text>
+          </Pressable>
+        }
+      />
+      <CurrencyPickerSheet
+        visible={showAddSubcurrency}
+        onClose={() => setShowAddSubcurrency(false)}
+        onSelect={(code) => {
+          void addFxCurrency(code);
+          setCurrency(code);
+        }}
+        excludeCodes={accountCurrencyCodes}
+        title={I18n.t('exchange_rates.add_currency')}
       />
     </ThemeModal>
   );
@@ -2681,6 +2726,7 @@ export function AccountsScreen({
             accounts={accounts}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
+            convertedBalanceMap={convertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
             scrollViewRef={accountsOverviewScrollRef}
             settings={settings}
