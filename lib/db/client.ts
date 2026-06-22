@@ -57,9 +57,26 @@ function ensureCoreData() {
   }
 }
 
+function applyPragmas(db: SQLiteDatabase) {
+  // WAL persists on the DB file once set; the rest are per-connection and must
+  // be reapplied on every open. NORMAL synchronous is the recommended WAL pairing
+  // (durable across app crashes, only loses data on full OS/power loss). mmap +
+  // larger cache + in-memory temp store cut read latency on the activity/insights
+  // hot paths that scan the transactions table.
+  db.execSync(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA foreign_keys = ON;
+    PRAGMA temp_store = MEMORY;
+    PRAGMA mmap_size = 134217728;
+    PRAGMA cache_size = -8000;
+  `);
+}
+
 export function getSQLite(): SQLiteDatabase {
   if (!sqlite) {
     sqlite = openDatabaseSync(DB_NAME);
+    applyPragmas(sqlite);
   }
   return sqlite;
 }

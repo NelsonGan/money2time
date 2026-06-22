@@ -698,7 +698,7 @@ export function SettingsScreen({
               <SettingsGridTile
                 icon={<Fingerprint size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.app_lock.title')}
-                pro
+                pro={!isPro}
                 onPress={isPro ? onOpenAppLock : onOpenProPaywall}
               />
             </SettingsGrid>
