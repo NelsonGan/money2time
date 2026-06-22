@@ -1127,6 +1127,7 @@ const en = {
     account_name_placeholder: 'Daily Wallet',
     balance: 'Balance',
     account_group: 'Account group',
+    currency: 'Currency',
     include_in_totals: 'Include in totals',
     include_in_totals_hint: 'Hidden accounts are excluded from total balance.',
     include_option_include: 'Include',

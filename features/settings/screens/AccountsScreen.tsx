@@ -45,7 +45,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
-import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
+import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY, MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
@@ -103,6 +103,7 @@ interface AccountEditorInput {
   creditDueDay: number | null;
   includeInTotals: boolean;
   startingBalance: number;
+  currency: string;
 }
 
 interface CreditSummary {
@@ -432,6 +433,7 @@ function AccountEditorSheet({
   presetGroupName = null,
   currentBalance,
   currencySymbol,
+  defaultCurrencyCode: propDefaultCurrencyCode,
   accountGroups,
   onClose,
   onSave,
@@ -442,6 +444,7 @@ function AccountEditorSheet({
   presetGroupName?: string | null;
   currentBalance: number;
   currencySymbol: string;
+  defaultCurrencyCode: string;
   accountGroups: AccountGroup[];
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
@@ -449,6 +452,7 @@ function AccountEditorSheet({
 }) {
   const themeColors = useThemeColors();
   const isEdit = account !== null;
+  const defaultCurrencyCode = propDefaultCurrencyCode || DEFAULT_CURRENCY;
 
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('debit');
@@ -459,6 +463,16 @@ function AccountEditorSheet({
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+  const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
+
+  const currencyOptions = useMemo(
+    () =>
+      MAJOR_CURRENCIES.map((item) => ({
+        value: item.code,
+        label: `${item.code} (${item.symbol}) · ${item.name}`,
+      })),
+    [],
+  );
 
   const accountGroupNameById = useMemo(
     () => new Map(accountGroups.map((group) => [group.id, group.name])),
@@ -489,6 +503,7 @@ function AccountEditorSheet({
       setBalanceInput(toBalanceInputValue(currentBalance));
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
+      setCurrency(account.currency || DEFAULT_CURRENCY);
     } else {
       setName('');
       setType('debit');
@@ -500,8 +515,9 @@ function AccountEditorSheet({
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
+      setCurrency(defaultCurrencyCode);
     }
-  }, [account, accountGroupIdByName, currentBalance, presetGroupName, visible]);
+  }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName, visible]);
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
@@ -533,6 +549,7 @@ function AccountEditorSheet({
       creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
       startingBalance: parsedBalance,
+      currency,
     });
   };
 
@@ -634,6 +651,12 @@ function AccountEditorSheet({
               value={accountGroupId}
               onChange={setAccountGroupId}
               options={accountGroupOptions}
+            />
+            <SelectField
+              label={I18n.t('accounts.currency')}
+              value={currency}
+              onChange={setCurrency}
+              options={currencyOptions}
             />
             <View>
               <Text variant="label" tone="muted" className="mb-2">
@@ -2002,6 +2025,7 @@ export function AccountsScreen({
         creditStatementDay: updates.creditStatementDay,
         creditDueDay: updates.creditDueDay,
         includeInTotals: updates.includeInTotals,
+        currency: updates.currency,
       };
       const delta = updates.startingBalance - currentBalance;
       const adjustmentAmount = Math.abs(delta);
@@ -2031,7 +2055,7 @@ export function AccountsScreen({
               createTransaction({
                 type: 'balance_adjustment',
                 amount: delta,
-                currency: settings.currencySymbol,
+                currency: updates.currency || account.currency,
                 date: new Date().toISOString(),
                 accountId: account.id,
                 fromAccountId: null,
@@ -2381,6 +2405,7 @@ export function AccountsScreen({
           account={account}
           currentBalance={balance}
           currencySymbol={settings.currencySymbol}
+          defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => setShowEditAccount(false)}
           onSave={(updates) =>
@@ -2679,6 +2704,7 @@ export function AccountsScreen({
           account={editingAccount}
           currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
           currencySymbol={settings.currencySymbol}
+          defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => {
             setShowEditAccount(false);
@@ -2739,6 +2765,7 @@ export function AccountsScreen({
         presetGroupName={createAccountGroupName}
         currentBalance={0}
         currencySymbol={settings.currencySymbol}
+        defaultCurrencyCode={settings.currencyCode}
         accountGroups={accountGroups}
         onClose={() => {
           setShowCreate(false);
@@ -2747,7 +2774,7 @@ export function AccountsScreen({
         onSave={(input) => {
           createAccount({
             ...input,
-            currency: DEFAULT_CURRENCY,
+            currency: input.currency || DEFAULT_CURRENCY,
           });
           setShowCreate(false);
           setCreateAccountGroupName(null);

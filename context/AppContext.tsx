@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 
 import {
-  DEFAULT_CURRENCY_SYMBOL,
+  DEFAULT_CURRENCY,
   DEFAULT_TRANSACTION_FILTERS,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
@@ -2504,7 +2504,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }) => {
       try {
         const currentSettings = settingsRepository.get();
-        const preferredCurrency = currentSettings.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
+        // Seed new accounts/wallets with the reporting currency CODE so they
+        // participate correctly in multi-currency conversion.
+        const preferredCurrency = currentSettings.currencyCode ?? DEFAULT_CURRENCY;
         let createdCategories = 0;
         let createdAccounts = 0;
         let shouldRefreshAccounts = false;
@@ -2562,7 +2564,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (seedDefaults = false) => {
       runMutation(() => {
         const currentSettings = settingsRepository.get();
-        ensureSimpleWalletExists(currentSettings.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL);
+        ensureSimpleWalletExists(currentSettings.currencyCode ?? DEFAULT_CURRENCY);
         if (seedDefaults) {
           seedMinimalCategoriesIfMissing();
         }

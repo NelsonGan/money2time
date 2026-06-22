@@ -20,6 +20,7 @@ interface BackupTables {
   categories: Record<string, unknown>[];
   transactions: Record<string, unknown>[];
   transaction_splits: Record<string, unknown>[];
+  exchange_rates?: Record<string, unknown>[];
   recurring_rules: Record<string, unknown>[];
   settings: Record<string, unknown>[];
   monthly_wage_settings: Record<string, unknown>[];
@@ -78,6 +79,7 @@ export async function buildBackupData(): Promise<BackupData> {
       categories: sqlite.getAllSync('SELECT * FROM categories') as Record<string, unknown>[],
       transactions: sqlite.getAllSync('SELECT * FROM transactions') as Record<string, unknown>[],
       transaction_splits: tryReadTable(sqlite, 'transaction_splits'),
+      exchange_rates: tryReadTable(sqlite, 'exchange_rates'),
       recurring_rules: sqlite.getAllSync('SELECT * FROM recurring_rules') as Record<
         string,
         unknown
@@ -212,6 +214,11 @@ export function applyBackupData(backup: BackupData): ImportResult {
     } catch {
       // Older databases without the table — ignore.
     }
+    try {
+      sqlite.execSync('DELETE FROM exchange_rates');
+    } catch {
+      // Older databases without the table — ignore.
+    }
     sqlite.execSync('DELETE FROM recurring_rules');
     sqlite.execSync('DELETE FROM transactions');
     sqlite.execSync('DELETE FROM accounts');
@@ -225,6 +232,9 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'categories', backup.tables.categories);
     insertRows(sqlite, 'transactions', backup.tables.transactions);
     insertRows(sqlite, 'transaction_splits', backup.tables.transaction_splits);
+    if (backup.tables.exchange_rates && backup.tables.exchange_rates.length > 0) {
+      insertRows(sqlite, 'exchange_rates', backup.tables.exchange_rates);
+    }
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);

@@ -1084,6 +1084,7 @@ const zh = {
     account_name_placeholder: '日常钱包',
     balance: '余额',
     account_group: '账户分组',
+    currency: '货币',
     include_in_totals: '计入总额',
     include_in_totals_hint: '隐藏的账户不计入总余额。',
     include_option_include: '计入',
