@@ -46,6 +46,7 @@ import {
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY, MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
@@ -432,7 +433,6 @@ function AccountEditorSheet({
   account,
   presetGroupName = null,
   currentBalance,
-  currencySymbol,
   defaultCurrencyCode: propDefaultCurrencyCode,
   accountGroups,
   onClose,
@@ -443,7 +443,6 @@ function AccountEditorSheet({
   account: Account | null;
   presetGroupName?: string | null;
   currentBalance: number;
-  currencySymbol: string;
   defaultCurrencyCode: string;
   accountGroups: AccountGroup[];
   onClose: () => void;
@@ -517,7 +516,14 @@ function AccountEditorSheet({
       setCreditDueDay('1');
       setCurrency(defaultCurrencyCode);
     }
-  }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName, visible]);
+  }, [
+    account,
+    accountGroupIdByName,
+    currentBalance,
+    defaultCurrencyCode,
+    presetGroupName,
+    visible,
+  ]);
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
@@ -746,7 +752,7 @@ function AccountEditorSheet({
                 isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')
               }
               variant="currency"
-              currencySymbol={currencySymbol}
+              currencySymbol={currencySymbolForCode(currency)}
               value={balanceInput}
               onChangeText={setBalanceInput}
               helperText={isEdit ? I18n.t('accounts.current_balance_hint') : undefined}
@@ -1557,8 +1563,13 @@ export function AccountsScreen({
         currencyCode?: string;
       } = {},
     ) => {
-      const { variant = 'caption', tone = 'default', textClassName, iconColor, currencyCode } =
-        options;
+      const {
+        variant = 'caption',
+        tone = 'default',
+        textClassName,
+        iconColor,
+        currencyCode,
+      } = options;
       const label = formatVisibleBalance(amount, currencyCode);
       if (hideAccountBalances || settings.displayMode !== 'time') {
         return (
@@ -2404,7 +2415,6 @@ export function AccountsScreen({
           visible={showEditAccount}
           account={account}
           currentBalance={balance}
-          currencySymbol={settings.currencySymbol}
           defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => setShowEditAccount(false)}
@@ -2703,7 +2713,6 @@ export function AccountsScreen({
           visible={showEditAccount}
           account={editingAccount}
           currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
-          currencySymbol={settings.currencySymbol}
           defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => {
@@ -2764,7 +2773,6 @@ export function AccountsScreen({
         account={null}
         presetGroupName={createAccountGroupName}
         currentBalance={0}
-        currencySymbol={settings.currencySymbol}
         defaultCurrencyCode={settings.currencyCode}
         accountGroups={accountGroups}
         onClose={() => {

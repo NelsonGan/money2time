@@ -1,12 +1,11 @@
 import { Check, RefreshCw } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import {
   Button,
   Card,
   CardContent,
-  Input,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -43,10 +42,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   const [rateVersion, setRateVersion] = useState(0);
 
   const rateRows = useMemo(() => listExchangeRates(), [listExchangeRates, rateVersion]);
-  const rateByQuote = useMemo(
-    () => new Map(rateRows.map((r) => [r.quoteCurrency, r])),
-    [rateRows],
-  );
+  const rateByQuote = useMemo(() => new Map(rateRows.map((r) => [r.quoteCurrency, r])), [rateRows]);
   const asOfDate = useMemo(() => {
     let latest: string | null = null;
     for (const r of rateRows) {
@@ -56,14 +52,30 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   }, [rateRows]);
 
   // Currencies actually in use across the user's accounts (excluding the
-  // reporting currency itself), which is what the user needs rates for.
+  // reporting currency itself) — surfaced first and always shown even when no
+  // cached rate exists yet, so the user can enter one manually.
   const currenciesInUse = useMemo(() => {
     const set = new Set<string>();
     for (const account of accounts) {
       if (account.currency && account.currency !== reporting) set.add(account.currency);
     }
-    return Array.from(set).sort();
+    return set;
   }, [accounts, reporting]);
+
+  // Every currency we have a cached rate for (the full daily-refreshed table),
+  // merged with the in-use currencies. In-use currencies sort to the top.
+  const displayCodes = useMemo(() => {
+    const set = new Set<string>(currenciesInUse);
+    for (const r of rateRows) {
+      if (r.quoteCurrency !== reporting) set.add(r.quoteCurrency);
+    }
+    return Array.from(set).sort((a, b) => {
+      const aInUse = currenciesInUse.has(a);
+      const bInUse = currenciesInUse.has(b);
+      if (aInUse !== bInUse) return aInUse ? -1 : 1;
+      return a.localeCompare(b);
+    });
+  }, [currenciesInUse, rateRows, reporting]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -149,7 +161,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
           title={I18n.t('exchange_rates.rates_title')}
           subtitle={I18n.t('exchange_rates.rates_subtitle')}
         >
-          {currenciesInUse.length === 0 ? (
+          {displayCodes.length === 0 ? (
             <Card>
               <CardContent>
                 <Text variant="friendly" tone="muted">
@@ -160,22 +172,20 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
           ) : (
             <Card>
               <CardContent style={styles.list}>
-                {currenciesInUse.map((code, index) => {
+                {displayCodes.map((code, index) => {
                   const row = rateByQuote.get(code);
                   const supported = isAutoRateSupported(code);
                   const draft = drafts[code];
                   const displayValue =
-                    draft !== undefined
-                      ? draft
-                      : row
-                        ? formatRate(row.rate)
-                        : '';
+                    draft !== undefined ? draft : row ? formatRate(row.rate) : '';
                   return (
                     <View
                       key={code}
                       style={[
                         styles.rateRow,
-                        index > 0 ? { borderTopColor: themeColors.border, borderTopWidth: 1 } : null,
+                        index > 0
+                          ? { borderTopColor: themeColors.border, borderTopWidth: 1 }
+                          : null,
                       ]}
                     >
                       <View style={styles.rateInfo}>
@@ -194,15 +204,22 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                         <Text variant="caption" tone="muted">
                           1 {reporting} =
                         </Text>
-                        <Input
+                        <TextInput
                           value={displayValue}
-                          onChangeText={(text) =>
-                            setDrafts((prev) => ({ ...prev, [code]: text }))
-                          }
+                          onChangeText={(text) => setDrafts((prev) => ({ ...prev, [code]: text }))}
                           onBlur={() => commitManualRate(code)}
                           keyboardType="decimal-pad"
                           placeholder="—"
-                          style={styles.rateInput}
+                          placeholderTextColor={themeColors.textMuted}
+                          allowFontScaling={false}
+                          style={[
+                            styles.rateInput,
+                            {
+                              color: themeColors.text,
+                              borderColor: themeColors.border,
+                              backgroundColor: themeColors.card,
+                            },
+                          ]}
                         />
                         {draft !== undefined ? (
                           <Button
@@ -244,7 +261,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rateInfo: { flex: 1, gap: 2 },
-  rateEntry: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rateInput: { minWidth: 90, textAlign: 'right' },
+  rateEntry: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  rateInput: {
+    minWidth: 96,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    textAlign: 'right',
+    fontSize: 15,
+  },
   footnote: { marginTop: 16 },
 });

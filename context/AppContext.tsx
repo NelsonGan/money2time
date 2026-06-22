@@ -686,7 +686,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       type: CreateTransactionInput['type'],
       amount: number,
       currency: string,
-    ): { reportingCurrency: string | null; reportingAmount: number | null; fxRate: number | null } => {
+    ): {
+      reportingCurrency: string | null;
+      reportingAmount: number | null;
+      fxRate: number | null;
+    } => {
       if (type === 'transfer' || type === 'balance_adjustment') {
         return { reportingCurrency: null, reportingAmount: null, fxRate: null };
       }
@@ -1149,7 +1153,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
-      const snapshot = buildSnapshot(input.type, normalizeMoneyAmount(input.amount), input.currency);
+      const snapshot = buildSnapshot(
+        input.type,
+        normalizeMoneyAmount(input.amount),
+        input.currency,
+      );
       const normalizedInput = {
         ...input,
         amount: normalizeMoneyAmount(input.amount),
@@ -1250,7 +1258,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (affectsSnapshot && effectiveType !== 'transfer') {
           const nextAmount = normalizedInput.amount ?? currentTransaction?.amount ?? 0;
           const nextCurrency =
-            normalizedInput.currency ?? currentTransaction?.currency ?? reportingCurrencyRef.current;
+            normalizedInput.currency ??
+            currentTransaction?.currency ??
+            reportingCurrencyRef.current;
           const snap = buildSnapshot(effectiveType, nextAmount, nextCurrency);
           normalizedInput = {
             ...normalizedInput,
@@ -1958,10 +1968,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const rows = transactionsRepository.listForSnapshot();
     if (rows.length === 0) return;
 
-    const table = buildRateTable(
-      nextReporting,
-      exchangeRatesRepository.listByBase(nextReporting),
-    );
+    const table = buildRateTable(nextReporting, exchangeRatesRepository.listByBase(nextReporting));
 
     // Cache historical lookups per (currency|date) to avoid duplicate requests.
     const historicalCache = new Map<string, number | null>();

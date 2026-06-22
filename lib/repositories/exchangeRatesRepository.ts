@@ -30,10 +30,7 @@ class ExchangeRatesRepository {
       .select()
       .from(exchangeRatesTable)
       .where(
-        and(
-          eq(exchangeRatesTable.baseCurrency, base),
-          eq(exchangeRatesTable.quoteCurrency, quote),
-        ),
+        and(eq(exchangeRatesTable.baseCurrency, base), eq(exchangeRatesTable.quoteCurrency, quote)),
       )
       .get();
     return row ? toExchangeRate(row) : null;

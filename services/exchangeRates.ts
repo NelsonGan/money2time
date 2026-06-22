@@ -78,7 +78,9 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
     }
 
     try {
-      const data = await fetchJson(`${FRANKFURTER_BASE_URL}/latest?base=${encodeURIComponent(base)}`);
+      const data = await fetchJson(
+        `${FRANKFURTER_BASE_URL}/latest?base=${encodeURIComponent(base)}`,
+      );
       exchangeRatesRepository.upsertApiRates(base, data.date, data.rates);
       settingsRepository.updateSettings({ lastRateFetchAt: nowIso(), lastRateFetchError: null });
       return { ok: true, asOfDate: data.date, error: null };

@@ -35,6 +35,7 @@ import type {
   UserSettings,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { currencySymbolForCode } from '~/utils/currency';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -315,9 +316,9 @@ function selectedTypeColor(option: SheetType): string {
   return option === 'expense' ? HEADER_EXPENSE_COLOR : HEADER_INCOME_COLOR;
 }
 
-function formatMoneyOnly(amount: number, settings: UserSettings): string {
+function formatMoneyOnly(amount: number, currencySymbol: string): string {
   const normalized = normalizeMoneyAmount(Math.abs(amount));
-  return `${settings.currencySymbol}${normalized.toFixed(2)}`;
+  return `${currencySymbol}${normalized.toFixed(2)}`;
 }
 
 function formatTimeEquivalent(amount: number, trueHourlyRate: number): string | null {
@@ -718,6 +719,15 @@ export function QuickAddSheet({
   const selectedAccount = accountsById.get(effectiveAccountId ?? '') ?? null;
   const selectedAccountName = selectedAccount?.name;
 
+  // The amount is recorded in the native currency of the account it lands in
+  // (the simple wallet in simple mode), so display and storage use that
+  // currency rather than the reporting currency.
+  const entryAccount = isSimpleMode
+    ? (accountsById.get(simpleWalletId ?? '') ?? null)
+    : selectedAccount;
+  const entryCurrency = entryAccount?.currency ?? settings.currencyCode;
+  const entryCurrencySymbol = currencySymbolForCode(entryCurrency);
+
   const submitDisabled = useMemo(() => {
     if (!parsedLive.amount || parsedLive.amount <= 0) return true;
     if (isSimpleMode) return !simpleWalletId;
@@ -737,7 +747,7 @@ export function QuickAddSheet({
     const submission: CreateTransactionInput = {
       type,
       amount: parsedLive.amount,
-      currency: settings.currencyCode,
+      currency: entryCurrency,
       date,
       note: noteTrimmed.length > 0 ? noteTrimmed : fallbackNote,
       sentiment: 'neutral',
@@ -760,7 +770,7 @@ export function QuickAddSheet({
     onSubmit,
     parsedLive.amount,
     parsedLive.note,
-    settings.currencyCode,
+    entryCurrency,
     simpleWalletId,
     submitDisabled,
     type,
@@ -1198,7 +1208,7 @@ export function QuickAddSheet({
                         color: inputAccentColor,
                         fontWeight: '700' as const,
                       };
-                      const amountValue = formatMoneyOnly(displayAmount, settings);
+                      const amountValue = formatMoneyOnly(displayAmount, entryCurrencySymbol);
                       // Defensive fallback: if the locale's template is
                       // missing one or both tokens, render the parts we
                       // know about so the user never sees the raw
@@ -1237,7 +1247,7 @@ export function QuickAddSheet({
                   </Text>
                 ) : (
                   <Text style={[styles.amountValue, { color: inputAccentColor }]} numberOfLines={1}>
-                    {formatMoneyOnly(displayAmount, settings)}
+                    {formatMoneyOnly(displayAmount, entryCurrencySymbol)}
                   </Text>
                 )}
               </View>

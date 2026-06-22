@@ -73,7 +73,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { convert, currencySymbolForCode } from '~/utils/currency';
+import { convert, currencySymbolForCode, resolveRate } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
@@ -355,6 +355,13 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
       <Circle cx={11.5} cy={12.75} r={1.55} {...strokeProps} />
     </Svg>
   );
+}
+
+/** Human-friendly rate for the transfer pair line (more digits for tiny rates). */
+function formatTransferRate(rate: number): string {
+  if (rate >= 100) return rate.toFixed(2);
+  if (rate >= 1) return rate.toFixed(4);
+  return rate.toPrecision(4);
 }
 
 function formatDateDisplay(dateStr: string, locale: string) {
@@ -1016,14 +1023,22 @@ export function TransactionEditorScreen({
     [adjustAmountBy, splits],
   );
 
+  // Amount is always entered in the native currency of the account being
+  // touched (the from-account for transfers), so the keypad shows that symbol
+  // rather than the reporting-currency symbol.
+  const entryCurrencySymbol = useMemo(
+    () => currencySymbolForCode(accountCurrency(isTransferType ? fromAccountId : accountId)),
+    [accountCurrency, accountId, fromAccountId, isTransferType],
+  );
+
   const amountDisplay = useMemo(() => {
     if (activeField === 'amount' && amountExpression) {
-      return `${settings.currencySymbol}${amountExpression}`;
+      return `${entryCurrencySymbol}${amountExpression}`;
     }
     const num = Number(amount);
-    if (!amount || !Number.isFinite(num)) return `${settings.currencySymbol}${formatMoney(0)}`;
-    return `${settings.currencySymbol}${formatMoney(num)}`;
-  }, [activeField, amount, amountExpression, settings.currencySymbol]);
+    if (!amount || !Number.isFinite(num)) return `${entryCurrencySymbol}${formatMoney(0)}`;
+    return `${entryCurrencySymbol}${formatMoney(num)}`;
+  }, [activeField, amount, amountExpression, entryCurrencySymbol]);
 
   const amountTone = useMemo(() => {
     if (isBalanceAdjustmentType) {
@@ -1198,10 +1213,10 @@ export function TransactionEditorScreen({
           setError(
             sumOfUnpaidSplits > submitPayload.amount
               ? I18n.t('transactions.editor.split.sum_over', {
-                  diff: `${settings.currencySymbol}${(sumOfUnpaidSplits - submitPayload.amount).toFixed(2)}`,
+                  diff: `${entryCurrencySymbol}${(sumOfUnpaidSplits - submitPayload.amount).toFixed(2)}`,
                 })
               : I18n.t('transactions.editor.split.sum_mismatch', {
-                  diff: `${settings.currencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
+                  diff: `${entryCurrencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
                 }),
           );
           setFieldErrors({ amount: I18n.t('transactions.editor.error.required') });
@@ -1969,6 +1984,18 @@ export function TransactionEditorScreen({
                                   style={{ flex: 1, color: themeColors.text, paddingVertical: 4 }}
                                 />
                               </View>
+                              {(() => {
+                                const pairRate = resolveRate(
+                                  selectedFromAccount.currency,
+                                  selectedToAccount.currency,
+                                  rateTable,
+                                );
+                                return pairRate ? (
+                                  <Text variant="caption" tone="muted">
+                                    {`1 ${selectedFromAccount.currency} = ${formatTransferRate(pairRate)} ${selectedToAccount.currency}`}
+                                  </Text>
+                                ) : null;
+                              })()}
                               <Text variant="caption" tone="muted">
                                 {I18n.t('transactions.editor.transfer_rate_hint', {
                                   from: selectedFromAccount.currency,
@@ -2486,8 +2513,8 @@ export function TransactionEditorScreen({
           onSplitEvenlyChange={setSplitEvenly}
           accounts={accounts}
           accountGroups={accountGroups}
-          currencySymbol={settings.currencySymbol}
-          formatSettings={settings}
+          currencySymbol={entryCurrencySymbol}
+          formatSettings={{ ...settings, currencySymbol: entryCurrencySymbol }}
           onMarkPaid={handleSplitMarkPaidLocal}
           onMarkUnpaid={handleSplitMarkUnpaidLocal}
           newlyPaidIds={newlyPaidIds}
