@@ -213,49 +213,61 @@ function matchesIncludedCategory(transaction: TransactionWithRelations, category
   return transaction.categoryId === categoryId || transaction.categoryParentId === categoryId;
 }
 
+function buildSqlPredicates(normalized: TransactionFilters) {
+  const predicates = [
+    isNull(transactionsTable.deletedAt),
+    normalized.type === 'balance_adjustment'
+      ? or(eq(transactionsTable.type, 'balance_adjustment'), eq(transactionsTable.type, 'transfer'))
+      : normalized.type === 'transfer'
+        ? eq(transactionsTable.type, 'transfer')
+        : normalized.type !== 'all'
+          ? eq(transactionsTable.type, normalized.type)
+          : undefined,
+    normalized.dateRange ? gte(transactionsTable.date, normalized.dateRange.start) : undefined,
+    normalized.dateRange ? lte(transactionsTable.date, normalized.dateRange.end) : undefined,
+    normalized.accountId
+      ? or(
+          eq(transactionsTable.accountId, normalized.accountId),
+          eq(transactionsTable.fromAccountId, normalized.accountId),
+          eq(transactionsTable.toAccountId, normalized.accountId),
+        )
+      : undefined,
+    normalized.minAmount !== null ? gte(transactionsTable.amount, normalized.minAmount) : undefined,
+    normalized.maxAmount !== null ? lte(transactionsTable.amount, normalized.maxAmount) : undefined,
+  ];
+
+  if (normalized.search.trim()) {
+    const term = `%${normalized.search.trim().toLowerCase()}%`;
+    predicates.push(or(sql`lower(coalesce(${transactionsTable.note}, '')) like ${term}`));
+  }
+
+  return predicates;
+}
+
 class TransactionsRepository {
+  // Plain rows matching the SQL-level filters only — no relation JOINs and no
+  // splits lookup. Used by aggregations (cashflow, category breakdowns) which
+  // read amount/type/date/categoryId and never touch account/category names or
+  // splits, so the two extra queries in `list()` are pure waste there.
+  listForSummary(filters: Partial<TransactionFilters> = {}): Transaction[] {
+    const db = getDb();
+    const normalized = normalizeTransactionFilters(filters);
+    return db
+      .select()
+      .from(transactionsTable)
+      .where(and(...buildSqlPredicates(normalized)))
+      .all()
+      .map(toTransaction);
+  }
+
   list(filters: Partial<TransactionFilters> = {}): TransactionWithRelations[] {
     const db = getDb();
     const normalized = normalizeTransactionFilters(filters);
 
-    const predicates = [
-      isNull(transactionsTable.deletedAt),
-      normalized.type === 'balance_adjustment'
-        ? or(
-            eq(transactionsTable.type, 'balance_adjustment'),
-            eq(transactionsTable.type, 'transfer'),
-          )
-        : normalized.type === 'transfer'
-          ? eq(transactionsTable.type, 'transfer')
-          : normalized.type !== 'all'
-            ? eq(transactionsTable.type, normalized.type)
-            : undefined,
-      normalized.dateRange ? gte(transactionsTable.date, normalized.dateRange.start) : undefined,
-      normalized.dateRange ? lte(transactionsTable.date, normalized.dateRange.end) : undefined,
-      normalized.accountId
-        ? or(
-            eq(transactionsTable.accountId, normalized.accountId),
-            eq(transactionsTable.fromAccountId, normalized.accountId),
-            eq(transactionsTable.toAccountId, normalized.accountId),
-          )
-        : undefined,
-      normalized.minAmount !== null
-        ? gte(transactionsTable.amount, normalized.minAmount)
-        : undefined,
-      normalized.maxAmount !== null
-        ? lte(transactionsTable.amount, normalized.maxAmount)
-        : undefined,
-    ];
-
-    if (normalized.search.trim()) {
-      const term = `%${normalized.search.trim().toLowerCase()}%`;
-      predicates.push(or(sql`lower(coalesce(${transactionsTable.note}, '')) like ${term}`));
-    }
-
     const rows = db
       .select()
       .from(transactionsTable)
-      .where(and(...predicates))
+      .where(and(...buildSqlPredicates(normalized)))
       .all()
       .map(toTransaction);
     const transactions = attachRelations(rows);

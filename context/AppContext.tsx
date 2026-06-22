@@ -2101,7 +2101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const getCashflowSummary = useCallback(
     (range: DateRange): CashflowSummary => {
-      const txns = transactionsRepository.list({
+      const txns = transactionsRepository.listForSummary({
         dateRange: range,
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
       });
@@ -2124,7 +2124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const buildBreakdown = useCallback(
     (range: DateRange, type: 'income' | 'expense', groupByRoot: boolean): BreakdownItem[] => {
-      const txns = transactionsRepository.list({
+      const txns = transactionsRepository.listForSummary({
         type,
         dateRange: range,
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
