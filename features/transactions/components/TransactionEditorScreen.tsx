@@ -73,6 +73,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { convert, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
@@ -174,6 +175,8 @@ interface TransactionEditorInitialValues {
   accountId: string | null;
   fromAccountId: string | null;
   toAccountId: string | null;
+  /** Received amount for a cross-currency transfer (destination currency). */
+  toAmount: number | null;
   categoryId: string | null;
   note: string;
   sentiment: TransactionSentiment;
@@ -398,7 +401,17 @@ export function TransactionEditorScreen({
   initialAccountId,
   recurringOptions,
 }: TransactionEditorScreenProps) {
-  const { accounts, accountGroups, categories, settings, currentMonthWage } = useApp();
+  const { accounts, accountGroups, categories, settings, currentMonthWage, rateTable } = useApp();
+
+  // Resolve an account's native currency (code), falling back to the reporting
+  // currency. Used so transactions store the currency of the account they touch.
+  const accountCurrency = useCallback(
+    (id: string | null | undefined): string => {
+      if (!id) return settings.currencyCode;
+      return accounts.find((a) => a.id === id)?.currency ?? settings.currencyCode;
+    },
+    [accounts, settings.currencyCode],
+  );
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
@@ -433,6 +446,11 @@ export function TransactionEditorScreen({
   const [accountId, setAccountId] = useState<string | null>(initialSingleAccountId);
   const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
+  // Cross-currency transfers: amount received in the destination currency. Empty
+  // means "auto-convert at the current rate".
+  const [transferToAmount, setTransferToAmount] = useState(
+    initialValues?.toAmount != null ? String(initialValues.toAmount) : '',
+  );
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
@@ -1049,7 +1067,7 @@ export function TransactionEditorScreen({
         submitPayload = {
           type,
           amount: numericAmount,
-          currency: settings.currencySymbol,
+          currency: accountCurrency(accountId),
           date: txDate,
           accountId,
           categoryId: null,
@@ -1074,10 +1092,22 @@ export function TransactionEditorScreen({
           else if (transferErrors.to_account) activateField('toAccount');
           return;
         }
+        const fromCurrency = accountCurrency(fromAccountId);
+        const toCurrency = accountCurrency(toAccountId);
+        // Cross-currency transfer: credit the destination in its own currency.
+        // Prefer the user-entered received amount; otherwise convert at the
+        // latest cached rate (manual rates configurable in Exchange Rates).
+        const crossCurrency = fromCurrency !== toCurrency;
+        const enteredToAmount = transferToAmount.trim() ? Number(transferToAmount) : null;
+        const computedToAmount =
+          enteredToAmount !== null && Number.isFinite(enteredToAmount) && enteredToAmount > 0
+            ? enteredToAmount
+            : convert(numericAmount, fromCurrency, toCurrency, rateTable).value;
         submitPayload = {
           type,
           amount: numericAmount,
-          currency: settings.currencySymbol,
+          currency: fromCurrency,
+          toAmount: crossCurrency ? computedToAmount : null,
           date: txDate,
           fromAccountId,
           toAccountId,
@@ -1102,7 +1132,7 @@ export function TransactionEditorScreen({
         submitPayload = {
           type,
           amount: numericAmount,
-          currency: settings.currencySymbol,
+          currency: accountCurrency(accountId),
           date: txDate,
           accountId,
           categoryId,
@@ -1910,6 +1940,43 @@ export function TransactionEditorScreen({
                               </View>
                             </SummaryRow>
                           </View>
+                          {selectedFromAccount &&
+                          selectedToAccount &&
+                          selectedFromAccount.currency !== selectedToAccount.currency ? (
+                            <View className="mt-2 rounded-2xl border border-border/30 bg-secondary/30 p-3 gap-1.5">
+                              <Text variant="caption" tone="muted">
+                                {I18n.t('transactions.editor.received_amount', {
+                                  currency: selectedToAccount.currency,
+                                })}
+                              </Text>
+                              <View className="flex-row items-center gap-2">
+                                <Text variant="body" tone="muted">
+                                  {currencySymbolForCode(selectedToAccount.currency)}
+                                </Text>
+                                <TextInput
+                                  value={transferToAmount}
+                                  onChangeText={setTransferToAmount}
+                                  keyboardType="decimal-pad"
+                                  placeholder={String(
+                                    convert(
+                                      Number(amount) || 0,
+                                      selectedFromAccount.currency,
+                                      selectedToAccount.currency,
+                                      rateTable,
+                                    ).value || '',
+                                  )}
+                                  placeholderTextColor={themeColors.textMuted}
+                                  style={{ flex: 1, color: themeColors.text, paddingVertical: 4 }}
+                                />
+                              </View>
+                              <Text variant="caption" tone="muted">
+                                {I18n.t('transactions.editor.transfer_rate_hint', {
+                                  from: selectedFromAccount.currency,
+                                  to: selectedToAccount.currency,
+                                })}
+                              </Text>
+                            </View>
+                          ) : null}
                         </>
                       ) : (
                         <View onLayout={registerFieldLayout('account')}>

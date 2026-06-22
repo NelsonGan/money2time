@@ -360,9 +360,11 @@ function StackCard({
       return formatAmount(normalizeMoneyAmount(amount), settings, {
         showSign: false,
         trueHourlyRate,
+        // Show each account's balance in its own (native) currency.
+        currencyCode: account.currency,
       });
     },
-    [hideBalances, settings, trueHourlyRate],
+    [account.currency, hideBalances, settings, trueHourlyRate],
   );
 
   return (

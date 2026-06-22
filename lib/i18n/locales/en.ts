@@ -376,6 +376,8 @@ const en = {
       to: 'To',
       swap_accounts: 'Swap from and to accounts',
       choose_account: 'Choose account',
+      received_amount: 'Amount received ({{currency}})',
+      transfer_rate_hint: 'Leave blank to convert {{from}} → {{to}} at the latest rate.',
       choose_category: 'Choose category',
       choose_field: 'Choose {{field}}',
       optional: 'Optional',

@@ -1513,11 +1513,12 @@ export function AccountsScreen({
   }, []);
 
   const formatVisibleBalance = useCallback(
-    (amount: number) => {
+    (amount: number, currencyCode?: string) => {
       if (hideAccountBalances) return MASKED_BALANCE_VALUE;
       return formatAmount(normalizeMoneyAmount(amount), settings, {
         showSign: false,
         trueHourlyRate,
+        currencyCode,
       });
     },
     [hideAccountBalances, settings, trueHourlyRate],
@@ -1530,10 +1531,12 @@ export function AccountsScreen({
         tone?: React.ComponentProps<typeof Text>['tone'];
         textClassName?: string;
         iconColor?: string;
+        currencyCode?: string;
       } = {},
     ) => {
-      const { variant = 'caption', tone = 'default', textClassName, iconColor } = options;
-      const label = formatVisibleBalance(amount);
+      const { variant = 'caption', tone = 'default', textClassName, iconColor, currencyCode } =
+        options;
+      const label = formatVisibleBalance(amount, currencyCode);
       if (hideAccountBalances || settings.displayMode !== 'time') {
         return (
           <Text variant={variant} tone={tone} className={textClassName}>
@@ -1695,13 +1698,21 @@ export function AccountsScreen({
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
   }, [accountBalances]);
 
+  // Balances converted to the reporting currency, for cross-currency totals.
+  // Falls back to the native balance when no rate is available.
+  const convertedBalanceMap = useMemo(() => {
+    return new Map(
+      accountBalances.map((item) => [item.accountId, item.convertedBalance ?? item.balance]),
+    );
+  }, [accountBalances]);
+
   const { total, assetsTotal, debtTotal } = useMemo(() => {
     if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };
     let assets = 0;
     let debt = 0;
     for (const account of accounts) {
       if (!account.includeInTotals) continue;
-      const balance = balanceMap.get(account.id) ?? account.startingBalance;
+      const balance = convertedBalanceMap.get(account.id) ?? account.startingBalance;
       if (account.type === 'credit') {
         debt += balance;
       } else {
@@ -1713,7 +1724,7 @@ export function AccountsScreen({
       assetsTotal: normalizeMoneyAmount(assets),
       debtTotal: normalizeMoneyAmount(debt),
     };
-  }, [accounts, balanceMap, managementOnly]);
+  }, [accounts, convertedBalanceMap, managementOnly]);
   const creditSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, CreditSummary>();
     const creditAccounts = accounts.filter((account) => account.type === 'credit');

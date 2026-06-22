@@ -368,6 +368,8 @@ const zh = {
       to: '到',
       swap_accounts: '交换转出和转入账户',
       choose_account: '选择账户',
+      received_amount: '到账金额（{{currency}}）',
+      transfer_rate_hint: '留空则按最新汇率将 {{from}} → {{to}} 换算。',
       choose_category: '选择分类',
       choose_field: '选择{{field}}',
       optional: '选填',

@@ -10,6 +10,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
+import { currencySymbolForCode } from '~/utils/currency';
 import {
   amountToHoursByRate,
   formatAmount,
@@ -154,17 +155,23 @@ function TransactionItemView({
       : isIncome
         ? 'text-success'
         : 'text-destructive';
-  const primaryValue = formatAmount(transaction.amount, settings, {
+  // Time-mode conversions use the frozen reporting-currency snapshot (so a
+  // foreign transaction converts correctly via the reporting hourly rate);
+  // money mode shows the native amount with its own currency symbol.
+  const reportingAmount = transaction.reportingAmount ?? transaction.amount;
+  const nativeSymbol = currencySymbolForCode(transaction.currency);
+  const primaryValue = formatAmount(isTimeMode ? reportingAmount : transaction.amount, settings, {
     showSign: isBalanceAdjustment,
     neutralSign: isTransfer,
     trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
+    currencyCode: transaction.currency,
   });
   const secondaryValue =
     isTransfer || isBalanceAdjustment || rate <= 0
       ? null
       : isTimeMode
-        ? formatCurrency(transaction.amount, settings.currencySymbol)
-        : formatHours(amountToHoursByRate(transaction.amount, rate));
+        ? formatCurrency(transaction.amount, nativeSymbol)
+        : formatHours(amountToHoursByRate(reportingAmount, rate));
   const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
   const showsSecondaryTime = !isTimeMode && secondaryValue !== null;
   const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
