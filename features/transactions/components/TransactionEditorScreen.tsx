@@ -56,6 +56,7 @@ import {
   type SplitDraft,
   splitsHelpers,
   SummaryRow,
+  TransferFxModal,
 } from '~/features/transactions/components/editor';
 import {
   evaluateExpression,
@@ -458,6 +459,7 @@ export function TransactionEditorScreen({
   const [transferToAmount, setTransferToAmount] = useState(
     initialValues?.toAmount != null ? String(initialValues.toAmount) : '',
   );
+  const [transferFxModalVisible, setTransferFxModalVisible] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
@@ -1957,53 +1959,51 @@ export function TransactionEditorScreen({
                           </View>
                           {selectedFromAccount &&
                           selectedToAccount &&
-                          selectedFromAccount.currency !== selectedToAccount.currency ? (
-                            <View className="mt-2 rounded-2xl border border-border/30 bg-secondary/30 p-3 gap-1.5">
-                              <Text variant="caption" tone="muted">
-                                {I18n.t('transactions.editor.received_amount', {
-                                  currency: selectedToAccount.currency,
-                                })}
-                              </Text>
-                              <View className="flex-row items-center gap-2">
-                                <Text variant="body" tone="muted">
-                                  {currencySymbolForCode(selectedToAccount.currency)}
-                                </Text>
-                                <TextInput
-                                  value={transferToAmount}
-                                  onChangeText={setTransferToAmount}
-                                  keyboardType="decimal-pad"
-                                  placeholder={String(
-                                    convert(
-                                      Number(amount) || 0,
-                                      selectedFromAccount.currency,
-                                      selectedToAccount.currency,
-                                      rateTable,
-                                    ).value || '',
-                                  )}
-                                  placeholderTextColor={themeColors.textMuted}
-                                  style={{ flex: 1, color: themeColors.text, paddingVertical: 4 }}
-                                />
-                              </View>
-                              {(() => {
-                                const pairRate = resolveRate(
-                                  selectedFromAccount.currency,
-                                  selectedToAccount.currency,
-                                  rateTable,
+                          selectedFromAccount.currency !== selectedToAccount.currency
+                            ? (() => {
+                                const fromCur = selectedFromAccount.currency;
+                                const toCur = selectedToAccount.currency;
+                                const fromAmount = Number(amount) || 0;
+                                const receivedValue = transferToAmount.trim()
+                                  ? Number(transferToAmount)
+                                  : convert(fromAmount, fromCur, toCur, rateTable).value;
+                                const pairRate =
+                                  fromAmount > 0 && Number(transferToAmount) > 0
+                                    ? Number(transferToAmount) / fromAmount
+                                    : resolveRate(fromCur, toCur, rateTable);
+                                return (
+                                  <Pressable
+                                    onPress={() => setTransferFxModalVisible(true)}
+                                    className="mt-2 flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
+                                  >
+                                    <View className="flex-1 min-w-0">
+                                      <Text variant="caption" tone="muted">
+                                        {I18n.t('transactions.editor.received_label')}
+                                      </Text>
+                                      <Text variant="body">
+                                        {currencySymbolForCode(toCur)}
+                                        {Number.isFinite(receivedValue)
+                                          ? receivedValue.toFixed(2)
+                                          : '0.00'}
+                                      </Text>
+                                    </View>
+                                    <View className="items-end gap-0.5">
+                                      {pairRate ? (
+                                        <Text variant="caption" tone="muted">
+                                          {`1 ${fromCur} = ${formatTransferRate(pairRate)} ${toCur}`}
+                                        </Text>
+                                      ) : null}
+                                      <Text
+                                        variant="caption"
+                                        style={{ color: themeColors.primary }}
+                                      >
+                                        {I18n.t('common.edit')}
+                                      </Text>
+                                    </View>
+                                  </Pressable>
                                 );
-                                return pairRate ? (
-                                  <Text variant="caption" tone="muted">
-                                    {`1 ${selectedFromAccount.currency} = ${formatTransferRate(pairRate)} ${selectedToAccount.currency}`}
-                                  </Text>
-                                ) : null;
-                              })()}
-                              <Text variant="caption" tone="muted">
-                                {I18n.t('transactions.editor.transfer_rate_hint', {
-                                  from: selectedFromAccount.currency,
-                                  to: selectedToAccount.currency,
-                                })}
-                              </Text>
-                            </View>
-                          ) : null}
+                              })()
+                            : null}
                         </>
                       ) : (
                         <View onLayout={registerFieldLayout('account')}>
@@ -2518,6 +2518,18 @@ export function TransactionEditorScreen({
           onMarkPaid={handleSplitMarkPaidLocal}
           onMarkUnpaid={handleSplitMarkUnpaidLocal}
           newlyPaidIds={newlyPaidIds}
+        />
+      ) : null}
+      {isTransferType && selectedFromAccount && selectedToAccount ? (
+        <TransferFxModal
+          visible={transferFxModalVisible}
+          fromCurrency={selectedFromAccount.currency}
+          toCurrency={selectedToAccount.currency}
+          fromAmount={Number(amount) || 0}
+          rateTable={rateTable}
+          toAmount={transferToAmount}
+          onClose={() => setTransferFxModalVisible(false)}
+          onApply={setTransferToAmount}
         />
       ) : null}
       <AccountPickerSheet

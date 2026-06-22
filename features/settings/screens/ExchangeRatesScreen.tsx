@@ -1,11 +1,18 @@
-import { Check, RefreshCw } from 'lucide-react-native';
+import { RefreshCw } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 
 import {
-  Button,
   Card,
   CardContent,
+  SelectField,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -13,11 +20,12 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { currencyNameForCode, currencySymbolForCode, isAutoRateSupported } from '~/utils/currency';
+import { currencyNameForCode } from '~/utils/currency';
 
 interface ExchangeRatesScreenProps {
   onBack: () => void;
@@ -30,16 +38,32 @@ function formatRate(rate: number): string {
 }
 
 export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
-  const { settings, accounts, listExchangeRates, refreshExchangeRates, setManualExchangeRate } =
-    useApp();
+  const {
+    settings,
+    accounts,
+    listExchangeRates,
+    refreshExchangeRates,
+    setManualExchangeRate,
+    changeReportingCurrency,
+  } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
 
   const reporting = settings.currencyCode;
   const [refreshing, setRefreshing] = useState(false);
+  const [changingCurrency, setChangingCurrency] = useState(false);
   // Local edit buffers for manual-rate inputs, keyed by currency code.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [rateVersion, setRateVersion] = useState(0);
+
+  const currencyOptions = useMemo(
+    () =>
+      MAJOR_CURRENCIES.map((item) => ({
+        value: item.code,
+        label: `${item.code} (${item.symbol}) · ${item.name}`,
+      })),
+    [],
+  );
 
   const rateRows = useMemo(() => listExchangeRates(), [listExchangeRates, rateVersion]);
   const rateByQuote = useMemo(() => new Map(rateRows.map((r) => [r.quoteCurrency, r])), [rateRows]);
@@ -87,6 +111,22 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     else void triggerHaptic('warning');
   }, [refreshExchangeRates]);
 
+  const handleChangeMainCurrency = useCallback(
+    async (code: string) => {
+      if (code === reporting || changingCurrency) return;
+      setChangingCurrency(true);
+      void triggerHaptic('selection');
+      try {
+        await changeReportingCurrency(code);
+        setRateVersion((v) => v + 1);
+        void triggerHaptic('success');
+      } finally {
+        setChangingCurrency(false);
+      }
+    },
+    [changeReportingCurrency, changingCurrency, reporting],
+  );
+
   const commitManualRate = useCallback(
     (code: string) => {
       const raw = drafts[code];
@@ -117,50 +157,46 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
       >
         <Card>
           <CardContent style={styles.summaryCard}>
+            <SelectField
+              label={I18n.t('exchange_rates.main_currency')}
+              sheetTitle={I18n.t('exchange_rates.main_currency')}
+              value={reporting}
+              options={currencyOptions}
+              optionsLayout="list"
+              onChange={(code) => void handleChangeMainCurrency(code)}
+            />
             <View style={styles.summaryRow}>
               <Text variant="caption" tone="muted">
-                {I18n.t('exchange_rates.main_currency')}
+                {changingCurrency
+                  ? I18n.t('exchange_rates.updating')
+                  : asOfDate
+                    ? I18n.t('exchange_rates.as_of', { date: asOfDate })
+                    : I18n.t('exchange_rates.never_updated')}
               </Text>
-              <Text variant="friendly">
-                {reporting} ({currencySymbolForCode(reporting)})
-              </Text>
+              <Pressable
+                onPress={() => void handleRefresh()}
+                disabled={refreshing || changingCurrency}
+                style={[styles.refreshButton, { borderColor: themeColors.border }]}
+              >
+                {refreshing ? (
+                  <ActivityIndicator size="small" color={themeColors.primary} />
+                ) : (
+                  <RefreshCw size={14} color={themeColors.primary} />
+                )}
+                <Text variant="caption" style={{ color: themeColors.primary }}>
+                  {I18n.t('exchange_rates.update_rates')}
+                </Text>
+              </Pressable>
             </View>
-            <Text variant="caption" tone="muted">
-              {asOfDate
-                ? I18n.t('exchange_rates.as_of', { date: asOfDate })
-                : I18n.t('exchange_rates.never_updated')}
-            </Text>
             {settings.lastRateFetchError ? (
               <Text variant="caption" style={{ color: themeColors.error }}>
                 {settings.lastRateFetchError}
               </Text>
             ) : null}
-            <Button
-              variant="outline"
-              onPress={() => void handleRefresh()}
-              disabled={refreshing}
-              style={styles.refreshButton}
-            >
-              <View style={styles.buttonInner}>
-                {refreshing ? (
-                  <ActivityIndicator size="small" color={themeColors.primary} />
-                ) : (
-                  <RefreshCw size={16} color={themeColors.primary} />
-                )}
-                <Text>
-                  {refreshing
-                    ? I18n.t('exchange_rates.updating')
-                    : I18n.t('exchange_rates.update_rates')}
-                </Text>
-              </View>
-            </Button>
           </CardContent>
         </Card>
 
-        <SettingsSection
-          title={I18n.t('exchange_rates.rates_title')}
-          subtitle={I18n.t('exchange_rates.rates_subtitle')}
-        >
+        <SettingsSection title={I18n.t('exchange_rates.rates_title')}>
           {displayCodes.length === 0 ? (
             <Card>
               <CardContent>
@@ -174,7 +210,6 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
               <CardContent style={styles.list}>
                 {displayCodes.map((code, index) => {
                   const row = rateByQuote.get(code);
-                  const supported = isAutoRateSupported(code);
                   const draft = drafts[code];
                   const displayValue =
                     draft !== undefined ? draft : row ? formatRate(row.rate) : '';
@@ -189,15 +224,16 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                       ]}
                     >
                       <View style={styles.rateInfo}>
-                        <Text variant="friendly">
-                          {code} · {currencyNameForCode(code)}
-                        </Text>
-                        <Text variant="caption" tone="muted">
+                        <Text variant="bodyStrong">{code}</Text>
+                        <Text
+                          variant="caption"
+                          tone="muted"
+                          numberOfLines={1}
+                          style={styles.rateName}
+                        >
                           {row?.source === 'manual'
                             ? I18n.t('exchange_rates.manual_badge')
-                            : supported
-                              ? I18n.t('exchange_rates.auto_badge')
-                              : I18n.t('exchange_rates.manual_only')}
+                            : currencyNameForCode(code)}
                         </Text>
                       </View>
                       <View style={styles.rateEntry}>
@@ -221,15 +257,6 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                             },
                           ]}
                         />
-                        {draft !== undefined ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onPress={() => commitManualRate(code)}
-                          >
-                            <Check size={16} color={themeColors.primary} />
-                          </Button>
-                        ) : null}
                       </View>
                     </View>
                   );
@@ -238,38 +265,41 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
             </Card>
           )}
         </SettingsSection>
-
-        <Text variant="caption" tone="muted" style={styles.footnote}>
-          {I18n.t('exchange_rates.footnote')}
-        </Text>
       </ScrollView>
     </SettingsPageLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  summaryCard: { gap: 8 },
+  summaryCard: { gap: 12 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  refreshButton: { marginTop: 8 },
-  buttonInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
   list: { gap: 0 },
   rateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 10,
     gap: 12,
   },
-  rateInfo: { flex: 1, gap: 2 },
+  rateInfo: { flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  rateName: { flexShrink: 1 },
   rateEntry: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rateInput: {
-    minWidth: 96,
+    minWidth: 92,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     textAlign: 'right',
     fontSize: 15,
   },
-  footnote: { marginTop: 16 },
 });
