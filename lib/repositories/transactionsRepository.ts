@@ -364,34 +364,33 @@ class TransactionsRepository {
   }
 
   /**
-   * Re-denominate every transaction touching `accountId` into `toCurrency` by
-   * applying `rate` (1 old-currency = `rate` toCurrency) in a lump — used when
-   * the user changes an existing account's currency. Native entries switch
-   * currency and scale their amount (keeping the frozen reporting value);
-   * foreign entries only scale their frozen account-currency amount; transfer
-   * legs touching the account scale accordingly.
+   * Re-denominate an account into `toCurrency` by applying `rate`
+   * (1 old-currency = `rate` toCurrency) when the user changes the account's
+   * currency.
+   *
+   * Income/expense/adjustment rows keep their original amount AND currency —
+   * they simply become foreign entries in the new account currency, with their
+   * frozen account-currency value (`account_amount`) scaled so the account
+   * balance is denominated in `toCurrency`. (A row recorded in MYR stays MYR
+   * even after the account flips to USD, exactly like entering MYR into a USD
+   * account.) Their reporting snapshot is untouched (their own currency didn't
+   * change). Transfer legs, whose amount is intrinsically the account's
+   * currency, are converted in place.
    */
   redenominateAccount(accountId: string, toCurrency: string, rate: number): void {
     const sqlite = getSQLite();
     const now = nowIso();
     sqlite.execSync('BEGIN');
     try {
-      // Foreign-entry rows in this account: only the frozen account-currency value moves.
+      // Income/expense/adjustment rows: freeze their value in the new account
+      // currency without touching the entered amount/currency. COALESCE handles
+      // both native rows (no account_amount yet) and existing foreign rows.
       sqlite.runSync(
-        `UPDATE transactions SET account_amount = account_amount * ?, updated_at = ?
+        `UPDATE transactions
+           SET account_amount = COALESCE(account_amount, amount) * ?, updated_at = ?
          WHERE deleted_at IS NULL AND account_id = ?
-           AND type IN ('income','expense','balance_adjustment') AND account_amount IS NOT NULL`,
+           AND type IN ('income','expense','balance_adjustment')`,
         [rate, now, accountId],
-      );
-      // Native-entry rows: scale the amount, switch currency, keep the reporting value.
-      sqlite.runSync(
-        `UPDATE transactions SET amount = amount * ?, currency = ?,
-           fx_rate = CASE WHEN reporting_amount IS NOT NULL AND amount * ? != 0
-             THEN reporting_amount / (amount * ?) ELSE fx_rate END,
-           updated_at = ?
-         WHERE deleted_at IS NULL AND account_id = ?
-           AND type IN ('income','expense','balance_adjustment') AND account_amount IS NULL`,
-        [rate, toCurrency, rate, rate, now, accountId],
       );
       // Transfers out of this account (amount is in the from-currency). A
       // previously same-currency transfer becomes cross-currency, so freeze the

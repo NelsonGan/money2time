@@ -1145,7 +1145,7 @@ const en = {
     current_balance_hint: 'Set the latest actual balance for this account.',
     currency_change_title: 'Change account currency?',
     currency_change_message:
-      'Past entries in this account will be converted from {{from}} to {{to}} at the latest exchange rate, all at once. This changes how earlier entries are recorded.',
+      'The balance will be converted from {{from}} to {{to}} at the latest rate. Existing entries keep their original currency.',
     currency_change_action: 'Convert & change',
     balance_adjustment_prompt_title: 'How should this balance change be recorded?',
     balance_adjustment_prompt_message:

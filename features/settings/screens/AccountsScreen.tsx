@@ -47,7 +47,7 @@ import {
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
-import { currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
+import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
@@ -467,7 +467,13 @@ function AccountEditorSheet({
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showAddSubcurrency, setShowAddSubcurrency] = useState(false);
 
-  const { settings: appSettings, accounts: appAccounts, fxCurrencies, addFxCurrency } = useApp();
+  const {
+    settings: appSettings,
+    accounts: appAccounts,
+    fxCurrencies,
+    addFxCurrency,
+    rateTable,
+  } = useApp();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -477,6 +483,21 @@ function AccountEditorSheet({
     }
     return Array.from(set);
   }, [appSettings.currencyCode, appAccounts, fxCurrencies, currency]);
+
+  // Switching the currency previews the converted balance so the user sees the
+  // result before saving (the same rate is applied for real on save).
+  const handleCurrencyChange = useCallback(
+    (nextCurrency: string) => {
+      if (nextCurrency === currency) return;
+      const parsed = Number(balanceInput);
+      if (Number.isFinite(parsed) && parsed !== 0) {
+        const { value } = convert(parsed, currency, nextCurrency, rateTable);
+        setBalanceInput(toBalanceInputValue(value));
+      }
+      setCurrency(nextCurrency);
+    },
+    [balanceInput, currency, rateTable],
+  );
 
   const accountGroupNameById = useMemo(
     () => new Map(accountGroups.map((group) => [group.id, group.name])),
@@ -796,7 +817,7 @@ function AccountEditorSheet({
       <CurrencyPickerSheet
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}
-        onSelect={setCurrency}
+        onSelect={handleCurrencyChange}
         selectedCode={currency}
         restrictToCodes={accountCurrencyCodes}
         title={I18n.t('accounts.currency')}
@@ -820,7 +841,7 @@ function AccountEditorSheet({
         onClose={() => setShowAddSubcurrency(false)}
         onSelect={(code) => {
           void addFxCurrency(code);
-          setCurrency(code);
+          handleCurrencyChange(code);
         }}
         excludeCodes={accountCurrencyCodes}
         title={I18n.t('exchange_rates.add_currency')}

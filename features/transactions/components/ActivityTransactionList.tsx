@@ -277,7 +277,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         const value = isTimeMode
           ? getDisplayValueForTransaction(transaction)
           : subtotalCurrencyCode
-            ? transaction.amount
+            ? (transaction.accountAmount ?? transaction.amount)
             : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.income += value;
       }
@@ -285,7 +285,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         const value = isTimeMode
           ? getDisplayValueForTransaction(transaction)
           : subtotalCurrencyCode
-            ? transaction.amount
+            ? (transaction.accountAmount ?? transaction.amount)
             : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.expense += value;
       }

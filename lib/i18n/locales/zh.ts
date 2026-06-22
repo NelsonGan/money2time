@@ -1102,7 +1102,7 @@ const zh = {
     current_balance_hint: '设置该账户的最新实际余额。',
     currency_change_title: '更改账户货币？',
     currency_change_message:
-      '此账户的过往记录将按最新汇率从 {{from}} 一次性换算为 {{to}}。这会改变早前记录的记账方式。',
+      '余额将按最新汇率从 {{from}} 换算为 {{to}}。现有记录仍保留其原始货币。',
     currency_change_action: '换算并更改',
     balance_adjustment_prompt_title: '如何记录此余额变动？',
     balance_adjustment_prompt_message:
