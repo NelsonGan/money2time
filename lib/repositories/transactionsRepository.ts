@@ -44,6 +44,8 @@ export interface CreateTransactionInput {
   fxRate?: number | null;
   /** Credited amount in the to-account's currency for cross-currency transfers. */
   toAmount?: number | null;
+  /** Frozen value in the account's currency when the entered currency differs. */
+  accountAmount?: number | null;
   date: string;
   accountId?: string | null;
   fromAccountId?: string | null;
@@ -396,6 +398,7 @@ class TransactionsRepository {
         reportingAmount: normalizedInput.reportingAmount ?? null,
         fxRate: normalizedInput.fxRate ?? null,
         toAmount: normalizedInput.toAmount ?? null,
+        accountAmount: normalizedInput.accountAmount ?? null,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,

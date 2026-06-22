@@ -315,7 +315,7 @@ export function SimpleActivityScreen({
     (transaction: TransactionWithRelations) =>
       settings.displayMode === 'time'
         ? getDisplayValueForTransaction(transaction)
-        : transaction.amount,
+        : (transaction.reportingAmount ?? transaction.amount),
     [getDisplayValueForTransaction, settings.displayMode],
   );
 

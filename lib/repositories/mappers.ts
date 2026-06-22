@@ -201,6 +201,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     reportingAmount: row.reportingAmount ?? null,
     fxRate: row.fxRate ?? null,
     toAmount: row.toAmount ?? null,
+    accountAmount: row.accountAmount ?? null,
     date: row.date,
     accountId: row.accountId,
     fromAccountId: row.fromAccountId,

@@ -51,6 +51,9 @@ export const transactionsTable = sqliteTable('transactions', {
   fxRate: real('fx_rate'),
   // Credited amount (in the to-account's currency) for cross-currency transfers.
   toAmount: real('to_amount'),
+  // Frozen value in the owning account's currency, set when the entered
+  // currency differs from the account currency. Null when they match.
+  accountAmount: real('account_amount'),
   date: text('date').notNull(),
   accountId: text('account_id'),
   fromAccountId: text('from_account_id'),

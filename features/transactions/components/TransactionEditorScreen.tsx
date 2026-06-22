@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileText,
   Hash,
+  Pencil,
   Power,
   Repeat,
   Timer,
@@ -74,7 +75,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { convert, currencySymbolForCode, resolveRate } from '~/utils/currency';
+import { convert, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
@@ -178,6 +179,8 @@ interface TransactionEditorInitialValues {
   toAccountId: string | null;
   /** Received amount for a cross-currency transfer (destination currency). */
   toAmount: number | null;
+  /** Currency the amount was entered in (may differ from the account currency). */
+  currency: string | null;
   categoryId: string | null;
   note: string;
   sentiment: TransactionSentiment;
@@ -358,13 +361,6 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
   );
 }
 
-/** Human-friendly rate for the transfer pair line (more digits for tiny rates). */
-function formatTransferRate(rate: number): string {
-  if (rate >= 100) return rate.toFixed(2);
-  if (rate >= 1) return rate.toFixed(4);
-  return rate.toPrecision(4);
-}
-
 function formatDateDisplay(dateStr: string, locale: string) {
   const parsed = new Date(`${dateStr}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateStr;
@@ -409,7 +405,15 @@ export function TransactionEditorScreen({
   initialAccountId,
   recurringOptions,
 }: TransactionEditorScreenProps) {
-  const { accounts, accountGroups, categories, settings, currentMonthWage, rateTable } = useApp();
+  const {
+    accounts,
+    accountGroups,
+    categories,
+    settings,
+    currentMonthWage,
+    rateTable,
+    fxCurrencies,
+  } = useApp();
 
   // Resolve an account's native currency (code), falling back to the reporting
   // currency. Used so transactions store the currency of the account they touch.
@@ -452,6 +456,11 @@ export function TransactionEditorScreen({
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(initialSingleAccountId);
+  // Currency the amount is entered in. Defaults to the account currency but can
+  // be switched on the numpad (e.g. spending EUR from an MYR account).
+  const [entryCurrency, setEntryCurrency] = useState<string>(
+    initialValues?.currency ?? accountCurrency(initialSingleAccountId),
+  );
   const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
   // Cross-currency transfers: amount received in the destination currency. Empty
@@ -637,6 +646,9 @@ export function TransactionEditorScreen({
   }, [restrictTypeOptions]);
   const isTransferType = type === 'transfer';
   const isBalanceAdjustmentType = type === 'balance_adjustment';
+  // The amount is entered in `entryCurrency` (selectable on the numpad for
+  // expense/income). Transfers always use the from-account's currency.
+  const effectiveEntryCurrency = isTransferType ? accountCurrency(fromAccountId) : entryCurrency;
   const showTypeSelector = availableTypeCards.length > 1;
 
   useEffect(() => {
@@ -787,14 +799,29 @@ export function TransactionEditorScreen({
     if (!numericAmount || numericAmount <= 0) return null;
     const rate = currentMonthWage?.trueHourlyRate ?? 0;
     if (rate <= 0) return null;
-    const hours = amountToHoursByRate(numericAmount, rate);
+    // The hourly rate is in the reporting currency, so convert the entered
+    // amount to reporting before computing the time equivalent.
+    const reportingAmount = convert(
+      numericAmount,
+      effectiveEntryCurrency,
+      settings.currencyCode,
+      rateTable,
+    ).value;
+    const hours = amountToHoursByRate(reportingAmount, rate);
     const formattedHours = formatHours(hours);
     if (hours < 0.25)
       return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
     if (hours < 1)
       return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
     return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
-  }, [amount, currentMonthWage?.trueHourlyRate, type]);
+  }, [
+    amount,
+    currentMonthWage?.trueHourlyRate,
+    effectiveEntryCurrency,
+    rateTable,
+    settings.currencyCode,
+    type,
+  ]);
 
   const accountById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account])),
@@ -1025,13 +1052,22 @@ export function TransactionEditorScreen({
     [adjustAmountBy, splits],
   );
 
-  // Amount is always entered in the native currency of the account being
-  // touched (the from-account for transfers), so the keypad shows that symbol
-  // rather than the reporting-currency symbol.
   const entryCurrencySymbol = useMemo(
-    () => currencySymbolForCode(accountCurrency(isTransferType ? fromAccountId : accountId)),
-    [accountCurrency, accountId, fromAccountId, isTransferType],
+    () => currencySymbolForCode(effectiveEntryCurrency),
+    [effectiveEntryCurrency],
   );
+
+  // Currencies offered on the numpad: the selected account's currency first,
+  // then the reporting currency, the user's added currencies, and any other
+  // account currencies — de-duplicated.
+  const enabledCurrencies = useMemo(() => {
+    const acct = accountCurrency(accountId);
+    const set = new Set<string>([acct, settings.currencyCode, ...fxCurrencies]);
+    for (const account of accounts) {
+      if (account.currency) set.add(account.currency);
+    }
+    return [acct, ...Array.from(set).filter((code) => code !== acct)];
+  }, [accountCurrency, accountId, accounts, fxCurrencies, settings.currencyCode]);
 
   const amountDisplay = useMemo(() => {
     if (activeField === 'amount' && amountExpression) {
@@ -1041,6 +1077,26 @@ export function TransactionEditorScreen({
     if (!amount || !Number.isFinite(num)) return `${entryCurrencySymbol}${formatMoney(0)}`;
     return `${entryCurrencySymbol}${formatMoney(num)}`;
   }, [activeField, amount, amountExpression, entryCurrencySymbol]);
+
+  // For a cross-currency transfer, the credited amount in the destination
+  // currency — shown next to the main amount and editable via TransferFxModal.
+  const transferReceivedLabel = useMemo(() => {
+    if (
+      !isTransferType ||
+      !selectedFromAccount ||
+      !selectedToAccount ||
+      selectedFromAccount.currency === selectedToAccount.currency
+    ) {
+      return null;
+    }
+    const fromCur = selectedFromAccount.currency;
+    const toCur = selectedToAccount.currency;
+    const fromAmount = Number(amount) || 0;
+    const received = transferToAmount.trim()
+      ? Number(transferToAmount)
+      : convert(fromAmount, fromCur, toCur, rateTable).value;
+    return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
+  }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
   const amountTone = useMemo(() => {
     if (isBalanceAdjustmentType) {
@@ -1146,10 +1202,18 @@ export function TransactionEditorScreen({
           else if (baseErrors.category) activateField('category');
           return;
         }
+        // When the amount is entered in a currency other than the account's,
+        // freeze the converted account-currency value so balances stay correct.
+        const acctCurrency = accountCurrency(accountId);
+        const accountAmount =
+          entryCurrency !== acctCurrency
+            ? convert(numericAmount, entryCurrency, acctCurrency, rateTable).value
+            : null;
         submitPayload = {
           type,
           amount: numericAmount,
-          currency: accountCurrency(accountId),
+          currency: entryCurrency,
+          accountAmount,
           date: txDate,
           accountId,
           categoryId,
@@ -1436,13 +1500,15 @@ export function TransactionEditorScreen({
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
       setAccountId(nextAccountId);
+      // Default the entry currency to the newly chosen account's currency.
+      setEntryCurrency(accountCurrency(nextAccountId));
       if (isBalanceAdjustmentType) {
         activateField('amount');
         return;
       }
       activateField(categoryId ? null : 'category');
     },
-    [activateField, categoryId, isBalanceAdjustmentType],
+    [accountCurrency, activateField, categoryId, isBalanceAdjustmentType],
   );
 
   const handleFromAccountSelect = useCallback(
@@ -1541,12 +1607,56 @@ export function TransactionEditorScreen({
     switch (activeField) {
       case 'amount':
         return (
-          <NumpadPanel
-            initialExpression={amount}
-            onBackgroundPress={clearActiveField}
-            onValueChange={handleAmountValueChange}
-            onConfirm={handleAmountConfirm}
-          />
+          <View className="flex-1">
+            {!isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                style={{ flexGrow: 0, maxHeight: 48 }}
+                contentContainerStyle={{
+                  gap: 8,
+                  paddingHorizontal: 16,
+                  paddingTop: 8,
+                  alignItems: 'center',
+                }}
+              >
+                {enabledCurrencies.map((code) => {
+                  const selected = code === entryCurrency;
+                  return (
+                    <Pressable
+                      key={code}
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setEntryCurrency(code);
+                      }}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full border',
+                        selected
+                          ? 'bg-primary/15 border-primary/50'
+                          : 'bg-secondary/40 border-transparent',
+                      )}
+                    >
+                      <Text
+                        variant="caption"
+                        className={selected ? 'text-primary' : 'text-muted-foreground'}
+                      >
+                        {currencySymbolForCode(code)} {code}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            ) : null}
+            <View className="flex-1">
+              <NumpadPanel
+                initialExpression={amount}
+                onBackgroundPress={clearActiveField}
+                onValueChange={handleAmountValueChange}
+                onConfirm={handleAmountConfirm}
+              />
+            </View>
+          </View>
         );
       case 'repeat':
         return (
@@ -1816,7 +1926,7 @@ export function TransactionEditorScreen({
                                 {I18n.t('transactions.editor.amount')}
                               </Text>
                             </View>
-                            <View style={{ maxWidth: '55%' }}>
+                            <View style={{ maxWidth: '55%' }} className="items-end">
                               <Text
                                 variant="heading"
                                 numberOfLines={1}
@@ -1838,6 +1948,22 @@ export function TransactionEditorScreen({
                               >
                                 {amountDisplay}
                               </Text>
+                              {transferReceivedLabel ? (
+                                <Pressable
+                                  onPress={() => setTransferFxModalVisible(true)}
+                                  hitSlop={6}
+                                  className="mt-0.5 flex-row items-center gap-1"
+                                >
+                                  <Text
+                                    variant="caption"
+                                    numberOfLines={1}
+                                    style={{ color: themeColors.primary }}
+                                  >
+                                    {transferReceivedLabel}
+                                  </Text>
+                                  <Pencil size={11} color={themeColors.primary} />
+                                </Pressable>
+                              ) : null}
                             </View>
                           </View>
                           {nudgeMessageParts ? (
@@ -1957,53 +2083,6 @@ export function TransactionEditorScreen({
                               </View>
                             </SummaryRow>
                           </View>
-                          {selectedFromAccount &&
-                          selectedToAccount &&
-                          selectedFromAccount.currency !== selectedToAccount.currency
-                            ? (() => {
-                                const fromCur = selectedFromAccount.currency;
-                                const toCur = selectedToAccount.currency;
-                                const fromAmount = Number(amount) || 0;
-                                const receivedValue = transferToAmount.trim()
-                                  ? Number(transferToAmount)
-                                  : convert(fromAmount, fromCur, toCur, rateTable).value;
-                                const pairRate =
-                                  fromAmount > 0 && Number(transferToAmount) > 0
-                                    ? Number(transferToAmount) / fromAmount
-                                    : resolveRate(fromCur, toCur, rateTable);
-                                return (
-                                  <Pressable
-                                    onPress={() => setTransferFxModalVisible(true)}
-                                    className="mt-2 flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
-                                  >
-                                    <View className="flex-1 min-w-0">
-                                      <Text variant="caption" tone="muted">
-                                        {I18n.t('transactions.editor.received_label')}
-                                      </Text>
-                                      <Text variant="body">
-                                        {currencySymbolForCode(toCur)}
-                                        {Number.isFinite(receivedValue)
-                                          ? receivedValue.toFixed(2)
-                                          : '0.00'}
-                                      </Text>
-                                    </View>
-                                    <View className="items-end gap-0.5">
-                                      {pairRate ? (
-                                        <Text variant="caption" tone="muted">
-                                          {`1 ${fromCur} = ${formatTransferRate(pairRate)} ${toCur}`}
-                                        </Text>
-                                      ) : null}
-                                      <Text
-                                        variant="caption"
-                                        style={{ color: themeColors.primary }}
-                                      >
-                                        {I18n.t('common.edit')}
-                                      </Text>
-                                    </View>
-                                  </Pressable>
-                                );
-                              })()
-                            : null}
                         </>
                       ) : (
                         <View onLayout={registerFieldLayout('account')}>

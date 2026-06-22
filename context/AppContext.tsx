@@ -1182,6 +1182,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
         fxRate: input.fxRate ?? snapshot.fxRate,
         toAmount: input.toAmount ?? null,
+        accountAmount: input.accountAmount ?? null,
       };
       const id = newId();
       const now = nowIso();
@@ -1194,6 +1195,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingAmount: normalizedInput.reportingAmount,
         fxRate: normalizedInput.fxRate,
         toAmount: normalizedInput.toAmount,
+        accountAmount: normalizedInput.accountAmount,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,
@@ -1285,6 +1287,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reportingAmount: snap.reportingAmount,
             fxRate: snap.fxRate,
           };
+          // Re-freeze the account-currency value too, unless the caller (the
+          // editor) already supplied it.
+          if (!('accountAmount' in normalizedInput) && effectiveType !== 'balance_adjustment') {
+            const acctId = normalizedInput.accountId ?? currentTransaction?.accountId ?? null;
+            const acctCurrency = acctId
+              ? (accounts.find((a) => a.id === acctId)?.currency ?? reportingCurrencyRef.current)
+              : reportingCurrencyRef.current;
+            normalizedInput = {
+              ...normalizedInput,
+              accountAmount:
+                nextCurrency !== acctCurrency
+                  ? convert(nextAmount, nextCurrency, acctCurrency, rateTableRef.current).value
+                  : null,
+            };
+          }
         }
         normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
@@ -1334,6 +1351,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [
+      accounts,
       buildSnapshot,
       scheduleRefreshTransactions,
       resolveCategoryDefaultNote,
@@ -1458,6 +1476,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingCurrency: input.reportingCurrency ?? parentSnapshot.reportingCurrency,
         reportingAmount: input.reportingAmount ?? parentSnapshot.reportingAmount,
         fxRate: input.fxRate ?? parentSnapshot.fxRate,
+        accountAmount: input.accountAmount ?? null,
       };
       const txId = newId();
       const now = nowIso();
@@ -1509,6 +1528,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingAmount: null,
         fxRate: null,
         toAmount: null,
+        accountAmount: null,
         date: normalizedInput.date,
         accountId: null,
         fromAccountId: normalizedInput.accountId ?? null,
@@ -1538,6 +1558,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingAmount: normalizedInput.reportingAmount,
         fxRate: normalizedInput.fxRate,
         toAmount: null,
+        accountAmount: normalizedInput.accountAmount ?? null,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,
@@ -1734,6 +1755,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               reportingAmount: null,
               fxRate: null,
               toAmount: null,
+              accountAmount: null,
               date,
               accountId: null,
               fromAccountId: parent.accountId,

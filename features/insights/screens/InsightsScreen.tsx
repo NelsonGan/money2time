@@ -3283,7 +3283,9 @@ export function InsightsScreen({
             }
           }
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3436,7 +3438,9 @@ export function InsightsScreen({
             }
           }
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3574,7 +3578,9 @@ export function InsightsScreen({
           if (rootCategoryId !== selectedCategoryId) return;
 
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3821,7 +3827,9 @@ export function InsightsScreen({
           transactionsForAnalytics.push(tx);
 
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           const dayKey = transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date);
           const row = dayByKey.get(dayKey);
           if (row) {
@@ -3915,7 +3923,9 @@ export function InsightsScreen({
         const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
         const emoji = root?.icon ?? tx.categoryIcon ?? '•';
         const value =
-          settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+          settings.displayMode === 'time'
+            ? getDisplayValueForTransaction(tx)
+            : (tx.reportingAmount ?? tx.amount);
 
         const current = breakdownTotals.get(id);
         if (current) {
@@ -5468,7 +5478,7 @@ export function InsightsScreen({
       total +=
         settings.displayMode === 'time'
           ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
+          : (transaction.reportingAmount ?? transaction.amount);
     });
     return total;
   }, [

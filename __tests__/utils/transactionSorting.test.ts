@@ -15,6 +15,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     reportingAmount: overrides.amount ?? 0,
     fxRate: 1,
     toAmount: null,
+    accountAmount: null,
     date: overrides.date ?? '2026-05-13T00:00:00.000Z',
     accountId: null,
     fromAccountId: null,

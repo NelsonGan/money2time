@@ -266,11 +266,15 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       const dayKey = dayKeyFromIso(transaction.date);
       const dayTotals = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
       if (transaction.type === 'income') {
-        const value = isTimeMode ? getDisplayValueForTransaction(transaction) : transaction.amount;
+        const value = isTimeMode
+          ? getDisplayValueForTransaction(transaction)
+          : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.income += value;
       }
       if (transaction.type === 'expense') {
-        const value = isTimeMode ? getDisplayValueForTransaction(transaction) : transaction.amount;
+        const value = isTimeMode
+          ? getDisplayValueForTransaction(transaction)
+          : (transaction.reportingAmount ?? transaction.amount);
         dayTotals.expense += value;
       }
       dailyTotals.set(dayKey, dayTotals);

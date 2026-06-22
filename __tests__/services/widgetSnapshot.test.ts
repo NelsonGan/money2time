@@ -43,6 +43,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     reportingAmount: overrides.reportingAmount ?? overrides.amount ?? 0,
     fxRate: overrides.fxRate ?? 1,
     toAmount: overrides.toAmount ?? null,
+    accountAmount: overrides.accountAmount ?? null,
     date: overrides.date ?? '2026-06-03T12:00:00.000Z',
     accountId: null,
     fromAccountId: null,

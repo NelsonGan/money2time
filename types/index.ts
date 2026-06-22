@@ -247,6 +247,12 @@ export interface Transaction {
   fxRate: number | null;
   /** Credited amount in the to-account's currency for cross-currency transfers. */
   toAmount: number | null;
+  /**
+   * Frozen value in the owning account's currency, set when `currency` differs
+   * from the account currency (e.g. an EUR expense in an MYR account). Null when
+   * they match — use `amount` directly for account-currency math.
+   */
+  accountAmount: number | null;
   date: string;
   accountId: string | null;
   fromAccountId: string | null;
