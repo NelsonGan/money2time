@@ -2165,7 +2165,7 @@ export function AccountsScreen({
               createTransaction({
                 type: flowType,
                 amount: adjustmentAmount,
-                currency: settings.currencySymbol,
+                currency: updates.currency || account.currency,
                 date: new Date().toISOString(),
                 accountId: account.id,
                 note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
@@ -2528,7 +2528,7 @@ export function AccountsScreen({
             createTransaction({
               type: 'transfer',
               amount,
-              currency: settings.currencySymbol,
+              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
               date: new Date().toISOString(),
               fromAccountId,
               toAccountId: account.id,
@@ -2842,7 +2842,7 @@ export function AccountsScreen({
             createTransaction({
               type: 'transfer',
               amount,
-              currency: settings.currencySymbol,
+              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
               date: new Date().toISOString(),
               fromAccountId,
               toAccountId: payCardAccountId,

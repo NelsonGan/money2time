@@ -26,7 +26,8 @@ import {
   ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { getDb, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
+import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
+import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import {
   accountGroupsTable,
   accountsTable,
@@ -2624,6 +2625,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
+        // Money Manager rows are written with the currency symbol — normalize to
+        // ISO codes so multi-currency treats them correctly.
+        normalizeCurrencyColumns(getSQLite());
         refreshAll();
         void trackEvent(AnalyticsEvents.DATA_IMPORTED, {
           accounts: summary.accounts,
