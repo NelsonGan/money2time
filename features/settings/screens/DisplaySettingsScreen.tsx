@@ -28,7 +28,7 @@ interface DisplaySettingsScreenProps {
 }
 
 export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, changeReportingCurrency } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
@@ -182,10 +182,10 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       return;
     }
 
-    updateSettings({
-      currencyCode: nextMajorCurrency.code,
-      currencySymbol: nextMajorCurrency.symbol,
-    });
+    // Route through changeReportingCurrency so exchange rates are refetched for
+    // the new base and every transaction's frozen reporting snapshot is
+    // re-derived using historical rates.
+    void changeReportingCurrency(nextMajorCurrency.code);
   };
 
   const handleCustomCurrencyChange = (value: string) => {

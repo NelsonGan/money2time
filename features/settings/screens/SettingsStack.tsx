@@ -20,6 +20,7 @@ import { AutoBackupScreen } from './AutoBackupScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
+import { ExchangeRatesScreen } from './ExchangeRatesScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
@@ -87,6 +88,7 @@ function SettingsHomeRoute({
       onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
       onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
+      onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
@@ -221,6 +223,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AccountSettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="ExchangeRates">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <ExchangeRatesScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="WageCalculator">

@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Clock3,
   Code2,
+  Coins,
   Crown,
   DatabaseBackup,
   FileText,
@@ -93,6 +94,7 @@ interface SettingsScreenProps {
   onOpenHourlyValue: () => void;
   onOpenAccountSettings: () => void;
   onOpenAccounts: () => void;
+  onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
@@ -116,6 +118,7 @@ export function SettingsScreen({
   onOpenHourlyValue,
   onOpenAccountSettings,
   onOpenAccounts,
+  onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
   onOpenNotifications,
@@ -653,6 +656,13 @@ export function SettingsScreen({
                   icon={<Landmark size={20} color={themeColors.primary} />}
                   label={I18n.t('settings.accounts')}
                   onPress={onOpenAccounts}
+                />
+              ) : null}
+              {!isSimpleMode ? (
+                <SettingsGridTile
+                  icon={<Coins size={20} color={themeColors.primary} />}
+                  label={I18n.t('exchange_rates.title')}
+                  onPress={onOpenExchangeRates}
                 />
               ) : null}
               <SettingsGridTile

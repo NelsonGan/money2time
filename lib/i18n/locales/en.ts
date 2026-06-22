@@ -1421,6 +1421,22 @@ const en = {
       weekly_body: 'Tap to see your spending from the last 7 days.',
     },
   },
+  exchange_rates: {
+    title: 'Exchange rates',
+    main_currency: 'Main currency',
+    as_of: 'Rates as of {{date}}',
+    never_updated: 'Rates not updated yet',
+    update_rates: 'Update rates',
+    updating: 'Updating…',
+    rates_title: 'Your currencies',
+    rates_subtitle: 'Rates used to convert foreign accounts into your main currency.',
+    no_foreign_accounts: 'All your accounts use your main currency — no conversion needed.',
+    auto_badge: 'Auto',
+    manual_badge: 'Manual',
+    manual_only: 'No automatic rate — enter manually',
+    footnote:
+      'Automatic rates come from the European Central Bank via Frankfurter and refresh about once a day. Totals are approximate; each past transaction keeps the rate from the day it was recorded.',
+  },
   auto_backup: {
     title: 'Auto-backup',
     subtitle: 'Keep up to 10 backups of your data, safe even if the app is deleted.',

@@ -1364,6 +1364,22 @@ const zh = {
       weekly_body: '点击查看过去 7 天的支出。',
     },
   },
+  exchange_rates: {
+    title: '汇率',
+    main_currency: '主货币',
+    as_of: '汇率截至 {{date}}',
+    never_updated: '尚未更新汇率',
+    update_rates: '更新汇率',
+    updating: '更新中…',
+    rates_title: '你的货币',
+    rates_subtitle: '用于将外币账户换算为主货币的汇率。',
+    no_foreign_accounts: '你的所有账户都使用主货币，无需换算。',
+    auto_badge: '自动',
+    manual_badge: '手动',
+    manual_only: '无自动汇率，请手动输入',
+    footnote:
+      '自动汇率来自欧洲央行（通过 Frankfurter），约每天更新一次。总额为近似值；每笔历史交易都会保留记录当天的汇率。',
+  },
   auto_backup: {
     title: '自动备份',
     subtitle: '保留最多 10 个备份，即使应用被删除也能恢复数据。',
