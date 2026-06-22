@@ -39,6 +39,7 @@ import { I18n, setAppLocale } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
+import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
   type CreateRecurringRuleInput,
@@ -63,6 +64,11 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
+import {
+  fetchHistoricalRate,
+  refreshRatesNow,
+  runRateRefreshIfDue,
+} from '~/services/exchangeRates';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
@@ -86,9 +92,12 @@ import {
   type Category,
   type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
+  type ExchangeRate,
   type MonthlyWageSettings,
   type NotificationPreferences,
   type QuickEntryPrefs,
+  type RateRefreshResult,
+  type RateTable,
   type RecurringTransactionRule,
   type TransactionFilters,
   type TransactionSplit,
@@ -98,6 +107,13 @@ import {
   type WageConfig,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import {
+  buildRateTable,
+  convert,
+  currencySymbolForCode,
+  emptyRateTable,
+  isAutoRateSupported,
+} from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
 import {
@@ -138,6 +154,19 @@ interface AppContextValue extends AppState {
   monthlyWages: MonthlyWageSettings[];
   accountBalances: AccountBalance[];
   transactionFilters: TransactionFilters;
+
+  // Multi-currency / FX
+  rateTable: RateTable;
+  /** Convert `amount` from `currency` to the reporting currency (latest cached rate). */
+  convertToReporting: (amount: number, currency: string) => number;
+  /** Cached rates for the current reporting (base) currency. */
+  listExchangeRates: () => ExchangeRate[];
+  /** Force-fetch the latest rates from Frankfurter (the "Update rates" button). */
+  refreshExchangeRates: () => Promise<RateRefreshResult>;
+  /** Set/override a manual rate (1 reporting = `rate` quoteCurrency). */
+  setManualExchangeRate: (quoteCurrency: string, rate: number) => void;
+  /** Change the reporting currency, refetch rates, and re-snapshot history. */
+  changeReportingCurrency: (code: string) => Promise<RateRefreshResult>;
   setActiveAccountFilter: (accountId: string | null) => void;
   setTransactionFilters: (filters: Partial<TransactionFilters>) => void;
   resetTransactionFilters: () => void;
@@ -629,6 +658,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [quickEntryPrefs, setQuickEntryPrefs] =
     useState<QuickEntryPrefs>(DEFAULT_QUICK_ENTRY_PREFS);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [rateTable, setRateTable] = useState<RateTable>(() => emptyRateTable());
+
+  // Refs let the create/update callbacks read the latest rate table + reporting
+  // currency without being recreated (and re-subscribing consumers) on every FX
+  // refresh.
+  const rateTableRef = useRef<RateTable>(rateTable);
+  const reportingCurrencyRef = useRef<string>('USD');
+  useEffect(() => {
+    rateTableRef.current = rateTable;
+  }, [rateTable]);
+  useEffect(() => {
+    if (settings?.currencyCode) reportingCurrencyRef.current = settings.currencyCode;
+  }, [settings?.currencyCode]);
+
+  const reloadRateTable = useCallback((reportingCurrency: string) => {
+    const rows = exchangeRatesRepository.listByBase(reportingCurrency);
+    setRateTable(buildRateTable(reportingCurrency, rows));
+  }, []);
+
+  /**
+   * Compute the frozen reporting-currency snapshot for a transaction at write
+   * time. Transfers/adjustments carry no snapshot (excluded from cashflow).
+   */
+  const buildSnapshot = useCallback(
+    (
+      type: CreateTransactionInput['type'],
+      amount: number,
+      currency: string,
+    ): { reportingCurrency: string | null; reportingAmount: number | null; fxRate: number | null } => {
+      if (type === 'transfer' || type === 'balance_adjustment') {
+        return { reportingCurrency: null, reportingAmount: null, fxRate: null };
+      }
+      const reporting = reportingCurrencyRef.current;
+      const { value, rateUsed } = convert(amount, currency, reporting, rateTableRef.current);
+      return {
+        reportingCurrency: reporting,
+        reportingAmount: value,
+        fxRate: rateUsed ?? (currency === reporting ? 1 : null),
+      };
+    },
+    [],
+  );
 
   const refreshAll = useCallback(() => {
     try {
@@ -714,9 +785,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Sync scheduled notifications with current prefs and fresh weekly data
       void syncScheduledNotifications(nextNotificationPrefs, weeklyBody);
 
+      const nextRateTable = buildRateTable(
+        nextSettings.currencyCode,
+        exchangeRatesRepository.listByBase(nextSettings.currencyCode),
+      );
+
       setCurrentMonthWage(effectiveCurrentWage);
       setMonthlyWages(allWages);
       setSettings(nextSettings);
+      setRateTable(nextRateTable);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
       setCalendarPreferencesJson(nextCalendarPreferencesJson);
       setNotificationPrefs(nextNotificationPrefs);
@@ -1072,9 +1149,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
+      const snapshot = buildSnapshot(input.type, normalizeMoneyAmount(input.amount), input.currency);
       const normalizedInput = {
         ...input,
         amount: normalizeMoneyAmount(input.amount),
+        reportingCurrency: input.reportingCurrency ?? snapshot.reportingCurrency,
+        reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
+        fxRate: input.fxRate ?? snapshot.fxRate,
+        toAmount: input.toAmount ?? null,
       };
       const id = newId();
       const now = nowIso();
@@ -1083,6 +1165,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
+        reportingCurrency: normalizedInput.reportingCurrency,
+        reportingAmount: normalizedInput.reportingAmount,
+        fxRate: normalizedInput.fxRate,
+        toAmount: normalizedInput.toAmount,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,
@@ -1122,7 +1208,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, resolveRelationNames],
+    [buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -1155,6 +1241,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           };
         }
         if (Object.keys(normalizedInput).length === 0) return;
+        // Re-freeze the reporting snapshot when the amount or currency changes on
+        // a non-transfer transaction (skip when the caller supplied its own).
+        const affectsSnapshot =
+          ('amount' in normalizedInput || 'currency' in normalizedInput) &&
+          !('reportingAmount' in normalizedInput);
+        const effectiveType = normalizedInput.type ?? currentTransaction?.type ?? 'expense';
+        if (affectsSnapshot && effectiveType !== 'transfer') {
+          const nextAmount = normalizedInput.amount ?? currentTransaction?.amount ?? 0;
+          const nextCurrency =
+            normalizedInput.currency ?? currentTransaction?.currency ?? reportingCurrencyRef.current;
+          const snap = buildSnapshot(effectiveType, nextAmount, nextCurrency);
+          normalizedInput = {
+            ...normalizedInput,
+            reportingCurrency: snap.reportingCurrency,
+            reportingAmount: snap.reportingAmount,
+            fxRate: snap.fxRate,
+          };
+        }
         normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
           'accountId' in normalizedInput ||
@@ -1202,7 +1306,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, resolveCategoryDefaultNote, resolveRelationNames, transactions],
+    [
+      buildSnapshot,
+      scheduleRefreshTransactions,
+      resolveCategoryDefaultNote,
+      resolveRelationNames,
+      transactions,
+    ],
   );
 
   const deleteTransactionsBulk = useCallback(
@@ -1310,7 +1420,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransactionWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraftInput[]) => {
-      const normalizedInput = { ...input, amount: normalizeMoneyAmount(input.amount) };
+      const parentSnapshot = buildSnapshot(
+        input.type,
+        normalizeMoneyAmount(input.amount),
+        input.currency,
+      );
+      const normalizedInput = {
+        ...input,
+        amount: normalizeMoneyAmount(input.amount),
+        reportingCurrency: input.reportingCurrency ?? parentSnapshot.reportingCurrency,
+        reportingAmount: input.reportingAmount ?? parentSnapshot.reportingAmount,
+        fxRate: input.fxRate ?? parentSnapshot.fxRate,
+      };
       const txId = newId();
       const now = nowIso();
 
@@ -1357,6 +1478,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type: 'transfer',
         amount: t.amount,
         currency: normalizedInput.currency,
+        reportingCurrency: null,
+        reportingAmount: null,
+        fxRate: null,
+        toAmount: null,
         date: normalizedInput.date,
         accountId: null,
         fromAccountId: normalizedInput.accountId ?? null,
@@ -1382,6 +1507,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
+        reportingCurrency: normalizedInput.reportingCurrency,
+        reportingAmount: normalizedInput.reportingAmount,
+        fxRate: normalizedInput.fxRate,
+        toAmount: null,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,
@@ -1449,7 +1578,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, resolveRelationNames],
+    [buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionSplits = useCallback(
@@ -1574,6 +1703,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               type: 'transfer',
               amount: splitAmount,
               currency: parent.currency,
+              reportingCurrency: null,
+              reportingAmount: null,
+              fxRate: null,
+              toAmount: null,
               date,
               accountId: null,
               fromAccountId: parent.accountId,
@@ -1782,6 +1915,133 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [canUseTimeDisplayMode, runMutation],
   );
+
+  // ---- Multi-currency / FX ----
+
+  const convertToReporting = useCallback((amount: number, currency: string): number => {
+    return convert(amount, currency, reportingCurrencyRef.current, rateTableRef.current).value;
+  }, []);
+
+  const listExchangeRates = useCallback((): ExchangeRate[] => {
+    return exchangeRatesRepository.listByBase(reportingCurrencyRef.current);
+  }, []);
+
+  const refreshExchangeRates = useCallback(async (): Promise<RateRefreshResult> => {
+    const result = await refreshRatesNow();
+    reloadRateTable(reportingCurrencyRef.current);
+    setSettings(settingsRepository.get());
+    return result;
+  }, [reloadRateTable]);
+
+  const setManualExchangeRate = useCallback(
+    (quoteCurrency: string, rate: number) => {
+      if (!Number.isFinite(rate) || rate <= 0) return;
+      const base = reportingCurrencyRef.current;
+      exchangeRatesRepository.setManualRate(
+        base,
+        quoteCurrency,
+        rate,
+        dayKeyFromDateLocal(new Date()),
+      );
+      reloadRateTable(base);
+    },
+    [reloadRateTable],
+  );
+
+  /**
+   * Re-freeze every transaction's reporting snapshot into `nextReporting`, using
+   * the historical FX rate for each transaction's date where available (falling
+   * back to the latest cached rate). Runs once when the reporting currency
+   * changes so frozen history stays consistent with the new currency.
+   */
+  const resnapshotAllTransactions = useCallback(async (nextReporting: string) => {
+    const rows = transactionsRepository.listForSnapshot();
+    if (rows.length === 0) return;
+
+    const table = buildRateTable(
+      nextReporting,
+      exchangeRatesRepository.listByBase(nextReporting),
+    );
+
+    // Cache historical lookups per (currency|date) to avoid duplicate requests.
+    const historicalCache = new Map<string, number | null>();
+    const snapshots: {
+      id: string;
+      reportingCurrency: string;
+      reportingAmount: number;
+      fxRate: number;
+    }[] = [];
+
+    for (const row of rows) {
+      if (row.currency === nextReporting) {
+        snapshots.push({
+          id: row.id,
+          reportingCurrency: nextReporting,
+          reportingAmount: row.amount,
+          fxRate: 1,
+        });
+        continue;
+      }
+
+      let rate: number | null = null;
+      const cacheKey = `${row.currency}|${row.date}`;
+      if (historicalCache.has(cacheKey)) {
+        rate = historicalCache.get(cacheKey) ?? null;
+      } else if (isAutoRateSupported(row.currency) && isAutoRateSupported(nextReporting)) {
+        rate = await fetchHistoricalRate(row.currency, nextReporting, row.date.slice(0, 10));
+        historicalCache.set(cacheKey, rate);
+      }
+      if (rate === null) {
+        // Fall back to the latest cached rate.
+        rate = convert(1, row.currency, nextReporting, table).rateUsed;
+      }
+      const effectiveRate = rate ?? 1;
+      snapshots.push({
+        id: row.id,
+        reportingCurrency: nextReporting,
+        reportingAmount: row.amount * effectiveRate,
+        fxRate: effectiveRate,
+      });
+    }
+
+    transactionsRepository.bulkSetSnapshots(snapshots);
+  }, []);
+
+  const changeReportingCurrency = useCallback(
+    async (code: string): Promise<RateRefreshResult> => {
+      settingsRepository.updateSettings({
+        currencyCode: code,
+        currencySymbol: currencySymbolForCode(code),
+      });
+      reportingCurrencyRef.current = code;
+      const result = await refreshRatesNow();
+      reloadRateTable(code);
+      try {
+        await resnapshotAllTransactions(code);
+      } catch (error) {
+        setLoadError(getErrorMessage(error, I18n.t('errors.generic_operation_failed')));
+      }
+      void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, { changed_fields: 'currencyCode' });
+      refreshAll();
+      return result;
+    },
+    [reloadRateTable, resnapshotAllTransactions, refreshAll],
+  );
+
+  // Refresh FX rates once on load (and when the reporting currency changes),
+  // subject to the daily staleness guard inside the service.
+  const fxReportingCurrency = settings?.currencyCode;
+  useEffect(() => {
+    if (!fxReportingCurrency) return;
+    let cancelled = false;
+    void runRateRefreshIfDue().then((result) => {
+      if (cancelled || !result.ok || !result.asOfDate) return;
+      reloadRateTable(fxReportingCurrency);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fxReportingCurrency, reloadRateTable]);
 
   useEffect(() => {
     if (!settings?.locale) return;
@@ -2070,7 +2330,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         rate = getHourlyRateForMonth(monthKey);
         hourlyRateByMonth.set(monthKey, rate);
       }
-      next.set(transaction.id, amountToHoursByRate(transaction.amount, rate));
+      next.set(
+        transaction.id,
+        amountToHoursByRate(transaction.reportingAmount ?? transaction.amount, rate),
+      );
     });
     return next;
   }, [getHourlyRateForMonth, isTimeDisplayMode, transactions]);
@@ -2080,7 +2343,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!isTimeDisplayMode) return transaction.amount;
       return (
         displayValueByTransactionId?.get(transaction.id) ??
-        valueForDisplay(transaction.amount, transaction.date)
+        valueForDisplay(transaction.reportingAmount ?? transaction.amount, transaction.date)
       );
     },
     [displayValueByTransactionId, isTimeDisplayMode, valueForDisplay],
@@ -2109,7 +2372,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       let income = 0;
       let expense = 0;
       txns.forEach((transaction) => {
-        const value = valueForDisplay(transaction.amount, transaction.date);
+        const value = valueForDisplay(
+          transaction.reportingAmount ?? transaction.amount,
+          transaction.date,
+        );
         if (transaction.type === 'income') {
           income += value;
         } else if (transaction.type === 'expense') {
@@ -2139,7 +2405,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const root = cat.parentId ? categoryByIdMap.get(cat.parentId) : cat;
         const id = groupByRoot ? (root?.id ?? cat.id) : cat.id;
         const current = totals.get(id);
-        const inc = valueForDisplay(transaction.amount, transaction.date);
+        const inc = valueForDisplay(
+          transaction.reportingAmount ?? transaction.amount,
+          transaction.date,
+        );
         if (!current) {
           totals.set(id, {
             amount: inc,
@@ -2329,8 +2598,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (accounts.length === 0 && transactions.length === 0) {
       return [];
     }
-    return accountsRepository.getBalances();
-  }, [accounts, hasSettings, isLoading, transactions]);
+    const reporting = settings?.currencyCode ?? rateTable.base;
+    return accountsRepository.getBalances().map((b) => {
+      const { value, rateUsed } = convert(b.balance, b.currency, reporting, rateTable);
+      return { ...b, convertedBalance: rateUsed === null ? null : value };
+    });
+  }, [accounts, hasSettings, isLoading, transactions, rateTable, settings?.currencyCode]);
 
   const value = useMemo<AppContextValue | null>(
     () =>
@@ -2349,6 +2622,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             activeAccountFilter,
             accountBalances,
             transactionFilters,
+            rateTable,
+            convertToReporting,
+            listExchangeRates,
+            refreshExchangeRates,
+            setManualExchangeRate,
+            changeReportingCurrency,
             setActiveAccountFilter,
             setTransactionFilters,
             resetTransactionFilters,
@@ -2428,6 +2707,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       activeAccountFilter,
       accountBalances,
       transactionFilters,
+      rateTable,
+      convertToReporting,
+      listExchangeRates,
+      refreshExchangeRates,
+      setManualExchangeRate,
+      changeReportingCurrency,
       setActiveAccountFilter,
       setTransactionFilters,
       resetTransactionFilters,

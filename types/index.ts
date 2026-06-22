@@ -12,6 +12,38 @@ export type ThemeColor =
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 export type UserMode = 'power' | 'simple';
 export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
+export type ExchangeRateSource = 'api' | 'manual';
+
+export interface ExchangeRate {
+  id: string;
+  baseCurrency: string;
+  quoteCurrency: string;
+  /** 1 base = `rate` quote. */
+  rate: number;
+  /** Date the rate is valid for (YYYY-MM-DD), as reported by the source. */
+  asOfDate: string;
+  source: ExchangeRateSource;
+  updatedAt: string;
+}
+
+/**
+ * In-memory snapshot of cached exchange rates, all expressed relative to a
+ * single canonical `base` currency. Held by AppContext so conversions stay
+ * synchronous and usable inside memos.
+ */
+export interface RateTable {
+  base: string;
+  /** quoteCurrency -> rate (1 base = rate quote). Always includes base -> 1. */
+  rates: Record<string, number>;
+  /** Most recent `asOfDate` across the cached rates, or null when empty. */
+  asOfDate: string | null;
+}
+
+export interface RateRefreshResult {
+  ok: boolean;
+  asOfDate: string | null;
+  error: string | null;
+}
 
 export interface NotificationPreferences {
   dailyCheckin: {
@@ -105,6 +137,11 @@ export interface UserSettings {
   autoBackupTarget: BackupTarget;
   lastAutoBackupAt: string | null;
   lastAutoBackupError: string | null;
+  /** When true, exchange rates auto-refresh once per day. */
+  autoFxRefreshEnabled: boolean;
+  /** ISO timestamp of the last successful FX rate refresh, or null. */
+  lastRateFetchAt: string | null;
+  lastRateFetchError: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -199,6 +236,15 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   currency: string;
+  /**
+   * Frozen reporting-currency snapshot, captured at write time. Null for
+   * transfers and legacy rows. `reportingAmount = amount * fxRate`.
+   */
+  reportingCurrency: string | null;
+  reportingAmount: number | null;
+  fxRate: number | null;
+  /** Credited amount in the to-account's currency for cross-currency transfers. */
+  toAmount: number | null;
   date: string;
   accountId: string | null;
   fromAccountId: string | null;
@@ -255,6 +301,8 @@ export interface RecurringTransactionRule {
   type: RecurringTransactionType;
   amount: number;
   currency: string;
+  /** Credited amount in the to-account's currency for cross-currency transfer rules. */
+  toAmount: number | null;
   accountId: string | null;
   fromAccountId: string | null;
   toAccountId: string | null;
@@ -310,6 +358,13 @@ export interface AccountBalance {
   expense: number;
   transfersIn: number;
   transfersOut: number;
+  /** The account's native currency (the currency `balance` is denominated in). */
+  currency: string;
+  /**
+   * `balance` converted to the reporting currency at the latest cached rate, or
+   * null when no rate is available for this currency.
+   */
+  convertedBalance: number | null;
 }
 
 export interface AppState {

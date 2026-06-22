@@ -294,21 +294,30 @@ export function formatAmount(
     isIncome?: boolean;
     neutralSign?: boolean;
     trueHourlyRate?: number;
+    /**
+     * Render with this currency's symbol instead of the reporting-currency
+     * symbol from `settings`. Use when displaying an amount in an account's
+     * native (foreign) currency. Ignored in time display mode.
+     */
+    currencyCode?: string;
   } = {},
 ): string {
-  const { showSign = false, neutralSign = false, trueHourlyRate = 0 } = options;
+  const { showSign = false, neutralSign = false, trueHourlyRate = 0, currencyCode } = options;
   const normalizedAmount = normalizeMoneyAmount(amount);
   const amountSign = normalizedAmount > 0 ? '+' : normalizedAmount < 0 ? '-' : '';
   const sign = showSign ? (neutralSign ? '' : amountSign) : normalizedAmount < 0 ? '-' : '';
+  const symbol = currencyCode
+    ? (MAJOR_CURRENCIES.find((c) => c.code === currencyCode)?.symbol ?? settings.currencySymbol)
+    : settings.currencySymbol;
 
   if (settings.displayMode === 'time') {
     if (trueHourlyRate <= 0) {
-      return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
+      return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
     }
     return `${sign}${formatHours(Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate)))}`;
   }
 
-  return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
+  return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
 }
 
 export function formatRelativeDate(dateString: string, locale?: string): string {

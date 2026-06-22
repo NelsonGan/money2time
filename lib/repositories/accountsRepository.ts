@@ -162,7 +162,7 @@ class AccountsRepository {
         WHERE deleted_at IS NULL AND type = 'expense' AND account_id IS NOT NULL
         GROUP BY account_id
       UNION ALL
-      SELECT 'transfer_in', to_account_id, SUM(amount)
+      SELECT 'transfer_in', to_account_id, SUM(COALESCE(to_amount, amount))
         FROM transactions
         WHERE deleted_at IS NULL AND type = 'transfer' AND to_account_id IS NOT NULL
         GROUP BY to_account_id
@@ -224,6 +224,10 @@ class AccountsRepository {
         expense,
         transfersIn,
         transfersOut,
+        currency: account.currency,
+        // Conversion to the reporting currency is applied by AppContext, which
+        // holds the in-memory rate table.
+        convertedBalance: null,
       };
     });
   }
