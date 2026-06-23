@@ -1369,6 +1369,8 @@ const da = {
     feature_unlimited_wage_entries: 'Ubegrænsede timesatsposteringer',
     voice_label: 'Stemmeregistreringer',
     widgets_label: 'Widgets på startskærmen',
+    currencies_label: 'Valutaer',
+    biometric_label: 'App-lås (biometrisk)',
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se præcis, hvad du låser op for, når du opgraderer.',
     compare_limited: 'Begrænset',

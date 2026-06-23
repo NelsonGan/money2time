@@ -1375,6 +1375,8 @@ const pt = {
     feature_unlimited_wage_entries: 'Entradas de valor/hora ilimitadas',
     voice_label: 'Entradas por voz',
     widgets_label: 'Widgets da tela inicial',
+    currencies_label: 'Moedas',
+    biometric_label: 'Bloqueio do app (biometria)',
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',
     compare_limited: 'Limitado',

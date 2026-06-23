@@ -1365,6 +1365,8 @@ const uk = {
     feature_unlimited_wage_entries: 'Необмежені записи ставки',
     voice_label: 'Голосове введення',
     widgets_label: 'Віджети головного екрана',
+    currencies_label: 'Валюти',
+    biometric_label: 'Блокування застосунку (біометрія)',
     compare_title: 'Усе в Pro',
     compare_subtitle: 'Подивіться, що саме відкривається після оновлення.',
     compare_limited: 'Обмежено',

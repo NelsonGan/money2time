@@ -1390,6 +1390,8 @@ const fil = {
     feature_unlimited_wage_entries: 'Unlimited na hourly rate entry',
     voice_label: 'Mga voice entry',
     widgets_label: 'Mga widget sa home screen',
+    currencies_label: 'Mga pera',
+    biometric_label: 'App Lock (biometric)',
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',
     compare_limited: 'May limitasyon',

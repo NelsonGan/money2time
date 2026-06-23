@@ -1348,6 +1348,8 @@ const ja = {
     feature_unlimited_wage_entries: '無制限の時給記録',
     voice_label: '音声入力',
     widgets_label: 'ホーム画面ウィジェット',
+    currencies_label: '通貨',
+    biometric_label: 'アプリロック（生体認証）',
     compare_title: 'Pro のすべて',
     compare_subtitle: 'アップグレードで何が使えるようになるかを確認できます。',
     compare_limited: '制限あり',

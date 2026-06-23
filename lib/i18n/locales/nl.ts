@@ -1385,6 +1385,8 @@ const nl = {
     feature_unlimited_wage_entries: 'Onbeperkte uurtariefvermeldingen',
     voice_label: 'Spraakinvoer',
     widgets_label: 'Widgets op het beginscherm',
+    currencies_label: 'Valuta’s',
+    biometric_label: 'App-vergrendeling (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Zie precies wat je ontgrendelt met een upgrade.',
     compare_limited: 'Beperkt',

@@ -1336,6 +1336,8 @@ const en = {
     feature_unlimited_wage_entries: 'Unlimited hourly rate entries',
     voice_label: 'Voice entries',
     widgets_label: 'Home screen widgets',
+    currencies_label: 'Currencies',
+    biometric_label: 'App Lock (biometric)',
     compare_title: 'Everything in Pro',
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
     compare_limited: 'Limited',

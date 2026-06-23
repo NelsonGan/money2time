@@ -1367,6 +1367,8 @@ const sv = {
     feature_unlimited_wage_entries: 'Obegränsade timlöneposter',
     voice_label: 'Röstinmatningar',
     widgets_label: 'Widgetar på startskärmen',
+    currencies_label: 'Valutor',
+    biometric_label: 'Applås (biometriskt)',
     compare_title: 'Allt i Pro',
     compare_subtitle: 'Se exakt vad du låser upp när du uppgraderar.',
     compare_limited: 'Begränsat',

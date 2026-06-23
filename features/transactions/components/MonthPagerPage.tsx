@@ -29,6 +29,7 @@ interface MonthPagerPageProps {
   onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
+  onToggleDaySelection?: (transactionIds: string[]) => void;
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
   getScrollToDayRef?: (index: number) => MutableRefObject<ScrollToDayHandler>;
   contentPaddingHorizontal?: number;
@@ -51,6 +52,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   onTransactionSplitBadgePress,
   selectedTransactionIds = [],
   selectionMode = false,
+  onToggleDaySelection,
   getScrollToTopRef,
   getScrollToDayRef,
   contentPaddingHorizontal,
@@ -75,6 +77,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         onTransactionSplitBadgePress={onTransactionSplitBadgePress}
         selectedTransactionIds={selectedTransactionIds}
         selectionMode={selectionMode}
+        onToggleDaySelection={onToggleDaySelection}
         emptyTitle={I18n.t('transactions.empty_month_title')}
         emptyMessage={I18n.t('transactions.empty_month_message')}
         contentPaddingBottom={LIST_BOTTOM_PADDING}

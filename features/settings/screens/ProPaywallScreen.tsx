@@ -160,6 +160,12 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
             },
           ]
         : []),
+      {
+        label: I18n.t('pro.currencies_label'),
+        free: String(PRO_LIMITS.FREE_MAX_SUBCURRENCIES + 1),
+        pro: UNLIMITED,
+      },
+      { label: I18n.t('pro.biometric_label'), free: false, pro: true },
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
       { label: I18n.t('pro.widgets_label'), free: '2', pro: '6' },
     ],
