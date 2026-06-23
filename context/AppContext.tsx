@@ -171,6 +171,8 @@ interface AppContextValue extends AppState {
   addFxCurrency: (code: string) => Promise<void>;
   /** Remove a previously added sub-currency. */
   removeFxCurrency: (code: string) => void;
+  /** Persist a new display order for the tracked sub-currencies. */
+  reorderFxCurrencies: (codes: string[]) => void;
   setActiveAccountFilter: (accountId: string | null) => void;
   setTransactionFilters: (filters: Partial<TransactionFilters>) => void;
   resetTransactionFilters: () => void;
@@ -1207,19 +1209,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
-      const snapshot = buildSnapshot(
-        input.type,
-        normalizeMoneyAmount(input.amount),
-        input.currency,
-      );
+      const normalizedAmount = normalizeMoneyAmount(input.amount);
+      const snapshot = buildSnapshot(input.type, normalizedAmount, input.currency);
+      // Freeze the account-currency value when the entry currency differs from
+      // the account's own currency (e.g. spending EUR from an MYR account via the
+      // quick-add currency picker). Callers that already resolved it — the full
+      // editor — pass accountAmount explicitly; we only compute when omitted.
+      const computedAccountAmount = (() => {
+        if (input.accountAmount !== undefined) return input.accountAmount;
+        if (input.type === 'transfer' || input.type === 'balance_adjustment') return null;
+        const acctId = input.accountId ?? null;
+        const acctCurrency = acctId
+          ? (accounts.find((a) => a.id === acctId)?.currency ?? reportingCurrencyRef.current)
+          : reportingCurrencyRef.current;
+        if (input.currency === acctCurrency) return null;
+        return convert(normalizedAmount, input.currency, acctCurrency, rateTableRef.current).value;
+      })();
       const normalizedInput = {
         ...input,
-        amount: normalizeMoneyAmount(input.amount),
+        amount: normalizedAmount,
         reportingCurrency: input.reportingCurrency ?? snapshot.reportingCurrency,
         reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
         fxRate: input.fxRate ?? snapshot.fxRate,
         toAmount: input.toAmount ?? null,
-        accountAmount: input.accountAmount ?? null,
+        accountAmount: computedAccountAmount,
       };
       const id = newId();
       const now = nowIso();
@@ -1272,7 +1285,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
+    [accounts, buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -2065,6 +2078,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [persistFxCurrencies],
   );
 
+  // Persist a user-chosen order for the tracked sub-currencies. The list shown
+  // on the Multi currency page can include account currencies not yet in the
+  // stored set, so we absorb the full ordered list (deduped, minus the
+  // reporting currency) — harmless, since removal still filters by code.
+  const reorderFxCurrencies = useCallback(
+    (codes: string[]) => {
+      const base = reportingCurrencyRef.current;
+      const seen = new Set<string>();
+      const next: string[] = [];
+      for (const code of codes) {
+        if (!code || code === base || seen.has(code)) continue;
+        seen.add(code);
+        next.push(code);
+      }
+      persistFxCurrencies(next);
+    },
+    [persistFxCurrencies],
+  );
+
   const fxCurrencies = useMemo(
     () => parseFxCurrencies(settings?.fxCurrenciesJson ?? null),
     [settings?.fxCurrenciesJson],
@@ -2282,6 +2314,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.defaultAccountId !== undefined
             ? updates.defaultAccountId
             : previous.defaultAccountId,
+        defaultCurrency:
+          updates.defaultCurrency !== undefined
+            ? updates.defaultCurrency
+            : previous.defaultCurrency,
         voiceSkipConfirmation:
           updates.voiceSkipConfirmation !== undefined
             ? updates.voiceSkipConfirmation
@@ -2705,6 +2741,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             fxCurrencies,
             addFxCurrency,
             removeFxCurrency,
+            reorderFxCurrencies,
             setActiveAccountFilter,
             setTransactionFilters,
             resetTransactionFilters,
@@ -2794,6 +2831,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fxCurrencies,
       addFxCurrency,
       removeFxCurrency,
+      reorderFxCurrencies,
       setActiveAccountFilter,
       setTransactionFilters,
       resetTransactionFilters,

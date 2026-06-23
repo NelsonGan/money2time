@@ -1,13 +1,9 @@
-import { ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
+import { ChevronRight, GripVertical, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
+import type { ElementRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import {
   Card,
@@ -21,6 +17,8 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -47,9 +45,17 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     fxCurrencies,
     addFxCurrency,
     removeFxCurrency,
+    reorderFxCurrencies,
   } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+  const { checkLimit } = useProGate();
+  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  // Sortable items are absolutely positioned while dragging, so '100%' width
+  // doesn't resolve — give each row an explicit pixel width like the other
+  // reorderable settings lists.
+  const { contentWidth } = useDeviceLayout();
+  const rowWidth = Math.max(contentWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
 
   const reporting = settings.currencyCode;
   const [refreshing, setRefreshing] = useState(false);
@@ -80,18 +86,23 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     return set;
   }, [accounts, reporting]);
 
-  // The tracked list = account currencies + the sub-currencies the user added.
+  // The tracked list = the sub-currencies the user added (in their saved order)
+  // plus any account currency not yet tracked, appended. The stored order drives
+  // display so drag-to-reorder is stable.
   const displayCodes = useMemo(() => {
-    const set = new Set<string>(currenciesInUse);
+    const seen = new Set<string>();
+    const ordered: string[] = [];
     for (const code of fxCurrencies) {
-      if (code !== reporting) set.add(code);
+      if (code === reporting || seen.has(code)) continue;
+      seen.add(code);
+      ordered.push(code);
     }
-    return Array.from(set).sort((a, b) => {
-      const aInUse = currenciesInUse.has(a);
-      const bInUse = currenciesInUse.has(b);
-      if (aInUse !== bInUse) return aInUse ? -1 : 1;
-      return a.localeCompare(b);
-    });
+    for (const code of currenciesInUse) {
+      if (code === reporting || seen.has(code)) continue;
+      seen.add(code);
+      ordered.push(code);
+    }
+    return ordered;
   }, [currenciesInUse, fxCurrencies, reporting]);
 
   const excludeFromPicker = useMemo(() => [reporting, ...displayCodes], [reporting, displayCodes]);
@@ -114,6 +125,18 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
     },
     [reporting],
   );
+
+  // Free tier may hold a single sub-currency; adding more requires Pro. Account
+  // currencies that are otherwise required (in use) don't count against it.
+  const addedSubcurrencyCount = useMemo(
+    () => fxCurrencies.filter((c) => c !== reporting && !currenciesInUse.has(c)).length,
+    [currenciesInUse, fxCurrencies, reporting],
+  );
+  const handleOpenAddPicker = useCallback(() => {
+    if (!checkLimit('subcurrencies', addedSubcurrencyCount)) return;
+    void triggerHaptic('selection');
+    setAddPickerVisible(true);
+  }, [addedSubcurrencyCount, checkLimit]);
 
   const handleAddCurrency = useCallback(
     async (code: string) => {
@@ -146,7 +169,8 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   return (
     <SettingsPageLayout>
       <SettingsHeader title={I18n.t('exchange_rates.title')} onBack={onBack} />
-      <ScrollView
+      <Animated.ScrollView
+        ref={scrollRef}
         contentContainerStyle={[
           { paddingHorizontal: SETTINGS_HORIZONTAL_PADDING, paddingBottom: 32 },
           bottomNavInset,
@@ -205,7 +229,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                 {I18n.t('exchange_rates.subcurrencies_title')}
               </Text>
               <Pressable
-                onPress={() => setAddPickerVisible(true)}
+                onPress={handleOpenAddPicker}
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('exchange_rates.add_currency')}
                 hitSlop={8}
@@ -227,25 +251,53 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardContent style={styles.list}>
-                {displayCodes.map((code, index) => {
-                  const row = rateByQuote.get(code);
-                  const isManual = row?.source === 'manual';
-                  return (
-                    <Pressable
-                      key={code}
-                      onPress={() => setEditCode(code)}
-                      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                    >
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.08}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={8}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, toIndex, order }) => {
+                if (fromIndex === toIndex) return;
+                reorderFxCurrencies(order(displayCodes));
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={scrollRef}
+              width="fill"
+            >
+              {displayCodes.map((code) => {
+                const row = rateByQuote.get(code);
+                const isManual = row?.source === 'manual';
+                return (
+                  <View
+                    key={code}
+                    style={[
+                      styles.itemCard,
+                      {
+                        width: rowWidth,
+                        backgroundColor: themeColors.card,
+                        borderColor: themeColors.border,
+                      },
+                    ]}
+                  >
+                    <Sortable.Handle>
                       <View
-                        style={[
-                          styles.rateRow,
-                          index > 0
-                            ? { borderTopColor: themeColors.border, borderTopWidth: 1 }
-                            : null,
-                        ]}
+                        accessible
+                        accessibilityRole="button"
+                        accessibilityLabel={`${I18n.t('common.reorder')} ${code}`}
+                        style={styles.dragHandle}
                       >
+                        <GripVertical size={16} color={themeColors.textMuted} />
+                      </View>
+                    </Sortable.Handle>
+                    <Pressable
+                      onPress={() => setEditCode(code)}
+                      style={({ pressed }) => [styles.rowPressable, { opacity: pressed ? 0.6 : 1 }]}
+                    >
+                      <View style={styles.rowMain}>
                         <Text variant="bodyStrong" style={styles.rateCode}>
                           {code}
                         </Text>
@@ -259,13 +311,13 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                         </View>
                       </View>
                     </Pressable>
-                  );
-                })}
-              </CardContent>
-            </Card>
+                  </View>
+                );
+              })}
+            </Sortable.Flex>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <CurrencyPickerSheet
         visible={mainPickerVisible}
@@ -522,14 +574,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  list: { gap: 0 },
-  rateRow: {
-    width: '100%',
+  itemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingLeft: 8,
+    paddingRight: 14,
+  },
+  rowPressable: {
+    flex: 1,
+  },
+  rowMain: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 14,
     gap: 12,
+  },
+  dragHandle: {
+    paddingVertical: 14,
+    paddingRight: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   section: { marginTop: 28, gap: 12 },
   sectionHeader: { paddingHorizontal: 4 },

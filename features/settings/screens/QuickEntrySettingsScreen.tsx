@@ -7,6 +7,7 @@ import {
   CategoryEmoji,
   type CategoryPickerOption,
   CategoryPickerSheet,
+  CurrencyPickerSheet,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -23,6 +24,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
 import type { Category } from '~/types';
+import { currencyNameForCode } from '~/utils/currency';
 
 interface QuickEntrySettingsScreenProps {
   onBack: () => void;
@@ -139,7 +141,15 @@ function buildPickerOptions(categories: Category[]): {
 export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const { accounts, accountGroups, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
+  const {
+    settings,
+    accounts,
+    accountGroups,
+    categories,
+    fxCurrencies,
+    quickEntryPrefs,
+    updateQuickEntryPrefs,
+  } = useApp();
   const expenseCategories = useMemo(
     () => categories.filter((c) => c.type === 'expense'),
     [categories],
@@ -167,7 +177,19 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   const [activeBucket, setActiveBucket] = useState<KeywordCategoryKey | null>(null);
   const [activeDefault, setActiveDefault] = useState<'expense' | 'income' | null>(null);
   const [defaultAccountPickerVisible, setDefaultAccountPickerVisible] = useState(false);
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
+
+  // Currencies the user can pin quick-entry to: reporting + sub-currencies +
+  // any currency an account already uses. Only worth showing when there's a
+  // real choice (more than one available currency).
+  const enabledCurrencies = useMemo(() => {
+    const set = new Set<string>([settings.currencyCode, ...fxCurrencies]);
+    for (const account of accounts) {
+      if (account.currency) set.add(account.currency);
+    }
+    return Array.from(set);
+  }, [accounts, fxCurrencies, settings.currencyCode]);
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -239,6 +261,19 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     },
     [updateQuickEntryPrefs],
   );
+
+  const handlePickDefaultCurrency = useCallback(
+    (code: string) => {
+      updateQuickEntryPrefs({ defaultCurrency: code });
+      setCurrencyPickerVisible(false);
+    },
+    [updateQuickEntryPrefs],
+  );
+
+  const pinnedCurrency =
+    quickEntryPrefs.defaultCurrency && enabledCurrencies.includes(quickEntryPrefs.defaultCurrency)
+      ? quickEntryPrefs.defaultCurrency
+      : null;
 
   // When no explicit default account has been chosen, surface the same fallback
   // the entry flows use at runtime — the user's first account — so the row
@@ -379,6 +414,37 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
                       <ChevronRight size={16} color={themeColors.textMuted} />
                     </View>
                   </Pressable>
+                  {enabledCurrencies.length > 1 ? (
+                    <>
+                      <View style={styles.rowDivider} />
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setCurrencyPickerVisible(true);
+                        }}
+                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                      >
+                        <View style={styles.row}>
+                          <View style={styles.rowText}>
+                            <Text variant="body" className="text-foreground" numberOfLines={1}>
+                              {I18n.t('settings.quick_entry.default_currency_label')}
+                            </Text>
+                            <Text
+                              variant="caption"
+                              className="text-muted-foreground"
+                              numberOfLines={2}
+                            >
+                              {pinnedCurrency
+                                ? `${pinnedCurrency} · ${currencyNameForCode(pinnedCurrency)}`
+                                : I18n.t('settings.quick_entry.default_currency_auto')}
+                            </Text>
+                          </View>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </View>
+                      </Pressable>
+                    </>
+                  ) : null}
                 </View>
               </View>
 
@@ -543,6 +609,15 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
         selectedAccountId={defaultAccount?.id ?? null}
         onSelect={handlePickDefaultAccount}
         onClose={() => setDefaultAccountPickerVisible(false)}
+      />
+
+      <CurrencyPickerSheet
+        visible={currencyPickerVisible}
+        onClose={() => setCurrencyPickerVisible(false)}
+        onSelect={handlePickDefaultCurrency}
+        selectedCode={pinnedCurrency ?? settings.currencyCode}
+        restrictToCodes={enabledCurrencies}
+        title={I18n.t('settings.quick_entry.default_currency_label')}
       />
     </SettingsPageLayout>
   );

@@ -67,7 +67,48 @@ const nl = {
       placeholder: 'Selecteer',
     },
   },
+  exchange_rates: {
+    title: "Meerdere valuta's",
+    main_currency: 'Hoofdvaluta',
+    as_of: 'Bijgewerkt {{date}}',
+    never_updated: 'Nog niet bijgewerkt',
+    update_rates: 'Koersen bijwerken',
+    updating: 'Bijwerken…',
+    rates_title: 'Koersen',
+    subcurrencies_title: "Subvaluta's",
+    no_foreign_accounts: 'Voeg een valuta toe om de koers te volgen.',
+    manual_badge: 'Handmatig',
+    add_currency: 'Valuta toevoegen',
+    add: 'Toevoegen',
+    choose_currency: 'Valuta kiezen',
+    search_currency: 'Valuta zoeken',
+    no_currency_match: 'Geen overeenkomende valuta',
+    edit_rate_title: 'Koers bewerken',
+    remove_currency: 'Verwijderen',
+    reset_title: 'Hoofdvaluta wijzigen?',
+    reset_message:
+      'Overschakelen naar {{code}} verwijdert permanent al je rekeningen, transacties en instellingen. Dit kan niet ongedaan worden gemaakt.',
+    reset_prompt: 'Typ {{word}} om te bevestigen',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Verwijderen en wisselen',
+  },
   news: {
+    multi_currency_update: {
+      title: "Meerdere valuta's & meer",
+      showcase_main: 'Hoofd',
+      currency: {
+        title: 'Geef uit in elke valuta',
+        body: "Houd rekeningen en transacties bij in meerdere valuta's. Voeg subvaluta's toe, stel hun koersen in, en elk totaal wordt nog steeds omgerekend naar je hoofdvaluta.",
+      },
+      redesign: {
+        title: 'Een frisse nieuwe look',
+        body: 'Instellingen, Uurwaarde en Terugkerende betalingen zijn opnieuw ontworpen, overzichtelijker en makkelijker in gebruik.',
+      },
+      app_lock: {
+        title: 'Vergrendel de app',
+        body: 'Houd je financiën privé met Face ID, Touch ID of vingerafdruk. Beschikbaar met Pro.',
+      },
+    },
     account_logos: {
       title: 'Rekeninglogo’s',
       intro: {
@@ -362,6 +403,12 @@ const nl = {
       placeholder_income: 'Probeer "Salaris 3000", "Bonus 500", "Terugbetaling 50".',
     },
     editor: {
+      received_amount: 'Ontvangen bedrag ({{currency}})',
+      transfer_rate_hint: 'Laat leeg om {{from}} → {{to}} tegen de nieuwste koers om te rekenen.',
+      received_label: 'Ontvangen',
+      fx_title: 'Omrekening',
+      fx_rate: 'Wisselkoers',
+      fx_received: 'Ontvangen bedrag',
       title_create: 'Toevoegen',
       title_edit: 'Bijwerken',
       subtitle_create: 'Snel en eenvoudig boeken',
@@ -736,10 +783,12 @@ const nl = {
         'Tik op + voor het snelle toetsenbord. Uitschakelen om altijd het volledig formulier te openen.',
       section_expense: 'Uitgaven',
       section_income: 'Inkomsten',
-      default_account_section: 'Standaardrekening',
+      default_account_section: 'Standaardwaarden',
       default_account_label: 'Standaardrekening',
       default_account_subtitle:
         'Gebruikt door spraak- en tekstinvoer als er geen overeenkomst in de geschiedenis is',
+      default_currency_label: 'Standaardvaluta',
+      default_currency_auto: 'Gebruik de rekeningvaluta',
       default_row: 'Standaard',
       no_default: 'Automatisch · valt terug op Overig',
       unmapped: 'Niet gekoppeld',
@@ -1122,6 +1171,11 @@ const nl = {
     subcategories: 'Subcategorieën',
   },
   accounts: {
+    currency: 'Valuta',
+    currency_change_title: 'Rekeningvaluta wijzigen?',
+    currency_change_message:
+      'Het saldo wordt tegen de nieuwste koers omgerekend van {{from}} naar {{to}}. Bestaande boekingen behouden hun oorspronkelijke valuta.',
+    currency_change_action: 'Omrekenen en wijzigen',
     logo: {
       label: 'Logo',
       add: 'Logo toevoegen',
@@ -1260,6 +1314,8 @@ const nl = {
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
+    limit_subcurrencies:
+      'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     title: 'Money2Time Pro',
     upgrade: 'Upgraden naar Pro',
     upgrade_subtitle: 'Onbeperkte functies ontgrendelen',

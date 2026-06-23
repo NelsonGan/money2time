@@ -67,7 +67,48 @@ const tr = {
       placeholder: 'Seçin',
     },
   },
+  exchange_rates: {
+    title: 'Çoklu para birimi',
+    main_currency: 'Ana para birimi',
+    as_of: '{{date}} tarihinde güncellendi',
+    never_updated: 'Henüz güncellenmedi',
+    update_rates: 'Kurları güncelle',
+    updating: 'Güncelleniyor…',
+    rates_title: 'Kurlar',
+    subcurrencies_title: 'Alt para birimleri',
+    no_foreign_accounts: 'Döviz kurunu takip etmek için bir para birimi ekleyin.',
+    manual_badge: 'Manuel',
+    add_currency: 'Para birimi ekle',
+    add: 'Ekle',
+    choose_currency: 'Para birimi seç',
+    search_currency: 'Para birimi ara',
+    no_currency_match: 'Eşleşen para birimi yok',
+    edit_rate_title: 'Kuru düzenle',
+    remove_currency: 'Kaldır',
+    reset_title: 'Ana para birimi değiştirilsin mi?',
+    reset_message:
+      '{{code}} birimine geçmek tüm hesaplarınızı, işlemlerinizi ve ayarlarınızı kalıcı olarak siler. Bu geri alınamaz.',
+    reset_prompt: 'Onaylamak için {{word}} yazın',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Sil ve değiştir',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Çoklu para birimi ve dahası',
+      showcase_main: 'Ana',
+      currency: {
+        title: 'Her para biriminde harca',
+        body: 'Hesapları ve işlemleri birden fazla para biriminde takip et. Alt para birimleri ekle, kurlarını belirle; her toplam yine ana para biriminde hesaplanır.',
+      },
+      redesign: {
+        title: 'Yepyeni bir görünüm',
+        body: 'Ayarlar, Saatlik değer ve Tekrarlayan ödemeler daha sade ve kullanımı kolay olacak şekilde yeniden tasarlandı.',
+      },
+      app_lock: {
+        title: 'Uygulamayı kilitle',
+        body: 'Finansını Face ID, Touch ID veya parmak iziyle gizli tut. Pro ile kullanılabilir.',
+      },
+    },
     account_logos: {
       title: 'Hesap logoları',
       intro: {
@@ -363,6 +404,12 @@ const tr = {
       placeholder_income: '"Maaş 3000", "Prim 500", "İade 50" gibi yazın.',
     },
     editor: {
+      received_amount: 'Alınan tutar ({{currency}})',
+      transfer_rate_hint: 'En güncel kurla {{from}} → {{to}} dönüştürmek için boş bırakın.',
+      received_label: 'Alınan',
+      fx_title: 'Dönüştürme',
+      fx_rate: 'Döviz kuru',
+      fx_received: 'Alınan tutar',
       title_create: 'Ekle',
       title_edit: 'Güncelle',
       subtitle_create: 'Hızlı ve temiz kayıt',
@@ -734,9 +781,11 @@ const tr = {
         'Hızlı tuş takımı için + düğmesine dokunun. Kapatırsanız her zaman tam form açılır.',
       section_expense: 'Gider',
       section_income: 'Gelir',
-      default_account_section: 'Varsayılan Hesap',
+      default_account_section: 'Varsayılanlar',
       default_account_label: 'Varsayılan hesap',
       default_account_subtitle: 'Geçmiş eşleşme yoksa ses ve metin girişinde kullanılır',
+      default_currency_label: 'Varsayılan para birimi',
+      default_currency_auto: 'Hesap para birimini kullan',
       default_row: 'Varsayılan',
       no_default: "Otomatik · Diğer'e geri döner",
       unmapped: 'Eşlenmemiş',
@@ -1110,6 +1159,11 @@ const tr = {
     subcategories: 'Alt Kategoriler',
   },
   accounts: {
+    currency: 'Para birimi',
+    currency_change_title: 'Hesap para birimi değiştirilsin mi?',
+    currency_change_message:
+      'Bakiye en güncel kurla {{from}} biriminden {{to}} birimine dönüştürülecek. Mevcut kayıtlar kendi para birimini korur.',
+    currency_change_action: 'Dönüştür ve değiştir',
     logo: {
       label: 'Logo',
       add: 'Logo ekle',
@@ -1248,6 +1302,8 @@ const tr = {
     custom_logos_label: 'Özel hesap logoları',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
+    limit_subcurrencies:
+      'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',
     upgrade: "Pro'ya Yükselt",
     upgrade_subtitle: 'Sınırsız özellikleri açın',

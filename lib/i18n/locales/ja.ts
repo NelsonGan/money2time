@@ -67,7 +67,48 @@ const ja = {
       placeholder: '選択',
     },
   },
+  exchange_rates: {
+    title: '多通貨',
+    main_currency: 'メイン通貨',
+    as_of: '{{date}} に更新',
+    never_updated: 'まだ更新されていません',
+    update_rates: 'レートを更新',
+    updating: '更新中…',
+    rates_title: 'レート',
+    subcurrencies_title: 'サブ通貨',
+    no_foreign_accounts: '通貨を追加すると、その為替レートを追跡できます。',
+    manual_badge: '手動',
+    add_currency: '通貨を追加',
+    add: '追加',
+    choose_currency: '通貨を選択',
+    search_currency: '通貨を検索',
+    no_currency_match: '一致する通貨がありません',
+    edit_rate_title: 'レートを編集',
+    remove_currency: '削除',
+    reset_title: 'メイン通貨を変更しますか？',
+    reset_message:
+      '{{code}} に切り替えると、すべての口座・取引・設定が完全に削除されます。元に戻すことはできません。',
+    reset_prompt: '確認のため {{word}} と入力してください',
+    reset_confirm_word: 'DELETE',
+    reset_action: '削除して切り替え',
+  },
   news: {
+    multi_currency_update: {
+      title: '多通貨対応ほか',
+      showcase_main: 'メイン',
+      currency: {
+        title: 'どの通貨でも記録',
+        body: '複数の通貨で口座と取引を管理できます。サブ通貨を追加してレートを設定しても、合計はすべてメイン通貨に換算されます。',
+      },
+      redesign: {
+        title: '新しいデザイン',
+        body: '設定・時給価値・定期支払いのページを、より見やすく使いやすく刷新しました。',
+      },
+      app_lock: {
+        title: 'アプリをロック',
+        body: 'Face ID・Touch ID・指紋で家計を非公開に。Proで利用できます。',
+      },
+    },
     account_logos: {
       title: '口座ロゴ',
       intro: {
@@ -360,6 +401,12 @@ const ja = {
       placeholder_income: '例：「給与 3000」「ボーナス 500」「返金 50」',
     },
     editor: {
+      received_amount: '受取金額（{{currency}}）',
+      transfer_rate_hint: '空欄にすると、最新レートで {{from}} → {{to}} に換算します。',
+      received_label: '受取',
+      fx_title: '換算',
+      fx_rate: '為替レート',
+      fx_received: '受取金額',
       title_create: '追加',
       title_edit: '更新',
       subtitle_create: 'すばやく記録',
@@ -720,9 +767,11 @@ const ja = {
         '+ をタップして素早いキーパッドを使用。オフにすると常に全フォームが開きます。',
       section_expense: '支出',
       section_income: '収入',
-      default_account_section: 'デフォルト口座',
+      default_account_section: 'デフォルト',
       default_account_label: 'デフォルト口座',
       default_account_subtitle: '履歴に一致しない場合に音声・テキスト入力で使用されます',
+      default_currency_label: 'デフォルト通貨',
+      default_currency_auto: '口座の通貨に合わせる',
       default_row: 'デフォルト',
       no_default: '自動 · その他にフォールバック',
       unmapped: '未マッピング',
@@ -1086,6 +1135,11 @@ const ja = {
     subcategories: 'サブカテゴリ',
   },
   accounts: {
+    currency: '通貨',
+    currency_change_title: '口座の通貨を変更しますか？',
+    currency_change_message:
+      '残高は最新レートで {{from}} から {{to}} に換算されます。既存の記録は元の通貨のまま残ります。',
+    currency_change_action: '換算して変更',
     logo: {
       label: 'ロゴ',
       add: 'ロゴを追加',
@@ -1225,6 +1279,8 @@ const ja = {
     custom_logos_label: 'カスタム口座ロゴ',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+    limit_subcurrencies:
+      '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     title: 'Money2Time Pro',
     upgrade: 'Pro にアップグレード',
     upgrade_subtitle: '無制限機能を解放',

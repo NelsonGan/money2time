@@ -18,7 +18,10 @@ export interface FeatureAnnouncementPage {
     | 'savingsHistory'
     | 'voice'
     | 'shareEarn'
-    | 'accountLogos';
+    | 'accountLogos'
+    | 'multiCurrency'
+    | 'redesign'
+    | 'appLock';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'enableVoice' | 'openShareEarn';
 }

@@ -67,7 +67,48 @@ const pl = {
       placeholder: 'Wybierz',
     },
   },
+  exchange_rates: {
+    title: 'Wiele walut',
+    main_currency: 'Waluta główna',
+    as_of: 'Zaktualizowano {{date}}',
+    never_updated: 'Jeszcze nie zaktualizowano',
+    update_rates: 'Aktualizuj kursy',
+    updating: 'Aktualizowanie…',
+    rates_title: 'Kursy',
+    subcurrencies_title: 'Waluty podrzędne',
+    no_foreign_accounts: 'Dodaj walutę, aby śledzić jej kurs.',
+    manual_badge: 'Ręcznie',
+    add_currency: 'Dodaj walutę',
+    add: 'Dodaj',
+    choose_currency: 'Wybierz walutę',
+    search_currency: 'Szukaj waluty',
+    no_currency_match: 'Brak pasującej waluty',
+    edit_rate_title: 'Edytuj kurs',
+    remove_currency: 'Usuń',
+    reset_title: 'Zmienić walutę główną?',
+    reset_message:
+      'Przejście na {{code}} trwale usunie wszystkie konta, transakcje i ustawienia. Tej operacji nie można cofnąć.',
+    reset_prompt: 'Wpisz {{word}}, aby potwierdzić',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Usuń i zmień',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Wiele walut i więcej',
+      showcase_main: 'Główna',
+      currency: {
+        title: 'Wydawaj w dowolnej walucie',
+        body: 'Śledź konta i transakcje w wielu walutach. Dodaj waluty podrzędne, ustaw ich kursy, a każda suma nadal przeliczana jest na Twoją walutę główną.',
+      },
+      redesign: {
+        title: 'Świeży, nowy wygląd',
+        body: 'Ustawienia, Wartość godzinowa i Płatności cykliczne zostały przeprojektowane, by były czytelniejsze i wygodniejsze.',
+      },
+      app_lock: {
+        title: 'Zablokuj aplikację',
+        body: 'Chroń prywatność finansów dzięki Face ID, Touch ID lub odciskowi palca. Dostępne w Pro.',
+      },
+    },
     account_logos: {
       title: 'Logo kont',
       intro: {
@@ -362,6 +403,12 @@ const pl = {
       placeholder_income: 'Spróbuj "Pensja 3000", "Premia 500", "Zwrot 50".',
     },
     editor: {
+      received_amount: 'Otrzymana kwota ({{currency}})',
+      transfer_rate_hint: 'Pozostaw puste, aby przeliczyć {{from}} → {{to}} po najnowszym kursie.',
+      received_label: 'Otrzymano',
+      fx_title: 'Przeliczenie',
+      fx_rate: 'Kurs wymiany',
+      fx_received: 'Otrzymana kwota',
       title_create: 'Dodaj',
       title_edit: 'Zaktualizuj',
       subtitle_create: 'Szybki i przejrzysty wpis',
@@ -730,10 +777,12 @@ const pl = {
         'Dotknij +, by otworzyć szybką klawiaturę. Wyłącz, by zawsze otwierać pełny formularz.',
       section_expense: 'Wydatek',
       section_income: 'Przychód',
-      default_account_section: 'Domyślne konto',
+      default_account_section: 'Domyślne',
       default_account_label: 'Domyślne konto',
       default_account_subtitle:
         'Używane przez wpis głosowy i tekstowy, gdy nie pasuje żaden z historii',
+      default_currency_label: 'Domyślna waluta',
+      default_currency_auto: 'Dopasuj do waluty konta',
       default_row: 'Domyślne',
       no_default: 'Auto · przechodzi do Innych',
       unmapped: 'Nieprzypisane',
@@ -1111,6 +1160,11 @@ const pl = {
     subcategories: 'Podkategorie',
   },
   accounts: {
+    currency: 'Waluta',
+    currency_change_title: 'Zmienić walutę konta?',
+    currency_change_message:
+      'Saldo zostanie przeliczone z {{from}} na {{to}} po najnowszym kursie. Istniejące wpisy zachowują swoją pierwotną walutę.',
+    currency_change_action: 'Przelicz i zmień',
     logo: {
       label: 'Logo',
       add: 'Dodaj logo',
@@ -1249,6 +1303,8 @@ const pl = {
     custom_logos_label: 'Własne logo konta',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
+    limit_subcurrencies:
+      'W planie darmowym możesz dodać {{count}} walutę podrzędną. Przejdź na Pro, aby śledzić wiele walut bez limitu.',
     title: 'Money2Time Pro',
     upgrade: 'Przejdź na Pro',
     upgrade_subtitle: 'Odblokuj nieograniczone funkcje',

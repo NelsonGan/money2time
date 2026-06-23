@@ -67,7 +67,48 @@ const it = {
       placeholder: 'Seleziona',
     },
   },
+  exchange_rates: {
+    title: 'Multivaluta',
+    main_currency: 'Valuta principale',
+    as_of: 'Aggiornato {{date}}',
+    never_updated: 'Non ancora aggiornato',
+    update_rates: 'Aggiorna i tassi',
+    updating: 'Aggiornamento…',
+    rates_title: 'Tassi',
+    subcurrencies_title: 'Sotto-valute',
+    no_foreign_accounts: 'Aggiungi una valuta per seguirne il tasso di cambio.',
+    manual_badge: 'Manuale',
+    add_currency: 'Aggiungi valuta',
+    add: 'Aggiungi',
+    choose_currency: 'Scegli valuta',
+    search_currency: 'Cerca valuta',
+    no_currency_match: 'Nessuna valuta corrispondente',
+    edit_rate_title: 'Modifica tasso',
+    remove_currency: 'Rimuovi',
+    reset_title: 'Cambiare la valuta principale?',
+    reset_message:
+      "Passare a {{code}} eliminerà definitivamente tutti i tuoi conti, transazioni e impostazioni. L'operazione non può essere annullata.",
+    reset_prompt: 'Digita {{word}} per confermare',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Elimina e cambia',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Multivaluta e altro',
+      showcase_main: 'Principale',
+      currency: {
+        title: 'Spendi in qualsiasi valuta',
+        body: 'Tieni traccia di conti e transazioni in più valute. Aggiungi sotto-valute, imposta i tassi, e ogni totale viene comunque calcolato nella tua valuta principale.',
+      },
+      redesign: {
+        title: 'Un aspetto tutto nuovo',
+        body: 'Impostazioni, Valore orario e Pagamenti ricorrenti sono stati ridisegnati per essere più puliti e facili da usare.',
+      },
+      app_lock: {
+        title: "Blocca l'app",
+        body: 'Mantieni private le tue finanze con Face ID, Touch ID o impronta. Disponibile con Pro.',
+      },
+    },
     account_logos: {
       title: 'Logo dei conti',
       intro: {
@@ -362,6 +403,12 @@ const it = {
       placeholder_income: 'Prova "Stipendio 3000", "Bonus 500", "Rimborso 50".',
     },
     editor: {
+      received_amount: 'Importo ricevuto ({{currency}})',
+      transfer_rate_hint: 'Lascia vuoto per convertire {{from}} → {{to}} al tasso più recente.',
+      received_label: 'Ricevuto',
+      fx_title: 'Conversione',
+      fx_rate: 'Tasso di cambio',
+      fx_received: 'Importo ricevuto',
       title_create: 'Aggiungi',
       title_edit: 'Aggiorna',
       subtitle_create: 'Voce rapida e semplice',
@@ -730,10 +777,12 @@ const it = {
         'Tocca + per il tastierino rapido. Disattiva per aprire sempre il modulo completo.',
       section_expense: 'Uscite',
       section_income: 'Entrate',
-      default_account_section: 'Conto predefinito',
+      default_account_section: 'Predefiniti',
       default_account_label: 'Conto predefinito',
       default_account_subtitle:
         "Usato da voce e testo quando non c'è corrispondenza nella cronologia",
+      default_currency_label: 'Valuta predefinita',
+      default_currency_auto: 'Usa la valuta del conto',
       default_row: 'Predefinito',
       no_default: 'Auto · torna ad Altro',
       unmapped: 'Non mappato',
@@ -1112,6 +1161,11 @@ const it = {
     subcategories: 'Sottocategorie',
   },
   accounts: {
+    currency: 'Valuta',
+    currency_change_title: 'Cambiare la valuta del conto?',
+    currency_change_message:
+      'Il saldo verrà convertito da {{from}} a {{to}} al tasso più recente. I movimenti esistenti mantengono la loro valuta originale.',
+    currency_change_action: 'Converti e cambia',
     logo: {
       label: 'Logo',
       add: 'Aggiungi un logo',
@@ -1251,6 +1305,8 @@ const it = {
     custom_logos_label: 'Logo conto personalizzati',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
+    limit_subcurrencies:
+      'Puoi aggiungere {{count}} sotto-valuta con il piano gratuito. Passa a Pro per il multivaluta illimitato.',
     title: 'Money2Time Pro',
     upgrade: 'Passa a Pro',
     upgrade_subtitle: 'Sblocca funzionalità illimitate',

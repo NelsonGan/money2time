@@ -167,6 +167,12 @@ export interface QuickEntryPrefs {
    * when null.
    */
   defaultAccountId: string | null;
+  /**
+   * Currency new quick-entry transactions are recorded in. When null, falls
+   * back to the entry account's own currency. Lets the user enter a foreign
+   * currency (e.g. spend EUR from an MYR account) and have it persist.
+   */
+  defaultCurrency: string | null;
   /** When true, holding the + button on iOS opens the voice dictation flow. */
   voiceInputEnabled: boolean;
   /**
@@ -187,6 +193,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   defaultExpenseCategoryId: null,
   defaultIncomeCategoryId: null,
   defaultAccountId: null,
+  defaultCurrency: null,
   voiceInputEnabled: false,
   voicePromptDismissed: false,
   voiceSkipConfirmation: false,

@@ -67,7 +67,48 @@ const fil = {
       placeholder: 'Pumili',
     },
   },
+  exchange_rates: {
+    title: 'Multi-currency',
+    main_currency: 'Pangunahing pera',
+    as_of: 'Na-update {{date}}',
+    never_updated: 'Hindi pa na-update',
+    update_rates: 'I-update ang rate',
+    updating: 'Ina-update…',
+    rates_title: 'Mga rate',
+    subcurrencies_title: 'Mga sub-currency',
+    no_foreign_accounts: 'Magdagdag ng pera para subaybayan ang palitan nito.',
+    manual_badge: 'Manual',
+    add_currency: 'Magdagdag ng pera',
+    add: 'Idagdag',
+    choose_currency: 'Pumili ng pera',
+    search_currency: 'Maghanap ng pera',
+    no_currency_match: 'Walang tugmang pera',
+    edit_rate_title: 'I-edit ang rate',
+    remove_currency: 'Alisin',
+    reset_title: 'Palitan ang pangunahing pera?',
+    reset_message:
+      'Ang paglipat sa {{code}} ay permanenteng magbubura ng lahat ng iyong account, transaksyon, at setting. Hindi ito maibabalik.',
+    reset_prompt: 'I-type ang {{word}} para kumpirmahin',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Burahin at palitan',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Multi-currency at iba pa',
+      showcase_main: 'Pangunahin',
+      currency: {
+        title: 'Gumastos sa kahit anong pera',
+        body: 'Subaybayan ang mga account at transaksyon sa maraming pera. Magdagdag ng sub-currency, itakda ang rate, at lahat ng total ay nakabatay pa rin sa iyong pangunahing pera.',
+      },
+      redesign: {
+        title: 'Bagong itsura',
+        body: 'Binago namin ang Settings, Hourly value, at Recurring na mga bayarin para mas malinis at madaling gamitin.',
+      },
+      app_lock: {
+        title: 'I-lock ang app',
+        body: 'Panatilihing pribado ang iyong pananalapi gamit ang Face ID, Touch ID, o fingerprint. Available sa Pro.',
+      },
+    },
     account_logos: {
       title: 'Mga logo ng account',
       intro: {
@@ -364,6 +405,13 @@ const fil = {
       placeholder_income: 'Subukan ang "Sahod 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      received_amount: 'Halagang natanggap ({{currency}})',
+      transfer_rate_hint:
+        'Iwanang blangko para i-convert ang {{from}} → {{to}} sa pinakabagong palitan.',
+      received_label: 'Natanggap',
+      fx_title: 'Pagpapalit',
+      fx_rate: 'Palitan',
+      fx_received: 'Halagang natanggap',
       title_create: 'Magdagdag',
       title_edit: 'I-update',
       subtitle_create: 'Mabilis at malinaw na entry',
@@ -738,10 +786,12 @@ const fil = {
         'Pindutin ang + para sa mabilis na keypad. I-off para palaging buksan ang buong form.',
       section_expense: 'Gastos',
       section_income: 'Kita',
-      default_account_section: 'Default na Account',
+      default_account_section: 'Mga default',
       default_account_label: 'Default na account',
       default_account_subtitle:
         'Ginagamit ng voice at text entry kung walang nahanap na kasaysayan',
+      default_currency_label: 'Default na pera',
+      default_currency_auto: 'Itugma sa pera ng account',
       default_row: 'Default',
       no_default: 'Awtomatiko · babalik sa Iba pa',
       unmapped: 'Hindi naka-map',
@@ -1123,6 +1173,11 @@ const fil = {
     subcategories: 'Mga Subcategory',
   },
   accounts: {
+    currency: 'Pera',
+    currency_change_title: 'Palitan ang pera ng account?',
+    currency_change_message:
+      'Iko-convert ang balanse mula {{from}} papuntang {{to}} sa pinakabagong palitan. Pinapanatili ng mga umiiral na entry ang orihinal nilang pera.',
+    currency_change_action: 'I-convert at palitan',
     logo: {
       label: 'Logo',
       add: 'Magdagdag ng logo',
@@ -1261,6 +1316,8 @@ const fil = {
     custom_logos_label: 'Custom na logo ng account',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
+    limit_subcurrencies:
+      'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',
     upgrade: 'Mag-upgrade sa Pro',
     upgrade_subtitle: 'I-unlock ang unlimited na mga feature',

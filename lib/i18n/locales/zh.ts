@@ -68,6 +68,22 @@ const zh = {
     },
   },
   news: {
+    multi_currency_update: {
+      title: '多币种及更多',
+      showcase_main: '主',
+      currency: {
+        title: '用任何货币记账',
+        body: '可用多种货币管理账户和交易。添加子货币、设置汇率，所有合计仍会换算回你的主货币。',
+      },
+      redesign: {
+        title: '全新界面',
+        body: '我们重新设计了设置、时薪价值和定期支出页面，更简洁、更易用。',
+      },
+      app_lock: {
+        title: '应用锁',
+        body: '用 Face ID、Touch ID 或指纹保护你的财务隐私。Pro 会员可用。',
+      },
+    },
     account_logos: {
       title: '账户标志',
       intro: {
@@ -715,9 +731,11 @@ const zh = {
       enabled_subtitle: '点击 + 打开快捷键盘。关闭后将始终打开完整表单。',
       section_expense: '支出',
       section_income: '收入',
-      default_account_section: '默认账户',
+      default_account_section: '默认设置',
       default_account_label: '默认账户',
       default_account_subtitle: '语音和文本录入在无历史匹配时使用此账户',
+      default_currency_label: '默认货币',
+      default_currency_auto: '与账户货币一致',
       default_row: '默认',
       no_default: '自动 · 默认为"其他"',
       unmapped: '未映射',
@@ -1204,6 +1222,7 @@ const zh = {
   pro: {
     custom_logos_label: '自定义账户标志',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
+    limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     title: 'Money2Time Pro',
     upgrade: '升级到 Pro',
     upgrade_subtitle: '解锁无限功能',

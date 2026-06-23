@@ -245,6 +245,7 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               managementOnly
               useNativeBackGesture
+              onOpenMultiCurrency={() => props.navigation.navigate('ExchangeRates')}
             />
           );
         }}

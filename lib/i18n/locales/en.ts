@@ -68,6 +68,22 @@ const en = {
     },
   },
   news: {
+    multi_currency_update: {
+      title: 'Multi-currency & more',
+      showcase_main: 'Main',
+      currency: {
+        title: 'Spend in any currency',
+        body: 'Track accounts and transactions in several currencies. Add sub-currencies, set their rates, and every total still adds up in your main currency.',
+      },
+      redesign: {
+        title: 'A fresh new look',
+        body: 'Settings, Hourly value, and Recurring commitments have been redesigned to be cleaner and easier to use.',
+      },
+      app_lock: {
+        title: 'Lock the app',
+        body: 'Keep your finances private with Face ID, Touch ID, or fingerprint. Available with Pro.',
+      },
+    },
     account_logos: {
       title: 'Account Logos',
       intro: {
@@ -734,9 +750,11 @@ const en = {
       enabled_subtitle: 'Tap + for the fast keypad. Turn off to always open the full form.',
       section_expense: 'Expense',
       section_income: 'Income',
-      default_account_section: 'Default Account',
+      default_account_section: 'Defaults',
       default_account_label: 'Default account',
       default_account_subtitle: 'Used by voice and text entry when no history match applies',
+      default_currency_label: 'Default currency',
+      default_currency_auto: 'Match the account currency',
       default_row: 'Default',
       no_default: 'Auto · falls back to Other',
       unmapped: 'Unmapped',
@@ -1249,6 +1267,8 @@ const en = {
     custom_logos_label: 'Custom account logos',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
+    limit_subcurrencies:
+      'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',
     upgrade: 'Upgrade to Pro',
     upgrade_subtitle: 'Unlock unlimited features',

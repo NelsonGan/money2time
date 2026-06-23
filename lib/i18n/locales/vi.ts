@@ -67,7 +67,48 @@ const vi = {
       placeholder: 'Chọn',
     },
   },
+  exchange_rates: {
+    title: 'Đa tiền tệ',
+    main_currency: 'Tiền tệ chính',
+    as_of: 'Cập nhật {{date}}',
+    never_updated: 'Chưa cập nhật',
+    update_rates: 'Cập nhật tỷ giá',
+    updating: 'Đang cập nhật…',
+    rates_title: 'Tỷ giá',
+    subcurrencies_title: 'Tiền tệ phụ',
+    no_foreign_accounts: 'Thêm một loại tiền để theo dõi tỷ giá của nó.',
+    manual_badge: 'Thủ công',
+    add_currency: 'Thêm tiền tệ',
+    add: 'Thêm',
+    choose_currency: 'Chọn tiền tệ',
+    search_currency: 'Tìm tiền tệ',
+    no_currency_match: 'Không có tiền tệ phù hợp',
+    edit_rate_title: 'Sửa tỷ giá',
+    remove_currency: 'Xóa',
+    reset_title: 'Đổi tiền tệ chính?',
+    reset_message:
+      'Chuyển sang {{code}} sẽ xóa vĩnh viễn tất cả tài khoản, giao dịch và cài đặt của bạn. Không thể hoàn tác.',
+    reset_prompt: 'Nhập {{word}} để xác nhận',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Xóa và chuyển',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Đa tiền tệ và hơn thế',
+      showcase_main: 'Chính',
+      currency: {
+        title: 'Chi tiêu bằng mọi loại tiền',
+        body: 'Theo dõi tài khoản và giao dịch bằng nhiều loại tiền tệ. Thêm tiền tệ phụ, đặt tỷ giá, và mọi tổng số vẫn được quy về tiền tệ chính của bạn.',
+      },
+      redesign: {
+        title: 'Giao diện mới mẻ',
+        body: 'Cài đặt, Giá trị mỗi giờ và Khoản định kỳ đã được thiết kế lại gọn gàng và dễ dùng hơn.',
+      },
+      app_lock: {
+        title: 'Khóa ứng dụng',
+        body: 'Giữ tài chính riêng tư với Face ID, Touch ID hoặc vân tay. Có trong bản Pro.',
+      },
+    },
     account_logos: {
       title: 'Logo tài khoản',
       intro: {
@@ -359,6 +400,12 @@ const vi = {
       placeholder_income: 'Thử "Lương 5000", "Thưởng 500", "Hoàn tiền 50".',
     },
     editor: {
+      received_amount: 'Số tiền nhận ({{currency}})',
+      transfer_rate_hint: 'Để trống để quy đổi {{from}} → {{to}} theo tỷ giá mới nhất.',
+      received_label: 'Đã nhận',
+      fx_title: 'Quy đổi',
+      fx_rate: 'Tỷ giá',
+      fx_received: 'Số tiền nhận',
       title_create: 'Thêm',
       title_edit: 'Cập nhật',
       subtitle_create: 'Ghi nhanh, gọn',
@@ -721,9 +768,11 @@ const vi = {
       enabled_subtitle: 'Nhấn + để mở bàn phím nhanh. Tắt để luôn mở biểu mẫu đầy đủ.',
       section_expense: 'Chi tiêu',
       section_income: 'Thu nhập',
-      default_account_section: 'Tài khoản mặc định',
+      default_account_section: 'Mặc định',
       default_account_label: 'Tài khoản mặc định',
       default_account_subtitle: 'Dùng khi nhập giọng nói hoặc văn bản mà không khớp lịch sử',
+      default_currency_label: 'Tiền tệ mặc định',
+      default_currency_auto: 'Theo tiền tệ của tài khoản',
       default_row: 'Mặc định',
       no_default: 'Tự động · về Khác',
       unmapped: 'Chưa ánh xạ',
@@ -1091,6 +1140,11 @@ const vi = {
     subcategories: 'Danh mục con',
   },
   accounts: {
+    currency: 'Tiền tệ',
+    currency_change_title: 'Đổi tiền tệ của tài khoản?',
+    currency_change_message:
+      'Số dư sẽ được quy đổi từ {{from}} sang {{to}} theo tỷ giá mới nhất. Các giao dịch hiện có vẫn giữ nguyên tiền tệ gốc.',
+    currency_change_action: 'Quy đổi và thay đổi',
     logo: {
       label: 'Logo',
       add: 'Thêm logo',
@@ -1229,6 +1283,8 @@ const vi = {
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
+    limit_subcurrencies:
+      'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     title: 'Money2Time Pro',
     upgrade: 'Nâng cấp lên Pro',
     upgrade_subtitle: 'Mở khóa tính năng không giới hạn',

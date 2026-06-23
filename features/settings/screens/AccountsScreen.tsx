@@ -439,6 +439,7 @@ function AccountEditorSheet({
   onClose,
   onSave,
   onDelete,
+  onOpenMultiCurrency,
 }: {
   visible: boolean;
   account: Account | null;
@@ -449,6 +450,7 @@ function AccountEditorSheet({
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
+  onOpenMultiCurrency?: () => void;
 }) {
   const themeColors = useThemeColors();
   const isEdit = account !== null;
@@ -465,15 +467,8 @@ function AccountEditorSheet({
   const [creditDueDay, setCreditDueDay] = useState('1');
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
-  const [showAddSubcurrency, setShowAddSubcurrency] = useState(false);
 
-  const {
-    settings: appSettings,
-    accounts: appAccounts,
-    fxCurrencies,
-    addFxCurrency,
-    rateTable,
-  } = useApp();
+  const { settings: appSettings, accounts: appAccounts, fxCurrencies, rateTable } = useApp();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -822,29 +817,22 @@ function AccountEditorSheet({
         restrictToCodes={accountCurrencyCodes}
         title={I18n.t('accounts.currency')}
         footer={
-          <Pressable
-            onPress={() => {
-              setShowCurrencyPicker(false);
-              setShowAddSubcurrency(true);
-            }}
-            className="mt-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-3 active:opacity-80"
-          >
-            <Plus size={16} color={themeColors.primary} />
-            <Text variant="body" style={{ color: themeColors.primary }}>
-              {I18n.t('exchange_rates.add_currency')}
-            </Text>
-          </Pressable>
+          onOpenMultiCurrency ? (
+            <Pressable
+              onPress={() => {
+                setShowCurrencyPicker(false);
+                onClose();
+                onOpenMultiCurrency();
+              }}
+              className="mt-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-3 active:opacity-80"
+            >
+              <Plus size={16} color={themeColors.primary} />
+              <Text variant="body" style={{ color: themeColors.primary }}>
+                {I18n.t('exchange_rates.add_currency')}
+              </Text>
+            </Pressable>
+          ) : null
         }
-      />
-      <CurrencyPickerSheet
-        visible={showAddSubcurrency}
-        onClose={() => setShowAddSubcurrency(false)}
-        onSelect={(code) => {
-          void addFxCurrency(code);
-          handleCurrencyChange(code);
-        }}
-        excludeCodes={accountCurrencyCodes}
-        title={I18n.t('exchange_rates.add_currency')}
       />
     </ThemeModal>
   );
@@ -1325,6 +1313,7 @@ interface AccountsScreenProps {
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
   onOpenNetAssetsInsight?: () => void;
+  onOpenMultiCurrency?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
 }
@@ -1341,6 +1330,7 @@ export function AccountsScreen({
   onOpenTransactionSplitBadge,
   onOpenSettings,
   onOpenNetAssetsInsight,
+  onOpenMultiCurrency,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
@@ -2539,6 +2529,7 @@ export function AccountsScreen({
             setShowEditAccount(false);
             closeSelectedAccount();
           }}
+          onOpenMultiCurrency={onOpenMultiCurrency}
         />
         <PayCreditCardSheet
           visible={payCardAccountId === account.id}
@@ -2843,6 +2834,7 @@ export function AccountsScreen({
             setShowEditAccount(false);
             setEditingAccountId(null);
           }}
+          onOpenMultiCurrency={onOpenMultiCurrency}
         />
       ) : null}
 
@@ -2895,6 +2887,7 @@ export function AccountsScreen({
           setShowCreate(false);
           setCreateAccountGroupName(null);
         }}
+        onOpenMultiCurrency={onOpenMultiCurrency}
       />
 
       <ThemeModal
