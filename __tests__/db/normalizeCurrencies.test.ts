@@ -55,4 +55,20 @@ describe('normalizeCurrencyColumns', () => {
     expect(updates).toContainEqual({ table: 'transactions', to: 'MYR', from: '€' });
     expect(updates).toContainEqual({ table: 'transactions', to: 'MYR', from: '¥' });
   });
+
+  it('collapses a stray valid ISO code to the main code when collapseAll is set', () => {
+    // Pre-multi-currency data: a stray "USD" left by an old default template is
+    // not a real foreign account, so it must collapse to the main currency.
+    const { db, updates } = makeDb({ code: 'MYR', symbol: 'RM' }, { accounts: ['RM', 'USD'] });
+    normalizeCurrencyColumns(db, { collapseAll: true });
+    expect(updates).toContainEqual({ table: 'accounts', to: 'MYR', from: 'RM' });
+    expect(updates).toContainEqual({ table: 'accounts', to: 'MYR', from: 'USD' });
+  });
+
+  it('preserves valid ISO codes when collapseAll is not set', () => {
+    const { db, updates } = makeDb({ code: 'MYR', symbol: 'RM' }, { accounts: ['RM', 'USD'] });
+    normalizeCurrencyColumns(db, { collapseAll: false });
+    expect(updates).toContainEqual({ table: 'accounts', to: 'MYR', from: 'RM' });
+    expect(updates).not.toContainEqual({ table: 'accounts', to: 'MYR', from: 'USD' });
+  });
 });
