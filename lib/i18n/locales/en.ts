@@ -68,6 +68,22 @@ const en = {
     },
   },
   news: {
+    multi_currency_update: {
+      title: 'Multi-currency & more',
+      showcase_main: 'Main',
+      currency: {
+        title: 'Spend in any currency',
+        body: 'Track accounts and transactions in several currencies. Add sub-currencies, set their rates, and every total still adds up in your main currency.',
+      },
+      redesign: {
+        title: 'A fresh new look',
+        body: 'Settings, Hourly value, and Recurring commitments have been redesigned to be cleaner and easier to use.',
+      },
+      app_lock: {
+        title: 'Lock the app',
+        body: 'Keep your finances private with Face ID, Touch ID, or fingerprint. Available with Pro.',
+      },
+    },
     account_logos: {
       title: 'Account Logos',
       intro: {
@@ -376,6 +392,12 @@ const en = {
       to: 'To',
       swap_accounts: 'Swap from and to accounts',
       choose_account: 'Choose account',
+      received_amount: 'Amount received ({{currency}})',
+      transfer_rate_hint: 'Leave blank to convert {{from}} → {{to}} at the latest rate.',
+      received_label: 'Received',
+      fx_title: 'Conversion',
+      fx_rate: 'Exchange rate',
+      fx_received: 'Amount received',
       choose_category: 'Choose category',
       choose_field: 'Choose {{field}}',
       optional: 'Optional',
@@ -728,9 +750,11 @@ const en = {
       enabled_subtitle: 'Tap + for the fast keypad. Turn off to always open the full form.',
       section_expense: 'Expense',
       section_income: 'Income',
-      default_account_section: 'Default Account',
+      default_account_section: 'Defaults',
       default_account_label: 'Default account',
       default_account_subtitle: 'Used by voice and text entry when no history match applies',
+      default_currency_label: 'Default currency',
+      default_currency_auto: 'Match the account currency',
       default_row: 'Default',
       no_default: 'Auto · falls back to Other',
       unmapped: 'Unmapped',
@@ -1125,6 +1149,7 @@ const en = {
     account_name_placeholder: 'Daily Wallet',
     balance: 'Balance',
     account_group: 'Account group',
+    currency: 'Currency',
     include_in_totals: 'Include in totals',
     include_in_totals_hint: 'Hidden accounts are excluded from total balance.',
     include_option_include: 'Include',
@@ -1136,6 +1161,10 @@ const en = {
     due_day: 'Due day',
     current_balance: 'Current balance',
     current_balance_hint: 'Set the latest actual balance for this account.',
+    currency_change_title: 'Change account currency?',
+    currency_change_message:
+      'The balance will be converted from {{from}} to {{to}} at the latest rate. Existing entries keep their original currency.',
+    currency_change_action: 'Convert & change',
     balance_adjustment_prompt_title: 'How should this balance change be recorded?',
     balance_adjustment_prompt_message:
       'Balance changed by {{amount}}. Record as income/expense or keep as account difference (excluded from insights totals).',
@@ -1238,6 +1267,8 @@ const en = {
     custom_logos_label: 'Custom account logos',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
+    limit_subcurrencies:
+      'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',
     upgrade: 'Upgrade to Pro',
     upgrade_subtitle: 'Unlock unlimited features',
@@ -1420,6 +1451,31 @@ const en = {
       weekly_title: 'Your week in review',
       weekly_body: 'Tap to see your spending from the last 7 days.',
     },
+  },
+  exchange_rates: {
+    title: 'Multi currency',
+    main_currency: 'Main currency',
+    as_of: 'Updated {{date}}',
+    never_updated: 'Not updated yet',
+    update_rates: 'Update rates',
+    updating: 'Updating…',
+    rates_title: 'Rates',
+    subcurrencies_title: 'Subcurrencies',
+    no_foreign_accounts: 'Add a currency to track its exchange rate.',
+    manual_badge: 'Manual',
+    add_currency: 'Add currency',
+    add: 'Add',
+    choose_currency: 'Choose currency',
+    search_currency: 'Search currency',
+    no_currency_match: 'No matching currency',
+    edit_rate_title: 'Edit rate',
+    remove_currency: 'Remove',
+    reset_title: 'Change main currency?',
+    reset_message:
+      'Switching to {{code}} will permanently delete all your accounts, transactions, and settings. This cannot be undone.',
+    reset_prompt: 'Type {{word}} to confirm',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Delete & switch',
   },
   auto_backup: {
     title: 'Auto-backup',

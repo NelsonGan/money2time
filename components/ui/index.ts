@@ -5,6 +5,7 @@ export { Button } from './button';
 export { Card, CardContent } from './card';
 export { CategoryEmoji } from './CategoryEmoji';
 export { type CategoryPickerOption, CategoryPickerSheet } from './CategoryPickerSheet';
+export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
 export { Input } from './input';
 export { SelectField } from './select';

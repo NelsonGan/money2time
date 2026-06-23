@@ -36,6 +36,8 @@ interface AccountCardStackProps {
   accounts: Account[];
   accountGroups: AccountGroup[];
   balanceMap: Map<string, number>;
+  /** Balances converted to the reporting currency — used for group sums. */
+  convertedBalanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
   scrollViewRef?: React.RefObject<ScrollView | null>;
   settings: UserSettings;
@@ -360,9 +362,11 @@ function StackCard({
       return formatAmount(normalizeMoneyAmount(amount), settings, {
         showSign: false,
         trueHourlyRate,
+        // Show each account's balance in its own (native) currency.
+        currencyCode: account.currency,
       });
     },
-    [hideBalances, settings, trueHourlyRate],
+    [account.currency, hideBalances, settings, trueHourlyRate],
   );
 
   return (
@@ -645,6 +649,7 @@ export function AccountCardStack({
   accounts,
   accountGroups,
   balanceMap,
+  convertedBalanceMap,
   creditSummaryByAccountId,
   scrollViewRef,
   settings,
@@ -720,7 +725,9 @@ export function AccountCardStack({
         const sectionTotal = normalizeMoneyAmount(
           section.accounts.reduce((sum, a) => {
             if (!a.includeInTotals) return sum;
-            const bal = balanceMap.get(a.id) ?? a.startingBalance;
+            // Convert each account to the reporting currency before summing so
+            // a group mixing currencies totals correctly.
+            const bal = convertedBalanceMap.get(a.id) ?? balanceMap.get(a.id) ?? a.startingBalance;
             return sum + getNetAssetContribution(a.type, bal);
           }, 0),
         );

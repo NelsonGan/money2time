@@ -46,7 +46,26 @@ export function QuickAddScreen({
     getTrueHourlyRateForDate,
     quickEntryPrefs,
     updateQuickEntryPrefs,
+    fxCurrencies,
+    rateTable,
   } = useApp();
+
+  // Currencies the user can enter quick-add amounts in: the reporting currency,
+  // their sub-currencies, and any currency an account already uses.
+  const enabledCurrencies = useMemo(() => {
+    const set = new Set<string>([settings.currencyCode, ...fxCurrencies]);
+    for (const account of accounts) {
+      if (account.currency) set.add(account.currency);
+    }
+    return Array.from(set);
+  }, [accounts, fxCurrencies, settings.currencyCode]);
+
+  const handleChangeEntryCurrency = useCallback(
+    (code: string) => {
+      updateQuickEntryPrefs({ defaultCurrency: code });
+    },
+    [updateQuickEntryPrefs],
+  );
 
   const today = useMemo(() => dayKeyFromDateLocal(new Date()), []);
   const initialDate = initialValues?.date ?? today;
@@ -137,6 +156,9 @@ export function QuickAddScreen({
         initialCategoryId={initialValues?.categoryId ?? null}
         trueHourlyRate={trueHourlyRate}
         quickEntryPrefs={quickEntryPrefs}
+        enabledCurrencies={enabledCurrencies}
+        rateTable={rateTable}
+        onChangeEntryCurrency={handleChangeEntryCurrency}
         onClose={onClose}
         onSubmit={handleSubmit}
         onExpandToDetailed={onExpandToDetailed ? handleExpand : undefined}

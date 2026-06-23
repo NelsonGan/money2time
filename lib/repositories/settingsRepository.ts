@@ -50,6 +50,10 @@ class SettingsRepository {
         | 'autoBackupTarget'
         | 'lastAutoBackupAt'
         | 'lastAutoBackupError'
+        | 'autoFxRefreshEnabled'
+        | 'lastRateFetchAt'
+        | 'lastRateFetchError'
+        | 'fxCurrenciesJson'
       >
     >,
   ) {
@@ -168,6 +172,9 @@ class SettingsRepository {
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,
         lastAutoBackupError: null,
+        autoFxRefreshEnabled: true,
+        lastRateFetchAt: null,
+        lastRateFetchError: null,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

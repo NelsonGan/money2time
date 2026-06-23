@@ -307,7 +307,9 @@ export function InsightsDrilldownScreen({
       items.forEach((item) => {
         valueById.set(
           item.id,
-          settings.displayMode === 'time' ? getDisplayValueForTransaction(item) : item.amount,
+          settings.displayMode === 'time'
+            ? getDisplayValueForTransaction(item)
+            : (item.reportingAmount ?? item.amount),
         );
       });
       const sorted = [...items];
@@ -384,7 +386,7 @@ export function InsightsDrilldownScreen({
       const value =
         settings.displayMode === 'time'
           ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
+          : (transaction.reportingAmount ?? transaction.amount);
       const categoryId = transaction.categoryId ?? null;
       const transactionCategory = transaction.categoryId
         ? (categoryById.get(transaction.categoryId) ?? null)
@@ -485,7 +487,7 @@ export function InsightsDrilldownScreen({
       total +=
         settings.displayMode === 'time'
           ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
+          : (transaction.reportingAmount ?? transaction.amount);
     });
     return total;
   }, [

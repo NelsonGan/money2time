@@ -67,7 +67,48 @@ const id = {
       placeholder: 'Pilih',
     },
   },
+  exchange_rates: {
+    title: 'Multi-mata uang',
+    main_currency: 'Mata uang utama',
+    as_of: 'Diperbarui {{date}}',
+    never_updated: 'Belum diperbarui',
+    update_rates: 'Perbarui kurs',
+    updating: 'Memperbarui…',
+    rates_title: 'Kurs',
+    subcurrencies_title: 'Sub-mata uang',
+    no_foreign_accounts: 'Tambahkan mata uang untuk melacak kursnya.',
+    manual_badge: 'Manual',
+    add_currency: 'Tambah mata uang',
+    add: 'Tambah',
+    choose_currency: 'Pilih mata uang',
+    search_currency: 'Cari mata uang',
+    no_currency_match: 'Tidak ada mata uang yang cocok',
+    edit_rate_title: 'Edit kurs',
+    remove_currency: 'Hapus',
+    reset_title: 'Ubah mata uang utama?',
+    reset_message:
+      'Beralih ke {{code}} akan menghapus permanen semua akun, transaksi, dan pengaturan Anda. Ini tidak dapat dibatalkan.',
+    reset_prompt: 'Ketik {{word}} untuk mengonfirmasi',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Hapus & ganti',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Multi-mata uang & lainnya',
+      showcase_main: 'Utama',
+      currency: {
+        title: 'Belanja dengan mata uang apa pun',
+        body: 'Lacak akun dan transaksi dalam beberapa mata uang. Tambahkan sub-mata uang, atur kursnya, dan setiap total tetap dihitung dalam mata uang utama Anda.',
+      },
+      redesign: {
+        title: 'Tampilan baru',
+        body: 'Pengaturan, Nilai per jam, dan Komitmen berulang dirancang ulang agar lebih rapi dan mudah digunakan.',
+      },
+      app_lock: {
+        title: 'Kunci aplikasi',
+        body: 'Jaga privasi keuangan Anda dengan Face ID, Touch ID, atau sidik jari. Tersedia dengan Pro.',
+      },
+    },
     account_logos: {
       title: 'Logo akun',
       intro: {
@@ -363,6 +404,12 @@ const id = {
       placeholder_income: 'Coba "Gaji 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      received_amount: 'Jumlah diterima ({{currency}})',
+      transfer_rate_hint: 'Biarkan kosong untuk mengonversi {{from}} → {{to}} dengan kurs terbaru.',
+      received_label: 'Diterima',
+      fx_title: 'Konversi',
+      fx_rate: 'Kurs',
+      fx_received: 'Jumlah diterima',
       title_create: 'Tambah',
       title_edit: 'Perbarui',
       subtitle_create: 'Entri cepat dan ringkas',
@@ -736,10 +783,12 @@ const id = {
         'Ketuk + untuk keypad cepat. Nonaktifkan untuk selalu membuka formulir lengkap.',
       section_expense: 'Pengeluaran',
       section_income: 'Pemasukan',
-      default_account_section: 'Akun Default',
+      default_account_section: 'Default',
       default_account_label: 'Akun default',
       default_account_subtitle:
         'Digunakan oleh entri suara dan teks saat tidak ada riwayat yang cocok',
+      default_currency_label: 'Mata uang default',
+      default_currency_auto: 'Samakan dengan mata uang akun',
       default_row: 'Default',
       no_default: 'Otomatis · fallback ke Lainnya',
       unmapped: 'Tidak dipetakan',
@@ -1115,6 +1164,11 @@ const id = {
     subcategories: 'Subkategori',
   },
   accounts: {
+    currency: 'Mata uang',
+    currency_change_title: 'Ubah mata uang akun?',
+    currency_change_message:
+      'Saldo akan dikonversi dari {{from}} ke {{to}} dengan kurs terbaru. Entri yang ada tetap menggunakan mata uang aslinya.',
+    currency_change_action: 'Konversi & ubah',
     logo: {
       label: 'Logo',
       add: 'Tambahkan logo',
@@ -1253,6 +1307,8 @@ const id = {
     custom_logos_label: 'Logo akun khusus',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
+    limit_subcurrencies:
+      'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     title: 'Money2Time Pro',
     upgrade: 'Upgrade ke Pro',
     upgrade_subtitle: 'Buka fitur tanpa batas',

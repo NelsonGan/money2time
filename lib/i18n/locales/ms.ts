@@ -67,7 +67,48 @@ const ms = {
       placeholder: 'Pilih',
     },
   },
+  exchange_rates: {
+    title: 'Berbilang mata wang',
+    main_currency: 'Mata wang utama',
+    as_of: 'Dikemas kini {{date}}',
+    never_updated: 'Belum dikemas kini',
+    update_rates: 'Kemas kini kadar',
+    updating: 'Mengemas kini…',
+    rates_title: 'Kadar',
+    subcurrencies_title: 'Sub-mata wang',
+    no_foreign_accounts: 'Tambah mata wang untuk menjejaki kadar pertukarannya.',
+    manual_badge: 'Manual',
+    add_currency: 'Tambah mata wang',
+    add: 'Tambah',
+    choose_currency: 'Pilih mata wang',
+    search_currency: 'Cari mata wang',
+    no_currency_match: 'Tiada mata wang sepadan',
+    edit_rate_title: 'Edit kadar',
+    remove_currency: 'Buang',
+    reset_title: 'Tukar mata wang utama?',
+    reset_message:
+      'Bertukar ke {{code}} akan memadam secara kekal semua akaun, transaksi dan tetapan anda. Ini tidak boleh dibatalkan.',
+    reset_prompt: 'Taip {{word}} untuk mengesahkan',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Padam & tukar',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Berbilang mata wang & lagi',
+      showcase_main: 'Utama',
+      currency: {
+        title: 'Belanja dalam apa-apa mata wang',
+        body: 'Jejaki akaun dan transaksi dalam beberapa mata wang. Tambah sub-mata wang, tetapkan kadarnya, dan setiap jumlah tetap dikira dalam mata wang utama anda.',
+      },
+      redesign: {
+        title: 'Rupa yang segar',
+        body: 'Tetapan, Nilai sejam dan Komitmen berulang telah direka semula supaya lebih kemas dan mudah digunakan.',
+      },
+      app_lock: {
+        title: 'Kunci apl',
+        body: 'Pastikan kewangan anda peribadi dengan Face ID, Touch ID atau cap jari. Tersedia dengan Pro.',
+      },
+    },
     account_logos: {
       title: 'Logo akaun',
       intro: {
@@ -362,6 +403,12 @@ const ms = {
       placeholder_income: 'Cuba "Gaji 3000", "Bonus 500", "Bayaran balik 50".',
     },
     editor: {
+      received_amount: 'Jumlah diterima ({{currency}})',
+      transfer_rate_hint: 'Biarkan kosong untuk menukar {{from}} → {{to}} pada kadar terkini.',
+      received_label: 'Diterima',
+      fx_title: 'Penukaran',
+      fx_rate: 'Kadar pertukaran',
+      fx_received: 'Jumlah diterima',
       title_create: 'Tambah',
       title_edit: 'Kemaskini',
       subtitle_create: 'Entri cepat dan mudah',
@@ -732,9 +779,11 @@ const ms = {
         'Ketik + untuk papan kekunci cepat. Matikan untuk sentiasa buka borang penuh.',
       section_expense: 'Perbelanjaan',
       section_income: 'Pendapatan',
-      default_account_section: 'Akaun Lalai',
+      default_account_section: 'Lalai',
       default_account_label: 'Akaun lalai',
       default_account_subtitle: 'Digunakan oleh entri suara dan teks apabila tiada padanan sejarah',
+      default_currency_label: 'Mata wang lalai',
+      default_currency_auto: 'Padankan mata wang akaun',
       default_row: 'Lalai',
       no_default: 'Auto · guna Lain-lain',
       unmapped: 'Tidak dipetakan',
@@ -1107,6 +1156,11 @@ const ms = {
     subcategories: 'Subkategori',
   },
   accounts: {
+    currency: 'Mata wang',
+    currency_change_title: 'Tukar mata wang akaun?',
+    currency_change_message:
+      'Baki akan ditukar daripada {{from}} ke {{to}} pada kadar terkini. Entri sedia ada mengekalkan mata wang asalnya.',
+    currency_change_action: 'Tukar & ubah',
     logo: {
       label: 'Logo',
       add: 'Tambah logo',
@@ -1246,6 +1300,8 @@ const ms = {
     custom_logos_label: 'Logo akaun tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
+    limit_subcurrencies:
+      'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     title: 'Money2Time Pro',
     upgrade: 'Naik taraf ke Pro',
     upgrade_subtitle: 'Buka kunci ciri tanpa had',

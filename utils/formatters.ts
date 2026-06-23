@@ -1,6 +1,7 @@
 import { getLocales } from 'expo-localization';
 
 import {
+  ALL_CURRENCIES,
   DEFAULT_CURRENCY,
   DEFAULT_CURRENCY_SYMBOL,
   MAJOR_CURRENCIES,
@@ -9,6 +10,7 @@ import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+const SYMBOL_BY_CODE = new Map(ALL_CURRENCIES.map((c) => [c.code, c.symbol]));
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -294,21 +296,30 @@ export function formatAmount(
     isIncome?: boolean;
     neutralSign?: boolean;
     trueHourlyRate?: number;
+    /**
+     * Render with this currency's symbol instead of the reporting-currency
+     * symbol from `settings`. Use when displaying an amount in an account's
+     * native (foreign) currency. Ignored in time display mode.
+     */
+    currencyCode?: string;
   } = {},
 ): string {
-  const { showSign = false, neutralSign = false, trueHourlyRate = 0 } = options;
+  const { showSign = false, neutralSign = false, trueHourlyRate = 0, currencyCode } = options;
   const normalizedAmount = normalizeMoneyAmount(amount);
   const amountSign = normalizedAmount > 0 ? '+' : normalizedAmount < 0 ? '-' : '';
   const sign = showSign ? (neutralSign ? '' : amountSign) : normalizedAmount < 0 ? '-' : '';
+  const symbol = currencyCode
+    ? (SYMBOL_BY_CODE.get(currencyCode) ?? settings.currencySymbol)
+    : settings.currencySymbol;
 
   if (settings.displayMode === 'time') {
     if (trueHourlyRate <= 0) {
-      return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
+      return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
     }
     return `${sign}${formatHours(Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate)))}`;
   }
 
-  return `${sign}${formatCurrency(Math.abs(normalizedAmount), settings.currencySymbol)}`;
+  return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
 }
 
 export function formatRelativeDate(dateString: string, locale?: string): string {

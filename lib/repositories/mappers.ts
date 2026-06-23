@@ -2,6 +2,7 @@ import type {
   AccountGroupRow,
   AccountRow,
   CategoryRow,
+  ExchangeRateRow,
   MonthlyWageSettingsRow,
   RecurringRuleRow,
   SettingsRow,
@@ -13,6 +14,8 @@ import type {
   AccountGroup,
   BackupTarget,
   Category,
+  ExchangeRate,
+  ExchangeRateSource,
   MonthlyWageSettings,
   RecurringTransactionRule,
   ThemeColor,
@@ -194,6 +197,11 @@ export function toTransaction(row: TransactionRow): Transaction {
     type: asTransactionType(row.type),
     amount: row.amount,
     currency: row.currency,
+    reportingCurrency: row.reportingCurrency ?? null,
+    reportingAmount: row.reportingAmount ?? null,
+    fxRate: row.fxRate ?? null,
+    toAmount: row.toAmount ?? null,
+    accountAmount: row.accountAmount ?? null,
     date: row.date,
     accountId: row.accountId,
     fromAccountId: row.fromAccountId,
@@ -235,6 +243,7 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
     type: row.type === 'income' ? 'income' : row.type === 'transfer' ? 'transfer' : 'expense',
     amount: row.amount,
     currency: row.currency,
+    toAmount: row.toAmount ?? null,
     accountId: row.accountId,
     fromAccountId: row.fromAccountId,
     toAccountId: row.toAccountId,
@@ -281,9 +290,29 @@ export function toSettings(row: SettingsRow): UserSettings {
     autoBackupTarget: asBackupTarget(row.autoBackupTarget),
     lastAutoBackupAt: row.lastAutoBackupAt,
     lastAutoBackupError: row.lastAutoBackupError,
+    autoFxRefreshEnabled: row.autoFxRefreshEnabled ?? true,
+    lastRateFetchAt: row.lastRateFetchAt ?? null,
+    lastRateFetchError: row.lastRateFetchError ?? null,
+    fxCurrenciesJson: row.fxCurrenciesJson ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
+  };
+}
+
+function asExchangeRateSource(value: string | null | undefined): ExchangeRateSource {
+  return value === 'manual' ? 'manual' : 'api';
+}
+
+export function toExchangeRate(row: ExchangeRateRow): ExchangeRate {
+  return {
+    id: row.id,
+    baseCurrency: row.baseCurrency,
+    quoteCurrency: row.quoteCurrency,
+    rate: row.rate,
+    asOfDate: row.asOfDate,
+    source: asExchangeRateSource(row.source),
+    updatedAt: row.updatedAt,
   };
 }
 

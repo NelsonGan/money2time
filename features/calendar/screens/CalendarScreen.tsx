@@ -432,7 +432,7 @@ export function CalendarScreen({
     let total = 0;
     filteredTransactions.forEach((transaction) => {
       if (!selectedIdSet.has(transaction.id)) return;
-      total += transaction.amount;
+      total += transaction.reportingAmount ?? transaction.amount;
     });
     return formatAmount(
       Math.abs(total),

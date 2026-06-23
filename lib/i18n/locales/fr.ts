@@ -67,7 +67,48 @@ const fr = {
       placeholder: 'Sélectionner',
     },
   },
+  exchange_rates: {
+    title: 'Multidevise',
+    main_currency: 'Devise principale',
+    as_of: 'Mis à jour le {{date}}',
+    never_updated: 'Pas encore mis à jour',
+    update_rates: 'Mettre à jour les taux',
+    updating: 'Mise à jour…',
+    rates_title: 'Taux',
+    subcurrencies_title: 'Sous-devises',
+    no_foreign_accounts: 'Ajoutez une devise pour suivre son taux de change.',
+    manual_badge: 'Manuel',
+    add_currency: 'Ajouter une devise',
+    add: 'Ajouter',
+    choose_currency: 'Choisir une devise',
+    search_currency: 'Rechercher une devise',
+    no_currency_match: 'Aucune devise correspondante',
+    edit_rate_title: 'Modifier le taux',
+    remove_currency: 'Retirer',
+    reset_title: 'Changer la devise principale ?',
+    reset_message:
+      'Passer à {{code}} supprimera définitivement tous vos comptes, transactions et réglages. Cette action est irréversible.',
+    reset_prompt: 'Tapez {{word}} pour confirmer',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Supprimer et changer',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Multidevise et plus',
+      showcase_main: 'Principale',
+      currency: {
+        title: "Dépensez dans n'importe quelle devise",
+        body: 'Suivez vos comptes et transactions dans plusieurs devises. Ajoutez des sous-devises, définissez leurs taux, et chaque total reste calculé dans votre devise principale.',
+      },
+      redesign: {
+        title: 'Un nouveau look',
+        body: 'Les Réglages, la Valeur horaire et les Engagements récurrents ont été redessinés pour être plus clairs et faciles à utiliser.',
+      },
+      app_lock: {
+        title: "Verrouillez l'app",
+        body: "Gardez vos finances privées avec Face ID, Touch ID ou l'empreinte digitale. Disponible avec Pro.",
+      },
+    },
     account_logos: {
       title: 'Logos de compte',
       intro: {
@@ -361,6 +402,12 @@ const fr = {
       placeholder_income: 'Essayez « Salaire 3000 », « Prime 500 », « Remboursement 50 ».',
     },
     editor: {
+      received_amount: 'Montant reçu ({{currency}})',
+      transfer_rate_hint: 'Laissez vide pour convertir {{from}} → {{to}} au dernier taux.',
+      received_label: 'Reçu',
+      fx_title: 'Conversion',
+      fx_rate: 'Taux de change',
+      fx_received: 'Montant reçu',
       title_create: 'Ajouter',
       title_edit: 'Modifier',
       subtitle_create: 'Saisie rapide et claire',
@@ -732,10 +779,12 @@ const fr = {
         'Appuyez sur + pour le pavé rapide. Désactivez pour toujours ouvrir le formulaire complet.',
       section_expense: 'Dépenses',
       section_income: 'Revenus',
-      default_account_section: 'Compte par défaut',
+      default_account_section: 'Valeurs par défaut',
       default_account_label: 'Compte par défaut',
       default_account_subtitle:
         "Utilisé par la saisie vocale et textuelle sans correspondance d'historique",
+      default_currency_label: 'Devise par défaut',
+      default_currency_auto: 'Suivre la devise du compte',
       default_row: 'Par défaut',
       no_default: 'Auto · repli sur Autre',
       unmapped: 'Non associé',
@@ -1119,6 +1168,11 @@ const fr = {
     subcategories: 'Sous-catégories',
   },
   accounts: {
+    currency: 'Devise',
+    currency_change_title: 'Changer la devise du compte ?',
+    currency_change_message:
+      "Le solde sera converti de {{from}} en {{to}} au dernier taux. Les écritures existantes conservent leur devise d'origine.",
+    currency_change_action: 'Convertir et changer',
     logo: {
       label: 'Logo',
       add: 'Ajouter un logo',
@@ -1257,6 +1311,8 @@ const fr = {
     custom_logos_label: 'Logos de compte personnalisés',
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+    limit_subcurrencies:
+      'Vous pouvez ajouter {{count}} sous-devise avec le forfait gratuit. Passez à Pro pour un suivi multidevise illimité.',
     title: 'Money2Time Pro',
     upgrade: 'Passer à Pro',
     upgrade_subtitle: 'Débloquez les fonctionnalités illimitées',

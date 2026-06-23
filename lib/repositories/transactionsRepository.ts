@@ -38,6 +38,14 @@ export interface CreateTransactionInput {
   type: TransactionType;
   amount: number;
   currency: string;
+  /** Frozen reporting-currency snapshot (computed by AppContext at write time). */
+  reportingCurrency?: string | null;
+  reportingAmount?: number | null;
+  fxRate?: number | null;
+  /** Credited amount in the to-account's currency for cross-currency transfers. */
+  toAmount?: number | null;
+  /** Frozen value in the account's currency when the entered currency differs. */
+  accountAmount?: number | null;
   date: string;
   accountId?: string | null;
   fromAccountId?: string | null;
@@ -355,6 +363,66 @@ class TransactionsRepository {
     return this.list({ accountId, sortBy: 'date_desc' });
   }
 
+  /**
+   * Re-denominate an account into `toCurrency` by applying `rate`
+   * (1 old-currency = `rate` toCurrency) when the user changes the account's
+   * currency.
+   *
+   * Income/expense/adjustment rows keep their original amount AND currency —
+   * they simply become foreign entries in the new account currency, with their
+   * frozen account-currency value (`account_amount`) scaled so the account
+   * balance is denominated in `toCurrency`. (A row recorded in MYR stays MYR
+   * even after the account flips to USD, exactly like entering MYR into a USD
+   * account.) Their reporting snapshot is untouched (their own currency didn't
+   * change). Transfer legs, whose amount is intrinsically the account's
+   * currency, are converted in place.
+   */
+  redenominateAccount(accountId: string, toCurrency: string, rate: number): void {
+    const sqlite = getSQLite();
+    const now = nowIso();
+    sqlite.execSync('BEGIN');
+    try {
+      // Income/expense/adjustment rows: freeze their value in the new account
+      // currency without touching the entered amount/currency. COALESCE handles
+      // both native rows (no account_amount yet) and existing foreign rows.
+      sqlite.runSync(
+        `UPDATE transactions
+           SET account_amount = COALESCE(account_amount, amount) * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND account_id = ?
+           AND type IN ('income','expense','balance_adjustment')`,
+        [rate, now, accountId],
+      );
+      // Transfers out of this account (amount is in the from-currency). A
+      // previously same-currency transfer becomes cross-currency, so freeze the
+      // destination's value before scaling the sent amount.
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = amount
+         WHERE deleted_at IS NULL AND from_account_id = ? AND type = 'transfer' AND to_amount IS NULL`,
+        [accountId],
+      );
+      sqlite.runSync(
+        `UPDATE transactions SET amount = amount * ?, currency = ?, updated_at = ?
+         WHERE deleted_at IS NULL AND from_account_id = ? AND type = 'transfer'`,
+        [rate, toCurrency, now, accountId],
+      );
+      // Transfers into this account (to_amount is in this account's currency).
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = to_amount * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND to_account_id = ? AND type = 'transfer' AND to_amount IS NOT NULL`,
+        [rate, now, accountId],
+      );
+      sqlite.runSync(
+        `UPDATE transactions SET to_amount = amount * ?, updated_at = ?
+         WHERE deleted_at IS NULL AND to_account_id = ? AND type = 'transfer' AND to_amount IS NULL`,
+        [rate, now, accountId],
+      );
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
   getById(id: string): TransactionWithRelations | null {
     const db = getDb();
     const row = db
@@ -386,6 +454,11 @@ class TransactionsRepository {
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
+        reportingCurrency: normalizedInput.reportingCurrency ?? null,
+        reportingAmount: normalizedInput.reportingAmount ?? null,
+        fxRate: normalizedInput.fxRate ?? null,
+        toAmount: normalizedInput.toAmount ?? null,
+        accountAmount: normalizedInput.accountAmount ?? null,
         date: normalizedInput.date,
         accountId: normalizedInput.accountId ?? null,
         fromAccountId: normalizedInput.fromAccountId ?? null,

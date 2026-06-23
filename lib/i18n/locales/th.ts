@@ -67,7 +67,48 @@ const th = {
       placeholder: 'เลือก',
     },
   },
+  exchange_rates: {
+    title: 'หลายสกุลเงิน',
+    main_currency: 'สกุลเงินหลัก',
+    as_of: 'อัปเดตเมื่อ {{date}}',
+    never_updated: 'ยังไม่ได้อัปเดต',
+    update_rates: 'อัปเดตอัตรา',
+    updating: 'กำลังอัปเดต…',
+    rates_title: 'อัตราแลกเปลี่ยน',
+    subcurrencies_title: 'สกุลเงินย่อย',
+    no_foreign_accounts: 'เพิ่มสกุลเงินเพื่อติดตามอัตราแลกเปลี่ยน',
+    manual_badge: 'กำหนดเอง',
+    add_currency: 'เพิ่มสกุลเงิน',
+    add: 'เพิ่ม',
+    choose_currency: 'เลือกสกุลเงิน',
+    search_currency: 'ค้นหาสกุลเงิน',
+    no_currency_match: 'ไม่พบสกุลเงินที่ตรงกัน',
+    edit_rate_title: 'แก้ไขอัตรา',
+    remove_currency: 'นำออก',
+    reset_title: 'เปลี่ยนสกุลเงินหลัก?',
+    reset_message:
+      'การเปลี่ยนไปใช้ {{code}} จะลบบัญชี ธุรกรรม และการตั้งค่าทั้งหมดอย่างถาวร ไม่สามารถยกเลิกได้',
+    reset_prompt: 'พิมพ์ {{word}} เพื่อยืนยัน',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'ลบและเปลี่ยน',
+  },
   news: {
+    multi_currency_update: {
+      title: 'หลายสกุลเงินและอื่น ๆ',
+      showcase_main: 'หลัก',
+      currency: {
+        title: 'ใช้จ่ายได้ทุกสกุลเงิน',
+        body: 'ติดตามบัญชีและรายการในหลายสกุลเงิน เพิ่มสกุลเงินย่อย ตั้งอัตราแลกเปลี่ยน และทุกยอดรวมยังถูกแปลงกลับเป็นสกุลเงินหลักของคุณ',
+      },
+      redesign: {
+        title: 'หน้าตาใหม่',
+        body: 'เราออกแบบหน้าตั้งค่า มูลค่าต่อชั่วโมง และรายการประจำใหม่ ให้สะอาดตาและใช้งานง่ายขึ้น',
+      },
+      app_lock: {
+        title: 'ล็อกแอป',
+        body: 'เก็บข้อมูลการเงินเป็นส่วนตัวด้วย Face ID, Touch ID หรือลายนิ้วมือ ใช้ได้กับ Pro',
+      },
+    },
     account_logos: {
       title: 'โลโก้บัญชี',
       intro: {
@@ -358,6 +399,12 @@ const th = {
       placeholder_income: 'ลอง "เงินเดือน 30000", "โบนัส 5000", "คืนเงิน 500"',
     },
     editor: {
+      received_amount: 'จำนวนที่ได้รับ ({{currency}})',
+      transfer_rate_hint: 'เว้นว่างไว้เพื่อแปลง {{from}} → {{to}} ตามอัตราล่าสุด',
+      received_label: 'ได้รับ',
+      fx_title: 'การแปลง',
+      fx_rate: 'อัตราแลกเปลี่ยน',
+      fx_received: 'จำนวนที่ได้รับ',
       title_create: 'เพิ่ม',
       title_edit: 'แก้ไข',
       subtitle_create: 'บันทึกรวดเร็ว',
@@ -716,9 +763,11 @@ const th = {
       enabled_subtitle: 'แตะ + เพื่อเปิดแป้นพิมพ์ด่วน ปิดเพื่อเปิดฟอร์มเต็มเสมอ',
       section_expense: 'รายจ่าย',
       section_income: 'รายรับ',
-      default_account_section: 'บัญชีเริ่มต้น',
+      default_account_section: 'ค่าเริ่มต้น',
       default_account_label: 'บัญชีเริ่มต้น',
       default_account_subtitle: 'ใช้เมื่อไม่มีประวัติที่ตรงกันสำหรับการป้อนด้วยเสียงหรือข้อความ',
+      default_currency_label: 'สกุลเงินเริ่มต้น',
+      default_currency_auto: 'ใช้สกุลเงินของบัญชี',
       default_row: 'ค่าเริ่มต้น',
       no_default: 'อัตโนมัติ · ใช้ "อื่น ๆ"',
       unmapped: 'ไม่ได้จับคู่',
@@ -1076,6 +1125,11 @@ const th = {
     subcategories: 'หมวดหมู่ย่อย',
   },
   accounts: {
+    currency: 'สกุลเงิน',
+    currency_change_title: 'เปลี่ยนสกุลเงินของบัญชี?',
+    currency_change_message:
+      'ยอดคงเหลือจะถูกแปลงจาก {{from}} เป็น {{to}} ตามอัตราล่าสุด รายการเดิมจะยังคงสกุลเงินเดิมไว้',
+    currency_change_action: 'แปลงและเปลี่ยน',
     logo: {
       label: 'โลโก้',
       add: 'เพิ่มโลโก้',
@@ -1214,6 +1268,8 @@ const th = {
     custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
+    limit_subcurrencies:
+      'แผนฟรีเพิ่มสกุลเงินย่อยได้ {{count}} สกุล อัปเกรดเป็น Pro เพื่อใช้หลายสกุลเงินไม่จำกัด',
     title: 'Money2Time Pro',
     upgrade: 'อัปเกรดเป็น Pro',
     upgrade_subtitle: 'ปลดล็อกฟีเจอร์ไม่จำกัด',

@@ -1,5 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Calendar, Check, History, Maximize2, Mic, Settings2, X } from 'lucide-react-native';
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  History,
+  Maximize2,
+  Mic,
+  Settings2,
+  X,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -15,6 +24,7 @@ import {
   CategoryEmoji,
   CategoryPickerSheet,
   type CategoryPickerOption,
+  CurrencyPickerSheet,
   Text,
 } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -30,11 +40,13 @@ import type {
   AccountGroup,
   Category,
   QuickEntryPrefs,
+  RateTable,
   Transaction,
   TransactionType,
   UserSettings,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { convert, currencySymbolForCode } from '~/utils/currency';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -63,6 +75,12 @@ interface QuickAddSheetProps {
   initialCategoryId?: string | null;
   trueHourlyRate: number;
   quickEntryPrefs: QuickEntryPrefs;
+  /** Currencies the amount can be entered in (main + sub + account currencies). */
+  enabledCurrencies?: string[];
+  /** Rate table for converting a foreign entry to the reporting currency. */
+  rateTable?: RateTable;
+  /** Persist the chosen quick-entry currency so it carries to the next open. */
+  onChangeEntryCurrency?: (code: string) => void;
   onClose: () => void;
   onSubmit: (input: CreateTransactionInput) => void;
   onExpandToDetailed?: (values: ExpandToDetailedValues) => void;
@@ -242,6 +260,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 18,
   },
+  reportingEquiv: {
+    fontSize: 12,
+    lineHeight: 18,
+    flexShrink: 1,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -277,6 +300,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 999,
     borderWidth: 1,
+  },
+  headerCurrencyButton: {
+    height: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  headerCurrencyLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   submitButton: {
     width: 38,
@@ -315,9 +353,9 @@ function selectedTypeColor(option: SheetType): string {
   return option === 'expense' ? HEADER_EXPENSE_COLOR : HEADER_INCOME_COLOR;
 }
 
-function formatMoneyOnly(amount: number, settings: UserSettings): string {
+function formatMoneyOnly(amount: number, currencySymbol: string): string {
   const normalized = normalizeMoneyAmount(Math.abs(amount));
-  return `${settings.currencySymbol}${normalized.toFixed(2)}`;
+  return `${currencySymbol}${normalized.toFixed(2)}`;
 }
 
 function formatTimeEquivalent(amount: number, trueHourlyRate: number): string | null {
@@ -404,6 +442,9 @@ export function QuickAddSheet({
   initialCategoryId,
   trueHourlyRate,
   quickEntryPrefs,
+  enabledCurrencies,
+  rateTable,
+  onChangeEntryCurrency,
   onClose,
   onSubmit,
   onExpandToDetailed,
@@ -718,6 +759,28 @@ export function QuickAddSheet({
   const selectedAccount = accountsById.get(effectiveAccountId ?? '') ?? null;
   const selectedAccountName = selectedAccount?.name;
 
+  // The amount is recorded in the native currency of the account it lands in
+  // (the simple wallet in simple mode) unless the user has pinned a quick-entry
+  // currency — that pinned choice wins so foreign-currency entries persist
+  // across opens. createTransaction freezes the account-currency equivalent.
+  const entryAccount = isSimpleMode
+    ? (accountsById.get(simpleWalletId ?? '') ?? null)
+    : selectedAccount;
+  const accountCurrency = entryAccount?.currency ?? settings.currencyCode;
+  const currencyChoices = useMemo(
+    () =>
+      enabledCurrencies && enabledCurrencies.length > 0 ? enabledCurrencies : [accountCurrency],
+    [enabledCurrencies, accountCurrency],
+  );
+  const pinnedCurrency =
+    quickEntryPrefs.defaultCurrency && currencyChoices.includes(quickEntryPrefs.defaultCurrency)
+      ? quickEntryPrefs.defaultCurrency
+      : null;
+  const entryCurrency = pinnedCurrency ?? accountCurrency;
+  const entryCurrencySymbol = currencySymbolForCode(entryCurrency);
+  const canPickCurrency = !!onChangeEntryCurrency && currencyChoices.length > 1;
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+
   const submitDisabled = useMemo(() => {
     if (!parsedLive.amount || parsedLive.amount <= 0) return true;
     if (isSimpleMode) return !simpleWalletId;
@@ -737,7 +800,7 @@ export function QuickAddSheet({
     const submission: CreateTransactionInput = {
       type,
       amount: parsedLive.amount,
-      currency: settings.currencyCode,
+      currency: entryCurrency,
       date,
       note: noteTrimmed.length > 0 ? noteTrimmed : fallbackNote,
       sentiment: 'neutral',
@@ -760,7 +823,7 @@ export function QuickAddSheet({
     onSubmit,
     parsedLive.amount,
     parsedLive.note,
-    settings.currencyCode,
+    entryCurrency,
     simpleWalletId,
     submitDisabled,
     type,
@@ -873,6 +936,21 @@ export function QuickAddSheet({
     type,
   ]);
 
+  const handleOpenCurrencyPicker = useCallback(() => {
+    void triggerHaptic('selection');
+    Keyboard.dismiss();
+    setShowCurrencyPicker(true);
+  }, []);
+
+  const handleSelectCurrency = useCallback(
+    (code: string) => {
+      setShowCurrencyPicker(false);
+      onChangeEntryCurrency?.(code);
+      refocusInput();
+    },
+    [onChangeEntryCurrency, refocusInput],
+  );
+
   const handleOpenSettings = useCallback(() => {
     if (!onOpenQuickEntrySettings) return;
     void triggerHaptic('selection');
@@ -886,7 +964,20 @@ export function QuickAddSheet({
 
   const showAmountChip = parsedLive.amount !== null && parsedLive.amount > 0;
   const displayAmount = parsedLive.amount ?? 0;
-  const timeEquivalent = formatTimeEquivalent(displayAmount, trueHourlyRate);
+  // For a foreign entry currency the worktime estimate would be meaningless
+  // (the hourly rate is in the reporting currency), so we mirror the full
+  // editor: hide the time sentence and show the reporting-currency equivalent.
+  const isForeignEntry = entryCurrency !== settings.currencyCode;
+  const reportingEquivLabel =
+    isForeignEntry && rateTable
+      ? `≈ ${formatMoneyOnly(
+          convert(displayAmount, entryCurrency, settings.currencyCode, rateTable).value,
+          currencySymbolForCode(settings.currencyCode),
+        )}`
+      : null;
+  const timeEquivalent = isForeignEntry
+    ? null
+    : formatTimeEquivalent(displayAmount, trueHourlyRate);
   const cardBottomMargin = 10;
 
   return (
@@ -999,6 +1090,25 @@ export function QuickAddSheet({
               })}
             </View>
             <View style={styles.headerRight}>
+              {canPickCurrency ? (
+                <Pressable
+                  onPress={handleOpenCurrencyPicker}
+                  accessibilityLabel={I18n.t('accounts.currency')}
+                  hitSlop={6}
+                  style={[
+                    styles.headerCurrencyButton,
+                    {
+                      backgroundColor: themeColors.card,
+                      borderColor: themeColors.border,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.headerCurrencyLabel, { color: themeColors.text }]}>
+                    {entryCurrency}
+                  </Text>
+                  <ChevronDown size={12} color={themeColors.textSoft} />
+                </Pressable>
+              ) : null}
               {onOpenQuickEntrySettings ? (
                 <Pressable
                   onPress={handleOpenSettings}
@@ -1198,7 +1308,7 @@ export function QuickAddSheet({
                         color: inputAccentColor,
                         fontWeight: '700' as const,
                       };
-                      const amountValue = formatMoneyOnly(displayAmount, settings);
+                      const amountValue = formatMoneyOnly(displayAmount, entryCurrencySymbol);
                       // Defensive fallback: if the locale's template is
                       // missing one or both tokens, render the parts we
                       // know about so the user never sees the raw
@@ -1237,9 +1347,17 @@ export function QuickAddSheet({
                   </Text>
                 ) : (
                   <Text style={[styles.amountValue, { color: inputAccentColor }]} numberOfLines={1}>
-                    {formatMoneyOnly(displayAmount, settings)}
+                    {formatMoneyOnly(displayAmount, entryCurrencySymbol)}
                   </Text>
                 )}
+                {reportingEquivLabel ? (
+                  <Text
+                    style={[styles.reportingEquiv, { color: themeColors.textSoft }]}
+                    numberOfLines={1}
+                  >
+                    {reportingEquivLabel}
+                  </Text>
+                ) : null}
               </View>
             </View>
           </View>
@@ -1272,6 +1390,15 @@ export function QuickAddSheet({
         value={date}
         onSelect={handleDateSelect}
         onClose={closePicker}
+      />
+
+      <CurrencyPickerSheet
+        visible={showCurrencyPicker}
+        onClose={() => setShowCurrencyPicker(false)}
+        onSelect={handleSelectCurrency}
+        selectedCode={entryCurrency}
+        restrictToCodes={currencyChoices}
+        title={I18n.t('accounts.currency')}
       />
     </View>
   );
