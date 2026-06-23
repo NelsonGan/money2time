@@ -1337,6 +1337,8 @@ const th = {
     feature_unlimited_wage_entries: 'รายการอัตรารายชั่วโมงไม่จำกัด',
     voice_label: 'การป้อนด้วยเสียง',
     widgets_label: 'วิดเจ็ตหน้าจอหลัก',
+    currencies_label: 'สกุลเงิน',
+    biometric_label: 'ล็อกแอป (ไบโอเมตริก)',
     compare_title: 'ทุกอย่างใน Pro',
     compare_subtitle: 'ดูว่าคุณจะปลดล็อกอะไรบ้างเมื่ออัปเกรด',
     compare_limited: 'จำกัด',

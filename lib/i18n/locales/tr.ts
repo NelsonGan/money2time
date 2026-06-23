@@ -1374,6 +1374,8 @@ const tr = {
     feature_unlimited_wage_entries: 'Sınırsız saatlik oran girişi',
     voice_label: 'Sesli girişler',
     widgets_label: 'Ana ekran widget’ları',
+    currencies_label: 'Para birimleri',
+    biometric_label: 'Uygulama kilidi (biyometrik)',
     compare_title: 'Pro’daki her şey',
     compare_subtitle: 'Yükselttiğinde neyin açıldığını tam olarak gör.',
     compare_limited: 'Sınırlı',

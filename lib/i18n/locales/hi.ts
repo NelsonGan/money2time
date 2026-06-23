@@ -1355,6 +1355,8 @@ const hi = {
     feature_unlimited_wage_entries: 'असीमित प्रति घंटा दर एंट्री',
     voice_label: 'वॉइस एंट्री',
     widgets_label: 'होम स्क्रीन विजेट',
+    currencies_label: 'मुद्राएँ',
+    biometric_label: 'ऐप लॉक (बायोमेट्रिक)',
     compare_title: 'Pro में सब कुछ',
     compare_subtitle: 'देखें कि अपग्रेड करने पर आपको क्या मिलता है।',
     compare_limited: 'सीमित',

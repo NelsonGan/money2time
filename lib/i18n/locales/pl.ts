@@ -1373,6 +1373,8 @@ const pl = {
     feature_unlimited_wage_entries: 'Nieograniczone wpisy stawki godzinowej',
     voice_label: 'Wpisy głosowe',
     widgets_label: 'Widżety ekranu głównego',
+    currencies_label: 'Waluty',
+    biometric_label: 'Blokada aplikacji (biometria)',
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',
     compare_limited: 'Ograniczone',

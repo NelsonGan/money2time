@@ -1353,6 +1353,8 @@ const vi = {
     feature_unlimited_wage_entries: 'Mục lương giờ không giới hạn',
     voice_label: 'Nhập bằng giọng nói',
     widgets_label: 'Tiện ích màn hình chính',
+    currencies_label: 'Tiền tệ',
+    biometric_label: 'Khóa ứng dụng (sinh trắc học)',
     compare_title: 'Mọi thứ trong Pro',
     compare_subtitle: 'Xem chính xác những gì được mở khóa khi bạn nâng cấp.',
     compare_limited: 'Giới hạn',

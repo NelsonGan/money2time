@@ -1371,6 +1371,8 @@ const ms = {
     feature_unlimited_wage_entries: 'Entri kadar jam tanpa had',
     voice_label: 'Entri suara',
     widgets_label: 'Widget skrin utama',
+    currencies_label: 'Mata wang',
+    biometric_label: 'Kunci apl (biometrik)',
     compare_title: 'Semua dalam Pro',
     compare_subtitle: 'Lihat dengan tepat apa yang terbuka apabila anda menaik taraf.',
     compare_limited: 'Terhad',

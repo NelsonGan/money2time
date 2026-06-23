@@ -1371,6 +1371,8 @@ const ru = {
     feature_unlimited_wage_entries: 'Безлимитные записи ставки',
     voice_label: 'Голосовой ввод',
     widgets_label: 'Виджеты на главном экране',
+    currencies_label: 'Валюты',
+    biometric_label: 'Блокировка приложения (биометрия)',
     compare_title: 'Всё в Pro',
     compare_subtitle: 'Узнайте, что именно открывается после перехода на Pro.',
     compare_limited: 'Ограниченно',

@@ -1289,6 +1289,8 @@ const zh = {
     feature_unlimited_wage_entries: '无限时薪记录',
     voice_label: '语音记账',
     widgets_label: '主屏小组件',
+    currencies_label: '货币',
+    biometric_label: '应用锁（生物识别）',
     compare_title: 'Pro 全部功能',
     compare_subtitle: '升级后即可解锁以下功能。',
     compare_limited: '有限',

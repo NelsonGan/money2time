@@ -1388,6 +1388,8 @@ const de = {
     feature_unlimited_wage_entries: 'Unbegrenzte Stundenwert-Einträge',
     voice_label: 'Spracheingaben',
     widgets_label: 'Startbildschirm-Widgets',
+    currencies_label: 'Währungen',
+    biometric_label: 'App-Sperre (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',
     compare_limited: 'Begrenzt',

@@ -1384,6 +1384,8 @@ const fr = {
     feature_unlimited_wage_entries: 'Entrées de taux horaire illimitées',
     voice_label: 'Saisies vocales',
     widgets_label: 'Widgets d’écran d’accueil',
+    currencies_label: 'Devises',
+    biometric_label: 'Verrouillage (biométrie)',
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',
     compare_limited: 'Limité',

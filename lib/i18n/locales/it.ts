@@ -1375,6 +1375,8 @@ const it = {
     feature_unlimited_wage_entries: 'Voci tariffa oraria illimitate',
     voice_label: 'Inserimenti vocali',
     widgets_label: 'Widget della schermata Home',
+    currencies_label: 'Valute',
+    biometric_label: 'Blocco app (biometrico)',
     compare_title: 'Tutto in Pro',
     compare_subtitle: 'Scopri esattamente cosa sblocchi con l’upgrade.',
     compare_limited: 'Limitato',

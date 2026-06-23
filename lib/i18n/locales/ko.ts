@@ -1340,6 +1340,8 @@ const ko = {
     feature_unlimited_wage_entries: '무제한 시급 항목',
     voice_label: '음성 입력',
     widgets_label: '홈 화면 위젯',
+    currencies_label: '통화',
+    biometric_label: '앱 잠금(생체 인증)',
     compare_title: 'Pro의 모든 기능',
     compare_subtitle: '업그레이드하면 무엇이 열리는지 확인하세요.',
     compare_limited: '제한적',

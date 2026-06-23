@@ -1378,6 +1378,8 @@ const es = {
     feature_unlimited_wage_entries: 'Entradas de tarifa por hora ilimitadas',
     voice_label: 'Entradas por voz',
     widgets_label: 'Widgets de pantalla de inicio',
+    currencies_label: 'Monedas',
+    biometric_label: 'Bloqueo con biometría',
     compare_title: 'Todo en Pro',
     compare_subtitle: 'Mira exactamente qué desbloqueas al mejorar.',
     compare_limited: 'Limitado',
