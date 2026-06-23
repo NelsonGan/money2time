@@ -1346,6 +1346,9 @@ function AppContent() {
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
   const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
+  // Initialize pessimistically from the persisted intent so the announcement is
+  // never presented during the brief window before the lock gate reports in.
+  const [biometricLocked, setBiometricLocked] = useState(settings.biometricLockEnabled);
   const [tutorialStartToken, setTutorialStartToken] = useState(0);
   const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('home');
   const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
@@ -1571,12 +1574,12 @@ function AppContent() {
       </ThemeModal>
       <FeatureAnnouncementModal
         announcement={featureAnnouncement}
-        visible={featureAnnouncementVisible}
+        visible={featureAnnouncementVisible && !biometricLocked}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
       />
       <ReviewPrePromptSheet />
-      <BiometricLockGate />
+      <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );
 }
