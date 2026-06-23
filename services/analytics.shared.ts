@@ -21,9 +21,8 @@ export const AnalyticsEvents = {
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
 
-  // Navigation / screen views
-  TAB_VIEWED: 'Tab Viewed',
-  SCREEN_VIEWED: 'Screen Viewed',
+  // Home-screen widget deep-link opens
+  WIDGET_OPENED: 'Widget Opened',
 
   // Transactions
   TRANSACTION_CREATED: 'Transaction Created',
