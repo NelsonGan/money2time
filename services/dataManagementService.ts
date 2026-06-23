@@ -244,8 +244,13 @@ export function applyBackupData(backup: BackupData): ImportResult {
 
     // Older backups stored currency symbols (e.g. "RM") instead of ISO codes —
     // normalize so multi-currency doesn't treat them as bogus sub-currencies.
+    // A backup written before multi-currency has no `exchange_rates` table; such
+    // data is single-currency, so collapse every value (even stray valid codes
+    // like a "USD" placeholder) to the main currency. Backups from a
+    // multi-currency build keep their genuine per-account codes.
+    const isPreMultiCurrencyBackup = backup.tables.exchange_rates === undefined;
     try {
-      normalizeCurrencyColumns(sqlite);
+      normalizeCurrencyColumns(sqlite, { collapseAll: isPreMultiCurrencyBackup });
     } catch {
       // Best-effort — a normalization failure shouldn't fail the restore.
     }
