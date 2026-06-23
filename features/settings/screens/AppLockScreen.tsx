@@ -1,4 +1,4 @@
-import { Check, Fingerprint, ShieldCheck } from 'lucide-react-native';
+import { Check, Fingerprint } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
@@ -216,13 +216,6 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
 
           {enabled ? (
             <>
-              <View className="mt-3 flex-row items-center gap-2 px-1">
-                <ShieldCheck size={15} color={themeColors.primary} />
-                <Text variant="caption" tone="muted" className="flex-1">
-                  {I18n.t('settings.app_lock.enabled_hint', { method: biometricLabel })}
-                </Text>
-              </View>
-
               <View className="mt-6">
                 <Text variant="caption" tone="muted" className="mb-2 px-1">
                   {I18n.t('settings.app_lock.delay_section')}
@@ -255,9 +248,6 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
                     );
                   })}
                 </View>
-                <Text variant="caption" tone="muted" className="mt-2 px-1">
-                  {I18n.t('settings.app_lock.delay_hint')}
-                </Text>
               </View>
             </>
           ) : null}
