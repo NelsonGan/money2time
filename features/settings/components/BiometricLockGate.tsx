@@ -19,7 +19,14 @@ import { authenticateWithBiometrics, getBiometricLabel } from '~/services/biomet
  * locked. Never locks when the setting is off; if the user is no longer Pro the
  * setting is turned off automatically so a lapsed subscriber is never locked out.
  */
-export function BiometricLockGate() {
+export function BiometricLockGate({
+  onLockStateChange,
+}: {
+  /** Reports whether the lock overlay is currently covering the app. Lets the
+   * root suppress other modals (e.g. the feature announcement) while locked —
+   * two simultaneously-presented native modals freeze touch input on iOS. */
+  onLockStateChange?: (locked: boolean) => void;
+} = {}) {
   const themeColors = useThemeColors();
   const { settings, updateSettings } = useApp();
   const { isPro, isLoading } = usePro();
@@ -107,6 +114,12 @@ export function BiometricLockGate() {
   }, []);
 
   const visible = enabled && locked;
+
+  // Surface the overlay's presented state so the root can avoid co-presenting
+  // another native modal on top of it.
+  useEffect(() => {
+    onLockStateChange?.(visible);
+  }, [visible, onLockStateChange]);
 
   // Auto-prompt whenever the overlay is shown (and on each re-foreground while
   // locked). The short delay lets the OS settle on resume so the Face ID /
