@@ -67,8 +67,8 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
       name: 'AddTransaction',
       params: { initialValues: { type } },
     });
-    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, {
-      screen: 'widget_quick_add',
+    void trackEvent(AnalyticsEvents.WIDGET_OPENED, {
+      widget: 'quick_add',
       type,
     });
     return true;
@@ -89,8 +89,8 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
         requestFocusInsight(parsed.params.focus);
       }
     });
-    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, {
-      screen: `widget_open_${parsed.action}`,
+    void trackEvent(AnalyticsEvents.WIDGET_OPENED, {
+      widget: parsed.action,
       ...(parsed.params.focus ? { focus: parsed.params.focus } : {}),
     });
     return true;

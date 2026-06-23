@@ -271,18 +271,6 @@ function MountedTab({
   );
 }
 
-const MAIN_TAB_SCREEN_NAMES = new Set<string>([
-  'home',
-  'accounts',
-  'calendar',
-  'insights',
-  'settings',
-]);
-
-function isMainTabScreen(screen: string): boolean {
-  return MAIN_TAB_SCREEN_NAMES.has(screen);
-}
-
 function ThemeGate({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const { setColorScheme } = useColorScheme();
@@ -609,7 +597,6 @@ function MainShellScreen({
     previousActiveTabRef.current = activeTab;
 
     if (previousTab === activeTab) return;
-    void trackEvent(AnalyticsEvents.TAB_VIEWED, { tab: activeTab });
     if (activeTab === 'insights') {
       recordInsightsView();
     }
@@ -1354,7 +1341,6 @@ function AppContent() {
   const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
-  const previousVisibleScreenRef = useRef<string | null>(null);
   const checkedFeatureAnnouncementUserRef = useRef<string | null>(null);
 
   const syncRootActiveScreen = useCallback(() => {
@@ -1374,15 +1360,7 @@ function AppContent() {
   useEffect(() => {
     if (isLoading) return;
 
-    const previousScreen = previousVisibleScreenRef.current;
-    previousVisibleScreenRef.current = visibleScreen;
-
     void setCurrentScreen(visibleScreen);
-
-    if (previousScreen === visibleScreen) return;
-    if (visibleScreen === 'onboarding' || isMainTabScreen(visibleScreen)) return;
-
-    void trackEvent(AnalyticsEvents.SCREEN_VIEWED, { screen: visibleScreen });
   }, [isLoading, visibleScreen]);
 
   useEffect(() => {
