@@ -67,7 +67,48 @@ const es = {
       placeholder: 'Seleccionar',
     },
   },
+  exchange_rates: {
+    title: 'Multidivisa',
+    main_currency: 'Moneda principal',
+    as_of: 'Actualizado {{date}}',
+    never_updated: 'Aún no actualizado',
+    update_rates: 'Actualizar tasas',
+    updating: 'Actualizando…',
+    rates_title: 'Tasas',
+    subcurrencies_title: 'Subdivisas',
+    no_foreign_accounts: 'Añade una moneda para seguir su tipo de cambio.',
+    manual_badge: 'Manual',
+    add_currency: 'Añadir moneda',
+    add: 'Añadir',
+    choose_currency: 'Elegir moneda',
+    search_currency: 'Buscar moneda',
+    no_currency_match: 'Ninguna moneda coincide',
+    edit_rate_title: 'Editar tasa',
+    remove_currency: 'Quitar',
+    reset_title: '¿Cambiar la moneda principal?',
+    reset_message:
+      'Cambiar a {{code}} eliminará permanentemente todas tus cuentas, transacciones y ajustes. Esto no se puede deshacer.',
+    reset_prompt: 'Escribe {{word}} para confirmar',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Eliminar y cambiar',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Multidivisa y más',
+      showcase_main: 'Principal',
+      currency: {
+        title: 'Gasta en cualquier moneda',
+        body: 'Lleva cuentas y transacciones en varias monedas. Añade subdivisas, define sus tasas y cada total se sigue sumando en tu moneda principal.',
+      },
+      redesign: {
+        title: 'Un aspecto renovado',
+        body: 'Rediseñamos Ajustes, Valor por hora y Pagos recurrentes para que sean más limpios y fáciles de usar.',
+      },
+      app_lock: {
+        title: 'Bloquea la app',
+        body: 'Mantén tus finanzas privadas con Face ID, Touch ID o huella. Disponible con Pro.',
+      },
+    },
     account_logos: {
       title: 'Logos de cuenta',
       intro: {
@@ -362,6 +403,12 @@ const es = {
       placeholder_income: 'Prueba "Sueldo 3000", "Bono 500", "Reembolso 50".',
     },
     editor: {
+      received_amount: 'Importe recibido ({{currency}})',
+      transfer_rate_hint: 'Déjalo en blanco para convertir {{from}} → {{to}} al tipo más reciente.',
+      received_label: 'Recibido',
+      fx_title: 'Conversión',
+      fx_rate: 'Tipo de cambio',
+      fx_received: 'Importe recibido',
       title_create: 'Añadir',
       title_edit: 'Actualizar',
       subtitle_create: 'Entrada rápida y limpia',
@@ -735,9 +782,11 @@ const es = {
         'Toca + para el teclado rápido. Desactívalo para abrir siempre el formulario completo.',
       section_expense: 'Gastos',
       section_income: 'Ingresos',
-      default_account_section: 'Cuenta por defecto',
+      default_account_section: 'Valores predeterminados',
       default_account_label: 'Cuenta por defecto',
       default_account_subtitle: 'Usada por voz y texto cuando no hay coincidencia en el historial',
+      default_currency_label: 'Moneda predeterminada',
+      default_currency_auto: 'Usar la moneda de la cuenta',
       default_row: 'Por defecto',
       no_default: 'Auto · usa Otro como respaldo',
       unmapped: 'Sin asignar',
@@ -1115,6 +1164,11 @@ const es = {
     subcategories: 'Subcategorías',
   },
   accounts: {
+    currency: 'Moneda',
+    currency_change_title: '¿Cambiar la moneda de la cuenta?',
+    currency_change_message:
+      'El saldo se convertirá de {{from}} a {{to}} al tipo de cambio más reciente. Los movimientos existentes mantienen su moneda original.',
+    currency_change_action: 'Convertir y cambiar',
     logo: {
       label: 'Logo',
       add: 'Añadir un logo',
@@ -1253,6 +1307,8 @@ const es = {
     custom_logos_label: 'Logos de cuenta personalizados',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
+    limit_subcurrencies:
+      'Puedes añadir {{count}} subdivisa en el plan gratuito. Cambia a Pro para multidivisa ilimitada.',
     title: 'Money2Time Pro',
     upgrade: 'Actualizar a Pro',
     upgrade_subtitle: 'Desbloquea funciones ilimitadas',

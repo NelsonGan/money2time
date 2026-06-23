@@ -46,34 +46,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       })),
     [currentLocaleSelection],
   );
-  const currencyOptions = [
-    ...MAJOR_CURRENCIES.map((item) => ({
-      value: item.code,
-      label: `${item.code} (${item.symbol}) · ${item.name}`,
-    })),
-    { value: '__custom__', label: I18n.t('settings.custom_symbol_code') },
-  ];
-  const currencyByCode = useMemo(
-    () => new Map(MAJOR_CURRENCIES.map((item) => [item.code, item])),
-    [],
-  );
-  const currencyBySymbol = useMemo(() => {
-    const bySymbol = new Map<string, (typeof MAJOR_CURRENCIES)[number]>();
-    MAJOR_CURRENCIES.forEach((item) => {
-      if (bySymbol.has(item.symbol)) return;
-      bySymbol.set(item.symbol, item);
-    });
-    return bySymbol;
-  }, []);
-
-  const selectedMajorCurrency = useMemo(
-    () => currencyByCode.get(settings.currencyCode),
-    [currencyByCode, settings.currencyCode],
-  );
-  const fallbackMajorCurrency = useMemo(
-    () => currencyBySymbol.get(settings.currencySymbol),
-    [currencyBySymbol, settings.currencySymbol],
-  );
   const themeOptions = [
     { value: 'system' as const, label: I18n.t('settings.theme_system') },
     { value: 'light' as const, label: I18n.t('settings.theme_light') },
@@ -91,23 +63,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       />
     ),
   }));
-  const currentCurrencySelection =
-    settings.currencyCode === '__custom__'
-      ? '__custom__'
-      : (selectedMajorCurrency?.code ?? fallbackMajorCurrency?.code ?? '__custom__');
-
-  const [customCurrency, setCustomCurrency] = useState(
-    currentCurrencySelection === '__custom__' ? settings.currencySymbol : '',
-  );
   const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   // Only the last 4 characters of the user id are ever shown or copied.
   const appUserIdLast4 = appUserId ? appUserId.slice(-4) : null;
   const maskedUserId = appUserIdLast4 ? `••••${appUserIdLast4}` : null;
-
-  useEffect(() => {
-    setCustomCurrency(currentCurrencySelection === '__custom__' ? settings.currencySymbol : '');
-  }, [currentCurrencySelection, settings.currencySymbol]);
 
   useEffect(() => {
     if (!didCopyRevenueCatUserId) {
@@ -120,8 +80,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
 
     return () => clearTimeout(timeout);
   }, [didCopyRevenueCatUserId]);
-
-  const isCustomCurrencyMode = currentCurrencySelection === '__custom__';
 
   const handleCopyRevenueCatUserId = () => {
     if (!appUserIdLast4) {
@@ -157,49 +115,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
         },
       ],
     );
-  };
-
-  const handleCurrencyChange = (nextCurrency: string) => {
-    if (nextCurrency === '__custom__') {
-      const nextSymbol = settings.currencySymbol;
-      setCustomCurrency(nextSymbol);
-      if (settings.currencyCode === '__custom__') {
-        return;
-      }
-      updateSettings({ currencyCode: '__custom__', currencySymbol: nextSymbol });
-      return;
-    }
-
-    const nextMajorCurrency = currencyByCode.get(nextCurrency);
-    if (!nextMajorCurrency) {
-      return;
-    }
-
-    if (
-      nextMajorCurrency.code === settings.currencyCode &&
-      nextMajorCurrency.symbol === settings.currencySymbol
-    ) {
-      return;
-    }
-
-    updateSettings({
-      currencyCode: nextMajorCurrency.code,
-      currencySymbol: nextMajorCurrency.symbol,
-    });
-  };
-
-  const handleCustomCurrencyChange = (value: string) => {
-    setCustomCurrency(value);
-    const trimmedValue = value.trim();
-    if (!trimmedValue) {
-      return;
-    }
-
-    if (settings.currencyCode === '__custom__' && trimmedValue === settings.currencySymbol) {
-      return;
-    }
-
-    updateSettings({ currencyCode: '__custom__', currencySymbol: trimmedValue });
   };
 
   const handleThemeChange = (value: string) => {
@@ -288,22 +203,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 options={languageOptions}
                 onChange={handleLanguageChange}
               />
-              <SelectField
-                label={I18n.t('settings.currency')}
-                value={currentCurrencySelection}
-                options={currencyOptions}
-                onChange={handleCurrencyChange}
-              />
-              {isCustomCurrencyMode ? (
-                <View>
-                  <Input
-                    label={I18n.t('settings.custom_currency')}
-                    placeholder={I18n.t('settings.custom_currency_placeholder')}
-                    value={customCurrency}
-                    onChangeText={handleCustomCurrencyChange}
-                  />
-                </View>
-              ) : null}
               <SelectField
                 label={I18n.t('settings.theme')}
                 value={settings.themeMode}

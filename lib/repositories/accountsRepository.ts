@@ -152,17 +152,17 @@ class AccountsRepository {
       accountId: string | null;
       total: number | null;
     }>(`
-      SELECT 'income' AS bucket, account_id AS accountId, SUM(amount) AS total
+      SELECT 'income' AS bucket, account_id AS accountId, SUM(COALESCE(account_amount, amount)) AS total
         FROM transactions
         WHERE deleted_at IS NULL AND type = 'income' AND account_id IS NOT NULL
         GROUP BY account_id
       UNION ALL
-      SELECT 'expense', account_id, SUM(amount)
+      SELECT 'expense', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
         WHERE deleted_at IS NULL AND type = 'expense' AND account_id IS NOT NULL
         GROUP BY account_id
       UNION ALL
-      SELECT 'transfer_in', to_account_id, SUM(amount)
+      SELECT 'transfer_in', to_account_id, SUM(COALESCE(to_amount, amount))
         FROM transactions
         WHERE deleted_at IS NULL AND type = 'transfer' AND to_account_id IS NOT NULL
         GROUP BY to_account_id
@@ -172,7 +172,7 @@ class AccountsRepository {
         WHERE deleted_at IS NULL AND type = 'transfer' AND from_account_id IS NOT NULL
         GROUP BY from_account_id
       UNION ALL
-      SELECT 'adjustment', account_id, SUM(amount)
+      SELECT 'adjustment', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
         WHERE deleted_at IS NULL AND type = 'balance_adjustment' AND account_id IS NOT NULL
         GROUP BY account_id
@@ -224,6 +224,10 @@ class AccountsRepository {
         expense,
         transfersIn,
         transfersOut,
+        currency: account.currency,
+        // Conversion to the reporting currency is applied by AppContext, which
+        // holds the in-memory rate table.
+        convertedBalance: null,
       };
     });
   }

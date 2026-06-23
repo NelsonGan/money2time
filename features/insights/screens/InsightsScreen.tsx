@@ -1,8 +1,8 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   CalendarDays,
-  ChevronLeft,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Landmark,
   PiggyBank,
@@ -33,7 +33,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { G, Image as SvgImage, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Image as SvgImage, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -70,9 +70,9 @@ import { SentimentStackedBarChart } from '~/features/insights/components/Sentime
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import {
   ActivityTransactionList,
-  type BulkTransactionChanges,
-  BulkEditTransactionsSheet,
   buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
   DisplayModeToggle,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
@@ -1286,6 +1286,124 @@ function pieSliceIdFromTouch(
     if (normalizedAngle <= cursor) return slice.id;
   }
   return slices[slices.length - 1]?.id ?? null;
+}
+
+type PieLabelLayout = {
+  id: string;
+  anchorX: number;
+  anchorY: number;
+  outerX: number;
+  outerY: number;
+  innerX: number;
+  boxLeft: number;
+  labelY: number;
+};
+
+// Label layout: anchor each label at its slice midpoint, split into left/right halves,
+// then relax each side vertically to a minimum gap so labels spread out without
+// overlapping. Each column's inner edge follows the pie's arc (labels near the top/bottom
+// hug closer to the center, labels near the middle sit furthest out), and a short leader
+// (radial stub off the slice, then a segment to the inner edge) connects them. Keeps the
+// chart compact (cropped top/bottom).
+function layoutBreakdownPieLabels(
+  slices: { id: string; amount: number }[],
+  opts: {
+    cx: number;
+    cy: number;
+    radius: number;
+    elbowLength: number;
+    tailLength: number;
+    labelWidth: number;
+    labelHeight: number;
+    labelGap: number;
+    stageHeight: number;
+    totalAmount: number;
+  },
+): PieLabelLayout[] {
+  const {
+    cx,
+    cy,
+    radius,
+    elbowLength,
+    tailLength,
+    labelWidth,
+    labelHeight,
+    labelGap,
+    stageHeight,
+    totalAmount,
+  } = opts;
+  if (slices.length === 0 || totalAmount <= 0) return [];
+
+  const TWO_PI = Math.PI * 2;
+  const startAngle = -Math.PI / 2;
+  let cursor = 0;
+  const raw = slices.map((slice) => {
+    const fraction = slice.amount / totalAmount;
+    const midTheta = cursor + (fraction / 2) * TWO_PI; // from top, clockwise, 0..2π
+    cursor += fraction * TWO_PI;
+    const angle = startAngle + midTheta;
+    const isRight = midTheta < Math.PI;
+    return {
+      id: slice.id,
+      side: (isRight ? 'right' : 'left') as 'left' | 'right',
+      anchorX: cx + radius * Math.cos(angle),
+      anchorY: cy + radius * Math.sin(angle),
+      outerX: cx + (radius + elbowLength) * Math.cos(angle),
+      outerY: cy + (radius + elbowLength) * Math.sin(angle),
+    };
+  });
+
+  const minY = labelHeight / 2;
+  const maxY = Math.max(minY, stageHeight - labelHeight / 2);
+
+  const place = (items: typeof raw, sign: 1 | -1): PieLabelLayout[] => {
+    const sorted = [...items].sort((a, b) => a.outerY - b.outerY);
+    const ys = sorted.map((item) => Math.min(maxY, Math.max(minY, item.outerY)));
+    // Forward pass: push overlapping labels downward.
+    for (let i = 1; i < ys.length; i++) {
+      if (ys[i] < ys[i - 1] + labelGap) ys[i] = ys[i - 1] + labelGap;
+    }
+    // If the stack overflowed the bottom, anchor it there and relax back upward.
+    if (ys.length > 0 && ys[ys.length - 1] > maxY) {
+      ys[ys.length - 1] = maxY;
+      for (let i = ys.length - 2; i >= 0; i--) {
+        if (ys[i] > ys[i + 1] - labelGap) ys[i] = ys[i + 1] - labelGap;
+      }
+    }
+    // Follow the pie's arc: the label's inner edge sits a fixed gap beyond the circle
+    // edge at its own height. Near the top/bottom (where the pie is narrow) labels pull
+    // in toward the center; near the middle (widest) they sit furthest out.
+    const offset = elbowLength + tailLength;
+    const radiusSq = radius * radius;
+    return sorted.map((item, i) => {
+      const labelY = ys[i];
+      const dy = labelY - cy;
+      const arcX = Math.sqrt(Math.max(0, radiusSq - dy * dy));
+      const innerX = cx + sign * (arcX + offset);
+      const boxLeft = sign === 1 ? innerX : innerX - labelWidth;
+      return {
+        id: item.id,
+        anchorX: item.anchorX,
+        anchorY: item.anchorY,
+        outerX: item.outerX,
+        outerY: item.outerY,
+        innerX,
+        boxLeft,
+        labelY,
+      };
+    });
+  };
+
+  return [
+    ...place(
+      raw.filter((item) => item.side === 'right'),
+      1,
+    ),
+    ...place(
+      raw.filter((item) => item.side === 'left'),
+      -1,
+    ),
+  ];
 }
 
 function monthDateFromMonthKey(monthKey: string): Date {
@@ -3283,7 +3401,9 @@ export function InsightsScreen({
             }
           }
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3436,7 +3556,9 @@ export function InsightsScreen({
             }
           }
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3574,7 +3696,9 @@ export function InsightsScreen({
           if (rootCategoryId !== selectedCategoryId) return;
 
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           if (!Number.isFinite(value) || value <= 0) return;
 
           const rowKey = isYearPeriod
@@ -3821,7 +3945,9 @@ export function InsightsScreen({
           transactionsForAnalytics.push(tx);
 
           const value =
-            settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+            settings.displayMode === 'time'
+              ? getDisplayValueForTransaction(tx)
+              : (tx.reportingAmount ?? tx.amount);
           const dayKey = transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date);
           const row = dayByKey.get(dayKey);
           if (row) {
@@ -3915,7 +4041,9 @@ export function InsightsScreen({
         const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
         const emoji = root?.icon ?? tx.categoryIcon ?? '•';
         const value =
-          settings.displayMode === 'time' ? getDisplayValueForTransaction(tx) : tx.amount;
+          settings.displayMode === 'time'
+            ? getDisplayValueForTransaction(tx)
+            : (tx.reportingAmount ?? tx.amount);
 
         const current = breakdownTotals.get(id);
         if (current) {
@@ -4411,11 +4539,25 @@ export function InsightsScreen({
       Math.min(BREAKDOWN_PIE_MAX_RADIUS, Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2)),
     );
     const pieStageWidth = (pieRadius + pieExtraRadius) * 2;
+    // Crop top/bottom: labels sit in left/right columns, so the full square isn't needed.
     const pieStageHeight = Math.max(
       pieRadius * 2 + 24,
       pieStageWidth - Math.min(140, Math.max(92, pieExtraRadius * 1.2)),
     );
     const pieStageVerticalInset = Math.max(0, Math.floor((pieStageWidth - pieStageHeight) / 2));
+    const pieLabelStyleById = new Map<
+      string,
+      {
+        categoryLabel: string;
+        labelIconSource: ReturnType<typeof resolveCategoryIconSource>;
+        labelStroke: string;
+        labelTextColor: string;
+        lineThickness: number;
+        emoji: string;
+        pct: number;
+        dimmed: boolean;
+      }
+    >();
     const interactivePieData = pagePieData.map((item) => {
       const isSelected = activeSlice?.id === item.id;
       const hasSelection = activeSlice !== null;
@@ -4433,59 +4575,32 @@ export function InsightsScreen({
           : withColorAlpha(item.color, isDark ? 0.46 : 0.28);
       const labelTextColor =
         hasSelection && !isSelected ? withColorAlpha(themeColors.text, 0.62) : themeColors.text;
-
+      pieLabelStyleById.set(item.id, {
+        categoryLabel,
+        labelIconSource,
+        labelStroke,
+        labelTextColor,
+        lineThickness: isSelected ? 1.7 : 1.2,
+        emoji: item.emoji,
+        pct: item.pct,
+        dimmed: hasSelection && !isSelected,
+      });
       return {
         ...item,
         color: sliceColor,
-        labelLineConfig: {
-          color: labelStroke,
-          thickness: isSelected ? 1.7 : 1.2,
-          length: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
-          tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
-          labelComponentWidth: pieLabelWidth,
-          labelComponentHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
-          labelComponentMargin: BREAKDOWN_PIE_LABEL_MARGIN,
-          avoidOverlappingOfLabels: true,
-        },
-        externalLabelComponent: () => (
-          <G opacity={hasSelection && !isSelected ? 0.72 : 1}>
-            {labelIconSource ? (
-              <SvgImage
-                href={labelIconSource}
-                x={pieLabelWidth / 2 - 7}
-                y={-16}
-                width={14}
-                height={14}
-                preserveAspectRatio="xMidYMid meet"
-              />
-            ) : null}
-            <SvgText
-              x={pieLabelWidth / 2}
-              y={labelIconSource ? 3 : -4}
-              textAnchor="middle"
-              alignmentBaseline="middle"
-              fontSize={9.2}
-              fontFamily={FONT.bold}
-              fontWeight="700"
-              fill={labelTextColor}
-            >
-              {labelIconSource ? categoryLabel : `${item.emoji} ${categoryLabel}`}
-            </SvgText>
-            <SvgText
-              x={pieLabelWidth / 2}
-              y={labelIconSource ? 13 : 8}
-              textAnchor="middle"
-              alignmentBaseline="middle"
-              fontSize={8}
-              fontFamily={FONT.semibold}
-              fontWeight="600"
-              fill={withColorAlpha(labelTextColor, isDark ? 0.75 : 0.55)}
-            >
-              {`${item.pct.toFixed(1)}%`}
-            </SvgText>
-          </G>
-        ),
       };
+    });
+    const pieLabels = layoutBreakdownPieLabels(pagePieData, {
+      cx: pieStageWidth / 2,
+      cy: pieStageWidth / 2 - pieStageVerticalInset,
+      radius: pieRadius,
+      elbowLength: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
+      tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
+      labelWidth: pieLabelWidth,
+      labelHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
+      labelGap: BREAKDOWN_PIE_LABEL_HEIGHT + BREAKDOWN_PIE_LABEL_MARGIN,
+      stageHeight: pieStageHeight,
+      totalAmount: pageTotalAmount,
     });
     if (pageData.filteredForRange.length === 0) {
       return (
@@ -4550,11 +4665,70 @@ export function InsightsScreen({
                     <PieChart
                       data={interactivePieData}
                       radius={pieRadius}
-                      showExternalLabels
                       extraRadius={pieExtraRadius}
-                      labelsPosition="outward"
                     />
                   </View>
+                  <Svg
+                    pointerEvents="none"
+                    width={pieStageWidth}
+                    height={pieStageHeight}
+                    style={StyleSheet.absoluteFill}
+                  >
+                    {pieLabels.map((label) => {
+                      const style = pieLabelStyleById.get(label.id);
+                      if (!style) return null;
+                      return (
+                        <G key={label.id} opacity={style.dimmed ? 0.72 : 1}>
+                          <Polyline
+                            points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                            fill="none"
+                            stroke={style.labelStroke}
+                            strokeWidth={style.lineThickness}
+                            strokeLinejoin="round"
+                            strokeLinecap="round"
+                          />
+                          <G x={label.boxLeft} y={label.labelY}>
+                            {style.labelIconSource ? (
+                              <SvgImage
+                                href={style.labelIconSource}
+                                x={pieLabelWidth / 2 - 7}
+                                y={-16}
+                                width={14}
+                                height={14}
+                                preserveAspectRatio="xMidYMid meet"
+                              />
+                            ) : null}
+                            <SvgText
+                              x={pieLabelWidth / 2}
+                              y={style.labelIconSource ? 3 : -4}
+                              textAnchor="middle"
+                              alignmentBaseline="middle"
+                              fontSize={9.2}
+                              fontFamily={FONT.bold}
+                              fontWeight="700"
+                              fill={style.labelTextColor}
+                            >
+                              {style.labelIconSource
+                                ? style.categoryLabel
+                                : `${style.emoji} ${style.categoryLabel}`}
+                            </SvgText>
+                            <SvgText
+                              x={pieLabelWidth / 2}
+                              y={style.labelIconSource ? 13 : 8}
+                              textAnchor="middle"
+                              alignmentBaseline="middle"
+                              fontSize={8}
+                              fontFamily={FONT.semibold}
+                              fontWeight="600"
+                              fill={withColorAlpha(style.labelTextColor, isDark ? 0.75 : 0.55)}
+                            >
+                              {`${style.pct.toFixed(1)}%`}
+                            </SvgText>
+                          </G>
+                        </G>
+                      );
+                    })}
+                  </Svg>
                 </View>
               </View>
             ) : (
@@ -5468,7 +5642,7 @@ export function InsightsScreen({
       total +=
         settings.displayMode === 'time'
           ? getDisplayValueForTransaction(transaction)
-          : transaction.amount;
+          : (transaction.reportingAmount ?? transaction.amount);
     });
     return total;
   }, [

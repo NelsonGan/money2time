@@ -345,7 +345,8 @@ export function TransactionsScreen({
     let total = 0;
     filteredTransactions.forEach((transaction) => {
       if (!selectedIdSet.has(transaction.id)) return;
-      total += transaction.amount;
+      // Sum in the reporting currency so a mixed-currency selection totals correctly.
+      total += transaction.reportingAmount ?? transaction.amount;
     });
     return total;
   }, [filteredTransactions, selectedTransactionIds]);
@@ -377,10 +378,12 @@ export function TransactionsScreen({
     return types;
   }, [filteredTransactions, selectedTransactionIds]);
   const resolveTransactionValue = useCallback(
+    // Day/month subtotals sum across currencies, so always use the frozen
+    // reporting-currency value (time mode converts that to hours downstream).
     (transaction: TransactionWithRelations) =>
       settings.displayMode === 'time'
         ? getDisplayValueForTransaction(transaction)
-        : transaction.amount,
+        : (transaction.reportingAmount ?? transaction.amount),
     [getDisplayValueForTransaction, settings.displayMode],
   );
   const monthBuckets = useMemo(() => {

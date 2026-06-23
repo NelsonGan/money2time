@@ -52,6 +52,7 @@ import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewP
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import {
   AccountsScreen,
+  ExchangeRatesScreen,
   HourlyValueScreen,
   ProPaywallScreen,
   QuickEntrySettingsScreen,
@@ -860,6 +861,7 @@ function MainShellScreen({
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
             onOpenSettings={openAccountSettings}
+            onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
             onOpenNetAssetsInsight={() =>
               openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
             }
@@ -1003,7 +1005,7 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
           initialValues,
         });
       }}
-      onOpenQuickEntrySettings={() => navigation.push('SettingsQuickEntry')}
+      onOpenQuickEntrySettings={() => navigation.replace('SettingsQuickEntry')}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
@@ -1097,6 +1099,7 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
       useNativeBackGesture
+      onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
       onOpenAddTransaction={(accountId) =>
         navigation.push('AddTransactionDetailed', { initialAccountId: accountId })
       }
@@ -1126,7 +1129,14 @@ function ProPaywallRouteScreen({ route, navigation }: RootStackRouteProps<'ProPa
 }
 
 function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'SettingsAccounts'>) {
-  return <AccountsScreen onBack={() => navigation.goBack()} managementOnly useNativeBackGesture />;
+  return (
+    <AccountsScreen
+      onBack={() => navigation.goBack()}
+      managementOnly
+      useNativeBackGesture
+      onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+    />
+  );
 }
 
 function SettingsRecurringRouteScreen({ navigation }: RootStackRouteProps<'SettingsRecurring'>) {
@@ -1160,6 +1170,12 @@ function SettingsHourlyValueRouteScreen({
 
 function SettingsQuickEntryRouteScreen({ navigation }: RootStackRouteProps<'SettingsQuickEntry'>) {
   return <QuickEntrySettingsScreen onBack={() => navigation.goBack()} />;
+}
+
+function SettingsMultiCurrencyRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsMultiCurrency'>) {
+  return <ExchangeRatesScreen onBack={() => navigation.goBack()} />;
 }
 
 function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEarn'>) {
@@ -1514,6 +1530,10 @@ function AppContent() {
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
           <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
+          <RootStack.Screen
+            name="SettingsMultiCurrency"
+            component={SettingsMultiCurrencyRouteScreen}
+          />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen
             name="SettingsWageCalculator"

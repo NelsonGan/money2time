@@ -4,6 +4,7 @@ export { AutoBackupScreen } from './AutoBackupScreen';
 export { CategoriesScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
+export { ExchangeRatesScreen } from './ExchangeRatesScreen';
 export { HourlyValueScreen } from './HourlyValueScreen';
 export { NewsScreen } from '~/features/news/screens/NewsScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';

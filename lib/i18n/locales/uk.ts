@@ -67,7 +67,48 @@ const uk = {
       placeholder: 'Вибрати',
     },
   },
+  exchange_rates: {
+    title: 'Мультивалютність',
+    main_currency: 'Основна валюта',
+    as_of: 'Оновлено {{date}}',
+    never_updated: 'Ще не оновлювалося',
+    update_rates: 'Оновити курси',
+    updating: 'Оновлення…',
+    rates_title: 'Курси',
+    subcurrencies_title: 'Додаткові валюти',
+    no_foreign_accounts: 'Додайте валюту, щоб відстежувати її курс.',
+    manual_badge: 'Вручну',
+    add_currency: 'Додати валюту',
+    add: 'Додати',
+    choose_currency: 'Вибрати валюту',
+    search_currency: 'Пошук валюти',
+    no_currency_match: 'Немає відповідної валюти',
+    edit_rate_title: 'Змінити курс',
+    remove_currency: 'Видалити',
+    reset_title: 'Змінити основну валюту?',
+    reset_message:
+      'Перехід на {{code}} назавжди видалить усі ваші рахунки, операції та налаштування. Це не можна скасувати.',
+    reset_prompt: 'Введіть {{word}} для підтвердження',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Видалити та змінити',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Мультивалютність та інше',
+      showcase_main: 'Основна',
+      currency: {
+        title: 'Витрачайте в будь-якій валюті',
+        body: 'Ведіть рахунки й операції в кількох валютах. Додавайте додаткові валюти, задавайте їхні курси — усі підсумки все одно зводяться до основної валюти.',
+      },
+      redesign: {
+        title: 'Свіжий новий вигляд',
+        body: 'Налаштування, Вартість години та Регулярні платежі оновлено, щоб були охайнішими та зручнішими.',
+      },
+      app_lock: {
+        title: 'Блокування застосунку',
+        body: 'Тримайте фінанси приватними за допомогою Face ID, Touch ID або відбитка пальця. Доступно у Pro.',
+      },
+    },
     account_logos: {
       title: 'Логотипи рахунків',
       intro: {
@@ -361,6 +402,13 @@ const uk = {
       placeholder_income: 'Наприклад: "Зарплата 30000", "Бонус 5000", "Повернення 500".',
     },
     editor: {
+      received_amount: 'Отримана сума ({{currency}})',
+      transfer_rate_hint:
+        'Залиште порожнім, щоб конвертувати {{from}} → {{to}} за останнім курсом.',
+      received_label: 'Отримано',
+      fx_title: 'Конвертація',
+      fx_rate: 'Курс обміну',
+      fx_received: 'Отримана сума',
       title_create: 'Додати',
       title_edit: 'Оновити',
       subtitle_create: 'Швидкий і зручний запис',
@@ -726,10 +774,12 @@ const uk = {
         'Натисніть + для швидкої клавіатури. Вимкніть, щоб завжди відкривати повну форму.',
       section_expense: 'Витрати',
       section_income: 'Доходи',
-      default_account_section: 'Рахунок за замовчуванням',
+      default_account_section: 'За замовчуванням',
       default_account_label: 'Рахунок за замовчуванням',
       default_account_subtitle:
         'Використовується голосовим і текстовим введенням, коли немає збігу з історією',
+      default_currency_label: 'Валюта за замовчуванням',
+      default_currency_auto: 'Використовувати валюту рахунку',
       default_row: 'За замовчуванням',
       no_default: 'Авто · повертається до "Інше"',
       unmapped: 'Не призначено',
@@ -1103,6 +1153,11 @@ const uk = {
     subcategories: 'Підкатегорії',
   },
   accounts: {
+    currency: 'Валюта',
+    currency_change_title: 'Змінити валюту рахунку?',
+    currency_change_message:
+      'Баланс буде конвертовано з {{from}} у {{to}} за останнім курсом. Наявні записи зберігають свою початкову валюту.',
+    currency_change_action: 'Конвертувати та змінити',
     logo: {
       label: 'Логотип',
       add: 'Додати логотип',
@@ -1240,6 +1295,8 @@ const uk = {
     custom_logos_label: 'Власні логотипи рахунків',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',
+    limit_subcurrencies:
+      'У безкоштовному плані можна додати {{count}} додаткову валюту. Перейдіть на Pro для необмеженого мультивалютного обліку.',
     title: 'Money2Time Pro',
     upgrade: 'Перейти на Pro',
     upgrade_subtitle: 'Розблокуйте необмежені функції',

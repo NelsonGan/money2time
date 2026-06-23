@@ -44,6 +44,16 @@ export const transactionsTable = sqliteTable('transactions', {
   type: text('type').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
+  // Frozen reporting-currency snapshot taken at write time so historical
+  // aggregates never drift when FX rates move. Null for transfers / legacy rows.
+  reportingCurrency: text('reporting_currency'),
+  reportingAmount: real('reporting_amount'),
+  fxRate: real('fx_rate'),
+  // Credited amount (in the to-account's currency) for cross-currency transfers.
+  toAmount: real('to_amount'),
+  // Frozen value in the owning account's currency, set when the entered
+  // currency differs from the account currency. Null when they match.
+  accountAmount: real('account_amount'),
   date: text('date').notNull(),
   accountId: text('account_id'),
   fromAccountId: text('from_account_id'),
@@ -66,6 +76,8 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   type: text('type').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
+  // Credited amount (in the to-account's currency) for cross-currency transfer rules.
+  toAmount: real('to_amount'),
   accountId: text('account_id'),
   fromAccountId: text('from_account_id'),
   toAccountId: text('to_account_id'),
@@ -111,9 +123,25 @@ export const settingsTable = sqliteTable('settings', {
   autoBackupTarget: text('auto_backup_target').notNull().default('local'),
   lastAutoBackupAt: text('last_auto_backup_at'),
   lastAutoBackupError: text('last_auto_backup_error'),
+  autoFxRefreshEnabled: integer('auto_fx_refresh_enabled', { mode: 'boolean' })
+    .notNull()
+    .default(true),
+  lastRateFetchAt: text('last_rate_fetch_at'),
+  lastRateFetchError: text('last_rate_fetch_error'),
+  fxCurrenciesJson: text('fx_currencies_json'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
+});
+
+export const exchangeRatesTable = sqliteTable('exchange_rates', {
+  id: text('id').primaryKey(),
+  baseCurrency: text('base_currency').notNull(),
+  quoteCurrency: text('quote_currency').notNull(),
+  rate: real('rate').notNull(),
+  asOfDate: text('as_of_date').notNull(),
+  source: text('source').notNull().default('api'),
+  updatedAt: text('updated_at').notNull(),
 });
 
 export const transactionSplitsTable = sqliteTable('transaction_splits', {
@@ -154,3 +182,4 @@ export type RecurringRuleRow = typeof recurringRulesTable.$inferSelect;
 export type TransactionSplitRow = typeof transactionSplitsTable.$inferSelect;
 export type SettingsRow = typeof settingsTable.$inferSelect;
 export type MonthlyWageSettingsRow = typeof monthlyWageSettingsTable.$inferSelect;
+export type ExchangeRateRow = typeof exchangeRatesTable.$inferSelect;

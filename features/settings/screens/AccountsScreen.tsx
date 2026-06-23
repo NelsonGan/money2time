@@ -31,6 +31,7 @@ import {
   AccountPickerSheet,
   Button,
   CategoryEmoji,
+  CurrencyPickerSheet,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -46,6 +47,7 @@ import {
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
+import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
@@ -103,6 +105,7 @@ interface AccountEditorInput {
   creditDueDay: number | null;
   includeInTotals: boolean;
   startingBalance: number;
+  currency: string;
 }
 
 interface CreditSummary {
@@ -431,24 +434,27 @@ function AccountEditorSheet({
   account,
   presetGroupName = null,
   currentBalance,
-  currencySymbol,
+  defaultCurrencyCode: propDefaultCurrencyCode,
   accountGroups,
   onClose,
   onSave,
   onDelete,
+  onOpenMultiCurrency,
 }: {
   visible: boolean;
   account: Account | null;
   presetGroupName?: string | null;
   currentBalance: number;
-  currencySymbol: string;
+  defaultCurrencyCode: string;
   accountGroups: AccountGroup[];
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
+  onOpenMultiCurrency?: () => void;
 }) {
   const themeColors = useThemeColors();
   const isEdit = account !== null;
+  const defaultCurrencyCode = propDefaultCurrencyCode || DEFAULT_CURRENCY;
 
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('debit');
@@ -459,6 +465,34 @@ function AccountEditorSheet({
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+  const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+
+  const { settings: appSettings, accounts: appAccounts, fxCurrencies, rateTable } = useApp();
+  // Account currency choices = the main currency + the user's subcurrencies
+  // (added ones plus any already used by an account).
+  const accountCurrencyCodes = useMemo(() => {
+    const set = new Set<string>([appSettings.currencyCode, ...fxCurrencies, currency]);
+    for (const a of appAccounts) {
+      if (a.currency) set.add(a.currency);
+    }
+    return Array.from(set);
+  }, [appSettings.currencyCode, appAccounts, fxCurrencies, currency]);
+
+  // Switching the currency previews the converted balance so the user sees the
+  // result before saving (the same rate is applied for real on save).
+  const handleCurrencyChange = useCallback(
+    (nextCurrency: string) => {
+      if (nextCurrency === currency) return;
+      const parsed = Number(balanceInput);
+      if (Number.isFinite(parsed) && parsed !== 0) {
+        const { value } = convert(parsed, currency, nextCurrency, rateTable);
+        setBalanceInput(toBalanceInputValue(value));
+      }
+      setCurrency(nextCurrency);
+    },
+    [balanceInput, currency, rateTable],
+  );
 
   const accountGroupNameById = useMemo(
     () => new Map(accountGroups.map((group) => [group.id, group.name])),
@@ -489,6 +523,7 @@ function AccountEditorSheet({
       setBalanceInput(toBalanceInputValue(currentBalance));
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
+      setCurrency(account.currency || DEFAULT_CURRENCY);
     } else {
       setName('');
       setType('debit');
@@ -500,8 +535,16 @@ function AccountEditorSheet({
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
+      setCurrency(defaultCurrencyCode);
     }
-  }, [account, accountGroupIdByName, currentBalance, presetGroupName, visible]);
+  }, [
+    account,
+    accountGroupIdByName,
+    currentBalance,
+    defaultCurrencyCode,
+    presetGroupName,
+    visible,
+  ]);
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
@@ -533,6 +576,7 @@ function AccountEditorSheet({
       creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
       startingBalance: parsedBalance,
+      currency,
     });
   };
 
@@ -637,6 +681,20 @@ function AccountEditorSheet({
             />
             <View>
               <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('accounts.currency')}
+              </Text>
+              <Pressable
+                onPress={() => setShowCurrencyPicker(true)}
+                className="flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
+              >
+                <Text variant="body">
+                  {currency} · {currencyNameForCode(currency)}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('accounts.type')}
               </Text>
               {isEdit ? (
@@ -723,7 +781,7 @@ function AccountEditorSheet({
                 isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')
               }
               variant="currency"
-              currencySymbol={currencySymbol}
+              currencySymbol={currencySymbolForCode(currency)}
               value={balanceInput}
               onChangeText={setBalanceInput}
               helperText={isEdit ? I18n.t('accounts.current_balance_hint') : undefined}
@@ -750,6 +808,31 @@ function AccountEditorSheet({
         selectedLogoId={logoId}
         onSelect={setLogoId}
         onLimitReached={onClose}
+      />
+      <CurrencyPickerSheet
+        visible={showCurrencyPicker}
+        onClose={() => setShowCurrencyPicker(false)}
+        onSelect={handleCurrencyChange}
+        selectedCode={currency}
+        restrictToCodes={accountCurrencyCodes}
+        title={I18n.t('accounts.currency')}
+        footer={
+          onOpenMultiCurrency ? (
+            <Pressable
+              onPress={() => {
+                setShowCurrencyPicker(false);
+                onClose();
+                onOpenMultiCurrency();
+              }}
+              className="mt-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-3 active:opacity-80"
+            >
+              <Plus size={16} color={themeColors.primary} />
+              <Text variant="body" style={{ color: themeColors.primary }}>
+                {I18n.t('exchange_rates.add_currency')}
+              </Text>
+            </Pressable>
+          ) : null
+        }
       />
     </ThemeModal>
   );
@@ -1230,6 +1313,7 @@ interface AccountsScreenProps {
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
   onOpenNetAssetsInsight?: () => void;
+  onOpenMultiCurrency?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
 }
@@ -1246,6 +1330,7 @@ export function AccountsScreen({
   onOpenTransactionSplitBadge,
   onOpenSettings,
   onOpenNetAssetsInsight,
+  onOpenMultiCurrency,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
 }: AccountsScreenProps = {}) {
@@ -1304,6 +1389,7 @@ export function AccountsScreen({
     reorderAccountGroups,
     renameAccountGroup,
     updateAccount,
+    changeAccountCurrency,
     updateTransactionsBulk,
   } = useApp();
   const { checkLimit } = useProGate();
@@ -1513,11 +1599,12 @@ export function AccountsScreen({
   }, []);
 
   const formatVisibleBalance = useCallback(
-    (amount: number) => {
+    (amount: number, currencyCode?: string) => {
       if (hideAccountBalances) return MASKED_BALANCE_VALUE;
       return formatAmount(normalizeMoneyAmount(amount), settings, {
         showSign: false,
         trueHourlyRate,
+        currencyCode,
       });
     },
     [hideAccountBalances, settings, trueHourlyRate],
@@ -1530,10 +1617,17 @@ export function AccountsScreen({
         tone?: React.ComponentProps<typeof Text>['tone'];
         textClassName?: string;
         iconColor?: string;
+        currencyCode?: string;
       } = {},
     ) => {
-      const { variant = 'caption', tone = 'default', textClassName, iconColor } = options;
-      const label = formatVisibleBalance(amount);
+      const {
+        variant = 'caption',
+        tone = 'default',
+        textClassName,
+        iconColor,
+        currencyCode,
+      } = options;
+      const label = formatVisibleBalance(amount, currencyCode);
       if (hideAccountBalances || settings.displayMode !== 'time') {
         return (
           <Text variant={variant} tone={tone} className={textClassName}>
@@ -1695,13 +1789,21 @@ export function AccountsScreen({
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
   }, [accountBalances]);
 
+  // Balances converted to the reporting currency, for cross-currency totals.
+  // Falls back to the native balance when no rate is available.
+  const convertedBalanceMap = useMemo(() => {
+    return new Map(
+      accountBalances.map((item) => [item.accountId, item.convertedBalance ?? item.balance]),
+    );
+  }, [accountBalances]);
+
   const { total, assetsTotal, debtTotal } = useMemo(() => {
     if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };
     let assets = 0;
     let debt = 0;
     for (const account of accounts) {
       if (!account.includeInTotals) continue;
-      const balance = balanceMap.get(account.id) ?? account.startingBalance;
+      const balance = convertedBalanceMap.get(account.id) ?? account.startingBalance;
       if (account.type === 'credit') {
         debt += balance;
       } else {
@@ -1713,7 +1815,7 @@ export function AccountsScreen({
       assetsTotal: normalizeMoneyAmount(assets),
       debtTotal: normalizeMoneyAmount(debt),
     };
-  }, [accounts, balanceMap, managementOnly]);
+  }, [accounts, convertedBalanceMap, managementOnly]);
   const creditSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, CreditSummary>();
     const creditAccounts = accounts.filter((account) => account.type === 'credit');
@@ -1991,7 +2093,40 @@ export function AccountsScreen({
         creditStatementDay: updates.creditStatementDay,
         creditDueDay: updates.creditDueDay,
         includeInTotals: updates.includeInTotals,
+        currency: updates.currency,
       };
+
+      // Currency change on an existing account re-denominates prior entries at
+      // the latest rate in a lump — warn, then run it as its own operation.
+      if (updates.currency && updates.currency !== account.currency) {
+        Alert.alert(
+          I18n.t('accounts.currency_change_title'),
+          I18n.t('accounts.currency_change_message', {
+            from: account.currency,
+            to: updates.currency,
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.currency_change_action'),
+              style: 'destructive',
+              onPress: () => {
+                changeAccountCurrency(account.id, updates.currency, {
+                  name: updates.name,
+                  accountGroup: updates.accountGroup,
+                  logoId: updates.logoId,
+                  creditStatementDay: updates.creditStatementDay,
+                  creditDueDay: updates.creditDueDay,
+                  includeInTotals: updates.includeInTotals,
+                });
+                onComplete();
+              },
+            },
+          ],
+        );
+        return;
+      }
+
       const delta = updates.startingBalance - currentBalance;
       const adjustmentAmount = Math.abs(delta);
       const hasBalanceChange = adjustmentAmount > 0.000001;
@@ -2020,7 +2155,7 @@ export function AccountsScreen({
               createTransaction({
                 type: 'balance_adjustment',
                 amount: delta,
-                currency: settings.currencySymbol,
+                currency: updates.currency || account.currency,
                 date: new Date().toISOString(),
                 accountId: account.id,
                 fromAccountId: null,
@@ -2041,7 +2176,7 @@ export function AccountsScreen({
               createTransaction({
                 type: flowType,
                 amount: adjustmentAmount,
-                currency: settings.currencySymbol,
+                currency: updates.currency || account.currency,
                 date: new Date().toISOString(),
                 accountId: account.id,
                 note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
@@ -2052,7 +2187,13 @@ export function AccountsScreen({
         ],
       );
     },
-    [createTransaction, currentMonthWage?.trueHourlyRate, settings, updateAccount],
+    [
+      changeAccountCurrency,
+      createTransaction,
+      currentMonthWage?.trueHourlyRate,
+      settings,
+      updateAccount,
+    ],
   );
   const handleAccountManagementPress = useCallback((account: Account) => {
     void triggerHaptic('selection');
@@ -2103,6 +2244,7 @@ export function AccountsScreen({
             transactions={pageTransactions}
             locale={activeLocale}
             displaySettings={transactionDisplaySettings}
+            subtotalCurrencyCode={selectedAccount?.currency ?? null}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
@@ -2144,6 +2286,7 @@ export function AccountsScreen({
       isSelectionMode,
       pagerAnchorDate,
       pagerPageStyle,
+      selectedAccount?.currency,
       selectedAccountIdForPager,
       selectedAccountStatementDay,
       selectedTransactionIds,
@@ -2369,7 +2512,7 @@ export function AccountsScreen({
           visible={showEditAccount}
           account={account}
           currentBalance={balance}
-          currencySymbol={settings.currencySymbol}
+          defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => setShowEditAccount(false)}
           onSave={(updates) =>
@@ -2386,6 +2529,7 @@ export function AccountsScreen({
             setShowEditAccount(false);
             closeSelectedAccount();
           }}
+          onOpenMultiCurrency={onOpenMultiCurrency}
         />
         <PayCreditCardSheet
           visible={payCardAccountId === account.id}
@@ -2398,7 +2542,7 @@ export function AccountsScreen({
             createTransaction({
               type: 'transfer',
               amount,
-              currency: settings.currencySymbol,
+              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
               date: new Date().toISOString(),
               fromAccountId,
               toAccountId: account.id,
@@ -2635,6 +2779,7 @@ export function AccountsScreen({
             accounts={accounts}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
+            convertedBalanceMap={convertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
             scrollViewRef={accountsOverviewScrollRef}
             settings={settings}
@@ -2667,7 +2812,7 @@ export function AccountsScreen({
           visible={showEditAccount}
           account={editingAccount}
           currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
-          currencySymbol={settings.currencySymbol}
+          defaultCurrencyCode={settings.currencyCode}
           accountGroups={accountGroups}
           onClose={() => {
             setShowEditAccount(false);
@@ -2689,6 +2834,7 @@ export function AccountsScreen({
             setShowEditAccount(false);
             setEditingAccountId(null);
           }}
+          onOpenMultiCurrency={onOpenMultiCurrency}
         />
       ) : null}
 
@@ -2711,7 +2857,7 @@ export function AccountsScreen({
             createTransaction({
               type: 'transfer',
               amount,
-              currency: settings.currencySymbol,
+              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
               date: new Date().toISOString(),
               fromAccountId,
               toAccountId: payCardAccountId,
@@ -2727,7 +2873,7 @@ export function AccountsScreen({
         account={null}
         presetGroupName={createAccountGroupName}
         currentBalance={0}
-        currencySymbol={settings.currencySymbol}
+        defaultCurrencyCode={settings.currencyCode}
         accountGroups={accountGroups}
         onClose={() => {
           setShowCreate(false);
@@ -2736,11 +2882,12 @@ export function AccountsScreen({
         onSave={(input) => {
           createAccount({
             ...input,
-            currency: DEFAULT_CURRENCY,
+            currency: input.currency || DEFAULT_CURRENCY,
           });
           setShowCreate(false);
           setCreateAccountGroupName(null);
         }}
+        onOpenMultiCurrency={onOpenMultiCurrency}
       />
 
       <ThemeModal

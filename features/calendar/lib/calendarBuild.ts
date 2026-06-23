@@ -154,7 +154,9 @@ export function buildCalendarMonth({
     if (tx.type !== 'income' && tx.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(tx.date);
     if (dayKey < firstDayKey || dayKey > lastDayKey) continue;
-    const value = isTimeMode ? getDisplayValueForTransaction(tx) : tx.amount;
+    const value = isTimeMode
+      ? getDisplayValueForTransaction(tx)
+      : (tx.reportingAmount ?? tx.amount);
     let agg = dailyByDayKey.get(dayKey);
     if (!agg) {
       agg = {

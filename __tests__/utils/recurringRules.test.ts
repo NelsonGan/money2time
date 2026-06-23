@@ -10,6 +10,7 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     type: 'expense',
     amount: 100,
     currency: 'USD',
+    toAmount: null,
     accountId: overrides.accountId ?? null,
     fromAccountId: overrides.fromAccountId ?? null,
     toAccountId: overrides.toAccountId ?? null,

@@ -20,6 +20,9 @@ import {
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
+import { AppLockShowcase } from './AppLockShowcase';
+import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
+import { RedesignShowcase } from './RedesignShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
@@ -222,6 +225,12 @@ export function FeatureAnnouncementModal({
                 <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
+              ) : page.visual === 'multiCurrency' ? (
+                <MultiCurrencyShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'redesign' ? (
+                <RedesignShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'appLock' ? (
+                <AppLockShowcase width={Math.round(showcaseWidth * 0.72)} />
               ) : (
                 <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
               )}

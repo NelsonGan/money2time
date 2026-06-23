@@ -10,6 +10,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
+import { currencySymbolForCode } from '~/utils/currency';
 import {
   amountToHoursByRate,
   formatAmount,
@@ -154,19 +155,40 @@ function TransactionItemView({
       : isIncome
         ? 'text-success'
         : 'text-destructive';
-  const primaryValue = formatAmount(transaction.amount, settings, {
+  // Time-mode conversions use the frozen reporting-currency snapshot (so a
+  // foreign transaction converts correctly via the reporting hourly rate);
+  // money mode shows the native amount with its own currency symbol.
+  const reportingAmount = transaction.reportingAmount ?? transaction.amount;
+  const nativeSymbol = currencySymbolForCode(transaction.currency);
+  // A transaction is "foreign" when it was recorded in a subcurrency — its
+  // frozen snapshot currency differs from the amount's own currency.
+  const isForeign =
+    !isTransfer &&
+    !isBalanceAdjustment &&
+    transaction.reportingCurrency != null &&
+    transaction.reportingCurrency !== transaction.currency;
+  const primaryValue = formatAmount(isTimeMode ? reportingAmount : transaction.amount, settings, {
     showSign: isBalanceAdjustment,
     neutralSign: isTransfer,
     trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
+    currencyCode: transaction.currency,
   });
+  // Money mode: show the main-currency equivalent (snapshot rate) beneath a
+  // foreign amount; otherwise fall back to the time equivalent.
   const secondaryValue =
-    isTransfer || isBalanceAdjustment || rate <= 0
+    isTransfer || isBalanceAdjustment
       ? null
       : isTimeMode
-        ? formatCurrency(transaction.amount, settings.currencySymbol)
-        : formatHours(amountToHoursByRate(transaction.amount, rate));
+        ? rate > 0
+          ? formatCurrency(transaction.amount, nativeSymbol)
+          : null
+        : isForeign
+          ? formatCurrency(reportingAmount, currencySymbolForCode(transaction.reportingCurrency!))
+          : rate > 0
+            ? formatHours(amountToHoursByRate(reportingAmount, rate))
+            : null;
   const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
-  const showsSecondaryTime = !isTimeMode && secondaryValue !== null;
+  const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
   const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
   const amountToneColor = isTransfer
     ? themeColors.textMuted

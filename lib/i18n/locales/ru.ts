@@ -67,7 +67,48 @@ const ru = {
       placeholder: 'Выбрать',
     },
   },
+  exchange_rates: {
+    title: 'Мультивалютность',
+    main_currency: 'Основная валюта',
+    as_of: 'Обновлено {{date}}',
+    never_updated: 'Ещё не обновлялось',
+    update_rates: 'Обновить курсы',
+    updating: 'Обновление…',
+    rates_title: 'Курсы',
+    subcurrencies_title: 'Дополнительные валюты',
+    no_foreign_accounts: 'Добавьте валюту, чтобы отслеживать её курс.',
+    manual_badge: 'Вручную',
+    add_currency: 'Добавить валюту',
+    add: 'Добавить',
+    choose_currency: 'Выбрать валюту',
+    search_currency: 'Поиск валюты',
+    no_currency_match: 'Нет подходящей валюты',
+    edit_rate_title: 'Изменить курс',
+    remove_currency: 'Удалить',
+    reset_title: 'Сменить основную валюту?',
+    reset_message:
+      'Переход на {{code}} безвозвратно удалит все ваши счета, операции и настройки. Это нельзя отменить.',
+    reset_prompt: 'Введите {{word}} для подтверждения',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Удалить и сменить',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Мультивалютность и не только',
+      showcase_main: 'Основная',
+      currency: {
+        title: 'Тратьте в любой валюте',
+        body: 'Ведите счета и операции в нескольких валютах. Добавляйте дополнительные валюты, задавайте их курсы — все итоги по-прежнему сводятся к основной валюте.',
+      },
+      redesign: {
+        title: 'Свежий новый вид',
+        body: 'Настройки, Стоимость часа и Регулярные платежи переработаны, чтобы стать понятнее и удобнее.',
+      },
+      app_lock: {
+        title: 'Блокировка приложения',
+        body: 'Держите финансы в тайне с Face ID, Touch ID или отпечатком пальца. Доступно в Pro.',
+      },
+    },
     account_logos: {
       title: 'Логотипы счетов',
       intro: {
@@ -360,6 +401,13 @@ const ru = {
       placeholder_income: 'Попробуйте "Зарплата 3000", "Бонус 500", "Возврат 50".',
     },
     editor: {
+      received_amount: 'Полученная сумма ({{currency}})',
+      transfer_rate_hint:
+        'Оставьте пустым, чтобы пересчитать {{from}} → {{to}} по последнему курсу.',
+      received_label: 'Получено',
+      fx_title: 'Конвертация',
+      fx_rate: 'Курс обмена',
+      fx_received: 'Полученная сумма',
       title_create: 'Добавить',
       title_edit: 'Изменить',
       subtitle_create: 'Быстрая запись',
@@ -728,10 +776,12 @@ const ru = {
         'Нажмите + для быстрой клавиатуры. Выключите, чтобы всегда открывать полную форму.',
       section_expense: 'Расходы',
       section_income: 'Доходы',
-      default_account_section: 'Счёт по умолчанию',
+      default_account_section: 'По умолчанию',
       default_account_label: 'Счёт по умолчанию',
       default_account_subtitle:
         'Используется для голосового и текстового ввода без совпадения в истории',
+      default_currency_label: 'Валюта по умолчанию',
+      default_currency_auto: 'Использовать валюту счёта',
       default_row: 'По умолчанию',
       no_default: 'Авто · резервный "Другое"',
       unmapped: 'Не сопоставлено',
@@ -1108,6 +1158,11 @@ const ru = {
     subcategories: 'Подкатегории',
   },
   accounts: {
+    currency: 'Валюта',
+    currency_change_title: 'Сменить валюту счёта?',
+    currency_change_message:
+      'Баланс будет пересчитан из {{from}} в {{to}} по последнему курсу. Существующие операции сохраняют свою исходную валюту.',
+    currency_change_action: 'Пересчитать и сменить',
     logo: {
       label: 'Логотип',
       add: 'Добавить логотип',
@@ -1246,6 +1301,8 @@ const ru = {
     custom_logos_label: 'Свои логотипы счетов',
     limit_custom_logos:
       'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
+    limit_subcurrencies:
+      'В бесплатном плане можно добавить {{count}} дополнительную валюту. Перейдите на Pro для безлимитной мультивалютности.',
     title: 'Money2Time Pro',
     upgrade: 'Обновиться до Pro',
     upgrade_subtitle: 'Разблокировать все функции',

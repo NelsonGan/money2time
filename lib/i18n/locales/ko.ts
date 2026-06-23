@@ -67,7 +67,48 @@ const ko = {
       placeholder: '선택',
     },
   },
+  exchange_rates: {
+    title: '다중 통화',
+    main_currency: '주 통화',
+    as_of: '{{date}} 업데이트됨',
+    never_updated: '아직 업데이트되지 않음',
+    update_rates: '환율 업데이트',
+    updating: '업데이트 중…',
+    rates_title: '환율',
+    subcurrencies_title: '보조 통화',
+    no_foreign_accounts: '통화를 추가하면 환율을 추적할 수 있습니다.',
+    manual_badge: '수동',
+    add_currency: '통화 추가',
+    add: '추가',
+    choose_currency: '통화 선택',
+    search_currency: '통화 검색',
+    no_currency_match: '일치하는 통화 없음',
+    edit_rate_title: '환율 편집',
+    remove_currency: '삭제',
+    reset_title: '주 통화를 변경할까요?',
+    reset_message:
+      '{{code}}(으)로 전환하면 모든 계좌, 거래, 설정이 영구적으로 삭제됩니다. 되돌릴 수 없습니다.',
+    reset_prompt: '확인하려면 {{word}} 입력',
+    reset_confirm_word: 'DELETE',
+    reset_action: '삭제 후 전환',
+  },
   news: {
+    multi_currency_update: {
+      title: '다중 통화 외',
+      showcase_main: '기본',
+      currency: {
+        title: '어떤 통화로든 지출',
+        body: '여러 통화로 계좌와 거래를 관리하세요. 보조 통화를 추가하고 환율을 설정해도 모든 합계는 주 통화로 환산됩니다.',
+      },
+      redesign: {
+        title: '새로워진 디자인',
+        body: '설정, 시간당 가치, 반복 지출 화면을 더 깔끔하고 쓰기 쉽게 새로 디자인했습니다.',
+      },
+      app_lock: {
+        title: '앱 잠금',
+        body: 'Face ID, Touch ID 또는 지문으로 재정을 비공개로 유지하세요. Pro에서 사용할 수 있습니다.',
+      },
+    },
     account_logos: {
       title: '계정 로고',
       intro: {
@@ -360,6 +401,12 @@ const ko = {
       placeholder_income: '"월급 3000", "보너스 500", "환불 50" 형식으로 입력해 보세요.',
     },
     editor: {
+      received_amount: '받는 금액 ({{currency}})',
+      transfer_rate_hint: '비워 두면 최신 환율로 {{from}} → {{to}}(으)로 환산합니다.',
+      received_label: '받음',
+      fx_title: '환전',
+      fx_rate: '환율',
+      fx_received: '받는 금액',
       title_create: '추가',
       title_edit: '수정',
       subtitle_create: '간편 입력',
@@ -718,9 +765,11 @@ const ko = {
       enabled_subtitle: '+를 탭해 빠른 키패드를 열어요. 끄면 항상 전체 폼이 열려요.',
       section_expense: '지출',
       section_income: '수입',
-      default_account_section: '기본 계좌',
+      default_account_section: '기본값',
       default_account_label: '기본 계좌',
       default_account_subtitle: '일치하는 내역이 없을 때 음성·텍스트 입력에 사용되는 계좌',
+      default_currency_label: '기본 통화',
+      default_currency_auto: '계좌 통화에 맞춤',
       default_row: '기본값',
       no_default: '자동 · 기타로 폴백',
       unmapped: '매핑 안 됨',
@@ -1079,6 +1128,11 @@ const ko = {
     subcategories: '하위 카테고리',
   },
   accounts: {
+    currency: '통화',
+    currency_change_title: '계좌 통화를 변경할까요?',
+    currency_change_message:
+      '잔액이 최신 환율로 {{from}}에서 {{to}}(으)로 환산됩니다. 기존 거래는 원래 통화를 유지합니다.',
+    currency_change_action: '환산 후 변경',
     logo: {
       label: '로고',
       add: '로고 추가',
@@ -1217,6 +1271,8 @@ const ko = {
     custom_logos_label: '사용자 지정 계정 로고',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+    limit_subcurrencies:
+      '무료 플랜에서는 보조 통화를 {{count}}개 추가할 수 있습니다. 무제한 다중 통화는 Pro로 업그레이드하세요.',
     title: 'Money2Time Pro',
     upgrade: 'Pro로 업그레이드',
     upgrade_subtitle: '무제한 기능 잠금 해제',

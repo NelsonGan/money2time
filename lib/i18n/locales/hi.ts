@@ -67,7 +67,48 @@ const hi = {
       placeholder: 'चुनें',
     },
   },
+  exchange_rates: {
+    title: 'मल्टी-करेंसी',
+    main_currency: 'मुख्य मुद्रा',
+    as_of: '{{date}} को अपडेट किया गया',
+    never_updated: 'अभी तक अपडेट नहीं हुआ',
+    update_rates: 'दरें अपडेट करें',
+    updating: 'अपडेट हो रहा है…',
+    rates_title: 'दरें',
+    subcurrencies_title: 'उप-मुद्राएँ',
+    no_foreign_accounts: 'इसकी विनिमय दर ट्रैक करने के लिए एक मुद्रा जोड़ें।',
+    manual_badge: 'मैनुअल',
+    add_currency: 'मुद्रा जोड़ें',
+    add: 'जोड़ें',
+    choose_currency: 'मुद्रा चुनें',
+    search_currency: 'मुद्रा खोजें',
+    no_currency_match: 'कोई मेल खाती मुद्रा नहीं',
+    edit_rate_title: 'दर संपादित करें',
+    remove_currency: 'हटाएँ',
+    reset_title: 'मुख्य मुद्रा बदलें?',
+    reset_message:
+      '{{code}} पर स्विच करने से आपके सभी खाते, लेन-देन और सेटिंग्स स्थायी रूप से हट जाएँगे। इसे पूर्ववत नहीं किया जा सकता।',
+    reset_prompt: 'पुष्टि के लिए {{word}} टाइप करें',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'हटाएँ और बदलें',
+  },
   news: {
+    multi_currency_update: {
+      title: 'मल्टी-करेंसी और बहुत कुछ',
+      showcase_main: 'मुख्य',
+      currency: {
+        title: 'किसी भी मुद्रा में खर्च करें',
+        body: 'कई मुद्राओं में खाते और लेन-देन ट्रैक करें। उप-मुद्राएँ जोड़ें, उनकी दरें सेट करें, और हर योग आपकी मुख्य मुद्रा में ही जुड़ता रहेगा।',
+      },
+      redesign: {
+        title: 'बिल्कुल नया रूप',
+        body: 'सेटिंग्स, प्रति घंटा मूल्य और आवर्ती भुगतान पेज को साफ़ और आसान बनाने के लिए नया रूप दिया गया है।',
+      },
+      app_lock: {
+        title: 'ऐप लॉक करें',
+        body: 'Face ID, Touch ID या फ़िंगरप्रिंट से अपने वित्त को निजी रखें। Pro के साथ उपलब्ध।',
+      },
+    },
     account_logos: {
       title: 'खाता लोगो',
       intro: {
@@ -360,6 +401,12 @@ const hi = {
       placeholder_income: 'जैसे "Salary 30000", "Bonus 5000", "Refund 500"।',
     },
     editor: {
+      received_amount: 'प्राप्त राशि ({{currency}})',
+      transfer_rate_hint: '{{from}} → {{to}} को नवीनतम दर पर बदलने के लिए खाली छोड़ें।',
+      received_label: 'प्राप्त',
+      fx_title: 'रूपांतरण',
+      fx_rate: 'विनिमय दर',
+      fx_received: 'प्राप्त राशि',
       title_create: 'जोड़ें',
       title_edit: 'अपडेट करें',
       subtitle_create: 'त्वरित और साफ एंट्री',
@@ -723,9 +770,11 @@ const hi = {
       enabled_subtitle: '+ के लिए टैप करें त्वरित कीपैड। बंद करने पर हमेशा पूरा फॉर्म खुलेगा।',
       section_expense: 'खर्च',
       section_income: 'आय',
-      default_account_section: 'डिफ़ॉल्ट खाता',
+      default_account_section: 'डिफ़ॉल्ट',
       default_account_label: 'डिफ़ॉल्ट खाता',
       default_account_subtitle: 'वॉयस और टेक्स्ट एंट्री में जब कोई इतिहास मेल न करे तब उपयोग',
+      default_currency_label: 'डिफ़ॉल्ट मुद्रा',
+      default_currency_auto: 'खाते की मुद्रा से मिलाएँ',
       default_row: 'डिफ़ॉल्ट',
       no_default: 'स्वचालित · अन्य पर वापस',
       unmapped: 'मैप नहीं किया',
@@ -1094,6 +1143,11 @@ const hi = {
     subcategories: 'उपश्रेणियां',
   },
   accounts: {
+    currency: 'मुद्रा',
+    currency_change_title: 'खाते की मुद्रा बदलें?',
+    currency_change_message:
+      'शेष राशि को नवीनतम दर पर {{from}} से {{to}} में बदला जाएगा। मौजूदा प्रविष्टियाँ अपनी मूल मुद्रा में रहेंगी।',
+    currency_change_action: 'बदलें और लागू करें',
     logo: {
       label: 'लोगो',
       add: 'लोगो जोड़ें',
@@ -1232,6 +1286,8 @@ const hi = {
     custom_logos_label: 'कस्टम खाता लोगो',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
+    limit_subcurrencies:
+      'मुफ़्त प्लान में आप {{count}} उप-मुद्रा जोड़ सकते हैं। असीमित मल्टी-करेंसी के लिए Pro लें।',
     title: 'Money2Time Pro',
     upgrade: 'Pro में अपग्रेड करें',
     upgrade_subtitle: 'असीमित सुविधाएं अनलॉक करें',

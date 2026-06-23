@@ -6,7 +6,13 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 
-type LimitType = 'accounts' | 'categories' | 'recurring' | 'wage_entries' | 'custom_logos';
+type LimitType =
+  | 'accounts'
+  | 'categories'
+  | 'recurring'
+  | 'wage_entries'
+  | 'custom_logos'
+  | 'subcurrencies';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -14,6 +20,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   recurring: PRO_LIMITS.FREE_MAX_RECURRING_RULES,
   wage_entries: PRO_LIMITS.FREE_MAX_WAGE_ENTRIES,
   custom_logos: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
+  subcurrencies: PRO_LIMITS.FREE_MAX_SUBCURRENCIES,
 };
 
 export function useProGate() {

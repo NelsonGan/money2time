@@ -114,6 +114,22 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
   { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
 ];
 
+/**
+ * Every currency we carry name/symbol metadata for. Extends {@link
+ * MAJOR_CURRENCIES} with the remaining currencies the Frankfurter (ECB) feed
+ * supports, so the full picker and auto-rate set line up. Used by the currency
+ * pickers and by `currencySymbolForCode` / `currencyNameForCode`.
+ */
+export const ALL_CURRENCIES: { code: string; symbol: string; name: string }[] = [
+  ...MAJOR_CURRENCIES,
+  { code: 'BGN', symbol: 'лв', name: 'Bulgarian Lev' },
+  { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna' },
+  { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+  { code: 'ILS', symbol: '₪', name: 'Israeli New Shekel' },
+  { code: 'ISK', symbol: 'kr', name: 'Icelandic Króna' },
+  { code: 'RON', symbol: 'lei', name: 'Romanian Leu' },
+];
+
 type OnboardingCategorySeed = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 type OnboardingAccountSeed = Omit<
   Account,

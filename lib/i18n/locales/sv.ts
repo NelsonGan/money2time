@@ -67,7 +67,48 @@ const sv = {
       placeholder: 'Välj',
     },
   },
+  exchange_rates: {
+    title: 'Flera valutor',
+    main_currency: 'Huvudvaluta',
+    as_of: 'Uppdaterad {{date}}',
+    never_updated: 'Inte uppdaterad än',
+    update_rates: 'Uppdatera kurser',
+    updating: 'Uppdaterar…',
+    rates_title: 'Kurser',
+    subcurrencies_title: 'Undervalutor',
+    no_foreign_accounts: 'Lägg till en valuta för att följa dess växelkurs.',
+    manual_badge: 'Manuell',
+    add_currency: 'Lägg till valuta',
+    add: 'Lägg till',
+    choose_currency: 'Välj valuta',
+    search_currency: 'Sök valuta',
+    no_currency_match: 'Ingen matchande valuta',
+    edit_rate_title: 'Redigera kurs',
+    remove_currency: 'Ta bort',
+    reset_title: 'Byta huvudvaluta?',
+    reset_message:
+      'Att byta till {{code}} raderar permanent alla dina konton, transaktioner och inställningar. Detta kan inte ångras.',
+    reset_prompt: 'Skriv {{word}} för att bekräfta',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Radera och byt',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Flera valutor och mer',
+      showcase_main: 'Primär',
+      currency: {
+        title: 'Spendera i valfri valuta',
+        body: 'Följ konton och transaktioner i flera valutor. Lägg till undervalutor, ange deras kurser, och alla summor räknas fortfarande om till din huvudvaluta.',
+      },
+      redesign: {
+        title: 'Ett fräscht nytt utseende',
+        body: 'Inställningar, Timvärde och Återkommande betalningar har gjorts om för att bli renare och enklare att använda.',
+      },
+      app_lock: {
+        title: 'Lås appen',
+        body: 'Håll din ekonomi privat med Face ID, Touch ID eller fingeravtryck. Tillgängligt med Pro.',
+      },
+    },
     account_logos: {
       title: 'Kontologotyper',
       intro: {
@@ -360,6 +401,12 @@ const sv = {
       placeholder_income: 'Prova "Lön 3000", "Bonus 500", "Återbetalning 50".',
     },
     editor: {
+      received_amount: 'Mottaget belopp ({{currency}})',
+      transfer_rate_hint: 'Lämna tomt för att räkna om {{from}} → {{to}} med den senaste kursen.',
+      received_label: 'Mottaget',
+      fx_title: 'Omräkning',
+      fx_rate: 'Växelkurs',
+      fx_received: 'Mottaget belopp',
       title_create: 'Lägg till',
       title_edit: 'Uppdatera',
       subtitle_create: 'Snabb och enkel post',
@@ -728,9 +775,11 @@ const sv = {
         'Tryck + för snabbknappsats. Stäng av för att alltid öppna hela formuläret.',
       section_expense: 'Utgift',
       section_income: 'Inkomst',
-      default_account_section: 'Standardkonto',
+      default_account_section: 'Standardvärden',
       default_account_label: 'Standardkonto',
       default_account_subtitle: 'Används av röst- och textinmatning när ingen historik matchar',
+      default_currency_label: 'Standardvaluta',
+      default_currency_auto: 'Följ kontots valuta',
       default_row: 'Standard',
       no_default: 'Automatisk · faller tillbaka till Övrigt',
       unmapped: 'Ej kopplat',
@@ -1106,6 +1155,11 @@ const sv = {
     subcategories: 'Underkategorier',
   },
   accounts: {
+    currency: 'Valuta',
+    currency_change_title: 'Ändra kontots valuta?',
+    currency_change_message:
+      'Saldot räknas om från {{from}} till {{to}} med den senaste kursen. Befintliga poster behåller sin ursprungliga valuta.',
+    currency_change_action: 'Räkna om och ändra',
     logo: {
       label: 'Logga',
       add: 'Lägg till en logga',
@@ -1244,6 +1298,8 @@ const sv = {
     custom_logos_label: 'Anpassade kontologotyper',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
+    limit_subcurrencies:
+      'Du kan lägga till {{count}} undervaluta i gratisplanen. Uppgradera till Pro för obegränsad flervaluta.',
     title: 'Money2Time Pro',
     upgrade: 'Uppgradera till Pro',
     upgrade_subtitle: 'Lås upp obegränsade funktioner',

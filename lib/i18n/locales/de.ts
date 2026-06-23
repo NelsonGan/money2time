@@ -67,7 +67,48 @@ const de = {
       placeholder: 'Auswählen',
     },
   },
+  exchange_rates: {
+    title: 'Mehrere Währungen',
+    main_currency: 'Hauptwährung',
+    as_of: 'Aktualisiert {{date}}',
+    never_updated: 'Noch nicht aktualisiert',
+    update_rates: 'Kurse aktualisieren',
+    updating: 'Wird aktualisiert…',
+    rates_title: 'Kurse',
+    subcurrencies_title: 'Unterwährungen',
+    no_foreign_accounts: 'Füge eine Währung hinzu, um ihren Kurs zu verfolgen.',
+    manual_badge: 'Manuell',
+    add_currency: 'Währung hinzufügen',
+    add: 'Hinzufügen',
+    choose_currency: 'Währung wählen',
+    search_currency: 'Währung suchen',
+    no_currency_match: 'Keine passende Währung',
+    edit_rate_title: 'Kurs bearbeiten',
+    remove_currency: 'Entfernen',
+    reset_title: 'Hauptwährung ändern?',
+    reset_message:
+      'Der Wechsel zu {{code}} löscht dauerhaft alle deine Konten, Transaktionen und Einstellungen. Das kann nicht rückgängig gemacht werden.',
+    reset_prompt: 'Gib {{word}} ein, um zu bestätigen',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Löschen & wechseln',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Mehrere Währungen & mehr',
+      showcase_main: 'Haupt',
+      currency: {
+        title: 'In jeder Währung ausgeben',
+        body: 'Verfolge Konten und Transaktionen in mehreren Währungen. Füge Unterwährungen hinzu, lege Kurse fest – jede Summe wird weiterhin in deine Hauptwährung umgerechnet.',
+      },
+      redesign: {
+        title: 'Frisches neues Design',
+        body: 'Einstellungen, Stundenwert und wiederkehrende Zahlungen wurden übersichtlicher und einfacher gestaltet.',
+      },
+      app_lock: {
+        title: 'App sperren',
+        body: 'Halte deine Finanzen mit Face ID, Touch ID oder Fingerabdruck privat. Mit Pro verfügbar.',
+      },
+    },
     account_logos: {
       title: 'Kontologos',
       intro: {
@@ -363,6 +404,12 @@ const de = {
       placeholder_income: 'Versuche „Gehalt 3000", „Bonus 500", „Rückerstattung 50".',
     },
     editor: {
+      received_amount: 'Erhaltener Betrag ({{currency}})',
+      transfer_rate_hint: 'Leer lassen, um {{from}} → {{to}} zum aktuellen Kurs umzurechnen.',
+      received_label: 'Erhalten',
+      fx_title: 'Umrechnung',
+      fx_rate: 'Wechselkurs',
+      fx_received: 'Erhaltener Betrag',
       title_create: 'Hinzufügen',
       title_edit: 'Aktualisieren',
       subtitle_create: 'Schnell und einfach erfassen',
@@ -736,10 +783,12 @@ const de = {
         'Tippe + für die schnelle Tastatur. Deaktivieren, um immer das volle Formular zu öffnen.',
       section_expense: 'Ausgaben',
       section_income: 'Einnahmen',
-      default_account_section: 'Standardkonto',
+      default_account_section: 'Standardwerte',
       default_account_label: 'Standardkonto',
       default_account_subtitle:
         'Wird von Sprach- und Texteingabe verwendet, wenn keine Verlaufsübereinstimmung vorliegt',
+      default_currency_label: 'Standardwährung',
+      default_currency_auto: 'Kontowährung übernehmen',
       default_row: 'Standard',
       no_default: 'Auto · fällt auf „Sonstiges" zurück',
       unmapped: 'Nicht zugeordnet',
@@ -1125,6 +1174,11 @@ const de = {
     subcategories: 'Unterkategorien',
   },
   accounts: {
+    currency: 'Währung',
+    currency_change_title: 'Kontowährung ändern?',
+    currency_change_message:
+      'Der Saldo wird zum aktuellen Kurs von {{from}} in {{to}} umgerechnet. Vorhandene Buchungen behalten ihre ursprüngliche Währung.',
+    currency_change_action: 'Umrechnen & ändern',
     logo: {
       label: 'Logo',
       add: 'Logo hinzufügen',
@@ -1264,6 +1318,8 @@ const de = {
     custom_logos_label: 'Eigene Kontologos',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
+    limit_subcurrencies:
+      'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     title: 'Money2Time Pro',
     upgrade: 'Auf Pro upgraden',
     upgrade_subtitle: 'Unbegrenzte Funktionen freischalten',

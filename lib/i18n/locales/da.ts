@@ -67,7 +67,48 @@ const da = {
       placeholder: 'Vælg',
     },
   },
+  exchange_rates: {
+    title: 'Flere valutaer',
+    main_currency: 'Hovedvaluta',
+    as_of: 'Opdateret {{date}}',
+    never_updated: 'Ikke opdateret endnu',
+    update_rates: 'Opdater kurser',
+    updating: 'Opdaterer…',
+    rates_title: 'Kurser',
+    subcurrencies_title: 'Undervalutaer',
+    no_foreign_accounts: 'Tilføj en valuta for at følge dens kurs.',
+    manual_badge: 'Manuel',
+    add_currency: 'Tilføj valuta',
+    add: 'Tilføj',
+    choose_currency: 'Vælg valuta',
+    search_currency: 'Søg valuta',
+    no_currency_match: 'Ingen matchende valuta',
+    edit_rate_title: 'Rediger kurs',
+    remove_currency: 'Fjern',
+    reset_title: 'Skift hovedvaluta?',
+    reset_message:
+      'Skift til {{code}} sletter permanent alle dine konti, transaktioner og indstillinger. Dette kan ikke fortrydes.',
+    reset_prompt: 'Skriv {{word}} for at bekræfte',
+    reset_confirm_word: 'DELETE',
+    reset_action: 'Slet og skift',
+  },
   news: {
+    multi_currency_update: {
+      title: 'Flere valutaer og mere',
+      showcase_main: 'Primær',
+      currency: {
+        title: 'Brug enhver valuta',
+        body: 'Følg konti og transaktioner i flere valutaer. Tilføj undervalutaer, sæt deres kurser, og alle totaler omregnes stadig til din hovedvaluta.',
+      },
+      redesign: {
+        title: 'Helt nyt udseende',
+        body: 'Indstillinger, Timeværdi og Faste betalinger er redesignet, så de er renere og lettere at bruge.',
+      },
+      app_lock: {
+        title: 'Lås appen',
+        body: 'Hold din økonomi privat med Face ID, Touch ID eller fingeraftryk. Fås med Pro.',
+      },
+    },
     account_logos: {
       title: 'Kontologoer',
       intro: {
@@ -361,6 +402,12 @@ const da = {
       placeholder_income: 'Prøv "Løn 20000", "Bonus 5000", "Refusion 200".',
     },
     editor: {
+      received_amount: 'Modtaget beløb ({{currency}})',
+      transfer_rate_hint: 'Lad stå tom for at omregne {{from}} → {{to}} til den seneste kurs.',
+      received_label: 'Modtaget',
+      fx_title: 'Konvertering',
+      fx_rate: 'Vekselkurs',
+      fx_received: 'Modtaget beløb',
       title_create: 'Tilføj',
       title_edit: 'Opdater',
       subtitle_create: 'Hurtig og nem postering',
@@ -733,9 +780,11 @@ const da = {
         'Tryk + for det hurtige tastatur. Slå fra for altid at åbne den fulde formular.',
       section_expense: 'Udgift',
       section_income: 'Indtægt',
-      default_account_section: 'Standardkonto',
+      default_account_section: 'Standardindstillinger',
       default_account_label: 'Standardkonto',
       default_account_subtitle: 'Bruges af stemme- og tekstpostering, når ingen historik matcher',
+      default_currency_label: 'Standardvaluta',
+      default_currency_auto: 'Følg kontoens valuta',
       default_row: 'Standard',
       no_default: 'Auto · falder tilbage til Andet',
       unmapped: 'Ikke tilknyttet',
@@ -1108,6 +1157,11 @@ const da = {
     subcategories: 'Underkategorier',
   },
   accounts: {
+    currency: 'Valuta',
+    currency_change_title: 'Skift kontoens valuta?',
+    currency_change_message:
+      'Saldoen omregnes fra {{from}} til {{to}} til den seneste kurs. Eksisterende posteringer beholder deres oprindelige valuta.',
+    currency_change_action: 'Omregn og skift',
     logo: {
       label: 'Logo',
       add: 'Tilføj et logo',
@@ -1246,6 +1300,8 @@ const da = {
     custom_logos_label: 'Tilpassede kontologoer',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
+    limit_subcurrencies:
+      'Du kan tilføje {{count}} undervaluta på gratisplanen. Opgradér til Pro for ubegrænset multivaluta.',
     title: 'Money2Time Pro',
     upgrade: 'Opgrader til Pro',
     upgrade_subtitle: 'Lås ubegrænsede funktioner op',
