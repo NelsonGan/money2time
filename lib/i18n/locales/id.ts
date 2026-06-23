@@ -1378,6 +1378,8 @@ const id = {
     feature_unlimited_wage_entries: 'Entri tarif per jam tanpa batas',
     voice_label: 'Entri suara',
     widgets_label: 'Widget layar utama',
+    currencies_label: 'Mata uang',
+    biometric_label: 'Kunci aplikasi (biometrik)',
     compare_title: 'Semua di Pro',
     compare_subtitle: 'Lihat apa saja yang terbuka saat kamu meningkatkan.',
     compare_limited: 'Terbatas',

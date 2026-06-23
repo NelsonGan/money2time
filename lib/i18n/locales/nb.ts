@@ -1372,6 +1372,8 @@ const nb = {
     feature_unlimited_wage_entries: 'Ubegrensede timesatsoppføringer',
     voice_label: 'Taleregistreringer',
     widgets_label: 'Widgets på startskjermen',
+    currencies_label: 'Valutaer',
+    biometric_label: 'App-lås (biometrisk)',
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se nøyaktig hva du låser opp når du oppgraderer.',
     compare_limited: 'Begrenset',

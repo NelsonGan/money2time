@@ -1,7 +1,7 @@
 import type { FlashListRef } from '@shopify/flash-list';
 import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -14,6 +14,7 @@ import { TransactionItem } from '~/features/transactions/components/TransactionI
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations, UserSettings } from '~/types';
+import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
@@ -27,6 +28,7 @@ type ActivityRow =
       weekdayLabel: string;
       incomeSubtotal: number;
       expenseSubtotal: number;
+      transactionIds: string[];
     }
   | { kind: 'item'; id: string; transaction: TransactionWithRelations };
 
@@ -54,6 +56,8 @@ interface ActivityTransactionListProps {
   onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
+  /** Toggle selection of every transaction under a day header (select-all). */
+  onToggleDaySelection?: (transactionIds: string[]) => void;
   emptyTitle: string;
   emptyMessage: string;
   listHeaderComponent?: React.ReactNode;
@@ -85,6 +89,9 @@ interface DayHeaderRowProps {
   expenseSubtotal: number;
   isTimeMode: boolean;
   settings: TransactionDisplaySettings;
+  selectionMode: boolean;
+  allSelected: boolean;
+  onToggleSelectAll?: () => void;
 }
 
 const DayHeaderRow = memo(function DayHeaderRow({
@@ -94,12 +101,33 @@ const DayHeaderRow = memo(function DayHeaderRow({
   expenseSubtotal,
   isTimeMode,
   settings,
+  selectionMode,
+  allSelected,
+  onToggleSelectAll,
 }: DayHeaderRowProps) {
   const themeColors = useThemeColors();
 
   return (
     <View className="pt-2 pb-1.5 flex-row items-center justify-between">
       <View className="flex-row items-center gap-2">
+        {selectionMode ? (
+          <Pressable
+            onPress={onToggleSelectAll}
+            hitSlop={8}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: allSelected }}
+            className={cn(
+              'mr-0.5 h-5 w-5 rounded-full border items-center justify-center',
+              allSelected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
+            )}
+          >
+            {allSelected ? (
+              <Text variant="label" className="text-primary">
+                ✓
+              </Text>
+            ) : null}
+          </Pressable>
+        ) : null}
         <Text variant="caption" tone="muted">
           {dateLabel}
         </Text>
@@ -226,6 +254,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   onTransactionSplitBadgePress,
   selectedTransactionIds = [],
   selectionMode = false,
+  onToggleDaySelection,
   emptyTitle,
   emptyMessage,
   listHeaderComponent,
@@ -267,6 +296,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
     const dailyTotals = new Map<string, { income: number; expense: number }>();
     const headerRowsByDay = new Map<string, Extract<ActivityRow, { kind: 'header' }>[]>();
+    const transactionIdsByDay = new Map<string, string[]>();
     const nextRows: ActivityRow[] = [];
     let currentHeaderDay: string | null = null;
 
@@ -301,6 +331,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           weekdayLabel,
           incomeSubtotal: 0,
           expenseSubtotal: 0,
+          transactionIds: [],
         };
         const dayHeaders = headerRowsByDay.get(dayKey);
         if (dayHeaders) {
@@ -310,15 +341,24 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         }
         nextRows.push(headerRow);
       }
+      const dayIds = transactionIdsByDay.get(dayKey);
+      if (dayIds) {
+        dayIds.push(transaction.id);
+      } else {
+        transactionIdsByDay.set(dayKey, [transaction.id]);
+      }
       nextRows.push({ kind: 'item', id: transaction.id, transaction });
     });
 
     headerRowsByDay.forEach((headerRows, dayKey) => {
       const totals = dailyTotals.get(dayKey);
-      if (!totals) return;
+      const dayIds = transactionIdsByDay.get(dayKey) ?? [];
       headerRows.forEach((headerRow) => {
-        headerRow.incomeSubtotal = totals.income;
-        headerRow.expenseSubtotal = totals.expense;
+        if (totals) {
+          headerRow.incomeSubtotal = totals.income;
+          headerRow.expenseSubtotal = totals.expense;
+        }
+        headerRow.transactionIds = dayIds;
       });
     });
 
@@ -363,6 +403,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const renderRow = useCallback(
     (item: ActivityRow) => {
       if (item.kind === 'header') {
+        const allSelected =
+          item.transactionIds.length > 0 &&
+          item.transactionIds.every((id) => selectedTransactionIdSet.has(id));
         return (
           <DayHeaderRow
             dateLabel={item.dateLabel}
@@ -371,6 +414,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             expenseSubtotal={item.expenseSubtotal}
             isTimeMode={isTimeMode}
             settings={subtotalSettings}
+            selectionMode={selectionMode}
+            allSelected={allSelected}
+            onToggleSelectAll={
+              onToggleDaySelection ? () => onToggleDaySelection(item.transactionIds) : undefined
+            }
           />
         );
       }
@@ -400,6 +448,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionPress,
       onTransactionLongPress,
       onTransactionSplitBadgePress,
+      onToggleDaySelection,
       selectedTransactionIdSet,
       selectionMode,
       displaySettings,

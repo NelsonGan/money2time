@@ -647,6 +647,23 @@ export function TransactionsScreen({
       return next;
     });
   }, []);
+  const toggleDaySelection = useCallback((dayTransactionIds: string[]) => {
+    if (dayTransactionIds.length === 0) return;
+    void triggerHaptic('selection');
+    setSelectedTransactionIds((previous) => {
+      const previousSet = new Set(previous);
+      const allSelected = dayTransactionIds.every((id) => previousSet.has(id));
+      if (allSelected) {
+        const dayIdSet = new Set(dayTransactionIds);
+        return previous.filter((id) => !dayIdSet.has(id));
+      }
+      const next = [...previous];
+      for (const id of dayTransactionIds) {
+        if (!previousSet.has(id)) next.push(id);
+      }
+      return next;
+    });
+  }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -840,6 +857,7 @@ export function TransactionsScreen({
           onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
           selectedTransactionIds={selectedTransactionIds}
           selectionMode={isSelectionMode}
+          onToggleDaySelection={toggleDaySelection}
           getScrollToTopRef={getPageScrollToTopRef}
           getScrollToDayRef={getPageScrollToDayRef}
           contentPaddingHorizontal={listHorizontalPadding}
@@ -852,6 +870,7 @@ export function TransactionsScreen({
       handleTransactionLongPress,
       handleTransactionPress,
       handleTransactionSplitBadgePress,
+      toggleDaySelection,
       activeLocale,
       getDisplayValueForTransaction,
       getTrueHourlyRateForDate,
@@ -986,6 +1005,7 @@ export function TransactionsScreen({
             onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
             selectedTransactionIds={selectedTransactionIds}
             selectionMode={isSelectionMode}
+            onToggleDaySelection={toggleDaySelection}
             emptyTitle={I18n.t('transactions.empty_search_title')}
             emptyMessage={I18n.t('transactions.empty_search_message')}
             contentPaddingBottom={LIST_BOTTOM_PADDING}
