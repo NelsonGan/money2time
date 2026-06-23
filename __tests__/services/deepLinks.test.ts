@@ -9,7 +9,7 @@ jest.mock('react-native', () => ({
 }));
 
 jest.mock('~/services/analytics', () => ({
-  AnalyticsEvents: { SCREEN_VIEWED: 'screen_viewed' },
+  AnalyticsEvents: { WIDGET_OPENED: 'widget_opened' },
   trackEvent: jest.fn(),
 }));
 
