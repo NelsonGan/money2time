@@ -255,37 +255,39 @@ export function CalendarScreen({
   const zoomLevel = useSharedValue(VIEW_MODE_INDEX.day);
 
   const dayAnimStyle = useAnimatedStyle(() => {
-    const active = zoomLevel.value;
-    const scale = active <= 0 ? 1 : 1 + (active) * 0.6;
-    const opacity = active <= 0 ? 1 : Math.max(0, 1 - active * 1.5);
-    return {
-      transform: [{ scale }],
-      opacity,
-      zIndex: active <= 0.5 ? 2 : 0,
-    };
+    const z = zoomLevel.value;
+    if (z <= 0) return { transform: [{ scale: 1 }], opacity: 1, zIndex: 2 };
+    // Zooming out from day: this layer scales UP (zooming into it) and fades
+    const scale = 1 + z * 1.5;
+    const opacity = Math.max(0, 1 - z * 2);
+    return { transform: [{ scale }], opacity, zIndex: z < 0.5 ? 2 : 0 };
   });
 
   const monthAnimStyle = useAnimatedStyle(() => {
-    const active = zoomLevel.value;
-    const dist = Math.abs(active - 1);
-    const scale = active < 1 ? 0.5 + active * 0.5 : 1 + (active - 1) * 0.6;
-    const opacity = dist < 0.7 ? 1 - dist * 1.4 : 0;
-    return {
-      transform: [{ scale }],
-      opacity: Math.max(0, opacity),
-      zIndex: dist < 0.5 ? 2 : 0,
-    };
+    const z = zoomLevel.value;
+    if (z < 1) {
+      // Coming from day (z: 0→1): month starts small and grows to 1
+      const scale = 0.4 + z * 0.6;
+      const opacity = Math.max(0, z * 1.5);
+      return { transform: [{ scale }], opacity: Math.min(1, opacity), zIndex: z > 0.5 ? 2 : 0 };
+    }
+    if (z <= 1) return { transform: [{ scale: 1 }], opacity: 1, zIndex: 2 };
+    // Going to year (z: 1→2): month scales UP and fades
+    const t = z - 1;
+    const scale = 1 + t * 1.5;
+    const opacity = Math.max(0, 1 - t * 2);
+    return { transform: [{ scale }], opacity, zIndex: t < 0.5 ? 2 : 0 };
   });
 
   const yearAnimStyle = useAnimatedStyle(() => {
-    const active = zoomLevel.value;
-    const scale = active >= 2 ? 1 : 0.5 + (active) * 0.25;
-    const opacity = active >= 2 ? 1 : Math.max(0, (active - 1) * 1.5);
-    return {
-      transform: [{ scale }],
-      opacity,
-      zIndex: active >= 1.5 ? 2 : 0,
-    };
+    const z = zoomLevel.value;
+    if (z >= 2) return { transform: [{ scale: 1 }], opacity: 1, zIndex: 2 };
+    if (z <= 1) return { transform: [{ scale: 0.4 }], opacity: 0, zIndex: 0 };
+    // Coming from month (z: 1→2): year starts small and grows to 1
+    const t = z - 1;
+    const scale = 0.4 + t * 0.6;
+    const opacity = Math.max(0, t * 1.5);
+    return { transform: [{ scale }], opacity: Math.min(1, opacity), zIndex: t > 0.5 ? 2 : 0 };
   });
 
   // --- Year view ---
@@ -724,8 +726,9 @@ export function CalendarScreen({
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
     setSelectedDayKey(dayKey);
     const idx = getDayIndexForDayKey(dayKey);
+    const distance = Math.abs(idx - dayPagerActiveIndex.current);
     dayPagerActiveIndex.current = idx;
-    dayPagerRef.current?.scrollToIndex({ index: idx, animated: true });
+    dayPagerRef.current?.scrollToIndex({ index: idx, animated: distance <= 2 });
   }, [getDayIndexForDayKey]);
 
   // --- Day selection from month grid — zoom in to day view ---
@@ -1186,12 +1189,6 @@ export function CalendarScreen({
     ],
   );
 
-  // --- Year label for header ---
-  const selectedYearLabel = useMemo(() => {
-    const d = dayKeyToUtcDate(selectedDayKey);
-    return d ? String(d.getUTCFullYear()) : String(new Date().getFullYear());
-  }, [selectedDayKey]);
-
   const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
 
   // --- Back/zoom-out button ---
@@ -1230,11 +1227,6 @@ export function CalendarScreen({
             <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
               <View className="flex-row items-center gap-2 flex-1">
                 {BackButton}
-                {viewMode === 'year' && (
-                  <Text variant="heading" className="tracking-tight" numberOfLines={1}>
-                    {selectedYearLabel}
-                  </Text>
-                )}
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
