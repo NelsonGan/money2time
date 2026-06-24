@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, ChevronUp, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TextInput,
   UIManager,
   useWindowDimensions,
   View,
@@ -31,6 +32,7 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
+  ActivitySearchRow,
   DisplayModeToggle,
   MonthJumpPopover,
   TransactionItem,
@@ -255,6 +257,11 @@ export function CalendarScreen({
     height: number;
   } | null>(null);
 
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<TextInput | null>(null);
+  const hasActiveSearch = searchQuery.trim().length > 0;
+
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilterPicker, setActiveFilterPicker] = useState<FilterPickerKind | null>(null);
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
@@ -400,10 +407,22 @@ export function CalendarScreen({
     excludedIncomeCategoryIds.length +
     excludedExpenseCategoryIds.length;
 
+  // --- Search filtering ---
+  const searchFilteredTransactions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return filteredTransactions;
+    return filteredTransactions.filter((tx) => {
+      if (tx.note && tx.note.toLowerCase().includes(q)) return true;
+      if (tx.categoryName && tx.categoryName.toLowerCase().includes(q)) return true;
+      if (tx.categoryParentName && tx.categoryParentName.toLowerCase().includes(q)) return true;
+      return false;
+    });
+  }, [filteredTransactions, searchQuery]);
+
   // --- Build a global daily aggregate map for the week strip ---
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, { dayKey: string; income: number; expense: number; net: number; transactionCount: number; transactions: TransactionWithRelations[] }>();
-    for (const tx of filteredTransactions) {
+    for (const tx of searchFilteredTransactions) {
       if (tx.type !== 'income' && tx.type !== 'expense') continue;
       const dayKey = dayKeyFromIsoLocal(tx.date);
       let agg = map.get(dayKey);
@@ -424,7 +443,7 @@ export function CalendarScreen({
       agg.net = agg.income - agg.expense;
     });
     return map;
-  }, [filteredTransactions, isTimeMode, getDisplayValueForTransaction]);
+  }, [searchFilteredTransactions, isTimeMode, getDisplayValueForTransaction]);
 
   // --- Week strip anchor ---
   const anchorWeekStart = useMemo(
@@ -468,7 +487,7 @@ export function CalendarScreen({
     () =>
       buildCalendarMonth({
         monthAnchor: viewMode === 'month' ? activeMonthDate : selectedMonthDate,
-        transactions: filteredTransactions,
+        transactions: searchFilteredTransactions,
         locale: activeLocale,
         isTimeMode,
         getDisplayValueForTransaction,
@@ -479,7 +498,7 @@ export function CalendarScreen({
       viewMode,
       activeMonthDate,
       selectedMonthDate,
-      filteredTransactions,
+      searchFilteredTransactions,
       activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
@@ -702,6 +721,28 @@ export function CalendarScreen({
     },
     [handleHorizontalMomentumEnd],
   );
+
+  // --- Search ---
+  const handleOpenSearch = useCallback(() => {
+    void triggerHaptic('light');
+    setIsMonthPickerOpen(false);
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+      return;
+    }
+    setIsSearchOpen(true);
+  }, [isSearchOpen]);
+
+  const handleCloseSearch = useCallback(() => {
+    void triggerHaptic('light');
+    setSearchQuery('');
+    searchInputRef.current?.blur();
+    setIsSearchOpen(false);
+  }, []);
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchQuery(text);
+  }, []);
 
   // --- Filters ---
   const handleResetFilters = useCallback(() => {
@@ -982,7 +1023,7 @@ export function CalendarScreen({
             <CalendarMonthGrid
               monthData={buildCalendarMonth({
                 monthAnchor: pageMonth,
-                transactions: filteredTransactions,
+                transactions: searchFilteredTransactions,
                 locale: activeLocale,
                 isTimeMode,
                 getDisplayValueForTransaction,
@@ -1002,7 +1043,7 @@ export function CalendarScreen({
     },
     [
       activeLocale,
-      filteredTransactions,
+      searchFilteredTransactions,
       getDisplayValueForTransaction,
       gridChartWidth,
       handleSelectDayFromMonth,
@@ -1170,10 +1211,35 @@ export function CalendarScreen({
                 </View>
               </View>
               <View className="flex-row items-center gap-2">
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.filters.search')}
+                  onPress={handleOpenSearch}
+                  className={cn(
+                    'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+                    isSearchOpen || hasActiveSearch
+                      ? 'border-primary/45 bg-primary/10'
+                      : 'border-border/40 bg-card',
+                  )}
+                >
+                  <Search
+                    size={15}
+                    color={isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
+                  />
+                </Pressable>
                 <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
                 <DisplayModeToggle />
               </View>
             </View>
+
+            {/* Search row */}
+            <ActivitySearchRow
+              inputRef={searchInputRef}
+              visible={isSearchOpen || hasActiveSearch}
+              value={searchQuery}
+              onChangeText={handleSearchChange}
+              onClose={handleCloseSearch}
+            />
 
             {/* Summary row */}
             <View style={styles.summarySlot}>
