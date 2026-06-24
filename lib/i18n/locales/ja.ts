@@ -13,6 +13,7 @@ const ja = {
     copy: 'コピー',
     copied: 'コピー済み',
     delete: '削除',
+    remove: '外す',
     edit: '編集',
     reorder: '並び替え',
     on: 'オン',
@@ -936,7 +937,6 @@ const ja = {
     remove_simple_wallet_title: 'シンプルウォレットを削除しますか？',
     remove_simple_wallet_message:
       'シンプルウォレットとそれに紐づくすべての取引が完全に削除されます。',
-    remove: '削除',
     data_management: 'データ管理',
     statement_import: '明細インポート',
   },
@@ -1550,6 +1550,7 @@ const ja = {
     edit_transactions_title: '取引を編集',
     add_transactions_title: '取引を追加',
     remove_from_album: 'アルバムから削除',
+    remove_selected_body: 'このアルバムから{{count}}件の取引を外しますか？取引は削除されません。',
     tab_breakdown: '内訳',
     tab_transactions: '取引',
     no_expenses: '内訳できる支出がまだありません。',

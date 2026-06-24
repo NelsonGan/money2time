@@ -13,6 +13,7 @@ const es = {
     copy: 'Copiar',
     copied: 'Copiado',
     delete: 'Eliminar',
+    remove: 'Quitar',
     edit: 'Editar',
     reorder: 'Reordenar',
     on: 'Activo',
@@ -959,7 +960,6 @@ const es = {
     remove_simple_wallet_title: '¿Eliminar Billetera Simple?',
     remove_simple_wallet_message:
       'Se eliminará permanentemente la Billetera Simple y todos los movimientos vinculados a ella.',
-    remove: 'Eliminar',
     data_management: 'Gestión de datos',
     statement_import: 'Importar extracto',
   },
@@ -1581,6 +1581,7 @@ const es = {
     edit_transactions_title: 'Editar transacciones',
     add_transactions_title: 'Añadir transacciones',
     remove_from_album: 'Quitar del álbum',
+    remove_selected_body: '¿Quitar {{count}} transacciones de este álbum? No se eliminarán.',
     tab_breakdown: 'Desglose',
     tab_transactions: 'Transacciones',
     no_expenses: 'Aún no hay gastos para desglosar.',

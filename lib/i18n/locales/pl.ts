@@ -13,6 +13,7 @@ const pl = {
     copy: 'Kopiuj',
     copied: 'Skopiowano',
     delete: 'Usuń',
+    remove: 'Usuń',
     edit: 'Edytuj',
     reorder: 'Zmień kolejność',
     on: 'Wł.',
@@ -958,7 +959,6 @@ const pl = {
     remove_simple_wallet_title: 'Usunąć prosty portfel?',
     remove_simple_wallet_message:
       'Spowoduje to trwałe usunięcie prostego portfela i wszystkich powiązanych transakcji.',
-    remove: 'Usuń',
     data_management: 'Zarządzanie danymi',
     statement_import: 'Import wyciągu',
   },
@@ -1575,6 +1575,7 @@ const pl = {
     edit_transactions_title: 'Edytuj transakcje',
     add_transactions_title: 'Dodaj transakcje',
     remove_from_album: 'Usuń z albumu',
+    remove_selected_body: 'Usunąć {{count}} transakcji z tego albumu? Nie zostaną skasowane.',
     tab_breakdown: 'Podział',
     tab_transactions: 'Transakcje',
     no_expenses: 'Brak wydatków do podziału.',

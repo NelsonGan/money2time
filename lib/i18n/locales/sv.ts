@@ -13,6 +13,7 @@ const sv = {
     copy: 'Kopiera',
     copied: 'Kopierat',
     delete: 'Ta bort',
+    remove: 'Ta bort',
     edit: 'Redigera',
     reorder: 'Sortera om',
     on: 'På',
@@ -952,7 +953,6 @@ const sv = {
     remove_simple_wallet_title: 'Ta bort enkel plånbok?',
     remove_simple_wallet_message:
       'Det här tar permanent bort den enkla plånboken och alla transaktioner kopplade till den.',
-    remove: 'Ta bort',
     data_management: 'Datahantering',
     statement_import: 'Kontoutdragsimport',
   },
@@ -1569,6 +1569,7 @@ const sv = {
     edit_transactions_title: 'Redigera transaktioner',
     add_transactions_title: 'Lägg till transaktioner',
     remove_from_album: 'Ta bort från album',
+    remove_selected_body: 'Ta bort {{count}} transaktioner från det här albumet? De raderas inte.',
     tab_breakdown: 'Fördelning',
     tab_transactions: 'Transaktioner',
     no_expenses: 'Inga utgifter att fördela än.',

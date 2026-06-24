@@ -9,13 +9,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
+import {
+  type BreakdownChartRow,
+  CategoryBreakdownChart,
+  INSIGHTS_CHART_COLORS,
+} from '~/features/insights/components';
+import type { InsightsDrilldownPayload } from '~/features/insights/screens';
+import {
+  buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
+  TransactionSelectionToolbar,
+} from '~/features/transactions/components';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
-import type { TransactionWithRelations } from '~/types';
+import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatAmount, formatHours } from '~/utils/formatters';
@@ -34,6 +45,7 @@ interface AlbumDetailScreenProps {
   onAddTransactions: (albumId: string) => void;
   onEditDetails: (albumId: string) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenBreakdown: (payload: InsightsDrilldownPayload) => void;
   onDeleted: () => void;
 }
 
@@ -44,6 +56,7 @@ export function AlbumDetailScreen({
   onAddTransactions,
   onEditDetails,
   onOpenTransaction,
+  onOpenBreakdown,
   onDeleted,
 }: AlbumDetailScreenProps) {
   const {
@@ -56,11 +69,15 @@ export function AlbumDetailScreen({
     getTrueHourlyRateForDate,
     deleteAlbum,
     updateAlbum,
+    updateTransactionsBulk,
+    removeTransactionsFromAlbum,
   } = useApp();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const [tab, setTab] = useState<DetailTab>('breakdown');
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
   const album = albums.find((a) => a.id === albumId);
   // `albums` is included so membership/stat edits (which trigger a full reload)
@@ -80,8 +97,9 @@ export function AlbumDetailScreen({
   );
 
   // Expense-only breakdown grouped by root category, mirroring the insights breakdown.
-  const breakdownRows = useMemo<BreakdownChartRow[]>(() => {
+  const { breakdownRows, breakdownTransactionsByRoot } = useMemo(() => {
     const totals = new Map<string, BreakdownChartRow>();
+    const byRoot = new Map<string, TransactionWithRelations[]>();
     albumTransactions.forEach((t) => {
       if (t.type !== 'expense' || !t.categoryId) return;
       const cat = getCategoryById(t.categoryId);
@@ -102,9 +120,37 @@ export function AlbumDetailScreen({
           count: 1,
         });
       }
+      const list = byRoot.get(id);
+      if (list) list.push(t);
+      else byRoot.set(id, [t]);
     });
-    return [...totals.values()].sort((a, b) => b.amount - a.amount);
+    return {
+      breakdownRows: [...totals.values()].sort((a, b) => b.amount - a.amount),
+      breakdownTransactionsByRoot: byRoot,
+    };
   }, [albumTransactions, displayValue, getCategoryById]);
+
+  // Drill into a breakdown category exactly like the insights expense breakdown:
+  // parents open their subcategories, leaves open their transactions.
+  const handleOpenBreakdownRow = useCallback(
+    (rowId: string) => {
+      const index = breakdownRows.findIndex((row) => row.id === rowId);
+      if (index === -1) return;
+      const row = breakdownRows[index];
+      const rowTransactions = breakdownTransactionsByRoot.get(rowId) ?? [];
+      const rootCategory = getCategoryById(rowId);
+      onOpenBreakdown({
+        label: row.label,
+        transactionIds: rowTransactions.map((t) => t.id),
+        categoryRootId: rootCategory?.id,
+        categoryRootLabel: rootCategory?.name ?? row.label,
+        categoryRootEmoji: rootCategory?.icon ?? row.emoji ?? undefined,
+        categoryRootColor: INSIGHTS_CHART_COLORS[index % INSIGHTS_CHART_COLORS.length],
+        albumId,
+      });
+    },
+    [albumId, breakdownRows, breakdownTransactionsByRoot, getCategoryById, onOpenBreakdown],
+  );
 
   const formatValue = useCallback(
     (amount: number) =>
@@ -153,6 +199,114 @@ export function AlbumDetailScreen({
     }
   }, [album?.coverPhotoUri, albumId, updateAlbum]);
 
+  // --- Transactions tab multi-select ---
+  const isSelectionMode = selectedTransactionIds.length > 0;
+  const selectedTransactionCount = selectedTransactionIds.length;
+  const transactionById = useMemo(
+    () => new Map(albumTransactions.map((t) => [t.id, t])),
+    [albumTransactions],
+  );
+  const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedTransactionIds((prev) =>
+      prev.includes(id) ? prev.filter((existing) => existing !== id) : [...prev, id],
+    );
+  }, []);
+  const toggleDaySelection = useCallback((dayTransactionIds: string[]) => {
+    if (dayTransactionIds.length === 0) return;
+    void triggerHaptic('selection');
+    setSelectedTransactionIds((prev) => {
+      const prevSet = new Set(prev);
+      const allSelected = dayTransactionIds.every((id) => prevSet.has(id));
+      if (allSelected) {
+        const dayIdSet = new Set(dayTransactionIds);
+        return prev.filter((id) => !dayIdSet.has(id));
+      }
+      const next = [...prev];
+      for (const id of dayTransactionIds) {
+        if (!prevSet.has(id)) next.push(id);
+      }
+      return next;
+    });
+  }, []);
+  const handleTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleSelection(transaction.id);
+        return;
+      }
+      onOpenTransaction(transaction);
+    },
+    [isSelectionMode, onOpenTransaction, toggleSelection],
+  );
+  const handleTransactionLongPress = useCallback(
+    (transaction: TransactionWithRelations) => {
+      if (isSelectionMode) {
+        toggleSelection(transaction.id);
+        return;
+      }
+      void triggerHaptic('selection');
+      setSelectedTransactionIds([transaction.id]);
+    },
+    [isSelectionMode, toggleSelection],
+  );
+  const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
+    let hasIncome = false;
+    let hasExpense = false;
+    selectedTransactionIds.forEach((id) => {
+      const t = transactionById.get(id);
+      if (t?.type === 'income') hasIncome = true;
+      else if (t?.type === 'expense') hasExpense = true;
+    });
+    const types: CategoryType[] = [];
+    if (hasIncome) types.push('income');
+    if (hasExpense) types.push('expense');
+    return types;
+  }, [selectedTransactionIds, transactionById]);
+  const selectedTotal = useMemo(() => {
+    let total = 0;
+    selectedTransactionIds.forEach((id) => {
+      const t = transactionById.get(id);
+      if (t) total += displayValue(t);
+    });
+    return total;
+  }, [displayValue, selectedTransactionIds, transactionById]);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      const updates = buildBulkUpdateInputs(
+        selectedTransactionIds,
+        changes,
+        (id) => transactionById.get(id)?.type,
+      );
+      if (updates.length > 0) {
+        updateTransactionsBulk(updates);
+        void triggerHaptic('success');
+      }
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, transactionById, updateTransactionsBulk],
+  );
+  const handleRemoveSelected = useCallback(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const idsToRemove = [...selectedTransactionIds];
+    Alert.alert(
+      I18n.t('albums.remove_from_album'),
+      I18n.t('albums.remove_selected_body', { count: idsToRemove.length }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.remove'),
+          onPress: () => {
+            removeTransactionsFromAlbum(albumId, idsToRemove);
+            setSelectedTransactionIds([]);
+          },
+        },
+      ],
+    );
+  }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds]);
+
   if (!album) {
     return <View className="flex-1 bg-background" />;
   }
@@ -177,6 +331,7 @@ export function AlbumDetailScreen({
             key={option.value}
             onPress={() => {
               void triggerHaptic('selection');
+              setSelectedTransactionIds([]);
               setTab(option.value);
             }}
             accessibilityRole="tab"
@@ -337,27 +492,57 @@ export function AlbumDetailScreen({
                 <ScrollView
                   nestedScrollEnabled
                   showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingTop: 0, paddingBottom: insets.bottom + 32 }}
+                  contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
                 >
-                  <CategoryBreakdownChart rows={breakdownRows} formatValue={formatValue} />
+                  <CategoryBreakdownChart
+                    rows={breakdownRows}
+                    formatValue={formatValue}
+                    onSelectRow={handleOpenBreakdownRow}
+                  />
                 </ScrollView>
               )
             ) : (
-              <ActivityTransactionList
-                transactions={albumTransactions}
-                displaySettings={settings}
-                getDisplayValueForTransaction={getDisplayValueForTransaction}
-                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                onTransactionPress={onOpenTransaction}
-                emptyTitle={I18n.t('albums.no_transactions_title')}
-                emptyMessage={I18n.t('albums.no_transactions_message')}
-                contentPaddingBottom={insets.bottom + 32}
-                disableItemAnimations
-                compactItems
-              />
+              <View className="flex-1">
+                <ActivityTransactionList
+                  transactions={albumTransactions}
+                  displaySettings={settings}
+                  getDisplayValueForTransaction={getDisplayValueForTransaction}
+                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                  onTransactionPress={handleTransactionPress}
+                  onTransactionLongPress={handleTransactionLongPress}
+                  onToggleDaySelection={toggleDaySelection}
+                  selectedTransactionIds={selectedTransactionIds}
+                  selectionMode={isSelectionMode}
+                  emptyTitle={I18n.t('albums.no_transactions_title')}
+                  emptyMessage={I18n.t('albums.no_transactions_message')}
+                  contentPaddingBottom={insets.bottom + 32}
+                  disableItemAnimations
+                  compactItems
+                />
+                {isSelectionMode ? (
+                  <TransactionSelectionToolbar
+                    selectedCount={selectedTransactionCount}
+                    totalNode={
+                      <Text variant="label" className="text-foreground">
+                        {formatValue(selectedTotal)}
+                      </Text>
+                    }
+                    onCancel={clearSelection}
+                    onEdit={() => setShowBulkUpdate(true)}
+                    onDelete={handleRemoveSelected}
+                  />
+                ) : null}
+              </View>
             )}
           </View>
         </ScrollView>
+        <BulkEditTransactionsSheet
+          visible={showBulkUpdate}
+          selectedCount={selectedTransactionCount}
+          categoryTypes={selectionCategoryTypes}
+          onClose={() => setShowBulkUpdate(false)}
+          onApply={handleApplyBulkUpdate}
+        />
       </TabletContentContainer>
     </View>
   );

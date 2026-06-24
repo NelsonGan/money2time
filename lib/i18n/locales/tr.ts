@@ -13,6 +13,7 @@ const tr = {
     copy: 'Kopyala',
     copied: 'Kopyalandı',
     delete: 'Sil',
+    remove: 'Kaldır',
     edit: 'Düzenle',
     reorder: 'Yeniden Sırala',
     on: 'Açık',
@@ -956,7 +957,6 @@ const tr = {
     remove_simple_wallet_title: 'Basit Cüzdan Kaldırılsın mı?',
     remove_simple_wallet_message:
       'Bu işlem Basit Cüzdanı ve ona bağlı tüm işlemleri kalıcı olarak siler.',
-    remove: 'Kaldır',
     data_management: 'Veri Yönetimi',
     statement_import: 'Ekstre İçe Aktarma',
   },
@@ -1579,6 +1579,7 @@ const tr = {
     edit_transactions_title: 'İşlemleri düzenle',
     add_transactions_title: 'İşlem ekle',
     remove_from_album: 'Albümden çıkar',
+    remove_selected_body: '{{count}} işlem bu albümden çıkarılsın mı? İşlemler silinmez.',
     tab_breakdown: 'Dağılım',
     tab_transactions: 'İşlemler',
     no_expenses: 'Henüz dağıtılacak harcama yok.',

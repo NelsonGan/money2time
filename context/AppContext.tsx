@@ -1205,23 +1205,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
-  const addTransactionsToAlbum = useCallback(
-    (albumId: string, transactionIds: string[]) => {
-      runMutation(() => {
-        albumsRepository.addTransactions(albumId, transactionIds);
-      });
-    },
-    [runMutation],
-  );
+  // Membership edits only touch the album join table — a full refreshAll() would
+  // re-init the DB and reload everything (slow). Reloading just `albums` gives the
+  // membership-derived memos a fresh reference and updates the UI immediately.
+  const addTransactionsToAlbum = useCallback((albumId: string, transactionIds: string[]) => {
+    albumsRepository.addTransactions(albumId, transactionIds);
+    setAlbums(albumsRepository.list());
+  }, []);
 
-  const removeTransactionsFromAlbum = useCallback(
-    (albumId: string, transactionIds: string[]) => {
-      runMutation(() => {
-        albumsRepository.removeTransactions(albumId, transactionIds);
-      });
-    },
-    [runMutation],
-  );
+  const removeTransactionsFromAlbum = useCallback((albumId: string, transactionIds: string[]) => {
+    albumsRepository.removeTransactions(albumId, transactionIds);
+    setAlbums(albumsRepository.list());
+  }, []);
 
   const getAlbumTransactionIds = useCallback(
     (albumId: string) => albumsRepository.getTransactionIds(albumId),

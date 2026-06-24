@@ -13,6 +13,7 @@ const it = {
     copy: 'Copia',
     copied: 'Copiato',
     delete: 'Elimina',
+    remove: 'Rimuovi',
     edit: 'Modifica',
     reorder: 'Riordina',
     on: 'Attivo',
@@ -958,7 +959,6 @@ const it = {
     remove_simple_wallet_title: 'Rimuovere il portafoglio semplice?',
     remove_simple_wallet_message:
       'Il portafoglio semplice e tutte le transazioni collegate verranno eliminati definitivamente.',
-    remove: 'Rimuovi',
     data_management: 'Gestione dati',
     statement_import: 'Importa estratto conto',
   },
@@ -1578,6 +1578,8 @@ const it = {
     edit_transactions_title: 'Modifica transazioni',
     add_transactions_title: 'Aggiungi transazioni',
     remove_from_album: "Rimuovi dall'album",
+    remove_selected_body:
+      'Rimuovere {{count}} transazioni da questo album? Non verranno eliminate.',
     tab_breakdown: 'Ripartizione',
     tab_transactions: 'Transazioni',
     no_expenses: 'Ancora nessuna spesa da ripartire.',

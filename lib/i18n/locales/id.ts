@@ -13,6 +13,7 @@ const id = {
     copy: 'Salin',
     copied: 'Tersalin',
     delete: 'Hapus',
+    remove: 'Keluarkan',
     edit: 'Edit',
     reorder: 'Urutkan',
     on: 'Aktif',
@@ -961,7 +962,6 @@ const id = {
     remove_simple_wallet_title: 'Hapus Dompet Sederhana?',
     remove_simple_wallet_message:
       'Ini akan menghapus permanen Dompet Sederhana dan semua transaksi yang terhubung dengannya.',
-    remove: 'Hapus',
     data_management: 'Manajemen Data',
     statement_import: 'Impor Rekening Koran',
   },
@@ -1581,6 +1581,8 @@ const id = {
     edit_transactions_title: 'Edit transaksi',
     add_transactions_title: 'Tambah transaksi',
     remove_from_album: 'Hapus dari album',
+    remove_selected_body:
+      'Keluarkan {{count}} transaksi dari album ini? Transaksi tidak akan dihapus.',
     tab_breakdown: 'Rincian',
     tab_transactions: 'Transaksi',
     no_expenses: 'Belum ada pengeluaran untuk dirinci.',

@@ -13,6 +13,7 @@ const th = {
     copy: 'คัดลอก',
     copied: 'คัดลอกแล้ว',
     delete: 'ลบ',
+    remove: 'นำออก',
     edit: 'แก้ไข',
     reorder: 'จัดเรียง',
     on: 'เปิด',
@@ -932,7 +933,6 @@ const th = {
     remove_simple_wallet_title: 'ลบกระเป๋าเรียบง่าย?',
     remove_simple_wallet_message:
       'การดำเนินการนี้จะลบกระเป๋าเรียบง่ายและรายการที่เชื่อมโยงทั้งหมดอย่างถาวร',
-    remove: 'ลบ',
     data_management: 'การจัดการข้อมูล',
     statement_import: 'นำเข้าใบแจ้งยอด',
   },
@@ -1532,6 +1532,7 @@ const th = {
     edit_transactions_title: 'แก้ไขรายการ',
     add_transactions_title: 'เพิ่มรายการ',
     remove_from_album: 'นำออกจากอัลบั้ม',
+    remove_selected_body: 'นำ {{count}} รายการออกจากอัลบั้มนี้หรือไม่? รายการจะไม่ถูกลบ',
     tab_breakdown: 'สัดส่วน',
     tab_transactions: 'รายการ',
     no_expenses: 'ยังไม่มีค่าใช้จ่ายให้แสดงสัดส่วน',

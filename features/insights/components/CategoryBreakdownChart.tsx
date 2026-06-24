@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { CategoryEmoji, Text } from '~/components/ui';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { triggerHaptic } from '~/services/haptics';
 import { FONT } from '~/utils/fonts';
 
 import {
@@ -49,6 +50,11 @@ interface CategoryBreakdownChartProps {
   rows: BreakdownChartRow[];
   /** Formats an amount into the on-screen string (currency or hours). */
   formatValue: (amount: number) => string;
+  /**
+   * When provided, each legend row becomes tappable and reports the row id —
+   * used to drill into a category (subcategories or its transactions).
+   */
+  onSelectRow?: (rowId: string) => void;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -67,7 +73,11 @@ function withColorAlpha(hex: string, alpha: number) {
  * Category breakdown pie + legend, matching the insights expense breakdown
  * (gifted-charts pie with a custom collision-avoiding outward-label overlay).
  */
-export function CategoryBreakdownChart({ rows, formatValue }: CategoryBreakdownChartProps) {
+export function CategoryBreakdownChart({
+  rows,
+  formatValue,
+  onSelectRow,
+}: CategoryBreakdownChartProps) {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const isDark = resolvedTheme === 'dark';
@@ -221,9 +231,24 @@ export function CategoryBreakdownChart({ rows, formatValue }: CategoryBreakdownC
         {items.map((item) => {
           const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
           return (
-            <View
+            <Pressable
               key={item.id}
-              className="rounded-xl border px-2.5 py-2"
+              disabled={!onSelectRow}
+              onPress={
+                onSelectRow
+                  ? () => {
+                      void triggerHaptic('selection');
+                      onSelectRow(item.id);
+                    }
+                  : undefined
+              }
+              accessibilityRole={onSelectRow ? 'button' : undefined}
+              accessibilityLabel={`${item.emoji ?? ''} ${item.label}`.trim()}
+              className={
+                onSelectRow
+                  ? 'rounded-xl border px-2.5 py-2 active:opacity-85'
+                  : 'rounded-xl border px-2.5 py-2'
+              }
               style={{
                 backgroundColor: withColorAlpha(item.color, 0.07 + pctRatio * 0.22),
                 borderColor: withColorAlpha(item.color, 0.2 + pctRatio * 0.32),
@@ -250,7 +275,7 @@ export function CategoryBreakdownChart({ rows, formatValue }: CategoryBreakdownC
                   </View>
                 </View>
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>

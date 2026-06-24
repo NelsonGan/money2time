@@ -1164,6 +1164,7 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
+      onOpenBreakdown={(payload) => navigation.navigate('InsightsDrilldown', payload)}
     />
   );
 }
@@ -1290,6 +1291,8 @@ function InsightsDrilldownRouteScreen({
   route,
   navigation,
 }: RootStackRouteProps<'InsightsDrilldown'>) {
+  const { removeTransactionsFromAlbum } = useApp();
+  const albumId = route.params.albumId;
   return (
     <InsightsDrilldownScreen
       payload={route.params}
@@ -1306,6 +1309,7 @@ function InsightsDrilldownRouteScreen({
         })
       }
       onOpenSubcategoryDrilldown={(payload) => navigation.push('InsightsDrilldown', payload)}
+      onRemoveFromAlbum={albumId ? (ids) => removeTransactionsFromAlbum(albumId, ids) : undefined}
     />
   );
 }

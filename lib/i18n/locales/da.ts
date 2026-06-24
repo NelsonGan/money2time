@@ -13,6 +13,7 @@ const da = {
     copy: 'Kopier',
     copied: 'Kopieret',
     delete: 'Slet',
+    remove: 'Fjern',
     edit: 'Rediger',
     reorder: 'Omarranger',
     on: 'Til',
@@ -957,7 +958,6 @@ const da = {
     remove_simple_wallet_title: 'Fjern simpel pung?',
     remove_simple_wallet_message:
       'Dette sletter permanent den simple pung og alle transaktioner tilknyttet den.',
-    remove: 'Fjern',
     data_management: 'Datastyring',
     statement_import: 'Kontoopgørelse-import',
   },
@@ -1571,6 +1571,7 @@ const da = {
     edit_transactions_title: 'Rediger transaktioner',
     add_transactions_title: 'Tilføj transaktioner',
     remove_from_album: 'Fjern fra album',
+    remove_selected_body: 'Fjern {{count}} transaktioner fra dette album? De slettes ikke.',
     tab_breakdown: 'Fordeling',
     tab_transactions: 'Transaktioner',
     no_expenses: 'Ingen udgifter at fordele endnu.',

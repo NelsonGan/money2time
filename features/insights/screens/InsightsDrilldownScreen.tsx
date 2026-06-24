@@ -15,7 +15,6 @@ import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import {
   CategoryEmoji,
-  Input,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -38,30 +37,25 @@ import {
 } from '~/features/insights/breakdownPieLayout';
 import {
   ActivityTransactionList,
+  buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
-import { DatePickerModal } from '~/components/datePicker';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionType, TransactionWithRelations } from '~/types';
+import type { Category, CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { FONT } from '~/utils/fonts';
-import { formatAmount, formatDateInput, formatHours } from '~/utils/formatters';
+import { formatAmount, formatHours } from '~/utils/formatters';
 
 type DrilldownSortOption = 'default' | 'largest_value';
 type DrilldownTransactionFilter = 'income' | 'expense';
-type EditableTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 
-const DRILLDOWN_BULK_SCROLL_CONTENT_STYLE = {
-  padding: spacing.screenHorizontal,
-  paddingBottom: spacing.listBottom + spacing.xs,
-  gap: spacing.sm,
-} as const;
-const DRILLDOWN_BULK_TYPE_PILLS_STYLE = { gap: spacing.xs } as const;
 const DRILLDOWN_DIRECT_PARENT_ROW_ID = '__direct-parent__';
 const EMPTY_DRILLDOWN_TRANSACTIONS: TransactionWithRelations[] = [];
 
@@ -194,6 +188,12 @@ export interface InsightsDrilldownPayload {
   categoryRootEmoji?: string;
   categoryRootColor?: string;
   showSubcategorySelection?: boolean;
+  /**
+   * When set, this drilldown was opened from an album. The selection delete
+   * action removes transactions from that album instead of deleting them, and
+   * subcategory drilldowns carry the same album context.
+   */
+  albumId?: string;
 }
 
 interface InsightsDrilldownScreenProps {
@@ -202,6 +202,11 @@ interface InsightsDrilldownScreenProps {
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSubcategoryDrilldown?: (payload: InsightsDrilldownPayload) => void;
+  /**
+   * Album-context override: when provided, the selection delete button removes
+   * the transactions from the album rather than deleting them outright.
+   */
+  onRemoveFromAlbum?: (transactionIds: string[]) => void;
 }
 
 export function InsightsDrilldownScreen({
@@ -210,6 +215,7 @@ export function InsightsDrilldownScreen({
   onOpenTransaction,
   onOpenTransactionSplitBadge,
   onOpenSubcategoryDrilldown,
+  onRemoveFromAlbum,
 }: InsightsDrilldownScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const themeColors = useThemeColors();
@@ -218,11 +224,13 @@ export function InsightsDrilldownScreen({
   const { width } = useWindowDimensions();
   const { isTablet } = useDeviceLayout();
   const {
+    albums,
     categories,
     transactions,
     settings,
     updateTransactionsBulk,
     deleteTransactionsBulk,
+    getAlbumTransactionIds,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
@@ -231,12 +239,6 @@ export function InsightsDrilldownScreen({
   const [drilldownSortOption, setDrilldownSortOption] = useState<DrilldownSortOption>('default');
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
-  const [bulkDateTouched, setBulkDateTouched] = useState(false);
-  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
-  const [bulkType, setBulkType] = useState<EditableTransactionType | null>(null);
-  const [bulkNote, setBulkNote] = useState('');
-  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const [activeBreakdownSliceId, setActiveBreakdownSliceId] = useState<string | null>(null);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
   const setActiveBreakdownSlice = useCallback((nextId: string | null, withHaptic = false) => {
@@ -291,16 +293,6 @@ export function InsightsDrilldownScreen({
   const hasRootChildCategories = rootChildCategories.length > 0;
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
-  const hasBulkChanges = bulkDateTouched || bulkNoteTouched || bulkType !== null;
-  const drilldownBulkTypeOptions = useMemo(
-    () =>
-      [
-        { value: 'expense', label: I18n.t('transactions.filters.spent') },
-        { value: 'income', label: I18n.t('transactions.filters.earned') },
-        { value: 'transfer', label: I18n.t('transactions.filters.moved') },
-      ] satisfies { value: EditableTransactionType; label: string }[],
-    [],
-  );
 
   const sortTransactions = useCallback(
     (items: TransactionWithRelations[]) => {
@@ -328,11 +320,20 @@ export function InsightsDrilldownScreen({
     },
     [drilldownSortOption, getDisplayValueForTransaction, settings.displayMode],
   );
+  // In album mode, restrict to transactions still in the album so removals
+  // disappear immediately (membership edits trigger a full reload of `albums`).
+  // `albums` is included so membership edits (which trigger a full reload)
+  // recompute this immediately.
+  const albumMemberIds = useMemo(
+    () => (payload.albumId ? new Set(getAlbumTransactionIds(payload.albumId)) : null),
+    [payload.albumId, getAlbumTransactionIds, albums],
+  );
   const { resolvedTransactions, payloadTransactionById } = useMemo(() => {
     const requestedTransactionIds = new Set(payload.transactionIds);
     const nextTransactionById = new Map<string, TransactionWithRelations>();
     transactions.forEach((transaction) => {
       if (!requestedTransactionIds.has(transaction.id)) return;
+      if (albumMemberIds && !albumMemberIds.has(transaction.id)) return;
       nextTransactionById.set(transaction.id, transaction);
     });
 
@@ -347,7 +348,7 @@ export function InsightsDrilldownScreen({
       resolvedTransactions: sortTransactions(resolved),
       payloadTransactionById: nextTransactionById,
     };
-  }, [payload.transactionIds, sortTransactions, transactions]);
+  }, [albumMemberIds, payload.transactionIds, sortTransactions, transactions]);
   const subcategoryRows = useMemo<DrilldownSubcategoryRow[]>(() => {
     if (!rootCategoryId || !hasRootChildCategories) return [];
 
@@ -638,6 +639,23 @@ export function InsightsDrilldownScreen({
       return next;
     });
   }, []);
+  const toggleDaySelection = useCallback((dayTransactionIds: string[]) => {
+    if (dayTransactionIds.length === 0) return;
+    void triggerHaptic('selection');
+    setSelectedTransactionIds((previous) => {
+      const previousSet = new Set(previous);
+      const allSelected = dayTransactionIds.every((id) => previousSet.has(id));
+      if (allSelected) {
+        const dayIdSet = new Set(dayTransactionIds);
+        return previous.filter((id) => !dayIdSet.has(id));
+      }
+      const next = [...previous];
+      for (const id of dayTransactionIds) {
+        if (!previousSet.has(id)) next.push(id);
+      }
+      return next;
+    });
+  }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -673,97 +691,64 @@ export function InsightsDrilldownScreen({
     [isSelectionMode, toggleSelection],
   );
 
+  const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
+    let hasIncome = false;
+    let hasExpense = false;
+    selectedTransactionIds.forEach((id) => {
+      const transaction = payloadTransactionById.get(id);
+      if (transaction?.type === 'income') hasIncome = true;
+      else if (transaction?.type === 'expense') hasExpense = true;
+    });
+    const types: CategoryType[] = [];
+    if (hasIncome) types.push('income');
+    if (hasExpense) types.push('expense');
+    return types;
+  }, [payloadTransactionById, selectedTransactionIds]);
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
-    setBulkDate(formatDateInput(new Date()));
-    setBulkDateTouched(false);
-    setBulkType(null);
-    setBulkNote('');
-    setBulkNoteTouched(false);
     setShowBulkUpdate(true);
   }, [selectedTransactionCount]);
   const handleCloseBulkUpdate = useCallback(() => {
     setShowBulkUpdate(false);
   }, []);
-  const handleApplyBulkUpdate = useCallback(() => {
-    if (selectedTransactionIds.length === 0 || !hasBulkChanges) return;
-
-    const baseUpdates: { date?: string; note?: string | null } = {};
-    if (bulkDateTouched) baseUpdates.date = bulkDate;
-    if (bulkNoteTouched) {
-      const normalizedNote = bulkNote.trim();
-      baseUpdates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-
-    const updatesById: {
-      id: string;
-      input: {
-        date?: string;
-        note?: string | null;
-        type?: EditableTransactionType;
-        accountId?: string | null;
-        categoryId?: string | null;
-        fromAccountId?: string | null;
-        toAccountId?: string | null;
-      };
-    }[] = [];
-
-    selectedTransactionIds.forEach((transactionId) => {
-      const existing = payloadTransactionById.get(transactionId);
-      const updates: {
-        date?: string;
-        note?: string | null;
-        type?: EditableTransactionType;
-        accountId?: string | null;
-        categoryId?: string | null;
-        fromAccountId?: string | null;
-        toAccountId?: string | null;
-      } = { ...baseUpdates };
-
-      if (bulkType === 'transfer') {
-        if (existing?.type === 'income' || existing?.type === 'expense') {
-          if (!existing.accountId) return;
-          updates.type = 'transfer';
-          updates.accountId = null;
-          updates.categoryId = null;
-          updates.fromAccountId = existing.accountId;
-          updates.toAccountId = null;
-        } else {
-          updates.type = 'transfer';
-          updates.accountId = null;
-          updates.categoryId = null;
-        }
-      } else if (bulkType) {
-        updates.type = bulkType;
-        updates.categoryId = null;
-        updates.fromAccountId = null;
-        updates.toAccountId = null;
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      const updates = buildBulkUpdateInputs(
+        selectedTransactionIds,
+        changes,
+        (id) => payloadTransactionById.get(id)?.type,
+      );
+      if (updates.length > 0) {
+        updateTransactionsBulk(updates);
+        void triggerHaptic('success');
       }
-
-      if (Object.keys(updates).length === 0) return;
-      updatesById.push({ id: transactionId, input: updates });
-    });
-
-    if (updatesById.length === 0) return;
-
-    updateTransactionsBulk(updatesById);
-
-    setShowBulkUpdate(false);
-    setSelectedTransactionIds([]);
-  }, [
-    bulkDate,
-    bulkDateTouched,
-    bulkNote,
-    bulkNoteTouched,
-    bulkType,
-    hasBulkChanges,
-    selectedTransactionIds,
-    payloadTransactionById,
-    updateTransactionsBulk,
-  ]);
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, payloadTransactionById, updateTransactionsBulk],
+  );
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
     const idsToDelete = [...selectedTransactionIds];
+    if (onRemoveFromAlbum) {
+      Alert.alert(
+        I18n.t('albums.remove_from_album'),
+        I18n.t('albums.remove_selected_body', { count: idsToDelete.length }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.remove'),
+            onPress: () => {
+              onRemoveFromAlbum(idsToDelete);
+              setShowBulkUpdate(false);
+              setSelectedTransactionIds([]);
+            },
+          },
+        ],
+      );
+      return;
+    }
     Alert.alert(
       I18n.t('transactions.selection.delete_title'),
       I18n.t('transactions.selection.delete_message', { count: idsToDelete.length }),
@@ -780,7 +765,7 @@ export function InsightsDrilldownScreen({
         },
       ],
     );
-  }, [deleteTransactionsBulk, selectedTransactionIds]);
+  }, [deleteTransactionsBulk, onRemoveFromAlbum, selectedTransactionIds]);
 
   useEffect(() => {
     if (!isSelectionMode) {
@@ -924,445 +909,332 @@ export function InsightsDrilldownScreen({
 
   return (
     <SettingsPageLayout>
-      {showBulkUpdate ? (
-        <>
-          <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
-            <View className="flex-1 pr-3">
-              <Text variant="subheading">
-                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('transactions.selection.update_subtitle')}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={handleCloseBulkUpdate}
-                className="px-3 py-2 rounded-full bg-secondary/70"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.cancel')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleApplyBulkUpdate}
-                disabled={!hasBulkChanges}
-                className={cn(
-                  'px-3 py-2 rounded-full',
-                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
+      <View style={styles.headerContainer}>
+        <SettingsHeader className="px-0 pt-5 pb-3" onBack={handleHeaderBack} title={headerTitle} />
+      </View>
+
+      {isSelectionMode ? (
+        <TransactionSelectionToolbar
+          selectedCount={selectedTransactionCount}
+          totalNode={renderDisplayValueNode(selectedTransactionTotalLabel, {
+            variant: 'label',
+            textClassName: selectedTransactionTotalToneClass,
+            iconColor: themeColors.text,
+          })}
+          onCancel={clearSelection}
+          onEdit={handleOpenBulkUpdate}
+          onDelete={handleDeleteSelectedTransactions}
+        />
+      ) : null}
+
+      {shouldShowSortControls ? (
+        <View className="px-5 pb-2">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.sortControlsContent}
+          >
+            <Text variant="caption" tone="muted">
+              {I18n.t('transactions.filters.sort')}
+            </Text>
+            <FilterPill
+              label={I18n.t('transactions.sort.newest')}
+              active={drilldownSortOption === 'default'}
+              onPress={() => handleSortOptionChange('default')}
+            />
+            <FilterPill
+              label={I18n.t('transactions.sort.high')}
+              active={drilldownSortOption === 'largest_value'}
+              onPress={() => handleSortOptionChange('largest_value')}
+            />
+          </ScrollView>
+        </View>
+      ) : null}
+
+      {shouldShowSubcategoryList ? (
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={styles.subcategoryScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="gap-1">
+            <View className="items-center px-1">
+              <View className="w-full items-center gap-0.5 py-1">
+                {renderDisplayValueNode(
+                  settings.displayMode === 'time'
+                    ? formatHours(pageTotalAmount)
+                    : formatAmount(pageTotalAmount, settings, { showSign: false }),
+                  {
+                    variant: 'heading',
+                    textClassName:
+                      'text-[24px] leading-[38px] font-black tracking-tight text-center',
+                    iconColor: totalRowAccentColor,
+                    iconSize: 22,
+                    style: { color: totalRowAccentColor },
+                  },
                 )}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.save')}
-                accessibilityState={{ disabled: !hasBulkChanges }}
+                <View
+                  style={{
+                    width: 36,
+                    height: 3,
+                    borderRadius: 2,
+                    backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+                    marginTop: 1,
+                  }}
+                />
+              </View>
+
+              <View className="mt-2 w-full items-center overflow-visible">
+                {pagePieData.length > 0 && pageTotalAmount > 0 ? (
+                  <View className="w-full items-center" style={styles.chartSizeCenter}>
+                    <View
+                      style={buildSizeStyle(pieStageWidth, pieStageHeight)}
+                      onStartShouldSetResponder={() => true}
+                      onResponderRelease={(event) => {
+                        const { locationX, locationY } = event.nativeEvent;
+                        const nextId = pieSliceIdFromTouch(
+                          {
+                            x: locationX - pieExtraRadius,
+                            y: locationY + pieStageVerticalInset - pieExtraRadius,
+                          },
+                          pagePieData,
+                          pageTotalAmount,
+                          pieRadius,
+                        );
+                        if (!nextId) {
+                          setActiveBreakdownSlice(null, false);
+                          return;
+                        }
+                        if (activeBreakdownSliceId === nextId) return;
+                        setActiveBreakdownSlice(nextId, true);
+                      }}
+                    >
+                      <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
+                        <PieChart
+                          data={interactivePieData}
+                          radius={pieRadius}
+                          extraRadius={pieExtraRadius}
+                        />
+                      </View>
+                      <Svg
+                        pointerEvents="none"
+                        width={pieStageWidth}
+                        height={pieStageHeight}
+                        style={StyleSheet.absoluteFill}
+                      >
+                        {pieLabels.map((label) => {
+                          const labelStyle = pieLabelStyleById.get(label.id);
+                          if (!labelStyle) return null;
+                          return (
+                            <G key={label.id} opacity={labelStyle.dimmed ? 0.72 : 1}>
+                              <Polyline
+                                points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                                fill="none"
+                                stroke={labelStyle.labelStroke}
+                                strokeWidth={labelStyle.lineThickness}
+                                strokeLinejoin="round"
+                                strokeLinecap="round"
+                              />
+                              <G x={label.boxLeft} y={label.labelY}>
+                                <SvgText
+                                  x={pieLabelWidth / 2}
+                                  y={-4}
+                                  textAnchor="middle"
+                                  alignmentBaseline="middle"
+                                  fontSize={9.2}
+                                  fontFamily={FONT.bold}
+                                  fontWeight="700"
+                                  fill={labelStyle.labelTextColor}
+                                >
+                                  {`${labelStyle.emoji} ${labelStyle.categoryLabel}`}
+                                </SvgText>
+                                <SvgText
+                                  x={pieLabelWidth / 2}
+                                  y={8}
+                                  textAnchor="middle"
+                                  alignmentBaseline="middle"
+                                  fontSize={8}
+                                  fontFamily={FONT.semibold}
+                                  fontWeight="600"
+                                  fill={withColorAlpha(
+                                    labelStyle.labelTextColor,
+                                    isDark ? 0.75 : 0.55,
+                                  )}
+                                >
+                                  {`${labelStyle.pct.toFixed(1)}%`}
+                                </SvgText>
+                              </G>
+                            </G>
+                          );
+                        })}
+                      </Svg>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+
+            <View className="gap-1.5">
+              {pagePieData.map((item) => {
+                const isSelected = activeBreakdownSliceId === item.id;
+                const hasSelection = activeBreakdownSliceId !== null;
+                const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
+                const rowBackgroundColor = isSelected
+                  ? withColorAlpha(item.color, 0.28)
+                  : hasSelection
+                    ? withColorAlpha(item.color, 0.04)
+                    : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
+                const rowBorderColor = isSelected
+                  ? withColorAlpha(item.color, 0.7)
+                  : hasSelection
+                    ? withColorAlpha(item.color, 0.1)
+                    : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
+                const percentBadgeColor = isSelected
+                  ? withColorAlpha(item.color, 0.38)
+                  : withColorAlpha(item.color, 0.24);
+
+                return (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => {
+                      setActiveBreakdownSlice(null, false);
+                      handleSelectSubcategory({
+                        id: item.id,
+                        label: item.name,
+                        emoji: item.emoji,
+                        totalValue: item.totalValue,
+                        sharePct: item.pct,
+                        count: item.count,
+                        transactions: item.transactions,
+                      });
+                    }}
+                    disabled={!onOpenSubcategoryDrilldown}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${item.emoji} ${item.name}`}
+                    accessibilityState={{ disabled: !onOpenSubcategoryDrilldown }}
+                    className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                    style={[
+                      { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
+                      isSelected && { borderWidth: 2 },
+                      hasSelection && !isSelected && { opacity: 0.5 },
+                    ]}
+                  >
+                    <View className="flex-row items-center justify-between gap-2">
+                      <View className="flex-1 flex-row items-center gap-1.5 pr-2">
+                        <CategoryEmoji icon={item.emoji} size={16} />
+                        <Text variant="caption" className="flex-1" numberOfLines={2}>
+                          {item.name}
+                        </Text>
+                      </View>
+                      <View className="items-end">
+                        <View className="flex-row items-center gap-1.5">
+                          {renderSubcategoryValue(item.totalValue)}
+                          <View
+                            className="rounded-full px-1.5 py-0.5"
+                            style={[
+                              styles.breakdownPercentBadge,
+                              { backgroundColor: percentBadgeColor },
+                            ]}
+                          >
+                            <Text variant="label" className="text-foreground">
+                              {item.pct.toFixed(1)}%
+                            </Text>
+                          </View>
+                        </View>
+                        <Text variant="label" tone="muted" className="mt-0.5">
+                          {item.count} {I18n.t('calendar.transactions')}
+                        </Text>
+                      </View>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
+      ) : null}
+
+      {shouldShowTypeFilter ? (
+        <View className="px-5 pb-2">
+          <View className="border-b border-border/35">
+            <View className="flex-row items-center">
+              <Pressable
+                onPress={() => handleTypeFilterChange('income')}
+                accessibilityRole="tab"
+                accessibilityLabel={I18n.t('calendar.income')}
+                accessibilityState={{ selected: drilldownTypeFilter === 'income' }}
+                className="flex-1 items-center py-2.5 active:opacity-85"
               >
                 <Text
-                  variant="caption"
-                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
+                  variant="bodyStrong"
+                  className={cn(
+                    drilldownTypeFilter === 'income' ? 'text-foreground' : 'text-muted-foreground',
+                  )}
                 >
-                  {I18n.t('common.save')}
+                  {I18n.t('calendar.income')}
                 </Text>
+                <View
+                  className={cn(
+                    'mt-1 h-0.5 w-10 rounded-full',
+                    drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-transparent',
+                  )}
+                />
               </Pressable>
-            </View>
-          </View>
-
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={DRILLDOWN_BULK_SCROLL_CONTENT_STYLE}
-          >
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.filters.type')}
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={DRILLDOWN_BULK_TYPE_PILLS_STYLE}
-              >
-                {drilldownBulkTypeOptions.map((option) => (
-                  <FilterPill
-                    key={option.value}
-                    label={option.label}
-                    active={bulkType === option.value}
-                    onPress={() =>
-                      setBulkType((current) => (current === option.value ? null : option.value))
-                    }
-                  />
-                ))}
-              </ScrollView>
-            </View>
-
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.date')}
-              </Text>
               <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setBulkDateModalVisible(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.editor.date')}
-                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
+                onPress={() => handleTypeFilterChange('expense')}
+                accessibilityRole="tab"
+                accessibilityLabel={I18n.t('calendar.expense')}
+                accessibilityState={{ selected: drilldownTypeFilter === 'expense' }}
+                className="flex-1 items-center py-2.5 active:opacity-85"
               >
-                <Text variant="caption">{bulkDate}</Text>
+                <Text
+                  variant="bodyStrong"
+                  className={cn(
+                    drilldownTypeFilter === 'expense' ? 'text-foreground' : 'text-muted-foreground',
+                  )}
+                >
+                  {I18n.t('calendar.expense')}
+                </Text>
+                <View
+                  className={cn(
+                    'mt-1 h-0.5 w-10 rounded-full',
+                    drilldownTypeFilter === 'expense' ? 'bg-destructive' : 'bg-transparent',
+                  )}
+                />
               </Pressable>
             </View>
-
-            <View className="gap-2.5">
-              <Input
-                label={I18n.t('transaction_detail.note')}
-                placeholder={I18n.t('transactions.editor.optional')}
-                value={bulkNote}
-                onChangeText={(value) => {
-                  setBulkNote(value);
-                  setBulkNoteTouched(true);
-                }}
-              />
-            </View>
-          </ScrollView>
-        </>
-      ) : (
-        <>
-          <View style={styles.headerContainer}>
-            <SettingsHeader
-              className="px-0 pt-5 pb-3"
-              onBack={handleHeaderBack}
-              title={headerTitle}
-            />
           </View>
+        </View>
+      ) : null}
 
-          {isSelectionMode ? (
-            <TransactionSelectionToolbar
-              selectedCount={selectedTransactionCount}
-              totalNode={renderDisplayValueNode(selectedTransactionTotalLabel, {
-                variant: 'label',
-                textClassName: selectedTransactionTotalToneClass,
-                iconColor: themeColors.text,
-              })}
-              onCancel={clearSelection}
-              onEdit={handleOpenBulkUpdate}
-              onDelete={handleDeleteSelectedTransactions}
-            />
-          ) : null}
-
-          {shouldShowSortControls ? (
-            <View className="px-5 pb-2">
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.sortControlsContent}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.filters.sort')}
-                </Text>
-                <FilterPill
-                  label={I18n.t('transactions.sort.newest')}
-                  active={drilldownSortOption === 'default'}
-                  onPress={() => handleSortOptionChange('default')}
-                />
-                <FilterPill
-                  label={I18n.t('transactions.sort.high')}
-                  active={drilldownSortOption === 'largest_value'}
-                  onPress={() => handleSortOptionChange('largest_value')}
-                />
-              </ScrollView>
-            </View>
-          ) : null}
-
-          {shouldShowSubcategoryList ? (
-            <ScrollView
-              className="flex-1"
-              contentContainerStyle={styles.subcategoryScrollContent}
-              showsVerticalScrollIndicator={false}
-            >
-              <View className="gap-1">
-                <View className="items-center px-1">
-                  <View className="w-full items-center gap-0.5 py-1">
-                    {renderDisplayValueNode(
-                      settings.displayMode === 'time'
-                        ? formatHours(pageTotalAmount)
-                        : formatAmount(pageTotalAmount, settings, { showSign: false }),
-                      {
-                        variant: 'heading',
-                        textClassName:
-                          'text-[24px] leading-[38px] font-black tracking-tight text-center',
-                        iconColor: totalRowAccentColor,
-                        iconSize: 22,
-                        style: { color: totalRowAccentColor },
-                      },
-                    )}
-                    <View
-                      style={{
-                        width: 36,
-                        height: 3,
-                        borderRadius: 2,
-                        backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
-                        marginTop: 1,
-                      }}
-                    />
-                  </View>
-
-                  <View className="mt-2 w-full items-center overflow-visible">
-                    {pagePieData.length > 0 && pageTotalAmount > 0 ? (
-                      <View className="w-full items-center" style={styles.chartSizeCenter}>
-                        <View
-                          style={buildSizeStyle(pieStageWidth, pieStageHeight)}
-                          onStartShouldSetResponder={() => true}
-                          onResponderRelease={(event) => {
-                            const { locationX, locationY } = event.nativeEvent;
-                            const nextId = pieSliceIdFromTouch(
-                              {
-                                x: locationX - pieExtraRadius,
-                                y: locationY + pieStageVerticalInset - pieExtraRadius,
-                              },
-                              pagePieData,
-                              pageTotalAmount,
-                              pieRadius,
-                            );
-                            if (!nextId) {
-                              setActiveBreakdownSlice(null, false);
-                              return;
-                            }
-                            if (activeBreakdownSliceId === nextId) return;
-                            setActiveBreakdownSlice(nextId, true);
-                          }}
-                        >
-                          <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
-                            <PieChart
-                              data={interactivePieData}
-                              radius={pieRadius}
-                              extraRadius={pieExtraRadius}
-                            />
-                          </View>
-                          <Svg
-                            pointerEvents="none"
-                            width={pieStageWidth}
-                            height={pieStageHeight}
-                            style={StyleSheet.absoluteFill}
-                          >
-                            {pieLabels.map((label) => {
-                              const labelStyle = pieLabelStyleById.get(label.id);
-                              if (!labelStyle) return null;
-                              return (
-                                <G key={label.id} opacity={labelStyle.dimmed ? 0.72 : 1}>
-                                  <Polyline
-                                    points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
-                                    fill="none"
-                                    stroke={labelStyle.labelStroke}
-                                    strokeWidth={labelStyle.lineThickness}
-                                    strokeLinejoin="round"
-                                    strokeLinecap="round"
-                                  />
-                                  <G x={label.boxLeft} y={label.labelY}>
-                                    <SvgText
-                                      x={pieLabelWidth / 2}
-                                      y={-4}
-                                      textAnchor="middle"
-                                      alignmentBaseline="middle"
-                                      fontSize={9.2}
-                                      fontFamily={FONT.bold}
-                                      fontWeight="700"
-                                      fill={labelStyle.labelTextColor}
-                                    >
-                                      {`${labelStyle.emoji} ${labelStyle.categoryLabel}`}
-                                    </SvgText>
-                                    <SvgText
-                                      x={pieLabelWidth / 2}
-                                      y={8}
-                                      textAnchor="middle"
-                                      alignmentBaseline="middle"
-                                      fontSize={8}
-                                      fontFamily={FONT.semibold}
-                                      fontWeight="600"
-                                      fill={withColorAlpha(
-                                        labelStyle.labelTextColor,
-                                        isDark ? 0.75 : 0.55,
-                                      )}
-                                    >
-                                      {`${labelStyle.pct.toFixed(1)}%`}
-                                    </SvgText>
-                                  </G>
-                                </G>
-                              );
-                            })}
-                          </Svg>
-                        </View>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-
-                <View className="gap-1.5">
-                  {pagePieData.map((item) => {
-                    const isSelected = activeBreakdownSliceId === item.id;
-                    const hasSelection = activeBreakdownSliceId !== null;
-                    const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
-                    const rowBackgroundColor = isSelected
-                      ? withColorAlpha(item.color, 0.28)
-                      : hasSelection
-                        ? withColorAlpha(item.color, 0.04)
-                        : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
-                    const rowBorderColor = isSelected
-                      ? withColorAlpha(item.color, 0.7)
-                      : hasSelection
-                        ? withColorAlpha(item.color, 0.1)
-                        : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
-                    const percentBadgeColor = isSelected
-                      ? withColorAlpha(item.color, 0.38)
-                      : withColorAlpha(item.color, 0.24);
-
-                    return (
-                      <Pressable
-                        key={item.id}
-                        onPress={() => {
-                          setActiveBreakdownSlice(null, false);
-                          handleSelectSubcategory({
-                            id: item.id,
-                            label: item.name,
-                            emoji: item.emoji,
-                            totalValue: item.totalValue,
-                            sharePct: item.pct,
-                            count: item.count,
-                            transactions: item.transactions,
-                          });
-                        }}
-                        disabled={!onOpenSubcategoryDrilldown}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${item.emoji} ${item.name}`}
-                        accessibilityState={{ disabled: !onOpenSubcategoryDrilldown }}
-                        className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
-                        style={[
-                          { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
-                          isSelected && { borderWidth: 2 },
-                          hasSelection && !isSelected && { opacity: 0.5 },
-                        ]}
-                      >
-                        <View className="flex-row items-center justify-between gap-2">
-                          <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                            <CategoryEmoji icon={item.emoji} size={16} />
-                            <Text variant="caption" className="flex-1" numberOfLines={2}>
-                              {item.name}
-                            </Text>
-                          </View>
-                          <View className="items-end">
-                            <View className="flex-row items-center gap-1.5">
-                              {renderSubcategoryValue(item.totalValue)}
-                              <View
-                                className="rounded-full px-1.5 py-0.5"
-                                style={[
-                                  styles.breakdownPercentBadge,
-                                  { backgroundColor: percentBadgeColor },
-                                ]}
-                              >
-                                <Text variant="label" className="text-foreground">
-                                  {item.pct.toFixed(1)}%
-                                </Text>
-                              </View>
-                            </View>
-                            <Text variant="label" tone="muted" className="mt-0.5">
-                              {item.count} {I18n.t('calendar.transactions')}
-                            </Text>
-                          </View>
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            </ScrollView>
-          ) : null}
-
-          {shouldShowTypeFilter ? (
-            <View className="px-5 pb-2">
-              <View className="border-b border-border/35">
-                <View className="flex-row items-center">
-                  <Pressable
-                    onPress={() => handleTypeFilterChange('income')}
-                    accessibilityRole="tab"
-                    accessibilityLabel={I18n.t('calendar.income')}
-                    accessibilityState={{ selected: drilldownTypeFilter === 'income' }}
-                    className="flex-1 items-center py-2.5 active:opacity-85"
-                  >
-                    <Text
-                      variant="bodyStrong"
-                      className={cn(
-                        drilldownTypeFilter === 'income'
-                          ? 'text-foreground'
-                          : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t('calendar.income')}
-                    </Text>
-                    <View
-                      className={cn(
-                        'mt-1 h-0.5 w-10 rounded-full',
-                        drilldownTypeFilter === 'income' ? 'bg-success' : 'bg-transparent',
-                      )}
-                    />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleTypeFilterChange('expense')}
-                    accessibilityRole="tab"
-                    accessibilityLabel={I18n.t('calendar.expense')}
-                    accessibilityState={{ selected: drilldownTypeFilter === 'expense' }}
-                    className="flex-1 items-center py-2.5 active:opacity-85"
-                  >
-                    <Text
-                      variant="bodyStrong"
-                      className={cn(
-                        drilldownTypeFilter === 'expense'
-                          ? 'text-foreground'
-                          : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t('calendar.expense')}
-                    </Text>
-                    <View
-                      className={cn(
-                        'mt-1 h-0.5 w-10 rounded-full',
-                        drilldownTypeFilter === 'expense' ? 'bg-destructive' : 'bg-transparent',
-                      )}
-                    />
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          ) : null}
-
-          {shouldShowTransactions ? (
-            <ActivityTransactionList
-              transactions={displayedTransactions}
-              displaySettings={transactionDisplaySettings}
-              getDisplayValueForTransaction={getDisplayValueForTransaction}
-              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-              onTransactionPress={handleTransactionPress}
-              onTransactionLongPress={handleTransactionLongPress}
-              onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-              selectedTransactionIds={selectedTransactionIds}
-              selectionMode={isSelectionMode}
-              emptyTitle={I18n.t('insights.empty_category.title')}
-              emptyMessage={I18n.t('insights.empty_category.message')}
-              contentPaddingBottom={30}
-              disableItemAnimations
-              disableScrollBounce
-              compactItems
-              groupByDate={shouldGroupByDate}
-              scrollToTopRef={drilldownScrollToTopRef}
-            />
-          ) : null}
-        </>
-      )}
-      <DatePickerModal
-        visible={bulkDateModalVisible}
-        value={bulkDate}
-        onSelect={(value) => {
-          setBulkDate(value);
-          setBulkDateTouched(true);
-          setBulkDateModalVisible(false);
-        }}
-        onClose={() => setBulkDateModalVisible(false)}
+      {shouldShowTransactions ? (
+        <ActivityTransactionList
+          transactions={displayedTransactions}
+          displaySettings={transactionDisplaySettings}
+          getDisplayValueForTransaction={getDisplayValueForTransaction}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+          onTransactionPress={handleTransactionPress}
+          onTransactionLongPress={handleTransactionLongPress}
+          onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+          selectedTransactionIds={selectedTransactionIds}
+          selectionMode={isSelectionMode}
+          onToggleDaySelection={toggleDaySelection}
+          emptyTitle={I18n.t('insights.empty_category.title')}
+          emptyMessage={I18n.t('insights.empty_category.message')}
+          contentPaddingBottom={30}
+          disableItemAnimations
+          disableScrollBounce
+          compactItems
+          groupByDate={shouldGroupByDate}
+          scrollToTopRef={drilldownScrollToTopRef}
+        />
+      ) : null}
+      <BulkEditTransactionsSheet
+        visible={showBulkUpdate}
+        selectedCount={selectedTransactionCount}
+        categoryTypes={selectionCategoryTypes}
+        onClose={handleCloseBulkUpdate}
+        onApply={handleApplyBulkUpdate}
       />
     </SettingsPageLayout>
   );

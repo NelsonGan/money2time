@@ -13,6 +13,7 @@ const fil = {
     copy: 'Kopyahin',
     copied: 'Nakopya',
     delete: 'Burahin',
+    remove: 'Alisin',
     edit: 'I-edit',
     reorder: 'Ayusin',
     on: 'On',
@@ -969,7 +970,6 @@ const fil = {
     remove_simple_wallet_title: 'Alisin ang Simple Wallet?',
     remove_simple_wallet_message:
       'Permanenteng mabubura ang Simple Wallet at lahat ng transaksyong nakakonekta dito.',
-    remove: 'Alisin',
     data_management: 'Data Management',
     statement_import: 'Statement Import',
   },
@@ -1594,6 +1594,8 @@ const fil = {
     edit_transactions_title: 'I-edit ang mga transaksyon',
     add_transactions_title: 'Magdagdag ng mga transaksyon',
     remove_from_album: 'Alisin sa album',
+    remove_selected_body:
+      'Alisin ang {{count}} na transaksyon sa album na ito? Hindi ito buburahin.',
     tab_breakdown: 'Breakdown',
     tab_transactions: 'Mga transaksyon',
     no_expenses: 'Wala pang gastusing maibbreakdown.',

@@ -16,12 +16,7 @@ import {
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations } from '~/types';
-import {
-  addMonthsAtMonthStart,
-  formatMonthYearLabel,
-  monthKeyFromDateLocal,
-  startOfMonthDate,
-} from '~/utils/formatters';
+import { addMonthsAtMonthStart, formatMonthYearLabel, startOfMonthDate } from '~/utils/formatters';
 import { bucketTransactionsByMonth } from '~/utils/transactions';
 
 const FLEX_ONE = { flex: 1 } as const;
@@ -55,9 +50,14 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     (transaction: TransactionWithRelations) => getDisplayValueForTransaction(transaction),
     [getDisplayValueForTransaction],
   );
+  // Albums track spending, so only expenses are pickable.
+  const expenseTransactions = useMemo(
+    () => transactions.filter((transaction) => transaction.type === 'expense'),
+    [transactions],
+  );
   const monthBuckets = useMemo(
-    () => bucketTransactionsByMonth(transactions, resolveValue),
-    [transactions, resolveValue],
+    () => bucketTransactionsByMonth(expenseTransactions, resolveValue),
+    [expenseTransactions, resolveValue],
   );
 
   const {

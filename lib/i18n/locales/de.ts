@@ -13,6 +13,7 @@ const de = {
     copy: 'Kopieren',
     copied: 'Kopiert',
     delete: 'Löschen',
+    remove: 'Entfernen',
     edit: 'Bearbeiten',
     reorder: 'Sortieren',
     on: 'An',
@@ -968,7 +969,6 @@ const de = {
     remove_simple_wallet_title: 'Einfache Geldbörse entfernen?',
     remove_simple_wallet_message:
       'Die einfache Geldbörse und alle damit verknüpften Transaktionen werden dauerhaft gelöscht.',
-    remove: 'Entfernen',
     data_management: 'Datenverwaltung',
     statement_import: 'Kontoauszug importieren',
   },
@@ -1595,6 +1595,8 @@ const de = {
     edit_transactions_title: 'Transaktionen bearbeiten',
     add_transactions_title: 'Transaktionen hinzufügen',
     remove_from_album: 'Aus Album entfernen',
+    remove_selected_body:
+      '{{count}} Transaktionen aus diesem Album entfernen? Sie werden nicht gelöscht.',
     tab_breakdown: 'Aufschlüsselung',
     tab_transactions: 'Transaktionen',
     no_expenses: 'Noch keine Ausgaben zum Aufschlüsseln.',
