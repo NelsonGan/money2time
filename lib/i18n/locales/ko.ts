@@ -1111,6 +1111,15 @@ const ko = {
     new_category: '새 카테고리',
     edit_category: '카테고리 편집',
     delete_confirm: '이 카테고리가 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.',
+    delete_title: '카테고리를 삭제할까요?',
+    delete_has_transactions_body:
+      '{{count}}건의 거래가 이 카테고리를 사용하고 있습니다. 다른 카테고리로 옮기거나, 삭제하고 미분류로 둘 수 있습니다.',
+    delete_move_to_other: '다른 카테고리로 이동',
+    delete_keep_delete: '그래도 삭제',
+    move_confirm_title: '거래를 이동하시겠어요?',
+    move_confirm_body:
+      '모든 거래가 “{{name}}”(으)로 이동되고 이 카테고리는 삭제됩니다. 이 작업은 취소할 수 없습니다.',
+    move_confirm_action: '이동 후 삭제',
     name: '이름',
     color: '색상',
     emoji: '이모지',
@@ -1339,6 +1348,9 @@ const ko = {
     voice_label: '음성 입력',
     widgets_label: '홈 화면 위젯',
     currencies_label: '통화',
+    albums_label: '앨범',
+    limit_albums:
+      '무료 플랜에서는 최대 {{count}}개의 앨범을 만들 수 있습니다. 무제한으로 사용하려면 Pro로 업그레이드하세요.',
     biometric_label: '앱 잠금(생체 인증)',
     compare_title: 'Pro의 모든 기능',
     compare_subtitle: '업그레이드하면 무엇이 열리는지 확인하세요.',

@@ -9,6 +9,8 @@ export const PRO_LIMITS = {
   FREE_MAX_SUBCURRENCIES: 1,
   /** Free users can hold-to-record this many times total (lifetime, not per-day). */
   FREE_VOICE_TOTAL_USES: 15,
+  /** Free users can create this many albums (trips). */
+  FREE_MAX_ALBUMS: 3,
 } as const;
 
 export const PRO_TREND_TYPES = [

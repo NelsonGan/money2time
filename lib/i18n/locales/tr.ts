@@ -1142,6 +1142,15 @@ const tr = {
     new_category: 'Yeni Kategori',
     edit_category: 'Kategori Düzenle',
     delete_confirm: 'Bu işlem bu kategoriyi kalıcı olarak siler. Bu geri alınamaz.',
+    delete_title: 'Kategori silinsin mi?',
+    delete_has_transactions_body:
+      '{{count}} işlem bu kategoriyi kullanıyor. Bunları başka bir kategoriye taşıyın ya da kategoriyi silip işlemleri kategorisiz bırakın.',
+    delete_move_to_other: 'Başka bir kategoriye taşı',
+    delete_keep_delete: 'Yine de sil',
+    move_confirm_title: 'İşlemler taşınsın mı?',
+    move_confirm_body:
+      'Tüm işlemler “{{name}}” kategorisine taşınacak ve bu kategori silinecek. Bu işlem geri alınamaz.',
+    move_confirm_action: 'Taşı ve sil',
     name: 'Ad',
     color: 'Renk',
     emoji: 'Emoji',
@@ -1373,6 +1382,9 @@ const tr = {
     voice_label: 'Sesli girişler',
     widgets_label: 'Ana ekran widget’ları',
     currencies_label: 'Para birimleri',
+    albums_label: 'Albümler',
+    limit_albums:
+      'Ücretsiz planda en fazla {{count}} albüm oluşturabilirsiniz. Sınırsız için Pro’ya yükseltin.',
     biometric_label: 'Uygulama kilidi (biyometrik)',
     compare_title: 'Pro’daki her şey',
     compare_subtitle: 'Yükselttiğinde neyin açıldığını tam olarak gör.',

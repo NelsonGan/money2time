@@ -1107,6 +1107,15 @@ const en = {
     new_category: 'New Category',
     edit_category: 'Edit Category',
     delete_confirm: 'This will permanently delete this category. This cannot be undone.',
+    delete_title: 'Delete category?',
+    delete_has_transactions_body:
+      '{{count}} transactions use this category. Move them to another category, or delete it and leave them uncategorized.',
+    delete_move_to_other: 'Move to another category',
+    delete_keep_delete: 'Delete anyway',
+    move_confirm_title: 'Move transactions?',
+    move_confirm_body:
+      'All transactions will be moved to “{{name}}” and this category will be deleted. This cannot be undone.',
+    move_confirm_action: 'Move & delete',
     name: 'Name',
     color: 'Color',
     emoji: 'Emoji',
@@ -1335,6 +1344,7 @@ const en = {
     voice_label: 'Voice entries',
     widgets_label: 'Home screen widgets',
     currencies_label: 'Currencies',
+    albums_label: 'Albums',
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Everything in Pro',
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
@@ -1364,6 +1374,8 @@ const en = {
       'You can have up to {{count}} hourly rate entries on the free plan. Upgrade to Pro for unlimited.',
     limit_voice:
       'Free plan includes {{count}} voice entries. Upgrade to Pro for unlimited voice input.',
+    limit_albums:
+      'You can create up to {{count}} albums on the free plan. Upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:

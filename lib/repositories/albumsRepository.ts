@@ -42,12 +42,14 @@ class AlbumsRepository {
     const db = getDb();
     const id = newId();
     const now = nowIso();
-    const maxSort = db
-      .select({ maxSort: sql<number>`coalesce(max(${albumsTable.sortOrder}), -1)` })
+    // New albums sort to the top of the list, so use one below the current
+    // minimum sortOrder (the list is ordered ascending).
+    const minSort = db
+      .select({ minSort: sql<number>`coalesce(min(${albumsTable.sortOrder}), 0)` })
       .from(albumsTable)
       .where(isNull(albumsTable.deletedAt))
       .get();
-    const nextSortOrder = input.sortOrder ?? (maxSort?.maxSort ?? -1) + 1;
+    const nextSortOrder = input.sortOrder ?? (minSort?.minSort ?? 0) - 1;
 
     db.insert(albumsTable)
       .values({
@@ -72,6 +74,28 @@ class AlbumsRepository {
       .set({ ...input, updatedAt: nowIso() })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
       .run();
+  }
+
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      ids.forEach((id, index) => {
+        db.update(albumsTable)
+          .set({ sortOrder: index, updatedAt: now })
+          .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
+          .run();
+      });
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
   }
 
   /** Marks one album active (clearing any other), or clears all when id is null. */

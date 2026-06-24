@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import { categoriesTable } from '~/lib/db/schema';
@@ -107,14 +107,16 @@ class CategoriesRepository {
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();
+    // Promote any children to top-level rather than cascading the delete, so a
+    // parent can be removed without losing its subcategories.
+    db.update(categoriesTable)
+      .set({ parentId: null, updatedAt: now })
+      .where(and(eq(categoriesTable.parentId, id), isNull(categoriesTable.deletedAt)))
+      .run();
+    // Soft-delete only this category.
     db.update(categoriesTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(
-        and(
-          or(eq(categoriesTable.id, id), eq(categoriesTable.parentId, id)),
-          isNull(categoriesTable.deletedAt),
-        ),
-      )
+      .where(and(eq(categoriesTable.id, id), isNull(categoriesTable.deletedAt)))
       .run();
   }
 }
