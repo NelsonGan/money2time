@@ -1,6 +1,7 @@
 import type {
   AccountGroupRow,
   AccountRow,
+  AlbumRow,
   CategoryRow,
   ExchangeRateRow,
   MonthlyWageSettingsRow,
@@ -12,6 +13,7 @@ import type {
 import type {
   Account,
   AccountGroup,
+  Album,
   BackupTarget,
   Category,
   ExchangeRate,
@@ -159,6 +161,21 @@ export function toAccount(row: AccountRow): Account {
     currency: row.currency,
     startingBalance: row.startingBalance,
     includeInTotals: row.includeInTotals,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toAlbum(row: AlbumRow): Album {
+  return {
+    id: row.id,
+    name: row.name,
+    coverPhotoUri: row.coverPhotoUri ?? null,
+    isActive: row.isActive ?? false,
+    startDate: row.startDate ?? null,
+    endDate: row.endDate ?? null,
+    sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

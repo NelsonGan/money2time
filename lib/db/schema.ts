@@ -159,6 +159,31 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   deletedAt: text('deleted_at'),
 });
 
+export const albumsTable = sqliteTable('albums', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  coverPhotoUri: text('cover_photo_uri'),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
+  // Optional manual overrides; when null the range falls back to the first/last
+  // transaction date in the album.
+  startDate: text('start_date'),
+  endDate: text('end_date'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const albumTransactionsTable = sqliteTable('album_transactions', {
+  id: text('id').primaryKey(),
+  albumId: text('album_id').notNull(),
+  transactionId: text('transaction_id').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -183,3 +208,5 @@ export type TransactionSplitRow = typeof transactionSplitsTable.$inferSelect;
 export type SettingsRow = typeof settingsTable.$inferSelect;
 export type MonthlyWageSettingsRow = typeof monthlyWageSettingsTable.$inferSelect;
 export type ExchangeRateRow = typeof exchangeRatesTable.$inferSelect;
+export type AlbumRow = typeof albumsTable.$inferSelect;
+export type AlbumTransactionRow = typeof albumTransactionsTable.$inferSelect;

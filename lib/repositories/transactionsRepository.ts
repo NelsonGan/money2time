@@ -437,6 +437,24 @@ class TransactionsRepository {
     return withRelations[0] ?? null;
   }
 
+  /**
+   * Loads many transactions (with relations + splits) in a fixed number of
+   * queries via batched IN lookups, instead of N per-id round trips. Order is
+   * not preserved — callers that need ordering should sort the result.
+   */
+  listByIds(ids: string[]): TransactionWithRelations[] {
+    if (ids.length === 0) return [];
+    const db = getDb();
+    const rows = db
+      .select()
+      .from(transactionsTable)
+      .where(and(inArray(transactionsTable.id, ids), isNull(transactionsTable.deletedAt)))
+      .all();
+    const withRelations = attachRelations(rows.map(toTransaction));
+    attachSplits(withRelations);
+    return withRelations;
+  }
+
   create(input: CreateTransactionInput): string {
     const id = newId();
     this.createWithId(id, input);

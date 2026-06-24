@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
-import { G, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import {
   CategoryEmoji,
@@ -25,6 +25,17 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import {
+  BREAKDOWN_PIE_LABEL_HEIGHT,
+  BREAKDOWN_PIE_LABEL_LINE_LENGTH,
+  BREAKDOWN_PIE_LABEL_MARGIN,
+  BREAKDOWN_PIE_LABEL_MAX_WIDTH,
+  BREAKDOWN_PIE_LABEL_MIN_WIDTH,
+  BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
+  BREAKDOWN_PIE_MAX_RADIUS,
+  BREAKDOWN_PIE_MIN_RADIUS,
+  layoutBreakdownPieLabels,
+} from '~/features/insights/breakdownPieLayout';
 import {
   ActivityTransactionList,
   TransactionSelectionToolbar,
@@ -68,15 +79,6 @@ const INSIGHTS_CHART_COLORS = [
   '#6D4C41',
   '#546E7A',
 ];
-
-const BREAKDOWN_PIE_LABEL_MIN_WIDTH = 72;
-const BREAKDOWN_PIE_LABEL_MAX_WIDTH = 88;
-const BREAKDOWN_PIE_LABEL_HEIGHT = 24;
-const BREAKDOWN_PIE_LABEL_LINE_LENGTH = 12;
-const BREAKDOWN_PIE_LABEL_TAIL_LENGTH = 10;
-const BREAKDOWN_PIE_LABEL_MARGIN = 4;
-const BREAKDOWN_PIE_MIN_RADIUS = 48;
-const BREAKDOWN_PIE_MAX_RADIUS = 108;
 
 const BREAKDOWN_TINT_EXPENSE = '#D24B36';
 const BREAKDOWN_TINT_INCOME = '#1D9B63';
@@ -869,6 +871,20 @@ export function InsightsDrilldownScreen({
   );
   const pieStageVerticalInset = Math.max(0, Math.floor((pieStageWidth - pieStageHeight) / 2));
 
+  // Custom collision-avoiding label overlay (shared with the insights breakdown
+  // and album charts), instead of gifted-charts' built-in external labels.
+  const pieLabelStyleById = new Map<
+    string,
+    {
+      categoryLabel: string;
+      labelStroke: string;
+      labelTextColor: string;
+      lineThickness: number;
+      emoji: string;
+      pct: number;
+      dimmed: boolean;
+    }
+  >();
   const interactivePieData = pagePieData.map((item) => {
     const isSelected = activeBreakdownSlice?.id === item.id;
     const hasSelection = activeBreakdownSlice !== null;
@@ -877,57 +893,33 @@ export function InsightsDrilldownScreen({
         ? item.name
         : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
     const sliceColor = hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
-    const labelStroke = isSelected
-      ? withColorAlpha(item.color, 0.72)
-      : hasSelection
-        ? withColorAlpha(item.color, 0.18)
-        : withColorAlpha(item.color, isDark ? 0.46 : 0.28);
-    const labelTextColor =
-      hasSelection && !isSelected ? withColorAlpha(themeColors.text, 0.62) : themeColors.text;
-
-    return {
-      ...item,
-      value: item.amount,
-      color: sliceColor,
-      labelLineConfig: {
-        color: labelStroke,
-        thickness: isSelected ? 1.7 : 1.2,
-        length: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
-        tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
-        labelComponentWidth: pieLabelWidth,
-        labelComponentHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
-        labelComponentMargin: BREAKDOWN_PIE_LABEL_MARGIN,
-        avoidOverlappingOfLabels: true,
-      },
-      externalLabelComponent: () => (
-        <G opacity={hasSelection && !isSelected ? 0.72 : 1}>
-          <SvgText
-            x={pieLabelWidth / 2}
-            y={-4}
-            textAnchor="middle"
-            alignmentBaseline="middle"
-            fontSize={9.2}
-            fontFamily={FONT.bold}
-            fontWeight="700"
-            fill={labelTextColor}
-          >
-            {`${item.emoji} ${categoryLabel}`}
-          </SvgText>
-          <SvgText
-            x={pieLabelWidth / 2}
-            y={8}
-            textAnchor="middle"
-            alignmentBaseline="middle"
-            fontSize={8}
-            fontFamily={FONT.semibold}
-            fontWeight="600"
-            fill={withColorAlpha(labelTextColor, isDark ? 0.75 : 0.55)}
-          >
-            {`${item.pct.toFixed(1)}%`}
-          </SvgText>
-        </G>
-      ),
-    };
+    pieLabelStyleById.set(item.id, {
+      categoryLabel,
+      labelStroke: isSelected
+        ? withColorAlpha(item.color, 0.72)
+        : hasSelection
+          ? withColorAlpha(item.color, 0.18)
+          : withColorAlpha(item.color, isDark ? 0.46 : 0.28),
+      labelTextColor:
+        hasSelection && !isSelected ? withColorAlpha(themeColors.text, 0.62) : themeColors.text,
+      lineThickness: isSelected ? 1.7 : 1.2,
+      emoji: item.emoji,
+      pct: item.pct,
+      dimmed: hasSelection && !isSelected,
+    });
+    return { ...item, value: item.amount, color: sliceColor };
+  });
+  const pieLabels = layoutBreakdownPieLabels(pagePieData, {
+    cx: pieStageWidth / 2,
+    cy: pieStageWidth / 2 - pieStageVerticalInset,
+    radius: pieRadius,
+    elbowLength: BREAKDOWN_PIE_LABEL_LINE_LENGTH,
+    tailLength: BREAKDOWN_PIE_LABEL_TAIL_LENGTH,
+    labelWidth: pieLabelWidth,
+    labelHeight: BREAKDOWN_PIE_LABEL_HEIGHT,
+    labelGap: BREAKDOWN_PIE_LABEL_HEIGHT + BREAKDOWN_PIE_LABEL_MARGIN,
+    stageHeight: pieStageHeight,
+    totalAmount: pageTotalAmount,
   });
 
   return (
@@ -1141,11 +1133,61 @@ export function InsightsDrilldownScreen({
                             <PieChart
                               data={interactivePieData}
                               radius={pieRadius}
-                              showExternalLabels
                               extraRadius={pieExtraRadius}
-                              labelsPosition="outward"
                             />
                           </View>
+                          <Svg
+                            pointerEvents="none"
+                            width={pieStageWidth}
+                            height={pieStageHeight}
+                            style={StyleSheet.absoluteFill}
+                          >
+                            {pieLabels.map((label) => {
+                              const labelStyle = pieLabelStyleById.get(label.id);
+                              if (!labelStyle) return null;
+                              return (
+                                <G key={label.id} opacity={labelStyle.dimmed ? 0.72 : 1}>
+                                  <Polyline
+                                    points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                                    fill="none"
+                                    stroke={labelStyle.labelStroke}
+                                    strokeWidth={labelStyle.lineThickness}
+                                    strokeLinejoin="round"
+                                    strokeLinecap="round"
+                                  />
+                                  <G x={label.boxLeft} y={label.labelY}>
+                                    <SvgText
+                                      x={pieLabelWidth / 2}
+                                      y={-4}
+                                      textAnchor="middle"
+                                      alignmentBaseline="middle"
+                                      fontSize={9.2}
+                                      fontFamily={FONT.bold}
+                                      fontWeight="700"
+                                      fill={labelStyle.labelTextColor}
+                                    >
+                                      {`${labelStyle.emoji} ${labelStyle.categoryLabel}`}
+                                    </SvgText>
+                                    <SvgText
+                                      x={pieLabelWidth / 2}
+                                      y={8}
+                                      textAnchor="middle"
+                                      alignmentBaseline="middle"
+                                      fontSize={8}
+                                      fontFamily={FONT.semibold}
+                                      fontWeight="600"
+                                      fill={withColorAlpha(
+                                        labelStyle.labelTextColor,
+                                        isDark ? 0.75 : 0.55,
+                                      )}
+                                    >
+                                      {`${labelStyle.pct.toFixed(1)}%`}
+                                    </SvgText>
+                                  </G>
+                                </G>
+                              );
+                            })}
+                          </Svg>
                         </View>
                       </View>
                     ) : null}
