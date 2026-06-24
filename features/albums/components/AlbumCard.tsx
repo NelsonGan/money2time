@@ -67,29 +67,29 @@ export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: Albu
           </View>
         )}
 
-        {/* Bottom scrim with title + active toggle + meta overlaid on the cover. */}
+        {/* Bottom scrim with title + amount + meta overlaid on the cover. */}
         <View
-          className="absolute inset-x-0 bottom-0 px-4 pb-2.5 pt-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.42)' }}
+          className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-5"
+          style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
         >
-          <Text variant="bodyStrong" numberOfLines={1} className="text-white">
+          <Text variant="caption" numberOfLines={1} className="text-white/80">
             {album.name}
           </Text>
-          <View className="mt-0.5 flex-row items-center justify-between gap-2">
+          <View className="mt-0.5 flex-row items-baseline justify-between gap-2">
             {isTimeMode ? (
               <TimeValueInline
                 value={formatHours(stats.totalSpent)}
-                variant="caption"
+                variant="subheading"
                 textClassName="text-white"
                 iconColor="#fff"
-                iconSize={11}
+                iconSize={16}
               />
             ) : (
-              <Text variant="caption" className="text-white">
+              <Text variant="subheading" className="text-white">
                 {formatAmount(stats.totalSpent, settings, { showSign: false })}
               </Text>
             )}
-            <Text variant="label" numberOfLines={1} className="text-white/80">
+            <Text variant="label" numberOfLines={1} className="text-white/70">
               {metaLabel}
             </Text>
           </View>
