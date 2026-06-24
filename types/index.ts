@@ -240,6 +240,33 @@ export interface Category {
   deletedAt: string | null;
 }
 
+export interface Album {
+  id: string;
+  name: string;
+  coverPhotoUri: string | null;
+  isActive: boolean;
+  /** Manual start-date override (YYYY-MM-DD); null falls back to first transaction. */
+  startDate: string | null;
+  /** Manual end-date override (YYYY-MM-DD); null falls back to last transaction. */
+  endDate: string | null;
+  sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface AlbumStats {
+  /** Sum of expense transactions in the album, in the reporting currency. */
+  totalSpent: number;
+  transactionCount: number;
+  /** Effective start date (manual override, else first transaction), or null. */
+  startDate: string | null;
+  /** Effective end date (manual override, else last transaction), or null. */
+  endDate: string | null;
+}
+
+export interface AlbumWithStats extends Album, AlbumStats {}
+
 export interface Transaction {
   id: string;
   type: TransactionType;

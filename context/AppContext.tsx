@@ -39,6 +39,7 @@ import {
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
@@ -83,6 +84,8 @@ import {
   type Account,
   type AccountBalance,
   type AccountGroup,
+  type Album,
+  type AlbumStats,
   type AppState,
   type BreakdownItem,
   type CashflowSummary,
@@ -207,6 +210,32 @@ interface AppContextValue extends AppState {
   ) => void;
   deleteCategory: (id: string) => void;
   reorderCategories: (ids: string[]) => void;
+
+  albums: Album[];
+  activeAlbumId: string | null;
+  createAlbum: (input: {
+    name: string;
+    coverPhotoUri?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    transactionIds?: string[];
+  }) => string;
+  updateAlbum: (
+    id: string,
+    updates: {
+      name?: string;
+      coverPhotoUri?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    },
+  ) => void;
+  deleteAlbum: (id: string) => void;
+  setActiveAlbum: (albumId: string | null) => void;
+  addTransactionsToAlbum: (albumId: string, transactionIds: string[]) => void;
+  removeTransactionsFromAlbum: (albumId: string, transactionIds: string[]) => void;
+  getAlbumTransactionIds: (albumId: string) => string[];
+  getAlbumTransactions: (albumId: string) => TransactionWithRelations[];
+  getAlbumStats: (albumId: string) => AlbumStats;
 
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -669,6 +698,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
     DEFAULT_TRANSACTION_FILTERS,
   );
@@ -790,6 +820,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextAccounts = accountsRepository.list();
       const nextCategories = categoriesRepository.list();
       const nextTransactions = transactionsRepository.list();
+      const nextAlbums = albumsRepository.list();
 
       // Compute last 7 days spending for weekly notification body
       const sevenDaysAgoKey = (() => {
@@ -830,6 +861,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setAccounts(nextAccounts);
       setCategories(nextCategories);
       setTransactions(nextTransactions);
+      setAlbums(nextAlbums);
       setLoadError(null);
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
@@ -1108,6 +1140,102 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  const createAlbum = useCallback(
+    (input: {
+      name: string;
+      coverPhotoUri?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+      transactionIds?: string[];
+    }) => {
+      const id = runMutation(() => {
+        const albumId = albumsRepository.create({
+          name: input.name,
+          coverPhotoUri: input.coverPhotoUri ?? null,
+          startDate: input.startDate ?? null,
+          endDate: input.endDate ?? null,
+        });
+        if (input.transactionIds && input.transactionIds.length > 0) {
+          albumsRepository.addTransactions(albumId, input.transactionIds);
+        }
+        return albumId;
+      });
+      void trackEvent(AnalyticsEvents.ALBUM_CREATED, {
+        transactionCount: input.transactionIds?.length ?? 0,
+      });
+      return id;
+    },
+    [runMutation],
+  );
+
+  const updateAlbum = useCallback(
+    (
+      id: string,
+      updates: {
+        name?: string;
+        coverPhotoUri?: string | null;
+        startDate?: string | null;
+        endDate?: string | null;
+      },
+    ) => {
+      runMutation(() => {
+        albumsRepository.update(id, updates);
+      });
+      void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
+    },
+    [runMutation],
+  );
+
+  const deleteAlbum = useCallback(
+    (id: string) => {
+      runMutation(() => {
+        albumsRepository.softDelete(id);
+      });
+      void trackEvent(AnalyticsEvents.ALBUM_DELETED);
+    },
+    [runMutation],
+  );
+
+  const setActiveAlbum = useCallback(
+    (albumId: string | null) => {
+      runMutation(() => {
+        albumsRepository.setActive(albumId);
+      });
+    },
+    [runMutation],
+  );
+
+  const addTransactionsToAlbum = useCallback(
+    (albumId: string, transactionIds: string[]) => {
+      runMutation(() => {
+        albumsRepository.addTransactions(albumId, transactionIds);
+      });
+    },
+    [runMutation],
+  );
+
+  const removeTransactionsFromAlbum = useCallback(
+    (albumId: string, transactionIds: string[]) => {
+      runMutation(() => {
+        albumsRepository.removeTransactions(albumId, transactionIds);
+      });
+    },
+    [runMutation],
+  );
+
+  const getAlbumTransactionIds = useCallback(
+    (albumId: string) => albumsRepository.getTransactionIds(albumId),
+    [],
+  );
+
+  const getAlbumTransactions = useCallback((albumId: string): TransactionWithRelations[] => {
+    const ids = albumsRepository.getTransactionIds(albumId);
+    // Batched load (fixed query count) instead of one getById per id.
+    return transactionsRepository
+      .listByIds(ids)
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  }, []);
+
   const accountNameById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account.name])),
     [accounts],
@@ -1266,6 +1394,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(id, normalizedInput);
+          // Auto-file into the active album, if one is set.
+          const activeAlbumId = albumsRepository.getActiveId();
+          if (activeAlbumId) albumsRepository.addTransactions(activeAlbumId, [id]);
           // Voice entries fire a dedicated event so voice adoption can be
           // measured separately from manual transaction creation.
           const createdEvent =
@@ -1633,6 +1764,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       InteractionManager.runAfterInteractions(() => {
         try {
           transactionsRepository.createWithId(txId, normalizedInput);
+          // Auto-file the primary transaction into the active album, if any.
+          const activeAlbumId = albumsRepository.getActiveId();
+          if (activeAlbumId) albumsRepository.addTransactions(activeAlbumId, [txId]);
           for (const t of transfersToCreate) {
             transactionsRepository.createWithId(t.id, {
               type: 'transfer',
@@ -2545,6 +2679,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [buildBreakdown],
   );
 
+  const getAlbumStats = useCallback(
+    (albumId: string): AlbumStats => {
+      // Lightweight single-query rows (no relation/split loading) — this runs
+      // per album card on the index, so it must stay cheap.
+      const rows = albumsRepository.getStatRows(albumId);
+      let totalSpent = 0;
+      let startDate: string | null = null;
+      let endDate: string | null = null;
+      rows.forEach((row) => {
+        if (row.type === 'expense') {
+          totalSpent += valueForDisplay(row.reportingAmount ?? row.amount, row.date);
+        }
+        if (startDate === null || row.date < startDate) startDate = row.date;
+        if (endDate === null || row.date > endDate) endDate = row.date;
+      });
+      // Manual overrides win over the computed first/last transaction dates.
+      const album = albumsRepository.getById(albumId);
+      return {
+        totalSpent,
+        transactionCount: rows.length,
+        startDate: album?.startDate ?? startDate,
+        endDate: album?.endDate ?? endDate,
+      };
+    },
+    [valueForDisplay],
+  );
+
   const getTransfersBetweenAccounts = useCallback(
     (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
       return transactionsRepository.getTransfersBetweenAccounts(
@@ -2763,6 +2924,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateCategory,
             deleteCategory,
             reorderCategories,
+            albums,
+            activeAlbumId: albums.find((a) => a.isActive)?.id ?? null,
+            createAlbum,
+            updateAlbum,
+            deleteAlbum,
+            setActiveAlbum,
+            addTransactionsToAlbum,
+            removeTransactionsFromAlbum,
+            getAlbumTransactionIds,
+            getAlbumTransactions,
+            getAlbumStats,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -2853,6 +3025,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateCategory,
       deleteCategory,
       reorderCategories,
+      albums,
+      createAlbum,
+      updateAlbum,
+      deleteAlbum,
+      setActiveAlbum,
+      addTransactionsToAlbum,
+      removeTransactionsFromAlbum,
+      getAlbumTransactionIds,
+      getAlbumTransactions,
+      getAlbumStats,
       createTransaction,
       updateTransaction,
       deleteTransaction,

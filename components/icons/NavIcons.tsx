@@ -250,6 +250,38 @@ export function SettingsIcon({ size = 24, color = '#000', strokeWidth = 1.8, fil
   );
 }
 
+export function AlbumsIcon({ size = 24, color = '#000', strokeWidth = 1.8, filled }: IconProps) {
+  if (filled) {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Rect x="3" y="5" width="18" height="16" rx="3" fill={color} opacity={0.2} />
+        <Rect x="3" y="5" width="18" height="16" rx="3" stroke={color} strokeWidth={strokeWidth} />
+        <Circle cx="8.5" cy="10" r="1.6" fill={color} />
+        <Path
+          d="M5 18l4.5-4.5 3 3L16 13l3 3"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="5" width="18" height="16" rx="3" stroke={color} strokeWidth={strokeWidth} />
+      <Circle cx="8.5" cy="10" r="1.6" stroke={color} strokeWidth={strokeWidth} />
+      <Path
+        d="M5 18l4.5-4.5 3 3L16 13l3 3"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export function PlusIcon({ size = 24, color = '#fff', strokeWidth = 2.8 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
