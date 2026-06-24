@@ -13,6 +13,7 @@ const nb = {
     copy: 'Kopier',
     copied: 'Kopiert',
     delete: 'Slett',
+    remove: 'Fjern',
     edit: 'Rediger',
     reorder: 'Sorter',
     on: 'På',
@@ -956,7 +957,6 @@ const nb = {
     remove_simple_wallet_title: 'Fjerne enkel lommebok?',
     remove_simple_wallet_message:
       'Dette vil permanent slette den enkle lommeboken og alle transaksjoner knyttet til den.',
-    remove: 'Fjern',
     data_management: 'Dataadministrasjon',
     statement_import: 'Kontoutskriftsimport',
   },
@@ -1574,6 +1574,7 @@ const nb = {
     edit_transactions_title: 'Rediger transaksjoner',
     add_transactions_title: 'Legg til transaksjoner',
     remove_from_album: 'Fjern fra album',
+    remove_selected_body: 'Fjern {{count}} transaksjoner fra dette albumet? De blir ikke slettet.',
     tab_breakdown: 'Fordeling',
     tab_transactions: 'Transaksjoner',
     no_expenses: 'Ingen utgifter å fordele ennå.',

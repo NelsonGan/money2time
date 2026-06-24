@@ -13,6 +13,7 @@ const fr = {
     copy: 'Copier',
     copied: 'Copié',
     delete: 'Supprimer',
+    remove: 'Retirer',
     edit: 'Modifier',
     reorder: 'Réorganiser',
     on: 'On',
@@ -963,7 +964,6 @@ const fr = {
     remove_simple_wallet_title: 'Supprimer le portefeuille Simple ?',
     remove_simple_wallet_message:
       'Ceci supprimera définitivement le portefeuille Simple et toutes les transactions qui lui sont liées.',
-    remove: 'Supprimer',
     data_management: 'Gestion des données',
     statement_import: 'Import de relevé',
   },
@@ -1590,6 +1590,8 @@ const fr = {
     edit_transactions_title: 'Modifier les transactions',
     add_transactions_title: 'Ajouter des transactions',
     remove_from_album: "Retirer de l'album",
+    remove_selected_body:
+      'Retirer {{count}} transactions de cet album ? Elles ne seront pas supprimées.',
     tab_breakdown: 'Répartition',
     tab_transactions: 'Transactions',
     no_expenses: "Aucune dépense à répartir pour l'instant.",

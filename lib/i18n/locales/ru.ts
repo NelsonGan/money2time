@@ -13,6 +13,7 @@ const ru = {
     copy: 'Копировать',
     copied: 'Скопировано',
     delete: 'Удалить',
+    remove: 'Убрать',
     edit: 'Изменить',
     reorder: 'Сортировка',
     on: 'Вкл',
@@ -957,7 +958,6 @@ const ru = {
     remove_simple_wallet_title: 'Удалить простой кошелёк?',
     remove_simple_wallet_message:
       'Простой кошелёк и все связанные транзакции будут удалены безвозвратно.',
-    remove: 'Удалить',
     data_management: 'Управление данными',
     statement_import: 'Импорт выписки',
   },
@@ -1572,6 +1572,7 @@ const ru = {
     edit_transactions_title: 'Изменить операции',
     add_transactions_title: 'Добавить операции',
     remove_from_album: 'Убрать из альбома',
+    remove_selected_body: 'Убрать {{count}} операций из этого альбома? Они не будут удалены.',
     tab_breakdown: 'Разбивка',
     tab_transactions: 'Операции',
     no_expenses: 'Пока нет расходов для разбивки.',

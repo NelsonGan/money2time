@@ -13,6 +13,7 @@ const en = {
     copy: 'Copy',
     copied: 'Copied',
     delete: 'Delete',
+    remove: 'Remove',
     edit: 'Edit',
     reorder: 'Reorder',
     on: 'On',
@@ -925,7 +926,6 @@ const en = {
     remove_simple_wallet_title: 'Remove Simple Wallet?',
     remove_simple_wallet_message:
       'This will permanently delete the Simple Wallet and all transactions linked to it.',
-    remove: 'Remove',
     data_management: 'Data Management',
     statement_import: 'Statement Import',
   },
@@ -1563,6 +1563,7 @@ const en = {
     edit_transactions_title: 'Edit transactions',
     add_transactions_title: 'Add transactions',
     remove_from_album: 'Remove from album',
+    remove_selected_body: "Remove {{count}} transactions from this album? They won't be deleted.",
     tab_breakdown: 'Breakdown',
     tab_transactions: 'Transactions',
     no_expenses: 'No expenses to break down yet.',
