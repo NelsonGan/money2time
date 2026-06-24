@@ -13,6 +13,7 @@ const nl = {
     copy: 'Kopiëren',
     copied: 'Gekopieerd',
     delete: 'Verwijderen',
+    remove: 'Verwijderen',
     edit: 'Bewerken',
     reorder: 'Sorteren',
     on: 'Aan',
@@ -966,7 +967,6 @@ const nl = {
     remove_simple_wallet_title: 'Eenvoudige portemonnee verwijderen?',
     remove_simple_wallet_message:
       'Dit verwijdert permanent de eenvoudige portemonnee en alle eraan gekoppelde transacties.',
-    remove: 'Verwijderen',
     data_management: 'Gegevensbeheer',
     statement_import: 'Afschrift importeren',
   },
@@ -1589,6 +1589,8 @@ const nl = {
     edit_transactions_title: 'Transacties bewerken',
     add_transactions_title: 'Transacties toevoegen',
     remove_from_album: 'Uit album verwijderen',
+    remove_selected_body:
+      '{{count}} transacties uit dit album verwijderen? Ze worden niet verwijderd.',
     tab_breakdown: 'Verdeling',
     tab_transactions: 'Transacties',
     no_expenses: 'Nog geen uitgaven om te verdelen.',

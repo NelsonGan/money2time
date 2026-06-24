@@ -13,6 +13,7 @@ const pt = {
     copy: 'Copiar',
     copied: 'Copiado',
     delete: 'Excluir',
+    remove: 'Remover',
     edit: 'Editar',
     reorder: 'Reordenar',
     on: 'Ligado',
@@ -957,7 +958,6 @@ const pt = {
     remove_simple_wallet_title: 'Remover Carteira simples?',
     remove_simple_wallet_message:
       'Isso excluirá permanentemente a Carteira simples e todas as transações vinculadas a ela.',
-    remove: 'Remover',
     data_management: 'Gerenciamento de dados',
     statement_import: 'Importar extrato',
   },
@@ -1578,6 +1578,7 @@ const pt = {
     edit_transactions_title: 'Editar transações',
     add_transactions_title: 'Adicionar transações',
     remove_from_album: 'Remover do álbum',
+    remove_selected_body: 'Remover {{count}} transações deste álbum? Elas não serão excluídas.',
     tab_breakdown: 'Detalhamento',
     tab_transactions: 'Transações',
     no_expenses: 'Ainda não há despesas para detalhar.',

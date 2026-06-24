@@ -13,6 +13,7 @@ const vi = {
     copy: 'Sao chép',
     copied: 'Đã sao chép',
     delete: 'Xóa',
+    remove: 'Gỡ',
     edit: 'Sửa',
     reorder: 'Sắp xếp',
     on: 'Bật',
@@ -941,7 +942,6 @@ const vi = {
     remove_simple_wallet_title: 'Xóa ví đơn giản?',
     remove_simple_wallet_message:
       'Thao tác này sẽ xóa vĩnh viễn ví đơn giản và tất cả giao dịch liên kết.',
-    remove: 'Xóa',
     data_management: 'Quản lý dữ liệu',
     statement_import: 'Nhập sao kê',
   },
@@ -1551,6 +1551,7 @@ const vi = {
     edit_transactions_title: 'Sửa giao dịch',
     add_transactions_title: 'Thêm giao dịch',
     remove_from_album: 'Xóa khỏi album',
+    remove_selected_body: 'Gỡ {{count}} giao dịch khỏi album này? Giao dịch sẽ không bị xóa.',
     tab_breakdown: 'Phân tích',
     tab_transactions: 'Giao dịch',
     no_expenses: 'Chưa có chi tiêu để phân tích.',

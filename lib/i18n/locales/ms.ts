@@ -13,6 +13,7 @@ const ms = {
     copy: 'Salin',
     copied: 'Disalin',
     delete: 'Padam',
+    remove: 'Buang',
     edit: 'Edit',
     reorder: 'Susun Semula',
     on: 'Hidup',
@@ -955,7 +956,6 @@ const ms = {
     remove_simple_wallet_title: 'Buang Dompet Mudah?',
     remove_simple_wallet_message:
       'Ini akan memadam Dompet Mudah dan semua transaksi yang dikaitkan dengannya secara kekal.',
-    remove: 'Buang',
     data_management: 'Pengurusan Data',
     statement_import: 'Import Penyata',
   },
@@ -1574,6 +1574,8 @@ const ms = {
     edit_transactions_title: 'Edit transaksi',
     add_transactions_title: 'Tambah transaksi',
     remove_from_album: 'Buang dari album',
+    remove_selected_body:
+      'Keluarkan {{count}} transaksi daripada album ini? Ia tidak akan dipadam.',
     tab_breakdown: 'Pecahan',
     tab_transactions: 'Transaksi',
     no_expenses: 'Belum ada perbelanjaan untuk dipecahkan.',
