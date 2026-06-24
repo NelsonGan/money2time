@@ -1,0 +1,98 @@
+import { Image } from 'expo-image';
+import { memo, useMemo } from 'react';
+import { Pressable, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+import { Text, TimeValueInline } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
+import { usePressScale } from '~/hooks/usePressScale';
+import { I18n } from '~/lib/i18n';
+import { getAlbumCoverUri } from '~/services/userAssets';
+import { triggerHaptic } from '~/services/haptics';
+import type { Album } from '~/types';
+import { formatAmount, formatHours } from '~/utils/formatters';
+
+import { formatAlbumDateRange } from '../utils';
+
+interface AlbumCardProps {
+  album: Album;
+  width: number;
+  onPress: (albumId: string) => void;
+}
+
+export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: AlbumCardProps) {
+  const { settings, getAlbumStats } = useApp();
+  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.96 });
+
+  // Depend on the album object (a fresh reference after each data reload) so the
+  // total/date range recompute when the album's transactions change.
+  const stats = useMemo(() => getAlbumStats(album.id), [getAlbumStats, album]);
+  const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
+  const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate);
+  const isTimeMode = settings.displayMode === 'time';
+
+  // Full-width 2:1 banner.
+  const coverHeight = Math.round(width * 0.5);
+  const metaLabel =
+    dateRange ?? I18n.t('albums.transaction_count', { count: stats.transactionCount });
+
+  return (
+    <Animated.View style={[animatedStyle, { width }]}>
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          onPress(album.id);
+        }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel={album.name}
+        className="overflow-hidden rounded-3xl border border-border/40 shadow-soft"
+        style={{ height: coverHeight }}
+      >
+        {coverUri ? (
+          <Image
+            source={{ uri: coverUri }}
+            style={{ width: '100%', height: '100%' }}
+            contentFit="cover"
+            transition={120}
+          />
+        ) : (
+          <View className="flex-1 items-center justify-center bg-primary/15">
+            <Text variant="display" tone="muted">
+              {album.name.slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+        )}
+
+        {/* Bottom scrim with title + active toggle + meta overlaid on the cover. */}
+        <View
+          className="absolute inset-x-0 bottom-0 px-4 pb-2.5 pt-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.42)' }}
+        >
+          <Text variant="bodyStrong" numberOfLines={1} className="text-white">
+            {album.name}
+          </Text>
+          <View className="mt-0.5 flex-row items-center justify-between gap-2">
+            {isTimeMode ? (
+              <TimeValueInline
+                value={formatHours(stats.totalSpent)}
+                variant="caption"
+                textClassName="text-white"
+                iconColor="#fff"
+                iconSize={11}
+              />
+            ) : (
+              <Text variant="caption" className="text-white">
+                {formatAmount(stats.totalSpent, settings, { showSign: false })}
+              </Text>
+            )}
+            <Text variant="label" numberOfLines={1} className="text-white/80">
+              {metaLabel}
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+});

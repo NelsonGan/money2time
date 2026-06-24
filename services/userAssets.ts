@@ -19,6 +19,7 @@ const ACCOUNT_LOGOS_KIND = 'account-logos';
 export const CUSTOM_LOGO_PREFIX = 'custom:';
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
 const AVATARS_KIND = 'avatars';
+const ALBUM_COVERS_KIND = 'album-covers';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -85,6 +86,30 @@ export function getProfileAvatarUri(relativePath?: string | null): string | null
 
 /** Deletes a stored avatar file, e.g. when replacing or clearing it. */
 export function deleteProfileAvatar(relativePath?: string | null) {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (file.exists) file.delete();
+}
+
+/** Copies a picked image into the album-cover store, returning its relative
+ *  path (e.g. `album-covers/9f3c.jpg`) for persistence on the album row. */
+export function saveAlbumCover(sourceUri: string): string {
+  ensureDir(kindDir(ALBUM_COVERS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, ALBUM_COVERS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  return `${ALBUM_COVERS_KIND}/${fileName}`;
+}
+
+/** Resolves a stored album-cover relative path to an on-disk file uri, or null. */
+export function getAlbumCoverUri(relativePath?: string | null): string | null {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  return file.exists ? file.uri : null;
+}
+
+/** Deletes a stored album-cover file, e.g. when replacing or clearing it. */
+export function deleteAlbumCover(relativePath?: string | null) {
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
   const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
   if (file.exists) file.delete();

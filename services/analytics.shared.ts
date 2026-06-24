@@ -43,6 +43,11 @@ export const AnalyticsEvents = {
   CATEGORY_CREATED: 'Category Created',
   CATEGORY_DELETED: 'Category Deleted',
 
+  // Albums
+  ALBUM_CREATED: 'Album Created',
+  ALBUM_UPDATED: 'Album Updated',
+  ALBUM_DELETED: 'Album Deleted',
+
   // Recurring rules
   RECURRING_RULE_CREATED: 'Recurring Rule Created',
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',

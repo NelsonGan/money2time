@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  AlbumsIcon,
   CalendarIcon,
   HomeIcon,
   InsightsIcon,
@@ -26,7 +27,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-export type TabName = 'home' | 'accounts' | 'calendar' | 'insights' | 'settings';
+export type TabName = 'home' | 'accounts' | 'calendar' | 'insights' | 'albums' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabName;
@@ -44,6 +45,7 @@ const TABS: { name: TabName; icon: NavIconComponent }[] = [
   { name: 'accounts', icon: WalletIcon },
   { name: 'calendar', icon: CalendarIcon },
   { name: 'insights', icon: InsightsIcon },
+  { name: 'albums', icon: AlbumsIcon },
   { name: 'settings', icon: SettingsIcon },
 ];
 

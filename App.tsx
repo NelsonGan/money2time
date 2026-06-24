@@ -43,6 +43,14 @@ import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
+import {
+  AddAlbumTransactionsScreen,
+  AlbumDetailScreen,
+  AlbumsScreen,
+  CreateAlbumScreen,
+  EditAlbumDetailsScreen,
+  EditAlbumTransactionsScreen,
+} from '~/features/albums/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
@@ -120,7 +128,14 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
-const MAIN_TAB_ORDER: MainTab[] = ['home', 'accounts', 'calendar', 'insights', 'settings'];
+const MAIN_TAB_ORDER: MainTab[] = [
+  'home',
+  'accounts',
+  'calendar',
+  'insights',
+  'albums',
+  'settings',
+];
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -230,6 +245,7 @@ const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
 const MemoAccountsScreen = React.memo(AccountsScreen);
 const MemoCalendarScreen = React.memo(CalendarScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
+const MemoAlbumsScreen = React.memo(AlbumsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 
 const styles = StyleSheet.create({
@@ -366,6 +382,7 @@ function MainShellScreen({
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
     useState<ActivityBreakdownInsightRequest | null>(null);
+  const [albumsScrollTopToken, setAlbumsScrollTopToken] = useState(0);
   const [settingsCurrentScreen, setSettingsCurrentScreen] = useState('settings');
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
@@ -519,6 +536,16 @@ function MainShellScreen({
     [],
   );
 
+  const openCreateAlbum = useCallback(() => {
+    navigation.navigate('CreateAlbum');
+  }, [navigation]);
+  const openAlbumDetail = useCallback(
+    (albumId: string) => {
+      navigation.navigate('AlbumDetail', { albumId });
+    },
+    [navigation],
+  );
+
   const openAccountSettings = useCallback(() => {
     navigation.navigate('SettingsAccounts');
   }, [navigation]);
@@ -579,6 +606,9 @@ function MainShellScreen({
       }
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
+      }
+      if (tab === 'albums' && activeTab === 'albums') {
+        setAlbumsScrollTopToken((prev) => prev + 1);
       }
       if (tab === 'settings') {
         setSettingsCurrentScreen('settings');
@@ -754,7 +784,7 @@ function MainShellScreen({
   // (floating liquid-glass pill vs. classic bar) without measuring it directly.
   const navTabsBoundingRect = useMemo<TutorialTargetRect | null>(() => {
     const visibleTabs = isSimpleMode
-      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts')
+      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts' && tab !== 'albums')
       : MAIN_TAB_ORDER;
     const rects = visibleTabs
       .map((tab) => tutorialNavTabRects[tab])
@@ -876,6 +906,13 @@ function MainShellScreen({
             tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
+        <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
+          <MemoAlbumsScreen
+            scrollToTopToken={albumsScrollTopToken}
+            onOpenCreateAlbum={openCreateAlbum}
+            onOpenAlbumDetail={openAlbumDetail}
+          />
+        </MountedTab>
         <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
@@ -895,7 +932,7 @@ function MainShellScreen({
           <BottomNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            hideTabs={isSimpleMode ? ['accounts'] : undefined}
+            hideTabs={isSimpleMode ? ['accounts', 'albums'] : undefined}
             onTutorialTabLayout={handleTutorialTabLayout}
             tutorialFocusedTab={currentTutorialFocusedTab}
             tutorialMeasureToken={tutorialSpotlightRequest.token}
@@ -1101,6 +1138,65 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
           openSplitBill: true,
         })
       }
+    />
+  );
+}
+
+function CreateAlbumRouteScreen({ route, navigation }: RootStackRouteProps<'CreateAlbum'>) {
+  return (
+    <CreateAlbumScreen
+      initialTransactionIds={route.params?.initialTransactionIds}
+      onClose={() => navigation.goBack()}
+      onCreated={(albumId) => navigation.replace('AlbumDetail', { albumId })}
+    />
+  );
+}
+
+function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'AlbumDetail'>) {
+  return (
+    <AlbumDetailScreen
+      albumId={route.params.albumId}
+      onClose={() => navigation.goBack()}
+      onDeleted={() => navigation.goBack()}
+      onEditTransactions={(albumId) => navigation.navigate('EditAlbumTransactions', { albumId })}
+      onAddTransactions={(albumId) => navigation.navigate('AddAlbumTransactions', { albumId })}
+      onEditDetails={(albumId) => navigation.navigate('EditAlbumDetails', { albumId })}
+      onOpenTransaction={(transaction) =>
+        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+      }
+    />
+  );
+}
+
+function EditAlbumDetailsRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'EditAlbumDetails'>) {
+  return (
+    <EditAlbumDetailsScreen albumId={route.params.albumId} onClose={() => navigation.goBack()} />
+  );
+}
+
+function EditAlbumTransactionsRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'EditAlbumTransactions'>) {
+  return (
+    <EditAlbumTransactionsScreen
+      albumId={route.params.albumId}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
+function AddAlbumTransactionsRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'AddAlbumTransactions'>) {
+  return (
+    <AddAlbumTransactionsScreen
+      albumId={route.params.albumId}
+      onClose={() => navigation.goBack()}
     />
   );
 }
@@ -1519,6 +1615,27 @@ function AppContent() {
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}
+          />
+          <RootStack.Screen
+            name="CreateAlbum"
+            component={CreateAlbumRouteScreen}
+            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
+          />
+          <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
+          <RootStack.Screen
+            name="EditAlbumTransactions"
+            component={EditAlbumTransactionsRouteScreen}
+            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
+          />
+          <RootStack.Screen
+            name="AddAlbumTransactions"
+            component={AddAlbumTransactionsRouteScreen}
+            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
+          />
+          <RootStack.Screen
+            name="EditAlbumDetails"
+            component={EditAlbumDetailsRouteScreen}
+            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
           />
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />

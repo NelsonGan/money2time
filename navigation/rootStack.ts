@@ -39,6 +39,11 @@ export type RootStackParamList = {
   SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
   ShareAndEarn: undefined;
   ProPaywall: { source?: string; flashMessage?: string } | undefined;
+  CreateAlbum: { initialTransactionIds?: string[] } | undefined;
+  AlbumDetail: { albumId: string };
+  EditAlbumTransactions: { albumId: string };
+  AddAlbumTransactions: { albumId: string };
+  EditAlbumDetails: { albumId: string };
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
