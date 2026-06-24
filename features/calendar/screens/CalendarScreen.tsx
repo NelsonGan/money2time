@@ -1,7 +1,9 @@
-import { ChevronDown, ChevronRight, ChevronUp, Pencil, Search, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
+  Easing,
   FlatList,
   LayoutAnimation,
   Platform,
@@ -34,7 +36,6 @@ import { useApp } from '~/context/AppContext';
 import {
   ActivitySearchRow,
   DisplayModeToggle,
-  MonthJumpPopover,
   TransactionItem,
 } from '~/features/transactions/components';
 import { DatePickerModal } from '~/components/datePicker';
@@ -67,6 +68,7 @@ import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import { CalendarWeekStrip, CENTER_WEEK_INDEX } from '../components/CalendarWeekStrip';
+import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
 import {
   buildCalendarMonth,
   dayKeyToUtcDate,
@@ -245,17 +247,9 @@ export function CalendarScreen({
 
   const todayDayKey = dayKeyFromDateLocal(new Date());
 
-  // --- View mode: 'week' (collapsed) or 'month' (expanded) ---
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  // --- View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom) ---
+  const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
-
-  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
-  const [monthPickerAnchorRect, setMonthPickerAnchorRect] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -267,6 +261,15 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
+
+  // --- Zoom animation ---
+  const zoomScale = useRef(new Animated.Value(1)).current;
+  const zoomOpacity = useRef(new Animated.Value(1)).current;
+
+  // --- Year view ---
+  const centerYear = useMemo(() => new Date().getFullYear(), []);
+  const yearViewListRef = useRef<FlatList<number> | null>(null);
+  const pendingYearScrollRef = useRef<number | null>(null);
 
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
@@ -317,8 +320,7 @@ export function CalendarScreen({
     writeStoredJson: updateCalendarPreferencesJson,
   });
 
-  // --- Month pager (for expanded month view) ---
-  const monthPickerTriggerRef = useRef<View>(null);
+  // --- Month pager (for month view) ---
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const weekStripListRef = useRef<FlatList<number> | null>(null);
   const dayPagerRef = useRef<FlatList<number> | null>(null);
@@ -472,7 +474,7 @@ export function CalendarScreen({
     [activeMonthDate, activeLocale],
   );
 
-  const displayedMonthLabel = viewMode === 'week' ? selectedMonthLabel : activeMonthLabel;
+  const displayedMonthLabel = viewMode === 'day' ? selectedMonthLabel : activeMonthLabel;
 
   const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
   const selectedMonthKey = useMemo(() => {
@@ -480,13 +482,13 @@ export function CalendarScreen({
     return d ? monthKeyFromDateLocal(d) : monthKeyFromDateLocal(new Date());
   }, [selectedDayKey]);
 
-  const displayedMonthKey = viewMode === 'week' ? selectedMonthKey : activeMonthKey;
+  const displayedMonthKey = viewMode === 'day' ? selectedMonthKey : activeMonthKey;
 
   // --- Build month data for the active month (header summary + month grid) ---
   const activeMonthData = useMemo(
     () =>
       buildCalendarMonth({
-        monthAnchor: viewMode === 'month' ? activeMonthDate : selectedMonthDate,
+        monthAnchor: viewMode !== 'day' ? activeMonthDate : selectedMonthDate,
         transactions: searchFilteredTransactions,
         locale: activeLocale,
         isTimeMode,
@@ -663,21 +665,121 @@ export function CalendarScreen({
     [],
   );
 
-  // --- Toggle expand/collapse ---
-  const handleToggleViewMode = useCallback(() => {
+  const handleYearListRef = useCallback(
+    (ref: FlatList<number> | null) => {
+      yearViewListRef.current = ref;
+      if (ref && pendingYearScrollRef.current != null) {
+        const idx = pendingYearScrollRef.current;
+        pendingYearScrollRef.current = null;
+        requestAnimationFrame(() => {
+          ref.scrollToIndex({ index: idx, animated: false });
+        });
+      }
+    },
+    [],
+  );
+
+  // --- Zoom animations ---
+  const animateZoomOut = useCallback(
+    (from: 'day' | 'month', onMid: () => void) => {
+      zoomScale.setValue(1);
+      zoomOpacity.setValue(1);
+      Animated.parallel([
+        Animated.timing(zoomScale, {
+          toValue: 0.92,
+          duration: 150,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(zoomOpacity, {
+          toValue: 0,
+          duration: 150,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        onMid();
+        zoomScale.setValue(1.08);
+        zoomOpacity.setValue(0);
+        Animated.parallel([
+          Animated.timing(zoomScale, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(zoomOpacity, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
+    },
+    [zoomScale, zoomOpacity],
+  );
+
+  const animateZoomIn = useCallback(
+    (onMid: () => void) => {
+      zoomScale.setValue(1);
+      zoomOpacity.setValue(1);
+      Animated.parallel([
+        Animated.timing(zoomScale, {
+          toValue: 1.08,
+          duration: 150,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(zoomOpacity, {
+          toValue: 0,
+          duration: 150,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        onMid();
+        zoomScale.setValue(0.92);
+        zoomOpacity.setValue(0);
+        Animated.parallel([
+          Animated.timing(zoomScale, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(zoomOpacity, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
+    },
+    [zoomScale, zoomOpacity],
+  );
+
+  // --- Zoom out (back button): day → month → year ---
+  const handleZoomOut = useCallback(() => {
     void triggerHaptic('selection');
-    LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
-    if (viewMode === 'week') {
+    if (viewMode === 'day') {
       const idx = getMonthIndexForDay(selectedDayKey);
-      setActiveMonthIndex(idx);
       pendingMonthScrollRef.current = idx;
-      setViewMode('month');
-    } else {
-      pendingWeekScrollRef.current = getWeekIndexForDay(selectedDayKey);
-      pendingDayScrollRef.current = getDayIndexForDayKey(selectedDayKey);
-      setViewMode('week');
+      animateZoomOut('day', () => {
+        setActiveMonthIndex(idx);
+        setViewMode('month');
+      });
+    } else if (viewMode === 'month') {
+      const d = dayKeyToUtcDate(selectedDayKey);
+      const yr = d ? d.getUTCFullYear() : centerYear;
+      const yearIdx = CENTER_YEAR_INDEX + (yr - centerYear);
+      pendingYearScrollRef.current = yearIdx;
+      animateZoomOut('month', () => {
+        setViewMode('year');
+      });
     }
-  }, [viewMode, selectedDayKey, getMonthIndexForDay, getWeekIndexForDay, getDayIndexForDayKey, setActiveMonthIndex]);
+  }, [viewMode, selectedDayKey, getMonthIndexForDay, setActiveMonthIndex, animateZoomOut, centerYear]);
 
   // --- Day selection from week strip ---
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
@@ -687,17 +789,37 @@ export function CalendarScreen({
     dayPagerRef.current?.scrollToIndex({ index: idx, animated: true });
   }, [getDayIndexForDayKey]);
 
-  // --- Day selection from month grid — collapse back to week ---
+  // --- Day selection from month grid — zoom in to day view ---
   const handleSelectDayFromMonth = useCallback(
     (dayKey: string) => {
       void triggerHaptic('selection');
       setSelectedDayKey(dayKey);
-      LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
       pendingWeekScrollRef.current = getWeekIndexForDay(dayKey);
       pendingDayScrollRef.current = getDayIndexForDayKey(dayKey);
-      setViewMode('week');
+      animateZoomIn(() => {
+        setViewMode('day');
+      });
     },
-    [getWeekIndexForDay, getDayIndexForDayKey],
+    [getWeekIndexForDay, getDayIndexForDayKey, animateZoomIn],
+  );
+
+  // --- Month selection from year view — zoom in to month view ---
+  const handleSelectMonthFromYear = useCallback(
+    (year: number, monthIndex: number) => {
+      void triggerHaptic('selection');
+      const monthDate = new Date(Date.UTC(year, monthIndex, 1));
+      const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
+      const idx = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
+      pendingMonthScrollRef.current = idx;
+      const m = String(monthIndex + 1).padStart(2, '0');
+      const dayKey = `${year}-${m}-01`;
+      setSelectedDayKey(dayKey);
+      animateZoomIn(() => {
+        setActiveMonthIndex(idx);
+        setViewMode('month');
+      });
+    },
+    [monthPagerAnchorDate, clampMonthIndex, setActiveMonthIndex, animateZoomIn],
   );
 
   // When active month changes in month view, pick a day inside it
@@ -725,7 +847,6 @@ export function CalendarScreen({
   // --- Search ---
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
-    setIsMonthPickerOpen(false);
     if (isSearchOpen) {
       searchInputRef.current?.focus();
       return;
@@ -753,7 +874,6 @@ export function CalendarScreen({
   }, []);
 
   const handleOpenFilters = useCallback(() => {
-    setIsMonthPickerOpen(false);
     setShowFilters(true);
   }, []);
 
@@ -770,52 +890,13 @@ export function CalendarScreen({
     setShowFilters(false);
   }, []);
 
-  // --- Month jump picker ---
-  const handleMonthTriggerLayout = useCallback(() => {
-    monthPickerTriggerRef.current?.measureInWindow((x, y, width, height) => {
-      setMonthPickerAnchorRect({ x, y, width, height });
-    });
-  }, []);
-
-  const handleOpenMonthPicker = useCallback(() => {
-    handleMonthTriggerLayout();
-    setIsMonthPickerOpen(true);
-  }, [handleMonthTriggerLayout]);
-
-  const handleCloseMonthPicker = useCallback(() => {
-    setIsMonthPickerOpen(false);
-  }, []);
-
-  const handleJumpToMonth = useCallback(
-    (monthDate: Date) => {
-      if (viewMode === 'month') {
-        const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
-        const nextIndex = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
-        setActiveMonthIndex(nextIndex);
-        horizontalListRef.current?.scrollToIndex({ index: nextIndex, animated: false });
-      } else {
-        const y = monthDate.getFullYear();
-        const m = String(monthDate.getMonth() + 1).padStart(2, '0');
-        const dayKey = `${y}-${m}-01`;
-        setSelectedDayKey(dayKey);
-        const weekIdx = getWeekIndexForDay(dayKey);
-        const dayIdx = getDayIndexForDayKey(dayKey);
-        dayPagerActiveIndex.current = dayIdx;
-        requestAnimationFrame(() => {
-          weekStripListRef.current?.scrollToIndex({ index: weekIdx, animated: false });
-          dayPagerRef.current?.scrollToIndex({ index: dayIdx, animated: false });
-        });
-      }
-      setIsMonthPickerOpen(false);
-    },
-    [viewMode, clampMonthIndex, monthPagerAnchorDate, setActiveMonthIndex, getWeekIndexForDay, getDayIndexForDayKey],
-  );
-
   // Reset to current month/today
   useEffect(() => {
     if (!resetToCurrentMonthToken) return;
     setSelectedDayKey(todayDayKey);
-    if (viewMode === 'month') {
+    if (viewMode === 'year') {
+      yearViewListRef.current?.scrollToIndex({ index: CENTER_YEAR_INDEX, animated: false });
+    } else if (viewMode === 'month') {
       setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
       horizontalListRef.current?.scrollToIndex({
         index: MONTH_PAGER_CENTER_INDEX,
@@ -1098,7 +1179,7 @@ export function CalendarScreen({
           <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
             <View style={styles.daySectionHeader}>
               <View style={styles.daySectionTitleGroup}>
-                <Text variant="heading" className="tracking-tight">{dayLabel}</Text>
+                <Text variant="bodyStrong" className="tracking-tight">{dayLabel}</Text>
               </View>
               <View style={styles.daySectionSubtotals}>
                 {agg && agg.income > 0 ? (
@@ -1168,23 +1249,38 @@ export function CalendarScreen({
     ],
   );
 
-  // --- The expand/collapse toggle button ---
-  const ExpandCollapseButton = useMemo(
-    () => (
-      <Pressable
-        onPress={handleToggleViewMode}
-        accessibilityRole="button"
-        accessibilityLabel={viewMode === 'week' ? I18n.t('calendar.expand') : I18n.t('calendar.collapse')}
-        className="h-9 w-9 rounded-full items-center justify-center bg-secondary/60 active:scale-95"
-      >
-        {viewMode === 'week' ? (
-          <ChevronDown size={18} color={themeColors.textSoft} />
-        ) : (
-          <ChevronUp size={18} color={themeColors.textSoft} />
-        )}
-      </Pressable>
-    ),
-    [handleToggleViewMode, viewMode, themeColors.textSoft],
+  // --- Year label for header ---
+  const selectedYearLabel = useMemo(() => {
+    const d = dayKeyToUtcDate(selectedDayKey);
+    return d ? String(d.getUTCFullYear()) : String(new Date().getFullYear());
+  }, [selectedDayKey]);
+
+  const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
+
+  // --- Back/zoom-out button ---
+  const backButtonLabel = useMemo(() => {
+    if (viewMode === 'day') return displayedMonthLabel;
+    if (viewMode === 'month') return activeYearLabel;
+    return '';
+  }, [viewMode, displayedMonthLabel, activeYearLabel]);
+
+  const BackButton = useMemo(
+    () =>
+      viewMode === 'year' ? null : (
+        <Pressable
+          onPress={handleZoomOut}
+          accessibilityRole="button"
+          accessibilityLabel={backButtonLabel}
+          className="flex-row items-center gap-0.5 active:opacity-70"
+          hitSlop={8}
+        >
+          <ChevronLeft size={22} color={themeColors.primary} />
+          <Text variant="body" style={{ color: themeColors.primary }}>
+            {backButtonLabel}
+          </Text>
+        </Pressable>
+      ),
+    [viewMode, handleZoomOut, backButtonLabel, themeColors.primary],
   );
 
   return (
@@ -1196,19 +1292,12 @@ export function CalendarScreen({
             {/* Title row */}
             <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
               <View className="flex-row items-center gap-2 flex-1">
-                {ExpandCollapseButton}
-                <View ref={monthPickerTriggerRef} onLayout={handleMonthTriggerLayout}>
-                  <Pressable
-                    onPress={handleOpenMonthPicker}
-                    accessibilityRole="button"
-                    accessibilityLabel={displayedMonthLabel}
-                    className="active:opacity-80"
-                  >
-                    <Text variant="heading" className="tracking-tight" numberOfLines={1}>
-                      {displayedMonthLabel}
-                    </Text>
-                  </Pressable>
-                </View>
+                {BackButton}
+                {viewMode === 'year' && (
+                  <Text variant="heading" className="tracking-tight" numberOfLines={1}>
+                    {selectedYearLabel}
+                  </Text>
+                )}
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
@@ -1242,7 +1331,7 @@ export function CalendarScreen({
             />
 
             {/* Summary row */}
-            <View style={styles.summarySlot}>
+            {viewMode !== 'year' && <View style={styles.summarySlot}>
               {isSelectionMode ? (
                 <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
                   <Pressable
@@ -1298,15 +1387,18 @@ export function CalendarScreen({
                   onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
                 />
               )}
-            </View>
+            </View>}
           </View>
         </View>
       </TabletContentContainer>
 
       {/* --- Calendar area --- */}
-      <View className="flex-1 overflow-hidden bg-background">
-        {viewMode === 'week' ? (
-          // WEEK MODE: week strip + swipeable day pager
+      <Animated.View
+        className="flex-1 overflow-hidden bg-background"
+        style={{ transform: [{ scale: zoomScale }], opacity: zoomOpacity }}
+      >
+        {viewMode === 'day' ? (
+          // DAY MODE: week strip + swipeable day pager
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1338,7 +1430,7 @@ export function CalendarScreen({
               style={styles.flexOne}
             />
           </View>
-        ) : (
+        ) : viewMode === 'month' ? (
           // MONTH MODE: full calendar grid (swipeable months)
           <View style={[styles.flexOne, { paddingBottom: bottomPad }]}>
             <FlatList
@@ -1365,20 +1457,21 @@ export function CalendarScreen({
               style={styles.flexOne}
             />
           </View>
+        ) : (
+          // YEAR MODE: scrollable year grid
+          <View style={[styles.flexOne, { paddingBottom: bottomPad }]}>
+            <CalendarYearView
+              centerYear={centerYear}
+              todayDayKey={todayDayKey}
+              dailyByDayKey={globalDailyByDayKey}
+              weekStartsOn={settings.weekStartsOn}
+              locale={activeLocale}
+              onSelectMonth={handleSelectMonthFromYear}
+              onListRef={handleYearListRef}
+            />
+          </View>
         )}
-      </View>
-
-      {/* --- Popovers and modals --- */}
-      <MonthJumpPopover
-        visible={isMonthPickerOpen}
-        anchorRect={monthPickerAnchorRect}
-        screenWidth={screenWidth}
-        screenHeight={screenHeight}
-        locale={activeLocale}
-        currentMonthDate={viewMode === 'month' ? activeMonthDate : selectedMonthDate}
-        onSelectMonth={handleJumpToMonth}
-        onClose={handleCloseMonthPicker}
-      />
+      </Animated.View>
 
       <ThemeModal
         visible={showBulkUpdate}
