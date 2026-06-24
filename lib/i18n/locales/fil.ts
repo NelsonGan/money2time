@@ -1156,6 +1156,15 @@ const fil = {
     new_category: 'Bagong Kategorya',
     edit_category: 'I-edit ang Kategorya',
     delete_confirm: 'Permanenteng mabubura ang kategoryang ito. Hindi ito maaaring ibalik.',
+    delete_title: 'Burahin ang kategorya?',
+    delete_has_transactions_body:
+      '{{count}} na transaksyon ang gumagamit ng kategoryang ito. Ilipat ang mga ito sa ibang kategorya, o burahin ito at iwang walang kategorya.',
+    delete_move_to_other: 'Ilipat sa ibang kategorya',
+    delete_keep_delete: 'Burahin pa rin',
+    move_confirm_title: 'Ilipat ang mga transaksyon?',
+    move_confirm_body:
+      'Ililipat ang lahat ng transaksyon sa “{{name}}” at buburahin ang kategoryang ito. Hindi ito maibabalik.',
+    move_confirm_action: 'Ilipat at burahin',
     name: 'Pangalan',
     color: 'Kulay',
     emoji: 'Emoji',
@@ -1389,6 +1398,9 @@ const fil = {
     voice_label: 'Mga voice entry',
     widgets_label: 'Mga widget sa home screen',
     currencies_label: 'Mga pera',
+    albums_label: 'Mga Album',
+    limit_albums:
+      'Maaari kang gumawa ng hanggang {{count}} album sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',

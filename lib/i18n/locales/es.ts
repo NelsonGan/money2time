@@ -1147,6 +1147,15 @@ const es = {
     edit_category: 'Editar categoría',
     delete_confirm:
       'Se eliminará permanentemente esta categoría. Esta acción no se puede deshacer.',
+    delete_title: '¿Eliminar categoría?',
+    delete_has_transactions_body:
+      '{{count}} transacciones usan esta categoría. Muévelas a otra categoría o elimínala y déjalas sin categoría.',
+    delete_move_to_other: 'Mover a otra categoría',
+    delete_keep_delete: 'Eliminar de todos modos',
+    move_confirm_title: '¿Mover transacciones?',
+    move_confirm_body:
+      'Todas las transacciones se moverán a «{{name}}» y esta categoría se eliminará. Esto no se puede deshacer.',
+    move_confirm_action: 'Mover y eliminar',
     name: 'Nombre',
     color: 'Color',
     emoji: 'Emoji',
@@ -1377,6 +1386,9 @@ const es = {
     voice_label: 'Entradas por voz',
     widgets_label: 'Widgets de pantalla de inicio',
     currencies_label: 'Monedas',
+    albums_label: 'Álbumes',
+    limit_albums:
+      'Puedes crear hasta {{count}} álbumes en el plan gratuito. Mejora a Pro para ilimitados.',
     biometric_label: 'Bloqueo con biometría',
     compare_title: 'Todo en Pro',
     compare_subtitle: 'Mira exactamente qué desbloqueas al mejorar.',

@@ -554,6 +554,21 @@ class TransactionsRepository {
       .run();
   }
 
+  /** Moves every non-deleted transaction in `fromCategoryIds` to `toCategoryId`. */
+  reassignCategory(fromCategoryIds: string[], toCategoryId: string) {
+    if (fromCategoryIds.length === 0) return;
+    const db = getDb();
+    db.update(transactionsTable)
+      .set({ categoryId: toCategoryId, updatedAt: nowIso() })
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          inArray(transactionsTable.categoryId, fromCategoryIds),
+        ),
+      )
+      .run();
+  }
+
   softDeleteByAccountId(accountId: string) {
     const db = getDb();
     const now = nowIso();

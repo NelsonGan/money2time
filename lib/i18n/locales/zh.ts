@@ -1078,6 +1078,14 @@ const zh = {
     income: '收入',
     subcategories: '子分类',
     delete_confirm: '将永久删除此分类，此操作不可撤销。',
+    delete_title: '删除分类？',
+    delete_has_transactions_body:
+      '有 {{count}} 笔交易使用此分类。可将它们移至其他分类，或删除此分类并让它们变为未分类。',
+    delete_move_to_other: '移至其他分类',
+    delete_keep_delete: '仍然删除',
+    move_confirm_title: '移动交易？',
+    move_confirm_body: '所有交易将被移至“{{name}}”，且此分类将被删除。此操作无法撤销。',
+    move_confirm_action: '移动并删除',
   },
   accounts: {
     logo: {
@@ -1288,6 +1296,8 @@ const zh = {
     voice_label: '语音记账',
     widgets_label: '主屏小组件',
     currencies_label: '货币',
+    albums_label: '相册',
+    limit_albums: '免费版最多可创建 {{count}} 个相册。升级到 Pro 即可无限创建。',
     biometric_label: '应用锁（生物识别）',
     compare_title: 'Pro 全部功能',
     compare_subtitle: '升级后即可解锁以下功能。',

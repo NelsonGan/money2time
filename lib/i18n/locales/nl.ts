@@ -1154,6 +1154,15 @@ const nl = {
     edit_category: 'Categorie bewerken',
     delete_confirm:
       'Dit verwijdert deze categorie permanent. Dit kan niet ongedaan worden gemaakt.',
+    delete_title: 'Categorie verwijderen?',
+    delete_has_transactions_body:
+      '{{count}} transacties gebruiken deze categorie. Verplaats ze naar een andere categorie, of verwijder de categorie en laat ze zonder categorie.',
+    delete_move_to_other: 'Naar een andere categorie verplaatsen',
+    delete_keep_delete: 'Toch verwijderen',
+    move_confirm_title: 'Transacties verplaatsen?',
+    move_confirm_body:
+      'Alle transacties worden verplaatst naar “{{name}}” en deze categorie wordt verwijderd. Dit kan niet ongedaan worden gemaakt.',
+    move_confirm_action: 'Verplaatsen en verwijderen',
     name: 'Naam',
     color: 'Kleur',
     emoji: 'Emoji',
@@ -1384,6 +1393,9 @@ const nl = {
     voice_label: 'Spraakinvoer',
     widgets_label: 'Widgets op het beginscherm',
     currencies_label: 'Valuta’s',
+    albums_label: 'Albums',
+    limit_albums:
+      'Je kunt maximaal {{count}} albums maken met het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     biometric_label: 'App-vergrendeling (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Zie precies wat je ontgrendelt met een upgrade.',

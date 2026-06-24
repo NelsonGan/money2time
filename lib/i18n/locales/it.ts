@@ -1144,6 +1144,15 @@ const it = {
     new_category: 'Nuova categoria',
     edit_category: 'Modifica categoria',
     delete_confirm: 'Questa categoria verrà eliminata definitivamente. Non è possibile annullare.',
+    delete_title: 'Eliminare la categoria?',
+    delete_has_transactions_body:
+      '{{count}} transazioni usano questa categoria. Spostale in un’altra categoria, oppure eliminala e lasciale senza categoria.',
+    delete_move_to_other: 'Sposta in un’altra categoria',
+    delete_keep_delete: 'Elimina comunque',
+    move_confirm_title: 'Spostare le transazioni?',
+    move_confirm_body:
+      'Tutte le transazioni verranno spostate in “{{name}}” e questa categoria verrà eliminata. Questa azione non può essere annullata.',
+    move_confirm_action: 'Sposta ed elimina',
     name: 'Nome',
     color: 'Colore',
     emoji: 'Emoji',
@@ -1374,6 +1383,9 @@ const it = {
     voice_label: 'Inserimenti vocali',
     widgets_label: 'Widget della schermata Home',
     currencies_label: 'Valute',
+    albums_label: 'Album',
+    limit_albums:
+      'Puoi creare fino a {{count}} album con il piano gratuito. Passa a Pro per averne illimitati.',
     biometric_label: 'Blocco app (biometrico)',
     compare_title: 'Tutto in Pro',
     compare_subtitle: 'Scopri esattamente cosa sblocchi con l’upgrade.',

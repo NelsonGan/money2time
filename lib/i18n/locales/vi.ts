@@ -1123,6 +1123,15 @@ const vi = {
     new_category: 'Danh mục mới',
     edit_category: 'Sửa danh mục',
     delete_confirm: 'Sẽ xóa vĩnh viễn danh mục này. Không thể hoàn tác.',
+    delete_title: 'Xóa danh mục?',
+    delete_has_transactions_body:
+      '{{count}} giao dịch đang dùng danh mục này. Chuyển chúng sang danh mục khác, hoặc xóa danh mục và để chúng không có danh mục.',
+    delete_move_to_other: 'Chuyển sang danh mục khác',
+    delete_keep_delete: 'Vẫn xóa',
+    move_confirm_title: 'Chuyển giao dịch?',
+    move_confirm_body:
+      'Tất cả giao dịch sẽ được chuyển sang “{{name}}” và danh mục này sẽ bị xóa. Không thể hoàn tác thao tác này.',
+    move_confirm_action: 'Chuyển và xóa',
     name: 'Tên',
     color: 'Màu',
     emoji: 'Biểu tượng',
@@ -1352,6 +1361,9 @@ const vi = {
     voice_label: 'Nhập bằng giọng nói',
     widgets_label: 'Tiện ích màn hình chính',
     currencies_label: 'Tiền tệ',
+    albums_label: 'Album',
+    limit_albums:
+      'Bạn có thể tạo tối đa {{count}} album trong gói miễn phí. Nâng cấp lên Pro để không giới hạn.',
     biometric_label: 'Khóa ứng dụng (sinh trắc học)',
     compare_title: 'Mọi thứ trong Pro',
     compare_subtitle: 'Xem chính xác những gì được mở khóa khi bạn nâng cấp.',

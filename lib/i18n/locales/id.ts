@@ -1147,6 +1147,15 @@ const id = {
     edit_category: 'Edit Kategori',
     delete_confirm:
       'Ini akan menghapus kategori ini secara permanen. Tindakan ini tidak bisa dibatalkan.',
+    delete_title: 'Hapus kategori?',
+    delete_has_transactions_body:
+      '{{count}} transaksi menggunakan kategori ini. Pindahkan ke kategori lain, atau hapus dan biarkan tanpa kategori.',
+    delete_move_to_other: 'Pindahkan ke kategori lain',
+    delete_keep_delete: 'Tetap hapus',
+    move_confirm_title: 'Pindahkan transaksi?',
+    move_confirm_body:
+      'Semua transaksi akan dipindahkan ke “{{name}}” dan kategori ini akan dihapus. Tindakan ini tidak dapat dibatalkan.',
+    move_confirm_action: 'Pindahkan & hapus',
     name: 'Nama',
     color: 'Warna',
     emoji: 'Emoji',
@@ -1377,6 +1386,9 @@ const id = {
     voice_label: 'Entri suara',
     widgets_label: 'Widget layar utama',
     currencies_label: 'Mata uang',
+    albums_label: 'Album',
+    limit_albums:
+      'Anda dapat membuat hingga {{count}} album di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
     biometric_label: 'Kunci aplikasi (biometrik)',
     compare_title: 'Semua di Pro',
     compare_subtitle: 'Lihat apa saja yang terbuka saat kamu meningkatkan.',
