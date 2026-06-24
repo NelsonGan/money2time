@@ -182,7 +182,6 @@ const en = {
     empty_day: 'No income or expenses recorded for this day.',
     expand: 'Expand to month view',
     collapse: 'Collapse to week view',
-    swipe_months: 'Swipe to change month',
   },
   onboarding: {
     progress_step_of: 'Step {{step}} of {{total}}',
