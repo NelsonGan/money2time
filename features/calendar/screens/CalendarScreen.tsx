@@ -1,20 +1,25 @@
-import { ChevronRight, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
+  LayoutAnimation,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
+  UIManager,
   useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '~/components/feedback/EmptyState';
 import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   AccountPickerSheet,
   CategoryPickerSheet,
@@ -25,13 +30,16 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { DisplayModeToggle, MonthJumpPopover } from '~/features/transactions/components';
+import {
+  DisplayModeToggle,
+  MonthJumpPopover,
+  TransactionItem,
+} from '~/features/transactions/components';
 import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
-import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
@@ -44,6 +52,7 @@ import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addMonthsAtMonthStart,
   dayKeyFromDateLocal,
+  dayKeyFromIsoLocal,
   formatAmount,
   formatDateInput,
   formatHours,
@@ -51,10 +60,25 @@ import {
   monthKeyFromDateLocal,
   startOfMonthDate,
 } from '~/utils/formatters';
+import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
-import { CalendarMonthPage } from '../components/CalendarMonthPage';
-import { buildCalendarMonth, getCalendarWeekdayLabels } from '../lib/calendarBuild';
+import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
+import { CalendarWeekStrip, CENTER_WEEK_INDEX } from '../components/CalendarWeekStrip';
+import {
+  buildCalendarMonth,
+  dayKeyToUtcDate,
+  formatCalendarDate,
+  getCalendarWeekdayLabels,
+  weekStartDayKey,
+} from '../lib/calendarBuild';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
@@ -170,12 +194,17 @@ export interface CalendarScreenProps {
 }
 
 function monthOffsetFromAnchor(anchor: Date, target: Date): number {
-  // year*12 + month delta — independent of variable month length so the
-  // round-trip from index → month → index is exact.
   return (
     (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
   );
 }
+
+const EXPAND_ANIM_CONFIG = {
+  duration: 300,
+  create: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+  update: { type: LayoutAnimation.Types.easeInEaseOut },
+  delete: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+} as const;
 
 export function CalendarScreen({
   scrollToTopToken = 0,
@@ -207,10 +236,14 @@ export function CalendarScreen({
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
+  const reportBottomNavScroll = useBottomNavScrollReporter();
 
-  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(() =>
-    dayKeyFromDateLocal(new Date()),
-  );
+  const todayDayKey = dayKeyFromDateLocal(new Date());
+
+  // --- View mode: 'week' (collapsed) or 'month' (expanded) ---
+  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
+
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [monthPickerAnchorRect, setMonthPickerAnchorRect] = useState<{
     x: number;
@@ -241,6 +274,7 @@ export function CalendarScreen({
     if (!showFilters) setActiveFilterPicker(null);
   }, [showFilters]);
 
+  // --- Preferences persistence ---
   const applyCalendarPreferencesSnapshot = useCallback(
     (saved: Partial<CalendarPreferencesSnapshot>) => {
       if (saved.excludedAccountIds) setExcludedAccountIds(saved.excludedAccountIds);
@@ -273,8 +307,10 @@ export function CalendarScreen({
     writeStoredJson: updateCalendarPreferencesJson,
   });
 
+  // --- Month pager (for expanded month view) ---
   const monthPickerTriggerRef = useRef<View>(null);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
+  const weekStripListRef = useRef<FlatList<number> | null>(null);
 
   const pageWidth = Math.max(1, screenWidth);
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
@@ -302,6 +338,7 @@ export function CalendarScreen({
     [activeMonthIndex, monthPagerAnchorDate],
   );
 
+  // --- Transactions filtering ---
   const scopedTransactions = useMemo(
     () => filterTransactionsByWallet(transactions, isSimpleMode ? simpleWalletId : null),
     [transactions, isSimpleMode, simpleWalletId],
@@ -320,8 +357,6 @@ export function CalendarScreen({
   const filteredTransactions = useMemo(() => {
     return scopedTransactions.filter((tx) => {
       if (tx.accountId && excludedAccountIdSet.has(tx.accountId)) return false;
-      // Excluding a parent category also excludes its child sub-categories, so
-      // match the transaction's own category id or its parent's id.
       if (
         tx.type === 'income' &&
         tx.categoryId &&
@@ -361,6 +396,281 @@ export function CalendarScreen({
     excludedIncomeCategoryIds.length +
     excludedExpenseCategoryIds.length;
 
+  // --- Build a global daily aggregate map for the week strip ---
+  const globalDailyByDayKey = useMemo(() => {
+    const map = new Map<string, { dayKey: string; income: number; expense: number; net: number; transactionCount: number; transactions: TransactionWithRelations[] }>();
+    for (const tx of filteredTransactions) {
+      if (tx.type !== 'income' && tx.type !== 'expense') continue;
+      const dayKey = dayKeyFromIsoLocal(tx.date);
+      let agg = map.get(dayKey);
+      if (!agg) {
+        agg = { dayKey, income: 0, expense: 0, net: 0, transactionCount: 0, transactions: [] };
+        map.set(dayKey, agg);
+      }
+      const value = isTimeMode ? getDisplayValueForTransaction(tx) : (tx.reportingAmount ?? tx.amount);
+      if (tx.type === 'income') {
+        agg.income += value;
+      } else {
+        agg.expense += value;
+      }
+      agg.transactionCount += 1;
+      agg.transactions.push(tx);
+    }
+    map.forEach((agg) => {
+      agg.net = agg.income - agg.expense;
+    });
+    return map;
+  }, [filteredTransactions, isTimeMode, getDisplayValueForTransaction]);
+
+  // --- Week strip anchor ---
+  const anchorWeekStart = useMemo(
+    () => weekStartDayKey(todayDayKey, settings.weekStartsOn),
+    [todayDayKey, settings.weekStartsOn],
+  );
+
+  const weekdayLabels = useMemo(
+    () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
+    [activeLocale, settings.weekStartsOn],
+  );
+
+  // --- Selected day's month for header label ---
+  const selectedMonthDate = useMemo(() => {
+    const d = dayKeyToUtcDate(selectedDayKey);
+    return d ?? new Date();
+  }, [selectedDayKey]);
+
+  const selectedMonthLabel = useMemo(
+    () => formatMonthYearLabel(selectedMonthDate, activeLocale),
+    [selectedMonthDate, activeLocale],
+  );
+
+  const activeMonthLabel = useMemo(
+    () => formatMonthYearLabel(activeMonthDate, activeLocale),
+    [activeMonthDate, activeLocale],
+  );
+
+  const displayedMonthLabel = viewMode === 'week' ? selectedMonthLabel : activeMonthLabel;
+
+  const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
+  const selectedMonthKey = useMemo(() => {
+    const d = dayKeyToUtcDate(selectedDayKey);
+    return d ? monthKeyFromDateLocal(d) : monthKeyFromDateLocal(new Date());
+  }, [selectedDayKey]);
+
+  const displayedMonthKey = viewMode === 'week' ? selectedMonthKey : activeMonthKey;
+
+  // --- Build month data for the active month (header summary + month grid) ---
+  const activeMonthData = useMemo(
+    () =>
+      buildCalendarMonth({
+        monthAnchor: viewMode === 'month' ? activeMonthDate : selectedMonthDate,
+        transactions: filteredTransactions,
+        locale: activeLocale,
+        isTimeMode,
+        getDisplayValueForTransaction,
+        todayDayKey,
+        weekStartsOn: settings.weekStartsOn,
+      }),
+    [
+      viewMode,
+      activeMonthDate,
+      selectedMonthDate,
+      filteredTransactions,
+      activeLocale,
+      isTimeMode,
+      getDisplayValueForTransaction,
+      todayDayKey,
+      settings.weekStartsOn,
+    ],
+  );
+
+  // --- Selected day transactions ---
+  const selectedDayAggregate = useMemo(
+    () => globalDailyByDayKey.get(selectedDayKey) ?? null,
+    [globalDailyByDayKey, selectedDayKey],
+  );
+
+  const selectedDayTransactions = useMemo(() => {
+    if (!selectedDayAggregate) return [];
+    return [...selectedDayAggregate.transactions].sort(compareTransactionsByDateDesc);
+  }, [selectedDayAggregate]);
+
+  const isFutureDay = selectedDayKey > todayDayKey;
+  const selectedDayLabel = formatCalendarDate(selectedDayKey, activeLocale);
+
+  const transactionDisplaySettings = useMemo(
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+    }),
+    [settings.currencySymbol, settings.displayMode],
+  );
+
+  // --- Selection mode ---
+  const selectedTransactionTotalLabel = useMemo(() => {
+    if (selectedTransactionIds.length === 0) return '';
+    const selectedIdSet = new Set(selectedTransactionIds);
+    let total = 0;
+    filteredTransactions.forEach((transaction) => {
+      if (!selectedIdSet.has(transaction.id)) return;
+      total += transaction.reportingAmount ?? transaction.amount;
+    });
+    return formatAmount(
+      Math.abs(total),
+      { currencySymbol: settings.currencySymbol, displayMode: 'money' },
+      { showSign: false, trueHourlyRate: 0 },
+    );
+  }, [filteredTransactions, selectedTransactionIds, settings.currencySymbol]);
+
+  useEffect(() => {
+    if (selectedTransactionIds.length === 0) return;
+    const availableIds = new Set(filteredTransactions.map((transaction) => transaction.id));
+    setSelectedTransactionIds((previous) => {
+      const next = previous.filter((id) => availableIds.has(id));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [filteredTransactions, selectedTransactionIds.length]);
+
+  useEffect(() => {
+    setSelectedTransactionIds([]);
+  }, [selectedDayKey]);
+
+  useEffect(() => {
+    if (!isSelectionMode) setShowBulkUpdate(false);
+  }, [isSelectionMode]);
+
+  useLayoutEffect(() => {
+    onSelectionModeChange?.(isSelectionMode);
+    return () => {
+      onSelectionModeChange?.(false);
+    };
+  }, [isSelectionMode, onSelectionModeChange]);
+
+  // Pending scroll target after view mode switches — the target FlatList
+  // may not be mounted yet when we toggle, so we store the index and apply
+  // it once the list appears.
+  const pendingMonthScrollRef = useRef<number | null>(null);
+  const pendingWeekScrollRef = useRef<number | null>(null);
+
+  const getMonthIndexForDay = useCallback(
+    (dayKey: string) => {
+      const d = dayKeyToUtcDate(dayKey);
+      if (!d) return MONTH_PAGER_CENTER_INDEX;
+      const monthDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
+      const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
+      return clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
+    },
+    [clampMonthIndex, monthPagerAnchorDate],
+  );
+
+  const getWeekIndexForDay = useCallback(
+    (dayKey: string) => {
+      const ws = weekStartDayKey(dayKey, settings.weekStartsOn);
+      const anchorDate = dayKeyToUtcDate(anchorWeekStart);
+      const targetDate = dayKeyToUtcDate(ws);
+      if (!anchorDate || !targetDate) return CENTER_WEEK_INDEX;
+      const diffMs = targetDate.getTime() - anchorDate.getTime();
+      return CENTER_WEEK_INDEX + Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+    },
+    [anchorWeekStart, settings.weekStartsOn],
+  );
+
+  // Apply pending scrolls when the target list mounts
+  const handleMonthListRef = useCallback(
+    (ref: FlatList<number> | null) => {
+      (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
+      if (ref && pendingMonthScrollRef.current != null) {
+        const idx = pendingMonthScrollRef.current;
+        pendingMonthScrollRef.current = null;
+        setActiveMonthIndex(idx);
+        requestAnimationFrame(() => {
+          ref.scrollToIndex({ index: idx, animated: false });
+        });
+      }
+    },
+    [setActiveMonthIndex],
+  );
+
+  const handleWeekListRef = useCallback(
+    (ref: FlatList<number> | null) => {
+      (weekStripListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
+      if (ref && pendingWeekScrollRef.current != null) {
+        const idx = pendingWeekScrollRef.current;
+        pendingWeekScrollRef.current = null;
+        requestAnimationFrame(() => {
+          ref.scrollToIndex({ index: idx, animated: false });
+        });
+      }
+    },
+    [],
+  );
+
+  // --- Toggle expand/collapse ---
+  const handleToggleViewMode = useCallback(() => {
+    void triggerHaptic('selection');
+    LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
+    if (viewMode === 'week') {
+      const idx = getMonthIndexForDay(selectedDayKey);
+      setActiveMonthIndex(idx);
+      pendingMonthScrollRef.current = idx;
+      setViewMode('month');
+    } else {
+      const idx = getWeekIndexForDay(selectedDayKey);
+      pendingWeekScrollRef.current = idx;
+      setViewMode('week');
+    }
+  }, [viewMode, selectedDayKey, getMonthIndexForDay, getWeekIndexForDay, setActiveMonthIndex]);
+
+  // --- Day selection from week strip ---
+  const handleSelectDayFromWeek = useCallback((dayKey: string) => {
+    setSelectedDayKey(dayKey);
+  }, []);
+
+  // --- Day selection from month grid — collapse back to week ---
+  const handleSelectDayFromMonth = useCallback(
+    (dayKey: string) => {
+      void triggerHaptic('selection');
+      setSelectedDayKey(dayKey);
+      LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
+      pendingWeekScrollRef.current = getWeekIndexForDay(dayKey);
+      setViewMode('week');
+    },
+    [getWeekIndexForDay],
+  );
+
+  // When active month changes in month view, pick a day inside it
+  useEffect(() => {
+    if (viewMode !== 'month') return;
+    setSelectedDayKey((prev) => {
+      if (prev && prev >= activeMonthData.firstDayKey && prev <= activeMonthData.lastDayKey) {
+        return prev;
+      }
+      const inMonth =
+        activeMonthData.firstDayKey <= todayDayKey && activeMonthData.lastDayKey >= todayDayKey;
+      return inMonth ? todayDayKey : activeMonthData.firstDayKey;
+    });
+  }, [viewMode, activeMonthData.firstDayKey, activeMonthData.lastDayKey, todayDayKey]);
+
+  // --- Month pager navigation ---
+  const handlePrevMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    scrollToRelativeMonth(-1);
+  }, [scrollToRelativeMonth]);
+
+  const handleNextMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    scrollToRelativeMonth(1);
+  }, [scrollToRelativeMonth]);
+
+  const handleMonthMomentumEnd = useCallback(
+    (e: Parameters<typeof handleHorizontalMomentumEnd>[0]) => {
+      void triggerHaptic('selection');
+      handleHorizontalMomentumEnd(e);
+    },
+    [handleHorizontalMomentumEnd],
+  );
+
+  // --- Filters ---
   const handleResetFilters = useCallback(() => {
     void triggerHaptic('selection');
     setExcludedAccountIds([]);
@@ -386,117 +696,63 @@ export function CalendarScreen({
     setShowFilters(false);
   }, []);
 
-  const todayDayKey = dayKeyFromDateLocal(new Date());
-
-  // Build month data for the *active* month so the header summary always
-  // reflects what the user is looking at. Each page computes its own
-  // month data internally — duplicated work for the active page, but it
-  // keeps the page component self-contained and renders the header in
-  // one place without prop-drilling per-page data out.
-  const activeMonthData = useMemo(
-    () =>
-      buildCalendarMonth({
-        monthAnchor: activeMonthDate,
-        transactions: filteredTransactions,
-        locale: activeLocale,
-        isTimeMode,
-        getDisplayValueForTransaction,
-        todayDayKey,
-        weekStartsOn: settings.weekStartsOn,
-      }),
-    [
-      activeMonthDate,
-      filteredTransactions,
-      activeLocale,
-      isTimeMode,
-      getDisplayValueForTransaction,
-      todayDayKey,
-      settings.weekStartsOn,
-    ],
-  );
-
-  const weekdayLabels = useMemo(
-    () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
-    [activeLocale, settings.weekStartsOn],
-  );
-
-  const activeMonthLabel = useMemo(
-    () => formatMonthYearLabel(activeMonthDate, activeLocale),
-    [activeMonthDate, activeLocale],
-  );
-  const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
-
-  const selectedTransactionTotalLabel = useMemo(() => {
-    if (selectedTransactionIds.length === 0) return '';
-    const selectedIdSet = new Set(selectedTransactionIds);
-    let total = 0;
-    filteredTransactions.forEach((transaction) => {
-      if (!selectedIdSet.has(transaction.id)) return;
-      total += transaction.reportingAmount ?? transaction.amount;
+  // --- Month jump picker ---
+  const handleMonthTriggerLayout = useCallback(() => {
+    monthPickerTriggerRef.current?.measureInWindow((x, y, width, height) => {
+      setMonthPickerAnchorRect({ x, y, width, height });
     });
-    return formatAmount(
-      Math.abs(total),
-      { currencySymbol: settings.currencySymbol, displayMode: 'money' },
-      { showSign: false, trueHourlyRate: 0 },
-    );
-  }, [filteredTransactions, selectedTransactionIds, settings.currencySymbol]);
+  }, []);
 
-  // Drop any selected ids that are no longer present (e.g. after a delete or a
-  // filter change) so the toolbar count and bulk actions stay accurate.
-  useEffect(() => {
-    if (selectedTransactionIds.length === 0) return;
-    const availableIds = new Set(filteredTransactions.map((transaction) => transaction.id));
-    setSelectedTransactionIds((previous) => {
-      const next = previous.filter((id) => availableIds.has(id));
-      return next.length === previous.length ? previous : next;
-    });
-  }, [filteredTransactions, selectedTransactionIds.length]);
+  const handleOpenMonthPicker = useCallback(() => {
+    handleMonthTriggerLayout();
+    setIsMonthPickerOpen(true);
+  }, [handleMonthTriggerLayout]);
 
-  // Selection is scoped to the day the user is looking at — the day-detail list
-  // only shows one day at a time, so navigating to another day (or swiping to a
-  // new month, which re-picks the day) drops the selection. Without this, the
-  // toolbar would keep a count for transactions that are no longer on screen and
-  // a bulk delete could remove rows the user can't see.
-  useEffect(() => {
-    setSelectedTransactionIds([]);
-  }, [selectedDayKey]);
+  const handleCloseMonthPicker = useCallback(() => {
+    setIsMonthPickerOpen(false);
+  }, []);
 
-  // Close the bulk-update sheet if selection mode exits underneath it (e.g. the
-  // last selected transaction was pruned away).
-  useEffect(() => {
-    if (!isSelectionMode) setShowBulkUpdate(false);
-  }, [isSelectionMode]);
-
-  // Report selection mode up so the shell can hide the bottom nav during a
-  // multi-select, matching the transactions screen.
-  useLayoutEffect(() => {
-    onSelectionModeChange?.(isSelectionMode);
-    return () => {
-      onSelectionModeChange?.(false);
-    };
-  }, [isSelectionMode, onSelectionModeChange]);
-
-  // When the active month changes, default-pick a day inside it for the
-  // lifted selection — today if it falls inside, else the 1st.
-  useEffect(() => {
-    setSelectedDayKey((prev) => {
-      if (prev && prev >= activeMonthData.firstDayKey && prev <= activeMonthData.lastDayKey) {
-        return prev;
+  const handleJumpToMonth = useCallback(
+    (monthDate: Date) => {
+      if (viewMode === 'month') {
+        const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
+        const nextIndex = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
+        setActiveMonthIndex(nextIndex);
+        horizontalListRef.current?.scrollToIndex({ index: nextIndex, animated: false });
+      } else {
+        const y = monthDate.getFullYear();
+        const m = String(monthDate.getMonth() + 1).padStart(2, '0');
+        const dayKey = `${y}-${m}-01`;
+        setSelectedDayKey(dayKey);
+        const idx = getWeekIndexForDay(dayKey);
+        requestAnimationFrame(() => {
+          weekStripListRef.current?.scrollToIndex({ index: idx, animated: false });
+        });
       }
-      const inMonth =
-        activeMonthData.firstDayKey <= todayDayKey && activeMonthData.lastDayKey >= todayDayKey;
-      return inMonth ? todayDayKey : activeMonthData.firstDayKey;
-    });
-  }, [activeMonthData.firstDayKey, activeMonthData.lastDayKey, todayDayKey]);
-
-  const transactionDisplaySettings = useMemo(
-    () => ({
-      currencySymbol: settings.currencySymbol,
-      displayMode: settings.displayMode,
-    }),
-    [settings.currencySymbol, settings.displayMode],
+      setIsMonthPickerOpen(false);
+    },
+    [viewMode, clampMonthIndex, monthPagerAnchorDate, setActiveMonthIndex, getWeekIndexForDay],
   );
 
+  // Reset to current month/today
+  useEffect(() => {
+    if (!resetToCurrentMonthToken) return;
+    setSelectedDayKey(todayDayKey);
+    if (viewMode === 'month') {
+      setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
+      horizontalListRef.current?.scrollToIndex({
+        index: MONTH_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+    } else {
+      const idx = getWeekIndexForDay(todayDayKey);
+      requestAnimationFrame(() => {
+        weekStripListRef.current?.scrollToIndex({ index: idx, animated: false });
+      });
+    }
+  }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode, getWeekIndexForDay]);
+
+  // --- Summary formatting ---
   const formatSummaryValue = useCallback(
     (value: number) =>
       isTimeMode ? (
@@ -512,32 +768,31 @@ export function CalendarScreen({
     [isTimeMode, settings],
   );
 
-  const handlePrevMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    scrollToRelativeMonth(-1);
-  }, [scrollToRelativeMonth]);
+  const formatDaySubtotal = useCallback(
+    (value: number, tone: 'income' | 'expense') => {
+      const colorClass = tone === 'income' ? 'text-success' : 'text-destructive';
+      const iconColor = tone === 'income' ? themeColors.success : themeColors.error;
+      if (isTimeMode) {
+        return (
+          <TimeValueInline
+            value={formatHours(value)}
+            variant="caption"
+            textClassName={colorClass}
+            iconColor={iconColor}
+            iconSize={10}
+          />
+        );
+      }
+      return (
+        <Text variant="caption" className={colorClass}>
+          {formatAmount(value, settings, { showSign: false })}
+        </Text>
+      );
+    },
+    [isTimeMode, settings, themeColors.success, themeColors.error],
+  );
 
-  const handleNextMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    scrollToRelativeMonth(1);
-  }, [scrollToRelativeMonth]);
-
-  const handleSelectDay = useCallback((dayKey: string) => {
-    setSelectedDayKey(dayKey);
-  }, []);
-
-  const handleOpenIncomeBreakdown = useCallback(() => {
-    if (!onOpenBreakdownInsight) return;
-    void triggerHaptic('selection');
-    onOpenBreakdownInsight('income_breakdown', activeMonthKey);
-  }, [activeMonthKey, onOpenBreakdownInsight]);
-
-  const handleOpenExpenseBreakdown = useCallback(() => {
-    if (!onOpenBreakdownInsight) return;
-    void triggerHaptic('selection');
-    onOpenBreakdownInsight('expense_breakdown', activeMonthKey);
-  }, [activeMonthKey, onOpenBreakdownInsight]);
-
+  // --- Transaction press handlers ---
   const clearSelection = useCallback(() => {
     void triggerHaptic('selection');
     setSelectedTransactionIds([]);
@@ -587,6 +842,7 @@ export function CalendarScreen({
     [isSelectionMode, toggleTransactionSelection],
   );
 
+  // --- Bulk operations ---
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setBulkDate(formatDateInput(new Date()));
@@ -649,42 +905,19 @@ export function CalendarScreen({
     );
   }, [deleteTransactionsBulk, selectedTransactionIds]);
 
-  const handleMonthTriggerLayout = useCallback(() => {
-    monthPickerTriggerRef.current?.measureInWindow((x, y, width, height) => {
-      setMonthPickerAnchorRect({ x, y, width, height });
-    });
-  }, []);
+  const handleOpenIncomeBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('income_breakdown', displayedMonthKey);
+  }, [displayedMonthKey, onOpenBreakdownInsight]);
 
-  const handleOpenMonthPicker = useCallback(() => {
-    handleMonthTriggerLayout();
-    setIsMonthPickerOpen(true);
-  }, [handleMonthTriggerLayout]);
+  const handleOpenExpenseBreakdown = useCallback(() => {
+    if (!onOpenBreakdownInsight) return;
+    void triggerHaptic('selection');
+    onOpenBreakdownInsight('expense_breakdown', displayedMonthKey);
+  }, [displayedMonthKey, onOpenBreakdownInsight]);
 
-  const handleCloseMonthPicker = useCallback(() => {
-    setIsMonthPickerOpen(false);
-  }, []);
-
-  const handleJumpToMonth = useCallback(
-    (monthDate: Date) => {
-      const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
-      const nextIndex = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
-      setActiveMonthIndex(nextIndex);
-      horizontalListRef.current?.scrollToIndex({ index: nextIndex, animated: false });
-      setIsMonthPickerOpen(false);
-    },
-    [clampMonthIndex, monthPagerAnchorDate, setActiveMonthIndex],
-  );
-
-  useEffect(() => {
-    if (!resetToCurrentMonthToken) return;
-    setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
-    setSelectedDayKey(dayKeyFromDateLocal(new Date()));
-    horizontalListRef.current?.scrollToIndex({
-      index: MONTH_PAGER_CENTER_INDEX,
-      animated: false,
-    });
-  }, [resetToCurrentMonthToken, setActiveMonthIndex]);
-
+  // --- Month grid rendering for expanded view ---
   const gridChartWidth = useMemo(() => {
     const horizontal = CALENDAR_GRID_HORIZONTAL_PADDING * 2;
     return Math.max(280, contentWidth - horizontal);
@@ -695,168 +928,369 @@ export function CalendarScreen({
     [safeAreaInsets.bottom],
   );
 
+  const selectedTransactionIdSet = useMemo(
+    () => new Set(selectedTransactionIds),
+    [selectedTransactionIds],
+  );
+
+  // --- Month page renderer for month mode FlatList ---
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
       const pageMonth = addMonthsAtMonthStart(monthPagerAnchorDate, offset);
-      const isActive = item === activeMonthIndex;
       return (
-        <CalendarMonthPage
-          pageWidth={pageWidth}
-          monthAnchor={pageMonth}
-          transactions={filteredTransactions}
-          locale={activeLocale}
-          isTimeMode={isTimeMode}
-          getDisplayValueForTransaction={getDisplayValueForTransaction}
-          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          todayDayKey={todayDayKey}
-          weekdayLabels={weekdayLabels}
-          gridChartWidth={gridChartWidth}
-          bottomPad={bottomPad}
-          contentPaddingHorizontal={CALENDAR_HORIZONTAL_PADDING}
-          gridPaddingHorizontal={CALENDAR_GRID_HORIZONTAL_PADDING}
-          displaySettings={transactionDisplaySettings}
-          fullSettings={settings}
-          selectedDayKey={selectedDayKey}
-          isActive={isActive}
-          scrollToTopToken={scrollToTopToken}
-          onSelectDay={handleSelectDay}
-          onOpenTransaction={handleTransactionPress}
-          onOpenTransactionSplitBadge={handleTransactionSplitBadgePress}
-          onLongPressTransaction={handleTransactionLongPress}
-          selectionMode={isSelectionMode}
-          selectedTransactionIds={selectedTransactionIds}
-        />
+        <View style={{ width: pageWidth }}>
+          <View style={[styles.calendarWrapper, { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING }]}>
+            <CalendarMonthGrid
+              monthData={buildCalendarMonth({
+                monthAnchor: pageMonth,
+                transactions: filteredTransactions,
+                locale: activeLocale,
+                isTimeMode,
+                getDisplayValueForTransaction,
+                todayDayKey,
+                weekStartsOn: settings.weekStartsOn,
+              })}
+              weekdayLabels={weekdayLabels}
+              selectedDayKey={selectedDayKey}
+              isTimeMode={isTimeMode}
+              locale={activeLocale}
+              onSelectDay={handleSelectDayFromMonth}
+              chartWidth={gridChartWidth}
+            />
+          </View>
+        </View>
       );
     },
     [
       activeLocale,
-      activeMonthIndex,
-      bottomPad,
+      filteredTransactions,
       getDisplayValueForTransaction,
-      getTrueHourlyRateForDate,
       gridChartWidth,
-      handleSelectDay,
-      handleTransactionLongPress,
-      handleTransactionPress,
-      handleTransactionSplitBadgePress,
-      isSelectionMode,
+      handleSelectDayFromMonth,
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
-      filteredTransactions,
-      scrollToTopToken,
       selectedDayKey,
-      selectedTransactionIds,
-      settings,
+      settings.weekStartsOn,
       todayDayKey,
-      transactionDisplaySettings,
       weekdayLabels,
     ],
   );
 
+  // --- The expand/collapse toggle button ---
+  const ExpandCollapseButton = useMemo(
+    () => (
+      <Pressable
+        onPress={handleToggleViewMode}
+        accessibilityRole="button"
+        accessibilityLabel={viewMode === 'week' ? I18n.t('calendar.expand') : I18n.t('calendar.collapse')}
+        className="h-9 w-9 rounded-full items-center justify-center bg-secondary/60 active:scale-95"
+      >
+        {viewMode === 'week' ? (
+          <ChevronDown size={18} color={themeColors.textSoft} />
+        ) : (
+          <ChevronUp size={18} color={themeColors.textSoft} />
+        )}
+      </Pressable>
+    ),
+    [handleToggleViewMode, viewMode, themeColors.textSoft],
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <MonthControlsHeader
-        title={I18n.t('calendar.title')}
-        showAccent={false}
-        monthLabel={activeMonthLabel}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-        onMonthPress={handleOpenMonthPicker}
-        monthTriggerRef={monthPickerTriggerRef}
-        onMonthTriggerLayout={handleMonthTriggerLayout}
-        actions={
-          <>
-            <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
-            <DisplayModeToggle />
-          </>
-        }
-      >
-        <View style={styles.summarySlot}>
-          {isSelectionMode ? (
-            <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
-              <Pressable
-                onPress={clearSelection}
-                className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.cancel')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-
-              <View className="flex-1 items-center px-1">
-                <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                  <Text variant="caption" className="text-foreground">
-                    {I18n.t('transactions.selection.selected_count', {
-                      count: selectedTransactionCount,
-                    })}
-                  </Text>
-                  <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                    <Text variant="label" className="text-foreground">
-                      {selectedTransactionTotalLabel}
+      {/* --- Header --- */}
+      <TabletContentContainer>
+        <View className="bg-background pb-1.5 pt-1">
+          <View className="px-5 pt-1.5 gap-2.5">
+            {/* Title row */}
+            <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
+              <View className="flex-row items-center gap-2 flex-1">
+                {ExpandCollapseButton}
+                <View ref={monthPickerTriggerRef} onLayout={handleMonthTriggerLayout}>
+                  <Pressable
+                    onPress={handleOpenMonthPicker}
+                    accessibilityRole="button"
+                    accessibilityLabel={displayedMonthLabel}
+                    className="active:opacity-80"
+                  >
+                    <Text variant="heading" className="tracking-tight" numberOfLines={1}>
+                      {displayedMonthLabel}
                     </Text>
+                  </Pressable>
+                </View>
+              </View>
+              <View className="flex-row items-center gap-2">
+                <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+                <DisplayModeToggle />
+              </View>
+            </View>
+
+            {/* Summary row */}
+            <View style={styles.summarySlot}>
+              {isSelectionMode ? (
+                <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+                  <Pressable
+                    onPress={clearSelection}
+                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.cancel')}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.cancel')}
+                    </Text>
+                  </Pressable>
+                  <View className="flex-1 items-center px-1">
+                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('transactions.selection.selected_count', {
+                          count: selectedTransactionCount,
+                        })}
+                      </Text>
+                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                        <Text variant="label" className="text-foreground">
+                          {selectedTransactionTotalLabel}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
+                  <View className="flex-row items-center gap-1.5">
+                    <Pressable
+                      onPress={handleOpenBulkUpdate}
+                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.selection.update')}
+                      hitSlop={8}
+                    >
+                      <Pencil size={14} color={themeColors.primary} />
+                    </Pressable>
+                    <Pressable
+                      onPress={handleDeleteSelectedTransactions}
+                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.delete')}
+                      hitSlop={8}
+                    >
+                      <Trash2 size={14} color={themeColors.coral} />
+                    </Pressable>
+                  </View>
+                </View>
+              ) : (
+                <InOutHeader
+                  incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
+                  expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+                  onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
+                  onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+                />
+              )}
+            </View>
+          </View>
+        </View>
+      </TabletContentContainer>
+
+      {/* --- Calendar area --- */}
+      <View className="flex-1 overflow-hidden bg-background">
+        {viewMode === 'week' ? (
+          // WEEK MODE: week strip + day transactions
+          <View style={styles.flexOne}>
+            <View className="border-b border-border/30">
+              <CalendarWeekStrip
+                selectedDayKey={selectedDayKey}
+                todayDayKey={todayDayKey}
+                weekdayLabels={weekdayLabels}
+                anchorWeekStart={anchorWeekStart}
+                dailyByDayKey={globalDailyByDayKey}
+                onSelectDay={handleSelectDayFromWeek}
+                onListRef={handleWeekListRef}
+              />
+            </View>
+            <ScrollView
+              contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              onScroll={reportBottomNavScroll}
+              scrollEventThrottle={32}
+            >
+              <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
+                <View style={styles.daySectionHeader}>
+                  <View style={styles.daySectionTitleGroup}>
+                    <Text variant="bodyStrong">{selectedDayLabel}</Text>
+                  </View>
+                  <View style={styles.daySectionSubtotals}>
+                    {selectedDayAggregate && selectedDayAggregate.income > 0 ? (
+                      <View className="rounded-full bg-success/10 px-2 py-0.5">
+                        {formatDaySubtotal(selectedDayAggregate.income, 'income')}
+                      </View>
+                    ) : null}
+                    {selectedDayAggregate && selectedDayAggregate.expense > 0 ? (
+                      <View className="rounded-full bg-destructive/10 px-2 py-0.5">
+                        {formatDaySubtotal(selectedDayAggregate.expense, 'expense')}
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+
+                {selectedDayTransactions.length === 0 ? (
+                  <EmptyState
+                    title={I18n.t('calendar.empty_title')}
+                    message={
+                      isFutureDay
+                        ? I18n.t('calendar.future_empty')
+                        : I18n.t('calendar.empty_day')
+                    }
+                    mascotMood="curious"
+                    animateIn={false}
+                    compact
+                  />
+                ) : (
+                  <View style={styles.transactionList}>
+                    {selectedDayTransactions.map((tx) => (
+                      <TransactionItem
+                        key={tx.id}
+                        transaction={tx}
+                        onPressTransaction={handleTransactionPress}
+                        onPressSplitBadge={handleTransactionSplitBadgePress}
+                        onLongPressTransaction={handleTransactionLongPress}
+                        selectionMode={isSelectionMode}
+                        selected={selectedTransactionIdSet.has(tx.id)}
+                        settings={transactionDisplaySettings}
+                        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                        compact
+                        disableAnimations
+                      />
+                    ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        ) : (
+          // MONTH MODE: full calendar grid (swipeable months) + day transactions
+          <ScrollView
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            onScroll={reportBottomNavScroll}
+            scrollEventThrottle={32}
+          >
+            <View style={{ height: undefined }}>
+              <FlatList
+                ref={handleMonthListRef}
+                data={monthPagerSlots}
+                keyExtractor={monthPagerKeyExtractor}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                bounces={false}
+                directionalLockEnabled
+                decelerationRate="fast"
+                overScrollMode="never"
+                renderItem={renderMonthPage}
+                initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+                getItemLayout={getHorizontalItemLayout}
+                onScrollEndDrag={handleHorizontalScrollEndDrag}
+                onMomentumScrollEnd={handleMonthMomentumEnd}
+                onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+                initialNumToRender={3}
+                maxToRenderPerBatch={3}
+                windowSize={5}
+                removeClippedSubviews
+                nestedScrollEnabled
+                style={styles.monthPager}
+              />
+            </View>
+
+            {/* Month navigation capsule */}
+            <View style={{ paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }}>
+              <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5 mt-1">
+                <View className="flex-row items-center justify-between">
+                  <Pressable
+                    onPress={handlePrevMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronRight
+                      size={14}
+                      color={themeColors.textSoft}
+                      style={{ transform: [{ scaleX: -1 }] }}
+                    />
+                  </Pressable>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('calendar.swipe_months')}
+                  </Text>
+                  <Pressable
+                    onPress={handleNextMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronRight size={14} color={themeColors.textSoft} />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+
+            {/* Day detail below the grid */}
+            <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
+              <View style={styles.daySectionHeader}>
+                <View style={styles.daySectionTitleGroup}>
+                  <Text variant="bodyStrong">{selectedDayLabel}</Text>
+                </View>
+                <View style={styles.daySectionSubtotals}>
+                  {selectedDayAggregate && selectedDayAggregate.income > 0 ? (
+                    <View className="rounded-full bg-success/10 px-2 py-0.5">
+                      {formatDaySubtotal(selectedDayAggregate.income, 'income')}
+                    </View>
+                  ) : null}
+                  {selectedDayAggregate && selectedDayAggregate.expense > 0 ? (
+                    <View className="rounded-full bg-destructive/10 px-2 py-0.5">
+                      {formatDaySubtotal(selectedDayAggregate.expense, 'expense')}
+                    </View>
+                  ) : null}
                 </View>
               </View>
 
-              <View className="flex-row items-center gap-1.5">
-                <Pressable
-                  onPress={handleOpenBulkUpdate}
-                  className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.selection.update')}
-                  hitSlop={8}
-                >
-                  <Pencil size={14} color={themeColors.primary} />
-                </Pressable>
-                <Pressable
-                  onPress={handleDeleteSelectedTransactions}
-                  className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.delete')}
-                  hitSlop={8}
-                >
-                  <Trash2 size={14} color={themeColors.coral} />
-                </Pressable>
-              </View>
+              {selectedDayTransactions.length === 0 ? (
+                <EmptyState
+                  title={I18n.t('calendar.empty_title')}
+                  message={
+                    isFutureDay
+                      ? I18n.t('calendar.future_empty')
+                      : I18n.t('calendar.empty_day')
+                  }
+                  mascotMood="curious"
+                  animateIn={false}
+                  compact
+                />
+              ) : (
+                <View style={styles.transactionList}>
+                  {selectedDayTransactions.map((tx) => (
+                    <TransactionItem
+                      key={tx.id}
+                      transaction={tx}
+                      onPressTransaction={handleTransactionPress}
+                      onPressSplitBadge={handleTransactionSplitBadgePress}
+                      onLongPressTransaction={handleTransactionLongPress}
+                      selectionMode={isSelectionMode}
+                      selected={selectedTransactionIdSet.has(tx.id)}
+                      settings={transactionDisplaySettings}
+                      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                      compact
+                      disableAnimations
+                    />
+                  ))}
+                </View>
+              )}
             </View>
-          ) : (
-            <InOutHeader
-              incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-              expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
-              onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
-              onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
-            />
-          )}
-        </View>
-      </MonthControlsHeader>
-
-      <View className="flex-1 overflow-hidden bg-background">
-        <FlatList
-          ref={horizontalListRef}
-          data={monthPagerSlots}
-          keyExtractor={monthPagerKeyExtractor}
-          style={styles.flexOne}
-          {...MONTH_PAGER_LIST_CONFIG}
-          renderItem={renderMonthPage}
-          initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-          getItemLayout={getHorizontalItemLayout}
-          onScrollEndDrag={handleHorizontalScrollEndDrag}
-          onMomentumScrollEnd={handleHorizontalMomentumEnd}
-          onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-        />
+          </ScrollView>
+        )}
       </View>
 
+      {/* --- Popovers and modals --- */}
       <MonthJumpPopover
         visible={isMonthPickerOpen}
         anchorRect={monthPickerAnchorRect}
         screenWidth={screenWidth}
         screenHeight={screenHeight}
         locale={activeLocale}
-        currentMonthDate={activeMonthDate}
+        currentMonthDate={viewMode === 'month' ? activeMonthDate : selectedMonthDate}
         onSelectMonth={handleJumpToMonth}
         onClose={handleCloseMonthPicker}
       />
@@ -1100,6 +1534,42 @@ const styles = StyleSheet.create({
   summarySlot: {
     minHeight: 56,
     justifyContent: 'center',
+  },
+  scrollContent: {
+    paddingTop: spacing.xxs,
+    gap: spacing.sm,
+  },
+  calendarWrapper: {
+    paddingTop: spacing.xs,
+    alignItems: 'center',
+  },
+  daySection: {
+    gap: spacing.xs,
+  },
+  daySectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xxs,
+    paddingTop: spacing.xs,
+    gap: spacing.sm,
+  },
+  daySectionTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexShrink: 1,
+  },
+  daySectionSubtotals: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  transactionList: {
+    gap: 2,
+  },
+  monthPager: {
+    flexGrow: 0,
   },
   modalHeaderRow: {
     paddingHorizontal: spacing.screenHorizontal,
