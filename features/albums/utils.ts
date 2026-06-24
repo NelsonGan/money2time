@@ -25,15 +25,17 @@ function dayLabel(dayKey: string, withYear: boolean, locale: string): string {
 export function formatAlbumDateRange(
   startDate: string | null,
   endDate: string | null,
-  locale: string = I18n.locale ?? 'en',
+  options: { locale?: string; alwaysShowYear?: boolean } = {},
 ): string | null {
   if (!startDate || !endDate) return null;
+  const { locale = I18n.locale ?? 'en', alwaysShowYear = false } = options;
   const startKey = dayKeyFromIsoLocal(startDate);
   const endKey = dayKeyFromIsoLocal(endDate);
   const currentYear = String(new Date().getFullYear());
   const spansOtherYear = !startKey.startsWith(currentYear) || !endKey.startsWith(currentYear);
-  const startLabel = dayLabel(startKey, spansOtherYear, locale);
+  const withYear = alwaysShowYear || spansOtherYear;
+  const startLabel = dayLabel(startKey, withYear, locale);
   if (startKey === endKey) return startLabel;
-  const endLabel = dayLabel(endKey, spansOtherYear, locale);
+  const endLabel = dayLabel(endKey, withYear, locale);
   return `${startLabel} – ${endLabel}`;
 }

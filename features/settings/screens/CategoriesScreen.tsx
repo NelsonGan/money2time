@@ -177,12 +177,17 @@ function isCategoryType(value: string): value is CategoryType {
   return value === 'expense' || value === 'income';
 }
 
+const EMPTY_CHILD_MAP: Map<string, CategoryPickerOption[]> = new Map();
+
 function CategoryEditor({
   visible,
   mode,
   topLevel,
   initial,
   disableParentSelect = false,
+  affectedCount = 0,
+  reassignParents = [],
+  reassignChildByParent = EMPTY_CHILD_MAP,
   onClose,
   onSubmit,
   onDelete,
@@ -194,9 +199,14 @@ function CategoryEditor({
   // A category that already has children cannot itself become a child — that
   // would create a third nesting level. Hide the parent selector in that case.
   disableParentSelect?: boolean;
+  // Number of transactions using this category (and its children) — drives the
+  // delete prompt's reassign option.
+  affectedCount?: number;
+  reassignParents?: CategoryPickerOption[];
+  reassignChildByParent?: Map<string, CategoryPickerOption[]>;
   onClose: () => void;
   onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
-  onDelete?: () => void;
+  onDelete?: (reassignToCategoryId?: string) => void;
 }) {
   const themeColors = useThemeColors();
   const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
@@ -205,6 +215,7 @@ function CategoryEditor({
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
   const [iconManuallyPicked, setIconManuallyPicked] = useState(mode === 'edit');
   const [parentPickerOpen, setParentPickerOpen] = useState(false);
+  const [reassignPickerOpen, setReassignPickerOpen] = useState(false);
 
   const parentPickerParents = useMemo<CategoryPickerOption[]>(
     () =>
@@ -215,6 +226,35 @@ function CategoryEditor({
   );
   const parentPickerChildren = useMemo(() => new Map<string, CategoryPickerOption[]>(), []);
   const selectedParent = parentId ? topLevel.find((category) => category.id === parentId) : null;
+
+  // Resolve a reassign-target id to its name for the confirmation prompt.
+  const reassignNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    reassignParents.forEach((option) => map.set(option.id, option.name));
+    reassignChildByParent.forEach((children) =>
+      children.forEach((option) => map.set(option.id, option.name)),
+    );
+    return map;
+  }, [reassignParents, reassignChildByParent]);
+
+  const confirmMoveAndDelete = (targetId: string) => {
+    setReassignPickerOpen(false);
+    Alert.alert(
+      I18n.t('categories.move_confirm_title'),
+      I18n.t('categories.move_confirm_body', { name: reassignNameById.get(targetId) ?? '' }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('categories.move_confirm_action'),
+          style: 'destructive',
+          onPress: () => {
+            void triggerHaptic('warning');
+            onDelete?.(targetId);
+          },
+        },
+      ],
+    );
+  };
 
   useEffect(() => {
     if (!visible) return;
@@ -239,8 +279,36 @@ function CategoryEditor({
 
   const canSave = name.trim().length > 0;
 
+  const hasReassignTargets = reassignParents.length > 0 || reassignChildByParent.size > 0;
+
   const handleDelete = () => {
     if (!onDelete) return;
+    if (affectedCount > 0) {
+      Alert.alert(
+        I18n.t('categories.delete_title'),
+        I18n.t('categories.delete_has_transactions_body', { count: affectedCount }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          ...(hasReassignTargets
+            ? [
+                {
+                  text: I18n.t('categories.delete_move_to_other'),
+                  onPress: () => setReassignPickerOpen(true),
+                },
+              ]
+            : []),
+          {
+            text: I18n.t('categories.delete_keep_delete'),
+            style: 'destructive' as const,
+            onPress: () => {
+              void triggerHaptic('warning');
+              onDelete();
+            },
+          },
+        ],
+      );
+      return;
+    }
     Alert.alert(I18n.t('common.delete'), I18n.t('categories.delete_confirm'), [
       { text: I18n.t('common.cancel'), style: 'cancel' },
       {
@@ -424,6 +492,16 @@ function CategoryEditor({
             setParentId(id);
             setParentPickerOpen(false);
           }}
+        />
+        <CategoryPickerSheet
+          visible={reassignPickerOpen}
+          onClose={() => setReassignPickerOpen(false)}
+          parents={reassignParents}
+          childByParent={reassignChildByParent}
+          allowParentSelection
+          overlay
+          selectedCategoryId={null}
+          onSelect={confirmMoveAndDelete}
         />
       </SafeAreaView>
     </ThemeModal>
@@ -617,8 +695,14 @@ export function CategoriesScreen({
   onBack,
   useNativeBackGesture = false,
 }: CategoriesScreenProps = {}) {
-  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
-    useApp();
+  const {
+    categories,
+    transactions,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    reorderCategories,
+  } = useApp();
   const { checkLimit } = useProGate();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const themeColors = useThemeColors();
@@ -722,6 +806,37 @@ export function CategoriesScreen({
     },
     [categories, childrenByParent, topLevel, type],
   );
+
+  // Transactions tied directly to the category being edited (children keep their
+  // own and are promoted to top-level on delete) and the categories its direct
+  // transactions can move to — drives the delete prompt.
+  const editingDeleteInfo = useMemo(() => {
+    if (!editing) {
+      return { count: 0, parents: [] as CategoryPickerOption[], childByParent: EMPTY_CHILD_MAP };
+    }
+    const editingChildIds = new Set(
+      categories.filter((category) => category.parentId === editing.id).map((c) => c.id),
+    );
+    const count = transactions.filter((t) => t.categoryId === editing.id).length;
+
+    // Targets reflect the post-delete hierarchy: every category of this type
+    // except the one being deleted, with its children promoted to top-level.
+    const parents: CategoryPickerOption[] = [];
+    const childByParent = new Map<string, CategoryPickerOption[]>();
+    categories.forEach((category) => {
+      if (category.type !== editing.type || category.id === editing.id) return;
+      const option = { id: category.id, name: category.name, icon: category.icon };
+      // Top-level, or a child of the deleted parent (about to be promoted).
+      if (!category.parentId || editingChildIds.has(category.id)) {
+        parents.push(option);
+        return;
+      }
+      const existing = childByParent.get(category.parentId);
+      if (existing) existing.push(option);
+      else childByParent.set(category.parentId, [option]);
+    });
+    return { count, parents, childByParent };
+  }, [editing, categories, transactions]);
 
   const handleToggleExpand = useCallback((parentId: string) => {
     void triggerHaptic('selection');
@@ -876,15 +991,18 @@ export function CategoriesScreen({
         topLevel={topLevel}
         initial={editing ?? undefined}
         disableParentSelect={!!editing && (childrenByParent.get(editing.id)?.length ?? 0) > 0}
+        affectedCount={editingDeleteInfo.count}
+        reassignParents={editingDeleteInfo.parents}
+        reassignChildByParent={editingDeleteInfo.childByParent}
         onClose={() => setEditing(null)}
         onSubmit={(input) => {
           if (!editing) return;
           updateCategory(editing.id, input);
           setEditing(null);
         }}
-        onDelete={() => {
+        onDelete={(reassignToCategoryId) => {
           if (!editing) return;
-          deleteCategory(editing.id);
+          deleteCategory(editing.id, reassignToCategoryId ? { reassignToCategoryId } : undefined);
           setEditing(null);
         }}
       />

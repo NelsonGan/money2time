@@ -1151,6 +1151,15 @@ const fr = {
     edit_category: 'Modifier la catégorie',
     delete_confirm:
       'Ceci supprimera définitivement cette catégorie. Cette action est irréversible.',
+    delete_title: 'Supprimer la catégorie ?',
+    delete_has_transactions_body:
+      '{{count}} transactions utilisent cette catégorie. Déplacez-les vers une autre catégorie, ou supprimez-la et laissez-les sans catégorie.',
+    delete_move_to_other: 'Déplacer vers une autre catégorie',
+    delete_keep_delete: 'Supprimer quand même',
+    move_confirm_title: 'Déplacer les transactions ?',
+    move_confirm_body:
+      'Toutes les transactions seront déplacées vers « {{name}} » et cette catégorie sera supprimée. Cette action est irréversible.',
+    move_confirm_action: 'Déplacer et supprimer',
     name: 'Nom',
     color: 'Couleur',
     emoji: 'Emoji',
@@ -1383,6 +1392,9 @@ const fr = {
     voice_label: 'Saisies vocales',
     widgets_label: 'Widgets d’écran d’accueil',
     currencies_label: 'Devises',
+    albums_label: 'Albums',
+    limit_albums:
+      'Vous pouvez créer jusqu’à {{count}} albums avec le forfait gratuit. Passez à Pro pour un nombre illimité.',
     biometric_label: 'Verrouillage (biométrie)',
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',

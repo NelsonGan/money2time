@@ -1138,6 +1138,15 @@ const sv = {
     new_category: 'Ny kategori',
     edit_category: 'Redigera kategori',
     delete_confirm: 'Det här tar permanent bort den här kategorin. Det kan inte ångras.',
+    delete_title: 'Ta bort kategori?',
+    delete_has_transactions_body:
+      '{{count}} transaktioner använder den här kategorin. Flytta dem till en annan kategori, eller ta bort den och lämna dem okategoriserade.',
+    delete_move_to_other: 'Flytta till en annan kategori',
+    delete_keep_delete: 'Ta bort ändå',
+    move_confirm_title: 'Flytta transaktioner?',
+    move_confirm_body:
+      'Alla transaktioner flyttas till ”{{name}}” och den här kategorin tas bort. Detta kan inte ångras.',
+    move_confirm_action: 'Flytta och ta bort',
     name: 'Namn',
     color: 'Färg',
     emoji: 'Emoji',
@@ -1366,6 +1375,9 @@ const sv = {
     voice_label: 'Röstinmatningar',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
+    albums_label: 'Album',
+    limit_albums:
+      'Du kan skapa upp till {{count}} album i gratisplanen. Uppgradera till Pro för obegränsat.',
     biometric_label: 'Applås (biometriskt)',
     compare_title: 'Allt i Pro',
     compare_subtitle: 'Se exakt vad du låser upp när du uppgraderar.',

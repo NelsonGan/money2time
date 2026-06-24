@@ -208,7 +208,7 @@ interface AppContextValue extends AppState {
     id: string,
     updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
-  deleteCategory: (id: string) => void;
+  deleteCategory: (id: string, options?: { reassignToCategoryId?: string }) => void;
   reorderCategories: (ids: string[]) => void;
 
   albums: Album[];
@@ -230,6 +230,7 @@ interface AppContextValue extends AppState {
     },
   ) => void;
   deleteAlbum: (id: string) => void;
+  reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
   addTransactionsToAlbum: (albumId: string, transactionIds: string[]) => void;
   removeTransactionsFromAlbum: (albumId: string, transactionIds: string[]) => void;
@@ -1122,11 +1123,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteCategory = useCallback(
-    (id: string) => {
+    (id: string, options?: { reassignToCategoryId?: string }) => {
       runMutation(() => {
+        if (options?.reassignToCategoryId) {
+          // Only move transactions tied directly to this category. Children are
+          // promoted to top-level (not deleted), so they keep their own.
+          transactionsRepository.reassignCategory([id], options.reassignToCategoryId);
+        }
         categoriesRepository.softDelete(id);
       });
-      void trackEvent(AnalyticsEvents.CATEGORY_DELETED);
+      void trackEvent(AnalyticsEvents.CATEGORY_DELETED, {
+        reassigned: Boolean(options?.reassignToCategoryId),
+      });
     },
     [runMutation],
   );
@@ -1215,6 +1223,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const removeTransactionsFromAlbum = useCallback((albumId: string, transactionIds: string[]) => {
     albumsRepository.removeTransactions(albumId, transactionIds);
+    setAlbums(albumsRepository.list());
+  }, []);
+
+  // Reorder only rewrites sortOrder on the albums table, so reload just `albums`.
+  const reorderAlbums = useCallback((ids: string[]) => {
+    albumsRepository.reorder(ids);
     setAlbums(albumsRepository.list());
   }, []);
 
@@ -1391,7 +1405,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           transactionsRepository.createWithId(id, normalizedInput);
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
-          if (activeAlbumId) albumsRepository.addTransactions(activeAlbumId, [id]);
+          if (activeAlbumId) {
+            albumsRepository.addTransactions(activeAlbumId, [id]);
+            // Refresh albums so index-card stats (a memo keyed on the album
+            // reference) recompute for the auto-added transaction.
+            setAlbums(albumsRepository.list());
+          }
           // Voice entries fire a dedicated event so voice adoption can be
           // measured separately from manual transaction creation.
           const createdEvent =
@@ -1761,7 +1780,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           transactionsRepository.createWithId(txId, normalizedInput);
           // Auto-file the primary transaction into the active album, if any.
           const activeAlbumId = albumsRepository.getActiveId();
-          if (activeAlbumId) albumsRepository.addTransactions(activeAlbumId, [txId]);
+          if (activeAlbumId) {
+            albumsRepository.addTransactions(activeAlbumId, [txId]);
+            setAlbums(albumsRepository.list());
+          }
           for (const t of transfersToCreate) {
             transactionsRepository.createWithId(t.id, {
               type: 'transfer',
@@ -2658,7 +2680,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .map(([id, value]) => ({ id, ...value }))
         .sort((a, b) => b.amount - a.amount);
     },
-    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId],
+    // `transactions` is read fresh from the DB inside, but it's listed as a dep so
+    // the callback identity changes whenever transactions mutate (e.g. a bulk
+    // category reassignment) — without it, memoized breakdown consumers keep a
+    // stale result until the next full reload.
+    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId, transactions],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
@@ -2924,6 +2950,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createAlbum,
             updateAlbum,
             deleteAlbum,
+            reorderAlbums,
             setActiveAlbum,
             addTransactionsToAlbum,
             removeTransactionsFromAlbum,
@@ -3024,6 +3051,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createAlbum,
       updateAlbum,
       deleteAlbum,
+      reorderAlbums,
       setActiveAlbum,
       addTransactionsToAlbum,
       removeTransactionsFromAlbum,

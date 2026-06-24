@@ -1139,6 +1139,15 @@ const ms = {
     edit_category: 'Edit Kategori',
     delete_confirm:
       'Ini akan memadam kategori ini secara kekal. Tindakan ini tidak boleh dibuat semula.',
+    delete_title: 'Padam kategori?',
+    delete_has_transactions_body:
+      '{{count}} transaksi menggunakan kategori ini. Alihkannya ke kategori lain, atau padam dan biarkan tanpa kategori.',
+    delete_move_to_other: 'Alih ke kategori lain',
+    delete_keep_delete: 'Padam juga',
+    move_confirm_title: 'Alihkan transaksi?',
+    move_confirm_body:
+      'Semua transaksi akan dialihkan ke “{{name}}” dan kategori ini akan dipadamkan. Tindakan ini tidak boleh dibuat asal.',
+    move_confirm_action: 'Alih & padam',
     name: 'Nama',
     color: 'Warna',
     emoji: 'Emoji',
@@ -1370,6 +1379,9 @@ const ms = {
     voice_label: 'Entri suara',
     widgets_label: 'Widget skrin utama',
     currencies_label: 'Mata wang',
+    albums_label: 'Album',
+    limit_albums:
+      'Anda boleh mencipta sehingga {{count}} album pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     biometric_label: 'Kunci apl (biometrik)',
     compare_title: 'Semua dalam Pro',
     compare_subtitle: 'Lihat dengan tepat apa yang terbuka apabila anda menaik taraf.',

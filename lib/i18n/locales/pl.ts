@@ -1143,6 +1143,15 @@ const pl = {
     new_category: 'Nowa kategoria',
     edit_category: 'Edytuj kategorię',
     delete_confirm: 'Ta kategoria zostanie trwale usunięta. Tej operacji nie można cofnąć.',
+    delete_title: 'Usunąć kategorię?',
+    delete_has_transactions_body:
+      '{{count}} transakcji używa tej kategorii. Przenieś je do innej kategorii albo usuń ją i pozostaw bez kategorii.',
+    delete_move_to_other: 'Przenieś do innej kategorii',
+    delete_keep_delete: 'Usuń mimo to',
+    move_confirm_title: 'Przenieść transakcje?',
+    move_confirm_body:
+      'Wszystkie transakcje zostaną przeniesione do „{{name}}”, a ta kategoria zostanie usunięta. Tej operacji nie można cofnąć.',
+    move_confirm_action: 'Przenieś i usuń',
     name: 'Nazwa',
     color: 'Kolor',
     emoji: 'Emoji',
@@ -1372,6 +1381,9 @@ const pl = {
     voice_label: 'Wpisy głosowe',
     widgets_label: 'Widżety ekranu głównego',
     currencies_label: 'Waluty',
+    albums_label: 'Albumy',
+    limit_albums:
+      'W planie darmowym możesz utworzyć maksymalnie {{count}} albumów. Przejdź na Pro, aby mieć nieograniczoną liczbę.',
     biometric_label: 'Blokada aplikacji (biometria)',
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',

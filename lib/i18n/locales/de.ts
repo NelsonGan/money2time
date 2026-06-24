@@ -1157,6 +1157,15 @@ const de = {
     edit_category: 'Kategorie bearbeiten',
     delete_confirm:
       'Diese Kategorie wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+    delete_title: 'Kategorie löschen?',
+    delete_has_transactions_body:
+      '{{count}} Transaktionen verwenden diese Kategorie. Verschiebe sie in eine andere Kategorie oder lösche die Kategorie und lass sie unkategorisiert.',
+    delete_move_to_other: 'In eine andere Kategorie verschieben',
+    delete_keep_delete: 'Trotzdem löschen',
+    move_confirm_title: 'Transaktionen verschieben?',
+    move_confirm_body:
+      'Alle Transaktionen werden nach „{{name}}“ verschoben und diese Kategorie wird gelöscht. Dies kann nicht rückgängig gemacht werden.',
+    move_confirm_action: 'Verschieben und löschen',
     name: 'Name',
     color: 'Farbe',
     emoji: 'Emoji',
@@ -1387,6 +1396,9 @@ const de = {
     voice_label: 'Spracheingaben',
     widgets_label: 'Startbildschirm-Widgets',
     currencies_label: 'Währungen',
+    albums_label: 'Alben',
+    limit_albums:
+      'Im kostenlosen Plan kannst du bis zu {{count}} Alben erstellen. Upgrade auf Pro für unbegrenzt.',
     biometric_label: 'App-Sperre (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',

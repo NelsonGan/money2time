@@ -1126,6 +1126,15 @@ const hi = {
     new_category: 'नई श्रेणी',
     edit_category: 'श्रेणी संपादित करें',
     delete_confirm: 'यह श्रेणी स्थायी रूप से हट जाएगी। यह पूर्ववत नहीं किया जा सकता।',
+    delete_title: 'श्रेणी हटाएँ?',
+    delete_has_transactions_body:
+      '{{count}} लेन-देन इस श्रेणी का उपयोग करते हैं। उन्हें किसी अन्य श्रेणी में ले जाएँ, या इसे हटाकर उन्हें बिना श्रेणी के छोड़ दें।',
+    delete_move_to_other: 'किसी अन्य श्रेणी में ले जाएँ',
+    delete_keep_delete: 'फिर भी हटाएँ',
+    move_confirm_title: 'लेन-देन स्थानांतरित करें?',
+    move_confirm_body:
+      'सभी लेन-देन “{{name}}” में स्थानांतरित कर दिए जाएँगे और यह श्रेणी हटा दी जाएगी. इसे पूर्ववत नहीं किया जा सकता.',
+    move_confirm_action: 'स्थानांतरित करें और हटाएँ',
     name: 'नाम',
     color: 'रंग',
     emoji: 'इमोजी',
@@ -1354,6 +1363,9 @@ const hi = {
     voice_label: 'वॉइस एंट्री',
     widgets_label: 'होम स्क्रीन विजेट',
     currencies_label: 'मुद्राएँ',
+    albums_label: 'एल्बम',
+    limit_albums:
+      'मुफ़्त प्लान पर आप अधिकतम {{count}} एल्बम बना सकते हैं। असीमित के लिए Pro में अपग्रेड करें।',
     biometric_label: 'ऐप लॉक (बायोमेट्रिक)',
     compare_title: 'Pro में सब कुछ',
     compare_subtitle: 'देखें कि अपग्रेड करने पर आपको क्या मिलता है।',

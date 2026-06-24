@@ -1140,6 +1140,15 @@ const da = {
     new_category: 'Ny kategori',
     edit_category: 'Rediger kategori',
     delete_confirm: 'Dette sletter permanent denne kategori. Dette kan ikke fortrydes.',
+    delete_title: 'Slet kategori?',
+    delete_has_transactions_body:
+      '{{count}} transaktioner bruger denne kategori. Flyt dem til en anden kategori, eller slet den og lad dem være ukategoriserede.',
+    delete_move_to_other: 'Flyt til en anden kategori',
+    delete_keep_delete: 'Slet alligevel',
+    move_confirm_title: 'Flyt transaktioner?',
+    move_confirm_body:
+      'Alle transaktioner flyttes til “{{name}}”, og denne kategori slettes. Dette kan ikke fortrydes.',
+    move_confirm_action: 'Flyt og slet',
     name: 'Navn',
     color: 'Farve',
     emoji: 'Emoji',
@@ -1368,6 +1377,9 @@ const da = {
     voice_label: 'Stemmeregistreringer',
     widgets_label: 'Widgets på startskærmen',
     currencies_label: 'Valutaer',
+    albums_label: 'Album',
+    limit_albums:
+      'Du kan oprette op til {{count}} album på gratisplanen. Opgrader til Pro for ubegrænset.',
     biometric_label: 'App-lås (biometrisk)',
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se præcis, hvad du låser op for, når du opgraderer.',

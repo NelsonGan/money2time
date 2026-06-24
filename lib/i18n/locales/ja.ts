@@ -1118,6 +1118,15 @@ const ja = {
     new_category: '新規カテゴリ',
     edit_category: 'カテゴリを編集',
     delete_confirm: 'このカテゴリを完全に削除します。この操作は元に戻せません。',
+    delete_title: 'カテゴリを削除しますか？',
+    delete_has_transactions_body:
+      '{{count}}件の取引がこのカテゴリを使用しています。別のカテゴリに移動するか、削除して未分類のままにします。',
+    delete_move_to_other: '別のカテゴリに移動',
+    delete_keep_delete: 'そのまま削除',
+    move_confirm_title: '取引を移動しますか？',
+    move_confirm_body:
+      'すべての取引が「{{name}}」に移動され、このカテゴリは削除されます。この操作は取り消せません。',
+    move_confirm_action: '移動して削除',
     name: '名前',
     color: 'カラー',
     emoji: '絵文字',
@@ -1347,6 +1356,9 @@ const ja = {
     voice_label: '音声入力',
     widgets_label: 'ホーム画面ウィジェット',
     currencies_label: '通貨',
+    albums_label: 'アルバム',
+    limit_albums:
+      '無料プランでは最大{{count}}個のアルバムを作成できます。無制限にするにはProにアップグレードしてください。',
     biometric_label: 'アプリロック（生体認証）',
     compare_title: 'Pro のすべて',
     compare_subtitle: 'アップグレードで何が使えるようになるかを確認できます。',

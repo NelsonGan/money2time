@@ -334,6 +334,16 @@ export function InsightsDrilldownScreen({
     transactions.forEach((transaction) => {
       if (!requestedTransactionIds.has(transaction.id)) return;
       if (albumMemberIds && !albumMemberIds.has(transaction.id)) return;
+      // When scoped to a category, drop transactions whose category was changed
+      // away from this root (e.g. via bulk edit) so they disappear immediately
+      // instead of lingering until the next reload.
+      if (
+        rootCategoryId &&
+        transaction.categoryId !== rootCategoryId &&
+        !(transaction.categoryId !== null && rootChildCategoryIdSet.has(transaction.categoryId))
+      ) {
+        return;
+      }
       nextTransactionById.set(transaction.id, transaction);
     });
 
@@ -348,7 +358,14 @@ export function InsightsDrilldownScreen({
       resolvedTransactions: sortTransactions(resolved),
       payloadTransactionById: nextTransactionById,
     };
-  }, [albumMemberIds, payload.transactionIds, sortTransactions, transactions]);
+  }, [
+    albumMemberIds,
+    payload.transactionIds,
+    rootCategoryId,
+    rootChildCategoryIdSet,
+    sortTransactions,
+    transactions,
+  ]);
   const subcategoryRows = useMemo<DrilldownSubcategoryRow[]>(() => {
     if (!rootCategoryId || !hasRootChildCategories) return [];
 

@@ -1,7 +1,9 @@
 import { Image } from 'expo-image';
+import { Menu } from 'lucide-react-native';
 import { memo, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import { Text, TimeValueInline } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -28,7 +30,7 @@ export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: Albu
   // total/date range recompute when the album's transactions change.
   const stats = useMemo(() => getAlbumStats(album.id), [getAlbumStats, album]);
   const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
-  const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate);
+  const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate, { alwaysShowYear: true });
   const isTimeMode = settings.displayMode === 'time';
 
   // Full-width 2:1 banner.
@@ -93,6 +95,23 @@ export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: Albu
           </View>
         </View>
       </Pressable>
+
+      {/* Handle must be a sibling of the Pressable — nesting it inside lets the
+          Pressable swallow the touch so the drag gesture never activates. The
+          absolute wrapper pins it inside the card's top-right corner. */}
+      <View className="absolute right-3 top-3" pointerEvents="box-none">
+        <Sortable.Handle>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('common.reorder')} ${album.name}`}
+            className="h-8 w-8 items-center justify-center rounded-full"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          >
+            <Menu size={16} color="#fff" />
+          </View>
+        </Sortable.Handle>
+      </View>
     </Animated.View>
   );
 });

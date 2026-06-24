@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { type ElementRef, useEffect, useMemo } from 'react';
+import { Pressable, useWindowDimensions, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { PlusIcon } from '~/components/icons/NavIcons';
@@ -8,6 +10,7 @@ import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinim
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { SelectField, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -27,11 +30,12 @@ export function AlbumsScreen({
   onOpenCreateAlbum,
   onOpenAlbumDetail,
 }: AlbumsScreenProps) {
-  const { albums, activeAlbumId, setActiveAlbum } = useApp();
+  const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
+  const { checkLimit } = useProGate();
   const insets = useSafeAreaInsets();
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
-  const scrollRef = useRef<ScrollView | null>(null);
+  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   useEffect(() => {
     if (scrollToTopToken === undefined) return;
@@ -58,6 +62,7 @@ export function AlbumsScreen({
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
+              if (!checkLimit('albums', albums.length)) return;
               onOpenCreateAlbum();
             }}
             accessibilityRole="button"
@@ -75,7 +80,7 @@ export function AlbumsScreen({
             mascotMood="curious"
           />
         ) : (
-          <ScrollView
+          <Animated.ScrollView
             ref={scrollRef}
             contentContainerStyle={{
               paddingHorizontal: SCREEN_PADDING,
@@ -94,7 +99,23 @@ export function AlbumsScreen({
                 onChange={(value) => setActiveAlbum(value || null)}
               />
             </View>
-            <View style={{ gap: GRID_GAP }}>
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.12}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={GRID_GAP}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, order, toIndex }) => {
+                if (fromIndex === toIndex) return;
+                reorderAlbums(order(albums).map((album) => album.id));
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={scrollRef}
+              width="fill"
+            >
               {albums.map((album) => (
                 <AlbumCard
                   key={album.id}
@@ -103,8 +124,8 @@ export function AlbumsScreen({
                   onPress={onOpenAlbumDetail}
                 />
               ))}
-            </View>
-          </ScrollView>
+            </Sortable.Flex>
+          </Animated.ScrollView>
         )}
       </TabletContentContainer>
     </View>

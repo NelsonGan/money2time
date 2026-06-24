@@ -1144,6 +1144,15 @@ const pt = {
     new_category: 'Nova categoria',
     edit_category: 'Editar categoria',
     delete_confirm: 'Isso excluirá permanentemente esta categoria. Não é possível desfazer.',
+    delete_title: 'Excluir categoria?',
+    delete_has_transactions_body:
+      '{{count}} transações usam esta categoria. Mova-as para outra categoria ou exclua-a e deixe-as sem categoria.',
+    delete_move_to_other: 'Mover para outra categoria',
+    delete_keep_delete: 'Excluir mesmo assim',
+    move_confirm_title: 'Mover transações?',
+    move_confirm_body:
+      'Todas as transações serão movidas para “{{name}}” e esta categoria será excluída. Esta ação não pode ser desfeita.',
+    move_confirm_action: 'Mover e excluir',
     name: 'Nome',
     color: 'Cor',
     emoji: 'Emoji',
@@ -1374,6 +1383,9 @@ const pt = {
     voice_label: 'Entradas por voz',
     widgets_label: 'Widgets da tela inicial',
     currencies_label: 'Moedas',
+    albums_label: 'Álbuns',
+    limit_albums:
+      'Você pode criar até {{count}} álbuns no plano gratuito. Faça upgrade para o Pro para ilimitado.',
     biometric_label: 'Bloqueio do app (biometria)',
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',

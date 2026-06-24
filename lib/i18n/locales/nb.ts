@@ -1141,6 +1141,15 @@ const nb = {
     new_category: 'Ny kategori',
     edit_category: 'Rediger kategori',
     delete_confirm: 'Dette sletter denne kategorien permanent. Dette kan ikke angres.',
+    delete_title: 'Slette kategori?',
+    delete_has_transactions_body:
+      '{{count}} transaksjoner bruker denne kategorien. Flytt dem til en annen kategori, eller slett den og la dem være ukategorisert.',
+    delete_move_to_other: 'Flytt til en annen kategori',
+    delete_keep_delete: 'Slett likevel',
+    move_confirm_title: 'Flytte transaksjoner?',
+    move_confirm_body:
+      'Alle transaksjoner flyttes til «{{name}}», og denne kategorien slettes. Dette kan ikke angres.',
+    move_confirm_action: 'Flytt og slett',
     name: 'Navn',
     color: 'Farge',
     emoji: 'Emoji',
@@ -1371,6 +1380,9 @@ const nb = {
     voice_label: 'Taleregistreringer',
     widgets_label: 'Widgets på startskjermen',
     currencies_label: 'Valutaer',
+    albums_label: 'Album',
+    limit_albums:
+      'Du kan opprette opptil {{count}} album på gratisplanen. Oppgrader til Pro for ubegrenset.',
     biometric_label: 'App-lås (biometrisk)',
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se nøyaktig hva du låser opp når du oppgraderer.',

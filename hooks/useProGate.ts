@@ -12,7 +12,8 @@ type LimitType =
   | 'recurring'
   | 'wage_entries'
   | 'custom_logos'
-  | 'subcurrencies';
+  | 'subcurrencies'
+  | 'albums';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -21,6 +22,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   wage_entries: PRO_LIMITS.FREE_MAX_WAGE_ENTRIES,
   custom_logos: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
   subcurrencies: PRO_LIMITS.FREE_MAX_SUBCURRENCIES,
+  albums: PRO_LIMITS.FREE_MAX_ALBUMS,
 };
 
 export function useProGate() {
