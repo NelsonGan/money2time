@@ -470,20 +470,20 @@ export function CalendarScreen({
     excludedExpenseCategoryIds.length;
 
   // --- Search ---
-  // Lowercased haystack per transaction, rebuilt only when the (non-search)
-  // transaction set changes — not on every keystroke. Typing then costs a
+  // Lowercased haystack per transaction, built lazily once search is open (and
+  // rebuilt only when the non-search transaction set changes) — so non-search
+  // sessions and unrelated mutations don't pay for it. Typing then costs a
   // single `includes` per row instead of repeated `toLowerCase` calls.
-  const searchIndex = useMemo(
-    () =>
-      filteredTransactions.map((tx) => {
-        let haystack = '';
-        if (tx.note) haystack += tx.note;
-        if (tx.categoryName) haystack += `\n${tx.categoryName}`;
-        if (tx.categoryParentName) haystack += `\n${tx.categoryParentName}`;
-        return { tx, haystack: haystack.toLowerCase() };
-      }),
-    [filteredTransactions],
-  );
+  const searchIndex = useMemo(() => {
+    if (!isSearchOpen) return [];
+    return filteredTransactions.map((tx) => {
+      let haystack = '';
+      if (tx.note) haystack += tx.note;
+      if (tx.categoryName) haystack += `\n${tx.categoryName}`;
+      if (tx.categoryParentName) haystack += `\n${tx.categoryParentName}`;
+      return { tx, haystack: haystack.toLowerCase() };
+    });
+  }, [isSearchOpen, filteredTransactions]);
 
   // The list shown while searching drops the day/month/year scoping and shows
   // matching transactions across all history, grouped by date (newest first).
