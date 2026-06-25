@@ -649,10 +649,6 @@ export function CalendarScreen({
   }, [filteredTransactions, selectedTransactionIds.length]);
 
   useEffect(() => {
-    setSelectedTransactionIds([]);
-  }, [selectedDayKey]);
-
-  useEffect(() => {
     if (!isSelectionMode) setShowBulkUpdate(false);
   }, [isSelectionMode]);
 
@@ -1271,27 +1267,82 @@ export function CalendarScreen({
       <TabletContentContainer>
         <View className="bg-background pb-1.5 pt-1">
           <View className="px-5 pt-1.5 gap-2.5">
-            {/* Title row */}
-            <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-              <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
-              <View className="flex-row items-center gap-2">
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.filters.search')}
-                  onPress={handleOpenSearch}
-                  className={cn(
-                    'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
-                    isSearchOpen ? 'border-primary/45 bg-primary/10' : 'border-border/40 bg-card',
-                  )}
-                >
-                  <Search
-                    size={15}
-                    color={isSearchOpen ? themeColors.primary : themeColors.textMuted}
-                  />
-                </Pressable>
-                <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
-                <DisplayModeToggle />
-              </View>
+            {/* Title row — replaced in-place by the selection toolbar while
+                multi-selecting so the header height stays constant (no layout
+                shift when entering/leaving selection mode). */}
+            <View className="flex-row items-center justify-between gap-2" style={{ minHeight: 40 }}>
+              {isSelectionMode ? (
+                <View className="flex-1 flex-row items-center justify-between gap-2">
+                  <Pressable
+                    onPress={clearSelection}
+                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.cancel')}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.cancel')}
+                    </Text>
+                  </Pressable>
+                  <View className="flex-1 items-center px-1">
+                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                      <Text variant="caption" className="text-foreground">
+                        {I18n.t('transactions.selection.selected_count', {
+                          count: selectedTransactionCount,
+                        })}
+                      </Text>
+                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                        <Text variant="label" className="text-foreground">
+                          {selectedTransactionTotalLabel}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View className="flex-row items-center gap-1.5">
+                    <Pressable
+                      onPress={handleOpenBulkUpdate}
+                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.selection.update')}
+                      hitSlop={8}
+                    >
+                      <Pencil size={14} color={themeColors.primary} />
+                    </Pressable>
+                    <Pressable
+                      onPress={handleDeleteSelectedTransactions}
+                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.delete')}
+                      hitSlop={8}
+                    >
+                      <Trash2 size={14} color={themeColors.coral} />
+                    </Pressable>
+                  </View>
+                </View>
+              ) : (
+                <>
+                  <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
+                  <View className="flex-row items-center gap-2">
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.filters.search')}
+                      onPress={handleOpenSearch}
+                      className={cn(
+                        'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+                        isSearchOpen
+                          ? 'border-primary/45 bg-primary/10'
+                          : 'border-border/40 bg-card',
+                      )}
+                    >
+                      <Search
+                        size={15}
+                        color={isSearchOpen ? themeColors.primary : themeColors.textMuted}
+                      />
+                    </Pressable>
+                    <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
+                    <DisplayModeToggle />
+                  </View>
+                </>
+              )}
             </View>
 
             {/* Search row */}
@@ -1330,64 +1381,17 @@ export function CalendarScreen({
               </View>
             )}
 
-            {/* Summary row — income/expense cards only in month view; selection toolbar in any list view */}
-            {(isSelectionMode || (viewMode === 'month' && !isSearchOpen)) && (
+            {/* Summary row — income/expense cards in month view. The selection
+                toolbar lives in the title row above, so this slot keeps showing
+                the month summary even while multi-selecting (no layout shift). */}
+            {viewMode === 'month' && !isSearchOpen && (
               <View style={styles.summarySlot}>
-                {isSelectionMode ? (
-                  <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
-                    <Pressable
-                      onPress={clearSelection}
-                      className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.cancel')}
-                    >
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('common.cancel')}
-                      </Text>
-                    </Pressable>
-                    <View className="flex-1 items-center px-1">
-                      <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                        <Text variant="caption" className="text-foreground">
-                          {I18n.t('transactions.selection.selected_count', {
-                            count: selectedTransactionCount,
-                          })}
-                        </Text>
-                        <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                          <Text variant="label" className="text-foreground">
-                            {selectedTransactionTotalLabel}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                    <View className="flex-row items-center gap-1.5">
-                      <Pressable
-                        onPress={handleOpenBulkUpdate}
-                        className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.selection.update')}
-                        hitSlop={8}
-                      >
-                        <Pencil size={14} color={themeColors.primary} />
-                      </Pressable>
-                      <Pressable
-                        onPress={handleDeleteSelectedTransactions}
-                        className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('common.delete')}
-                        hitSlop={8}
-                      >
-                        <Trash2 size={14} color={themeColors.coral} />
-                      </Pressable>
-                    </View>
-                  </View>
-                ) : (
-                  <InOutHeader
-                    incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-                    expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
-                    onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
-                    onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
-                  />
-                )}
+                <InOutHeader
+                  incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
+                  expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+                  onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
+                  onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+                />
               </View>
             )}
           </View>
