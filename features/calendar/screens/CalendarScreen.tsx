@@ -3,13 +3,10 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import {
   Alert,
   FlatList,
-  LayoutAnimation,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   TextInput,
-  UIManager,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -81,23 +78,9 @@ import {
   weekStartDayKey,
 } from '../lib/calendarBuild';
 
-if (
-  Platform.OS === 'android' &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
-
-const EXPAND_ANIM_CONFIG = {
-  duration: 300,
-  create: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
-  update: { type: LayoutAnimation.Types.easeInEaseOut },
-  delete: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
-} as const;
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -264,32 +247,48 @@ export function CalendarScreen({
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
 
-  // --- Month↔Year zoom animation (reanimated) ---
-  // 0 = month view, 1 = year view
+  // --- Zoom animations (reanimated) ---
+  // dayMonthZoom: 0 = day view, 1 = month view
+  const dayMonthZoom = useSharedValue(0);
+  // monthYearZoom: 0 = month view, 1 = year view
   const monthYearZoom = useSharedValue(0);
 
-  const monthZoomStyle = useAnimatedStyle(() => {
-    const z = monthYearZoom.value;
-    if (z <= 0) return { transform: [{ scale: 1 }], opacity: 1, zIndex: 2 };
-    // Zooming out to year: month shrinks down and fades
-    const scale = 1 - z * 0.6;
-    const opacity = Math.max(0, 1 - z * 1.5);
-    return { transform: [{ scale }], opacity, zIndex: z < 0.5 ? 2 : 0 };
+  const dayLayerStyle = useAnimatedStyle(() => {
+    const t = dayMonthZoom.value;
+    if (t <= 0) return { opacity: 1, zIndex: 3 };
+    if (t >= 1) return { opacity: 0, zIndex: 0 };
+    return {
+      opacity: 1 - t,
+      zIndex: t < 0.5 ? 3 : 0,
+    };
   });
 
-  const yearZoomStyle = useAnimatedStyle(() => {
-    const z = monthYearZoom.value;
-    if (z >= 1) return { transform: [{ scale: 1 }], opacity: 1, zIndex: 2 };
-    // Zooming in from month: year grows from small
-    const scale = 0.5 + z * 0.5;
-    const opacity = Math.max(0, z * 2);
-    return { transform: [{ scale }], opacity: Math.min(1, opacity), zIndex: z > 0.5 ? 2 : 0 };
+  const monthLayerStyle = useAnimatedStyle(() => {
+    const dm = dayMonthZoom.value;
+    const my = monthYearZoom.value;
+    if (dm <= 0) return { opacity: 0, zIndex: 0 };
+    if (dm >= 1 && my <= 0) return { opacity: 1, transform: [{ scale: 1 }], zIndex: 2 };
+    let opacity = dm;
+    let scale = 1;
+    if (my > 0) {
+      scale = 1 - my * 0.85;
+      opacity = Math.min(opacity, Math.max(0, 1 - my * 1.5));
+    }
+    return { opacity, transform: [{ scale }], zIndex: (dm >= 0.5 && my < 0.5) ? 2 : 0 };
+  });
+
+  const yearLayerStyle = useAnimatedStyle(() => {
+    const my = monthYearZoom.value;
+    if (my >= 1) return { opacity: 1, transform: [{ scale: 1 }], zIndex: 2 };
+    if (my <= 0) return { opacity: 0, transform: [{ scale: 0.3 }], zIndex: 0 };
+    const scale = 0.3 + my * 0.7;
+    const opacity = Math.min(1, my * 2);
+    return { opacity, transform: [{ scale }], zIndex: my > 0.5 ? 2 : 0 };
   });
 
   // --- Year view ---
   const centerYear = useMemo(() => new Date().getFullYear(), []);
   const yearViewListRef = useRef<FlatList<number> | null>(null);
-  const pendingYearScrollRef = useRef<number | null>(null);
 
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
@@ -576,11 +575,6 @@ export function CalendarScreen({
     };
   }, [isSelectionMode, onSelectionModeChange]);
 
-  // Pending scroll target after view mode switches — the target FlatList
-  // may not be mounted yet when we toggle, so we store the index and apply
-  // it once the list appears.
-  const pendingMonthScrollRef = useRef<number | null>(null);
-  const pendingWeekScrollRef = useRef<number | null>(null);
 
   const getMonthIndexForDay = useCallback(
     (dayKey: string) => {
@@ -605,32 +599,16 @@ export function CalendarScreen({
     [anchorWeekStart, settings.weekStartsOn],
   );
 
-  // Apply pending scrolls when the target list mounts
   const handleMonthListRef = useCallback(
     (ref: FlatList<number> | null) => {
       (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
-      if (ref && pendingMonthScrollRef.current != null) {
-        const idx = pendingMonthScrollRef.current;
-        pendingMonthScrollRef.current = null;
-        setActiveMonthIndex(idx);
-        requestAnimationFrame(() => {
-          ref.scrollToIndex({ index: idx, animated: false });
-        });
-      }
     },
-    [setActiveMonthIndex],
+    [],
   );
 
   const handleWeekListRef = useCallback(
     (ref: FlatList<number> | null) => {
       (weekStripListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
-      if (ref && pendingWeekScrollRef.current != null) {
-        const idx = pendingWeekScrollRef.current;
-        pendingWeekScrollRef.current = null;
-        requestAnimationFrame(() => {
-          ref.scrollToIndex({ index: idx, animated: false });
-        });
-      }
     },
     [],
   );
@@ -638,13 +616,6 @@ export function CalendarScreen({
   const handleYearListRef = useCallback(
     (ref: FlatList<number> | null) => {
       yearViewListRef.current = ref;
-      if (ref && pendingYearScrollRef.current != null) {
-        const idx = pendingYearScrollRef.current;
-        pendingYearScrollRef.current = null;
-        requestAnimationFrame(() => {
-          ref.scrollToIndex({ index: idx, animated: false });
-        });
-      }
     },
     [],
   );
@@ -653,22 +624,24 @@ export function CalendarScreen({
   const handleZoomOut = useCallback(() => {
     void triggerHaptic('selection');
     if (viewMode === 'day') {
-      // Day → Month: LayoutAnimation expand
       const idx = getMonthIndexForDay(selectedDayKey);
-      pendingMonthScrollRef.current = idx;
       setActiveMonthIndex(idx);
-      LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
+      requestAnimationFrame(() => {
+        horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
+      });
       setViewMode('month');
+      dayMonthZoom.value = withTiming(1, ZOOM_TIMING);
     } else if (viewMode === 'month') {
-      // Month → Year: reanimated zoom (month shrinks into year grid)
       const d = dayKeyToUtcDate(selectedDayKey);
       const yr = d ? d.getUTCFullYear() : centerYear;
       const yearIdx = CENTER_YEAR_INDEX + (yr - centerYear);
-      pendingYearScrollRef.current = yearIdx;
+      requestAnimationFrame(() => {
+        yearViewListRef.current?.scrollToIndex({ index: yearIdx, animated: false });
+      });
       setViewMode('year');
       monthYearZoom.value = withTiming(1, ZOOM_TIMING);
     }
-  }, [viewMode, selectedDayKey, getMonthIndexForDay, setActiveMonthIndex, centerYear, monthYearZoom]);
+  }, [viewMode, selectedDayKey, getMonthIndexForDay, setActiveMonthIndex, centerYear, dayMonthZoom, monthYearZoom]);
 
   // --- Day selection from week strip ---
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
@@ -682,11 +655,14 @@ export function CalendarScreen({
     (dayKey: string) => {
       void triggerHaptic('selection');
       setSelectedDayKey(dayKey);
-      pendingWeekScrollRef.current = getWeekIndexForDay(dayKey);
-      LayoutAnimation.configureNext(EXPAND_ANIM_CONFIG);
+      const weekIdx = getWeekIndexForDay(dayKey);
+      requestAnimationFrame(() => {
+        weekStripListRef.current?.scrollToIndex({ index: weekIdx, animated: false });
+      });
       setViewMode('day');
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [getWeekIndexForDay],
+    [getWeekIndexForDay, dayMonthZoom],
   );
 
   // --- Month selection from year view — zoom in to month view ---
@@ -696,11 +672,13 @@ export function CalendarScreen({
       const monthDate = new Date(Date.UTC(year, monthIndex, 1));
       const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
       const idx = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
-      pendingMonthScrollRef.current = idx;
       const m = String(monthIndex + 1).padStart(2, '0');
       const dayKey = `${year}-${m}-01`;
       setSelectedDayKey(dayKey);
       setActiveMonthIndex(idx);
+      requestAnimationFrame(() => {
+        horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
+      });
       setViewMode('month');
       monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     },
@@ -1169,10 +1147,10 @@ export function CalendarScreen({
         </View>
       </TabletContentContainer>
 
-      {/* --- Calendar area --- */}
+      {/* --- Calendar area: three stacked reanimated layers --- */}
       <View className="flex-1 overflow-hidden bg-background">
-        {viewMode === 'day' ? (
-          // DAY MODE: week strip + selected day's transactions below
+        {/* Day layer */}
+        <Reanimated.View style={[styles.zoomLayer, dayLayerStyle]} pointerEvents={viewMode === 'day' ? 'auto' : 'none'}>
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1246,48 +1224,47 @@ export function CalendarScreen({
               </View>
             </ScrollView>
           </View>
-        ) : (
-          // MONTH + YEAR: stacked layers with zoom animation between them
-          <View style={styles.flexOne}>
-            <Reanimated.View style={[styles.zoomLayer, monthZoomStyle]} pointerEvents={viewMode === 'month' ? 'auto' : 'none'}>
-              <FlatList
-                ref={handleMonthListRef}
-                data={monthPagerSlots}
-                keyExtractor={monthPagerKeyExtractor}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                bounces={false}
-                directionalLockEnabled
-                decelerationRate="fast"
-                overScrollMode="never"
-                renderItem={renderMonthPage}
-                initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-                getItemLayout={getHorizontalItemLayout}
-                onScrollEndDrag={handleHorizontalScrollEndDrag}
-                onMomentumScrollEnd={handleMonthMomentumEnd}
-                onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-                initialNumToRender={3}
-                maxToRenderPerBatch={3}
-                windowSize={5}
-                removeClippedSubviews
-                style={styles.flexOne}
-              />
-            </Reanimated.View>
+        </Reanimated.View>
 
-            <Reanimated.View style={[styles.zoomLayer, yearZoomStyle]} pointerEvents={viewMode === 'year' ? 'auto' : 'none'}>
-              <CalendarYearView
-                centerYear={centerYear}
-                todayDayKey={todayDayKey}
-                dailyByDayKey={globalDailyByDayKey}
-                weekStartsOn={settings.weekStartsOn}
-                locale={activeLocale}
-                onSelectMonth={handleSelectMonthFromYear}
-                onListRef={handleYearListRef}
-              />
-            </Reanimated.View>
-          </View>
-        )}
+        {/* Month layer */}
+        <Reanimated.View style={[styles.zoomLayer, monthLayerStyle]} pointerEvents={viewMode === 'month' ? 'auto' : 'none'}>
+          <FlatList
+            ref={handleMonthListRef}
+            data={monthPagerSlots}
+            keyExtractor={monthPagerKeyExtractor}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+            directionalLockEnabled
+            decelerationRate="fast"
+            overScrollMode="never"
+            renderItem={renderMonthPage}
+            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+            getItemLayout={getHorizontalItemLayout}
+            onScrollEndDrag={handleHorizontalScrollEndDrag}
+            onMomentumScrollEnd={handleMonthMomentumEnd}
+            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+            initialNumToRender={3}
+            maxToRenderPerBatch={3}
+            windowSize={5}
+            removeClippedSubviews
+            style={styles.flexOne}
+          />
+        </Reanimated.View>
+
+        {/* Year layer */}
+        <Reanimated.View style={[styles.zoomLayer, yearLayerStyle]} pointerEvents={viewMode === 'year' ? 'auto' : 'none'}>
+          <CalendarYearView
+            centerYear={centerYear}
+            todayDayKey={todayDayKey}
+            dailyByDayKey={globalDailyByDayKey}
+            weekStartsOn={settings.weekStartsOn}
+            locale={activeLocale}
+            onSelectMonth={handleSelectMonthFromYear}
+            onListRef={handleYearListRef}
+          />
+        </Reanimated.View>
       </View>
 
       <ThemeModal

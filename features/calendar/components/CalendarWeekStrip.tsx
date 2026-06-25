@@ -208,6 +208,7 @@ export const CalendarWeekStrip = memo(function CalendarWeekStrip({
       keyExtractor={keyExtractor}
       getItemLayout={getItemLayout}
       renderItem={renderItem}
+      extraData={selectedDayKey}
       initialScrollIndex={CENTER_WEEK_INDEX}
       onMomentumScrollEnd={handleMomentumEnd}
       initialNumToRender={3}
