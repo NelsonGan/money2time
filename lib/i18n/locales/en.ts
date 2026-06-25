@@ -180,8 +180,6 @@ const en = {
     empty_title: 'No transactions',
     future_empty: 'No transactions yet for this future day.',
     empty_day: 'No income or expenses recorded for this day.',
-    expand: 'Expand to month view',
-    collapse: 'Collapse to week view',
   },
   onboarding: {
     progress_step_of: 'Step {{step}} of {{total}}',
