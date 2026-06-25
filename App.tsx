@@ -1438,10 +1438,20 @@ function AppContent() {
     };
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
 
+  const splashHiddenRef = useRef(false);
   const handleContentLayout = useCallback(() => {
-    // First real page has laid out — hide the native splash now so the
-    // transition goes straight from splash to content with no flash.
-    void SplashScreen.hideAsync();
+    // The root view has laid out, but its lists (FlashList day pager, etc.)
+    // commit their rows a frame or two later. Hiding the splash on this layout
+    // pass reveals the empty shell first and then flashes the rows in. Wait two
+    // frames so the first real content frame has painted, then lift the splash
+    // straight onto populated content.
+    if (splashHiddenRef.current) return;
+    splashHiddenRef.current = true;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        void SplashScreen.hideAsync();
+      });
+    });
   }, []);
 
   const handleOnboardingComplete = useCallback(() => {
