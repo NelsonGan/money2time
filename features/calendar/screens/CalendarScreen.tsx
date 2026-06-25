@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -44,7 +44,7 @@ import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
-import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -223,7 +223,7 @@ export function CalendarScreen({
     updateCalendarPreferencesJson,
   } = useApp();
   const themeColors = useThemeColors();
-  const { contentWidth } = useDeviceLayout();
+  const { contentWidth, isTablet } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
@@ -736,6 +736,27 @@ export function CalendarScreen({
     }
   }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode]);
 
+  const isOnToday = selectedDayKey === todayDayKey && viewMode === 'day';
+
+  const handleGoToToday = useCallback(() => {
+    void triggerHaptic('selection');
+    setSelectedDayKey(todayDayKey);
+    if (viewMode === 'year') {
+      yearViewListRef.current?.scrollToIndex({ index: CENTER_YEAR_INDEX, animated: false });
+      setViewMode('day');
+      monthYearZoom.value = withTiming(0, ZOOM_TIMING);
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+    } else if (viewMode === 'month') {
+      setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
+      horizontalListRef.current?.scrollToIndex({
+        index: MONTH_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+      setViewMode('day');
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+    }
+  }, [todayDayKey, viewMode, setActiveMonthIndex, dayMonthZoom, monthYearZoom]);
+
   // --- Summary formatting ---
   const formatSummaryValue = useCallback(
     (value: number) =>
@@ -936,7 +957,7 @@ export function CalendarScreen({
                 weekStartsOn: settings.weekStartsOn,
               })}
               weekdayLabels={weekdayLabels}
-              selectedDayKey={viewMode === 'month' ? selectedDayKey : null}
+              selectedDayKey={null}
               isTimeMode={isTimeMode}
               locale={activeLocale}
               onSelectDay={handleSelectDayFromMonth}
@@ -955,8 +976,6 @@ export function CalendarScreen({
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
-      viewMode,
-      selectedDayKey,
       settings.weekStartsOn,
       todayDayKey,
       weekdayLabels,
@@ -1019,6 +1038,9 @@ export function CalendarScreen({
             <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
               <View className="flex-row items-center gap-2 flex-1">
                 {BackButton}
+                {viewMode === 'month' ? (
+                  <Text variant="subheading" className="tracking-tight">{activeMonthLabel}</Text>
+                ) : null}
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
@@ -1231,6 +1253,44 @@ export function CalendarScreen({
           />
         </Reanimated.View>
       </View>
+
+      {/* Floating Today button — bottom left */}
+      {!isOnToday && !isSelectionMode ? (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: getBottomNavReservedInset(safeAreaInsets.bottom) + 12,
+          }}
+        >
+          <View
+            pointerEvents="box-none"
+            style={[
+              { paddingLeft: spacing.lg },
+              isTablet && {
+                maxWidth: TABLET_CONTENT_MAX_WIDTH,
+                alignSelf: 'center' as const,
+                width: '100%',
+              },
+            ]}
+          >
+            <Pressable
+              onPress={handleGoToToday}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.today')}
+              className="flex-row items-center gap-1.5 rounded-full bg-card border border-border/40 px-3.5 py-2.5 active:opacity-85"
+              style={styles.todayFab}
+            >
+              <CalendarDays size={15} color={themeColors.primary} />
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                {I18n.t('common.today')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
 
       <ThemeModal
         visible={showBulkUpdate}
@@ -1519,5 +1579,13 @@ const styles = StyleSheet.create({
   modalActionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+  },
+  todayFab: {
+    alignSelf: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });
