@@ -36,7 +36,7 @@ interface MiniMonthProps {
   dailyByDayKey: Map<string, CalendarDayAggregate>;
   weekStartsOn: WeekStartsOn;
   locale: string;
-  onPress: () => void;
+  onSelectMonth: (year: number, monthIndex: number) => void;
 }
 
 const MiniMonth = memo(function MiniMonth({
@@ -48,8 +48,9 @@ const MiniMonth = memo(function MiniMonth({
   dailyByDayKey,
   weekStartsOn,
   locale,
-  onPress,
+  onSelectMonth,
 }: MiniMonthProps) {
+  const handlePress = useCallback(() => onSelectMonth(year, monthIndex), [onSelectMonth, year, monthIndex]);
   const themeColors = useThemeColors();
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
@@ -73,7 +74,7 @@ const MiniMonth = memo(function MiniMonth({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       style={{ width: monthWidth }}
       accessibilityRole="button"
       accessibilityLabel={monthName}
@@ -189,7 +190,7 @@ const YearPage = memo(function YearPage({
                 dailyByDayKey={dailyByDayKey}
                 weekStartsOn={weekStartsOn}
                 locale={locale}
-                onPress={() => onSelectMonth(year, mi)}
+                onSelectMonth={onSelectMonth}
               />
             );
           })}

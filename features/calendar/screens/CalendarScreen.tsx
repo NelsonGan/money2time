@@ -70,6 +70,7 @@ import { filterTransactionsByWallet } from '~/utils/transactions';
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
 import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
+import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
   buildCalendarMonth,
   dayKeyToUtcDate,
@@ -438,7 +439,7 @@ export function CalendarScreen({
 
   // --- Build a global daily aggregate map for the week strip ---
   const globalDailyByDayKey = useMemo(() => {
-    const map = new Map<string, { dayKey: string; income: number; expense: number; net: number; transactionCount: number; transactions: TransactionWithRelations[] }>();
+    const map = new Map<string, CalendarDayAggregate>();
     for (const tx of searchFilteredTransactions) {
       if (tx.type !== 'income' && tx.type !== 'expense') continue;
       const dayKey = dayKeyFromIsoLocal(tx.date);
