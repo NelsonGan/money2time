@@ -44,6 +44,7 @@ import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   ActivitySearchRow,
+  ActivityTransactionList,
   DisplayModeToggle,
   TransactionItem,
 } from '~/features/transactions/components';
@@ -478,6 +479,15 @@ export function CalendarScreen({
     });
   }, [filteredTransactions, searchQuery]);
 
+  // While searching we drop the day/month/year scoping entirely and show every
+  // matching transaction across all history, grouped by date (newest first).
+  const searchResults = useMemo(() => {
+    if (!hasActiveSearch) return [];
+    return searchFilteredTransactions
+      .filter((tx) => tx.type === 'income' || tx.type === 'expense')
+      .sort(compareTransactionsByDateDesc);
+  }, [hasActiveSearch, searchFilteredTransactions]);
+
   // --- Pre-group transactions by month key (single pass) ---
   const transactionsByMonthKey = useMemo(() => {
     const map = new Map<string, TransactionWithRelations[]>();
@@ -896,6 +906,20 @@ export function CalendarScreen({
     setSelectedTransactionIds([]);
   }, []);
 
+  const toggleDaySelection = useCallback((transactionIds: string[]) => {
+    if (transactionIds.length === 0) return;
+    setSelectedTransactionIds((previous) => {
+      const allSelected = transactionIds.every((id) => previous.includes(id));
+      if (allSelected) {
+        const toRemove = new Set(transactionIds);
+        return previous.filter((id) => !toRemove.has(id));
+      }
+      const next = new Set(previous);
+      transactionIds.forEach((id) => next.add(id));
+      return Array.from(next);
+    });
+  }, []);
+
   const toggleTransactionSelection = useCallback((transactionId: string) => {
     setSelectedTransactionIds((previous) => {
       const index = previous.indexOf(transactionId);
@@ -1194,7 +1218,7 @@ export function CalendarScreen({
 
   const BackButton = useMemo(
     () =>
-      viewMode === 'year' ? null : (
+      viewMode === 'year' || hasActiveSearch ? null : (
         <Pressable
           onPress={handleZoomOut}
           accessibilityRole="button"
@@ -1208,7 +1232,7 @@ export function CalendarScreen({
           </Text>
         </Pressable>
       ),
-    [viewMode, handleZoomOut, backButtonLabel, themeColors.primary],
+    [viewMode, hasActiveSearch, handleZoomOut, backButtonLabel, themeColors.primary],
   );
 
   return (
@@ -1260,7 +1284,7 @@ export function CalendarScreen({
             />
 
             {/* Month pager — matches the Insights month navigation capsule */}
-            {viewMode === 'month' && (
+            {viewMode === 'month' && !hasActiveSearch && (
               <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
                 <View className="flex-row items-center justify-between">
                   <Pressable
@@ -1287,7 +1311,7 @@ export function CalendarScreen({
             )}
 
             {/* Summary row — income/expense cards only in month view; selection toolbar in any list view */}
-            {(isSelectionMode || viewMode === 'month') && (
+            {(isSelectionMode || (viewMode === 'month' && !hasActiveSearch)) && (
               <View style={styles.summarySlot}>
                 {isSelectionMode ? (
                   <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
@@ -1437,10 +1461,38 @@ export function CalendarScreen({
             onListRef={handleYearListRef}
           />
         </Reanimated.View>
+
+        {/* Search results — overlays every calendar layer. A query searches all
+            history, so we abandon the day/month/year scoping and just show the
+            matching transactions grouped by date, newest first. */}
+        {hasActiveSearch ? (
+          <View
+            style={[StyleSheet.absoluteFillObject, styles.searchLayerZ]}
+            className="bg-background"
+          >
+            <ActivityTransactionList
+              transactions={searchResults}
+              displaySettings={transactionDisplaySettings}
+              getDisplayValueForTransaction={getDisplayValueForTransaction}
+              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              onTransactionPress={handleTransactionPress}
+              onTransactionLongPress={handleTransactionLongPress}
+              onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+              selectedTransactionIds={selectedTransactionIds}
+              selectionMode={isSelectionMode}
+              onToggleDaySelection={toggleDaySelection}
+              emptyTitle={I18n.t('transactions.empty_search_title')}
+              emptyMessage={I18n.t('transactions.empty_search_message')}
+              locale={activeLocale}
+              compactItems
+              extendUnderBottomNav
+            />
+          </View>
+        ) : null}
       </View>
 
       {/* Floating Today button — bottom left */}
-      {!isOnToday && !isSelectionMode ? (
+      {!isOnToday && !isSelectionMode && !hasActiveSearch ? (
         <View
           pointerEvents="box-none"
           style={{
@@ -1729,6 +1781,9 @@ const styles = StyleSheet.create({
   },
   yearLayerZ: {
     zIndex: 4,
+  },
+  searchLayerZ: {
+    zIndex: 5,
   },
   summarySlot: {
     minHeight: 56,
