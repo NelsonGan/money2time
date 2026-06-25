@@ -490,15 +490,17 @@ export function WidgetShowcase({
   kind,
   width,
   maxHeight,
+  hidePro = false,
 }: {
   kind: WidgetShowcaseKind;
   width: number;
   maxHeight?: number;
+  hidePro?: boolean;
 }) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
   const snapshot = useMemo(() => buildSampleWidgetSnapshot(settings), [settings]);
-  const isPro = kind !== 'monthly' && kind !== 'quickAdd';
+  const isPro = !hidePro && kind !== 'monthly' && kind !== 'quickAdd';
 
   // The small widget is a 158pt square on-device; cap it so it doesn't blow up
   // to the full panel width like the medium/large showcases.

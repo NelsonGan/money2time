@@ -6,7 +6,7 @@ export const calendarAlbumsAnnouncement: FeatureAnnouncement = {
   announcementNumber: 6,
   releaseDate: '2026-06-25',
   pages: [
-    { key: 'calendar', accent: 'primary', visual: 'calendar' },
+    { key: 'calendar', accent: 'primary', visual: 'calendar', hidePro: true },
     { key: 'albums', accent: 'success', visual: 'albums' },
   ],
 };

@@ -4,9 +4,11 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
+import { formatAmount } from '~/utils/formatters';
 
 interface AlbumShowcaseProps {
   width: number;
@@ -15,24 +17,28 @@ interface AlbumShowcaseProps {
 interface SampleAlbum {
   nameKey: string;
   metaKey: string;
-  amount: string;
+  amount: number;
   gradient: [string, string];
 }
 
 export function AlbumShowcase({ width }: AlbumShowcaseProps) {
   const colors = useThemeColors();
+  const { settings } = useApp();
+  // Always render in money mode so the showcase displays the user's currency,
+  // regardless of whether the app is currently in time-display mode.
+  const amountSettings = { currencySymbol: settings.currencySymbol, displayMode: 'money' as const };
 
   const albums: SampleAlbum[] = [
     {
       nameKey: 'news.showcase.album_trip',
       metaKey: 'news.showcase.album_trip_meta',
-      amount: '1,240',
+      amount: 1240,
       gradient: [colors.primary, colors.sky],
     },
     {
       nameKey: 'news.showcase.album_celebration',
       metaKey: 'news.showcase.album_celebration_meta',
-      amount: '380',
+      amount: 380,
       gradient: [colors.lavender, colors.coral],
     },
   ];
@@ -64,7 +70,7 @@ export function AlbumShowcase({ width }: AlbumShowcaseProps) {
             </Text>
             <View style={styles.row}>
               <Text variant="subheading" numberOfLines={1} className="text-white">
-                {album.amount}
+                {formatAmount(album.amount, amountSettings, { showSign: false })}
               </Text>
               <View style={styles.meta}>
                 <CalendarRange size={11} color="rgba(255,255,255,0.8)" strokeWidth={2.2} />

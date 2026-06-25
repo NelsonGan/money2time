@@ -235,7 +235,11 @@ export function FeatureAnnouncementModal({
               ) : page.visual === 'appLock' ? (
                 <AppLockShowcase width={Math.round(showcaseWidth * 0.72)} />
               ) : (
-                <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
+                <WidgetShowcase
+                  kind={visualToKind(page.visual)}
+                  width={showcaseWidth}
+                  hidePro={page.hidePro}
+                />
               )}
             </View>
           </View>

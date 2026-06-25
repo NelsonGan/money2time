@@ -25,6 +25,11 @@ export interface FeatureAnnouncementPage {
     | 'appLock';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'enableVoice' | 'openShareEarn';
+  /**
+   * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
+   * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
+   */
+  hidePro?: boolean;
 }
 
 export interface FeatureAnnouncement {
