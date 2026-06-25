@@ -68,14 +68,13 @@ import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
-import { CalendarWeekStrip, CENTER_WEEK_INDEX } from '../components/CalendarWeekStrip';
+import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
 import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
 import {
   buildCalendarMonth,
   dayKeyToUtcDate,
   formatCalendarDate,
   getCalendarWeekdayLabels,
-  weekStartDayKey,
 } from '../lib/calendarBuild';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
@@ -341,7 +340,6 @@ export function CalendarScreen({
 
   // --- Refs ---
   const horizontalListRef = useRef<FlatList<number> | null>(null);
-  const weekStripListRef = useRef<FlatList<number> | null>(null);
 
   const pageWidth = Math.max(1, screenWidth);
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
@@ -464,12 +462,6 @@ export function CalendarScreen({
     return map;
   }, [searchFilteredTransactions, isTimeMode, getDisplayValueForTransaction]);
 
-  // --- Week strip anchor ---
-  const anchorWeekStart = useMemo(
-    () => weekStartDayKey(todayDayKey, settings.weekStartsOn),
-    [todayDayKey, settings.weekStartsOn],
-  );
-
   const weekdayLabels = useMemo(
     () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
     [activeLocale, settings.weekStartsOn],
@@ -587,28 +579,9 @@ export function CalendarScreen({
     [clampMonthIndex, monthPagerAnchorDate],
   );
 
-  const getWeekIndexForDay = useCallback(
-    (dayKey: string) => {
-      const ws = weekStartDayKey(dayKey, settings.weekStartsOn);
-      const anchorDate = dayKeyToUtcDate(anchorWeekStart);
-      const targetDate = dayKeyToUtcDate(ws);
-      if (!anchorDate || !targetDate) return CENTER_WEEK_INDEX;
-      const diffMs = targetDate.getTime() - anchorDate.getTime();
-      return CENTER_WEEK_INDEX + Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
-    },
-    [anchorWeekStart, settings.weekStartsOn],
-  );
-
   const handleMonthListRef = useCallback(
     (ref: FlatList<number> | null) => {
       (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
-    },
-    [],
-  );
-
-  const handleWeekListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      (weekStripListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
     },
     [],
   );
@@ -646,23 +619,17 @@ export function CalendarScreen({
   // --- Day selection from week strip ---
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
     setSelectedDayKey(dayKey);
-    const weekIdx = getWeekIndexForDay(dayKey);
-    weekStripListRef.current?.scrollToIndex({ index: weekIdx, animated: true });
-  }, [getWeekIndexForDay]);
+  }, []);
 
   // --- Day selection from month grid — zoom in to day view ---
   const handleSelectDayFromMonth = useCallback(
     (dayKey: string) => {
       void triggerHaptic('selection');
       setSelectedDayKey(dayKey);
-      const weekIdx = getWeekIndexForDay(dayKey);
-      requestAnimationFrame(() => {
-        weekStripListRef.current?.scrollToIndex({ index: weekIdx, animated: false });
-      });
       setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [getWeekIndexForDay, dayMonthZoom],
+    [dayMonthZoom],
   );
 
   // --- Month selection from year view — zoom in to month view ---
@@ -765,11 +732,8 @@ export function CalendarScreen({
         index: MONTH_PAGER_CENTER_INDEX,
         animated: false,
       });
-    } else {
-      const weekIdx = getWeekIndexForDay(todayDayKey);
-      weekStripListRef.current?.scrollToIndex({ index: weekIdx, animated: false });
     }
-  }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode, getWeekIndexForDay]);
+  }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode]);
 
   // --- Summary formatting ---
   const formatSummaryValue = useCallback(
@@ -1157,10 +1121,9 @@ export function CalendarScreen({
                 selectedDayKey={selectedDayKey}
                 todayDayKey={todayDayKey}
                 weekdayLabels={weekdayLabels}
-                anchorWeekStart={anchorWeekStart}
+                weekStartsOn={settings.weekStartsOn}
                 dailyByDayKey={globalDailyByDayKey}
                 onSelectDay={handleSelectDayFromWeek}
-                onListRef={handleWeekListRef}
               />
             </View>
             <ScrollView

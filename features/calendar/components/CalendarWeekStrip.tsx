@@ -1,51 +1,39 @@
-import React, { memo, useCallback, useMemo, useRef } from 'react';
-import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import React, { memo, useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
+import type { WeekStartsOn } from '~/types';
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
-import { dayKeyToUtcDate, shiftDayKey, weekDayKeys } from '../lib/calendarBuild';
-
-const TOTAL_WEEK_SLOTS = 521;
-const CENTER_WEEK_INDEX = 260;
+import { dayKeyToUtcDate, weekDayKeys, weekStartDayKey } from '../lib/calendarBuild';
 
 interface CalendarWeekStripProps {
   selectedDayKey: string;
   todayDayKey: string;
   weekdayLabels: string[];
-  anchorWeekStart: string;
-  dailyByDayKey: Map<string, CalendarDayAggregate>;
-  onSelectDay: (dayKey: string) => void;
-  onWeekChange?: (weekStartKey: string) => void;
-  onListRef?: (ref: FlatList<number> | null) => void;
-}
-
-interface WeekPageProps {
-  pageWidth: number;
-  weekStartKey: string;
-  selectedDayKey: string;
-  todayDayKey: string;
-  weekdayLabels: string[];
+  weekStartsOn: WeekStartsOn;
   dailyByDayKey: Map<string, CalendarDayAggregate>;
   onSelectDay: (dayKey: string) => void;
 }
 
-const WeekPage = memo(function WeekPage({
-  pageWidth,
-  weekStartKey,
+export const CalendarWeekStrip = memo(function CalendarWeekStrip({
   selectedDayKey,
   todayDayKey,
   weekdayLabels,
+  weekStartsOn,
   dailyByDayKey,
   onSelectDay,
-}: WeekPageProps) {
+}: CalendarWeekStripProps) {
   const themeColors = useThemeColors();
-  const days = useMemo(() => weekDayKeys(weekStartKey), [weekStartKey]);
-  const cellWidth = Math.floor((pageWidth - 40) / 7);
+  const wsKey = useMemo(
+    () => weekStartDayKey(selectedDayKey, weekStartsOn),
+    [selectedDayKey, weekStartsOn],
+  );
+  const days = useMemo(() => weekDayKeys(wsKey), [wsKey]);
 
   return (
-    <View style={[styles.weekPage, { width: pageWidth }]}>
+    <View style={styles.weekPage}>
       <View style={styles.weekRow}>
         {days.map((dayKey, i) => {
           const isSelected = dayKey === selectedDayKey;
@@ -64,7 +52,7 @@ const WeekPage = memo(function WeekPage({
               }}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
-              style={[styles.dayColumn, { width: cellWidth }]}
+              style={styles.dayColumn}
             >
               <Text variant="label" tone="muted" style={styles.weekdayLabelText}>
                 {weekdayLabels[i]}
@@ -112,120 +100,7 @@ const WeekPage = memo(function WeekPage({
   );
 });
 
-export const CalendarWeekStrip = memo(function CalendarWeekStrip({
-  selectedDayKey,
-  todayDayKey,
-  weekdayLabels,
-  anchorWeekStart,
-  dailyByDayKey,
-  onSelectDay,
-  onWeekChange,
-  onListRef,
-}: CalendarWeekStripProps) {
-  const { width: screenWidth } = useWindowDimensions();
-  const listRef = useRef<FlatList<number> | null>(null);
-  const activeIndexRef = useRef(CENTER_WEEK_INDEX);
-
-  const setListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      listRef.current = ref;
-      onListRef?.(ref);
-    },
-    [onListRef],
-  );
-
-  const slots = useMemo(
-    () => Array.from({ length: TOTAL_WEEK_SLOTS }, (_, i) => i),
-    [],
-  );
-
-  const getWeekStartForIndex = useCallback(
-    (index: number) => {
-      const offset = (index - CENTER_WEEK_INDEX) * 7;
-      return shiftDayKey(anchorWeekStart, offset);
-    },
-    [anchorWeekStart],
-  );
-
-  const getItemLayout = useCallback(
-    (_: unknown, index: number) => ({
-      length: screenWidth,
-      offset: screenWidth * index,
-      index,
-    }),
-    [screenWidth],
-  );
-
-  const keyExtractor = useCallback((item: number) => String(item), []);
-
-  const handleMomentumEnd = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
-      const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
-      if (idx !== activeIndexRef.current) {
-        activeIndexRef.current = idx;
-        void triggerHaptic('selection');
-        const ws = getWeekStartForIndex(idx);
-        onWeekChange?.(ws);
-      }
-    },
-    [screenWidth, getWeekStartForIndex, onWeekChange],
-  );
-
-  const renderItem = useCallback(
-    ({ item }: { item: number }) => {
-      const ws = getWeekStartForIndex(item);
-      return (
-        <WeekPage
-          pageWidth={screenWidth}
-          weekStartKey={ws}
-          selectedDayKey={selectedDayKey}
-          todayDayKey={todayDayKey}
-          weekdayLabels={weekdayLabels}
-          dailyByDayKey={dailyByDayKey}
-          onSelectDay={onSelectDay}
-        />
-      );
-    },
-    [
-      screenWidth,
-      selectedDayKey,
-      todayDayKey,
-      weekdayLabels,
-      dailyByDayKey,
-      onSelectDay,
-      getWeekStartForIndex,
-    ],
-  );
-
-  return (
-    <FlatList
-      ref={setListRef}
-      data={slots}
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      bounces={false}
-      keyExtractor={keyExtractor}
-      getItemLayout={getItemLayout}
-      renderItem={renderItem}
-      extraData={selectedDayKey}
-      initialScrollIndex={CENTER_WEEK_INDEX}
-      onMomentumScrollEnd={handleMomentumEnd}
-      initialNumToRender={3}
-      maxToRenderPerBatch={3}
-      windowSize={5}
-      removeClippedSubviews
-      style={styles.list}
-    />
-  );
-});
-
-export { CENTER_WEEK_INDEX };
-
 const styles = StyleSheet.create({
-  list: {
-    flexGrow: 0,
-  },
   weekPage: {
     paddingHorizontal: 20,
     paddingVertical: 6,
