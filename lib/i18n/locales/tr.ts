@@ -87,6 +87,17 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Takvim ana ekranı ve albümler',
+      calendar: {
+        title: 'Paranız, gün gün',
+        body: 'Ana sekme artık bir takvim. Harcamanızı görmek için herhangi bir güne dokunun, günler arasında kaydırın ve düzeninizi bir bakışta görmek için aya ya da tüm yıla uzaklaşın.',
+      },
+      albums: {
+        title: 'Harcamaları albümlerde grupla',
+        body: 'Bir gezi, parti veya projedeki işlemleri kendi kapağı, toplamı ve dökümü olan bir albümde toplayın. Birini etkin yapın, yeni harcamalar otomatik olarak eklensin.',
+      },
+    },
     multi_currency_update: {
       title: 'Çoklu para birimi ve dahası',
       showcase_main: 'Ana',
@@ -130,6 +141,10 @@ const tr = {
       voice_category: 'Ulaşım',
       voice_logged: 'Sesle kaydedildi',
       voice_example: 'taksi 30',
+      album_trip: 'Tokyo Gezisi',
+      album_trip_meta: '4 Mar – 11 Mar',
+      album_celebration: 'Annemin Doğum Günü',
+      album_celebration_meta: '8 işlem',
     },
     home_widgets: {
       title: "Ana Ekran Widget'ları",

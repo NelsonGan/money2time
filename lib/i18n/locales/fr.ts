@@ -87,6 +87,17 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Accueil calendrier & albums',
+      calendar: {
+        title: 'Votre argent, jour par jour',
+        body: "L'onglet d'accueil est désormais un calendrier. Touchez un jour pour voir vos dépenses, glissez entre les jours, et dézoomez sur le mois ou l'année entière pour repérer vos tendances d'un coup d'œil.",
+      },
+      albums: {
+        title: 'Regroupez vos dépenses en albums',
+        body: "Regroupez les transactions d'un voyage, d'une fête ou d'un projet dans un album avec sa propre couverture, son total et sa répartition. Définissez-en un comme actif et les nouvelles dépenses s'ajoutent automatiquement.",
+      },
+    },
     multi_currency_update: {
       title: 'Multidevise et plus',
       showcase_main: 'Principale',
@@ -130,6 +141,10 @@ const fr = {
       voice_category: 'Transport',
       voice_logged: 'Enregistré à la voix',
       voice_example: 'taxi 30',
+      album_trip: 'Voyage à Tokyo',
+      album_trip_meta: '4 mars – 11 mars',
+      album_celebration: 'Anniversaire de maman',
+      album_celebration_meta: '8 transactions',
     },
     home_widgets: {
       title: "Widgets sur l'écran d'accueil",

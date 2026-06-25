@@ -87,6 +87,17 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalender-hjem & album',
+      calendar: {
+        title: 'Dine penge, dag for dag',
+        body: 'Hjem-fanen er nu en kalender. Tryk på en dag for at se dit forbrug, swipe mellem dage, og zoom ud til måneden eller hele året for at se dine mønstre på et øjeblik.',
+      },
+      albums: {
+        title: 'Saml forbrug i album',
+        body: 'Saml transaktionerne fra en rejse, fest eller et projekt i et album med eget cover, total og oversigt. Vælg et som aktivt, så tilføjes nye udgifter automatisk.',
+      },
+    },
     multi_currency_update: {
       title: 'Flere valutaer og mere',
       showcase_main: 'Primær',
@@ -130,6 +141,10 @@ const da = {
       voice_category: 'Transport',
       voice_logged: 'Registreret via stemme',
       voice_example: 'taxi 30',
+      album_trip: 'Tokyo-tur',
+      album_trip_meta: '4. mar – 11. mar',
+      album_celebration: 'Mors fødselsdag',
+      album_celebration_meta: '8 transaktioner',
     },
     home_widgets: {
       title: 'Widgets på startskærmen',

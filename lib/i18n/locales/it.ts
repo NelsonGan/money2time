@@ -87,6 +87,17 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Home a calendario e album',
+      calendar: {
+        title: 'I tuoi soldi, giorno per giorno',
+        body: "La scheda home ora è un calendario. Tocca un giorno qualsiasi per vedere quanto hai speso, scorri tra i giorni e rimpicciolisci al mese o all'intero anno per cogliere i tuoi schemi a colpo d'occhio.",
+      },
+      albums: {
+        title: 'Raggruppa le spese in album',
+        body: 'Raccogli le transazioni di un viaggio, una festa o un progetto in un album con copertina, totale e ripartizione propri. Imposta un album come attivo e le nuove spese vengono aggiunte automaticamente.',
+      },
+    },
     multi_currency_update: {
       title: 'Multivaluta e altro',
       showcase_main: 'Principale',
@@ -130,6 +141,10 @@ const it = {
       voice_category: 'Trasporti',
       voice_logged: 'Registrato a voce',
       voice_example: 'taxi 30',
+      album_trip: 'Viaggio a Tokyo',
+      album_trip_meta: '4 mar – 11 mar',
+      album_celebration: 'Compleanno della mamma',
+      album_celebration_meta: '8 transazioni',
     },
     home_widgets: {
       title: 'Widget nella schermata Home',

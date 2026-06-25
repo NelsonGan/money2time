@@ -14,6 +14,7 @@ export interface FeatureAnnouncementPage {
     | 'quickAdd'
     | 'weekly'
     | 'calendar'
+    | 'albums'
     | 'savings'
     | 'savingsHistory'
     | 'voice'

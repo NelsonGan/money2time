@@ -87,6 +87,17 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalendarz na start i albumy',
+      calendar: {
+        title: 'Twoje pieniądze, dzień po dniu',
+        body: 'Karta główna jest teraz kalendarzem. Dotknij dowolnego dnia, aby zobaczyć wydatki, przesuwaj między dniami i oddal widok do miesiąca lub całego roku, aby od razu dostrzec swoje wzorce.',
+      },
+      albums: {
+        title: 'Grupuj wydatki w albumy',
+        body: 'Zbierz transakcje z podróży, imprezy lub projektu w albumie z własną okładką, sumą i podziałem. Ustaw jeden jako aktywny, a nowe wydatki będą dodawane automatycznie.',
+      },
+    },
     multi_currency_update: {
       title: 'Wiele walut i więcej',
       showcase_main: 'Główna',
@@ -130,6 +141,10 @@ const pl = {
       voice_category: 'Transport',
       voice_logged: 'Zapisano głosem',
       voice_example: 'taksówka 30',
+      album_trip: 'Wyjazd do Tokio',
+      album_trip_meta: '4 mar – 11 mar',
+      album_celebration: 'Urodziny mamy',
+      album_celebration_meta: '8 transakcji',
     },
     home_widgets: {
       title: 'Widżety na ekranie głównym',

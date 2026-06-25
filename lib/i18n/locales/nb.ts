@@ -87,6 +87,17 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalender-hjem og album',
+      calendar: {
+        title: 'Pengene dine, dag for dag',
+        body: 'Hjem-fanen er nå en kalender. Trykk på en dag for å se hva du brukte, sveip mellom dager, og zoom ut til måneden eller hele året for å se mønstrene dine med ett blikk.',
+      },
+      albums: {
+        title: 'Samle forbruk i album',
+        body: 'Samle transaksjonene fra en reise, fest eller et prosjekt i et album med eget omslag, total og oversikt. Sett ett som aktivt, så legges nye utgifter til automatisk.',
+      },
+    },
     multi_currency_update: {
       title: 'Flervaluta og mer',
       showcase_main: 'Primær',
@@ -130,6 +141,10 @@ const nb = {
       voice_category: 'Transport',
       voice_logged: 'Registrert med stemme',
       voice_example: 'taxi 30',
+      album_trip: 'Tokyo-tur',
+      album_trip_meta: '4. mar – 11. mar',
+      album_celebration: 'Mammas bursdag',
+      album_celebration_meta: '8 transaksjoner',
     },
     home_widgets: {
       title: 'Widgeter på startskjermen',
