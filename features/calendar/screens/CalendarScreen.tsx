@@ -44,6 +44,7 @@ import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   ActivitySearchRow,
+  ActivityTransactionList,
   DisplayModeToggle,
   TransactionItem,
 } from '~/features/transactions/components';
@@ -259,8 +260,10 @@ export function CalendarScreen({
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  // Debounced copy that actually drives the (potentially expensive) filtering,
+  // so typing stays responsive instead of re-filtering on every keystroke.
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const searchInputRef = useRef<TextInput | null>(null);
-  const hasActiveSearch = searchQuery.trim().length > 0;
 
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilterPicker, setActiveFilterPicker] = useState<FilterPickerKind | null>(null);
@@ -466,22 +469,54 @@ export function CalendarScreen({
     excludedIncomeCategoryIds.length +
     excludedExpenseCategoryIds.length;
 
-  // --- Search filtering ---
-  const searchFilteredTransactions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return filteredTransactions;
-    return filteredTransactions.filter((tx) => {
-      if (tx.note && tx.note.toLowerCase().includes(q)) return true;
-      if (tx.categoryName && tx.categoryName.toLowerCase().includes(q)) return true;
-      if (tx.categoryParentName && tx.categoryParentName.toLowerCase().includes(q)) return true;
-      return false;
+  // --- Search ---
+  // Lowercased haystack per transaction, built lazily once search is open (and
+  // rebuilt only when the non-search transaction set changes) — so non-search
+  // sessions and unrelated mutations don't pay for it. Typing then costs a
+  // single `includes` per row instead of repeated `toLowerCase` calls.
+  const searchIndex = useMemo(() => {
+    if (!isSearchOpen) return [];
+    return filteredTransactions.map((tx) => {
+      let haystack = '';
+      if (tx.note) haystack += tx.note;
+      if (tx.categoryName) haystack += `\n${tx.categoryName}`;
+      if (tx.categoryParentName) haystack += `\n${tx.categoryParentName}`;
+      return { tx, haystack: haystack.toLowerCase() };
     });
-  }, [filteredTransactions, searchQuery]);
+  }, [isSearchOpen, filteredTransactions]);
+
+  // The list shown while searching drops the day/month/year scoping and shows
+  // matching transactions across all history, grouped by date (newest first).
+  // Driven by the debounced query so it doesn't recompute on every keystroke;
+  // an empty query browses everything. Computed only while search is open.
+  const searchResults = useMemo(() => {
+    if (!isSearchOpen) return [];
+    const q = debouncedSearchQuery.trim().toLowerCase();
+    const matched = q
+      ? searchIndex.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.tx)
+      : [...filteredTransactions];
+    matched.sort(compareTransactionsByDateDesc);
+    return matched;
+  }, [isSearchOpen, debouncedSearchQuery, searchIndex, filteredTransactions]);
+
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    // Apply the empty query immediately (instant clear / browse-all on open);
+    // debounce only the keystrokes that trigger real filtering.
+    if (trimmed.length === 0) {
+      setDebouncedSearchQuery('');
+      return;
+    }
+    const handle = setTimeout(() => setDebouncedSearchQuery(trimmed), 180);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
 
   // --- Pre-group transactions by month key (single pass) ---
+  // Built from the (non-search) filtered set so the calendar grids/day pages
+  // stay stable while searching — the search overlay covers them anyway.
   const transactionsByMonthKey = useMemo(() => {
     const map = new Map<string, TransactionWithRelations[]>();
-    for (const tx of searchFilteredTransactions) {
+    for (const tx of filteredTransactions) {
       const mk = dayKeyFromIsoLocal(tx.date).slice(0, 7);
       let arr = map.get(mk);
       if (!arr) {
@@ -491,26 +526,29 @@ export function CalendarScreen({
       arr.push(tx);
     }
     return map;
-  }, [searchFilteredTransactions]);
+  }, [filteredTransactions]);
 
   // --- Build a global daily aggregate map for the week strip (no transaction arrays) ---
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, CalendarDayAggregate>();
-    for (const tx of searchFilteredTransactions) {
-      if (tx.type !== 'income' && tx.type !== 'expense') continue;
+    for (const tx of filteredTransactions) {
       const dayKey = dayKeyFromIsoLocal(tx.date);
       let agg = map.get(dayKey);
       if (!agg) {
         agg = { dayKey, income: 0, expense: 0, net: 0, transactionCount: 0, transactions: [] };
         map.set(dayKey, agg);
       }
-      const value = isTimeMode
-        ? getDisplayValueForTransaction(tx)
-        : (tx.reportingAmount ?? tx.amount);
-      if (tx.type === 'income') {
-        agg.income += value;
-      } else {
-        agg.expense += value;
+      // Transfers and balance adjustments count as activity but don't feed the
+      // income/expense subtotals.
+      if (tx.type === 'income' || tx.type === 'expense') {
+        const value = isTimeMode
+          ? getDisplayValueForTransaction(tx)
+          : (tx.reportingAmount ?? tx.amount);
+        if (tx.type === 'income') {
+          agg.income += value;
+        } else {
+          agg.expense += value;
+        }
       }
       agg.transactionCount += 1;
     }
@@ -518,7 +556,7 @@ export function CalendarScreen({
       agg.net = agg.income - agg.expense;
     });
     return map;
-  }, [searchFilteredTransactions, isTimeMode, getDisplayValueForTransaction]);
+  }, [filteredTransactions, isTimeMode, getDisplayValueForTransaction]);
 
   const weekdayLabels = useMemo(
     () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
@@ -896,6 +934,20 @@ export function CalendarScreen({
     setSelectedTransactionIds([]);
   }, []);
 
+  const toggleDaySelection = useCallback((transactionIds: string[]) => {
+    if (transactionIds.length === 0) return;
+    setSelectedTransactionIds((previous) => {
+      const allSelected = transactionIds.every((id) => previous.includes(id));
+      if (allSelected) {
+        const toRemove = new Set(transactionIds);
+        return previous.filter((id) => !toRemove.has(id));
+      }
+      const next = new Set(previous);
+      transactionIds.forEach((id) => next.add(id));
+      return Array.from(next);
+    });
+  }, []);
+
   const toggleTransactionSelection = useCallback((transactionId: string) => {
     setSelectedTransactionIds((previous) => {
       const index = previous.indexOf(transactionId);
@@ -1089,11 +1141,7 @@ export function CalendarScreen({
       const monthTxs = transactionsByMonthKey.get(dayKey.slice(0, 7));
       const dayTxs = monthTxs
         ? monthTxs
-            .filter(
-              (tx) =>
-                (tx.type === 'income' || tx.type === 'expense') &&
-                dayKeyFromIsoLocal(tx.date) === dayKey,
-            )
+            .filter((tx) => dayKeyFromIsoLocal(tx.date) === dayKey)
             .sort(compareTransactionsByDateDesc)
         : [];
       const isFuture = dayKey > todayDayKey;
@@ -1194,7 +1242,7 @@ export function CalendarScreen({
 
   const BackButton = useMemo(
     () =>
-      viewMode === 'year' ? null : (
+      viewMode === 'year' || isSearchOpen ? null : (
         <Pressable
           onPress={handleZoomOut}
           accessibilityRole="button"
@@ -1208,7 +1256,7 @@ export function CalendarScreen({
           </Text>
         </Pressable>
       ),
-    [viewMode, handleZoomOut, backButtonLabel, themeColors.primary],
+    [viewMode, isSearchOpen, handleZoomOut, backButtonLabel, themeColors.primary],
   );
 
   return (
@@ -1233,16 +1281,12 @@ export function CalendarScreen({
                   onPress={handleOpenSearch}
                   className={cn(
                     'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
-                    isSearchOpen || hasActiveSearch
-                      ? 'border-primary/45 bg-primary/10'
-                      : 'border-border/40 bg-card',
+                    isSearchOpen ? 'border-primary/45 bg-primary/10' : 'border-border/40 bg-card',
                   )}
                 >
                   <Search
                     size={15}
-                    color={
-                      isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted
-                    }
+                    color={isSearchOpen ? themeColors.primary : themeColors.textMuted}
                   />
                 </Pressable>
                 <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
@@ -1253,14 +1297,14 @@ export function CalendarScreen({
             {/* Search row */}
             <ActivitySearchRow
               inputRef={searchInputRef}
-              visible={isSearchOpen || hasActiveSearch}
+              visible={isSearchOpen}
               value={searchQuery}
               onChangeText={handleSearchChange}
               onClose={handleCloseSearch}
             />
 
             {/* Month pager — matches the Insights month navigation capsule */}
-            {viewMode === 'month' && (
+            {viewMode === 'month' && !isSearchOpen && (
               <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
                 <View className="flex-row items-center justify-between">
                   <Pressable
@@ -1287,7 +1331,7 @@ export function CalendarScreen({
             )}
 
             {/* Summary row — income/expense cards only in month view; selection toolbar in any list view */}
-            {(isSelectionMode || viewMode === 'month') && (
+            {(isSelectionMode || (viewMode === 'month' && !isSearchOpen)) && (
               <View style={styles.summarySlot}>
                 {isSelectionMode ? (
                   <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
@@ -1437,10 +1481,40 @@ export function CalendarScreen({
             onListRef={handleYearListRef}
           />
         </Reanimated.View>
+
+        {/* Search results — overlays every calendar layer the moment search
+            opens, so the week strip / day-month-year views are hidden right
+            away. Shows matching transactions across all history, grouped by
+            date (newest first); an empty query browses everything. */}
+        {isSearchOpen ? (
+          <View
+            style={[StyleSheet.absoluteFillObject, styles.searchLayerZ]}
+            className="bg-background"
+          >
+            <ActivityTransactionList
+              transactions={searchResults}
+              displaySettings={transactionDisplaySettings}
+              getDisplayValueForTransaction={getDisplayValueForTransaction}
+              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              onTransactionPress={handleTransactionPress}
+              onTransactionLongPress={handleTransactionLongPress}
+              onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+              selectedTransactionIds={selectedTransactionIds}
+              selectionMode={isSelectionMode}
+              onToggleDaySelection={toggleDaySelection}
+              emptyTitle={I18n.t('transactions.empty_search_title')}
+              emptyMessage={I18n.t('transactions.empty_search_message')}
+              locale={activeLocale}
+              compactItems
+              disableItemAnimations
+              extendUnderBottomNav
+            />
+          </View>
+        ) : null}
       </View>
 
       {/* Floating Today button — bottom left */}
-      {!isOnToday && !isSelectionMode ? (
+      {!isOnToday && !isSelectionMode && !isSearchOpen ? (
         <View
           pointerEvents="box-none"
           style={{
@@ -1729,6 +1803,9 @@ const styles = StyleSheet.create({
   },
   yearLayerZ: {
     zIndex: 4,
+  },
+  searchLayerZ: {
+    zIndex: 5,
   },
   summarySlot: {
     minHeight: 56,
