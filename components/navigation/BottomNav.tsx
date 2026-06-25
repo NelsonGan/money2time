@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AlbumsIcon,
   CalendarIcon,
-  HomeIcon,
   InsightsIcon,
   SettingsIcon,
   WalletIcon,
@@ -27,7 +26,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-export type TabName = 'home' | 'accounts' | 'calendar' | 'insights' | 'albums' | 'settings';
+export type TabName = 'accounts' | 'calendar' | 'insights' | 'albums' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabName;
@@ -38,12 +37,11 @@ interface BottomNavProps {
   tutorialMeasureToken?: number;
 }
 
-type NavIconComponent = typeof HomeIcon;
+type NavIconComponent = typeof CalendarIcon;
 
 const TABS: { name: TabName; icon: NavIconComponent }[] = [
-  { name: 'home', icon: HomeIcon },
-  { name: 'accounts', icon: WalletIcon },
   { name: 'calendar', icon: CalendarIcon },
+  { name: 'accounts', icon: WalletIcon },
   { name: 'insights', icon: InsightsIcon },
   { name: 'albums', icon: AlbumsIcon },
   { name: 'settings', icon: SettingsIcon },

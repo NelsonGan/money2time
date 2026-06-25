@@ -79,8 +79,6 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
-  SimpleActivityScreen,
-  TransactionsScreen,
 } from '~/features/transactions/screens';
 import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
 import type {
@@ -129,9 +127,8 @@ import {
 
 type MainTab = TabName;
 const MAIN_TAB_ORDER: MainTab[] = [
-  'home',
-  'accounts',
   'calendar',
+  'accounts',
   'insights',
   'albums',
   'settings',
@@ -190,14 +187,14 @@ interface GuidedTutorialStep {
 
 const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   {
-    tab: 'home',
+    tab: 'calendar',
     targetId: 'nav.add',
     titleKey: 'tutorial.coach_steps.add_title',
     bodyKey: 'tutorial.coach_steps.add_body',
     mascot: 'excited',
   },
   {
-    tab: 'home',
+    tab: 'calendar',
     targetId: 'nav.tabs',
     titleKey: 'tutorial.coach_steps.tabs_title',
     bodyKey: 'tutorial.coach_steps.tabs_body',
@@ -240,8 +237,6 @@ const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
   },
 ];
 
-const MemoTransactionsScreen = React.memo(TransactionsScreen);
-const MemoSimpleActivityScreen = React.memo(SimpleActivityScreen);
 const MemoAccountsScreen = React.memo(AccountsScreen);
 const MemoCalendarScreen = React.memo(CalendarScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
@@ -367,18 +362,12 @@ function MainShellScreen({
     Partial<Record<MainTab, TutorialTargetRect>>
   >({});
   const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
-  const [activeTab, setActiveTab] = useState<MainTab>('home');
-  const [isTransactionsSelectionMode, setIsTransactionsSelectionMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<MainTab>('calendar');
   const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
-  const [transactionsScrollTopToken, setTransactionsScrollTopToken] = useState(0);
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToken, setAccountsResetToken] = useState(0);
   const [calendarScrollTopToken, setCalendarScrollTopToken] = useState(0);
   const [calendarResetToken, setCalendarResetToken] = useState(0);
-  const [transactionsTutorialResetToken, setTransactionsTutorialResetToken] = useState(0);
-  const [transactionsFocusMonthKey, setTransactionsFocusMonthKey] = useState<string | null>(null);
-  const [transactionsFocusDayKey, setTransactionsFocusDayKey] = useState<string | null>(null);
-  const [transactionsFocusMonthToken, setTransactionsFocusMonthToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
     useState<ActivityBreakdownInsightRequest | null>(null);
@@ -394,12 +383,7 @@ function MainShellScreen({
   const [warmupQuickAdd, setWarmupQuickAdd] = useState(false);
 
   useEffect(() => {
-    // Progressively pre-mount the non-home tabs after home has rendered, so
-    // the first tap on each tab doesn't pay its mount cost on the JS thread
-    // (visible as lag + a one-frame layout shift on Settings, whose nested
-    // NativeStack only resolves window insets once mounted). Staggering one
-    // tab per InteractionManager pass keeps them from competing with home.
-    const order: MainTab[] = ['settings', 'insights', 'calendar', 'accounts'];
+    const order: MainTab[] = ['settings', 'insights', 'accounts'];
     let cancelled = false;
     let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
     let pendingInteraction: ReturnType<typeof InteractionManager.runAfterInteractions> | null =
@@ -467,18 +451,12 @@ function MainShellScreen({
     });
   }, [navigation]);
 
-  const jumpTransactionsToMonth = useCallback((monthKey: string, dayKey: string | null = null) => {
-    setTransactionsFocusMonthKey(monthKey);
-    setTransactionsFocusDayKey(dayKey);
-    setTransactionsFocusMonthToken((prev) => prev + 1);
-  }, []);
-
   useEffect(() => {
-    return subscribeOpenTransactionsRequest(({ monthKey, dayKey }) => {
-      setActiveTab('home');
-      jumpTransactionsToMonth(monthKey ?? monthKeyFromDateLocal(new Date()), dayKey ?? null);
+    return subscribeOpenTransactionsRequest(() => {
+      setActiveTab('calendar');
+      setCalendarResetToken((prev) => prev + 1);
     });
-  }, [jumpTransactionsToMonth]);
+  }, []);
 
   useEffect(() => {
     return subscribeOpenTabRequest(({ tab }) => {
@@ -572,9 +550,7 @@ function MainShellScreen({
     openAddTransaction();
   }, [openAddTransaction]);
 
-  const shouldHideBottomNav =
-    (activeTab === 'home' && isTransactionsSelectionMode) ||
-    (activeTab === 'calendar' && isCalendarSelectionMode);
+  const shouldHideBottomNav = activeTab === 'calendar' && isCalendarSelectionMode;
 
   const { resetMinimize } = useBottomNavMinimize();
 
@@ -592,10 +568,6 @@ function MainShellScreen({
   const handleTabChange = useCallback(
     (tab: TabName) => {
       resetMinimize();
-      if (tab === 'home' && activeTab === 'home') {
-        jumpTransactionsToMonth(monthKeyFromDateLocal(new Date()));
-        setTransactionsScrollTopToken((prev) => prev + 1);
-      }
       if (tab === 'accounts' && activeTab === 'accounts') {
         setAccountsResetToken((prev) => prev + 1);
         setAccountsScrollTopToken((prev) => prev + 1);
@@ -619,7 +591,7 @@ function MainShellScreen({
       }
       setActiveTab(tab);
     },
-    [activeTab, jumpTransactionsToMonth, resetMinimize],
+    [activeTab, resetMinimize],
   );
 
   useEffect(() => {
@@ -707,15 +679,6 @@ function MainShellScreen({
       handleTabChange(step.tab);
     }
   }, [activeTab, guidedTutorialStepIndex, handleTabChange, isGuidedTutorialActive]);
-
-  useEffect(() => {
-    if (!isGuidedTutorialActive) return;
-    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
-    if (!step) return;
-    if (step.targetId === 'nav.add') {
-      setTransactionsTutorialResetToken((previous) => previous + 1);
-    }
-  }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
 
   useEffect(() => {
     if (!isGuidedTutorialActive) return;
@@ -840,32 +803,6 @@ function MainShellScreen({
   return (
     <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
       <View style={styles.flex}>
-        <MountedTab active={activeTab === 'home'}>
-          {isSimpleMode ? (
-            <MemoSimpleActivityScreen
-              scrollToTopToken={transactionsScrollTopToken}
-              focusMonthKey={transactionsFocusMonthKey}
-              focusDayKey={transactionsFocusDayKey}
-              focusMonthToken={transactionsFocusMonthToken}
-              onOpenTransaction={openTransactionEditor}
-              onOpenTransactionSplitBadge={openTransactionSplitBill}
-              onOpenBreakdownInsight={openActivityBreakdownInsight}
-              tutorialResetToken={transactionsTutorialResetToken}
-            />
-          ) : (
-            <MemoTransactionsScreen
-              scrollToTopToken={transactionsScrollTopToken}
-              focusMonthKey={transactionsFocusMonthKey}
-              focusDayKey={transactionsFocusDayKey}
-              focusMonthToken={transactionsFocusMonthToken}
-              onOpenTransaction={openTransactionEditor}
-              onOpenTransactionSplitBadge={openTransactionSplitBill}
-              onOpenBreakdownInsight={openActivityBreakdownInsight}
-              onSelectionModeChange={setIsTransactionsSelectionMode}
-              tutorialResetToken={transactionsTutorialResetToken}
-            />
-          )}
-        </MountedTab>
         <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
           <MemoAccountsScreen
             safeAreaEdges={['top']}
@@ -884,7 +821,7 @@ function MainShellScreen({
             }
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'calendar'} shouldPreload={preloadedTabs.has('calendar')}>
+        <MountedTab active={activeTab === 'calendar'}>
           <MemoCalendarScreen
             scrollToTopToken={calendarScrollTopToken}
             resetToCurrentMonthToken={calendarResetToken}
@@ -937,7 +874,7 @@ function MainShellScreen({
             tutorialFocusedTab={currentTutorialFocusedTab}
             tutorialMeasureToken={tutorialSpotlightRequest.token}
           />
-          {activeTab === 'home' ? (
+          {activeTab === 'calendar' ? (
             <AddFab
               onPress={openBottomNavPrimaryAction}
               onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
@@ -1437,7 +1374,7 @@ function AppContent() {
   // never presented during the brief window before the lock gate reports in.
   const [biometricLocked, setBiometricLocked] = useState(settings.biometricLockEnabled);
   const [tutorialStartToken, setTutorialStartToken] = useState(0);
-  const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('home');
+  const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('calendar');
   const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
