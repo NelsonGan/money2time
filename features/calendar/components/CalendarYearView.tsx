@@ -4,6 +4,7 @@ import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'reac
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { WeekStartsOn } from '~/types';
+
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import { weekdayColumnIndex } from '../lib/calendarBuild';
 
@@ -100,38 +101,31 @@ const MiniMonth = memo(function MiniMonth({
                 {isToday ? (
                   <View
                     style={[
-                      styles.todayCircle,
+                      StyleSheet.absoluteFillObject,
                       {
-                        width: cellSize,
-                        height: cellSize,
                         borderRadius: cellSize / 2,
                         backgroundColor: themeColors.primary,
                       },
                     ]}
-                  >
-                    <Text
-                      style={[
-                        styles.miniDayText,
-                        { color: '#fff', fontSize, lineHeight: fontSize + 2 },
-                      ]}
-                    >
-                      {day}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text
-                    style={[
-                      styles.miniDayText,
-                      {
-                        color: hasActivity ? themeColors.primary : themeColors.textMuted,
-                        fontSize,
-                        fontWeight: hasActivity ? '600' : '400',
-                      },
-                    ]}
-                  >
-                    {day}
-                  </Text>
-                )}
+                  />
+                ) : null}
+                <Text
+                  style={[
+                    styles.miniDayText,
+                    {
+                      color: isToday
+                        ? '#fff'
+                        : hasActivity
+                          ? themeColors.primary
+                          : themeColors.textMuted,
+                      fontSize,
+                      lineHeight: fontSize + 2,
+                      fontWeight: isToday || hasActivity ? '600' : '400',
+                    },
+                  ]}
+                >
+                  {day}
+                </Text>
               </View>
             );
           })}
@@ -168,7 +162,7 @@ const YearPage = memo(function YearPage({
       <Text style={[styles.yearHeader, { color: themeColors.text }]}>{year}</Text>
       {Array.from({ length: 4 }, (_, row) => (
         <View key={row} style={[styles.monthRow, { gap: MONTH_GAP_H }]}>
-          {Array.from({ length: 3 }, (_, col) => {
+          {Array.from({ length: 3 }, (__, col) => {
             const mi = row * 3 + col;
             return (
               <MiniMonth
@@ -292,10 +286,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   miniCell: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  todayCircle: {
     alignItems: 'center',
     justifyContent: 'center',
   },

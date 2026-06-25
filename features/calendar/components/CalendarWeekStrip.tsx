@@ -5,6 +5,7 @@ import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import type { WeekStartsOn } from '~/types';
+
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import { dayKeyToUtcDate, weekDayKeys, weekStartDayKey } from '../lib/calendarBuild';
 

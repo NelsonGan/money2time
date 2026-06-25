@@ -9,8 +9,8 @@ import { Text, TimeValueInline } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
-import { getAlbumCoverUri } from '~/services/userAssets';
 import { triggerHaptic } from '~/services/haptics';
+import { getAlbumCoverUri } from '~/services/userAssets';
 import type { Album } from '~/types';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
