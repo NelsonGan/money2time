@@ -87,6 +87,17 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Calendar home at Albums',
+      calendar: {
+        title: 'Ang pera mo, araw-araw',
+        body: 'Calendar na ngayon ang home tab. I-tap ang kahit anong araw para makita ang gastos mo, mag-swipe sa pagitan ng mga araw, at mag-zoom out sa buwan o buong taon para makita agad ang iyong mga padron.',
+      },
+      albums: {
+        title: 'Pagsama-samahin ang gastos sa album',
+        body: 'Tipunin ang mga transaksyon mula sa isang biyahe, party, o proyekto sa isang album na may sariling cover, kabuuan, at breakdown. Gawing aktibo ang isa at awtomatikong maidadagdag ang mga bagong gastos.',
+      },
+    },
     multi_currency_update: {
       title: 'Multi-currency at iba pa',
       showcase_main: 'Pangunahin',
@@ -130,6 +141,10 @@ const fil = {
       voice_category: 'Transportasyon',
       voice_logged: 'Naitala sa boses',
       voice_example: 'taxi 30',
+      album_trip: 'Biyahe sa Tokyo',
+      album_trip_meta: 'Mar 4 – Mar 11',
+      album_celebration: 'Kaarawan ni Mama',
+      album_celebration_meta: '8 na transaksyon',
     },
     home_widgets: {
       title: 'Mga Widget sa Home Screen',

@@ -62,6 +62,17 @@ const zh = {
     },
   },
   news: {
+    calendar_albums_update: {
+      title: '日历主页与相册',
+      calendar: {
+        title: '按天查看你的开销',
+        body: '主页现在是日历视图。点按任意一天即可查看当天的支出，左右滑动切换日期，缩小到月或整年即可一眼看清你的消费规律。',
+      },
+      albums: {
+        title: '把开销整理进相册',
+        body: '把一次旅行、聚会或项目的交易整理成一个相册，配上专属封面、合计和明细。设为「进行中」后，新的支出会自动加入。',
+      },
+    },
     multi_currency_update: {
       title: '多币种及更多',
       showcase_main: '主',
@@ -105,6 +116,10 @@ const zh = {
       voice_category: '交通',
       voice_logged: '语音记录',
       voice_example: '打车 30',
+      album_trip: '东京之旅',
+      album_trip_meta: '3月4日 – 3月11日',
+      album_celebration: '妈妈的生日',
+      album_celebration_meta: '8 笔交易',
     },
     home_widgets: {
       title: '主屏幕小组件',

@@ -87,6 +87,17 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalender-Start & Alben',
+      calendar: {
+        title: 'Dein Geld, Tag für Tag',
+        body: 'Der Start-Tab ist jetzt ein Kalender. Tippe auf einen Tag, um deine Ausgaben zu sehen, wische zwischen Tagen und zoome auf Monat oder ganzes Jahr, um deine Muster auf einen Blick zu erkennen.',
+      },
+      albums: {
+        title: 'Ausgaben in Alben bündeln',
+        body: 'Fasse die Transaktionen einer Reise, Feier oder eines Projekts in einem Album mit eigenem Cover, Gesamtsumme und Aufschlüsselung zusammen. Lege eins als aktiv fest, und neue Ausgaben werden automatisch hinzugefügt.',
+      },
+    },
     multi_currency_update: {
       title: 'Mehrere Währungen & mehr',
       showcase_main: 'Haupt',
@@ -130,6 +141,10 @@ const de = {
       voice_category: 'Transport',
       voice_logged: 'Per Sprache erfasst',
       voice_example: 'Taxi 30',
+      album_trip: 'Tokio-Reise',
+      album_trip_meta: '4. Mär – 11. Mär',
+      album_celebration: 'Mamas Geburtstag',
+      album_celebration_meta: '8 Transaktionen',
     },
     home_widgets: {
       title: 'Startbildschirm-Widgets',

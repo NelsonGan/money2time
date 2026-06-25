@@ -98,8 +98,8 @@ export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: Albu
 
       {/* Handle must be a sibling of the Pressable — nesting it inside lets the
           Pressable swallow the touch so the drag gesture never activates. The
-          absolute wrapper pins it inside the card's top-right corner. */}
-      <View className="absolute right-3 top-3" pointerEvents="box-none">
+          absolute wrapper pins it inside the card's top-left corner. */}
+      <View className="absolute left-3 top-3" pointerEvents="box-none">
         <Sortable.Handle>
           <View
             accessible

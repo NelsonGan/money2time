@@ -1198,7 +1198,13 @@ export function CalendarScreen({
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    // Use an explicit top padding from the safe-area context (seeded by
+    // `initialWindowMetrics`) instead of a `SafeAreaView`. The `SafeAreaView`
+    // component derives its padding from its own measured frame, so on the
+    // very first frame after launch it paints with a 0 inset and then jumps
+    // down once measured — the visible "button starts at the top, then snaps"
+    // shift on first open. Reading the context value avoids that flash.
+    <View className="flex-1 bg-background" style={{ paddingTop: safeAreaInsets.top }}>
       {/* --- Header --- */}
       <TabletContentContainer>
         <View className="bg-background pb-1.5 pt-1">
@@ -1687,7 +1693,7 @@ export function CalendarScreen({
           ) : null}
         </SafeAreaView>
       </ThemeModal>
-    </SafeAreaView>
+    </View>
   );
 }
 

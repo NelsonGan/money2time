@@ -87,6 +87,17 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Beranda kalender & Album',
+      calendar: {
+        title: 'Uang Anda, per hari',
+        body: 'Tab beranda kini berupa kalender. Ketuk hari mana pun untuk melihat pengeluaran Anda, geser antar hari, dan perkecil ke bulan atau setahun penuh untuk melihat polanya sekilas.',
+      },
+      albums: {
+        title: 'Kelompokkan pengeluaran ke album',
+        body: 'Gabungkan transaksi dari sebuah perjalanan, pesta, atau proyek ke dalam album dengan sampul, total, dan rinciannya sendiri. Jadikan satu album aktif dan pengeluaran baru otomatis ditambahkan.',
+      },
+    },
     multi_currency_update: {
       title: 'Multi-mata uang & lainnya',
       showcase_main: 'Utama',
@@ -130,6 +141,10 @@ const id = {
       voice_category: 'Transportasi',
       voice_logged: 'Dicatat lewat suara',
       voice_example: 'taksi 30',
+      album_trip: 'Perjalanan Tokyo',
+      album_trip_meta: '4 Mar – 11 Mar',
+      album_celebration: 'Ulang Tahun Ibu',
+      album_celebration_meta: '8 transaksi',
     },
     home_widgets: {
       title: 'Widget Layar Beranda',

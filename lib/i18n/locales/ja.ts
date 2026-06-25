@@ -87,6 +87,17 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    calendar_albums_update: {
+      title: 'カレンダーホームとアルバム',
+      calendar: {
+        title: '毎日のお金がひと目で',
+        body: 'ホームタブがカレンダーになりました。任意の日をタップして支出を確認し、日をスワイプで切り替え、月や年全体にズームアウトして傾向をひと目で把握できます。',
+      },
+      albums: {
+        title: '支出をアルバムにまとめる',
+        body: '旅行・パーティー・プロジェクトの取引を、専用のカバー・合計・内訳付きのアルバムにまとめましょう。1つを「進行中」に設定すると、新しい支出が自動で追加されます。',
+      },
+    },
     multi_currency_update: {
       title: '多通貨対応ほか',
       showcase_main: 'メイン',
@@ -130,6 +141,10 @@ const ja = {
       voice_category: '交通',
       voice_logged: '音声で記録',
       voice_example: 'タクシー 30',
+      album_trip: '東京旅行',
+      album_trip_meta: '3月4日〜3月11日',
+      album_celebration: '母の誕生日',
+      album_celebration_meta: '8件の取引',
     },
     home_widgets: {
       title: 'ホーム画面ウィジェット',
