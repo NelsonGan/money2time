@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   AlbumsIcon,
-  CalendarIcon,
+  HomeIcon,
   InsightsIcon,
   SettingsIcon,
   WalletIcon,
@@ -37,10 +37,10 @@ interface BottomNavProps {
   tutorialMeasureToken?: number;
 }
 
-type NavIconComponent = typeof CalendarIcon;
+type NavIconComponent = typeof HomeIcon;
 
 const TABS: { name: TabName; icon: NavIconComponent }[] = [
-  { name: 'calendar', icon: CalendarIcon },
+  { name: 'calendar', icon: HomeIcon },
   { name: 'accounts', icon: WalletIcon },
   { name: 'insights', icon: InsightsIcon },
   { name: 'albums', icon: AlbumsIcon },

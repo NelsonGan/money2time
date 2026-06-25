@@ -13,7 +13,7 @@ const MONTHS_PER_ROW = 3;
 const PADDING_H = 20;
 const MONTH_GAP_H = 14;
 const ROW_GAP_V = 20;
-const YEAR_HEADER_HEIGHT = 48;
+const YEAR_HEADER_HEIGHT = 36;
 const MONTH_NAME_HEIGHT = 22;
 const DAY_ROWS = 6;
 
@@ -102,14 +102,21 @@ const MiniMonth = memo(function MiniMonth({
                     style={[
                       styles.todayCircle,
                       {
-                        width: cellSize - 2,
-                        height: cellSize - 2,
-                        borderRadius: (cellSize - 2) / 2,
+                        width: cellSize,
+                        height: cellSize,
+                        borderRadius: cellSize / 2,
                         backgroundColor: themeColors.primary,
                       },
                     ]}
                   >
-                    <Text style={[styles.miniDayText, { color: '#fff', fontSize }]}>{day}</Text>
+                    <Text
+                      style={[
+                        styles.miniDayText,
+                        { color: '#fff', fontSize, lineHeight: fontSize + 2 },
+                      ]}
+                    >
+                      {day}
+                    </Text>
                   </View>
                 ) : (
                   <Text
@@ -200,7 +207,7 @@ export const CalendarYearView = memo(function CalendarYearView({
   );
   const cellSize = Math.floor(monthWidth / 7);
   const miniMonthHeight = MONTH_NAME_HEIGHT + cellSize * DAY_ROWS;
-  const yearItemHeight = YEAR_HEADER_HEIGHT + miniMonthHeight * 4 + ROW_GAP_V * 3 + 24;
+  const yearItemHeight = YEAR_HEADER_HEIGHT + miniMonthHeight * 4 + ROW_GAP_V * 3 + 16;
 
   const slots = useMemo(() => Array.from({ length: TOTAL_YEAR_SLOTS }, (_, i) => i), []);
 
@@ -263,7 +270,7 @@ export const CalendarYearView = memo(function CalendarYearView({
 const styles = StyleSheet.create({
   yearItem: {
     paddingHorizontal: PADDING_H,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
   yearHeader: {
     fontSize: 28,
