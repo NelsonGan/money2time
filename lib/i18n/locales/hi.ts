@@ -42,13 +42,6 @@ const hi = {
     loading_world: 'आपकी टाइम दुनिया लोड हो रही है...',
   },
   nav: {
-    home: 'होम',
-    activity: 'गतिविधि',
-    account: 'खाते',
-    calendar: 'कैलेंडर',
-    insights: 'इनसाइट्स',
-    albums: 'एल्बम',
-    settings: 'सेटिंग्स',
     income: 'आय',
     expense: 'खर्च',
   },

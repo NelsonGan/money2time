@@ -42,13 +42,6 @@ const ja = {
     loading_world: 'あなたの時間の世界を読み込み中...',
   },
   nav: {
-    home: 'ホーム',
-    activity: '履歴',
-    account: '口座',
-    calendar: 'カレンダー',
-    insights: '分析',
-    albums: 'アルバム',
-    settings: '設定',
     income: '収入',
     expense: '支出',
   },

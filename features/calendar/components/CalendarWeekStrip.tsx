@@ -61,10 +61,11 @@ export const CalendarWeekStrip = memo(function CalendarWeekStrip({
                 style={[
                   styles.dayCircle,
                   isSelected && { backgroundColor: themeColors.primary },
-                  isToday && !isSelected && {
-                    borderWidth: 2,
-                    borderColor: themeColors.primary,
-                  },
+                  isToday &&
+                    !isSelected && {
+                      borderWidth: 2,
+                      borderColor: themeColors.primary,
+                    },
                 ]}
               >
                 <Text
@@ -83,9 +84,7 @@ export const CalendarWeekStrip = memo(function CalendarWeekStrip({
                   style={[
                     styles.activityDot,
                     {
-                      backgroundColor: isSelected
-                        ? themeColors.primary
-                        : themeColors.textMuted,
+                      backgroundColor: isSelected ? themeColors.primary : themeColors.textMuted,
                     },
                   ]}
                 />

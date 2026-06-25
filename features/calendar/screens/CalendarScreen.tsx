@@ -1,4 +1,11 @@
-import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Search,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -10,8 +17,10 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   Easing as REasing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -44,7 +53,7 @@ import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
-import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -70,8 +79,9 @@ import { filterTransactionsByWallet } from '~/utils/transactions';
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
 import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
+import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
-  buildCalendarMonth,
+  buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   formatCalendarDate,
   getCalendarWeekdayLabels,
@@ -180,7 +190,6 @@ function buildCategoryPickerData(
 type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
 
 export interface CalendarScreenProps {
-  scrollToTopToken?: number;
   resetToCurrentMonthToken?: number;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
@@ -198,7 +207,6 @@ function monthOffsetFromAnchor(anchor: Date, target: Date): number {
 }
 
 export function CalendarScreen({
-  scrollToTopToken = 0,
   resetToCurrentMonthToken = 0,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
@@ -222,9 +230,9 @@ export function CalendarScreen({
     updateCalendarPreferencesJson,
   } = useApp();
   const themeColors = useThemeColors();
-  const { contentWidth } = useDeviceLayout();
+  const { contentWidth, isTablet } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
   const reportBottomNavScroll = useBottomNavScrollReporter();
@@ -273,7 +281,7 @@ export function CalendarScreen({
       scale = 1 - my * 0.85;
       opacity = Math.min(opacity, Math.max(0, 1 - my * 1.5));
     }
-    return { opacity, transform: [{ scale }], zIndex: (dm >= 0.5 && my < 0.5) ? 2 : 0 };
+    return { opacity, transform: [{ scale }], zIndex: dm >= 0.5 && my < 0.5 ? 2 : 0 };
   });
 
   const yearLayerStyle = useAnimatedStyle(() => {
@@ -410,14 +418,14 @@ export function CalendarScreen({
     excludedExpenseCategoryIdSet,
   ]);
 
-  const incomeCategoryPickerData = useMemo(
-    () => buildCategoryPickerData(categories, 'income'),
-    [categories],
-  );
-  const expenseCategoryPickerData = useMemo(
-    () => buildCategoryPickerData(categories, 'expense'),
-    [categories],
-  );
+  const incomeCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  const expenseCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  if (showFilters) {
+    incomeCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'income');
+    expenseCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'expense');
+  }
+  const incomeCategoryPickerData = incomeCategoryPickerDataRef.current;
+  const expenseCategoryPickerData = expenseCategoryPickerDataRef.current;
 
   const activeFilterCount =
     excludedAccountIds.length +
@@ -436,9 +444,24 @@ export function CalendarScreen({
     });
   }, [filteredTransactions, searchQuery]);
 
-  // --- Build a global daily aggregate map for the week strip ---
+  // --- Pre-group transactions by month key (single pass) ---
+  const transactionsByMonthKey = useMemo(() => {
+    const map = new Map<string, TransactionWithRelations[]>();
+    for (const tx of searchFilteredTransactions) {
+      const mk = dayKeyFromIsoLocal(tx.date).slice(0, 7);
+      let arr = map.get(mk);
+      if (!arr) {
+        arr = [];
+        map.set(mk, arr);
+      }
+      arr.push(tx);
+    }
+    return map;
+  }, [searchFilteredTransactions]);
+
+  // --- Build a global daily aggregate map for the week strip (no transaction arrays) ---
   const globalDailyByDayKey = useMemo(() => {
-    const map = new Map<string, { dayKey: string; income: number; expense: number; net: number; transactionCount: number; transactions: TransactionWithRelations[] }>();
+    const map = new Map<string, CalendarDayAggregate>();
     for (const tx of searchFilteredTransactions) {
       if (tx.type !== 'income' && tx.type !== 'expense') continue;
       const dayKey = dayKeyFromIsoLocal(tx.date);
@@ -447,14 +470,15 @@ export function CalendarScreen({
         agg = { dayKey, income: 0, expense: 0, net: 0, transactionCount: 0, transactions: [] };
         map.set(dayKey, agg);
       }
-      const value = isTimeMode ? getDisplayValueForTransaction(tx) : (tx.reportingAmount ?? tx.amount);
+      const value = isTimeMode
+        ? getDisplayValueForTransaction(tx)
+        : (tx.reportingAmount ?? tx.amount);
       if (tx.type === 'income') {
         agg.income += value;
       } else {
         agg.expense += value;
       }
       agg.transactionCount += 1;
-      agg.transactions.push(tx);
     }
     map.forEach((agg) => {
       agg.net = agg.income - agg.expense;
@@ -494,29 +518,29 @@ export function CalendarScreen({
   const displayedMonthKey = viewMode === 'day' ? selectedMonthKey : activeMonthKey;
 
   // --- Build month data for the active month (header summary + month grid) ---
-  const activeMonthData = useMemo(
-    () =>
-      buildCalendarMonth({
-        monthAnchor: viewMode !== 'day' ? activeMonthDate : selectedMonthDate,
-        transactions: searchFilteredTransactions,
-        locale: activeLocale,
-        isTimeMode,
-        getDisplayValueForTransaction,
-        todayDayKey,
-        weekStartsOn: settings.weekStartsOn,
-      }),
-    [
-      viewMode,
-      activeMonthDate,
-      selectedMonthDate,
-      searchFilteredTransactions,
-      activeLocale,
+  const activeMonthData = useMemo(() => {
+    const anchor = viewMode !== 'day' ? activeMonthDate : selectedMonthDate;
+    const mk = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
+    return buildCalendarMonthFromGrouped({
+      monthAnchor: anchor,
+      transactions: transactionsByMonthKey.get(mk) ?? [],
+      locale: activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
       todayDayKey,
-      settings.weekStartsOn,
-    ],
-  );
+      weekStartsOn: settings.weekStartsOn,
+    });
+  }, [
+    viewMode,
+    activeMonthDate,
+    selectedMonthDate,
+    transactionsByMonthKey,
+    activeLocale,
+    isTimeMode,
+    getDisplayValueForTransaction,
+    todayDayKey,
+    settings.weekStartsOn,
+  ]);
 
   // --- Selected day transactions ---
   const transactionDisplaySettings = useMemo(
@@ -567,7 +591,6 @@ export function CalendarScreen({
     };
   }, [isSelectionMode, onSelectionModeChange]);
 
-
   const getMonthIndexForDay = useCallback(
     (dayKey: string) => {
       const d = dayKeyToUtcDate(dayKey);
@@ -579,19 +602,13 @@ export function CalendarScreen({
     [clampMonthIndex, monthPagerAnchorDate],
   );
 
-  const handleMonthListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
-    },
-    [],
-  );
+  const handleMonthListRef = useCallback((ref: FlatList<number> | null) => {
+    (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
+  }, []);
 
-  const handleYearListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      yearViewListRef.current = ref;
-    },
-    [],
-  );
+  const handleYearListRef = useCallback((ref: FlatList<number> | null) => {
+    yearViewListRef.current = ref;
+  }, []);
 
   // --- Back / zoom out: day → month → year ---
   const handleZoomOut = useCallback(() => {
@@ -614,12 +631,48 @@ export function CalendarScreen({
       setViewMode('year');
       monthYearZoom.value = withTiming(1, ZOOM_TIMING);
     }
-  }, [viewMode, selectedDayKey, getMonthIndexForDay, setActiveMonthIndex, centerYear, dayMonthZoom, monthYearZoom]);
+  }, [
+    viewMode,
+    selectedDayKey,
+    getMonthIndexForDay,
+    setActiveMonthIndex,
+    centerYear,
+    dayMonthZoom,
+    monthYearZoom,
+  ]);
 
   // --- Day selection from week strip ---
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
     setSelectedDayKey(dayKey);
   }, []);
+
+  const navigateDayBy = useCallback(
+    (delta: number) => {
+      const d = dayKeyToUtcDate(selectedDayKey);
+      if (!d) return;
+      d.setUTCDate(d.getUTCDate() + delta);
+      const newKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      void triggerHaptic('selection');
+      setSelectedDayKey(newKey);
+    },
+    [selectedDayKey],
+  );
+
+  const daySwipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-30, 30])
+        .failOffsetY([-20, 20])
+        .onEnd((e) => {
+          'worklet';
+          if (e.translationX < -50 || e.velocityX < -800) {
+            runOnJS(navigateDayBy)(1);
+          } else if (e.translationX > 50 || e.velocityX > 800) {
+            runOnJS(navigateDayBy)(-1);
+          }
+        }),
+    [navigateDayBy],
+  );
 
   // --- Day selection from month grid — zoom in to day view ---
   const handleSelectDayFromMonth = useCallback(
@@ -673,6 +726,20 @@ export function CalendarScreen({
     },
     [handleHorizontalMomentumEnd],
   );
+
+  const handlePrevMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeMonthIndex - 1);
+    setActiveMonthIndex(nextIdx);
+    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
+
+  const handleNextMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeMonthIndex + 1);
+    setActiveMonthIndex(nextIdx);
+    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
 
   // --- Search ---
   const handleOpenSearch = useCallback(() => {
@@ -734,6 +801,27 @@ export function CalendarScreen({
       });
     }
   }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode]);
+
+  const isOnToday = selectedDayKey === todayDayKey && viewMode === 'day';
+
+  const handleGoToToday = useCallback(() => {
+    void triggerHaptic('selection');
+    setSelectedDayKey(todayDayKey);
+    if (viewMode === 'year') {
+      yearViewListRef.current?.scrollToIndex({ index: CENTER_YEAR_INDEX, animated: false });
+      setViewMode('day');
+      monthYearZoom.value = withTiming(0, ZOOM_TIMING);
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+    } else if (viewMode === 'month') {
+      setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
+      horizontalListRef.current?.scrollToIndex({
+        index: MONTH_PAGER_CENTER_INDEX,
+        animated: false,
+      });
+      setViewMode('day');
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+    }
+  }, [todayDayKey, viewMode, setActiveMonthIndex, dayMonthZoom, monthYearZoom]);
 
   // --- Summary formatting ---
   const formatSummaryValue = useCallback(
@@ -921,13 +1009,19 @@ export function CalendarScreen({
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
       const pageMonth = addMonthsAtMonthStart(monthPagerAnchorDate, offset);
+      const mk = `${pageMonth.getFullYear()}-${String(pageMonth.getMonth() + 1).padStart(2, '0')}`;
       return (
         <View style={{ width: pageWidth }}>
-          <View style={[styles.calendarWrapper, { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING }]}>
+          <View
+            style={[
+              styles.calendarWrapper,
+              { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING },
+            ]}
+          >
             <CalendarMonthGrid
-              monthData={buildCalendarMonth({
+              monthData={buildCalendarMonthFromGrouped({
                 monthAnchor: pageMonth,
-                transactions: searchFilteredTransactions,
+                transactions: transactionsByMonthKey.get(mk) ?? [],
                 locale: activeLocale,
                 isTimeMode,
                 getDisplayValueForTransaction,
@@ -935,7 +1029,7 @@ export function CalendarScreen({
                 weekStartsOn: settings.weekStartsOn,
               })}
               weekdayLabels={weekdayLabels}
-              selectedDayKey={viewMode === 'month' ? selectedDayKey : null}
+              selectedDayKey={null}
               isTimeMode={isTimeMode}
               locale={activeLocale}
               onSelectDay={handleSelectDayFromMonth}
@@ -947,15 +1041,13 @@ export function CalendarScreen({
     },
     [
       activeLocale,
-      searchFilteredTransactions,
+      transactionsByMonthKey,
       getDisplayValueForTransaction,
       gridChartWidth,
       handleSelectDayFromMonth,
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
-      viewMode,
-      selectedDayKey,
       settings.weekStartsOn,
       todayDayKey,
       weekdayLabels,
@@ -974,9 +1066,17 @@ export function CalendarScreen({
   );
 
   const selectedDayTxs = useMemo(() => {
-    if (!selectedDayAgg) return [];
-    return [...selectedDayAgg.transactions].sort(compareTransactionsByDateDesc);
-  }, [selectedDayAgg]);
+    const mk = selectedDayKey.slice(0, 7);
+    const monthTxs = transactionsByMonthKey.get(mk);
+    if (!monthTxs) return [];
+    return monthTxs
+      .filter(
+        (tx) =>
+          (tx.type === 'income' || tx.type === 'expense') &&
+          dayKeyFromIsoLocal(tx.date) === selectedDayKey,
+      )
+      .sort(compareTransactionsByDateDesc);
+  }, [transactionsByMonthKey, selectedDayKey]);
 
   const isSelectedDayFuture = selectedDayKey > todayDayKey;
 
@@ -1033,7 +1133,9 @@ export function CalendarScreen({
                 >
                   <Search
                     size={15}
-                    color={isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
+                    color={
+                      isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted
+                    }
                   />
                 </Pressable>
                 <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
@@ -1050,64 +1152,91 @@ export function CalendarScreen({
               onClose={handleCloseSearch}
             />
 
-            {/* Summary row */}
-            {viewMode !== 'year' && <View style={styles.summarySlot}>
-              {isSelectionMode ? (
-                <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+            {/* Month pager */}
+            {viewMode === 'month' && (
+              <View className="flex-row items-center justify-center">
+                <View className="flex-row items-center rounded-full bg-secondary/40 px-1.5 py-1">
                   <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
+                    onPress={handlePrevMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                   >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
+                    <ChevronLeft size={15} color={themeColors.textSoft} />
                   </Pressable>
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
+                  <View className="px-3">
+                    <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                      {activeMonthLabel}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={handleNextMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronRight size={15} color={themeColors.textSoft} />
+                  </Pressable>
+                </View>
+              </View>
+            )}
+
+            {/* Summary row */}
+            {viewMode !== 'year' && (
+              <View style={styles.summarySlot}>
+                {isSelectionMode ? (
+                  <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+                    <Pressable
+                      onPress={clearSelection}
+                      className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.cancel')}
+                    >
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('common.cancel')}
                       </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground">
-                          {selectedTransactionTotalLabel}
+                    </Pressable>
+                    <View className="flex-1 items-center px-1">
+                      <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                        <Text variant="caption" className="text-foreground">
+                          {I18n.t('transactions.selection.selected_count', {
+                            count: selectedTransactionCount,
+                          })}
                         </Text>
+                        <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                          <Text variant="label" className="text-foreground">
+                            {selectedTransactionTotalLabel}
+                          </Text>
+                        </View>
                       </View>
                     </View>
+                    <View className="flex-row items-center gap-1.5">
+                      <Pressable
+                        onPress={handleOpenBulkUpdate}
+                        className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.selection.update')}
+                        hitSlop={8}
+                      >
+                        <Pencil size={14} color={themeColors.primary} />
+                      </Pressable>
+                      <Pressable
+                        onPress={handleDeleteSelectedTransactions}
+                        className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('common.delete')}
+                        hitSlop={8}
+                      >
+                        <Trash2 size={14} color={themeColors.coral} />
+                      </Pressable>
+                    </View>
                   </View>
-                  <View className="flex-row items-center gap-1.5">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
-                  </View>
-                </View>
-              ) : (
-                <InOutHeader
-                  incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-                  expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
-                  onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
-                  onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
-                />
-              )}
-            </View>}
+                ) : (
+                  <InOutHeader
+                    incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
+                    expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+                    onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
+                    onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </View>
       </TabletContentContainer>
@@ -1115,7 +1244,11 @@ export function CalendarScreen({
       {/* --- Calendar area: three stacked reanimated layers --- */}
       <View className="flex-1 overflow-hidden bg-background">
         {/* Day layer */}
-        <Reanimated.View style={[styles.zoomLayer, dayLayerStyle]} pointerEvents={viewMode === 'day' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, dayLayerStyle]}
+          pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
+        >
+          <GestureDetector gesture={daySwipeGesture}>
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1138,7 +1271,9 @@ export function CalendarScreen({
               <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
                 <View style={styles.daySectionHeader}>
                   <View style={styles.daySectionTitleGroup}>
-                    <Text variant="bodyStrong" className="tracking-tight">{selectedDayLabel}</Text>
+                    <Text variant="bodyStrong" className="tracking-tight">
+                      {selectedDayLabel}
+                    </Text>
                   </View>
                   <View style={styles.daySectionSubtotals}>
                     {selectedDayAgg && selectedDayAgg.income > 0 ? (
@@ -1188,10 +1323,14 @@ export function CalendarScreen({
               </View>
             </ScrollView>
           </View>
+          </GestureDetector>
         </Reanimated.View>
 
         {/* Month layer */}
-        <Reanimated.View style={[styles.zoomLayer, monthLayerStyle]} pointerEvents={viewMode === 'month' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, monthLayerStyle]}
+          pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
+        >
           <FlatList
             ref={handleMonthListRef}
             data={monthPagerSlots}
@@ -1209,16 +1348,19 @@ export function CalendarScreen({
             onScrollEndDrag={handleHorizontalScrollEndDrag}
             onMomentumScrollEnd={handleMonthMomentumEnd}
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            windowSize={5}
+            initialNumToRender={1}
+            maxToRenderPerBatch={2}
+            windowSize={3}
             removeClippedSubviews
             style={styles.flexOne}
           />
         </Reanimated.View>
 
         {/* Year layer */}
-        <Reanimated.View style={[styles.zoomLayer, yearLayerStyle]} pointerEvents={viewMode === 'year' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, yearLayerStyle]}
+          pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
+        >
           <CalendarYearView
             centerYear={centerYear}
             todayDayKey={todayDayKey}
@@ -1230,6 +1372,44 @@ export function CalendarScreen({
           />
         </Reanimated.View>
       </View>
+
+      {/* Floating Today button — bottom left */}
+      {!isOnToday && !isSelectionMode ? (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: getBottomNavReservedInset(safeAreaInsets.bottom) + 12,
+          }}
+        >
+          <View
+            pointerEvents="box-none"
+            style={[
+              { paddingLeft: spacing.lg },
+              isTablet && {
+                maxWidth: TABLET_CONTENT_MAX_WIDTH,
+                alignSelf: 'center' as const,
+                width: '100%',
+              },
+            ]}
+          >
+            <Pressable
+              onPress={handleGoToToday}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.today')}
+              className="flex-row items-center gap-1.5 rounded-full bg-card border border-border/40 px-3.5 py-2.5 active:opacity-85"
+              style={styles.todayFab}
+            >
+              <CalendarDays size={15} color={themeColors.primary} />
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                {I18n.t('common.today')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
 
       <ThemeModal
         visible={showBulkUpdate}
@@ -1431,32 +1611,36 @@ export function CalendarScreen({
             }
             onClear={() => setExcludedAccountIds([])}
           />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeFilterPicker === 'incomeCategories'}
-            onClose={closeFilterPicker}
-            parents={incomeCategoryPickerData.parents}
-            childByParent={incomeCategoryPickerData.childByParent}
-            selectedCategoryIds={excludedIncomeCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
-            }
-            onClear={() => setExcludedIncomeCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeFilterPicker === 'expenseCategories'}
-            onClose={closeFilterPicker}
-            parents={expenseCategoryPickerData.parents}
-            childByParent={expenseCategoryPickerData.childByParent}
-            selectedCategoryIds={excludedExpenseCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
-            }
-            onClear={() => setExcludedExpenseCategoryIds([])}
-          />
+          {incomeCategoryPickerData ? (
+            <CategoryPickerSheet
+              overlay
+              allowParentSelection
+              visible={activeFilterPicker === 'incomeCategories'}
+              onClose={closeFilterPicker}
+              parents={incomeCategoryPickerData.parents}
+              childByParent={incomeCategoryPickerData.childByParent}
+              selectedCategoryIds={excludedIncomeCategoryIds}
+              onToggleSelect={(categoryId) =>
+                setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
+              }
+              onClear={() => setExcludedIncomeCategoryIds([])}
+            />
+          ) : null}
+          {expenseCategoryPickerData ? (
+            <CategoryPickerSheet
+              overlay
+              allowParentSelection
+              visible={activeFilterPicker === 'expenseCategories'}
+              onClose={closeFilterPicker}
+              parents={expenseCategoryPickerData.parents}
+              childByParent={expenseCategoryPickerData.childByParent}
+              selectedCategoryIds={excludedExpenseCategoryIds}
+              onToggleSelect={(categoryId) =>
+                setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
+              }
+              onClear={() => setExcludedExpenseCategoryIds([])}
+            />
+          ) : null}
         </SafeAreaView>
       </ThemeModal>
     </SafeAreaView>
@@ -1518,5 +1702,13 @@ const styles = StyleSheet.create({
   modalActionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+  },
+  todayFab: {
+    alignSelf: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });

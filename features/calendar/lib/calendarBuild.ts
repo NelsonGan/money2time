@@ -91,9 +91,6 @@ export function weekdayColumnIndex(dayKey: string, weekStartsOn: WeekStartsOn): 
   return (sundayFirst - weekStartsOn + 7) % 7;
 }
 
-/**
- * Returns the dayKey of the week-start (e.g. Monday) for the week containing `dayKey`.
- */
 export function weekStartDayKey(dayKey: string, weekStartsOn: WeekStartsOn): string {
   const date = dayKeyToUtcDate(dayKey);
   if (!date) return dayKey;
@@ -106,9 +103,6 @@ export function weekStartDayKey(dayKey: string, weekStartsOn: WeekStartsOn): str
   return `${y}-${m}-${d}`;
 }
 
-/**
- * Returns an array of 7 dayKeys for the week starting at `weekStartKey`.
- */
 export function weekDayKeys(weekStartKey: string): string[] {
   const date = dayKeyToUtcDate(weekStartKey);
   if (!date) return [weekStartKey];
@@ -120,19 +114,6 @@ export function weekDayKeys(weekStartKey: string): string[] {
     const dd = String(d.getUTCDate()).padStart(2, '0');
     return `${y}-${m}-${dd}`;
   });
-}
-
-/**
- * Shift a dayKey by `offset` days.
- */
-export function shiftDayKey(dayKey: string, offset: number): string {
-  const date = dayKeyToUtcDate(dayKey);
-  if (!date) return dayKey;
-  date.setUTCDate(date.getUTCDate() + offset);
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(date.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 export function monthLabelFromMonthKey(monthKey: string, locale: string): string {
@@ -173,15 +154,16 @@ export function formatCalendarDate(dayKey: string, locale: string): string {
   return label;
 }
 
-export function buildCalendarMonth({
-  monthAnchor,
-  transactions,
-  locale,
-  isTimeMode,
-  getDisplayValueForTransaction,
-  todayDayKey,
-  weekStartsOn,
-}: BuildCalendarMonthInput): CalendarMonthData {
+function buildCalendarMonthCore(
+  monthAnchor: Date,
+  transactions: TransactionWithRelations[],
+  locale: string,
+  isTimeMode: boolean,
+  getDisplayValueForTransaction: (tx: TransactionWithRelations) => number,
+  todayDayKey: string,
+  weekStartsOn: WeekStartsOn,
+  preGrouped: boolean,
+): CalendarMonthData {
   const year = monthAnchor.getFullYear();
   const monthIndex = monthAnchor.getMonth();
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
@@ -197,7 +179,7 @@ export function buildCalendarMonth({
   for (const tx of transactions) {
     if (tx.type !== 'income' && tx.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(tx.date);
-    if (dayKey < firstDayKey || dayKey > lastDayKey) continue;
+    if (!preGrouped && (dayKey < firstDayKey || dayKey > lastDayKey)) continue;
     const value = isTimeMode
       ? getDisplayValueForTransaction(tx)
       : (tx.reportingAmount ?? tx.amount);
@@ -276,4 +258,30 @@ export function buildCalendarMonth({
     lastDayKey,
     maxAbsNet,
   };
+}
+
+export function buildCalendarMonth(input: BuildCalendarMonthInput): CalendarMonthData {
+  return buildCalendarMonthCore(
+    input.monthAnchor,
+    input.transactions,
+    input.locale,
+    input.isTimeMode,
+    input.getDisplayValueForTransaction,
+    input.todayDayKey,
+    input.weekStartsOn,
+    false,
+  );
+}
+
+export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): CalendarMonthData {
+  return buildCalendarMonthCore(
+    input.monthAnchor,
+    input.transactions,
+    input.locale,
+    input.isTimeMode,
+    input.getDisplayValueForTransaction,
+    input.todayDayKey,
+    input.weekStartsOn,
+    true,
+  );
 }

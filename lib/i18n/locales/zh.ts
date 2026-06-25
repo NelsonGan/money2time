@@ -42,13 +42,6 @@ const zh = {
     loading_world: '正在加载你的时间世界...',
   },
   nav: {
-    home: '首页',
-    activity: '动态',
-    account: '账户',
-    calendar: '日历',
-    insights: '洞察',
-    albums: '相册',
-    settings: '设置',
     income: '收入',
     expense: '支出',
   },
