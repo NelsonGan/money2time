@@ -154,15 +154,16 @@ export function formatCalendarDate(dayKey: string, locale: string): string {
   return label;
 }
 
-export function buildCalendarMonth({
-  monthAnchor,
-  transactions,
-  locale,
-  isTimeMode,
-  getDisplayValueForTransaction,
-  todayDayKey,
-  weekStartsOn,
-}: BuildCalendarMonthInput): CalendarMonthData {
+function buildCalendarMonthCore(
+  monthAnchor: Date,
+  transactions: TransactionWithRelations[],
+  locale: string,
+  isTimeMode: boolean,
+  getDisplayValueForTransaction: (tx: TransactionWithRelations) => number,
+  todayDayKey: string,
+  weekStartsOn: WeekStartsOn,
+  preGrouped: boolean,
+): CalendarMonthData {
   const year = monthAnchor.getFullYear();
   const monthIndex = monthAnchor.getMonth();
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
@@ -178,7 +179,7 @@ export function buildCalendarMonth({
   for (const tx of transactions) {
     if (tx.type !== 'income' && tx.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(tx.date);
-    if (dayKey < firstDayKey || dayKey > lastDayKey) continue;
+    if (!preGrouped && (dayKey < firstDayKey || dayKey > lastDayKey)) continue;
     const value = isTimeMode
       ? getDisplayValueForTransaction(tx)
       : (tx.reportingAmount ?? tx.amount);
@@ -257,4 +258,30 @@ export function buildCalendarMonth({
     lastDayKey,
     maxAbsNet,
   };
+}
+
+export function buildCalendarMonth(input: BuildCalendarMonthInput): CalendarMonthData {
+  return buildCalendarMonthCore(
+    input.monthAnchor,
+    input.transactions,
+    input.locale,
+    input.isTimeMode,
+    input.getDisplayValueForTransaction,
+    input.todayDayKey,
+    input.weekStartsOn,
+    false,
+  );
+}
+
+export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): CalendarMonthData {
+  return buildCalendarMonthCore(
+    input.monthAnchor,
+    input.transactions,
+    input.locale,
+    input.isTimeMode,
+    input.getDisplayValueForTransaction,
+    input.todayDayKey,
+    input.weekStartsOn,
+    true,
+  );
 }
