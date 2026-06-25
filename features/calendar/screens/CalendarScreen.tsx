@@ -697,6 +697,20 @@ export function CalendarScreen({
     [handleHorizontalMomentumEnd],
   );
 
+  const handlePrevMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeMonthIndex - 1);
+    setActiveMonthIndex(nextIdx);
+    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
+
+  const handleNextMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeMonthIndex + 1);
+    setActiveMonthIndex(nextIdx);
+    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
+
   // --- Search ---
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
@@ -1075,9 +1089,25 @@ export function CalendarScreen({
               <View className="flex-row items-center gap-2 flex-1">
                 {BackButton}
                 {viewMode === 'month' ? (
-                  <Text variant="subheading" className="tracking-tight">
-                    {activeMonthLabel}
-                  </Text>
+                  <View className="flex-row items-center rounded-full bg-secondary/40 px-1.5 py-1">
+                    <Pressable
+                      onPress={handlePrevMonth}
+                      className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                    >
+                      <ChevronLeft size={15} color={themeColors.textSoft} />
+                    </Pressable>
+                    <View className="px-3">
+                      <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                        {activeMonthLabel}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={handleNextMonth}
+                      className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                    >
+                      <ChevronRight size={15} color={themeColors.textSoft} />
+                    </Pressable>
+                  </View>
                 ) : null}
               </View>
               <View className="flex-row items-center gap-2">
