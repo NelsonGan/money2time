@@ -17,8 +17,10 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   Easing as REasing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -644,6 +646,34 @@ export function CalendarScreen({
     setSelectedDayKey(dayKey);
   }, []);
 
+  const navigateDayBy = useCallback(
+    (delta: number) => {
+      const d = dayKeyToUtcDate(selectedDayKey);
+      if (!d) return;
+      d.setUTCDate(d.getUTCDate() + delta);
+      const newKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      void triggerHaptic('selection');
+      setSelectedDayKey(newKey);
+    },
+    [selectedDayKey],
+  );
+
+  const daySwipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-30, 30])
+        .failOffsetY([-20, 20])
+        .onEnd((e) => {
+          'worklet';
+          if (e.translationX < -50 || e.velocityX < -800) {
+            runOnJS(navigateDayBy)(1);
+          } else if (e.translationX > 50 || e.velocityX > 800) {
+            runOnJS(navigateDayBy)(-1);
+          }
+        }),
+    [navigateDayBy],
+  );
+
   // --- Day selection from month grid — zoom in to day view ---
   const handleSelectDayFromMonth = useCallback(
     (dayKey: string) => {
@@ -1088,27 +1118,6 @@ export function CalendarScreen({
             <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
               <View className="flex-row items-center gap-2 flex-1">
                 {BackButton}
-                {viewMode === 'month' ? (
-                  <View className="flex-row items-center rounded-full bg-secondary/40 px-1.5 py-1">
-                    <Pressable
-                      onPress={handlePrevMonth}
-                      className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                    >
-                      <ChevronLeft size={15} color={themeColors.textSoft} />
-                    </Pressable>
-                    <View className="px-3">
-                      <Text variant="bodyStrong" className="text-foreground tracking-tight">
-                        {activeMonthLabel}
-                      </Text>
-                    </View>
-                    <Pressable
-                      onPress={handleNextMonth}
-                      className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                    >
-                      <ChevronRight size={15} color={themeColors.textSoft} />
-                    </Pressable>
-                  </View>
-                ) : null}
               </View>
               <View className="flex-row items-center gap-2">
                 <Pressable
@@ -1142,6 +1151,31 @@ export function CalendarScreen({
               onChangeText={handleSearchChange}
               onClose={handleCloseSearch}
             />
+
+            {/* Month pager */}
+            {viewMode === 'month' && (
+              <View className="flex-row items-center justify-center">
+                <View className="flex-row items-center rounded-full bg-secondary/40 px-1.5 py-1">
+                  <Pressable
+                    onPress={handlePrevMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronLeft size={15} color={themeColors.textSoft} />
+                  </Pressable>
+                  <View className="px-3">
+                    <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                      {activeMonthLabel}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={handleNextMonth}
+                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronRight size={15} color={themeColors.textSoft} />
+                  </Pressable>
+                </View>
+              </View>
+            )}
 
             {/* Summary row */}
             {viewMode !== 'year' && (
@@ -1214,6 +1248,7 @@ export function CalendarScreen({
           style={[styles.zoomLayer, dayLayerStyle]}
           pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
         >
+          <GestureDetector gesture={daySwipeGesture}>
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1288,6 +1323,7 @@ export function CalendarScreen({
               </View>
             </ScrollView>
           </View>
+          </GestureDetector>
         </Reanimated.View>
 
         {/* Month layer */}
@@ -1312,9 +1348,9 @@ export function CalendarScreen({
             onScrollEndDrag={handleHorizontalScrollEndDrag}
             onMomentumScrollEnd={handleMonthMomentumEnd}
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            windowSize={5}
+            initialNumToRender={1}
+            maxToRenderPerBatch={2}
+            windowSize={3}
             removeClippedSubviews
             style={styles.flexOne}
           />
