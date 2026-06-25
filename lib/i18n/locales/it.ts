@@ -42,13 +42,6 @@ const it = {
     loading_world: 'Caricamento del tuo mondo temporale...',
   },
   nav: {
-    home: 'Home',
-    activity: 'Attività',
-    account: 'Conti',
-    calendar: 'Calendario',
-    insights: 'Analisi',
-    albums: 'Album',
-    settings: 'Impostazioni',
     income: 'Entrate',
     expense: 'Uscite',
   },

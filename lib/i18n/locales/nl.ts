@@ -42,13 +42,6 @@ const nl = {
     loading_world: 'Je tijdwereld laden...',
   },
   nav: {
-    home: 'Home',
-    activity: 'Activiteit',
-    account: 'Rekeningen',
-    calendar: 'Kalender',
-    insights: 'Inzichten',
-    albums: 'Albums',
-    settings: 'Instellingen',
     income: 'Inkomsten',
     expense: 'Uitgaven',
   },
