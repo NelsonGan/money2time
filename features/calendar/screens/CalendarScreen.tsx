@@ -229,7 +229,7 @@ export function CalendarScreen({
   const isTimeMode = settings.displayMode === 'time';
   const reportBottomNavScroll = useBottomNavScrollReporter();
 
-  const todayDayKey = dayKeyFromDateLocal(new Date());
+  const todayDayKey = useMemo(() => dayKeyFromDateLocal(new Date()), []);
 
   // --- View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom) ---
   const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
@@ -935,7 +935,7 @@ export function CalendarScreen({
                 weekStartsOn: settings.weekStartsOn,
               })}
               weekdayLabels={weekdayLabels}
-              selectedDayKey={selectedDayKey}
+              selectedDayKey={viewMode === 'month' ? selectedDayKey : null}
               isTimeMode={isTimeMode}
               locale={activeLocale}
               onSelectDay={handleSelectDayFromMonth}
@@ -954,6 +954,7 @@ export function CalendarScreen({
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
+      viewMode,
       selectedDayKey,
       settings.weekStartsOn,
       todayDayKey,
