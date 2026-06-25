@@ -483,9 +483,7 @@ export function CalendarScreen({
   // matching transaction across all history, grouped by date (newest first).
   const searchResults = useMemo(() => {
     if (!hasActiveSearch) return [];
-    return searchFilteredTransactions
-      .filter((tx) => tx.type === 'income' || tx.type === 'expense')
-      .sort(compareTransactionsByDateDesc);
+    return [...searchFilteredTransactions].sort(compareTransactionsByDateDesc);
   }, [hasActiveSearch, searchFilteredTransactions]);
 
   // --- Pre-group transactions by month key (single pass) ---
@@ -507,20 +505,23 @@ export function CalendarScreen({
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, CalendarDayAggregate>();
     for (const tx of searchFilteredTransactions) {
-      if (tx.type !== 'income' && tx.type !== 'expense') continue;
       const dayKey = dayKeyFromIsoLocal(tx.date);
       let agg = map.get(dayKey);
       if (!agg) {
         agg = { dayKey, income: 0, expense: 0, net: 0, transactionCount: 0, transactions: [] };
         map.set(dayKey, agg);
       }
-      const value = isTimeMode
-        ? getDisplayValueForTransaction(tx)
-        : (tx.reportingAmount ?? tx.amount);
-      if (tx.type === 'income') {
-        agg.income += value;
-      } else {
-        agg.expense += value;
+      // Transfers and balance adjustments count as activity but don't feed the
+      // income/expense subtotals.
+      if (tx.type === 'income' || tx.type === 'expense') {
+        const value = isTimeMode
+          ? getDisplayValueForTransaction(tx)
+          : (tx.reportingAmount ?? tx.amount);
+        if (tx.type === 'income') {
+          agg.income += value;
+        } else {
+          agg.expense += value;
+        }
       }
       agg.transactionCount += 1;
     }
@@ -1113,11 +1114,7 @@ export function CalendarScreen({
       const monthTxs = transactionsByMonthKey.get(dayKey.slice(0, 7));
       const dayTxs = monthTxs
         ? monthTxs
-            .filter(
-              (tx) =>
-                (tx.type === 'income' || tx.type === 'expense') &&
-                dayKeyFromIsoLocal(tx.date) === dayKey,
-            )
+            .filter((tx) => dayKeyFromIsoLocal(tx.date) === dayKey)
             .sort(compareTransactionsByDateDesc)
         : [];
       const isFuture = dayKey > todayDayKey;

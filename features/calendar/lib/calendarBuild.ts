@@ -176,11 +176,11 @@ function buildCalendarMonthCore(
   let totalExpense = 0;
 
   for (const tx of transactions) {
-    if (tx.type !== 'income' && tx.type !== 'expense') continue;
+    // Every transaction type (income, expense, transfer, balance adjustment)
+    // counts toward the day's activity so it shows up in the grid and day list.
+    // Only income/expense feed the income/expense/net totals, since transfers
+    // and balance adjustments are not spending or earning.
     const dayKey = dayKeyFromIsoLocal(tx.date);
-    const value = isTimeMode
-      ? getDisplayValueForTransaction(tx)
-      : (tx.reportingAmount ?? tx.amount);
     let agg = dailyByDayKey.get(dayKey);
     if (!agg) {
       agg = {
@@ -193,12 +193,17 @@ function buildCalendarMonthCore(
       };
       dailyByDayKey.set(dayKey, agg);
     }
-    if (tx.type === 'income') {
-      agg.income += value;
-      totalIncome += value;
-    } else {
-      agg.expense += value;
-      totalExpense += value;
+    if (tx.type === 'income' || tx.type === 'expense') {
+      const value = isTimeMode
+        ? getDisplayValueForTransaction(tx)
+        : (tx.reportingAmount ?? tx.amount);
+      if (tx.type === 'income') {
+        agg.income += value;
+        totalIncome += value;
+      } else {
+        agg.expense += value;
+        totalExpense += value;
+      }
     }
     agg.transactions.push(tx);
     agg.transactionCount += 1;

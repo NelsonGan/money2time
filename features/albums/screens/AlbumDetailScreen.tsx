@@ -2,7 +2,8 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, ChevronLeft, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -74,10 +75,15 @@ export function AlbumDetailScreen({
   } = useApp();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [tab, setTab] = useState<DetailTab>('breakdown');
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const pagerRef = useRef<ScrollView | null>(null);
+  // Page width drives both the pager layout and the tap→scroll math. Seeded with
+  // the window width and corrected once the pager measures itself (tablets render
+  // narrower than the full window inside TabletContentContainer).
+  const [pageWidth, setPageWidth] = useState(windowWidth);
 
   const album = albums.find((a) => a.id === albumId);
   // `albums` is included so membership/stat edits (which trigger a full reload)
@@ -307,6 +313,31 @@ export function AlbumDetailScreen({
     );
   }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds]);
 
+  // Tap a tab → animate the pager to that page (swipe is handled by the pager).
+  const selectTab = useCallback(
+    (value: DetailTab) => {
+      void triggerHaptic('selection');
+      setSelectedTransactionIds([]);
+      setTab(value);
+      const index = value === 'transactions' ? 1 : 0;
+      pagerRef.current?.scrollTo({ x: index * pageWidth, animated: true });
+    },
+    [pageWidth],
+  );
+
+  // Swipe settles on a page → sync the active tab and clear any selection.
+  const handlePagerMomentumEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const index = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, pageWidth));
+      const value: DetailTab = index === 1 ? 'transactions' : 'breakdown';
+      if (value === tab) return;
+      void triggerHaptic('selection');
+      setSelectedTransactionIds([]);
+      setTab(value);
+    },
+    [pageWidth, tab],
+  );
+
   if (!album) {
     return <View className="flex-1 bg-background" />;
   }
@@ -329,11 +360,7 @@ export function AlbumDetailScreen({
         return (
           <Pressable
             key={option.value}
-            onPress={() => {
-              void triggerHaptic('selection');
-              setSelectedTransactionIds([]);
-              setTab(option.value);
-            }}
+            onPress={() => selectTab(option.value)}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             className="mr-6 justify-center"
@@ -479,30 +506,51 @@ export function AlbumDetailScreen({
           {/* Sticky tab bar */}
           {tabsBar}
 
-          {/* Full-screen content */}
-          <View style={{ height: contentHeight }}>
-            {tab === 'breakdown' ? (
-              breakdownRows.length === 0 ? (
-                <View className="flex-1 items-center justify-center px-8">
-                  <Text variant="body" tone="muted" className="text-center">
-                    {I18n.t('albums.no_expenses')}
-                  </Text>
-                </View>
-              ) : (
-                <ScrollView
-                  nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
-                >
-                  <CategoryBreakdownChart
-                    rows={breakdownRows}
-                    formatValue={formatValue}
-                    onSelectRow={handleOpenBreakdownRow}
-                  />
-                </ScrollView>
-              )
-            ) : (
-              <View className="flex-1">
+          {/* Full-screen content — horizontal pager: swipe left/right to switch
+              tabs, in sync with the sticky tab bar above. */}
+          <View
+            style={{ height: contentHeight }}
+            onLayout={(e) => {
+              const width = e.nativeEvent.layout.width;
+              if (width > 0 && width !== pageWidth) setPageWidth(width);
+            }}
+          >
+            <ScrollView
+              ref={pagerRef}
+              horizontal
+              pagingEnabled
+              directionalLockEnabled
+              showsHorizontalScrollIndicator={false}
+              nestedScrollEnabled
+              keyboardShouldPersistTaps="handled"
+              scrollEventThrottle={32}
+              onMomentumScrollEnd={handlePagerMomentumEnd}
+            >
+              {/* Breakdown page */}
+              <View style={{ width: pageWidth, height: contentHeight }}>
+                {breakdownRows.length === 0 ? (
+                  <View className="flex-1 items-center justify-center px-8">
+                    <Text variant="body" tone="muted" className="text-center">
+                      {I18n.t('albums.no_expenses')}
+                    </Text>
+                  </View>
+                ) : (
+                  <ScrollView
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
+                  >
+                    <CategoryBreakdownChart
+                      rows={breakdownRows}
+                      formatValue={formatValue}
+                      onSelectRow={handleOpenBreakdownRow}
+                    />
+                  </ScrollView>
+                )}
+              </View>
+
+              {/* Transactions page */}
+              <View style={{ width: pageWidth, height: contentHeight }}>
                 <ActivityTransactionList
                   transactions={albumTransactions}
                   displaySettings={settings}
@@ -533,7 +581,7 @@ export function AlbumDetailScreen({
                   />
                 ) : null}
               </View>
-            )}
+            </ScrollView>
           </View>
         </ScrollView>
         <BulkEditTransactionsSheet
