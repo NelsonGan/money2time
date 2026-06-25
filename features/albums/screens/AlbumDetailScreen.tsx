@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, ChevronLeft, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -337,6 +337,16 @@ export function AlbumDetailScreen({
     },
     [pageWidth, tab],
   );
+
+  // Keep the pager aligned to the active tab when the page width changes
+  // (tablet layout correction, orientation change). Re-aligning on width only —
+  // not on tab — so tap/swipe transitions aren't interrupted by a snap.
+  const activeTabRef = useRef(tab);
+  activeTabRef.current = tab;
+  useEffect(() => {
+    if (activeTabRef.current !== 'transactions') return;
+    pagerRef.current?.scrollTo({ x: pageWidth, animated: false });
+  }, [pageWidth]);
 
   if (!album) {
     return <View className="flex-1 bg-background" />;
