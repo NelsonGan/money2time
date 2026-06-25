@@ -87,6 +87,17 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalender-start & albums',
+      calendar: {
+        title: 'Je geld, per dag',
+        body: 'Het starttabblad is nu een kalender. Tik op een dag om je uitgaven te zien, veeg tussen dagen, en zoom uit naar de maand of het hele jaar om je patronen in één oogopslag te zien.',
+      },
+      albums: {
+        title: 'Bundel uitgaven in albums',
+        body: 'Bundel de transacties van een reis, feest of project in een album met een eigen omslag, totaal en overzicht. Stel er één in als actief en nieuwe uitgaven worden automatisch toegevoegd.',
+      },
+    },
     multi_currency_update: {
       title: "Meerdere valuta's & meer",
       showcase_main: 'Hoofd',
@@ -130,6 +141,10 @@ const nl = {
       voice_category: 'Vervoer',
       voice_logged: 'Vastgelegd via spraak',
       voice_example: 'taxi 30',
+      album_trip: 'Reis naar Tokio',
+      album_trip_meta: '4 mrt – 11 mrt',
+      album_celebration: "Mama's verjaardag",
+      album_celebration_meta: '8 transacties',
     },
     home_widgets: {
       title: 'Widgets op het beginscherm',

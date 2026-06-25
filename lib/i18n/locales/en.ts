@@ -62,6 +62,17 @@ const en = {
     },
   },
   news: {
+    calendar_albums_update: {
+      title: 'Calendar home & Albums',
+      calendar: {
+        title: 'Your money, by the day',
+        body: 'The home tab is now a calendar. Tap any day to see what you spent, swipe between days, and zoom out to the month or whole year to spot your patterns at a glance.',
+      },
+      albums: {
+        title: 'Group spending into albums',
+        body: 'Bundle the transactions from a trip, party, or project into an album with its own cover, total, and breakdown. Set one active and new expenses get added automatically.',
+      },
+    },
     multi_currency_update: {
       title: 'Multi-currency & more',
       showcase_main: 'Main',
@@ -105,6 +116,10 @@ const en = {
       voice_category: 'Transport',
       voice_logged: 'Logged by voice',
       voice_example: 'uber 30',
+      album_trip: 'Tokyo Trip',
+      album_trip_meta: 'Mar 4 – Mar 11',
+      album_celebration: "Mom's Birthday",
+      album_celebration_meta: '8 transactions',
     },
     home_widgets: {
       title: 'Home Screen Widgets',

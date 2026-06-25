@@ -87,6 +87,17 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    calendar_albums_update: {
+      title: '캘린더 홈 & 앨범',
+      calendar: {
+        title: '하루 단위로 보는 내 돈',
+        body: '홈 탭이 이제 캘린더입니다. 아무 날짜나 탭하여 지출을 확인하고, 날짜를 좌우로 넘기고, 월이나 한 해 전체로 축소해 소비 패턴을 한눈에 파악하세요.',
+      },
+      albums: {
+        title: '지출을 앨범으로 묶기',
+        body: '여행, 파티, 프로젝트의 거래를 표지, 합계, 분석이 있는 앨범으로 모아 보세요. 하나를 활성으로 설정하면 새 지출이 자동으로 추가됩니다.',
+      },
+    },
     multi_currency_update: {
       title: '다중 통화 외',
       showcase_main: '기본',
@@ -130,6 +141,10 @@ const ko = {
       voice_category: '교통',
       voice_logged: '음성으로 기록됨',
       voice_example: '택시 30',
+      album_trip: '도쿄 여행',
+      album_trip_meta: '3월 4일 – 3월 11일',
+      album_celebration: '엄마 생일',
+      album_celebration_meta: '거래 8건',
     },
     home_widgets: {
       title: '홈 화면 위젯',

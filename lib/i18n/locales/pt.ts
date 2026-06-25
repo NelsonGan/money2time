@@ -87,6 +87,17 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Início em calendário e álbuns',
+      calendar: {
+        title: 'O seu dinheiro, dia a dia',
+        body: 'A aba inicial agora é um calendário. Toque em qualquer dia para ver o que gastou, deslize entre os dias e afaste para o mês ou o ano inteiro para perceber os seus padrões num relance.',
+      },
+      albums: {
+        title: 'Agrupe gastos em álbuns',
+        body: 'Junte as transações de uma viagem, festa ou projeto num álbum com capa, total e detalhamento próprios. Defina um como ativo e as novas despesas são adicionadas automaticamente.',
+      },
+    },
     multi_currency_update: {
       title: 'Multimoeda e mais',
       showcase_main: 'Principal',
@@ -130,6 +141,10 @@ const pt = {
       voice_category: 'Transporte',
       voice_logged: 'Registrado por voz',
       voice_example: 'táxi 30',
+      album_trip: 'Viagem a Tóquio',
+      album_trip_meta: '4 mar – 11 mar',
+      album_celebration: 'Aniversário da mãe',
+      album_celebration_meta: '8 transações',
     },
     home_widgets: {
       title: 'Widgets na tela inicial',

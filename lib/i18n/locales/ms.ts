@@ -87,6 +87,17 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Laman kalendar & Album',
+      calendar: {
+        title: 'Wang anda, ikut hari',
+        body: 'Tab laman utama kini ialah kalendar. Ketik mana-mana hari untuk melihat perbelanjaan anda, leret antara hari, dan zum keluar ke bulan atau setahun penuh untuk melihat corak anda sepintas lalu.',
+      },
+      albums: {
+        title: 'Kumpulkan perbelanjaan dalam album',
+        body: 'Himpunkan transaksi daripada percutian, majlis, atau projek ke dalam album dengan kulit, jumlah, dan pecahannya sendiri. Tetapkan satu sebagai aktif dan perbelanjaan baharu ditambah secara automatik.',
+      },
+    },
     multi_currency_update: {
       title: 'Berbilang mata wang & lagi',
       showcase_main: 'Utama',
@@ -130,6 +141,10 @@ const ms = {
       voice_category: 'Pengangkutan',
       voice_logged: 'Direkod melalui suara',
       voice_example: 'teksi 30',
+      album_trip: 'Percutian Tokyo',
+      album_trip_meta: '4 Mac – 11 Mac',
+      album_celebration: 'Hari Jadi Ibu',
+      album_celebration_meta: '8 transaksi',
     },
     home_widgets: {
       title: 'Widget Skrin Utama',

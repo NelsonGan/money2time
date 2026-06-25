@@ -87,6 +87,17 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Trang chủ lịch & Album',
+      calendar: {
+        title: 'Tiền của bạn, theo từng ngày',
+        body: 'Tab trang chủ giờ là một cuốn lịch. Chạm vào bất kỳ ngày nào để xem khoản chi, vuốt giữa các ngày, và thu nhỏ về tháng hoặc cả năm để thấy ngay quy luật chi tiêu của bạn.',
+      },
+      albums: {
+        title: 'Gom chi tiêu vào album',
+        body: 'Gom các giao dịch của một chuyến đi, bữa tiệc hay dự án vào một album với ảnh bìa, tổng số và phân tích riêng. Đặt một album đang hoạt động và các khoản chi mới sẽ tự động được thêm vào.',
+      },
+    },
     multi_currency_update: {
       title: 'Đa tiền tệ và hơn thế',
       showcase_main: 'Chính',
@@ -130,6 +141,10 @@ const vi = {
       voice_category: 'Di chuyển',
       voice_logged: 'Ghi bằng giọng nói',
       voice_example: 'taxi 30',
+      album_trip: 'Chuyến đi Tokyo',
+      album_trip_meta: '4 Th3 – 11 Th3',
+      album_celebration: 'Sinh nhật mẹ',
+      album_celebration_meta: '8 giao dịch',
     },
     home_widgets: {
       title: 'Tiện ích trên màn hình chính',

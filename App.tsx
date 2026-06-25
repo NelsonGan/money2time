@@ -376,7 +376,7 @@ function MainShellScreen({
   const [warmupQuickAdd, setWarmupQuickAdd] = useState(false);
 
   useEffect(() => {
-    const order: MainTab[] = ['settings', 'insights', 'accounts'];
+    const order: MainTab[] = ['settings', 'insights', 'accounts', 'albums'];
     let cancelled = false;
     let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
     let pendingInteraction: ReturnType<typeof InteractionManager.runAfterInteractions> | null =

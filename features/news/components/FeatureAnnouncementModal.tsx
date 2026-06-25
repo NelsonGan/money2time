@@ -20,6 +20,7 @@ import {
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
+import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
@@ -223,6 +224,8 @@ export function FeatureAnnouncementModal({
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
               ) : page.visual === 'shareEarn' ? (
                 <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />
+              ) : page.visual === 'albums' ? (
+                <AlbumShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'multiCurrency' ? (
@@ -232,7 +235,11 @@ export function FeatureAnnouncementModal({
               ) : page.visual === 'appLock' ? (
                 <AppLockShowcase width={Math.round(showcaseWidth * 0.72)} />
               ) : (
-                <WidgetShowcase kind={visualToKind(page.visual)} width={showcaseWidth} />
+                <WidgetShowcase
+                  kind={visualToKind(page.visual)}
+                  width={showcaseWidth}
+                  hidePro={page.hidePro}
+                />
               )}
             </View>
           </View>

@@ -87,6 +87,17 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    calendar_albums_update: {
+      title: 'Kalenderstart och album',
+      calendar: {
+        title: 'Dina pengar, dag för dag',
+        body: 'Hem-fliken är nu en kalender. Tryck på en dag för att se vad du spenderat, svep mellan dagar och zooma ut till månaden eller hela året för att se dina mönster med en blick.',
+      },
+      albums: {
+        title: 'Samla utgifter i album',
+        body: 'Samla transaktionerna från en resa, fest eller ett projekt i ett album med eget omslag, summa och uppdelning. Ange ett som aktivt så läggs nya utgifter till automatiskt.',
+      },
+    },
     multi_currency_update: {
       title: 'Flera valutor och mer',
       showcase_main: 'Primär',
@@ -130,6 +141,10 @@ const sv = {
       voice_category: 'Transport',
       voice_logged: 'Registrerat med röst',
       voice_example: 'taxi 30',
+      album_trip: 'Tokyo-resa',
+      album_trip_meta: '4 mar – 11 mar',
+      album_celebration: 'Mammas födelsedag',
+      album_celebration_meta: '8 transaktioner',
     },
     home_widgets: {
       title: 'Widgetar på hemskärmen',
