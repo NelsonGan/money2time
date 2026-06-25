@@ -162,7 +162,6 @@ function buildCalendarMonthCore(
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number,
   todayDayKey: string,
   weekStartsOn: WeekStartsOn,
-  preGrouped: boolean,
 ): CalendarMonthData {
   const year = monthAnchor.getFullYear();
   const monthIndex = monthAnchor.getMonth();
@@ -179,7 +178,6 @@ function buildCalendarMonthCore(
   for (const tx of transactions) {
     if (tx.type !== 'income' && tx.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(tx.date);
-    if (!preGrouped && (dayKey < firstDayKey || dayKey > lastDayKey)) continue;
     const value = isTimeMode
       ? getDisplayValueForTransaction(tx)
       : (tx.reportingAmount ?? tx.amount);
@@ -260,19 +258,6 @@ function buildCalendarMonthCore(
   };
 }
 
-export function buildCalendarMonth(input: BuildCalendarMonthInput): CalendarMonthData {
-  return buildCalendarMonthCore(
-    input.monthAnchor,
-    input.transactions,
-    input.locale,
-    input.isTimeMode,
-    input.getDisplayValueForTransaction,
-    input.todayDayKey,
-    input.weekStartsOn,
-    false,
-  );
-}
-
 export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): CalendarMonthData {
   return buildCalendarMonthCore(
     input.monthAnchor,
@@ -282,6 +267,5 @@ export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): C
     input.getDisplayValueForTransaction,
     input.todayDayKey,
     input.weekStartsOn,
-    true,
   );
 }

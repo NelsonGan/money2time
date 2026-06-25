@@ -7,32 +7,31 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { NativeScrollEvent, NativeSyntheticEvent, TextInput } from 'react-native';
 import {
   Alert,
   FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   Easing as REasing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
-import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   AccountPickerSheet,
   CategoryPickerSheet,
@@ -48,7 +47,6 @@ import {
   DisplayModeToggle,
   TransactionItem,
 } from '~/features/transactions/components';
-import { DatePickerModal } from '~/components/datePicker';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -73,8 +71,8 @@ import {
   monthKeyFromDateLocal,
   startOfMonthDate,
 } from '~/utils/formatters';
-import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 import { filterTransactionsByWallet } from '~/utils/transactions';
+import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
@@ -90,6 +88,22 @@ import {
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
+
+// Day pager: a small re-centering carousel. The list always rests on its center
+// slot (showing the selected day); neighbours render the previous/next day for
+// swipe previews. After each swipe it snaps back to center and re-anchors on the
+// new day, so jumping to an arbitrary day never triggers a far virtualized scroll.
+const DAY_PAGER_SLOTS = [0, 1, 2, 3, 4];
+const DAY_PAGER_CENTER = 2;
+const DAY_MS = 86400000;
+
+const dayPagerSlotKeyExtractor = (item: number) => String(item);
+
+function addDaysToDayKey(dayKey: string, offset: number): string {
+  const [y, m, d] = dayKey.split('-').map(Number);
+  const base = new Date(Date.UTC(y, m - 1, d) + offset * DAY_MS);
+  return `${base.getUTCFullYear()}-${String(base.getUTCMonth() + 1).padStart(2, '0')}-${String(base.getUTCDate()).padStart(2, '0')}`;
+}
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -260,37 +274,31 @@ export function CalendarScreen({
   // monthYearZoom: 0 = month view, 1 = year view
   const monthYearZoom = useSharedValue(0);
 
+  // zIndex is kept static per layer (year > day > month) in the View styles below.
+  // Animating zIndex inside a worklet causes a native view-reorder flicker mid-crossfade,
+  // so these worklets only drive opacity/scale.
   const dayLayerStyle = useAnimatedStyle(() => {
-    const t = dayMonthZoom.value;
-    if (t <= 0) return { opacity: 1, zIndex: 3 };
-    if (t >= 1) return { opacity: 0, zIndex: 0 };
-    return {
-      opacity: 1 - t,
-      zIndex: t < 0.5 ? 3 : 0,
-    };
+    const t = Math.min(1, Math.max(0, dayMonthZoom.value));
+    return { opacity: 1 - t };
   });
 
   const monthLayerStyle = useAnimatedStyle(() => {
-    const dm = dayMonthZoom.value;
-    const my = monthYearZoom.value;
-    if (dm <= 0) return { opacity: 0, zIndex: 0 };
-    if (dm >= 1 && my <= 0) return { opacity: 1, transform: [{ scale: 1 }], zIndex: 2 };
+    const dm = Math.min(1, Math.max(0, dayMonthZoom.value));
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
     let opacity = dm;
     let scale = 1;
     if (my > 0) {
       scale = 1 - my * 0.85;
       opacity = Math.min(opacity, Math.max(0, 1 - my * 1.5));
     }
-    return { opacity, transform: [{ scale }], zIndex: dm >= 0.5 && my < 0.5 ? 2 : 0 };
+    return { opacity, transform: [{ scale }] };
   });
 
   const yearLayerStyle = useAnimatedStyle(() => {
-    const my = monthYearZoom.value;
-    if (my >= 1) return { opacity: 1, transform: [{ scale: 1 }], zIndex: 2 };
-    if (my <= 0) return { opacity: 0, transform: [{ scale: 0.3 }], zIndex: 0 };
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
     const scale = 0.3 + my * 0.7;
     const opacity = Math.min(1, my * 2);
-    return { opacity, transform: [{ scale }], zIndex: my > 0.5 ? 2 : 0 };
+    return { opacity, transform: [{ scale }] };
   });
 
   // --- Year view ---
@@ -373,6 +381,23 @@ export function CalendarScreen({
     () => addMonthsAtMonthStart(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
     [activeMonthIndex, monthPagerAnchorDate],
   );
+
+  // --- Day pager (re-centering carousel, swipe between days with preview) ---
+  const dayPagerListRef = useRef<FlatList<number> | null>(null);
+  const getDayItemLayout = useCallback(
+    (_: ArrayLike<number> | null | undefined, index: number) => ({
+      length: pageWidth,
+      offset: pageWidth * index,
+      index,
+    }),
+    [pageWidth],
+  );
+  const recenterDayPager = useCallback(() => {
+    dayPagerListRef.current?.scrollToOffset({
+      offset: DAY_PAGER_CENTER * pageWidth,
+      animated: false,
+    });
+  }, [pageWidth]);
 
   // --- Transactions filtering ---
   const scopedTransactions = useMemo(
@@ -646,32 +671,20 @@ export function CalendarScreen({
     setSelectedDayKey(dayKey);
   }, []);
 
-  const navigateDayBy = useCallback(
-    (delta: number) => {
-      const d = dayKeyToUtcDate(selectedDayKey);
-      if (!d) return;
-      d.setUTCDate(d.getUTCDate() + delta);
-      const newKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
-      void triggerHaptic('selection');
-      setSelectedDayKey(newKey);
+  // Commit a day-pager swipe to the neighbouring day, then snap back to center.
+  // Re-anchoring on the new selected day keeps both the page we landed on and the
+  // center slot showing identical content, so the snap-back is seamless.
+  const handleDayPagerMomentumEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const landed = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
+      const delta = landed - DAY_PAGER_CENTER;
+      if (delta !== 0) {
+        void triggerHaptic('selection');
+        setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
+      }
+      recenterDayPager();
     },
-    [selectedDayKey],
-  );
-
-  const daySwipeGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX([-30, 30])
-        .failOffsetY([-20, 20])
-        .onEnd((e) => {
-          'worklet';
-          if (e.translationX < -50 || e.velocityX < -800) {
-            runOnJS(navigateDayBy)(1);
-          } else if (e.translationX > 50 || e.velocityX > 800) {
-            runOnJS(navigateDayBy)(-1);
-          }
-        }),
-    [navigateDayBy],
+    [pageWidth, recenterDayPager],
   );
 
   // --- Day selection from month grid — zoom in to day view ---
@@ -1054,31 +1067,107 @@ export function CalendarScreen({
     ],
   );
 
-  // --- Selected day data ---
-  const selectedDayLabel = useMemo(
-    () => formatCalendarDate(selectedDayKey, activeLocale),
-    [selectedDayKey, activeLocale],
+  // --- Day page renderer for the day-mode horizontal pager ---
+  const renderDayPage = useCallback(
+    ({ item }: { item: number }) => {
+      const dayKey = addDaysToDayKey(selectedDayKey, item - DAY_PAGER_CENTER);
+      const dayLabel = formatCalendarDate(dayKey, activeLocale);
+      const monthTxs = transactionsByMonthKey.get(dayKey.slice(0, 7));
+      const dayTxs = monthTxs
+        ? monthTxs
+            .filter(
+              (tx) =>
+                (tx.type === 'income' || tx.type === 'expense') &&
+                dayKeyFromIsoLocal(tx.date) === dayKey,
+            )
+            .sort(compareTransactionsByDateDesc)
+        : [];
+      const isFuture = dayKey > todayDayKey;
+      const dayAgg = globalDailyByDayKey.get(dayKey) ?? null;
+      return (
+        <View style={{ width: pageWidth }}>
+          <ScrollView
+            style={styles.flexOne}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            onScroll={reportBottomNavScroll}
+            scrollEventThrottle={32}
+          >
+            <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
+              <View style={styles.daySectionHeader}>
+                <View style={styles.daySectionTitleGroup}>
+                  <Text variant="bodyStrong" className="tracking-tight">
+                    {dayLabel}
+                  </Text>
+                </View>
+                <View style={styles.daySectionSubtotals}>
+                  {dayAgg && dayAgg.income > 0 ? (
+                    <View className="rounded-full bg-success/10 px-2 py-0.5">
+                      {formatDaySubtotal(dayAgg.income, 'income')}
+                    </View>
+                  ) : null}
+                  {dayAgg && dayAgg.expense > 0 ? (
+                    <View className="rounded-full bg-destructive/10 px-2 py-0.5">
+                      {formatDaySubtotal(dayAgg.expense, 'expense')}
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+
+              {dayTxs.length === 0 ? (
+                <EmptyState
+                  title={I18n.t('calendar.empty_title')}
+                  message={
+                    isFuture ? I18n.t('calendar.future_empty') : I18n.t('calendar.empty_day')
+                  }
+                  mascotMood="curious"
+                  animateIn={false}
+                  compact
+                />
+              ) : (
+                <View style={styles.transactionList}>
+                  {dayTxs.map((tx) => (
+                    <TransactionItem
+                      key={tx.id}
+                      transaction={tx}
+                      onPressTransaction={handleTransactionPress}
+                      onPressSplitBadge={handleTransactionSplitBadgePress}
+                      onLongPressTransaction={handleTransactionLongPress}
+                      selectionMode={isSelectionMode}
+                      selected={selectedTransactionIdSet.has(tx.id)}
+                      settings={transactionDisplaySettings}
+                      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                      compact
+                      disableAnimations
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      );
+    },
+    [
+      selectedDayKey,
+      todayDayKey,
+      activeLocale,
+      transactionsByMonthKey,
+      globalDailyByDayKey,
+      formatDaySubtotal,
+      pageWidth,
+      bottomPad,
+      reportBottomNavScroll,
+      handleTransactionPress,
+      handleTransactionSplitBadgePress,
+      handleTransactionLongPress,
+      isSelectionMode,
+      selectedTransactionIdSet,
+      transactionDisplaySettings,
+      getTrueHourlyRateForDate,
+    ],
   );
-
-  const selectedDayAgg = useMemo(
-    () => globalDailyByDayKey.get(selectedDayKey) ?? null,
-    [globalDailyByDayKey, selectedDayKey],
-  );
-
-  const selectedDayTxs = useMemo(() => {
-    const mk = selectedDayKey.slice(0, 7);
-    const monthTxs = transactionsByMonthKey.get(mk);
-    if (!monthTxs) return [];
-    return monthTxs
-      .filter(
-        (tx) =>
-          (tx.type === 'income' || tx.type === 'expense') &&
-          dayKeyFromIsoLocal(tx.date) === selectedDayKey,
-      )
-      .sort(compareTransactionsByDateDesc);
-  }, [transactionsByMonthKey, selectedDayKey]);
-
-  const isSelectedDayFuture = selectedDayKey > todayDayKey;
 
   const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
 
@@ -1116,9 +1205,7 @@ export function CalendarScreen({
           <View className="px-5 pt-1.5 gap-2.5">
             {/* Title row */}
             <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-              <View className="flex-row items-center gap-2 flex-1">
-                {BackButton}
-              </View>
+              <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
               <View className="flex-row items-center gap-2">
                 <Pressable
                   accessibilityRole="button"
@@ -1152,33 +1239,35 @@ export function CalendarScreen({
               onClose={handleCloseSearch}
             />
 
-            {/* Month pager */}
+            {/* Month pager — matches the Insights month navigation capsule */}
             {viewMode === 'month' && (
-              <View className="flex-row items-center justify-center">
-                <View className="flex-row items-center rounded-full bg-secondary/40 px-1.5 py-1">
+              <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
+                <View className="flex-row items-center justify-between">
                   <Pressable
                     onPress={handlePrevMonth}
-                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                   >
-                    <ChevronLeft size={15} color={themeColors.textSoft} />
+                    <ChevronLeft size={16} color={themeColors.textSoft} />
                   </Pressable>
-                  <View className="px-3">
-                    <Text variant="bodyStrong" className="text-foreground tracking-tight">
-                      {activeMonthLabel}
-                    </Text>
+                  <View className="flex-1 items-center">
+                    <View className="px-2">
+                      <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                        {activeMonthLabel}
+                      </Text>
+                    </View>
                   </View>
                   <Pressable
                     onPress={handleNextMonth}
-                    className="h-8 w-8 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                   >
-                    <ChevronRight size={15} color={themeColors.textSoft} />
+                    <ChevronRight size={16} color={themeColors.textSoft} />
                   </Pressable>
                 </View>
               </View>
             )}
 
-            {/* Summary row */}
-            {viewMode !== 'year' && (
+            {/* Summary row — income/expense cards only in month view; selection toolbar in any list view */}
+            {(isSelectionMode || viewMode === 'month') && (
               <View style={styles.summarySlot}>
                 {isSelectionMode ? (
                   <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
@@ -1245,10 +1334,9 @@ export function CalendarScreen({
       <View className="flex-1 overflow-hidden bg-background">
         {/* Day layer */}
         <Reanimated.View
-          style={[styles.zoomLayer, dayLayerStyle]}
+          style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}
           pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
         >
-          <GestureDetector gesture={daySwipeGesture}>
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1260,75 +1348,31 @@ export function CalendarScreen({
                 onSelectDay={handleSelectDayFromWeek}
               />
             </View>
-            <ScrollView
+            <FlatList
+              ref={dayPagerListRef}
+              data={DAY_PAGER_SLOTS}
+              keyExtractor={dayPagerSlotKeyExtractor}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+              directionalLockEnabled
+              decelerationRate="fast"
+              overScrollMode="never"
+              renderItem={renderDayPage}
+              initialScrollIndex={DAY_PAGER_CENTER}
+              getItemLayout={getDayItemLayout}
+              onMomentumScrollEnd={handleDayPagerMomentumEnd}
+              initialNumToRender={DAY_PAGER_SLOTS.length}
+              windowSize={DAY_PAGER_SLOTS.length}
               style={styles.flexOne}
-              contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              onScroll={reportBottomNavScroll}
-              scrollEventThrottle={32}
-            >
-              <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
-                <View style={styles.daySectionHeader}>
-                  <View style={styles.daySectionTitleGroup}>
-                    <Text variant="bodyStrong" className="tracking-tight">
-                      {selectedDayLabel}
-                    </Text>
-                  </View>
-                  <View style={styles.daySectionSubtotals}>
-                    {selectedDayAgg && selectedDayAgg.income > 0 ? (
-                      <View className="rounded-full bg-success/10 px-2 py-0.5">
-                        {formatDaySubtotal(selectedDayAgg.income, 'income')}
-                      </View>
-                    ) : null}
-                    {selectedDayAgg && selectedDayAgg.expense > 0 ? (
-                      <View className="rounded-full bg-destructive/10 px-2 py-0.5">
-                        {formatDaySubtotal(selectedDayAgg.expense, 'expense')}
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-
-                {selectedDayTxs.length === 0 ? (
-                  <EmptyState
-                    title={I18n.t('calendar.empty_title')}
-                    message={
-                      isSelectedDayFuture
-                        ? I18n.t('calendar.future_empty')
-                        : I18n.t('calendar.empty_day')
-                    }
-                    mascotMood="curious"
-                    animateIn={false}
-                    compact
-                  />
-                ) : (
-                  <View style={styles.transactionList}>
-                    {selectedDayTxs.map((tx) => (
-                      <TransactionItem
-                        key={tx.id}
-                        transaction={tx}
-                        onPressTransaction={handleTransactionPress}
-                        onPressSplitBadge={handleTransactionSplitBadgePress}
-                        onLongPressTransaction={handleTransactionLongPress}
-                        selectionMode={isSelectionMode}
-                        selected={selectedTransactionIdSet.has(tx.id)}
-                        settings={transactionDisplaySettings}
-                        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                        compact
-                        disableAnimations
-                      />
-                    ))}
-                  </View>
-                )}
-              </View>
-            </ScrollView>
+            />
           </View>
-          </GestureDetector>
         </Reanimated.View>
 
         {/* Month layer */}
         <Reanimated.View
-          style={[styles.zoomLayer, monthLayerStyle]}
+          style={[styles.zoomLayer, styles.monthLayerZ, monthLayerStyle]}
           pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
         >
           <FlatList
@@ -1358,7 +1402,7 @@ export function CalendarScreen({
 
         {/* Year layer */}
         <Reanimated.View
-          style={[styles.zoomLayer, yearLayerStyle]}
+          style={[styles.zoomLayer, styles.yearLayerZ, yearLayerStyle]}
           pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
         >
           <CalendarYearView
@@ -1653,6 +1697,16 @@ const styles = StyleSheet.create({
   },
   zoomLayer: {
     ...StyleSheet.absoluteFillObject,
+  },
+  // Static stacking order so zIndex never animates (avoids crossfade flicker).
+  monthLayerZ: {
+    zIndex: 2,
+  },
+  dayLayerZ: {
+    zIndex: 3,
+  },
+  yearLayerZ: {
+    zIndex: 4,
   },
   summarySlot: {
     minHeight: 56,
