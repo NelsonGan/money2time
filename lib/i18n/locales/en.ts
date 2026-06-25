@@ -42,13 +42,6 @@ const en = {
     loading_world: 'Loading your time world...',
   },
   nav: {
-    home: 'Home',
-    activity: 'Activity',
-    account: 'Accounts',
-    calendar: 'Calendar',
-    insights: 'Insights',
-    albums: 'Albums',
-    settings: 'Settings',
     income: 'Income',
     expense: 'Expense',
   },

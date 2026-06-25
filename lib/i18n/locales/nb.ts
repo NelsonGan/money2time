@@ -42,13 +42,6 @@ const nb = {
     loading_world: 'Laster inn tidsverdenen din...',
   },
   nav: {
-    home: 'Hjem',
-    activity: 'Aktivitet',
-    account: 'Kontoer',
-    calendar: 'Kalender',
-    insights: 'Innsikt',
-    albums: 'Album',
-    settings: 'Innstillinger',
     income: 'Inntekt',
     expense: 'Utgift',
   },

@@ -42,13 +42,6 @@ const tr = {
     loading_world: 'Zaman dünyanız yükleniyor...',
   },
   nav: {
-    home: 'Ana Sayfa',
-    activity: 'Hareketler',
-    account: 'Hesaplar',
-    calendar: 'Takvim',
-    insights: 'Analiz',
-    albums: 'Albümler',
-    settings: 'Ayarlar',
     income: 'Gelir',
     expense: 'Gider',
   },
