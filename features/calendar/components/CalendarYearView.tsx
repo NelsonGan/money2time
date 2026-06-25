@@ -50,7 +50,10 @@ const MiniMonth = memo(function MiniMonth({
   locale,
   onSelectMonth,
 }: MiniMonthProps) {
-  const handlePress = useCallback(() => onSelectMonth(year, monthIndex), [onSelectMonth, year, monthIndex]);
+  const handlePress = useCallback(
+    () => onSelectMonth(year, monthIndex),
+    [onSelectMonth, year, monthIndex],
+  );
   const themeColors = useThemeColors();
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
@@ -80,31 +83,20 @@ const MiniMonth = memo(function MiniMonth({
       accessibilityLabel={monthName}
       className="active:opacity-70"
     >
-      <Text
-        style={[styles.monthName, { color: themeColors.text }]}
-        numberOfLines={1}
-      >
+      <Text style={[styles.monthName, { color: themeColors.text }]} numberOfLines={1}>
         {monthName}
       </Text>
       {Array.from({ length: DAY_ROWS }, (_, row) => (
         <View key={row} style={styles.miniRow}>
           {cells.slice(row * 7, (row + 1) * 7).map((day, col) => {
             if (day == null) {
-              return (
-                <View
-                  key={col}
-                  style={{ width: cellSize, height: cellSize }}
-                />
-              );
+              return <View key={col} style={{ width: cellSize, height: cellSize }} />;
             }
             const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
             const isToday = dayKey === todayDayKey;
             const hasActivity = dailyByDayKey.has(dayKey);
             return (
-              <View
-                key={col}
-                style={[styles.miniCell, { width: cellSize, height: cellSize }]}
-              >
+              <View key={col} style={[styles.miniCell, { width: cellSize, height: cellSize }]}>
                 {isToday ? (
                   <View
                     style={[
@@ -117,20 +109,14 @@ const MiniMonth = memo(function MiniMonth({
                       },
                     ]}
                   >
-                    <Text
-                      style={[styles.miniDayText, { color: '#fff', fontSize }]}
-                    >
-                      {day}
-                    </Text>
+                    <Text style={[styles.miniDayText, { color: '#fff', fontSize }]}>{day}</Text>
                   </View>
                 ) : (
                   <Text
                     style={[
                       styles.miniDayText,
                       {
-                        color: hasActivity
-                          ? themeColors.primary
-                          : themeColors.textMuted,
+                        color: hasActivity ? themeColors.primary : themeColors.textMuted,
                         fontSize,
                         fontWeight: hasActivity ? '600' : '400',
                       },
@@ -172,9 +158,7 @@ const YearPage = memo(function YearPage({
   const themeColors = useThemeColors();
   return (
     <View style={styles.yearItem}>
-      <Text style={[styles.yearHeader, { color: themeColors.text }]}>
-        {year}
-      </Text>
+      <Text style={[styles.yearHeader, { color: themeColors.text }]}>{year}</Text>
       {Array.from({ length: 4 }, (_, row) => (
         <View key={row} style={[styles.monthRow, { gap: MONTH_GAP_H }]}>
           {Array.from({ length: 3 }, (_, col) => {
@@ -212,18 +196,13 @@ export const CalendarYearView = memo(function CalendarYearView({
   const { width: screenWidth } = useWindowDimensions();
 
   const monthWidth = Math.floor(
-    (screenWidth - PADDING_H * 2 - MONTH_GAP_H * (MONTHS_PER_ROW - 1)) /
-      MONTHS_PER_ROW,
+    (screenWidth - PADDING_H * 2 - MONTH_GAP_H * (MONTHS_PER_ROW - 1)) / MONTHS_PER_ROW,
   );
   const cellSize = Math.floor(monthWidth / 7);
   const miniMonthHeight = MONTH_NAME_HEIGHT + cellSize * DAY_ROWS;
-  const yearItemHeight =
-    YEAR_HEADER_HEIGHT + miniMonthHeight * 4 + ROW_GAP_V * 3 + 24;
+  const yearItemHeight = YEAR_HEADER_HEIGHT + miniMonthHeight * 4 + ROW_GAP_V * 3 + 24;
 
-  const slots = useMemo(
-    () => Array.from({ length: TOTAL_YEAR_SLOTS }, (_, i) => i),
-    [],
-  );
+  const slots = useMemo(() => Array.from({ length: TOTAL_YEAR_SLOTS }, (_, i) => i), []);
 
   const getItemLayout = useCallback(
     (_: unknown, index: number) => ({

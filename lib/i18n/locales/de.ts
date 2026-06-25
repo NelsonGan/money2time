@@ -42,13 +42,6 @@ const de = {
     loading_world: 'Deine Zeitwelt wird geladen…',
   },
   nav: {
-    home: 'Start',
-    activity: 'Aktivität',
-    account: 'Konten',
-    calendar: 'Kalender',
-    insights: 'Einblicke',
-    albums: 'Alben',
-    settings: 'Einstellungen',
     income: 'Einnahmen',
     expense: 'Ausgaben',
   },

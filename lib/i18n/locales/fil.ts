@@ -42,13 +42,6 @@ const fil = {
     loading_world: 'Nilo-load ang iyong time world...',
   },
   nav: {
-    home: 'Home',
-    activity: 'Aktibidad',
-    account: 'Accounts',
-    calendar: 'Kalendaryo',
-    insights: 'Insights',
-    albums: 'Mga Album',
-    settings: 'Settings',
     income: 'Kita',
     expense: 'Gastos',
   },

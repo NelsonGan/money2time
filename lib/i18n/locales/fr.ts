@@ -42,13 +42,6 @@ const fr = {
     loading_world: 'Chargement de votre monde temporel...',
   },
   nav: {
-    home: 'Accueil',
-    activity: 'Activité',
-    account: 'Comptes',
-    calendar: 'Calendrier',
-    insights: 'Analyses',
-    albums: 'Albums',
-    settings: 'Réglages',
     income: 'Revenus',
     expense: 'Dépenses',
   },

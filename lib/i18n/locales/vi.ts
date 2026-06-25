@@ -42,13 +42,6 @@ const vi = {
     loading_world: 'Đang tải thế giới thời gian của bạn...',
   },
   nav: {
-    home: 'Trang chủ',
-    activity: 'Giao dịch',
-    account: 'Tài khoản',
-    calendar: 'Lịch',
-    insights: 'Phân tích',
-    albums: 'Album',
-    settings: 'Cài đặt',
     income: 'Thu nhập',
     expense: 'Chi tiêu',
   },

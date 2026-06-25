@@ -42,13 +42,6 @@ const id = {
     loading_world: 'Memuat dunia waktumu...',
   },
   nav: {
-    home: 'Beranda',
-    activity: 'Aktivitas',
-    account: 'Akun',
-    calendar: 'Kalender',
-    insights: 'Wawasan',
-    albums: 'Album',
-    settings: 'Pengaturan',
     income: 'Pemasukan',
     expense: 'Pengeluaran',
   },

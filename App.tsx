@@ -126,13 +126,7 @@ import {
 } from '~/utils/formatters';
 
 type MainTab = TabName;
-const MAIN_TAB_ORDER: MainTab[] = [
-  'calendar',
-  'accounts',
-  'insights',
-  'albums',
-  'settings',
-];
+const MAIN_TAB_ORDER: MainTab[] = ['calendar', 'accounts', 'insights', 'albums', 'settings'];
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -366,7 +360,6 @@ function MainShellScreen({
   const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToken, setAccountsResetToken] = useState(0);
-  const [calendarScrollTopToken, setCalendarScrollTopToken] = useState(0);
   const [calendarResetToken, setCalendarResetToken] = useState(0);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
@@ -574,7 +567,6 @@ function MainShellScreen({
       }
       if (tab === 'calendar' && activeTab === 'calendar') {
         setCalendarResetToken((prev) => prev + 1);
-        setCalendarScrollTopToken((prev) => prev + 1);
       }
       if (tab === 'insights' && activeTab === 'insights') {
         setInsightsResetToMonthToken((prev) => prev + 1);
@@ -823,7 +815,6 @@ function MainShellScreen({
         </MountedTab>
         <MountedTab active={activeTab === 'calendar'}>
           <MemoCalendarScreen
-            scrollToTopToken={calendarScrollTopToken}
             resetToCurrentMonthToken={calendarResetToken}
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}

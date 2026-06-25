@@ -1,4 +1,11 @@
-import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Search,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -72,7 +79,6 @@ import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
 import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
-  buildCalendarMonth,
   buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   formatCalendarDate,
@@ -182,7 +188,6 @@ function buildCategoryPickerData(
 type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
 
 export interface CalendarScreenProps {
-  scrollToTopToken?: number;
   resetToCurrentMonthToken?: number;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
@@ -200,7 +205,6 @@ function monthOffsetFromAnchor(anchor: Date, target: Date): number {
 }
 
 export function CalendarScreen({
-  scrollToTopToken = 0,
   resetToCurrentMonthToken = 0,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
@@ -275,7 +279,7 @@ export function CalendarScreen({
       scale = 1 - my * 0.85;
       opacity = Math.min(opacity, Math.max(0, 1 - my * 1.5));
     }
-    return { opacity, transform: [{ scale }], zIndex: (dm >= 0.5 && my < 0.5) ? 2 : 0 };
+    return { opacity, transform: [{ scale }], zIndex: dm >= 0.5 && my < 0.5 ? 2 : 0 };
   });
 
   const yearLayerStyle = useAnimatedStyle(() => {
@@ -464,7 +468,9 @@ export function CalendarScreen({
         agg = { dayKey, income: 0, expense: 0, net: 0, transactionCount: 0, transactions: [] };
         map.set(dayKey, agg);
       }
-      const value = isTimeMode ? getDisplayValueForTransaction(tx) : (tx.reportingAmount ?? tx.amount);
+      const value = isTimeMode
+        ? getDisplayValueForTransaction(tx)
+        : (tx.reportingAmount ?? tx.amount);
       if (tx.type === 'income') {
         agg.income += value;
       } else {
@@ -583,7 +589,6 @@ export function CalendarScreen({
     };
   }, [isSelectionMode, onSelectionModeChange]);
 
-
   const getMonthIndexForDay = useCallback(
     (dayKey: string) => {
       const d = dayKeyToUtcDate(dayKey);
@@ -595,19 +600,13 @@ export function CalendarScreen({
     [clampMonthIndex, monthPagerAnchorDate],
   );
 
-  const handleMonthListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
-    },
-    [],
-  );
+  const handleMonthListRef = useCallback((ref: FlatList<number> | null) => {
+    (horizontalListRef as React.MutableRefObject<FlatList<number> | null>).current = ref;
+  }, []);
 
-  const handleYearListRef = useCallback(
-    (ref: FlatList<number> | null) => {
-      yearViewListRef.current = ref;
-    },
-    [],
-  );
+  const handleYearListRef = useCallback((ref: FlatList<number> | null) => {
+    yearViewListRef.current = ref;
+  }, []);
 
   // --- Back / zoom out: day → month → year ---
   const handleZoomOut = useCallback(() => {
@@ -630,7 +629,15 @@ export function CalendarScreen({
       setViewMode('year');
       monthYearZoom.value = withTiming(1, ZOOM_TIMING);
     }
-  }, [viewMode, selectedDayKey, getMonthIndexForDay, setActiveMonthIndex, centerYear, dayMonthZoom, monthYearZoom]);
+  }, [
+    viewMode,
+    selectedDayKey,
+    getMonthIndexForDay,
+    setActiveMonthIndex,
+    centerYear,
+    dayMonthZoom,
+    monthYearZoom,
+  ]);
 
   // --- Day selection from week strip ---
   const handleSelectDayFromWeek = useCallback((dayKey: string) => {
@@ -961,7 +968,12 @@ export function CalendarScreen({
       const mk = `${pageMonth.getFullYear()}-${String(pageMonth.getMonth() + 1).padStart(2, '0')}`;
       return (
         <View style={{ width: pageWidth }}>
-          <View style={[styles.calendarWrapper, { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING }]}>
+          <View
+            style={[
+              styles.calendarWrapper,
+              { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING },
+            ]}
+          >
             <CalendarMonthGrid
               monthData={buildCalendarMonthFromGrouped({
                 monthAnchor: pageMonth,
@@ -1014,7 +1026,11 @@ export function CalendarScreen({
     const monthTxs = transactionsByMonthKey.get(mk);
     if (!monthTxs) return [];
     return monthTxs
-      .filter((tx) => (tx.type === 'income' || tx.type === 'expense') && dayKeyFromIsoLocal(tx.date) === selectedDayKey)
+      .filter(
+        (tx) =>
+          (tx.type === 'income' || tx.type === 'expense') &&
+          dayKeyFromIsoLocal(tx.date) === selectedDayKey,
+      )
       .sort(compareTransactionsByDateDesc);
   }, [transactionsByMonthKey, selectedDayKey]);
 
@@ -1059,7 +1075,9 @@ export function CalendarScreen({
               <View className="flex-row items-center gap-2 flex-1">
                 {BackButton}
                 {viewMode === 'month' ? (
-                  <Text variant="subheading" className="tracking-tight">{activeMonthLabel}</Text>
+                  <Text variant="subheading" className="tracking-tight">
+                    {activeMonthLabel}
+                  </Text>
                 ) : null}
               </View>
               <View className="flex-row items-center gap-2">
@@ -1076,7 +1094,9 @@ export function CalendarScreen({
                 >
                   <Search
                     size={15}
-                    color={isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted}
+                    color={
+                      isSearchOpen || hasActiveSearch ? themeColors.primary : themeColors.textMuted
+                    }
                   />
                 </Pressable>
                 <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
@@ -1094,63 +1114,65 @@ export function CalendarScreen({
             />
 
             {/* Summary row */}
-            {viewMode !== 'year' && <View style={styles.summarySlot}>
-              {isSelectionMode ? (
-                <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
-                    </Text>
-                  </Pressable>
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
+            {viewMode !== 'year' && (
+              <View style={styles.summarySlot}>
+                {isSelectionMode ? (
+                  <View className="rounded-2xl bg-card border border-border/40 px-3.5 py-2.5 flex-row items-center justify-between gap-2">
+                    <Pressable
+                      onPress={clearSelection}
+                      className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.cancel')}
+                    >
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('common.cancel')}
                       </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground">
-                          {selectedTransactionTotalLabel}
+                    </Pressable>
+                    <View className="flex-1 items-center px-1">
+                      <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                        <Text variant="caption" className="text-foreground">
+                          {I18n.t('transactions.selection.selected_count', {
+                            count: selectedTransactionCount,
+                          })}
                         </Text>
+                        <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
+                          <Text variant="label" className="text-foreground">
+                            {selectedTransactionTotalLabel}
+                          </Text>
+                        </View>
                       </View>
                     </View>
+                    <View className="flex-row items-center gap-1.5">
+                      <Pressable
+                        onPress={handleOpenBulkUpdate}
+                        className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.selection.update')}
+                        hitSlop={8}
+                      >
+                        <Pencil size={14} color={themeColors.primary} />
+                      </Pressable>
+                      <Pressable
+                        onPress={handleDeleteSelectedTransactions}
+                        className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('common.delete')}
+                        hitSlop={8}
+                      >
+                        <Trash2 size={14} color={themeColors.coral} />
+                      </Pressable>
+                    </View>
                   </View>
-                  <View className="flex-row items-center gap-1.5">
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
-                  </View>
-                </View>
-              ) : (
-                <InOutHeader
-                  incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-                  expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
-                  onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
-                  onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
-                />
-              )}
-            </View>}
+                ) : (
+                  <InOutHeader
+                    incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
+                    expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+                    onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
+                    onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </View>
       </TabletContentContainer>
@@ -1158,7 +1180,10 @@ export function CalendarScreen({
       {/* --- Calendar area: three stacked reanimated layers --- */}
       <View className="flex-1 overflow-hidden bg-background">
         {/* Day layer */}
-        <Reanimated.View style={[styles.zoomLayer, dayLayerStyle]} pointerEvents={viewMode === 'day' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, dayLayerStyle]}
+          pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
+        >
           <View style={styles.flexOne}>
             <View className="border-b border-border/30">
               <CalendarWeekStrip
@@ -1181,7 +1206,9 @@ export function CalendarScreen({
               <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
                 <View style={styles.daySectionHeader}>
                   <View style={styles.daySectionTitleGroup}>
-                    <Text variant="bodyStrong" className="tracking-tight">{selectedDayLabel}</Text>
+                    <Text variant="bodyStrong" className="tracking-tight">
+                      {selectedDayLabel}
+                    </Text>
                   </View>
                   <View style={styles.daySectionSubtotals}>
                     {selectedDayAgg && selectedDayAgg.income > 0 ? (
@@ -1234,7 +1261,10 @@ export function CalendarScreen({
         </Reanimated.View>
 
         {/* Month layer */}
-        <Reanimated.View style={[styles.zoomLayer, monthLayerStyle]} pointerEvents={viewMode === 'month' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, monthLayerStyle]}
+          pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
+        >
           <FlatList
             ref={handleMonthListRef}
             data={monthPagerSlots}
@@ -1261,7 +1291,10 @@ export function CalendarScreen({
         </Reanimated.View>
 
         {/* Year layer */}
-        <Reanimated.View style={[styles.zoomLayer, yearLayerStyle]} pointerEvents={viewMode === 'year' ? 'auto' : 'none'}>
+        <Reanimated.View
+          style={[styles.zoomLayer, yearLayerStyle]}
+          pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
+        >
           <CalendarYearView
             centerYear={centerYear}
             todayDayKey={todayDayKey}

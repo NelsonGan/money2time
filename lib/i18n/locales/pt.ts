@@ -42,13 +42,6 @@ const pt = {
     loading_world: 'Carregando seu mundo de tempo...',
   },
   nav: {
-    home: 'Início',
-    activity: 'Atividade',
-    account: 'Contas',
-    calendar: 'Calendário',
-    insights: 'Insights',
-    albums: 'Álbuns',
-    settings: 'Config.',
     income: 'Receita',
     expense: 'Despesa',
   },
