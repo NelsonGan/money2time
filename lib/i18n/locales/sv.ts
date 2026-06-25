@@ -42,13 +42,6 @@ const sv = {
     loading_world: 'Laddar din tidsvärld...',
   },
   nav: {
-    home: 'Hem',
-    activity: 'Aktivitet',
-    account: 'Konton',
-    calendar: 'Kalender',
-    insights: 'Insikter',
-    albums: 'Album',
-    settings: 'Inställningar',
     income: 'Inkomst',
     expense: 'Utgift',
   },

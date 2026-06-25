@@ -42,13 +42,6 @@ const uk = {
     loading_world: 'Завантажуємо твій часовий світ...',
   },
   nav: {
-    home: 'Головна',
-    activity: 'Операції',
-    account: 'Рахунки',
-    calendar: 'Календар',
-    insights: 'Аналіз',
-    albums: 'Альбоми',
-    settings: 'Налаштування',
     income: 'Дохід',
     expense: 'Витрата',
   },

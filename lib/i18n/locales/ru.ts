@@ -42,13 +42,6 @@ const ru = {
     loading_world: 'Загружаем ваш мир времени...',
   },
   nav: {
-    home: 'Главная',
-    activity: 'Активность',
-    account: 'Счета',
-    calendar: 'Календарь',
-    insights: 'Аналитика',
-    albums: 'Альбомы',
-    settings: 'Настройки',
     income: 'Доход',
     expense: 'Расход',
   },

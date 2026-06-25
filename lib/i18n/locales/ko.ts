@@ -42,13 +42,6 @@ const ko = {
     loading_world: '나의 시간 세계를 불러오는 중...',
   },
   nav: {
-    home: '홈',
-    activity: '내역',
-    account: '계좌',
-    calendar: '캘린더',
-    insights: '분석',
-    albums: '앨범',
-    settings: '설정',
     income: '수입',
     expense: '지출',
   },

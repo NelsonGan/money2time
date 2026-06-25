@@ -42,13 +42,6 @@ const da = {
     loading_world: 'Indlæser din tidsverden...',
   },
   nav: {
-    home: 'Hjem',
-    activity: 'Aktivitet',
-    account: 'Konti',
-    calendar: 'Kalender',
-    insights: 'Indsigt',
-    albums: 'Album',
-    settings: 'Indstillinger',
     income: 'Indtægt',
     expense: 'Udgift',
   },
