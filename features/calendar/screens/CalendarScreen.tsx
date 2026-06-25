@@ -416,14 +416,14 @@ export function CalendarScreen({
     excludedExpenseCategoryIdSet,
   ]);
 
-  const incomeCategoryPickerData = useMemo(
-    () => (showFilters ? buildCategoryPickerData(categories, 'income') : null),
-    [categories, showFilters],
-  );
-  const expenseCategoryPickerData = useMemo(
-    () => (showFilters ? buildCategoryPickerData(categories, 'expense') : null),
-    [categories, showFilters],
-  );
+  const incomeCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  const expenseCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  if (showFilters) {
+    incomeCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'income');
+    expenseCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'expense');
+  }
+  const incomeCategoryPickerData = incomeCategoryPickerDataRef.current;
+  const expenseCategoryPickerData = expenseCategoryPickerDataRef.current;
 
   const activeFilterCount =
     excludedAccountIds.length +
@@ -1545,32 +1545,36 @@ export function CalendarScreen({
             }
             onClear={() => setExcludedAccountIds([])}
           />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeFilterPicker === 'incomeCategories'}
-            onClose={closeFilterPicker}
-            parents={incomeCategoryPickerData!.parents}
-            childByParent={incomeCategoryPickerData!.childByParent}
-            selectedCategoryIds={excludedIncomeCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
-            }
-            onClear={() => setExcludedIncomeCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeFilterPicker === 'expenseCategories'}
-            onClose={closeFilterPicker}
-            parents={expenseCategoryPickerData!.parents}
-            childByParent={expenseCategoryPickerData!.childByParent}
-            selectedCategoryIds={excludedExpenseCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
-            }
-            onClear={() => setExcludedExpenseCategoryIds([])}
-          />
+          {incomeCategoryPickerData ? (
+            <CategoryPickerSheet
+              overlay
+              allowParentSelection
+              visible={activeFilterPicker === 'incomeCategories'}
+              onClose={closeFilterPicker}
+              parents={incomeCategoryPickerData.parents}
+              childByParent={incomeCategoryPickerData.childByParent}
+              selectedCategoryIds={excludedIncomeCategoryIds}
+              onToggleSelect={(categoryId) =>
+                setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
+              }
+              onClear={() => setExcludedIncomeCategoryIds([])}
+            />
+          ) : null}
+          {expenseCategoryPickerData ? (
+            <CategoryPickerSheet
+              overlay
+              allowParentSelection
+              visible={activeFilterPicker === 'expenseCategories'}
+              onClose={closeFilterPicker}
+              parents={expenseCategoryPickerData.parents}
+              childByParent={expenseCategoryPickerData.childByParent}
+              selectedCategoryIds={excludedExpenseCategoryIds}
+              onToggleSelect={(categoryId) =>
+                setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
+              }
+              onClear={() => setExcludedExpenseCategoryIds([])}
+            />
+          ) : null}
         </SafeAreaView>
       </ThemeModal>
     </SafeAreaView>
