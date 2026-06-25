@@ -42,13 +42,6 @@ const ms = {
     loading_world: 'Memuat dunia masa anda...',
   },
   nav: {
-    home: 'Utama',
-    activity: 'Aktiviti',
-    account: 'Akaun',
-    calendar: 'Kalendar',
-    insights: 'Analitik',
-    albums: 'Album',
-    settings: 'Tetapan',
     income: 'Pendapatan',
     expense: 'Perbelanjaan',
   },

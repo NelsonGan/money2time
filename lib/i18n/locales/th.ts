@@ -42,13 +42,6 @@ const th = {
     loading_world: 'กำลังโหลดโลกเวลาของคุณ...',
   },
   nav: {
-    home: 'หน้าหลัก',
-    activity: 'กิจกรรม',
-    account: 'บัญชี',
-    calendar: 'ปฏิทิน',
-    insights: 'วิเคราะห์',
-    albums: 'อัลบั้ม',
-    settings: 'ตั้งค่า',
     income: 'รายรับ',
     expense: 'รายจ่าย',
   },
