@@ -73,6 +73,7 @@ import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearV
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
   buildCalendarMonth,
+  buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   formatCalendarDate,
   getCalendarWeekdayLabels,
@@ -225,7 +226,7 @@ export function CalendarScreen({
   const themeColors = useThemeColors();
   const { contentWidth, isTablet } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
   const reportBottomNavScroll = useBottomNavScrollReporter();
@@ -412,12 +413,12 @@ export function CalendarScreen({
   ]);
 
   const incomeCategoryPickerData = useMemo(
-    () => buildCategoryPickerData(categories, 'income'),
-    [categories],
+    () => (showFilters ? buildCategoryPickerData(categories, 'income') : null),
+    [categories, showFilters],
   );
   const expenseCategoryPickerData = useMemo(
-    () => buildCategoryPickerData(categories, 'expense'),
-    [categories],
+    () => (showFilters ? buildCategoryPickerData(categories, 'expense') : null),
+    [categories, showFilters],
   );
 
   const activeFilterCount =
@@ -437,7 +438,22 @@ export function CalendarScreen({
     });
   }, [filteredTransactions, searchQuery]);
 
-  // --- Build a global daily aggregate map for the week strip ---
+  // --- Pre-group transactions by month key (single pass) ---
+  const transactionsByMonthKey = useMemo(() => {
+    const map = new Map<string, TransactionWithRelations[]>();
+    for (const tx of searchFilteredTransactions) {
+      const mk = dayKeyFromIsoLocal(tx.date).slice(0, 7);
+      let arr = map.get(mk);
+      if (!arr) {
+        arr = [];
+        map.set(mk, arr);
+      }
+      arr.push(tx);
+    }
+    return map;
+  }, [searchFilteredTransactions]);
+
+  // --- Build a global daily aggregate map for the week strip (no transaction arrays) ---
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, CalendarDayAggregate>();
     for (const tx of searchFilteredTransactions) {
@@ -455,7 +471,6 @@ export function CalendarScreen({
         agg.expense += value;
       }
       agg.transactionCount += 1;
-      agg.transactions.push(tx);
     }
     map.forEach((agg) => {
       agg.net = agg.income - agg.expense;
@@ -495,29 +510,29 @@ export function CalendarScreen({
   const displayedMonthKey = viewMode === 'day' ? selectedMonthKey : activeMonthKey;
 
   // --- Build month data for the active month (header summary + month grid) ---
-  const activeMonthData = useMemo(
-    () =>
-      buildCalendarMonth({
-        monthAnchor: viewMode !== 'day' ? activeMonthDate : selectedMonthDate,
-        transactions: searchFilteredTransactions,
-        locale: activeLocale,
-        isTimeMode,
-        getDisplayValueForTransaction,
-        todayDayKey,
-        weekStartsOn: settings.weekStartsOn,
-      }),
-    [
-      viewMode,
-      activeMonthDate,
-      selectedMonthDate,
-      searchFilteredTransactions,
-      activeLocale,
+  const activeMonthData = useMemo(() => {
+    const anchor = viewMode !== 'day' ? activeMonthDate : selectedMonthDate;
+    const mk = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
+    return buildCalendarMonthFromGrouped({
+      monthAnchor: anchor,
+      transactions: transactionsByMonthKey.get(mk) ?? [],
+      locale: activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
       todayDayKey,
-      settings.weekStartsOn,
-    ],
-  );
+      weekStartsOn: settings.weekStartsOn,
+    });
+  }, [
+    viewMode,
+    activeMonthDate,
+    selectedMonthDate,
+    transactionsByMonthKey,
+    activeLocale,
+    isTimeMode,
+    getDisplayValueForTransaction,
+    todayDayKey,
+    settings.weekStartsOn,
+  ]);
 
   // --- Selected day transactions ---
   const transactionDisplaySettings = useMemo(
@@ -943,13 +958,14 @@ export function CalendarScreen({
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
       const pageMonth = addMonthsAtMonthStart(monthPagerAnchorDate, offset);
+      const mk = `${pageMonth.getFullYear()}-${String(pageMonth.getMonth() + 1).padStart(2, '0')}`;
       return (
         <View style={{ width: pageWidth }}>
           <View style={[styles.calendarWrapper, { paddingHorizontal: CALENDAR_GRID_HORIZONTAL_PADDING }]}>
             <CalendarMonthGrid
-              monthData={buildCalendarMonth({
+              monthData={buildCalendarMonthFromGrouped({
                 monthAnchor: pageMonth,
-                transactions: searchFilteredTransactions,
+                transactions: transactionsByMonthKey.get(mk) ?? [],
                 locale: activeLocale,
                 isTimeMode,
                 getDisplayValueForTransaction,
@@ -969,7 +985,7 @@ export function CalendarScreen({
     },
     [
       activeLocale,
-      searchFilteredTransactions,
+      transactionsByMonthKey,
       getDisplayValueForTransaction,
       gridChartWidth,
       handleSelectDayFromMonth,
@@ -994,9 +1010,13 @@ export function CalendarScreen({
   );
 
   const selectedDayTxs = useMemo(() => {
-    if (!selectedDayAgg) return [];
-    return [...selectedDayAgg.transactions].sort(compareTransactionsByDateDesc);
-  }, [selectedDayAgg]);
+    const mk = selectedDayKey.slice(0, 7);
+    const monthTxs = transactionsByMonthKey.get(mk);
+    if (!monthTxs) return [];
+    return monthTxs
+      .filter((tx) => (tx.type === 'income' || tx.type === 'expense') && dayKeyFromIsoLocal(tx.date) === selectedDayKey)
+      .sort(compareTransactionsByDateDesc);
+  }, [transactionsByMonthKey, selectedDayKey]);
 
   const isSelectedDayFuture = selectedDayKey > todayDayKey;
 
@@ -1497,8 +1517,8 @@ export function CalendarScreen({
             allowParentSelection
             visible={activeFilterPicker === 'incomeCategories'}
             onClose={closeFilterPicker}
-            parents={incomeCategoryPickerData.parents}
-            childByParent={incomeCategoryPickerData.childByParent}
+            parents={incomeCategoryPickerData!.parents}
+            childByParent={incomeCategoryPickerData!.childByParent}
             selectedCategoryIds={excludedIncomeCategoryIds}
             onToggleSelect={(categoryId) =>
               setExcludedIncomeCategoryIds((previous) => toggleStringId(previous, categoryId))
@@ -1510,8 +1530,8 @@ export function CalendarScreen({
             allowParentSelection
             visible={activeFilterPicker === 'expenseCategories'}
             onClose={closeFilterPicker}
-            parents={expenseCategoryPickerData.parents}
-            childByParent={expenseCategoryPickerData.childByParent}
+            parents={expenseCategoryPickerData!.parents}
+            childByParent={expenseCategoryPickerData!.childByParent}
             selectedCategoryIds={excludedExpenseCategoryIds}
             onToggleSelect={(categoryId) =>
               setExcludedExpenseCategoryIds((previous) => toggleStringId(previous, categoryId))
