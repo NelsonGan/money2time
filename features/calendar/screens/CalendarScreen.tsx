@@ -384,6 +384,15 @@ export function CalendarScreen({
 
   // --- Day pager (re-centering carousel, swipe between days with preview) ---
   const dayPagerListRef = useRef<FlatList<number> | null>(null);
+  // Only fire pager haptics for scrolls the user actually drove. Programmatic
+  // scrolls (initialScrollIndex settle on mount, scrollToIndex from the prev/
+  // next buttons, recenter) also emit `onMomentumScrollEnd`, and firing a
+  // haptic there produces a stray buzz right after the screen loads. We arm
+  // this flag on `onScrollBeginDrag` and consume it on momentum end.
+  const userDraggingPagerRef = useRef(false);
+  const handlePagerScrollBeginDrag = useCallback(() => {
+    userDraggingPagerRef.current = true;
+  }, []);
   const getDayItemLayout = useCallback(
     (_: ArrayLike<number> | null | undefined, index: number) => ({
       length: pageWidth,
@@ -676,10 +685,12 @@ export function CalendarScreen({
   // center slot showing identical content, so the snap-back is seamless.
   const handleDayPagerMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const wasUserDriven = userDraggingPagerRef.current;
+      userDraggingPagerRef.current = false;
       const landed = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
       const delta = landed - DAY_PAGER_CENTER;
       if (delta !== 0) {
-        void triggerHaptic('selection');
+        if (wasUserDriven) void triggerHaptic('selection');
         setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
       }
       recenterDayPager();
@@ -734,7 +745,10 @@ export function CalendarScreen({
   // --- Month pager navigation ---
   const handleMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleHorizontalMomentumEnd>[0]) => {
-      void triggerHaptic('selection');
+      // Skip the buzz for programmatic settles (mount, prev/next buttons) —
+      // only a user swipe should produce the month-change haptic.
+      if (userDraggingPagerRef.current) void triggerHaptic('selection');
+      userDraggingPagerRef.current = false;
       handleHorizontalMomentumEnd(e);
     },
     [handleHorizontalMomentumEnd],
@@ -1368,6 +1382,7 @@ export function CalendarScreen({
               renderItem={renderDayPage}
               initialScrollIndex={DAY_PAGER_CENTER}
               getItemLayout={getDayItemLayout}
+              onScrollBeginDrag={handlePagerScrollBeginDrag}
               onMomentumScrollEnd={handleDayPagerMomentumEnd}
               initialNumToRender={DAY_PAGER_SLOTS.length}
               windowSize={DAY_PAGER_SLOTS.length}
@@ -1395,6 +1410,7 @@ export function CalendarScreen({
             renderItem={renderMonthPage}
             initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
             getItemLayout={getHorizontalItemLayout}
+            onScrollBeginDrag={handlePagerScrollBeginDrag}
             onScrollEndDrag={handleHorizontalScrollEndDrag}
             onMomentumScrollEnd={handleMonthMomentumEnd}
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
