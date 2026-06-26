@@ -22,7 +22,7 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import {
   BREAKDOWN_PIE_LABEL_HEIGHT,
@@ -226,7 +226,6 @@ export function InsightsDrilldownScreen({
   const {
     albums,
     categories,
-    transactions,
     settings,
     updateTransactionsBulk,
     deleteTransactionsBulk,
@@ -234,6 +233,7 @@ export function InsightsDrilldownScreen({
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
+  const { transactions } = useTransactions();
   const [drilldownTypeFilter, setDrilldownTypeFilter] =
     useState<DrilldownTransactionFilter>('expense');
   const [drilldownSortOption, setDrilldownSortOption] = useState<DrilldownSortOption>('default');

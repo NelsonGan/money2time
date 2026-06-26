@@ -14,7 +14,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
@@ -629,8 +629,8 @@ function DataSourceToggle({
 }
 
 export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
-  const { settings, transactions, categories, insightsPreferencesJson, getTrueHourlyRateForDate } =
-    useApp();
+  const { settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } = useApp();
+  const { transactions } = useTransactions();
   const { isPro } = usePro();
   const bottomNavInset = useSettingsBottomNavInset();
   // Default to the sample snapshot — this is exactly what the OS widget gallery shows.

@@ -49,7 +49,7 @@ import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import {
@@ -1373,7 +1373,6 @@ export function AccountsScreen({
   const {
     accountGroups,
     accounts,
-    accountBalances,
     settings,
     currentMonthWage,
     createAccount,
@@ -1392,6 +1391,7 @@ export function AccountsScreen({
     changeAccountCurrency,
     updateTransactionsBulk,
   } = useApp();
+  const { accountBalances } = useTransactions();
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
