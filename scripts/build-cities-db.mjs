@@ -25,12 +25,17 @@ const GEONAMES_BASE = 'https://download.geonames.org/export/dump';
 const CITIES_FILE = 'cities15000';
 const EMPTY = process.argv.includes('--empty');
 
+// ascii_name columns hold diacritic-free names so the runtime can do fast,
+// diacritic-insensitive LIKE prefix/contains checks for match-tier ordering.
+// cities_fts indexes admin1 + country names too, so a query can match a city by
+// its state or country (e.g. "japan", "california").
 const SCHEMA = `
-  CREATE TABLE country_names (code TEXT PRIMARY KEY, name TEXT NOT NULL);
-  CREATE TABLE admin1_names (key TEXT PRIMARY KEY, name TEXT NOT NULL);
+  CREATE TABLE country_names (code TEXT PRIMARY KEY, name TEXT NOT NULL, ascii_name TEXT NOT NULL);
+  CREATE TABLE admin1_names (key TEXT PRIMARY KEY, name TEXT NOT NULL, ascii_name TEXT NOT NULL);
   CREATE TABLE cities (
     id           TEXT PRIMARY KEY,
     name         TEXT NOT NULL,
+    ascii_name   TEXT NOT NULL,
     admin1       TEXT,
     country_code TEXT NOT NULL,
     latitude     REAL NOT NULL,
@@ -40,7 +45,7 @@ const SCHEMA = `
   );
   CREATE INDEX cities_population ON cities (population DESC);
   CREATE VIRTUAL TABLE cities_fts USING fts5(
-    name, ascii_name, content='', tokenize = "unicode61 remove_diacritics 2"
+    name, ascii_name, admin_name, country_name, content='', tokenize = "unicode61 remove_diacritics 2"
   );
 `;
 
@@ -82,7 +87,7 @@ function parseCountryInfo(text) {
     const cols = line.split('\t');
     const code = cols[0];
     const name = cols[4];
-    if (code && name) rows.push([code, name]);
+    if (code && name) rows.push([code, name, stripDiacritics(name)]);
   }
   return rows;
 }
@@ -94,7 +99,8 @@ function parseAdmin1(text) {
     const cols = line.split('\t');
     const key = cols[0]; // e.g. "JP.40"
     const name = cols[1];
-    if (key && name) rows.push([key, name]);
+    const asciiName = cols[2] || name; // admin1CodesASCII ships an ascii column
+    if (key && name) rows.push([key, name, stripDiacritics(asciiName)]);
   }
   return rows;
 }
@@ -140,27 +146,43 @@ async function main() {
       downloadTsv('admin1CodesASCII.txt'),
     ]);
 
-    const insertCountry = db.prepare('INSERT INTO country_names (code, name) VALUES (?, ?)');
-    const insertAdmin1 = db.prepare('INSERT INTO admin1_names (key, name) VALUES (?, ?)');
+    const insertCountry = db.prepare(
+      'INSERT INTO country_names (code, name, ascii_name) VALUES (?, ?, ?)',
+    );
+    const insertAdmin1 = db.prepare(
+      'INSERT INTO admin1_names (key, name, ascii_name) VALUES (?, ?, ?)',
+    );
     const insertCity = db.prepare(
-      `INSERT INTO cities (id, name, admin1, country_code, latitude, longitude, population, timezone)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO cities (id, name, ascii_name, admin1, country_code, latitude, longitude, population, timezone)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     const insertFts = db.prepare(
-      'INSERT INTO cities_fts (rowid, name, ascii_name) VALUES (?, ?, ?)',
+      'INSERT INTO cities_fts (rowid, name, ascii_name, admin_name, country_name) VALUES (?, ?, ?, ?, ?)',
     );
 
+    // Name lookups so each city's FTS row can carry its state + country names.
+    const countryByCode = new Map();
+    const admin1ByKey = new Map();
+
     db.exec('BEGIN');
-    for (const [code, name] of parseCountryInfo(countryTxt)) insertCountry.run(code, name);
-    for (const [key, name] of parseAdmin1(admin1Txt)) insertAdmin1.run(key, name);
+    for (const [code, name, asciiName] of parseCountryInfo(countryTxt)) {
+      insertCountry.run(code, name, asciiName);
+      countryByCode.set(code, name);
+    }
+    for (const [key, name, asciiName] of parseAdmin1(admin1Txt)) {
+      insertAdmin1.run(key, name, asciiName);
+      admin1ByKey.set(key, name);
+    }
 
     let rowid = 0;
     let count = 0;
     for (const city of parseCities(citiesTxt)) {
       rowid += 1;
+      const asciiName = stripDiacritics(city.asciiName || city.name);
       insertCity.run(
         city.id,
         city.name,
+        asciiName,
         city.admin1,
         city.countryCode,
         city.latitude,
@@ -168,7 +190,9 @@ async function main() {
         city.population,
         city.timezone,
       );
-      insertFts.run(rowid, city.name, stripDiacritics(city.asciiName || city.name));
+      const adminName = city.admin1 ? admin1ByKey.get(`${city.countryCode}.${city.admin1}`) : null;
+      const countryName = countryByCode.get(city.countryCode) || null;
+      insertFts.run(rowid, city.name, asciiName, adminName, countryName);
       count += 1;
     }
     db.exec('COMMIT');
