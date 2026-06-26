@@ -329,6 +329,32 @@ interface AppContextValue extends AppState {
 const AppContext = createContext<AppContextValue | null>(null);
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 
+// Defer a persist/refresh task off the critical render path (so the optimistic
+// UI paint and any in-flight close/navigation animation stay smooth) without
+// letting a busy device starve it. `InteractionManager.runAfterInteractions`
+// alone is unbounded: on slower Android phones the modal-dismiss + tab-switch +
+// calendar re-render keep registering interaction handles, so a quick-add write
+// (and the refresh that follows) could be held off for many seconds — the
+// "transaction took ~10s to appear / redirect" symptom. We still prefer running
+// after interactions, but cap the wait with a timer fallback so the write
+// always lands promptly. `run` is guarded to fire exactly once.
+const DEFERRED_WRITE_MAX_DELAY_MS = 300;
+function runDeferredWrite(task: () => void) {
+  let ran = false;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const run = () => {
+    if (ran) return;
+    ran = true;
+    if (timer) clearTimeout(timer);
+    task();
+  };
+  const handle = InteractionManager.runAfterInteractions(run);
+  timer = setTimeout(() => {
+    handle.cancel();
+    run();
+  }, DEFERRED_WRITE_MAX_DELAY_MS);
+}
+
 function categorySeedKey(type: Category['type'], name: string) {
   return `${type}:${name.trim().toLowerCase()}`;
 }
@@ -1400,7 +1426,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...resolveRelationNames(normalizedInput),
       };
       setTransactions((prev) => sortTransactions([optimistic, ...prev], 'date_desc'));
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           transactionsRepository.createWithId(id, normalizedInput);
           // Auto-file into the active album, if one is set.
@@ -1535,7 +1561,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           'date_desc',
         ),
       );
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
           void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
@@ -1609,7 +1635,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             };
           }),
       );
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           transactionsRepository.softDeleteMany(uniqueIds);
           if (parentTxIdsWithSplits.size > 0) {
@@ -1775,7 +1801,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions((prev) =>
         sortTransactions([optimisticParent, ...optimisticTransfers, ...prev], 'date_desc'),
       );
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           transactionsRepository.createWithId(txId, normalizedInput);
           // Auto-file the primary transaction into the active album, if any.
@@ -1870,7 +1896,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return { ...tx, splits: merged, splitsSummary: summarizeSplits(merged) };
         }),
       );
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           const existingPersisted = transactionSplitsRepository.listByTransactionId(transactionId);
           const nextIds = new Set(optimisticSplits.map((s) => s.id));
@@ -2011,7 +2037,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // DB. By the time this runs, updateTransactionSplits' own IM has already
       // written any brand-new rows, so this works for both existing and newly
       // inserted paid splits.
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           const split = transactionSplitsRepository.findById(splitId);
           if (!split || split.isSelf || split.paidAt) return;
@@ -2089,7 +2115,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // Always queue persistence; read from DB to avoid the React 19 batching
       // race where setTransactions updaters run after this synchronous code.
-      InteractionManager.runAfterInteractions(() => {
+      runDeferredWrite(() => {
         try {
           const split = transactionSplitsRepository.findById(splitId);
           if (!split || !split.paidAt) return;

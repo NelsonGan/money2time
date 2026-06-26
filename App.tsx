@@ -39,6 +39,7 @@ import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
+import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
@@ -98,6 +99,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
+import { requestCalendarGoToToday } from '~/services/calendarNavigation';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import {
   getLatestUnseenAnnouncementForUser,
@@ -358,6 +360,7 @@ function MainShellScreen({
   const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTab>('calendar');
   const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
+  const [showCalendarTodayButton, setShowCalendarTodayButton] = useState(false);
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToken, setAccountsResetToken] = useState(0);
   const [calendarResetToken, setCalendarResetToken] = useState(0);
@@ -820,6 +823,7 @@ function MainShellScreen({
             onOpenTransactionSplitBadge={openTransactionSplitBill}
             onOpenBreakdownInsight={openActivityBreakdownInsight}
             onSelectionModeChange={setIsCalendarSelectionMode}
+            onShowTodayButtonChange={setShowCalendarTodayButton}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
@@ -875,6 +879,9 @@ function MainShellScreen({
               onTutorialTargetLayout={handleTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
             />
+          ) : null}
+          {activeTab === 'calendar' && showCalendarTodayButton ? (
+            <TodayJumpFab onPress={requestCalendarGoToToday} />
           ) : null}
         </>
       ) : null}

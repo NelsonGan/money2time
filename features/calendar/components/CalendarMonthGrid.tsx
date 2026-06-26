@@ -140,8 +140,6 @@ export const CalendarMonthGrid = memo(function CalendarMonthGrid({
               <RNText
                 allowFontScaling={false}
                 numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
                 style={[
                   styles.cellValueText,
                   {
@@ -156,8 +154,6 @@ export const CalendarMonthGrid = memo(function CalendarMonthGrid({
               <RNText
                 allowFontScaling={false}
                 numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
                 style={[
                   styles.cellValueText,
                   {

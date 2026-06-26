@@ -327,7 +327,11 @@ export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: Settin
     setWidth(event.nativeEvent.layout.width);
   }, []);
 
-  const tileWidth = width > 0 ? (width - gap * (columns - 1)) / columns : 0;
+  // Floor the per-tile width so N tiles + gaps never exceed the measured
+  // container width. Android rounds fractional layout widths up, which pushed
+  // the total past the row and wrapped the last tile to a new line (3 cols
+  // collapsing to 2). Flooring keeps the row intact on every platform.
+  const tileWidth = width > 0 ? Math.floor((width - gap * (columns - 1)) / columns) : 0;
   const items = React.Children.toArray(children);
 
   return (
