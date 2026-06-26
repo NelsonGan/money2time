@@ -1,11 +1,4 @@
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Search,
-  Trash2,
-} from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent, TextInput } from 'react-native';
 import {
@@ -52,11 +45,12 @@ import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { subscribeCalendarGoToToday } from '~/services/calendarNavigation';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
@@ -213,6 +207,12 @@ export interface CalendarScreenProps {
     monthKey: string,
   ) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
+  /**
+   * Reports whether the floating "Today" pill should be visible. The pill itself
+   * is rendered by the shell next to the Add button so it anchors reliably to
+   * the bottom of the screen on Android.
+   */
+  onShowTodayButtonChange?: (show: boolean) => void;
 }
 
 function monthOffsetFromAnchor(anchor: Date, target: Date): number {
@@ -227,6 +227,7 @@ export function CalendarScreen({
   onOpenTransactionSplitBadge,
   onOpenBreakdownInsight,
   onSelectionModeChange,
+  onShowTodayButtonChange,
 }: CalendarScreenProps) {
   const {
     transactions,
@@ -245,7 +246,7 @@ export function CalendarScreen({
     updateCalendarPreferencesJson,
   } = useApp();
   const themeColors = useThemeColors();
-  const { contentWidth, isTablet } = useDeviceLayout();
+  const { contentWidth } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
@@ -727,8 +728,13 @@ export function CalendarScreen({
       // jumping two days from one swipe. Limiting the step to ±1 keeps both
       // platforms advancing exactly one day per swipe.
       const delta = Math.max(-1, Math.min(1, landed - DAY_PAGER_CENTER));
-      if (delta !== 0) {
-        if (wasUserDriven) void triggerHaptic('selection');
+      // Only advance for the user's own fling. Android emits onMomentumScrollEnd
+      // more than once for a single fling (and the recenter scroll can emit
+      // another), and each spurious fire was advancing the day again — the
+      // "swipe moved two days" bug. Consuming the drag flag means only the first,
+      // user-driven momentum end commits; later echoes just recenter.
+      if (delta !== 0 && wasUserDriven) {
+        void triggerHaptic('selection');
         setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
       }
       recenterDayPager();
@@ -887,6 +893,21 @@ export function CalendarScreen({
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     }
   }, [todayDayKey, viewMode, setActiveMonthIndex, dayMonthZoom, monthYearZoom]);
+
+  // The "Today" pill is rendered by the shell (next to the Add button) so it
+  // anchors to the bottom of the screen reliably on Android. Report when it
+  // should be visible, and run the jump when the shell pill is pressed.
+  const showTodayButton = !isOnToday && !isSelectionMode && !isSearchOpen;
+  useEffect(() => {
+    onShowTodayButtonChange?.(showTodayButton);
+  }, [showTodayButton, onShowTodayButtonChange]);
+  useEffect(
+    () => () => {
+      onShowTodayButtonChange?.(false);
+    },
+    [onShowTodayButtonChange],
+  );
+  useEffect(() => subscribeCalendarGoToToday(handleGoToToday), [handleGoToToday]);
 
   // --- Summary formatting ---
   const formatSummaryValue = useCallback(
@@ -1521,35 +1542,6 @@ export function CalendarScreen({
         ) : null}
       </View>
 
-      {/* Floating Today button — bottom left */}
-      {!isOnToday && !isSelectionMode && !isSearchOpen ? (
-        <View
-          pointerEvents="box-none"
-          style={[
-            styles.todayFabAnchor,
-            { bottom: getBottomNavReservedInset(safeAreaInsets.bottom) + 12 },
-          ]}
-        >
-          <View
-            pointerEvents="box-none"
-            style={[styles.todayFabInner, isTablet && styles.todayFabInnerTablet]}
-          >
-            <Pressable
-              onPress={handleGoToToday}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.today')}
-              className="flex-row items-center gap-1.5 rounded-full bg-card border border-border/40 px-3.5 py-2.5 active:opacity-85"
-              style={styles.todayFab}
-            >
-              <CalendarDays size={15} color={themeColors.primary} />
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                {I18n.t('common.today')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      ) : null}
-
       <ThemeModal
         visible={showBulkUpdate}
         animationType="slide"
@@ -1854,32 +1846,5 @@ const styles = StyleSheet.create({
   modalActionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-  },
-  // Mirror the AddFab layout exactly (which anchors correctly at bottom-right on
-  // Android): an absolute full-width strip with a flex-row inner that justifies
-  // its single child. The Today pill only differs by justifying to the start
-  // (left) with left padding instead of the end. The previous column +
-  // `alignSelf` approach floated the pill toward the middle on Android.
-  todayFabAnchor: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-  },
-  todayFabInner: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    paddingLeft: spacing.lg,
-  },
-  todayFabInnerTablet: {
-    width: '100%',
-    maxWidth: TABLET_CONTENT_MAX_WIDTH,
-    alignSelf: 'center',
-  },
-  todayFab: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
   },
 });
