@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent, TextInput } from 'react-native';
+import type { TextInput } from 'react-native';
 import {
   Alert,
   FlatList,
@@ -19,10 +19,7 @@ import Reanimated, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
-import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
-import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { InOutHeader } from '~/components/navigation/InOutHeader';
 import {
@@ -39,13 +36,18 @@ import {
   ActivitySearchRow,
   ActivityTransactionList,
   DisplayModeToggle,
-  TransactionItem,
+  MonthPagerPage,
 } from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
+import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import {
+  useIndexedHandlerRefs,
+  useIndexedScrollToTopRefs,
+} from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -70,40 +72,17 @@ import { filterTransactionsByWallet } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
-import { CalendarWeekStrip } from '../components/CalendarWeekStrip';
 import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
   buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
-  formatCalendarDate,
   getCalendarWeekdayLabels,
 } from '../lib/calendarBuild';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
-
-// Day pager: a windowed carousel. Each slot renders a fixed day relative to a
-// stable anchor (the day at the centre slot), so an ordinary swipe just moves
-// to a neighbouring slot whose content is ALREADY rendered — nothing re-renders
-// and the list never snaps. That avoids the Android "flash" the old design had,
-// where snapping back to centre on every swipe raced the re-render (the centre
-// briefly showed the previous day). We only re-anchor (and snap) when a swipe
-// reaches the window edge or the day is changed from outside the pager (week
-// strip, month grid, "Today"), which is infrequent.
-const DAY_PAGER_SLOTS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-const DAY_PAGER_CENTER = 4;
-const DAY_PAGER_LAST = DAY_PAGER_SLOTS.length - 1;
-const DAY_MS = 86400000;
-
-const dayPagerSlotKeyExtractor = (item: number) => String(item);
-
-function addDaysToDayKey(dayKey: string, offset: number): string {
-  const [y, m, d] = dayKey.split('-').map(Number);
-  const base = new Date(Date.UTC(y, m - 1, d) + offset * DAY_MS);
-  return `${base.getUTCFullYear()}-${String(base.getUTCMonth() + 1).padStart(2, '0')}-${String(base.getUTCDate()).padStart(2, '0')}`;
-}
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -256,21 +235,18 @@ export function CalendarScreen({
   const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
-  const reportBottomNavScroll = useBottomNavScrollReporter();
 
   const todayDayKey = useMemo(() => dayKeyFromDateLocal(new Date()), []);
 
   // --- View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom) ---
+  // The 'day' level is the monthly transaction LIST (the home page); 'month' is
+  // the calendar grid; 'year' is the year overview. The list and the grid share
+  // the same month-index space (same anchor + centre), so zooming between them
+  // is a direct index hand-off.
   const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
+  // The focused day — used by the year view, the grid→list scroll target, and
+  // "today". The list view itself is paged by month (see the list month pager).
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
-  // The day shown at the day pager's centre slot. Each pager slot renders a day
-  // relative to this anchor, so it stays put across ordinary swipes (only edge
-  // swipes / external day changes re-anchor it). `pagerSlotRef` tracks which
-  // slot the carousel currently rests on; `pagerSelfDriveRef` distinguishes a
-  // pager-driven day change (don't re-anchor) from an external one (do).
-  const [dayAnchorKey, setDayAnchorKey] = useState<string>(todayDayKey);
-  const pagerSlotRef = useRef(DAY_PAGER_CENTER);
-  const pagerSelfDriveRef = useRef(false);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -372,10 +348,21 @@ export function CalendarScreen({
   });
 
   // --- Refs ---
+  // Month-grid pager (the 'month' view).
   const horizontalListRef = useRef<FlatList<number> | null>(null);
+  // Monthly-list pager (the 'day' / home view). Separate FlatList, but shares
+  // the grid's month-index space so zooming hands the index straight across.
+  const listPagerRef = useRef<FlatList<number> | null>(null);
 
   const pageWidth = Math.max(1, screenWidth);
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
+  const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
+  const listHorizontalPadding = CALENDAR_HORIZONTAL_PADDING;
+
+  // Per-page scroll handlers for the monthly-list pages, keyed by slot index, so
+  // we can scroll a given month's list to the top or to a specific day's header.
+  const getPageScrollToTopRef = useIndexedScrollToTopRefs();
+  const getPageScrollToDayRef = useIndexedHandlerRefs<(dayKey: string) => void>();
 
   const {
     activeIndex: activeMonthIndex,
@@ -394,37 +381,57 @@ export function CalendarScreen({
     initialIndex: MONTH_PAGER_CENTER_INDEX,
   });
 
+  const {
+    activeIndex: activeListMonthIndex,
+    slots: listMonthPagerSlots,
+    setActiveIndex: setActiveListMonthIndex,
+    handleMomentumEnd: handleListMonthMomentumEndRaw,
+    handleScrollEndDrag: handleListMonthScrollEndDrag,
+    handleScrollToIndexFailed: handleListMonthScrollToIndexFailed,
+    getItemLayout: getListItemLayout,
+    keyExtractor: listMonthPagerKeyExtractor,
+  } = useMonthPager({
+    listRef: listPagerRef,
+    pageWidth,
+    totalSlots: MONTH_PAGER_TOTAL_SLOTS,
+    initialIndex: MONTH_PAGER_CENTER_INDEX,
+  });
+
   const activeMonthDate = useMemo(
     () => addMonthsAtMonthStart(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
     [activeMonthIndex, monthPagerAnchorDate],
   );
 
-  // --- Day pager (re-centering carousel, swipe between days with preview) ---
-  const dayPagerListRef = useRef<FlatList<number> | null>(null);
-  // Only fire pager haptics for scrolls the user actually drove. Programmatic
-  // scrolls (initialScrollIndex settle on mount, scrollToIndex from the prev/
-  // next buttons, recenter) also emit `onMomentumScrollEnd`, and firing a
-  // haptic there produces a stray buzz right after the screen loads. We arm
-  // this flag on `onScrollBeginDrag` and consume it on momentum end.
+  const activeListMonthDate = useMemo(
+    () =>
+      addMonthsAtMonthStart(monthPagerAnchorDate, activeListMonthIndex - MONTH_PAGER_CENTER_INDEX),
+    [activeListMonthIndex, monthPagerAnchorDate],
+  );
+
+  // Fire pager haptics only for user-driven scrolls. Programmatic settles
+  // (mount, prev/next buttons, zoom hand-off) also emit onMomentumScrollEnd; a
+  // haptic there is a stray buzz. Armed on drag-begin, consumed on momentum end.
   const userDraggingPagerRef = useRef(false);
   const handlePagerScrollBeginDrag = useCallback(() => {
     userDraggingPagerRef.current = true;
   }, []);
-  const getDayItemLayout = useCallback(
-    (_: ArrayLike<number> | null | undefined, index: number) => ({
-      length: pageWidth,
-      offset: pageWidth * index,
-      index,
-    }),
-    [pageWidth],
+
+  // Scroll a destination month's list to a day's section header once its page
+  // has mounted. Retries once for far-away pages that aren't laid out yet.
+  const scrollListToDay = useCallback(
+    (monthIndex: number, dayKey: string) => {
+      const attempt = () => getPageScrollToDayRef(monthIndex).current?.(dayKey);
+      const handle = setTimeout(() => {
+        if (getPageScrollToDayRef(monthIndex).current) {
+          attempt();
+        } else {
+          setTimeout(attempt, 220);
+        }
+      }, 80);
+      return handle;
+    },
+    [getPageScrollToDayRef],
   );
-  const recenterDayPager = useCallback(() => {
-    pagerSlotRef.current = DAY_PAGER_CENTER;
-    dayPagerListRef.current?.scrollToOffset({
-      offset: DAY_PAGER_CENTER * pageWidth,
-      animated: false,
-    });
-  }, [pageWidth]);
 
   // --- Transactions filtering ---
   const scopedTransactions = useMemo(
@@ -578,56 +585,61 @@ export function CalendarScreen({
     [activeLocale, settings.weekStartsOn],
   );
 
-  // --- Selected day's month for header label ---
-  const selectedMonthDate = useMemo(() => {
-    const d = dayKeyToUtcDate(selectedDayKey);
-    return d ?? new Date();
-  }, [selectedDayKey]);
-
-  const selectedMonthLabel = useMemo(
-    () => formatMonthYearLabel(selectedMonthDate, activeLocale),
-    [selectedMonthDate, activeLocale],
-  );
-
+  // --- Header month label / key (list view tracks its own month pager) ---
   const activeMonthLabel = useMemo(
     () => formatMonthYearLabel(activeMonthDate, activeLocale),
     [activeMonthDate, activeLocale],
   );
+  const activeListMonthLabel = useMemo(
+    () => formatMonthYearLabel(activeListMonthDate, activeLocale),
+    [activeListMonthDate, activeLocale],
+  );
 
-  const displayedMonthLabel = viewMode === 'day' ? selectedMonthLabel : activeMonthLabel;
+  const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
 
   const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
-  const selectedMonthKey = useMemo(() => {
-    const d = dayKeyToUtcDate(selectedDayKey);
-    return d ? monthKeyFromDateLocal(d) : monthKeyFromDateLocal(new Date());
-  }, [selectedDayKey]);
+  const activeListMonthKey = useMemo(
+    () => monthKeyFromDateLocal(activeListMonthDate),
+    [activeListMonthDate],
+  );
 
-  const displayedMonthKey = viewMode === 'day' ? selectedMonthKey : activeMonthKey;
+  const displayedMonthKey = viewMode === 'day' ? activeListMonthKey : activeMonthKey;
 
-  // --- Build month data for the active month (header summary + month grid) ---
-  const activeMonthData = useMemo(() => {
-    const anchor = viewMode !== 'day' ? activeMonthDate : selectedMonthDate;
-    const mk = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
-    return buildCalendarMonthFromGrouped({
-      monthAnchor: anchor,
-      transactions: transactionsByMonthKey.get(mk) ?? [],
-      locale: activeLocale,
+  // --- Build month data (header summary + month grid). `activeMonthData` is the
+  // grid month; `activeListMonthData` feeds the list-view summary. ---
+  const buildMonthData = useCallback(
+    (anchor: Date) => {
+      const mk = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
+      return buildCalendarMonthFromGrouped({
+        monthAnchor: anchor,
+        transactions: transactionsByMonthKey.get(mk) ?? [],
+        locale: activeLocale,
+        isTimeMode,
+        getDisplayValueForTransaction,
+        todayDayKey,
+        weekStartsOn: settings.weekStartsOn,
+      });
+    },
+    [
+      transactionsByMonthKey,
+      activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
       todayDayKey,
-      weekStartsOn: settings.weekStartsOn,
-    });
-  }, [
-    viewMode,
-    activeMonthDate,
-    selectedMonthDate,
-    transactionsByMonthKey,
-    activeLocale,
-    isTimeMode,
-    getDisplayValueForTransaction,
-    todayDayKey,
-    settings.weekStartsOn,
-  ]);
+      settings.weekStartsOn,
+    ],
+  );
+
+  const activeMonthData = useMemo(
+    () => buildMonthData(activeMonthDate),
+    [buildMonthData, activeMonthDate],
+  );
+  const activeListMonthData = useMemo(
+    () => buildMonthData(activeListMonthDate),
+    [buildMonthData, activeListMonthDate],
+  );
+
+  const summaryMonthData = viewMode === 'day' ? activeListMonthData : activeMonthData;
 
   // --- Selected day transactions ---
   const transactionDisplaySettings = useMemo(
@@ -693,11 +705,13 @@ export function CalendarScreen({
     yearViewListRef.current = ref;
   }, []);
 
-  // --- Back / zoom out: day → month → year ---
+  // --- Back / zoom out: list → month grid → year ---
   const handleZoomOut = useCallback(() => {
     void triggerHaptic('selection');
     if (viewMode === 'day') {
-      const idx = getMonthIndexForDay(selectedDayKey);
+      // The list and the grid share a month-index space, so the grid opens on
+      // exactly the month the list is showing.
+      const idx = activeListMonthIndex;
       setActiveMonthIndex(idx);
       requestAnimationFrame(() => {
         horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
@@ -717,69 +731,29 @@ export function CalendarScreen({
   }, [
     viewMode,
     selectedDayKey,
-    getMonthIndexForDay,
+    activeListMonthIndex,
     setActiveMonthIndex,
     centerYear,
     dayMonthZoom,
     monthYearZoom,
   ]);
 
-  // --- Day selection from week strip ---
-  const handleSelectDayFromWeek = useCallback((dayKey: string) => {
-    setSelectedDayKey(dayKey);
-  }, []);
-
-  // A swipe just lands the carousel on a neighbouring slot whose day is already
-  // rendered (relative to the stable anchor), so there's no snap-back and no
-  // flash. We only re-anchor + recentre when the swipe reaches the window edge,
-  // which keeps room to keep swiping in that direction.
-  const handleDayPagerMomentumEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const wasUserDriven = userDraggingPagerRef.current;
-      userDraggingPagerRef.current = false;
-      const landed = Math.max(
-        0,
-        Math.min(DAY_PAGER_LAST, Math.round(e.nativeEvent.contentOffset.x / pageWidth)),
-      );
-      // Ignore Android's duplicate momentum echoes (which fire with the drag
-      // flag already consumed) and no-op settles, so one swipe = one day.
-      if (!wasUserDriven || landed === pagerSlotRef.current) return;
-      pagerSlotRef.current = landed;
-      void triggerHaptic('selection');
-      const newDay = addDaysToDayKey(dayAnchorKey, landed - DAY_PAGER_CENTER);
-      // Tell the external-sync effect this day change came from the pager, so it
-      // doesn't re-anchor (which would snap and re-render mid-swipe).
-      pagerSelfDriveRef.current = true;
-      setSelectedDayKey(newDay);
-      if (landed <= 0 || landed >= DAY_PAGER_LAST) {
-        setDayAnchorKey(newDay);
-        recenterDayPager();
-      }
-    },
-    [pageWidth, dayAnchorKey, recenterDayPager],
-  );
-
-  // Keep the pager anchored on the selected day when it changes from OUTSIDE the
-  // pager (week strip, month-grid tap, "Today", reset). Pager-driven changes set
-  // the self-drive flag and are skipped so ordinary swipes never re-anchor.
-  useEffect(() => {
-    if (pagerSelfDriveRef.current) {
-      pagerSelfDriveRef.current = false;
-      return;
-    }
-    setDayAnchorKey(selectedDayKey);
-    recenterDayPager();
-  }, [selectedDayKey, recenterDayPager]);
-
-  // --- Day selection from month grid — zoom in to day view ---
+  // --- Day selection from month grid — zoom in to the monthly list and scroll
+  // to that day's section. ---
   const handleSelectDayFromMonth = useCallback(
     (dayKey: string) => {
       void triggerHaptic('selection');
+      const idx = getMonthIndexForDay(dayKey);
       setSelectedDayKey(dayKey);
+      setActiveListMonthIndex(idx);
+      requestAnimationFrame(() => {
+        listPagerRef.current?.scrollToIndex({ index: idx, animated: false });
+        scrollListToDay(idx, dayKey);
+      });
       setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [dayMonthZoom],
+    [getMonthIndexForDay, setActiveListMonthIndex, scrollListToDay, dayMonthZoom],
   );
 
   // --- Month selection from year view — zoom in to month view ---
@@ -815,7 +789,7 @@ export function CalendarScreen({
     });
   }, [viewMode, activeMonthData.firstDayKey, activeMonthData.lastDayKey, todayDayKey]);
 
-  // --- Month pager navigation ---
+  // --- Month-grid pager navigation ---
   const handleMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleHorizontalMomentumEnd>[0]) => {
       // Skip the buzz for programmatic settles (mount, prev/next buttons) —
@@ -840,6 +814,30 @@ export function CalendarScreen({
     setActiveMonthIndex(nextIdx);
     horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
   }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
+
+  // --- Monthly-list pager navigation ---
+  const handleListMonthMomentumEnd = useCallback(
+    (e: Parameters<typeof handleListMonthMomentumEndRaw>[0]) => {
+      if (userDraggingPagerRef.current) void triggerHaptic('selection');
+      userDraggingPagerRef.current = false;
+      handleListMonthMomentumEndRaw(e);
+    },
+    [handleListMonthMomentumEndRaw],
+  );
+
+  const handleListPrevMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeListMonthIndex - 1);
+    setActiveListMonthIndex(nextIdx);
+    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
+
+  const handleListNextMonth = useCallback(() => {
+    void triggerHaptic('selection');
+    const nextIdx = clampMonthIndex(activeListMonthIndex + 1);
+    setActiveListMonthIndex(nextIdx);
+    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
+  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
 
   // --- Search ---
   const handleOpenSearch = useCallback(() => {
@@ -887,10 +885,13 @@ export function CalendarScreen({
     setShowFilters(false);
   }, []);
 
-  // Reset to current month/today
+  // Reset to current month/today — re-centre the list (and the grid/year if
+  // they're showing) and scroll the list to today's section.
   useEffect(() => {
     if (!resetToCurrentMonthToken) return;
     setSelectedDayKey(todayDayKey);
+    setActiveListMonthIndex(MONTH_PAGER_CENTER_INDEX);
+    listPagerRef.current?.scrollToIndex({ index: MONTH_PAGER_CENTER_INDEX, animated: false });
     if (viewMode === 'year') {
       yearViewListRef.current?.scrollToIndex({ index: CENTER_YEAR_INDEX, animated: false });
     } else if (viewMode === 'month') {
@@ -899,29 +900,45 @@ export function CalendarScreen({
         index: MONTH_PAGER_CENTER_INDEX,
         animated: false,
       });
+    } else {
+      scrollListToDay(MONTH_PAGER_CENTER_INDEX, todayDayKey);
     }
-  }, [resetToCurrentMonthToken, setActiveMonthIndex, todayDayKey, viewMode]);
+  }, [
+    resetToCurrentMonthToken,
+    setActiveMonthIndex,
+    setActiveListMonthIndex,
+    scrollListToDay,
+    todayDayKey,
+    viewMode,
+  ]);
 
-  const isOnToday = selectedDayKey === todayDayKey && viewMode === 'day';
+  // "Today" = the current month's list. The pill hides once we're there.
+  const isOnToday = viewMode === 'day' && activeListMonthIndex === MONTH_PAGER_CENTER_INDEX;
 
   const handleGoToToday = useCallback(() => {
     void triggerHaptic('selection');
     setSelectedDayKey(todayDayKey);
+    setActiveListMonthIndex(MONTH_PAGER_CENTER_INDEX);
+    requestAnimationFrame(() => {
+      listPagerRef.current?.scrollToIndex({ index: MONTH_PAGER_CENTER_INDEX, animated: false });
+      scrollListToDay(MONTH_PAGER_CENTER_INDEX, todayDayKey);
+    });
     if (viewMode === 'year') {
       yearViewListRef.current?.scrollToIndex({ index: CENTER_YEAR_INDEX, animated: false });
-      setViewMode('day');
       monthYearZoom.value = withTiming(0, ZOOM_TIMING);
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     } else if (viewMode === 'month') {
-      setActiveMonthIndex(MONTH_PAGER_CENTER_INDEX);
-      horizontalListRef.current?.scrollToIndex({
-        index: MONTH_PAGER_CENTER_INDEX,
-        animated: false,
-      });
-      setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     }
-  }, [todayDayKey, viewMode, setActiveMonthIndex, dayMonthZoom, monthYearZoom]);
+    setViewMode('day');
+  }, [
+    todayDayKey,
+    viewMode,
+    setActiveListMonthIndex,
+    scrollListToDay,
+    dayMonthZoom,
+    monthYearZoom,
+  ]);
 
   // The "Today" pill is rendered by the shell (next to the Add button) so it
   // anchors to the bottom of the screen reliably on Android. Report when it
@@ -952,30 +969,6 @@ export function CalendarScreen({
         formatAmount(value, settings, { showSign: false })
       ),
     [isTimeMode, settings],
-  );
-
-  const formatDaySubtotal = useCallback(
-    (value: number, tone: 'income' | 'expense') => {
-      const colorClass = tone === 'income' ? 'text-success' : 'text-destructive';
-      const iconColor = tone === 'income' ? themeColors.success : themeColors.error;
-      if (isTimeMode) {
-        return (
-          <TimeValueInline
-            value={formatHours(value)}
-            variant="caption"
-            textClassName={colorClass}
-            iconColor={iconColor}
-            iconSize={10}
-          />
-        );
-      }
-      return (
-        <Text variant="caption" className={colorClass}>
-          {formatAmount(value, settings, { showSign: false })}
-        </Text>
-      );
-    },
-    [isTimeMode, settings, themeColors.success, themeColors.error],
   );
 
   // --- Transaction press handlers ---
@@ -1123,16 +1116,6 @@ export function CalendarScreen({
     return Math.max(280, contentWidth - horizontal);
   }, [contentWidth]);
 
-  const bottomPad = useMemo(
-    () => getBottomNavReservedInset(safeAreaInsets.bottom) + spacing.lg,
-    [safeAreaInsets.bottom],
-  );
-
-  const selectedTransactionIdSet = useMemo(
-    () => new Set(selectedTransactionIds),
-    [selectedTransactionIds],
-  );
-
   // --- Month page renderer for month mode FlatList ---
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
@@ -1183,101 +1166,47 @@ export function CalendarScreen({
     ],
   );
 
-  // --- Day page renderer for the day-mode horizontal pager ---
-  const renderDayPage = useCallback(
-    ({ item }: { item: number }) => {
-      const dayKey = addDaysToDayKey(dayAnchorKey, item - DAY_PAGER_CENTER);
-      const dayLabel = formatCalendarDate(dayKey, activeLocale);
-      const monthTxs = transactionsByMonthKey.get(dayKey.slice(0, 7));
-      const dayTxs = monthTxs
-        ? monthTxs
-            .filter((tx) => dayKeyFromIsoLocal(tx.date) === dayKey)
-            .sort(compareTransactionsByDateDesc)
-        : [];
-      const isFuture = dayKey > todayDayKey;
-      const dayAgg = globalDailyByDayKey.get(dayKey) ?? null;
-      return (
-        <View style={{ width: pageWidth }}>
-          <ScrollView
-            style={styles.flexOne}
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            onScroll={reportBottomNavScroll}
-            scrollEventThrottle={32}
-          >
-            <View style={[styles.daySection, { paddingHorizontal: CALENDAR_HORIZONTAL_PADDING }]}>
-              <View style={styles.daySectionHeader}>
-                <View style={styles.daySectionTitleGroup}>
-                  <Text variant="bodyStrong" className="tracking-tight">
-                    {dayLabel}
-                  </Text>
-                </View>
-                <View style={styles.daySectionSubtotals}>
-                  {dayAgg && dayAgg.income > 0 ? (
-                    <View className="rounded-full bg-success/10 px-2 py-0.5">
-                      {formatDaySubtotal(dayAgg.income, 'income')}
-                    </View>
-                  ) : null}
-                  {dayAgg && dayAgg.expense > 0 ? (
-                    <View className="rounded-full bg-destructive/10 px-2 py-0.5">
-                      {formatDaySubtotal(dayAgg.expense, 'expense')}
-                    </View>
-                  ) : null}
-                </View>
-              </View>
-
-              {dayTxs.length === 0 ? (
-                <EmptyState
-                  title={I18n.t('calendar.empty_title')}
-                  message={
-                    isFuture ? I18n.t('calendar.future_empty') : I18n.t('calendar.empty_day')
-                  }
-                  mascotMood="curious"
-                  animateIn={false}
-                  compact
-                />
-              ) : (
-                <View style={styles.transactionList}>
-                  {dayTxs.map((tx) => (
-                    <TransactionItem
-                      key={tx.id}
-                      transaction={tx}
-                      onPressTransaction={handleTransactionPress}
-                      onPressSplitBadge={handleTransactionSplitBadgePress}
-                      onLongPressTransaction={handleTransactionLongPress}
-                      selectionMode={isSelectionMode}
-                      selected={selectedTransactionIdSet.has(tx.id)}
-                      settings={transactionDisplaySettings}
-                      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                      compact
-                      disableAnimations
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-          </ScrollView>
-        </View>
-      );
-    },
+  // --- Month page renderer for the monthly-list pager (the home view) ---
+  const renderListMonthPage = useCallback(
+    ({ item }: { item: number }) => (
+      <MonthPagerPage
+        item={item}
+        monthPagerAnchorDate={monthPagerAnchorDate}
+        centerIndex={MONTH_PAGER_CENTER_INDEX}
+        localeKey={activeLocale}
+        monthPageStyle={monthPageStyle}
+        monthTransactionsMap={transactionsByMonthKey}
+        displaySettings={transactionDisplaySettings}
+        getDisplayValueForTransaction={getDisplayValueForTransaction}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        onTransactionPress={handleTransactionPress}
+        onTransactionLongPress={handleTransactionLongPress}
+        onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+        selectedTransactionIds={selectedTransactionIds}
+        selectionMode={isSelectionMode}
+        onToggleDaySelection={toggleDaySelection}
+        getScrollToTopRef={getPageScrollToTopRef}
+        getScrollToDayRef={getPageScrollToDayRef}
+        contentPaddingHorizontal={listHorizontalPadding}
+      />
+    ),
     [
-      dayAnchorKey,
-      todayDayKey,
+      monthPagerAnchorDate,
       activeLocale,
+      monthPageStyle,
       transactionsByMonthKey,
-      globalDailyByDayKey,
-      formatDaySubtotal,
-      pageWidth,
-      bottomPad,
-      reportBottomNavScroll,
-      handleTransactionPress,
-      handleTransactionSplitBadgePress,
-      handleTransactionLongPress,
-      isSelectionMode,
-      selectedTransactionIdSet,
       transactionDisplaySettings,
+      getDisplayValueForTransaction,
       getTrueHourlyRateForDate,
+      handleTransactionPress,
+      handleTransactionLongPress,
+      handleTransactionSplitBadgePress,
+      selectedTransactionIds,
+      isSelectionMode,
+      toggleDaySelection,
+      getPageScrollToTopRef,
+      getPageScrollToDayRef,
+      listHorizontalPadding,
     ],
   );
 
@@ -1408,12 +1337,13 @@ export function CalendarScreen({
               onClose={handleCloseSearch}
             />
 
-            {/* Month pager — matches the Insights month navigation capsule */}
-            {viewMode === 'month' && !isSearchOpen && (
+            {/* Month nav capsule — shown in both the monthly list and the month
+                grid; the prev/next + label drive whichever pager is active. */}
+            {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
               <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
                 <View className="flex-row items-center justify-between">
                   <Pressable
-                    onPress={handlePrevMonth}
+                    onPress={viewMode === 'day' ? handleListPrevMonth : handlePrevMonth}
                     className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                   >
                     <ChevronLeft size={16} color={themeColors.textSoft} />
@@ -1421,12 +1351,12 @@ export function CalendarScreen({
                   <View className="flex-1 items-center">
                     <View className="px-2">
                       <Text variant="bodyStrong" className="text-foreground tracking-tight">
-                        {activeMonthLabel}
+                        {displayedMonthLabel}
                       </Text>
                     </View>
                   </View>
                   <Pressable
-                    onPress={handleNextMonth}
+                    onPress={viewMode === 'day' ? handleListNextMonth : handleNextMonth}
                     className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                   >
                     <ChevronRight size={16} color={themeColors.textSoft} />
@@ -1435,14 +1365,14 @@ export function CalendarScreen({
               </View>
             )}
 
-            {/* Summary row — income/expense cards in month view. The selection
-                toolbar lives in the title row above, so this slot keeps showing
-                the month summary even while multi-selecting (no layout shift). */}
-            {viewMode === 'month' && !isSearchOpen && (
+            {/* Summary row — income/expense cards for the active month. The
+                selection toolbar lives in the title row above, so this slot keeps
+                showing the month summary even while multi-selecting (no shift). */}
+            {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
               <View style={styles.summarySlot}>
                 <InOutHeader
-                  incomeValue={formatSummaryValue(activeMonthData.totalIncome)}
-                  expenseValue={formatSummaryValue(activeMonthData.totalExpense)}
+                  incomeValue={formatSummaryValue(summaryMonthData.totalIncome)}
+                  expenseValue={formatSummaryValue(summaryMonthData.totalExpense)}
                   onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
                   onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
                 />
@@ -1454,43 +1384,25 @@ export function CalendarScreen({
 
       {/* --- Calendar area: three stacked reanimated layers --- */}
       <View className="flex-1 overflow-hidden bg-background">
-        {/* Day layer */}
+        {/* List layer — the monthly transaction list (home view) */}
         <Reanimated.View
           style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}
           pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
         >
-          <View style={styles.flexOne}>
-            <View className="border-b border-border/30">
-              <CalendarWeekStrip
-                selectedDayKey={selectedDayKey}
-                todayDayKey={todayDayKey}
-                weekdayLabels={weekdayLabels}
-                weekStartsOn={settings.weekStartsOn}
-                dailyByDayKey={globalDailyByDayKey}
-                onSelectDay={handleSelectDayFromWeek}
-              />
-            </View>
-            <FlatList
-              ref={dayPagerListRef}
-              data={DAY_PAGER_SLOTS}
-              keyExtractor={dayPagerSlotKeyExtractor}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              bounces={false}
-              directionalLockEnabled
-              decelerationRate="fast"
-              overScrollMode="never"
-              renderItem={renderDayPage}
-              initialScrollIndex={DAY_PAGER_CENTER}
-              getItemLayout={getDayItemLayout}
-              onScrollBeginDrag={handlePagerScrollBeginDrag}
-              onMomentumScrollEnd={handleDayPagerMomentumEnd}
-              initialNumToRender={DAY_PAGER_SLOTS.length}
-              windowSize={DAY_PAGER_SLOTS.length}
-              style={styles.flexOne}
-            />
-          </View>
+          <FlatList
+            ref={listPagerRef}
+            data={listMonthPagerSlots}
+            keyExtractor={listMonthPagerKeyExtractor}
+            {...MONTH_PAGER_LIST_CONFIG}
+            renderItem={renderListMonthPage}
+            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+            getItemLayout={getListItemLayout}
+            onScrollBeginDrag={handlePagerScrollBeginDrag}
+            onScrollEndDrag={handleListMonthScrollEndDrag}
+            onMomentumScrollEnd={handleListMonthMomentumEnd}
+            onScrollToIndexFailed={handleListMonthScrollToIndexFailed}
+            style={styles.flexOne}
+          />
         </Reanimated.View>
 
         {/* Month layer */}
@@ -1831,38 +1743,9 @@ const styles = StyleSheet.create({
     minHeight: 56,
     justifyContent: 'center',
   },
-  scrollContent: {
-    paddingTop: spacing.xxs,
-    gap: spacing.sm,
-  },
   calendarWrapper: {
     paddingTop: spacing.xs,
     alignItems: 'center',
-  },
-  daySection: {
-    gap: spacing.xs,
-  },
-  daySectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.xxs,
-    paddingTop: spacing.xs,
-    gap: spacing.sm,
-  },
-  daySectionTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    flexShrink: 1,
-  },
-  daySectionSubtotals: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  transactionList: {
-    gap: 2,
   },
   modalHeaderRow: {
     paddingHorizontal: spacing.screenHorizontal,
