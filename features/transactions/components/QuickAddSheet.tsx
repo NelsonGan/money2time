@@ -47,6 +47,7 @@ import type {
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode } from '~/utils/currency';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -179,9 +180,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     minHeight: 60,
     maxHeight: 80,
-    paddingTop: 0,
-    paddingBottom: 0,
+    // Zero ALL padding (not just vertical). Android's native TextInput adds
+    // default horizontal padding, which pushed the caret and typed text to the
+    // right of the placeholder <Text> overlay (which has none) — the caret
+    // looked misaligned with the placeholder. padding:0 lines them up.
+    padding: 0,
     textAlignVertical: 'top',
+    // Match the placeholder overlay exactly so the caret and typed text sit on
+    // the same baseline as the placeholder. Without an explicit fontFamily the
+    // input falls back to the system font (Roboto) while the placeholder uses
+    // Work Sans on Android, and includeFontPadding adds extra top padding to
+    // the input but not the <Text> overlay — together that left the blinking
+    // caret visibly offset from the placeholder.
+    fontFamily: FONT.regular,
+    includeFontPadding: false,
   },
   inputColumn: {
     position: 'relative',
@@ -196,6 +208,7 @@ const styles = StyleSheet.create({
   placeholderLine: {
     fontSize: 14,
     lineHeight: 20,
+    includeFontPadding: false,
   },
   summaryRow: {
     flexDirection: 'row',
