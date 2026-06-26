@@ -1593,6 +1593,19 @@ const en = {
     delete_body: 'This removes the album. Your transactions are not deleted.',
     cover_permission_title: 'Photo access needed',
     cover_permission_body: 'Allow photo access to choose a cover image.',
+    location: {
+      label: 'Location',
+      add: 'Add location',
+      clear: 'Clear location',
+      picker_title: 'Choose a place',
+      search_placeholder: 'Search cities…',
+      search_hint: 'Search for a city to place this trip on the map.',
+      no_results: 'No places found',
+      screen_title: 'Trip map',
+      empty_title: 'No places yet',
+      empty_message: 'Add a location to an album to see it on the globe and map.',
+      fit_all: 'Fit all',
+    },
   },
 };
 

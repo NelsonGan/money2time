@@ -47,6 +47,9 @@ export const AnalyticsEvents = {
   ALBUM_CREATED: 'Album Created',
   ALBUM_UPDATED: 'Album Updated',
   ALBUM_DELETED: 'Album Deleted',
+  ALBUM_LOCATION_SET: 'Album Location Set',
+  ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
+  MAP_PIN_TAPPED: 'Map Pin Tapped',
 
   // Recurring rules
   RECURRING_RULE_CREATED: 'Recurring Rule Created',

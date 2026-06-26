@@ -39,3 +39,15 @@ export function formatAlbumDateRange(
   const endLabel = dayLabel(endKey, withYear, locale);
   return `${startLabel} – ${endLabel}`;
 }
+
+/** A located album reduced to what the map marker needs to draw it. */
+export interface AlbumPin {
+  albumId: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  /** Resolved cover image uri, or null to fall back to the album initial. */
+  coverUri: string | null;
+  /** Pre-formatted total spend (respects money/time display mode). */
+  spendLabel: string;
+}

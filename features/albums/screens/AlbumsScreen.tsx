@@ -1,3 +1,4 @@
+import { Map as MapIcon } from 'lucide-react-native';
 import { type ElementRef, useEffect, useMemo } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -20,6 +21,7 @@ interface AlbumsScreenProps {
   scrollToTopToken?: number;
   onOpenCreateAlbum: () => void;
   onOpenAlbumDetail: (albumId: string) => void;
+  onOpenAlbumLocations: () => void;
 }
 
 const GRID_GAP = 14;
@@ -29,6 +31,7 @@ export function AlbumsScreen({
   scrollToTopToken,
   onOpenCreateAlbum,
   onOpenAlbumDetail,
+  onOpenAlbumLocations,
 }: AlbumsScreenProps) {
   const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
   const { checkLimit } = useProGate();
@@ -128,6 +131,21 @@ export function AlbumsScreen({
           </Animated.ScrollView>
         )}
       </TabletContentContainer>
+
+      {albums.length > 0 ? (
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenAlbumLocations();
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('albums.location.screen_title')}
+          className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-soft active:opacity-85"
+          style={{ bottom: bottomNavInset + 16 }}
+        >
+          <MapIcon size={24} color="#fff" />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
