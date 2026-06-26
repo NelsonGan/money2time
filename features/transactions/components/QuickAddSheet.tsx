@@ -180,8 +180,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     minHeight: 60,
     maxHeight: 80,
-    paddingTop: 0,
-    paddingBottom: 0,
+    // Zero ALL padding (not just vertical). Android's native TextInput adds
+    // default horizontal padding, which pushed the caret and typed text to the
+    // right of the placeholder <Text> overlay (which has none) — the caret
+    // looked misaligned with the placeholder. padding:0 lines them up.
+    padding: 0,
     textAlignVertical: 'top',
     // Match the placeholder overlay exactly so the caret and typed text sit on
     // the same baseline as the placeholder. Without an explicit fontFamily the

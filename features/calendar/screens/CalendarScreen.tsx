@@ -722,7 +722,11 @@ export function CalendarScreen({
       const wasUserDriven = userDraggingPagerRef.current;
       userDraggingPagerRef.current = false;
       const landed = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
-      const delta = landed - DAY_PAGER_CENTER;
+      // Clamp to a single page per swipe. iOS paging snaps one page at a time,
+      // but a hard fling on Android can carry the momentum two slots over,
+      // jumping two days from one swipe. Limiting the step to ±1 keeps both
+      // platforms advancing exactly one day per swipe.
+      const delta = Math.max(-1, Math.min(1, landed - DAY_PAGER_CENTER));
       if (delta !== 0) {
         if (wasUserDriven) void triggerHaptic('selection');
         setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
@@ -1851,17 +1855,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
-  // Anchor the floating Today pill to the bottom-left. `alignItems: 'flex-start'`
-  // pins the pill to the left explicitly instead of relying on the child's
-  // `alignSelf` inside a full-width stretch parent — on Android that nesting
-  // could leave the pill floating away from the edge rather than flush-left.
+  // Mirror the AddFab layout exactly (which anchors correctly at bottom-right on
+  // Android): an absolute full-width strip with a flex-row inner that justifies
+  // its single child. The Today pill only differs by justifying to the start
+  // (left) with left padding instead of the end. The previous column +
+  // `alignSelf` approach floated the pill toward the middle on Android.
   todayFabAnchor: {
     position: 'absolute',
     left: 0,
     right: 0,
-    alignItems: 'flex-start',
   },
   todayFabInner: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     paddingLeft: spacing.lg,
   },
   todayFabInnerTablet: {
@@ -1870,7 +1876,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   todayFab: {
-    alignSelf: 'flex-start',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,

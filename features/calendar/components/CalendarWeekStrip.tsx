@@ -62,11 +62,7 @@ export const CalendarWeekStrip = memo(function CalendarWeekStrip({
                 style={[
                   styles.dayCircle,
                   isSelected && { backgroundColor: themeColors.primary },
-                  isToday &&
-                    !isSelected && {
-                      borderWidth: 2,
-                      borderColor: themeColors.primary,
-                    },
+                  isToday && !isSelected && { borderColor: themeColors.primary },
                 ]}
               >
                 <Text
@@ -121,11 +117,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    // Clip to the rounded bounds. The strip lives inside an opacity-animated
-    // Reanimated layer; without an explicit clip Android can paint the filled
-    // selection background as a square (corners not rounded). overflow:hidden
-    // forces the circular clip and is a no-op on iOS.
-    overflow: 'hidden',
+    // Always carry a border on the box (transparent unless it's the today
+    // ring). On Android (new architecture) a rounded view with a background but
+    // no border can paint with square corners; keeping a border forces the
+    // rounded outline path — the same pattern the month grid uses, which
+    // renders correctly. Recolored to the primary ring for today.
+    borderWidth: 2,
+    borderColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
