@@ -34,6 +34,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
         "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
+        "NSLocationWhenInUseUsageDescription": "Money2Time can use your location to show your current position on the trip album map. Your location is never stored or shared.",
         "BGTaskSchedulerPermittedIdentifiers": ["money2time-auto-backup"],
         "NSUbiquitousContainers": {
           "iCloud.com.nelsongan.money2time": {
