@@ -1,0 +1,27 @@
+{
+  "version": 8,
+  "name": "money2time-basemap",
+  "metadata": {
+    "note": "Minimal no-key raster basemap. For full offline support, bundle a Protomaps PMTiles archive and point the sources at a pmtiles:// or local file source, then load this file in AlbumMapView instead of the default demotiles style."
+  },
+  "sources": {
+    "osm": {
+      "type": "raster",
+      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      "tileSize": 256,
+      "attribution": "© OpenStreetMap contributors"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#e8eef2" }
+    },
+    {
+      "id": "osm",
+      "type": "raster",
+      "source": "osm"
+    }
+  ]
+}

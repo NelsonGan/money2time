@@ -10,6 +10,7 @@ import {
   formatCurrency,
   formatDateInput,
   formatHours,
+  formatHoursCompact,
   formatMonthYearLabel,
   formatRelativeDate,
   getLocaleCurrencyCode,
@@ -277,9 +278,26 @@ describe('formatHours', () => {
   });
 });
 
+describe('formatHoursCompact', () => {
+  it('returns minutes below an hour and drops minutes above', () => {
+    expect(formatHoursCompact(0)).toBe('0m');
+    expect(formatHoursCompact(0.5)).toBe('30m');
+    expect(formatHoursCompact(2.4)).toBe('2h');
+  });
+
+  it('abbreviates large hour counts', () => {
+    expect(formatHoursCompact(1500)).toBe('1.5Kh');
+  });
+});
+
 describe('formatAmount', () => {
   const moneySettings = { currencySymbol: '$', displayMode: 'money' as const };
   const timeSettings = { currencySymbol: '$', displayMode: 'time' as const };
+
+  it('abbreviates money when compact is set', () => {
+    expect(formatAmount(1234.56, moneySettings, { compact: true })).toBe('$1.2K');
+    expect(formatAmount(250, moneySettings, { compact: true })).toBe('$250');
+  });
 
   it('formats money with default sign', () => {
     expect(formatAmount(12.5, moneySettings)).toBe('$12.50');

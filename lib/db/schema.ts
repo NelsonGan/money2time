@@ -168,6 +168,13 @@ export const albumsTable = sqliteTable('albums', {
   // transaction date in the album.
   startDate: text('start_date'),
   endDate: text('end_date'),
+  // Optional real-world location. "Located" = latitude is non-null.
+  latitude: real('latitude'),
+  longitude: real('longitude'),
+  placeId: text('place_id'),
+  placeName: text('place_name'),
+  placeAdmin: text('place_admin'),
+  countryCode: text('country_code'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
