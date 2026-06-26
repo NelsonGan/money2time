@@ -37,25 +37,25 @@ npm run check
 npm test
 ```
 
-Tests live in `__tests__/` (18 suites covering utils, repositories, services, navigation). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
+Tests live in `__tests__/` (29 suites covering utils, repositories, services, navigation, db, features, i18n parity). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
 
 ## Architecture
 
 ### Navigation
 
-`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` (5 tabs: **home, accounts, calendar, insights, settings**) overlaying a tab-based content area. The `home` tab renders `TransactionsScreen` (power mode) or `SimpleActivityScreen` (simple mode); `accounts` is hidden in simple mode. Modal/push screens (editors, drilldowns, flows) are registered at the root stack level.
+`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` overlaying a tab-based content area. The app is **calendar-first**: the 5 tabs are **calendar, accounts, insights, albums, settings** (`TabName` in `components/navigation/BottomNav.tsx`). The `calendar` tab is the home/base view and renders `CalendarScreen` (which surfaces the month grid, day pager, and transaction list); `accounts` is hidden in simple mode. Modal/push screens (editors, drilldowns, flows) are registered at the root stack level.
 
 **Root stack screens** (defined in `navigation/rootStack.ts`):
-`Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsQuickEntry`, `SettingsWageCalculator`, `ProPaywall`.
+`Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsQuickEntry`, `SettingsMultiCurrency`, `SettingsWageCalculator`, `ShareAndEarn`, `ProPaywall`, `CreateAlbum`, `AlbumDetail`, `EditAlbumTransactions`, `AddAlbumTransactions`, `EditAlbumDetails`.
 
 **Settings has its own nested stack** (`navigation/settingsStack.ts`):
-`SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `Categories`, `CategoriesSubcategories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `QuickEntrySettings`.
+`SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `ExchangeRates`, `Categories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `ShareAndEarn`, `QuickEntrySettings`, `AppLock`, `WidgetPreviews`.
 
 Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide animations, gesture-enabled back).
 
 ### State Management
 
-Global state lives in `context/AppContext.tsx` via the `useApp()` hook. This is the single source of truth for all DB data — wallets, transactions, categories, settings, recurring rules, monthly wages, account balances. All CRUD operations are methods on this context. There is no Redux, Zustand, or other state library.
+Global state lives in `context/AppContext.tsx` via the `useApp()` hook. This is the single source of truth for all DB data — wallets, transactions, categories, settings, recurring rules, monthly wages, account balances, albums, and the multi-currency exchange-rate table. All CRUD operations are methods on this context. There is no Redux, Zustand, or other state library.
 
 Key properties from `useApp()`:
 
@@ -68,7 +68,9 @@ Key properties from `useApp()`:
 - **Queries**: `getAccountById`, `getCategoryById`, `getTransactionsByAccount`, `queryTransactions`, `getCashflowSummary`, `getExpenseBreakdownByCategory`, `getExpenseBreakdownBySubcategory`, `getIncomeBreakdown`, `getTransfersBetweenAccounts`, `getTrueHourlyRateForDate`, `getDisplayValueForTransaction`
 - **Data management**: `resetTransactionsOnly`, `resetAllData`, `importMoneyManagerBackup`
 - **Mode helpers**: `isSimpleMode`, `simpleWalletId`, `completeOnboarding`, `switchToSimpleMode`, `switchToPowerMode`, `deleteSimpleWalletAndTransactions`
-- **Preferences**: `insightsPreferencesJson`, `updateInsightsPreferencesJson`, `notificationPrefs`, `updateNotificationPrefs`, `quickEntryPrefs`, `updateQuickEntryPrefs`
+- **Album ops**: `albums`, `activeAlbumId`, `createAlbum`, `updateAlbum`, `deleteAlbum`, `reorderAlbums`, `setActiveAlbum`, `addTransactionsToAlbum`, `removeTransactionsFromAlbum`, `getAlbumTransactionIds`, `getAlbumTransactions`, `getAlbumStats` (trip albums — group transactions with a cover, date range, and breakdown; Pro-limited to `FREE_MAX_ALBUMS`)
+- **Multi-currency / FX ops**: `listExchangeRates`, `refreshExchangeRates`, `setManualExchangeRate` (reporting-currency rate table; transactions snapshot `reportingCurrency`/`reportingAmount`/`fxRate` at write time so historical aggregates never drift)
+- **Preferences**: `insightsPreferencesJson`, `updateInsightsPreferencesJson`, `notificationPrefs`, `updateNotificationPrefs`, `quickEntryPrefs`, `updateQuickEntryPrefs`, `calendarPrefs`
 
 Other contexts:
 
@@ -77,75 +79,84 @@ Other contexts:
 
 ### Database
 
-SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, 18 migrations, `SIMPLE_WALLET_NAME` constant defined there).
+SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`028`, `SIMPLE_WALLET_NAME` constant defined there). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
 
-**Tables** (all use soft-deletes via `deletedAt`):
+**Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache):
 
-| Table                      | Key columns                                                                                                                                                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accountsTable`            | id, name, sortOrder, type (debit/credit), accountGroup, currency, startingBalance, includeInTotals                                                                                                                                           |
-| `accountGroupsTable`       | id, name, sortOrder                                                                                                                                                                                                                          |
-| `categoriesTable`          | id, name, sortOrder, type (expense/income), parentId, icon, isDefault                                                                                                                                                                        |
-| `transactionsTable`        | id, type (expense/income/transfer/balance_adjustment), amount, currency, date, accountId, categoryId, note, recurrence fields, sentiment                                                                                                     |
-| `transactionSplitsTable`   | id, transactionId, payerName, shareAmount, sortOrder                                                                                                                                                                                         |
-| `recurringRulesTable`      | id, name, type, amount, accountId, categoryId, recurrencePattern, recurrenceInterval, nextRunDate, isActive                                                                                                                                  |
-| `settingsTable`            | id, appUserId, locale, currencyCode, displayMode, themeMode, themeColor, userMode, hapticsEnabled, insightsPrefsJson, notificationPrefsJson, quickEntryPrefsJson, autoBackupEnabled, autoBackupTarget, lastAutoBackupAt, onboardingCompleted |
-| `monthlyWageSettingsTable` | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                                                                                                     |
+| Table                      | Key columns                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accountsTable`            | id, name, sortOrder, type (debit/credit), accountGroup, logoId, creditStatementDay, creditDueDay, currency, startingBalance, includeInTotals                                                                                                                                                                                                                                                    |
+| `accountGroupsTable`       | id, name, sortOrder                                                                                                                                                                                                                                                                                                                                                                             |
+| `categoriesTable`          | id, name, sortOrder, type (expense/income), parentId, icon, isDefault                                                                                                                                                                                                                                                                                                                           |
+| `transactionsTable`        | id, type (expense/income/transfer/balance_adjustment), amount, currency, **reportingCurrency, reportingAmount, fxRate** (frozen FX snapshot), **toAmount, accountAmount** (cross-currency), date, accountId, fromAccountId, toAccountId, categoryId, note, recurrence fields, sentiment                                                                                                         |
+| `transactionSplitsTable`   | id, transactionId, personName, amount, isSelf, paybackAccountId, paidAt, paidTransactionId, sortOrder                                                                                                                                                                                                                                                                                           |
+| `recurringRulesTable`      | id, name, type, amount, currency, toAmount, accountId, fromAccountId, toAccountId, categoryId, recurrencePattern, recurrenceInterval, nextRunDate, endDate, isActive                                                                                                                                                                                                                            |
+| `settingsTable`            | id, appUserId, locale, currencyCode, currencySymbol, displayMode, hapticsEnabled, themeMode, themeColor, accountLogoCountry, profileName, profileAvatarUri, insights/notification/quickEntry/calendar PrefsJson, onboardingCompleted, userMode, weekStartsOn, biometricLockEnabled, biometricLockDelaySeconds, autoBackup fields, autoFxRefreshEnabled, lastRateFetchAt/Error, fxCurrenciesJson |
+| `exchangeRatesTable`       | id, baseCurrency, quoteCurrency, rate, asOfDate, source (api/manual), updatedAt (FX rate cache, no soft-delete)                                                                                                                                                                                                                                                                                 |
+| `albumsTable`              | id, name, coverPhotoUri, isActive, startDate, endDate, sortOrder                                                                                                                                                                                                                                                                                                                                |
+| `albumTransactionsTable`   | id, albumId, transactionId, sortOrder (join table)                                                                                                                                                                                                                                                                                                                                              |
+| `monthlyWageSettingsTable` | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                                                                                                                                                                                                                                                        |
 
-Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, plus `mappers.ts` for DB row → domain type transformations.
+Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, `albumsRepository`, `exchangeRatesRepository`, plus `mappers.ts` for DB row → domain type transformations.
 
 ### Feature Structure
 
 Features live under `features/` in domain folders. Each has `screens/` and sometimes `components/`, `services/`, `constants/`.
 
-| Feature         | Purpose                                                                           | Key screens / components                                                                                                                                                                                                                                                                                               |
-| --------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transactions/` | Transaction CRUD, month-paged activity list, search, bulk edit, voice quick-entry | `TransactionsScreen`, `SimpleActivityScreen`, `AddTransactionScreen`, `EditTransactionScreen`, `QuickAddScreen`, `QuickAddSheet`, `VoiceQuickAddOverlay`, `VoiceCaptureOverlay`, `VoicePreviewSheet`, `TransactionEditorScreen`                                                                                        |
-| `calendar/`     | Calendar tab — month grid of daily totals                                         | `CalendarScreen`, `CalendarMonthGrid`, `CalendarMonthPage`                                                                                                                                                                                                                                                             |
-| `insights/`     | Analytics charts — expense trends, category breakdown, sentiment                  | `InsightsScreen`, `InsightsDrilldownScreen`                                                                                                                                                                                                                                                                            |
-| `settings/`     | All configuration, account/category management, data import/export, auto-backup   | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen` |
-| `onboarding/`   | First-time setup flow: value-prop, mode, wage, preferences, notifications         | `OnboardingFlow` + 6 step screens (`OnboardingValuePropStep`, `OnboardingModeStep`, `OnboardingWageStep`, `OnboardingPreferencesStep`, `OnboardingNotificationsStep`, `OnboardingBootstrapStep`)                                                                                                                       |
-| `tutorial/`     | Coach-mark overlays for first-use guidance                                        | `TutorialCoachmarkOverlay`                                                                                                                                                                                                                                                                                             |
-| `voice/`        | (reserved — voice components currently live under `transactions/components/`)     | —                                                                                                                                                                                                                                                                                                                      |
+| Feature         | Purpose                                                                                                            | Key screens / components                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `transactions/` | Transaction CRUD, month-paged activity list, search, bulk edit, voice quick-entry, split-bill                      | `TransactionsScreen`, `SimpleActivityScreen`, `AddTransactionScreen`, `EditTransactionScreen`, `QuickAddScreen`, `QuickAddSheet`, `VoiceQuickAddOverlay`, `VoiceCaptureOverlay`, `VoicePreviewSheet`, `TransactionEditorScreen`                                                                                                                                                                              |
+| `calendar/`     | Calendar tab (app home) — three-level zoom (year/month/day), month grid of daily totals, day pager, search overlay | `CalendarScreen`, `CalendarMonthGrid`, `CalendarMonthPage` (+ `calendar/lib/`)                                                                                                                                                                                                                                                                                                                               |
+| `albums/`       | Trip albums — group transactions with a cover photo, date range, breakdown drill-down, active auto-add             | `AlbumsScreen`, `AlbumDetailScreen`, `CreateAlbumScreen`, album editor screens (+ `albums/utils.ts`)                                                                                                                                                                                                                                                                                                         |
+| `insights/`     | Analytics charts — expense trends, category breakdown, sentiment                                                   | `InsightsScreen`, `InsightsDrilldownScreen` (+ `insights/breakdownPieLayout.ts`)                                                                                                                                                                                                                                                                                                                             |
+| `settings/`     | All configuration, account/category management, data import/export, auto-backup, multi-currency, App Lock          | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `ExchangeRatesScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `AppLockScreen`, `WidgetPreviewsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen`, `ShareAndEarnScreen` |
+| `news/`         | In-app feature announcements & showcases (changelog-style)                                                         | `NewsScreen`, `FeatureAnnouncementModal`, per-feature `*Showcase` components, `announcements/` (numbered entries), `featureAnnouncements.ts`                                                                                                                                                                                                                                                                 |
+| `onboarding/`   | First-time setup flow: value-prop, mode, wage, preferences, notifications                                          | `OnboardingFlow` + 6 step screens (`OnboardingValuePropStep`, `OnboardingModeStep`, `OnboardingWageStep`, `OnboardingPreferencesStep`, `OnboardingNotificationsStep`, `OnboardingBootstrapStep`)                                                                                                                                                                                                             |
+| `tutorial/`     | Coach-mark overlays for first-use guidance                                                                         | `TutorialCoachmarkOverlay`                                                                                                                                                                                                                                                                                                                                                                                   |
+| `reviewPrompt/` | In-app App Store / Play review request prompt                                                                      | review prompt components (paired with `services/reviewPrompt.ts`)                                                                                                                                                                                                                                                                                                                                            |
 
-Shared UI primitives in `components/ui/`: `button`, `card`, `input`, `select`, `settings`, `text`, `textInputStyles`, `theme-modal`, `time-value-inline`, `toggle`, plus the cross-feature sheets `AccountPickerSheet`, `CategoryPickerSheet`, and icon helpers `CategoryEmoji`, `SentimentIcons`.
+Shared UI primitives in `components/ui/`: `button`, `fat-button`, `card`, `input`, `select`, `settings`, `text`, `textInputStyles`, `theme-modal`, `time-value-inline`, `toggle`, plus the cross-feature sheets `AccountPickerSheet`, `CategoryPickerSheet`, `CurrencyPickerSheet`, `AccountLogoPickerSheet`, and icon/logo helpers `CategoryEmoji`, `SentimentIcons`, `AccountLogo`.
 
-Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, Mascot), `components/navigation/` (BottomNav, MonthControlsHeader, InOutHeader, FilterIconButton), `components/icons/` (NavIcons via Lucide), `components/layout/` (TabletContentContainer).
+Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, Mascot, LoadingDots, ImportingOverlay), `components/navigation/` (BottomNav, BottomNavMinimize, AddFab, TodayJumpFab, EdgeSwipeBackContainer, MonthControlsHeader, InOutHeader, FilterIconButton, `liquidGlass`), `components/icons/` (NavIcons, SocialIcons via Lucide), `components/datePicker/` (DatePickerModal, InlineDatePicker, MonthYearWheelPicker), `components/layout/` (TabletContentContainer), `components/widget-preview/` (home-screen widget previews).
 
 ### Services
 
-| Service                                                                 | Purpose                                                                                                                                                      |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `analytics.ts` (+ `.native.ts`, `.shared.ts`)                           | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`, `flushAnalytics`                                                                                 |
-| `notifications.ts` (+ `.native.ts`, `.shared.ts`)                       | Expo Notifications: `scheduleDailyCheckin`, `scheduleWeeklySummary`, `fireRecurringTransactionNotification`, `syncScheduledNotifications`                    |
-| `haptics.ts`                                                            | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                                                                                           |
-| `revenueCat.ts` (+ `.native.ts`, `.shared.ts`)                          | RevenueCat SDK: subscription state, purchase, restore                                                                                                        |
-| `speechRecognition.ts` (+ `.native.ts`, `.shared.ts`)                   | On-device speech-to-text for voice quick-entry (`expo-speech-recognition`)                                                                                   |
-| `autoBackup.ts` (+ `.native.ts`, `.shared.ts`) + `autoBackupProviders/` | Daily auto-backup: `runAutoBackupIfDue`, `listAllBackups`, `restoreFromBackup`, `previewBackup`, `deleteBackup`, `isTargetAvailable`, Google Sign-In helpers |
-| `autoBackupTaskRegistration.ts`                                         | Registers the `expo-background-task` task for periodic backup runs                                                                                           |
-| `mmbakImportService.ts` + `mmbakImport/`                                | Money Manager `.mmbackup` file import                                                                                                                        |
-| `dataManagementService.ts`                                              | Export, JSON backup/restore                                                                                                                                  |
-| `hourlyValueNavigation.ts`                                              | Navigation helper for hourly value settings                                                                                                                  |
-| `paywallNavigation.ts`                                                  | Navigation helper for pro paywall                                                                                                                            |
-| `transactionsNavigation.ts`                                             | Navigation helper for transactions/activity                                                                                                                  |
+| Service                                                                                                                                                                            | Purpose                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `analytics.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                      | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`, `flushAnalytics`                                                                                  |
+| `notifications.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                  | Expo Notifications: `scheduleDailyCheckin`, `scheduleWeeklySummary`, `fireRecurringTransactionNotification`, `syncScheduledNotifications`                     |
+| `haptics.ts`                                                                                                                                                                       | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                                                                                            |
+| `revenueCat.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                     | RevenueCat SDK: subscription state, purchase, restore                                                                                                         |
+| `speechRecognition.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                              | On-device speech-to-text for voice quick-entry (`expo-speech-recognition`)                                                                                    |
+| `autoBackup.ts` (+ `.native.ts`, `.shared.ts`) + `autoBackupProviders/`                                                                                                            | Daily auto-backup: `runAutoBackupIfDue`, `listAllBackups`, `restoreFromBackup`, `previewBackup`, `deleteBackup`, `isTargetAvailable`, Google Sign-In helpers  |
+| `autoBackupTaskRegistration.ts`                                                                                                                                                    | Registers the `expo-background-task` task for periodic backup runs                                                                                            |
+| `mmbakImportService.ts` + `mmbakImport/`                                                                                                                                           | Money Manager `.mmbackup` file import                                                                                                                         |
+| `dataManagementService.ts`                                                                                                                                                         | Export, JSON backup/restore                                                                                                                                   |
+| `biometricAuth.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                  | App Lock — Face ID / Touch ID / device-credential gate (`expo-local-authentication`)                                                                          |
+| `exchangeRates.ts`                                                                                                                                                                 | Multi-currency FX: Frankfurter daily fetch, `refreshRatesNow`, `runRateRefreshIfDue`, staleness guard, offline-safe cache, manual overrides, historical rates |
+| `reviewPrompt.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                   | In-app App Store / Play review request (`expo-store-review`)                                                                                                  |
+| `speechRecognition.ts` + `voiceInputPermission.ts`                                                                                                                                 | On-device speech-to-text + mic permission flow for voice quick-entry                                                                                          |
+| `widgetSnapshot.ts` (+ `.shared.ts`) + `widgetRegistry.ts`                                                                                                                         | Home-screen widget data snapshots and registry                                                                                                                |
+| `featureAnnouncementState.ts`                                                                                                                                                      | Tracks which `news` feature announcements have been seen                                                                                                      |
+| `deepLinks.ts`                                                                                                                                                                     | Deep-link / URL routing into the app                                                                                                                          |
+| `userAssets.ts`                                                                                                                                                                    | Profile avatar / user-supplied image asset handling                                                                                                           |
+| `calendarNavigation.ts`, `insightsNavigation.ts`, `tabNavigation.ts`, `reviewPromptNavigation.ts`, `hourlyValueNavigation.ts`, `paywallNavigation.ts`, `transactionsNavigation.ts` | Imperative navigation helpers (route into a tab/screen from anywhere)                                                                                         |
 
 Platform-split services (`.native.ts` / `.shared.ts`) use the `.native.ts` implementation on iOS/Android and `.shared.ts` as web/test fallback.
 
 ### Custom Hooks
 
-| Hook                            | Purpose                                     |
-| ------------------------------- | ------------------------------------------- |
-| `useMonthPager`                 | Month paging with scroll callbacks          |
-| `useScrollToTopTokenNavigation` | Scroll-to-top on tab navigation             |
-| `useIndexedScrollToTopRefs`     | Track multiple scrollable refs              |
-| `useThemeVars`                  | Access theme color scheme CSS variables     |
-| `useThemeColors`                | Get theme-specific color values             |
-| `useEdgeSwipeBack`              | Handle edge-swipe back gestures             |
-| `useProGate`                    | Gate features behind Pro subscription       |
-| `useFocusMonthNavigation`       | Navigate to specific month on screen focus  |
-| `useDeviceLayout`               | Detect tablet vs phone layout               |
-| `usePersistedJsonSnapshot`      | Persist/restore JSON state via AsyncStorage |
-| `usePressScale`                 | Animated press scaling effect               |
+| Hook                        | Purpose                                     |
+| --------------------------- | ------------------------------------------- |
+| `useMonthPager`             | Month paging with scroll callbacks          |
+| `useIndexedScrollToTopRefs` | Track multiple scrollable refs              |
+| `useThemeVars`              | Access theme color scheme CSS variables     |
+| `useThemeColors`            | Get theme-specific color values             |
+| `useEdgeSwipeBack`          | Handle edge-swipe back gestures             |
+| `useProGate`                | Gate features behind Pro subscription       |
+| `useDeviceLayout`           | Detect tablet vs phone layout               |
+| `usePersistedJsonSnapshot`  | Persist/restore JSON state via AsyncStorage |
+| `usePressScale`             | Animated press scaling effect               |
 
 ### Styling
 
@@ -155,24 +166,27 @@ NativeWind (Tailwind CSS for React Native). Custom colors and theming defined in
 
 All shared types are in `types/index.ts`:
 
-- **Display**: `DisplayMode` ('money' | 'time'), `ThemeMode` ('system' | 'light' | 'dark'), `ThemeColor` (8 options), `UserMode` ('power' | 'simple'), `WageType` ('hourly' | 'monthly' | 'yearly'), `BackupTarget` ('local' | 'icloud' | 'googleDrive')
-- **Domain**: `Account`, `AccountGroup`, `Category`, `Transaction`, `TransactionWithRelations`, `TransactionSplit`, `TransactionSplitsSummary`, `RecurringTransactionRule`, `ProcessedRecurringRule`, `MonthlyWageSettings`, `WageConfig`, `UserSettings`, `QuickEntryPrefs`
+- **Display**: `DisplayMode` ('money' | 'time'), `ThemeMode` ('system' | 'light' | 'dark'), `ThemeColor` (8 options), `UserMode` ('power' | 'simple'), `WageType` ('hourly' | 'monthly' | 'yearly'), `BackupTarget` ('local' | 'icloud' | 'googleDrive'), `WeekStartsOn` (0–6)
+- **Domain**: `Account`, `AccountGroup`, `Category`, `Transaction`, `TransactionWithRelations`, `TransactionSplit`, `TransactionSplitsSummary`, `RecurringTransactionRule`, `ProcessedRecurringRule`, `MonthlyWageSettings`, `WageConfig`, `UserSettings`, `QuickEntryPrefs`, `Album`, `AlbumStats`, `AlbumWithStats`
+- **Multi-currency**: `ExchangeRateSource` ('api' | 'manual'), `ExchangeRate`, `RateTable`, `RateRefreshResult`
 - **Enums**: `TransactionSentiment` ('happy' | 'neutral' | 'sad'), `AccountType` ('debit' | 'credit'), `TransactionType` ('expense' | 'income' | 'transfer' | 'balance_adjustment'), `RecurringTransactionType` (TransactionType minus balance_adjustment), `CategoryType` ('expense' | 'income'), `RecurrencePattern` ('none' | 'daily' | 'weekly' | 'monthly' | 'yearly')
 - **Queries / state**: `TransactionFilters`, `AccountBalance`, `CashflowSummary`, `BreakdownItem`, `DateRange`, `NotificationPreferences`, `AppState`
 
 ### Constants
 
-| File                        | Contents                                                                                        |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `constants/appDefaults.ts`  | Default wage config, transaction filters, currency defaults, account templates, category emojis |
-| `constants/designSystem.ts` | Color palettes for all 8 themes, spacing, typography, theme-specific styles                     |
-| `constants/motion.ts`       | Animation timings and easing curves                                                             |
-| `constants/pager.ts`        | Pagination constants                                                                            |
-| `constants/proLimits.ts`    | Free tier transaction limits                                                                    |
+| File                                            | Contents                                                                                        |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `constants/appDefaults.ts`                      | Default wage config, transaction filters, currency defaults, account templates, category emojis |
+| `constants/designSystem.ts`                     | Color palettes for all 8 themes, spacing, typography, theme-specific styles                     |
+| `constants/motion.ts`                           | Animation timings and easing curves                                                             |
+| `constants/pager.ts`                            | Pagination constants                                                                            |
+| `constants/proLimits.ts`                        | Free-tier limits (`PRO_LIMITS`, `FREE_MAX_ALBUMS`, `PRO_TREND_TYPES`)                           |
+| `constants/categoryIcons.ts`, `utilityIcons.ts` | Category / utility icon maps                                                                    |
+| `constants/accountLogos.ts` (+ `.generated.ts`) | Bank/brand account logo catalog                                                                 |
 
 ### i18n
 
-`I18n.t('key')` via i18n-js. Setup in `lib/i18n/index.ts` with device locale detection. Two locales implemented: English (`lib/i18n/locales/en.ts`) and Chinese (`lib/i18n/locales/zh.ts`). Falls back to English for unsupported locales. Locale labels exist for es, fr, de, pt, ja, ko (strings not yet implemented).
+`I18n.t('key')` via i18n-js. Setup in `lib/i18n/index.ts` with device locale detection. **23 locales** are fully implemented in `lib/i18n/locales/` (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh). English (`en.ts`) is the source of truth; falls back to English for unsupported locales. `__tests__/i18n/localeParity.test.ts` enforces that every locale has the same key set as `en.ts` — when you add a string to `en.ts`, add it to all locales or the parity test fails.
 
 ### Key Patterns
 
@@ -189,6 +203,10 @@ All shared types are in `types/index.ts`:
 - **IDs**: Use `newId()` from `~/utils/id` for generating unique identifiers (UUID-based).
 - **Error handling**: Use `getErrorMessage()` from `~/utils/errorHandling` to safely extract error messages.
 - **Tablet layout**: Use `useDeviceLayout()` hook and `TabletContentContainer` for responsive layouts.
+- **Multi-currency**: Each transaction stores its entered `currency` plus a frozen reporting-currency snapshot (`reportingCurrency`/`reportingAmount`/`fxRate`) taken at write time so historical aggregates never drift when FX rates move. Use `convert`/`buildRateTable` from `~/utils/currency`; never recompute historical totals from live rates. FX rates come from `services/exchangeRates.ts`.
+- **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops.
+- **App Lock**: Biometric gate via `services/biometricAuth.ts`, configured in `AppLockScreen`; settings `biometricLockEnabled` / `biometricLockDelaySeconds`.
+- **Feature announcements**: Add a numbered entry under `features/news/announcements/` and a matching `*Showcase`; seen-state tracked by `services/featureAnnouncementState.ts`.
 
 ### CI / Deploy
 

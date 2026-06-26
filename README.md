@@ -6,7 +6,7 @@ A React Native expense tracker that lets you view spending as **money or as time
 
 - **Expo SDK 54** + React Native 0.81.5 + React 19 (New Architecture enabled)
 - **TypeScript** strict mode, path alias `~/*` → repo root
-- **SQLite** via `expo-sqlite` + **Drizzle ORM** (18 migrations)
+- **SQLite** via `expo-sqlite` + **Drizzle ORM** (28 migrations)
 - **NativeWind 4** (Tailwind for React Native) — class-based dark mode, 8 theme colors
 - **React Navigation** native stack (root + nested settings stack)
 - **react-native-reanimated 4** + Skia + gifted-charts for animation and visualizations
@@ -26,8 +26,8 @@ A React Native expense tracker that lets you view spending as **money or as time
 npm install
 cp .env.example .env  # fill in RevenueCat/Mixpanel keys (optional in dev)
 
-# Dev with Expo Go / dev client (tunnel recommended)
-EXPO_TUNNEL_SUBDOMAIN=<your-subdomain> npx expo start --tunnel --clear
+# Dev with the dev client (use --localhost; tunnel mode no longer needed)
+npx expo start --localhost
 
 # Native run (syncs adaptive icons first)
 npm run ios
@@ -82,9 +82,11 @@ money2time/
 │   ├── insights/               # Charts: trends, breakdowns, sentiment
 │   ├── onboarding/             # 5-step first-run flow
 │   ├── settings/               # All settings screens + nested stack
-│   ├── transactions/           # Activity list, add/edit, quick-add, voice
+│   ├── transactions/           # Activity list, add/edit, quick-add, voice, split-bill
+│   ├── albums/                 # Trip albums — group transactions, cover, breakdown
+│   ├── news/                   # In-app feature announcements & showcases
 │   ├── tutorial/               # Coach-mark overlay
-│   └── voice/                  # (reserved)
+│   └── reviewPrompt/           # In-app store review request
 ├── context/
 │   ├── AppContext.tsx          # Global state — single useApp() hook
 │   ├── ThemeContext.tsx        # Theme color + light/dark resolution
@@ -93,25 +95,25 @@ money2time/
 ├── hooks/                      # Cross-screen hooks (month paging, scroll-to-top, theme vars…)
 ├── services/                   # Device/integration services (see below)
 ├── lib/
-│   ├── db/                     # SQLite client, schema, 18 migrations
-│   ├── i18n/                   # i18n-js setup, locales (en, zh)
+│   ├── db/                     # SQLite client, schema, 28 migrations, currency normalizer
+│   ├── i18n/                   # i18n-js setup, 23 locales
 │   └── repositories/           # Drizzle data-access layer
-├── constants/                  # appDefaults, designSystem, motion, pager, proLimits
-├── utils/                      # Pure helpers (formatters, IDs, date keys, error utils)
+├── constants/                  # appDefaults, designSystem, motion, pager, proLimits, icons, accountLogos
+├── utils/                      # Pure helpers (formatters, IDs, date keys, currency, error utils)
 ├── types/                      # Shared domain types
 ├── scripts/                    # sync-icons.mjs
-├── __tests__/                  # Jest tests (utils, repositories, services, navigation)
+├── __tests__/                  # Jest tests (29 suites: utils, repositories, services, navigation, db, features, i18n)
 └── .github/workflows/          # CI: deploy.yml (test → build → submit)
 ```
 
 ### Navigation
 
-`App.tsx` mounts a single `RootStack`. The base screen `Main` renders `MainShellScreen`, which keeps five bottom-nav tabs mounted for fast switching: **home, accounts, calendar, insights, settings**.
+`App.tsx` mounts a single `RootStack`. The base screen `Main` renders `MainShellScreen`, which keeps five bottom-nav tabs mounted for fast switching: **calendar, accounts, insights, albums, settings** (the app is calendar-first).
 
-The `home` tab renders `TransactionsScreen` (power mode) or `SimpleActivityScreen` (simple mode). The `settings` tab hosts its own nested stack.
+The `calendar` tab is the home view (`CalendarScreen`, with three-level year/month/day zoom and a day pager). In simple mode the `accounts` tab is hidden and the activity list is rendered by `SimpleActivityScreen`. The `settings` tab hosts its own nested stack.
 
-- **Root stack** ([navigation/rootStack.ts](navigation/rootStack.ts)): `Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsQuickEntry`, `SettingsWageCalculator`, `ProPaywall`.
-- **Settings stack** ([navigation/settingsStack.ts](navigation/settingsStack.ts)): `SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `Categories`, `CategoriesSubcategories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `QuickEntrySettings`.
+- **Root stack** ([navigation/rootStack.ts](navigation/rootStack.ts)): `Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `AccountDetail`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsQuickEntry`, `SettingsMultiCurrency`, `SettingsWageCalculator`, `ShareAndEarn`, `ProPaywall`, `CreateAlbum`, `AlbumDetail`, `EditAlbumTransactions`, `AddAlbumTransactions`, `EditAlbumDetails`.
+- **Settings stack** ([navigation/settingsStack.ts](navigation/settingsStack.ts)): `SettingsHome`, `DisplaySettings`, `HourlyValue`, `WageCalculator`, `AccountSettings`, `Accounts`, `ExchangeRates`, `Categories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `ShareAndEarn`, `QuickEntrySettings`, `AppLock`, `WidgetPreviews`.
 
 ### State
 
@@ -126,16 +128,19 @@ Two other contexts:
 
 SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema in [lib/db/schema.ts](lib/db/schema.ts), migrations in [lib/db/migrations/](lib/db/migrations/). All tables use soft-deletes (`deletedAt`).
 
-| Table                      | Purpose                                                             |
-| -------------------------- | ------------------------------------------------------------------- |
-| `accountsTable`            | Wallets (debit/credit), starting balance, currency, sort order      |
-| `accountGroupsTable`       | Groupings for accounts                                              |
-| `categoriesTable`          | Income/expense categories with parent (subcategory) support         |
-| `transactionsTable`        | Transactions (expense/income/transfer/balance-adjustment)           |
-| `transactionSplitsTable`   | Split-bill participants on a transaction                            |
-| `recurringRulesTable`      | Templates that schedule future transactions                         |
-| `monthlyWageSettingsTable` | Per-month wage config (hourly/monthly/yearly + commute)             |
-| `settingsTable`            | Singleton row for app preferences (locale, theme, mode, prefs JSON) |
+| Table                      | Purpose                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `accountsTable`            | Wallets (debit/credit), starting balance, currency, sort order                                 |
+| `accountGroupsTable`       | Groupings for accounts                                                                         |
+| `categoriesTable`          | Income/expense categories with parent (subcategory) support                                    |
+| `transactionsTable`        | Transactions (expense/income/transfer/balance-adjustment) + multi-currency FX snapshot columns |
+| `transactionSplitsTable`   | Split-bill participants (with payback tracking) on a transaction                               |
+| `recurringRulesTable`      | Templates that schedule future transactions                                                    |
+| `exchangeRatesTable`       | Cached FX rates (api/manual) per base→quote currency                                           |
+| `albumsTable`              | Trip albums (cover, date range, active flag)                                                   |
+| `albumTransactionsTable`   | Album ↔ transaction join table                                                                 |
+| `monthlyWageSettingsTable` | Per-month wage config (hourly/monthly/yearly + commute)                                        |
+| `settingsTable`            | Singleton row for app preferences (locale, currency, theme, mode, App Lock, FX, prefs JSON)    |
 
 Repositories live in `lib/repositories/`; mapping between rows and domain types is in [lib/repositories/mappers.ts](lib/repositories/mappers.ts).
 
@@ -143,28 +148,33 @@ Repositories live in `lib/repositories/`; mapping between rows and domain types 
 
 Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for web fallback).
 
-| Service                                                                         | Purpose                                                                   |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `analytics.*`                                                                   | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`                |
-| `notifications.*`                                                               | Daily check-in, weekly summary, recurring-txn nudges (expo-notifications) |
-| `haptics.ts`                                                                    | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`        |
-| `revenueCat.*`                                                                  | RevenueCat SDK — purchase, restore, customer state                        |
-| `speechRecognition.*`                                                           | On-device speech-to-text for voice quick-entry                            |
-| `autoBackup.*` + `autoBackupProviders/`                                         | Daily auto-backup to local / iCloud / Google Drive                        |
-| `autoBackupTaskRegistration.ts`                                                 | Registers `expo-background-task` for daily backup runs                    |
-| `mmbakImportService.ts` + `mmbakImport/`                                        | Money Manager `.mmbackup` import                                          |
-| `dataManagementService.ts`                                                      | Export, JSON backup/restore                                               |
-| `hourlyValueNavigation.ts`, `paywallNavigation.ts`, `transactionsNavigation.ts` | Navigation helpers used outside react-navigation context                  |
+| Service                                                                                      | Purpose                                                                   |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `analytics.*`                                                                                | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`                |
+| `notifications.*`                                                                            | Daily check-in, weekly summary, recurring-txn nudges (expo-notifications) |
+| `haptics.ts`                                                                                 | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`        |
+| `revenueCat.*`                                                                               | RevenueCat SDK — purchase, restore, customer state                        |
+| `speechRecognition.*`                                                                        | On-device speech-to-text for voice quick-entry                            |
+| `autoBackup.*` + `autoBackupProviders/`                                                      | Daily auto-backup to local / iCloud / Google Drive                        |
+| `autoBackupTaskRegistration.ts`                                                              | Registers `expo-background-task` for daily backup runs                    |
+| `mmbakImportService.ts` + `mmbakImport/`                                                     | Money Manager `.mmbackup` import                                          |
+| `dataManagementService.ts`                                                                   | Export, JSON backup/restore                                               |
+| `exchangeRates.ts`                                                                           | Multi-currency FX fetch/refresh (Frankfurter), cache, manual overrides    |
+| `biometricAuth.*`                                                                            | App Lock — Face ID / Touch ID gate (expo-local-authentication)            |
+| `reviewPrompt.*`                                                                             | In-app store review request (expo-store-review)                           |
+| `widgetSnapshot.*` + `widgetRegistry.ts`                                                     | Home-screen widget data snapshots                                         |
+| `featureAnnouncementState.ts`, `deepLinks.ts`, `userAssets.ts`                               | News seen-state, deep-link routing, profile asset handling                |
+| `*Navigation.ts` (calendar, insights, tab, hourlyValue, paywall, transactions, reviewPrompt) | Imperative navigation helpers used outside react-navigation context       |
 
 ### Theming & i18n
 
 NativeWind drives styles; theme colors live in [constants/designSystem.ts](constants/designSystem.ts) with palettes for **sage, ocean, terracotta, slate, amber, indigo, emerald, rosewood**. Dark mode is class-based.
 
-i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). Currently shipped: **en** and **zh**; device locale auto-detected with English fallback.
+i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). **23 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
 
 ### Modes
 
-`settings.userMode` is `'simple' | 'power'`. Simple mode hides the accounts tab, uses a single auto-created wallet (`SIMPLE_WALLET_NAME` in `lib/db/client.ts`), and renders `SimpleActivityScreen` on the home tab. `useApp()` exposes `isSimpleMode` and `simpleWalletId` globally.
+`settings.userMode` is `'simple' | 'power'`. Simple mode hides the accounts tab, uses a single auto-created wallet (`SIMPLE_WALLET_NAME` in `lib/db/client.ts`), and renders `SimpleActivityScreen` for the activity list. `useApp()` exposes `isSimpleMode` and `simpleWalletId` globally.
 
 ## CI
 
