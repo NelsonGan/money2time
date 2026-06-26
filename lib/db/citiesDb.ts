@@ -13,7 +13,9 @@ import type { City } from '~/types';
 
 // Bump whenever assets/db/cities.db is regenerated so the cached copy is replaced.
 // v2: populated with real GeoNames cities15000 (the v1 asset was an empty placeholder).
-export const CITIES_DB_VERSION = 2;
+// v3: fuzzy search by country / state — FTS now indexes admin1 + country names and
+//     every table carries an ascii_name column used for match-tier ordering.
+export const CITIES_DB_VERSION = 3;
 const CITIES_DB_NAME = 'cities.db';
 
 // ---------------------------------------------------------------------------
@@ -29,6 +31,10 @@ export function normalizeCityQuery(query: string): string {
  * Build an FTS5 MATCH expression for prefix typeahead. Each whitespace token is
  * reduced to alphanumerics and turned into a prefix term (`tok*`). Returns ''
  * when there is nothing searchable, so callers can short-circuit.
+ *
+ * Tokens are ANDed, so "san jose" requires both terms; they may match across any
+ * indexed column (city name, admin1/state name, or country name), which is what
+ * makes "japan", "california" or "los angeles california" all resolve.
  */
 export function buildFtsMatch(query: string): string {
   const normalized = normalizeCityQuery(query);
@@ -39,6 +45,14 @@ export function buildFtsMatch(query: string): string {
     .filter(Boolean)
     .map((token) => `${token}*`);
   return terms.join(' ');
+}
+
+/**
+ * Escape a normalized query for use inside a SQL `LIKE` pattern so user input
+ * like "100%" or "a_b" can't act as wildcards. Pair with `ESCAPE '\'` in SQL.
+ */
+export function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }
 
 interface CityJoinRow {
@@ -81,6 +95,23 @@ const CITY_SELECT = `
   FROM cities c
   LEFT JOIN country_names cn ON cn.code = c.country_code
   LEFT JOIN admin1_names an ON an.key = c.country_code || '.' || c.admin1
+`;
+
+// Relevance tiers (lower = better) so a city whose own name matches outranks one
+// pulled in only because its state or country matched. Within a tier, the most
+// populous places win. Patterns compare against the diacritic-free ascii_name
+// columns, matching the already-normalized query.
+// Bound params, in order: prefix, prefix, prefix, contains.
+const ORDER_BY = `
+  ORDER BY
+    CASE
+      WHEN c.ascii_name LIKE ? ESCAPE '\\' THEN 0
+      WHEN an.ascii_name LIKE ? ESCAPE '\\' THEN 1
+      WHEN cn.ascii_name LIKE ? ESCAPE '\\' THEN 2
+      WHEN c.ascii_name LIKE ? ESCAPE '\\' THEN 3
+      ELSE 4
+    END,
+    c.population DESC
 `;
 
 async function copyAssetIfNeeded(): Promise<void> {
@@ -134,20 +165,28 @@ function getCitiesDb(): Promise<SQLiteDatabase | null> {
   return initPromise;
 }
 
-/** Diacritic-insensitive prefix search, ranked by population. Empty on failure. */
+/**
+ * Diacritic-insensitive fuzzy search across city, state/admin1 and country names.
+ * Results are tiered by where the match landed (city name > state > country) and
+ * then ordered by population. Returns empty on failure or empty query.
+ */
 export async function searchCities(query: string, limit = 30): Promise<City[]> {
   const match = buildFtsMatch(query);
-  if (!match) return [];
+  const normalized = normalizeCityQuery(query);
+  if (!match || !normalized) return [];
   const db = await getCitiesDb();
   if (!db) return [];
+  const escaped = escapeLike(normalized);
+  const prefix = `${escaped}%`;
+  const contains = `%${escaped}%`;
   try {
     const rows = db.getAllSync<CityJoinRow>(
       `${CITY_SELECT}
        JOIN cities_fts f ON f.rowid = c.rowid
        WHERE cities_fts MATCH ?
-       ORDER BY c.population DESC
+       ${ORDER_BY}
        LIMIT ?`,
-      [match, limit],
+      [match, prefix, prefix, prefix, contains, limit],
     );
     return rows.map(toCity);
   } catch (error) {
