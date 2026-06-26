@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AppState, Linking } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
 import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -67,13 +67,13 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     accounts,
     accountGroups,
     categories,
-    transactions,
     createTransaction,
     quickEntryPrefs,
     updateQuickEntryPrefs,
     isSimpleMode,
     simpleWalletId,
   } = useApp();
+  const { transactions } = useTransactions();
   const { isPro } = usePro();
 
   const [recording, setRecording] = useState(false);

@@ -41,7 +41,7 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import { Button, Text, ThemeModal } from '~/components/ui';
-import { AppProvider, useApp } from '~/context/AppContext';
+import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
@@ -996,8 +996,8 @@ function AddTransactionDetailedRouteScreen({
 }
 
 function WidgetSnapshotSync() {
-  const { transactions, settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } =
-    useApp();
+  const { settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } = useApp();
+  const { transactions } = useTransactions();
   const { isPro } = usePro();
 
   useEffect(() => {
@@ -1026,7 +1026,8 @@ function WidgetSnapshotSync() {
 }
 
 function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'EditTransaction'>) {
-  const { transactions, isSimpleMode, simpleWalletId } = useApp();
+  const { isSimpleMode, simpleWalletId } = useApp();
+  const { transactions } = useTransactions();
   const transaction = useMemo(
     () => transactions.find((item) => item.id === route.params.transactionId) ?? null,
     [route.params.transactionId, transactions],

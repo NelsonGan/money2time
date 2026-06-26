@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import { getFeatureAnnouncementById } from '~/features/news/featureAnnouncements';
 import {
@@ -41,7 +41,6 @@ export function QuickAddScreen({
     accounts,
     accountGroups,
     categories,
-    transactions,
     createTransaction,
     getTrueHourlyRateForDate,
     quickEntryPrefs,
@@ -49,6 +48,7 @@ export function QuickAddScreen({
     fxCurrencies,
     rateTable,
   } = useApp();
+  const { transactions } = useTransactions();
 
   // Currencies the user can enter quick-add amounts in: the reporting currency,
   // their sub-currencies, and any currency an account already uses.
