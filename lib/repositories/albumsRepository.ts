@@ -12,6 +12,12 @@ interface CreateAlbumInput {
   coverPhotoUri?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  placeId?: string | null;
+  placeName?: string | null;
+  placeAdmin?: string | null;
+  countryCode?: string | null;
   sortOrder?: number;
   deletedAt?: string | null;
 }
@@ -58,6 +64,12 @@ class AlbumsRepository {
         coverPhotoUri: input.coverPhotoUri ?? null,
         startDate: input.startDate ?? null,
         endDate: input.endDate ?? null,
+        latitude: input.latitude ?? null,
+        longitude: input.longitude ?? null,
+        placeId: input.placeId ?? null,
+        placeName: input.placeName ?? null,
+        placeAdmin: input.placeAdmin ?? null,
+        countryCode: input.countryCode ?? null,
         sortOrder: nextSortOrder,
         createdAt: now,
         updatedAt: now,

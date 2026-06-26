@@ -9,6 +9,8 @@ import { getErrorMessage } from '~/utils/errorHandling';
 interface AppErrorBoundaryProps {
   children: React.ReactNode;
   onRetry?: () => void;
+  /** Custom UI to show instead of the default app-level error screen. */
+  fallback?: React.ReactNode;
 }
 
 interface AppErrorBoundaryState {
@@ -35,6 +37,10 @@ export class AppErrorBoundary extends React.Component<
   render() {
     if (!this.state.error) {
       return this.props.children;
+    }
+
+    if (this.props.fallback !== undefined) {
+      return this.props.fallback;
     }
 
     return (

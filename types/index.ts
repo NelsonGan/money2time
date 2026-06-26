@@ -249,10 +249,50 @@ export interface Album {
   startDate: string | null;
   /** Manual end-date override (YYYY-MM-DD); null falls back to last transaction. */
   endDate: string | null;
+  /** Real-world location; all null when the album has no place set. */
+  latitude: number | null;
+  longitude: number | null;
+  /** GeoNames id of the resolved place, kept so it can be re-resolved later. */
+  placeId: string | null;
+  /** Display place name, e.g. "Tokyo". */
+  placeName: string | null;
+  /** admin1 region, e.g. "Tokyo" / "California"; nullable. */
+  placeAdmin: string | null;
+  /** ISO 3166-1 alpha-2 country code, e.g. "JP". */
+  countryCode: string | null;
   sortOrder?: number;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+/** The location fields of an album, written together as a unit. */
+export interface AlbumLocation {
+  latitude: number;
+  longitude: number;
+  placeId: string | null;
+  placeName: string;
+  placeAdmin: string | null;
+  countryCode: string | null;
+}
+
+/** An album that has a real-world location (latitude/longitude non-null). */
+export type LocatedAlbum = Album & { latitude: number; longitude: number };
+
+export function isLocatedAlbum(album: Album): album is LocatedAlbum {
+  return album.latitude != null && album.longitude != null;
+}
+
+/** A city row from the offline GeoNames place database. */
+export interface City {
+  id: string;
+  name: string;
+  admin: string | null;
+  countryCode: string;
+  countryName: string;
+  latitude: number;
+  longitude: number;
+  population: number;
 }
 
 export interface AlbumStats {

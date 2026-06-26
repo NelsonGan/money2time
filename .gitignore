@@ -49,6 +49,8 @@ yarn-error.*
 *.db-wal
 *.sqlite
 *.sqlite-*
+# bundled read-only reference DB (built by scripts/build-cities-db.mjs)
+!assets/db/cities.db
 *.mmbak
 skills-lock.json
 /.agents

@@ -274,6 +274,18 @@ export function formatTimeOfDay(hour: number, minute: number): string {
   return `${display}:${min} ${period}`;
 }
 
+/** Short hours label for tight spaces: drops minutes and abbreviates 1000+ as K. */
+export function formatHoursCompact(hours: number): string {
+  const abs = Math.abs(hours);
+  const h = String(I18n.t('common.hour_unit'));
+  const m = String(I18n.t('common.minute_unit'));
+  if (abs < 0.01) return `0${m}`;
+  const minutes = Math.round(abs * 60);
+  if (minutes < 60) return `${minutes}${m}`;
+  const wholeHours = Math.round(abs);
+  return wholeHours < 1000 ? `${wholeHours}${h}` : `${formatCompactNumber(wholeHours)}${h}`;
+}
+
 export function formatHours(hours: number): string {
   const absHours = Math.abs(hours);
   const h = String(I18n.t('common.hour_unit'));
@@ -302,9 +314,17 @@ export function formatAmount(
      * native (foreign) currency. Ignored in time display mode.
      */
     currencyCode?: string;
+    /** Abbreviate to a short form for tight spaces (e.g. $1.2K, 12h). */
+    compact?: boolean;
   } = {},
 ): string {
-  const { showSign = false, neutralSign = false, trueHourlyRate = 0, currencyCode } = options;
+  const {
+    showSign = false,
+    neutralSign = false,
+    trueHourlyRate = 0,
+    currencyCode,
+    compact = false,
+  } = options;
   const normalizedAmount = normalizeMoneyAmount(amount);
   const amountSign = normalizedAmount > 0 ? '+' : normalizedAmount < 0 ? '-' : '';
   const sign = showSign ? (neutralSign ? '' : amountSign) : normalizedAmount < 0 ? '-' : '';
@@ -312,14 +332,18 @@ export function formatAmount(
     ? (SYMBOL_BY_CODE.get(currencyCode) ?? settings.currencySymbol)
     : settings.currencySymbol;
 
+  const money = (value: number) =>
+    compact ? `${symbol}${formatCompactNumber(value)}` : formatCurrency(value, symbol);
+
   if (settings.displayMode === 'time') {
     if (trueHourlyRate <= 0) {
-      return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
+      return `${sign}${money(Math.abs(normalizedAmount))}`;
     }
-    return `${sign}${formatHours(Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate)))}`;
+    const hours = Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate));
+    return `${sign}${compact ? formatHoursCompact(hours) : formatHours(hours)}`;
   }
 
-  return `${sign}${formatCurrency(Math.abs(normalizedAmount), symbol)}`;
+  return `${sign}${money(Math.abs(normalizedAmount))}`;
 }
 
 export function formatRelativeDate(dateString: string, locale?: string): string {

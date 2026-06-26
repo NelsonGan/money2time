@@ -7,6 +7,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -539,11 +540,12 @@ export function AlbumDetailScreen({
               {/* Breakdown page */}
               <View style={{ width: pageWidth, height: contentHeight }}>
                 {breakdownRows.length === 0 ? (
-                  <View className="flex-1 items-center justify-center px-8">
-                    <Text variant="body" tone="muted" className="text-center">
-                      {I18n.t('albums.no_expenses')}
-                    </Text>
-                  </View>
+                  <EmptyState
+                    title={I18n.t('albums.no_transactions_title')}
+                    message={I18n.t('albums.no_transactions_message')}
+                    mascotMood="curious"
+                    animateIn={false}
+                  />
                 ) : (
                   <ScrollView
                     nestedScrollEnabled

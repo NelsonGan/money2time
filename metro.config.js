@@ -9,7 +9,9 @@ config.transformer = {
 };
 config.resolver = {
   ...config.resolver,
-  assetExts: config.resolver.assetExts.filter((ext) => ext !== 'svg'),
+  // Drop svg from assets (handled by the transformer); add db so the bundled
+  // read-only cities database (assets/db/cities.db) ships as an asset.
+  assetExts: [...config.resolver.assetExts.filter((ext) => ext !== 'svg'), 'db'],
   sourceExts: [...config.resolver.sourceExts, 'svg'],
 };
 

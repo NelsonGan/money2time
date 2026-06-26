@@ -85,6 +85,7 @@ import {
   type AccountBalance,
   type AccountGroup,
   type Album,
+  type AlbumLocation,
   type AlbumStats,
   type AppState,
   type BreakdownItem,
@@ -93,6 +94,8 @@ import {
   type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
   type ExchangeRate,
+  isLocatedAlbum,
+  type LocatedAlbum,
   type MonthlyWageSettings,
   type NotificationPreferences,
   type QuickEntryPrefs,
@@ -225,6 +228,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 
   albums: Album[];
   activeAlbumId: string | null;
+  /** Albums that have a real-world location (latitude/longitude set). */
+  locatedAlbums: LocatedAlbum[];
   createAlbum: (input: {
     name: string;
     coverPhotoUri?: string | null;
@@ -241,6 +246,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
       endDate?: string | null;
     },
   ) => void;
+  /** Sets or clears an album's real-world location. */
+  setAlbumLocation: (id: string, location: AlbumLocation | null) => void;
   deleteAlbum: (id: string) => void;
   reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
@@ -1229,6 +1236,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumsRepository.update(id, updates);
       });
       void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
+    },
+    [runMutation],
+  );
+
+  const setAlbumLocation = useCallback(
+    (id: string, location: AlbumLocation | null) => {
+      runMutation(() => {
+        albumsRepository.update(id, {
+          latitude: location?.latitude ?? null,
+          longitude: location?.longitude ?? null,
+          placeId: location?.placeId ?? null,
+          placeName: location?.placeName ?? null,
+          placeAdmin: location?.placeAdmin ?? null,
+          countryCode: location?.countryCode ?? null,
+        });
+      });
+      void trackEvent(AnalyticsEvents.ALBUM_LOCATION_SET, { cleared: location == null });
     },
     [runMutation],
   );
@@ -2744,6 +2768,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [valueForDisplay],
   );
 
+  const locatedAlbums = useMemo<LocatedAlbum[]>(() => albums.filter(isLocatedAlbum), [albums]);
+
   const getTransfersBetweenAccounts = useCallback(
     (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
       return transactionsRepository.getTransfersBetweenAccounts(
@@ -2959,8 +2985,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reorderCategories,
             albums,
             activeAlbumId: albums.find((a) => a.isActive)?.id ?? null,
+            locatedAlbums,
             createAlbum,
             updateAlbum,
+            setAlbumLocation,
             deleteAlbum,
             reorderAlbums,
             setActiveAlbum,
@@ -3055,8 +3083,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteCategory,
       reorderCategories,
       albums,
+      locatedAlbums,
       createAlbum,
       updateAlbum,
+      setAlbumLocation,
       deleteAlbum,
       reorderAlbums,
       setActiveAlbum,
