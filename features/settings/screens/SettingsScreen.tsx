@@ -58,7 +58,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -135,7 +135,8 @@ export function SettingsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
-  const { settings, transactions, updateSettings, isSimpleMode } = useApp();
+  const { settings, updateSettings, isSimpleMode } = useApp();
+  const { transactions } = useTransactions();
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();

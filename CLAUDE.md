@@ -57,9 +57,12 @@ Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide an
 
 Global state lives in `context/AppContext.tsx` via the `useApp()` hook. This is the single source of truth for all DB data — wallets, transactions, categories, settings, recurring rules, monthly wages, account balances, albums, and the multi-currency exchange-rate table. All CRUD operations are methods on this context. There is no Redux, Zustand, or other state library.
 
+**Two contexts, by update frequency.** The volatile transaction-derived state — `transactions`, `filteredTransactions`, `accountBalances`, `transactionFilters`, `activeAccountFilter` — lives in a separate `TransactionsContext`, read via **`useTransactions()`**. Everything else (settings, accounts, categories, albums, FX, wages, prefs) plus all action functions stay on `useApp()`. This matters because transaction CRUD updates `transactions` optimistically/granularly (not via the full `refreshAll()` reload that other mutations use), so isolating it keeps the app's most frequent mutation from re-rendering every settings/account/album consumer. **Rule of thumb:** if a component needs live transaction data use `useTransactions()`; otherwise use `useApp()` and it won't re-render on transaction churn.
+
 Key properties from `useApp()`:
 
-- **State**: `isLoading`, `settings`, `currentMonthWage`, `accounts`, `accountGroups`, `categories`, `transactions`, `filteredTransactions`, `monthlyWages`, `accountBalances`, `recurringRules`, `transactionFilters`, `activeAccountFilter`
+- **State** (on `useApp()`): `isLoading`, `settings`, `currentMonthWage`, `accounts`, `accountGroups`, `categories`, `monthlyWages`, `recurringRules`
+- **State** (on `useTransactions()`): `transactions`, `filteredTransactions`, `accountBalances`, `transactionFilters`, `activeAccountFilter`
 - **Account ops**: `createAccount`, `updateAccount`, `deleteAccount`, `reorderAccounts`, `createAccountGroup`, `renameAccountGroup`, `deleteAccountGroup`, `reorderAccountGroups`
 - **Transaction ops**: `createTransaction`, `updateTransaction`, `deleteTransaction`, `updateTransactionsBulk`, `deleteTransactionsBulk`
 - **Category ops**: `createCategory`, `updateCategory`, `deleteCategory`, `reorderCategories`
