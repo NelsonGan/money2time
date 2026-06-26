@@ -1,4 +1,4 @@
-import { buildFtsMatch, normalizeCityQuery, toCity } from '~/lib/db/citiesDb';
+import { buildFtsMatch, escapeLike, normalizeCityQuery, toCity } from '~/lib/db/citiesDb';
 import { toAlbum } from '~/lib/repositories/mappers';
 import type { Album } from '~/types';
 import { isLocatedAlbum } from '~/types';
@@ -94,6 +94,18 @@ describe('buildFtsMatch', () => {
   it('returns empty for blank or non-alphanumeric input', () => {
     expect(buildFtsMatch('   ')).toBe('');
     expect(buildFtsMatch('!!!')).toBe('');
+  });
+});
+
+describe('escapeLike', () => {
+  it('escapes LIKE wildcards and the escape char itself', () => {
+    expect(escapeLike('100%')).toBe('100\\%');
+    expect(escapeLike('a_b')).toBe('a\\_b');
+    expect(escapeLike('c\\d')).toBe('c\\\\d');
+  });
+
+  it('leaves ordinary text untouched', () => {
+    expect(escapeLike('san francisco')).toBe('san francisco');
   });
 });
 
