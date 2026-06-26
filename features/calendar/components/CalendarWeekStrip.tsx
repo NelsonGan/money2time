@@ -121,6 +121,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
+    // Clip to the rounded bounds. The strip lives inside an opacity-animated
+    // Reanimated layer; without an explicit clip Android can paint the filled
+    // selection background as a square (corners not rounded). overflow:hidden
+    // forces the circular clip and is a no-op on iOS.
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1521,23 +1521,14 @@ export function CalendarScreen({
       {!isOnToday && !isSelectionMode && !isSearchOpen ? (
         <View
           pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: getBottomNavReservedInset(safeAreaInsets.bottom) + 12,
-          }}
+          style={[
+            styles.todayFabAnchor,
+            { bottom: getBottomNavReservedInset(safeAreaInsets.bottom) + 12 },
+          ]}
         >
           <View
             pointerEvents="box-none"
-            style={[
-              { paddingLeft: spacing.lg },
-              isTablet && {
-                maxWidth: TABLET_CONTENT_MAX_WIDTH,
-                alignSelf: 'center' as const,
-                width: '100%',
-              },
-            ]}
+            style={[styles.todayFabInner, isTablet && styles.todayFabInnerTablet]}
           >
             <Pressable
               onPress={handleGoToToday}
@@ -1859,6 +1850,24 @@ const styles = StyleSheet.create({
   modalActionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+  },
+  // Anchor the floating Today pill to the bottom-left. `alignItems: 'flex-start'`
+  // pins the pill to the left explicitly instead of relying on the child's
+  // `alignSelf` inside a full-width stretch parent — on Android that nesting
+  // could leave the pill floating away from the edge rather than flush-left.
+  todayFabAnchor: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'flex-start',
+  },
+  todayFabInner: {
+    paddingLeft: spacing.lg,
+  },
+  todayFabInnerTablet: {
+    width: '100%',
+    maxWidth: TABLET_CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
   },
   todayFab: {
     alignSelf: 'flex-start',
