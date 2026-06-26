@@ -736,11 +736,26 @@ export function CalendarScreen({
       if (delta !== 0 && wasUserDriven) {
         void triggerHaptic('selection');
         setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
+        // The snap-back to center is deferred to the layout effect below so the
+        // scroll lands in the SAME commit that swaps in the new day's content.
+        // Recentering here (before the re-render) made Android briefly draw the
+        // old/neighbouring page — the transactions "flash" during a swipe.
+      } else if (landed !== DAY_PAGER_CENTER) {
+        // Off-center without committing a day change (a clamped echo or an
+        // ignored fling): snap straight back. Nothing re-renders, so no flash.
+        recenterDayPager();
       }
-      recenterDayPager();
     },
     [pageWidth, recenterDayPager],
   );
+
+  // Re-anchor the day carousel on its center slot after the selected day
+  // commits. Running in a layout effect batches the scroll with the render that
+  // swaps in the new day, so the centered page is already correct when Android
+  // draws it — preventing the previous day's transactions from flashing.
+  useLayoutEffect(() => {
+    recenterDayPager();
+  }, [selectedDayKey, recenterDayPager]);
 
   // --- Day selection from month grid — zoom in to day view ---
   const handleSelectDayFromMonth = useCallback(
