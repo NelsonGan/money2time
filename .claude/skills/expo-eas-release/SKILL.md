@@ -1,91 +1,64 @@
 ---
 name: expo-eas-release
-description: Build, submit, and OTA-update the money2time app with Expo EAS. Use when cutting a release, running an EAS build, submitting to TestFlight / App Store / Play, pushing an over-the-air (expo-updates) JS update, bumping the version, choosing a build profile/channel, or debugging an EAS build/submit/update. Grounded in this repo's eas.json, app.json, and CI.
+description: Release the money2time app via the GitHub Actions pipeline (EAS Build → EAS Submit). Use when cutting a release, triggering or debugging the deploy workflow, submitting to TestFlight / App Store / Play, bumping the version, or choosing a build profile. Releases run only through CI — there is no manual local-build or OTA path. Grounded in this repo's eas.json, app.json, and .github/workflows/deploy.yml.
 ---
 
 # Expo EAS release (money2time)
 
-Expo SDK 54 / RN 0.81, New Architecture. Releases go through **EAS Build → EAS Submit**, with **expo-updates** for OTA JS patches. This repo builds **locally** (`--local`), not on EAS cloud builders.
+Expo SDK 54 / RN 0.81, New Architecture. **Releases happen only through GitHub Actions** (`.github/workflows/deploy.yml`), which runs EAS Build then EAS Submit. There is no manual local-build path and no OTA/`eas update` flow — do not run `eas build` / `eas submit` / `eas update` by hand for a release.
 
-Config sources of truth: `eas.json` (profiles/submit), `app.json` (version, updates, runtimeVersion), `.github/workflows/deploy.yml` (CI), and the `/ship-ios` & `/ship-android` commands (the manual path).
+Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.github/workflows/deploy.yml` (the pipeline).
 
 ## Project facts (don't re-derive)
 
-- **EAS project**: `projectId 27dec73c-197f-4b74-87ae-542e75fc549e`, slug `money2time`. Updates URL `https://u.expo.dev/<projectId>`.
+- **EAS project**: slug `money2time`, `projectId 27dec73c-197f-4b74-87ae-542e75fc549e`.
 - **Profiles** (`eas.json`): `development` (dev client, internal dist), `preview` (internal dist), `production` (`autoIncrement: true`, `channel: production`).
-- **`appVersionSource: "remote"`** — the version/build number is owned by EAS, not hand-edited build-to-build. `production` auto-increments the build number.
+- **`appVersionSource: "remote"`** — the build number is owned by EAS, not hand-edited; the `production` profile auto-increments it.
 - **Submit targets**: iOS `ascAppId 6760418898`; Android `track: production`.
-- **OTA**: `expo-updates` with `runtimeVersion.policy = "appVersion"` and the `production` channel. **An OTA update only reaches installed builds whose app version (e.g. `1.3.1`) matches** — change the native runtime (new native module, SDK bump, version bump) and old installs will NOT receive that JS bundle; they need a new store build.
+- **CI secret**: the pipeline requires the `EXPO_TOKEN` repo secret.
 
-## Preflight (always, before any build or update)
+## The pipeline (`deploy.yml`)
 
-The CI `test` job gates every build on `npm run check && npm test`. Reproduce it locally first — a red check means a wasted ~20–40 min build:
+Three jobs, gated `test → plan → deploy`:
 
-```bash
-npm run check   # typecheck + lint + format:check
-npm test
-```
+- **test** — runs on every push, PR, and dispatch: `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A red check here blocks `plan` and `deploy`.
+- **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
+- **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (macos-latest for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
 
-Also confirm you're on the intended ref (releases ship from `main`) and the working tree is clean.
+Concurrency cancels in-flight runs on a new push to the same ref.
 
-## Path A — Full native release (most common)
+## How to release
 
-Use when anything native changed (new native dep, config plugin, version bump, SDK) or for a normal store release.
-
-- **Easiest: use the existing commands** — `/ship-ios` and `/ship-android`. They run the exact two-step local build + submit for this project (answer `Y` to prompts; iOS submit may ask for the Apple ID email).
-- **Or push to `main`** — CI (`deploy.yml`) auto-runs test → plan → deploy: `eas build --local` on the matched runner (macOS for iOS, Ubuntu for Android) then `eas submit`. Push to `main` ships both platforms to the stores automatically. Requires the `EXPO_TOKEN` repo secret.
-- **Manual equivalents** (what the ship commands wrap):
-  ```bash
-  # iOS
-  eas env:exec production 'eas build --platform ios --profile production --local \
-    --output ./dist/Money2Time.ipa --non-interactive'
-  yes | eas submit --platform ios --profile production --path ./dist/Money2Time.ipa --non-interactive
-
-  # Android
-  eas env:exec production 'eas build --platform android --profile production --local \
-    --output ./dist/Money2Time.aab --non-interactive'
-  yes | eas submit --platform android --profile production --path ./dist/Money2Time.aab
-  ```
-  `eas env:exec production` injects the EAS-hosted production env vars (RevenueCat/Mixpanel keys) into the local build.
-
-## Path B — OTA update (JS-only, no native change)
-
-Use **only** when the change is pure JS/assets (no native module, no version/SDK bump). Much faster than a store release; no review.
-
-```bash
-eas update --branch production --message "describe the change"
-```
-
-The `production` channel maps to the `production` branch. The update reaches only installs whose `runtimeVersion` (= app version) matches the current `app.json` `version`. If you bumped `version`, OTA won't reach older installs — ship a native build instead.
-
-**Decision rule:** native code / native deps / SDK / `version` changed → **Path A**. Otherwise → **Path B**.
+1. **Make sure `npm run check` and `npm test` pass** (locally is fine; CI's `test` job will block the release otherwise). This is the only gate that matters before shipping.
+2. **Bump `app.json` `expo.version`** for a user-facing release. Don't touch build numbers — `appVersionSource: remote` + `autoIncrement` manages them.
+3. **Trigger the deploy:**
+   - **Normal release:** merge/push to `main`. CI runs test → plan → deploy and ships **both** platforms to TestFlight + Play (`production` track) automatically.
+   - **Single platform / non-production profile:** use **workflow_dispatch** on `deploy.yml` and pick the `platform` (ios/android) and `profile` (production/preview/development) inputs.
+4. **Watch the run** until `deploy` is green; confirm the build reached the store track.
 
 ## Versioning
 
-- App marketing version lives in `app.json` `expo.version` (currently `1.3.1`) and drives `runtimeVersion` via the `appVersion` policy. Bump it for a user-facing release with native changes.
-- Build numbers are remote/auto-incremented by the `production` profile — don't hand-set them.
-- Bumping `version` starts a fresh OTA runtime: pre-bump installs stop getting OTA on the old runtime and must update via the stores.
+- Marketing version lives in `app.json` `expo.version` (currently `1.3.1`); bump it for a user-facing release.
+- Build numbers are remote/auto-incremented by the `production` profile — never hand-set them.
 
 ## Debugging
 
-- **Build fails in check/test**: fix locally; CI won't proceed past the `test` job.
-- **Local build env/credentials**: builds use `--local`; ensure Xcode/Android SDK and signing are set up. `ANDROID_HOME` must be exported for Android. Credentials are managed by EAS (`eas credentials`).
-- **Submit rejected**: verify `ascAppId` / Play track in `eas.json` and that the binary's version/build number isn't already used.
-- **OTA not landing**: almost always a `runtimeVersion` (app version) mismatch, wrong channel/branch, or the app not having fetched the update yet (expo-updates checks on launch). Confirm with `eas update:list --branch production`.
-- **Inspect**: `eas build:list`, `eas build:view`, `eas submit` logs, `eas update:list`.
+- **`test` job red** → fix `npm run check` / `npm test` locally and push again; the pipeline won't build until it's green.
+- **`deploy` build fails** → read the EAS build logs in the job output; common causes are signing/credentials (`eas credentials`) or a native/config error. Credentials are managed by EAS.
+- **Submit rejected** → verify `ascAppId` / Play track in `eas.json` and that the version/build number isn't already used on the store.
+- **Inspect** outside CI with read-only commands if needed: `eas build:list`, `eas build:view`, `eas submit` history.
 
 ## Definition of done
 
-- `npm run check` + `npm test` green before building.
-- Correct path chosen (native build vs OTA) per the decision rule.
-- Version bumped iff a user-facing native release.
-- Build submitted to the right store track / OTA pushed to `production`.
-- Release notes / `eas update` message describe the change.
+- `npm run check` + `npm test` green.
+- `app.json` version bumped iff a user-facing release.
+- The `deploy` job finished green and the build reached the correct store track.
+- Release notes describe the change.
 
 ## Anti-patterns
 
-- Shipping an OTA update that includes a native change or version bump (old installs break or silently miss it).
+- Running `eas build` / `eas submit` / `eas update` by hand for a release — releases go through GitHub Actions only.
+- Pushing a release before `npm run check`/`npm test` pass — CI blocks it at the `test` job.
 - Hand-editing build numbers despite `appVersionSource: remote` + `autoIncrement`.
-- Building before `npm run check`/`npm test` pass — wastes a long local build.
-- Submitting from a profile/channel other than `production` for a real release.
-- Committing secrets — production env comes from `eas env:exec`, not the repo.
+- Triggering a release from a profile other than `production` for a real store release.
+- Committing secrets — release env is provided to CI via `EXPO_TOKEN`, not the repo.
