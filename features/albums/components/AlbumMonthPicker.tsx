@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { FlatList, useWindowDimensions, View } from 'react-native';
 
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import { MonthPagerPage } from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
@@ -32,8 +32,8 @@ interface AlbumMonthPickerProps {
  * tap toggles album membership.
  */
 export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProps) {
-  const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
-  const { transactions } = useTransactions();
+  const { transactions, settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } =
+    useApp();
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);

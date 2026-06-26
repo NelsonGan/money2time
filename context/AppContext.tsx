@@ -151,22 +151,11 @@ export interface CreateTransactionMeta {
   source?: TransactionSource;
 }
 
-/**
- * Volatile transaction-derived state, split into its own context so the most
- * frequent mutation (transaction CRUD, which updates only `transactions`
- * optimistically) does not re-render components that read settings/accounts/
- * albums/etc. Read it via `useTransactions()`.
- */
-export interface TransactionsContextValue {
-  transactions: TransactionWithRelations[];
+interface AppContextValue extends AppState {
   filteredTransactions: TransactionWithRelations[];
+  monthlyWages: MonthlyWageSettings[];
   accountBalances: AccountBalance[];
   transactionFilters: TransactionFilters;
-  activeAccountFilter: string | null;
-}
-
-interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccountFilter'> {
-  monthlyWages: MonthlyWageSettings[];
 
   // Multi-currency / FX
   rateTable: RateTable;
@@ -339,7 +328,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
-const TransactionsContext = createContext<TransactionsContextValue | null>(null);
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 
 // Defer a persist/refresh task off the critical render path (so the optimistic
@@ -2926,6 +2914,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             recurringRules,
             accounts,
             categories,
+            transactions,
+            filteredTransactions,
+            activeAccountFilter,
+            accountBalances,
+            transactionFilters,
             rateTable,
             convertToReporting,
             listExchangeRates,
@@ -3023,6 +3016,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       recurringRules,
       accounts,
       categories,
+      transactions,
+      filteredTransactions,
+      activeAccountFilter,
+      accountBalances,
+      transactionFilters,
       rateTable,
       convertToReporting,
       listExchangeRates,
@@ -3111,19 +3109,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
-  // Volatile transaction-derived state lives in its own context so the most
-  // frequent mutation (transaction CRUD) only re-renders transaction consumers.
-  const transactionsValue = useMemo<TransactionsContextValue>(
-    () => ({
-      transactions,
-      filteredTransactions,
-      accountBalances,
-      transactionFilters,
-      activeAccountFilter,
-    }),
-    [transactions, filteredTransactions, accountBalances, transactionFilters, activeAccountFilter],
-  );
-
   if (!settings) {
     if (isLoading) {
       return null;
@@ -3148,33 +3133,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return (
-    <AppContext.Provider value={value}>
-      <TransactionsContext.Provider value={transactionsValue}>
-        {children}
-      </TransactionsContext.Provider>
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {
     throw new Error('useApp must be used within AppProvider');
-  }
-  return context;
-}
-
-/**
- * Subscribe to volatile transaction-derived state (transactions,
- * filteredTransactions, accountBalances, filters). Components that do NOT need
- * this data should use `useApp()` instead so they don't re-render on every
- * transaction mutation.
- */
-export function useTransactions() {
-  const context = useContext(TransactionsContext);
-  if (!context) {
-    throw new Error('useTransactions must be used within AppProvider');
   }
   return context;
 }

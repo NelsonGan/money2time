@@ -27,7 +27,7 @@ import {
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
 import { CATEGORY_ICON_PICKER_VALUES } from '~/constants/categoryIcons';
 import { spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -695,9 +695,14 @@ export function CategoriesScreen({
   onBack,
   useNativeBackGesture = false,
 }: CategoriesScreenProps = {}) {
-  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
-    useApp();
-  const { transactions } = useTransactions();
+  const {
+    categories,
+    transactions,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    reorderCategories,
+  } = useApp();
   const { checkLimit } = useProGate();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const themeColors = useThemeColors();

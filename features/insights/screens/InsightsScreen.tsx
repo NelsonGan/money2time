@@ -61,7 +61,7 @@ import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
@@ -2610,6 +2610,7 @@ export function InsightsScreen({
     categories,
     accounts,
     accountGroups,
+    transactions: rawTransactions,
     canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
@@ -2620,7 +2621,6 @@ export function InsightsScreen({
     updateTransactionsBulk,
     deleteTransactionsBulk,
   } = useApp();
-  const { transactions: rawTransactions } = useTransactions();
   const { isPro } = usePro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 

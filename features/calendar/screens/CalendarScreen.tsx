@@ -31,7 +31,7 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import {
   ActivitySearchRow,
   ActivityTransactionList,
@@ -213,8 +213,8 @@ export function CalendarScreen({
   onSelectionModeChange,
   onShowTodayButtonChange,
 }: CalendarScreenProps) {
-  const { transactions } = useTransactions();
   const {
+    transactions,
     settings,
     isLoading,
     isSimpleMode,
