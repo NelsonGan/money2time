@@ -1,23 +1,36 @@
-# Album Globe — Design & Implementation Plan
+# Album Globe & Map — Design & Implementation Plan
 
 Status: **Planned** · Branch: `claude/album-globe-planning-zp3mqt`
 
-This document describes how to add a **3D globe view of albums** to money2time.
-The user attaches a real-world location (city / country) to each album, and a
-new "globe mode" renders every located album as a pin on a spinning Earth. The
-pin shows the album's cover photo and total spend; tapping it opens the album.
-Albums at the same place stack into a swipeable card.
+This document describes how to add **two location views of albums** to money2time:
+
+- A **3D globe** (the hero view) — a spinning Earth with each located album shown
+  as a pin carrying its cover photo + total spend.
+- A **flat map** (drill-down view) — a real, pannable/zoomable street-capable map
+  for looking closely at a place, built on the open-source **MapLibre** stack
+  (no API key).
+
+The user attaches a real-world location (city / country) to each album; both
+views render those albums as pins. Tapping a pin opens the album. Albums at the
+same place stack into a swipeable card.
+
+> **Update log**
+> - v2 — Added the flat-map view via **MapLibre React Native** (open-source, no
+>   API key). Clarified globe stays on Skia (fully offline, zero-dep). Adjusted
+>   the "no new native deps" claim: the **globe** adds none; the **map** adds one
+>   native module. See §2.2.
 
 Hard requirements from the request:
 
-1. **Fully offline** — globe textures, the city database, and all geocoding ship
-   inside the app bundle. No network calls, ever.
+1. **Globe is fully offline** — globe texture, the city database, and all
+   geocoding ship inside the app bundle. No network calls for the globe, ever.
 2. **City picker backed by a real place database** — e.g. pick "Tokyo, Japan".
-   Sourced from an open dataset, bundled offline.
-3. **Globe markers show the album photo + expense.** Multiple albums at one place
+   Sourced from an open dataset (GeoNames), bundled offline.
+3. **Markers show the album photo + expense.** Multiple albums at one place
    stack / are swipeable.
-4. **A floating button on the albums index** toggles globe mode.
-5. **Performant** — 60fps rotation, no jank, fast cold start.
+4. **A floating button on the albums index** toggles location mode.
+5. **Performant** — 60fps globe rotation, smooth map, fast cold start.
+6. **Open-source map, no API key** — use MapLibre, not the token-gated Mapbox SDK.
 
 ---
 
@@ -45,195 +58,176 @@ The album feature is already shipped and is the right foundation:
 - **Cover photos** (`services/userAssets.ts`): `saveAlbumCover` /
   `getAlbumCoverUri` / `deleteAlbumCover` store images under
   `<documentDirectory>/user-assets/album-covers/<id>.<ext>` and are already
-  walked by the backup layer. We reuse these as the globe pin thumbnails — no new
+  walked by the backup layer. We reuse these as the pin thumbnails — no new
   asset plumbing.
-- **Stack already in the project we can lean on**: `@shopify/react-native-skia`
-  (2.2.12), `react-native-reanimated` (~4.1), `react-native-gesture-handler`
-  (~2.28), `react-native-worklets`, `expo-image`, `expo-sqlite` (16),
-  `drizzle-orm`, `react-native-pager-view`. **No new native module is required
-  for the recommended approach.**
-- **Pro gating**: `useProGate()` + `PRO_LIMITS.FREE_MAX_ALBUMS`. Globe mode can
-  be a Pro perk or free — decision below.
+- **Stack already in the project**: `@shopify/react-native-skia` (2.2.12),
+  `react-native-reanimated` (~4.1), `react-native-gesture-handler` (~2.28),
+  `react-native-worklets`, `expo-image`, `expo-sqlite` (16), `drizzle-orm`,
+  `react-native-pager-view`. The globe reuses these with **no new native module**;
+  the map adds **one** (MapLibre — see §2.2).
+- **Pro gating**: `useProGate()` + `PRO_LIMITS.FREE_MAX_ALBUMS`.
 
-Implication: this feature is mostly **(a) add location columns + a city picker**
-and **(b) add a new globe render surface + a globe screen**. The data model,
+Implication: this feature is mostly **(a) add location columns + a city picker**,
+**(b) a Skia globe surface**, and **(c) a MapLibre map surface**. The data model,
 album CRUD, photo storage, and backup are largely done.
 
 ---
 
-## 2. Rendering the globe — library research & recommendation
+## 2. Rendering — globe (Skia) + map (MapLibre)
 
-This is the highest-risk decision, so it gets the most depth. Constraints:
-offline, performant, can pin arbitrary lat/lng with a custom image + label,
-hit-testable taps.
+The two views answer different needs and use different engines on purpose:
 
-### Options evaluated
+| View | Engine | Offline | New native dep | Role |
+|---|---|---|---|---|
+| **Globe** | Skia + SkSL shader | Fully offline | None | Hero overview, "my trips on Earth" |
+| **Map** | MapLibre React Native | Offline-first (bundled low-zoom tiles) + optional online detail | One module | Drill into a place, street-capable |
 
-| Approach | 3D? | New native deps | Offline | Custom image pins | Verdict |
-|---|---|---|---|---|---|
-| **Skia + SkSL sphere shader** (recommended) | Faux-3D (shaded sphere) | **None** (Skia already in app) | Yes (bundled texture) | Yes (Skia images, JS-projected) | ✅ Best fit |
-| `expo-gl` + `three.js` / `expo-three` | True 3D mesh | `expo-gl`, `expo-three` (+ dev-client rebuild) | Yes | Yes (sprites + raycast) | Viable but heavier |
-| `@aeryflux/globe` (`/react-native`) | True 3D (three) | `expo-gl`, `expo-three` | **No** — models load from jsDelivr CDN by default; no documented lat/lng pin API | Limited | ❌ Rejected |
-| `react-globe.gl` / `react-globe` | True 3D | WebGL/DOM | n/a | Yes | ❌ Web only (needs DOM/WebGL canvas) |
+### 2.1 Globe — Skia with an SkSL runtime shader (recommended, unchanged)
 
-`@aeryflux/globe` looks attractive (it advertises an Expo entry point) but its
-models are CDN-served by default and it exposes country/city *highlight* data,
-not an arbitrary lat/lng pin-with-image API — both disqualifiers for our use
-case. `react-globe.gl` and `react-globe` are DOM/WebGL components for the web.
-
-### Recommendation: **Skia globe with an SkSL runtime shader**
-
-Render the Earth as a **shaded sphere in a single Skia `Canvas`**, using a Skia
-runtime (SkSL) fragment shader that ray-marches a sphere and samples a **bundled
+Render the Earth as a **shaded sphere in a single Skia `Canvas`** via a runtime
+(SkSL) fragment shader that ray-marches a sphere and samples a **bundled
 equirectangular Earth texture**. Rotation/zoom come from Gesture Handler +
 Reanimated shared values. Album pins are projected from lat/lng to screen space
 **in JS/worklet**, back-face-culled, and drawn as Skia `Image`/`Circle` nodes on
 top. Taps are hit-tested against the same projected positions.
 
-Why this is the right call for *this* app:
+Why Skia for the globe:
 
-- **Zero new native modules.** Skia, Reanimated, Gesture Handler, and Worklets
-  are already dependencies. No `expo-gl`/`expo-three`, no dev-client rebuild
-  churn, no extra app-size from a second graphics runtime. This matters: the CI
-  in `.github/workflows/deploy.yml` builds locally with EAS and every native dep
-  added is build risk.
-- **GPU-fast.** Skia runs in C++ over JSI; the shader runs on the GPU. A single
-  full-screen shader pass for the sphere + a few dozen image draws is trivial for
-  Skia at 60fps.
-- **Fully offline by construction.** The texture is an asset in the bundle; the
-  shader is a string. Nothing fetches.
-- **Matches house style.** The codebase already commits to Skia for custom
-  drawing; reviewers and future maintainers stay on familiar ground.
+- **Zero new native modules** — Skia, Reanimated, Gesture Handler, Worklets are
+  already dependencies.
+- **GPU-fast** — one full-screen shader pass + a few dozen image draws at 60fps.
+- **Fully offline by construction** — the texture is a bundled asset; the shader
+  is a string. Nothing fetches.
+- **On-brand** — can be a stylized, **theme-tinted** minimal globe (tinted to the
+  user's `themeColor`) rather than a photoreal one, matching the design system.
 
-Trade-off vs. true 3D (three.js): we get a *single shaded globe* (one sphere,
-atmosphere halo, day texture, optional night/normal map in-shader) rather than a
-full 3D scene graph. For "show my trips on a turning Earth" that is exactly
-enough, and it is dramatically cheaper. If we later want true 3D extruded arcs
-between trips, we revisit `expo-gl` then — the data model below doesn't change.
+Rejected for the globe: `@aeryflux/globe` (CDN-served models by default, no
+lat/lng pin API), `react-globe.gl` / `react-globe` (web/DOM only), and
+`expo-gl`+`three.js` (true 3D but adds native modules for no real gain here).
 
-### The shader, concretely
+> Note: MapLibre Native has recently gained a **globe projection** too, so in
+> principle one library could do both surfaces. We keep the Skia globe as primary
+> because it is fully offline with zero deps and trivially theme-tintable; the
+> MapLibre globe is a possible future unification, not the v1 path.
 
-`features/albums/globe/earthShader.ts` exports an SkSL source string compiled
-once via `Skia.RuntimeEffect.Make(...)`. Uniforms:
+**Shader** (`features/albums/globe/earthShader.ts`): SkSL compiled once via
+`Skia.RuntimeEffect.Make(...)`. Uniforms: `uResolution`, `uRotation` (yaw/pitch),
+`uZoom`, `uLightDir`, `uTexture` (equirectangular image shader). Per fragment:
+build a ray, intersect the unit sphere; on miss draw atmosphere/space; on hit
+rotate the point by `uRotation`, convert to `(u,v) = (atan2(z,x), asin(y))`,
+sample `uTexture`, apply Lambert shading + a rim/atmosphere term near the limb.
 
-- `uResolution` (vec2), `uRotation` (vec2 — yaw/pitch driven by gestures),
-  `uZoom` (float), `uLightDir` (vec3), `uTexture` (shader — the equirectangular
-  image via `image.makeShaderOptions(...)` / `ImageShader`).
+**Projection** (`features/albums/globe/projection.ts`, pure + unit-tested):
+`latLngToVec3`, `project(vec3, rotation, zoom, viewport) -> { x, y, visible }`
+(same rotation convention as the shader; `visible` = near hemisphere), and
+`clusterByScreenDistance` for stacking. **Both shader and projection derive from
+one shared `rotate` helper** so pins stay glued exactly to their coordinate — the
+single most important correctness detail, covered by landmark tests (Tokyo, NYC,
+London, and `(0,0)` in the Gulf of Guinea).
 
-Per-fragment logic: build a ray from the fragment, intersect the unit sphere; on
-miss, draw the atmosphere/space gradient; on hit, rotate the hit point by
-`uRotation`, convert the sphere point to `(u,v) = (atan2(z,x), asin(y))`
-equirectangular coords, sample `uTexture`, apply Lambert shading from
-`uLightDir`, and a rim/atmosphere term near the limb. This yields a convincing
-lit Earth with day texture in one pass.
+**Texture**: one equirectangular map, **2048×1024 WebP** (~200–400 KB), e.g. NASA
+Blue Marble (public domain) for photoreal, or a stylized grayscale landmask we
+tint to the theme. Stored at `assets/globe/earth-2k.webp`, loaded via Skia
+`useImage()`.
 
-### Projecting pins (the JS/worklet side)
+**Perf budget**: shader-driven rotation off the JS thread (Reanimated shared
+values), pre-decode pin thumbnails once and memoize, draw only **visible** pins,
+recompute projections only past a rotation epsilon, inertial fling + idle
+auto-spin that pauses on touch, clamped pitch/zoom, static fallback if `useImage`
+returns null.
 
-`features/albums/globe/projection.ts` — pure, unit-tested math:
+### 2.2 Map — MapLibre React Native (open-source, no API key)
 
-- `latLngToVec3(lat, lng) -> {x,y,z}` (unit sphere).
-- `project(vec3, rotation, zoom, viewport) -> { x, y, visible }` applies the same
-  rotation as the shader, returns screen coords and a `visible` flag (true when
-  the point's rotated `z` faces the camera — i.e. on the near hemisphere). This
-  keeps pins glued to the surface and hidden when they rotate to the back.
-- `clusterByScreenDistance(points, radiusPx)` groups pins whose projected
-  positions are within `radiusPx` so co-located albums stack (see §6).
+Use **`@maplibre/maplibre-react-native`** — the community open-source fork of the
+Mapbox SDK, **BSD-licensed, no token required**, vector tiles, smooth zoom to
+street level, fully themeable styles.
 
-The projection constants must exactly mirror the shader's rotation convention;
-both are derived from one shared `rotateY/rotateX` helper to avoid drift. This is
-the single most important correctness detail and gets dedicated tests.
+> **Naming clarification.** The old `react-native-mapbox-gl` package is
+> deprecated. It split into `@rnmapbox/maps` (requires a Mapbox account/token —
+> avoid) and **`@maplibre/maplibre-react-native`** (no token, open-source — use
+> this one). Same component API and visual style as Mapbox GL.
 
-### Assets & sizing
+**Native-module reality.** MapLibre RN is a native module, so it needs an Expo
+**config plugin** + a **dev-client / prebuild** (no Expo Go). This is compatible
+with our pipeline — CI already does native EAS local builds in
+`.github/workflows/deploy.yml` — but it is real build surface: add the plugin to
+`app.json`, rebuild the dev client, and expect the first Android/iOS build after
+adding it to take longer. Document this in `CLAUDE.md`.
 
-- **Earth texture**: bundle one equirectangular day map. Use a **2048×1024 WebP**
-  (~200–400 KB) as the default; optionally a 1024×512 fallback for low-RAM
-  devices. Source: NASA Blue Marble (public domain). Store under
-  `assets/globe/earth-day-2k.webp`, referenced via `require(...)` and loaded with
-  `useImage()` from Skia. Public-domain source means no attribution/licensing
-  blocker.
-- Optionally a subtle **night-lights** or **normal/specular** map later; v1 ships
-  day-only to keep the bundle lean.
+**Offline strategy (no API key, network-optional).** This is the crux. Options,
+in order of preference:
 
-### Performance budget & safeguards
+1. **Bundle a low-zoom world basemap as a static file (recommended).** Use a
+   **Protomaps PMTiles** archive of a world/region basemap (built from OpenStreetMap,
+   free, no key) covering low zooms (≈ z0–z6, tens of MB), shipped as an asset and
+   read locally via the `pmtiles://` protocol. A single static file, no tile
+   server, no key — gives a fully-offline overview/region map. *Verify current
+   MapLibre **Native** PMTiles support for the installed version; if unavailable,
+   fall back to a bundled **MBTiles** raster/vector pack read through a local file
+   source.*
+2. **Online detail when connected (optional enhancement).** Point the style at a
+   free no-key online tile source (or the user's own) for street-level detail when
+   the device is online; tiles cache after first load. This is *offline-first*:
+   overview always works; detail loads when available.
+3. **Offline packs** (MapLibre `OfflineManager`) — let the user download a region
+   for offline use. Useful later; requires network once.
 
-- One shader pass + N small image draws (N = located albums, realistically < 100).
-- Pin thumbnails: render album covers through `expo-image`'s cache or pre-decode
-  to Skia images **once** and memoize; never decode per frame. Draw covers as
-  small rounded rects (e.g. 44px) only for **visible** pins; off-hemisphere pins
-  are skipped entirely.
-- Drive `uRotation`/`uZoom` from Reanimated shared values so gestures never cross
-  the JS bridge per frame. A momentum/inertia decay on fling, plus a slow idle
-  auto-spin that pauses on touch.
-- Clamp pitch to avoid pole flipping; clamp zoom.
-- Cap pin redraws by only recomputing projections when rotation actually changes
-  beyond a small epsilon.
-- Provide a static fallback (flat map image + tappable list) if `useImage`
-  returns null or the device reports no GPU — defensive, rarely hit.
+Default v1: **option 1** (bundled low-zoom PMTiles overview) so the map works with
+no network, with **option 2** as a connected-only enhancement. This honors
+"open-source, no key" and keeps the offline-first promise; only *street-level*
+detail needs connectivity.
+
+**Style & theming.** The map style is JSON. Start from a free no-key basemap
+(Protomaps "basemaps", or the Made-with-MapLibre light/minimal/dark styles) and
+**tint it to the active `themeColor`** so the map matches the globe and the rest
+of the app. Light-minimal/dark read as the sleekest for a finance app.
+
+**Album pins on the map.** Two render paths:
+
+- `ShapeSource` (a GeoJSON `FeatureCollection` of located albums) + `SymbolLayer`
+  with **`cluster: true`** → MapLibre handles co-location **clustering natively**
+  (a cluster bubble with a count, expanding as you zoom). This is the performant
+  default for many pins.
+- For the album-photo look, `MarkerView` / `PointAnnotation` host a custom RN view
+  (the cover thumbnail + expense pill) at a coordinate. Use these for the
+  individual (unclustered) pins; tapping opens the album, tapping a cluster zooms
+  in or opens the swipeable cluster sheet (§6).
+
+So clustering is **native on the map** and **manual (screen-distance) on the
+globe** (§6) — same UX, two mechanisms.
 
 ---
 
-## 3. Offline place database — research & recommendation
+## 3. Offline place database — GeoNames, bundled as read-only SQLite
 
-We need a searchable list of world cities → `{ name, admin1 (state/region),
-countryCode, countryName, lat, lng, population, timezone }`, fully offline.
+We need a searchable list of world cities → `{ name, admin1, countryCode,
+countryName, lat, lng, population, timezone }`, fully offline.
 
-### Source
+**Source:** **GeoNames** `cities15000` (~26k cities of pop > 15,000 or capitals)
+— the sweet spot for coverage vs. size. `cities5000` (~50k) is the fallback for
+smaller towns; `cities500` (~200k) is overkill.
 
-**GeoNames** (creativecommons, free). The `cities15000` extract (~26k cities of
-population > 15,000 or capitals) is the sweet spot: covers essentially every
-place a user would tag a trip with, while staying small. `cities5000` (~50k) is a
-fallback if coverage feels thin; `cities500` (~200k) is overkill and bloats the
-bundle. Recommendation: **start with `cities15000`.**
+**Packaging:** prebuild a **read-only SQLite** at build time and bundle it as an
+asset (the standard offline-geo pattern, cf. `geonames-sqlite`).
 
-### Packaging: a prebuilt read-only SQLite asset
+- **Build script** `scripts/build-cities-db.mjs`: downloads `cities15000.zip` +
+  `countryInfo.txt` + `admin1CodesASCII.txt`, writes `assets/db/cities.db` with
+  `cities`, `country_names`, `admin1_names`, an **FTS5** table `cities_fts` for
+  diacritic-insensitive typeahead, and a `population DESC` index; `VACUUM`s to a
+  single compact file. Expected size **~2–4 MB**. Run manually when refreshing
+  data; the generated `.db` is committed as a build asset.
 
-Rather than ship raw TSV and import at runtime, **prebuild a read-only SQLite
-database at build time** and bundle it as an asset. This is the standard
-offline-geo pattern (cf. `geonames-sqlite`).
+**Runtime** (`lib/db/citiesDb.ts`): a **second, read-only `expo-sqlite`
+connection**, separate from `money2time.db`. On first launch, copy
+`assets/db/cities.db` into `<documentDirectory>SQLite/cities.db` (guarded by a
+version marker), open with `query_only = ON` + mmap. **Never** run the money2time
+migration runner against it. API: `searchCities(query, limit)` (FTS5 prefix, ranked
+by population, debounced in UI) and `getCityById(id)`. It is reference data —
+excluded from backup and from `resetAllData`.
 
-- **Build script** `scripts/build-cities-db.mjs`: downloads `cities15000.zip`
-  from GeoNames, parses the TSV, writes `assets/db/cities.db` with:
-  - `cities(id, name, asciiName, admin1Code, countryCode, lat, lng, population,
-    timezone)`
-  - `country_names(countryCode, name)` (from GeoNames `countryInfo.txt`)
-  - optional `admin1_names(code, name)` (from `admin1CodesASCII.txt`) so we can
-    show "Tokyo, **Tokyo**, Japan".
-  - An **FTS5** virtual table `cities_fts(name, asciiName)` for fast diacritic-
-    insensitive typeahead, plus a `population DESC` index for ranking.
-  - Run `VACUUM` + `PRAGMA journal_mode=DELETE` so the shipped file is a single
-    compact, read-only artifact. Expected size **~2–4 MB** for cities15000.
-- The script is documented in `CLAUDE.md`/README and run manually when refreshing
-  data (not on every CI run). The generated `.db` is committed (or fetched as a
-  build asset) so contributors don't need network at build time.
-
-### Runtime access
-
-`lib/db/citiesDb.ts` — a **second, read-only `expo-sqlite` connection**, separate
-from `money2time.db`:
-
-- On first launch, copy `assets/db/cities.db` from the bundle into
-  `<documentDirectory>SQLite/cities.db` (expo-sqlite can only open DBs from its
-  own directory). Use `expo-asset` + `expo-file-system` to copy once; guard with
-  a version marker so we re-copy when the bundled DB updates.
-- Open with `openDatabaseSync('cities.db')`; apply read-only-friendly pragmas
-  (`query_only = ON`, `mmap_size`, `temp_store = MEMORY`). **Never** run the
-  money2time migration runner against it.
-- API:
-  - `searchCities(query, limit = 25): CityResult[]` — FTS5 prefix match, ranked
-    by `population DESC`. Debounced in the UI.
-  - `getCityById(id): CityResult | null` — to re-resolve a saved place.
-
-This keeps the user's writable app DB and the static reference DB cleanly
-separated (different lifecycles, backup rules, and reset semantics — the cities
-DB is never touched by `resetAllData`).
-
-### Why not a JSON file / npm geo package?
-
-A 26k-row JSON would be a multi-MB parse on the JS thread at startup (jank) and
-can't do FTS. SQLite+FTS5 gives instant, memory-light prefix search and lazy
-loading. npm geo packages (`@hebcal/geo-sqlite`, etc.) either pull data at
-runtime or aren't RN-friendly; building our own bundled `.db` keeps us fully
-offline and in control of size.
+Why not JSON / npm geo packages: a 26k-row JSON is a multi-MB main-thread parse
+with no FTS; npm packages either fetch at runtime or aren't RN-friendly. A bundled
+`.db` keeps us fully offline and in control of size.
 
 ---
 
@@ -241,147 +235,118 @@ offline and in control of size.
 
 ### Migration `037_album_location.ts`
 
-Add nullable location columns to `albums` (nullable so existing albums are
-unaffected and "located" is simply "latitude IS NOT NULL"):
+Add nullable location columns to `albums` (nullable → existing albums unaffected;
+"located" = `latitude IS NOT NULL`):
 
 ```sql
 ALTER TABLE albums ADD COLUMN latitude REAL;
 ALTER TABLE albums ADD COLUMN longitude REAL;
 ALTER TABLE albums ADD COLUMN place_id TEXT;       -- GeoNames id, for re-resolve
 ALTER TABLE albums ADD COLUMN place_name TEXT;     -- "Tokyo"
-ALTER TABLE albums ADD COLUMN place_admin TEXT;    -- "Tokyo" (admin1), nullable
+ALTER TABLE albums ADD COLUMN place_admin TEXT;    -- admin1, nullable
 ALTER TABLE albums ADD COLUMN country_code TEXT;   -- "JP"
 ```
 
-Follow the existing `ALTER TABLE … ADD COLUMN` migration style (see
-`035_albums_active` / `036_albums_dates`). Mirror columns in
-`lib/db/schema.ts` (`albumsTable`), add to `AlbumRow`, and to the
-`resetSchemaToBaseline` drop list ordering only if needed (no — albums already
-listed).
+Follow the `ALTER TABLE … ADD COLUMN` style of `035`/`036`. Mirror the columns in
+`albumsTable` + `AlbumRow` (`lib/db/schema.ts`).
 
-### Type + mapper
+### Type + mapper + repo + context
 
-- `types/index.ts` → extend `Album` with `latitude/longitude/placeId/placeName/
-  placeAdmin/countryCode` (all nullable). Add a small `AlbumLocation` helper type
-  and a `LocatedAlbum = Album & { latitude: number; longitude: number }` guard.
+- `types/index.ts` → extend `Album` with the six nullable location fields; add
+  `LocatedAlbum = Album & { latitude: number; longitude: number }` guard and an
+  `AlbumLocation` helper type.
 - `lib/repositories/mappers.ts` → `toAlbum` maps the new columns.
-- `albumsRepository.CreateAlbumInput` / `update` input → add the location fields
-  (the existing spread-based `update` already persists them once typed).
-
-### Context
-
-- `updateAlbum` already forwards partial updates → setting a location is
-  `updateAlbum(id, { latitude, longitude, placeId, placeName, placeAdmin,
-  countryCode })`. No new context method strictly required, but add a typed
-  convenience `setAlbumLocation(id, location | null)` for clarity and to centralize
-  the "clear location" path.
-- Expose a memoized `locatedAlbums` selector (albums with non-null lat/lng) so the
-  globe screen doesn't re-filter on every render.
+- `albumsRepository` `CreateAlbumInput`/`update` input → add location fields (the
+  spread-based `update` persists them once typed).
+- `context/AppContext.tsx` → `setAlbumLocation(id, location | null)` convenience +
+  a memoized `locatedAlbums` selector + a memoized `albumsGeoJson` selector (the
+  `FeatureCollection` the MapLibre `ShapeSource` consumes).
 
 ---
 
 ## 5. UX & screens
 
-### 5.1 Setting a location (city picker)
+### 5.1 Setting a location (offline city picker)
 
-In **`EditAlbumDetailsScreen`** (and optionally `CreateAlbumScreen`), add a
-**"Location"** row. Tapping it opens a new bottom-sheet **`CityPickerSheet`**
-(mirror the existing `AccountPickerSheet`/`CategoryPickerSheet` patterns in
-`components/ui/`):
+In `EditAlbumDetailsScreen` (and optionally `CreateAlbumScreen`), add a
+**"Location"** row → opens a new bottom-sheet **`CityPickerSheet`** (mirroring
+`AccountPickerSheet`/`CategoryPickerSheet`): debounced search → `searchCities()`
+→ FlashList of "City, Admin, Country" rows; selecting writes the six location
+fields; a chip with "✕ clear" removes it. i18n empty/no-results copy.
 
-- A search `TextInput` (debounced ~200ms) → `searchCities(query)` → FlashList of
-  results showing "City, Admin, Country" with a small flag/emoji.
-- Selecting a city writes the six location fields to the album and shows a chip
-  with a "✕ clear" affordance.
-- Empty state / "no results" copy via i18n.
+### 5.2 Location mode toggle (albums index)
 
-This satisfies "select the location/city … from an online database, made fully
-offline": the data originated from GeoNames online but ships in-app.
+On `AlbumsScreen`, add a **floating action button** (bottom-right, above the
+bottom-nav inset via `useBottomNavContentInset()`) with a globe/map icon
+(`lucide-react-native` `Globe`/`Map`). It pushes a new root-stack screen
+`AlbumLocations`. The top-right "+" stays for create. Register the screen in
+`navigation/rootStack.ts` + `navigation/stackOptions.ts` (`headerShown: false`,
+gesture-back), following the existing pattern.
 
-### 5.2 Globe mode toggle (albums index)
+### 5.3 The location screen — `features/albums/screens/AlbumLocationsScreen.tsx`
 
-On **`AlbumsScreen`**, add a **floating action button** (bottom-right, above the
-bottom nav inset using `useBottomNavContentInset()`) with a globe icon
-(`lucide-react-native` `Globe`/`Earth`). It pushes a new root-stack screen
-`AlbumGlobe`. The existing top-right "+" stays for create. The FAB is only shown
-when at least one album has a location (otherwise show a one-time hint on first
-located album, or always show and let the globe present its own empty state).
+Hosts **both views with a segmented toggle** (Globe ⇄ Map) in the top bar:
 
-Register `AlbumGlobe` in `navigation/rootStack.ts` and `navigation/
-stackOptions.ts` (full-screen modal/push, gesture-back enabled, `headerShown:
-false`) following the existing root-screen registration pattern.
+- **Globe view** — the Skia `AlbumGlobeView` (§2.1): rotate/pinch/fling, idle
+  auto-spin, photo pins with expense badges, taps open albums / cluster sheet.
+- **Map view** — the MapLibre `AlbumMapView` (§2.2): `MapView` + `Camera`, the
+  themed offline style, `ShapeSource`(cluster) + `MarkerView` photo pins, tap to
+  open album / zoom cluster. A "fit all" button frames all located albums.
+- Shared chrome: back chevron (consistent with `AlbumDetailScreen`), the
+  Globe/Map toggle, and an empty state (mascot + "Add a location to an album to
+  see it here") when no album has a location.
 
-### 5.3 The globe screen — `features/albums/screens/AlbumGlobeScreen.tsx`
-
-Layout:
-
-- Full-bleed `Canvas` (Skia) background rendering the shaded Earth.
-- Gesture overlay (`GestureDetector`): pan = rotate, pinch = zoom, fling =
-  inertial spin; double-tap = zoom-to-fit / reset. Idle auto-spin.
-- Pins layer: for each **visible** located album, a tappable cover thumbnail with
-  a small expense badge (total spend from `getAlbumStats`, formatted with
-  `formatAmount` / `formatHours` respecting display mode). Use the project's time
-  vs. money display convention.
-- Top bar: back chevron (consistent with `AlbumDetailScreen`), title, and a
-  "list" toggle to fall back to the grid.
-- Empty state when no album has a location: mascot + "Add a location to an album
-  to see it here," with a button into album editing.
-
-Tapping a pin → open `AlbumDetailScreen` for that album (reuse existing nav).
+Both views read the same `locatedAlbums` / `albumsGeoJson` selectors and open the
+same `AlbumDetailScreen` on pin tap — only the renderer differs.
 
 ### 5.4 Pin visual
 
-A rounded-square cover thumbnail (~44px) with a subtle border + drop shadow,
-anchored by a small triangular "tail"/dot at the exact surface point, and a pill
-badge beneath showing the total spend. Covers come from `getAlbumCoverUri`; fall
-back to the album initial (same fallback `AlbumDetailScreen` already uses).
+Rounded-square cover thumbnail (~44px) with border + soft shadow, anchored by a
+small dot/tail at the exact coordinate, and a pill badge below showing total spend
+(`formatAmount`/`formatHours`, respecting display mode). Covers from
+`getAlbumCoverUri`; fall back to the album initial (as `AlbumDetailScreen` does).
+Same component drives globe (Skia draw) and map (`MarkerView` RN view).
 
 ---
 
 ## 6. Stacking co-located albums
 
-Multiple albums near the same screen point (`clusterByScreenDistance`,
-radius ≈ pin width) form a **cluster**:
+- **Globe**: `clusterByScreenDistance` (radius ≈ pin width) groups co-located
+  pins into one thumbnail with a count badge + stacked-cards shadow; recomputed
+  only past a rotation/zoom epsilon.
+- **Map**: native `ShapeSource` clustering (`cluster: true`) gives count bubbles
+  that split as you zoom.
 
-- Render the cluster as a single thumbnail with a **count badge** (e.g. "3") and a
-  slight "stacked cards" shadow offset.
-- Tapping a cluster opens a **`GlobeClusterSheet`** — a bottom sheet hosting a
-  `react-native-pager-view` (already a dep) of album cards, **swipeable**
-  left/right, each card showing cover + name + date range + total spend, with an
-  "Open album" CTA. This directly satisfies "if multiple at same location, make it
-  stack or swipeable."
-- Single-album "clusters" skip the sheet and open the album directly.
-
-Clustering runs in a worklet/memo keyed on rotation+zoom, recomputed only when
-the view actually changes beyond an epsilon (perf safeguard from §2).
+Tapping a multi-album cluster (either view) opens **`GlobeClusterSheet`** — a
+bottom sheet hosting a `react-native-pager-view` (already a dep) of **swipeable**
+album cards (cover + name + date range + total spend + "Open album"). Single-album
+clusters open the album directly. This satisfies "stack or swipeable."
 
 ---
 
 ## 7. Pro gating decision
 
-Albums themselves are already limited by `PRO_LIMITS.FREE_MAX_ALBUMS = 3`.
-Recommendation: **globe mode is free** (it's a viewer over data the user already
-created) to drive engagement, but treat it as a natural Pro showcase in the
-paywall (`features/news` already has an album showcase). If we want it Pro-gated,
-wrap the FAB with `useProGate()` and a `checkLimit`/paywall push — the hook and
-`ProPaywall` screen already exist. Flag this for product sign-off; default to
-**free** unless told otherwise.
+Albums are already limited by `PRO_LIMITS.FREE_MAX_ALBUMS = 3`. Recommendation:
+**location mode (globe + map) is free** (it's a viewer over data the user already
+created) and used as a Pro *showcase* in the paywall. If product wants it gated,
+wrap the FAB with `useProGate()`/`checkLimit` + `ProPaywall` (both already exist).
+Default **free** unless told otherwise.
 
 ---
 
-## 8. i18n, analytics, backup
+## 8. i18n, analytics, backup, build
 
-- **i18n**: add an `albums.globe.*` / `albums.location.*` namespace to
-  `lib/i18n/locales/en.ts` (and `zh.ts`); other locales fall back to English per
-  existing setup. Keys: title, FAB label, empty states, city-picker placeholder,
-  "no results", cluster "open album", clear-location, etc.
-- **Analytics**: `trackEvent` for `AlbumGlobeOpened`, `AlbumLocationSet`,
-  `GlobePinTapped`, `GlobeClusterOpened` (extend `AnalyticsEvents`).
-- **Backup**: cover photos already covered by `user-assets` backup. The new album
-  columns ride along in the existing album backup/export (verify
-  `dataManagementService` serializes full album rows — extend if it whitelists
-  columns). The **cities.db is reference data, not user data** → explicitly
-  excluded from backup/reset (it's outside `user-assets` and the writable DB).
+- **i18n**: `albums.location.*` / `albums.globe.*` / `albums.map.*` namespaces in
+  `en.ts` + `zh.ts` (others fall back to English).
+- **Analytics**: `AlbumLocationSet`, `AlbumLocationsOpened`, `LocationViewToggled`
+  (globe/map), `GlobePinTapped`, `MapPinTapped`, `ClusterOpened`.
+- **Backup**: cover photos already in `user-assets` backup; the new album columns
+  ride along in album export (verify `dataManagementService` serializes full album
+  rows — extend if it whitelists columns). `cities.db`, the Earth texture, and the
+  PMTiles basemap are **reference assets, excluded** from backup/reset.
+- **Build**: add MapLibre's Expo **config plugin** to `app.json`; ensure `.db`,
+  `.pmtiles`/`.mbtiles`, and `.webp` are bundled (metro `assetExts` /
+  `assetBundlePatterns`). Rebuild the dev client. Document in `CLAUDE.md`.
 
 ---
 
@@ -390,85 +355,101 @@ wrap the FAB with `useProGate()` and a `checkLimit`/paywall push — the hook an
 **New files**
 
 - `lib/db/migrations/037_album_location.ts` — location columns.
-- `lib/db/citiesDb.ts` — read-only cities DB connection, copy-on-first-run,
-  `searchCities`, `getCityById`.
-- `assets/db/cities.db` — prebuilt GeoNames cities15000 (build artifact).
-- `assets/globe/earth-day-2k.webp` (+ optional 1k fallback) — Earth texture.
-- `scripts/build-cities-db.mjs` — generates `cities.db` from GeoNames dumps.
+- `lib/db/citiesDb.ts` — read-only cities DB, copy-on-first-run, `searchCities`,
+  `getCityById`.
+- `assets/db/cities.db` — prebuilt GeoNames cities15000.
+- `assets/globe/earth-2k.webp` (+ optional 1k fallback) — Earth texture.
+- `assets/map/basemap.pmtiles` (or `.mbtiles`) — bundled low-zoom offline basemap.
+- `assets/map/style.json` — themeable MapLibre style (tinted at runtime).
+- `scripts/build-cities-db.mjs` — generates `cities.db` from GeoNames.
 - `features/albums/globe/earthShader.ts` — SkSL source + compiled effect.
-- `features/albums/globe/projection.ts` — lat/lng→screen math + clustering (pure).
-- `features/albums/screens/AlbumGlobeScreen.tsx` — the globe screen.
-- `features/albums/components/GlobePin.tsx` — pin/cluster Skia node.
+- `features/albums/globe/projection.ts` — lat/lng→screen + clustering (pure).
+- `features/albums/components/AlbumGlobeView.tsx` — Skia globe surface.
+- `features/albums/components/AlbumMapView.tsx` — MapLibre map surface.
+- `features/albums/components/GlobePin.tsx` — pin/cluster visual (shared).
 - `features/albums/components/GlobeClusterSheet.tsx` — swipeable cluster cards.
+- `features/albums/screens/AlbumLocationsScreen.tsx` — globe/map host screen.
 - `components/ui/CityPickerSheet.tsx` — offline city search sheet.
-- `__tests__/globeProjection.test.ts`, `__tests__/citiesDb.test.ts` (mock sqlite),
+- Tests: `__tests__/globeProjection.test.ts`, `__tests__/citiesDb.test.ts`,
   `__tests__/albumLocation.repository.test.ts`.
 
 **Edited files**
 
 - `lib/db/schema.ts` — `albumsTable` + `AlbumRow` location columns.
 - `types/index.ts` — `Album` + `LocatedAlbum`/`AlbumLocation`.
-- `lib/repositories/mappers.ts` — `toAlbum` maps new columns.
+- `lib/repositories/mappers.ts` — `toAlbum`.
 - `lib/repositories/albumsRepository.ts` — `CreateAlbumInput` location fields.
-- `context/AppContext.tsx` — `setAlbumLocation`, `locatedAlbums` selector.
-- `navigation/rootStack.ts`, `navigation/stackOptions.ts` — register `AlbumGlobe`.
-- `features/albums/screens/AlbumsScreen.tsx` — globe FAB.
-- `features/albums/screens/EditAlbumDetailsScreen.tsx` (and/or `CreateAlbumScreen`)
+- `context/AppContext.tsx` — `setAlbumLocation`, `locatedAlbums`, `albumsGeoJson`.
+- `navigation/rootStack.ts`, `navigation/stackOptions.ts` — register
+  `AlbumLocations`.
+- `features/albums/screens/AlbumsScreen.tsx` — location FAB.
+- `features/albums/screens/EditAlbumDetailsScreen.tsx` (+ maybe `CreateAlbumScreen`)
   — Location row + `CityPickerSheet`.
 - `features/albums/screens/index.ts` — export new screen.
 - `lib/i18n/locales/en.ts`, `zh.ts` — strings.
 - `services/analytics.shared.ts` — new events.
-- `app.json`/metro asset config — ensure `.db` is bundled as an asset (add `db`
-  to `assetBundlePatterns` / metro `assetExts` if needed).
-- `CLAUDE.md` — document the globe feature, the cities DB build script, and the
-  "never migrate cities.db" rule.
+- `app.json` — MapLibre config plugin + asset bundling.
+- `package.json` — add `@maplibre/maplibre-react-native` (+ `pmtiles` protocol
+  helper if needed).
+- `CLAUDE.md` — document the feature, the cities-DB build script, the
+  "never migrate cities.db" rule, and the MapLibre dev-client requirement.
 
 ---
 
 ## 10. Phased delivery
 
-1. **Phase 1 — Location data & city picker (no globe yet).**
-   Migration 037, schema/type/mapper/repo, `citiesDb` + `build-cities-db.mjs` +
-   bundled `cities.db`, `CityPickerSheet`, Location row in album editing. Ship
-   value immediately (albums gain a place; searchable, offline). Tests: projection
-   not needed yet; cities search + repository tests.
+1. **Phase 1 — Location data & city picker (no views yet).** Migration 037;
+   schema/type/mapper/repo/context; `citiesDb` + `build-cities-db.mjs` + bundled
+   `cities.db`; `CityPickerSheet`; Location row in album editing. Ships value
+   immediately (albums gain a searchable, offline place). Tests: cities search +
+   repository.
 
-2. **Phase 2 — The globe surface.**
-   `earthShader` + `projection` + `AlbumGlobeScreen` with rotate/zoom/pins,
-   bundled Earth texture, FAB on the index, nav registration. Projection unit
-   tests + manual QA via Argent on simulator/emulator (rotation glued pins,
-   back-face culling, 60fps).
+2. **Phase 2 — Globe (fully offline, zero-dep).** `earthShader` + `projection` +
+   `AlbumGlobeView` + `AlbumLocationsScreen` (globe only) + FAB + nav. Bundled
+   Earth texture, theme tinting. Projection landmark unit tests + Argent QA
+   (glued pins, back-face culling, 60fps).
 
-3. **Phase 3 — Stacking, polish, gating.**
-   Clustering + `GlobeClusterSheet` swipe, expense badges + time/money display,
-   inertial spin + idle auto-spin, empty/fallback states, analytics, i18n
-   completion, Pro decision wiring. Screenshot-diff QA.
+3. **Phase 3 — Map (MapLibre).** Add `@maplibre/maplibre-react-native` + config
+   plugin + dev-client rebuild; bundled offline PMTiles basemap + themed style;
+   `AlbumMapView` with clustered `ShapeSource` + photo `MarkerView`; Globe/Map
+   toggle. QA the offline overview + online detail paths.
 
-Each phase keeps `npm run check && npm test` green (the CI `test` job gate).
+4. **Phase 4 — Stacking, polish, gating.** `GlobeClusterSheet` swipe (both views);
+   expense badges + time/money display; inertial spin + idle auto-spin; empty/
+   fallback states; analytics; i18n completion; Pro decision. Screenshot-diff QA.
+
+Each phase keeps `npm run check && npm test` green (CI `test` gate).
 
 ---
 
 ## 11. Open questions for sign-off
 
-1. **Location granularity** — city only (recommended), or also allow
-   country-only / custom dropped pin? City-only keeps the picker simple.
-2. **Pro gating** — globe free (recommended) vs. Pro-gated.
-3. **City coverage** — `cities15000` (~26k, ~2–4 MB; recommended) vs. `cities5000`
-   (~50k) for smaller towns, trading bundle size.
-4. **Per-transaction locations later?** Out of scope for v1 (album-level matches
-   the request), but the schema leaves room to add `transactions.latitude/longitude`
-   if "expenses on a map" becomes its own feature.
+1. **Map offline depth** — bundle a **low-zoom world** PMTiles overview only
+   (small, fully offline), or also pre-bundle one or two **regions at higher zoom**
+   (bigger, but offline street detail where the user travels most)?
+2. **Globe art direction** — **theme-tinted minimal** (recommended, on-brand) vs.
+   photoreal Blue Marble.
+3. **Pro gating** — location mode free (recommended) vs. Pro-gated.
+4. **City coverage** — `cities15000` (~26k, ~2–4 MB; recommended) vs. `cities5000`
+   (~50k) for smaller towns.
+5. **Per-transaction locations later?** Out of scope for v1 (album-level matches
+   the request); schema leaves room for `transactions.latitude/longitude` if
+   "expenses on a map" becomes its own feature.
 
 ---
 
 ## Sources
 
-- Skia for RN graphics / performance: <https://shopify.engineering/webgpu-skia-web-graphics>,
-  <https://docs.expo.dev/versions/latest/sdk/skia/>
-- Globe libraries surveyed: <https://github.com/aeryflux/globe>,
-  <https://github.com/vasturiano/react-globe.gl>
+- MapLibre React Native (open-source, no key):
+  <https://github.com/maplibre/maplibre-react-native>,
+  <https://maplibre.org/maplibre-react-native/docs/setup/expo/>
+- No-key basemaps / styles: <https://madewithmaplibre.com/basemaps/gallery/>,
+  Protomaps / PMTiles <https://docs.protomaps.com/>
+- rnmapbox (token-gated alternative, for API reference):
+  <https://rnmapbox.github.io/>
+- Skia for RN graphics: <https://docs.expo.dev/versions/latest/sdk/skia/>,
+  <https://shopify.engineering/webgpu-skia-web-graphics>
 - Offline city data: <https://www.geonames.org/export/>,
   <https://github.com/mjradwin/geonames-sqlite>
 - Earth texture (public domain): NASA Blue Marble / Visible Earth.
 </content>
-</invoke>
