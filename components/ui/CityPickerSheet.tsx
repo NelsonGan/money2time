@@ -1,6 +1,14 @@
 import { MapPin, Search, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  InteractionManager,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui/text';
@@ -71,8 +79,12 @@ export function CityPickerSheet({ visible, onClose, onSelect }: CityPickerSheetP
 
   const handleSelect = (city: City) => {
     void triggerHaptic('selection');
-    onSelect(cityToLocation(city));
+    const location = cityToLocation(city);
+    // Close first so the sheet starts dismissing immediately, then defer the
+    // selection: onSelect persists the location, which triggers a synchronous
+    // refreshAll() in AppContext — running it now would block the close animation.
     handleClose();
+    InteractionManager.runAfterInteractions(() => onSelect(location));
   };
 
   const trimmed = query.trim();
