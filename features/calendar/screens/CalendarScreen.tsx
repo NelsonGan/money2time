@@ -84,12 +84,17 @@ const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
 
-// Day pager: a small re-centering carousel. The list always rests on its center
-// slot (showing the selected day); neighbours render the previous/next day for
-// swipe previews. After each swipe it snaps back to center and re-anchors on the
-// new day, so jumping to an arbitrary day never triggers a far virtualized scroll.
-const DAY_PAGER_SLOTS = [0, 1, 2, 3, 4];
-const DAY_PAGER_CENTER = 2;
+// Day pager: a windowed carousel. Each slot renders a fixed day relative to a
+// stable anchor (the day at the centre slot), so an ordinary swipe just moves
+// to a neighbouring slot whose content is ALREADY rendered — nothing re-renders
+// and the list never snaps. That avoids the Android "flash" the old design had,
+// where snapping back to centre on every swipe raced the re-render (the centre
+// briefly showed the previous day). We only re-anchor (and snap) when a swipe
+// reaches the window edge or the day is changed from outside the pager (week
+// strip, month grid, "Today"), which is infrequent.
+const DAY_PAGER_SLOTS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const DAY_PAGER_CENTER = 4;
+const DAY_PAGER_LAST = DAY_PAGER_SLOTS.length - 1;
 const DAY_MS = 86400000;
 
 const dayPagerSlotKeyExtractor = (item: number) => String(item);
@@ -258,6 +263,14 @@ export function CalendarScreen({
   // --- View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom) ---
   const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
+  // The day shown at the day pager's centre slot. Each pager slot renders a day
+  // relative to this anchor, so it stays put across ordinary swipes (only edge
+  // swipes / external day changes re-anchor it). `pagerSlotRef` tracks which
+  // slot the carousel currently rests on; `pagerSelfDriveRef` distinguishes a
+  // pager-driven day change (don't re-anchor) from an external one (do).
+  const [dayAnchorKey, setDayAnchorKey] = useState<string>(todayDayKey);
+  const pagerSlotRef = useRef(DAY_PAGER_CENTER);
+  const pagerSelfDriveRef = useRef(false);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -406,6 +419,7 @@ export function CalendarScreen({
     [pageWidth],
   );
   const recenterDayPager = useCallback(() => {
+    pagerSlotRef.current = DAY_PAGER_CENTER;
     dayPagerListRef.current?.scrollToOffset({
       offset: DAY_PAGER_CENTER * pageWidth,
       animated: false,
@@ -715,45 +729,45 @@ export function CalendarScreen({
     setSelectedDayKey(dayKey);
   }, []);
 
-  // Commit a day-pager swipe to the neighbouring day, then snap back to center.
-  // Re-anchoring on the new selected day keeps both the page we landed on and the
-  // center slot showing identical content, so the snap-back is seamless.
+  // A swipe just lands the carousel on a neighbouring slot whose day is already
+  // rendered (relative to the stable anchor), so there's no snap-back and no
+  // flash. We only re-anchor + recentre when the swipe reaches the window edge,
+  // which keeps room to keep swiping in that direction.
   const handleDayPagerMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const wasUserDriven = userDraggingPagerRef.current;
       userDraggingPagerRef.current = false;
-      const landed = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
-      // Clamp to a single page per swipe. iOS paging snaps one page at a time,
-      // but a hard fling on Android can carry the momentum two slots over,
-      // jumping two days from one swipe. Limiting the step to ±1 keeps both
-      // platforms advancing exactly one day per swipe.
-      const delta = Math.max(-1, Math.min(1, landed - DAY_PAGER_CENTER));
-      // Only advance for the user's own fling. Android emits onMomentumScrollEnd
-      // more than once for a single fling (and the recenter scroll can emit
-      // another), and each spurious fire was advancing the day again — the
-      // "swipe moved two days" bug. Consuming the drag flag means only the first,
-      // user-driven momentum end commits; later echoes just recenter.
-      if (delta !== 0 && wasUserDriven) {
-        void triggerHaptic('selection');
-        setSelectedDayKey((prev) => addDaysToDayKey(prev, delta));
-        // The snap-back to center is deferred to the layout effect below so the
-        // scroll lands in the SAME commit that swaps in the new day's content.
-        // Recentering here (before the re-render) made Android briefly draw the
-        // old/neighbouring page — the transactions "flash" during a swipe.
-      } else if (landed !== DAY_PAGER_CENTER) {
-        // Off-center without committing a day change (a clamped echo or an
-        // ignored fling): snap straight back. Nothing re-renders, so no flash.
+      const landed = Math.max(
+        0,
+        Math.min(DAY_PAGER_LAST, Math.round(e.nativeEvent.contentOffset.x / pageWidth)),
+      );
+      // Ignore Android's duplicate momentum echoes (which fire with the drag
+      // flag already consumed) and no-op settles, so one swipe = one day.
+      if (!wasUserDriven || landed === pagerSlotRef.current) return;
+      pagerSlotRef.current = landed;
+      void triggerHaptic('selection');
+      const newDay = addDaysToDayKey(dayAnchorKey, landed - DAY_PAGER_CENTER);
+      // Tell the external-sync effect this day change came from the pager, so it
+      // doesn't re-anchor (which would snap and re-render mid-swipe).
+      pagerSelfDriveRef.current = true;
+      setSelectedDayKey(newDay);
+      if (landed <= 0 || landed >= DAY_PAGER_LAST) {
+        setDayAnchorKey(newDay);
         recenterDayPager();
       }
     },
-    [pageWidth, recenterDayPager],
+    [pageWidth, dayAnchorKey, recenterDayPager],
   );
 
-  // Re-anchor the day carousel on its center slot after the selected day
-  // commits. Running in a layout effect batches the scroll with the render that
-  // swaps in the new day, so the centered page is already correct when Android
-  // draws it — preventing the previous day's transactions from flashing.
-  useLayoutEffect(() => {
+  // Keep the pager anchored on the selected day when it changes from OUTSIDE the
+  // pager (week strip, month-grid tap, "Today", reset). Pager-driven changes set
+  // the self-drive flag and are skipped so ordinary swipes never re-anchor.
+  useEffect(() => {
+    if (pagerSelfDriveRef.current) {
+      pagerSelfDriveRef.current = false;
+      return;
+    }
+    setDayAnchorKey(selectedDayKey);
     recenterDayPager();
   }, [selectedDayKey, recenterDayPager]);
 
@@ -1172,7 +1186,7 @@ export function CalendarScreen({
   // --- Day page renderer for the day-mode horizontal pager ---
   const renderDayPage = useCallback(
     ({ item }: { item: number }) => {
-      const dayKey = addDaysToDayKey(selectedDayKey, item - DAY_PAGER_CENTER);
+      const dayKey = addDaysToDayKey(dayAnchorKey, item - DAY_PAGER_CENTER);
       const dayLabel = formatCalendarDate(dayKey, activeLocale);
       const monthTxs = transactionsByMonthKey.get(dayKey.slice(0, 7));
       const dayTxs = monthTxs
@@ -1248,7 +1262,7 @@ export function CalendarScreen({
       );
     },
     [
-      selectedDayKey,
+      dayAnchorKey,
       todayDayKey,
       activeLocale,
       transactionsByMonthKey,
