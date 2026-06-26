@@ -106,6 +106,7 @@ import {
   type UserSettings,
   type WageConfig,
 } from '~/types';
+import { aggregateBreakdown } from '~/utils/breakdown';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   buildRateTable,
@@ -2678,33 +2679,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
       });
 
-      const totals = new Map<string, { amount: number; parentLabel?: string; label: string }>();
-
-      txns.forEach((transaction) => {
-        if (!transaction.categoryId) return;
-        const cat = categoryByIdMap.get(transaction.categoryId);
-        if (!cat) return;
-        const root = cat.parentId ? categoryByIdMap.get(cat.parentId) : cat;
-        const id = groupByRoot ? (root?.id ?? cat.id) : cat.id;
-        const current = totals.get(id);
-        const inc = valueForDisplay(
-          transaction.reportingAmount ?? transaction.amount,
-          transaction.date,
-        );
-        if (!current) {
-          totals.set(id, {
-            amount: inc,
-            label: groupByRoot ? (root?.name ?? cat.name) : cat.name,
-            parentLabel: groupByRoot ? undefined : root?.name,
-          });
-        } else {
-          current.amount += inc;
-        }
+      return aggregateBreakdown(txns, {
+        resolveCategory: (id) => categoryByIdMap.get(id),
+        valueOf: valueForDisplay,
+        groupByRoot,
       });
-
-      return Array.from(totals.entries())
-        .map(([id, value]) => ({ id, ...value }))
-        .sort((a, b) => b.amount - a.amount);
     },
     // `transactions` is read fresh from the DB inside, but it's listed as a dep so
     // the callback identity changes whenever transactions mutate (e.g. a bulk
