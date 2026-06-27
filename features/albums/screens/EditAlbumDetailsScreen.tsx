@@ -44,27 +44,40 @@ export function EditAlbumDetailsScreen({ albumId, onClose }: EditAlbumDetailsScr
       : null,
   );
   const [pickerVisible, setPickerVisible] = useState(false);
+  // Location is staged locally and only committed on Save, matching the name /
+  // dates fields. The dirty flag keeps Save from re-writing (and re-firing the
+  // analytics event) when the location was never touched.
+  const [locationDirty, setLocationDirty] = useState(false);
 
-  const handleSelectLocation = useCallback(
-    (next: AlbumLocation) => {
-      setLocation(next);
-      setAlbumLocation(albumId, next);
-    },
-    [albumId, setAlbumLocation],
-  );
+  const handleSelectLocation = useCallback((next: AlbumLocation) => {
+    setLocation(next);
+    setLocationDirty(true);
+  }, []);
 
   const handleClearLocation = useCallback(() => {
     setLocation(null);
-    setAlbumLocation(albumId, null);
-  }, [albumId, setAlbumLocation]);
+    setLocationDirty(true);
+  }, []);
 
   const canSave = name.trim().length > 0;
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
     updateAlbum(albumId, { name: name.trim(), startDate, endDate });
+    if (locationDirty) setAlbumLocation(albumId, location);
     onClose();
-  }, [albumId, canSave, endDate, name, onClose, startDate, updateAlbum]);
+  }, [
+    albumId,
+    canSave,
+    endDate,
+    location,
+    locationDirty,
+    name,
+    onClose,
+    setAlbumLocation,
+    startDate,
+    updateAlbum,
+  ]);
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
