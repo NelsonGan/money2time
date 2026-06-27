@@ -1239,38 +1239,43 @@ export function TransactionEditorScreen({
           sentiment,
         };
         preparedSubmitPayload = submitPayload;
-        if (recurringOptions) {
-          const normalizedName = recurrenceName.trim();
-          if (!normalizedName) {
-            setError(I18n.t('transactions.editor.error.enter_rule_name'));
-            setFieldErrors({ rule_name: I18n.t('transactions.editor.error.required') });
-            return;
-          }
-          const interval = Math.max(1, Math.trunc(Number(recurrenceInterval) || 1));
-          const endDateDraft = recurrenceEndDate.trim();
-          const endDateIsoValue = toUtcIsoFromLocalDateInput(endDateDraft, 'end');
-          const endDateIso = recurrenceEndMode === 'on_date' ? endDateIsoValue : null;
-          if (recurrenceEndMode === 'on_date' && (!endDateDraft || !endDateIsoValue)) {
-            setError(I18n.t('transactions.editor.error.valid_end_date'));
-            setFieldErrors({ end_date: I18n.t('transactions.editor.error.required') });
-            return;
-          }
-          const capturedPayload = submitPayload;
-          preparedSubmitPayload = capturedPayload;
-          recurringSubmit = () => {
-            recurringOptions.onSubmitRecurring({
-              transaction: capturedPayload,
-              recurring: {
-                name: normalizedName,
-                pattern: recurrencePattern,
-                interval,
-                endDate: endDateIso,
-                isActive: recurrenceIsActive,
-              },
-            });
-          };
-          submitPayload = null; // handled by recurringSubmit
+      }
+
+      // Recurring mode applies to expense/income AND transfer rules. Balance
+      // adjustments are never offered as a recurring type, so skip them. When a
+      // rule is being saved we hand off to onSubmitRecurring and clear the
+      // one-off submitPayload (the recurring route's onSubmit is a no-op).
+      if (recurringOptions && !isBalanceAdjustmentType && submitPayload) {
+        const normalizedName = recurrenceName.trim();
+        if (!normalizedName) {
+          setError(I18n.t('transactions.editor.error.enter_rule_name'));
+          setFieldErrors({ rule_name: I18n.t('transactions.editor.error.required') });
+          return;
         }
+        const interval = Math.max(1, Math.trunc(Number(recurrenceInterval) || 1));
+        const endDateDraft = recurrenceEndDate.trim();
+        const endDateIsoValue = toUtcIsoFromLocalDateInput(endDateDraft, 'end');
+        const endDateIso = recurrenceEndMode === 'on_date' ? endDateIsoValue : null;
+        if (recurrenceEndMode === 'on_date' && (!endDateDraft || !endDateIsoValue)) {
+          setError(I18n.t('transactions.editor.error.valid_end_date'));
+          setFieldErrors({ end_date: I18n.t('transactions.editor.error.required') });
+          return;
+        }
+        const capturedPayload = submitPayload;
+        preparedSubmitPayload = capturedPayload;
+        recurringSubmit = () => {
+          recurringOptions.onSubmitRecurring({
+            transaction: capturedPayload,
+            recurring: {
+              name: normalizedName,
+              pattern: recurrencePattern,
+              interval,
+              endDate: endDateIso,
+              isActive: recurrenceIsActive,
+            },
+          });
+        };
+        submitPayload = null; // handled by recurringSubmit
       }
 
       if (preparedSubmitPayload) {
