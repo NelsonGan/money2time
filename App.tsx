@@ -1265,14 +1265,8 @@ function InsightsDrilldownRouteScreen({
 }
 
 function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'RecurringEditor'>) {
-  const {
-    settings,
-    recurringRules,
-    createRecurringRule,
-    updateRecurringRule,
-    isSimpleMode,
-    simpleWalletId,
-  } = useApp();
+  const { recurringRules, createRecurringRule, updateRecurringRule, isSimpleMode, simpleWalletId } =
+    useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
     () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
@@ -1319,7 +1313,10 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
             name: recurring.name,
             type: recurringTxType,
             amount: transaction.amount,
-            currency: settings.currencySymbol,
+            // Store the actual currency code (matching normal transactions),
+            // not the display symbol — runDueTransactions relies on this for
+            // FX conversion and cross-currency detection when the rule fires.
+            currency: transaction.currency,
             note: transaction.note ?? null,
             recurrencePattern: recurring.pattern,
             recurrenceInterval: recurring.interval,
