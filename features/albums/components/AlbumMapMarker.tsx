@@ -69,7 +69,7 @@ export const AlbumMapMarker = memo(function AlbumMapMarker({
           >
             <Text
               numberOfLines={1}
-              className="text-[9px] font-bold uppercase tracking-wider text-white"
+              className="text-[9px] font-bold uppercase leading-[12px] tracking-wider text-white"
             >
               {monthLabel}
             </Text>
