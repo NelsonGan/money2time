@@ -45,9 +45,9 @@ export function AlbumLocationsScreen({ onClose, onOpenAlbumDetail }: AlbumLocati
           spendLabel: isTimeMode
             ? formatHoursCompact(stats.totalSpent)
             : formatAmount(stats.totalSpent, settings, { showSign: false, compact: true }),
-          // Default the badge to the album's start month/year (manual override,
-          // else first transaction).
-          monthLabel: formatAlbumMonthYear(album.startDate ?? stats.startDate),
+          // Default the badge to the album's start month/year. stats.startDate
+          // already resolves the manual override, else the first transaction.
+          monthLabel: formatAlbumMonthYear(stats.startDate),
         };
       }),
     [locatedAlbums, getAlbumStats, isTimeMode, settings],
