@@ -202,19 +202,24 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
             ]
           : group;
       const count = ordered.length;
+      const isStacked = count > 1;
       ordered.forEach((pin, index) => {
         const depth = count - 1 - index; // front (last) = 0
         out.push(
-          // No `onPress` on the Marker itself: its native press hit-tests at the
+          // Stacked markers get NO native `onPress`: its press hit-tests at the
           // shared anchor (the front card), so for a stack it fires for the wrong
-          // album and races the inner Pressable, opening on the same tap that
-          // should only promote. The inner Pressable is offset-aware (it matches
-          // the card the user actually sees/taps), so let it be the sole handler.
+          // album and races the offset-aware inner Pressable — opening on the very
+          // tap that should only promote. We let the inner Pressable (which tracks
+          // the card the user actually sees/taps) be the sole handler there.
+          // Singletons keep the native press: it's the reliable tap target on iOS
+          // where a Pressable inside an annotation may not receive touches, and a
+          // duplicate call is harmless (navigate() to the same album is a no-op).
           <Marker
             key={pin.albumId}
             id={pin.albumId}
             lngLat={[pin.longitude, pin.latitude]}
             anchor="bottom"
+            {...(isStacked ? {} : { onPress: () => handlePinPress(pin) })}
           >
             <View
               style={
