@@ -220,7 +220,6 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
                         { translateX: depth * STACK_SHIFT_X },
                         { translateY: -depth * STACK_PEEK_Y },
                       ],
-                      opacity: 0.96,
                     }
                   : undefined
               }
