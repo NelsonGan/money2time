@@ -134,13 +134,6 @@ function coordKey(pin: AlbumPin): string {
 const STACK_PEEK_Y = 16;
 const STACK_SHIFT_X = 7;
 
-// A single physical tap on a stacked marker can reach us twice (the native
-// marker press AND the inner Pressable, across two render ticks). Once a behind
-// album is promoted to front, swallow any follow-up press for that same album
-// within this window so the same tap can't immediately open it — opening needs
-// a deliberate second tap.
-const STACK_PROMOTE_LOCK_MS = 300;
-
 export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -175,10 +168,6 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
   // it here (bring-to-front) rather than opening it; only the front album opens.
   const [frontByCoord, setFrontByCoord] = useState<Record<string, string>>({});
 
-  // Album just promoted to front + the time it stops being "locked", used to
-  // ignore the duplicate press from the same tap (see STACK_PROMOTE_LOCK_MS).
-  const justPromotedRef = useRef<{ albumId: string; until: number } | null>(null);
-
   const handlePinPress = useCallback(
     (pin: AlbumPin) => {
       const key = coordKey(pin);
@@ -187,23 +176,11 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
         onSelectAlbum(pin.albumId);
         return;
       }
-
-      // Swallow the second press of the same tap that promoted this album, so it
-      // doesn't open immediately — opening requires a fresh, deliberate tap.
-      const locked = justPromotedRef.current;
-      if (locked && locked.albumId === pin.albumId && Date.now() < locked.until) {
-        return;
-      }
-
       const frontId = frontByCoord[key] ?? group[0].albumId;
       if (pin.albumId === frontId) {
         onSelectAlbum(pin.albumId);
       } else {
         // Bring the tapped (behind) album to the front; don't open it yet.
-        justPromotedRef.current = {
-          albumId: pin.albumId,
-          until: Date.now() + STACK_PROMOTE_LOCK_MS,
-        };
         setFrontByCoord((prev) => ({ ...prev, [key]: pin.albumId }));
       }
     },
@@ -228,12 +205,16 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
       ordered.forEach((pin, index) => {
         const depth = count - 1 - index; // front (last) = 0
         out.push(
+          // No `onPress` on the Marker itself: its native press hit-tests at the
+          // shared anchor (the front card), so for a stack it fires for the wrong
+          // album and races the inner Pressable, opening on the same tap that
+          // should only promote. The inner Pressable is offset-aware (it matches
+          // the card the user actually sees/taps), so let it be the sole handler.
           <Marker
             key={pin.albumId}
             id={pin.albumId}
             lngLat={[pin.longitude, pin.latitude]}
             anchor="bottom"
-            onPress={() => handlePinPress(pin)}
           >
             <View
               style={
