@@ -1222,6 +1222,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [runMutation],
   );
 
+  // Detail and location edits only touch the `albums` table, so reload just
+  // `albums` instead of a full refreshAll() — the latter re-inits the DB and
+  // re-reads every table (incl. all transactions), which made saving an album
+  // sluggish (and the edit screen calls both back-to-back, doubling it).
   const updateAlbum = useCallback(
     (
       id: string,
@@ -1232,30 +1236,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         endDate?: string | null;
       },
     ) => {
-      runMutation(() => {
-        albumsRepository.update(id, updates);
-      });
+      albumsRepository.update(id, updates);
+      setAlbums(albumsRepository.list());
       void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
     },
-    [runMutation],
+    [],
   );
 
-  const setAlbumLocation = useCallback(
-    (id: string, location: AlbumLocation | null) => {
-      runMutation(() => {
-        albumsRepository.update(id, {
-          latitude: location?.latitude ?? null,
-          longitude: location?.longitude ?? null,
-          placeId: location?.placeId ?? null,
-          placeName: location?.placeName ?? null,
-          placeAdmin: location?.placeAdmin ?? null,
-          countryCode: location?.countryCode ?? null,
-        });
-      });
-      void trackEvent(AnalyticsEvents.ALBUM_LOCATION_SET, { cleared: location == null });
-    },
-    [runMutation],
-  );
+  const setAlbumLocation = useCallback((id: string, location: AlbumLocation | null) => {
+    albumsRepository.update(id, {
+      latitude: location?.latitude ?? null,
+      longitude: location?.longitude ?? null,
+      placeId: location?.placeId ?? null,
+      placeName: location?.placeName ?? null,
+      placeAdmin: location?.placeAdmin ?? null,
+      countryCode: location?.countryCode ?? null,
+    });
+    setAlbums(albumsRepository.list());
+    void trackEvent(AnalyticsEvents.ALBUM_LOCATION_SET, { cleared: location == null });
+  }, []);
 
   const deleteAlbum = useCallback(
     (id: string) => {
