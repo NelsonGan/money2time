@@ -3,6 +3,7 @@ import { dayKeyFromIsoLocal } from '~/utils/formatters';
 
 const rangeFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const rangeFormatterWithYearByLocale = new Map<string, Intl.DateTimeFormat>();
+const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 
 function dayLabel(dayKey: string, withYear: boolean, locale: string): string {
   const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
@@ -40,6 +41,27 @@ export function formatAlbumDateRange(
   return `${startLabel} – ${endLabel}`;
 }
 
+/**
+ * Compact "Jun 2026" month + year label from a transaction date / day-key
+ * string. Used for the badge on map album pins (defaults to the album's start).
+ */
+export function formatAlbumMonthYear(
+  date: string | null,
+  options: { locale?: string } = {},
+): string | null {
+  if (!date) return null;
+  const { locale = I18n.locale ?? 'en' } = options;
+  const [yearRaw, monthRaw, dayRaw] = dayKeyFromIsoLocal(date).split('-');
+  const parsed = new Date(Number(yearRaw), Number(monthRaw) - 1, Number(dayRaw));
+  if (Number.isNaN(parsed.getTime())) return null;
+  let formatter = monthYearFormatterByLocale.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' });
+    monthYearFormatterByLocale.set(locale, formatter);
+  }
+  return formatter.format(parsed);
+}
+
 /** A located album reduced to what the map marker needs to draw it. */
 export interface AlbumPin {
   albumId: string;
@@ -50,4 +72,6 @@ export interface AlbumPin {
   coverUri: string | null;
   /** Pre-formatted total spend (respects money/time display mode). */
   spendLabel: string;
+  /** "Jun 2026" badge label (album start month/year), or null when undated. */
+  monthLabel: string | null;
 }

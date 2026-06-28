@@ -12,7 +12,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { getAlbumCoverUri } from '~/services/userAssets';
 import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
-import type { AlbumPin } from '../utils';
+import { type AlbumPin, formatAlbumMonthYear } from '../utils';
 
 // MapLibre is a native module; lazy-load it so the rest of the app keeps working
 // on a dev client that hasn't been rebuilt with the native pod yet.
@@ -45,6 +45,9 @@ export function AlbumLocationsScreen({ onClose, onOpenAlbumDetail }: AlbumLocati
           spendLabel: isTimeMode
             ? formatHoursCompact(stats.totalSpent)
             : formatAmount(stats.totalSpent, settings, { showSign: false, compact: true }),
+          // Default the badge to the album's start month/year (manual override,
+          // else first transaction).
+          monthLabel: formatAlbumMonthYear(album.startDate ?? stats.startDate),
         };
       }),
     [locatedAlbums, getAlbumStats, isTimeMode, settings],
