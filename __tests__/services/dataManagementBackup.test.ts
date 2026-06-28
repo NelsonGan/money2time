@@ -1,4 +1,5 @@
 import { getSQLite } from '~/lib/db/client';
+import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
 // Native modules pulled in at module load but only used by export/picker paths
@@ -173,5 +174,125 @@ describe('dataManagementService album backup/restore', () => {
     // Restore is a full replace, so prior albums are cleared, none re-added.
     expect(fresh.tables.albums).toEqual([]);
     expect(fresh.tables.album_transactions).toEqual([]);
+  });
+});
+
+const TX_COLUMNS = [
+  'id',
+  'type',
+  'amount',
+  'currency',
+  'reporting_currency',
+  'reporting_amount',
+  'fx_rate',
+  'to_amount',
+  'account_amount',
+  'date',
+  'account_id',
+  'category_id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
+const RATE_COLUMNS = [
+  'id',
+  'base_currency',
+  'quote_currency',
+  'rate',
+  'as_of_date',
+  'source',
+  'updated_at',
+];
+
+describe('dataManagementService multi-currency backup/restore', () => {
+  const normalizeMock = normalizeCurrencyColumns as jest.Mock;
+
+  // A EUR expense recorded in a USD-reporting account, with its frozen FX snapshot.
+  const foreignTx: Row = {
+    id: 'tx1',
+    type: 'expense',
+    amount: 10,
+    currency: 'EUR',
+    reporting_currency: 'USD',
+    reporting_amount: 11,
+    fx_rate: 1.1,
+    to_amount: null,
+    account_amount: null,
+    date: '2026-06-10',
+    account_id: 'acc1',
+    category_id: 'cat1',
+    created_at: '2026-06-10T00:00:00.000Z',
+    updated_at: '2026-06-10T00:00:00.000Z',
+    deleted_at: null,
+  };
+  const rate: Row = {
+    id: 'r1',
+    base_currency: 'USD',
+    quote_currency: 'EUR',
+    rate: 0.9,
+    as_of_date: '2026-06-10',
+    source: 'api',
+    updated_at: '2026-06-10T00:00:00.000Z',
+  };
+
+  beforeEach(() => normalizeMock.mockClear());
+
+  it('backs up exchange rates and the frozen FX columns on transactions', async () => {
+    const fake = createFakeSqlite(
+      { transactions: [{ ...foreignTx }], exchange_rates: [{ ...rate }] },
+      { transactions: TX_COLUMNS, exchange_rates: RATE_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(fake);
+
+    const data = await buildBackupData();
+    expect(data.tables.exchange_rates).toEqual([rate]);
+    expect(data.tables.transactions).toEqual([foreignTx]);
+  });
+
+  it('restores rates and the foreign-currency code without collapsing it', async () => {
+    const source = createFakeSqlite(
+      { transactions: [{ ...foreignTx }], exchange_rates: [{ ...rate }] },
+      { transactions: TX_COLUMNS, exchange_rates: RATE_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(source);
+    const data = await buildBackupData();
+
+    const fresh = createFakeSqlite(
+      { transactions: [], exchange_rates: [] },
+      { transactions: TX_COLUMNS, exchange_rates: RATE_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const result = applyBackupData(data);
+    expect(result.success).toBe(true);
+    expect(fresh.tables.exchange_rates).toEqual([rate]);
+    expect(fresh.tables.transactions).toEqual([foreignTx]);
+    // A backup that carries an exchange_rates table is multi-currency, so the
+    // currency normalizer must NOT collapse genuine ISO codes (e.g. EUR → USD).
+    expect(normalizeMock).toHaveBeenCalledWith(fresh, { collapseAll: false });
+  });
+
+  it('collapses currencies only for a legacy backup with no exchange_rates key', () => {
+    const fresh = createFakeSqlite({ transactions: [] }, { transactions: TX_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const legacy = {
+      version: 1,
+      exportedAt: '2026-01-01T00:00:00.000Z',
+      tables: {
+        accounts: [],
+        account_groups: [],
+        categories: [],
+        transactions: [],
+        transaction_splits: [],
+        recurring_rules: [],
+        settings: [],
+        monthly_wage_settings: [],
+      },
+    };
+
+    const result = applyBackupData(legacy as never);
+    expect(result.success).toBe(true);
+    expect(normalizeMock).toHaveBeenCalledWith(fresh, { collapseAll: true });
   });
 });
