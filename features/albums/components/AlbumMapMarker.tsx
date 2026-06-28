@@ -13,6 +13,8 @@ interface AlbumMapMarkerProps {
   coverUri: string | null;
   /** Total spend, shown under the album name. */
   spendLabel: string;
+  /** "Jun 2026" badge overlaid on the cover; hidden when null. */
+  monthLabel: string | null;
   onPress: () => void;
 }
 
@@ -20,6 +22,7 @@ export const AlbumMapMarker = memo(function AlbumMapMarker({
   name,
   coverUri,
   spendLabel,
+  monthLabel,
   onPress,
 }: AlbumMapMarkerProps) {
   const themeColors = useThemeColors();
@@ -56,6 +59,22 @@ export const AlbumMapMarker = memo(function AlbumMapMarker({
             </Text>
           </View>
         )}
+        {/* Date badge — floats over the cover so it reads at a glance without
+            stealing room from the name/spend rows below. A translucent dark
+            chip keeps it legible over any photo or the tinted placeholder. */}
+        {monthLabel ? (
+          <View
+            className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5"
+            style={{ backgroundColor: 'rgba(17, 24, 39, 0.62)' }}
+          >
+            <Text
+              numberOfLines={1}
+              className="text-[9px] font-bold uppercase tracking-wider text-white"
+            >
+              {monthLabel}
+            </Text>
+          </View>
+        ) : null}
         {/* Labels, separated from the image on the card surface. */}
         <View className="items-center px-2 py-1.5">
           <Text variant="caption" numberOfLines={1} className="font-medium text-foreground">

@@ -1,7 +1,7 @@
 import { Camera, type CameraRef, Map, Marker } from '@maplibre/maplibre-react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { Maximize2 } from 'lucide-react-native';
-import { useMemo, useRef } from 'react';
+import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -120,6 +120,20 @@ function boundsOf(pins: AlbumPin[]): [number, number, number, number] {
   return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
 }
 
+// Albums placed in the same city share identical coordinates (the picker snaps
+// to a city centroid), so they land on the exact same screen point and overlap.
+// We group pins by a coarse coordinate key (~11m grid) to detect those stacks.
+const COORD_GRID = 1e4;
+
+function coordKey(pin: AlbumPin): string {
+  return `${Math.round(pin.longitude * COORD_GRID)}:${Math.round(pin.latitude * COORD_GRID)}`;
+}
+
+// How far each card behind the front one peeks out, so stacked albums are both
+// visible and individually tappable.
+const STACK_PEEK_Y = 16;
+const STACK_SHIFT_X = 7;
+
 export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -139,28 +153,92 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
     cameraRef.current?.fitBounds(boundsOf(pins), { duration: 600 });
   };
 
-  // Build the markers once per pins/handler change (not on every camera move) so
-  // their element identity stays stable and they don't flicker while panning.
-  const markers = useMemo(
-    () =>
-      pins.map((pin) => (
-        <Marker
-          key={pin.albumId}
-          id={pin.albumId}
-          lngLat={[pin.longitude, pin.latitude]}
-          anchor="bottom"
-          onPress={() => onSelectAlbum(pin.albumId)}
-        >
-          <AlbumMapMarker
-            name={pin.name}
-            coverUri={pin.coverUri}
-            spendLabel={pin.spendLabel}
-            onPress={() => onSelectAlbum(pin.albumId)}
-          />
-        </Marker>
-      )),
-    [pins, onSelectAlbum],
+  // Group co-located pins so we can fan them out and tell front from behind.
+  // (A plain record, since the `Map` identifier is the MapLibre component here.)
+  const stacks = useMemo(() => {
+    const groups: Record<string, AlbumPin[]> = {};
+    for (const pin of pins) {
+      const key = coordKey(pin);
+      (groups[key] ??= []).push(pin);
+    }
+    return groups;
+  }, [pins]);
+
+  // Which album sits on top within each stack. Tapping a behind album promotes
+  // it here (bring-to-front) rather than opening it; only the front album opens.
+  const [frontByCoord, setFrontByCoord] = useState<Record<string, string>>({});
+
+  const handlePinPress = useCallback(
+    (pin: AlbumPin) => {
+      const key = coordKey(pin);
+      const group = stacks[key];
+      if (!group || group.length < 2) {
+        onSelectAlbum(pin.albumId);
+        return;
+      }
+      const frontId = frontByCoord[key] ?? group[0].albumId;
+      if (pin.albumId === frontId) {
+        onSelectAlbum(pin.albumId);
+      } else {
+        // Bring the tapped (behind) album to the front; don't open it yet.
+        setFrontByCoord((prev) => ({ ...prev, [key]: pin.albumId }));
+      }
+    },
+    [stacks, frontByCoord, onSelectAlbum],
   );
+
+  // Build the markers once per stack/front/handler change (not on every camera
+  // move) so their element identity stays stable and they don't flicker.
+  const markers = useMemo(() => {
+    const out: ReactNode[] = [];
+    for (const [key, group] of Object.entries(stacks)) {
+      // Render the front album last so it draws on top; behind albums fan up.
+      const frontId = group.length > 1 ? (frontByCoord[key] ?? group[0].albumId) : group[0].albumId;
+      const ordered =
+        group.length > 1
+          ? [
+              ...group.filter((p) => p.albumId !== frontId),
+              ...group.filter((p) => p.albumId === frontId),
+            ]
+          : group;
+      const count = ordered.length;
+      ordered.forEach((pin, index) => {
+        const depth = count - 1 - index; // front (last) = 0
+        out.push(
+          <Marker
+            key={pin.albumId}
+            id={pin.albumId}
+            lngLat={[pin.longitude, pin.latitude]}
+            anchor="bottom"
+            onPress={() => handlePinPress(pin)}
+          >
+            <View
+              style={
+                depth > 0
+                  ? {
+                      transform: [
+                        { translateX: depth * STACK_SHIFT_X },
+                        { translateY: -depth * STACK_PEEK_Y },
+                      ],
+                      opacity: 0.96,
+                    }
+                  : undefined
+              }
+            >
+              <AlbumMapMarker
+                name={pin.name}
+                coverUri={pin.coverUri}
+                spendLabel={pin.spendLabel}
+                monthLabel={pin.monthLabel}
+                onPress={() => handlePinPress(pin)}
+              />
+            </View>
+          </Marker>,
+        );
+      });
+    }
+    return out;
+  }, [stacks, frontByCoord, handlePinPress]);
 
   return (
     <View className="flex-1">
