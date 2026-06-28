@@ -25,6 +25,10 @@ interface BackupTables {
   recurring_rules: Record<string, unknown>[];
   settings: Record<string, unknown>[];
   monthly_wage_settings: Record<string, unknown>[];
+  // Trip albums and their transaction join rows. Optional so backups written
+  // before albums existed still parse; absent on restore means "no albums".
+  albums?: Record<string, unknown>[];
+  album_transactions?: Record<string, unknown>[];
 }
 
 export interface BackupData {
@@ -92,6 +96,10 @@ export async function buildBackupData(): Promise<BackupData> {
         string,
         unknown
       >[],
+      // Read defensively — albums were added in a later migration and may be
+      // absent on very old databases.
+      albums: tryReadTable(sqlite, 'albums'),
+      album_transactions: tryReadTable(sqlite, 'album_transactions'),
     },
   };
 }
@@ -216,6 +224,17 @@ export function applyBackupData(backup: BackupData): ImportResult {
       // Older databases without the table — ignore.
     }
     try {
+      // Join rows reference transactions/albums — clear them before either side.
+      sqlite.execSync('DELETE FROM album_transactions');
+    } catch {
+      // Older databases without the table — ignore.
+    }
+    try {
+      sqlite.execSync('DELETE FROM albums');
+    } catch {
+      // Older databases without the table — ignore.
+    }
+    try {
       sqlite.execSync('DELETE FROM exchange_rates');
     } catch {
       // Older databases without the table — ignore.
@@ -237,6 +256,9 @@ export function applyBackupData(backup: BackupData): ImportResult {
       insertRows(sqlite, 'exchange_rates', backup.tables.exchange_rates);
     }
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules);
+    // Albums before their join rows, both after transactions (join references both).
+    insertRows(sqlite, 'albums', backup.tables.albums);
+    insertRows(sqlite, 'album_transactions', backup.tables.album_transactions);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
