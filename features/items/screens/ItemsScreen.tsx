@@ -1,4 +1,4 @@
-import { CalendarClock, Clock, Package, Plus, Wallet } from 'lucide-react-native';
+import { CalendarClock, CalendarDays, Clock, Package, Plus, Wallet } from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -25,7 +25,7 @@ import type { ItemWithStats, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
-import { formatAmount, formatHours } from '~/utils/formatters';
+import { formatAmount, formatHours, formatMonthYearLabel } from '~/utils/formatters';
 
 interface ItemsScreenProps {
   /** When provided, renders a standalone header with this back action (settings push). */
@@ -42,6 +42,12 @@ const NOOP = () => {};
 /** Money in the item's own currency, ignoring the time display mode. */
 function formatMoney(value: number, currency: string, settings: UserSettings): string {
   return formatAmount(value, { ...settings, displayMode: 'money' }, { currencyCode: currency });
+}
+
+/** Local Date from a `YYYY-MM-DD` day key (no UTC drift across the month boundary). */
+function dayKeyToDate(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
 }
 
 /**
@@ -128,48 +134,60 @@ function ItemCard({
   themeColors: ReturnType<typeof useThemeColors>;
   onPress: () => void;
 }) {
+  const purchaseLabel = formatMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
+
   return (
     <Pressable
       onPress={() => {
         void triggerHaptic('selection');
         onPress();
       }}
-      className="flex-row items-center gap-3 rounded-2xl border border-border/45 bg-card p-3.5"
+      className="flex-row items-center gap-3.5 rounded-2xl border border-border/45 bg-card p-3.5"
     >
-      {/* Image on the left (shown in full, never cropped). */}
-      <View className="items-center justify-center" style={{ width: 60, height: 60 }}>
-        <ItemIcon iconId={item.iconId} size={56} />
+      {/* Image centered on the left (shown in full, never cropped). */}
+      <View className="items-center justify-center" style={{ width: 72, height: 72 }}>
+        <ItemIcon iconId={item.iconId} size={68} />
       </View>
 
-      {/* Name + days owned / status. */}
+      {/* Attributes on the right. */}
       <View className="flex-1">
-        <Text variant="bodyStrong" numberOfLines={1}>
-          {item.name}
-        </Text>
-        <View className="mt-1 flex-row items-center gap-2">
-          <IconStat
-            icon={Clock}
-            themeColors={themeColors}
-            value={I18n.t('items.days_count', { count: item.daysOwned })}
-          />
+        <View className="flex-row items-center gap-2">
+          <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+            {item.name}
+          </Text>
           <StatusPill active={item.isActive} themeColors={themeColors} />
         </View>
-      </View>
 
-      {/* Hero daily cost + total paid, right-aligned. */}
-      <View className="items-end pl-2">
-        <View className="flex-row items-baseline gap-0.5">
+        {/* Purchase month — secondary context under the name. */}
+        <IconStat
+          className="mt-0.5"
+          icon={CalendarDays}
+          themeColors={themeColors}
+          value={purchaseLabel}
+        />
+
+        <View className="mt-1.5 flex-row items-baseline gap-1">
           <DailyValue item={item} settings={settings} variant="heading" />
           <Text variant="caption" tone="muted">
             {I18n.t('items.per_day')}
           </Text>
         </View>
-        <IconStat
-          className="mt-1"
-          icon={Wallet}
-          themeColors={themeColors}
-          value={formatMoney(item.purchasePrice, item.currency, settings)}
-        />
+
+        {/* Two fixed columns so the icons line up across every card. */}
+        <View className="mt-2.5 flex-row gap-3">
+          <IconStat
+            className="flex-1"
+            icon={Clock}
+            themeColors={themeColors}
+            value={I18n.t('items.days_count', { count: item.daysOwned })}
+          />
+          <IconStat
+            className="flex-1"
+            icon={Wallet}
+            themeColors={themeColors}
+            value={formatMoney(item.purchasePrice, item.currency, settings)}
+          />
+        </View>
       </View>
     </Pressable>
   );
