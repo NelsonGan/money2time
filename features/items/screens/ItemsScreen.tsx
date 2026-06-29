@@ -36,7 +36,7 @@ import type { ItemWithStats, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
-import { formatAmount, formatHours, formatMonthYearLabel } from '~/utils/formatters';
+import { formatAmount, formatHours, formatShortMonthYearLabel } from '~/utils/formatters';
 
 interface ItemsScreenProps {
   /** When provided, renders a standalone header with this back action (settings push). */
@@ -151,7 +151,7 @@ function ItemCard({
   width: number;
   onPress: () => void;
 }) {
-  const purchaseLabel = formatMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
+  const purchaseLabel = formatShortMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
 
   // Sortable.Flex forces `alignSelf: flex-start` on every child and switches to
   // absolute layout while dragging, so rows never stretch — give the card an
