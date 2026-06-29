@@ -1,6 +1,6 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { itemsTable } from '~/lib/db/schema';
 import type { Item } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -72,6 +72,29 @@ class ItemsRepository {
       .set({ ...input, updatedAt: nowIso() })
       .where(and(eq(itemsTable.id, id), isNull(itemsTable.deletedAt)))
       .run();
+  }
+
+  /** Persists the given item ids as the new ascending sort order. */
+  reorder(ids: string[]) {
+    if (ids.length === 0) return;
+
+    const sqlite = getSQLite();
+    const db = getDb();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      ids.forEach((id, index) => {
+        db.update(itemsTable)
+          .set({ sortOrder: index, updatedAt: now })
+          .where(and(eq(itemsTable.id, id), isNull(itemsTable.deletedAt)))
+          .run();
+      });
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
   }
 
   softDelete(id: string) {
