@@ -4,19 +4,9 @@ import { ITEM_ICON_SOURCES, ITEM_ICONS, type ItemIconMeta } from './itemIcons.ge
 
 export { ITEM_ICONS, type ItemIconMeta };
 
-const ICON_BY_ID = new Map<string, ItemIconMeta>(ITEM_ICONS.map((icon) => [icon.id, icon]));
-
-/** Default glyph used when an item has no icon assigned yet. */
-export const DEFAULT_ITEM_ICON_ID = ITEM_ICONS[0]?.id ?? null;
-
 export function resolveItemIconSource(iconId?: string | null): ImageSourcePropType | null {
   if (!iconId) return null;
   return ITEM_ICON_SOURCES[iconId] ?? null;
-}
-
-export function getItemIconMeta(iconId?: string | null): ItemIconMeta | null {
-  if (!iconId) return null;
-  return ICON_BY_ID.get(iconId) ?? null;
 }
 
 /**

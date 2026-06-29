@@ -1,5 +1,5 @@
 import { Eye, EyeOff, Plus, Settings } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -68,6 +68,7 @@ export function AssetsTab({
   const themeColors = useThemeColors();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
   const [hideBalances, setHideBalances] = useState(false);
+  const toggleBalances = useCallback(() => setHideBalances((previous) => !previous), []);
 
   useEffect(() => {
     if (resetToAccountsToken !== undefined) setTab('accounts');
@@ -115,7 +116,7 @@ export function AssetsTab({
                 accessibilityLabel={
                   hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
                 }
-                onPress={() => setHideBalances((previous) => !previous)}
+                onPress={toggleBalances}
               >
                 {hideBalances ? (
                   <EyeOff size={18} color={themeColors.textMuted} />
@@ -130,10 +131,7 @@ export function AssetsTab({
 
       <View className="flex-1">
         <MountedPane active={tab === 'accounts'}>
-          {renderAccounts({
-            hideBalances,
-            onToggleBalances: () => setHideBalances((previous) => !previous),
-          })}
+          {renderAccounts({ hideBalances, onToggleBalances: toggleBalances })}
         </MountedPane>
         <MountedPane active={tab === 'items'}>{renderItems()}</MountedPane>
       </View>

@@ -279,7 +279,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   createItem: (input: CreateItemInput) => string;
   updateItem: (id: string, updates: Partial<CreateItemInput>) => void;
   deleteItem: (id: string) => void;
-  reorderItems: (ids: string[]) => void;
 
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -2850,11 +2849,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setItems(itemsRepository.list());
   }, []);
 
-  const reorderItems = useCallback((ids: string[]) => {
-    itemsRepository.reorder(ids);
-    setItems(itemsRepository.list());
-  }, []);
-
   const getTransfersBetweenAccounts = useCallback(
     (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
       return transactionsRepository.getTransfersBetweenAccounts(
@@ -3086,7 +3080,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createItem,
             updateItem,
             deleteItem,
-            reorderItems,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -3189,7 +3182,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createItem,
       updateItem,
       deleteItem,
-      reorderItems,
       createTransaction,
       updateTransaction,
       deleteTransaction,
