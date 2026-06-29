@@ -1,20 +1,28 @@
-import { Plus } from 'lucide-react-native';
+import { Eye, EyeOff, Plus, Settings } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button } from '~/components/ui/button';
-import { I18n } from '~/lib/i18n';
 import {
   AssetsTabBar,
   type AssetsTab as AssetsTabName,
 } from '~/features/items/components/AssetsTabBar';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+
+interface AccountsRenderOptions {
+  hideBalances: boolean;
+  onToggleBalances: () => void;
+}
 
 interface AssetsTabProps {
-  renderAccounts: () => React.ReactNode;
+  renderAccounts: (options: AccountsRenderOptions) => React.ReactNode;
   renderItems: () => React.ReactNode;
   onAddItem: () => void;
+  /** Opens account settings (the gear button now lives on the tab bar). */
+  onOpenAccountSettings: () => void;
   /** Bumping this token resets the view back to the Accounts sub-tab. */
   resetToAccountsToken?: number;
 }
@@ -42,20 +50,24 @@ function MountedPane({ active, children }: { active: boolean; children: React.Re
 }
 
 /**
- * Host for the assets page. Renders an underline tab bar (Accounts | Items) with
- * a top-right add button on the Items tab, and keeps both sub-screens mounted so
- * their internal state (month pager, scroll) survives a tab switch. The child
- * screens manage their own content but not the top safe-area inset — this host
- * provides it once, above the tab bar.
+ * Host for the assets page. Renders an underline tab bar (Accounts | Items) and,
+ * on its top-right, the actions for the active tab — the accounts settings + eye
+ * (balance visibility) buttons on Accounts, the add button on Items. Both
+ * sub-screens stay mounted so their state (month pager, scroll) survives a tab
+ * switch. Child screens manage their own content but not the top safe-area
+ * inset — this host provides it once, above the tab bar.
  */
 export function AssetsTab({
   renderAccounts,
   renderItems,
   onAddItem,
+  onOpenAccountSettings,
   resetToAccountsToken,
 }: AssetsTabProps) {
   const insets = useSafeAreaInsets();
+  const themeColors = useThemeColors();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
+  const [hideBalances, setHideBalances] = useState(false);
 
   useEffect(() => {
     if (resetToAccountsToken !== undefined) setTab('accounts');
@@ -83,12 +95,46 @@ export function AssetsTab({
             <Button size="icon" onPress={onAddItem} accessibilityLabel={I18n.t('items.add')}>
               <Plus size={18} color="#fff" />
             </Button>
-          ) : null}
+          ) : (
+            <View className="flex-row items-center gap-2">
+              <Button
+                size="icon"
+                variant="secondary"
+                haptic="selection"
+                className="h-10 w-10 rounded-full"
+                accessibilityLabel={I18n.t('settings.account_settings')}
+                onPress={onOpenAccountSettings}
+              >
+                <Settings size={18} color={themeColors.textMuted} />
+              </Button>
+              <Button
+                size="icon"
+                variant="secondary"
+                haptic="selection"
+                className="h-10 w-10 rounded-full"
+                accessibilityLabel={
+                  hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
+                }
+                onPress={() => setHideBalances((previous) => !previous)}
+              >
+                {hideBalances ? (
+                  <EyeOff size={18} color={themeColors.textMuted} />
+                ) : (
+                  <Eye size={18} color={themeColors.textMuted} />
+                )}
+              </Button>
+            </View>
+          )}
         </View>
       </TabletContentContainer>
 
       <View className="flex-1">
-        <MountedPane active={tab === 'accounts'}>{renderAccounts()}</MountedPane>
+        <MountedPane active={tab === 'accounts'}>
+          {renderAccounts({
+            hideBalances,
+            onToggleBalances: () => setHideBalances((previous) => !previous),
+          })}
+        </MountedPane>
         <MountedPane active={tab === 'items'}>{renderItems()}</MountedPane>
       </View>
     </View>

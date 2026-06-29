@@ -819,9 +819,13 @@ function MainShellScreen({
           <AssetsTab
             resetToAccountsToken={accountsResetToken}
             onAddItem={() => openItemEditor()}
-            renderAccounts={() => (
+            onOpenAccountSettings={openAccountSettings}
+            renderAccounts={({ hideBalances, onToggleBalances }) => (
               <MemoAccountsScreen
                 safeAreaEdges={[]}
+                hideOverviewHeader
+                hideBalances={hideBalances}
+                onToggleBalances={onToggleBalances}
                 resetToRootToken={accountsResetToken}
                 scrollToTopToken={accountsScrollTopToken}
                 onOpenAccount={openAccountDetail}
