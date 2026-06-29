@@ -42,16 +42,6 @@ class ItemsRepository {
     return row ? toItem(row) : null;
   }
 
-  count(): number {
-    const db = getDb();
-    const row = db
-      .select({ count: sql<number>`count(*)` })
-      .from(itemsTable)
-      .where(isNull(itemsTable.deletedAt))
-      .get();
-    return row?.count ?? 0;
-  }
-
   create(input: CreateItemInput): string {
     const db = getDb();
     const id = newId();

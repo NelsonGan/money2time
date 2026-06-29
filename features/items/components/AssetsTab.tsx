@@ -21,16 +21,20 @@ interface AssetsTabProps {
 
 const styles = StyleSheet.create({
   pane: { ...StyleSheet.absoluteFillObject },
-  paneHidden: { opacity: 0, transform: [{ translateX: 100000 }] },
+  paneVisible: { opacity: 1 },
+  paneHidden: { opacity: 0 },
 });
 
 function MountedPane({ active, children }: { active: boolean; children: React.ReactNode }) {
+  // Mount on first activation and keep mounted so the pane's state (e.g. the
+  // accounts month pager) survives a tab switch. Hidden panes stay laid out but
+  // invisible and non-interactive, mirroring the shell's MountedTab.
   const hasBeenActiveRef = useRef(active);
   if (active) hasBeenActiveRef.current = true;
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
-      style={[styles.pane, active ? undefined : styles.paneHidden]}
+      style={[styles.pane, active ? styles.paneVisible : styles.paneHidden]}
     >
       {hasBeenActiveRef.current ? children : null}
     </View>

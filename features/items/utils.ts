@@ -21,16 +21,27 @@ export function daysBetweenDayKeys(startKey: string, endKey: string): number {
  * - Inactive/sold items freeze the count at their `endDate`.
  * - `daysOwned` is clamped to ≥ 1 so a same-day purchase shows the full price
  *   as its daily cost rather than dividing by zero.
- * - `netCost` subtracts any resale value; `dailyCost = netCost / daysOwned`.
+ * - `netCost` / `dailyCost` stay in the item's own currency (cards render them
+ *   with that currency's symbol).
  * - `dailyWorkHours` is null when no wage is configured (`hourlyRate <= 0`).
+ *   `hourlyRate` is in the reporting currency, so `dailyCost` is converted with
+ *   `fxRateToReporting` (item currency → reporting; defaults to 1 for same-currency
+ *   items) before applying the rate, otherwise foreign-currency items would report
+ *   nonsensical work-time.
  */
-export function computeItemStats(item: Item, todayKey: string, hourlyRate: number): ItemStats {
+export function computeItemStats(
+  item: Item,
+  todayKey: string,
+  hourlyRate: number,
+  fxRateToReporting = 1,
+): ItemStats {
   const isActive = item.endDate == null;
   const endKey = isActive ? todayKey : item.endDate!;
   const daysOwned = Math.max(1, daysBetweenDayKeys(item.purchaseDate, endKey));
   const netCost = item.purchasePrice - (item.salePrice ?? 0);
   const dailyCost = netCost / daysOwned;
-  const dailyWorkHours = hourlyRate > 0 ? amountToHoursByRate(dailyCost, hourlyRate) : null;
+  const dailyWorkHours =
+    hourlyRate > 0 ? amountToHoursByRate(dailyCost * fxRateToReporting, hourlyRate) : null;
 
   return { isActive, daysOwned, netCost, dailyCost, dailyWorkHours };
 }

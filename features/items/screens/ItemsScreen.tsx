@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react-native';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
 
@@ -20,6 +20,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ItemWithStats, UserSettings } from '~/types';
+import { convert } from '~/utils/currency';
 import { formatAmount, formatHours, formatRelativeDate } from '~/utils/formatters';
 
 interface ItemsScreenProps {
@@ -140,22 +141,25 @@ export function ItemsScreen({
   embedded = false,
   safeAreaEdges = ['top'],
 }: ItemsScreenProps) {
-  const { items, settings } = useApp();
+  const { items, settings, rateTable } = useApp();
   const { checkLimit } = useProGate();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
-  const scrollRef = useRef<ScrollView | null>(null);
 
   const handleAdd = useCallback(() => {
     if (!checkLimit('items', items.length)) return;
     onOpenItem();
   }, [checkLimit, items.length, onOpenItem]);
 
-  // Totals reflect what currently-owned items cost; sums assume the reporting
-  // currency for a quick at-a-glance figure (per-item cards keep native currency).
+  // Totals are summed in the reporting currency: each item's native-currency
+  // amount is converted via the FX table so mixed-currency items aggregate
+  // correctly (per-item cards still render in each item's own currency).
   const summary = useMemo(() => {
+    const reporting = settings.currencyCode;
+    const toReporting = (value: number, currency: string) =>
+      convert(value, currency, reporting, rateTable).value;
     const active = items.filter((i) => i.isActive);
-    const totalSpent = items.reduce((sum, i) => sum + i.netCost, 0);
-    const dailyCost = active.reduce((sum, i) => sum + i.dailyCost, 0);
+    const totalSpent = items.reduce((sum, i) => sum + toReporting(i.netCost, i.currency), 0);
+    const dailyCost = active.reduce((sum, i) => sum + toReporting(i.dailyCost, i.currency), 0);
     const dailyWork = active.reduce((sum, i) => sum + (i.dailyWorkHours ?? 0), 0);
     const hasWage = active.some((i) => i.dailyWorkHours != null);
     return {
@@ -166,7 +170,7 @@ export function ItemsScreen({
       activeCount: active.length,
       inactiveCount: items.length - active.length,
     };
-  }, [items]);
+  }, [items, rateTable, settings.currencyCode]);
 
   return (
     <SettingsPageLayout edges={safeAreaEdges}>
@@ -195,7 +199,6 @@ export function ItemsScreen({
         />
       ) : (
         <ScrollView
-          ref={scrollRef}
           className="flex-1"
           contentContainerStyle={[{ paddingHorizontal: 20, paddingTop: 12 }, listNavInset]}
           showsVerticalScrollIndicator={false}

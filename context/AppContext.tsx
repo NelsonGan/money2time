@@ -34,6 +34,7 @@ import {
   accountGroupsTable,
   accountsTable,
   categoriesTable,
+  itemsTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
   transactionsTable,
@@ -579,6 +580,7 @@ function purgeAllData() {
   db.delete(recurringRulesTable).run();
   db.delete(accountGroupsTable).run();
   db.delete(monthlyWageSettingsTable).run();
+  db.delete(itemsTable).run();
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
@@ -2817,15 +2819,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Enrich each item with derived cost-per-day stats. Active items use today's
   // hourly rate for the work-time equivalent; inactive items freeze at their
-  // end date (and use that month's rate).
+  // end date (and use that month's rate). The item's amount is converted to the
+  // reporting currency before applying the rate so foreign-currency items report
+  // correct work-time.
+  const reportingCurrencyCode = settings?.currencyCode ?? DEFAULT_CURRENCY;
   const itemsWithStats = useMemo<ItemWithStats[]>(() => {
     const todayKey = dayKeyFromDateLocal(new Date());
     return items.map((item) => {
       const rateDateKey = item.endDate ?? todayKey;
       const hourlyRate = getTrueHourlyRateForDate(rateDateKey);
-      return { ...item, ...computeItemStats(item, todayKey, hourlyRate) };
+      const fxRateToReporting =
+        convert(1, item.currency, reportingCurrencyCode, rateTable).rateUsed ?? 1;
+      return { ...item, ...computeItemStats(item, todayKey, hourlyRate, fxRateToReporting) };
     });
-  }, [getTrueHourlyRateForDate, items]);
+  }, [getTrueHourlyRateForDate, items, rateTable, reportingCurrencyCode]);
 
   const createItem = useCallback((input: CreateItemInput) => {
     const id = itemsRepository.create(input);

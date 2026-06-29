@@ -79,4 +79,16 @@ describe('computeItemStats', () => {
     expect(stats.daysOwned).toBe(1);
     expect(stats.dailyWorkHours).toBeCloseTo(2, 5);
   });
+
+  it('converts a foreign-currency daily cost before applying the hourly rate', () => {
+    // 2000 (foreign) / day, FX 0.01 → 20 reporting / day at 10/hour = 2 hours.
+    const stats = computeItemStats(
+      makeItem({ purchasePrice: 2000, currency: 'JPY' }),
+      '2024-01-02',
+      10,
+      0.01,
+    );
+    expect(stats.dailyCost).toBe(2000); // stays in the item's own currency
+    expect(stats.dailyWorkHours).toBeCloseTo(2, 5);
+  });
 });
