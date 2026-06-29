@@ -404,7 +404,6 @@ export function SelectField({
             <Text
               variant={isSmallScreen ? 'subheading' : 'heading'}
               numberOfLines={1}
-              adjustsFontSizeToFit
               className={cn(
                 'flex-1 tracking-tight',
                 selected ? 'text-foreground' : 'text-muted-foreground',

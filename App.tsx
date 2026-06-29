@@ -1656,6 +1656,19 @@ export default function App() {
       : {},
   );
 
+  // Failsafe: the splash is normally lifted on first content layout, but a
+  // bootstrap failure (e.g. a migration or data-load throw) renders the error
+  // fallback instead, which never reaches that layout pass. Without this, the
+  // user is stuck staring at the native splash forever. Force-hide after a
+  // generous delay so a broken launch can never trap them behind the splash —
+  // hideAsync is idempotent, so the happy path's earlier hide still wins.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void SplashScreen.hideAsync();
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Splash stays up (prevented from auto-hiding) while fonts resolve, so this
   // null render is never visible. Proceed on error so we can't get stuck.
   if (shouldLoadCustomFonts && !fontsLoaded && !fontError) {
