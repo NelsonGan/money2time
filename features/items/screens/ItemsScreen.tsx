@@ -135,14 +135,20 @@ function ItemCard({
         onPress();
       }}
       style={{ width: '48%' }}
-      className="mb-3 rounded-2xl border border-border/45 bg-card p-3.5"
+      className="mb-3 overflow-hidden rounded-2xl border border-border/45 bg-card p-2.5"
     >
-      <View className="flex-row items-start justify-between">
-        <ItemIcon iconId={item.iconId} size={44} />
-        <StatusPill active={item.isActive} themeColors={themeColors} />
+      {/* Hero image tile — the product image is the focal point of the card */}
+      <View
+        style={{ aspectRatio: 1 }}
+        className="relative overflow-hidden rounded-xl bg-secondary/30 p-2"
+      >
+        <ItemIcon iconId={item.iconId} fill />
+        <View className="absolute right-1.5 top-1.5">
+          <StatusPill active={item.isActive} themeColors={themeColors} />
+        </View>
       </View>
 
-      <Text variant="bodyStrong" numberOfLines={1} className="mt-2.5">
+      <Text variant="bodyStrong" numberOfLines={1} className="mt-2.5 px-1">
         {item.name}
       </Text>
       <View className="mt-0.5 flex-row items-baseline gap-1">
