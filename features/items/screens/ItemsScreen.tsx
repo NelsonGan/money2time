@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarDays, Package, Plus, Wallet } from 'lucide-react-native';
+import { CalendarClock, Package, Plus, Wallet } from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -100,6 +100,19 @@ function StatusPill({
   );
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <View className="flex-1">
+      <Text variant="label" tone="muted" className="text-[9px]">
+        {label}
+      </Text>
+      <Text variant="caption" numberOfLines={1} className="mt-0.5 text-foreground">
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 /** Full-width row card: image centered on the left, attributes on the right. */
 function ItemCard({
   item,
@@ -143,12 +156,17 @@ function ItemCard({
           </Text>
         </View>
 
-        <View className="mt-1.5 flex-row items-center gap-1.5">
-          <CalendarDays size={12} color={themeColors.textMuted} strokeWidth={2.2} />
-          <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
-            {purchaseLabel} · {I18n.t('items.days_count', { count: item.daysOwned })} ·{' '}
-            {formatMoney(item.purchasePrice, item.currency, settings)}
-          </Text>
+        {/* Labeled mini-stats instead of a dot-separated run-on line. */}
+        <View className="mt-3 flex-row gap-3">
+          <Stat
+            label={I18n.t('items.stat_owned')}
+            value={I18n.t('items.days_count', { count: item.daysOwned })}
+          />
+          <Stat
+            label={I18n.t('items.stat_paid')}
+            value={formatMoney(item.purchasePrice, item.currency, settings)}
+          />
+          <Stat label={I18n.t('items.stat_bought')} value={purchaseLabel} />
         </View>
       </View>
     </Pressable>
