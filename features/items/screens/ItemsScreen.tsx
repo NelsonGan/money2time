@@ -327,7 +327,7 @@ export function ItemsScreen({
     const toReporting = (value: number, currency: string) =>
       convert(value, currency, reporting, rateTable).value;
     const active = items.filter((i) => i.isActive);
-    const totalValue = items.reduce((sum, i) => sum + toReporting(i.purchasePrice, i.currency), 0);
+    const totalValue = active.reduce((sum, i) => sum + toReporting(i.purchasePrice, i.currency), 0);
     const dailyCost = active.reduce((sum, i) => sum + toReporting(i.dailyCost, i.currency), 0);
     const dailyWork = active.reduce((sum, i) => sum + (i.dailyWorkHours ?? 0), 0);
     const hasWage = active.some((i) => i.dailyWorkHours != null);
