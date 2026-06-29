@@ -1,3 +1,4 @@
+import * as SplashScreen from 'expo-splash-screen';
 import React, {
   createContext,
   useCallback,
@@ -48,12 +49,12 @@ import {
   recurringRulesRepository,
 } from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
+import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
   type CreateTransactionInput,
   summarizeSplits,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
-import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
   AnalyticsEvents,
   flushAnalytics,
@@ -67,7 +68,6 @@ import {
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
-import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
   importMoneyManagerBackupFromUri,
@@ -80,6 +80,7 @@ import {
   initNotificationHandler,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import {
   type Account,
   type AccountBalance,
@@ -824,16 +825,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextInsightsPreferencesJson = settingsRepository.getInsightsPreferencesJson();
       const nextCalendarPreferencesJson = settingsRepository.getCalendarPrefsJson();
       const nextNotificationPrefsJson = settingsRepository.getNotificationPreferencesJson();
-      const nextNotificationPrefs: NotificationPreferences = nextNotificationPrefsJson
-        ? { ...DEFAULT_NOTIFICATION_PREFS, ...JSON.parse(nextNotificationPrefsJson) }
-        : DEFAULT_NOTIFICATION_PREFS;
+      const nextNotificationPrefs: NotificationPreferences = (() => {
+        if (!nextNotificationPrefsJson) return DEFAULT_NOTIFICATION_PREFS;
+        try {
+          const raw = JSON.parse(nextNotificationPrefsJson);
+          // A corrupt prefs blob must not brick the whole launch — fall back to
+          // defaults rather than throwing out of refreshAll. Guard non-object
+          // results too (e.g. "null"/primitive), not just parse throws.
+          if (!raw || typeof raw !== 'object') return DEFAULT_NOTIFICATION_PREFS;
+          return { ...DEFAULT_NOTIFICATION_PREFS, ...raw };
+        } catch {
+          return DEFAULT_NOTIFICATION_PREFS;
+        }
+      })();
       const nextQuickEntryPrefsJson = settingsRepository.getQuickEntryPrefsJson();
       const nextQuickEntryPrefs: QuickEntryPrefs = (() => {
         if (!nextQuickEntryPrefsJson) return DEFAULT_QUICK_ENTRY_PREFS;
-        const parsed = JSON.parse(nextQuickEntryPrefsJson) as Partial<QuickEntryPrefs> & {
+        let parsed: Partial<QuickEntryPrefs> & {
           voiceDefaultAccountId?: string | null;
           voiceUsageDayKey?: string | null;
         };
+        try {
+          const raw = JSON.parse(nextQuickEntryPrefsJson);
+          // A corrupt prefs blob must not brick the whole launch. Guard
+          // non-object results (e.g. "null"/primitive) too, since the field
+          // access below would throw on them.
+          if (!raw || typeof raw !== 'object') return DEFAULT_QUICK_ENTRY_PREFS;
+          parsed = raw;
+        } catch {
+          return DEFAULT_QUICK_ENTRY_PREFS;
+        }
         // Migrate the field-rename: voiceDefaultAccountId → defaultAccountId.
         // The default now applies to both voice and text entry.
         if (parsed.voiceDefaultAccountId != null && parsed.defaultAccountId == null) {
@@ -3159,7 +3180,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-      <View style={fallbackStyles.errorRoot}>
+      <View
+        style={fallbackStyles.errorRoot}
+        onLayout={() => {
+          // The native splash is normally lifted on AppContent's first content
+          // layout, but AppContent never mounts while settings is null. Hide it
+          // here so this error + Retry is actually visible instead of being
+          // trapped behind the splash.
+          void SplashScreen.hideAsync();
+        }}
+      >
         <View style={fallbackStyles.errorCard}>
           <Text style={fallbackStyles.errorTitle}>{I18n.t('errors.data_load_failed_title')}</Text>
           <Text style={fallbackStyles.errorMessage}>
