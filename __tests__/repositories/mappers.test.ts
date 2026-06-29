@@ -2,6 +2,7 @@ import {
   toAccount,
   toAccountGroup,
   toCategory,
+  toItem,
   toMonthlyWageSettings,
   toRecurringRule,
   toSettings,
@@ -396,5 +397,50 @@ describe('toMonthlyWageSettings', () => {
 
   it('defaults unknown wage type to monthly', () => {
     expect(toMonthlyWageSettings({ ...baseRow, wageType: 'weekly' }).wageType).toBe('monthly');
+  });
+});
+
+describe('toItem', () => {
+  const baseRow: any = {
+    id: 'i1',
+    name: 'Espresso machine',
+    iconId: 'espresso-machine',
+    purchasePrice: 365,
+    currency: 'USD',
+    purchaseDate: '2024-01-01',
+    endDate: null,
+    salePrice: null,
+    note: null,
+    sortOrder: 2,
+    ...STAMPS,
+  };
+
+  it('maps a row to a domain item', () => {
+    expect(toItem(baseRow)).toEqual({
+      id: 'i1',
+      name: 'Espresso machine',
+      iconId: 'espresso-machine',
+      purchasePrice: 365,
+      currency: 'USD',
+      purchaseDate: '2024-01-01',
+      endDate: null,
+      salePrice: null,
+      note: null,
+      sortOrder: 2,
+      ...STAMPS,
+    });
+  });
+
+  it('coerces nullish optional fields', () => {
+    const result = toItem({
+      ...baseRow,
+      iconId: null,
+      salePrice: null,
+      note: null,
+      sortOrder: null,
+    });
+    expect(result.iconId).toBeNull();
+    expect(result.salePrice).toBeNull();
+    expect(result.sortOrder).toBe(0);
   });
 });

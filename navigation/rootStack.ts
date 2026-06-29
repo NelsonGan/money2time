@@ -45,6 +45,7 @@ export type RootStackParamList = {
   EditAlbumTransactions: { albumId: string };
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
+  ItemEditor: { itemId?: string } | undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

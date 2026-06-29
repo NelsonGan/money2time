@@ -27,6 +27,7 @@ import {
   ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
+import { computeItemStats } from '~/features/items/utils';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import {
@@ -43,6 +44,7 @@ import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
+import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
   type CreateRecurringRuleInput,
@@ -96,6 +98,8 @@ import {
   DEFAULT_QUICK_ENTRY_PREFS,
   type ExchangeRate,
   isLocatedAlbum,
+  type Item,
+  type ItemWithStats,
   type LocatedAlbum,
   type MonthlyWageSettings,
   type NotificationPreferences,
@@ -153,6 +157,17 @@ export type TransactionSource = 'manual' | 'voice';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
+}
+
+export interface CreateItemInput {
+  name: string;
+  iconId?: string | null;
+  purchasePrice: number;
+  currency: string;
+  purchaseDate: string;
+  endDate?: string | null;
+  salePrice?: number | null;
+  note?: string | null;
 }
 
 /**
@@ -257,6 +272,13 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   getAlbumTransactionIds: (albumId: string) => string[];
   getAlbumTransactions: (albumId: string) => TransactionWithRelations[];
   getAlbumStats: (albumId: string) => AlbumStats;
+
+  /** Cost-per-day items, each enriched with derived stats (daily cost, days owned, etc.). */
+  items: ItemWithStats[];
+  createItem: (input: CreateItemInput) => string;
+  updateItem: (id: string, updates: Partial<CreateItemInput>) => void;
+  deleteItem: (id: string) => void;
+  reorderItems: (ids: string[]) => void;
 
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -747,6 +769,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
     DEFAULT_TRANSACTION_FILTERS,
   );
@@ -889,6 +912,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextCategories = categoriesRepository.list();
       const nextTransactions = transactionsRepository.list();
       const nextAlbums = albumsRepository.list();
+      const nextItems = itemsRepository.list();
 
       // Compute last 7 days spending for weekly notification body
       const sevenDaysAgoKey = (() => {
@@ -930,6 +954,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCategories(nextCategories);
       setTransactions(nextTransactions);
       setAlbums(nextAlbums);
+      setItems(nextItems);
       setLoadError(null);
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
@@ -2790,6 +2815,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const locatedAlbums = useMemo<LocatedAlbum[]>(() => albums.filter(isLocatedAlbum), [albums]);
 
+  // Enrich each item with derived cost-per-day stats. Active items use today's
+  // hourly rate for the work-time equivalent; inactive items freeze at their
+  // end date (and use that month's rate).
+  const itemsWithStats = useMemo<ItemWithStats[]>(() => {
+    const todayKey = dayKeyFromDateLocal(new Date());
+    return items.map((item) => {
+      const rateDateKey = item.endDate ?? todayKey;
+      const hourlyRate = getTrueHourlyRateForDate(rateDateKey);
+      return { ...item, ...computeItemStats(item, todayKey, hourlyRate) };
+    });
+  }, [getTrueHourlyRateForDate, items]);
+
+  const createItem = useCallback((input: CreateItemInput) => {
+    const id = itemsRepository.create(input);
+    setItems(itemsRepository.list());
+    return id;
+  }, []);
+
+  const updateItem = useCallback((id: string, updates: Partial<CreateItemInput>) => {
+    itemsRepository.update(id, updates);
+    setItems(itemsRepository.list());
+  }, []);
+
+  const deleteItem = useCallback((id: string) => {
+    itemsRepository.softDelete(id);
+    setItems(itemsRepository.list());
+  }, []);
+
+  const reorderItems = useCallback((ids: string[]) => {
+    itemsRepository.reorder(ids);
+    setItems(itemsRepository.list());
+  }, []);
+
   const getTransfersBetweenAccounts = useCallback(
     (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
       return transactionsRepository.getTransfersBetweenAccounts(
@@ -3017,6 +3075,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getAlbumTransactionIds,
             getAlbumTransactions,
             getAlbumStats,
+            items: itemsWithStats,
+            createItem,
+            updateItem,
+            deleteItem,
+            reorderItems,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -3115,6 +3178,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getAlbumTransactionIds,
       getAlbumTransactions,
       getAlbumStats,
+      itemsWithStats,
+      createItem,
+      updateItem,
+      deleteItem,
+      reorderItems,
       createTransaction,
       updateTransaction,
       deleteTransaction,

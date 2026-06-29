@@ -13,7 +13,8 @@ type LimitType =
   | 'wage_entries'
   | 'custom_logos'
   | 'subcurrencies'
-  | 'albums';
+  | 'albums'
+  | 'items';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -23,6 +24,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   custom_logos: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
   subcurrencies: PRO_LIMITS.FREE_MAX_SUBCURRENCIES,
   albums: PRO_LIMITS.FREE_MAX_ALBUMS,
+  items: PRO_LIMITS.FREE_MAX_ITEMS,
 };
 
 export function useProGate() {

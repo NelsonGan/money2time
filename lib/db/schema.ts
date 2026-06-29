@@ -191,6 +191,25 @@ export const albumTransactionsTable = sqliteTable('album_transactions', {
   deletedAt: text('deleted_at'),
 });
 
+export const itemsTable = sqliteTable('items', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  // Item-icon library id or a `custom:` uploaded-image id; null = package fallback.
+  iconId: text('icon_id'),
+  purchasePrice: real('purchase_price').notNull().default(0),
+  currency: text('currency').notNull(),
+  purchaseDate: text('purchase_date').notNull(),
+  // Null = still owned (active). Set when the item is retired/sold; day-counting stops here.
+  endDate: text('end_date'),
+  // Optional resale value; net cost = purchasePrice - salePrice.
+  salePrice: real('sale_price'),
+  note: text('note'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -217,3 +236,4 @@ export type MonthlyWageSettingsRow = typeof monthlyWageSettingsTable.$inferSelec
 export type ExchangeRateRow = typeof exchangeRatesTable.$inferSelect;
 export type AlbumRow = typeof albumsTable.$inferSelect;
 export type AlbumTransactionRow = typeof albumTransactionsTable.$inferSelect;
+export type ItemRow = typeof itemsTable.$inferSelect;
