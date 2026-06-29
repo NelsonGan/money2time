@@ -113,9 +113,9 @@ function IconStat({
   className?: string;
 }) {
   return (
-    <View className={cn('flex-row items-center gap-1.5', className)}>
-      <Icon size={13} color={themeColors.textMuted} strokeWidth={2.2} />
-      <Text variant="caption" numberOfLines={1} className="shrink text-foreground">
+    <View className={cn('flex-row items-center gap-1', className)}>
+      <Icon size={11} color={themeColors.textMuted} strokeWidth={2.2} />
+      <Text numberOfLines={1} className="shrink text-[10px] text-foreground">
         {value}
       </Text>
     </View>
@@ -158,34 +158,35 @@ function ItemCard({
           <StatusPill active={item.isActive} themeColors={themeColors} />
         </View>
 
-        {/* Purchase month — secondary context under the name. */}
-        <IconStat
-          className="mt-0.5"
-          icon={CalendarDays}
-          themeColors={themeColors}
-          value={purchaseLabel}
-        />
-
-        <View className="mt-1.5 flex-row items-baseline gap-1">
+        <View className="mt-1 flex-row items-baseline gap-1">
           <DailyValue item={item} settings={settings} variant="heading" />
           <Text variant="caption" tone="muted">
             {I18n.t('items.per_day')}
           </Text>
         </View>
 
-        {/* Two fixed columns so the icons line up across every card. */}
-        <View className="mt-2.5 flex-row gap-3">
+        {/* Days owned · total paid · purchase month — equal columns split by
+            vertical dividers so the figures line up across every card. */}
+        <View className="mt-2.5 flex-row items-center gap-2">
           <IconStat
             className="flex-1"
             icon={Clock}
             themeColors={themeColors}
             value={I18n.t('items.days_count', { count: item.daysOwned })}
           />
+          <View className="h-3.5 w-px bg-border/50" />
           <IconStat
             className="flex-1"
             icon={Wallet}
             themeColors={themeColors}
             value={formatMoney(item.purchasePrice, item.currency, settings)}
+          />
+          <View className="h-3.5 w-px bg-border/50" />
+          <IconStat
+            className="flex-1"
+            icon={CalendarDays}
+            themeColors={themeColors}
+            value={purchaseLabel}
           />
         </View>
       </View>
