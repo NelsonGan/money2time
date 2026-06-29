@@ -27,6 +27,7 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -48,6 +49,10 @@ interface ItemsScreenProps {
 }
 
 const NOOP = () => {};
+
+// Lets the drag handle fill the card's full height (it's a flex child of the
+// row), giving a tall, easy-to-grab target.
+const HANDLE_STRETCH_STYLE = { alignSelf: 'stretch' } as const;
 
 /** Money in the item's own currency, ignoring the time display mode. */
 function formatMoney(value: number, currency: string, settings: UserSettings): string {
@@ -137,17 +142,25 @@ function ItemCard({
   item,
   settings,
   themeColors,
+  width,
   onPress,
 }: {
   item: ItemWithStats;
   settings: UserSettings;
   themeColors: ReturnType<typeof useThemeColors>;
+  width: number;
   onPress: () => void;
 }) {
   const purchaseLabel = formatMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
 
+  // Sortable.Flex forces `alignSelf: flex-start` on every child and switches to
+  // absolute layout while dragging, so rows never stretch — give the card an
+  // explicit width to span the list (matching the accounts management list).
   return (
-    <View className="w-full flex-row items-center rounded-2xl border border-border/45 bg-card">
+    <View
+      style={{ width }}
+      className="flex-row items-center rounded-2xl border border-border/45 bg-card"
+    >
       <Pressable
         onPress={() => {
           void triggerHaptic('selection');
@@ -206,13 +219,13 @@ function ItemCard({
       </Pressable>
 
       {/* Triple-line drag handle — only this area starts a reorder drag, so the
-          rest of the card stays tappable. */}
-      <Sortable.Handle>
+          rest of the card stays tappable. Stretched full-height for an easy grab. */}
+      <Sortable.Handle style={HANDLE_STRETCH_STYLE}>
         <View
           accessible
           accessibilityRole="button"
           accessibilityLabel={`${I18n.t('common.reorder')} ${item.name}`}
-          className="items-center justify-center self-stretch pl-1 pr-3"
+          className="flex-1 items-center justify-center pl-1 pr-3"
         >
           <GripVertical size={18} color={withColorAlpha(themeColors.textMuted, 0.55)} />
         </View>
@@ -297,6 +310,9 @@ export function ItemsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
+  const { contentWidth } = useDeviceLayout();
+  // The list pads `spacing.lg` on each side; cards span the remaining width.
+  const cardWidth = Math.max(contentWidth - spacing.lg * 2, 0);
 
   const handleAdd = useCallback(() => {
     if (!checkLimit('items', items.length)) return;
@@ -407,6 +423,7 @@ export function ItemsScreen({
                   item={item}
                   settings={settings}
                   themeColors={themeColors}
+                  width={cardWidth}
                   onPress={() => onOpenItem(item.id)}
                 />
               ))}
