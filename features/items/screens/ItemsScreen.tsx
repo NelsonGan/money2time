@@ -1,4 +1,4 @@
-import { CalendarClock, Package, Plus, Wallet } from 'lucide-react-native';
+import { CalendarClock, CalendarDays, Package, Plus, Wallet } from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -20,9 +20,9 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ItemWithStats, UserSettings } from '~/types';
-import { cn } from '~/utils';
+import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
-import { formatAmount, formatHours } from '~/utils/formatters';
+import { formatAmount, formatHours, formatMonthYearLabel } from '~/utils/formatters';
 
 interface ItemsScreenProps {
   /** When provided, renders a standalone header with this back action (settings push). */
@@ -39,6 +39,12 @@ function formatMoney(value: number, currency: string, settings: UserSettings): s
   return formatAmount(value, { ...settings, displayMode: 'money' }, { currencyCode: currency });
 }
 
+/** Local Date from a `YYYY-MM-DD` day key (no UTC drift across the month boundary). */
+function dayKeyToDate(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
 /**
  * The daily-cost value as it should read under the active display mode: hours of
  * work when the global toggle is on Time (and a wage is set), money otherwise.
@@ -46,7 +52,7 @@ function formatMoney(value: number, currency: string, settings: UserSettings): s
 function DailyValue({
   item,
   settings,
-  variant = 'heading',
+  variant = 'subheading',
 }: {
   item: ItemWithStats;
   settings: UserSettings;
@@ -69,63 +75,113 @@ function DailyValue({
   );
 }
 
+function StatusPill({
+  active,
+  themeColors,
+}: {
+  active: boolean;
+  themeColors: ReturnType<typeof useThemeColors>;
+}) {
+  const color = active ? themeColors.success : themeColors.mutedForeground;
+  return (
+    <View
+      className="rounded-full px-2 py-0.5"
+      style={{ backgroundColor: withColorAlpha(color, 0.12) }}
+    >
+      <Text variant="label" className="text-[9px]" style={{ color }}>
+        {active ? I18n.t('items.status_active') : I18n.t('items.status_inactive')}
+      </Text>
+    </View>
+  );
+}
+
+function MetaRow({
+  icon: Icon,
+  text,
+  themeColors,
+}: {
+  icon: typeof CalendarDays;
+  text: string;
+  themeColors: ReturnType<typeof useThemeColors>;
+}) {
+  return (
+    <View className="flex-row items-center gap-1.5">
+      <Icon size={12} color={themeColors.textMuted} strokeWidth={2.2} />
+      <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
+        {text}
+      </Text>
+    </View>
+  );
+}
+
+/** Square index card (two per row). */
 function ItemCard({
   item,
   settings,
+  themeColors,
   onPress,
 }: {
   item: ItemWithStats;
   settings: UserSettings;
+  themeColors: ReturnType<typeof useThemeColors>;
   onPress: () => void;
 }) {
+  const purchaseLabel = formatMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
+
   return (
     <Pressable
       onPress={() => {
         void triggerHaptic('selection');
         onPress();
       }}
-      className={cn(
-        'flex-row items-center gap-3 rounded-2xl border border-border/45 bg-card px-3.5 py-3',
-        !item.isActive && 'opacity-60',
-      )}
+      style={{ width: '48%' }}
+      className="mb-3 rounded-2xl border border-border/45 bg-card p-3.5"
     >
-      <ItemIcon iconId={item.iconId} size={40} />
-      <View className="flex-1">
-        <Text variant="bodyStrong" numberOfLines={1}>
-          {item.name}
-        </Text>
-        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-          {item.isActive
-            ? I18n.t('items.owned_for', { count: item.daysOwned })
-            : `${I18n.t('items.status_inactive')} · ${I18n.t('items.owned_for', { count: item.daysOwned })}`}
-        </Text>
+      <View className="flex-row items-start justify-between">
+        <ItemIcon iconId={item.iconId} size={44} />
+        <StatusPill active={item.isActive} themeColors={themeColors} />
       </View>
-      <View className="items-end">
+
+      <Text variant="bodyStrong" numberOfLines={1} className="mt-2.5">
+        {item.name}
+      </Text>
+      <View className="mt-0.5 flex-row items-baseline gap-1">
         <DailyValue item={item} settings={settings} />
         <Text variant="caption" tone="muted">
           {I18n.t('items.per_day')}
         </Text>
+      </View>
+
+      <View className="mt-3 gap-1.5 border-t border-border/30 pt-2.5">
+        <MetaRow
+          icon={CalendarDays}
+          themeColors={themeColors}
+          text={`${purchaseLabel} · ${I18n.t('items.days_count', { count: item.daysOwned })}`}
+        />
+        <MetaRow
+          icon={Wallet}
+          themeColors={themeColors}
+          text={formatMoney(item.purchasePrice, item.currency, settings)}
+        />
       </View>
     </Pressable>
   );
 }
 
 /**
- * Overview card matching the accounts summary: a hero figure (total cost per day)
- * over a two-stat footer (total spent + item count). The hero respects the
+ * Overview card matching the accounts summary: a hero figure (total value) over a
+ * two-stat footer (cost per day + item count). The cost-per-day stat respects the
  * global money/time toggle.
  */
 function ItemsSummaryBlock({
-  totalDailyCostNode,
-  totalSpent,
-  activeCount,
-  inactiveCount,
+  totalValue,
+  dailyCostNode,
+  itemCount,
   themeColors,
 }: {
-  totalDailyCostNode: React.ReactNode;
-  totalSpent: string;
-  activeCount: number;
-  inactiveCount: number;
+  totalValue: string;
+  dailyCostNode: React.ReactNode;
+  itemCount: number;
   themeColors: ReturnType<typeof useThemeColors>;
 }) {
   return (
@@ -138,12 +194,14 @@ function ItemsSummaryBlock({
 
       <View className="px-4 pb-3 pt-3.5">
         <View className="flex-row items-center gap-1.5">
-          <CalendarClock size={12} color={themeColors.primary} strokeWidth={2.4} />
+          <Wallet size={12} color={themeColors.primary} strokeWidth={2.4} />
           <Text variant="label" className="text-[10px] text-primary">
-            {I18n.t('items.summary_daily_cost')}
+            {I18n.t('items.summary_total_value')}
           </Text>
         </View>
-        <View className="mt-1.5">{totalDailyCostNode}</View>
+        <Text variant="monoLg" className="mt-1.5">
+          {totalValue}
+        </Text>
       </View>
 
       <View className="h-px bg-border/40" />
@@ -151,14 +209,12 @@ function ItemsSummaryBlock({
       <View className="flex-row">
         <View className="flex-1 px-4 py-2.5">
           <View className="flex-row items-center gap-1.5">
-            <Wallet size={12} color={themeColors.textMuted} strokeWidth={2.4} />
+            <CalendarClock size={12} color={themeColors.textMuted} strokeWidth={2.4} />
             <Text variant="label" className="text-[10px]" tone="muted">
-              {I18n.t('items.summary_total_spent')}
+              {I18n.t('items.summary_daily_cost')}
             </Text>
           </View>
-          <Text variant="mono" className="mt-1">
-            {totalSpent}
-          </Text>
+          <View className="mt-1">{dailyCostNode}</View>
         </View>
         <View className="w-px bg-border/40" />
         <View className="flex-1 px-4 py-2.5">
@@ -169,7 +225,7 @@ function ItemsSummaryBlock({
             </Text>
           </View>
           <Text variant="mono" className="mt-1">
-            {I18n.t('items.counts_value', { active: activeCount, inactive: inactiveCount })}
+            {itemCount}
           </Text>
         </View>
       </View>
@@ -201,29 +257,22 @@ export function ItemsScreen({
     const toReporting = (value: number, currency: string) =>
       convert(value, currency, reporting, rateTable).value;
     const active = items.filter((i) => i.isActive);
-    const totalSpent = items.reduce((sum, i) => sum + toReporting(i.netCost, i.currency), 0);
+    const totalValue = items.reduce((sum, i) => sum + toReporting(i.purchasePrice, i.currency), 0);
     const dailyCost = active.reduce((sum, i) => sum + toReporting(i.dailyCost, i.currency), 0);
     const dailyWork = active.reduce((sum, i) => sum + (i.dailyWorkHours ?? 0), 0);
     const hasWage = active.some((i) => i.dailyWorkHours != null);
-    return {
-      totalSpent,
-      dailyCost,
-      dailyWork,
-      hasWage,
-      activeCount: active.length,
-      inactiveCount: items.length - active.length,
-    };
+    return { totalValue, dailyCost, dailyWork, hasWage };
   }, [items, rateTable, settings.currencyCode]);
 
   const showTime = settings.displayMode === 'time' && summary.hasWage;
-  const totalDailyCostNode = showTime ? (
+  const dailyCostNode = showTime ? (
     <TimeValueInline
       value={formatHours(summary.dailyWork)}
-      variant="monoLg"
+      variant="mono"
       iconColor={themeColors.primary}
     />
   ) : (
-    <Text variant="monoLg">{formatMoney(summary.dailyCost, settings.currencyCode, settings)}</Text>
+    <Text variant="mono">{formatMoney(summary.dailyCost, settings.currencyCode, settings)}</Text>
   );
 
   return (
@@ -259,20 +308,20 @@ export function ItemsScreen({
         >
           <View className="mb-3">
             <ItemsSummaryBlock
-              totalDailyCostNode={totalDailyCostNode}
-              totalSpent={formatMoney(summary.totalSpent, settings.currencyCode, settings)}
-              activeCount={summary.activeCount}
-              inactiveCount={summary.inactiveCount}
+              totalValue={formatMoney(summary.totalValue, settings.currencyCode, settings)}
+              dailyCostNode={dailyCostNode}
+              itemCount={items.length}
               themeColors={themeColors}
             />
           </View>
 
-          <View className="gap-2">
+          <View className="flex-row flex-wrap justify-between">
             {items.map((item) => (
               <ItemCard
                 key={item.id}
                 item={item}
                 settings={settings}
+                themeColors={themeColors}
                 onPress={() => onOpenItem(item.id)}
               />
             ))}

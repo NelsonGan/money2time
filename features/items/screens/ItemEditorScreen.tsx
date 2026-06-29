@@ -207,67 +207,65 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
             </Pressable>
           </View>
 
-          {/* Inactive toggle */}
-          <View className="rounded-2xl border border-border/30 bg-card px-4 py-3 gap-3">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1 pr-3">
-                <Text variant="bodyStrong">{I18n.t('items.mark_inactive')}</Text>
-                <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t('items.mark_inactive_hint')}
-                </Text>
-              </View>
-              <Switch
-                value={isInactive}
-                onValueChange={(v) => {
-                  void triggerHaptic('selection');
-                  setIsInactive(v);
-                }}
-                trackColor={{ true: themeColors.primary }}
-              />
+          {/* Mark as inactive — flat fields, consistent with the rest of the form */}
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1">
+              <Text variant="body">{I18n.t('items.mark_inactive')}</Text>
+              <Text variant="caption" tone="muted" className="mt-0.5">
+                {I18n.t('items.mark_inactive_hint')}
+              </Text>
             </View>
-
-            {isInactive ? (
-              <>
-                <View className="gap-1.5">
-                  <Text variant="label" tone="muted">
-                    {I18n.t('items.end_date_label')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setShowEndPicker(true)}
-                    className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
-                  >
-                    <Text variant="body">{formatRelativeDate(endDate, settings.locale)}</Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
-
-                <View className="flex-row items-center justify-between">
-                  <Text variant="body" className="flex-1 pr-3">
-                    {I18n.t('items.sold_toggle')}
-                  </Text>
-                  <Switch
-                    value={hasSalePrice}
-                    onValueChange={(v) => {
-                      void triggerHaptic('selection');
-                      setHasSalePrice(v);
-                    }}
-                    trackColor={{ true: themeColors.primary }}
-                  />
-                </View>
-
-                {hasSalePrice ? (
-                  <Input
-                    label={I18n.t('items.sale_price_label')}
-                    variant="currency"
-                    currencySymbol={currencySymbol}
-                    value={salePrice}
-                    onChangeText={setSalePrice}
-                    placeholder="0.00"
-                  />
-                ) : null}
-              </>
-            ) : null}
+            <Switch
+              value={isInactive}
+              onValueChange={(v) => {
+                void triggerHaptic('selection');
+                setIsInactive(v);
+              }}
+              trackColor={{ true: themeColors.primary }}
+            />
           </View>
+
+          {isInactive ? (
+            <>
+              <View className="gap-1.5">
+                <Text variant="label" tone="muted">
+                  {I18n.t('items.end_date_label')}
+                </Text>
+                <Pressable
+                  onPress={() => setShowEndPicker(true)}
+                  className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
+                >
+                  <Text variant="body">{formatRelativeDate(endDate, settings.locale)}</Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+
+              <View className="flex-row items-center justify-between gap-3">
+                <Text variant="body" className="flex-1">
+                  {I18n.t('items.sold_toggle')}
+                </Text>
+                <Switch
+                  value={hasSalePrice}
+                  onValueChange={(v) => {
+                    void triggerHaptic('selection');
+                    setHasSalePrice(v);
+                  }}
+                  trackColor={{ true: themeColors.primary }}
+                />
+              </View>
+
+              {hasSalePrice ? (
+                <Input
+                  label={I18n.t('items.sale_price_label')}
+                  variant="currency"
+                  currencySymbol={currencySymbol}
+                  value={salePrice}
+                  onChangeText={setSalePrice}
+                  placeholder="0.00"
+                />
+              ) : null}
+            </>
+          ) : null}
 
           <Input
             label={I18n.t('items.note_label')}
