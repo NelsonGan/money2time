@@ -22,6 +22,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ItemWithStats, UserSettings } from '~/types';
+import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
 import { formatAmount, formatHours, formatMonthYearLabel } from '~/utils/formatters';
@@ -104,15 +105,17 @@ function IconStat({
   icon: Icon,
   value,
   themeColors,
+  className,
 }: {
   icon: typeof Clock;
   value: string;
   themeColors: ReturnType<typeof useThemeColors>;
+  className?: string;
 }) {
   return (
-    <View className="flex-row items-center gap-1.5">
+    <View className={cn('flex-row items-center gap-1.5', className)}>
       <Icon size={13} color={themeColors.textMuted} strokeWidth={2.2} />
-      <Text variant="caption" numberOfLines={1} className="text-foreground">
+      <Text variant="caption" numberOfLines={1} className="shrink text-foreground">
         {value}
       </Text>
     </View>
@@ -155,26 +158,35 @@ function ItemCard({
           <StatusPill active={item.isActive} themeColors={themeColors} />
         </View>
 
-        <View className="mt-1 flex-row items-baseline gap-1">
+        {/* Purchase month — secondary context under the name. */}
+        <IconStat
+          className="mt-0.5"
+          icon={CalendarDays}
+          themeColors={themeColors}
+          value={purchaseLabel}
+        />
+
+        <View className="mt-1.5 flex-row items-baseline gap-1">
           <DailyValue item={item} settings={settings} variant="heading" />
           <Text variant="caption" tone="muted">
             {I18n.t('items.per_day')}
           </Text>
         </View>
 
-        {/* Icon-tagged stats: time owned, price paid, purchase month. */}
-        <View className="mt-2.5 flex-row flex-wrap items-center gap-x-3.5 gap-y-1">
+        {/* Two fixed columns so the icons line up across every card. */}
+        <View className="mt-2.5 flex-row gap-3">
           <IconStat
+            className="flex-1"
             icon={Clock}
             themeColors={themeColors}
             value={I18n.t('items.days_count', { count: item.daysOwned })}
           />
           <IconStat
+            className="flex-1"
             icon={Wallet}
             themeColors={themeColors}
             value={formatMoney(item.purchasePrice, item.currency, settings)}
           />
-          <IconStat icon={CalendarDays} themeColors={themeColors} value={purchaseLabel} />
         </View>
       </View>
     </Pressable>
