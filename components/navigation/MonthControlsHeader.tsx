@@ -71,7 +71,6 @@ export function MonthControlsHeader({
                           variant={isSmallScreen ? 'subheading' : 'heading'}
                           className="tracking-tight"
                           numberOfLines={1}
-                          adjustsFontSizeToFit
                         >
                           {title}
                         </Text>
