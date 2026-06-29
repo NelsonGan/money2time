@@ -31,7 +31,7 @@ interface ItemEditorScreenProps {
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
 
 export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditorScreenProps) {
-  const { items, settings, createItem, updateItem, deleteItem } = useApp();
+  const { items, settings, fxCurrencies, createItem, updateItem, deleteItem } = useApp();
   const themeColors = useThemeColors();
 
   const existing = useMemo(() => items.find((i) => i.id === itemId) ?? null, [itemId, items]);
@@ -60,6 +60,13 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
   const currencySymbol = currencySymbolForCode(currency);
   const parsedPrice = Number.parseFloat(price);
   const canSave = name.trim().length > 0 && Number.isFinite(parsedPrice) && parsedPrice >= 0;
+
+  // Currency choices = the main currency + the user's sub-currencies (plus the
+  // item's own currency, so an existing value is always selectable).
+  const currencyCodes = useMemo(
+    () => Array.from(new Set([settings.currencyCode, ...fxCurrencies, currency])),
+    [settings.currencyCode, fxCurrencies, currency],
+  );
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
@@ -290,6 +297,7 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}
         selectedCode={currency}
+        restrictToCodes={currencyCodes}
         onSelect={(code) => {
           setCurrency(code);
           setShowCurrencyPicker(false);
