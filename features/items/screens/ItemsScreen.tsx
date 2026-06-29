@@ -1,7 +1,17 @@
-import { CalendarClock, CalendarDays, Clock, Package, Plus, Wallet } from 'lucide-react-native';
+import {
+  CalendarClock,
+  CalendarDays,
+  Clock,
+  GripVertical,
+  Package,
+  Plus,
+  Wallet,
+} from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import type { Edge } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -137,60 +147,77 @@ function ItemCard({
   const purchaseLabel = formatMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
 
   return (
-    <Pressable
-      onPress={() => {
-        void triggerHaptic('selection');
-        onPress();
-      }}
-      className="flex-row items-center gap-3.5 rounded-2xl border border-border/45 bg-card p-3.5"
-    >
-      {/* Image centered on the left (shown in full, never cropped). */}
-      <View className="items-center justify-center" style={{ width: 72, height: 72 }}>
-        <ItemIcon iconId={item.iconId} size={68} />
-      </View>
-
-      {/* Attributes on the right. */}
-      <View className="flex-1">
-        <View className="flex-row items-center gap-2">
-          <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-            {item.name}
-          </Text>
-          <StatusPill active={item.isActive} themeColors={themeColors} />
+    <View className="w-full flex-row items-center rounded-2xl border border-border/45 bg-card">
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          onPress();
+        }}
+        className="flex-1 flex-row items-center gap-3.5 py-3.5 pl-3.5"
+        accessibilityRole="button"
+        accessibilityLabel={item.name}
+      >
+        {/* Image centered on the left (shown in full, never cropped). */}
+        <View className="items-center justify-center" style={{ width: 72, height: 72 }}>
+          <ItemIcon iconId={item.iconId} size={68} />
         </View>
 
-        <View className="mt-1 flex-row items-baseline gap-1">
-          <DailyValue item={item} settings={settings} variant="heading" />
-          <Text variant="caption" tone="muted">
-            {I18n.t('items.per_day')}
-          </Text>
-        </View>
+        {/* Attributes on the right. */}
+        <View className="flex-1">
+          <View className="flex-row items-center gap-2">
+            <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+              {item.name}
+            </Text>
+            <StatusPill active={item.isActive} themeColors={themeColors} />
+          </View>
 
-        {/* Days owned · total paid · purchase month — equal columns split by
+          <View className="mt-1 flex-row items-baseline gap-1">
+            <DailyValue item={item} settings={settings} variant="heading" />
+            <Text variant="caption" tone="muted">
+              {I18n.t('items.per_day')}
+            </Text>
+          </View>
+
+          {/* Days owned · total paid · purchase month — equal columns split by
             vertical dividers so the figures line up across every card. */}
-        <View className="mt-2.5 flex-row items-center gap-2">
-          <IconStat
-            className="flex-1"
-            icon={Clock}
-            themeColors={themeColors}
-            value={I18n.t('items.days_count', { count: item.daysOwned })}
-          />
-          <View className="h-3.5 w-px bg-border/50" />
-          <IconStat
-            className="flex-1"
-            icon={Wallet}
-            themeColors={themeColors}
-            value={formatMoney(item.purchasePrice, item.currency, settings)}
-          />
-          <View className="h-3.5 w-px bg-border/50" />
-          <IconStat
-            className="flex-1"
-            icon={CalendarDays}
-            themeColors={themeColors}
-            value={purchaseLabel}
-          />
+          <View className="mt-2.5 flex-row items-center gap-2">
+            <IconStat
+              className="flex-1"
+              icon={Clock}
+              themeColors={themeColors}
+              value={I18n.t('items.days_count', { count: item.daysOwned })}
+            />
+            <View className="h-3.5 w-px bg-border/50" />
+            <IconStat
+              className="flex-1"
+              icon={Wallet}
+              themeColors={themeColors}
+              value={formatMoney(item.purchasePrice, item.currency, settings)}
+            />
+            <View className="h-3.5 w-px bg-border/50" />
+            <IconStat
+              className="flex-1"
+              icon={CalendarDays}
+              themeColors={themeColors}
+              value={purchaseLabel}
+            />
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+
+      {/* Triple-line drag handle — only this area starts a reorder drag, so the
+          rest of the card stays tappable. */}
+      <Sortable.Handle>
+        <View
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={`${I18n.t('common.reorder')} ${item.name}`}
+          className="items-center justify-center self-stretch pl-1 pr-3"
+        >
+          <GripVertical size={18} color={withColorAlpha(themeColors.textMuted, 0.55)} />
+        </View>
+      </Sortable.Handle>
+    </View>
   );
 }
 
@@ -265,10 +292,11 @@ export function ItemsScreen({
   embedded = false,
   safeAreaEdges = ['top'],
 }: ItemsScreenProps) {
-  const { items, settings, rateTable } = useApp();
+  const { items, settings, rateTable, reorderItems } = useApp();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
+  const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
 
   const handleAdd = useCallback(() => {
     if (!checkLimit('items', items.length)) return;
@@ -346,7 +374,8 @@ export function ItemsScreen({
               themeColors={themeColors}
             />
           </MonthControlsHeader>
-          <ScrollView
+          <Animated.ScrollView
+            ref={listScrollRef}
             className="flex-1"
             contentContainerStyle={[
               { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
@@ -354,7 +383,24 @@ export function ItemsScreen({
             ]}
             showsVerticalScrollIndicator={false}
           >
-            <View className="gap-2.5">
+            <Sortable.Flex
+              activeItemScale={1.02}
+              activeItemShadowOpacity={0.08}
+              customHandle
+              dragActivationDelay={0}
+              flexDirection="column"
+              flexWrap="nowrap"
+              gap={10}
+              inactiveItemOpacity={1}
+              onDragEnd={({ fromIndex, order, toIndex }) => {
+                if (fromIndex === toIndex) return;
+                const ordered = order(items);
+                reorderItems(ordered.map((item) => item.id));
+                void triggerHaptic('selection');
+              }}
+              scrollableRef={listScrollRef}
+              width="fill"
+            >
               {items.map((item) => (
                 <ItemCard
                   key={item.id}
@@ -364,8 +410,8 @@ export function ItemsScreen({
                   onPress={() => onOpenItem(item.id)}
                 />
               ))}
-            </View>
-          </ScrollView>
+            </Sortable.Flex>
+          </Animated.ScrollView>
         </>
       )}
     </SettingsPageLayout>
