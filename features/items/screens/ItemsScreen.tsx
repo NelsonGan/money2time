@@ -69,11 +69,12 @@ function DailyValue({
         value={formatHours(item.dailyWorkHours as number)}
         variant={variant}
         textClassName="text-primary"
+        numberOfLines={1}
       />
     );
   }
   return (
-    <Text variant={variant} className="text-primary">
+    <Text variant={variant} numberOfLines={1} className="text-primary">
       {formatMoney(item.dailyCost, item.currency, settings)}
     </Text>
   );
@@ -99,26 +100,7 @@ function StatusPill({
   );
 }
 
-function MetaRow({
-  icon: Icon,
-  text,
-  themeColors,
-}: {
-  icon: typeof CalendarDays;
-  text: string;
-  themeColors: ReturnType<typeof useThemeColors>;
-}) {
-  return (
-    <View className="flex-row items-center gap-1.5">
-      <Icon size={12} color={themeColors.textMuted} strokeWidth={2.2} />
-      <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
-        {text}
-      </Text>
-    </View>
-  );
-}
-
-/** Square index card (two per row). */
+/** Full-width row card: image centered on the left, attributes on the right. */
 function ItemCard({
   item,
   settings,
@@ -138,40 +120,36 @@ function ItemCard({
         void triggerHaptic('selection');
         onPress();
       }}
-      style={{ width: '48%' }}
-      className="mb-3 rounded-2xl border border-border/45 bg-card p-3"
+      className="flex-row items-center gap-3.5 rounded-2xl border border-border/45 bg-card p-3.5"
     >
-      <Text variant="bodyStrong" numberOfLines={1}>
-        {item.name}
-      </Text>
-
-      {/* Image centered on the left half (shown in full, never cropped); the key
-          attributes sit to its right. */}
-      <View className="mt-2 flex-row items-center gap-2">
-        <View className="items-center justify-center" style={{ width: 60, height: 60 }}>
-          <ItemIcon iconId={item.iconId} size={56} />
-        </View>
-        <View className="flex-1 gap-1">
-          <View className="flex-row items-baseline gap-0.5">
-            <DailyValue item={item} settings={settings} />
-            <Text variant="caption" tone="muted">
-              {I18n.t('items.per_day')}
-            </Text>
-          </View>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {I18n.t('items.days_count', { count: item.daysOwned })}
-          </Text>
-          <View className="flex-row">
-            <StatusPill active={item.isActive} themeColors={themeColors} />
-          </View>
-        </View>
+      {/* Image centered on the left (shown in full, never cropped). */}
+      <View className="items-center justify-center" style={{ width: 72, height: 72 }}>
+        <ItemIcon iconId={item.iconId} size={68} />
       </View>
 
-      <View className="mt-2.5 flex-row items-center justify-between gap-2 border-t border-border/30 pt-2.5">
-        <MetaRow icon={CalendarDays} themeColors={themeColors} text={purchaseLabel} />
-        <Text variant="caption" tone="muted" numberOfLines={1}>
-          {formatMoney(item.purchasePrice, item.currency, settings)}
-        </Text>
+      {/* Attributes on the right. */}
+      <View className="flex-1">
+        <View className="flex-row items-center gap-2">
+          <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+            {item.name}
+          </Text>
+          <StatusPill active={item.isActive} themeColors={themeColors} />
+        </View>
+
+        <View className="mt-1 flex-row items-baseline gap-1">
+          <DailyValue item={item} settings={settings} variant="heading" />
+          <Text variant="caption" tone="muted">
+            {I18n.t('items.per_day')}
+          </Text>
+        </View>
+
+        <View className="mt-1.5 flex-row items-center gap-1.5">
+          <CalendarDays size={12} color={themeColors.textMuted} strokeWidth={2.2} />
+          <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
+            {purchaseLabel} · {I18n.t('items.days_count', { count: item.daysOwned })} ·{' '}
+            {formatMoney(item.purchasePrice, item.currency, settings)}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -337,7 +315,7 @@ export function ItemsScreen({
             ]}
             showsVerticalScrollIndicator={false}
           >
-            <View className="flex-row flex-wrap justify-between">
+            <View className="gap-2.5">
               {items.map((item) => (
                 <ItemCard
                   key={item.id}
