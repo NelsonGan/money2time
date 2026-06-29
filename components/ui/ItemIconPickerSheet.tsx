@@ -216,8 +216,8 @@ export function ItemIconPickerSheet({
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
+      // No forced square crop — keep the user's full image (shown with `contain`).
+      allowsEditing: false,
       quality: 0.9,
     });
     if (result.canceled || !result.assets?.[0]) return;

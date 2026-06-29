@@ -141,8 +141,9 @@ function ItemCard({
       style={{ width: '48%' }}
       className="mb-3 overflow-hidden rounded-2xl border border-border/45 bg-card p-2.5"
     >
-      {/* Hero image tile — the product image is the focal point of the card */}
-      <View style={{ aspectRatio: 1 }} className="overflow-hidden rounded-xl bg-secondary/30 p-4">
+      {/* Hero image — the product image is the focal point of the card. No tile
+          background, and shown in full (never cropped). */}
+      <View style={{ aspectRatio: 1 }} className="p-2">
         <ItemIcon iconId={item.iconId} fill />
       </View>
 

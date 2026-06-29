@@ -32,16 +32,13 @@ export const ItemIcon = React.memo(function ItemIcon({ iconId, size = 40, fill }
     : ({ width: size, height: size } as const);
   const fallbackGlyphSize = fill ? 56 : Math.round(size * 0.6);
 
-  if (isCustomLogoId(iconId)) {
-    const uri = getCustomLogoUri(iconId);
-    if (uri) {
-      return <Image source={{ uri }} style={[box, { borderRadius }]} resizeMode="cover" />;
-    }
-  } else {
-    const source = resolveItemIconSource(iconId);
-    if (source) {
-      return <Image source={source} style={[box, { borderRadius }]} resizeMode="contain" />;
-    }
+  // Library glyph (require) or user-uploaded image (file uri). Both render with
+  // `contain` so the whole image is shown — item images are never cropped.
+  const customUri = isCustomLogoId(iconId) ? getCustomLogoUri(iconId) : null;
+  const source = customUri ? { uri: customUri } : resolveItemIconSource(iconId);
+
+  if (source) {
+    return <Image source={source} style={[box, { borderRadius }]} resizeMode="contain" />;
   }
 
   return (
