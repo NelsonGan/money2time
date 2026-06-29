@@ -1,4 +1,4 @@
-import { CalendarClock, Package, Plus, Wallet } from 'lucide-react-native';
+import { CalendarClock, CalendarDays, Clock, Package, Plus, Wallet } from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -100,13 +100,19 @@ function StatusPill({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function IconStat({
+  icon: Icon,
+  value,
+  themeColors,
+}: {
+  icon: typeof Clock;
+  value: string;
+  themeColors: ReturnType<typeof useThemeColors>;
+}) {
   return (
-    <View className="flex-1">
-      <Text variant="label" tone="muted" className="text-[9px]">
-        {label}
-      </Text>
-      <Text variant="caption" numberOfLines={1} className="mt-0.5 text-foreground">
+    <View className="flex-row items-center gap-1.5">
+      <Icon size={13} color={themeColors.textMuted} strokeWidth={2.2} />
+      <Text variant="caption" numberOfLines={1} className="text-foreground">
         {value}
       </Text>
     </View>
@@ -156,17 +162,19 @@ function ItemCard({
           </Text>
         </View>
 
-        {/* Labeled mini-stats instead of a dot-separated run-on line. */}
-        <View className="mt-3 flex-row gap-3">
-          <Stat
-            label={I18n.t('items.stat_owned')}
+        {/* Icon-tagged stats: time owned, price paid, purchase month. */}
+        <View className="mt-2.5 flex-row flex-wrap items-center gap-x-3.5 gap-y-1">
+          <IconStat
+            icon={Clock}
+            themeColors={themeColors}
             value={I18n.t('items.days_count', { count: item.daysOwned })}
           />
-          <Stat
-            label={I18n.t('items.stat_paid')}
+          <IconStat
+            icon={Wallet}
+            themeColors={themeColors}
             value={formatMoney(item.purchasePrice, item.currency, settings)}
           />
-          <Stat label={I18n.t('items.stat_bought')} value={purchaseLabel} />
+          <IconStat icon={CalendarDays} themeColors={themeColors} value={purchaseLabel} />
         </View>
       </View>
     </Pressable>
