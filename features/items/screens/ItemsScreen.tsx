@@ -139,38 +139,39 @@ function ItemCard({
         onPress();
       }}
       style={{ width: '48%' }}
-      className="mb-3 overflow-hidden rounded-2xl border border-border/45 bg-card p-2.5"
+      className="mb-3 rounded-2xl border border-border/45 bg-card p-3"
     >
-      {/* Hero image — the product image is the focal point of the card. No tile
-          background, and shown in full (never cropped). */}
-      <View style={{ aspectRatio: 1 }} className="p-2">
-        <ItemIcon iconId={item.iconId} fill />
+      <Text variant="bodyStrong" numberOfLines={1}>
+        {item.name}
+      </Text>
+
+      {/* Image centered on the left half (shown in full, never cropped); the key
+          attributes sit to its right. */}
+      <View className="mt-2 flex-row items-center gap-2">
+        <View className="items-center justify-center" style={{ width: 60, height: 60 }}>
+          <ItemIcon iconId={item.iconId} size={56} />
+        </View>
+        <View className="flex-1 gap-1">
+          <View className="flex-row items-baseline gap-0.5">
+            <DailyValue item={item} settings={settings} />
+            <Text variant="caption" tone="muted">
+              {I18n.t('items.per_day')}
+            </Text>
+          </View>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {I18n.t('items.days_count', { count: item.daysOwned })}
+          </Text>
+          <View className="flex-row">
+            <StatusPill active={item.isActive} themeColors={themeColors} />
+          </View>
+        </View>
       </View>
 
-      <View className="mt-2.5 flex-row items-center gap-2 px-1">
-        <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-          {item.name}
+      <View className="mt-2.5 flex-row items-center justify-between gap-2 border-t border-border/30 pt-2.5">
+        <MetaRow icon={CalendarDays} themeColors={themeColors} text={purchaseLabel} />
+        <Text variant="caption" tone="muted" numberOfLines={1}>
+          {formatMoney(item.purchasePrice, item.currency, settings)}
         </Text>
-        <StatusPill active={item.isActive} themeColors={themeColors} />
-      </View>
-      <View className="mt-0.5 flex-row items-baseline gap-1 px-1">
-        <DailyValue item={item} settings={settings} />
-        <Text variant="caption" tone="muted">
-          {I18n.t('items.per_day')}
-        </Text>
-      </View>
-
-      <View className="mt-3 gap-1.5 border-t border-border/30 pt-2.5">
-        <MetaRow
-          icon={CalendarDays}
-          themeColors={themeColors}
-          text={`${purchaseLabel} · ${I18n.t('items.days_count', { count: item.daysOwned })}`}
-        />
-        <MetaRow
-          icon={Wallet}
-          themeColors={themeColors}
-          text={formatMoney(item.purchasePrice, item.currency, settings)}
-        />
       </View>
     </Pressable>
   );
