@@ -1285,6 +1285,8 @@ const en = {
     custom_item_images_label: 'Custom item images',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
+    limit_custom_item_images:
+      'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_subcurrencies:
       'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',

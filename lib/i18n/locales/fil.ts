@@ -1334,6 +1334,8 @@ const fil = {
     custom_item_images_label: 'Custom na larawan ng item',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
+    limit_custom_item_images:
+      'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',

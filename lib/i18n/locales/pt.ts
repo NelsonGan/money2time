@@ -1323,6 +1323,8 @@ const pt = {
     custom_item_images_label: 'Imagens de itens personalizadas',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
+    limit_custom_item_images:
+      'Pode carregar até {{count}} imagens de itens personalizadas no plano gratuito. Torne-se Pro para ter ilimitadas.',
     limit_subcurrencies:
       'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
     title: 'Money2Time Pro',

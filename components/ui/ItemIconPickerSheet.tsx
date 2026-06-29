@@ -201,7 +201,7 @@ export function ItemIconPickerSheet({
 
   const handleUpload = useCallback(async () => {
     void triggerHaptic('selection');
-    if (!checkLimit('custom_logos', customIcons.length)) {
+    if (!checkLimit('custom_item_images', customIcons.length)) {
       onClose();
       onLimitReached?.();
       return;

@@ -1297,6 +1297,8 @@ const ja = {
     custom_item_images_label: 'カスタムアイテム画像',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+    limit_custom_item_images:
+      '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_subcurrencies:
       '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     title: 'Money2Time Pro',

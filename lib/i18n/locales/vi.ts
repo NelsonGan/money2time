@@ -1301,6 +1301,8 @@ const vi = {
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
+    limit_custom_item_images:
+      'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_subcurrencies:
       'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     title: 'Money2Time Pro',

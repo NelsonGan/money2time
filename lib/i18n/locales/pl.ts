@@ -1321,6 +1321,8 @@ const pl = {
     custom_item_images_label: 'Własne obrazy przedmiotów',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
+    limit_custom_item_images:
+      'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_subcurrencies:
       'W planie darmowym możesz dodać {{count}} walutę podrzędną. Przejdź na Pro, aby śledzić wiele walut bez limitu.',
     title: 'Money2Time Pro',

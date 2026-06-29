@@ -1304,6 +1304,8 @@ const hi = {
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
+    limit_custom_item_images:
+      'मुफ़्त प्लान में आप {{count}} तक कस्टम आइटम छवियाँ अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
     limit_subcurrencies:
       'मुफ़्त प्लान में आप {{count}} उप-मुद्रा जोड़ सकते हैं। असीमित मल्टी-करेंसी के लिए Pro लें।',
     title: 'Money2Time Pro',

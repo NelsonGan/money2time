@@ -1318,6 +1318,8 @@ const ms = {
     custom_item_images_label: 'Imej item tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
+    limit_custom_item_images:
+      'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_subcurrencies:
       'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     title: 'Money2Time Pro',

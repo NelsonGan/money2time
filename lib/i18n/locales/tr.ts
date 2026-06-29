@@ -1320,6 +1320,8 @@ const tr = {
     custom_item_images_label: 'Özel eşya görselleri',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
+    limit_custom_item_images:
+      'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_subcurrencies:
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',

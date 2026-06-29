@@ -1329,6 +1329,8 @@ const fr = {
     custom_item_images_label: "Images d'objets personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+    limit_custom_item_images:
+      "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:
       'Vous pouvez ajouter {{count}} sous-devise avec le forfait gratuit. Passez à Pro pour un suivi multidevise illimité.',
     title: 'Money2Time Pro',

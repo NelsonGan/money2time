@@ -1289,6 +1289,8 @@ const ko = {
     custom_item_images_label: '맞춤 물건 이미지',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+    limit_custom_item_images:
+      '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_subcurrencies:
       '무료 플랜에서는 보조 통화를 {{count}}개 추가할 수 있습니다. 무제한 다중 통화는 Pro로 업그레이드하세요.',
     title: 'Money2Time Pro',
