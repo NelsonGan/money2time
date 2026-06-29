@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   Button,
   ItemIcon,
@@ -14,6 +15,7 @@ import {
   TimeValueInline,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -33,6 +35,8 @@ interface ItemsScreenProps {
   embedded?: boolean;
   safeAreaEdges?: Edge[];
 }
+
+const NOOP = () => {};
 
 /** Money in the item's own currency, ignoring the time display mode. */
 function formatMoney(value: number, currency: string, settings: UserSettings): string {
@@ -304,32 +308,46 @@ export function ItemsScreen({
           animateIn={false}
         />
       ) : (
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={[{ paddingHorizontal: 20, paddingTop: 12 }, listNavInset]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="mb-3">
+        <>
+          {/* Same pinned-overview structure as the accounts page so the cards
+              line up pixel-for-pixel when switching tabs. */}
+          <MonthControlsHeader
+            title=""
+            monthLabel=""
+            onPrevMonth={NOOP}
+            onNextMonth={NOOP}
+            hideTitleRow
+            hideNavigation
+            showAccent={false}
+          >
             <ItemsSummaryBlock
               totalValue={formatMoney(summary.totalValue, settings.currencyCode, settings)}
               dailyCostNode={dailyCostNode}
               itemCount={items.length}
               themeColors={themeColors}
             />
-          </View>
-
-          <View className="flex-row flex-wrap justify-between">
-            {items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                settings={settings}
-                themeColors={themeColors}
-                onPress={() => onOpenItem(item.id)}
-              />
-            ))}
-          </View>
-        </ScrollView>
+          </MonthControlsHeader>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={[
+              { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+              listNavInset,
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="flex-row flex-wrap justify-between">
+              {items.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  settings={settings}
+                  themeColors={themeColors}
+                  onPress={() => onOpenItem(item.id)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </>
       )}
     </SettingsPageLayout>
   );
