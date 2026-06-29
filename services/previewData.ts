@@ -2,14 +2,19 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import {
   accountGroupsTable,
   accountsTable,
+  albumsTable,
+  albumTransactionsTable,
   categoriesTable,
+  itemsTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
   transactionsTable,
 } from '~/lib/db/schema';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
+import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
@@ -26,6 +31,8 @@ export interface PreviewSeedSummary {
   recurringRules: number;
   transactions: number;
   wageMonths: number;
+  albums: number;
+  items: number;
 }
 
 type RandomFn = () => number;
@@ -286,6 +293,33 @@ interface PreviewRecurringRuleConfig {
   note: string;
 }
 
+// A trip album shown on the Albums map. Each is matched to one of the seeded
+// travel months (most recent first) so its card surfaces real flight/hotel/
+// dining spend, and its map pin lands on the destination's coordinates.
+interface PreviewAlbumSeed {
+  name: string;
+  placeName: string;
+  placeAdmin: string | null;
+  countryCode: string;
+  latitude: number;
+  longitude: number;
+}
+
+// A cost-per-day tracker entry. `purchaseMonthsAgo` anchors the buy date
+// relative to "now" so the day count always looks lived-in; retired items set
+// `retiredMonthsAgo` (+ optional `salePrice`) to demonstrate the sold/owned
+// split and net-cost maths.
+interface PreviewItemSeed {
+  name: string;
+  iconId: string;
+  purchaseMonthsAgo: number;
+  purchaseDay: number;
+  purchasePrice: number;
+  retiredMonthsAgo?: number;
+  salePrice?: number;
+  note?: string;
+}
+
 interface PreviewProfile {
   seed: number;
   locale: string;
@@ -312,6 +346,10 @@ interface PreviewProfile {
     investment: PreviewRecurringRuleConfig;
   };
   transactions: PreviewTransactionsConfig;
+  // Trip albums (newest-first); paired with the most recent travel months.
+  albums: PreviewAlbumSeed[];
+  // Cost-per-day tracker entries.
+  items: PreviewItemSeed[];
 }
 
 const ACCOUNT_GROUP_ORDER: AccountGroupKey[] = ['everyday', 'goals', 'credit', 'investing'];
@@ -786,6 +824,105 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         familyCelebrationSpread: 45,
       },
     },
+    albums: [
+      {
+        name: 'Tokyo Getaway',
+        placeName: 'Tokyo',
+        placeAdmin: 'Japan',
+        countryCode: 'JP',
+        latitude: 35.6762,
+        longitude: 139.6503,
+      },
+      {
+        name: 'Iceland Road Trip',
+        placeName: 'Reykjavík',
+        placeAdmin: 'Iceland',
+        countryCode: 'IS',
+        latitude: 64.1466,
+        longitude: -21.9426,
+      },
+      {
+        name: 'NYC Long Weekend',
+        placeName: 'New York City',
+        placeAdmin: 'New York',
+        countryCode: 'US',
+        latitude: 40.7128,
+        longitude: -74.006,
+      },
+      {
+        name: 'Cancún Escape',
+        placeName: 'Cancún',
+        placeAdmin: 'Mexico',
+        countryCode: 'MX',
+        latitude: 21.1619,
+        longitude: -86.8515,
+      },
+    ],
+    items: [
+      {
+        name: 'iPhone 15 Pro',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 13,
+        purchaseDay: 22,
+        purchasePrice: 999,
+        note: 'Natural Titanium, 256GB',
+      },
+      {
+        name: 'MacBook Air M3',
+        iconId: 'laptop',
+        purchaseMonthsAgo: 20,
+        purchaseDay: 9,
+        purchasePrice: 1299,
+        note: 'Daily driver for side projects',
+      },
+      {
+        name: 'Sony WH-1000XM5',
+        iconId: 'headphones',
+        purchaseMonthsAgo: 8,
+        purchaseDay: 4,
+        purchasePrice: 399,
+      },
+      {
+        name: 'Apple Watch Series 9',
+        iconId: 'smartwatch',
+        purchaseMonthsAgo: 11,
+        purchaseDay: 17,
+        purchasePrice: 429,
+      },
+      {
+        name: 'Sony A7 IV',
+        iconId: 'dslr-camera',
+        purchaseMonthsAgo: 26,
+        purchaseDay: 12,
+        purchasePrice: 2498,
+        note: 'Travel + vlog camera',
+      },
+      {
+        name: 'Specialized Turbo Vado',
+        iconId: 'e-bike',
+        purchaseMonthsAgo: 18,
+        purchaseDay: 28,
+        purchasePrice: 2800,
+        note: 'Bike-to-work commuter',
+      },
+      {
+        name: 'PlayStation 5',
+        iconId: 'playstation',
+        purchaseMonthsAgo: 30,
+        purchaseDay: 6,
+        purchasePrice: 499,
+      },
+      {
+        name: 'iPhone 13 (sold)',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 38,
+        purchaseDay: 15,
+        purchasePrice: 799,
+        retiredMonthsAgo: 13,
+        salePrice: 360,
+        note: 'Traded in for the 15 Pro',
+      },
+    ],
   },
   chinese: {
     seed: 20260318,
@@ -1021,6 +1158,103 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         familyCelebrationSpread: 120,
       },
     },
+    albums: [
+      {
+        name: '东京之旅',
+        placeName: '东京',
+        placeAdmin: '日本',
+        countryCode: 'JP',
+        latitude: 35.6762,
+        longitude: 139.6503,
+      },
+      {
+        name: '普吉岛度假',
+        placeName: '普吉岛',
+        placeAdmin: '泰国',
+        countryCode: 'TH',
+        latitude: 7.8804,
+        longitude: 98.3923,
+      },
+      {
+        name: '云南大理',
+        placeName: '大理',
+        placeAdmin: '云南',
+        countryCode: 'CN',
+        latitude: 25.6065,
+        longitude: 100.2676,
+      },
+      {
+        name: '香港购物游',
+        placeName: '香港',
+        placeAdmin: '香港特别行政区',
+        countryCode: 'HK',
+        latitude: 22.3193,
+        longitude: 114.1694,
+      },
+    ],
+    items: [
+      {
+        name: 'iPhone 15 Pro',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 12,
+        purchaseDay: 20,
+        purchasePrice: 8999,
+        note: '原色钛金属 256G',
+      },
+      {
+        name: '华为 MateBook X Pro',
+        iconId: 'laptop',
+        purchaseMonthsAgo: 19,
+        purchaseDay: 8,
+        purchasePrice: 9999,
+      },
+      {
+        name: '索尼 WH-1000XM5',
+        iconId: 'headphones',
+        purchaseMonthsAgo: 7,
+        purchaseDay: 14,
+        purchasePrice: 2899,
+      },
+      {
+        name: 'Apple Watch S9',
+        iconId: 'smartwatch',
+        purchaseMonthsAgo: 10,
+        purchaseDay: 3,
+        purchasePrice: 3199,
+      },
+      {
+        name: '大疆 Pocket 3',
+        iconId: 'action-camera',
+        purchaseMonthsAgo: 9,
+        purchaseDay: 26,
+        purchasePrice: 3499,
+        note: '旅行 vlog 神器',
+      },
+      {
+        name: '石头扫地机器人',
+        iconId: 'robot-vacuum',
+        purchaseMonthsAgo: 22,
+        purchaseDay: 11,
+        purchasePrice: 3299,
+      },
+      {
+        name: '任天堂 Switch OLED',
+        iconId: 'handheld-game-console',
+        purchaseMonthsAgo: 28,
+        purchaseDay: 5,
+        purchasePrice: 2099,
+      },
+      {
+        name: '大疆 Mini 3（已出）',
+        iconId: 'drone',
+        purchaseMonthsAgo: 34,
+        purchaseDay: 18,
+        purchasePrice: 4788,
+        retiredMonthsAgo: 11,
+        salePrice: 2600,
+        note: '升级 Mini 4 后转卖',
+      },
+    ],
   },
   malaysian_en: {
     seed: 20260411,
@@ -1352,6 +1586,103 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         ],
       },
     },
+    albums: [
+      {
+        name: 'Bali Trip',
+        placeName: 'Bali',
+        placeAdmin: 'Indonesia',
+        countryCode: 'ID',
+        latitude: -8.4095,
+        longitude: 115.1889,
+      },
+      {
+        name: 'Tokyo Holiday',
+        placeName: 'Tokyo',
+        placeAdmin: 'Japan',
+        countryCode: 'JP',
+        latitude: 35.6762,
+        longitude: 139.6503,
+      },
+      {
+        name: 'Bangkok Weekend',
+        placeName: 'Bangkok',
+        placeAdmin: 'Thailand',
+        countryCode: 'TH',
+        latitude: 13.7563,
+        longitude: 100.5018,
+      },
+      {
+        name: 'Langkawi Getaway',
+        placeName: 'Langkawi',
+        placeAdmin: 'Kedah',
+        countryCode: 'MY',
+        latitude: 6.35,
+        longitude: 99.8,
+      },
+    ],
+    items: [
+      {
+        name: 'iPhone 15 Pro',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 12,
+        purchaseDay: 21,
+        purchasePrice: 5499,
+        note: 'Natural Titanium 256GB',
+      },
+      {
+        name: 'ASUS Zenbook 14',
+        iconId: 'laptop',
+        purchaseMonthsAgo: 18,
+        purchaseDay: 7,
+        purchasePrice: 4999,
+      },
+      {
+        name: 'Sony WH-1000XM5',
+        iconId: 'headphones',
+        purchaseMonthsAgo: 8,
+        purchaseDay: 15,
+        purchasePrice: 1799,
+      },
+      {
+        name: 'Apple Watch S9',
+        iconId: 'smartwatch',
+        purchaseMonthsAgo: 10,
+        purchaseDay: 2,
+        purchasePrice: 1899,
+      },
+      {
+        name: 'DJI Osmo Pocket 3',
+        iconId: 'action-camera',
+        purchaseMonthsAgo: 9,
+        purchaseDay: 24,
+        purchasePrice: 2199,
+        note: 'Travel vlogging',
+      },
+      {
+        name: 'Dyson V12 Detect',
+        iconId: 'cordless-vacuum',
+        purchaseMonthsAgo: 21,
+        purchaseDay: 12,
+        purchasePrice: 2799,
+      },
+      {
+        name: 'Nintendo Switch OLED',
+        iconId: 'handheld-game-console',
+        purchaseMonthsAgo: 27,
+        purchaseDay: 5,
+        purchasePrice: 1299,
+      },
+      {
+        name: 'iPhone 12 (sold)',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 36,
+        purchaseDay: 16,
+        purchasePrice: 3199,
+        retiredMonthsAgo: 12,
+        salePrice: 900,
+        note: 'Sold to upgrade',
+      },
+    ],
   },
   malaysian_zh: {
     seed: 20260424,
@@ -1661,6 +1992,103 @@ const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
         convenienceMerchants: ['7-Eleven', 'Family Mart', 'KK 超市', 'MyNews', '99 速达'],
       },
     },
+    albums: [
+      {
+        name: '巴厘岛之旅',
+        placeName: '巴厘岛',
+        placeAdmin: '印尼',
+        countryCode: 'ID',
+        latitude: -8.4095,
+        longitude: 115.1889,
+      },
+      {
+        name: '东京假期',
+        placeName: '东京',
+        placeAdmin: '日本',
+        countryCode: 'JP',
+        latitude: 35.6762,
+        longitude: 139.6503,
+      },
+      {
+        name: '曼谷周末游',
+        placeName: '曼谷',
+        placeAdmin: '泰国',
+        countryCode: 'TH',
+        latitude: 13.7563,
+        longitude: 100.5018,
+      },
+      {
+        name: '浮罗交怡',
+        placeName: '浮罗交怡',
+        placeAdmin: '吉打',
+        countryCode: 'MY',
+        latitude: 6.35,
+        longitude: 99.8,
+      },
+    ],
+    items: [
+      {
+        name: 'iPhone 15 Pro',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 12,
+        purchaseDay: 21,
+        purchasePrice: 5499,
+        note: '原色钛金属 256G',
+      },
+      {
+        name: '华硕 Zenbook 14',
+        iconId: 'laptop',
+        purchaseMonthsAgo: 18,
+        purchaseDay: 7,
+        purchasePrice: 4999,
+      },
+      {
+        name: '索尼 WH-1000XM5',
+        iconId: 'headphones',
+        purchaseMonthsAgo: 8,
+        purchaseDay: 15,
+        purchasePrice: 1799,
+      },
+      {
+        name: 'Apple Watch S9',
+        iconId: 'smartwatch',
+        purchaseMonthsAgo: 10,
+        purchaseDay: 2,
+        purchasePrice: 1899,
+      },
+      {
+        name: '大疆 Osmo Pocket 3',
+        iconId: 'action-camera',
+        purchaseMonthsAgo: 9,
+        purchaseDay: 24,
+        purchasePrice: 2199,
+        note: '旅行 vlog',
+      },
+      {
+        name: '戴森 V12 吸尘器',
+        iconId: 'cordless-vacuum',
+        purchaseMonthsAgo: 21,
+        purchaseDay: 12,
+        purchasePrice: 2799,
+      },
+      {
+        name: '任天堂 Switch OLED',
+        iconId: 'handheld-game-console',
+        purchaseMonthsAgo: 27,
+        purchaseDay: 5,
+        purchasePrice: 1299,
+      },
+      {
+        name: 'iPhone 12（已出）',
+        iconId: 'smartphone',
+        purchaseMonthsAgo: 36,
+        purchaseDay: 16,
+        purchasePrice: 3199,
+        retiredMonthsAgo: 12,
+        salePrice: 900,
+        note: '升级后转卖',
+      },
+    ],
   },
 };
 
@@ -1732,6 +2160,9 @@ function pick<T>(items: readonly T[], random: RandomFn): T {
 
 function purgePreviewData() {
   const db = getDb();
+  db.delete(albumTransactionsTable).run();
+  db.delete(albumsTable).run();
+  db.delete(itemsTable).run();
   db.delete(transactionsTable).run();
   db.delete(recurringRulesTable).run();
   db.delete(categoriesTable).run();
@@ -1810,23 +2241,41 @@ function createCategories(profile: PreviewProfile): CategoryRefs {
   return ids;
 }
 
+// One-time commute reduction (a move closer to work / hybrid switch) lands at
+// ~60% through the history so the back portion of the hourly-value chart shows
+// an intentional step-up rather than month-to-month noise.
+const COMMUTE_DROP_INDEX = Math.floor(WAGE_HISTORY_MONTHS * 0.6);
+
 function seedWageHistory(profile: PreviewProfile) {
   const currentMonth = monthStart(new Date());
+  const wageHistory = profile.wageHistory;
 
   for (let index = 0; index < WAGE_HISTORY_MONTHS; index += 1) {
     const monthDate = monthStart(currentMonth, index - (WAGE_HISTORY_MONTHS - 1));
-    const yearlyStep = Math.floor(index / 12);
-    const wageHistory = profile.wageHistory;
+    const yearsElapsed = Math.floor(index / 12);
+
+    // Salary climbs as a clean upward curve: a steady monthly merit creep plus a
+    // larger raise on each completed year. Monotonic by design, so the derived
+    // hourly value reads as real income growth instead of scattered data points.
+    const wageAmount = roundAmount(
+      wageHistory.baseAmount +
+        index * wageHistory.monthlyGrowth +
+        yearsElapsed * wageHistory.yearlyStep,
+    );
+
+    // Hours stay flat and commute changes only once, so the true hourly rate
+    // tracks pay rather than bookkeeping jitter.
+    const commuteMinutesPerWorkday =
+      index >= COMMUTE_DROP_INDEX
+        ? Math.max(0, wageHistory.commuteBase - wageHistory.commuteStep)
+        : wageHistory.commuteBase;
+
     const config: WageConfig = {
       wageType: 'monthly',
-      wageAmount: roundAmount(
-        wageHistory.baseAmount +
-          index * wageHistory.monthlyGrowth +
-          yearlyStep * wageHistory.yearlyStep,
-      ),
-      hoursWorkedPerWeek: roundAmount(wageHistory.hoursBase + ((index % 4) - 1.5) * 0.75),
+      wageAmount,
+      hoursWorkedPerWeek: wageHistory.hoursBase,
       workdaysPerWeek: 5,
-      commuteMinutesPerWorkday: wageHistory.commuteBase + (index % 3) * wageHistory.commuteStep,
+      commuteMinutesPerWorkday,
     };
 
     monthlyWageRepository.saveForMonth(monthKey(monthDate), config);
@@ -1922,11 +2371,16 @@ function randomSentiment(type: string, random: RandomFn): TransactionSentiment {
   return 'neutral';
 }
 
+interface PreviewTrip {
+  date: Date;
+  transactionIds: string[];
+}
+
 function seedTransactions(
   profile: PreviewProfile,
   accounts: AccountRefs,
   categories: CategoryRefs,
-) {
+): { count: number; trips: PreviewTrip[] } {
   const random = createSeededRandom(profile.seed);
   const previewMonths = getPreviewMonths();
   const {
@@ -1944,15 +2398,23 @@ function seedTransactions(
   const subscriptionTotal = subscriptions.reduce((sum, amount) => sum + amount, 0);
 
   let transactionCount = 0;
+  // Trip spend grouped by travel month, so albums can be linked to the actual
+  // flight/hotel/dining transactions afterwards.
+  const trips: PreviewTrip[] = [];
 
-  const add = (input: Parameters<typeof transactionsRepository.create>[0], multiplier = 1) => {
+  const add = (
+    input: Parameters<typeof transactionsRepository.create>[0],
+    multiplier = 1,
+  ): string => {
+    let lastId = '';
     for (let index = 0; index < multiplier; index += 1) {
-      transactionsRepository.create({
+      lastId = transactionsRepository.create({
         ...input,
         sentiment: input.sentiment ?? randomSentiment(input.type, random),
       });
       transactionCount += 1;
     }
+    return lastId;
   };
 
   for (let index = 0; index < previewMonths.length; index += 1) {
@@ -2350,7 +2812,7 @@ function seedTransactions(
     });
 
     if (travel.months.includes(monthNumber)) {
-      add({
+      const flightsId = add({
         type: 'expense',
         amount: jitter(travel.flightsBase, travel.flightsSpread, random),
         currency: profile.currencySymbol,
@@ -2360,7 +2822,7 @@ function seedTransactions(
         note: pick(merchants.flights, random),
       });
 
-      add({
+      const hotelsId = add({
         type: 'expense',
         amount: jitter(travel.hotelsBase, travel.hotelsSpread, random),
         currency: profile.currencySymbol,
@@ -2370,7 +2832,7 @@ function seedTransactions(
         note: pick(merchants.hotels, random),
       });
 
-      add({
+      const localTransitId = add({
         type: 'expense',
         amount: jitter(travel.localTransitBase, travel.localTransitSpread, random),
         currency: profile.currencySymbol,
@@ -2381,7 +2843,7 @@ function seedTransactions(
       });
 
       const tripDiningAmount = jitter(travel.diningBase, travel.diningSpread, random);
-      add({
+      const tripDiningId = add({
         type: 'expense',
         amount: tripDiningAmount,
         currency: profile.currencySymbol,
@@ -2391,6 +2853,11 @@ function seedTransactions(
         note: notes.tripDining,
       });
       creditSpend += tripDiningAmount;
+
+      trips.push({
+        date: monthDate,
+        transactionIds: [flightsId, hotelsId, localTransitId, tripDiningId],
+      });
     }
 
     if (monthNumber === travel.giftMonth) {
@@ -2514,7 +2981,64 @@ function seedTransactions(
     });
   }
 
-  return transactionCount;
+  return { count: transactionCount, trips };
+}
+
+function seedAlbums(profile: PreviewProfile, trips: PreviewTrip[]) {
+  if (profile.albums.length === 0 || trips.length === 0) return 0;
+
+  // Pair albums (defined newest-first) with the most recent trips, newest first,
+  // so each album card surfaces real flight/hotel/dining spend and its pin lands
+  // on the destination.
+  const recentTrips = trips.slice(-profile.albums.length).reverse();
+  let created = 0;
+
+  profile.albums.forEach((seed, index) => {
+    const trip = recentTrips[index];
+    if (!trip) return;
+
+    const albumId = albumsRepository.create({
+      name: seed.name,
+      startDate: monthIso(trip.date, 7, 9),
+      endDate: monthIso(trip.date, 13, 21),
+      latitude: seed.latitude,
+      longitude: seed.longitude,
+      placeName: seed.placeName,
+      placeAdmin: seed.placeAdmin,
+      countryCode: seed.countryCode,
+      sortOrder: index,
+    });
+    albumsRepository.addTransactions(albumId, trip.transactionIds);
+    created += 1;
+  });
+
+  return created;
+}
+
+function seedItems(profile: PreviewProfile) {
+  const currentMonth = monthStart(new Date());
+
+  profile.items.forEach((seed, index) => {
+    const purchaseMonth = monthStart(currentMonth, -seed.purchaseMonthsAgo);
+    const endDate =
+      seed.retiredMonthsAgo != null
+        ? monthIso(monthStart(currentMonth, -seed.retiredMonthsAgo), seed.purchaseDay, 12)
+        : null;
+
+    itemsRepository.create({
+      name: seed.name,
+      iconId: seed.iconId,
+      purchasePrice: seed.purchasePrice,
+      currency: profile.currencySymbol,
+      purchaseDate: monthIso(purchaseMonth, seed.purchaseDay, 12),
+      endDate,
+      salePrice: seed.salePrice ?? null,
+      note: seed.note ?? null,
+      sortOrder: index,
+    });
+  });
+
+  return profile.items.length;
 }
 
 export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSummary {
@@ -2536,8 +3060,10 @@ export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSum
     const accounts = createAccounts(profile);
     const categories = createCategories(profile);
     seedWageHistory(profile);
-    const transactions = seedTransactions(profile, accounts, categories);
+    const { count: transactions, trips } = seedTransactions(profile, accounts, categories);
     const recurringRules = seedRecurringRules(profile, accounts, categories);
+    const albums = seedAlbums(profile, trips);
+    const items = seedItems(profile);
 
     sqlite.execSync('COMMIT');
 
@@ -2549,6 +3075,8 @@ export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSum
       recurringRules,
       transactions,
       wageMonths: WAGE_HISTORY_MONTHS,
+      albums,
+      items,
     };
   } catch (error) {
     sqlite.execSync('ROLLBACK');
