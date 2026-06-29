@@ -38,6 +38,7 @@ export function AlbumsScreen({
   const insets = useSafeAreaInsets();
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
+  const isSmallScreen = windowWidth < 380;
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   useEffect(() => {
@@ -59,7 +60,11 @@ export function AlbumsScreen({
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <TabletContentContainer style={{ flex: 1 }}>
         <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
-          <Text variant="heading" className="tracking-tight">
+          <Text
+            variant={isSmallScreen ? 'subheading' : 'heading'}
+            className="flex-1 pr-3 tracking-tight"
+            numberOfLines={1}
+          >
             {I18n.t('albums.title')}
           </Text>
           <Pressable
