@@ -138,20 +138,17 @@ function ItemCard({
       className="mb-3 overflow-hidden rounded-2xl border border-border/45 bg-card p-2.5"
     >
       {/* Hero image tile — the product image is the focal point of the card */}
-      <View
-        style={{ aspectRatio: 1 }}
-        className="relative overflow-hidden rounded-xl bg-secondary/30 p-2"
-      >
+      <View style={{ aspectRatio: 1 }} className="overflow-hidden rounded-xl bg-secondary/30 p-4">
         <ItemIcon iconId={item.iconId} fill />
-        <View className="absolute right-1.5 top-1.5">
-          <StatusPill active={item.isActive} themeColors={themeColors} />
-        </View>
       </View>
 
-      <Text variant="bodyStrong" numberOfLines={1} className="mt-2.5 px-1">
-        {item.name}
-      </Text>
-      <View className="mt-0.5 flex-row items-baseline gap-1">
+      <View className="mt-2.5 flex-row items-center gap-2 px-1">
+        <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+          {item.name}
+        </Text>
+        <StatusPill active={item.isActive} themeColors={themeColors} />
+      </View>
+      <View className="mt-0.5 flex-row items-baseline gap-1 px-1">
         <DailyValue item={item} settings={settings} />
         <Text variant="caption" tone="muted">
           {I18n.t('items.per_day')}
