@@ -1309,6 +1309,8 @@ const uk = {
   },
   pro: {
     custom_logos_label: 'Власні логотипи рахунків',
+    items_label: 'Речі',
+    custom_item_images_label: 'Власні зображення речей',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',
     limit_subcurrencies:

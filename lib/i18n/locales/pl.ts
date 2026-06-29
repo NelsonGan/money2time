@@ -1317,6 +1317,8 @@ const pl = {
   },
   pro: {
     custom_logos_label: 'Własne logo konta',
+    items_label: 'Przedmioty',
+    custom_item_images_label: 'Własne obrazy przedmiotów',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
     limit_subcurrencies:

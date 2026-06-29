@@ -1315,6 +1315,8 @@ const ru = {
   },
   pro: {
     custom_logos_label: 'Свои логотипы счетов',
+    items_label: 'Вещи',
+    custom_item_images_label: 'Свои изображения вещей',
     limit_custom_logos:
       'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
     limit_subcurrencies:

@@ -1300,6 +1300,8 @@ const hi = {
   },
   pro: {
     custom_logos_label: 'कस्टम खाता लोगो',
+    items_label: 'चीज़ें',
+    custom_item_images_label: 'कस्टम आइटम छवियाँ',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
     limit_subcurrencies:

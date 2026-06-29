@@ -1321,6 +1321,8 @@ const id = {
   },
   pro: {
     custom_logos_label: 'Logo akun khusus',
+    items_label: 'Barang',
+    custom_item_images_label: 'Gambar barang khusus',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
     limit_subcurrencies:

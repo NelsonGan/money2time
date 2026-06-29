@@ -1285,6 +1285,8 @@ const ko = {
   },
   pro: {
     custom_logos_label: '사용자 지정 계정 로고',
+    items_label: '물건',
+    custom_item_images_label: '맞춤 물건 이미지',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_subcurrencies:

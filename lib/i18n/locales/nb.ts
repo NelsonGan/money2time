@@ -1315,6 +1315,8 @@ const nb = {
   },
   pro: {
     custom_logos_label: 'Egendefinerte kontologoer',
+    items_label: 'Gjenstander',
+    custom_item_images_label: 'Egne gjenstandsbilder',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_subcurrencies:

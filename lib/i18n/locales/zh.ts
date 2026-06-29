@@ -1236,6 +1236,8 @@ const zh = {
   },
   pro: {
     custom_logos_label: '自定义账户标志',
+    items_label: '物品',
+    custom_item_images_label: '自定义物品图片',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
     limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     title: 'Money2Time Pro',

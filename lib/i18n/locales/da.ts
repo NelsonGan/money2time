@@ -1314,6 +1314,8 @@ const da = {
   },
   pro: {
     custom_logos_label: 'Tilpassede kontologoer',
+    items_label: 'Ting',
+    custom_item_images_label: 'Egne tingbilleder',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
     limit_subcurrencies:

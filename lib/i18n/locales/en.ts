@@ -1281,6 +1281,8 @@ const en = {
   },
   pro: {
     custom_logos_label: 'Custom account logos',
+    items_label: 'Items',
+    custom_item_images_label: 'Custom item images',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
     limit_subcurrencies:

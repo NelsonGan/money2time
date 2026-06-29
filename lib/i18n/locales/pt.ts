@@ -1319,6 +1319,8 @@ const pt = {
   },
   pro: {
     custom_logos_label: 'Logos de conta personalizados',
+    items_label: 'Itens',
+    custom_item_images_label: 'Imagens de itens personalizadas',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
     limit_subcurrencies:

@@ -1328,6 +1328,8 @@ const nl = {
   },
   pro: {
     custom_logos_label: 'Aangepaste rekeninglogo’s',
+    items_label: 'Items',
+    custom_item_images_label: 'Eigen itemafbeeldingen',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_subcurrencies:

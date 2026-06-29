@@ -1332,6 +1332,8 @@ const de = {
   },
   pro: {
     custom_logos_label: 'Eigene Kontologos',
+    items_label: 'Artikel',
+    custom_item_images_label: 'Eigene Artikelbilder',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
     limit_subcurrencies:
