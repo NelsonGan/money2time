@@ -1330,8 +1330,12 @@ const fil = {
   },
   pro: {
     custom_logos_label: 'Custom na logo ng account',
+    items_label: 'Mga item',
+    custom_item_images_label: 'Custom na larawan ng item',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
+    limit_custom_item_images:
+      'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',
@@ -1438,6 +1442,8 @@ const fil = {
       'Maaari kang magkaroon ng hanggang {{count}} hourly rate entry sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     limit_voice:
       'Ang libreng plano ay may kasamang {{count}} voice entry. Mag-upgrade sa Pro para sa unlimited na voice input.',
+    limit_items:
+      'Maaari kang mag-track ng hanggang {{count}} item sa libreng plano. Mag-Pro para walang limitasyon.',
     badge: 'PRO',
     trend_preview_title: 'I-unlock ang pangmatagalang trend',
     trend_preview_message:
@@ -1638,6 +1644,48 @@ const fil = {
     delete_body: 'Tatanggalin nito ang album. Hindi binubura ang iyong mga transaksyon.',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
+  },
+  assets: {
+    tab_accounts: 'Mga account',
+    tab_items: 'Mga item',
+  },
+  items: {
+    title: 'Mga item',
+    subtitle: 'Tingnan kung magkano talaga ang gastos ng gamit mo kada araw',
+    add: 'Magdagdag ng item',
+    add_title: 'Bagong item',
+    edit_title: 'I-edit ang item',
+    empty_title: 'Wala pang item',
+    empty_message:
+      'Mag-record ng binili at makita ang gastos nitong bumababa kada araw na hawak mo.',
+    choose_icon: 'Pumili ng icon',
+    name_label: 'Pangalan',
+    name_placeholder: 'hal. Espresso machine',
+    price_label: 'Presyo ng pagbili',
+    currency_label: 'Pera',
+    purchase_date_label: 'Petsa ng pagbili',
+    mark_inactive: 'Markahan bilang inactive',
+    mark_inactive_hint:
+      'Hinihinto ang pagbilang ng araw para sa mga bagay na naibenta, nasira, o hindi na ginagamit.',
+    end_date_label: 'Petsa ng pagtatapos',
+    sold_toggle: 'Naibenta ko',
+    sale_price_label: 'Presyo ng benta',
+    note_label: 'Tala',
+    note_placeholder: 'Opsyonal',
+    status_inactive: 'Inactive',
+    status_active: 'Aktibo',
+    days_count: '{{count}} araw',
+    summary_total_value: 'Kabuuang halaga',
+    per_day: '/ araw',
+    delete_title: 'Tanggalin ang item?',
+    delete_message: 'Aalisin nito ang item sa iyong tracker.',
+    summary_daily_cost: 'Gastos / araw',
+    summary_counts: 'Mga item',
+    icon: {
+      choose_title: 'Pumili ng icon',
+      choose_subtitle: 'Pumili ng icon o mag-upload ng sarili',
+      search_placeholder: 'Maghanap ng icon…',
+    },
   },
 };
 

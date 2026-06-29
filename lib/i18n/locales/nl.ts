@@ -1328,8 +1328,12 @@ const nl = {
   },
   pro: {
     custom_logos_label: 'Aangepaste rekeninglogo’s',
+    items_label: 'Items',
+    custom_item_images_label: 'Eigen itemafbeeldingen',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
+    limit_custom_item_images:
+      'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_subcurrencies:
       'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     title: 'Money2Time Pro',
@@ -1433,6 +1437,8 @@ const nl = {
       'Je kunt maximaal {{count}} uurtariefvermeldingen hebben in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_voice:
       'Het gratis abonnement bevat {{count}} spraakinvoeren. Upgrade naar Pro voor onbeperkte spraakinvoer.',
+    limit_items:
+      'Je kunt tot {{count}} items volgen met het gratis abonnement. Word Pro voor onbeperkt.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:
@@ -1633,6 +1639,47 @@ const nl = {
     delete_body: 'Hiermee wordt het album verwijderd. Je transacties worden niet verwijderd.',
     cover_permission_title: "Toegang tot foto's nodig",
     cover_permission_body: "Geef toegang tot foto's om een omslagafbeelding te kiezen.",
+  },
+  assets: {
+    tab_accounts: 'Rekeningen',
+    tab_items: 'Items',
+  },
+  items: {
+    title: 'Items',
+    subtitle: 'Zie wat je spullen echt per dag kosten',
+    add: 'Item toevoegen',
+    add_title: 'Nieuw item',
+    edit_title: 'Item bewerken',
+    empty_title: 'Nog geen items',
+    empty_message: 'Registreer een aankoop en zie de kosten dalen met elke dag dat je het houdt.',
+    choose_icon: 'Pictogram kiezen',
+    name_label: 'Naam',
+    name_placeholder: 'bijv. Espressomachine',
+    price_label: 'Aankoopprijs',
+    currency_label: 'Valuta',
+    purchase_date_label: 'Aankoopdatum',
+    mark_inactive: 'Markeren als inactief',
+    mark_inactive_hint:
+      'Stopt het tellen van dagen voor dingen die je verkocht, kapot of niet meer gebruikt.',
+    end_date_label: 'Einddatum',
+    sold_toggle: 'Ik heb het verkocht',
+    sale_price_label: 'Verkoopprijs',
+    note_label: 'Notitie',
+    note_placeholder: 'Optioneel',
+    status_inactive: 'Inactief',
+    status_active: 'Actief',
+    days_count: '{{count}} dagen',
+    summary_total_value: 'Totale waarde',
+    per_day: '/ dag',
+    delete_title: 'Item verwijderen?',
+    delete_message: 'Dit verwijdert het item uit je tracker.',
+    summary_daily_cost: 'Kosten / dag',
+    summary_counts: 'Items',
+    icon: {
+      choose_title: 'Pictogram kiezen',
+      choose_subtitle: 'Kies een pictogram of upload je eigen',
+      search_placeholder: 'Pictogrammen zoeken…',
+    },
   },
 };
 

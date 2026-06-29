@@ -1300,8 +1300,12 @@ const hi = {
   },
   pro: {
     custom_logos_label: 'कस्टम खाता लोगो',
+    items_label: 'चीज़ें',
+    custom_item_images_label: 'कस्टम आइटम छवियाँ',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
+    limit_custom_item_images:
+      'मुफ़्त प्लान में आप {{count}} तक कस्टम आइटम छवियाँ अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
     limit_subcurrencies:
       'मुफ़्त प्लान में आप {{count}} उप-मुद्रा जोड़ सकते हैं। असीमित मल्टी-करेंसी के लिए Pro लें।',
     title: 'Money2Time Pro',
@@ -1403,6 +1407,8 @@ const hi = {
       'फ्री प्लान पर अधिकतम {{count}} प्रति घंटा दर एंट्री हो सकती हैं। असीमित के लिए Pro में अपग्रेड करें।',
     limit_voice:
       'फ्री प्लान में {{count}} वॉयस एंट्री शामिल हैं। असीमित वॉयस इनपुट के लिए Pro में अपग्रेड करें।',
+    limit_items:
+      'मुफ़्त प्लान में आप {{count}} तक चीज़ें ट्रैक कर सकते हैं। असीमित के लिए Pro लें।',
     badge: 'PRO',
     trend_preview_title: 'दीर्घकालिक ट्रेंड अनलॉक करें',
     trend_preview_message:
@@ -1601,6 +1607,47 @@ const hi = {
     delete_body: 'इससे एल्बम हट जाता है। आपके लेन-देन नहीं हटते।',
     cover_permission_title: 'फ़ोटो एक्सेस आवश्यक',
     cover_permission_body: 'कवर इमेज चुनने के लिए फ़ोटो एक्सेस की अनुमति दें।',
+  },
+  assets: {
+    tab_accounts: 'खाते',
+    tab_items: 'चीज़ें',
+  },
+  items: {
+    title: 'चीज़ें',
+    subtitle: 'देखें कि आपकी चीज़ें रोज़ाना असल में कितनी महंगी हैं',
+    add: 'चीज़ जोड़ें',
+    add_title: 'नई चीज़',
+    edit_title: 'चीज़ संपादित करें',
+    empty_title: 'अभी कोई चीज़ नहीं',
+    empty_message: 'एक खरीद दर्ज करें और देखें कि हर दिन के साथ उसकी लागत कैसे घटती है।',
+    choose_icon: 'आइकन चुनें',
+    name_label: 'नाम',
+    name_placeholder: 'जैसे एस्प्रेसो मशीन',
+    price_label: 'खरीद मूल्य',
+    currency_label: 'मुद्रा',
+    purchase_date_label: 'खरीद तिथि',
+    mark_inactive: 'निष्क्रिय के रूप में चिह्नित करें',
+    mark_inactive_hint:
+      'बेची गई, टूटी या अब उपयोग न होने वाली चीज़ों के लिए दिन गिनना बंद कर देता है।',
+    end_date_label: 'समाप्ति तिथि',
+    sold_toggle: 'मैंने इसे बेच दिया',
+    sale_price_label: 'बिक्री मूल्य',
+    note_label: 'नोट',
+    note_placeholder: 'वैकल्पिक',
+    status_inactive: 'निष्क्रिय',
+    status_active: 'सक्रिय',
+    days_count: '{{count}} दिन',
+    summary_total_value: 'कुल मूल्य',
+    per_day: '/ दिन',
+    delete_title: 'चीज़ हटाएं?',
+    delete_message: 'यह चीज़ को आपके ट्रैकर से हटा देता है।',
+    summary_daily_cost: 'लागत / दिन',
+    summary_counts: 'चीज़ें',
+    icon: {
+      choose_title: 'आइकन चुनें',
+      choose_subtitle: 'एक आइकन चुनें या अपना अपलोड करें',
+      search_placeholder: 'आइकन खोजें…',
+    },
   },
 };
 

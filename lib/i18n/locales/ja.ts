@@ -1293,8 +1293,12 @@ const ja = {
   },
   pro: {
     custom_logos_label: 'カスタム口座ロゴ',
+    items_label: 'アイテム',
+    custom_item_images_label: 'カスタムアイテム画像',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+    limit_custom_item_images:
+      '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_subcurrencies:
       '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     title: 'Money2Time Pro',
@@ -1396,6 +1400,8 @@ const ja = {
       '無料プランでは最大 {{count}} 件の時給記録まで。無制限は Pro にアップグレードしてください。',
     limit_voice:
       '無料プランでは {{count}} 回の音声入力が含まれます。無制限は Pro にアップグレードしてください。',
+    limit_items:
+      '無料プランでは最大 {{count}} 個まで記録できます。無制限にするには Pro にアップグレードしてください。',
     badge: 'PRO',
     trend_preview_title: '長期トレンドを解放',
     trend_preview_message:
@@ -1593,6 +1599,46 @@ const ja = {
     delete_body: 'アルバムを削除します。取引は削除されません。',
     cover_permission_title: '写真へのアクセスが必要',
     cover_permission_body: 'カバー画像を選ぶには写真へのアクセスを許可してください。',
+  },
+  assets: {
+    tab_accounts: '口座',
+    tab_items: 'アイテム',
+  },
+  items: {
+    title: 'アイテム',
+    subtitle: '持ち物の1日あたりの本当のコストを見る',
+    add: 'アイテムを追加',
+    add_title: '新しいアイテム',
+    edit_title: 'アイテムを編集',
+    empty_title: 'アイテムがありません',
+    empty_message: '購入を記録すると、持ち続けるほどコストが下がるのが分かります。',
+    choose_icon: 'アイコンを選択',
+    name_label: '名前',
+    name_placeholder: '例：エスプレッソマシン',
+    price_label: '購入価格',
+    currency_label: '通貨',
+    purchase_date_label: '購入日',
+    mark_inactive: '使用停止にする',
+    mark_inactive_hint: '売却・故障・使わなくなった物の日数カウントを停止します。',
+    end_date_label: '終了日',
+    sold_toggle: '売却しました',
+    sale_price_label: '売却価格',
+    note_label: 'メモ',
+    note_placeholder: '任意',
+    status_inactive: '停止',
+    status_active: '使用中',
+    days_count: '{{count}}日',
+    summary_total_value: '合計価値',
+    per_day: '/ 日',
+    delete_title: 'アイテムを削除しますか？',
+    delete_message: 'トラッカーからアイテムを削除します。',
+    summary_daily_cost: 'コスト / 日',
+    summary_counts: 'アイテム',
+    icon: {
+      choose_title: 'アイコンを選択',
+      choose_subtitle: 'アイコンを選ぶか自分でアップロード',
+      search_placeholder: 'アイコンを検索…',
+    },
   },
 };
 

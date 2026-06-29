@@ -1315,8 +1315,12 @@ const nb = {
   },
   pro: {
     custom_logos_label: 'Egendefinerte kontologoer',
+    items_label: 'Gjenstander',
+    custom_item_images_label: 'Egne gjenstandsbilder',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
+    limit_custom_item_images:
+      'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_subcurrencies:
       'Du kan legge til {{count}} undervaluta på gratisplanen. Oppgrader til Pro for ubegrenset flervaluta.',
     title: 'Money2Time Pro',
@@ -1420,6 +1424,7 @@ const nb = {
       'Du kan ha opptil {{count}} timesatsoppføringer på gratis planen. Oppgrader til Pro for ubegrenset.',
     limit_voice:
       'Gratis plan inkluderer {{count}} taleoppføringer. Oppgrader til Pro for ubegrenset taleinntasting.',
+    limit_items: 'Du kan spore opptil {{count}} gjenstander i gratisplanen. Få Pro for ubegrenset.',
     badge: 'PRO',
     trend_preview_title: 'Lås opp langsiktige trender',
     trend_preview_message:
@@ -1617,6 +1622,47 @@ const nb = {
     delete_body: 'Dette fjerner albumet. Transaksjonene dine slettes ikke.',
     cover_permission_title: 'Trenger tilgang til bilder',
     cover_permission_body: 'Gi tilgang til bilder for å velge et omslagsbilde.',
+  },
+  assets: {
+    tab_accounts: 'Kontoer',
+    tab_items: 'Gjenstander',
+  },
+  items: {
+    title: 'Gjenstander',
+    subtitle: 'Se hva tingene dine faktisk koster per dag',
+    add: 'Legg til gjenstand',
+    add_title: 'Ny gjenstand',
+    edit_title: 'Rediger gjenstand',
+    empty_title: 'Ingen gjenstander ennå',
+    empty_message: 'Registrer et kjøp og se kostnaden synke for hver dag du eier den.',
+    choose_icon: 'Velg ikon',
+    name_label: 'Navn',
+    name_placeholder: 'f.eks. Espressomaskin',
+    price_label: 'Kjøpspris',
+    currency_label: 'Valuta',
+    purchase_date_label: 'Kjøpsdato',
+    mark_inactive: 'Merk som inaktiv',
+    mark_inactive_hint:
+      'Stopper dagtellingen for ting du har solgt, som er ødelagt eller du ikke lenger bruker.',
+    end_date_label: 'Sluttdato',
+    sold_toggle: 'Jeg solgte den',
+    sale_price_label: 'Salgspris',
+    note_label: 'Notat',
+    note_placeholder: 'Valgfritt',
+    status_inactive: 'Inaktiv',
+    status_active: 'Aktiv',
+    days_count: '{{count}} dager',
+    summary_total_value: 'Total verdi',
+    per_day: '/ dag',
+    delete_title: 'Slette gjenstand?',
+    delete_message: 'Dette fjerner gjenstanden fra sporeren din.',
+    summary_daily_cost: 'Kostnad / dag',
+    summary_counts: 'Gjenstander',
+    icon: {
+      choose_title: 'Velg ikon',
+      choose_subtitle: 'Velg et ikon eller last opp ditt eget',
+      search_placeholder: 'Søk ikoner…',
+    },
   },
 };
 

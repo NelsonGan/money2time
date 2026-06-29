@@ -55,6 +55,8 @@ import {
 } from '~/features/albums/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import { AssetsTab } from '~/features/items/components';
+import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -89,6 +91,7 @@ import type {
   TutorialTargetRect,
 } from '~/features/tutorial/types';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -319,7 +322,8 @@ function MainShellScreen({
   onVisibleScreenChange,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs } = useApp();
+  const { isSimpleMode, quickEntryPrefs, items } = useApp();
+  const { checkLimit } = useProGate();
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
@@ -537,6 +541,15 @@ function MainShellScreen({
       }
     },
     [navigation],
+  );
+
+  const openItemEditor = useCallback(
+    (itemId?: string) => {
+      // Adding a new item is gated by the free-tier limit; editing is always allowed.
+      if (!itemId && !checkLimit('items', items.length)) return;
+      navigation.navigate('ItemEditor', itemId ? { itemId } : undefined);
+    },
+    [checkLimit, items.length, navigation],
   );
 
   const openProPaywall = useCallback(
@@ -803,21 +816,34 @@ function MainShellScreen({
     <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
-          <MemoAccountsScreen
-            safeAreaEdges={['top']}
-            resetToRootToken={accountsResetToken}
-            scrollToTopToken={accountsScrollTopToken}
-            onOpenAccount={openAccountDetail}
-            onOpenAddTransaction={(accountId) =>
-              navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId })
-            }
-            onOpenTransaction={openTransactionEditor}
-            onOpenTransactionSplitBadge={openTransactionSplitBill}
-            onOpenSettings={openAccountSettings}
-            onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
-            onOpenNetAssetsInsight={() =>
-              openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
-            }
+          <AssetsTab
+            resetToAccountsToken={accountsResetToken}
+            onAddItem={() => openItemEditor()}
+            onOpenAccountSettings={openAccountSettings}
+            renderAccounts={({ hideBalances, onToggleBalances }) => (
+              <MemoAccountsScreen
+                safeAreaEdges={[]}
+                hideOverviewHeader
+                hideBalances={hideBalances}
+                onToggleBalances={onToggleBalances}
+                resetToRootToken={accountsResetToken}
+                scrollToTopToken={accountsScrollTopToken}
+                onOpenAccount={openAccountDetail}
+                onOpenAddTransaction={(accountId) =>
+                  navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId })
+                }
+                onOpenTransaction={openTransactionEditor}
+                onOpenTransactionSplitBadge={openTransactionSplitBill}
+                onOpenSettings={openAccountSettings}
+                onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+                onOpenNetAssetsInsight={() =>
+                  openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
+                }
+              />
+            )}
+            renderItems={() => (
+              <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />
+            )}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'calendar'}>
@@ -855,6 +881,7 @@ function MainShellScreen({
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
+            onOpenItemEditor={openItemEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
@@ -1079,6 +1106,16 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
           openSplitBill: true,
         })
       }
+    />
+  );
+}
+
+function ItemEditorRouteScreen({ route, navigation }: RootStackRouteProps<'ItemEditor'>) {
+  return (
+    <ItemEditorScreen
+      itemId={route.params?.itemId}
+      onClose={() => navigation.goBack()}
+      onLimitReached={() => navigation.navigate('ProPaywall', { source: 'items' })}
     />
   );
 }
@@ -1573,6 +1610,11 @@ function AppContent() {
             component={SettingsMultiCurrencyRouteScreen}
           />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
+          <RootStack.Screen
+            name="ItemEditor"
+            component={ItemEditorRouteScreen}
+            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
+          />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}

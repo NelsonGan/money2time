@@ -1314,8 +1314,12 @@ const ms = {
   },
   pro: {
     custom_logos_label: 'Logo akaun tersuai',
+    items_label: 'Item',
+    custom_item_images_label: 'Imej item tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
+    limit_custom_item_images:
+      'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_subcurrencies:
       'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     title: 'Money2Time Pro',
@@ -1419,6 +1423,8 @@ const ms = {
       'Anda boleh mempunyai sehingga {{count}} entri kadar jam dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_voice:
       'Pelan percuma termasuk {{count}} entri suara. Naik taraf ke Pro untuk input suara tanpa had.',
+    limit_items:
+      'Anda boleh menjejak sehingga {{count}} item dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     badge: 'PRO',
     trend_preview_title: 'Buka kunci trend jangka panjang',
     trend_preview_message:
@@ -1618,6 +1624,47 @@ const ms = {
     delete_body: 'Ini mengeluarkan album. Transaksi anda tidak dipadam.',
     cover_permission_title: 'Akses foto diperlukan',
     cover_permission_body: 'Benarkan akses foto untuk memilih imej kulit.',
+  },
+  assets: {
+    tab_accounts: 'Akaun',
+    tab_items: 'Item',
+  },
+  items: {
+    title: 'Item',
+    subtitle: 'Lihat kos harian sebenar barang anda',
+    add: 'Tambah item',
+    add_title: 'Item baharu',
+    edit_title: 'Edit item',
+    empty_title: 'Tiada item lagi',
+    empty_message: 'Rekod pembelian dan lihat kosnya menurun setiap hari anda memilikinya.',
+    choose_icon: 'Pilih ikon',
+    name_label: 'Nama',
+    name_placeholder: 'cth. Mesin espresso',
+    price_label: 'Harga belian',
+    currency_label: 'Mata wang',
+    purchase_date_label: 'Tarikh belian',
+    mark_inactive: 'Tanda sebagai tidak aktif',
+    mark_inactive_hint:
+      'Menghentikan kiraan hari untuk barang yang dijual, rosak atau tidak lagi digunakan.',
+    end_date_label: 'Tarikh tamat',
+    sold_toggle: 'Saya menjualnya',
+    sale_price_label: 'Harga jualan',
+    note_label: 'Nota',
+    note_placeholder: 'Pilihan',
+    status_inactive: 'Tidak aktif',
+    status_active: 'Aktif',
+    days_count: '{{count}} hari',
+    summary_total_value: 'Jumlah nilai',
+    per_day: '/ hari',
+    delete_title: 'Padam item?',
+    delete_message: 'Ini mengeluarkan item daripada penjejak anda.',
+    summary_daily_cost: 'Kos / hari',
+    summary_counts: 'Item',
+    icon: {
+      choose_title: 'Pilih ikon',
+      choose_subtitle: 'Pilih ikon atau muat naik sendiri',
+      search_placeholder: 'Cari ikon…',
+    },
   },
 };
 

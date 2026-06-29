@@ -1314,8 +1314,12 @@ const da = {
   },
   pro: {
     custom_logos_label: 'Tilpassede kontologoer',
+    items_label: 'Ting',
+    custom_item_images_label: 'Egne tingbilleder',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
+    limit_custom_item_images:
+      'Du kan uploade op til {{count}} egne tingbilleder i gratisplanen. Få Pro for ubegrænset.',
     limit_subcurrencies:
       'Du kan tilføje {{count}} undervaluta på gratisplanen. Opgradér til Pro for ubegrænset multivaluta.',
     title: 'Money2Time Pro',
@@ -1417,6 +1421,7 @@ const da = {
       'Du kan have op til {{count}} timesatsposteringer på den gratis plan. Opgrader til Pro for ubegrænset.',
     limit_voice:
       'Gratis plan inkluderer {{count}} stemmeposteringer. Opgrader til Pro for ubegrænset stemmeinput.',
+    limit_items: 'Du kan spore op til {{count}} ting i gratisplanen. Få Pro for ubegrænset.',
     badge: 'PRO',
     trend_preview_title: 'Lås langsigtede tendenser op',
     trend_preview_message:
@@ -1614,6 +1619,47 @@ const da = {
     delete_body: 'Dette fjerner albummet. Dine transaktioner slettes ikke.',
     cover_permission_title: 'Adgang til fotos kræves',
     cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
+  },
+  assets: {
+    tab_accounts: 'Konti',
+    tab_items: 'Ting',
+  },
+  items: {
+    title: 'Ting',
+    subtitle: 'Se hvad dine ting faktisk koster pr. dag',
+    add: 'Tilføj ting',
+    add_title: 'Ny ting',
+    edit_title: 'Rediger ting',
+    empty_title: 'Ingen ting endnu',
+    empty_message: 'Registrer et køb og se omkostningen falde for hver dag, du ejer den.',
+    choose_icon: 'Vælg ikon',
+    name_label: 'Navn',
+    name_placeholder: 'f.eks. Espressomaskine',
+    price_label: 'Købspris',
+    currency_label: 'Valuta',
+    purchase_date_label: 'Købsdato',
+    mark_inactive: 'Markér som inaktiv',
+    mark_inactive_hint:
+      'Stopper dagoptællingen for ting du har solgt, som er gået i stykker eller ikke længere bruger.',
+    end_date_label: 'Slutdato',
+    sold_toggle: 'Jeg solgte den',
+    sale_price_label: 'Salgspris',
+    note_label: 'Note',
+    note_placeholder: 'Valgfrit',
+    status_inactive: 'Inaktiv',
+    status_active: 'Aktiv',
+    days_count: '{{count}} dage',
+    summary_total_value: 'Samlet værdi',
+    per_day: '/ dag',
+    delete_title: 'Slet ting?',
+    delete_message: 'Dette fjerner tingen fra din sporing.',
+    summary_daily_cost: 'Pris / dag',
+    summary_counts: 'Ting',
+    icon: {
+      choose_title: 'Vælg ikon',
+      choose_subtitle: 'Vælg et ikon eller upload dit eget',
+      search_placeholder: 'Søg ikoner…',
+    },
   },
 };
 

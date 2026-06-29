@@ -1319,8 +1319,12 @@ const pt = {
   },
   pro: {
     custom_logos_label: 'Logos de conta personalizados',
+    items_label: 'Itens',
+    custom_item_images_label: 'Imagens de itens personalizadas',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
+    limit_custom_item_images:
+      'Pode carregar até {{count}} imagens de itens personalizadas no plano gratuito. Torne-se Pro para ter ilimitadas.',
     limit_subcurrencies:
       'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
     title: 'Money2Time Pro',
@@ -1423,6 +1427,8 @@ const pt = {
       'Você pode ter até {{count}} entradas de valor/hora no plano gratuito. Assine o Pro para ilimitado.',
     limit_voice:
       'O plano gratuito inclui {{count}} entradas por voz. Assine o Pro para entrada por voz ilimitada.',
+    limit_items:
+      'Pode acompanhar até {{count}} itens no plano gratuito. Torne-se Pro para ter ilimitados.',
     badge: 'PRO',
     trend_preview_title: 'Desbloqueie tendências de longo prazo',
     trend_preview_message:
@@ -1621,6 +1627,46 @@ const pt = {
     delete_body: 'Isto remove o álbum. As suas transações não são excluídas.',
     cover_permission_title: 'Acesso a fotos necessário',
     cover_permission_body: 'Permita o acesso a fotos para escolher uma imagem de capa.',
+  },
+  assets: {
+    tab_accounts: 'Contas',
+    tab_items: 'Itens',
+  },
+  items: {
+    title: 'Itens',
+    subtitle: 'Veja quanto as suas coisas custam por dia',
+    add: 'Adicionar item',
+    add_title: 'Novo item',
+    edit_title: 'Editar item',
+    empty_title: 'Ainda sem itens',
+    empty_message: 'Registe uma compra e veja o custo diminuir a cada dia que a mantém.',
+    choose_icon: 'Escolher ícone',
+    name_label: 'Nome',
+    name_placeholder: 'ex. Máquina de espresso',
+    price_label: 'Preço de compra',
+    currency_label: 'Moeda',
+    purchase_date_label: 'Data de compra',
+    mark_inactive: 'Marcar como inativo',
+    mark_inactive_hint: 'Para a contagem de dias para coisas que vendeu, quebraram ou já não usa.',
+    end_date_label: 'Data de fim',
+    sold_toggle: 'Vendi-o',
+    sale_price_label: 'Preço de venda',
+    note_label: 'Nota',
+    note_placeholder: 'Opcional',
+    status_inactive: 'Inativo',
+    status_active: 'Ativo',
+    days_count: '{{count}} dias',
+    summary_total_value: 'Valor total',
+    per_day: '/ dia',
+    delete_title: 'Eliminar item?',
+    delete_message: 'Isto remove o item do seu registo.',
+    summary_daily_cost: 'Custo / dia',
+    summary_counts: 'Itens',
+    icon: {
+      choose_title: 'Escolher ícone',
+      choose_subtitle: 'Escolha um ícone ou carregue o seu',
+      search_placeholder: 'Procurar ícones…',
+    },
   },
 };
 

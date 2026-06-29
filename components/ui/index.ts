@@ -8,6 +8,8 @@ export { type CategoryPickerOption, CategoryPickerSheet } from './CategoryPicker
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
 export { Input } from './input';
+export { ItemIcon } from './ItemIcon';
+export { ItemIconPickerSheet } from './ItemIconPickerSheet';
 export { SelectField } from './select';
 export {
   SETTINGS_FORM_BOTTOM_PADDING,

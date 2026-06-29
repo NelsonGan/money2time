@@ -1312,8 +1312,12 @@ const sv = {
   },
   pro: {
     custom_logos_label: 'Anpassade kontologotyper',
+    items_label: 'Föremål',
+    custom_item_images_label: 'Egna föremålsbilder',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
+    limit_custom_item_images:
+      'Du kan ladda upp till {{count}} egna föremålsbilder i gratisplanen. Skaffa Pro för obegränsat.',
     limit_subcurrencies:
       'Du kan lägga till {{count}} undervaluta i gratisplanen. Uppgradera till Pro för obegränsad flervaluta.',
     title: 'Money2Time Pro',
@@ -1415,6 +1419,8 @@ const sv = {
       'Du kan ha upp till {{count}} timlöneposter på gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_voice:
       'Gratisplanen inkluderar {{count}} röstposter. Uppgradera till Pro för obegränsad röstinmatning.',
+    limit_items:
+      'Du kan spåra upp till {{count}} föremål i gratisplanen. Skaffa Pro för obegränsat.',
     badge: 'PRO',
     trend_preview_title: 'Lås upp långsiktiga trender',
     trend_preview_message:
@@ -1612,6 +1618,47 @@ const sv = {
     delete_body: 'Detta tar bort albumet. Dina transaktioner raderas inte.',
     cover_permission_title: 'Åtkomst till foton krävs',
     cover_permission_body: 'Tillåt åtkomst till foton för att välja en omslagsbild.',
+  },
+  assets: {
+    tab_accounts: 'Konton',
+    tab_items: 'Föremål',
+  },
+  items: {
+    title: 'Föremål',
+    subtitle: 'Se vad dina prylar faktiskt kostar per dag',
+    add: 'Lägg till föremål',
+    add_title: 'Nytt föremål',
+    edit_title: 'Redigera föremål',
+    empty_title: 'Inga föremål än',
+    empty_message: 'Registrera ett köp och se kostnaden sjunka för varje dag du äger det.',
+    choose_icon: 'Välj ikon',
+    name_label: 'Namn',
+    name_placeholder: 't.ex. Espressomaskin',
+    price_label: 'Inköpspris',
+    currency_label: 'Valuta',
+    purchase_date_label: 'Inköpsdatum',
+    mark_inactive: 'Markera som inaktiv',
+    mark_inactive_hint:
+      'Slutar räkna dagar för saker du sålt, som gått sönder eller inte längre använder.',
+    end_date_label: 'Slutdatum',
+    sold_toggle: 'Jag sålde det',
+    sale_price_label: 'Försäljningspris',
+    note_label: 'Anteckning',
+    note_placeholder: 'Valfritt',
+    status_inactive: 'Inaktiv',
+    status_active: 'Aktiv',
+    days_count: '{{count}} dagar',
+    summary_total_value: 'Totalt värde',
+    per_day: '/ dag',
+    delete_title: 'Ta bort föremål?',
+    delete_message: 'Detta tar bort föremålet från din spårare.',
+    summary_daily_cost: 'Kostnad / dag',
+    summary_counts: 'Föremål',
+    icon: {
+      choose_title: 'Välj ikon',
+      choose_subtitle: 'Välj en ikon eller ladda upp din egen',
+      search_placeholder: 'Sök ikoner…',
+    },
   },
 };
 

@@ -17,6 +17,7 @@ import {
   Heart,
   Landmark,
   Newspaper,
+  Package,
   Palette,
   Pencil,
   ReceiptText,
@@ -94,6 +95,7 @@ interface SettingsScreenProps {
   onOpenHourlyValue: () => void;
   onOpenAccountSettings: () => void;
   onOpenAccounts: () => void;
+  onOpenItems: () => void;
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
@@ -118,6 +120,7 @@ export function SettingsScreen({
   onOpenHourlyValue,
   onOpenAccountSettings,
   onOpenAccounts,
+  onOpenItems,
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
@@ -659,6 +662,11 @@ export function SettingsScreen({
                   onPress={onOpenAccounts}
                 />
               ) : null}
+              <SettingsGridTile
+                icon={<Package size={20} color={themeColors.primary} />}
+                label={I18n.t('items.title')}
+                onPress={onOpenItems}
+              />
               {!isSimpleMode ? (
                 <SettingsGridTile
                   icon={<Coins size={20} color={themeColors.primary} />}
