@@ -13,6 +13,7 @@ type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>
 const SYMBOL_BY_CODE = new Map(ALL_CURRENCIES.map((c) => [c.code, c.symbol]));
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const shortMonthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeMonthDayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 
@@ -25,6 +26,14 @@ function getMonthYearFormatter(locale: string) {
   if (cached) return cached;
   const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
   monthYearFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+function getShortMonthYearFormatter(locale: string) {
+  const cached = shortMonthYearFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' });
+  shortMonthYearFormatterByLocale.set(locale, formatter);
   return formatter;
 }
 
@@ -185,6 +194,11 @@ export function parseMonthKey(month: string): Date | null {
 
 export function formatMonthYearLabel(date: Date, locale?: string): string {
   return getMonthYearFormatter(resolveLocale(locale)).format(date);
+}
+
+/** Abbreviated month + year, e.g. "Jan 2025" instead of "January 2025". */
+export function formatShortMonthYearLabel(date: Date, locale?: string): string {
+  return getShortMonthYearFormatter(resolveLocale(locale)).format(date);
 }
 
 export function amountToHoursByRate(amount: number, trueHourlyRate: number): number {
