@@ -15,6 +15,7 @@ export type SettingsStackParamList = {
   WageCalculator: { monthKey: string; initialConfig: WageConfig };
   AccountSettings: undefined;
   Accounts: undefined;
+  Items: undefined;
   ExchangeRates: undefined;
   Categories: undefined;
   Recurring: undefined;

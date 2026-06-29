@@ -11,6 +11,8 @@ export const PRO_LIMITS = {
   FREE_VOICE_TOTAL_USES: 15,
   /** Free users can create this many albums (trips). */
   FREE_MAX_ALBUMS: 3,
+  /** Free users can track this many cost-per-day items. */
+  FREE_MAX_ITEMS: 5,
 } as const;
 
 export const PRO_TREND_TYPES = [

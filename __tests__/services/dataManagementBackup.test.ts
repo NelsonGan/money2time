@@ -82,6 +82,90 @@ function createFakeSqlite(tables: Record<string, Row[]>, columns: Record<string,
   };
 }
 
+const ITEM_COLUMNS = [
+  'id',
+  'name',
+  'icon_id',
+  'purchase_price',
+  'currency',
+  'purchase_date',
+  'end_date',
+  'sale_price',
+  'note',
+  'sort_order',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
+
+describe('dataManagementService item backup/restore', () => {
+  const item: Row = {
+    id: 'it1',
+    name: 'Espresso machine',
+    icon_id: 'espresso-machine',
+    purchase_price: 365,
+    currency: 'USD',
+    purchase_date: '2024-01-01',
+    end_date: null,
+    sale_price: null,
+    note: null,
+    sort_order: 0,
+    created_at: '2024-01-01T00:00:00.000Z',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    deleted_at: null,
+  };
+
+  function seedItems() {
+    const tables: Record<string, Row[]> = { items: [{ ...item }] };
+    const fake = createFakeSqlite(tables, { items: ITEM_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fake);
+    return fake;
+  }
+
+  it('includes items in the backup', async () => {
+    seedItems();
+    const data = await buildBackupData();
+    expect(data.tables.items).toEqual([item]);
+  });
+
+  it('restores items from a backup into a fresh database', async () => {
+    seedItems();
+    const data = await buildBackupData();
+
+    const fresh = createFakeSqlite({ items: [] }, { items: ITEM_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const result = applyBackupData(data);
+    expect(result.success).toBe(true);
+    expect(fresh.tables.items).toEqual([item]);
+  });
+
+  it('clears existing items on restore from a legacy backup with no items key', () => {
+    const fresh = createFakeSqlite({ items: [{ ...item }] }, { items: ITEM_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const legacy = {
+      version: 3,
+      exportedAt: '2026-01-01T00:00:00.000Z',
+      tables: {
+        accounts: [],
+        account_groups: [],
+        categories: [],
+        transactions: [],
+        transaction_splits: [],
+        recurring_rules: [],
+        settings: [],
+        monthly_wage_settings: [],
+      },
+    };
+
+    const result = applyBackupData(legacy as never);
+    expect(result.success).toBe(true);
+    // Restore is a full replace, so prior items are cleared, none re-added.
+    expect(fresh.tables.items).toEqual([]);
+  });
+});
+
 describe('dataManagementService album backup/restore', () => {
   const album: Row = {
     id: 'al1',

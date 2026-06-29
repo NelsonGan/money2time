@@ -307,6 +307,46 @@ export interface AlbumStats {
 
 export interface AlbumWithStats extends Album, AlbumStats {}
 
+/**
+ * A tracked possession whose effective daily cost (price ÷ days owned) shrinks
+ * the longer it is kept. Standalone — items never create transactions.
+ */
+export interface Item {
+  id: string;
+  name: string;
+  /** Item-icon library id or a `custom:` uploaded-image id; null = package fallback. */
+  iconId: string | null;
+  /** What was paid for it, in `currency`. */
+  purchasePrice: number;
+  currency: string;
+  /** Acquisition date (YYYY-MM-DD). */
+  purchaseDate: string;
+  /** Retire/sell date (YYYY-MM-DD); null = still owned (active). Day-counting stops here. */
+  endDate: string | null;
+  /** Optional resale value; net cost = purchasePrice − salePrice. */
+  salePrice: number | null;
+  note: string | null;
+  sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface ItemStats {
+  /** Whether the item is still being counted (no end date). */
+  isActive: boolean;
+  /** Whole days owned (clamped to ≥ 1). For inactive items this freezes at the end date. */
+  daysOwned: number;
+  /** purchasePrice − (salePrice ?? 0). What it has cost net of any resale. */
+  netCost: number;
+  /** netCost ÷ daysOwned, in the item's currency. */
+  dailyCost: number;
+  /** Work-time per day implied by dailyCost, in hours; null when no wage is set. */
+  dailyWorkHours: number | null;
+}
+
+export interface ItemWithStats extends Item, ItemStats {}
+
 export interface Transaction {
   id: string;
   type: TransactionType;

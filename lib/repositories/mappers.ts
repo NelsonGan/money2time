@@ -4,6 +4,7 @@ import type {
   AlbumRow,
   CategoryRow,
   ExchangeRateRow,
+  ItemRow,
   MonthlyWageSettingsRow,
   RecurringRuleRow,
   SettingsRow,
@@ -18,6 +19,7 @@ import type {
   Category,
   ExchangeRate,
   ExchangeRateSource,
+  Item,
   MonthlyWageSettings,
   RecurringTransactionRule,
   ThemeColor,
@@ -181,6 +183,24 @@ export function toAlbum(row: AlbumRow): Album {
     placeName: row.placeName ?? null,
     placeAdmin: row.placeAdmin ?? null,
     countryCode: row.countryCode ?? null,
+    sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toItem(row: ItemRow): Item {
+  return {
+    id: row.id,
+    name: row.name,
+    iconId: row.iconId ?? null,
+    purchasePrice: row.purchasePrice ?? 0,
+    currency: row.currency,
+    purchaseDate: row.purchaseDate,
+    endDate: row.endDate ?? null,
+    salePrice: row.salePrice ?? null,
+    note: row.note ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

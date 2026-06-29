@@ -1281,8 +1281,12 @@ const en = {
   },
   pro: {
     custom_logos_label: 'Custom account logos',
+    items_label: 'Items',
+    custom_item_images_label: 'Custom item images',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
+    limit_custom_item_images:
+      'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_subcurrencies:
       'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',
@@ -1384,6 +1388,8 @@ const en = {
       'Free plan includes {{count}} voice entries. Upgrade to Pro for unlimited voice input.',
     limit_albums:
       'You can create up to {{count}} albums on the free plan. Upgrade to Pro for unlimited.',
+    limit_items:
+      'You can track up to {{count}} items on the free plan. Upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:
@@ -1605,6 +1611,46 @@ const en = {
       empty_title: 'No places yet',
       empty_message: 'Add a location to an album to see it on the globe and map.',
       fit_all: 'Fit all',
+    },
+  },
+  assets: {
+    tab_accounts: 'Accounts',
+    tab_items: 'Items',
+  },
+  items: {
+    title: 'Items',
+    subtitle: 'See what your things really cost per day',
+    add: 'Add item',
+    add_title: 'New item',
+    edit_title: 'Edit item',
+    empty_title: 'No items yet',
+    empty_message: 'Track a purchase to see its cost shrink with every day you own it.',
+    choose_icon: 'Choose icon',
+    name_label: 'Name',
+    name_placeholder: 'e.g. Espresso machine',
+    price_label: 'Purchase price',
+    currency_label: 'Currency',
+    purchase_date_label: 'Purchase date',
+    mark_inactive: 'Mark as inactive',
+    mark_inactive_hint: 'Stops the day count for things you sold, broke, or no longer use.',
+    end_date_label: 'End date',
+    sold_toggle: 'I sold it',
+    sale_price_label: 'Sale price',
+    note_label: 'Note',
+    note_placeholder: 'Optional',
+    status_inactive: 'Inactive',
+    status_active: 'Active',
+    days_count: '{{count}} days',
+    summary_total_value: 'Total value',
+    per_day: '/ day',
+    delete_title: 'Delete item?',
+    delete_message: 'This removes the item from your tracker.',
+    summary_daily_cost: 'Cost / day',
+    summary_counts: 'Items',
+    icon: {
+      choose_title: 'Choose icon',
+      choose_subtitle: 'Pick an icon or upload your own',
+      search_placeholder: 'Search icons…',
     },
   },
 };

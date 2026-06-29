@@ -1332,8 +1332,12 @@ const de = {
   },
   pro: {
     custom_logos_label: 'Eigene Kontologos',
+    items_label: 'Artikel',
+    custom_item_images_label: 'Eigene Artikelbilder',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
+    limit_custom_item_images:
+      'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_subcurrencies:
       'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     title: 'Money2Time Pro',
@@ -1436,6 +1440,8 @@ const de = {
       'Im kostenlosen Plan sind bis zu {{count}} Stundenwert-Einträge möglich. Upgrade auf Pro für unbegrenzte Einträge.',
     limit_voice:
       'Der kostenlose Plan enthält {{count}} Spracheingaben. Upgrade auf Pro für unbegrenzte Spracheingabe.',
+    limit_items:
+      'Im kostenlosen Tarif kannst du bis zu {{count}} Artikel verfolgen. Hol dir Pro für unbegrenzte.',
     badge: 'PRO',
     trend_preview_title: 'Langfristige Trends freischalten',
     trend_preview_message:
@@ -1639,6 +1645,47 @@ const de = {
     delete_body: 'Damit wird das Album entfernt. Deine Transaktionen werden nicht gelöscht.',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
+  },
+  assets: {
+    tab_accounts: 'Konten',
+    tab_items: 'Artikel',
+  },
+  items: {
+    title: 'Artikel',
+    subtitle: 'Sieh, was deine Dinge pro Tag wirklich kosten',
+    add: 'Artikel hinzufügen',
+    add_title: 'Neuer Artikel',
+    edit_title: 'Artikel bearbeiten',
+    empty_title: 'Noch keine Artikel',
+    empty_message: 'Erfasse einen Kauf und sieh, wie die Kosten mit jedem Tag sinken.',
+    choose_icon: 'Symbol wählen',
+    name_label: 'Name',
+    name_placeholder: 'z. B. Espressomaschine',
+    price_label: 'Kaufpreis',
+    currency_label: 'Währung',
+    purchase_date_label: 'Kaufdatum',
+    mark_inactive: 'Als inaktiv markieren',
+    mark_inactive_hint:
+      'Stoppt die Tagezählung für Dinge, die du verkauft hast, die kaputt sind oder die du nicht mehr nutzt.',
+    end_date_label: 'Enddatum',
+    sold_toggle: 'Ich habe es verkauft',
+    sale_price_label: 'Verkaufspreis',
+    note_label: 'Notiz',
+    note_placeholder: 'Optional',
+    status_inactive: 'Inaktiv',
+    status_active: 'Aktiv',
+    days_count: '{{count}} Tage',
+    summary_total_value: 'Gesamtwert',
+    per_day: '/ Tag',
+    delete_title: 'Artikel löschen?',
+    delete_message: 'Dies entfernt den Artikel aus deinem Tracker.',
+    summary_daily_cost: 'Kosten / Tag',
+    summary_counts: 'Artikel',
+    icon: {
+      choose_title: 'Symbol wählen',
+      choose_subtitle: 'Symbol wählen oder eigenes hochladen',
+      search_placeholder: 'Symbole suchen…',
+    },
   },
 };
 

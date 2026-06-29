@@ -149,6 +149,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS),
         pro: UNLIMITED,
       },
+      {
+        label: I18n.t('pro.custom_item_images_label'),
+        free: String(PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS),
+        pro: UNLIMITED,
+      },
       // Voice entry only appears when the device actually supports speech
       // recognition — no point advertising it otherwise.
       ...(voiceSupported
@@ -168,6 +173,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
       {
         label: I18n.t('pro.albums_label'),
         free: String(PRO_LIMITS.FREE_MAX_ALBUMS),
+        pro: UNLIMITED,
+      },
+      {
+        label: I18n.t('pro.items_label'),
+        free: String(PRO_LIMITS.FREE_MAX_ITEMS),
         pro: UNLIMITED,
       },
       { label: I18n.t('pro.biometric_label'), free: false, pro: true },

@@ -2,6 +2,7 @@ import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import {
@@ -37,6 +38,7 @@ interface SettingsStackProps {
   resetToRootToken?: number;
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
+  onOpenItemEditor: (itemId?: string) => void;
   onOpenProPaywall: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
@@ -88,6 +90,7 @@ function SettingsHomeRoute({
       onOpenHourlyValue={() => navigation.navigate('HourlyValue')}
       onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
+      onOpenItems={() => navigation.navigate('Items')}
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
@@ -130,6 +133,7 @@ export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
   onOpenRecurringEditor,
+  onOpenItemEditor,
   onOpenProPaywall,
   onScreenChange,
   onStartTutorial,
@@ -247,6 +251,14 @@ export function SettingsStack({
               useNativeBackGesture
               onOpenMultiCurrency={() => props.navigation.navigate('ExchangeRates')}
             />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Items">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <ItemsScreen onBack={() => props.navigation.goBack()} onOpenItem={onOpenItemEditor} />
           );
         }}
       </SettingsStackNavigator.Screen>

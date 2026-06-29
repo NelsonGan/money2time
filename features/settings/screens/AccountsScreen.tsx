@@ -1316,6 +1316,15 @@ interface AccountsScreenProps {
   onOpenMultiCurrency?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
+  /**
+   * When the host (the assets tab) owns the balance-visibility toggle, it passes
+   * the state down and renders the eye button itself. Left undefined, the screen
+   * keeps its own internal toggle (e.g. when pushed standalone).
+   */
+  hideBalances?: boolean;
+  onToggleBalances?: () => void;
+  /** Hides the overview title row + its inline settings/eye actions (the tab provides them). */
+  hideOverviewHeader?: boolean;
 }
 
 export function AccountsScreen({
@@ -1333,6 +1342,9 @@ export function AccountsScreen({
   onOpenMultiCurrency,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
+  hideBalances,
+  onToggleBalances,
+  hideOverviewHeader = false,
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
@@ -1395,7 +1407,9 @@ export function AccountsScreen({
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
-  const [hideAccountBalances, setHideAccountBalances] = useState(false);
+  const [internalHideBalances, setInternalHideBalances] = useState(false);
+  // Controlled when the host passes `hideBalances`; otherwise self-managed.
+  const hideAccountBalances = hideBalances ?? internalHideBalances;
   const [showCreate, setShowCreate] = useState(false);
   // Group name pre-selected when adding an account via a group card's "+".
   const [createAccountGroupName, setCreateAccountGroupName] = useState<string | null>(null);
@@ -1595,8 +1609,12 @@ export function AccountsScreen({
     : I18n.t('accounts.hide_balances');
 
   const handleToggleAccountBalances = useCallback(() => {
-    setHideAccountBalances((previous) => !previous);
-  }, []);
+    if (onToggleBalances) {
+      onToggleBalances();
+      return;
+    }
+    setInternalHideBalances((previous) => !previous);
+  }, [onToggleBalances]);
 
   const formatVisibleBalance = useCallback(
     (amount: number, currencyCode?: string) => {
@@ -2748,22 +2766,25 @@ export function AccountsScreen({
             onPrevMonth={() => {}}
             onNextMonth={() => {}}
             hideNavigation
+            hideTitleRow={hideOverviewHeader}
             showAccent={false}
             actions={
-              <>
-                {onOpenSettings ? (
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    haptic="selection"
-                    className="h-10 w-10 rounded-full"
-                    onPress={onOpenSettings}
-                  >
-                    <Settings size={18} color={themeColors.textMuted} />
-                  </Button>
-                ) : null}
-                {renderBalanceToggleButton()}
-              </>
+              hideOverviewHeader ? undefined : (
+                <>
+                  {onOpenSettings ? (
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      haptic="selection"
+                      className="h-10 w-10 rounded-full"
+                      onPress={onOpenSettings}
+                    >
+                      <Settings size={18} color={themeColors.textMuted} />
+                    </Button>
+                  ) : null}
+                  {renderBalanceToggleButton()}
+                </>
+              )
             }
           >
             <AccountsSummaryBlock

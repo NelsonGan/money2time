@@ -1285,8 +1285,12 @@ const ko = {
   },
   pro: {
     custom_logos_label: '사용자 지정 계정 로고',
+    items_label: '물건',
+    custom_item_images_label: '맞춤 물건 이미지',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+    limit_custom_item_images:
+      '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_subcurrencies:
       '무료 플랜에서는 보조 통화를 {{count}}개 추가할 수 있습니다. 무제한 다중 통화는 Pro로 업그레이드하세요.',
     title: 'Money2Time Pro',
@@ -1387,6 +1391,8 @@ const ko = {
       '무료 플랜에서는 시급 항목을 최대 {{count}}개 만들 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_voice:
       '무료 플랜에는 음성 입력 {{count}}회가 포함됩니다. Pro로 업그레이드하면 무제한 음성 입력을 사용할 수 있습니다.',
+    limit_items:
+      '무료 플랜에서는 최대 {{count}}개까지 추적할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     badge: 'PRO',
     trend_preview_title: '장기 추세 잠금 해제',
     trend_preview_message:
@@ -1582,6 +1588,46 @@ const ko = {
     delete_body: '앨범이 삭제됩니다. 거래는 삭제되지 않습니다.',
     cover_permission_title: '사진 접근 필요',
     cover_permission_body: '커버 이미지를 선택하려면 사진 접근을 허용하세요.',
+  },
+  assets: {
+    tab_accounts: '계정',
+    tab_items: '물건',
+  },
+  items: {
+    title: '물건',
+    subtitle: '내 물건의 하루 실제 비용을 확인하세요',
+    add: '물건 추가',
+    add_title: '새 물건',
+    edit_title: '물건 편집',
+    empty_title: '아직 물건이 없습니다',
+    empty_message: '구매를 기록하면 소유한 날이 늘수록 비용이 줄어드는 걸 볼 수 있어요.',
+    choose_icon: '아이콘 선택',
+    name_label: '이름',
+    name_placeholder: '예: 에스프레소 머신',
+    price_label: '구매 가격',
+    currency_label: '통화',
+    purchase_date_label: '구매 날짜',
+    mark_inactive: '비활성으로 표시',
+    mark_inactive_hint: '팔았거나 고장났거나 더 이상 쓰지 않는 물건의 날짜 계산을 멈춥니다.',
+    end_date_label: '종료 날짜',
+    sold_toggle: '판매했어요',
+    sale_price_label: '판매 가격',
+    note_label: '메모',
+    note_placeholder: '선택 사항',
+    status_inactive: '비활성',
+    status_active: '사용 중',
+    days_count: '{{count}}일',
+    summary_total_value: '총 가치',
+    per_day: '/ 일',
+    delete_title: '물건을 삭제할까요?',
+    delete_message: '트래커에서 물건을 제거합니다.',
+    summary_daily_cost: '비용 / 일',
+    summary_counts: '물건',
+    icon: {
+      choose_title: '아이콘 선택',
+      choose_subtitle: '아이콘을 고르거나 직접 업로드하세요',
+      search_placeholder: '아이콘 검색…',
+    },
   },
 };
 

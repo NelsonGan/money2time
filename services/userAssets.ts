@@ -20,6 +20,7 @@ export const CUSTOM_LOGO_PREFIX = 'custom:';
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
 const AVATARS_KIND = 'avatars';
 const ALBUM_COVERS_KIND = 'album-covers';
+const ITEM_ICONS_KIND = 'item-icons';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -140,6 +141,28 @@ export function deleteCustomLogo(logoId: string) {
   if (!rel) return;
   const file = new File(Paths.document, ROOT, ...rel.split('/'));
   if (file.exists) file.delete();
+}
+
+/** Copies a picked image into the item-icon store, returning a `custom:` id
+ *  (e.g. `custom:item-icons/9f3c.png`) for persistence on the item row. */
+export function saveCustomItemIcon(sourceUri: string): string {
+  ensureDir(kindDir(ITEM_ICONS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, ITEM_ICONS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  return `${CUSTOM_LOGO_PREFIX}${ITEM_ICONS_KIND}/${fileName}`;
+}
+
+export function listCustomItemIcons(): { id: string; uri: string }[] {
+  const dir = kindDir(ITEM_ICONS_KIND);
+  if (!dir.exists) return [];
+  return dir
+    .list()
+    .filter((entry): entry is File => entry instanceof File)
+    .map((file) => ({
+      id: `${CUSTOM_LOGO_PREFIX}${ITEM_ICONS_KIND}/${file.name}`,
+      uri: file.uri,
+    }));
 }
 
 /**

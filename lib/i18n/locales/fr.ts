@@ -1325,8 +1325,12 @@ const fr = {
   },
   pro: {
     custom_logos_label: 'Logos de compte personnalisés',
+    items_label: 'Objets',
+    custom_item_images_label: "Images d'objets personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+    limit_custom_item_images:
+      "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:
       'Vous pouvez ajouter {{count}} sous-devise avec le forfait gratuit. Passez à Pro pour un suivi multidevise illimité.',
     title: 'Money2Time Pro',
@@ -1432,6 +1436,8 @@ const fr = {
       "Vous pouvez avoir jusqu'à {{count}} entrées de taux horaire avec l'offre gratuite. Passez à Pro pour un accès illimité.",
     limit_voice:
       "L'offre gratuite inclut {{count}} saisies vocales. Passez à Pro pour une saisie vocale illimitée.",
+    limit_items:
+      "Vous pouvez suivre jusqu'à {{count}} objets avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     badge: 'PRO',
     trend_preview_title: 'Débloquez les tendances long terme',
     trend_preview_message:
@@ -1634,6 +1640,47 @@ const fr = {
     delete_body: "Cela supprime l'album. Vos transactions ne sont pas supprimées.",
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
+  },
+  assets: {
+    tab_accounts: 'Comptes',
+    tab_items: 'Objets',
+  },
+  items: {
+    title: 'Objets',
+    subtitle: 'Voyez ce que vos affaires coûtent vraiment par jour',
+    add: 'Ajouter un objet',
+    add_title: 'Nouvel objet',
+    edit_title: "Modifier l'objet",
+    empty_title: 'Aucun objet',
+    empty_message: 'Enregistrez un achat et voyez son coût diminuer chaque jour où vous le gardez.',
+    choose_icon: 'Choisir une icône',
+    name_label: 'Nom',
+    name_placeholder: 'ex. Machine à espresso',
+    price_label: "Prix d'achat",
+    currency_label: 'Devise',
+    purchase_date_label: "Date d'achat",
+    mark_inactive: 'Marquer comme inactif',
+    mark_inactive_hint:
+      "Arrête le compte des jours pour ce que vous avez vendu, cassé ou n'utilisez plus.",
+    end_date_label: 'Date de fin',
+    sold_toggle: "Je l'ai vendu",
+    sale_price_label: 'Prix de vente',
+    note_label: 'Note',
+    note_placeholder: 'Facultatif',
+    status_inactive: 'Inactif',
+    status_active: 'Actif',
+    days_count: '{{count}} jours',
+    summary_total_value: 'Valeur totale',
+    per_day: '/ jour',
+    delete_title: "Supprimer l'objet ?",
+    delete_message: "Cela retire l'objet de votre suivi.",
+    summary_daily_cost: 'Coût / jour',
+    summary_counts: 'Objets',
+    icon: {
+      choose_title: 'Choisir une icône',
+      choose_subtitle: 'Choisissez une icône ou importez la vôtre',
+      search_placeholder: 'Rechercher des icônes…',
+    },
   },
 };
 

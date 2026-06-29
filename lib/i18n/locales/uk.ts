@@ -1309,8 +1309,12 @@ const uk = {
   },
   pro: {
     custom_logos_label: 'Власні логотипи рахунків',
+    items_label: 'Речі',
+    custom_item_images_label: 'Власні зображення речей',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',
+    limit_custom_item_images:
+      'У безкоштовному плані можна завантажити до {{count}} власних зображень речей. Оформте Pro для безлімітного.',
     limit_subcurrencies:
       'У безкоштовному плані можна додати {{count}} додаткову валюту. Перейдіть на Pro для необмеженого мультивалютного обліку.',
     title: 'Money2Time Pro',
@@ -1413,6 +1417,8 @@ const uk = {
       'У безкоштовному плані можна мати до {{count}} записів ставки. Перейдіть на Pro для необмеженої кількості.',
     limit_voice:
       'Безкоштовний план включає {{count}} голосових записів. Перейдіть на Pro для необмеженого введення голосом.',
+    limit_items:
+      'У безкоштовному плані можна відстежувати до {{count}} речей. Оформте Pro для безлімітного.',
     badge: 'PRO',
     trend_preview_title: 'Розблокуйте довгострокові тренди',
     trend_preview_message:
@@ -1610,6 +1616,47 @@ const uk = {
     delete_body: 'Це вилучає альбом. Ваші операції не видаляються.',
     cover_permission_title: 'Потрібен доступ до фото',
     cover_permission_body: 'Дозвольте доступ до фото, щоб вибрати обкладинку.',
+  },
+  assets: {
+    tab_accounts: 'Рахунки',
+    tab_items: 'Речі',
+  },
+  items: {
+    title: 'Речі',
+    subtitle: 'Дізнайтеся, скільки ваші речі коштують на день',
+    add: 'Додати річ',
+    add_title: 'Нова річ',
+    edit_title: 'Редагувати річ',
+    empty_title: 'Ще немає речей',
+    empty_message: 'Запишіть покупку й дивіться, як її вартість падає з кожним днем володіння.',
+    choose_icon: 'Вибрати значок',
+    name_label: 'Назва',
+    name_placeholder: 'напр. Кавомашина',
+    price_label: 'Ціна покупки',
+    currency_label: 'Валюта',
+    purchase_date_label: 'Дата покупки',
+    mark_inactive: 'Позначити неактивною',
+    mark_inactive_hint:
+      'Зупиняє підрахунок днів для речей, які ви продали, зламали або більше не використовуєте.',
+    end_date_label: 'Дата завершення',
+    sold_toggle: 'Я продав це',
+    sale_price_label: 'Ціна продажу',
+    note_label: 'Нотатка',
+    note_placeholder: 'Необов’язково',
+    status_inactive: 'Неактивно',
+    status_active: 'Активно',
+    days_count: '{{count}} дн.',
+    summary_total_value: 'Загальна вартість',
+    per_day: '/ день',
+    delete_title: 'Видалити річ?',
+    delete_message: 'Це вилучить річ із вашого трекера.',
+    summary_daily_cost: 'Вартість / день',
+    summary_counts: 'Речі',
+    icon: {
+      choose_title: 'Вибрати значок',
+      choose_subtitle: 'Виберіть значок або завантажте свій',
+      search_placeholder: 'Пошук значків…',
+    },
   },
 };
 

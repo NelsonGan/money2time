@@ -1316,8 +1316,12 @@ const tr = {
   },
   pro: {
     custom_logos_label: 'Özel hesap logoları',
+    items_label: 'Eşyalar',
+    custom_item_images_label: 'Özel eşya görselleri',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
+    limit_custom_item_images:
+      'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_subcurrencies:
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',
@@ -1422,6 +1426,8 @@ const tr = {
       "Ücretsiz planda en fazla {{count}} saatlik oran girişi oluşturabilirsiniz. Sınırsız için Pro'ya yükseltin.",
     limit_voice:
       "Ücretsiz plan {{count}} sesli giriş içerir. Sınırsız sesli giriş için Pro'ya yükseltin.",
+    limit_items:
+      'Ücretsiz planda {{count}} eşyaya kadar takip edebilirsin. Sınırsız için Pro’ya geç.',
     badge: 'PRO',
     trend_preview_title: 'Uzun vadeli eğilimlerin kilidini açın',
     trend_preview_message:
@@ -1622,6 +1628,47 @@ const tr = {
     delete_body: 'Bu, albümü kaldırır. İşlemleriniz silinmez.',
     cover_permission_title: 'Fotoğraf erişimi gerekli',
     cover_permission_body: 'Kapak resmi seçmek için fotoğraf erişimine izin verin.',
+  },
+  assets: {
+    tab_accounts: 'Hesaplar',
+    tab_items: 'Eşyalar',
+  },
+  items: {
+    title: 'Eşyalar',
+    subtitle: 'Eşyalarının günlük gerçek maliyetini gör',
+    add: 'Eşya ekle',
+    add_title: 'Yeni eşya',
+    edit_title: 'Eşyayı düzenle',
+    empty_title: 'Henüz eşya yok',
+    empty_message: 'Bir satın alımı kaydet ve sahip oldukça maliyetinin her gün düştüğünü gör.',
+    choose_icon: 'Simge seç',
+    name_label: 'Ad',
+    name_placeholder: 'örn. Espresso makinesi',
+    price_label: 'Satın alma fiyatı',
+    currency_label: 'Para birimi',
+    purchase_date_label: 'Satın alma tarihi',
+    mark_inactive: 'Pasif olarak işaretle',
+    mark_inactive_hint:
+      'Sattığın, kırılan ya da artık kullanmadığın şeyler için gün saymayı durdurur.',
+    end_date_label: 'Bitiş tarihi',
+    sold_toggle: 'Sattım',
+    sale_price_label: 'Satış fiyatı',
+    note_label: 'Not',
+    note_placeholder: 'İsteğe bağlı',
+    status_inactive: 'Pasif',
+    status_active: 'Aktif',
+    days_count: '{{count}} gün',
+    summary_total_value: 'Toplam değer',
+    per_day: '/ gün',
+    delete_title: 'Eşya silinsin mi?',
+    delete_message: 'Bu, eşyayı takipçinden kaldırır.',
+    summary_daily_cost: 'Maliyet / gün',
+    summary_counts: 'Eşyalar',
+    icon: {
+      choose_title: 'Simge seç',
+      choose_subtitle: 'Bir simge seç veya kendininkini yükle',
+      search_placeholder: 'Simge ara…',
+    },
   },
 };
 

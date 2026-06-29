@@ -1282,8 +1282,12 @@ const th = {
   },
   pro: {
     custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
+    items_label: 'ของใช้',
+    custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
+    limit_custom_item_images:
+      'แผนฟรีอัปโหลดรูปของใช้ที่กำหนดเองได้สูงสุด {{count}} รูป อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_subcurrencies:
       'แผนฟรีเพิ่มสกุลเงินย่อยได้ {{count}} สกุล อัปเกรดเป็น Pro เพื่อใช้หลายสกุลเงินไม่จำกัด',
     title: 'Money2Time Pro',
@@ -1380,6 +1384,7 @@ const th = {
     limit_wage_entries:
       'แผนฟรีมีได้สูงสุด {{count}} รายการอัตรารายชั่วโมง อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_voice: 'แผนฟรีรวมการป้อนด้วยเสียง {{count}} ครั้ง อัปเกรดเป็น Pro เพื่อใช้ไม่จำกัด',
+    limit_items: 'แผนฟรีติดตามได้สูงสุด {{count}} ชิ้น อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     badge: 'PRO',
     trend_preview_title: 'ปลดล็อกแนวโน้มระยะยาว',
     trend_preview_message:
@@ -1575,6 +1580,46 @@ const th = {
     delete_body: 'การลบจะนำอัลบั้มออก แต่ไม่ลบรายการของคุณ',
     cover_permission_title: 'ต้องการสิทธิ์เข้าถึงรูปภาพ',
     cover_permission_body: 'อนุญาตการเข้าถึงรูปภาพเพื่อเลือกรูปปก',
+  },
+  assets: {
+    tab_accounts: 'บัญชี',
+    tab_items: 'ของใช้',
+  },
+  items: {
+    title: 'ของใช้',
+    subtitle: 'ดูว่าของของคุณมีต้นทุนต่อวันเท่าไรจริง ๆ',
+    add: 'เพิ่มของใช้',
+    add_title: 'ของใช้ใหม่',
+    edit_title: 'แก้ไขของใช้',
+    empty_title: 'ยังไม่มีของใช้',
+    empty_message: 'บันทึกการซื้อแล้วดูต้นทุนลดลงทุกวันที่คุณใช้มัน',
+    choose_icon: 'เลือกไอคอน',
+    name_label: 'ชื่อ',
+    name_placeholder: 'เช่น เครื่องชงเอสเพรสโซ',
+    price_label: 'ราคาซื้อ',
+    currency_label: 'สกุลเงิน',
+    purchase_date_label: 'วันที่ซื้อ',
+    mark_inactive: 'ทำเครื่องหมายว่าเลิกใช้',
+    mark_inactive_hint: 'หยุดนับวันสำหรับของที่คุณขาย เสีย หรือไม่ใช้แล้ว',
+    end_date_label: 'วันที่สิ้นสุด',
+    sold_toggle: 'ฉันขายมันไปแล้ว',
+    sale_price_label: 'ราคาขาย',
+    note_label: 'บันทึก',
+    note_placeholder: 'ไม่บังคับ',
+    status_inactive: 'เลิกใช้',
+    status_active: 'ใช้งาน',
+    days_count: '{{count}} วัน',
+    summary_total_value: 'มูลค่ารวม',
+    per_day: '/ วัน',
+    delete_title: 'ลบของใช้?',
+    delete_message: 'การนี้จะนำของใช้ออกจากตัวติดตามของคุณ',
+    summary_daily_cost: 'ต้นทุน / วัน',
+    summary_counts: 'ของใช้',
+    icon: {
+      choose_title: 'เลือกไอคอน',
+      choose_subtitle: 'เลือกไอคอนหรืออัปโหลดของคุณเอง',
+      search_placeholder: 'ค้นหาไอคอน…',
+    },
   },
 };
 

@@ -29,6 +29,9 @@ interface BackupTables {
   // before albums existed still parse; absent on restore means "no albums".
   albums?: Record<string, unknown>[];
   album_transactions?: Record<string, unknown>[];
+  // Cost-per-day items. Optional so older backups still parse; absent on
+  // restore means "no items".
+  items?: Record<string, unknown>[];
 }
 
 export interface BackupData {
@@ -100,6 +103,8 @@ export async function buildBackupData(): Promise<BackupData> {
       // absent on very old databases.
       albums: tryReadTable(sqlite, 'albums'),
       album_transactions: tryReadTable(sqlite, 'album_transactions'),
+      // Items were added in a later migration and may be absent on old databases.
+      items: tryReadTable(sqlite, 'items'),
     },
   };
 }
@@ -239,6 +244,11 @@ export function applyBackupData(backup: BackupData): ImportResult {
     } catch {
       // Older databases without the table — ignore.
     }
+    try {
+      sqlite.execSync('DELETE FROM items');
+    } catch {
+      // Older databases without the table — ignore.
+    }
     sqlite.execSync('DELETE FROM recurring_rules');
     sqlite.execSync('DELETE FROM transactions');
     sqlite.execSync('DELETE FROM accounts');
@@ -259,6 +269,8 @@ export function applyBackupData(backup: BackupData): ImportResult {
     // Albums before their join rows, both after transactions (join references both).
     insertRows(sqlite, 'albums', backup.tables.albums);
     insertRows(sqlite, 'album_transactions', backup.tables.album_transactions);
+    // Items are standalone (no FK dependencies).
+    insertRows(sqlite, 'items', backup.tables.items);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 

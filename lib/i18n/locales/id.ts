@@ -1321,8 +1321,12 @@ const id = {
   },
   pro: {
     custom_logos_label: 'Logo akun khusus',
+    items_label: 'Barang',
+    custom_item_images_label: 'Gambar barang khusus',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
+    limit_custom_item_images:
+      'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_subcurrencies:
       'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     title: 'Money2Time Pro',
@@ -1426,6 +1430,8 @@ const id = {
       'Kamu bisa memiliki hingga {{count}} entri tarif per jam di paket gratis. Upgrade ke Pro untuk tanpa batas.',
     limit_voice:
       'Paket gratis mencakup {{count}} entri suara. Upgrade ke Pro untuk input suara tanpa batas.',
+    limit_items:
+      'Kamu bisa melacak hingga {{count}} barang di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:
@@ -1625,6 +1631,47 @@ const id = {
     delete_body: 'Ini menghapus album. Transaksi Anda tidak dihapus.',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
+  },
+  assets: {
+    tab_accounts: 'Akun',
+    tab_items: 'Barang',
+  },
+  items: {
+    title: 'Barang',
+    subtitle: 'Lihat biaya harian barang-barangmu sebenarnya',
+    add: 'Tambah barang',
+    add_title: 'Barang baru',
+    edit_title: 'Edit barang',
+    empty_title: 'Belum ada barang',
+    empty_message: 'Catat pembelian dan lihat biayanya menurun setiap hari kamu memilikinya.',
+    choose_icon: 'Pilih ikon',
+    name_label: 'Nama',
+    name_placeholder: 'mis. Mesin espresso',
+    price_label: 'Harga beli',
+    currency_label: 'Mata uang',
+    purchase_date_label: 'Tanggal beli',
+    mark_inactive: 'Tandai tidak aktif',
+    mark_inactive_hint:
+      'Menghentikan penghitungan hari untuk barang yang dijual, rusak, atau tidak lagi dipakai.',
+    end_date_label: 'Tanggal berakhir',
+    sold_toggle: 'Saya menjualnya',
+    sale_price_label: 'Harga jual',
+    note_label: 'Catatan',
+    note_placeholder: 'Opsional',
+    status_inactive: 'Tidak aktif',
+    status_active: 'Aktif',
+    days_count: '{{count}} hari',
+    summary_total_value: 'Total nilai',
+    per_day: '/ hari',
+    delete_title: 'Hapus barang?',
+    delete_message: 'Ini menghapus barang dari pelacakmu.',
+    summary_daily_cost: 'Biaya / hari',
+    summary_counts: 'Barang',
+    icon: {
+      choose_title: 'Pilih ikon',
+      choose_subtitle: 'Pilih ikon atau unggah milikmu',
+      search_placeholder: 'Cari ikon…',
+    },
   },
 };
 

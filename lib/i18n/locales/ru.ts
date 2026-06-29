@@ -1315,8 +1315,12 @@ const ru = {
   },
   pro: {
     custom_logos_label: 'Свои логотипы счетов',
+    items_label: 'Вещи',
+    custom_item_images_label: 'Свои изображения вещей',
     limit_custom_logos:
       'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
+    limit_custom_item_images:
+      'На бесплатном плане можно загрузить до {{count}} своих изображений вещей. Оформите Pro для безлимита.',
     limit_subcurrencies:
       'В бесплатном плане можно добавить {{count}} дополнительную валюту. Перейдите на Pro для безлимитной мультивалютности.',
     title: 'Money2Time Pro',
@@ -1419,6 +1423,8 @@ const ru = {
       'В бесплатном плане доступно до {{count}} записей ставки. Обновитесь до Pro для безлимита.',
     limit_voice:
       'Бесплатный план включает {{count}} голосовых записей. Обновитесь до Pro для безлимитного голосового ввода.',
+    limit_items:
+      'На бесплатном плане можно отслеживать до {{count}} предметов. Оформите Pro для безлимита.',
     badge: 'PRO',
     trend_preview_title: 'Разблокировать долгосрочные тренды',
     trend_preview_message:
@@ -1615,6 +1621,47 @@ const ru = {
     delete_body: 'Альбом будет удалён. Ваши операции не удаляются.',
     cover_permission_title: 'Нужен доступ к фото',
     cover_permission_body: 'Разрешите доступ к фото, чтобы выбрать обложку.',
+  },
+  assets: {
+    tab_accounts: 'Счета',
+    tab_items: 'Вещи',
+  },
+  items: {
+    title: 'Вещи',
+    subtitle: 'Узнайте, сколько ваши вещи стоят в день',
+    add: 'Добавить вещь',
+    add_title: 'Новая вещь',
+    edit_title: 'Изменить вещь',
+    empty_title: 'Пока нет вещей',
+    empty_message: 'Запишите покупку и смотрите, как её стоимость падает с каждым днём владения.',
+    choose_icon: 'Выбрать значок',
+    name_label: 'Название',
+    name_placeholder: 'напр. Кофемашина',
+    price_label: 'Цена покупки',
+    currency_label: 'Валюта',
+    purchase_date_label: 'Дата покупки',
+    mark_inactive: 'Отметить неактивной',
+    mark_inactive_hint:
+      'Останавливает подсчёт дней для вещей, которые вы продали, сломали или больше не используете.',
+    end_date_label: 'Дата окончания',
+    sold_toggle: 'Я продал это',
+    sale_price_label: 'Цена продажи',
+    note_label: 'Заметка',
+    note_placeholder: 'Необязательно',
+    status_inactive: 'Неактивно',
+    status_active: 'Активно',
+    days_count: '{{count}} дн.',
+    summary_total_value: 'Общая стоимость',
+    per_day: '/ день',
+    delete_title: 'Удалить вещь?',
+    delete_message: 'Это удалит вещь из вашего трекера.',
+    summary_daily_cost: 'Стоимость / день',
+    summary_counts: 'Вещи',
+    icon: {
+      choose_title: 'Выбрать значок',
+      choose_subtitle: 'Выберите значок или загрузите свой',
+      search_placeholder: 'Поиск значков…',
+    },
   },
 };
 

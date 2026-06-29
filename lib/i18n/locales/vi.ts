@@ -1297,8 +1297,12 @@ const vi = {
   },
   pro: {
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
+    items_label: 'Vật dụng',
+    custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
+    limit_custom_item_images:
+      'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_subcurrencies:
       'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     title: 'Money2Time Pro',
@@ -1399,6 +1403,8 @@ const vi = {
       'Gói miễn phí tối đa {{count}} mục lương giờ. Nâng cấp lên Pro để không giới hạn.',
     limit_voice:
       'Gói miễn phí có {{count}} lần nhập giọng nói. Nâng cấp lên Pro để nhập không giới hạn.',
+    limit_items:
+      'Bạn có thể theo dõi tối đa {{count}} món ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     badge: 'PRO',
     trend_preview_title: 'Mở khóa xu hướng dài hạn',
     trend_preview_message:
@@ -1594,6 +1600,46 @@ const vi = {
     delete_body: 'Thao tác này xóa album. Giao dịch của bạn không bị xóa.',
     cover_permission_title: 'Cần quyền truy cập ảnh',
     cover_permission_body: 'Cho phép truy cập ảnh để chọn ảnh bìa.',
+  },
+  assets: {
+    tab_accounts: 'Tài khoản',
+    tab_items: 'Vật dụng',
+  },
+  items: {
+    title: 'Vật dụng',
+    subtitle: 'Xem đồ của bạn thực sự tốn bao nhiêu mỗi ngày',
+    add: 'Thêm vật dụng',
+    add_title: 'Vật dụng mới',
+    edit_title: 'Sửa vật dụng',
+    empty_title: 'Chưa có vật dụng',
+    empty_message: 'Ghi lại một lần mua và xem chi phí giảm dần mỗi ngày bạn sở hữu.',
+    choose_icon: 'Chọn biểu tượng',
+    name_label: 'Tên',
+    name_placeholder: 'vd. Máy pha espresso',
+    price_label: 'Giá mua',
+    currency_label: 'Tiền tệ',
+    purchase_date_label: 'Ngày mua',
+    mark_inactive: 'Đánh dấu ngừng',
+    mark_inactive_hint: 'Dừng đếm ngày cho những món bạn đã bán, hỏng hoặc không còn dùng.',
+    end_date_label: 'Ngày kết thúc',
+    sold_toggle: 'Tôi đã bán',
+    sale_price_label: 'Giá bán',
+    note_label: 'Ghi chú',
+    note_placeholder: 'Tùy chọn',
+    status_inactive: 'Ngừng',
+    status_active: 'Đang dùng',
+    days_count: '{{count}} ngày',
+    summary_total_value: 'Tổng giá trị',
+    per_day: '/ ngày',
+    delete_title: 'Xóa vật dụng?',
+    delete_message: 'Thao tác này xóa vật dụng khỏi danh sách theo dõi.',
+    summary_daily_cost: 'Chi phí / ngày',
+    summary_counts: 'Vật dụng',
+    icon: {
+      choose_title: 'Chọn biểu tượng',
+      choose_subtitle: 'Chọn biểu tượng hoặc tải lên của bạn',
+      search_placeholder: 'Tìm biểu tượng…',
+    },
   },
 };
 
