@@ -146,6 +146,12 @@ import {
 
 type MainTab = TabName;
 const MAIN_TAB_ORDER: MainTab[] = ['calendar', 'accounts', 'insights', 'albums', 'settings'];
+
+// Delay before presenting the cloud-backup prompt so the add-transaction
+// screen's pop transition (which triggers it) is fully settled first —
+// presenting an RN Modal mid-navigation freezes iOS.
+const CLOUD_BACKUP_PROMPT_PRESENT_DELAY_MS = 450;
+
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -1558,10 +1564,17 @@ function AppContent() {
         }
         cloudBackupShowingRef.current = true;
         markPromptVisible('cloudBackupPrompt');
-        setCloudBackupPromptVisible(true);
         void recordCloudBackupPromptShown();
         void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
           transaction_count: transactionCount,
+        });
+        // The trigger fires as the add-transaction screen is popping back to
+        // Main. Presenting an RN Modal mid-navigation deadlocks the iOS touch
+        // system and freezes the page, so wait for the transition/interactions
+        // to settle before actually showing it. The claim above is already
+        // synchronous, so nothing else can stack in the meantime.
+        InteractionManager.runAfterInteractions(() => {
+          setTimeout(() => setCloudBackupPromptVisible(true), CLOUD_BACKUP_PROMPT_PRESENT_DELAY_MS);
         });
       })();
     });
