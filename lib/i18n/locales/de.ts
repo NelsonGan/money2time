@@ -1610,7 +1610,7 @@ const de = {
   },
   cloud_backup_prompt: {
     title: 'Schütze deine Daten',
-    body: 'Deine Backups werden nur auf diesem Gerät gespeichert – wenn du die App deinstallierst, sind sie weg. Aktiviere Cloud-Backup, um sie sicher in iCloud oder Google Drive aufzubewahren.',
+    body: 'Deine Backups werden nur auf diesem Gerät gespeichert und gehen verloren, wenn du die App deinstallierst. Aktiviere Cloud-Backup, um sie sicher in iCloud oder Google Drive aufzubewahren.',
     cta: 'In der Cloud sichern',
     dismiss: 'Vielleicht später',
   },

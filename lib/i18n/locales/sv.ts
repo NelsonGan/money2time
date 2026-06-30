@@ -1584,7 +1584,7 @@ const sv = {
   },
   cloud_backup_prompt: {
     title: 'Håll dina data säkra',
-    body: 'Dina säkerhetskopior sparas bara på den här enheten – om du avinstallerar appen försvinner de. Aktivera molnbackup för att hålla dem säkra i iCloud eller Google Drive.',
+    body: 'Dina säkerhetskopior sparas bara på den här enheten, så de försvinner om du avinstallerar appen. Aktivera molnbackup för att hålla dem säkra i iCloud eller Google Drive.',
     cta: 'Säkerhetskopiera till molnet',
     dismiss: 'Kanske senare',
   },

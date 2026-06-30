@@ -1588,7 +1588,7 @@ const nb = {
   },
   cloud_backup_prompt: {
     title: 'Hold dataene dine trygge',
-    body: 'Sikkerhetskopiene dine lagres bare på denne enheten – hvis du avinstallerer appen, er de borte. Slå på skylagring for å holde dem trygge i iCloud eller Google Disk.',
+    body: 'Sikkerhetskopiene dine lagres bare på denne enheten, så de forsvinner hvis du avinstallerer appen. Slå på skylagring for å holde dem trygge i iCloud eller Google Disk.',
     cta: 'Sikkerhetskopier til skyen',
     dismiss: 'Kanskje senere',
   },

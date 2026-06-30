@@ -1511,7 +1511,7 @@ const zh = {
   },
   cloud_backup_prompt: {
     title: '保护你的数据安全',
-    body: '你的备份仅保存在本设备上——如果卸载应用，备份就会丢失。开启云备份，将其安全保存到 iCloud 或 Google 云端硬盘。',
+    body: '你的备份仅保存在本设备上，卸载应用后备份就会丢失。开启云备份，将其安全保存到 iCloud 或 Google 云端硬盘。',
     cta: '备份到云端',
     dismiss: '以后再说',
   },

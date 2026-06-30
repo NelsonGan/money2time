@@ -1593,7 +1593,7 @@ const pt = {
   },
   cloud_backup_prompt: {
     title: 'Mantenha seus dados seguros',
-    body: 'Seus backups são armazenados apenas neste dispositivo — se você desinstalar o app, eles serão perdidos. Ative o backup na nuvem para mantê-los seguros no iCloud ou no Google Drive.',
+    body: 'Seus backups são armazenados apenas neste dispositivo, então serão perdidos se você desinstalar o app. Ative o backup na nuvem para mantê-los seguros no iCloud ou no Google Drive.',
     cta: 'Fazer backup na nuvem',
     dismiss: 'Talvez depois',
   },

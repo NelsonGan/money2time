@@ -1596,7 +1596,7 @@ const es = {
   },
   cloud_backup_prompt: {
     title: 'Mantén tus datos a salvo',
-    body: 'Tus copias de seguridad se guardan solo en este dispositivo: si desinstalas la app, se perderán. Activa la copia en la nube para guardarlas de forma segura en iCloud o Google Drive.',
+    body: 'Tus copias de seguridad se guardan solo en este dispositivo, así que se perderán si desinstalas la app. Activa la copia en la nube para guardarlas de forma segura en iCloud o Google Drive.',
     cta: 'Hacer copia en la nube',
     dismiss: 'Quizás más tarde',
   },

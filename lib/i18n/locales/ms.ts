@@ -1589,7 +1589,7 @@ const ms = {
   },
   cloud_backup_prompt: {
     title: 'Pastikan data anda selamat',
-    body: 'Sandaran anda disimpan hanya pada peranti ini — jika anda menyahpasang apl, ia akan hilang. Hidupkan sandaran awan untuk menyimpannya dengan selamat dalam iCloud atau Google Drive.',
+    body: 'Sandaran anda disimpan hanya pada peranti ini, jadi ia akan hilang jika anda menyahpasang apl. Hidupkan sandaran awan untuk menyimpannya dengan selamat dalam iCloud atau Google Drive.',
     cta: 'Sandar ke awan',
     dismiss: 'Mungkin nanti',
   },
