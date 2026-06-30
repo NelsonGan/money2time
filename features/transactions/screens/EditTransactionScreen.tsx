@@ -194,6 +194,7 @@ export function EditTransactionScreen({
         currency: transaction.currency,
         categoryId: transaction.categoryId,
         note: transaction.note ?? '',
+        receiptUri: transaction.receiptUri ?? null,
         sentiment: transaction.sentiment ?? 'neutral',
       }}
     />

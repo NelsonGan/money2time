@@ -44,6 +44,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     fxRate: overrides.fxRate ?? 1,
     toAmount: overrides.toAmount ?? null,
     accountAmount: overrides.accountAmount ?? null,
+    receiptUri: overrides.receiptUri ?? null,
     date: overrides.date ?? '2026-06-03T12:00:00.000Z',
     accountId: null,
     fromAccountId: null,
