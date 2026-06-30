@@ -1467,9 +1467,9 @@ const de = {
     hero_body:
       'Teile einen Screenshot der App zusammen mit deinen eigenen Geldtipps. Je mehr Likes dein Beitrag bekommt, desto größer die Belohnung.',
     rewards_title: 'Belohnungsstufen',
-    tier1_badge: 'Nur posten',
+    tier1_badge: '30+ Likes',
     tier1_reward: '1 Monat Pro',
-    tier1_desc: 'Jeder öffentliche Beitrag zählt auf Instagram, 小红书, Facebook und mehr.',
+    tier1_desc: 'Bring deinen Beitrag auf 30 Likes auf Instagram, 小红书, Facebook und mehr.',
     tier2_badge: '100+ Likes',
     tier2_reward: '1 Jahr Pro',
     tier2_desc: 'Dein Beitrag kam bei den Leuten an.',

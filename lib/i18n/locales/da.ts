@@ -1447,9 +1447,9 @@ const da = {
     hero_body:
       'Del et skærmbillede af appen sammen med dine egne pengetips. Jo mere opslaget bliver elsket, jo større belønning.',
     rewards_title: 'Belønningsniveauer',
-    tier1_badge: 'Bare del',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 måneds Pro',
-    tier1_desc: 'Ethvert offentligt opslag tæller på Instagram, 小红书, Facebook med flere.',
+    tier1_desc: 'Få dit opslag op på 30 likes på Instagram, 小红书, Facebook med flere.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 års Pro',
     tier2_desc: 'Dit opslag ramte plet hos folk.',

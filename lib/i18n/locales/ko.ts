@@ -1418,9 +1418,9 @@ const ko = {
     hero_body:
       '앱 스크린샷을 나만의 돈 관리 팁과 함께 공유하세요. 게시물에 좋아요가 많을수록 보상이 커집니다.',
     rewards_title: '보상 단계',
-    tier1_badge: '게시만 해도',
+    tier1_badge: '좋아요 30+',
     tier1_reward: 'Pro 1개월',
-    tier1_desc: 'Instagram, 小红书, Facebook 등 공개 게시물이면 무엇이든 인정돼요.',
+    tier1_desc: 'Instagram, 小红书, Facebook 등에서 게시물에 좋아요 30개를 받아보세요.',
     tier2_badge: '좋아요 100+',
     tier2_reward: 'Pro 1년',
     tier2_desc: '게시물이 사람들의 공감을 얻었어요.',

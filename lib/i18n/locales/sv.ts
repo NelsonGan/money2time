@@ -1446,9 +1446,9 @@ const sv = {
     hero_body:
       'Dela en skärmbild av appen tillsammans med dina egna pengatips. Ju fler gillningar ditt inlägg får, desto större belöning.',
     rewards_title: 'Belöningsnivåer',
-    tier1_badge: 'Bara posta',
+    tier1_badge: '30+ gillningar',
     tier1_reward: '1 månad Pro',
-    tier1_desc: 'Varje offentligt inlägg räknas på Instagram, 小红书, Facebook med mera.',
+    tier1_desc: 'Få ditt inlägg till 30 gillningar på Instagram, 小红书, Facebook med mera.',
     tier2_badge: '100+ gillningar',
     tier2_reward: '1 år Pro',
     tier2_desc: 'Ditt inlägg träffade rätt hos folk.',

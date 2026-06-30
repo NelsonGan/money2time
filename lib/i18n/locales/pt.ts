@@ -1454,9 +1454,9 @@ const pt = {
     hero_body:
       'Compartilhe uma captura de tela do app junto com as suas próprias dicas de dinheiro. Quanto mais curtidas o seu post receber, maior a recompensa.',
     rewards_title: 'Níveis de recompensa',
-    tier1_badge: 'Só postar',
+    tier1_badge: '30+ curtidas',
     tier1_reward: '1 mês de Pro',
-    tier1_desc: 'Qualquer post público conta no Instagram, 小红书, Facebook e mais.',
+    tier1_desc: 'Leve seu post a 30 curtidas no Instagram, 小红书, Facebook e mais.',
     tier2_badge: '100+ curtidas',
     tier2_reward: '1 ano de Pro',
     tier2_desc: 'Seu post tocou as pessoas.',
