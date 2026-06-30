@@ -1590,7 +1590,7 @@ const pl = {
   },
   cloud_backup_prompt: {
     title: 'Chroń swoje dane',
-    body: 'Twoje kopie zapasowe są przechowywane tylko na tym urządzeniu — jeśli odinstalujesz aplikację, znikną. Włącz kopię w chmurze, aby bezpiecznie przechowywać je w iCloud lub Google Drive.',
+    body: 'Twoje kopie zapasowe są przechowywane tylko na tym urządzeniu, więc znikną, jeśli odinstalujesz aplikację. Włącz kopię w chmurze, aby bezpiecznie przechowywać je w iCloud lub Google Drive.',
     cta: 'Utwórz kopię w chmurze',
     dismiss: 'Może później',
   },

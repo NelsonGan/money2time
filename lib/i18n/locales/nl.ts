@@ -1604,7 +1604,7 @@ const nl = {
   },
   cloud_backup_prompt: {
     title: 'Houd je gegevens veilig',
-    body: 'Je back-ups worden alleen op dit apparaat opgeslagen — als je de app verwijdert, zijn ze weg. Schakel cloudback-up in om ze veilig te bewaren in iCloud of Google Drive.',
+    body: 'Je back-ups worden alleen op dit apparaat opgeslagen, dus ze zijn weg als je de app verwijdert. Schakel cloudback-up in om ze veilig te bewaren in iCloud of Google Drive.',
     cta: 'Back-up naar de cloud',
     dismiss: 'Misschien later',
   },

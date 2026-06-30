@@ -18,7 +18,7 @@ export const CLOUD_BACKUP_PROMPT_STORAGE_KEY = '@m2t/cloud_backup_prompt_state/v
 export const CLOUD_BACKUP_PROMPT_SCHEMA_VERSION = 1;
 
 /** Maximum number of times the prompt is ever shown. */
-export const MAX_SHOWS = 3;
+export const MAX_SHOWS = 10;
 
 /** Minimum days between successive prompts. */
 export const MIN_DAYS_BETWEEN_PROMPTS = 14;

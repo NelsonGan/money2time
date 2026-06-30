@@ -1605,7 +1605,7 @@ const fr = {
   },
   cloud_backup_prompt: {
     title: 'Protégez vos données',
-    body: 'Vos sauvegardes sont stockées uniquement sur cet appareil : si vous désinstallez l’application, elles seront perdues. Activez la sauvegarde dans le cloud pour les conserver en sécurité sur iCloud ou Google Drive.',
+    body: 'Vos sauvegardes sont stockées uniquement sur cet appareil, elles seront donc perdues si vous désinstallez l’application. Activez la sauvegarde dans le cloud pour les conserver en sécurité sur iCloud ou Google Drive.',
     cta: 'Sauvegarder dans le cloud',
     dismiss: 'Plus tard',
   },

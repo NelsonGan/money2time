@@ -1578,7 +1578,7 @@ const en = {
   },
   cloud_backup_prompt: {
     title: 'Keep your data safe',
-    body: 'Your backups are stored only on this device — if you uninstall the app, they’re gone. Turn on cloud backup to keep them safe in iCloud or Google Drive.',
+    body: 'Your backups are stored only on this device, so they disappear if you uninstall the app. Turn on cloud backup to keep them safe in iCloud or Google Drive.',
     cta: 'Back up to the cloud',
     dismiss: 'Maybe later',
   },

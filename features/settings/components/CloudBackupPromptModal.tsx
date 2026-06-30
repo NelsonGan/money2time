@@ -1,8 +1,9 @@
-import { CloudUpload, X } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { GoogleDriveIcon, ICloudIcon } from '~/components/icons/CloudProviderIcons';
 import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -41,12 +42,41 @@ export function CloudBackupPromptModal({
         style={{ paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.md }}
       >
         <View className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float">
-          {/* Tinted hero panel with the cloud glyph. */}
+          {/* Tinted hero panel showing the two cloud destinations. */}
           <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
-            <View
-              style={[styles.iconBubble, { backgroundColor: withColorAlpha(accentColor, 0.16) }]}
-            >
-              <CloudUpload size={40} color={accentColor} strokeWidth={2.2} />
+            <View style={styles.providerRow}>
+              <View style={styles.provider}>
+                <View
+                  style={[
+                    styles.iconBubble,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: withColorAlpha(colors.text, 0.08),
+                    },
+                  ]}
+                >
+                  <ICloudIcon size={34} />
+                </View>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('auto_backup.target.icloud')}
+                </Text>
+              </View>
+              <View style={styles.provider}>
+                <View
+                  style={[
+                    styles.iconBubble,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: withColorAlpha(colors.text, 0.08),
+                    },
+                  ]}
+                >
+                  <GoogleDriveIcon size={30} />
+                </View>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('auto_backup.target.google_drive')}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -93,14 +123,25 @@ export function CloudBackupPromptModal({
 const styles = StyleSheet.create({
   panel: {
     paddingHorizontal: PANEL_PADDING,
-    paddingVertical: 28,
+    paddingVertical: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  providerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: 28,
+  },
+  provider: {
+    alignItems: 'center',
+    gap: 8,
+  },
   iconBubble: {
-    width: 80,
-    height: 80,
+    width: 68,
+    height: 68,
     borderRadius: 999,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

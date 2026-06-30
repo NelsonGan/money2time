@@ -1609,7 +1609,7 @@ const fil = {
   },
   cloud_backup_prompt: {
     title: 'Panatilihing ligtas ang iyong data',
-    body: 'Ang iyong mga backup ay naka-imbak lamang sa device na ito — kung i-uninstall mo ang app, mawawala ang mga ito. I-on ang cloud backup para manatiling ligtas ang mga ito sa iCloud o Google Drive.',
+    body: 'Ang iyong mga backup ay naka-imbak lamang sa device na ito, kaya mawawala ang mga ito kung i-uninstall mo ang app. I-on ang cloud backup para manatiling ligtas ang mga ito sa iCloud o Google Drive.',
     cta: 'I-backup sa cloud',
     dismiss: 'Sa susunod na lang',
   },

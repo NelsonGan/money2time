@@ -1594,7 +1594,7 @@ const tr = {
   },
   cloud_backup_prompt: {
     title: 'Verilerinizi güvende tutun',
-    body: 'Yedekleriniz yalnızca bu cihazda saklanıyor; uygulamayı kaldırırsanız kaybolurlar. Bunları iCloud veya Google Drive’da güvende tutmak için bulut yedeklemeyi açın.',
+    body: 'Yedekleriniz yalnızca bu cihazda saklanır, bu yüzden uygulamayı kaldırırsanız kaybolurlar. Bunları iCloud veya Google Drive’da güvende tutmak için bulut yedeklemeyi açın.',
     cta: 'Buluta yedekle',
     dismiss: 'Belki sonra',
   },

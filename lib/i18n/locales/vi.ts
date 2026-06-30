@@ -1566,7 +1566,7 @@ const vi = {
   },
   cloud_backup_prompt: {
     title: 'Giữ an toàn cho dữ liệu của bạn',
-    body: 'Bản sao lưu của bạn chỉ được lưu trên thiết bị này — nếu gỡ cài đặt ứng dụng, chúng sẽ mất. Bật sao lưu đám mây để giữ an toàn trên iCloud hoặc Google Drive.',
+    body: 'Bản sao lưu của bạn chỉ được lưu trên thiết bị này, vì vậy chúng sẽ mất nếu bạn gỡ cài đặt ứng dụng. Bật sao lưu đám mây để giữ an toàn trên iCloud hoặc Google Drive.',
     cta: 'Sao lưu lên đám mây',
     dismiss: 'Để sau',
   },
