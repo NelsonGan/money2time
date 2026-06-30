@@ -778,7 +778,7 @@ function MainShellScreen({
   // (floating liquid-glass pill vs. classic bar) without measuring it directly.
   const navTabsBoundingRect = useMemo<TutorialTargetRect | null>(() => {
     const visibleTabs = isSimpleMode
-      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts' && tab !== 'albums')
+      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts')
       : MAIN_TAB_ORDER;
     const rects = visibleTabs
       .map((tab) => tutorialNavTabRects[tab])
@@ -915,7 +915,7 @@ function MainShellScreen({
           <BottomNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            hideTabs={isSimpleMode ? ['accounts', 'albums'] : undefined}
+            hideTabs={isSimpleMode ? ['accounts'] : undefined}
             onTutorialTabLayout={handleTutorialTabLayout}
             tutorialFocusedTab={currentTutorialFocusedTab}
             tutorialMeasureToken={tutorialSpotlightRequest.token}
