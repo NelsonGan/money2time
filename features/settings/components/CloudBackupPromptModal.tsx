@@ -37,11 +37,15 @@ export function CloudBackupPromptModal({
       presentationStyle="overFullScreen"
       onRequestClose={onDismiss}
     >
-      <View
+      <Pressable
         className="flex-1 justify-end bg-black/50 px-4"
         style={{ paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.md }}
+        onPress={onDismiss}
       >
-        <View className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float">
+        <Pressable
+          onPress={(event) => event.stopPropagation()}
+          className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float"
+        >
           {/* Tinted hero panel showing the two cloud destinations. */}
           <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
             <View style={styles.providerRow}>
@@ -114,8 +118,8 @@ export function CloudBackupPromptModal({
               </Button>
             </View>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </ThemeModal>
   );
 }
