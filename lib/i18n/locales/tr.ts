@@ -1453,10 +1453,9 @@ const tr = {
     hero_body:
       'Uygulamanın ekran görüntüsünü kendi para ipuçlarınla birlikte paylaş. Paylaşımın ne kadar çok beğeni alırsa ödül o kadar büyük.',
     rewards_title: 'Ödül seviyeleri',
-    tier1_badge: 'Sadece paylaş',
+    tier1_badge: '30+ beğeni',
     tier1_reward: '1 ay Pro',
-    tier1_desc:
-      'Instagram, 小红书, Facebook ve daha fazlasındaki her herkese açık paylaşım sayılır.',
+    tier1_desc: 'Instagram, 小红书, Facebook ve daha fazlasında paylaşımını 30 beğeniye ulaştır.',
     tier2_badge: '100+ beğeni',
     tier2_reward: '1 yıl Pro',
     tier2_desc: 'Paylaşımın insanlara dokundu.',

@@ -1464,9 +1464,9 @@ const nl = {
     hero_body:
       'Deel een screenshot van de app samen met je eigen geldtips. Hoe meer likes je post krijgt, hoe groter de beloning.',
     rewards_title: 'Beloningsniveaus',
-    tier1_badge: 'Gewoon posten',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 maand Pro',
-    tier1_desc: 'Elke openbare post telt op Instagram, 小红书, Facebook en meer.',
+    tier1_desc: 'Haal 30 likes op je post op Instagram, 小红书, Facebook en meer.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 jaar Pro',
     tier2_desc: 'Je post raakte een snaar bij mensen.',

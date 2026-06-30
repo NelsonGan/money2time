@@ -1454,9 +1454,9 @@ const it = {
     hero_body:
       'Condividi uno screenshot dell’app insieme ai tuoi consigli sui soldi. Più piace il tuo post, più grande è la ricompensa.',
     rewards_title: 'Livelli di ricompensa',
-    tier1_badge: 'Pubblica',
+    tier1_badge: '30+ like',
     tier1_reward: '1 mese di Pro',
-    tier1_desc: 'Vale qualsiasi post pubblico su Instagram, 小红书, Facebook e altri.',
+    tier1_desc: 'Raggiungi 30 like sul tuo post su Instagram, 小红书, Facebook e altri.',
     tier2_badge: '100+ like',
     tier2_reward: '1 anno di Pro',
     tier2_desc: 'Il tuo post ha colpito le persone.',

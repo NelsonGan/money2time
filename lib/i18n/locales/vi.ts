@@ -1430,9 +1430,9 @@ const vi = {
     hero_body:
       'Chia sẻ ảnh chụp màn hình ứng dụng kèm theo mẹo tiền bạc của riêng bạn. Bài đăng càng nhiều lượt thích, phần thưởng càng lớn.',
     rewards_title: 'Các mức thưởng',
-    tier1_badge: 'Chỉ cần đăng',
+    tier1_badge: '30+ lượt thích',
     tier1_reward: '1 tháng Pro',
-    tier1_desc: 'Mọi bài đăng công khai trên Instagram, 小红书, Facebook và hơn nữa đều tính.',
+    tier1_desc: 'Đạt 30 lượt thích cho bài đăng trên Instagram, 小红书, Facebook và hơn nữa.',
     tier2_badge: '100+ lượt thích',
     tier2_reward: '1 năm Pro',
     tier2_desc: 'Bài đăng của bạn chạm đến nhiều người.',

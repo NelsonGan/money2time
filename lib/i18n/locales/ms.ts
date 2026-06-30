@@ -1450,9 +1450,9 @@ const ms = {
     hero_body:
       'Kongsi tangkap layar apl bersama tip kewangan anda sendiri. Lebih banyak suka pada pos anda, lebih besar ganjaran.',
     rewards_title: 'Tahap ganjaran',
-    tier1_badge: 'Hantar pos sahaja',
+    tier1_badge: '30+ suka',
     tier1_reward: 'Pro 1 bulan',
-    tier1_desc: 'Mana-mana pos awam dikira di Instagram, 小红书, Facebook dan lain-lain.',
+    tier1_desc: 'Kumpulkan 30 suka untuk pos anda di Instagram, 小红书, Facebook dan lain-lain.',
     tier2_badge: '100+ suka',
     tier2_reward: 'Pro 1 tahun',
     tier2_desc: 'Pos anda menyentuh hati ramai orang.',

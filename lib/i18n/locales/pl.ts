@@ -1452,9 +1452,9 @@ const pl = {
     hero_body:
       'Udostępnij zrzut ekranu aplikacji wraz z własnymi poradami o pieniądzach. Im więcej polubień zbierze Twój post, tym większa nagroda.',
     rewards_title: 'Poziomy nagród',
-    tier1_badge: 'Po prostu opublikuj',
+    tier1_badge: '30+ polubień',
     tier1_reward: '1 miesiąc Pro',
-    tier1_desc: 'Liczy się każdy publiczny post na Instagram, 小红书, Facebook i innych.',
+    tier1_desc: 'Zdobądź 30 polubień pod swoim postem na Instagram, 小红书, Facebook i innych.',
     tier2_badge: '100+ polubień',
     tier2_reward: '1 rok Pro',
     tier2_desc: 'Twój post trafił do ludzi.',

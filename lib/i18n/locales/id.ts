@@ -1457,9 +1457,9 @@ const id = {
     hero_body:
       'Bagikan tangkapan layar aplikasi bersama tips keuanganmu sendiri. Makin banyak suka di postinganmu, makin besar hadiahnya.',
     rewards_title: 'Tingkat hadiah',
-    tier1_badge: 'Cukup posting',
+    tier1_badge: '30+ suka',
     tier1_reward: 'Pro 1 bulan',
-    tier1_desc: 'Postingan publik apa pun dihitung di Instagram, 小红书, Facebook, dan lainnya.',
+    tier1_desc: 'Kumpulkan 30 suka untuk postinganmu di Instagram, 小红书, Facebook, dan lainnya.',
     tier2_badge: '100+ suka',
     tier2_reward: 'Pro 1 tahun',
     tier2_desc: 'Postinganmu mengena di hati orang.',

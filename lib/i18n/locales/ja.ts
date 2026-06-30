@@ -1427,9 +1427,9 @@ const ja = {
     hero_body:
       'アプリのスクリーンショットを自分のお金の豆知識と一緒にシェアしましょう。投稿のいいねが多いほど報酬も大きくなります。',
     rewards_title: '報酬レベル',
-    tier1_badge: '投稿するだけ',
+    tier1_badge: '30いいね以上',
     tier1_reward: 'Pro 1か月',
-    tier1_desc: 'Instagram、小红书、Facebookなどの公開投稿ならどれでもOK。',
+    tier1_desc: 'Instagram、小红书、Facebookなどであなたの投稿に30いいねを集めましょう。',
     tier2_badge: '100いいね以上',
     tier2_reward: 'Pro 1年',
     tier2_desc: 'あなたの投稿が多くの人に響きました。',

@@ -1457,9 +1457,9 @@ const es = {
     hero_body:
       'Comparte una captura de la app junto con tus propios consejos de dinero. Cuantos más likes reciba tu publicación, mayor será la recompensa.',
     rewards_title: 'Niveles de recompensa',
-    tier1_badge: 'Solo publica',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 mes de Pro',
-    tier1_desc: 'Cualquier publicación pública cuenta en Instagram, 小红书, Facebook y más.',
+    tier1_desc: 'Consigue 30 likes en tu publicación en Instagram, 小红书, Facebook y más.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 año de Pro',
     tier2_desc: 'Tu publicación conectó con la gente.',

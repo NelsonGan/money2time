@@ -1415,9 +1415,9 @@ const en = {
     hero_body:
       'Share a screenshot of the app along with your own money tips. The more love your post gets, the bigger your reward.',
     rewards_title: 'Reward tiers',
-    tier1_badge: 'Just post',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 month of Pro',
-    tier1_desc: 'Any public post counts on Instagram, 小红书, Facebook, and more.',
+    tier1_desc: 'Get your post to 30 likes on Instagram, 小红书, Facebook, and more.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 year of Pro',
     tier2_desc: 'Your post struck a chord with people.',
