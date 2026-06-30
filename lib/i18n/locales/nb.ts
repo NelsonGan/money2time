@@ -1450,9 +1450,9 @@ const nb = {
     hero_body:
       'Del et skjermbilde av appen sammen med dine egne pengetips. Jo flere liker innlegget ditt, jo større belønning.',
     rewards_title: 'Belønningsnivåer',
-    tier1_badge: 'Bare post',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 måned Pro',
-    tier1_desc: 'Ethvert offentlig innlegg teller på Instagram, 小红书, Facebook med mer.',
+    tier1_desc: 'Få innlegget ditt opp i 30 likes på Instagram, 小红书, Facebook med mer.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 år Pro',
     tier2_desc: 'Innlegget ditt traff folk.',

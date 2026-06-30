@@ -1410,9 +1410,9 @@ const th = {
     hero_body:
       'แชร์ภาพหน้าจอของแอปพร้อมเคล็ดลับเรื่องเงินของคุณเอง ยิ่งโพสต์ได้ไลก์เยอะ รางวัลยิ่งใหญ่',
     rewards_title: 'ระดับรางวัล',
-    tier1_badge: 'แค่โพสต์',
+    tier1_badge: '30+ ไลก์',
     tier1_reward: 'Pro 1 เดือน',
-    tier1_desc: 'โพสต์สาธารณะบน Instagram, 小红书, Facebook และอื่นๆ นับหมด',
+    tier1_desc: 'ทำให้โพสต์ของคุณได้ 30 ไลก์บน Instagram, 小红书, Facebook และอื่นๆ',
     tier2_badge: '100+ ไลก์',
     tier2_reward: 'Pro 1 ปี',
     tier2_desc: 'โพสต์ของคุณโดนใจผู้คน',

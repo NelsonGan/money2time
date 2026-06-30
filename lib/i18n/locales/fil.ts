@@ -1469,9 +1469,9 @@ const fil = {
     hero_body:
       'Mag-share ng screenshot ng app kasama ang sarili mong money tips. Mas maraming likes, mas malaking reward.',
     rewards_title: 'Mga antas ng reward',
-    tier1_badge: 'Mag-post lang',
+    tier1_badge: '30+ likes',
     tier1_reward: '1 buwang Pro',
-    tier1_desc: 'Bilang ang anumang public post sa Instagram, 小红书, Facebook at iba pa.',
+    tier1_desc: 'Abutin ang 30 likes sa iyong post sa Instagram, 小红书, Facebook at iba pa.',
     tier2_badge: '100+ likes',
     tier2_reward: '1 taóng Pro',
     tier2_desc: 'Umugat sa mga tao ang post mo.',
