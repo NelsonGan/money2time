@@ -1521,11 +1521,20 @@ function AppContent() {
     // Never stack on top of another overlay — that overlap can freeze the page.
     blocked: showTutorialPrompt || featureAnnouncementVisible || biometricLocked,
   };
+  // Synchronous "already claimed" flag. Set the instant we decide to show and
+  // cleared on dismiss, so two rapid triggers (or the concurrently-resolving
+  // review pre-prompt) can never both open a modal.
+  const cloudBackupShowingRef = useRef(false);
 
   useEffect(() => {
     return subscribeMaybeShowCloudBackupPromptRequest(({ transactionCount }) => {
       const guards = cloudBackupGuardsRef.current;
-      if (guards.blocked || isAnyPromptVisible('cloudBackupPrompt')) return;
+      if (
+        guards.blocked ||
+        cloudBackupShowingRef.current ||
+        isAnyPromptVisible('cloudBackupPrompt')
+      )
+        return;
       void (async () => {
         const state = await getCloudBackupPromptState();
         const verdict = checkCloudBackupEligibility({
@@ -1535,14 +1544,22 @@ function AppContent() {
           transactionCount,
         });
         if (!verdict.eligible) return;
-        // Re-check after the async hop — a higher-priority overlay (or the lock
-        // gate) may have appeared while we read storage.
-        if (cloudBackupGuardsRef.current.blocked || isAnyPromptVisible('cloudBackupPrompt')) {
+        // Claim synchronously after the async hop — no await between this guard
+        // and the markPromptVisible/setVisible below — so this can't interleave
+        // with the review pre-prompt (which also claims synchronously) or a
+        // second rapid trigger. Either interleaving would stack a second modal
+        // and freeze the page.
+        if (
+          cloudBackupShowingRef.current ||
+          cloudBackupGuardsRef.current.blocked ||
+          isAnyPromptVisible('cloudBackupPrompt')
+        ) {
           return;
         }
-        await recordCloudBackupPromptShown();
+        cloudBackupShowingRef.current = true;
         markPromptVisible('cloudBackupPrompt');
         setCloudBackupPromptVisible(true);
+        void recordCloudBackupPromptShown();
         void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
           transaction_count: transactionCount,
         });
@@ -1597,12 +1614,14 @@ function AppContent() {
 
   const handleDismissCloudBackupPrompt = useCallback(() => {
     setCloudBackupPromptVisible(false);
+    cloudBackupShowingRef.current = false;
     markPromptHidden('cloudBackupPrompt');
     void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
   }, []);
 
   const handleEnableCloudBackup = useCallback(() => {
     setCloudBackupPromptVisible(false);
+    cloudBackupShowingRef.current = false;
     markPromptHidden('cloudBackupPrompt');
     void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_CTA_TAPPED);
     navigationRef.navigate('SettingsAutoBackup');

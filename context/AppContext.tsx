@@ -1895,9 +1895,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         splits: optimisticSplits,
         splitsSummary: summarizeSplits(optimisticSplits),
       };
-      setTransactions((prev) =>
-        sortTransactions([optimisticParent, ...optimisticTransfers, ...prev], 'date_desc'),
-      );
+      let transactionCountAfterCreate = 0;
+      setTransactions((prev) => {
+        const next = sortTransactions(
+          [optimisticParent, ...optimisticTransfers, ...prev],
+          'date_desc',
+        );
+        transactionCountAfterCreate = next.length;
+        return next;
+      });
       runDeferredWrite(() => {
         try {
           transactionsRepository.createWithId(txId, normalizedInput);
@@ -1944,6 +1950,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             split_total: normalizedInput.amount,
           });
           recordTransactionLogged();
+          requestMaybeShowCloudBackupPrompt({ transactionCount: transactionCountAfterCreate });
         } catch {
           // optimistic rollback handled by refresh
         }
