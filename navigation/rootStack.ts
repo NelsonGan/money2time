@@ -36,6 +36,7 @@ export type RootStackParamList = {
   SettingsHourlyValue: undefined;
   SettingsQuickEntry: undefined;
   SettingsMultiCurrency: undefined;
+  SettingsAutoBackup: undefined;
   SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
   ShareAndEarn: undefined;
   ProPaywall: { source?: string; flashMessage?: string } | undefined;

@@ -1586,6 +1586,12 @@ const nb = {
     feedback_open: 'Del tilbakemelding',
     feedback_skip: 'Nei takk',
   },
+  cloud_backup_prompt: {
+    title: 'Hold dataene dine trygge',
+    body: 'Sikkerhetskopiene dine lagres bare på denne enheten, så de forsvinner hvis du avinstallerer appen. Slå på skylagring for å holde dem trygge i iCloud eller Google Disk.',
+    cta: 'Sikkerhetskopier til skyen',
+    dismiss: 'Kanskje senere',
+  },
   albums: {
     location: {
       label: 'Sted',

@@ -1552,6 +1552,12 @@ const ko = {
     feedback_open: '피드백 보내기',
     feedback_skip: '괜찮아요',
   },
+  cloud_backup_prompt: {
+    title: '데이터를 안전하게 보관하세요',
+    body: '백업은 이 기기에만 저장되어 있어 앱을 삭제하면 사라집니다. 클라우드 백업을 켜서 iCloud 또는 Google 드라이브에 안전하게 보관하세요.',
+    cta: '클라우드에 백업',
+    dismiss: '나중에',
+  },
   albums: {
     location: {
       label: '위치',

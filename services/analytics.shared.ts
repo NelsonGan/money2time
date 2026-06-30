@@ -104,6 +104,11 @@ export const AnalyticsEvents = {
   REVIEW_PREPROMPT_DISMISSED: 'Review Preprompt Dismissed',
   REVIEW_PREPROMPT_FEEDBACK_OPENED: 'Review Preprompt Feedback Opened',
   REVIEW_PREPROMPT_FEEDBACK_DECLINED: 'Review Preprompt Feedback Declined',
+
+  // Cloud-backup opt-in prompt
+  CLOUD_BACKUP_PROMPT_SHOWN: 'Cloud Backup Prompt Shown',
+  CLOUD_BACKUP_PROMPT_CTA_TAPPED: 'Cloud Backup Prompt CTA Tapped',
+  CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 } as const;
 
 // ---------------------------------------------------------------------------
