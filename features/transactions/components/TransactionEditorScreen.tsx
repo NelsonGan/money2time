@@ -2242,7 +2242,7 @@ export function TransactionEditorScreen({
                               label={I18n.t('transaction_detail.note')}
                               isActive={activeField === 'note'}
                               onPress={focusNoteField}
-                              rightElement={<View style={styles.trailingSpacer} />}
+                              rightElement={null}
                             >
                               <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center gap-2">
