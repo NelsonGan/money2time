@@ -231,6 +231,31 @@ describe('toTransaction', () => {
     } as any);
     expect(tx.recurrencePattern).toBe('none');
   });
+
+  it('carries the receipt relative path through, defaulting missing to null', () => {
+    const base = {
+      id: 't',
+      type: 'expense',
+      amount: 0,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: null,
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: null,
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      ...STAMPS,
+    };
+    expect(toTransaction({ ...base, receiptUri: 'receipts/9f3c.jpg' } as any).receiptUri).toBe(
+      'receipts/9f3c.jpg',
+    );
+    expect(toTransaction(base as any).receiptUri).toBeNull();
+  });
 });
 
 describe('toTransactionSplit', () => {

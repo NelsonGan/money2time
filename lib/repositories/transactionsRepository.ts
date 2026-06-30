@@ -52,6 +52,8 @@ export interface CreateTransactionInput {
   toAccountId?: string | null;
   categoryId?: string | null;
   note?: string | null;
+  /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
+  receiptUri?: string | null;
   sentiment?: TransactionSentiment;
 }
 
@@ -483,6 +485,7 @@ class TransactionsRepository {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,

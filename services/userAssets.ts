@@ -21,6 +21,7 @@ const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
 const AVATARS_KIND = 'avatars';
 const ALBUM_COVERS_KIND = 'album-covers';
 const ITEM_ICONS_KIND = 'item-icons';
+const RECEIPTS_KIND = 'receipts';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -111,6 +112,30 @@ export function getAlbumCoverUri(relativePath?: string | null): string | null {
 
 /** Deletes a stored album-cover file, e.g. when replacing or clearing it. */
 export function deleteAlbumCover(relativePath?: string | null) {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (file.exists) file.delete();
+}
+
+/** Copies a picked image into the receipt store, returning its relative path
+ *  (e.g. `receipts/9f3c.jpg`) for persistence on the transaction row. */
+export function saveReceiptImage(sourceUri: string): string {
+  ensureDir(kindDir(RECEIPTS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, RECEIPTS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  return `${RECEIPTS_KIND}/${fileName}`;
+}
+
+/** Resolves a stored receipt relative path to an on-disk file uri, or null. */
+export function getReceiptUri(relativePath?: string | null): string | null {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  return file.exists ? file.uri : null;
+}
+
+/** Deletes a stored receipt file, e.g. when replacing or clearing it. */
+export function deleteReceiptImage(relativePath?: string | null) {
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
   const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
   if (file.exists) file.delete();

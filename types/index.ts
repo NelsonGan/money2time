@@ -373,6 +373,12 @@ export interface Transaction {
   toAccountId: string | null;
   categoryId: string | null;
   note: string | null;
+  /**
+   * Relative path (within the user-assets store) of an optional receipt image,
+   * e.g. `receipts/9f3c.jpg`. Resolve to a file uri with `getReceiptUri`. Null
+   * when no receipt is attached.
+   */
+  receiptUri: string | null;
   recurrencePattern: RecurrencePattern;
   recurrenceInterval: number;
   recurrenceEndDate: string | null;
