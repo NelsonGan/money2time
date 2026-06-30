@@ -1583,6 +1583,12 @@ const da = {
     feedback_open: 'Del feedback',
     feedback_skip: 'Nej tak',
   },
+  cloud_backup_prompt: {
+    title: 'Hold dine data sikre',
+    body: 'Dine sikkerhedskopier gemmes kun på denne enhed – hvis du afinstallerer appen, er de væk. Slå cloud-backup til for at holde dem sikre i iCloud eller Google Drev.',
+    cta: 'Sikkerhedskopiér til skyen',
+    dismiss: 'Måske senere',
+  },
   albums: {
     location: {
       label: 'Placering',

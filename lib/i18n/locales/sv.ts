@@ -1582,6 +1582,12 @@ const sv = {
     feedback_open: 'Dela feedback',
     feedback_skip: 'Nej tack',
   },
+  cloud_backup_prompt: {
+    title: 'Håll dina data säkra',
+    body: 'Dina säkerhetskopior sparas bara på den här enheten – om du avinstallerar appen försvinner de. Aktivera molnbackup för att hålla dem säkra i iCloud eller Google Drive.',
+    cta: 'Säkerhetskopiera till molnet',
+    dismiss: 'Kanske senare',
+  },
   albums: {
     location: {
       label: 'Plats',

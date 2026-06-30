@@ -1592,6 +1592,12 @@ const tr = {
     feedback_open: 'Geri bildirim gönder',
     feedback_skip: 'Hayır, teşekkürler',
   },
+  cloud_backup_prompt: {
+    title: 'Verilerinizi güvende tutun',
+    body: 'Yedekleriniz yalnızca bu cihazda saklanıyor; uygulamayı kaldırırsanız kaybolurlar. Bunları iCloud veya Google Drive’da güvende tutmak için bulut yedeklemeyi açın.',
+    cta: 'Buluta yedekle',
+    dismiss: 'Belki sonra',
+  },
   albums: {
     location: {
       label: 'Konum',

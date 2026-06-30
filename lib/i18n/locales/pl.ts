@@ -1588,6 +1588,12 @@ const pl = {
     feedback_open: 'Podziel się opinią',
     feedback_skip: 'Nie, dziękuję',
   },
+  cloud_backup_prompt: {
+    title: 'Chroń swoje dane',
+    body: 'Twoje kopie zapasowe są przechowywane tylko na tym urządzeniu — jeśli odinstalujesz aplikację, znikną. Włącz kopię w chmurze, aby bezpiecznie przechowywać je w iCloud lub Google Drive.',
+    cta: 'Utwórz kopię w chmurze',
+    dismiss: 'Może później',
+  },
   albums: {
     location: {
       label: 'Lokalizacja',

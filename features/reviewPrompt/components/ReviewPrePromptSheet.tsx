@@ -4,6 +4,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import {
+  isAnyPromptVisible,
+  markPromptHidden,
+  markPromptVisible,
+} from '~/services/globalPromptCoordinator';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import {
@@ -39,13 +44,20 @@ export function ReviewPrePromptSheet() {
 
   useEffect(() => {
     return subscribeShowReviewPrePromptRequest(({ trigger: nextTrigger }) => {
+      // Yield if another global overlay is up — stacking RN modals can freeze
+      // the page. The trigger is cadence-gated, so skipping one is harmless.
+      if (isAnyPromptVisible('reviewPrePrompt')) return;
+      markPromptVisible('reviewPrePrompt');
       setTrigger(nextTrigger);
       setStep('initial');
       setVisible(true);
     });
   }, []);
 
-  const close = useCallback(() => setVisible(false), []);
+  const close = useCallback(() => {
+    setVisible(false);
+    markPromptHidden('reviewPrePrompt');
+  }, []);
 
   const onHappy = useCallback(() => {
     void triggerHaptic('success');

@@ -83,6 +83,7 @@ import {
   initNotificationHandler,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import { requestMaybeShowCloudBackupPrompt } from '~/services/cloudBackupPromptNavigation';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import {
   type Account,
@@ -1511,7 +1512,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deletedAt: null,
         ...resolveRelationNames(normalizedInput),
       };
-      setTransactions((prev) => sortTransactions([optimistic, ...prev], 'date_desc'));
+      let transactionCountAfterCreate = 0;
+      setTransactions((prev) => {
+        const next = sortTransactions([optimistic, ...prev], 'date_desc');
+        transactionCountAfterCreate = next.length;
+        return next;
+      });
       runDeferredWrite(() => {
         try {
           transactionsRepository.createWithId(id, normalizedInput);
@@ -1536,6 +1542,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             sentiment: normalizedInput.sentiment ?? 'neutral',
           });
           recordTransactionLogged();
+          // Nudge non-cloud users toward iCloud/Drive backup. The overlay owns
+          // eligibility (cadence, cap, on-cloud check) + collision avoidance.
+          requestMaybeShowCloudBackupPrompt({ transactionCount: transactionCountAfterCreate });
         } catch {
           // rollback on failure
         }
