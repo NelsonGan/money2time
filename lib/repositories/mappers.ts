@@ -251,6 +251,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     toAccountId: row.toAccountId,
     categoryId: row.categoryId,
     note: row.note,
+    receiptUri: row.receiptUri ?? null,
     recurrencePattern: asRecurrencePattern(row.recurrencePattern),
     recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
     recurrenceEndDate: row.recurrenceEndDate,

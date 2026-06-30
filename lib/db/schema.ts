@@ -60,6 +60,9 @@ export const transactionsTable = sqliteTable('transactions', {
   toAccountId: text('to_account_id'),
   categoryId: text('category_id'),
   note: text('note'),
+  // Relative path (within the user-assets store) of an optional receipt image,
+  // e.g. `receipts/9f3c.jpg`. Null when no receipt is attached.
+  receiptUri: text('receipt_uri'),
   recurrencePattern: text('recurrence_pattern').notNull().default('none'),
   recurrenceInterval: integer('recurrence_interval').notNull().default(1),
   recurrenceEndDate: text('recurrence_end_date'),

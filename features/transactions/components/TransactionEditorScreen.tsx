@@ -53,6 +53,7 @@ import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
   NumpadPanel,
+  ReceiptField,
   SplitBillModal,
   type SplitDraft,
   splitsHelpers,
@@ -72,6 +73,7 @@ import {
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
+import { deleteReceiptImage } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -183,6 +185,8 @@ interface TransactionEditorInitialValues {
   currency: string | null;
   categoryId: string | null;
   note: string;
+  /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
+  receiptUri: string | null;
   sentiment: TransactionSentiment;
 }
 
@@ -473,6 +477,43 @@ export function TransactionEditorScreen({
   const [note, setNote] = useState(initialValues?.note ?? '');
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
     initialValues?.sentiment ?? 'neutral',
+  );
+  // Optional receipt image (relative path within the user-assets store).
+  const [receiptUri, setReceiptUri] = useState<string | null>(initialValues?.receiptUri ?? null);
+  // The receipt that was persisted when the editor opened. Used so editing the
+  // attachment cleans up orphaned files (the prior one on disk) without deleting
+  // the originally-saved file until the change is actually committed via Save.
+  const persistedReceiptRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  // Mirror of the current receipt + whether it was committed via Save, read by
+  // the unmount cleanup so closing without saving doesn't leave an orphan file.
+  const receiptUriRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  const receiptCommittedRef = useRef(false);
+  const handleReceiptChange = useCallback((nextReceiptUri: string | null) => {
+    setReceiptUri((prev) => {
+      // Drop an in-session temp (a file saved this session that isn't the
+      // originally-persisted one) the moment it's replaced or removed.
+      if (prev && prev !== persistedReceiptRef.current && prev !== nextReceiptUri) {
+        deleteReceiptImage(prev);
+      }
+      return nextReceiptUri;
+    });
+    receiptUriRef.current = nextReceiptUri;
+  }, []);
+  // On unmount: if the editor closed without committing a Save, delete a
+  // freshly-picked file that never became the persisted attachment (create-mode
+  // attach-then-cancel, or a replace that was abandoned). The persisted file is
+  // left untouched — its row may still reference it.
+  useEffect(
+    () => () => {
+      if (
+        !receiptCommittedRef.current &&
+        receiptUriRef.current &&
+        receiptUriRef.current !== persistedReceiptRef.current
+      ) {
+        deleteReceiptImage(receiptUriRef.current);
+      }
+    },
+    [],
   );
   const [amountExpression, setAmountExpression] = useState('');
 
@@ -1236,6 +1277,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          receiptUri,
           sentiment,
         };
         preparedSubmitPayload = submitPayload;
@@ -1313,7 +1355,15 @@ export function TransactionEditorScreen({
 
       // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
+      // Mark the current receipt as committed so the unmount cleanup keeps it.
+      receiptCommittedRef.current = true;
       onClose();
+
+      // The submission is committed — delete the previously-persisted receipt
+      // file if the user replaced or removed it this session (edit mode).
+      if (persistedReceiptRef.current && persistedReceiptRef.current !== receiptUri) {
+        deleteReceiptImage(persistedReceiptRef.current);
+      }
 
       let deferredSubmit: (() => void) | null = null;
       if (useSplitsPath && submitPayload && onSubmitWithSplits) {
@@ -2215,7 +2265,7 @@ export function TransactionEditorScreen({
                               label={I18n.t('transaction_detail.note')}
                               isActive={activeField === 'note'}
                               onPress={focusNoteField}
-                              rightElement={<View style={styles.trailingSpacer} />}
+                              rightElement={null}
                             >
                               <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center gap-2">
@@ -2249,6 +2299,17 @@ export function TransactionEditorScreen({
                               </View>
                             </SummaryRow>
                           </View>
+
+                          {/* Receipt row (expense / income only) */}
+                          {type === 'expense' || type === 'income' ? (
+                            <>
+                              <View className="h-[1px] bg-border/15 mx-4" />
+                              <ReceiptField
+                                receiptUri={receiptUri}
+                                onChange={handleReceiptChange}
+                              />
+                            </>
+                          ) : null}
 
                           {/* Sentiment picker */}
                           {type === 'expense' ? (

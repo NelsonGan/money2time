@@ -1480,6 +1480,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fxRate: input.fxRate ?? snapshot.fxRate,
         toAmount: input.toAmount ?? null,
         accountAmount: computedAccountAmount,
+        receiptUri: input.receiptUri ?? null,
       };
       const id = newId();
       const now = nowIso();
@@ -1499,6 +1500,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -1840,6 +1842,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: t.toAccountId,
         categoryId: null,
         note: null,
+        receiptUri: null,
         sentiment: 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -1870,6 +1873,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -2073,6 +2077,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               toAccountId: paybackAccountId,
               categoryId: null,
               note,
+              receiptUri: null,
               sentiment: 'neutral',
               recurrencePattern: 'none',
               recurrenceInterval: 1,
