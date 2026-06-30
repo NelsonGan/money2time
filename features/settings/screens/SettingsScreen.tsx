@@ -65,6 +65,7 @@ import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
@@ -788,6 +789,14 @@ export function SettingsScreen({
                     onPress={onOpenWidgetPreviews}
                   />
                 ) : null}
+                <SettingsGridTile
+                  icon={<RefreshCcw size={20} color={themeColors.primary} />}
+                  label="Reset cloud prompt"
+                  onPress={() => {
+                    void triggerHaptic('success');
+                    void resetCloudBackupPromptState();
+                  }}
+                />
               </SettingsGrid>
             </SettingsSection>
           ) : null}
