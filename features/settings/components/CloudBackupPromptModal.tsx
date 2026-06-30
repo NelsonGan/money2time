@@ -7,6 +7,7 @@ import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { withColorAlpha } from '~/utils/color';
 
 interface CloudBackupPromptModalProps {
   visible: boolean;
@@ -17,15 +18,6 @@ interface CloudBackupPromptModalProps {
 }
 
 const PANEL_PADDING = 18;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
-}
 
 export function CloudBackupPromptModal({
   visible,
