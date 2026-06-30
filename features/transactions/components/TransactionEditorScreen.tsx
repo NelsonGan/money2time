@@ -484,6 +484,10 @@ export function TransactionEditorScreen({
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
   const persistedReceiptRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  // Mirror of the current receipt + whether it was committed via Save, read by
+  // the unmount cleanup so closing without saving doesn't leave an orphan file.
+  const receiptUriRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  const receiptCommittedRef = useRef(false);
   const handleReceiptChange = useCallback((nextReceiptUri: string | null) => {
     setReceiptUri((prev) => {
       // Drop an in-session temp (a file saved this session that isn't the
@@ -493,7 +497,24 @@ export function TransactionEditorScreen({
       }
       return nextReceiptUri;
     });
+    receiptUriRef.current = nextReceiptUri;
   }, []);
+  // On unmount: if the editor closed without committing a Save, delete a
+  // freshly-picked file that never became the persisted attachment (create-mode
+  // attach-then-cancel, or a replace that was abandoned). The persisted file is
+  // left untouched — its row may still reference it.
+  useEffect(
+    () => () => {
+      if (
+        !receiptCommittedRef.current &&
+        receiptUriRef.current &&
+        receiptUriRef.current !== persistedReceiptRef.current
+      ) {
+        deleteReceiptImage(receiptUriRef.current);
+      }
+    },
+    [],
+  );
   const [amountExpression, setAmountExpression] = useState('');
 
   const hasInitialSplits = !!initialSplits && initialSplits.length > 0;
@@ -1334,6 +1355,8 @@ export function TransactionEditorScreen({
 
       // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
+      // Mark the current receipt as committed so the unmount cleanup keeps it.
+      receiptCommittedRef.current = true;
       onClose();
 
       // The submission is committed — delete the previously-persisted receipt

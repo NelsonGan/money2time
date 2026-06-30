@@ -49,23 +49,23 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
 
   const pickFrom = useCallback(
     async (source: 'camera' | 'library') => {
-      const permission =
-        source === 'camera'
-          ? await ImagePicker.requestCameraPermissionsAsync()
-          : await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert(
-          I18n.t('accounts.logo.permission_title'),
-          I18n.t('accounts.logo.permission_message'),
-        );
-        return;
-      }
-      const result =
-        source === 'camera'
-          ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
-          : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
-      if (result.canceled || !result.assets?.[0]) return;
       try {
+        const permission =
+          source === 'camera'
+            ? await ImagePicker.requestCameraPermissionsAsync()
+            : await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert(
+            I18n.t('accounts.logo.permission_title'),
+            I18n.t('accounts.logo.permission_message'),
+          );
+          return;
+        }
+        const result =
+          source === 'camera'
+            ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
+            : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+        if (result.canceled || !result.assets?.[0]) return;
         const relativePath = saveReceiptImage(result.assets[0].uri);
         onChange(relativePath);
       } catch {
