@@ -1602,6 +1602,12 @@ const nl = {
     feedback_open: 'Feedback delen',
     feedback_skip: 'Nee, bedankt',
   },
+  cloud_backup_prompt: {
+    title: 'Houd je gegevens veilig',
+    body: 'Je back-ups worden alleen op dit apparaat opgeslagen — als je de app verwijdert, zijn ze weg. Schakel cloudback-up in om ze veilig te bewaren in iCloud of Google Drive.',
+    cta: 'Back-up naar de cloud',
+    dismiss: 'Misschien later',
+  },
   albums: {
     location: {
       label: 'Locatie',

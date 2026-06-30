@@ -1563,6 +1563,12 @@ const ja = {
     feedback_open: 'フィードバックを送る',
     feedback_skip: '結構です',
   },
+  cloud_backup_prompt: {
+    title: 'データを安全に保ちましょう',
+    body: 'バックアップはこの端末にのみ保存されています。アプリを削除すると失われます。クラウドバックアップをオンにして、iCloud または Google ドライブに安全に保管しましょう。',
+    cta: 'クラウドにバックアップ',
+    dismiss: 'あとで',
+  },
   albums: {
     location: {
       label: '場所',

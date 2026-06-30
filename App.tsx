@@ -62,8 +62,10 @@ import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
+import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
 import {
   AccountsScreen,
+  AutoBackupScreen,
   ExchangeRatesScreen,
   HourlyValueScreen,
   ProPaywallScreen,
@@ -104,11 +106,22 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
+import {
+  checkEligibility as checkCloudBackupEligibility,
+  getCloudBackupPromptState,
+  recordCloudBackupPromptShown,
+} from '~/services/cloudBackupPrompt';
+import { subscribeMaybeShowCloudBackupPromptRequest } from '~/services/cloudBackupPromptNavigation';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
+import {
+  isAnyPromptVisible,
+  markPromptHidden,
+  markPromptVisible,
+} from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
@@ -1249,6 +1262,10 @@ function SettingsMultiCurrencyRouteScreen({
   return <ExchangeRatesScreen onBack={() => navigation.goBack()} />;
 }
 
+function SettingsAutoBackupRouteScreen({ navigation }: RootStackRouteProps<'SettingsAutoBackup'>) {
+  return <AutoBackupScreen onBack={() => navigation.goBack()} />;
+}
+
 function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEarn'>) {
   return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
 }
@@ -1417,6 +1434,7 @@ function AppContent() {
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
   const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
+  const [cloudBackupPromptVisible, setCloudBackupPromptVisible] = useState(false);
   // Initialize pessimistically from the persisted intent so the announcement is
   // never presented during the brief window before the lock gate reports in.
   const [biometricLocked, setBiometricLocked] = useState(settings.biometricLockEnabled);
@@ -1485,6 +1503,7 @@ function AppContent() {
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
         setFeatureAnnouncementVisible(true);
+        markPromptVisible('featureAnnouncement');
       })();
     });
 
@@ -1493,6 +1512,43 @@ function AppContent() {
       interactionHandle.cancel();
     };
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
+
+  // Latest snapshot of the cloud-backup prompt's gating inputs, read inside the
+  // (stable, subscribe-once) bus listener so the listener never re-subscribes.
+  const cloudBackupGuardsRef = useRef({ isOnCloudBackup: false, blocked: true });
+  cloudBackupGuardsRef.current = {
+    isOnCloudBackup: settings.autoBackupEnabled && settings.autoBackupTarget !== 'local',
+    // Never stack on top of another overlay — that overlap can freeze the page.
+    blocked: showTutorialPrompt || featureAnnouncementVisible || biometricLocked,
+  };
+
+  useEffect(() => {
+    return subscribeMaybeShowCloudBackupPromptRequest(({ transactionCount }) => {
+      const guards = cloudBackupGuardsRef.current;
+      if (guards.blocked || isAnyPromptVisible('cloudBackupPrompt')) return;
+      void (async () => {
+        const state = await getCloudBackupPromptState();
+        const verdict = checkCloudBackupEligibility({
+          state,
+          now: new Date(),
+          isOnCloudBackup: guards.isOnCloudBackup,
+          transactionCount,
+        });
+        if (!verdict.eligible) return;
+        // Re-check after the async hop — a higher-priority overlay (or the lock
+        // gate) may have appeared while we read storage.
+        if (cloudBackupGuardsRef.current.blocked || isAnyPromptVisible('cloudBackupPrompt')) {
+          return;
+        }
+        await recordCloudBackupPromptShown();
+        markPromptVisible('cloudBackupPrompt');
+        setCloudBackupPromptVisible(true);
+        void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
+          transaction_count: transactionCount,
+        });
+      })();
+    });
+  }, []);
 
   const splashHiddenRef = useRef(false);
   const handleContentLayout = useCallback(() => {
@@ -1514,26 +1570,43 @@ function AppContent() {
     setTutorialStartToken(0);
     InteractionManager.runAfterInteractions(() => {
       setShowTutorialPrompt(true);
+      markPromptVisible('tutorialPrompt');
     });
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
   }, []);
 
   const handleStartTutorialNow = useCallback(() => {
     setShowTutorialPrompt(false);
+    markPromptHidden('tutorialPrompt');
     setTutorialStartToken((prev) => prev + 1);
   }, []);
 
   const handleSkipTutorialPrompt = useCallback(() => {
     setShowTutorialPrompt(false);
+    markPromptHidden('tutorialPrompt');
   }, []);
 
   const handleDismissFeatureAnnouncement = useCallback(() => {
     const announcementId = featureAnnouncement?.id;
     setFeatureAnnouncementVisible(false);
+    markPromptHidden('featureAnnouncement');
     if (announcementId) {
       void markFeatureAnnouncementSeen(settings.appUserId, announcementId);
     }
   }, [featureAnnouncement?.id, settings.appUserId]);
+
+  const handleDismissCloudBackupPrompt = useCallback(() => {
+    setCloudBackupPromptVisible(false);
+    markPromptHidden('cloudBackupPrompt');
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
+  }, []);
+
+  const handleEnableCloudBackup = useCallback(() => {
+    setCloudBackupPromptVisible(false);
+    markPromptHidden('cloudBackupPrompt');
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_CTA_TAPPED);
+    navigationRef.navigate('SettingsAutoBackup');
+  }, [navigationRef]);
 
   // Keep the native splash up while data loads — render nothing so no
   // intermediate UI flashes before the first page is ready.
@@ -1609,6 +1682,7 @@ function AppContent() {
             name="SettingsMultiCurrency"
             component={SettingsMultiCurrencyRouteScreen}
           />
+          <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen
             name="ItemEditor"
@@ -1676,6 +1750,11 @@ function AppContent() {
         visible={featureAnnouncementVisible && !biometricLocked}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
+      />
+      <CloudBackupPromptModal
+        visible={cloudBackupPromptVisible && !biometricLocked}
+        onEnable={handleEnableCloudBackup}
+        onDismiss={handleDismissCloudBackupPrompt}
       />
       <ReviewPrePromptSheet />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />

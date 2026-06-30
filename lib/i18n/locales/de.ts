@@ -1608,6 +1608,12 @@ const de = {
     feedback_open: 'Feedback geben',
     feedback_skip: 'Nein danke',
   },
+  cloud_backup_prompt: {
+    title: 'Schütze deine Daten',
+    body: 'Deine Backups werden nur auf diesem Gerät gespeichert – wenn du die App deinstallierst, sind sie weg. Aktiviere Cloud-Backup, um sie sicher in iCloud oder Google Drive aufzubewahren.',
+    cta: 'In der Cloud sichern',
+    dismiss: 'Vielleicht später',
+  },
   albums: {
     location: {
       label: 'Ort',
