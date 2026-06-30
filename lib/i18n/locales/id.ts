@@ -1594,6 +1594,12 @@ const id = {
     feedback_open: 'Bagikan masukan',
     feedback_skip: 'Tidak, terima kasih',
   },
+  cloud_backup_prompt: {
+    title: 'Jaga data Anda tetap aman',
+    body: 'Cadangan Anda hanya disimpan di perangkat ini, jadi akan hilang jika Anda menghapus aplikasi. Aktifkan pencadangan cloud agar tetap aman di iCloud atau Google Drive.',
+    cta: 'Cadangkan ke cloud',
+    dismiss: 'Nanti saja',
+  },
   albums: {
     location: {
       label: 'Lokasi',

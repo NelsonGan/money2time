@@ -1576,6 +1576,12 @@ const en = {
     feedback_open: 'Share feedback',
     feedback_skip: 'No thanks',
   },
+  cloud_backup_prompt: {
+    title: 'Keep your data safe',
+    body: 'Your backups are stored only on this device, so they disappear if you uninstall the app. Turn on cloud backup to keep them safe in iCloud or Google Drive.',
+    cta: 'Back up to the cloud',
+    dismiss: 'Maybe later',
+  },
   albums: {
     title: 'Albums',
     active_label: 'Auto-add new transactions to',

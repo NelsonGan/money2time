@@ -62,8 +62,10 @@ import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
+import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
 import {
   AccountsScreen,
+  AutoBackupScreen,
   ExchangeRatesScreen,
   HourlyValueScreen,
   ProPaywallScreen,
@@ -104,11 +106,21 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
+import {
+  checkEligibility as checkCloudBackupEligibility,
+  getCloudBackupPromptState,
+  recordCloudBackupPromptShown,
+} from '~/services/cloudBackupPrompt';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
+import {
+  isAnyPromptVisible,
+  markPromptHidden,
+  markPromptVisible,
+} from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
@@ -314,12 +326,16 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
   onVisibleScreenChange?: (screen: string) => void;
+  /** Fired when the user switches into the Settings tab (a tab swap, not a
+   *  native push) — a safe moment to surface the cloud-backup nudge. */
+  onEnterSettingsTab?: () => void;
   tutorialStartToken?: number;
 }
 
 function MainShellScreen({
   navigation,
   onVisibleScreenChange,
+  onEnterSettingsTab,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
@@ -614,7 +630,10 @@ function MainShellScreen({
     if (activeTab === 'insights') {
       recordInsightsView();
     }
-  }, [activeTab]);
+    if (activeTab === 'settings') {
+      onEnterSettingsTab?.();
+    }
+  }, [activeTab, onEnterSettingsTab]);
 
   useEffect(() => {
     const visibleScreen = activeTab === 'settings' ? settingsCurrentScreen : activeTab;
@@ -1249,6 +1268,10 @@ function SettingsMultiCurrencyRouteScreen({
   return <ExchangeRatesScreen onBack={() => navigation.goBack()} />;
 }
 
+function SettingsAutoBackupRouteScreen({ navigation }: RootStackRouteProps<'SettingsAutoBackup'>) {
+  return <AutoBackupScreen onBack={() => navigation.goBack()} />;
+}
+
 function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEarn'>) {
   return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
 }
@@ -1409,7 +1432,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { isLoading, settings, quickEntryPrefs } = useApp();
+  const { isLoading, settings, quickEntryPrefs, getTransactionCount } = useApp();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
@@ -1417,6 +1440,7 @@ function AppContent() {
   const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
   const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
+  const [cloudBackupPromptVisible, setCloudBackupPromptVisible] = useState(false);
   // Initialize pessimistically from the persisted intent so the announcement is
   // never presented during the brief window before the lock gate reports in.
   const [biometricLocked, setBiometricLocked] = useState(settings.biometricLockEnabled);
@@ -1485,6 +1509,7 @@ function AppContent() {
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
         setFeatureAnnouncementVisible(true);
+        markPromptVisible('featureAnnouncement');
       })();
     });
 
@@ -1493,6 +1518,62 @@ function AppContent() {
       interactionHandle.cancel();
     };
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
+
+  // Latest snapshot of the cloud-backup prompt's gating inputs, read inside the
+  // (stable) handler so it can reference live settings without re-creating.
+  const cloudBackupGuardsRef = useRef({ isOnCloudBackup: false, blocked: true });
+  cloudBackupGuardsRef.current = {
+    isOnCloudBackup: settings.autoBackupEnabled && settings.autoBackupTarget !== 'local',
+    // Never stack on top of another overlay — that overlap can freeze the page.
+    blocked: showTutorialPrompt || featureAnnouncementVisible || biometricLocked,
+  };
+  // Synchronous "already claimed" flag, cleared on dismiss, so two rapid
+  // triggers can never both open the modal.
+  const cloudBackupShowingRef = useRef(false);
+
+  // Nudge non-cloud users toward iCloud/Drive backup when they open Settings —
+  // a tab swap (not a native push/pop), so presenting a modal here can't race a
+  // navigation transition the way the old post-transaction trigger did.
+  const maybeShowCloudBackupPrompt = useCallback(async () => {
+    const guards = cloudBackupGuardsRef.current;
+    if (
+      guards.blocked ||
+      cloudBackupShowingRef.current ||
+      isAnyPromptVisible('cloudBackupPrompt')
+    ) {
+      return;
+    }
+    const state = await getCloudBackupPromptState();
+    const verdict = checkCloudBackupEligibility({
+      state,
+      now: new Date(),
+      isOnCloudBackup: cloudBackupGuardsRef.current.isOnCloudBackup,
+      transactionCount: getTransactionCount(),
+    });
+    if (!verdict.eligible) return;
+    // Re-check after the async hop, then claim + present without awaiting in
+    // between so nothing else can stack a second modal in the gap.
+    if (
+      cloudBackupShowingRef.current ||
+      cloudBackupGuardsRef.current.blocked ||
+      isAnyPromptVisible('cloudBackupPrompt')
+    ) {
+      return;
+    }
+    cloudBackupShowingRef.current = true;
+    markPromptVisible('cloudBackupPrompt');
+    setCloudBackupPromptVisible(true);
+    void recordCloudBackupPromptShown();
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
+      transaction_count: getTransactionCount(),
+    });
+  }, [getTransactionCount]);
+
+  // Stable wrapper so MainShellScreen's tab effect doesn't re-subscribe each
+  // render (and to satisfy no-misused-promises on the void-returning prop).
+  const handleEnterSettingsTab = useCallback(() => {
+    void maybeShowCloudBackupPrompt();
+  }, [maybeShowCloudBackupPrompt]);
 
   const splashHiddenRef = useRef(false);
   const handleContentLayout = useCallback(() => {
@@ -1514,26 +1595,45 @@ function AppContent() {
     setTutorialStartToken(0);
     InteractionManager.runAfterInteractions(() => {
       setShowTutorialPrompt(true);
+      markPromptVisible('tutorialPrompt');
     });
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
   }, []);
 
   const handleStartTutorialNow = useCallback(() => {
     setShowTutorialPrompt(false);
+    markPromptHidden('tutorialPrompt');
     setTutorialStartToken((prev) => prev + 1);
   }, []);
 
   const handleSkipTutorialPrompt = useCallback(() => {
     setShowTutorialPrompt(false);
+    markPromptHidden('tutorialPrompt');
   }, []);
 
   const handleDismissFeatureAnnouncement = useCallback(() => {
     const announcementId = featureAnnouncement?.id;
     setFeatureAnnouncementVisible(false);
+    markPromptHidden('featureAnnouncement');
     if (announcementId) {
       void markFeatureAnnouncementSeen(settings.appUserId, announcementId);
     }
   }, [featureAnnouncement?.id, settings.appUserId]);
+
+  const handleDismissCloudBackupPrompt = useCallback(() => {
+    setCloudBackupPromptVisible(false);
+    cloudBackupShowingRef.current = false;
+    markPromptHidden('cloudBackupPrompt');
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
+  }, []);
+
+  const handleEnableCloudBackup = useCallback(() => {
+    setCloudBackupPromptVisible(false);
+    cloudBackupShowingRef.current = false;
+    markPromptHidden('cloudBackupPrompt');
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_CTA_TAPPED);
+    navigationRef.navigate('SettingsAutoBackup');
+  }, [navigationRef]);
 
   // Keep the native splash up while data loads — render nothing so no
   // intermediate UI flashes before the first page is ready.
@@ -1569,6 +1669,7 @@ function AppContent() {
                 <MainShellScreen
                   navigation={props.navigation}
                   onVisibleScreenChange={setMainShellCurrentScreen}
+                  onEnterSettingsTab={handleEnterSettingsTab}
                   tutorialStartToken={tutorialStartToken}
                 />
               </BottomNavMinimizeProvider>
@@ -1609,6 +1710,7 @@ function AppContent() {
             name="SettingsMultiCurrency"
             component={SettingsMultiCurrencyRouteScreen}
           />
+          <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen
             name="ItemEditor"
@@ -1676,6 +1778,11 @@ function AppContent() {
         visible={featureAnnouncementVisible && !biometricLocked}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
+      />
+      <CloudBackupPromptModal
+        visible={cloudBackupPromptVisible && !biometricLocked}
+        onEnable={handleEnableCloudBackup}
+        onDismiss={handleDismissCloudBackupPrompt}
       />
       <ReviewPrePromptSheet />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />

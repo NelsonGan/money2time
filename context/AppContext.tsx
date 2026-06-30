@@ -330,6 +330,9 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 
   getAccountById: (id: string) => Account | undefined;
   getCategoryById: (id: string) => Category | undefined;
+  /** Non-reactive count of currently-loaded (non-deleted) transactions. Lets
+   *  consumers gate on activity without subscribing to transaction churn. */
+  getTransactionCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
   queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
   getCashflowSummary: (range: DateRange) => CashflowSummary;
@@ -2614,6 +2617,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const getAccountById = useCallback((id: string) => accountByIdMap.get(id), [accountByIdMap]);
   const getCategoryById = useCallback((id: string) => categoryByIdMap.get(id), [categoryByIdMap]);
 
+  // Mirror the transaction count into a ref so callers can read it on demand
+  // (e.g. gating a one-off prompt) without re-rendering on every transaction.
+  const transactionCountRef = useRef(transactions.length);
+  transactionCountRef.current = transactions.length;
+  const getTransactionCount = useCallback(() => transactionCountRef.current, []);
+
   const getTransactionsByAccount = useCallback(
     (accountId: string) => transactionsByAccountId.get(accountId) ?? EMPTY_ACCOUNT_TRANSACTIONS,
     [transactionsByAccountId],
@@ -3109,6 +3118,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             canUseTimeDisplayMode,
             getAccountById,
             getCategoryById,
+            getTransactionCount,
             getTransactionsByAccount,
             queryTransactions,
             getCashflowSummary,
@@ -3212,6 +3222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       canUseTimeDisplayMode,
       getAccountById,
       getCategoryById,
+      getTransactionCount,
       getTransactionsByAccount,
       queryTransactions,
       getCashflowSummary,

@@ -1564,6 +1564,12 @@ const vi = {
     feedback_open: 'Chia sẻ phản hồi',
     feedback_skip: 'Không, cảm ơn',
   },
+  cloud_backup_prompt: {
+    title: 'Giữ an toàn cho dữ liệu của bạn',
+    body: 'Bản sao lưu của bạn chỉ được lưu trên thiết bị này, vì vậy chúng sẽ mất nếu bạn gỡ cài đặt ứng dụng. Bật sao lưu đám mây để giữ an toàn trên iCloud hoặc Google Drive.',
+    cta: 'Sao lưu lên đám mây',
+    dismiss: 'Để sau',
+  },
   albums: {
     location: {
       label: 'Vị trí',
