@@ -111,7 +111,6 @@ import {
   getCloudBackupPromptState,
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
-import { subscribeMaybeShowCloudBackupPromptRequest } from '~/services/cloudBackupPromptNavigation';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import {
   getLatestUnseenAnnouncementForUser,
@@ -327,12 +326,16 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
 interface MainShellScreenProps {
   navigation: RootMainNavigationProp;
   onVisibleScreenChange?: (screen: string) => void;
+  /** Fired when the user switches into the Settings tab (a tab swap, not a
+   *  native push) — a safe moment to surface the cloud-backup nudge. */
+  onEnterSettingsTab?: () => void;
   tutorialStartToken?: number;
 }
 
 function MainShellScreen({
   navigation,
   onVisibleScreenChange,
+  onEnterSettingsTab,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
@@ -627,7 +630,10 @@ function MainShellScreen({
     if (activeTab === 'insights') {
       recordInsightsView();
     }
-  }, [activeTab]);
+    if (activeTab === 'settings') {
+      onEnterSettingsTab?.();
+    }
+  }, [activeTab, onEnterSettingsTab]);
 
   useEffect(() => {
     const visibleScreen = activeTab === 'settings' ? settingsCurrentScreen : activeTab;
@@ -1426,7 +1432,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { isLoading, settings, quickEntryPrefs } = useApp();
+  const { isLoading, settings, quickEntryPrefs, getTransactionCount } = useApp();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
@@ -1514,58 +1520,60 @@ function AppContent() {
   }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
 
   // Latest snapshot of the cloud-backup prompt's gating inputs, read inside the
-  // (stable, subscribe-once) bus listener so the listener never re-subscribes.
+  // (stable) handler so it can reference live settings without re-creating.
   const cloudBackupGuardsRef = useRef({ isOnCloudBackup: false, blocked: true });
   cloudBackupGuardsRef.current = {
     isOnCloudBackup: settings.autoBackupEnabled && settings.autoBackupTarget !== 'local',
     // Never stack on top of another overlay — that overlap can freeze the page.
     blocked: showTutorialPrompt || featureAnnouncementVisible || biometricLocked,
   };
-  // Synchronous "already claimed" flag. Set the instant we decide to show and
-  // cleared on dismiss, so two rapid triggers (or the concurrently-resolving
-  // review pre-prompt) can never both open a modal.
+  // Synchronous "already claimed" flag, cleared on dismiss, so two rapid
+  // triggers can never both open the modal.
   const cloudBackupShowingRef = useRef(false);
 
-  useEffect(() => {
-    return subscribeMaybeShowCloudBackupPromptRequest(({ transactionCount }) => {
-      const guards = cloudBackupGuardsRef.current;
-      if (
-        guards.blocked ||
-        cloudBackupShowingRef.current ||
-        isAnyPromptVisible('cloudBackupPrompt')
-      )
-        return;
-      void (async () => {
-        const state = await getCloudBackupPromptState();
-        const verdict = checkCloudBackupEligibility({
-          state,
-          now: new Date(),
-          isOnCloudBackup: guards.isOnCloudBackup,
-          transactionCount,
-        });
-        if (!verdict.eligible) return;
-        // Claim synchronously after the async hop — no await between this guard
-        // and the markPromptVisible/setVisible below — so this can't interleave
-        // with the review pre-prompt (which also claims synchronously) or a
-        // second rapid trigger. Either interleaving would stack a second modal
-        // and freeze the page.
-        if (
-          cloudBackupShowingRef.current ||
-          cloudBackupGuardsRef.current.blocked ||
-          isAnyPromptVisible('cloudBackupPrompt')
-        ) {
-          return;
-        }
-        cloudBackupShowingRef.current = true;
-        markPromptVisible('cloudBackupPrompt');
-        setCloudBackupPromptVisible(true);
-        void recordCloudBackupPromptShown();
-        void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
-          transaction_count: transactionCount,
-        });
-      })();
+  // Nudge non-cloud users toward iCloud/Drive backup when they open Settings —
+  // a tab swap (not a native push/pop), so presenting a modal here can't race a
+  // navigation transition the way the old post-transaction trigger did.
+  const maybeShowCloudBackupPrompt = useCallback(async () => {
+    const guards = cloudBackupGuardsRef.current;
+    if (
+      guards.blocked ||
+      cloudBackupShowingRef.current ||
+      isAnyPromptVisible('cloudBackupPrompt')
+    ) {
+      return;
+    }
+    const state = await getCloudBackupPromptState();
+    const verdict = checkCloudBackupEligibility({
+      state,
+      now: new Date(),
+      isOnCloudBackup: cloudBackupGuardsRef.current.isOnCloudBackup,
+      transactionCount: getTransactionCount(),
     });
-  }, []);
+    if (!verdict.eligible) return;
+    // Re-check after the async hop, then claim + present without awaiting in
+    // between so nothing else can stack a second modal in the gap.
+    if (
+      cloudBackupShowingRef.current ||
+      cloudBackupGuardsRef.current.blocked ||
+      isAnyPromptVisible('cloudBackupPrompt')
+    ) {
+      return;
+    }
+    cloudBackupShowingRef.current = true;
+    markPromptVisible('cloudBackupPrompt');
+    setCloudBackupPromptVisible(true);
+    void recordCloudBackupPromptShown();
+    void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_SHOWN, {
+      transaction_count: getTransactionCount(),
+    });
+  }, [getTransactionCount]);
+
+  // Stable wrapper so MainShellScreen's tab effect doesn't re-subscribe each
+  // render (and to satisfy no-misused-promises on the void-returning prop).
+  const handleEnterSettingsTab = useCallback(() => {
+    void maybeShowCloudBackupPrompt();
+  }, [maybeShowCloudBackupPrompt]);
 
   const splashHiddenRef = useRef(false);
   const handleContentLayout = useCallback(() => {
@@ -1661,6 +1669,7 @@ function AppContent() {
                 <MainShellScreen
                   navigation={props.navigation}
                   onVisibleScreenChange={setMainShellCurrentScreen}
+                  onEnterSettingsTab={handleEnterSettingsTab}
                   tutorialStartToken={tutorialStartToken}
                 />
               </BottomNavMinimizeProvider>

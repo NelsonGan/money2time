@@ -67,3 +67,21 @@ export function recordCloudBackupPromptShown(): Promise<CloudBackupPromptState> 
   updateChain = result.catch(() => undefined);
   return result;
 }
+
+/**
+ * Dev-only: wipe the persisted shown-count / cadence state so the prompt becomes
+ * eligible again next time Settings is opened. Serialized through the same chain
+ * as `recordCloudBackupPromptShown` so it can't race a concurrent write.
+ */
+export function resetCloudBackupPromptState(): Promise<void> {
+  const result = updateChain.then(async () => {
+    cache = createInitialState();
+    try {
+      await AsyncStorage.removeItem(CLOUD_BACKUP_PROMPT_STORAGE_KEY);
+    } catch {
+      // Non-fatal: the in-memory cache reset already re-arms it for this session.
+    }
+  });
+  updateChain = result.catch(() => undefined);
+  return result;
+}
