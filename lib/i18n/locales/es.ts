@@ -1471,11 +1471,12 @@ const es = {
       'Solo publica una captura de la app con tus propios consejos de dinero en Instagram, 小红书, Reddit, Facebook o donde quieras. No hace falta mencionar la app por su nombre.',
     step2_body: 'Deja que sume likes. Más likes significa una recompensa mayor.',
     step3_body:
-      'Envíanos el enlace de tu publicación y te mandaremos por correo un código Pro gratis.',
+      'Comparte el enlace de tu publicación en nuestro Discord y te enviaremos un código Pro gratis.',
     platforms_title: 'Publica en',
     claim_title: '¿Ya publicaste?',
-    claim_body: 'Envíanos el enlace de tu publicación y te responderemos con tu código Pro gratis.',
-    claim_button: 'Reclamar mi recompensa',
+    claim_body:
+      'Únete a nuestro Discord, deja el enlace de tu publicación y te enviaremos tu código Pro gratis.',
+    claim_button: 'Unirme a nuestro Discord',
     fine_print:
       'Las recompensas se otorgan manualmente tras verificar que tu publicación es pública. Una recompensa por persona. Los likes se revisan al momento de reclamar.',
   },
