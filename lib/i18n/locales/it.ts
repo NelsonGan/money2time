@@ -420,6 +420,7 @@ const it = {
       fx_received: 'Importo ricevuto',
       title_create: 'Aggiungi',
       title_edit: 'Aggiorna',
+      bulk_mode: 'Multiplo',
       subtitle_create: 'Voce rapida e semplice',
       subtitle_edit: 'Aggiorna dettagli',
       subtitle_edit_balance_adjustment: 'Aggiorna importo e conto interessato',

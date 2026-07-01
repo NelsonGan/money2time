@@ -420,6 +420,7 @@ const ms = {
       fx_received: 'Jumlah diterima',
       title_create: 'Tambah',
       title_edit: 'Kemaskini',
+      bulk_mode: 'Pukal',
       subtitle_create: 'Entri cepat dan mudah',
       subtitle_edit: 'Kemaskini butiran',
       subtitle_edit_balance_adjustment: 'Kemaskini jumlah dan akaun berkaitan',

@@ -420,6 +420,7 @@ const pt = {
       fx_received: 'Valor recebido',
       title_create: 'Adicionar',
       title_edit: 'Atualizar',
+      bulk_mode: 'Múltiplo',
       subtitle_create: 'Entrada rápida e limpa',
       subtitle_edit: 'Atualizar detalhes',
       subtitle_edit_balance_adjustment: 'Atualizar valor e conta afetada',

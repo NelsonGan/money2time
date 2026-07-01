@@ -418,6 +418,7 @@ const sv = {
       fx_received: 'Mottaget belopp',
       title_create: 'Lägg till',
       title_edit: 'Uppdatera',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Snabb och enkel post',
       subtitle_edit: 'Uppdatera detaljer',
       subtitle_edit_balance_adjustment: 'Uppdatera belopp och berört konto',
