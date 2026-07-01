@@ -1438,6 +1438,16 @@ const de = {
     expires_on: 'Zugang bis',
     lifetime_access: 'Du hast dauerhaften Zugang zu allen Pro-Funktionen.',
     cancel_subscription: 'Abonnement kündigen',
+    lifetime_sub_warning_title: 'Du zahlst doppelt',
+    lifetime_sub_warning_body:
+      'Du hast Lifetime Pro, aber ein Abo ist noch aktiv. Kündige es, damit dir nichts mehr berechnet wird.',
+    upgrade_to_lifetime: 'Auf Lebenslang upgraden',
+    lifetime_upsell_subtitle: 'Einmal zahlen, für immer deins. Keine Abo-Verlängerungen mehr.',
+    switch_to_lifetime: 'Zu Lebenslang wechseln',
+    lifetime_purchased_title: 'Du hast jetzt Lifetime Pro',
+    lifetime_purchased_body:
+      'Dein Abo wird nicht mehr benötigt. Kündige es, damit dir nichts mehr berechnet wird.',
+    not_now: 'Jetzt nicht',
     cancel_subscription_note:
       'Um dein Abonnement zu kündigen, wirst du zu den Abonnementeinstellungen deines Geräts weitergeleitet.',
     limit_reached_title: 'Limit des kostenlosen Plans erreicht',

@@ -1,4 +1,4 @@
-import { Check, Crown, Minus, X } from 'lucide-react-native';
+import { ArrowUpCircle, Check, Crown, Minus, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
@@ -15,10 +15,15 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import { isRevenueCatCustomerStateActive, type RevenueCatPackage } from '~/services/revenueCat';
+import {
+  isRevenueCatCustomerStateActive,
+  isRevenueCatCustomerStateSubscriber,
+  type RevenueCatPackage,
+} from '~/services/revenueCat';
 import { recordProPurchase } from '~/services/reviewPrompt';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { FONT } from '~/utils/fonts';
+import { openStoreSubscriptions } from '~/utils/subscriptionSettings';
 
 interface ProPaywallScreenProps {
   onClose: () => void;
@@ -325,8 +330,13 @@ function getPlanSortOrder(pkg: RevenueCatPackage) {
 // ─── Main Screen ─────────────────────────────────────────────────────
 
 export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallScreenProps) {
-  const { isLoading, isPro, offering, purchasePackage, refresh, restorePurchases } = usePro();
+  const { isLoading, isPro, customerState, offering, purchasePackage, refresh, restorePurchases } =
+    usePro();
   const packages = usePackagesByType(offering);
+  const isSubscriber = isRevenueCatCustomerStateSubscriber(customerState);
+  // A subscriber can still move to Lifetime — but only if the offering exposes it.
+  const lifetimePackage = packages.lifetime;
+  const canOfferLifetimeUpgrade = isSubscriber && !!lifetimePackage;
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -340,6 +350,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   useEffect(() => {
     void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, { source: source ?? 'settings' });
   }, [source]);
+
+  useEffect(() => {
+    if (canOfferLifetimeUpgrade) {
+      void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_VIEWED, {
+        source: source ?? 'settings',
+      });
+    }
+  }, [canOfferLifetimeUpgrade, source]);
 
   useEffect(() => {
     if (!flashMessage) {
@@ -416,39 +434,81 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   const selectedPlan = planOptions.find((o) => o.pkg.identifier === selectedId) ?? null;
 
-  const handlePurchase = useCallback(async () => {
-    if (isPurchasing || !selectedPlan) return;
-    const pkgId = selectedPlan.pkg.identifier;
-    setIsPurchasing(true);
-    void trackEvent(AnalyticsEvents.PRO_PURCHASE_STARTED, { package: pkgId });
-    try {
-      const result = await purchasePackage(pkgId);
-      if (result.status === 'success') {
-        void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
-        recordProPurchase();
-        onClose();
-      } else if (result.status === 'pending') {
-        void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, { package: pkgId });
-        Alert.alert(
-          I18n.t('pro.purchase_pending_title'),
-          result.message ?? I18n.t('pro.purchase_pending_message'),
-        );
-      } else if (result.status === 'cancelled') {
-        void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, { package: pkgId });
-      } else {
-        void trackEvent(AnalyticsEvents.PRO_PURCHASE_FAILED, {
-          package: pkgId,
-          reason: result.message ?? result.status,
-        });
-        Alert.alert(
-          I18n.t('pro.purchase_failed'),
-          result.message ?? I18n.t('errors.generic_operation_failed'),
-        );
+  const handlePurchasePackage = useCallback(
+    async (pkg: RevenueCatPackage) => {
+      if (isPurchasing) return;
+      const pkgId = pkg.identifier;
+      // Capture upgrade context before the purchase mutates customer state, so
+      // we know whether to prompt the user to cancel their now-redundant sub.
+      const wasSubscriber = isRevenueCatCustomerStateSubscriber(customerState);
+      const boughtLifetime = normalizePackageType(pkg.packageType) === 'LIFETIME';
+      setIsPurchasing(true);
+      void trackEvent(AnalyticsEvents.PRO_PURCHASE_STARTED, { package: pkgId });
+      try {
+        const result = await purchasePackage(pkgId);
+        if (result.status === 'success') {
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
+          recordProPurchase();
+          onClose();
+          if (wasSubscriber && boughtLifetime) {
+            // A subscriber converting to Lifetime — the key conversion for this flow.
+            void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_COMPLETED, { package: pkgId });
+            // Lifetime is a separate one-time product; the old subscription keeps
+            // renewing until cancelled. Nudge the user to stop the double charge.
+            void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_VIEWED, { package: pkgId });
+            Alert.alert(
+              I18n.t('pro.lifetime_purchased_title'),
+              I18n.t('pro.lifetime_purchased_body'),
+              [
+                {
+                  text: I18n.t('pro.cancel_subscription'),
+                  onPress: () => {
+                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
+                      choice: 'cancel',
+                    });
+                    openStoreSubscriptions();
+                  },
+                },
+                {
+                  text: I18n.t('pro.not_now'),
+                  style: 'cancel',
+                  onPress: () =>
+                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
+                      choice: 'not_now',
+                    }),
+                },
+              ],
+            );
+          }
+        } else if (result.status === 'pending') {
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, { package: pkgId });
+          Alert.alert(
+            I18n.t('pro.purchase_pending_title'),
+            result.message ?? I18n.t('pro.purchase_pending_message'),
+          );
+        } else if (result.status === 'cancelled') {
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, { package: pkgId });
+        } else {
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_FAILED, {
+            package: pkgId,
+            reason: result.message ?? result.status,
+          });
+          Alert.alert(
+            I18n.t('pro.purchase_failed'),
+            result.message ?? I18n.t('errors.generic_operation_failed'),
+          );
+        }
+      } finally {
+        setIsPurchasing(false);
       }
-    } finally {
-      setIsPurchasing(false);
-    }
-  }, [isPurchasing, onClose, purchasePackage, selectedPlan]);
+    },
+    [customerState, isPurchasing, onClose, purchasePackage],
+  );
+
+  const handlePurchase = useCallback(() => {
+    if (!selectedPlan) return;
+    void handlePurchasePackage(selectedPlan.pkg);
+  }, [handlePurchasePackage, selectedPlan]);
 
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
@@ -473,6 +533,112 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       setIsRestoring(false);
     }
   }, [isRestoring, onClose, restorePurchases]);
+
+  // Active subscribers can still own Pro forever — surface a focused Lifetime
+  // upgrade instead of the "you're all set" wall (which would otherwise force
+  // them to cancel and wait for expiry before they could ever buy Lifetime).
+  if (isPro && canOfferLifetimeUpgrade && lifetimePackage) {
+    return (
+      <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
+        <PaywallBackdrop colors={colors} />
+        <View style={s.header}>
+          <View style={{ width: 32 }} />
+          <HeaderBrand colors={colors} />
+          <CloseBtn onClose={onClose} colors={colors} />
+        </View>
+
+        <ScrollView
+          style={s.bodyScroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={s.upsellScrollContent}
+        >
+          <TabletContentContainer>
+            <Animated.View entering={FadeIn.duration(400)} style={s.upsellHero}>
+              <Mascot size={132} name="plan-lifetime" animate />
+              <Text style={[s.upsellTitle, { color: colors.text }]}>
+                {I18n.t('pro.upgrade_to_lifetime')}
+              </Text>
+              <Text style={[s.upsellSubtitle, { color: colors.textMuted }]}>
+                {I18n.t('pro.lifetime_upsell_subtitle')}
+              </Text>
+            </Animated.View>
+
+            <View
+              style={[
+                s.upsellCard,
+                { backgroundColor: colors.cardBg, borderColor: colors.primary },
+              ]}
+            >
+              <View style={s.upsellCardRow}>
+                <Text style={[s.upsellPlanName, { color: colors.text }]}>
+                  {I18n.t('pro.lifetime')}
+                </Text>
+                <Text style={[s.upsellPrice, { color: colors.primary }]}>
+                  {lifetimePackage.localizedPriceString}
+                </Text>
+              </View>
+              <Text style={[s.upsellPlanDesc, { color: colors.textMuted }]}>
+                {I18n.t('pro.lifetime_desc')}
+              </Text>
+            </View>
+          </TabletContentContainer>
+        </ScrollView>
+
+        <View
+          style={[
+            s.footer,
+            {
+              backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
+              borderTopColor: colors.cardBorder,
+              paddingBottom: Math.max(insets.bottom - 10, 2),
+            },
+          ]}
+        >
+          <TabletContentContainer>
+            <Text style={[s.termsText, { color: colors.textMuted }]}>
+              {I18n.t('pro.terms_prefix')}{' '}
+              <Text
+                style={[s.termsLink, { color: colors.primary }]}
+                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+              >
+                {I18n.t('pro.privacy_policy')}
+              </Text>
+              .
+            </Text>
+
+            <Button
+              onPress={() => void handlePurchasePackage(lifetimePackage)}
+              disabled={isPurchasing}
+              variant="warm"
+              size="default"
+              className="h-[46px] w-full shadow-warm-lg"
+              haptic="none"
+            >
+              {isPurchasing ? (
+                <LoadingDots size="small" color="#fff" />
+              ) : (
+                <View style={s.ctaContent}>
+                  <ArrowUpCircle size={16} color="#fff" />
+                  <Text style={s.ctaText}>{I18n.t('pro.upgrade_to_lifetime')}</Text>
+                </View>
+              )}
+            </Button>
+
+            <Pressable
+              onPress={handleRestore}
+              disabled={isRestoring}
+              hitSlop={10}
+              style={s.restoreButton}
+            >
+              <Text style={[s.restoreText, { color: colors.textMuted }]}>
+                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+              </Text>
+            </Pressable>
+          </TabletContentContainer>
+        </View>
+      </View>
+    );
+  }
 
   if (isPro) {
     return (
@@ -858,6 +1024,47 @@ const s = StyleSheet.create({
   restoreText: { fontSize: 12, fontWeight: '500', textDecorationLine: 'underline' },
   footerEmpty: { alignItems: 'center', gap: 12, paddingVertical: spacing.sm },
   footerEmptyText: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+
+  // Subscriber → Lifetime upsell
+  upsellScrollContent: {
+    paddingHorizontal: spacing.screenHorizontal,
+    paddingBottom: spacing.lg,
+  },
+  upsellHero: {
+    alignItems: 'center',
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: 4,
+  },
+  upsellTitle: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  upsellSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  upsellCard: {
+    borderRadius: 18,
+    borderWidth: 1.5,
+    padding: 18,
+    gap: 6,
+    marginTop: spacing.sm,
+  },
+  upsellCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  upsellPlanName: { fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
+  upsellPrice: { fontSize: 20, fontWeight: '800', letterSpacing: -0.3 },
+  upsellPlanDesc: { fontSize: 14, lineHeight: 20 },
 
   // Active pro
   activeContainer: {

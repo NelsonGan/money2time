@@ -1440,6 +1440,17 @@ const fil = {
     expires_on: 'Access hanggang',
     lifetime_access: 'Mayroon kang habambuhay na access sa lahat ng Pro feature.',
     cancel_subscription: 'Kanselahin ang Subscription',
+    lifetime_sub_warning_title: 'Sinisingil ka nang dalawang beses',
+    lifetime_sub_warning_body:
+      'Mayroon kang Lifetime Pro, ngunit may aktibo pa ring subscription. Kanselahin ito para hindi ka na singilin muli.',
+    upgrade_to_lifetime: 'Mag-upgrade sa Lifetime',
+    lifetime_upsell_subtitle:
+      'Isang bayad, sa iyo na habambuhay. Wala nang pag-renew ng subscription.',
+    switch_to_lifetime: 'Lumipat sa Lifetime',
+    lifetime_purchased_title: 'Mayroon ka nang Lifetime Pro',
+    lifetime_purchased_body:
+      'Hindi na kailangan ang iyong subscription. Kanselahin ito para hindi ka na singilin muli.',
+    not_now: 'Hindi ngayon',
     cancel_subscription_note:
       'Para kanselahin ang iyong subscription, ire-redirect ka sa subscription settings ng iyong device.',
     limit_reached_title: 'Naabot na ang limitasyon ng libreng plano',

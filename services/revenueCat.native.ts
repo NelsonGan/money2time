@@ -93,6 +93,7 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
     activeProductIdentifier: source?.productIdentifier ?? null,
     expirationDate: source?.expirationDate ?? null,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
+    hasActiveSubscription: customerInfo.activeSubscriptions.length > 0,
   };
 }
 
