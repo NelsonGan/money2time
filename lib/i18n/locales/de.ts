@@ -1481,12 +1481,12 @@ const de = {
       'Poste einfach einen Screenshot der App mit deinen eigenen Geldtipps auf Instagram, 小红书, Reddit, Facebook oder wo du willst. Du musst die App nicht beim Namen nennen.',
     step2_body: 'Lass Likes sammeln. Mehr Likes bedeuten eine größere Belohnung.',
     step3_body:
-      'Schick uns den Link zu deinem Beitrag und wir mailen dir einen kostenlosen Pro-Code.',
+      'Teile den Link zu deinem Beitrag in unserem Discord und wir schicken dir einen kostenlosen Pro-Code.',
     platforms_title: 'Posten auf',
     claim_title: 'Schon gepostet?',
     claim_body:
-      'Schick uns den Link zu deinem Beitrag und wir antworten mit deinem kostenlosen Pro-Code.',
-    claim_button: 'Belohnung einlösen',
+      'Tritt unserem Discord bei, poste den Link zu deinem Beitrag und wir schicken dir deinen kostenlosen Pro-Code.',
+    claim_button: 'Discord beitreten',
     fine_print:
       'Belohnungen werden manuell vergeben, nachdem wir bestätigt haben, dass dein Beitrag öffentlich ist. Eine Belohnung pro Person. Die Like-Zahl wird beim Einlösen geprüft.',
   },

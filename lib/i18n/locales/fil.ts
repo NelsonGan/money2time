@@ -1482,11 +1482,13 @@ const fil = {
     step1_body:
       'Mag-post lang ng screenshot ng app kasama ang money tips mo sa Instagram, 小红书, Reddit, Facebook o kahit saan. Hindi mo kailangang banggitin ang pangalan ng app.',
     step2_body: 'Hayaang dumami ang likes. Mas maraming likes, mas malaking reward.',
-    step3_body: 'Ipadala sa amin ang link ng post mo at i-eemail namin ang libreng Pro code.',
+    step3_body:
+      'I-share ang link ng post mo sa aming Discord at ipapadala namin sa iyo ang libreng Pro code.',
     platforms_title: 'Mag-post sa',
     claim_title: 'Nakapag-post na?',
-    claim_body: 'Ipadala ang link ng post mo at sasagutin ka namin ng libreng Pro code.',
-    claim_button: 'Kunin ang reward',
+    claim_body:
+      'Sumali sa aming Discord, ilagay ang link ng post mo, at ipapadala namin ang libreng Pro code mo.',
+    claim_button: 'Sumali sa aming Discord',
     fine_print:
       'Manu-manong ibinibigay ang reward matapos naming kumpirmahin na public ang post mo. Isang reward kada tao. Ang bilang ng likes ay tinitingnan sa oras ng pag-claim.',
   },

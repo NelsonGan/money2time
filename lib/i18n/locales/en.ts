@@ -1428,11 +1428,11 @@ const en = {
     step1_body:
       'Just post a screenshot of the app with your own money tips on Instagram, 小红书, Reddit, Facebook, or anywhere. No need to mention the app by name.',
     step2_body: 'Let it gather likes. More likes means a bigger reward.',
-    step3_body: 'Send us your post link and we’ll email you a free Pro code.',
+    step3_body: 'Share your post link in our Discord and we’ll send you a free Pro code.',
     platforms_title: 'Post on',
     claim_title: 'Already posted?',
-    claim_body: 'Send us the link to your post and we’ll reply with your free Pro code.',
-    claim_button: 'Claim my reward',
+    claim_body: 'Join our Discord, drop your post link, and we’ll send your free Pro code.',
+    claim_button: 'Join our Discord',
     fine_print:
       'Rewards are granted manually after we verify your post is public. One reward per person. Like counts are checked at the time you claim.',
   },

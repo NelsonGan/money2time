@@ -22,7 +22,7 @@ interface ShareAndEarnScreenProps {
   onBack: () => void;
 }
 
-const CONTACT_URL = 'https://www.money2time.com/contact';
+const DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 
 async function openFirstAvailable(urls: string[]): Promise<void> {
   for (const url of urls) {
@@ -137,7 +137,7 @@ export function ShareAndEarnScreen({ onBack }: ShareAndEarnScreenProps) {
 
   const handleClaim = () => {
     void triggerHaptic('selection');
-    void Linking.openURL(CONTACT_URL).catch(() => undefined);
+    void Linking.openURL(DISCORD_URL).catch(() => undefined);
   };
 
   return (

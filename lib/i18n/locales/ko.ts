@@ -1431,11 +1431,11 @@ const ko = {
     step1_body:
       '앱 스크린샷을 나만의 돈 관리 팁과 함께 Instagram, 小红书, Reddit, Facebook 등에 올리기만 하면 돼요. 앱 이름을 언급할 필요는 없어요.',
     step2_body: '좋아요가 쌓이게 두세요. 좋아요가 많을수록 보상이 커집니다.',
-    step3_body: '게시물 링크를 보내주시면 무료 Pro 코드를 이메일로 보내드립니다.',
+    step3_body: '저희 Discord에 게시물 링크를 공유해 주시면 무료 Pro 코드를 보내드립니다.',
     platforms_title: '게시할 곳',
     claim_title: '이미 게시했나요?',
-    claim_body: '게시물 링크를 보내주시면 무료 Pro 코드로 답장해 드릴게요.',
-    claim_button: '보상 받기',
+    claim_body: '저희 Discord에 참여해 게시물 링크를 남겨주시면 무료 Pro 코드를 보내드릴게요.',
+    claim_button: 'Discord 참여하기',
     fine_print:
       '보상은 게시물이 공개 상태임을 확인한 후 수동으로 지급됩니다. 1인당 1회. 좋아요 수는 신청 시점에 확인합니다.',
   },

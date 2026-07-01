@@ -1470,11 +1470,13 @@ const id = {
     step1_body:
       'Cukup posting tangkapan layar aplikasi dengan tips keuanganmu di Instagram, 小红书, Reddit, Facebook, atau di mana saja. Tidak perlu menyebut nama aplikasi.',
     step2_body: 'Biarkan terkumpul suka. Makin banyak suka, makin besar hadiah.',
-    step3_body: 'Kirimkan tautan postinganmu dan kami akan mengirim kode Pro gratis lewat email.',
+    step3_body:
+      'Bagikan tautan postinganmu di Discord kami dan kami akan mengirimkan kode Pro gratis.',
     platforms_title: 'Posting di',
     claim_title: 'Sudah posting?',
-    claim_body: 'Kirimkan tautan postinganmu dan kami balas dengan kode Pro gratis.',
-    claim_button: 'Klaim hadiahku',
+    claim_body:
+      'Gabung ke Discord kami, kirim tautan postinganmu, dan kami akan mengirimkan kode Pro gratismu.',
+    claim_button: 'Gabung Discord kami',
     fine_print:
       'Hadiah diberikan secara manual setelah kami memverifikasi postinganmu bersifat publik. Satu hadiah per orang. Jumlah suka diperiksa saat kamu klaim.',
   },

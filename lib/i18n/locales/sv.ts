@@ -1459,11 +1459,12 @@ const sv = {
     step1_body:
       'Posta bara en skärmbild av appen med dina egna pengatips på Instagram, 小红书, Reddit, Facebook eller var du vill. Du behöver inte nämna appen vid namn.',
     step2_body: 'Låt det samla gillningar. Fler gillningar betyder större belöning.',
-    step3_body: 'Skicka oss länken till ditt inlägg så mejlar vi dig en gratis Pro-kod.',
+    step3_body: 'Dela länken till ditt inlägg i vår Discord så skickar vi dig en gratis Pro-kod.',
     platforms_title: 'Posta på',
     claim_title: 'Redan postat?',
-    claim_body: 'Skicka oss länken till ditt inlägg så svarar vi med din gratis Pro-kod.',
-    claim_button: 'Hämta min belöning',
+    claim_body:
+      'Gå med i vår Discord, lägg upp länken till ditt inlägg så skickar vi din gratis Pro-kod.',
+    claim_button: 'Gå med i vår Discord',
     fine_print:
       'Belöningar ges manuellt efter att vi bekräftat att ditt inlägg är offentligt. En belöning per person. Antalet gillningar kontrolleras när du gör anspråk.',
   },
