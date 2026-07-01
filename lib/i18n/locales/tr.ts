@@ -1467,11 +1467,12 @@ const tr = {
       'Sadece uygulamanın ekran görüntüsünü kendi para ipuçlarınla Instagram, 小红书, Reddit, Facebook veya istediğin yerde paylaş. Uygulamanın adını anmana gerek yok.',
     step2_body: 'Beğeni toplamasına izin ver. Daha çok beğeni, daha büyük ödül.',
     step3_body:
-      'Paylaşımının bağlantısını gönder, sana ücretsiz bir Pro kodunu e-postayla iletelim.',
+      'Paylaşımının bağlantısını Discord’umuzda paylaş, sana ücretsiz bir Pro kodu gönderelim.',
     platforms_title: 'Şurada paylaş',
     claim_title: 'Zaten paylaştın mı?',
-    claim_body: 'Paylaşımının bağlantısını gönder, ücretsiz Pro kodunla yanıt verelim.',
-    claim_button: 'Ödülümü al',
+    claim_body:
+      'Discord’umuza katıl, paylaşımının bağlantısını bırak, ücretsiz Pro kodunu gönderelim.',
+    claim_button: 'Discord’umuza katıl',
     fine_print:
       'Ödüller, paylaşımının herkese açık olduğunu doğruladıktan sonra elle verilir. Kişi başı bir ödül. Beğeni sayısı talep anında kontrol edilir.',
   },

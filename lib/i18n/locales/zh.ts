@@ -1369,11 +1369,11 @@ const zh = {
     step1_body:
       '只需把应用截图连同你自己的省钱小贴士发到 Instagram、小红书、Reddit、Facebook 或任意平台即可，无需特意提到应用名称。',
     step2_body: '让它积攒点赞。点赞越多，奖励越大。',
-    step3_body: '把帖子链接发给我们，我们会通过邮件给你免费的 Pro 兑换码。',
+    step3_body: '在我们的 Discord 分享你的帖子链接，我们就会发给你免费的 Pro 兑换码。',
     platforms_title: '发布到',
     claim_title: '已经发帖了？',
-    claim_body: '把帖子链接发给我们，我们会回复你的免费 Pro 兑换码。',
-    claim_button: '领取我的奖励',
+    claim_body: '加入我们的 Discord，贴上你的帖子链接，我们就会发给你免费的 Pro 兑换码。',
+    claim_button: '加入我们的 Discord',
     fine_print: '奖励在我们确认你的帖子为公开后人工发放。每人限领一次。点赞数以领取时为准。',
   },
   notifications: {

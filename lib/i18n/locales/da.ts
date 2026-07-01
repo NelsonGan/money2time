@@ -1460,11 +1460,12 @@ const da = {
     step1_body:
       'Læg bare et skærmbillede af appen op med dine egne pengetips på Instagram, 小红书, Reddit, Facebook eller hvor du vil. Du behøver ikke nævne appen ved navn.',
     step2_body: 'Lad det samle likes. Flere likes betyder større belønning.',
-    step3_body: 'Send os linket til dit opslag, så mailer vi dig en gratis Pro-kode.',
+    step3_body: 'Del linket til dit opslag i vores Discord, så sender vi dig en gratis Pro-kode.',
     platforms_title: 'Del på',
     claim_title: 'Har du allerede delt?',
-    claim_body: 'Send os linket til dit opslag, så svarer vi med din gratis Pro-kode.',
-    claim_button: 'Hent min belønning',
+    claim_body:
+      'Deltag i vores Discord, læg linket til dit opslag, så sender vi dig din gratis Pro-kode.',
+    claim_button: 'Deltag i vores Discord',
     fine_print:
       'Belønninger gives manuelt, når vi har bekræftet, at dit opslag er offentligt. Én belønning pr. person. Antal likes tjekkes, når du henter belønningen.',
   },

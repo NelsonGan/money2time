@@ -1467,11 +1467,13 @@ const pt = {
     step1_body:
       'Basta postar uma captura de tela do app com as suas dicas de dinheiro no Instagram, 小红书, Reddit, Facebook ou onde quiser. Não precisa citar o nome do app.',
     step2_body: 'Deixe acumular curtidas. Mais curtidas significam uma recompensa maior.',
-    step3_body: 'Envie o link do seu post e mandaremos um código Pro grátis por e-mail.',
+    step3_body:
+      'Compartilhe o link do seu post no nosso Discord e enviaremos um código Pro grátis.',
     platforms_title: 'Postar em',
     claim_title: 'Já postou?',
-    claim_body: 'Envie o link do seu post e responderemos com o seu código Pro grátis.',
-    claim_button: 'Resgatar minha recompensa',
+    claim_body:
+      'Entre no nosso Discord, deixe o link do seu post e enviaremos o seu código Pro grátis.',
+    claim_button: 'Entrar no nosso Discord',
     fine_print:
       'As recompensas são concedidas manualmente após confirmarmos que seu post é público. Uma recompensa por pessoa. As curtidas são verificadas no momento do resgate.',
   },

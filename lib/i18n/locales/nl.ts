@@ -1477,11 +1477,12 @@ const nl = {
     step1_body:
       'Plaats gewoon een screenshot van de app met je eigen geldtips op Instagram, 小红书, Reddit, Facebook of waar je maar wilt. Je hoeft de app niet bij naam te noemen.',
     step2_body: 'Laat het likes verzamelen. Meer likes betekent een grotere beloning.',
-    step3_body: 'Stuur ons de link naar je post en we mailen je een gratis Pro-code.',
+    step3_body: 'Deel de link naar je post in onze Discord en we sturen je een gratis Pro-code.',
     platforms_title: 'Posten op',
     claim_title: 'Al gepost?',
-    claim_body: 'Stuur ons de link naar je post en we antwoorden met je gratis Pro-code.',
-    claim_button: 'Mijn beloning claimen',
+    claim_body:
+      'Word lid van onze Discord, plaats de link naar je post en we sturen je je gratis Pro-code.',
+    claim_button: 'Word lid van onze Discord',
     fine_print:
       'Beloningen worden handmatig toegekend nadat we hebben bevestigd dat je post openbaar is. Eén beloning per persoon. Het aantal likes wordt gecontroleerd op het moment van claimen.',
   },

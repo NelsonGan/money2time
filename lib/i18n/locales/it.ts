@@ -1467,11 +1467,13 @@ const it = {
     step1_body:
       'Pubblica semplicemente uno screenshot dell’app con i tuoi consigli sui soldi su Instagram, 小红书, Reddit, Facebook o dove vuoi. Non serve citare l’app per nome.',
     step2_body: 'Lascia che accumuli like. Più like, ricompensa più grande.',
-    step3_body: 'Inviaci il link del tuo post e ti spediamo via email un codice Pro gratuito.',
+    step3_body:
+      'Condividi il link del tuo post nel nostro Discord e ti invieremo un codice Pro gratuito.',
     platforms_title: 'Pubblica su',
     claim_title: 'Hai già pubblicato?',
-    claim_body: 'Inviaci il link del tuo post e ti risponderemo con il tuo codice Pro gratuito.',
-    claim_button: 'Richiedi la ricompensa',
+    claim_body:
+      'Unisciti al nostro Discord, lascia il link del tuo post e ti invieremo il tuo codice Pro gratuito.',
+    claim_button: 'Unisciti al nostro Discord',
     fine_print:
       'Le ricompense vengono assegnate manualmente dopo aver verificato che il tuo post sia pubblico. Una ricompensa a persona. I like vengono controllati al momento della richiesta.',
   },

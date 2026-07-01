@@ -1463,11 +1463,12 @@ const ms = {
     step1_body:
       'Hanya hantar tangkap layar apl dengan tip kewangan anda di Instagram, 小红书, Reddit, Facebook atau mana-mana sahaja. Tak perlu sebut nama apl.',
     step2_body: 'Biar ia kumpul suka. Lebih banyak suka, lebih besar ganjaran.',
-    step3_body: 'Hantar pautan pos anda dan kami akan e-mel kod Pro percuma.',
+    step3_body: 'Kongsi pautan pos anda dalam Discord kami dan kami akan hantar kod Pro percuma.',
     platforms_title: 'Hantar pos di',
     claim_title: 'Sudah hantar pos?',
-    claim_body: 'Hantar pautan pos anda dan kami akan balas dengan kod Pro percuma.',
-    claim_button: 'Tuntut ganjaran saya',
+    claim_body:
+      'Sertai Discord kami, letakkan pautan pos anda, dan kami akan hantar kod Pro percuma anda.',
+    claim_button: 'Sertai Discord kami',
     fine_print:
       'Ganjaran diberi secara manual selepas kami sahkan pos anda bersifat awam. Satu ganjaran setiap orang. Jumlah suka disemak ketika anda menuntut.',
   },

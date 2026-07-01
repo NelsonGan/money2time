@@ -1444,11 +1444,12 @@ const vi = {
       'Chỉ cần đăng ảnh chụp màn hình ứng dụng kèm mẹo tiền bạc của bạn lên Instagram, 小红书, Reddit, Facebook hoặc bất cứ đâu. Không cần nhắc tên ứng dụng.',
     step2_body: 'Để bài thu thập lượt thích. Càng nhiều lượt thích, phần thưởng càng lớn.',
     step3_body:
-      'Gửi cho chúng tôi liên kết bài đăng và chúng tôi sẽ email cho bạn mã Pro miễn phí.',
+      'Chia sẻ liên kết bài đăng của bạn trong Discord của chúng tôi và chúng tôi sẽ gửi bạn mã Pro miễn phí.',
     platforms_title: 'Đăng trên',
     claim_title: 'Đã đăng rồi?',
-    claim_body: 'Gửi liên kết bài đăng và chúng tôi sẽ phản hồi kèm mã Pro miễn phí.',
-    claim_button: 'Nhận thưởng',
+    claim_body:
+      'Tham gia Discord của chúng tôi, để lại liên kết bài đăng, và chúng tôi sẽ gửi mã Pro miễn phí của bạn.',
+    claim_button: 'Tham gia Discord của chúng tôi',
     fine_print:
       'Phần thưởng được cấp thủ công sau khi chúng tôi xác minh bài đăng của bạn ở chế độ công khai. Mỗi người một phần thưởng. Số lượt thích được kiểm tra tại thời điểm nhận.',
   },

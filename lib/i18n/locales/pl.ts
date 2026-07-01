@@ -1465,11 +1465,13 @@ const pl = {
     step1_body:
       'Po prostu opublikuj zrzut ekranu aplikacji ze swoimi poradami o pieniądzach na Instagram, 小红书, Reddit, Facebook lub gdziekolwiek. Nie musisz wymieniać nazwy aplikacji.',
     step2_body: 'Niech zbiera polubienia. Więcej polubień to większa nagroda.',
-    step3_body: 'Wyślij nam link do swojego posta, a my mailowo prześlemy darmowy kod Pro.',
+    step3_body:
+      'Udostępnij link do swojego posta na naszym Discordzie, a my prześlemy Ci darmowy kod Pro.',
     platforms_title: 'Opublikuj na',
     claim_title: 'Już opublikowałeś?',
-    claim_body: 'Wyślij nam link do swojego posta, a odpowiemy z Twoim darmowym kodem Pro.',
-    claim_button: 'Odbierz nagrodę',
+    claim_body:
+      'Dołącz do naszego Discorda, wrzuć link do swojego posta, a my prześlemy Ci darmowy kod Pro.',
+    claim_button: 'Dołącz do naszego Discorda',
     fine_print:
       'Nagrody przyznajemy ręcznie po potwierdzeniu, że Twój post jest publiczny. Jedna nagroda na osobę. Liczbę polubień sprawdzamy w momencie zgłoszenia.',
   },
