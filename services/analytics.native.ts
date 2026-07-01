@@ -206,12 +206,21 @@ const FIRST_APP_OPEN_TRACKED_KEY = 'analytics.firstAppOpenTracked.v1';
  * the high-volume "App Session" event — which also removes the built-in
  * "First App Open". This re-creates that signal cheaply (one event per install,
  * guarded by a persisted flag). Safe to call on every launch.
+ *
+ * `suppressEmit` handles the upgrade case: existing users had their real first
+ * open long ago (as Mixpanel's `$ae_first_open`), but the guard flag is a new
+ * key so it's absent for them too. Passing `suppressEmit` for anyone who has
+ * already used the app marks the flag as consumed WITHOUT firing a spurious
+ * first-open, so only genuinely-new installs emit the event going forward.
  */
-export async function trackFirstAppOpenIfNeeded(): Promise<void> {
+export async function trackFirstAppOpenIfNeeded(options?: {
+  suppressEmit?: boolean;
+}): Promise<void> {
   try {
     const alreadyTracked = await AsyncStorage.getItem(FIRST_APP_OPEN_TRACKED_KEY);
     if (alreadyTracked) return;
     await AsyncStorage.setItem(FIRST_APP_OPEN_TRACKED_KEY, '1');
+    if (options?.suppressEmit) return;
     await trackEvent('First App Open');
   } catch {
     // Best-effort only; never block startup on analytics.

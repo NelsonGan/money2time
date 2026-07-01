@@ -2446,9 +2446,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!settings?.appUserId) return;
     void identifyUser(settings.appUserId);
     // Manual replacement for Mixpanel's automatic "First App Open" (disabled
-    // alongside the high-volume "App Session"). Fires once per install.
-    void trackFirstAppOpenIfNeeded();
-  }, [settings?.appUserId]);
+    // alongside the high-volume "App Session"). Fires once per install — but
+    // suppressed for users who have already onboarded, so upgrading to this
+    // build doesn't backfill a false first-open for the entire existing base.
+    void trackFirstAppOpenIfNeeded({ suppressEmit: settings.onboardingCompleted === true });
+  }, [settings?.appUserId, settings?.onboardingCompleted]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
   const autoBackupEnabled = settings?.autoBackupEnabled ?? true;

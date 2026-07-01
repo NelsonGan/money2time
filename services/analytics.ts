@@ -21,7 +21,9 @@ export async function trackEvent(
   _options?: TrackEventOptions,
 ): Promise<void> {}
 
-export async function trackFirstAppOpenIfNeeded(): Promise<void> {}
+export async function trackFirstAppOpenIfNeeded(_options?: {
+  suppressEmit?: boolean;
+}): Promise<void> {}
 
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
