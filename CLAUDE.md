@@ -223,7 +223,7 @@ Single workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml) 
 - **Plan** — push-to-main and manual-dispatch only. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — push-to-main and manual-dispatch only. `eas build --local` on the matched runner (macos-latest for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build.
 
-Concurrency group `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true` — a new push to `main` cancels the in-flight run; new commits to a PR cancel previous test runs. Requires repo secret `EXPO_TOKEN`. Push to `main` auto-submits to TestFlight + Play Internal.
+Concurrency group `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true` — a new push to `main` cancels the in-flight run; new commits to a PR cancel previous test runs. Requires repo secret `EXPO_TOKEN`. Push to `main` auto-submits to TestFlight (iOS) + Play **Open testing** (`beta` track, Android); promote to App Store / Play production manually.
 
 ### ESLint Rules Worth Knowing
 
