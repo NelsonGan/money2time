@@ -1417,6 +1417,16 @@ const sv = {
     expires_on: 'Tillgång till och med',
     lifetime_access: 'Du har livstidsåtkomst till alla Pro-funktioner.',
     cancel_subscription: 'Avsluta prenumeration',
+    lifetime_sub_warning_title: 'Du debiteras två gånger',
+    lifetime_sub_warning_body:
+      'Du har Livstids-Pro, men en prenumeration är fortfarande aktiv. Avsluta den så att du inte debiteras igen.',
+    upgrade_to_lifetime: 'Uppgradera till livstid',
+    lifetime_upsell_subtitle: 'En betalning, din för alltid. Inga fler prenumerationsförnyelser.',
+    switch_to_lifetime: 'Byt till livstid',
+    lifetime_purchased_title: 'Du har nu Livstids-Pro',
+    lifetime_purchased_body:
+      'Din prenumeration behövs inte längre. Avsluta den så att du aldrig debiteras igen.',
+    not_now: 'Inte nu',
     cancel_subscription_note:
       'För att avsluta din prenumeration omdirigeras du till enhetens prenumerationsinställningar.',
     limit_reached_title: 'Gratisplanens gräns nådd',

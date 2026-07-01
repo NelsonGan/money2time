@@ -82,6 +82,14 @@ export const AnalyticsEvents = {
   PRO_RESTORE_STARTED: 'Pro Restore Started',
   PRO_RESTORE_COMPLETED: 'Pro Restore Completed',
   PRO_LIMIT_HIT: 'Pro Limit Hit',
+  // Subscription → Lifetime upgrade funnel
+  PRO_LIFETIME_UPGRADE_VIEWED: 'Pro Lifetime Upgrade Viewed',
+  PRO_LIFETIME_UPGRADE_TAPPED: 'Pro Lifetime Upgrade Tapped',
+  PRO_LIFETIME_UPGRADE_COMPLETED: 'Pro Lifetime Upgrade Completed',
+  PRO_CANCEL_SUB_PROMPT_VIEWED: 'Pro Cancel Sub Prompt Viewed',
+  PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
+  PRO_REDUNDANT_SUB_WARNING_VIEWED: 'Pro Redundant Sub Warning Viewed',
+  PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
 
   // Statement import
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',

@@ -1,6 +1,6 @@
-import { Crown, ExternalLink } from 'lucide-react-native';
-import React, { useMemo } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { AlertTriangle, ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
+import React, { useEffect, useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import {
@@ -13,7 +13,13 @@ import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import {
+  hasRedundantSubscription,
+  isRevenueCatCustomerStateSubscriber,
+} from '~/services/revenueCat';
 import { FONT } from '~/utils/fonts';
+import { openStoreSubscriptions } from '~/utils/subscriptionSettings';
 
 interface ProManagementScreenProps {
   onBack: () => void;
@@ -38,14 +44,6 @@ function getPlanLabel(productIdentifier: string | null): string {
   return productIdentifier;
 }
 
-function openSubscriptionSettings() {
-  if (Platform.OS === 'ios') {
-    void Linking.openURL('https://apps.apple.com/account/subscriptions');
-  } else {
-    void Linking.openURL('https://play.google.com/store/account/subscriptions');
-  }
-}
-
 export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScreenProps) {
   const { isPro, customerState } = usePro();
   const themeColors = useThemeColors();
@@ -55,6 +53,24 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
     if (!customerState?.activeProductIdentifier) return false;
     return customerState.expirationDate === null;
   }, [customerState]);
+
+  const isSubscriber = useMemo(
+    () => isRevenueCatCustomerStateSubscriber(customerState),
+    [customerState],
+  );
+
+  // Lifetime owner who still has a subscription billing in the background —
+  // they're paying for access they already own. Nudge them to cancel.
+  const showRedundantSubWarning = useMemo(
+    () => hasRedundantSubscription(customerState),
+    [customerState],
+  );
+
+  useEffect(() => {
+    if (showRedundantSubWarning) {
+      void trackEvent(AnalyticsEvents.PRO_REDUNDANT_SUB_WARNING_VIEWED);
+    }
+  }, [showRedundantSubWarning]);
 
   if (!isPro) {
     return (
@@ -185,15 +201,76 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
         </View>
 
         {isLifetime ? (
-          <View className="mt-4 px-2">
-            <Text variant="friendly" tone="muted" className="text-center text-sm">
-              {I18n.t('pro.lifetime_access')}
-            </Text>
-          </View>
+          showRedundantSubWarning ? (
+            <View className="mt-6 gap-3">
+              <View
+                className="flex-row gap-2.5 rounded-2xl border p-4"
+                style={{
+                  borderColor: themeColors.coral,
+                  backgroundColor: `${themeColors.coral}1A`,
+                }}
+              >
+                <AlertTriangle size={18} color={themeColors.coral} style={{ marginTop: 1 }} />
+                <View className="flex-1">
+                  <Text
+                    className="text-sm"
+                    style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  >
+                    {I18n.t('pro.lifetime_sub_warning_title')}
+                  </Text>
+                  <Text variant="friendly" tone="muted" className="mt-1 text-sm">
+                    {I18n.t('pro.lifetime_sub_warning_body')}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => {
+                  void trackEvent(AnalyticsEvents.PRO_REDUNDANT_SUB_CANCEL_TAPPED);
+                  openStoreSubscriptions();
+                }}
+                className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
+                style={{ backgroundColor: themeColors.primary }}
+              >
+                <ExternalLink size={16} color="#fff" />
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
+                  {I18n.t('pro.cancel_subscription')}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View className="mt-4 px-2">
+              <Text variant="friendly" tone="muted" className="text-center text-sm">
+                {I18n.t('pro.lifetime_access')}
+              </Text>
+            </View>
+          )
         ) : (
           <View className="mt-6 gap-3">
+            {isSubscriber ? (
+              <Pressable
+                onPress={() => {
+                  void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_TAPPED, {
+                    source: 'pro_management',
+                  });
+                  onOpenPaywall();
+                }}
+                className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
+                style={{ backgroundColor: themeColors.primary }}
+              >
+                <ArrowUpCircle size={16} color="#fff" />
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
+                  {I18n.t('pro.switch_to_lifetime')}
+                </Text>
+              </Pressable>
+            ) : null}
             <Pressable
-              onPress={openSubscriptionSettings}
+              onPress={openStoreSubscriptions}
               className="flex-row items-center justify-center gap-2 rounded-xl border border-border/40 bg-surface px-4 py-3.5"
             >
               <ExternalLink size={16} color={themeColors.text} />

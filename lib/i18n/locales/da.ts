@@ -1419,6 +1419,16 @@ const da = {
     expires_on: 'Adgang til og med',
     lifetime_access: 'Du har livstidsadgang til alle Pro-funktioner.',
     cancel_subscription: 'Annullér abonnement',
+    lifetime_sub_warning_title: 'Du bliver opkrævet dobbelt',
+    lifetime_sub_warning_body:
+      'Du har Livstids-Pro, men et abonnement er stadig aktivt. Annullér det, så du ikke bliver opkrævet igen.',
+    upgrade_to_lifetime: 'Opgradér til livstid',
+    lifetime_upsell_subtitle: 'Én betaling, din for altid. Ingen fornyelser af abonnement.',
+    switch_to_lifetime: 'Skift til livstid',
+    lifetime_purchased_title: 'Du har nu Livstids-Pro',
+    lifetime_purchased_body:
+      'Dit abonnement er ikke længere nødvendigt. Annullér det, så du aldrig bliver opkrævet igen.',
+    not_now: 'Ikke nu',
     cancel_subscription_note:
       'For at annullere dit abonnement omdirigeres du til enhedens abonnementsindstillinger.',
     limit_reached_title: 'Gratis-planens grænse nået',

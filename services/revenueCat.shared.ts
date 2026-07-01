@@ -18,6 +18,14 @@ export interface RevenueCatCustomerState {
   activeProductIdentifier: string | null;
   expirationDate: string | null;
   latestPurchaseDate: string | null;
+  /**
+   * True when the customer still has at least one active auto-renewing
+   * subscription. Tracked independently of the resolved entitlement because a
+   * Lifetime purchase collapses the entitlement to non-expiring — after that,
+   * `expirationDate` alone can no longer reveal a subscription that is still
+   * billing in the background.
+   */
+  hasActiveSubscription: boolean;
 }
 
 export type RevenueCatActionStatus =
@@ -57,4 +65,30 @@ export function isRevenueCatCustomerStateActive(customerState: RevenueCatCustome
   }
 
   return !customerState.expirationDate || new Date(customerState.expirationDate) > new Date();
+}
+
+/**
+ * Lifetime Pro: an active, non-expiring entitlement (a one-time / non-consumable
+ * purchase). There is nothing left to upsell to these users.
+ */
+export function isRevenueCatCustomerStateLifetime(customerState: RevenueCatCustomerState | null) {
+  return isRevenueCatCustomerStateActive(customerState) && !customerState?.expirationDate;
+}
+
+/**
+ * Subscriber: active Pro backed by an auto-renewing subscription (has an
+ * expiration date). These users can still upgrade to Lifetime.
+ */
+export function isRevenueCatCustomerStateSubscriber(customerState: RevenueCatCustomerState | null) {
+  return isRevenueCatCustomerStateActive(customerState) && !!customerState?.expirationDate;
+}
+
+/**
+ * Lifetime owner who *also* still has a subscription billing in the background —
+ * e.g. they upgraded from Monthly to Lifetime but never cancelled the sub. These
+ * users are being charged for access they already own forever, so we should
+ * persistently nudge them to cancel.
+ */
+export function hasRedundantSubscription(customerState: RevenueCatCustomerState | null) {
+  return isRevenueCatCustomerStateLifetime(customerState) && !!customerState?.hasActiveSubscription;
 }

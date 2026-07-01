@@ -1405,6 +1405,16 @@ const hi = {
     expires_on: 'एक्सेस तक',
     lifetime_access: 'आपके पास सभी Pro सुविधाओं तक लाइफटाइम एक्सेस है।',
     cancel_subscription: 'सदस्यता रद्द करें',
+    lifetime_sub_warning_title: 'आपसे दो बार शुल्क लिया जा रहा है',
+    lifetime_sub_warning_body:
+      'आपके पास लाइफटाइम प्रो है, लेकिन एक सदस्यता अभी भी सक्रिय है। इसे रद्द करें ताकि आपसे दोबारा शुल्क न लिया जाए।',
+    upgrade_to_lifetime: 'लाइफटाइम में अपग्रेड करें',
+    lifetime_upsell_subtitle: 'एक बार भुगतान, हमेशा के लिए आपका। कोई सदस्यता नवीनीकरण नहीं।',
+    switch_to_lifetime: 'लाइफटाइम पर स्विच करें',
+    lifetime_purchased_title: 'अब आपके पास लाइफटाइम प्रो है',
+    lifetime_purchased_body:
+      'अब आपकी सदस्यता की ज़रूरत नहीं है। इसे रद्द करें ताकि आपसे दोबारा शुल्क न लिया जाए।',
+    not_now: 'अभी नहीं',
     cancel_subscription_note:
       'सदस्यता रद्द करने के लिए आपको डिवाइस सदस्यता सेटिंग्स पर भेजा जाएगा।',
     limit_reached_title: 'फ्री प्लान की सीमा पहुंच गई',
