@@ -419,6 +419,7 @@ const nb = {
       fx_received: 'Mottatt beløp',
       title_create: 'Legg til',
       title_edit: 'Oppdater',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Rask og enkel oppføring',
       subtitle_edit: 'Oppdater detaljer',
       subtitle_edit_balance_adjustment: 'Oppdater beløp og berørt konto',

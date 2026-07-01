@@ -420,6 +420,7 @@ const uk = {
       fx_received: 'Отримана сума',
       title_create: 'Додати',
       title_edit: 'Оновити',
+      bulk_mode: 'Масово',
       subtitle_create: 'Швидкий і зручний запис',
       subtitle_edit: 'Оновити деталі',
       subtitle_edit_balance_adjustment: 'Оновити суму та рахунок',

@@ -418,6 +418,7 @@ const ja = {
       fx_received: '受取金額',
       title_create: '追加',
       title_edit: '更新',
+      bulk_mode: '一括',
       subtitle_create: 'すばやく記録',
       subtitle_edit: '詳細を更新',
       subtitle_edit_balance_adjustment: '金額と対象口座を更新',

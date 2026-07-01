@@ -419,6 +419,7 @@ const da = {
       fx_received: 'Modtaget beløb',
       title_create: 'Tilføj',
       title_edit: 'Opdater',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Hurtig og nem postering',
       subtitle_edit: 'Opdater detaljer',
       subtitle_edit_balance_adjustment: 'Opdater beløb og berørt konto',

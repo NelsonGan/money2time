@@ -417,6 +417,7 @@ const vi = {
       fx_received: 'Số tiền nhận',
       title_create: 'Thêm',
       title_edit: 'Cập nhật',
+      bulk_mode: 'Hàng loạt',
       subtitle_create: 'Ghi nhanh, gọn',
       subtitle_edit: 'Cập nhật chi tiết',
       subtitle_edit_balance_adjustment: 'Cập nhật số tiền và tài khoản liên quan',

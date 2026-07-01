@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileText,
   Hash,
+  Layers,
   Pencil,
   Power,
   Repeat,
@@ -417,7 +418,19 @@ export function TransactionEditorScreen({
     currentMonthWage,
     rateTable,
     fxCurrencies,
+    quickEntryPrefs,
+    updateQuickEntryPrefs,
   } = useApp();
+
+  // Bulk create mode: when on, Save keeps the editor open in create mode so the
+  // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
+  // Only meaningful in create mode (not edit / recurring).
+  const showBulkToggle = mode === 'create' && !recurringOptions;
+  const bulkCreateEnabled = showBulkToggle && quickEntryPrefs.bulkCreateEnabled;
+  // Bumped after each bulk save so the numpad remounts with a cleared value
+  // (NumpadPanel keeps its own internal expression and won't re-sync from an
+  // emptied `amount` prop otherwise).
+  const [bulkEntryNonce, setBulkEntryNonce] = useState(0);
 
   // Resolve an account's native currency (code), falling back to the reporting
   // currency. Used so transactions store the currency of the account they touch.
@@ -1353,17 +1366,9 @@ export function TransactionEditorScreen({
         }
       }
 
-      // Close modal immediately, then submit after the dismiss animation
       void triggerHaptic('success');
       // Mark the current receipt as committed so the unmount cleanup keeps it.
       receiptCommittedRef.current = true;
-      onClose();
-
-      // The submission is committed — delete the previously-persisted receipt
-      // file if the user replaced or removed it this session (edit mode).
-      if (persistedReceiptRef.current && persistedReceiptRef.current !== receiptUri) {
-        deleteReceiptImage(persistedReceiptRef.current);
-      }
 
       let deferredSubmit: (() => void) | null = null;
       if (useSplitsPath && submitPayload && onSubmitWithSplits) {
@@ -1375,6 +1380,49 @@ export function TransactionEditorScreen({
         deferredSubmit = () => onSubmit(capturedPayload);
       } else {
         deferredSubmit = recurringSubmit;
+      }
+
+      // Bulk create mode: keep the editor open and make the reset feel instant.
+      // Reset the per-transaction fields (amount / note / receipt / splits) on
+      // THIS frame so the numpad clears and refocuses immediately, then hand the
+      // create off to run after interactions. The create is itself optimistic
+      // (the transaction lands in state synchronously and the SQLite write is
+      // deferred), so nothing here waits on the DB. Type / account / category /
+      // date / sentiment are kept for the next entry.
+      if (bulkCreateEnabled) {
+        // The captured payload already owns the receipt — detach it from the
+        // editor without deleting the file, and reset the commit flag so the
+        // next (not-yet-saved) entry starts clean.
+        receiptUriRef.current = null;
+        receiptCommittedRef.current = false;
+        setReceiptUri(null);
+        setAmount('');
+        setAmountExpression('');
+        setNote('');
+        setNoteSuggestions([]);
+        setError(null);
+        setFieldErrors({});
+        if (splitMode) {
+          setSplitMode(false);
+          setSplits([]);
+          setNewlyPaidIds(new Set());
+        }
+        setBulkEntryNonce((n) => n + 1);
+        activateField('amount');
+        if (deferredSubmit) {
+          InteractionManager.runAfterInteractions(deferredSubmit);
+        }
+        return;
+      }
+
+      // Normal path: close modal immediately, then submit after the dismiss
+      // animation.
+      onClose();
+
+      // The submission is committed — delete the previously-persisted receipt
+      // file if the user replaced or removed it this session (edit mode).
+      if (persistedReceiptRef.current && persistedReceiptRef.current !== receiptUri) {
+        deleteReceiptImage(persistedReceiptRef.current);
       }
 
       if (deferredSubmit) {
@@ -1724,6 +1772,7 @@ export function TransactionEditorScreen({
             ) : null}
             <View className="flex-1">
               <NumpadPanel
+                key={bulkEntryNonce}
                 initialExpression={amount}
                 onBackgroundPress={clearActiveField}
                 onValueChange={handleAmountValueChange}
@@ -1857,37 +1906,36 @@ export function TransactionEditorScreen({
                   </Text>
                 ) : null}
               </View>
-              {!hideSplitMode && type === 'expense' && !recurringOptions ? (
-                <View className="relative">
-                  {splitBillsUnpaidCount > 0 ? (
-                    <View
-                      pointerEvents="none"
-                      className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
-                    >
-                      <Text className="text-white text-[10px] font-bold leading-[12px]">
-                        {splitBillsUnpaidCount}
-                      </Text>
-                    </View>
-                  ) : null}
-                  <Pressable
-                    onPress={handleOpenSplitBill}
-                    disabled={!canOpenSplitBill}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+              {showBulkToggle ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    updateQuickEntryPrefs({ bulkCreateEnabled: !bulkCreateEnabled });
+                  }}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: bulkCreateEnabled }}
+                  accessibilityLabel={I18n.t('transactions.editor.bulk_mode')}
+                  className={cn(
+                    'flex-row items-center gap-1.5 px-2.5 h-8 rounded-full border',
+                    bulkCreateEnabled
+                      ? 'bg-primary/15 border-primary/40'
+                      : 'bg-secondary/60 border-border/30',
+                  )}
+                >
+                  <Layers
+                    size={14}
+                    color={bulkCreateEnabled ? themeColors.primary : themeColors.textMuted}
+                  />
+                  <Text
+                    variant="caption"
                     className={cn(
-                      'flex-row items-center gap-1.5 px-2.5 h-8 rounded-full',
-                      splitMode && splits.some((s) => !s.isSelf)
-                        ? 'bg-primary/15'
-                        : 'bg-secondary/60',
+                      'text-[12px]',
+                      bulkCreateEnabled ? 'text-primary' : 'text-muted-foreground',
                     )}
-                    style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
                   >
-                    <Text className="text-[14px]">🤝</Text>
-                    <Text variant="caption" className="text-[12px]">
-                      {I18n.t('transactions.editor.split.button_label')}
-                    </Text>
-                  </Pressable>
-                </View>
+                    {I18n.t('transactions.editor.bulk_mode')}
+                  </Text>
+                </Pressable>
               ) : null}
             </View>
             {mode === 'edit' && onDelete ? (
@@ -2337,6 +2385,35 @@ export function TransactionEditorScreen({
                         </>
                       ) : null}
                     </View>
+
+                    {/* Split Bill — full-width action below the sentiment picker */}
+                    {!hideSplitMode && type === 'expense' && !recurringOptions ? (
+                      <Pressable
+                        onPress={handleOpenSplitBill}
+                        disabled={!canOpenSplitBill}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+                        className={cn(
+                          'mt-3 flex-row items-center justify-center gap-2 h-12 rounded-2xl border',
+                          splitMode && splits.some((s) => !s.isSelf)
+                            ? 'bg-primary/15 border-primary/40'
+                            : 'bg-secondary/60 border-border/30',
+                        )}
+                        style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
+                      >
+                        <Text className="text-[18px]">🤝</Text>
+                        <Text variant="body">
+                          {I18n.t('transactions.editor.split.button_label')}
+                        </Text>
+                        {splitBillsUnpaidCount > 0 ? (
+                          <View className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-destructive items-center justify-center">
+                            <Text className="text-white text-[11px] font-bold leading-[14px]">
+                              {splitBillsUnpaidCount}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </Pressable>
+                    ) : null}
 
                     {/* Recurring options (traditional form inputs, secondary) */}
                     {recurringOptions ? (

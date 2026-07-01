@@ -420,6 +420,7 @@ const nl = {
       fx_received: 'Ontvangen bedrag',
       title_create: 'Toevoegen',
       title_edit: 'Bijwerken',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Snel en eenvoudig boeken',
       subtitle_edit: 'Details bijwerken',
       subtitle_edit_balance_adjustment: 'Bedrag en betrokken rekening bijwerken',
