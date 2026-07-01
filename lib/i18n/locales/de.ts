@@ -1441,11 +1441,11 @@ const de = {
     lifetime_sub_warning_body:
       'Du hast Lifetime Pro, aber ein Abo ist noch aktiv. Kündige es, damit dir nichts mehr berechnet wird.',
     upgrade_to_lifetime: 'Auf Lebenslang upgraden',
-    lifetime_upsell_subtitle: 'Einmal zahlen, für immer deins — keine Abo-Verlängerungen mehr.',
+    lifetime_upsell_subtitle: 'Einmal zahlen, für immer deins. Keine Abo-Verlängerungen mehr.',
     switch_to_lifetime: 'Zu Lebenslang wechseln',
     lifetime_purchased_title: 'Du hast jetzt Lifetime Pro',
     lifetime_purchased_body:
-      'Dein Abo wird nicht mehr benötigt — kündige es, damit dir nichts mehr berechnet wird.',
+      'Dein Abo wird nicht mehr benötigt. Kündige es, damit dir nichts mehr berechnet wird.',
     not_now: 'Jetzt nicht',
     cancel_subscription_note:
       'Um dein Abonnement zu kündigen, wirst du zu den Abonnementeinstellungen deines Geräts weitergeleitet.',

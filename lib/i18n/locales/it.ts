@@ -1428,11 +1428,11 @@ const it = {
     lifetime_sub_warning_body:
       'Hai Pro a vita, ma un abbonamento è ancora attivo. Annullalo per non essere più addebitato.',
     upgrade_to_lifetime: 'Passa a A vita',
-    lifetime_upsell_subtitle: "Un pagamento, tuo per sempre — nessun rinnovo dell'abbonamento.",
+    lifetime_upsell_subtitle: "Un pagamento, tuo per sempre. Nessun rinnovo dell'abbonamento.",
     switch_to_lifetime: 'Passa a A vita',
     lifetime_purchased_title: 'Ora hai Pro a vita',
     lifetime_purchased_body:
-      'Il tuo abbonamento non è più necessario — annullalo per non essere più addebitato.',
+      'Il tuo abbonamento non è più necessario. Annullalo per non essere più addebitato.',
     not_now: 'Non ora',
     cancel_subscription_note:
       "Per cancellare l'abbonamento, verrai reindirizzato alle impostazioni abbonamento del dispositivo.",

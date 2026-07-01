@@ -1393,10 +1393,10 @@ const ko = {
     lifetime_sub_warning_body:
       '평생 Pro를 이용 중이지만 구독이 아직 활성 상태입니다. 취소하면 다시 청구되지 않습니다.',
     upgrade_to_lifetime: '평생 이용으로 업그레이드',
-    lifetime_upsell_subtitle: '한 번 결제로 평생 사용 — 더 이상 구독 갱신이 없습니다.',
+    lifetime_upsell_subtitle: '한 번 결제로 평생 사용하세요. 더 이상 구독 갱신이 없습니다.',
     switch_to_lifetime: '평생 이용으로 전환',
     lifetime_purchased_title: '이제 평생 Pro를 이용할 수 있습니다',
-    lifetime_purchased_body: '구독이 더 이상 필요하지 않습니다 — 취소하면 다시 청구되지 않습니다.',
+    lifetime_purchased_body: '구독이 더 이상 필요하지 않습니다. 취소하면 다시 청구되지 않습니다.',
     not_now: '나중에',
     cancel_subscription_note: '구독을 취소하려면 기기의 구독 설정으로 이동합니다.',
     limit_reached_title: '무료 플랜 한도 초과',

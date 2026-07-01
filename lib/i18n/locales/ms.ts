@@ -1425,11 +1425,11 @@ const ms = {
       'Anda mempunyai Pro Seumur Hidup, tetapi langganan masih aktif. Batalkannya supaya anda tidak dicaj lagi.',
     upgrade_to_lifetime: 'Naik taraf ke Seumur Hidup',
     lifetime_upsell_subtitle:
-      'Sekali bayar, milik anda selamanya — tiada lagi pembaharuan langganan.',
+      'Sekali bayar, milik anda selamanya. Tiada lagi pembaharuan langganan.',
     switch_to_lifetime: 'Tukar ke Seumur Hidup',
     lifetime_purchased_title: 'Kini anda mempunyai Pro Seumur Hidup',
     lifetime_purchased_body:
-      'Langganan anda tidak lagi diperlukan — batalkannya supaya anda tidak dicaj lagi.',
+      'Langganan anda tidak lagi diperlukan. Batalkannya supaya anda tidak dicaj lagi.',
     not_now: 'Bukan sekarang',
     cancel_subscription_note:
       'Untuk batal langganan, anda akan diarahkan ke tetapan langganan peranti anda.',

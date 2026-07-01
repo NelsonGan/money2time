@@ -1401,7 +1401,7 @@ const ja = {
     lifetime_sub_warning_body:
       '買い切りProをお持ちですが、サブスクリプションがまだ有効です。解約すれば今後請求されません。',
     upgrade_to_lifetime: '買い切りにアップグレード',
-    lifetime_upsell_subtitle: '一度の支払いでずっと使える — サブスクの更新はもうありません。',
+    lifetime_upsell_subtitle: '一度の支払いでずっと使えます。サブスクの更新はもうありません。',
     switch_to_lifetime: '買い切りに切り替える',
     lifetime_purchased_title: '買い切りProになりました',
     lifetime_purchased_body: 'サブスクリプションは不要になりました。解約すれば今後請求されません。',

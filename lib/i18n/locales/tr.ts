@@ -1427,11 +1427,11 @@ const tr = {
     lifetime_sub_warning_body:
       "Ömür Boyu Pro'ya sahipsiniz ancak bir abonelik hâlâ etkin. Tekrar ücretlendirilmemek için iptal edin.",
     upgrade_to_lifetime: "Ömür Boyu'na Yükselt",
-    lifetime_upsell_subtitle: 'Tek ödeme, sonsuza dek sizin — artık abonelik yenileme yok.',
+    lifetime_upsell_subtitle: 'Tek ödeme, sonsuza dek sizin. Artık abonelik yenileme yok.',
     switch_to_lifetime: "Ömür Boyu'na Geç",
     lifetime_purchased_title: "Artık Ömür Boyu Pro'ya sahipsiniz",
     lifetime_purchased_body:
-      'Aboneliğinize artık gerek yok — tekrar ücretlendirilmemek için iptal edin.',
+      'Aboneliğinize artık gerek yok. Tekrar ücretlendirilmemek için iptal edin.',
     not_now: 'Şimdi değil',
     cancel_subscription_note:
       'Aboneliğinizi iptal etmek için cihazınızın abonelik ayarlarına yönlendirileceksiniz.',

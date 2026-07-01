@@ -1422,11 +1422,11 @@ const da = {
     lifetime_sub_warning_body:
       'Du har Livstids-Pro, men et abonnement er stadig aktivt. Annullér det, så du ikke bliver opkrævet igen.',
     upgrade_to_lifetime: 'Opgradér til livstid',
-    lifetime_upsell_subtitle: 'Én betaling, din for altid — ingen fornyelser af abonnement.',
+    lifetime_upsell_subtitle: 'Én betaling, din for altid. Ingen fornyelser af abonnement.',
     switch_to_lifetime: 'Skift til livstid',
     lifetime_purchased_title: 'Du har nu Livstids-Pro',
     lifetime_purchased_body:
-      'Dit abonnement er ikke længere nødvendigt — annullér det, så du aldrig bliver opkrævet igen.',
+      'Dit abonnement er ikke længere nødvendigt. Annullér det, så du aldrig bliver opkrævet igen.',
     not_now: 'Ikke nu',
     cancel_subscription_note:
       'For at annullere dit abonnement omdirigeres du til enhedens abonnementsindstillinger.',

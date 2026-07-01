@@ -1420,11 +1420,11 @@ const sv = {
     lifetime_sub_warning_body:
       'Du har Livstids-Pro, men en prenumeration är fortfarande aktiv. Avsluta den så att du inte debiteras igen.',
     upgrade_to_lifetime: 'Uppgradera till livstid',
-    lifetime_upsell_subtitle: 'En betalning, din för alltid — inga fler prenumerationsförnyelser.',
+    lifetime_upsell_subtitle: 'En betalning, din för alltid. Inga fler prenumerationsförnyelser.',
     switch_to_lifetime: 'Byt till livstid',
     lifetime_purchased_title: 'Du har nu Livstids-Pro',
     lifetime_purchased_body:
-      'Din prenumeration behövs inte längre — avsluta den så att du aldrig debiteras igen.',
+      'Din prenumeration behövs inte längre. Avsluta den så att du aldrig debiteras igen.',
     not_now: 'Inte nu',
     cancel_subscription_note:
       'För att avsluta din prenumeration omdirigeras du till enhetens prenumerationsinställningar.',

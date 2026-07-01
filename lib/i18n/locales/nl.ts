@@ -1439,11 +1439,11 @@ const nl = {
       'Je hebt Levenslang Pro, maar een abonnement is nog actief. Zeg het op zodat je niets meer wordt berekend.',
     upgrade_to_lifetime: 'Upgraden naar Levenslang',
     lifetime_upsell_subtitle:
-      'Eén betaling, voor altijd van jou — geen abonnementsverlengingen meer.',
+      'Eén betaling, voor altijd van jou. Geen abonnementsverlengingen meer.',
     switch_to_lifetime: 'Overschakelen naar Levenslang',
     lifetime_purchased_title: 'Je hebt nu Levenslang Pro',
     lifetime_purchased_body:
-      'Je abonnement is niet meer nodig — zeg het op zodat je niets meer wordt berekend.',
+      'Je abonnement is niet meer nodig. Zeg het op zodat je niets meer wordt berekend.',
     not_now: 'Niet nu',
     cancel_subscription_note:
       'Om je abonnement op te zeggen, word je doorgestuurd naar de abonnementsinstellingen van je apparaat.',

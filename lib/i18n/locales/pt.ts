@@ -1428,11 +1428,11 @@ const pt = {
     lifetime_sub_warning_body:
       'Você tem o Pro Vitalício, mas uma assinatura ainda está ativa. Cancele-a para não ser cobrado novamente.',
     upgrade_to_lifetime: 'Mudar para Vitalício',
-    lifetime_upsell_subtitle: 'Um pagamento, seu para sempre — sem mais renovações de assinatura.',
+    lifetime_upsell_subtitle: 'Um pagamento, seu para sempre. Sem mais renovações de assinatura.',
     switch_to_lifetime: 'Mudar para Vitalício',
     lifetime_purchased_title: 'Agora você tem o Pro Vitalício',
     lifetime_purchased_body:
-      'Sua assinatura não é mais necessária — cancele-a para não ser cobrado novamente.',
+      'Sua assinatura não é mais necessária. Cancele-a para não ser cobrado novamente.',
     not_now: 'Agora não',
     cancel_subscription_note:
       'Para cancelar sua assinatura, você será redirecionado para as configurações de assinatura do dispositivo.',
