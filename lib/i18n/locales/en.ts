@@ -1383,6 +1383,9 @@ const en = {
     expires_on: 'Access through',
     lifetime_access: 'You have lifetime access to all Pro features.',
     cancel_subscription: 'Cancel Subscription',
+    lifetime_sub_warning_title: "You're being charged twice",
+    lifetime_sub_warning_body:
+      'You have Lifetime Pro, but a subscription is still active. Cancel it so you are not charged again.',
     upgrade_to_lifetime: 'Upgrade to Lifetime',
     lifetime_upsell_subtitle: 'One payment, yours forever — no more subscription renewals.',
     switch_to_lifetime: 'Switch to Lifetime',

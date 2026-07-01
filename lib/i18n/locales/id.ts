@@ -1427,6 +1427,9 @@ const id = {
     expires_on: 'Akses hingga',
     lifetime_access: 'Kamu memiliki akses seumur hidup ke semua fitur Pro.',
     cancel_subscription: 'Batalkan Langganan',
+    lifetime_sub_warning_title: 'Kamu ditagih dua kali',
+    lifetime_sub_warning_body:
+      'Kamu memiliki Pro Seumur Hidup, tetapi langganan masih aktif. Batalkan agar kamu tidak ditagih lagi.',
     upgrade_to_lifetime: 'Tingkatkan ke Seumur Hidup',
     lifetime_upsell_subtitle:
       'Sekali bayar, milikmu selamanya — tanpa perpanjangan langganan lagi.',

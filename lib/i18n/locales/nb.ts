@@ -1421,6 +1421,9 @@ const nb = {
     expires_on: 'Tilgang til',
     lifetime_access: 'Du har livstidstilgang til alle Pro-funksjoner.',
     cancel_subscription: 'Avslutt abonnement',
+    lifetime_sub_warning_title: 'Du blir belastet to ganger',
+    lifetime_sub_warning_body:
+      'Du har Livstids-Pro, men et abonnement er fortsatt aktivt. Avslutt det så du ikke belastes igjen.',
     upgrade_to_lifetime: 'Oppgrader til livstid',
     lifetime_upsell_subtitle: 'Én betaling, din for alltid — ingen flere abonnementsfornyelser.',
     switch_to_lifetime: 'Bytt til livstid',

@@ -1433,6 +1433,9 @@ const fr = {
     expires_on: "Accès jusqu'au",
     lifetime_access: 'Vous avez un accès à vie à toutes les fonctionnalités Pro.',
     cancel_subscription: "Annuler l'abonnement",
+    lifetime_sub_warning_title: 'Vous êtes facturé deux fois',
+    lifetime_sub_warning_body:
+      'Vous avez le Pro à vie, mais un abonnement est encore actif. Annulez-le pour ne plus être facturé.',
     upgrade_to_lifetime: "Passer à l'offre à vie",
     lifetime_upsell_subtitle:
       "Un seul paiement, à vous pour toujours — plus aucun renouvellement d'abonnement.",

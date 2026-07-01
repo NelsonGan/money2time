@@ -1402,6 +1402,9 @@ const vi = {
     expires_on: 'Hết hạn vào',
     lifetime_access: 'Bạn có quyền truy cập trọn đời vào tất cả tính năng Pro.',
     cancel_subscription: 'Hủy đăng ký',
+    lifetime_sub_warning_title: 'Bạn đang bị tính phí hai lần',
+    lifetime_sub_warning_body:
+      'Bạn có Pro Trọn đời, nhưng một đăng ký vẫn đang hoạt động. Hãy hủy để không bị tính phí lần nào nữa.',
     upgrade_to_lifetime: 'Nâng cấp lên Trọn đời',
     lifetime_upsell_subtitle:
       'Thanh toán một lần, thuộc về bạn mãi mãi — không còn gia hạn đăng ký.',

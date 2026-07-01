@@ -1439,6 +1439,9 @@ const fil = {
     expires_on: 'Access hanggang',
     lifetime_access: 'Mayroon kang habambuhay na access sa lahat ng Pro feature.',
     cancel_subscription: 'Kanselahin ang Subscription',
+    lifetime_sub_warning_title: 'Sinisingil ka nang dalawang beses',
+    lifetime_sub_warning_body:
+      'Mayroon kang Lifetime Pro, ngunit may aktibo pa ring subscription. Kanselahin ito para hindi ka na singilin muli.',
     upgrade_to_lifetime: 'Mag-upgrade sa Lifetime',
     lifetime_upsell_subtitle:
       'Isang bayad, sa iyo na habambuhay — wala nang pag-renew ng subscription.',

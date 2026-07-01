@@ -1335,6 +1335,8 @@ const zh = {
     expires_on: '有效期至',
     lifetime_access: '你已永久解锁所有 Pro 功能。',
     cancel_subscription: '取消订阅',
+    lifetime_sub_warning_title: '你被重复扣费了',
+    lifetime_sub_warning_body: '你已拥有终身版 Pro，但仍有一个订阅在生效。取消订阅，以免再次扣费。',
     upgrade_to_lifetime: '升级为终身版',
     lifetime_upsell_subtitle: '一次付费，永久拥有 — 不再有订阅续费。',
     switch_to_lifetime: '切换为终身版',

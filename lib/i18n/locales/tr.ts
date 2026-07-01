@@ -1423,6 +1423,9 @@ const tr = {
     expires_on: 'Erişim süresi',
     lifetime_access: 'Tüm Pro özelliklerine ömür boyu erişiminiz var.',
     cancel_subscription: 'Aboneliği İptal Et',
+    lifetime_sub_warning_title: 'İki kez ücretlendiriliyorsunuz',
+    lifetime_sub_warning_body:
+      "Ömür Boyu Pro'ya sahipsiniz ancak bir abonelik hâlâ etkin. Tekrar ücretlendirilmemek için iptal edin.",
     upgrade_to_lifetime: "Ömür Boyu'na Yükselt",
     lifetime_upsell_subtitle: 'Tek ödeme, sonsuza dek sizin — artık abonelik yenileme yok.',
     switch_to_lifetime: "Ömür Boyu'na Geç",

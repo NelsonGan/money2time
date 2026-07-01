@@ -1,4 +1,4 @@
-import { ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
+import { AlertTriangle, ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -13,7 +13,10 @@ import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { isRevenueCatCustomerStateSubscriber } from '~/services/revenueCat';
+import {
+  hasRedundantSubscription,
+  isRevenueCatCustomerStateSubscriber,
+} from '~/services/revenueCat';
 import { FONT } from '~/utils/fonts';
 import { openStoreSubscriptions } from '~/utils/subscriptionSettings';
 
@@ -52,6 +55,13 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
 
   const isSubscriber = useMemo(
     () => isRevenueCatCustomerStateSubscriber(customerState),
+    [customerState],
+  );
+
+  // Lifetime owner who still has a subscription billing in the background —
+  // they're paying for access they already own. Nudge them to cancel.
+  const showRedundantSubWarning = useMemo(
+    () => hasRedundantSubscription(customerState),
     [customerState],
   );
 
@@ -184,11 +194,49 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
         </View>
 
         {isLifetime ? (
-          <View className="mt-4 px-2">
-            <Text variant="friendly" tone="muted" className="text-center text-sm">
-              {I18n.t('pro.lifetime_access')}
-            </Text>
-          </View>
+          showRedundantSubWarning ? (
+            <View className="mt-6 gap-3">
+              <View
+                className="flex-row gap-2.5 rounded-2xl border p-4"
+                style={{
+                  borderColor: themeColors.coral,
+                  backgroundColor: `${themeColors.coral}1A`,
+                }}
+              >
+                <AlertTriangle size={18} color={themeColors.coral} style={{ marginTop: 1 }} />
+                <View className="flex-1">
+                  <Text
+                    className="text-sm"
+                    style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  >
+                    {I18n.t('pro.lifetime_sub_warning_title')}
+                  </Text>
+                  <Text variant="friendly" tone="muted" className="mt-1 text-sm">
+                    {I18n.t('pro.lifetime_sub_warning_body')}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={openStoreSubscriptions}
+                className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
+                style={{ backgroundColor: themeColors.primary }}
+              >
+                <ExternalLink size={16} color="#fff" />
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
+                  {I18n.t('pro.cancel_subscription')}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View className="mt-4 px-2">
+              <Text variant="friendly" tone="muted" className="text-center text-sm">
+                {I18n.t('pro.lifetime_access')}
+              </Text>
+            </View>
+          )
         ) : (
           <View className="mt-6 gap-3">
             {isSubscriber ? (

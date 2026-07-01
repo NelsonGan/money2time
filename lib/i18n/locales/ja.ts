@@ -1397,6 +1397,9 @@ const ja = {
     expires_on: '利用期限',
     lifetime_access: 'すべての Pro 機能を永久に利用できます。',
     cancel_subscription: 'サブスクリプションをキャンセル',
+    lifetime_sub_warning_title: '二重に請求されています',
+    lifetime_sub_warning_body:
+      '買い切りProをお持ちですが、サブスクリプションがまだ有効です。解約すれば今後請求されません。',
     upgrade_to_lifetime: '買い切りにアップグレード',
     lifetime_upsell_subtitle: '一度の支払いでずっと使える — サブスクの更新はもうありません。',
     switch_to_lifetime: '買い切りに切り替える',

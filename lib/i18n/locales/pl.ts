@@ -1422,6 +1422,9 @@ const pl = {
     expires_on: 'Dostęp do',
     lifetime_access: 'Masz dożywotni dostęp do wszystkich funkcji Pro.',
     cancel_subscription: 'Anuluj subskrypcję',
+    lifetime_sub_warning_title: 'Płacisz podwójnie',
+    lifetime_sub_warning_body:
+      'Masz dożywotni Pro, ale subskrypcja jest nadal aktywna. Anuluj ją, aby nie naliczano Ci więcej opłat.',
     upgrade_to_lifetime: 'Przejdź na dożywotni',
     lifetime_upsell_subtitle: 'Jedna płatność, Twój na zawsze — bez odnawiania subskrypcji.',
     switch_to_lifetime: 'Przełącz na dożywotni',

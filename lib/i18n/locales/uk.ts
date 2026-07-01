@@ -1414,6 +1414,9 @@ const uk = {
     expires_on: 'Доступ до',
     lifetime_access: 'У вас безстроковий доступ до всіх Pro-функцій.',
     cancel_subscription: 'Скасувати підписку',
+    lifetime_sub_warning_title: 'З вас стягують двічі',
+    lifetime_sub_warning_body:
+      'У вас довічний Pro, але підписка все ще активна. Скасуйте її, щоб з вас більше не стягували кошти.',
     upgrade_to_lifetime: 'Перейти на довічний',
     lifetime_upsell_subtitle: 'Один платіж — назавжди ваш, без поновлення підписки.',
     switch_to_lifetime: 'Перейти на довічний',

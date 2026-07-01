@@ -1389,6 +1389,9 @@ const ko = {
     expires_on: '이용 기간',
     lifetime_access: '모든 Pro 기능에 평생 접근 권한이 있습니다.',
     cancel_subscription: '구독 취소',
+    lifetime_sub_warning_title: '이중으로 청구되고 있습니다',
+    lifetime_sub_warning_body:
+      '평생 Pro를 이용 중이지만 구독이 아직 활성 상태입니다. 취소하면 다시 청구되지 않습니다.',
     upgrade_to_lifetime: '평생 이용으로 업그레이드',
     lifetime_upsell_subtitle: '한 번 결제로 평생 사용 — 더 이상 구독 갱신이 없습니다.',
     switch_to_lifetime: '평생 이용으로 전환',

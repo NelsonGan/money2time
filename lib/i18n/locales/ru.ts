@@ -1420,6 +1420,9 @@ const ru = {
     expires_on: 'Доступ до',
     lifetime_access: 'У вас пожизненный доступ ко всем функциям Pro.',
     cancel_subscription: 'Отменить подписку',
+    lifetime_sub_warning_title: 'С вас списывают дважды',
+    lifetime_sub_warning_body:
+      'У вас пожизненный Pro, но подписка всё ещё активна. Отмените её, чтобы с вас больше не списывали средства.',
     upgrade_to_lifetime: 'Перейти на пожизненный',
     lifetime_upsell_subtitle: 'Один платёж — навсегда ваш, без продления подписки.',
     switch_to_lifetime: 'Перейти на пожизненный',

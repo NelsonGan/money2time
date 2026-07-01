@@ -1386,6 +1386,9 @@ const th = {
     expires_on: 'ใช้งานได้ถึง',
     lifetime_access: 'คุณมีสิทธิ์เข้าถึงฟีเจอร์ Pro ทั้งหมดตลอดชีพ',
     cancel_subscription: 'ยกเลิกการสมัครสมาชิก',
+    lifetime_sub_warning_title: 'คุณถูกเรียกเก็บเงินซ้ำซ้อน',
+    lifetime_sub_warning_body:
+      'คุณมี Pro ตลอดชีพ แต่ยังมีการสมัครสมาชิกที่ใช้งานอยู่ ยกเลิกเพื่อไม่ให้ถูกเรียกเก็บเงินอีก',
     upgrade_to_lifetime: 'อัปเกรดเป็นตลอดชีพ',
     lifetime_upsell_subtitle: 'จ่ายครั้งเดียว เป็นของคุณตลอดไป — ไม่มีการต่ออายุการสมัครสมาชิกอีก',
     switch_to_lifetime: 'เปลี่ยนเป็นตลอดชีพ',

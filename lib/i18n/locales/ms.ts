@@ -1420,6 +1420,9 @@ const ms = {
     expires_on: 'Akses sehingga',
     lifetime_access: 'Anda mempunyai akses seumur hidup ke semua ciri Pro.',
     cancel_subscription: 'Batal Langganan',
+    lifetime_sub_warning_title: 'Anda dicaj dua kali',
+    lifetime_sub_warning_body:
+      'Anda mempunyai Pro Seumur Hidup, tetapi langganan masih aktif. Batalkannya supaya anda tidak dicaj lagi.',
     upgrade_to_lifetime: 'Naik taraf ke Seumur Hidup',
     lifetime_upsell_subtitle:
       'Sekali bayar, milik anda selamanya — tiada lagi pembaharuan langganan.',

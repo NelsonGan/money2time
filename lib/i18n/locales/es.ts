@@ -1427,6 +1427,9 @@ const es = {
     expires_on: 'Acceso hasta',
     lifetime_access: 'Tienes acceso de por vida a todas las funciones Pro.',
     cancel_subscription: 'Cancelar suscripción',
+    lifetime_sub_warning_title: 'Se te está cobrando dos veces',
+    lifetime_sub_warning_body:
+      'Tienes Pro de por vida, pero una suscripción sigue activa. Cancélala para que no te vuelvan a cobrar.',
     upgrade_to_lifetime: 'Cambiar a De por vida',
     lifetime_upsell_subtitle:
       'Un solo pago, tuyo para siempre: sin más renovaciones de suscripción.',

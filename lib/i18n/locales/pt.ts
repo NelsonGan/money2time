@@ -1424,6 +1424,9 @@ const pt = {
     expires_on: 'Acesso até',
     lifetime_access: 'Você tem acesso vitalício a todos os recursos Pro.',
     cancel_subscription: 'Cancelar assinatura',
+    lifetime_sub_warning_title: 'Você está sendo cobrado duas vezes',
+    lifetime_sub_warning_body:
+      'Você tem o Pro Vitalício, mas uma assinatura ainda está ativa. Cancele-a para não ser cobrado novamente.',
     upgrade_to_lifetime: 'Mudar para Vitalício',
     lifetime_upsell_subtitle: 'Um pagamento, seu para sempre — sem mais renovações de assinatura.',
     switch_to_lifetime: 'Mudar para Vitalício',

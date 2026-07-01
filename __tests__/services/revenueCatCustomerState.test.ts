@@ -1,4 +1,5 @@
 import {
+  hasRedundantSubscription,
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateLifetime,
   isRevenueCatCustomerStateSubscriber,
@@ -14,6 +15,7 @@ function state(overrides: Partial<RevenueCatCustomerState>): RevenueCatCustomerS
     activeProductIdentifier: null,
     expirationDate: null,
     latestPurchaseDate: null,
+    hasActiveSubscription: false,
     ...overrides,
   };
 }
@@ -54,6 +56,31 @@ describe('revenueCat customer state classifiers', () => {
       expect(isRevenueCatCustomerStateSubscriber(lifetime)).toBe(false);
       expect(isRevenueCatCustomerStateSubscriber(expired)).toBe(false);
       expect(isRevenueCatCustomerStateSubscriber(null)).toBe(false);
+    });
+  });
+
+  describe('hasRedundantSubscription', () => {
+    it('is true only for a lifetime owner still carrying an active subscription', () => {
+      const lifetimeWithSub = state({
+        activeProductIdentifier: 'm2t_lifetime',
+        expirationDate: null,
+        hasActiveSubscription: true,
+      });
+      expect(hasRedundantSubscription(lifetimeWithSub)).toBe(true);
+    });
+
+    it('is false for a plain lifetime owner with no lingering subscription', () => {
+      expect(hasRedundantSubscription(lifetime)).toBe(false);
+    });
+
+    it('is false for a subscriber who has not bought lifetime', () => {
+      const subscriberWithSub = state({
+        activeProductIdentifier: 'm2t_monthly',
+        expirationDate: FUTURE,
+        hasActiveSubscription: true,
+      });
+      expect(hasRedundantSubscription(subscriberWithSub)).toBe(false);
+      expect(hasRedundantSubscription(null)).toBe(false);
     });
   });
 });
