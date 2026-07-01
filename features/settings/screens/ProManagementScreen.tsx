@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -13,6 +13,7 @@ import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import {
   hasRedundantSubscription,
   isRevenueCatCustomerStateSubscriber,
@@ -64,6 +65,12 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
     () => hasRedundantSubscription(customerState),
     [customerState],
   );
+
+  useEffect(() => {
+    if (showRedundantSubWarning) {
+      void trackEvent(AnalyticsEvents.PRO_REDUNDANT_SUB_WARNING_VIEWED);
+    }
+  }, [showRedundantSubWarning]);
 
   if (!isPro) {
     return (
@@ -217,7 +224,10 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
                 </View>
               </View>
               <Pressable
-                onPress={openStoreSubscriptions}
+                onPress={() => {
+                  void trackEvent(AnalyticsEvents.PRO_REDUNDANT_SUB_CANCEL_TAPPED);
+                  openStoreSubscriptions();
+                }}
                 className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
                 style={{ backgroundColor: themeColors.primary }}
               >
@@ -241,7 +251,12 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           <View className="mt-6 gap-3">
             {isSubscriber ? (
               <Pressable
-                onPress={onOpenPaywall}
+                onPress={() => {
+                  void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_TAPPED, {
+                    source: 'pro_management',
+                  });
+                  onOpenPaywall();
+                }}
                 className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
                 style={{ backgroundColor: themeColors.primary }}
               >

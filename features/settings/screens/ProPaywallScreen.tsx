@@ -352,6 +352,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   }, [source]);
 
   useEffect(() => {
+    if (canOfferLifetimeUpgrade) {
+      void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_VIEWED, {
+        source: source ?? 'settings',
+      });
+    }
+  }, [canOfferLifetimeUpgrade, source]);
+
+  useEffect(() => {
     if (!flashMessage) {
       setVisibleFlashMessage(null);
       return;
@@ -443,14 +451,32 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           recordProPurchase();
           onClose();
           if (wasSubscriber && boughtLifetime) {
+            // A subscriber converting to Lifetime — the key conversion for this flow.
+            void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_COMPLETED, { package: pkgId });
             // Lifetime is a separate one-time product; the old subscription keeps
             // renewing until cancelled. Nudge the user to stop the double charge.
+            void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_VIEWED, { package: pkgId });
             Alert.alert(
               I18n.t('pro.lifetime_purchased_title'),
               I18n.t('pro.lifetime_purchased_body'),
               [
-                { text: I18n.t('pro.cancel_subscription'), onPress: openStoreSubscriptions },
-                { text: I18n.t('pro.not_now'), style: 'cancel' },
+                {
+                  text: I18n.t('pro.cancel_subscription'),
+                  onPress: () => {
+                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
+                      choice: 'cancel',
+                    });
+                    openStoreSubscriptions();
+                  },
+                },
+                {
+                  text: I18n.t('pro.not_now'),
+                  style: 'cancel',
+                  onPress: () =>
+                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
+                      choice: 'not_now',
+                    }),
+                },
               ],
             );
           }
