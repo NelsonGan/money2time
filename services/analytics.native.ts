@@ -199,6 +199,11 @@ export async function trackEvent(
 
 const FIRST_APP_OPEN_TRACKED_KEY = 'analytics.firstAppOpenTracked.v1';
 
+// Synchronous in-memory guard so two near-simultaneous calls (the identify
+// effect re-runs when onboarding flips to complete) can't both pass the async
+// AsyncStorage check and double-emit. Set before the first await.
+let firstAppOpenHandledThisSession = false;
+
 /**
  * Emit a "First App Open" event exactly once per install.
  *
@@ -216,6 +221,8 @@ const FIRST_APP_OPEN_TRACKED_KEY = 'analytics.firstAppOpenTracked.v1';
 export async function trackFirstAppOpenIfNeeded(options?: {
   suppressEmit?: boolean;
 }): Promise<void> {
+  if (firstAppOpenHandledThisSession) return;
+  firstAppOpenHandledThisSession = true;
   try {
     const alreadyTracked = await AsyncStorage.getItem(FIRST_APP_OPEN_TRACKED_KEY);
     if (alreadyTracked) return;
@@ -223,7 +230,9 @@ export async function trackFirstAppOpenIfNeeded(options?: {
     if (options?.suppressEmit) return;
     await trackEvent('First App Open');
   } catch {
-    // Best-effort only; never block startup on analytics.
+    // Best-effort only; never block startup on analytics. Allow a retry on a
+    // later launch (fresh process) since the persisted flag was never written.
+    firstAppOpenHandledThisSession = false;
   }
 }
 
