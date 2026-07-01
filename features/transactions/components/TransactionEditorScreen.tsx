@@ -1382,15 +1382,17 @@ export function TransactionEditorScreen({
         deferredSubmit = recurringSubmit;
       }
 
-      // Bulk create mode: keep the editor open. Commit the transaction now,
-      // reset the per-transaction fields (amount / note / receipt / splits),
-      // keep type / account / category / date / sentiment, and refocus the
-      // amount numpad so the next entry can be typed immediately.
+      // Bulk create mode: keep the editor open and make the reset feel instant.
+      // Reset the per-transaction fields (amount / note / receipt / splits) on
+      // THIS frame so the numpad clears and refocuses immediately, then hand the
+      // create off to run after interactions. The create is itself optimistic
+      // (the transaction lands in state synchronously and the SQLite write is
+      // deferred), so nothing here waits on the DB. Type / account / category /
+      // date / sentiment are kept for the next entry.
       if (bulkCreateEnabled) {
-        deferredSubmit?.();
-        // The committed receipt now belongs to the saved transaction — detach
-        // it without deleting the file, and reset the commit flag so the next
-        // (not-yet-saved) entry starts clean.
+        // The captured payload already owns the receipt — detach it from the
+        // editor without deleting the file, and reset the commit flag so the
+        // next (not-yet-saved) entry starts clean.
         receiptUriRef.current = null;
         receiptCommittedRef.current = false;
         setReceiptUri(null);
@@ -1407,6 +1409,9 @@ export function TransactionEditorScreen({
         }
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
+        if (deferredSubmit) {
+          InteractionManager.runAfterInteractions(deferredSubmit);
+        }
         return;
       }
 
