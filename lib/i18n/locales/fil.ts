@@ -423,6 +423,7 @@ const fil = {
       fx_received: 'Halagang natanggap',
       title_create: 'Magdagdag',
       title_edit: 'I-update',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Mabilis at malinaw na entry',
       subtitle_edit: 'I-update ang mga detalye',
       subtitle_edit_balance_adjustment: 'I-update ang halaga at apektadong account',

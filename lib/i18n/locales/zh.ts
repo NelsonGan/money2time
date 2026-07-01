@@ -380,6 +380,7 @@ const zh = {
     editor: {
       title_create: '添加',
       title_edit: '更新',
+      bulk_mode: '批量',
       subtitle_create: '快速记一笔',
       subtitle_edit: '更新详情',
       subtitle_edit_balance_adjustment: '更新金额和关联账户',

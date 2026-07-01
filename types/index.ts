@@ -185,6 +185,12 @@ export interface QuickEntryPrefs {
   voiceSkipConfirmation: boolean;
   /** Total lifetime number of voice sessions the user has started. Free-tier limit. */
   voiceUsageCount: number;
+  /**
+   * When true, the full transaction editor stays open after Save in create
+   * mode: the transaction is created, note/amount reset, and focus returns to
+   * the amount numpad so multiple transactions can be added back-to-back.
+   */
+  bulkCreateEnabled: boolean;
 }
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
@@ -198,6 +204,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   voicePromptDismissed: false,
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
+  bulkCreateEnabled: false,
 };
 
 export interface Account {

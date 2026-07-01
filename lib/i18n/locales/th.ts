@@ -416,6 +416,7 @@ const th = {
       fx_received: 'จำนวนที่ได้รับ',
       title_create: 'เพิ่ม',
       title_edit: 'แก้ไข',
+      bulk_mode: 'กลุ่ม',
       subtitle_create: 'บันทึกรวดเร็ว',
       subtitle_edit: 'แก้ไขรายละเอียด',
       subtitle_edit_balance_adjustment: 'แก้ไขยอดเงินและบัญชีที่เกี่ยวข้อง',

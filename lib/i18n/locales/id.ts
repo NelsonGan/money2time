@@ -421,6 +421,7 @@ const id = {
       fx_received: 'Jumlah diterima',
       title_create: 'Tambah',
       title_edit: 'Perbarui',
+      bulk_mode: 'Massal',
       subtitle_create: 'Entri cepat dan ringkas',
       subtitle_edit: 'Perbarui detail',
       subtitle_edit_balance_adjustment: 'Perbarui jumlah dan akun yang terpengaruh',

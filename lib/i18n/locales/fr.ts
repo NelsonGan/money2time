@@ -419,6 +419,7 @@ const fr = {
       fx_received: 'Montant reçu',
       title_create: 'Ajouter',
       title_edit: 'Modifier',
+      bulk_mode: 'Multiple',
       subtitle_create: 'Saisie rapide et claire',
       subtitle_edit: 'Modifier les détails',
       subtitle_edit_balance_adjustment: 'Modifier le montant et le compte concerné',

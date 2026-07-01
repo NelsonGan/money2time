@@ -418,6 +418,7 @@ const hi = {
       fx_received: 'प्राप्त राशि',
       title_create: 'जोड़ें',
       title_edit: 'अपडेट करें',
+      bulk_mode: 'बल्क',
       subtitle_create: 'त्वरित और साफ एंट्री',
       subtitle_edit: 'विवरण अपडेट करें',
       subtitle_edit_balance_adjustment: 'राशि और प्रभावित खाता अपडेट करें',

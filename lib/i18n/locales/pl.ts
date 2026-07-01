@@ -420,6 +420,7 @@ const pl = {
       fx_received: 'Otrzymana kwota',
       title_create: 'Dodaj',
       title_edit: 'Zaktualizuj',
+      bulk_mode: 'Wiele',
       subtitle_create: 'Szybki i przejrzysty wpis',
       subtitle_edit: 'Zaktualizuj szczegóły',
       subtitle_edit_balance_adjustment: 'Zaktualizuj kwotę i powiązane konto',

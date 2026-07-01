@@ -388,6 +388,7 @@ const en = {
     editor: {
       title_create: 'Add',
       title_edit: 'Update',
+      bulk_mode: 'Bulk',
       subtitle_create: 'Quick and clean entry',
       subtitle_edit: 'Update details',
       subtitle_edit_balance_adjustment: 'Update amount and affected account',

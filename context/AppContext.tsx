@@ -2595,6 +2595,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.voiceUsageCount !== undefined
             ? updates.voiceUsageCount
             : previous.voiceUsageCount,
+        bulkCreateEnabled:
+          updates.bulkCreateEnabled !== undefined
+            ? updates.bulkCreateEnabled
+            : previous.bulkCreateEnabled,
       };
       settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;

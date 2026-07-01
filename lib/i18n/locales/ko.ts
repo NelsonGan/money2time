@@ -418,6 +418,7 @@ const ko = {
       fx_received: '받는 금액',
       title_create: '추가',
       title_edit: '수정',
+      bulk_mode: '일괄',
       subtitle_create: '간편 입력',
       subtitle_edit: '내용 수정',
       subtitle_edit_balance_adjustment: '금액 및 관련 계좌 수정',

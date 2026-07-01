@@ -421,6 +421,7 @@ const de = {
       fx_received: 'Erhaltener Betrag',
       title_create: 'Hinzufügen',
       title_edit: 'Aktualisieren',
+      bulk_mode: 'Mehrfach',
       subtitle_create: 'Schnell und einfach erfassen',
       subtitle_edit: 'Details aktualisieren',
       subtitle_edit_balance_adjustment: 'Betrag und betroffenes Konto aktualisieren',

@@ -421,6 +421,7 @@ const tr = {
       fx_received: 'Alınan tutar',
       title_create: 'Ekle',
       title_edit: 'Güncelle',
+      bulk_mode: 'Toplu',
       subtitle_create: 'Hızlı ve temiz kayıt',
       subtitle_edit: 'Ayrıntıları güncelle',
       subtitle_edit_balance_adjustment: 'Tutarı ve etkilenen hesabı güncelle',

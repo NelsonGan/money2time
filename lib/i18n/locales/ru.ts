@@ -419,6 +419,7 @@ const ru = {
       fx_received: 'Полученная сумма',
       title_create: 'Добавить',
       title_edit: 'Изменить',
+      bulk_mode: 'Массово',
       subtitle_create: 'Быстрая запись',
       subtitle_edit: 'Обновить детали',
       subtitle_edit_balance_adjustment: 'Обновить сумму и счёт',
