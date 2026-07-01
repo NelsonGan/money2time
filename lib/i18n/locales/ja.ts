@@ -1397,6 +1397,12 @@ const ja = {
     expires_on: '利用期限',
     lifetime_access: 'すべての Pro 機能を永久に利用できます。',
     cancel_subscription: 'サブスクリプションをキャンセル',
+    upgrade_to_lifetime: '買い切りにアップグレード',
+    lifetime_upsell_subtitle: '一度の支払いでずっと使える — サブスクの更新はもうありません。',
+    switch_to_lifetime: '買い切りに切り替える',
+    lifetime_purchased_title: '買い切りProになりました',
+    lifetime_purchased_body: 'サブスクリプションは不要になりました。解約すれば今後請求されません。',
+    not_now: '今はしない',
     cancel_subscription_note:
       'サブスクリプションをキャンセルするには、デバイスのサブスクリプション設定にリダイレクトされます。',
     limit_reached_title: '無料プランの上限に達しました',

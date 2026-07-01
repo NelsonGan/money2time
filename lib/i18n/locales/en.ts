@@ -1383,6 +1383,13 @@ const en = {
     expires_on: 'Access through',
     lifetime_access: 'You have lifetime access to all Pro features.',
     cancel_subscription: 'Cancel Subscription',
+    upgrade_to_lifetime: 'Upgrade to Lifetime',
+    lifetime_upsell_subtitle: 'One payment, yours forever — no more subscription renewals.',
+    switch_to_lifetime: 'Switch to Lifetime',
+    lifetime_purchased_title: 'You now have Lifetime Pro',
+    lifetime_purchased_body:
+      'Your subscription is no longer needed — cancel it so you are never charged again.',
+    not_now: 'Not now',
     cancel_subscription_note:
       'To cancel your subscription, you will be redirected to your device subscription settings.',
     limit_reached_title: 'Free plan limit reached',

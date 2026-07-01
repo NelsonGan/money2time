@@ -1424,6 +1424,13 @@ const pt = {
     expires_on: 'Acesso até',
     lifetime_access: 'Você tem acesso vitalício a todos os recursos Pro.',
     cancel_subscription: 'Cancelar assinatura',
+    upgrade_to_lifetime: 'Mudar para Vitalício',
+    lifetime_upsell_subtitle: 'Um pagamento, seu para sempre — sem mais renovações de assinatura.',
+    switch_to_lifetime: 'Mudar para Vitalício',
+    lifetime_purchased_title: 'Agora você tem o Pro Vitalício',
+    lifetime_purchased_body:
+      'Sua assinatura não é mais necessária — cancele-a para não ser cobrado novamente.',
+    not_now: 'Agora não',
     cancel_subscription_note:
       'Para cancelar sua assinatura, você será redirecionado para as configurações de assinatura do dispositivo.',
     limit_reached_title: 'Limite do plano gratuito atingido',

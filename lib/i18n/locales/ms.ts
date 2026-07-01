@@ -1420,6 +1420,14 @@ const ms = {
     expires_on: 'Akses sehingga',
     lifetime_access: 'Anda mempunyai akses seumur hidup ke semua ciri Pro.',
     cancel_subscription: 'Batal Langganan',
+    upgrade_to_lifetime: 'Naik taraf ke Seumur Hidup',
+    lifetime_upsell_subtitle:
+      'Sekali bayar, milik anda selamanya — tiada lagi pembaharuan langganan.',
+    switch_to_lifetime: 'Tukar ke Seumur Hidup',
+    lifetime_purchased_title: 'Kini anda mempunyai Pro Seumur Hidup',
+    lifetime_purchased_body:
+      'Langganan anda tidak lagi diperlukan — batalkannya supaya anda tidak dicaj lagi.',
+    not_now: 'Bukan sekarang',
     cancel_subscription_note:
       'Untuk batal langganan, anda akan diarahkan ke tetapan langganan peranti anda.',
     limit_reached_title: 'Had pelan percuma dicapai',

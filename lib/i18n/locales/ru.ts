@@ -1420,6 +1420,13 @@ const ru = {
     expires_on: 'Доступ до',
     lifetime_access: 'У вас пожизненный доступ ко всем функциям Pro.',
     cancel_subscription: 'Отменить подписку',
+    upgrade_to_lifetime: 'Перейти на пожизненный',
+    lifetime_upsell_subtitle: 'Один платёж — навсегда ваш, без продления подписки.',
+    switch_to_lifetime: 'Перейти на пожизненный',
+    lifetime_purchased_title: 'Теперь у вас пожизненный Pro',
+    lifetime_purchased_body:
+      'Подписка больше не нужна — отмените её, чтобы с вас больше не списывали средства.',
+    not_now: 'Не сейчас',
     cancel_subscription_note:
       'Для отмены подписки вы будете перенаправлены в настройки подписок устройства.',
     limit_reached_title: 'Достигнут лимит бесплатного плана',

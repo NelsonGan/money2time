@@ -58,3 +58,19 @@ export function isRevenueCatCustomerStateActive(customerState: RevenueCatCustome
 
   return !customerState.expirationDate || new Date(customerState.expirationDate) > new Date();
 }
+
+/**
+ * Lifetime Pro: an active, non-expiring entitlement (a one-time / non-consumable
+ * purchase). There is nothing left to upsell to these users.
+ */
+export function isRevenueCatCustomerStateLifetime(customerState: RevenueCatCustomerState | null) {
+  return isRevenueCatCustomerStateActive(customerState) && !customerState?.expirationDate;
+}
+
+/**
+ * Subscriber: active Pro backed by an auto-renewing subscription (has an
+ * expiration date). These users can still upgrade to Lifetime.
+ */
+export function isRevenueCatCustomerStateSubscriber(customerState: RevenueCatCustomerState | null) {
+  return isRevenueCatCustomerStateActive(customerState) && !!customerState?.expirationDate;
+}

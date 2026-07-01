@@ -1427,6 +1427,14 @@ const es = {
     expires_on: 'Acceso hasta',
     lifetime_access: 'Tienes acceso de por vida a todas las funciones Pro.',
     cancel_subscription: 'Cancelar suscripción',
+    upgrade_to_lifetime: 'Cambiar a De por vida',
+    lifetime_upsell_subtitle:
+      'Un solo pago, tuyo para siempre: sin más renovaciones de suscripción.',
+    switch_to_lifetime: 'Cambiar a De por vida',
+    lifetime_purchased_title: 'Ya tienes Pro de por vida',
+    lifetime_purchased_body:
+      'Tu suscripción ya no es necesaria: cancélala para que no te vuelvan a cobrar.',
+    not_now: 'Ahora no',
     cancel_subscription_note:
       'Para cancelar tu suscripción, serás redirigido a los ajustes de suscripción de tu dispositivo.',
     limit_reached_title: 'Límite del plan gratuito alcanzado',

@@ -1434,6 +1434,14 @@ const nl = {
     expires_on: 'Toegang tot',
     lifetime_access: 'Je hebt levenslange toegang tot alle Pro-functies.',
     cancel_subscription: 'Abonnement opzeggen',
+    upgrade_to_lifetime: 'Upgraden naar Levenslang',
+    lifetime_upsell_subtitle:
+      'Eén betaling, voor altijd van jou — geen abonnementsverlengingen meer.',
+    switch_to_lifetime: 'Overschakelen naar Levenslang',
+    lifetime_purchased_title: 'Je hebt nu Levenslang Pro',
+    lifetime_purchased_body:
+      'Je abonnement is niet meer nodig — zeg het op zodat je niets meer wordt berekend.',
+    not_now: 'Niet nu',
     cancel_subscription_note:
       'Om je abonnement op te zeggen, word je doorgestuurd naar de abonnementsinstellingen van je apparaat.',
     limit_reached_title: 'Limiet gratis abonnement bereikt',

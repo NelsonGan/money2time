@@ -1433,6 +1433,14 @@ const fr = {
     expires_on: "Accès jusqu'au",
     lifetime_access: 'Vous avez un accès à vie à toutes les fonctionnalités Pro.',
     cancel_subscription: "Annuler l'abonnement",
+    upgrade_to_lifetime: "Passer à l'offre à vie",
+    lifetime_upsell_subtitle:
+      "Un seul paiement, à vous pour toujours — plus aucun renouvellement d'abonnement.",
+    switch_to_lifetime: "Passer à l'offre à vie",
+    lifetime_purchased_title: 'Vous avez maintenant le Pro à vie',
+    lifetime_purchased_body:
+      "Votre abonnement n'est plus nécessaire — annulez-le pour ne plus jamais être facturé.",
+    not_now: 'Pas maintenant',
     cancel_subscription_note:
       "Pour annuler votre abonnement, vous serez redirigé vers les paramètres d'abonnement de votre appareil.",
     limit_reached_title: "Limite de l'offre gratuite atteinte",

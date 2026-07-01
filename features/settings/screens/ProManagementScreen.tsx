@@ -1,6 +1,6 @@
-import { Crown, ExternalLink } from 'lucide-react-native';
+import { ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
 import React, { useMemo } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import {
@@ -13,7 +13,9 @@ import { spacing } from '~/constants/designSystem';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { isRevenueCatCustomerStateSubscriber } from '~/services/revenueCat';
 import { FONT } from '~/utils/fonts';
+import { openStoreSubscriptions } from '~/utils/subscriptionSettings';
 
 interface ProManagementScreenProps {
   onBack: () => void;
@@ -38,14 +40,6 @@ function getPlanLabel(productIdentifier: string | null): string {
   return productIdentifier;
 }
 
-function openSubscriptionSettings() {
-  if (Platform.OS === 'ios') {
-    void Linking.openURL('https://apps.apple.com/account/subscriptions');
-  } else {
-    void Linking.openURL('https://play.google.com/store/account/subscriptions');
-  }
-}
-
 export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScreenProps) {
   const { isPro, customerState } = usePro();
   const themeColors = useThemeColors();
@@ -55,6 +49,11 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
     if (!customerState?.activeProductIdentifier) return false;
     return customerState.expirationDate === null;
   }, [customerState]);
+
+  const isSubscriber = useMemo(
+    () => isRevenueCatCustomerStateSubscriber(customerState),
+    [customerState],
+  );
 
   if (!isPro) {
     return (
@@ -192,8 +191,23 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           </View>
         ) : (
           <View className="mt-6 gap-3">
+            {isSubscriber ? (
+              <Pressable
+                onPress={onOpenPaywall}
+                className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
+                style={{ backgroundColor: themeColors.primary }}
+              >
+                <ArrowUpCircle size={16} color="#fff" />
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                >
+                  {I18n.t('pro.switch_to_lifetime')}
+                </Text>
+              </Pressable>
+            ) : null}
             <Pressable
-              onPress={openSubscriptionSettings}
+              onPress={openStoreSubscriptions}
               className="flex-row items-center justify-center gap-2 rounded-xl border border-border/40 bg-surface px-4 py-3.5"
             >
               <ExternalLink size={16} color={themeColors.text} />
