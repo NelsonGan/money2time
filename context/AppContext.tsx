@@ -64,6 +64,8 @@ import {
   identifyUser,
   setSuperProperties,
   trackEvent,
+  trackFirstAppOpenIfNeeded,
+  TRANSACTION_EVENT_SAMPLE_RATE,
 } from '~/services/analytics';
 import {
   registerBackgroundTask,
@@ -1528,16 +1530,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // Voice entries fire a dedicated event so voice adoption can be
           // measured separately from manual transaction creation.
-          const createdEvent =
-            meta?.source === 'voice'
-              ? AnalyticsEvents.VOICE_TRANSACTION_CREATED
-              : AnalyticsEvents.TRANSACTION_CREATED;
-          void trackEvent(createdEvent, {
-            type: normalizedInput.type,
-            has_category: !!normalizedInput.categoryId,
-            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
-            sentiment: normalizedInput.sentiment ?? 'neutral',
-          });
+          const isVoice = meta?.source === 'voice';
+          const createdEvent = isVoice
+            ? AnalyticsEvents.VOICE_TRANSACTION_CREATED
+            : AnalyticsEvents.TRANSACTION_CREATED;
+          void trackEvent(
+            createdEvent,
+            {
+              type: normalizedInput.type,
+              has_category: !!normalizedInput.categoryId,
+              has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+              sentiment: normalizedInput.sentiment ?? 'neutral',
+            },
+            // Voice entries are low-volume and worth tracking in full; sample
+            // only the high-volume manual create event.
+            isVoice ? undefined : { sampleRate: TRANSACTION_EVENT_SAMPLE_RATE },
+          );
           recordTransactionLogged();
         } catch {
           // rollback on failure
@@ -1653,7 +1661,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
-          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
+          void trackEvent(
+            AnalyticsEvents.TRANSACTION_UPDATED,
+            { count: normalizedUpdates.length },
+            { sampleRate: TRANSACTION_EVENT_SAMPLE_RATE },
+          );
         } catch {
           // rollback on failure
         }
@@ -1929,14 +1941,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               paidTransactionId: s.paidTransactionId,
             });
           });
-          void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
-            type: normalizedInput.type,
-            has_category: !!normalizedInput.categoryId,
-            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
-            sentiment: normalizedInput.sentiment ?? 'neutral',
-            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
-            split_total: normalizedInput.amount,
-          });
+          void trackEvent(
+            AnalyticsEvents.TRANSACTION_CREATED,
+            {
+              type: normalizedInput.type,
+              has_category: !!normalizedInput.categoryId,
+              has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+              sentiment: normalizedInput.sentiment ?? 'neutral',
+              split_count: optimisticSplits.filter((s) => !s.isSelf).length,
+              split_total: normalizedInput.amount,
+            },
+            { sampleRate: TRANSACTION_EVENT_SAMPLE_RATE },
+          );
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
@@ -2017,9 +2033,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               });
             }
           });
-          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, {
-            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
-          });
+          void trackEvent(
+            AnalyticsEvents.TRANSACTION_UPDATED,
+            {
+              split_count: optimisticSplits.filter((s) => !s.isSelf).length,
+            },
+            { sampleRate: TRANSACTION_EVENT_SAMPLE_RATE },
+          );
         } catch {
           // ignore; refresh below restores truth
         }
@@ -2425,6 +2445,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!settings?.appUserId) return;
     void identifyUser(settings.appUserId);
+    // Manual replacement for Mixpanel's automatic "First App Open" (disabled
+    // alongside the high-volume "App Session"). Fires once per install.
+    void trackFirstAppOpenIfNeeded();
   }, [settings?.appUserId]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
