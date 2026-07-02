@@ -4,15 +4,12 @@ import {
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 
-import type { WageConfig } from '~/types';
-
 export type NotificationDetailType = 'dailyCheckin' | 'weeklySummary';
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
   HourlyValue: undefined;
-  WageCalculator: { monthKey: string; initialConfig: WageConfig };
   AccountSettings: undefined;
   Accounts: undefined;
   Items: undefined;
