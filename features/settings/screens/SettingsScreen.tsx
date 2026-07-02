@@ -1,7 +1,9 @@
+import * as Sentry from '@sentry/react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import {
   Bell,
+  Bug,
   CalendarDays,
   Camera,
   ChevronRight,
@@ -799,6 +801,17 @@ export function SettingsScreen({
                   onPress={() => {
                     void triggerHaptic('success');
                     void resetCloudBackupPromptState();
+                  }}
+                />
+                <SettingsGridTile
+                  icon={<Bug size={20} color={themeColors.primary} />}
+                  label="Throw test error"
+                  onPress={() => {
+                    void triggerHaptic('warning');
+                    Sentry.captureException(
+                      new Error('Sentry test error from Settings > Developer'),
+                    );
+                    throw new Error('Sentry test error from Settings > Developer');
                   }}
                 />
               </SettingsGrid>
