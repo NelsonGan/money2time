@@ -1642,6 +1642,8 @@ const nb = {
     remove_selected_body: 'Fjern {{count}} transaksjoner fra dette albumet? De blir ikke slettet.',
     tab_breakdown: 'Fordeling',
     tab_transactions: 'Transaksjoner',
+    show_cover: 'Vis omslagsbilde',
+    show_details: 'Vis detaljer',
     no_expenses: 'Ingen utgifter å fordele ennå.',
     no_transactions_title: 'Ingen transaksjoner',
     no_transactions_message: 'Legg til transaksjoner i dette albumet for å se dem her.',

@@ -1607,6 +1607,8 @@ const ko = {
     remove_selected_body: '이 앨범에서 거래 {{count}}건을 제거할까요? 거래는 삭제되지 않습니다.',
     tab_breakdown: '분석',
     tab_transactions: '거래',
+    show_cover: '커버 사진 보기',
+    show_details: '세부정보 보기',
     no_expenses: '분석할 지출이 아직 없습니다.',
     no_transactions_title: '거래 없음',
     no_transactions_message: '이 앨범에 거래를 추가하면 여기에 표시됩니다.',

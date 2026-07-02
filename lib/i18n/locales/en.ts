@@ -1619,6 +1619,8 @@ const en = {
     remove_selected_body: "Remove {{count}} transactions from this album? They won't be deleted.",
     tab_breakdown: 'Breakdown',
     tab_transactions: 'Transactions',
+    show_cover: 'Show cover photo',
+    show_details: 'Show details',
     no_expenses: 'No expenses to break down yet.',
     no_transactions_title: 'No transactions',
     no_transactions_message: 'Add transactions to this album to see them here.',

@@ -1649,6 +1649,8 @@ const pt = {
     remove_selected_body: 'Remover {{count}} transações deste álbum? Elas não serão excluídas.',
     tab_breakdown: 'Detalhamento',
     tab_transactions: 'Transações',
+    show_cover: 'Mostrar capa',
+    show_details: 'Mostrar detalhes',
     no_expenses: 'Ainda não há despesas para detalhar.',
     no_transactions_title: 'Sem transações',
     no_transactions_message: 'Adicione transações a este álbum para vê-las aqui.',

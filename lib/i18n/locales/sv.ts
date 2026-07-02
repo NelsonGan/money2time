@@ -1639,6 +1639,8 @@ const sv = {
     remove_selected_body: 'Ta bort {{count}} transaktioner från det här albumet? De raderas inte.',
     tab_breakdown: 'Fördelning',
     tab_transactions: 'Transaktioner',
+    show_cover: 'Visa omslagsbild',
+    show_details: 'Visa detaljer',
     no_expenses: 'Inga utgifter att fördela än.',
     no_transactions_title: 'Inga transaktioner',
     no_transactions_message: 'Lägg till transaktioner i det här albumet för att se dem här.',
