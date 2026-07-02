@@ -144,7 +144,7 @@ import {
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
-import type { CategoryType, TransactionWithRelations } from '~/types';
+import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 import {
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
@@ -626,6 +626,12 @@ function MainShellScreen({
   const openAddWageMonth = useCallback(() => {
     navigation.navigate('AddWageMonth');
   }, [navigation]);
+  const openWageCalculator = useCallback(
+    (params: { monthKey: string; initialConfig: WageConfig }) => {
+      navigation.navigate('SettingsWageCalculator', params);
+    },
+    [navigation],
+  );
 
   const openBottomNavPrimaryAction = useCallback(() => {
     openAddTransaction();
@@ -960,6 +966,7 @@ function MainShellScreen({
             onOpenCreateGroup={openAccountGroupEditor}
             onOpenCategoryEditor={openCategoryEditor}
             onOpenAddWageMonth={openAddWageMonth}
+            onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={() => openProPaywall('settings')}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
