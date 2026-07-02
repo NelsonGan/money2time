@@ -545,6 +545,18 @@ const fallbackStyles = StyleSheet.create({
   },
 });
 
+/** The wage row that applies right now: the current month's entry, else the
+ *  first listed one. Shared by refreshAll and refreshWages so the two paths
+ *  can't drift. */
+function selectEffectiveCurrentWage(allWages: MonthlyWageSettings[]): MonthlyWageSettings | null {
+  const currentMonthKey = monthKeyFromDateLocal(new Date());
+  return (
+    allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
+    allWages[0] ??
+    null
+  );
+}
+
 function buildNormalizedRateHistory(history: MonthlyWageSettings[]) {
   const byMonth = new Map<string, { month: string; rate: number; updatedAt: string }>();
 
@@ -850,11 +862,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       initializeDatabase();
 
       const allWages = monthlyWageRepository.list();
-      const currentMonthKey = monthKeyFromDateLocal(new Date());
-      const effectiveCurrentWage =
-        allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
-        allWages[0] ??
-        null;
+      const effectiveCurrentWage = selectEffectiveCurrentWage(allWages);
       const nextSettings = settingsRepository.get();
       // Apply the persisted locale synchronously before the state batch commits so
       // the first paint of the real UI already renders in the stored language —
@@ -1038,13 +1046,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshWages = useCallback(() => {
     const allWages = monthlyWageRepository.list();
-    const currentMonthKey = monthKeyFromDateLocal(new Date());
     setMonthlyWages(allWages);
-    setCurrentMonthWage(
-      allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
-        allWages[0] ??
-        null,
-    );
+    setCurrentMonthWage(selectEffectiveCurrentWage(allWages));
   }, []);
 
   // When several mutations land in the same JS turn (e.g. a Save flush that
@@ -1136,9 +1139,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
         {
           refresh: () => {
-            refreshAccountsAndGroups();
-            // A rename changes the denormalized account names on loaded rows.
-            if ('name' in input) refreshTransactions();
+            // A rename changes the denormalized account names on loaded rows;
+            // refreshTransactions also re-reads balances, so skip the
+            // duplicate aggregate on that path.
+            const nameChanged = 'name' in input;
+            refreshAccountsAndGroups({ withBalances: !nameChanged });
+            if (nameChanged) refreshTransactions();
           },
         },
       );
@@ -1178,7 +1184,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
         {
           refresh: () => {
-            refreshAccountsAndGroups();
+            // refreshTransactions also re-reads balances — skip the duplicate.
+            refreshAccountsAndGroups({ withBalances: false });
             refreshTransactions();
           },
         },
@@ -1195,7 +1202,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
         {
           refresh: () => {
-            refreshAccountsAndGroups();
+            // refreshTransactions also re-reads balances — skip the duplicate.
+            refreshAccountsAndGroups({ withBalances: false });
             refreshTransactions();
           },
         },
@@ -2617,6 +2625,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       sub.remove();
     };
   }, [autoBackupEnabled, refreshSettings]);
+
+  // Recurring rules are materialized inside refreshAll()'s runDueTransactions
+  // pass. Before scoped mutation refreshes, every mutation reached that pass
+  // incidentally; now the only routine trigger is the cold-start load — not
+  // enough for an app that stays resident across midnight. Re-run the full
+  // reload on the first foreground of each new day so due recurring entries
+  // (and the weekly notification body) materialize without a cold start.
+  const lastFullRefreshDayRef = useRef(dayKeyFromDateLocal(new Date()));
+  useEffect(() => {
+    const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state !== 'active') return;
+      const today = dayKeyFromDateLocal(new Date());
+      if (today === lastFullRefreshDayRef.current) return;
+      lastFullRefreshDayRef.current = today;
+      refreshAll();
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [refreshAll]);
 
   const superPropUserMode = settings?.userMode ?? 'power';
   const superPropCurrencyCode = settings?.currencyCode;
