@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin, X } from 'lucide-react-native';
+import { ChevronRight, MapPin, Pencil, X } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,13 +16,18 @@ import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 interface EditAlbumDetailsScreenProps {
   albumId: string;
   onClose: () => void;
+  onEditTransactions: (albumId: string) => void;
 }
 
 function placeLabel(location: AlbumLocation): string {
   return [location.placeName, location.placeAdmin, location.countryCode].filter(Boolean).join(', ');
 }
 
-export function EditAlbumDetailsScreen({ albumId, onClose }: EditAlbumDetailsScreenProps) {
+export function EditAlbumDetailsScreen({
+  albumId,
+  onClose,
+  onEditTransactions,
+}: EditAlbumDetailsScreenProps) {
   const { albums, updateAlbum, setAlbumLocation } = useApp();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -141,6 +146,23 @@ export function EditAlbumDetailsScreen({ albumId, onClose }: EditAlbumDetailsScr
             ) : (
               <ChevronRight size={18} color={themeColors.textMuted} />
             )}
+          </Pressable>
+
+          <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+            {I18n.t('albums.tab_transactions')}
+          </Text>
+          <Pressable
+            onPress={() => onEditTransactions(albumId)}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('albums.edit_transactions_title')}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
+          >
+            <Pencil size={18} color={themeColors.textMuted} />
+            <Text variant="body" numberOfLines={1} className="flex-1">
+              {I18n.t('albums.edit_transactions_title')}
+            </Text>
+            <ChevronRight size={18} color={themeColors.textMuted} />
           </Pressable>
         </ScrollView>
 

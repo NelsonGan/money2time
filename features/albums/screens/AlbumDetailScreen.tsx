@@ -62,7 +62,6 @@ const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 interface AlbumDetailScreenProps {
   albumId: string;
   onClose: () => void;
-  onEditTransactions: (albumId: string) => void;
   onAddTransactions: (albumId: string) => void;
   onEditDetails: (albumId: string) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
@@ -73,7 +72,6 @@ interface AlbumDetailScreenProps {
 export function AlbumDetailScreen({
   albumId,
   onClose,
-  onEditTransactions,
   onAddTransactions,
   onEditDetails,
   onOpenTransaction,
@@ -480,10 +478,10 @@ export function AlbumDetailScreen({
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  onEditTransactions(albumId);
+                  onEditDetails(albumId);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={I18n.t('albums.edit_transactions_title')}
+                accessibilityLabel={I18n.t('albums.edit_details_title')}
                 className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
               >
                 <Pencil size={17} color={themeColors.textMuted} />
@@ -538,7 +536,16 @@ export function AlbumDetailScreen({
               </View>
             )}
 
-            {/* Change cover photo */}
+            {/* Date range — top left */}
+            {dateRange ? (
+              <View className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1.5">
+                <Text variant="label" className="text-white">
+                  {dateRange}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Change cover photo — top right */}
             <Pressable
               onPress={changeCover}
               accessibilityRole="button"
@@ -551,6 +558,7 @@ export function AlbumDetailScreen({
               </Text>
             </Pressable>
 
+            {/* Title — bottom center */}
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.55)']}
               locations={[0, 1]}
@@ -565,25 +573,9 @@ export function AlbumDetailScreen({
                 alignItems: 'center',
               }}
             >
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onEditDetails(albumId);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('albums.edit_details_title')}
-                className="flex-row items-center gap-1.5"
-              >
-                <Text variant="bodyStrong" numberOfLines={1} className="text-white">
-                  {album.name}
-                </Text>
-                {dateRange ? (
-                  <Text variant="caption" numberOfLines={1} className="text-white/75">
-                    {`· ${dateRange}`}
-                  </Text>
-                ) : null}
-                <Pencil size={13} color="rgba(255,255,255,0.85)" />
-              </Pressable>
+              <Text variant="bodyStrong" numberOfLines={1} className="text-center text-white">
+                {album.name}
+              </Text>
             </LinearGradient>
           </View>
 
