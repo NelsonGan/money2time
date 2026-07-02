@@ -12,6 +12,7 @@ import {
   WorkSans_900Black,
 } from '@expo-google-fonts/work-sans';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
@@ -107,6 +108,7 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
+import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
 import {
   checkEligibility as checkCloudBackupEligibility,
   getCloudBackupPromptState,
@@ -143,6 +145,23 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
+
+Sentry.init({
+  // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
+  // undefined when unset, which disables Sentry rather than crashing.
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+
+  // Finance app: never send IP, cookies, request bodies, or user PII.
+  sendDefaultPii: false,
+
+  // Sentry Logs product stays off; error monitoring does not need it.
+  enableLogs: false,
+
+  // Dedupe + volume-cap + PII scrub so a render loop can't burn the quota and
+  // no financial data leaves the device. See services/errorReporting.
+  beforeSend: (event) => beforeSendEvent(event),
+  beforeBreadcrumb: (breadcrumb) => beforeBreadcrumbFilter(breadcrumb),
+});
 
 type MainTab = TabName;
 const MAIN_TAB_ORDER: MainTab[] = ['calendar', 'accounts', 'insights', 'albums', 'settings'];
@@ -1793,7 +1812,7 @@ function AppContent() {
   );
 }
 
-export default function App() {
+export default Sentry.wrap(function App() {
   const shouldLoadCustomFonts = Platform.OS !== 'ios';
   const [fontsLoaded, fontError] = useFonts(
     shouldLoadCustomFonts
@@ -1845,4 +1864,4 @@ export default function App() {
       </KeyboardProvider>
     </GestureHandlerRootView>
   );
-}
+});
