@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import {
   Button,
   Card,
@@ -215,6 +216,11 @@ export function WageCalculatorFlowScreen({
 }: WageCalculatorFlowScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
+  // When the floating glass nav bar overlays the shell (iOS 26+), lift the
+  // pinned footer above it so the Save button isn't hidden behind the bar.
+  // Zero in fallback/classic mode, where the bar sits below content in flow.
+  const footerNavInset = useBottomNavContentInset();
+  const hasFloatingNav = footerNavInset > 0;
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const [step, setStep] = useState<(typeof WAGE_FLOW_STEPS)[number]>(1);
   const [wageType, setWageType] = useState<WageType>(initialConfig.wageType);
@@ -530,7 +536,11 @@ export function WageCalculatorFlowScreen({
         />
       </ScrollView>
 
-      <SafeAreaView edges={['bottom']} className="border-t border-border/25 bg-background">
+      <SafeAreaView
+        edges={hasFloatingNav ? [] : ['bottom']}
+        className="border-t border-border/25 bg-background"
+        style={hasFloatingNav ? { marginBottom: footerNavInset } : undefined}
+      >
         <View style={styles.footerActions}>
           <Button variant="outline" className="flex-1" haptic="selection" onPress={handleBack}>
             <Text>{step === 1 ? I18n.t('common.cancel') : I18n.t('common.back')}</Text>
