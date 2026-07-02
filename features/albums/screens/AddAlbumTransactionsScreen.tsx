@@ -1,4 +1,4 @@
-import { X } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,10 +52,10 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
           <Pressable
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
+            accessibilityLabel={I18n.t('common.back')}
             className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-card"
           >
-            <X size={18} color={themeColors.textMuted} />
+            <ChevronLeft size={20} color={themeColors.textMuted} />
           </Pressable>
           <View className="flex-1">
             <Text variant="bodyStrong" numberOfLines={1}>

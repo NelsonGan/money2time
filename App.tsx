@@ -1745,18 +1745,9 @@ function AppContent() {
           <RootStack.Screen
             name="EditAlbumTransactions"
             component={EditAlbumTransactionsRouteScreen}
-            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
           />
-          <RootStack.Screen
-            name="AddAlbumTransactions"
-            component={AddAlbumTransactionsRouteScreen}
-            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
-          />
-          <RootStack.Screen
-            name="EditAlbumDetails"
-            component={EditAlbumDetailsRouteScreen}
-            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
-          />
+          <RootStack.Screen name="AddAlbumTransactions" component={AddAlbumTransactionsRouteScreen} />
+          <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
           <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />

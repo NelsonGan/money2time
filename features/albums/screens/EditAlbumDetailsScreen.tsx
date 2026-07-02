@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin, X } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, MapPin, X } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -86,10 +86,10 @@ export function EditAlbumDetailsScreen({ albumId, onClose }: EditAlbumDetailsScr
           <Pressable
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
+            accessibilityLabel={I18n.t('common.back')}
             className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-card"
           >
-            <X size={18} color={themeColors.textMuted} />
+            <ChevronLeft size={20} color={themeColors.textMuted} />
           </Pressable>
           <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
             {I18n.t('albums.edit_details_title')}
