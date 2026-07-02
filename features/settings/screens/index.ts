@@ -1,11 +1,16 @@
 export { AccountSettingsScreen } from './AccountSettingsScreen';
-export { AccountsScreen } from './AccountsScreen';
+export {
+  AccountEditorScreen,
+  AccountGroupEditorScreen,
+  AccountsScreen,
+  PayCreditCardScreen,
+} from './AccountsScreen';
 export { AutoBackupScreen } from './AutoBackupScreen';
-export { CategoriesScreen } from './CategoriesScreen';
+export { CategoriesScreen, CategoryEditorScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { ExchangeRatesScreen } from './ExchangeRatesScreen';
-export { HourlyValueScreen } from './HourlyValueScreen';
+export { AddWageMonthScreen, HourlyValueScreen } from './HourlyValueScreen';
 export { NewsScreen } from '~/features/news/screens/NewsScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';
 export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
