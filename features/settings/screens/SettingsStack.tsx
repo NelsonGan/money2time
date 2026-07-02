@@ -1,11 +1,9 @@
 import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useApp } from '~/context/AppContext';
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
-import type { CategoryType } from '~/types';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -14,6 +12,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import type { CategoryType, WageConfig } from '~/types';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
@@ -32,7 +31,6 @@ import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
-import { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
 
 interface SettingsStackProps {
@@ -49,6 +47,7 @@ interface SettingsStackProps {
     type?: CategoryType;
   }) => void;
   onOpenAddWageMonth: () => void;
+  onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
@@ -121,24 +120,6 @@ function SettingsHomeRoute({
   );
 }
 
-function WageCalculatorRoute({ route, navigation }: SettingsStackRouteProps<'WageCalculator'>) {
-  const { settings, updateWageConfigForMonth } = useApp();
-  const { monthKey, initialConfig } = route.params;
-
-  return (
-    <WageCalculatorFlowScreen
-      initialConfig={initialConfig}
-      settings={settings}
-      monthLabel={monthKey}
-      onCancel={() => navigation.goBack()}
-      onComplete={(config) => {
-        updateWageConfigForMonth(monthKey, config);
-        navigation.goBack();
-      }}
-    />
-  );
-}
-
 export function SettingsStack({
   resetToRootToken = 0,
   scrollToTopToken = 0,
@@ -149,6 +130,7 @@ export function SettingsStack({
   onOpenCreateGroup,
   onOpenCategoryEditor,
   onOpenAddWageMonth,
+  onOpenWageCalculator,
   onOpenProPaywall,
   onScreenChange,
   onStartTutorial,
@@ -231,9 +213,7 @@ export function SettingsStack({
           return (
             <HourlyValueScreen
               onClose={() => props.navigation.goBack()}
-              onOpenWageCalculator={({ monthKey, initialConfig }) =>
-                props.navigation.navigate('WageCalculator', { monthKey, initialConfig })
-              }
+              onOpenWageCalculator={onOpenWageCalculator}
               onOpenAddWageMonth={onOpenAddWageMonth}
             />
           );
@@ -249,12 +229,6 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <ExchangeRatesScreen onBack={() => props.navigation.goBack()} />;
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="WageCalculator">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return <WageCalculatorRoute {...props} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="Accounts">
