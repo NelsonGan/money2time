@@ -65,6 +65,7 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
+import { setErrorUser } from '~/services/errorReporting';
 import {
   registerBackgroundTask,
   runAutoBackupIfDue,
@@ -2593,6 +2594,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!settings?.appUserId) return;
     void identifyUser(settings.appUserId);
+    setErrorUser(settings.appUserId);
   }, [settings?.appUserId]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
