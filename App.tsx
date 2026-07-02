@@ -1186,7 +1186,6 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
       albumId={route.params.albumId}
       onClose={() => navigation.goBack()}
       onDeleted={() => navigation.goBack()}
-      onEditTransactions={(albumId) => navigation.navigate('EditAlbumTransactions', { albumId })}
       onAddTransactions={(albumId) => navigation.navigate('AddAlbumTransactions', { albumId })}
       onEditDetails={(albumId) => navigation.navigate('EditAlbumDetails', { albumId })}
       onOpenTransaction={(transaction) =>
@@ -1202,7 +1201,11 @@ function EditAlbumDetailsRouteScreen({
   navigation,
 }: RootStackRouteProps<'EditAlbumDetails'>) {
   return (
-    <EditAlbumDetailsScreen albumId={route.params.albumId} onClose={() => navigation.goBack()} />
+    <EditAlbumDetailsScreen
+      albumId={route.params.albumId}
+      onClose={() => navigation.goBack()}
+      onEditTransactions={(albumId) => navigation.navigate('EditAlbumTransactions', { albumId })}
+    />
   );
 }
 

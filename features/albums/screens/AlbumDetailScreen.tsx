@@ -12,10 +12,18 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
-import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import {
+  Alert,
+  InteractionManager,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -48,10 +56,12 @@ type DetailTab = 'breakdown' | 'transactions';
 const TOP_BAR_HEIGHT = 52;
 const TAB_BAR_HEIGHT = 48;
 
+// Stable reference for the pre-ready window so dependent memos don't churn.
+const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
+
 interface AlbumDetailScreenProps {
   albumId: string;
   onClose: () => void;
-  onEditTransactions: (albumId: string) => void;
   onAddTransactions: (albumId: string) => void;
   onEditDetails: (albumId: string) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
@@ -62,7 +72,6 @@ interface AlbumDetailScreenProps {
 export function AlbumDetailScreen({
   albumId,
   onClose,
-  onEditTransactions,
   onAddTransactions,
   onEditDetails,
   onOpenTransaction,
@@ -97,6 +106,16 @@ export function AlbumDetailScreen({
   // the window width and corrected once the pager measures itself (tablets render
   // narrower than the full window inside TabletContentContainer).
   const [pageWidth, setPageWidth] = useState(windowWidth);
+  // Hold the heavy content (breakdown donut + full transaction list) off the
+  // first render so it doesn't compute and paint on the JS thread *during* the
+  // slide-in animation — that jank is what made the screen feel laggy on open.
+  // We mount the cheap cover/tab-bar chrome immediately and swap in the content
+  // once the navigation transition has settled.
+  const [contentReady, setContentReady] = useState(false);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => setContentReady(true));
+    return () => task.cancel();
+  }, []);
 
   // Cover occupies ~30% of the screen; the content below fills the rest. Computed
   // here (not just at render) so the scroll callbacks can snap to these offsets.
@@ -108,8 +127,8 @@ export function AlbumDetailScreen({
   // recompute these immediately when returning to this screen.
   const stats = useMemo(() => getAlbumStats(albumId), [getAlbumStats, albumId, albums]);
   const albumTransactions = useMemo(
-    () => getAlbumTransactions(albumId),
-    [getAlbumTransactions, albumId, albums],
+    () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
+    [contentReady, getAlbumTransactions, albumId, albums],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
   const isTimeMode = settings.displayMode === 'time';
@@ -459,10 +478,10 @@ export function AlbumDetailScreen({
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  onEditTransactions(albumId);
+                  onEditDetails(albumId);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={I18n.t('albums.edit_transactions_title')}
+                accessibilityLabel={I18n.t('albums.edit_details_title')}
                 className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
               >
                 <Pencil size={17} color={themeColors.textMuted} />
@@ -517,7 +536,7 @@ export function AlbumDetailScreen({
               </View>
             )}
 
-            {/* Change cover photo */}
+            {/* Change cover photo — top right */}
             <Pressable
               onPress={changeCover}
               accessibilityRole="button"
@@ -530,6 +549,7 @@ export function AlbumDetailScreen({
               </Text>
             </Pressable>
 
+            {/* Title + date — bottom left */}
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.55)']}
               locations={[0, 1]}
@@ -541,28 +561,17 @@ export function AlbumDetailScreen({
                 paddingTop: 44,
                 paddingBottom: 12,
                 paddingHorizontal: 20,
-                alignItems: 'center',
+                alignItems: 'flex-start',
               }}
             >
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onEditDetails(albumId);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('albums.edit_details_title')}
-                className="flex-row items-center gap-1.5"
-              >
-                <Text variant="bodyStrong" numberOfLines={1} className="text-white">
-                  {album.name}
+              <Text variant="bodyStrong" numberOfLines={1} className="text-white">
+                {album.name}
+              </Text>
+              {dateRange ? (
+                <Text variant="caption" numberOfLines={1} className="mt-0.5 text-white/75">
+                  {dateRange}
                 </Text>
-                {dateRange ? (
-                  <Text variant="caption" numberOfLines={1} className="text-white/75">
-                    {`· ${dateRange}`}
-                  </Text>
-                ) : null}
-                <Pencil size={13} color="rgba(255,255,255,0.85)" />
-              </Pressable>
+              ) : null}
             </LinearGradient>
           </View>
 
@@ -578,74 +587,80 @@ export function AlbumDetailScreen({
               if (width > 0 && width !== pageWidth) setPageWidth(width);
             }}
           >
-            <ScrollView
-              ref={pagerRef}
-              horizontal
-              pagingEnabled
-              directionalLockEnabled
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled
-              keyboardShouldPersistTaps="handled"
-              scrollEventThrottle={32}
-              onMomentumScrollEnd={handlePagerMomentumEnd}
-            >
-              {/* Breakdown page */}
-              <View style={{ width: pageWidth, height: contentHeight }}>
-                {breakdownRows.length === 0 ? (
-                  <EmptyState
-                    title={I18n.t('albums.no_transactions_title')}
-                    message={I18n.t('albums.no_transactions_message')}
-                    mascotMood="curious"
-                    animateIn={false}
-                  />
-                ) : (
-                  <ScrollView
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
-                  >
-                    <CategoryBreakdownChart
-                      rows={breakdownRows}
-                      formatValue={formatValue}
-                      onSelectRow={handleOpenBreakdownRow}
+            {!contentReady ? (
+              <View className="flex-1 items-center justify-center">
+                <LoadingDots />
+              </View>
+            ) : (
+              <ScrollView
+                ref={pagerRef}
+                horizontal
+                pagingEnabled
+                directionalLockEnabled
+                showsHorizontalScrollIndicator={false}
+                nestedScrollEnabled
+                keyboardShouldPersistTaps="handled"
+                scrollEventThrottle={32}
+                onMomentumScrollEnd={handlePagerMomentumEnd}
+              >
+                {/* Breakdown page */}
+                <View style={{ width: pageWidth, height: contentHeight }}>
+                  {breakdownRows.length === 0 ? (
+                    <EmptyState
+                      title={I18n.t('albums.no_transactions_title')}
+                      message={I18n.t('albums.no_transactions_message')}
+                      mascotMood="curious"
+                      animateIn={false}
                     />
-                  </ScrollView>
-                )}
-              </View>
+                  ) : (
+                    <ScrollView
+                      nestedScrollEnabled
+                      showsVerticalScrollIndicator={false}
+                      contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
+                    >
+                      <CategoryBreakdownChart
+                        rows={breakdownRows}
+                        formatValue={formatValue}
+                        onSelectRow={handleOpenBreakdownRow}
+                      />
+                    </ScrollView>
+                  )}
+                </View>
 
-              {/* Transactions page */}
-              <View style={{ width: pageWidth, height: contentHeight }}>
-                <ActivityTransactionList
-                  transactions={albumTransactions}
-                  displaySettings={settings}
-                  getDisplayValueForTransaction={getDisplayValueForTransaction}
-                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                  onTransactionPress={handleTransactionPress}
-                  onTransactionLongPress={handleTransactionLongPress}
-                  onToggleDaySelection={toggleDaySelection}
-                  selectedTransactionIds={selectedTransactionIds}
-                  selectionMode={isSelectionMode}
-                  emptyTitle={I18n.t('albums.no_transactions_title')}
-                  emptyMessage={I18n.t('albums.no_transactions_message')}
-                  contentPaddingBottom={insets.bottom + 32}
-                  disableItemAnimations
-                  compactItems
-                />
-                {isSelectionMode ? (
-                  <TransactionSelectionToolbar
-                    selectedCount={selectedTransactionCount}
-                    totalNode={
-                      <Text variant="label" className="text-foreground">
-                        {formatValue(selectedTotal)}
-                      </Text>
-                    }
-                    onCancel={clearSelection}
-                    onEdit={() => setShowBulkUpdate(true)}
-                    onDelete={handleRemoveSelected}
+                {/* Transactions page */}
+                <View style={{ width: pageWidth, height: contentHeight }}>
+                  <ActivityTransactionList
+                    transactions={albumTransactions}
+                    displaySettings={settings}
+                    getDisplayValueForTransaction={getDisplayValueForTransaction}
+                    getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                    onTransactionPress={handleTransactionPress}
+                    onTransactionLongPress={handleTransactionLongPress}
+                    onToggleDaySelection={toggleDaySelection}
+                    selectedTransactionIds={selectedTransactionIds}
+                    selectionMode={isSelectionMode}
+                    emptyTitle={I18n.t('albums.no_transactions_title')}
+                    emptyMessage={I18n.t('albums.no_transactions_message')}
+                    contentPaddingBottom={insets.bottom + 32}
+                    disableItemAnimations
+                    compactItems
                   />
-                ) : null}
-              </View>
-            </ScrollView>
+                  {isSelectionMode ? (
+                    <TransactionSelectionToolbar
+                      selectedCount={selectedTransactionCount}
+                      totalNode={
+                        <Text variant="label" className="text-foreground">
+                          {formatValue(selectedTotal)}
+                        </Text>
+                      }
+                      onCancel={clearSelection}
+                      onEdit={() => setShowBulkUpdate(true)}
+                      onDelete={handleRemoveSelected}
+                    />
+                  ) : null}
+                </View>
+              </ScrollView>
+            )}
           </View>
         </ScrollView>
         <BulkEditTransactionsSheet
