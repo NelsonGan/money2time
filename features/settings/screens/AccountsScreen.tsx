@@ -14,7 +14,16 @@ import {
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  View,
+} from 'react-native';
 import type { AnimatedRef } from 'react-native-reanimated';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,7 +56,6 @@ import {
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
-import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
@@ -74,6 +82,7 @@ import {
 } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
+import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import {
   addMonthsAtMonthStart,
   formatAmount,
@@ -468,6 +477,17 @@ function AccountEditorSheet({
   const [creditDueDay, setCreditDueDay] = useState('1');
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  // When the user taps "Add currency" from the picker we must tear down this
+  // editor modal and navigate to the multi-currency screen. Doing that in the
+  // same frame as the picker's own dismissal collides two native modal
+  // dismissals (plus a screen push) and freezes the UI on some iOS devices, so
+  // we defer the teardown until the picker has fully dismissed.
+  const [pendingMultiCurrency, setPendingMultiCurrency] = useState(false);
+
+  const openMultiCurrency = useCallback(() => {
+    onClose();
+    onOpenMultiCurrency?.();
+  }, [onClose, onOpenMultiCurrency]);
 
   const { settings: appSettings, accounts: appAccounts, fxCurrencies, rateTable } = useApp();
   // Account currency choices = the main currency + the user's subcurrencies
@@ -813,6 +833,11 @@ function AccountEditorSheet({
       <CurrencyPickerSheet
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}
+        onDismiss={() => {
+          if (!pendingMultiCurrency) return;
+          setPendingMultiCurrency(false);
+          openMultiCurrency();
+        }}
         onSelect={handleCurrencyChange}
         selectedCode={currency}
         restrictToCodes={accountCurrencyCodes}
@@ -821,9 +846,17 @@ function AccountEditorSheet({
           onOpenMultiCurrency ? (
             <Pressable
               onPress={() => {
-                setShowCurrencyPicker(false);
-                onClose();
-                onOpenMultiCurrency();
+                // Close the picker first. On iOS, wait for its dismissal
+                // (via onDismiss) before tearing down this editor + navigating
+                // so two native modals never dismiss in the same frame. On
+                // other platforms there's no such collision, so go directly.
+                if (Platform.OS === 'ios') {
+                  setPendingMultiCurrency(true);
+                  setShowCurrencyPicker(false);
+                } else {
+                  setShowCurrencyPicker(false);
+                  openMultiCurrency();
+                }
               }}
               className="mt-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-3 active:opacity-80"
             >
