@@ -127,7 +127,7 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="px-5">
         <SettingsHeader
-          className="px-0 pt-5 pb-2"
+          className="px-0 pt-5 pb-3"
           onBack={onClose}
           title={isEditing ? I18n.t('items.edit_title') : I18n.t('items.add_title')}
           rightAccessory={
