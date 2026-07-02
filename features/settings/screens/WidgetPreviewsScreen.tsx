@@ -661,6 +661,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
   return (
     <SettingsPageLayout>
       <SettingsHeader
+        className="px-5 pt-5 pb-3"
         onBack={onBack}
         title="Widget previews"
         subtitle={
