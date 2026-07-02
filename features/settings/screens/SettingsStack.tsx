@@ -48,6 +48,7 @@ interface SettingsStackProps {
     parentId?: string;
     type?: CategoryType;
   }) => void;
+  onOpenAddWageMonth: () => void;
   onOpenProPaywall: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
@@ -147,6 +148,7 @@ export function SettingsStack({
   onOpenPayCreditCard,
   onOpenCreateGroup,
   onOpenCategoryEditor,
+  onOpenAddWageMonth,
   onOpenProPaywall,
   onScreenChange,
   onStartTutorial,
@@ -232,6 +234,7 @@ export function SettingsStack({
               onOpenWageCalculator={({ monthKey, initialConfig }) =>
                 props.navigation.navigate('WageCalculator', { monthKey, initialConfig })
               }
+              onOpenAddWageMonth={onOpenAddWageMonth}
             />
           );
         }}

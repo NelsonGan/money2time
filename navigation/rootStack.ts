@@ -38,6 +38,7 @@ export type RootStackParamList = {
   SettingsRecurring: undefined;
   SettingsAccounts: undefined;
   SettingsHourlyValue: undefined;
+  AddWageMonth: undefined;
   SettingsQuickEntry: undefined;
   SettingsMultiCurrency: undefined;
   SettingsAutoBackup: undefined;

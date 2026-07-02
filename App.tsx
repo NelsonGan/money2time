@@ -69,6 +69,7 @@ import {
   AccountEditorScreen,
   AccountGroupEditorScreen,
   AccountsScreen,
+  AddWageMonthScreen,
   AutoBackupScreen,
   CategoryEditorScreen,
   ExchangeRatesScreen,
@@ -622,6 +623,9 @@ function MainShellScreen({
     },
     [navigation],
   );
+  const openAddWageMonth = useCallback(() => {
+    navigation.navigate('AddWageMonth');
+  }, [navigation]);
 
   const openBottomNavPrimaryAction = useCallback(() => {
     openAddTransaction();
@@ -955,6 +959,7 @@ function MainShellScreen({
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
             onOpenCategoryEditor={openCategoryEditor}
+            onOpenAddWageMonth={openAddWageMonth}
             onOpenProPaywall={() => openProPaywall('settings')}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
@@ -1346,6 +1351,18 @@ function SettingsHourlyValueRouteScreen({
       onClose={() => navigation.goBack()}
       onOpenWageCalculator={({ monthKey, initialConfig }) =>
         navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
+      }
+      onOpenAddWageMonth={() => navigation.navigate('AddWageMonth')}
+    />
+  );
+}
+
+function AddWageMonthRouteScreen({ navigation }: RootStackRouteProps<'AddWageMonth'>) {
+  return (
+    <AddWageMonthScreen
+      onClose={() => navigation.goBack()}
+      onOpenWageCalculator={({ monthKey, initialConfig }) =>
+        navigation.replace('SettingsWageCalculator', { monthKey, initialConfig })
       }
     />
   );
@@ -1802,6 +1819,7 @@ function AppContent() {
           <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
+          <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
           <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
           <RootStack.Screen
             name="SettingsMultiCurrency"
