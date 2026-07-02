@@ -250,7 +250,7 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
 
   return (
     <View className="flex-1">
-      <Map style={{ flex: 1 }} mapStyle={mapStyle} logo={false}>
+      <Map style={{ flex: 1 }} mapStyle={mapStyle} logo={false} attribution={false}>
         <Camera ref={cameraRef} initialViewState={initialViewState} />
         {markers}
       </Map>
