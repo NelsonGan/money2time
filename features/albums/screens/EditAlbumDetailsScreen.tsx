@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
-import { FatButton, Input, Text } from '~/components/ui';
+import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -82,19 +82,11 @@ export function EditAlbumDetailsScreen({ albumId, onClose }: EditAlbumDetailsScr
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <TabletContentContainer style={{ flex: 1 }}>
-        <View className="flex-row items-center gap-2 px-3 py-2">
-          <Pressable
-            onPress={onClose}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
-            className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-card"
-          >
-            <X size={18} color={themeColors.textMuted} />
-          </Pressable>
-          <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-            {I18n.t('albums.edit_details_title')}
-          </Text>
-        </View>
+        <SettingsHeader
+          className="px-5 pt-5 pb-3"
+          title={I18n.t('albums.edit_details_title')}
+          onBack={onClose}
+        />
 
         <ScrollView
           className="flex-1"

@@ -42,6 +42,7 @@ import {
   CategoryEmoji,
   CurrencyPickerSheet,
   Input,
+  PagePresentModal,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -617,17 +618,12 @@ function AccountEditorSheet({
   };
 
   return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
+    <PagePresentModal visible={visible} onClose={onClose}>
       <SafeAreaView className="flex-1 bg-background">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={isEdit ? I18n.t('accounts.edit_account') : I18n.t('accounts.new_account')}
-          onClose={onClose}
+          onBack={onClose}
           closeRowAccessory={
             isEdit && onDelete ? (
               <Pressable
@@ -705,7 +701,10 @@ function AccountEditorSheet({
                 {I18n.t('accounts.currency')}
               </Text>
               <Pressable
-                onPress={() => setShowCurrencyPicker(true)}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setShowCurrencyPicker(true);
+                }}
                 className="flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
               >
                 <Text variant="body">
@@ -868,7 +867,7 @@ function AccountEditorSheet({
           ) : null
         }
       />
-    </ThemeModal>
+    </PagePresentModal>
   );
 }
 
@@ -990,17 +989,12 @@ function PayCreditCardSheet({
   };
 
   return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
+    <PagePresentModal visible={visible} onClose={onClose}>
       <SafeAreaView className="flex-1 bg-background">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={I18n.t('accounts.pay_credit_card')}
-          onClose={onClose}
+          onBack={onClose}
         />
         <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
@@ -1050,7 +1044,7 @@ function PayCreditCardSheet({
           setShowFromAccountPicker(false);
         }}
       />
-    </ThemeModal>
+    </PagePresentModal>
   );
 }
 
@@ -2957,17 +2951,12 @@ export function AccountsScreen({
         onOpenMultiCurrency={onOpenMultiCurrency}
       />
 
-      <ThemeModal
-        visible={showGroupComposer}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={cancelCreateGroup}
-      >
+      <PagePresentModal visible={showGroupComposer} onClose={cancelCreateGroup}>
         <SafeAreaView className="flex-1 bg-background">
           <SettingsHeader
             className="px-5 pt-5 pb-2"
             title={I18n.t('accounts.create_group')}
-            onClose={cancelCreateGroup}
+            onBack={cancelCreateGroup}
           />
           <ScrollView
             contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
@@ -2987,7 +2976,7 @@ export function AccountsScreen({
             saveDisabled={!canCreateGroup}
           />
         </SafeAreaView>
-      </ThemeModal>
+      </PagePresentModal>
     </SettingsPageLayout>,
   );
 }

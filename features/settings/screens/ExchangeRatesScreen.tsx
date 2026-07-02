@@ -168,7 +168,11 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader title={I18n.t('exchange_rates.title')} onBack={onBack} />
+      <SettingsHeader
+        className="px-5 pt-5 pb-3"
+        title={I18n.t('exchange_rates.title')}
+        onBack={onBack}
+      />
       <Animated.ScrollView
         ref={scrollRef}
         contentContainerStyle={[

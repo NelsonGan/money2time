@@ -13,6 +13,7 @@ import {
   type CategoryPickerOption,
   CategoryPickerSheet,
   Input,
+  PagePresentModal,
   SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -21,7 +22,6 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
-  ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
@@ -323,12 +323,7 @@ function CategoryEditor({
   };
 
   return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
+    <PagePresentModal visible={visible} onClose={onClose}>
       <SafeAreaView className="flex-1 bg-background">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
@@ -337,7 +332,7 @@ function CategoryEditor({
               ? I18n.t('categories.new_category')
               : I18n.t('categories.edit_category')
           }
-          onClose={onClose}
+          onBack={onClose}
           closeRowAccessory={
             mode === 'edit' && onDelete ? (
               <Pressable
@@ -504,7 +499,7 @@ function CategoryEditor({
           onSelect={confirmMoveAndDelete}
         />
       </SafeAreaView>
-    </ThemeModal>
+    </PagePresentModal>
   );
 }
 

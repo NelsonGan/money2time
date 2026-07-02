@@ -1,12 +1,10 @@
-import { X } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FatButton, Text } from '~/components/ui';
+import { FatButton, SettingsHeader, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
@@ -19,7 +17,6 @@ interface AddAlbumTransactionsScreenProps {
 /** General month-pager picker for adding (or removing) transactions to an album. */
 export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransactionsScreenProps) {
   const { getAlbumTransactionIds, addTransactionsToAlbum, removeTransactionsFromAlbum } = useApp();
-  const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
   const initialIds = useMemo(
@@ -48,26 +45,18 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <TabletContentContainer style={{ flex: 1 }}>
-        <View className="flex-row items-center gap-2 px-3 pb-0.5 pt-1.5">
-          <Pressable
-            onPress={onClose}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
-            className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-card"
-          >
-            <X size={18} color={themeColors.textMuted} />
-          </Pressable>
-          <View className="flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {I18n.t('albums.add_transactions_title')}
-            </Text>
-          </View>
-          <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
-            <Text variant="label" tone="muted">
-              {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
-            </Text>
-          </View>
-        </View>
+        <SettingsHeader
+          className="px-5 pt-5 pb-3"
+          title={I18n.t('albums.add_transactions_title')}
+          onBack={onClose}
+          rightAccessory={
+            <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
+              </Text>
+            </View>
+          }
+        />
 
         <AlbumMonthPicker selectedIds={selectedIds} onChange={setSelectedIds} />
 

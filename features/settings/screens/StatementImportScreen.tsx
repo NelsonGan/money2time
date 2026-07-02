@@ -456,7 +456,11 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader onBack={onBack} title={I18n.t('statement_import.title')} />
+      <SettingsHeader
+        className="px-5 pt-5 pb-3"
+        onBack={onBack}
+        title={I18n.t('statement_import.title')}
+      />
 
       <ScrollView
         ref={scrollViewRef}
@@ -815,6 +819,7 @@ export function StatementImportListScreen({
   return (
     <SettingsPageLayout>
       <SettingsHeader
+        className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={title}
         subtitle={`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}

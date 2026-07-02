@@ -143,6 +143,7 @@ export function ShareAndEarnScreen({ onBack }: ShareAndEarnScreenProps) {
   return (
     <SettingsPageLayout>
       <SettingsHeader
+        className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={I18n.t('shareEarn.title')}
         subtitle={I18n.t('shareEarn.subtitle')}
