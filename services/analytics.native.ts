@@ -9,14 +9,9 @@
  * Expo Go where native modules aren't available.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules, Platform } from 'react-native';
 
-import type {
-  AnalyticsProperties,
-  AnalyticsSuperProperties,
-  TrackEventOptions,
-} from './analytics.shared';
+import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.shared';
 
 export * from './analytics.shared';
 
@@ -108,13 +103,7 @@ async function ensureInitialized(): Promise<MixpanelInstance | null> {
         warnUsingMixpanelJsMode();
       }
 
-      // Automatic events ($ae_session → "App Session", $ae_first_open →
-      // "First App Open", $ae_updated) are disabled: "App Session" fires on
-      // every foreground and was the single largest slice of our Mixpanel
-      // event volume. We re-emit a manual "First App Open" (see
-      // `trackFirstAppOpenIfNeeded`) so that signal is preserved.
-      const trackAutomaticEvents = false;
-      const mp = new MixpanelClass(token, trackAutomaticEvents, useNativeMixpanel);
+      const mp = new MixpanelClass(token, true, useNativeMixpanel);
       await mp.init();
       mixpanelInstance = mp;
     })().catch((error) => {
@@ -156,15 +145,7 @@ export async function identifyUser(appUserId: string): Promise<void> {
 export async function trackEvent(
   eventName: string,
   properties?: AnalyticsProperties,
-  options?: TrackEventOptions,
 ): Promise<void> {
-  // Client-side sampling: when a sampleRate below 1 is supplied, only send the
-  // event with that probability. Bail before touching the SDK so dropped calls
-  // are essentially free.
-  const sampleRate = options?.sampleRate;
-  const isSampled = typeof sampleRate === 'number' && sampleRate < 1;
-  if (isSampled && (sampleRate <= 0 || Math.random() >= sampleRate)) return;
-
   const mp = await ensureInitialized();
   if (!mp) return;
 
@@ -176,63 +157,14 @@ export async function trackEvent(
         : typeof properties?.tab === 'string'
           ? properties.tab
           : currentScreen;
-  let eventProperties = nextCurrentScreen
+  const eventProperties = nextCurrentScreen
     ? { ...properties, current_screen: nextCurrentScreen }
     : properties;
-
-  // Record the sample rate so true volume can be reconstructed downstream by
-  // scaling the count by 1 / sample_rate.
-  if (isSampled) {
-    eventProperties = { ...eventProperties, sample_rate: sampleRate };
-  }
 
   if (eventProperties) {
     mp.track(eventName, eventProperties);
   } else {
     mp.track(eventName);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Manual "First App Open"
-// ---------------------------------------------------------------------------
-
-const FIRST_APP_OPEN_TRACKED_KEY = 'analytics.firstAppOpenTracked.v1';
-
-// Synchronous in-memory guard so two near-simultaneous calls (the identify
-// effect re-runs when onboarding flips to complete) can't both pass the async
-// AsyncStorage check and double-emit. Set before the first await.
-let firstAppOpenHandledThisSession = false;
-
-/**
- * Emit a "First App Open" event exactly once per install.
- *
- * Mixpanel's automatic events are all-or-nothing, and we disabled them to drop
- * the high-volume "App Session" event — which also removes the built-in
- * "First App Open". This re-creates that signal cheaply (one event per install,
- * guarded by a persisted flag). Safe to call on every launch.
- *
- * `suppressEmit` handles the upgrade case: existing users had their real first
- * open long ago (as Mixpanel's `$ae_first_open`), but the guard flag is a new
- * key so it's absent for them too. Passing `suppressEmit` for anyone who has
- * already used the app marks the flag as consumed WITHOUT firing a spurious
- * first-open, so only genuinely-new installs emit the event going forward.
- */
-export async function trackFirstAppOpenIfNeeded(options?: {
-  suppressEmit?: boolean;
-}): Promise<void> {
-  if (firstAppOpenHandledThisSession) return;
-  firstAppOpenHandledThisSession = true;
-  try {
-    const alreadyTracked = await AsyncStorage.getItem(FIRST_APP_OPEN_TRACKED_KEY);
-    if (alreadyTracked) return;
-    await AsyncStorage.setItem(FIRST_APP_OPEN_TRACKED_KEY, '1');
-    if (options?.suppressEmit) return;
-    await trackEvent('First App Open');
-  } catch {
-    // Best-effort only; never block startup on analytics. Allow a retry on a
-    // later launch (fresh process) since the persisted flag was never written.
-    firstAppOpenHandledThisSession = false;
   }
 }
 
