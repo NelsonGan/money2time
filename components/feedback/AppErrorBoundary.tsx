@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { Mascot } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
+import { reportError } from '~/services/errorReporting';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 interface AppErrorBoundaryProps {
@@ -27,6 +28,12 @@ export class AppErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
     return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    // The boundary swallows the error (shows the fallback), so it never reaches
+    // Sentry's global handler on its own — report it here.
+    reportError(error, { componentStack: info.componentStack });
   }
 
   private handleRetry = () => {
