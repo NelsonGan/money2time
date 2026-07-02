@@ -96,32 +96,55 @@ jobs:
             exit 1
           fi
 
-          # Discord embed descriptions cap at 4096 chars; keep a safe margin.
+          # Human-friendly release date (e.g. "July 1, 2026"); fall back to raw.
+          humanDate="$(date -u -d "$releaseDate" +"%B %-d, %Y" 2>/dev/null || echo "$releaseDate")"
+
+          # Ask the CDN for a crisper icon than the default 100x100 thumbnail.
+          iconBig="${icon/100x100bb/512x512bb}"
+
+          # Build the "What's New" body. Blank-line-separate paragraphs so
+          # Discord renders the bullet list and closing note cleanly, and add a
+          # tappable App Store link at the end. Discord embed descriptions cap
+          # at 4096 chars, so trim the notes with room for the header + link.
+          notesTrimmed="$notes"
+          if [ "${#notes}" -gt 3500 ]; then
+            notesTrimmed="${notes:0:3490}…"
+          fi
+
           payload="$(jq -n \
-            --arg title  "🎉 $appName $version is out on the App Store!" \
-            --arg url    "$appUrl" \
-            --arg notes  "$notes" \
+            --arg appName "$appName" \
+            --arg url     "$appUrl" \
+            --arg notes   "$notesTrimmed" \
             --arg version "$version" \
-            --arg date   "$releaseDate" \
-            --arg icon   "$icon" \
+            --arg date    "$humanDate" \
+            --arg iso     "$releaseDate" \
+            --arg icon    "$icon" \
+            --arg iconBig "$iconBig" \
             '{
-              username: "App Store",
+              username: $appName,
+              avatar_url: $iconBig,
               embeds: [
-                {
-                  title: $title,
-                  url: $url,
-                  description: (if ($notes | length) > 4000
-                               then ($notes[0:3990] + "\n…")
-                               else $notes end),
-                  color: 3447003,
-                  fields: [
-                    { name: "Version",  value: $version, inline: true },
-                    { name: "Released", value: $date,    inline: true }
-                  ],
-                  footer: { text: "iOS · App Store" },
-                  timestamp: $date
-                }
-                + (if ($icon | length) > 0 then { thumbnail: { url: $icon } } else {} end)
+                (
+                  {
+                    author: ({ name: "New update on the App Store" }
+                      + (if ($icon | length) > 0 then { icon_url: $icon } else {} end)),
+                    title: ("🎉 " + $appName + " " + $version),
+                    url: $url,
+                    description: (
+                      "A new version is now live on the App Store!\n\n"
+                      + "**What'"'"'s New**\n" + $notes
+                      + "\n\n[⬇️ Update on the App Store](" + $url + ")"
+                    ),
+                    color: 2067055,
+                    fields: [
+                      { name: "Version",  value: $version, inline: true },
+                      { name: "Released", value: $date,    inline: true }
+                    ],
+                    footer: { text: "iOS · App Store" },
+                    timestamp: $iso
+                  }
+                  + (if ($iconBig | length) > 0 then { thumbnail: { url: $iconBig } } else {} end)
+                )
               ]
             }')"
 
