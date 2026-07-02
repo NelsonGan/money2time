@@ -1,21 +1,27 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { ChevronRight, ImageIcon, X } from 'lucide-react-native';
+import { ChevronRight, ImageIcon, MapPin, X } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
+import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
+import type { AlbumLocation } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
+
+function placeLabel(location: AlbumLocation): string {
+  return [location.placeName, location.placeAdmin, location.countryCode].filter(Boolean).join(', ');
+}
 
 interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
@@ -37,7 +43,9 @@ export function CreateAlbumScreen({
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialTransactionIds ?? []);
+  const [location, setLocation] = useState<AlbumLocation | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [locationPickerVisible, setLocationPickerVisible] = useState(false);
 
   const coverUri = useMemo(() => getAlbumCoverUri(coverPath), [coverPath]);
   const canSave = name.trim().length > 0;
@@ -75,12 +83,13 @@ export function CreateAlbumScreen({
         startDate,
         endDate,
         transactionIds: selectedIds,
+        location,
       });
       onCreated(albumId);
     } catch (error) {
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
-  }, [canSave, coverPath, createAlbum, name, onCreated, selectedIds]);
+  }, [canSave, coverPath, createAlbum, endDate, location, name, onCreated, selectedIds, startDate]);
 
   if (pickerOpen) {
     return (
@@ -164,7 +173,6 @@ export function CreateAlbumScreen({
               placeholder={I18n.t('albums.name_placeholder')}
               value={name}
               onChangeText={setName}
-              autoFocus={!initialTransactionIds?.length}
               style={{ height: 'auto' }}
             />
 
@@ -177,6 +185,38 @@ export function CreateAlbumScreen({
               onChangeStart={setStartDate}
               onChangeEnd={setEndDate}
             />
+
+            <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+              {I18n.t('albums.location.label')}
+            </Text>
+            <Pressable
+              onPress={() => setLocationPickerVisible(true)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
+            >
+              <MapPin size={18} color={location ? themeColors.primary : themeColors.textMuted} />
+              <Text
+                variant="body"
+                numberOfLines={1}
+                tone={location ? 'default' : 'muted'}
+                className="flex-1"
+              >
+                {location ? placeLabel(location) : I18n.t('albums.location.add')}
+              </Text>
+              {location ? (
+                <Pressable
+                  onPress={() => setLocation(null)}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('albums.location.clear')}
+                  hitSlop={10}
+                  className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+                >
+                  <X size={15} color={themeColors.textMuted} />
+                </Pressable>
+              ) : (
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              )}
+            </Pressable>
 
             <Pressable
               onPress={() => {
@@ -196,6 +236,12 @@ export function CreateAlbumScreen({
             </Pressable>
           </View>
         </ScrollView>
+
+        <CityPickerSheet
+          visible={locationPickerVisible}
+          onClose={() => setLocationPickerVisible(false)}
+          onSelect={setLocation}
+        />
 
         <View
           className="border-t border-border/30 bg-background px-5 pt-3"

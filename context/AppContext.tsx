@@ -65,12 +65,12 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
-import { setErrorUser } from '~/services/errorReporting';
 import {
   registerBackgroundTask,
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
+import { setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
@@ -254,6 +254,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     startDate?: string | null;
     endDate?: string | null;
     transactionIds?: string[];
+    location?: AlbumLocation | null;
   }) => string;
   updateAlbum: (
     id: string,
@@ -1386,6 +1387,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       startDate?: string | null;
       endDate?: string | null;
       transactionIds?: string[];
+      location?: AlbumLocation | null;
     }) => {
       const id = runMutation(
         () => {
@@ -1394,6 +1396,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             coverPhotoUri: input.coverPhotoUri ?? null,
             startDate: input.startDate ?? null,
             endDate: input.endDate ?? null,
+            latitude: input.location?.latitude ?? null,
+            longitude: input.location?.longitude ?? null,
+            placeId: input.location?.placeId ?? null,
+            placeName: input.location?.placeName ?? null,
+            placeAdmin: input.location?.placeAdmin ?? null,
+            countryCode: input.location?.countryCode ?? null,
           });
           if (input.transactionIds && input.transactionIds.length > 0) {
             albumsRepository.addTransactions(albumId, input.transactionIds);
