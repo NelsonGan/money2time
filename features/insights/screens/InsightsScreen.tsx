@@ -66,6 +66,7 @@ import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { shouldRestoreSavedAnchorForPreset } from '~/features/insights/insightsPreferencesHydration';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
@@ -2994,11 +2995,12 @@ export function InsightsScreen({
         const parsedAnchorDate = parseDateInput(saved.anchorDate);
         if (parsedAnchorDate) {
           const restoredPeriodPreset = getHydratedInsightPeriodPreset(saved);
-          setAnchorDate(
-            restoredPeriodPreset === 'week' || restoredPeriodPreset === 'custom'
-              ? startOfDayDate(parsedAnchorDate)
-              : startOfMonthDate(parsedAnchorDate),
-          );
+          // month/year presets always open on the current period (the default
+          // anchor state) so the breakdown circle isn't pinned to a stale month
+          // from a previous session — e.g. still showing June once July began.
+          if (shouldRestoreSavedAnchorForPreset(restoredPeriodPreset)) {
+            setAnchorDate(startOfDayDate(parsedAnchorDate));
+          }
         }
       }
       if (saved.customStart) setCustomStart(saved.customStart);
