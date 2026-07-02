@@ -167,13 +167,6 @@ jobs:
           echo "file=./build/money2time-${{ matrix.platform }}-${{ matrix.profile }}.$ext" >> "$GITHUB_OUTPUT"
 
       - name: Build app
-        env:
-          # Sentry source-map upload runs during the native build. Until
-          # SENTRY_AUTH_TOKEN is added as a repo secret, disable auto-upload so
-          # the build can't fail on the missing token. To enable symbolicated
-          # stack traces: add the secret and set SENTRY_DISABLE_AUTO_UPLOAD to false.
-          SENTRY_DISABLE_AUTO_UPLOAD: 'true'
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           mkdir -p build
           eas build \
