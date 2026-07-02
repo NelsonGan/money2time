@@ -43,6 +43,7 @@ import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
+import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
@@ -289,7 +290,9 @@ function MountedTab({
       pointerEvents={active ? 'auto' : 'none'}
       style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
-      {shouldMount ? children : null}
+      {shouldMount ? (
+        <TabVisibilityProvider visible={active}>{children}</TabVisibilityProvider>
+      ) : null}
     </View>
   );
 }

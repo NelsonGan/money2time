@@ -63,6 +63,7 @@ import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
@@ -2620,7 +2621,11 @@ export function InsightsScreen({
     updateTransactionsBulk,
     deleteTransactionsBulk,
   } = useApp();
-  const { transactions: rawTransactions } = useTransactions();
+  const { transactions: liveTransactions } = useTransactions();
+  // While the insights tab is hidden (it stays mounted behind the other tabs),
+  // hold the last-seen snapshot so every write doesn't re-run the full insight
+  // memo chain in the background; it catches up once when re-activated.
+  const rawTransactions = useValueWhileTabVisible(liveTransactions);
   const { isPro } = usePro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 

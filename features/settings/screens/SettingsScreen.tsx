@@ -61,6 +61,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -140,7 +141,10 @@ export function SettingsScreen({
   tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
-  const { transactions } = useTransactions();
+  const { transactions: liveTransactions } = useTransactions();
+  // Profile stats are cosmetic — while the settings tab is hidden, hold the
+  // last-seen snapshot instead of re-scanning all transactions on every write.
+  const transactions = useValueWhileTabVisible(liveTransactions);
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
