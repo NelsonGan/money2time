@@ -1,0 +1,161 @@
+name: App Store Release Notifier
+
+# Hourly check of the App Store listing. When a new version goes live,
+# post the version + release notes to Discord so users know the app updated.
+#
+# Requirements:
+#   - Repo secret DISCORD_WEBHOOK_URL  (Settings → Secrets and variables →
+#     Actions → New repository secret). Create the webhook in Discord under
+#     Server Settings → Integrations → Webhooks → New Webhook, then copy its URL.
+#
+# Notes:
+#   - Scheduled workflows only run from the DEFAULT branch, so this starts
+#     firing hourly once merged to main. Use "Run workflow" (workflow_dispatch)
+#     to test it manually beforehand.
+#   - The last-notified version is persisted via the Actions cache (not a repo
+#     commit) so this job never triggers the Deploy workflow.
+#   - The first run just records a baseline and does NOT notify, so it won't
+#     announce the already-published version as if it were new.
+
+on:
+  schedule:
+    - cron: '0 * * * *' # top of every hour (UTC)
+  workflow_dispatch:
+
+concurrency:
+  group: appstore-release-notifier
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Check App Store & notify Discord
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APPSTORE_APP_ID: '6760418898'
+      # Storefront to read the listing from (2-letter country code).
+      APPSTORE_COUNTRY: 'us'
+    steps:
+      - name: Restore last-seen version
+        uses: actions/cache/restore@v4
+        with:
+          path: .appstore-version
+          key: appstore-version-${{ github.run_id }}
+          restore-keys: |
+            appstore-version-
+
+      - name: Check App Store and notify Discord
+        id: check
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          API="https://itunes.apple.com/lookup?id=${APPSTORE_APP_ID}&country=${APPSTORE_COUNTRY}"
+          resp="$(curl -fsSL --retry 3 --retry-delay 5 "$API")"
+
+          count="$(echo "$resp" | jq '.resultCount')"
+          if [ "$count" -eq 0 ]; then
+            echo "App id ${APPSTORE_APP_ID} not found in storefront '${APPSTORE_COUNTRY}'. Nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          version="$(echo "$resp"    | jq -r '.results[0].version')"
+          notes="$(echo "$resp"      | jq -r '.results[0].releaseNotes // "No release notes provided."')"
+          releaseDate="$(echo "$resp" | jq -r '.results[0].currentVersionReleaseDate')"
+          appName="$(echo "$resp"    | jq -r '.results[0].trackName')"
+          appUrl="$(echo "$resp"     | jq -r '.results[0].trackViewUrl')"
+          icon="$(echo "$resp"       | jq -r '.results[0].artworkUrl100 // .results[0].artworkUrl60 // ""')"
+
+          prev=""
+          [ -f .appstore-version ] && prev="$(cat .appstore-version)"
+          echo "Current App Store version: '$version' | previously notified: '${prev:-<none>}'"
+
+          if [ "$version" = "$prev" ]; then
+            echo "No new release."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Persist the new version so we save it to the cache in the next step.
+          printf '%s' "$version" > .appstore-version
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+          # First observation: record baseline only, don't announce an old build.
+          if [ -z "$prev" ]; then
+            echo "First run — baseline recorded ($version). Not notifying."
+            exit 0
+          fi
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL secret is not set — cannot post to Discord."
+            exit 1
+          fi
+
+          # Human-friendly release date (e.g. "July 1, 2026"); fall back to raw.
+          humanDate="$(date -u -d "$releaseDate" +"%B %-d, %Y" 2>/dev/null || echo "$releaseDate")"
+
+          # Ask the CDN for a crisper icon than the default 100x100 thumbnail.
+          iconBig="${icon/100x100bb/512x512bb}"
+
+          # Build the "What's New" body. Blank-line-separate paragraphs so
+          # Discord renders the bullet list and closing note cleanly, and add a
+          # tappable App Store link at the end. Discord embed descriptions cap
+          # at 4096 chars, so trim the notes with room for the header + link.
+          notesTrimmed="$notes"
+          if [ "${#notes}" -gt 3500 ]; then
+            notesTrimmed="${notes:0:3490}…"
+          fi
+
+          payload="$(jq -n \
+            --arg appName "$appName" \
+            --arg url     "$appUrl" \
+            --arg notes   "$notesTrimmed" \
+            --arg version "$version" \
+            --arg date    "$humanDate" \
+            --arg iso     "$releaseDate" \
+            --arg icon    "$icon" \
+            --arg iconBig "$iconBig" \
+            '{
+              username: $appName,
+              avatar_url: $iconBig,
+              embeds: [
+                (
+                  {
+                    author: ({ name: "New update on the App Store" }
+                      + (if ($icon | length) > 0 then { icon_url: $icon } else {} end)),
+                    title: ("🎉 " + $appName + " " + $version),
+                    url: $url,
+                    description: (
+                      "A new version is now live on the App Store!\n\n"
+                      + "**What'"'"'s New**\n" + $notes
+                      + "\n\n[⬇️ Update on the App Store](" + $url + ")"
+                    ),
+                    color: 2067055,
+                    fields: [
+                      { name: "Version",  value: $version, inline: true },
+                      { name: "Released", value: $date,    inline: true }
+                    ],
+                    footer: { text: "iOS · App Store" },
+                    timestamp: $iso
+                  }
+                  + (if ($iconBig | length) > 0 then { thumbnail: { url: $iconBig } } else {} end)
+                )
+              ]
+            }')"
+
+          curl -fsSL --retry 3 --retry-delay 5 \
+            -X POST -H "Content-Type: application/json" \
+            -d "$payload" "$DISCORD_WEBHOOK_URL"
+          echo "Posted release notification for $version to Discord."
+
+      - name: Save last-seen version
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .appstore-version
+          key: appstore-version-${{ github.run_id }}
