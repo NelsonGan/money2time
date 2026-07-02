@@ -803,20 +803,25 @@ export function SettingsScreen({
                     void resetCloudBackupPromptState();
                   }}
                 />
-                <SettingsGridTile
-                  icon={<Bug size={20} color={themeColors.primary} />}
-                  label="Throw test error"
-                  onPress={() => {
-                    void triggerHaptic('warning');
-                    Sentry.captureException(
-                      new Error('Sentry test error from Settings > Developer'),
-                    );
-                    throw new Error('Sentry test error from Settings > Developer');
-                  }}
-                />
               </SettingsGrid>
             </SettingsSection>
           ) : null}
+
+          {/* TEMPORARY: exposed outside __DEV__ so Sentry can be verified in a
+              TestFlight/Play build. Remove this section once verified. */}
+          <SettingsSection className="mt-6 gap-2" title="Diagnostics" showAccent={false}>
+            <SettingsGrid>
+              <SettingsGridTile
+                icon={<Bug size={20} color={themeColors.primary} />}
+                label="Throw test error"
+                onPress={() => {
+                  void triggerHaptic('warning');
+                  Sentry.captureException(new Error('Sentry test error from Settings'));
+                  throw new Error('Sentry test error from Settings');
+                }}
+              />
+            </SettingsGrid>
+          </SettingsSection>
         </Animated.View>
       </ScrollView>
     </SettingsPageLayout>
