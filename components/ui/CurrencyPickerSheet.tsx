@@ -15,6 +15,13 @@ import { isAutoRateSupported } from '~/utils/currency';
 interface CurrencyPickerSheetProps {
   visible: boolean;
   onClose: () => void;
+  /**
+   * Fires after the modal has fully finished dismissing (iOS only, from the
+   * underlying `Modal`). Use this to chain follow-up work — e.g. tearing down a
+   * parent modal and navigating — so two native modal dismissals never collide
+   * in the same frame.
+   */
+  onDismiss?: () => void;
   onSelect: (code: string) => void;
   selectedCode?: string | null;
   /** Codes to hide (e.g. already-added currencies, the reporting currency). */
@@ -34,6 +41,7 @@ interface CurrencySection {
 export function CurrencyPickerSheet({
   visible,
   onClose,
+  onDismiss,
   onSelect,
   selectedCode,
   excludeCodes,
@@ -87,7 +95,13 @@ export function CurrencyPickerSheet({
   };
 
   return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+    <ThemeModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleClose}
+      onDismiss={onDismiss}
+    >
       <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
           <View
