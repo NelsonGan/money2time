@@ -1661,6 +1661,8 @@ const nl = {
       '{{count}} transacties uit dit album verwijderen? Ze worden niet verwijderd.',
     tab_breakdown: 'Verdeling',
     tab_transactions: 'Transacties',
+    show_cover: 'Omslagfoto tonen',
+    show_details: 'Details tonen',
     no_expenses: 'Nog geen uitgaven om te verdelen.',
     no_transactions_title: 'Geen transacties',
     no_transactions_message: 'Voeg transacties aan dit album toe om ze hier te zien.',

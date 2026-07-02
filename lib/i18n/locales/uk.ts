@@ -1638,6 +1638,8 @@ const uk = {
     remove_selected_body: 'Прибрати {{count}} операцій з цього альбому? Їх не буде видалено.',
     tab_breakdown: 'Розподіл',
     tab_transactions: 'Операції',
+    show_cover: 'Показати обкладинку',
+    show_details: 'Показати деталі',
     no_expenses: 'Поки немає витрат для розподілу.',
     no_transactions_title: 'Немає операцій',
     no_transactions_message: 'Додайте операції до цього альбому, щоб побачити їх тут.',

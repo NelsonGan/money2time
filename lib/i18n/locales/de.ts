@@ -1665,6 +1665,8 @@ const de = {
       '{{count}} Transaktionen aus diesem Album entfernen? Sie werden nicht gelöscht.',
     tab_breakdown: 'Aufschlüsselung',
     tab_transactions: 'Transaktionen',
+    show_cover: 'Titelbild anzeigen',
+    show_details: 'Details anzeigen',
     no_expenses: 'Noch keine Ausgaben zum Aufschlüsseln.',
     no_transactions_title: 'Keine Transaktionen',
     no_transactions_message: 'Füge diesem Album Transaktionen hinzu, um sie hier zu sehen.',

@@ -1628,6 +1628,8 @@ const hi = {
     remove_selected_body: 'इस एल्बम से {{count}} लेन-देन हटाएँ? वे हटाए नहीं जाएंगे।',
     tab_breakdown: 'विवरण',
     tab_transactions: 'लेन-देन',
+    show_cover: 'कवर फ़ोटो दिखाएँ',
+    show_details: 'विवरण दिखाएँ',
     no_expenses: 'विभाजित करने के लिए अभी कोई खर्च नहीं।',
     no_transactions_title: 'कोई लेन-देन नहीं',
     no_transactions_message: 'इस एल्बम में लेन-देन जोड़ें ताकि वे यहाँ दिखें।',

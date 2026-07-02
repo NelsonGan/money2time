@@ -1650,6 +1650,8 @@ const it = {
       'Rimuovere {{count}} transazioni da questo album? Non verranno eliminate.',
     tab_breakdown: 'Ripartizione',
     tab_transactions: 'Transazioni',
+    show_cover: 'Mostra copertina',
+    show_details: 'Mostra dettagli',
     no_expenses: 'Ancora nessuna spesa da ripartire.',
     no_transactions_title: 'Nessuna transazione',
     no_transactions_message: 'Aggiungi transazioni a questo album per vederle qui.',

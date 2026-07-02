@@ -1621,6 +1621,8 @@ const vi = {
     remove_selected_body: 'Gỡ {{count}} giao dịch khỏi album này? Giao dịch sẽ không bị xóa.',
     tab_breakdown: 'Phân tích',
     tab_transactions: 'Giao dịch',
+    show_cover: 'Hiện ảnh bìa',
+    show_details: 'Hiện chi tiết',
     no_expenses: 'Chưa có chi tiêu để phân tích.',
     no_transactions_title: 'Không có giao dịch',
     no_transactions_message: 'Thêm giao dịch vào album này để xem tại đây.',

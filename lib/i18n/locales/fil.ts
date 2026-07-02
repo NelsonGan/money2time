@@ -1667,6 +1667,8 @@ const fil = {
       'Alisin ang {{count}} na transaksyon sa album na ito? Hindi ito buburahin.',
     tab_breakdown: 'Breakdown',
     tab_transactions: 'Mga transaksyon',
+    show_cover: 'Ipakita ang cover photo',
+    show_details: 'Ipakita ang mga detalye',
     no_expenses: 'Wala pang gastusing maibbreakdown.',
     no_transactions_title: 'Walang transaksyon',
     no_transactions_message: 'Magdagdag ng transaksyon sa album na ito para makita dito.',

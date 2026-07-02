@@ -1643,6 +1643,8 @@ const ru = {
     remove_selected_body: 'Убрать {{count}} операций из этого альбома? Они не будут удалены.',
     tab_breakdown: 'Разбивка',
     tab_transactions: 'Операции',
+    show_cover: 'Показать обложку',
+    show_details: 'Показать детали',
     no_expenses: 'Пока нет расходов для разбивки.',
     no_transactions_title: 'Нет операций',
     no_transactions_message: 'Добавьте операции в этот альбом, чтобы увидеть их здесь.',

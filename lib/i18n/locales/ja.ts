@@ -1620,6 +1620,8 @@ const ja = {
     remove_selected_body: 'このアルバムから{{count}}件の取引を外しますか？取引は削除されません。',
     tab_breakdown: '内訳',
     tab_transactions: '取引',
+    show_cover: 'カバー写真を表示',
+    show_details: '詳細を表示',
     no_expenses: '内訳できる支出がまだありません。',
     no_transactions_title: '取引がありません',
     no_transactions_message: 'このアルバムに取引を追加すると表示されます。',

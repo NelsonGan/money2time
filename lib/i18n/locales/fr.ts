@@ -1661,6 +1661,8 @@ const fr = {
       'Retirer {{count}} transactions de cet album ? Elles ne seront pas supprimées.',
     tab_breakdown: 'Répartition',
     tab_transactions: 'Transactions',
+    show_cover: 'Afficher la couverture',
+    show_details: 'Afficher les détails',
     no_expenses: "Aucune dépense à répartir pour l'instant.",
     no_transactions_title: 'Aucune transaction',
     no_transactions_message: 'Ajoutez des transactions à cet album pour les voir ici.',
