@@ -21,6 +21,11 @@ on:
   schedule:
     - cron: '0 * * * *' # top of every hour (UTC)
   workflow_dispatch:
+    inputs:
+      force_notify:
+        description: "Post a Discord notification even if the version hasn't changed (for testing)"
+        type: boolean
+        default: false
 
 concurrency:
   group: appstore-release-notifier
@@ -51,8 +56,12 @@ jobs:
         id: check
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          # "true" only on a manual run with the force_notify box ticked.
+          FORCE_NOTIFY: ${{ github.event.inputs.force_notify }}
         run: |
           set -euo pipefail
+
+          force="${FORCE_NOTIFY:-false}"
 
           API="https://itunes.apple.com/lookup?id=${APPSTORE_APP_ID}&country=${APPSTORE_COUNTRY}"
           resp="$(curl -fsSL --retry 3 --retry-delay 5 "$API")"
@@ -75,21 +84,30 @@ jobs:
           [ -f .appstore-version ] && prev="$(cat .appstore-version)"
           echo "Current App Store version: '$version' | previously notified: '${prev:-<none>}'"
 
-          if [ "$version" = "$prev" ]; then
+          if [ "$version" = "$prev" ] && [ "$force" != "true" ]; then
             echo "No new release."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Persist the new version so we save it to the cache in the next step.
-          printf '%s' "$version" > .appstore-version
-          echo "changed=true" >> "$GITHUB_OUTPUT"
+          # Persist the new version (only when it actually changed) so the next
+          # step saves it to the cache as the new baseline. A forced test run on
+          # an unchanged version leaves the baseline as-is.
+          if [ "$version" != "$prev" ]; then
+            printf '%s' "$version" > .appstore-version
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
-          # First observation: record baseline only, don't announce an old build.
-          if [ -z "$prev" ]; then
+          # First observation: record baseline only, don't announce an old build
+          # — unless this is a forced manual test run.
+          if [ -z "$prev" ] && [ "$force" != "true" ]; then
             echo "First run — baseline recorded ($version). Not notifying."
             exit 0
           fi
+
+          [ "$force" = "true" ] && echo "force_notify enabled — sending a test notification for $version."
 
           if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
             echo "::error::DISCORD_WEBHOOK_URL secret is not set — cannot post to Discord."
