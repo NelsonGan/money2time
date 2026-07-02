@@ -705,7 +705,10 @@ function AccountEditorSheet({
                 {I18n.t('accounts.currency')}
               </Text>
               <Pressable
-                onPress={() => setShowCurrencyPicker(true)}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setShowCurrencyPicker(true);
+                }}
                 className="flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
               >
                 <Text variant="body">
