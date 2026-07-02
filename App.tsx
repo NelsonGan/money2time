@@ -66,10 +66,14 @@ import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewP
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
 import {
+  AccountEditorScreen,
+  AccountGroupEditorScreen,
   AccountsScreen,
   AutoBackupScreen,
+  CategoryEditorScreen,
   ExchangeRatesScreen,
   HourlyValueScreen,
+  PayCreditCardScreen,
   ProPaywallScreen,
   QuickEntrySettingsScreen,
   RecurringScreen,
@@ -139,7 +143,7 @@ import {
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
-import type { TransactionWithRelations } from '~/types';
+import type { CategoryType, TransactionWithRelations } from '~/types';
 import {
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
@@ -597,6 +601,28 @@ function MainShellScreen({
     [navigation],
   );
 
+  const openAccountEditor = useCallback(
+    (params?: { accountId?: string; presetGroupName?: string }) => {
+      navigation.navigate('AccountEditor', params);
+    },
+    [navigation],
+  );
+  const openPayCreditCard = useCallback(
+    (payAccountId: string) => {
+      navigation.navigate('PayCreditCard', { accountId: payAccountId });
+    },
+    [navigation],
+  );
+  const openAccountGroupEditor = useCallback(() => {
+    navigation.navigate('AccountGroupEditor');
+  }, [navigation]);
+  const openCategoryEditor = useCallback(
+    (params?: { categoryId?: string; parentId?: string; type?: CategoryType }) => {
+      navigation.navigate('CategoryEditor', params);
+    },
+    [navigation],
+  );
+
   const openBottomNavPrimaryAction = useCallback(() => {
     openAddTransaction();
   }, [openAddTransaction]);
@@ -876,7 +902,9 @@ function MainShellScreen({
                 onOpenTransaction={openTransactionEditor}
                 onOpenTransactionSplitBadge={openTransactionSplitBill}
                 onOpenSettings={openAccountSettings}
-                onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+                onOpenAccountEditor={openAccountEditor}
+                onOpenPayCreditCard={openPayCreditCard}
+                onOpenCreateGroup={openAccountGroupEditor}
                 onOpenNetAssetsInsight={() =>
                   openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
                 }
@@ -923,6 +951,10 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenItemEditor={openItemEditor}
+            onOpenAccountEditor={openAccountEditor}
+            onOpenPayCreditCard={openPayCreditCard}
+            onOpenCreateGroup={openAccountGroupEditor}
+            onOpenCategoryEditor={openCategoryEditor}
             onOpenProPaywall={() => openProPaywall('settings')}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
@@ -1132,7 +1164,9 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
       useNativeBackGesture
-      onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+      onOpenAccountEditor={(params) => navigation.navigate('AccountEditor', params)}
+      onOpenPayCreditCard={(accountId) => navigation.navigate('PayCreditCard', { accountId })}
+      onOpenCreateGroup={() => navigation.navigate('AccountGroupEditor')}
       onOpenAddTransaction={(accountId) =>
         navigation.push('AddTransactionDetailed', { initialAccountId: accountId })
       }
@@ -1157,6 +1191,38 @@ function ItemEditorRouteScreen({ route, navigation }: RootStackRouteProps<'ItemE
       itemId={route.params?.itemId}
       onClose={() => navigation.goBack()}
       onLimitReached={() => navigation.navigate('ProPaywall', { source: 'items' })}
+    />
+  );
+}
+
+function AccountEditorRouteScreen({ route, navigation }: RootStackRouteProps<'AccountEditor'>) {
+  return (
+    <AccountEditorScreen
+      accountId={route.params?.accountId}
+      presetGroupName={route.params?.presetGroupName}
+      onClose={() => navigation.goBack()}
+      onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+    />
+  );
+}
+
+function PayCreditCardRouteScreen({ route, navigation }: RootStackRouteProps<'PayCreditCard'>) {
+  return (
+    <PayCreditCardScreen accountId={route.params.accountId} onClose={() => navigation.goBack()} />
+  );
+}
+
+function AccountGroupEditorRouteScreen({ navigation }: RootStackRouteProps<'AccountGroupEditor'>) {
+  return <AccountGroupEditorScreen onClose={() => navigation.goBack()} />;
+}
+
+function CategoryEditorRouteScreen({ route, navigation }: RootStackRouteProps<'CategoryEditor'>) {
+  return (
+    <CategoryEditorScreen
+      categoryId={route.params?.categoryId}
+      parentId={route.params?.parentId}
+      type={route.params?.type}
+      onClose={() => navigation.goBack()}
     />
   );
 }
@@ -1249,7 +1315,9 @@ function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'Settin
       onBack={() => navigation.goBack()}
       managementOnly
       useNativeBackGesture
-      onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+      onOpenAccountEditor={(params) => navigation.navigate('AccountEditor', params)}
+      onOpenPayCreditCard={(accountId) => navigation.navigate('PayCreditCard', { accountId })}
+      onOpenCreateGroup={() => navigation.navigate('AccountGroupEditor')}
     />
   );
 }
@@ -1727,6 +1795,10 @@ function AppContent() {
           />
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
           <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
+          <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
+          <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
+          <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
+          <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
           <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
           <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
           <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />

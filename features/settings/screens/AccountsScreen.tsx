@@ -42,7 +42,6 @@ import {
   CategoryEmoji,
   CurrencyPickerSheet,
   Input,
-  PagePresentModal,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -441,7 +440,6 @@ function toBalanceInputValue(value: number) {
 }
 
 function AccountEditorSheet({
-  visible,
   account,
   presetGroupName = null,
   currentBalance,
@@ -452,7 +450,6 @@ function AccountEditorSheet({
   onDelete,
   onOpenMultiCurrency,
 }: {
-  visible: boolean;
   account: Account | null;
   presetGroupName?: string | null;
   currentBalance: number;
@@ -559,14 +556,7 @@ function AccountEditorSheet({
       setCreditDueDay('1');
       setCurrency(defaultCurrencyCode);
     }
-  }, [
-    account,
-    accountGroupIdByName,
-    currentBalance,
-    defaultCurrencyCode,
-    presetGroupName,
-    visible,
-  ]);
+  }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName]);
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
@@ -618,8 +608,8 @@ function AccountEditorSheet({
   };
 
   return (
-    <PagePresentModal visible={visible} onClose={onClose}>
-      <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={isEdit ? I18n.t('accounts.edit_account') : I18n.t('accounts.new_account')}
@@ -821,7 +811,7 @@ function AccountEditorSheet({
           </View>
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
-      </SafeAreaView>
+      </View>
       <AccountLogoPickerSheet
         visible={showLogoPicker}
         onClose={() => setShowLogoPicker(false)}
@@ -867,7 +857,180 @@ function AccountEditorSheet({
           ) : null
         }
       />
-    </PagePresentModal>
+    </SafeAreaView>
+  );
+}
+
+/** Full-page create/edit account editor (native-stack screen). */
+export function AccountEditorScreen({
+  accountId,
+  presetGroupName = null,
+  onClose,
+  onOpenMultiCurrency,
+}: {
+  accountId?: string;
+  presetGroupName?: string | null;
+  onClose: () => void;
+  onOpenMultiCurrency?: () => void;
+}) {
+  const {
+    accounts,
+    accountGroups,
+    settings,
+    currentMonthWage,
+    createAccount,
+    updateAccount,
+    deleteAccount,
+    changeAccountCurrency,
+    createTransaction,
+  } = useApp();
+  const { accountBalances } = useTransactions();
+
+  const account = accountId ? (accounts.find((a) => a.id === accountId) ?? null) : null;
+  const currentBalance = account
+    ? (accountBalances.find((b) => b.accountId === account.id)?.balance ?? account.startingBalance)
+    : 0;
+
+  const handleSave = useCallback(
+    (input: AccountEditorInput) => {
+      if (!account) {
+        createAccount({ ...input, currency: input.currency || DEFAULT_CURRENCY });
+        onClose();
+        return;
+      }
+
+      const accountUpdates = {
+        name: input.name,
+        accountGroup: input.accountGroup,
+        logoId: input.logoId,
+        creditStatementDay: input.creditStatementDay,
+        creditDueDay: input.creditDueDay,
+        includeInTotals: input.includeInTotals,
+        currency: input.currency,
+      };
+
+      // Currency change on an existing account re-denominates prior entries at
+      // the latest rate in a lump — warn, then run it as its own operation.
+      if (input.currency && input.currency !== account.currency) {
+        Alert.alert(
+          I18n.t('accounts.currency_change_title'),
+          I18n.t('accounts.currency_change_message', {
+            from: account.currency,
+            to: input.currency,
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.currency_change_action'),
+              style: 'destructive',
+              onPress: () => {
+                changeAccountCurrency(account.id, input.currency, {
+                  name: input.name,
+                  accountGroup: input.accountGroup,
+                  logoId: input.logoId,
+                  creditStatementDay: input.creditStatementDay,
+                  creditDueDay: input.creditDueDay,
+                  includeInTotals: input.includeInTotals,
+                });
+                onClose();
+              },
+            },
+          ],
+        );
+        return;
+      }
+
+      const delta = input.startingBalance - currentBalance;
+      const adjustmentAmount = Math.abs(delta);
+      const hasBalanceChange = adjustmentAmount > 0.000001;
+
+      if (!hasBalanceChange) {
+        updateAccount(account.id, accountUpdates);
+        onClose();
+        return;
+      }
+
+      const flowType = flowTypeForBalanceDelta(account.type, delta);
+      Alert.alert(
+        I18n.t('accounts.balance_adjustment_prompt_title'),
+        I18n.t('accounts.balance_adjustment_prompt_message', {
+          amount: formatAmount(adjustmentAmount, settings, {
+            showSign: false,
+            trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
+          }),
+        }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('accounts.record_as_difference'),
+            onPress: () => {
+              updateAccount(account.id, accountUpdates);
+              createTransaction({
+                type: 'balance_adjustment',
+                amount: delta,
+                currency: input.currency || account.currency,
+                date: new Date().toISOString(),
+                accountId: account.id,
+                fromAccountId: null,
+                toAccountId: null,
+                categoryId: null,
+                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
+              });
+              onClose();
+            },
+          },
+          {
+            text:
+              flowType === 'income'
+                ? I18n.t('accounts.record_as_income')
+                : I18n.t('accounts.record_as_expense'),
+            onPress: () => {
+              updateAccount(account.id, accountUpdates);
+              createTransaction({
+                type: flowType,
+                amount: adjustmentAmount,
+                currency: input.currency || account.currency,
+                date: new Date().toISOString(),
+                accountId: account.id,
+                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
+              });
+              onClose();
+            },
+          },
+        ],
+      );
+    },
+    [
+      account,
+      changeAccountCurrency,
+      createAccount,
+      createTransaction,
+      currentBalance,
+      currentMonthWage?.trueHourlyRate,
+      onClose,
+      settings,
+      updateAccount,
+    ],
+  );
+
+  const handleDelete = useCallback(() => {
+    if (!account) return;
+    deleteAccount(account.id);
+    onClose();
+  }, [account, deleteAccount, onClose]);
+
+  return (
+    <AccountEditorSheet
+      account={account}
+      presetGroupName={presetGroupName}
+      currentBalance={currentBalance}
+      defaultCurrencyCode={settings.currencyCode}
+      accountGroups={accountGroups}
+      onClose={onClose}
+      onSave={handleSave}
+      onDelete={account ? handleDelete : undefined}
+      onOpenMultiCurrency={onOpenMultiCurrency}
+    />
   );
 }
 
@@ -943,7 +1106,6 @@ function flowTypeForBalanceDelta(
 }
 
 function PayCreditCardSheet({
-  visible,
   onClose,
   onSubmit,
   fromAccounts,
@@ -951,7 +1113,6 @@ function PayCreditCardSheet({
   currencySymbol,
   defaultAmount = 0,
 }: {
-  visible: boolean;
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
   fromAccounts: Account[];
@@ -968,10 +1129,6 @@ function PayCreditCardSheet({
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
 
   useEffect(() => {
-    if (!visible) {
-      setAmount('');
-      return;
-    }
     if (defaultAmount > 0) setAmount(defaultAmount.toFixed(2));
     if (fromAccounts.length === 0) {
       setFromAccountId(null);
@@ -980,7 +1137,7 @@ function PayCreditCardSheet({
     if (!fromAccountId || !fromAccounts.some((account) => account.id === fromAccountId)) {
       setFromAccountId(fromAccounts[0].id);
     }
-  }, [defaultAmount, fromAccountId, fromAccounts, visible]);
+  }, [defaultAmount, fromAccountId, fromAccounts]);
 
   const handleSave = () => {
     if (!canSave || !fromAccountId) return;
@@ -989,8 +1146,8 @@ function PayCreditCardSheet({
   };
 
   return (
-    <PagePresentModal visible={visible} onClose={onClose}>
-      <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={I18n.t('accounts.pay_credit_card')}
@@ -1032,7 +1189,7 @@ function PayCreditCardSheet({
           </View>
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
-      </SafeAreaView>
+      </View>
       <AccountPickerSheet
         visible={showFromAccountPicker}
         onClose={() => setShowFromAccountPicker(false)}
@@ -1044,7 +1201,106 @@ function PayCreditCardSheet({
           setShowFromAccountPicker(false);
         }}
       />
-    </PagePresentModal>
+    </SafeAreaView>
+  );
+}
+
+/** Full-page pay-credit-card editor (native-stack screen). */
+export function PayCreditCardScreen({
+  accountId,
+  onClose,
+}: {
+  accountId: string;
+  onClose: () => void;
+}) {
+  const { accounts, accountGroups, settings, getTransactionsByAccount, createTransaction } =
+    useApp();
+  const { accountBalances } = useTransactions();
+
+  const account = accounts.find((a) => a.id === accountId) ?? null;
+
+  const fromAccounts = useMemo(
+    () => accounts.filter((a) => a.id !== accountId && a.type !== 'credit'),
+    [accounts, accountId],
+  );
+
+  const defaultAmount = useMemo(() => {
+    if (!account) return 0;
+    const balance =
+      accountBalances.find((b) => b.accountId === accountId)?.balance ?? account.startingBalance;
+    const txns = getTransactionsByAccount(accountId);
+    return computeCreditCycleSummary(account, txns, balance, new Date()).payable;
+  }, [account, accountId, accountBalances, getTransactionsByAccount]);
+
+  const handleSubmit = useCallback(
+    ({
+      fromAccountId,
+      amount,
+      note,
+    }: {
+      fromAccountId: string;
+      amount: number;
+      note: string | null;
+    }) => {
+      createTransaction({
+        type: 'transfer',
+        amount,
+        currency: accounts.find((a) => a.id === fromAccountId)?.currency ?? settings.currencyCode,
+        date: new Date().toISOString(),
+        fromAccountId,
+        toAccountId: accountId,
+        note,
+      });
+      onClose();
+    },
+    [accountId, accounts, createTransaction, onClose, settings.currencyCode],
+  );
+
+  return (
+    <PayCreditCardSheet
+      onClose={onClose}
+      fromAccounts={fromAccounts}
+      accountGroups={accountGroups}
+      currencySymbol={settings.currencySymbol}
+      defaultAmount={defaultAmount}
+      onSubmit={handleSubmit}
+    />
+  );
+}
+
+/** Full-page create-account-group editor (native-stack screen). */
+export function AccountGroupEditorScreen({ onClose }: { onClose: () => void }) {
+  const { createAccountGroup } = useApp();
+  const [name, setName] = useState('');
+  const canSave = name.trim().length > 0;
+  const handleSave = useCallback(() => {
+    const normalized = name.trim();
+    if (!normalized) return;
+    createAccountGroup(normalized);
+    onClose();
+  }, [createAccountGroup, name, onClose]);
+
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <SettingsHeader
+        className="px-5 pt-5 pb-2"
+        title={I18n.t('accounts.create_group')}
+        onBack={onClose}
+      />
+      <ScrollView
+        contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Input
+          label={I18n.t('accounts.group_name')}
+          value={name}
+          onChangeText={setName}
+          placeholder={I18n.t('accounts.create_group_placeholder')}
+        />
+      </ScrollView>
+      <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
+    </SafeAreaView>
   );
 }
 
@@ -1341,7 +1597,9 @@ interface AccountsScreenProps {
   onOpenTransactionSplitBadge?: (transaction: TransactionWithRelations) => void;
   onOpenSettings?: () => void;
   onOpenNetAssetsInsight?: () => void;
-  onOpenMultiCurrency?: () => void;
+  onOpenAccountEditor?: (params?: { accountId?: string; presetGroupName?: string }) => void;
+  onOpenPayCreditCard?: (accountId: string) => void;
+  onOpenCreateGroup?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
   /**
@@ -1367,7 +1625,9 @@ export function AccountsScreen({
   onOpenTransactionSplitBadge,
   onOpenSettings,
   onOpenNetAssetsInsight,
-  onOpenMultiCurrency,
+  onOpenAccountEditor,
+  onOpenPayCreditCard,
+  onOpenCreateGroup,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
   hideBalances,
@@ -1415,10 +1675,6 @@ export function AccountsScreen({
     accounts,
     settings,
     currentMonthWage,
-    createAccount,
-    createAccountGroup,
-    createTransaction,
-    deleteAccount,
     deleteAccountGroup,
     deleteTransactionsBulk,
     getDisplayValueForTransaction,
@@ -1427,8 +1683,6 @@ export function AccountsScreen({
     reorderAccounts,
     reorderAccountGroups,
     renameAccountGroup,
-    updateAccount,
-    changeAccountCurrency,
     updateTransactionsBulk,
   } = useApp();
   const { accountBalances: liveAccountBalances, transactions: liveTransactions } =
@@ -1444,19 +1698,11 @@ export function AccountsScreen({
   const [internalHideBalances, setInternalHideBalances] = useState(false);
   // Controlled when the host passes `hideBalances`; otherwise self-managed.
   const hideAccountBalances = hideBalances ?? internalHideBalances;
-  const [showCreate, setShowCreate] = useState(false);
-  // Group name pre-selected when adding an account via a group card's "+".
-  const [createAccountGroupName, setCreateAccountGroupName] = useState<string | null>(null);
-  const [showGroupComposer, setShowGroupComposer] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   // Track collapsed (not expanded) groups so cards stay expanded by default,
   // including newly created ones.
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(() => new Set());
-  const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
-  const [payCardAccountId, setPayCardAccountId] = useState<string | null>(null);
-  const [showEditAccount, setShowEditAccount] = useState(false);
   const [addTransactionAccountId, setAddTransactionAccountId] = useState<string | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRelations | null>(
     null,
@@ -1491,7 +1737,6 @@ export function AccountsScreen({
   }, [accountId, onBack]);
 
   const selectedAccount = activeAccountId ? (accountById.get(activeAccountId) ?? null) : null;
-  const editingAccount = editingAccountId ? (accountById.get(editingAccountId) ?? null) : null;
   const edgeSwipeBackHandler = useCallback(() => {
     if (addTransactionAccountId) {
       setAddTransactionAccountId(null);
@@ -1752,18 +1997,6 @@ export function AccountsScreen({
   }, [accountId, activeAccountId, onBack, selectedAccount]);
 
   useEffect(() => {
-    if (managementOnly) return;
-    if (selectedAccount) return;
-    setShowEditAccount(false);
-  }, [managementOnly, selectedAccount]);
-  useEffect(() => {
-    if (!managementOnly) return;
-    if (editingAccount) return;
-    setShowEditAccount(false);
-    setEditingAccountId(null);
-  }, [editingAccount, managementOnly]);
-
-  useEffect(() => {
     setSelectedTransaction(null);
     setSelectedTransactionIds([]);
     setShowBulkUpdate(false);
@@ -1803,14 +2036,8 @@ export function AccountsScreen({
   useEffect(() => {
     if (resetToRootToken <= 0) return;
     setSelectedAccountId(accountId ?? null);
-    setShowCreate(false);
-    setShowGroupComposer(false);
-    setNewGroupName('');
     setEditingGroupId(null);
     setEditingGroupName('');
-    setEditingAccountId(null);
-    setPayCardAccountId(null);
-    setShowEditAccount(false);
   }, [accountId, resetToRootToken]);
 
   useEffect(() => {
@@ -1974,26 +2201,12 @@ export function AccountsScreen({
     [buildReorderedAccountIds, reorderAccounts],
   );
 
-  const canCreateGroup = newGroupName.trim().length > 0;
   const startCreateGroup = useCallback(() => {
     setEditingGroupId(null);
     setEditingGroupName('');
-    setShowGroupComposer(true);
-  }, []);
-  const cancelCreateGroup = useCallback(() => {
-    setShowGroupComposer(false);
-    setNewGroupName('');
-  }, []);
-  const handleCreateGroup = useCallback(() => {
-    const normalized = newGroupName.trim();
-    if (!normalized) return;
-    createAccountGroup(normalized);
-    setNewGroupName('');
-    setShowGroupComposer(false);
-  }, [createAccountGroup, newGroupName]);
+    onOpenCreateGroup?.();
+  }, [onOpenCreateGroup]);
   const startEditGroup = useCallback((group: AccountGroup) => {
-    setShowGroupComposer(false);
-    setNewGroupName('');
     setEditingGroupId(group.id);
     setEditingGroupName(group.name);
   }, []);
@@ -2132,140 +2345,22 @@ export function AccountsScreen({
       ],
     );
   }, [deleteTransactionsBulk, selectedTransactionIds]);
-  const applyAccountSave = useCallback(
-    ({
-      account,
-      currentBalance,
-      updates,
-      onComplete,
-    }: {
-      account: Account;
-      currentBalance: number;
-      updates: AccountEditorInput;
-      onComplete: () => void;
-    }) => {
-      const accountUpdates = {
-        name: updates.name,
-        accountGroup: updates.accountGroup,
-        logoId: updates.logoId,
-        creditStatementDay: updates.creditStatementDay,
-        creditDueDay: updates.creditDueDay,
-        includeInTotals: updates.includeInTotals,
-        currency: updates.currency,
-      };
-
-      // Currency change on an existing account re-denominates prior entries at
-      // the latest rate in a lump — warn, then run it as its own operation.
-      if (updates.currency && updates.currency !== account.currency) {
-        Alert.alert(
-          I18n.t('accounts.currency_change_title'),
-          I18n.t('accounts.currency_change_message', {
-            from: account.currency,
-            to: updates.currency,
-          }),
-          [
-            { text: I18n.t('common.cancel'), style: 'cancel' },
-            {
-              text: I18n.t('accounts.currency_change_action'),
-              style: 'destructive',
-              onPress: () => {
-                changeAccountCurrency(account.id, updates.currency, {
-                  name: updates.name,
-                  accountGroup: updates.accountGroup,
-                  logoId: updates.logoId,
-                  creditStatementDay: updates.creditStatementDay,
-                  creditDueDay: updates.creditDueDay,
-                  includeInTotals: updates.includeInTotals,
-                });
-                onComplete();
-              },
-            },
-          ],
-        );
-        return;
-      }
-
-      const delta = updates.startingBalance - currentBalance;
-      const adjustmentAmount = Math.abs(delta);
-      const hasBalanceChange = adjustmentAmount > 0.000001;
-
-      if (!hasBalanceChange) {
-        updateAccount(account.id, accountUpdates);
-        onComplete();
-        return;
-      }
-
-      const flowType = flowTypeForBalanceDelta(account.type, delta);
-      Alert.alert(
-        I18n.t('accounts.balance_adjustment_prompt_title'),
-        I18n.t('accounts.balance_adjustment_prompt_message', {
-          amount: formatAmount(adjustmentAmount, settings, {
-            showSign: false,
-            trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
-          }),
-        }),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('accounts.record_as_difference'),
-            onPress: () => {
-              updateAccount(account.id, accountUpdates);
-              createTransaction({
-                type: 'balance_adjustment',
-                amount: delta,
-                currency: updates.currency || account.currency,
-                date: new Date().toISOString(),
-                accountId: account.id,
-                fromAccountId: null,
-                toAccountId: null,
-                categoryId: null,
-                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
-              });
-              onComplete();
-            },
-          },
-          {
-            text:
-              flowType === 'income'
-                ? I18n.t('accounts.record_as_income')
-                : I18n.t('accounts.record_as_expense'),
-            onPress: () => {
-              updateAccount(account.id, accountUpdates);
-              createTransaction({
-                type: flowType,
-                amount: adjustmentAmount,
-                currency: updates.currency || account.currency,
-                date: new Date().toISOString(),
-                accountId: account.id,
-                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
-              });
-              onComplete();
-            },
-          },
-        ],
-      );
+  const handleAccountManagementPress = useCallback(
+    (account: Account) => {
+      void triggerHaptic('selection');
+      onOpenAccountEditor?.({ accountId: account.id });
     },
-    [
-      changeAccountCurrency,
-      createTransaction,
-      currentMonthWage?.trueHourlyRate,
-      settings,
-      updateAccount,
-    ],
+    [onOpenAccountEditor],
   );
-  const handleAccountManagementPress = useCallback((account: Account) => {
-    void triggerHaptic('selection');
-    setEditingAccountId(account.id);
-    setShowEditAccount(true);
-  }, []);
   const handleAddAccountToGroup = useCallback(
     (card: GroupCard) => {
       if (!checkLimit('accounts', accounts.length)) return;
       void triggerHaptic('selection');
-      setCreateAccountGroupName(card.kind === 'ungrouped' ? null : card.label);
-      setShowCreate(true);
+      onOpenAccountEditor?.({
+        presetGroupName: card.kind === 'ungrouped' ? undefined : card.label,
+      });
     },
-    [accounts.length, checkLimit],
+    [accounts.length, checkLimit, onOpenAccountEditor],
   );
   const handleAddTransactionForAccount = useCallback(
     (targetAccountId: string) => {
@@ -2374,15 +2469,7 @@ export function AccountsScreen({
   if (!managementOnly && activeAccountId && selectedAccount) {
     const account = selectedAccount;
 
-    const balance = balanceMap.get(account.id) ?? account.startingBalance;
-    const txns = selectedAccountTransactions;
     const isCredit = account.type === 'credit';
-    const payFromAccounts = isCredit
-      ? accounts.filter((item) => item.id !== account.id && item.type !== 'credit')
-      : [];
-    const cyclePayable = isCredit
-      ? computeCreditCycleSummary(account, txns, balance, new Date()).payable
-      : 0;
     const creditTotalsSummaryNode = activePeriodCreditTotals ? (
       <>
         <View className="flex-1 rounded-[18px] border border-destructive/15 bg-destructive/6 px-3 py-2.5">
@@ -2433,7 +2520,7 @@ export function AccountsScreen({
                     variant="secondary"
                     className="h-8 px-3"
                     onPress={() => {
-                      setShowEditAccount(true);
+                      onOpenAccountEditor?.({ accountId: account.id });
                     }}
                   >
                     <Text>{I18n.t('accounts.edit_account')}</Text>
@@ -2540,7 +2627,7 @@ export function AccountsScreen({
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('medium');
-                      setPayCardAccountId(account.id);
+                      onOpenPayCreditCard?.(account.id);
                     }}
                     style={[styles.floatingAddButton, { backgroundColor: themeColors.accent }]}
                     accessibilityRole="button"
@@ -2566,49 +2653,6 @@ export function AccountsScreen({
             </View>
           ) : null}
         </View>
-        <AccountEditorSheet
-          visible={showEditAccount}
-          account={account}
-          currentBalance={balance}
-          defaultCurrencyCode={settings.currencyCode}
-          accountGroups={accountGroups}
-          onClose={() => setShowEditAccount(false)}
-          onSave={(updates) =>
-            applyAccountSave({
-              account,
-              currentBalance: balance,
-              updates,
-              onComplete: () => setShowEditAccount(false),
-            })
-          }
-          onDelete={() => {
-            deleteAccount(account.id);
-            setPayCardAccountId(null);
-            setShowEditAccount(false);
-            closeSelectedAccount();
-          }}
-          onOpenMultiCurrency={onOpenMultiCurrency}
-        />
-        <PayCreditCardSheet
-          visible={payCardAccountId === account.id}
-          onClose={() => setPayCardAccountId(null)}
-          fromAccounts={payFromAccounts}
-          accountGroups={accountGroups}
-          currencySymbol={settings.currencySymbol}
-          defaultAmount={cyclePayable}
-          onSubmit={({ fromAccountId, amount, note }) => {
-            createTransaction({
-              type: 'transfer',
-              amount,
-              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
-              date: new Date().toISOString(),
-              fromAccountId,
-              toAccountId: account.id,
-              note,
-            });
-            setPayCardAccountId(null);
-          }}
-        />
         <ThemeModal
           visible={showBulkUpdate}
           animationType="slide"
@@ -2856,127 +2900,16 @@ export function AccountsScreen({
             }}
             onEditAccount={(id) => {
               void triggerHaptic('selection');
-              setEditingAccountId(id);
-              setShowEditAccount(true);
+              onOpenAccountEditor?.({ accountId: id });
             }}
             onPayAccount={(id) => {
               void triggerHaptic('medium');
-              setPayCardAccountId(id);
+              onOpenPayCreditCard?.(id);
             }}
             onRenderBalanceNode={renderVisibleBalanceNode}
           />
         </>
       )}
-
-      {editingAccount ? (
-        <AccountEditorSheet
-          visible={showEditAccount}
-          account={editingAccount}
-          currentBalance={balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance}
-          defaultCurrencyCode={settings.currencyCode}
-          accountGroups={accountGroups}
-          onClose={() => {
-            setShowEditAccount(false);
-            setEditingAccountId(null);
-          }}
-          onSave={(updates) => {
-            applyAccountSave({
-              account: editingAccount,
-              currentBalance: balanceMap.get(editingAccount.id) ?? editingAccount.startingBalance,
-              updates,
-              onComplete: () => {
-                setShowEditAccount(false);
-                setEditingAccountId(null);
-              },
-            });
-          }}
-          onDelete={() => {
-            deleteAccount(editingAccount.id);
-            setShowEditAccount(false);
-            setEditingAccountId(null);
-          }}
-          onOpenMultiCurrency={onOpenMultiCurrency}
-        />
-      ) : null}
-
-      {payCardAccountId ? (
-        <PayCreditCardSheet
-          visible={!!payCardAccountId}
-          onClose={() => setPayCardAccountId(null)}
-          fromAccounts={accounts.filter((a) => a.id !== payCardAccountId && a.type !== 'credit')}
-          accountGroups={accountGroups}
-          currencySymbol={settings.currencySymbol}
-          defaultAmount={(() => {
-            const acc = accountById.get(payCardAccountId);
-            if (!acc) return 0;
-            const bal = balanceMap.get(payCardAccountId) ?? acc.startingBalance;
-            const txns = getTransactionsByAccount(payCardAccountId);
-            const { payable } = computeCreditCycleSummary(acc, txns, bal, new Date());
-            return payable;
-          })()}
-          onSubmit={({ fromAccountId, amount, note }) => {
-            createTransaction({
-              type: 'transfer',
-              amount,
-              currency: accountById.get(fromAccountId)?.currency ?? settings.currencyCode,
-              date: new Date().toISOString(),
-              fromAccountId,
-              toAccountId: payCardAccountId,
-              note,
-            });
-            setPayCardAccountId(null);
-          }}
-        />
-      ) : null}
-
-      <AccountEditorSheet
-        visible={showCreate}
-        account={null}
-        presetGroupName={createAccountGroupName}
-        currentBalance={0}
-        defaultCurrencyCode={settings.currencyCode}
-        accountGroups={accountGroups}
-        onClose={() => {
-          setShowCreate(false);
-          setCreateAccountGroupName(null);
-        }}
-        onSave={(input) => {
-          createAccount({
-            ...input,
-            currency: input.currency || DEFAULT_CURRENCY,
-          });
-          setShowCreate(false);
-          setCreateAccountGroupName(null);
-        }}
-        onOpenMultiCurrency={onOpenMultiCurrency}
-      />
-
-      <PagePresentModal visible={showGroupComposer} onClose={cancelCreateGroup}>
-        <SafeAreaView className="flex-1 bg-background">
-          <SettingsHeader
-            className="px-5 pt-5 pb-2"
-            title={I18n.t('accounts.create_group')}
-            onBack={cancelCreateGroup}
-          />
-          <ScrollView
-            contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Input
-              label={I18n.t('accounts.group_name')}
-              value={newGroupName}
-              onChangeText={setNewGroupName}
-              placeholder={I18n.t('accounts.create_group_placeholder')}
-            />
-          </ScrollView>
-          <SettingsActionBar
-            onCancel={cancelCreateGroup}
-            onSave={handleCreateGroup}
-            saveDisabled={!canCreateGroup}
-          />
-        </SafeAreaView>
-      </PagePresentModal>
     </SettingsPageLayout>,
   );
 }

@@ -5,6 +5,7 @@ import { useApp } from '~/context/AppContext';
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
+import type { CategoryType } from '~/types';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -39,6 +40,14 @@ interface SettingsStackProps {
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
   onOpenItemEditor: (itemId?: string) => void;
+  onOpenAccountEditor: (params?: { accountId?: string; presetGroupName?: string }) => void;
+  onOpenPayCreditCard: (accountId: string) => void;
+  onOpenCreateGroup: () => void;
+  onOpenCategoryEditor: (params?: {
+    categoryId?: string;
+    parentId?: string;
+    type?: CategoryType;
+  }) => void;
   onOpenProPaywall: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
@@ -134,6 +143,10 @@ export function SettingsStack({
   scrollToTopToken = 0,
   onOpenRecurringEditor,
   onOpenItemEditor,
+  onOpenAccountEditor,
+  onOpenPayCreditCard,
+  onOpenCreateGroup,
+  onOpenCategoryEditor,
   onOpenProPaywall,
   onScreenChange,
   onStartTutorial,
@@ -249,7 +262,9 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               managementOnly
               useNativeBackGesture
-              onOpenMultiCurrency={() => props.navigation.navigate('ExchangeRates')}
+              onOpenAccountEditor={onOpenAccountEditor}
+              onOpenPayCreditCard={onOpenPayCreditCard}
+              onOpenCreateGroup={onOpenCreateGroup}
             />
           );
         }}
@@ -265,7 +280,13 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="Categories">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <CategoriesScreen onBack={() => props.navigation.goBack()} useNativeBackGesture />;
+          return (
+            <CategoriesScreen
+              onBack={() => props.navigation.goBack()}
+              useNativeBackGesture
+              onOpenCategoryEditor={onOpenCategoryEditor}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="Recurring">

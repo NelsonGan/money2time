@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native-stack';
 
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
-import type { TransactionSentiment, TransactionType, WageConfig } from '~/types';
+import type { CategoryType, TransactionSentiment, TransactionType, WageConfig } from '~/types';
 
 export interface AddTransactionInitialValues {
   type?: TransactionType;
@@ -29,6 +29,10 @@ export type RootStackParamList = {
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   AccountDetail: { accountId: string };
+  AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
+  PayCreditCard: { accountId: string };
+  AccountGroupEditor: undefined;
+  CategoryEditor: { categoryId?: string; parentId?: string; type?: CategoryType } | undefined;
   InsightsDrilldown: InsightsDrilldownPayload;
   RecurringEditor: { ruleId?: string } | undefined;
   SettingsRecurring: undefined;

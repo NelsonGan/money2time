@@ -13,7 +13,6 @@ import {
   type CategoryPickerOption,
   CategoryPickerSheet,
   Input,
-  PagePresentModal,
   SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -180,7 +179,6 @@ function isCategoryType(value: string): value is CategoryType {
 const EMPTY_CHILD_MAP: Map<string, CategoryPickerOption[]> = new Map();
 
 function CategoryEditor({
-  visible,
   mode,
   topLevel,
   initial,
@@ -192,7 +190,6 @@ function CategoryEditor({
   onSubmit,
   onDelete,
 }: {
-  visible: boolean;
   mode: 'create' | 'edit';
   topLevel: Category[];
   initial?: Partial<Category>;
@@ -257,18 +254,6 @@ function CategoryEditor({
   };
 
   useEffect(() => {
-    if (!visible) return;
-    setName(initial?.name ?? '');
-    setIcon(initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]));
-    setParentId(initial?.parentId ?? null);
-    setIconManuallyPicked(mode === 'edit');
-    // Reset on open only. The modal always closes between edits, so we don't
-    // need to react to `initial` identity changes (parent passes a fresh
-    // object literal each render, which would otherwise wipe user input).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
-
-  useEffect(() => {
     if (iconManuallyPicked || parentId !== null) return;
     const timer = setTimeout(() => {
       const suggested = suggestCategoryEmoji(name);
@@ -323,8 +308,8 @@ function CategoryEditor({
   };
 
   return (
-    <PagePresentModal visible={visible} onClose={onClose}>
-      <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={
@@ -498,8 +483,95 @@ function CategoryEditor({
           selectedCategoryId={null}
           onSelect={confirmMoveAndDelete}
         />
-      </SafeAreaView>
-    </PagePresentModal>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+/** Full-page create/edit category editor (native-stack screen). */
+export function CategoryEditorScreen({
+  categoryId,
+  parentId,
+  type = 'expense',
+  onClose,
+}: {
+  categoryId?: string;
+  parentId?: string;
+  type?: CategoryType;
+  onClose: () => void;
+}) {
+  const { categories, createCategory, updateCategory, deleteCategory } = useApp();
+  const { transactions } = useTransactions();
+
+  const editing = categoryId ? (categories.find((c) => c.id === categoryId) ?? null) : null;
+  const mode: 'create' | 'edit' = editing ? 'edit' : 'create';
+  const effectiveType: CategoryType = editing?.type ?? type;
+
+  const { topLevel, childCountByParent } = useMemo(() => {
+    const nextTopLevel: Category[] = [];
+    const counts = new Map<string, number>();
+    categories.forEach((category) => {
+      if (category.type !== effectiveType) return;
+      if (!category.parentId) nextTopLevel.push(category);
+      else counts.set(category.parentId, (counts.get(category.parentId) ?? 0) + 1);
+    });
+    return { topLevel: nextTopLevel, childCountByParent: counts };
+  }, [categories, effectiveType]);
+
+  const editingDeleteInfo = useMemo(() => {
+    if (!editing) {
+      return { count: 0, parents: [] as CategoryPickerOption[], childByParent: EMPTY_CHILD_MAP };
+    }
+    const editingChildIds = new Set(
+      categories.filter((category) => category.parentId === editing.id).map((c) => c.id),
+    );
+    const count = transactions.filter((t) => t.categoryId === editing.id).length;
+    const parents: CategoryPickerOption[] = [];
+    const childByParent = new Map<string, CategoryPickerOption[]>();
+    categories.forEach((category) => {
+      if (category.type !== editing.type || category.id === editing.id) return;
+      const option = { id: category.id, name: category.name, icon: category.icon };
+      if (!category.parentId || editingChildIds.has(category.id)) {
+        parents.push(option);
+        return;
+      }
+      const existing = childByParent.get(category.parentId);
+      if (existing) existing.push(option);
+      else childByParent.set(category.parentId, [option]);
+    });
+    return { count, parents, childByParent };
+  }, [editing, categories, transactions]);
+
+  const initial =
+    editing ?? (parentId ? { parentId, type: effectiveType } : { type: effectiveType });
+
+  return (
+    <CategoryEditor
+      mode={mode}
+      topLevel={topLevel}
+      initial={initial}
+      disableParentSelect={!!editing && (childCountByParent.get(editing.id) ?? 0) > 0}
+      affectedCount={editingDeleteInfo.count}
+      reassignParents={editingDeleteInfo.parents}
+      reassignChildByParent={editingDeleteInfo.childByParent}
+      onClose={onClose}
+      onSubmit={(input) => {
+        if (editing) updateCategory(editing.id, input);
+        else createCategory({ ...input, type: effectiveType, isDefault: false });
+        onClose();
+      }}
+      onDelete={
+        editing
+          ? (reassignToCategoryId) => {
+              deleteCategory(
+                editing.id,
+                reassignToCategoryId ? { reassignToCategoryId } : undefined,
+              );
+              onClose();
+            }
+          : undefined
+      }
+    />
   );
 }
 
@@ -684,15 +756,19 @@ function ParentCard({
 interface CategoriesScreenProps {
   onBack?: () => void;
   useNativeBackGesture?: boolean;
+  onOpenCategoryEditor?: (params?: {
+    categoryId?: string;
+    parentId?: string;
+    type?: CategoryType;
+  }) => void;
 }
 
 export function CategoriesScreen({
   onBack,
   useNativeBackGesture = false,
+  onOpenCategoryEditor,
 }: CategoriesScreenProps = {}) {
-  const { categories, createCategory, updateCategory, deleteCategory, reorderCategories } =
-    useApp();
-  const { transactions } = useTransactions();
+  const { categories, reorderCategories } = useApp();
   const { checkLimit } = useProGate();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const themeColors = useThemeColors();
@@ -701,11 +777,6 @@ export function CategoriesScreen({
   const categoryCount = categories.length;
   const { contentWidth: windowWidth } = useDeviceLayout();
   const [type, setType] = useState<CategoryType>('expense');
-  // `createParentOpen` opens the editor for a new top-level category;
-  // `createChildForParentId` opens it for a new subcategory of that parent.
-  const [createParentOpen, setCreateParentOpen] = useState(false);
-  const [createChildForParentId, setCreateChildForParentId] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Category | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
   const rowWidth = Math.max(windowWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
@@ -797,37 +868,6 @@ export function CategoriesScreen({
     [categories, childrenByParent, topLevel, type],
   );
 
-  // Transactions tied directly to the category being edited (children keep their
-  // own and are promoted to top-level on delete) and the categories its direct
-  // transactions can move to — drives the delete prompt.
-  const editingDeleteInfo = useMemo(() => {
-    if (!editing) {
-      return { count: 0, parents: [] as CategoryPickerOption[], childByParent: EMPTY_CHILD_MAP };
-    }
-    const editingChildIds = new Set(
-      categories.filter((category) => category.parentId === editing.id).map((c) => c.id),
-    );
-    const count = transactions.filter((t) => t.categoryId === editing.id).length;
-
-    // Targets reflect the post-delete hierarchy: every category of this type
-    // except the one being deleted, with its children promoted to top-level.
-    const parents: CategoryPickerOption[] = [];
-    const childByParent = new Map<string, CategoryPickerOption[]>();
-    categories.forEach((category) => {
-      if (category.type !== editing.type || category.id === editing.id) return;
-      const option = { id: category.id, name: category.name, icon: category.icon };
-      // Top-level, or a child of the deleted parent (about to be promoted).
-      if (!category.parentId || editingChildIds.has(category.id)) {
-        parents.push(option);
-        return;
-      }
-      const existing = childByParent.get(category.parentId);
-      if (existing) existing.push(option);
-      else childByParent.set(category.parentId, [option]);
-    });
-    return { count, parents, childByParent };
-  }, [editing, categories, transactions]);
-
   const handleToggleExpand = useCallback((parentId: string) => {
     void triggerHaptic('selection');
     setExpandedIds((prev) => {
@@ -841,10 +881,13 @@ export function CategoriesScreen({
     });
   }, []);
 
-  const handleEdit = useCallback((item: Category) => {
-    void triggerHaptic('selection');
-    setEditing(item);
-  }, []);
+  const handleEdit = useCallback(
+    (item: Category) => {
+      void triggerHaptic('selection');
+      onOpenCategoryEditor?.({ categoryId: item.id });
+    },
+    [onOpenCategoryEditor],
+  );
 
   const handleAddChild = useCallback(
     (parentId: string) => {
@@ -856,9 +899,9 @@ export function CategoriesScreen({
         next.add(parentId);
         return next;
       });
-      setCreateChildForParentId(parentId);
+      onOpenCategoryEditor?.({ parentId, type });
     },
-    [categoryCount, checkLimit],
+    [categoryCount, checkLimit, onOpenCategoryEditor, type],
   );
 
   const handleReorderChildren = useCallback(
@@ -885,7 +928,7 @@ export function CategoriesScreen({
               onPress={() => {
                 if (!checkLimit('categories', categoryCount)) return;
                 void triggerHaptic('selection');
-                setCreateParentOpen(true);
+                onOpenCategoryEditor?.({ type });
               }}
             >
               <Plus size={18} color="#fff" />
@@ -952,50 +995,6 @@ export function CategoriesScreen({
           </Sortable.Flex>
         </Animated.ScrollView>
       </View>
-
-      <CategoryEditor
-        visible={createParentOpen}
-        mode="create"
-        topLevel={topLevel}
-        initial={{ type }}
-        onClose={() => setCreateParentOpen(false)}
-        onSubmit={(input) => {
-          createCategory({ ...input, type, isDefault: false });
-          setCreateParentOpen(false);
-        }}
-      />
-      <CategoryEditor
-        visible={!!createChildForParentId}
-        mode="create"
-        topLevel={topLevel}
-        initial={{ parentId: createChildForParentId, type }}
-        onClose={() => setCreateChildForParentId(null)}
-        onSubmit={(input) => {
-          createCategory({ ...input, type, isDefault: false });
-          setCreateChildForParentId(null);
-        }}
-      />
-      <CategoryEditor
-        visible={!!editing}
-        mode="edit"
-        topLevel={topLevel}
-        initial={editing ?? undefined}
-        disableParentSelect={!!editing && (childrenByParent.get(editing.id)?.length ?? 0) > 0}
-        affectedCount={editingDeleteInfo.count}
-        reassignParents={editingDeleteInfo.parents}
-        reassignChildByParent={editingDeleteInfo.childByParent}
-        onClose={() => setEditing(null)}
-        onSubmit={(input) => {
-          if (!editing) return;
-          updateCategory(editing.id, input);
-          setEditing(null);
-        }}
-        onDelete={(reassignToCategoryId) => {
-          if (!editing) return;
-          deleteCategory(editing.id, reassignToCategoryId ? { reassignToCategoryId } : undefined);
-          setEditing(null);
-        }}
-      />
     </SettingsPageLayout>
   );
   if (useNativeBackGesture) return content;
