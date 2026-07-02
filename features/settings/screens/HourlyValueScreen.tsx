@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -11,16 +11,15 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
-  ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import {
-  HourlyValueTimeline,
-  type HourlyTimelineRow,
-} from '~/features/settings/components/HourlyValueTimeline';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import {
+  type HourlyTimelineRow,
+  HourlyValueTimeline,
+} from '~/features/settings/components/HourlyValueTimeline';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -31,6 +30,7 @@ import { monthKeyFromDateLocal, normalizeMonthKey } from '~/utils/formatters';
 interface HourlyValueScreenProps {
   onClose: () => void;
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
+  onOpenAddWageMonth: () => void;
 }
 
 type DisplayPeriod = 'hourly' | 'weekly' | 'monthly' | 'yearly';
@@ -82,22 +82,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xl * 2,
   },
-  addSheetHeader: {
-    paddingHorizontal: spacing.screenHorizontal,
-    paddingTop: spacing.xl + spacing.xs,
-    paddingBottom: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  addSheetCancelButton: {
-    minHeight: 44,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-  },
   addSheetContent: {
     paddingHorizontal: spacing.screenHorizontal,
+    paddingTop: spacing.md,
     gap: spacing.sm,
   },
   addSheetPickerRow: {
@@ -155,22 +142,20 @@ function formatMonthLabel(monthKey: string, locale: string) {
   });
 }
 
-export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValueScreenProps) {
+export function HourlyValueScreen({
+  onClose,
+  onOpenWageCalculator,
+  onOpenAddWageMonth,
+}: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
-  const [showAddModal, setShowAddModal] = useState(false);
   const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('hourly');
-  const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
-  const [pickerMonth, setPickerMonth] = useState(() =>
-    String(new Date().getMonth() + 1).padStart(2, '0'),
-  );
 
   const currentMonthKey = useMemo(() => monthKeyFromDateLocal(new Date()), []);
-  const monthOptions = useMemo(() => buildMonthOptions(activeLocale), [activeLocale]);
 
   const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
 
@@ -209,15 +194,6 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     ],
     [],
   );
-
-  const yearOptions = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const fromRange = Array.from({ length: 9 }, (_, i) => String(currentYear - 5 + i));
-    const fromData = Array.from(new Set(normalizedHistory.map((item) => item.month.slice(0, 4))));
-    return Array.from(new Set([...fromRange, ...fromData, pickerYear])).sort(
-      (a, b) => Number(b) - Number(a),
-    );
-  }, [normalizedHistory, pickerYear]);
 
   const handleEditEntry = useCallback(
     (item: MonthlyWageSettings) => {
@@ -260,39 +236,6 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
     [activeLocale, deleteWageConfigForMonth],
   );
 
-  const handleAddConfirm = useCallback(() => {
-    const monthKey = normalizeMonthKey(`${pickerYear}-${pickerMonth}`);
-    const existing = normalizedHistory.find((item) => item.month === monthKey);
-    if (existing) {
-      Alert.alert(
-        I18n.t('settings.hourly_month_exists_title', {
-          month: formatMonthLabel(monthKey, activeLocale),
-        }),
-        I18n.t('settings.hourly_month_exists_message'),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('common.edit'),
-            onPress: () => {
-              setShowAddModal(false);
-              handleEditEntry(existing);
-            },
-          },
-        ],
-      );
-      return;
-    }
-    setShowAddModal(false);
-    onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
-  }, [
-    activeLocale,
-    handleEditEntry,
-    normalizedHistory,
-    onOpenWageCalculator,
-    pickerMonth,
-    pickerYear,
-  ]);
-
   return (
     <SettingsPageLayout>
       <View style={styles.headerContainer}>
@@ -308,7 +251,7 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
               onPress={() => {
                 if (!checkLimit('wage_entries', monthlyWages.length)) return;
                 void triggerHaptic('selection');
-                setShowAddModal(true);
+                onOpenAddWageMonth();
               }}
             >
               <Plus size={18} color="#fff" />
@@ -356,59 +299,101 @@ export function HourlyValueScreen({ onClose, onOpenWageCalculator }: HourlyValue
           </View>
         )}
       </ScrollView>
-
-      <ThemeModal
-        visible={showAddModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View style={styles.addSheetHeader}>
-            <Text variant="subheading">{I18n.t('settings.hourly_add_title')}</Text>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setShowAddModal(false);
-              }}
-              className="bg-secondary"
-              style={styles.addSheetCancelButton}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.cancel')}
-            >
-              <Text variant="caption" tone="muted">
-                {I18n.t('common.cancel')}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.addSheetContent}>
-            <View style={styles.addSheetPickerRow}>
-              <View className="flex-1">
-                <SelectField
-                  label={I18n.t('settings.year')}
-                  value={pickerYear}
-                  onChange={setPickerYear}
-                  options={yearOptions.map((year) => ({ value: year, label: year }))}
-                />
-              </View>
-              <View className="flex-1">
-                <SelectField
-                  label={I18n.t('settings.month')}
-                  value={pickerMonth}
-                  onChange={setPickerMonth}
-                  options={monthOptions}
-                />
-              </View>
-            </View>
-            <View style={styles.addSheetConfirmRow}>
-              <Button onPress={handleAddConfirm}>
-                <Text>{I18n.t('settings.hourly_add_confirm')}</Text>
-              </Button>
-            </View>
-          </View>
-        </SafeAreaView>
-      </ThemeModal>
     </SettingsPageLayout>
+  );
+}
+
+/** Full-page "add a wage month" picker (native-stack screen). */
+export function AddWageMonthScreen({
+  onClose,
+  onOpenWageCalculator,
+}: {
+  onClose: () => void;
+  onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
+}) {
+  const { settings, monthlyWages } = useApp();
+  const activeLocale = settings.locale ?? I18n.locale ?? 'en';
+
+  const [pickerYear, setPickerYear] = useState(() => String(new Date().getFullYear()));
+  const [pickerMonth, setPickerMonth] = useState(() =>
+    String(new Date().getMonth() + 1).padStart(2, '0'),
+  );
+
+  const monthOptions = useMemo(() => buildMonthOptions(activeLocale), [activeLocale]);
+  const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const fromRange = Array.from({ length: 9 }, (_, i) => String(currentYear - 5 + i));
+    const fromData = Array.from(new Set(normalizedHistory.map((item) => item.month.slice(0, 4))));
+    return Array.from(new Set([...fromRange, ...fromData, pickerYear])).sort(
+      (a, b) => Number(b) - Number(a),
+    );
+  }, [normalizedHistory, pickerYear]);
+
+  const handleAddConfirm = useCallback(() => {
+    const monthKey = normalizeMonthKey(`${pickerYear}-${pickerMonth}`);
+    const existing = normalizedHistory.find((item) => item.month === monthKey);
+    if (existing) {
+      Alert.alert(
+        I18n.t('settings.hourly_month_exists_title', {
+          month: formatMonthLabel(monthKey, activeLocale),
+        }),
+        I18n.t('settings.hourly_month_exists_message'),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.edit'),
+            onPress: () =>
+              onOpenWageCalculator({
+                monthKey: existing.month,
+                initialConfig: {
+                  wageType: existing.wageType,
+                  wageAmount: existing.wageAmount,
+                  hoursWorkedPerWeek: existing.hoursWorkedPerWeek,
+                  workdaysPerWeek: existing.workdaysPerWeek,
+                  commuteMinutesPerWorkday: existing.commuteMinutesPerWorkday,
+                },
+              }),
+          },
+        ],
+      );
+      return;
+    }
+    onOpenWageCalculator({ monthKey, initialConfig: DEFAULT_WAGE_CONFIG });
+  }, [activeLocale, normalizedHistory, onOpenWageCalculator, pickerMonth, pickerYear]);
+
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <SettingsHeader
+        className="px-5 pt-5 pb-2"
+        title={I18n.t('settings.hourly_add_title')}
+        onBack={onClose}
+      />
+      <View style={styles.addSheetContent}>
+        <View style={styles.addSheetPickerRow}>
+          <View className="flex-1">
+            <SelectField
+              label={I18n.t('settings.year')}
+              value={pickerYear}
+              onChange={setPickerYear}
+              options={yearOptions.map((year) => ({ value: year, label: year }))}
+            />
+          </View>
+          <View className="flex-1">
+            <SelectField
+              label={I18n.t('settings.month')}
+              value={pickerMonth}
+              onChange={setPickerMonth}
+              options={monthOptions}
+            />
+          </View>
+        </View>
+        <View style={styles.addSheetConfirmRow}>
+          <Button onPress={handleAddConfirm}>
+            <Text>{I18n.t('settings.hourly_add_confirm')}</Text>
+          </Button>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
