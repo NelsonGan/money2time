@@ -1,7 +1,15 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Camera, ChevronLeft, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import {
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
+  Pencil,
+  Plus,
+  Trash2,
+} from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
@@ -81,10 +89,19 @@ export function AlbumDetailScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const pagerRef = useRef<ScrollView | null>(null);
+  const outerScrollRef = useRef<ScrollView | null>(null);
+  // Whether the cover hero is scrolled off-screen (content snapped to the top).
+  // Drives the tab-bar toggle arrow's direction and action.
+  const [coverCollapsed, setCoverCollapsed] = useState(false);
   // Page width drives both the pager layout and the tap→scroll math. Seeded with
   // the window width and corrected once the pager measures itself (tablets render
   // narrower than the full window inside TabletContentContainer).
   const [pageWidth, setPageWidth] = useState(windowWidth);
+
+  // Cover occupies ~30% of the screen; the content below fills the rest. Computed
+  // here (not just at render) so the scroll callbacks can snap to these offsets.
+  const coverHeight = Math.round(windowHeight * 0.3);
+  const contentHeight = Math.max(260, windowHeight - insets.top - TOP_BAR_HEIGHT - TAB_BAR_HEIGHT);
 
   const album = albums.find((a) => a.id === albumId);
   // `albums` is included so membership/stat edits (which trigger a full reload)
@@ -314,6 +331,24 @@ export function AlbumDetailScreen({
     );
   }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds]);
 
+  // Track whether the cover hero has scrolled away so the toggle arrow can flip
+  // direction. Only flips state when crossing the halfway point to avoid churn.
+  const handleOuterScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const collapsed = e.nativeEvent.contentOffset.y >= coverHeight / 2;
+      setCoverCollapsed((prev) => (prev === collapsed ? prev : collapsed));
+    },
+    [coverHeight],
+  );
+
+  // Tab-bar arrow: snap the outer scroll between the cover photo (top) and the
+  // content. Gives a reliable control when the breakdown page is too short to
+  // hand its scroll gesture off to the outer snapping ScrollView.
+  const toggleCover = useCallback(() => {
+    void triggerHaptic('selection');
+    outerScrollRef.current?.scrollTo({ y: coverCollapsed ? 0 : coverHeight, animated: true });
+  }, [coverCollapsed, coverHeight]);
+
   // Tap a tab → animate the pager to that page (swipe is handled by the pager).
   const selectTab = useCallback(
     (value: DetailTab) => {
@@ -353,42 +388,56 @@ export function AlbumDetailScreen({
     return <View className="flex-1 bg-background" />;
   }
 
-  const coverHeight = Math.round(windowHeight * 0.3);
-  const contentHeight = Math.max(260, windowHeight - insets.top - TOP_BAR_HEIGHT - TAB_BAR_HEIGHT);
-
   const tabsBar = (
     <View
-      className="flex-row border-b border-border/30 bg-background px-5"
+      className="flex-row items-center justify-between border-b border-border/30 bg-background px-5"
       style={{ height: TAB_BAR_HEIGHT }}
     >
-      {(
-        [
-          { value: 'breakdown', label: I18n.t('albums.tab_breakdown') },
-          { value: 'transactions', label: I18n.t('albums.tab_transactions') },
-        ] as const
-      ).map((option) => {
-        const active = tab === option.value;
-        return (
-          <Pressable
-            key={option.value}
-            onPress={() => selectTab(option.value)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
-            className="mr-6 justify-center"
-          >
-            <Text
-              variant="bodyStrong"
-              className={cn(active ? 'text-primary' : 'text-muted-foreground')}
+      <View className="flex-row self-stretch">
+        {(
+          [
+            { value: 'breakdown', label: I18n.t('albums.tab_breakdown') },
+            { value: 'transactions', label: I18n.t('albums.tab_transactions') },
+          ] as const
+        ).map((option) => {
+          const active = tab === option.value;
+          return (
+            <Pressable
+              key={option.value}
+              onPress={() => selectTab(option.value)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              className="mr-6 justify-center"
             >
-              {option.label}
-            </Text>
-            <View
-              className="mt-1.5 h-0.5 rounded-full"
-              style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-            />
-          </Pressable>
-        );
-      })}
+              <Text
+                variant="bodyStrong"
+                className={cn(active ? 'text-primary' : 'text-muted-foreground')}
+              >
+                {option.label}
+              </Text>
+              <View
+                className="mt-1.5 h-0.5 rounded-full"
+                style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
+      <Pressable
+        onPress={toggleCover}
+        accessibilityRole="button"
+        accessibilityLabel={
+          coverCollapsed ? I18n.t('albums.show_cover') : I18n.t('albums.show_details')
+        }
+        hitSlop={8}
+        className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40"
+      >
+        {coverCollapsed ? (
+          <ChevronUp size={18} color={themeColors.textMuted} />
+        ) : (
+          <ChevronDown size={18} color={themeColors.textMuted} />
+        )}
+      </Pressable>
     </View>
   );
 
@@ -442,11 +491,14 @@ export function AlbumDetailScreen({
         </View>
 
         <ScrollView
+          ref={outerScrollRef}
           showsVerticalScrollIndicator={false}
           stickyHeaderIndices={[1]}
           snapToOffsets={[coverHeight]}
           decelerationRate="fast"
           nestedScrollEnabled
+          onScroll={handleOuterScroll}
+          scrollEventThrottle={16}
         >
           {/* Cover hero */}
           <View style={{ height: coverHeight }} className="bg-secondary/40">
