@@ -30,6 +30,13 @@ type KeyValue = string;
 
 interface NumpadPanelProps {
   initialExpression: string;
+  /**
+   * Bump to clear the pad in place (used by bulk create between saves). An
+   * explicit signal because the pad deliberately ignores an emptied
+   * `initialExpression` while it holds a value — and cheaper than a `key`
+   * remount, which would rebuild every animated key inside the Save handler.
+   */
+  resetNonce?: number;
   onValueChange: (expression: string) => void;
   onConfirm: (formatted: string) => void;
   onBackgroundPress?: () => void;
@@ -135,6 +142,7 @@ const NumpadKey = React.memo(function NumpadKey({
 
 export function NumpadPanel({
   initialExpression,
+  resetNonce,
   onValueChange,
   onConfirm,
   onBackgroundPress,
@@ -162,6 +170,15 @@ export function NumpadPanel({
     setExpression(sanitized);
     pristineRef.current = sanitized.length > 0;
   }, [initialExpression]);
+
+  const prevResetNonceRef = useRef(resetNonce);
+  useEffect(() => {
+    if (resetNonce === prevResetNonceRef.current) return;
+    prevResetNonceRef.current = resetNonce;
+    expressionRef.current = '';
+    pristineRef.current = false;
+    setExpression('');
+  }, [resetNonce]);
 
   const handleKeyPress = useCallback(
     (key: KeyValue) => {

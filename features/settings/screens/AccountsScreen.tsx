@@ -50,6 +50,7 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import {
@@ -1403,7 +1404,13 @@ export function AccountsScreen({
     changeAccountCurrency,
     updateTransactionsBulk,
   } = useApp();
-  const { accountBalances } = useTransactions();
+  const { accountBalances: liveAccountBalances, transactions: liveTransactions } =
+    useTransactions();
+  // While the accounts tab is hidden (tabs stay mounted), hold the last-seen
+  // snapshots so every transaction write doesn't recompute balances/credit
+  // summaries in the background; they catch up once when re-activated.
+  const accountBalances = useValueWhileTabVisible(liveAccountBalances);
+  const transactions = useValueWhileTabVisible(liveTransactions);
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
@@ -1492,7 +1499,10 @@ export function AccountsScreen({
   );
   const selectedAccountTransactions = useMemo(
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
-    [activeAccountId, getTransactionsByAccount],
+    // getTransactionsByAccount is identity-stable; `transactions` is the dep
+    // that signals the underlying data changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeAccountId, getTransactionsByAccount, transactions],
   );
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const pagerPageWidth = Math.max(1, windowWidth);
@@ -1847,7 +1857,10 @@ export function AccountsScreen({
       next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
     });
     return next;
-  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly]);
+    // getTransactionsByAccount is identity-stable; `transactions` is the dep
+    // that signals the underlying data changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
   const { accountGroupSections, groupCards, staticCards } = useMemo(() => {
     const knownNames = new Set<string>();
     accountGroups.forEach((group) => {
