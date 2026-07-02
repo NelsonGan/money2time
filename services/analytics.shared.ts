@@ -126,6 +126,35 @@ export const AnalyticsEvents = {
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
 
 // ---------------------------------------------------------------------------
+// Per-event tracking options
+// ---------------------------------------------------------------------------
+
+export interface TrackEventOptions {
+  /**
+   * Fraction of calls to actually send to Mixpanel, between 0 and 1.
+   *
+   * Omit (or pass `1`) to always send. When set below 1, each call is sent
+   * with that probability and a `sample_rate` property is attached to the
+   * event, so true volume can be reconstructed in reporting by scaling the
+   * count by `1 / sample_rate` (e.g. a 0.1 sample → multiply by 10).
+   *
+   * Use this to keep high-frequency, low-signal events within the Mixpanel
+   * monthly event quota without dropping the event type entirely (which would
+   * break existing dashboards). Pass it per call:
+   *
+   *   trackEvent(AnalyticsEvents.TRANSACTION_CREATED, props, { sampleRate: 0.1 })
+   */
+  sampleRate?: number;
+}
+
+/**
+ * Sample rate for the highest-volume, lowest-signal-per-event actions.
+ * Transaction create/update fire on every logged transaction; at scale they
+ * dominate the event quota, so we send 10% and scale ×10 in reporting.
+ */
+export const TRANSACTION_EVENT_SAMPLE_RATE = 0.1;
+
+// ---------------------------------------------------------------------------
 // Super-property keys set once per session / user
 // ---------------------------------------------------------------------------
 
