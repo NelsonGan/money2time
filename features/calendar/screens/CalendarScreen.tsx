@@ -32,6 +32,7 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import {
   ActivitySearchRow,
   ActivityTransactionList,
@@ -213,7 +214,11 @@ export function CalendarScreen({
   onSelectionModeChange,
   onShowTodayButtonChange,
 }: CalendarScreenProps) {
-  const { transactions } = useTransactions();
+  const { transactions: liveTransactions } = useTransactions();
+  // While the calendar tab is hidden (it stays mounted behind the other tabs),
+  // hold the last-seen snapshot so writes made elsewhere don't re-derive the
+  // month groupings on every change; it catches up once when re-activated.
+  const transactions = useValueWhileTabVisible(liveTransactions);
   const {
     settings,
     isLoading,

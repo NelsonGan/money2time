@@ -773,6 +773,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([]);
+  // Render-synced mirror of `transactions`. Mutation callbacks read it instead
+  // of closing over the state value so their identities stay stable across
+  // transaction churn — otherwise every write rebuilds the useApp() value and
+  // re-renders every consumer, defeating the two-context split.
+  const transactionsRef = useRef<TransactionWithRelations[]>(transactions);
+  transactionsRef.current = transactions;
   // Balance aggregates read from SQLite. Kept in state (refreshed after each
   // write) instead of queried inside a render-time memo — the synchronous
   // aggregate query was blocking every render triggered by a transactions
@@ -1003,6 +1009,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Scoped refetchers. Mutations that touch one or two tables refresh just that
+  // slice of state instead of funnelling through refreshAll() — which re-reads
+  // every table (including the full transactions join), re-runs recurring
+  // rules, and replaces every row identity, re-rendering all consumers. Far too
+  // heavy for a settings toggle or an account reorder. refreshAll() stays the
+  // funnel for restores/resets/imports/mode switches and recurring-rule edits
+  // (those rely on its runDueTransactions pass to materialize due entries).
+  const refreshAccountsAndGroups = useCallback(
+    (options?: { withBalances?: boolean }) => {
+      // Account edits can imply a group (accounts carry a group name), so
+      // materialize any missing groups before re-reading.
+      accountGroupsRepository.ensureFromActiveAccounts();
+      setAccounts(accountsRepository.list());
+      setAccountGroups(accountGroupsRepository.list());
+      if (options?.withBalances !== false) refreshAccountBalances();
+    },
+    [refreshAccountBalances],
+  );
+
+  const refreshCategories = useCallback(() => {
+    setCategories(categoriesRepository.list());
+  }, []);
+
+  const refreshAlbums = useCallback(() => {
+    setAlbums(albumsRepository.list());
+  }, []);
+
+  const refreshWages = useCallback(() => {
+    const allWages = monthlyWageRepository.list();
+    const currentMonthKey = monthKeyFromDateLocal(new Date());
+    setMonthlyWages(allWages);
+    setCurrentMonthWage(
+      allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
+        allWages[0] ??
+        null,
+    );
+  }, []);
+
   // When several mutations land in the same JS turn (e.g. a Save flush that
   // calls markSplitPaid + updateTransaction + updateTransactionSplits), each
   // one would otherwise trigger its own full transactions re-fetch + re-render.
@@ -1061,16 +1105,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const runMutation = useCallback(
-    <T,>(
-      operation: () => T,
-      fallbackMessage: string = I18n.t('errors.generic_operation_failed'),
-    ): T => {
+    <T,>(operation: () => T, options?: { fallbackMessage?: string; refresh?: () => void }): T => {
       try {
         const result = operation();
-        refreshAll();
+        (options?.refresh ?? refreshAll)();
         return result;
       } catch (error) {
-        throw toError(error, fallbackMessage);
+        throw toError(error, options?.fallbackMessage ?? I18n.t('errors.generic_operation_failed'));
       }
     },
     [refreshAll],
@@ -1078,20 +1119,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createAccount = useCallback(
     (input: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-      const id = runMutation(() => accountsRepository.create(input));
+      const id = runMutation(() => accountsRepository.create(input), {
+        refresh: refreshAccountsAndGroups,
+      });
       void trackEvent(AnalyticsEvents.ACCOUNT_CREATED, { type: input.type });
       return id;
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const updateAccount = useCallback(
     (id: string, input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>) => {
-      runMutation(() => {
-        accountsRepository.update(id, input);
-      });
+      runMutation(
+        () => {
+          accountsRepository.update(id, input);
+        },
+        {
+          refresh: () => {
+            refreshAccountsAndGroups();
+            // A rename changes the denormalized account names on loaded rows.
+            if ('name' in input) refreshTransactions();
+          },
+        },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, refreshTransactions, runMutation],
   );
 
   // Change an existing account's currency, re-denominating its starting balance
@@ -1115,71 +1167,102 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const reporting = reportingCurrencyRef.current;
       const freshTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
       const rate = resolveRate(acct.currency, toCurrency, freshTable) ?? 1;
-      runMutation(() => {
-        accountsRepository.update(accountId, {
-          ...otherUpdates,
-          currency: toCurrency,
-          startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
-        });
-        transactionsRepository.redenominateAccount(accountId, toCurrency, rate);
-      });
+      runMutation(
+        () => {
+          accountsRepository.update(accountId, {
+            ...otherUpdates,
+            currency: toCurrency,
+            startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
+          });
+          transactionsRepository.redenominateAccount(accountId, toCurrency, rate);
+        },
+        {
+          refresh: () => {
+            refreshAccountsAndGroups();
+            refreshTransactions();
+          },
+        },
+      );
     },
-    [accounts, runMutation, updateAccount],
+    [accounts, refreshAccountsAndGroups, refreshTransactions, runMutation, updateAccount],
   );
 
   const deleteAccount = useCallback(
     (id: string) => {
-      runMutation(() => {
-        accountsRepository.softDelete(id);
-      });
+      runMutation(
+        () => {
+          accountsRepository.softDelete(id);
+        },
+        {
+          refresh: () => {
+            refreshAccountsAndGroups();
+            refreshTransactions();
+          },
+        },
+      );
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
-    [runMutation],
+    [refreshAccountsAndGroups, refreshTransactions, runMutation],
   );
 
   const reorderAccounts = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        accountsRepository.reorder(ids);
-      });
+      runMutation(
+        () => {
+          accountsRepository.reorder(ids);
+        },
+        { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const createAccountGroup = useCallback(
     (name: string) => {
-      runMutation(() => {
-        accountGroupsRepository.create(name);
-      });
+      runMutation(
+        () => {
+          accountGroupsRepository.create(name);
+        },
+        { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const renameAccountGroup = useCallback(
     (id: string, name: string) => {
-      runMutation(() => {
-        accountGroupsRepository.rename(id, name);
-      });
+      runMutation(
+        () => {
+          accountGroupsRepository.rename(id, name);
+        },
+        { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const deleteAccountGroup = useCallback(
     (id: string) => {
-      runMutation(() => {
-        accountGroupsRepository.softDelete(id);
-      });
+      runMutation(
+        () => {
+          accountGroupsRepository.softDelete(id);
+        },
+        { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const reorderAccountGroups = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        accountGroupsRepository.reorder(ids);
-      });
+      runMutation(
+        () => {
+          accountGroupsRepository.reorder(ids);
+        },
+        { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+      );
     },
-    [runMutation],
+    [refreshAccountsAndGroups, runMutation],
   );
 
   const createRecurringRule = useCallback(
@@ -1217,12 +1300,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createCategory = useCallback(
     (input: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-      runMutation(() => {
-        categoriesRepository.create(input);
-      });
+      runMutation(
+        () => {
+          categoriesRepository.create(input);
+        },
+        { refresh: refreshCategories },
+      );
       void trackEvent(AnalyticsEvents.CATEGORY_CREATED, { type: input.type });
     },
-    [runMutation],
+    [refreshCategories, runMutation],
   );
 
   const updateCategory = useCallback(
@@ -1230,37 +1316,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: string,
       updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
     ) => {
-      runMutation(() => {
-        categoriesRepository.update(id, updates);
-      });
+      runMutation(
+        () => {
+          categoriesRepository.update(id, updates);
+        },
+        {
+          // Name/icon/parent edits change the denormalized category fields on
+          // loaded transaction rows.
+          refresh: () => {
+            refreshCategories();
+            refreshTransactions();
+          },
+        },
+      );
     },
-    [runMutation],
+    [refreshCategories, refreshTransactions, runMutation],
   );
 
   const deleteCategory = useCallback(
     (id: string, options?: { reassignToCategoryId?: string }) => {
-      runMutation(() => {
-        if (options?.reassignToCategoryId) {
-          // Only move transactions tied directly to this category. Children are
-          // promoted to top-level (not deleted), so they keep their own.
-          transactionsRepository.reassignCategory([id], options.reassignToCategoryId);
-        }
-        categoriesRepository.softDelete(id);
-      });
+      runMutation(
+        () => {
+          if (options?.reassignToCategoryId) {
+            // Only move transactions tied directly to this category. Children are
+            // promoted to top-level (not deleted), so they keep their own.
+            transactionsRepository.reassignCategory([id], options.reassignToCategoryId);
+          }
+          categoriesRepository.softDelete(id);
+        },
+        {
+          refresh: () => {
+            refreshCategories();
+            refreshTransactions();
+          },
+        },
+      );
       void trackEvent(AnalyticsEvents.CATEGORY_DELETED, {
         reassigned: Boolean(options?.reassignToCategoryId),
       });
     },
-    [runMutation],
+    [refreshCategories, refreshTransactions, runMutation],
   );
 
   const reorderCategories = useCallback(
     (ids: string[]) => {
-      runMutation(() => {
-        categoriesRepository.reorder(ids);
-      });
+      runMutation(
+        () => {
+          categoriesRepository.reorder(ids);
+        },
+        { refresh: refreshCategories },
+      );
     },
-    [runMutation],
+    [refreshCategories, runMutation],
   );
 
   const createAlbum = useCallback(
@@ -1271,24 +1378,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       endDate?: string | null;
       transactionIds?: string[];
     }) => {
-      const id = runMutation(() => {
-        const albumId = albumsRepository.create({
-          name: input.name,
-          coverPhotoUri: input.coverPhotoUri ?? null,
-          startDate: input.startDate ?? null,
-          endDate: input.endDate ?? null,
-        });
-        if (input.transactionIds && input.transactionIds.length > 0) {
-          albumsRepository.addTransactions(albumId, input.transactionIds);
-        }
-        return albumId;
-      });
+      const id = runMutation(
+        () => {
+          const albumId = albumsRepository.create({
+            name: input.name,
+            coverPhotoUri: input.coverPhotoUri ?? null,
+            startDate: input.startDate ?? null,
+            endDate: input.endDate ?? null,
+          });
+          if (input.transactionIds && input.transactionIds.length > 0) {
+            albumsRepository.addTransactions(albumId, input.transactionIds);
+          }
+          return albumId;
+        },
+        { refresh: refreshAlbums },
+      );
       void trackEvent(AnalyticsEvents.ALBUM_CREATED, {
         transactionCount: input.transactionIds?.length ?? 0,
       });
       return id;
     },
-    [runMutation],
+    [refreshAlbums, runMutation],
   );
 
   // Detail and location edits only touch the `albums` table, so reload just
@@ -1327,21 +1437,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAlbum = useCallback(
     (id: string) => {
-      runMutation(() => {
-        albumsRepository.softDelete(id);
-      });
+      runMutation(
+        () => {
+          albumsRepository.softDelete(id);
+        },
+        { refresh: refreshAlbums },
+      );
       void trackEvent(AnalyticsEvents.ALBUM_DELETED);
     },
-    [runMutation],
+    [refreshAlbums, runMutation],
   );
 
   const setActiveAlbum = useCallback(
     (albumId: string | null) => {
-      runMutation(() => {
-        albumsRepository.setActive(albumId);
-      });
+      runMutation(
+        () => {
+          albumsRepository.setActive(albumId);
+        },
+        { refresh: refreshAlbums },
+      );
     },
-    [runMutation],
+    [refreshAlbums, runMutation],
   );
 
   // Membership edits only touch the album join table — a full refreshAll() would
@@ -1586,7 +1702,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
       const inputById = new Map<string, Partial<CreateTransactionInput>>();
       const transactionById = new Map(
-        transactions.map((transaction) => [transaction.id, transaction]),
+        transactionsRef.current.map((transaction) => [transaction.id, transaction]),
       );
       updates.forEach(({ id, input }) => {
         let normalizedInput =
@@ -1697,7 +1813,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       scheduleRefreshTransactions,
       resolveCategoryDefaultNote,
       resolveRelationNames,
-      transactions,
     ],
   );
 
@@ -1723,7 +1838,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const parentTxIdsWithSplits = new Set<string>();
       const restoreByParentId = new Map<string, number>(); // parentId → cumulative restore amount
       const reverseSplitMap = new Map<string, string>(); // transferTxId → splitId
-      transactions.forEach((tx) => {
+      transactionsRef.current.forEach((tx) => {
         if (idSet.has(tx.id) && tx.splits && tx.splits.length > 0) {
           parentTxIdsWithSplits.add(tx.id);
         }
@@ -1787,7 +1902,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions, transactions],
+    [scheduleRefreshTransactions],
   );
 
   const updateTransaction = useCallback(
@@ -2300,9 +2415,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (nextUpdates.displayMode === 'time' && !canUseTimeDisplayMode) {
         nextUpdates.displayMode = 'money';
       }
-      runMutation(() => {
-        settingsRepository.updateSettings(nextUpdates);
-      });
+      runMutation(
+        () => {
+          settingsRepository.updateSettings(nextUpdates);
+        },
+        {
+          refresh: () => {
+            const next = settingsRepository.get();
+            // Apply a locale change synchronously before the state commit so
+            // the re-render already paints in the new language (matches the
+            // sync apply refreshAll used to do).
+            setAppLocale(next.locale);
+            setSettings(next);
+            // A reporting-currency change re-bases the FX rate table.
+            if (nextUpdates.currencyCode) reloadRateTable(next.currencyCode);
+          },
+        },
+      );
       const changedKeys = Object.keys(nextUpdates).filter(
         (key) => key !== 'onboardingCompleted' && key !== 'userMode',
       );
@@ -2312,7 +2441,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [canUseTimeDisplayMode, runMutation],
+    [canUseTimeDisplayMode, reloadRateTable, runMutation],
   );
 
   // ---- Multi-currency / FX ----
@@ -2517,30 +2646,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateWageConfig = useCallback(
     (config: WageConfig) => {
-      runMutation(() => {
-        monthlyWageRepository.saveForCurrentMonth(config);
-      });
+      runMutation(
+        () => {
+          monthlyWageRepository.saveForCurrentMonth(config);
+        },
+        { refresh: refreshWages },
+      );
     },
-    [runMutation],
+    [refreshWages, runMutation],
   );
 
   const updateWageConfigForMonth = useCallback(
     (month: string, config: WageConfig) => {
-      runMutation(() => {
-        monthlyWageRepository.saveForMonth(month, config);
-      });
+      runMutation(
+        () => {
+          monthlyWageRepository.saveForMonth(month, config);
+        },
+        { refresh: refreshWages },
+      );
       void trackEvent(AnalyticsEvents.WAGE_CONFIG_UPDATED, { wage_type: config.wageType });
     },
-    [runMutation],
+    [refreshWages, runMutation],
   );
 
   const deleteWageConfigForMonth = useCallback(
     (month: string) => {
-      runMutation(() => {
-        monthlyWageRepository.softDeleteByMonth(month);
-      });
+      runMutation(
+        () => {
+          monthlyWageRepository.softDeleteByMonth(month);
+        },
+        { refresh: refreshWages },
+      );
     },
-    [runMutation],
+    [refreshWages, runMutation],
   );
 
   const toggleDisplayMode = useCallback(() => {
@@ -2549,11 +2687,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const nextMode = current.displayMode === 'money' ? 'time' : 'money';
-    runMutation(() => {
-      settingsRepository.updateSettings({ displayMode: nextMode });
-    });
+    runMutation(
+      () => {
+        settingsRepository.updateSettings({ displayMode: nextMode });
+      },
+      { refresh: refreshSettings },
+    );
     void trackEvent(AnalyticsEvents.DISPLAY_MODE_TOGGLED, { mode: nextMode });
-  }, [canUseTimeDisplayMode, runMutation]);
+  }, [canUseTimeDisplayMode, refreshSettings, runMutation]);
 
   const updateInsightsPreferencesJson = useCallback((value: string | null) => {
     const normalized = value && value.trim().length > 0 ? value : null;
@@ -2658,18 +2799,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   transactionCountRef.current = transactions.length;
   const getTransactionCount = useCallback(() => transactionCountRef.current, []);
 
+  // Identity-stable: reads the render-synced map via a ref so transaction
+  // churn doesn't rebuild the useApp() value. Consumers that memoize on the
+  // result must key their memos on `useTransactions().transactions` (the
+  // function identity no longer signals data changes).
+  const transactionsByAccountIdRef = useRef(transactionsByAccountId);
+  transactionsByAccountIdRef.current = transactionsByAccountId;
   const getTransactionsByAccount = useCallback(
-    (accountId: string) => transactionsByAccountId.get(accountId) ?? EMPTY_ACCOUNT_TRANSACTIONS,
-    [transactionsByAccountId],
+    (accountId: string) =>
+      transactionsByAccountIdRef.current.get(accountId) ?? EMPTY_ACCOUNT_TRANSACTIONS,
+    [],
   );
 
-  const queryTransactions = useCallback(
-    (filters: Partial<TransactionFilters> = {}) => {
-      return transactionsRepository.list(filters);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [transactions],
-  );
+  // Reads the repository fresh on every call, so it never returns stale data;
+  // like getTransactionsByAccount, its identity does not track transaction
+  // churn — memoizing callers must key on `useTransactions().transactions`.
+  const queryTransactions = useCallback((filters: Partial<TransactionFilters> = {}) => {
+    return transactionsRepository.list(filters);
+  }, []);
 
   const orderedRateHistory = useMemo(
     () => buildNormalizedRateHistory(monthlyWages),
@@ -2753,15 +2900,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return next;
   }, [getHourlyRateForMonth, isTimeDisplayMode, transactions]);
 
+  // The per-transaction map is read via a render-synced ref so this callback's
+  // identity doesn't change on every write in time mode (which would rebuild
+  // the useApp() value). It still changes when the display mode or the wage
+  // history changes — the signals consumers' memos actually need.
+  const displayValueByTransactionIdRef = useRef(displayValueByTransactionId);
+  displayValueByTransactionIdRef.current = displayValueByTransactionId;
   const getDisplayValueForTransaction = useCallback(
     (transaction: TransactionWithRelations) => {
       if (!isTimeDisplayMode) return transaction.amount;
       return (
-        displayValueByTransactionId?.get(transaction.id) ??
+        displayValueByTransactionIdRef.current?.get(transaction.id) ??
         valueForDisplay(transaction.reportingAmount ?? transaction.amount, transaction.date)
       );
     },
-    [displayValueByTransactionId, isTimeDisplayMode, valueForDisplay],
+    [isTimeDisplayMode, valueForDisplay],
   );
 
   const isSimpleMode = settings?.userMode === 'simple';
@@ -2817,11 +2970,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         groupByRoot,
       });
     },
-    // `transactions` is read fresh from the DB inside, but it's listed as a dep so
-    // the callback identity changes whenever transactions mutate (e.g. a bulk
-    // category reassignment) — without it, memoized breakdown consumers keep a
-    // stale result until the next full reload.
-    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId, transactions],
+    // Transactions are read fresh from the DB inside, so results are never
+    // stale; the identity deliberately does NOT track transaction churn (that
+    // dep rebuilt the whole useApp() value on every write). Memoizing callers
+    // must key on `useTransactions().transactions`.
+    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
