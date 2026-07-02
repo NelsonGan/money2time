@@ -1746,7 +1746,10 @@ function AppContent() {
             name="EditAlbumTransactions"
             component={EditAlbumTransactionsRouteScreen}
           />
-          <RootStack.Screen name="AddAlbumTransactions" component={AddAlbumTransactionsRouteScreen} />
+          <RootStack.Screen
+            name="AddAlbumTransactions"
+            component={AddAlbumTransactionsRouteScreen}
+          />
           <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
           <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
           <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
