@@ -25,9 +25,7 @@ export const AnalyticsEvents = {
   WIDGET_OPENED: 'Widget Opened',
 
   // Transactions
-  TRANSACTION_CREATED: 'Transaction Created',
   VOICE_TRANSACTION_CREATED: 'Voice Transaction Created',
-  TRANSACTION_UPDATED: 'Transaction Updated',
   TRANSACTION_DELETED: 'Transaction Deleted',
   TRANSACTIONS_BULK_DELETED: 'Transactions Bulk Deleted',
 

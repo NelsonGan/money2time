@@ -1678,17 +1678,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setAlbums(albumsRepository.list());
           }
           // Voice entries fire a dedicated event so voice adoption can be
-          // measured separately from manual transaction creation.
-          const createdEvent =
-            meta?.source === 'voice'
-              ? AnalyticsEvents.VOICE_TRANSACTION_CREATED
-              : AnalyticsEvents.TRANSACTION_CREATED;
-          void trackEvent(createdEvent, {
-            type: normalizedInput.type,
-            has_category: !!normalizedInput.categoryId,
-            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
-            sentiment: normalizedInput.sentiment ?? 'neutral',
-          });
+          // measured. Manual transaction creation is no longer tracked.
+          if (meta?.source === 'voice') {
+            void trackEvent(AnalyticsEvents.VOICE_TRANSACTION_CREATED, {
+              type: normalizedInput.type,
+              has_category: !!normalizedInput.categoryId,
+              has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+              sentiment: normalizedInput.sentiment ?? 'neutral',
+            });
+          }
           recordTransactionLogged();
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,
@@ -1817,7 +1815,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
-          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, { count: normalizedUpdates.length });
         } catch {
           // rollback on failure
         }
@@ -2092,14 +2089,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               paidTransactionId: s.paidTransactionId,
             });
           });
-          void trackEvent(AnalyticsEvents.TRANSACTION_CREATED, {
-            type: normalizedInput.type,
-            has_category: !!normalizedInput.categoryId,
-            has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
-            sentiment: normalizedInput.sentiment ?? 'neutral',
-            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
-            split_total: normalizedInput.amount,
-          });
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
@@ -2179,9 +2168,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 sortOrder: next.sortOrder,
               });
             }
-          });
-          void trackEvent(AnalyticsEvents.TRANSACTION_UPDATED, {
-            split_count: optimisticSplits.filter((s) => !s.isSelf).length,
           });
         } catch {
           // ignore; refresh below restores truth
