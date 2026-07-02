@@ -135,7 +135,7 @@ export function CreateAlbumScreen({
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <TabletContentContainer style={{ flex: 1 }}>
-        <SettingsHeader title={I18n.t('albums.create_title')} onClose={onClose} />
+        <SettingsHeader title={I18n.t('albums.create_title')} onBack={onClose} />
 
         <ScrollView
           className="flex-1"

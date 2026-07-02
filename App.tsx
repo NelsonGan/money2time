@@ -1734,20 +1734,12 @@ function AppContent() {
           />
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
-          <RootStack.Screen
-            name="ItemEditor"
-            component={ItemEditorRouteScreen}
-            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
-          />
+          <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}
           />
-          <RootStack.Screen
-            name="CreateAlbum"
-            component={CreateAlbumRouteScreen}
-            options={{ presentation: 'card', animation: 'slide_from_bottom' }}
-          />
+          <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
           <RootStack.Screen name="AlbumLocations" component={AlbumLocationsRouteScreen} />
           <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
           <RootStack.Screen
