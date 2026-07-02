@@ -536,15 +536,6 @@ export function AlbumDetailScreen({
               </View>
             )}
 
-            {/* Date range — top left */}
-            {dateRange ? (
-              <View className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1.5">
-                <Text variant="label" className="text-white">
-                  {dateRange}
-                </Text>
-              </View>
-            ) : null}
-
             {/* Change cover photo — top right */}
             <Pressable
               onPress={changeCover}
@@ -558,7 +549,7 @@ export function AlbumDetailScreen({
               </Text>
             </Pressable>
 
-            {/* Title — bottom center */}
+            {/* Title + date — bottom left */}
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.55)']}
               locations={[0, 1]}
@@ -570,12 +561,17 @@ export function AlbumDetailScreen({
                 paddingTop: 44,
                 paddingBottom: 12,
                 paddingHorizontal: 20,
-                alignItems: 'center',
+                alignItems: 'flex-start',
               }}
             >
-              <Text variant="bodyStrong" numberOfLines={1} className="text-center text-white">
+              <Text variant="bodyStrong" numberOfLines={1} className="text-white">
                 {album.name}
               </Text>
+              {dateRange ? (
+                <Text variant="caption" numberOfLines={1} className="mt-0.5 text-white/75">
+                  {dateRange}
+                </Text>
+              ) : null}
             </LinearGradient>
           </View>
 
