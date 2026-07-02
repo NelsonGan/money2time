@@ -389,6 +389,14 @@ function splitHoursHighlightText(templateKey: string, hours: string) {
   };
 }
 
+// How long a bulk-mode save holds the create pipeline off the JS thread. On
+// the normal path runAfterInteractions lands the create behind the modal
+// dismiss animation, but in bulk mode nothing is animating, so it would fire
+// on the very next tick — exactly when the user starts typing the next
+// amount. A fixed delay lets the field reset paint and the first numpad taps
+// through first.
+const BULK_CREATE_SUBMIT_DELAY_MS = 300;
+
 export function TransactionEditorScreen({
   mode,
   onClose,
@@ -427,9 +435,10 @@ export function TransactionEditorScreen({
   // Only meaningful in create mode (not edit / recurring).
   const showBulkToggle = mode === 'create' && !recurringOptions;
   const bulkCreateEnabled = showBulkToggle && quickEntryPrefs.bulkCreateEnabled;
-  // Bumped after each bulk save so the numpad remounts with a cleared value
-  // (NumpadPanel keeps its own internal expression and won't re-sync from an
-  // emptied `amount` prop otherwise).
+  // Bumped after each bulk save so the numpad clears in place (NumpadPanel
+  // keeps its own internal expression and won't re-sync from an emptied
+  // `amount` prop otherwise). Passed as `resetNonce`, not `key` — remounting
+  // ~22 animated keys synchronously in the Save handler is a visible JS hit.
   const [bulkEntryNonce, setBulkEntryNonce] = useState(0);
 
   // Resolve an account's native currency (code), falling back to the reporting
@@ -1384,11 +1393,12 @@ export function TransactionEditorScreen({
 
       // Bulk create mode: keep the editor open and make the reset feel instant.
       // Reset the per-transaction fields (amount / note / receipt / splits) on
-      // THIS frame so the numpad clears and refocuses immediately, then hand the
-      // create off to run after interactions. The create is itself optimistic
-      // (the transaction lands in state synchronously and the SQLite write is
-      // deferred), so nothing here waits on the DB. Type / account / category /
-      // date / sentiment are kept for the next entry.
+      // THIS frame so the numpad clears and refocuses immediately, then hand
+      // the create off on a short timer (see BULK_CREATE_SUBMIT_DELAY_MS). The
+      // create is itself optimistic (the transaction lands in state
+      // synchronously and the SQLite write is deferred), so nothing here waits
+      // on the DB. Type / account / category / date / sentiment are kept for
+      // the next entry.
       if (bulkCreateEnabled) {
         // The captured payload already owns the receipt — detach it from the
         // editor without deleting the file, and reset the commit flag so the
@@ -1410,7 +1420,7 @@ export function TransactionEditorScreen({
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
         if (deferredSubmit) {
-          InteractionManager.runAfterInteractions(deferredSubmit);
+          setTimeout(deferredSubmit, BULK_CREATE_SUBMIT_DELAY_MS);
         }
         return;
       }
@@ -1772,7 +1782,7 @@ export function TransactionEditorScreen({
             ) : null}
             <View className="flex-1">
               <NumpadPanel
-                key={bulkEntryNonce}
+                resetNonce={bulkEntryNonce}
                 initialExpression={amount}
                 onBackgroundPress={clearActiveField}
                 onValueChange={handleAmountValueChange}

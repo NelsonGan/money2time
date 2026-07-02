@@ -773,6 +773,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([]);
+  // Balance aggregates read from SQLite. Kept in state (refreshed after each
+  // write) instead of queried inside a render-time memo — the synchronous
+  // aggregate query was blocking every render triggered by a transactions
+  // change, which is felt hardest during bulk create.
+  const [rawAccountBalances, setRawAccountBalances] = useState<AccountBalance[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
@@ -918,6 +923,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextTransactions = transactionsRepository.list();
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
+      const nextRawAccountBalances = accountsRepository.getBalances();
 
       // Compute last 7 days spending for weekly notification body
       const sevenDaysAgoKey = (() => {
@@ -960,6 +966,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(nextTransactions);
       setAlbums(nextAlbums);
       setItems(nextItems);
+      setRawAccountBalances(nextRawAccountBalances);
       setLoadError(null);
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
@@ -969,8 +976,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshTransactions = useCallback(() => {
     try {
       setTransactions(transactionsRepository.list());
+      setRawAccountBalances(accountsRepository.getBalances());
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
+    }
+  }, []);
+
+  // Off-render balance refetch for write paths that don't go through
+  // refreshTransactions (e.g. the single-row reconcile after a create).
+  const refreshAccountBalances = useCallback(() => {
+    try {
+      setRawAccountBalances(accountsRepository.getBalances());
+    } catch {
+      // Keep the previous balances on a failed read; the next write refreshes.
     }
   }, []);
 
@@ -1539,13 +1557,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             sentiment: normalizedInput.sentiment ?? 'neutral',
           });
           recordTransactionLogged();
+          // Reconcile only the inserted row. A full refreshTransactions here
+          // would re-read the whole table and replace every row identity,
+          // re-rendering all transaction consumers (calendar, insights) with
+          // their row-level memoization defeated — the main JS-thread stall
+          // felt right after Save in bulk create mode.
+          const persisted = transactionsRepository.getById(id);
+          setTransactions((prev) =>
+            persisted
+              ? prev.map((tx) => (tx.id === id ? persisted : tx))
+              : prev.filter((tx) => tx.id !== id),
+          );
         } catch {
-          // rollback on failure
+          // Roll back the optimistic row so a failed insert doesn't leave a
+          // phantom transaction in the UI.
+          setTransactions((prev) => prev.filter((tx) => tx.id !== id));
         }
-        scheduleRefreshTransactions();
+        refreshAccountBalances();
       });
     },
-    [accounts, buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
+    [accounts, buildSnapshot, refreshAccountBalances, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -3029,19 +3060,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [runMutation]);
 
   const hasSettings = settings !== null;
+  // Reporting-currency conversion over the raw balance rows. Pure map — the
+  // SQLite aggregate behind rawAccountBalances runs after writes, not here.
   const accountBalances = useMemo(() => {
     if (isLoading || !hasSettings) {
       return [];
     }
-    if (accounts.length === 0 && transactions.length === 0) {
-      return [];
-    }
     const reporting = settings?.currencyCode ?? rateTable.base;
-    return accountsRepository.getBalances().map((b) => {
+    return rawAccountBalances.map((b) => {
       const { value, rateUsed } = convert(b.balance, b.currency, reporting, rateTable);
       return { ...b, convertedBalance: rateUsed === null ? null : value };
     });
-  }, [accounts, hasSettings, isLoading, transactions, rateTable, settings?.currencyCode]);
+  }, [rawAccountBalances, hasSettings, isLoading, rateTable, settings?.currencyCode]);
 
   const value = useMemo<AppContextValue | null>(
     () =>
