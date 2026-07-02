@@ -63,7 +63,7 @@ import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
+import { useTabVisible, useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
@@ -2626,6 +2626,7 @@ export function InsightsScreen({
   // hold the last-seen snapshot so every write doesn't re-run the full insight
   // memo chain in the background; it catches up once when re-activated.
   const rawTransactions = useValueWhileTabVisible(liveTransactions);
+  const isInsightsTabVisible = useTabVisible();
   const { isPro } = usePro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 
@@ -2945,6 +2946,28 @@ export function InsightsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [resetToCurrentMonthToken]);
+
+  // The Insights tab is preloaded in the background, so its month pager can
+  // mount while the tab is hidden (`opacity: 0`, not drawn). A horizontal
+  // FlatList's `initialScrollIndex` doesn't reliably settle while the list
+  // isn't visible, which can leave the pager parked at offset 0 while its
+  // render window sits ~centerIndex pages away — the current period then paints
+  // as a blank pane (no chart AND no empty-state mascot) until the user swipes.
+  // Re-assert the committed page's offset the first time the tab is shown.
+  // `getItemLayout` makes every page `pageWidth` wide, so a direct offset is
+  // deterministic here.
+  const didSyncPagerOnVisibleRef = useRef(false);
+  useEffect(() => {
+    if (!isInsightsTabVisible || didSyncPagerOnVisibleRef.current) return;
+    didSyncPagerOnVisibleRef.current = true;
+    const frame = requestAnimationFrame(() => {
+      horizontalListRef.current?.scrollToOffset({
+        offset: committedPageIndexRef.current * pageWidth,
+        animated: false,
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isInsightsTabVisible, pageWidth]);
 
   const applyInsightsPreferencesSnapshot = useCallback(
     (saved: Partial<InsightsPreferencesSnapshot>) => {
