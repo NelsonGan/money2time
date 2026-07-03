@@ -5505,14 +5505,11 @@ export function InsightsScreen({
               </View>
             </View>
 
-            <View className="flex-row items-center gap-1.5">
-              <Sparkles size={12} color={themeColors.accent} />
-              <Text variant="label" tone="muted" className="flex-1">
-                {savingsRate === null
-                  ? I18n.t('insights.analytics.savings_rate.no_income_message')
-                  : I18n.t('insights.analytics.savings_rate.goal_hint')}
+            {savingsRate === null ? (
+              <Text variant="label" tone="muted">
+                {I18n.t('insights.analytics.savings_rate.no_income_message')}
               </Text>
-            </View>
+            ) : null}
 
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
               <View className="flex-1">
