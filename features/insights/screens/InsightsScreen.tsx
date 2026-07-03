@@ -5624,7 +5624,7 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={row.label}
-                  className="rounded-2xl border border-border/30 bg-card px-3 py-2.5 active:opacity-85"
+                  className="rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-85"
                 >
                   <View className="flex-row items-center gap-3">
                     <View className="w-11">
@@ -5635,7 +5635,7 @@ export function InsightsScreen({
                         {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
                       </View>
                     </View>
-                    <View className="flex-1 gap-1.5">
+                    <View className="flex-1 gap-2">
                       <View
                         className="h-2 overflow-hidden rounded-full"
                         style={{
@@ -5664,12 +5664,12 @@ export function InsightsScreen({
                         ) : null}
                       </View>
                       <View className="flex-row items-center justify-between gap-2">
-                        {renderValueNode(row.income, {
+                        {renderCompactValueNode(row.income, {
                           variant: 'label',
                           textClassName: 'text-success/90',
                           iconColor: themeColors.success,
                         })}
-                        {renderValueNode(row.expense, {
+                        {renderCompactValueNode(row.expense, {
                           variant: 'label',
                           textClassName: 'text-destructive/90',
                           iconColor: themeColors.error,
