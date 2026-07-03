@@ -7,6 +7,7 @@ import {
   Landmark,
   PiggyBank,
   Smile,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   X,
@@ -56,6 +57,7 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
+import { GradientPercent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
@@ -67,6 +69,7 @@ import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
+import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import {
@@ -372,6 +375,10 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1,
+  },
+  savingsRateRingIcon: {
+    width: 44,
+    height: 44,
   },
   insightsFilterModalHeader: {
     paddingHorizontal: spacing.screenHorizontal,
@@ -5358,28 +5365,32 @@ export function InsightsScreen({
     if (pageData.insightType === 'savings_rate') {
       const savingsRate =
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
-      const normalized = savingsRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(savingsRate)));
+      const isHealthy = savingsRate !== null && savingsRate >= HEALTHY_SAVINGS_RATE_THRESHOLD;
 
-      const toneClass =
+      const toneColor =
         savingsRate === null
-          ? 'text-muted-foreground'
-          : savingsRate >= 0.2
-            ? 'text-success'
+          ? themeColors.textMuted
+          : isHealthy
+            ? themeColors.success
             : savingsRate >= 0
-              ? 'text-warning'
-              : 'text-destructive';
-      const rateBarClass =
-        savingsRate === null
-          ? 'bg-border'
-          : savingsRate >= 0.2
-            ? 'bg-success'
-            : savingsRate >= 0
-              ? 'bg-warning'
-              : 'bg-destructive';
-      const formattedSavingsRate =
+              ? themeColors.accent
+              : themeColors.error;
+      const StatusIcon =
+        savingsRate === null || isHealthy
+          ? PiggyBank
+          : savingsRate >= 0
+            ? TrendingUp
+            : TrendingDown;
+      const statusLabel =
         savingsRate === null
           ? I18n.t('insights.analytics.savings_rate.no_income_short')
-          : `${(savingsRate * 100).toFixed(1)}%`;
+          : isHealthy
+            ? I18n.t('insights.analytics.savings_rate.status_healthy')
+            : savingsRate >= 0
+              ? I18n.t('insights.analytics.savings_rate.status_building')
+              : I18n.t('insights.analytics.savings_rate.status_overspent');
+      const formattedSavingsRate =
+        savingsRate === null ? '—' : `${(savingsRate * 100).toFixed(1)}%`;
       const yearlySavedAmount = Math.abs(pageData.totalNet);
       const yearlySavedAmountClass =
         pageData.totalNet > 0
@@ -5395,46 +5406,99 @@ export function InsightsScreen({
             : 'border-border/35 bg-secondary/20';
       const healthyMarkerLeft = `${Math.round(HEALTHY_SAVINGS_RATE_THRESHOLD * 100)}%` as const;
       const healthyMarkerColor = withColorAlpha(themeColors.text, isDark ? 0.75 : 0.5);
+      const ringTrackColor = withColorAlpha(themeColors.textMuted, isDark ? 0.26 : 0.16);
+      const monthTrackSpentColor = withColorAlpha(themeColors.error, isDark ? 0.32 : 0.16);
+      const monthTrackIdleColor = withColorAlpha(themeColors.textMuted, isDark ? 0.24 : 0.14);
+      const piggyIconSource = UTILITY_ICON_SOURCES[INSIGHT_TYPE_ICON_NAME.savings_rate];
+      const bestMonthKey = pageData.savingsRateRows.reduce<{
+        monthKey: string | null;
+        rate: number;
+      }>(
+        (best, row) =>
+          row.savingsRate !== null && row.savingsRate > best.rate
+            ? { monthKey: row.monthKey, rate: row.savingsRate }
+            : best,
+        { monthKey: null, rate: 0 },
+      ).monthKey;
 
       return (
         <View className="mt-2 gap-3">
-          <Card className="gap-3 p-4">
-            <View>
-              <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.savings_rate.title')}
-              </Text>
-              <View className="mt-1 flex-row flex-wrap items-center gap-2">
-                <Text variant="heading" className={toneClass}>
-                  {formattedSavingsRate}
+          <Card className="gap-4 p-5">
+            <View className="flex-row items-center gap-4">
+              <SavingsRateRing
+                size={104}
+                strokeWidth={11}
+                progress={savingsRate ?? 0}
+                color={toneColor}
+                trackColor={ringTrackColor}
+                goal={HEALTHY_SAVINGS_RATE_THRESHOLD}
+                goalColor={themeColors.accent}
+              >
+                {piggyIconSource ? (
+                  <Image
+                    source={piggyIconSource}
+                    resizeMode="contain"
+                    style={styles.savingsRateRingIcon}
+                  />
+                ) : (
+                  <PiggyBank size={36} color={toneColor} strokeWidth={1.8} />
+                )}
+              </SavingsRateRing>
+
+              <View className="flex-1">
+                <Text variant="label" tone="muted">
+                  {I18n.t('insights.analytics.savings_rate.title')}
                 </Text>
-                <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
-                  {renderCompactValueNode(yearlySavedAmount, {
-                    variant: 'label',
-                    textClassName: cn(yearlySavedAmountClass),
-                    iconColor:
-                      pageData.totalNet > 0
-                        ? themeColors.success
-                        : pageData.totalNet < 0
-                          ? themeColors.error
-                          : themeColors.textMuted,
-                  })}
+                <View className="mt-0.5">
+                  {savingsRate === null ? (
+                    <Text variant="monoLg" tone="muted">
+                      {I18n.t('insights.analytics.savings_rate.no_income_short')}
+                    </Text>
+                  ) : (
+                    <GradientPercent
+                      label={formattedSavingsRate}
+                      color={toneColor}
+                      gradientId="insightsSavingsRateHero"
+                    />
+                  )}
+                </View>
+                {savingsRate !== null ? (
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('widgets.of_income_saved')}
+                  </Text>
+                ) : null}
+                <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
+                  <View
+                    className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
+                    style={{ backgroundColor: withColorAlpha(toneColor, isDark ? 0.24 : 0.14) }}
+                  >
+                    <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
+                    <Text
+                      variant="label"
+                      style={{ color: toneColor, fontFamily: FONT.semibold, fontWeight: '600' }}
+                    >
+                      {statusLabel}
+                    </Text>
+                  </View>
+                  <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
+                    {renderCompactValueNode(yearlySavedAmount, {
+                      variant: 'label',
+                      textClassName: cn(yearlySavedAmountClass),
+                      iconColor:
+                        pageData.totalNet > 0
+                          ? themeColors.success
+                          : pageData.totalNet < 0
+                            ? themeColors.error
+                            : themeColors.textMuted,
+                    })}
+                  </View>
                 </View>
               </View>
-              <View className="mt-2 h-3 rounded-full bg-secondary overflow-hidden">
-                <View
-                  className={cn('h-full rounded-full', rateBarClass)}
-                  style={[styles.progressFill, buildWidthStyle(`${Math.round(normalized * 100)}%`)]}
-                />
-                <View
-                  pointerEvents="none"
-                  style={[
-                    styles.savingsRateHealthyMarker,
-                    buildLeftStyle(healthyMarkerLeft),
-                    { backgroundColor: healthyMarkerColor },
-                  ]}
-                />
-              </View>
-              <Text variant="label" tone="muted" className="mt-2">
+            </View>
+
+            <View className="flex-row items-center gap-1.5">
+              <Sparkles size={12} color={themeColors.accent} />
+              <Text variant="label" tone="muted" className="flex-1">
                 {savingsRate === null
                   ? I18n.t('insights.analytics.savings_rate.no_income_message')
                   : I18n.t('insights.analytics.savings_rate.goal_hint')}
@@ -5443,9 +5507,12 @@ export function InsightsScreen({
 
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.income')}
-                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <View className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.income')}
+                  </Text>
+                </View>
                 {renderValueNode(pageData.totalIncome, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-success',
@@ -5454,9 +5521,12 @@ export function InsightsScreen({
               </View>
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.expense')}
-                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.expense')}
+                  </Text>
+                </View>
                 {renderValueNode(pageData.totalExpense, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-destructive',
@@ -5465,9 +5535,17 @@ export function InsightsScreen({
               </View>
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.net')}
-                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <View
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      pageData.totalNet >= 0 ? 'bg-success' : 'bg-destructive',
+                    )}
+                  />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.net')}
+                  </Text>
+                </View>
                 {renderValueNode(Math.abs(pageData.totalNet), {
                   variant: 'caption',
                   textClassName: cn(
@@ -5480,44 +5558,52 @@ export function InsightsScreen({
             </View>
           </Card>
 
+          <View className="mt-1 px-1">
+            <Text variant="label" tone="muted">
+              {I18n.t('insights.analytics.savings_rate.month_by_month')}
+            </Text>
+          </View>
           <View className="gap-1.5">
             {pageData.savingsRateRows.map((row) => {
               const monthlyRate = row.savingsRate;
+              const hasActivity =
+                row.transactions.length > 0 || row.income !== 0 || row.expense !== 0;
+              if (!hasActivity) {
+                return (
+                  <View
+                    key={row.monthKey}
+                    className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3 py-2 opacity-60"
+                  >
+                    <Text variant="caption" tone="muted">
+                      {row.label}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      —
+                    </Text>
+                  </View>
+                );
+              }
+
               const monthlySavedAmount = Math.abs(row.net);
               const monthlyRateLabel =
-                monthlyRate === null
-                  ? I18n.t('insights.analytics.savings_rate.no_income_short')
-                  : `${(monthlyRate * 100).toFixed(1)}%`;
+                monthlyRate === null ? '—' : `${(monthlyRate * 100).toFixed(1)}%`;
               const monthlySavedAmountClass =
                 row.net > 0
                   ? 'text-success'
                   : row.net < 0
                     ? 'text-destructive'
                     : 'text-muted-foreground';
-              const monthlySavedBadgeClass =
-                row.net > 0
-                  ? 'border-success/30 bg-success/10'
-                  : row.net < 0
-                    ? 'border-destructive/30 bg-destructive/10'
-                    : 'border-border/35 bg-secondary/20';
-              const monthlyIntensity =
-                monthlyRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(monthlyRate)));
-              const monthlyToneClass =
+              const monthlyFillFraction =
+                monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
+              const monthlyToneColor =
                 monthlyRate === null
-                  ? 'text-muted-foreground'
-                  : monthlyRate >= 0.2
-                    ? 'text-success'
+                  ? themeColors.textMuted
+                  : monthlyRate >= HEALTHY_SAVINGS_RATE_THRESHOLD
+                    ? themeColors.success
                     : monthlyRate >= 0
-                      ? 'text-warning'
-                      : 'text-destructive';
-              const monthlyBarClass =
-                monthlyRate === null
-                  ? 'bg-border'
-                  : monthlyRate >= 0.2
-                    ? 'bg-success'
-                    : monthlyRate >= 0
-                      ? 'bg-warning'
-                      : 'bg-destructive';
+                      ? themeColors.accent
+                      : themeColors.error;
+              const isBestMonth = row.monthKey === bestMonthKey;
               return (
                 <Pressable
                   key={row.monthKey}
@@ -5531,50 +5617,73 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={row.label}
-                  className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
+                  className="rounded-2xl border border-border/30 bg-card px-3 py-2.5 active:opacity-85"
                 >
-                  <View className="flex-row items-center justify-between">
-                    <Text variant="caption">{row.label}</Text>
-                    <View className="flex-row items-center gap-1.5">
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-11">
+                      <View className="flex-row items-center gap-1">
+                        <Text variant="caption" numberOfLines={1}>
+                          {row.label}
+                        </Text>
+                        {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
+                      </View>
+                    </View>
+                    <View className="flex-1 gap-1.5">
                       <View
-                        className={cn('rounded-full border px-2 py-[3px]', monthlySavedBadgeClass)}
+                        className="h-2 overflow-hidden rounded-full"
+                        style={{
+                          backgroundColor:
+                            row.income > 0 || row.expense > 0
+                              ? monthTrackSpentColor
+                              : monthTrackIdleColor,
+                        }}
                       >
-                        {renderCompactValueNode(monthlySavedAmount, {
+                        <View
+                          style={[
+                            styles.progressFill,
+                            buildWidthStyle(`${Math.round(monthlyFillFraction * 100)}%`),
+                            { backgroundColor: themeColors.success },
+                          ]}
+                        />
+                        {row.income > 0 ? (
+                          <View
+                            pointerEvents="none"
+                            style={[
+                              styles.savingsRateHealthyMarker,
+                              buildLeftStyle(healthyMarkerLeft),
+                              { backgroundColor: healthyMarkerColor },
+                            ]}
+                          />
+                        ) : null}
+                      </View>
+                      <View className="flex-row items-center justify-between gap-2">
+                        {renderValueNode(row.income, {
                           variant: 'label',
-                          textClassName: cn(monthlySavedAmountClass),
-                          iconColor:
-                            row.net > 0
-                              ? themeColors.success
-                              : row.net < 0
-                                ? themeColors.error
-                                : themeColors.textMuted,
+                          textClassName: 'text-success/90',
+                          iconColor: themeColors.success,
+                        })}
+                        {renderValueNode(row.expense, {
+                          variant: 'label',
+                          textClassName: 'text-destructive/90',
+                          iconColor: themeColors.error,
                         })}
                       </View>
-                      <Text variant="caption" className={cn(monthlyToneClass)}>
+                    </View>
+                    <View className="items-end gap-0.5">
+                      <Text variant="mono" style={{ color: monthlyToneColor }}>
                         {monthlyRateLabel}
                       </Text>
+                      {renderCompactValueNode(monthlySavedAmount, {
+                        variant: 'label',
+                        textClassName: cn(monthlySavedAmountClass),
+                        iconColor:
+                          row.net > 0
+                            ? themeColors.success
+                            : row.net < 0
+                              ? themeColors.error
+                              : themeColors.textMuted,
+                      })}
                     </View>
-                  </View>
-                  <View className="mt-1.5 h-1.5 rounded-full bg-secondary overflow-hidden">
-                    <View
-                      className={cn('h-full rounded-full', monthlyBarClass)}
-                      style={[
-                        styles.progressFill,
-                        buildWidthStyle(`${Math.round(monthlyIntensity * 100)}%`),
-                      ]}
-                    />
-                  </View>
-                  <View className="mt-2 flex-row items-center justify-between gap-2">
-                    {renderValueNode(row.income, {
-                      variant: 'label',
-                      textClassName: 'text-success/90',
-                      iconColor: themeColors.success,
-                    })}
-                    {renderValueNode(row.expense, {
-                      variant: 'label',
-                      textClassName: 'text-destructive/90',
-                      iconColor: themeColors.error,
-                    })}
                   </View>
                 </Pressable>
               );

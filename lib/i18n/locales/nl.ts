@@ -673,6 +673,10 @@ const nl = {
         saved_per_year: '{{value}} gespaard dit jaar',
         exclusions_active: '{{count}} categorieën uitgesloten van berekening.',
         goal_hint: '20%+ wordt als gezond beschouwd.',
+        month_by_month: 'Maand voor maand',
+        status_healthy: 'Gezond',
+        status_building: 'Op de goede weg',
+        status_overspent: 'Te veel uitgegeven',
       },
       income_rate_history: {
         rate_title: 'Inkomstenpercentage',

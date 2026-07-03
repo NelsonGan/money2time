@@ -674,6 +674,10 @@ const de = {
         saved_per_year: '{{value}} dieses Jahr gespart',
         exclusions_active: '{{count}} Kategorien von der Berechnung ausgeschlossen.',
         goal_hint: '20 %+ gilt als gesund.',
+        month_by_month: 'Monat für Monat',
+        status_healthy: 'Gesund',
+        status_building: 'Auf gutem Weg',
+        status_overspent: 'Zu viel ausgegeben',
       },
       income_rate_history: {
         rate_title: 'Einnahmenrate',

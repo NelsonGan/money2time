@@ -672,6 +672,10 @@ const es = {
         saved_per_year: '{{value}} ahorrado este año',
         exclusions_active: 'Excluyendo {{count}} categorías del cálculo.',
         goal_hint: 'Un 20%+ se considera saludable.',
+        month_by_month: 'Mes a mes',
+        status_healthy: 'Saludable',
+        status_building: 'En camino',
+        status_overspent: 'Gastando de más',
       },
       income_rate_history: {
         rate_title: 'Tarifa por hora',

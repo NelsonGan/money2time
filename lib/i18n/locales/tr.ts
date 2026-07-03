@@ -672,6 +672,10 @@ const tr = {
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',
         exclusions_active: '{{count}} kategori hesaplamadan çıkarıldı.',
         goal_hint: '%20 ve üzeri sağlıklı kabul edilir.',
+        month_by_month: 'Ay ay',
+        status_healthy: 'Sağlıklı',
+        status_building: 'Yolunda',
+        status_overspent: 'Aşırı harcama',
       },
       income_rate_history: {
         rate_title: 'Gelir oranı',

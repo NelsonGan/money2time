@@ -655,6 +655,10 @@ const th = {
         saved_per_year: 'ออมได้ {{value}} ปีนี้',
         exclusions_active: 'ยกเว้น {{count}} หมวดหมู่จากการคำนวณ',
         goal_hint: '20% ขึ้นไปถือว่าดี',
+        month_by_month: 'เดือนต่อเดือน',
+        status_healthy: 'สุขภาพดี',
+        status_building: 'กำลังไปได้ดี',
+        status_overspent: 'ใช้จ่ายเกิน',
       },
       income_rate_history: {
         rate_title: 'อัตรารายรับ',

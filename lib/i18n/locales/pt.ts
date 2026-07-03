@@ -670,6 +670,10 @@ const pt = {
         saved_per_year: '{{value}} economizado este ano',
         exclusions_active: 'Excluindo {{count}} categorias do cálculo.',
         goal_hint: '20%+ é considerado saudável.',
+        month_by_month: 'Mês a mês',
+        status_healthy: 'Saudável',
+        status_building: 'No caminho certo',
+        status_overspent: 'Gastando demais',
       },
       income_rate_history: {
         rate_title: 'Taxa de receita',

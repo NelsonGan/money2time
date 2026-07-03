@@ -666,6 +666,10 @@ const sv = {
         saved_per_year: '{{value}} sparat i år',
         exclusions_active: 'Exkluderar {{count}} kategorier från beräkningen.',
         goal_hint: '20 %+ anses sunt.',
+        month_by_month: 'Månad för månad',
+        status_healthy: 'Sunt',
+        status_building: 'På god väg',
+        status_overspent: 'Överkonsumtion',
       },
       income_rate_history: {
         rate_title: 'Inkomstgrad',

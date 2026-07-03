@@ -670,6 +670,10 @@ const da = {
         saved_per_year: '{{value}} sparet i år',
         exclusions_active: 'Udelukker {{count}} kategorier fra beregningen.',
         goal_hint: '20%+ anses for sundt.',
+        month_by_month: 'Måned for måned',
+        status_healthy: 'Sundt',
+        status_building: 'Godt på vej',
+        status_overspent: 'Overforbrug',
       },
       income_rate_history: {
         rate_title: 'Indkomstsats',

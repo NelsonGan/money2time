@@ -667,6 +667,10 @@ const it = {
         saved_per_year: "{{value}} risparmiati quest'anno",
         exclusions_active: 'Escludendo {{count}} categorie dal calcolo.',
         goal_hint: '20%+ è considerato sano.',
+        month_by_month: 'Mese per mese',
+        status_healthy: 'Sano',
+        status_building: 'Sulla buona strada',
+        status_overspent: 'Spese eccessive',
       },
       income_rate_history: {
         rate_title: 'Tariffa oraria',

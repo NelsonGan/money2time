@@ -676,6 +676,10 @@ const fil = {
         saved_per_year: '{{value}} na nai-save ngayong taon',
         exclusions_active: 'Inalis ang {{count}} kategorya mula sa kalkulasyon.',
         goal_hint: 'Ang 20%+ ay itinuturing na malusog.',
+        month_by_month: 'Buwan-buwan',
+        status_healthy: 'Malusog',
+        status_building: 'Papalapit na',
+        status_overspent: 'Sobra ang gastos',
       },
       income_rate_history: {
         rate_title: 'Income rate',

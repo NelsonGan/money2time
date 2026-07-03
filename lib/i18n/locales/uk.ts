@@ -665,6 +665,10 @@ const uk = {
         saved_per_year: '{{value}} заощаджено цього року',
         exclusions_active: 'Виключено {{count}} категорій з розрахунку.',
         goal_hint: '20%+ вважається здоровим рівнем.',
+        month_by_month: 'Місяць за місяцем',
+        status_healthy: 'Здоровий рівень',
+        status_building: 'На правильному шляху',
+        status_overspent: 'Перевитрата',
       },
       income_rate_history: {
         rate_title: 'Погодинна ставка',

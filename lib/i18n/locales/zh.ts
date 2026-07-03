@@ -623,6 +623,10 @@ const zh = {
         saved_per_year: '今年已节省 {{value}}',
         exclusions_active: '已排除 {{count}} 个分类。',
         goal_hint: '20% 以上为健康储蓄。',
+        month_by_month: '逐月',
+        status_healthy: '健康',
+        status_building: '渐入佳境',
+        status_overspent: '超支',
       },
       income_rate_history: {
         rate_title: '时薪',

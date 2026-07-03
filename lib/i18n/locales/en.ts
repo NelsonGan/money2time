@@ -642,6 +642,10 @@ const en = {
         saved_per_year: '{{value}} saved this year',
         exclusions_active: 'Excluding {{count}} categories from calculation.',
         goal_hint: '20%+ is considered healthy.',
+        month_by_month: 'Month by month',
+        status_healthy: 'Healthy',
+        status_building: 'Getting there',
+        status_overspent: 'Overspending',
       },
       income_rate_history: {
         rate_title: 'Income rate',
