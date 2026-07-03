@@ -51,15 +51,15 @@ import {
   Card,
   CategoryEmoji,
   CategoryPickerSheet,
+  GradientPercent,
   SelectField,
   Text,
   ThemeModal,
   TimeValueInline,
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
-import { GradientPercent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
-import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
+import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
@@ -279,6 +279,8 @@ const Y_AXIS_LABEL_MIN_FONT_SIZE = 7.5;
 const CHART_SKELETON_READY_DELAY_MS = 180;
 const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
+const SAVINGS_RATE_RING_SIZE = 104;
+const SAVINGS_RATE_RING_STROKE_WIDTH = 11;
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
   lineHeight: 30,
@@ -1241,6 +1243,22 @@ function withColorAlpha(hex: string, alpha: number) {
   const b = Number.parseInt(value.slice(4, 6), 16);
   const normalizedAlpha = Math.max(0, Math.min(1, alpha));
   return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
+}
+
+// Tone, icon, and status copy all derive from the same rounded percent the user
+// sees, so the label and colors can never disagree (e.g. a -0.04% year rounds to
+// '0.0%' and reads as the amber "getting there" state, not a red overspend).
+function resolveSavingsRateStatus(displayRatePercent: number | null, palette: ColorPalette) {
+  if (displayRatePercent === null) {
+    return { color: palette.textMuted, Icon: PiggyBank, labelKey: 'no_income_short' as const };
+  }
+  if (displayRatePercent >= HEALTHY_SAVINGS_RATE_THRESHOLD * 100) {
+    return { color: palette.success, Icon: PiggyBank, labelKey: 'status_healthy' as const };
+  }
+  if (displayRatePercent >= 0) {
+    return { color: palette.accent, Icon: TrendingUp, labelKey: 'status_building' as const };
+  }
+  return { color: palette.error, Icon: TrendingDown, labelKey: 'status_overspent' as const };
 }
 
 function isLegacyBalanceAdjustmentTransfer(
@@ -5365,32 +5383,17 @@ export function InsightsScreen({
     if (pageData.insightType === 'savings_rate') {
       const savingsRate =
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
-      const isHealthy = savingsRate !== null && savingsRate >= HEALTHY_SAVINGS_RATE_THRESHOLD;
-
-      const toneColor =
-        savingsRate === null
-          ? themeColors.textMuted
-          : isHealthy
-            ? themeColors.success
-            : savingsRate >= 0
-              ? themeColors.accent
-              : themeColors.error;
-      const StatusIcon =
-        savingsRate === null || isHealthy
-          ? PiggyBank
-          : savingsRate >= 0
-            ? TrendingUp
-            : TrendingDown;
-      const statusLabel =
-        savingsRate === null
-          ? I18n.t('insights.analytics.savings_rate.no_income_short')
-          : isHealthy
-            ? I18n.t('insights.analytics.savings_rate.status_healthy')
-            : savingsRate >= 0
-              ? I18n.t('insights.analytics.savings_rate.status_building')
-              : I18n.t('insights.analytics.savings_rate.status_overspent');
+      const displayRatePercent =
+        savingsRate === null ? null : Number((savingsRate * 100).toFixed(1));
+      const {
+        color: toneColor,
+        Icon: StatusIcon,
+        labelKey: statusLabelKey,
+      } = resolveSavingsRateStatus(displayRatePercent, themeColors);
+      const statusLabel = I18n.t(`insights.analytics.savings_rate.${statusLabelKey}`);
+      const statusChipColor = withColorAlpha(toneColor, isDark ? 0.24 : 0.14);
       const formattedSavingsRate =
-        savingsRate === null ? '—' : `${(savingsRate * 100).toFixed(1)}%`;
+        displayRatePercent === null ? null : `${displayRatePercent.toFixed(1)}%`;
       const yearlySavedAmount = Math.abs(pageData.totalNet);
       const yearlySavedAmountClass =
         pageData.totalNet > 0
@@ -5410,24 +5413,22 @@ export function InsightsScreen({
       const monthTrackSpentColor = withColorAlpha(themeColors.error, isDark ? 0.32 : 0.16);
       const monthTrackIdleColor = withColorAlpha(themeColors.textMuted, isDark ? 0.24 : 0.14);
       const piggyIconSource = UTILITY_ICON_SOURCES[INSIGHT_TYPE_ICON_NAME.savings_rate];
-      const bestMonthKey = pageData.savingsRateRows.reduce<{
-        monthKey: string | null;
-        rate: number;
-      }>(
-        (best, row) =>
-          row.savingsRate !== null && row.savingsRate > best.rate
-            ? { monthKey: row.monthKey, rate: row.savingsRate }
-            : best,
-        { monthKey: null, rate: 0 },
-      ).monthKey;
+      let bestMonthKey: string | null = null;
+      let bestMonthRate = 0;
+      pageData.savingsRateRows.forEach((row) => {
+        if (row.savingsRate !== null && row.savingsRate > bestMonthRate) {
+          bestMonthKey = row.monthKey;
+          bestMonthRate = row.savingsRate;
+        }
+      });
 
       return (
         <View className="mt-2 gap-3">
           <Card className="gap-4 p-5">
             <View className="flex-row items-center gap-4">
               <SavingsRateRing
-                size={104}
-                strokeWidth={11}
+                size={SAVINGS_RATE_RING_SIZE}
+                strokeWidth={SAVINGS_RATE_RING_STROKE_WIDTH}
                 progress={savingsRate ?? 0}
                 color={toneColor}
                 trackColor={ringTrackColor}
@@ -5450,16 +5451,24 @@ export function InsightsScreen({
                   {I18n.t('insights.analytics.savings_rate.title')}
                 </Text>
                 <View className="mt-0.5">
-                  {savingsRate === null ? (
+                  {formattedSavingsRate === null ? (
                     <Text variant="monoLg" tone="muted">
                       {I18n.t('insights.analytics.savings_rate.no_income_short')}
                     </Text>
                   ) : (
-                    <GradientPercent
-                      label={formattedSavingsRate}
-                      color={toneColor}
-                      gradientId="insightsSavingsRateHero"
-                    />
+                    // The gradient number is SVG glyphs, invisible to screen
+                    // readers — announce the figure on the wrapper instead.
+                    <View
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel={formattedSavingsRate}
+                    >
+                      <GradientPercent
+                        label={formattedSavingsRate}
+                        color={toneColor}
+                        gradientId="insightsSavingsRateHero"
+                      />
+                    </View>
                   )}
                 </View>
                 {savingsRate !== null ? (
@@ -5470,7 +5479,7 @@ export function InsightsScreen({
                 <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
                   <View
                     className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
-                    style={{ backgroundColor: withColorAlpha(toneColor, isDark ? 0.24 : 0.14) }}
+                    style={{ backgroundColor: statusChipColor }}
                   >
                     <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
                     <Text
@@ -5585,8 +5594,10 @@ export function InsightsScreen({
               }
 
               const monthlySavedAmount = Math.abs(row.net);
+              const monthlyDisplayPercent =
+                monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
               const monthlyRateLabel =
-                monthlyRate === null ? '—' : `${(monthlyRate * 100).toFixed(1)}%`;
+                monthlyDisplayPercent === null ? '—' : `${monthlyDisplayPercent.toFixed(1)}%`;
               const monthlySavedAmountClass =
                 row.net > 0
                   ? 'text-success'
@@ -5595,14 +5606,10 @@ export function InsightsScreen({
                     : 'text-muted-foreground';
               const monthlyFillFraction =
                 monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
-              const monthlyToneColor =
-                monthlyRate === null
-                  ? themeColors.textMuted
-                  : monthlyRate >= HEALTHY_SAVINGS_RATE_THRESHOLD
-                    ? themeColors.success
-                    : monthlyRate >= 0
-                      ? themeColors.accent
-                      : themeColors.error;
+              const monthlyToneColor = resolveSavingsRateStatus(
+                monthlyDisplayPercent,
+                themeColors,
+              ).color;
               const isBestMonth = row.monthKey === bestMonthKey;
               return (
                 <Pressable

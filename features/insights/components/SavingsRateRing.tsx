@@ -36,7 +36,7 @@ export function SavingsRateRing({
   const goalAngle = goal === undefined ? null : -Math.PI / 2 + goal * 2 * Math.PI;
 
   return (
-    <View style={buildRingSizeStyle(size)} className="items-center justify-center">
+    <View style={{ width: size, height: size }} className="items-center justify-center">
       <Svg width={size} height={size} style={StyleSheet.absoluteFill} pointerEvents="none">
         <Circle
           cx={center}
@@ -71,8 +71,4 @@ export function SavingsRateRing({
       {children}
     </View>
   );
-}
-
-function buildRingSizeStyle(size: number) {
-  return { width: size, height: size };
 }
