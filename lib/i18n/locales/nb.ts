@@ -668,6 +668,10 @@ const nb = {
         saved_per_year: '{{value}} spart i år',
         exclusions_active: 'Ekskluderer {{count}} kategorier fra beregningen.',
         goal_hint: '20 %+ anses som sunt.',
+        month_by_month: 'Måned for måned',
+        status_healthy: 'Sunt',
+        status_building: 'På god vei',
+        status_overspent: 'Overforbruk',
       },
       income_rate_history: {
         rate_title: 'Inntektssats',

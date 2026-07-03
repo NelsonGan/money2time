@@ -657,6 +657,10 @@ const ko = {
         saved_per_year: '올해 {{value}} 저축',
         exclusions_active: '{{count}}개 카테고리 제외 중.',
         goal_hint: '20% 이상이 건강한 저축률입니다.',
+        month_by_month: '월별 현황',
+        status_healthy: '건강함',
+        status_building: '순항 중',
+        status_overspent: '과소비',
       },
       income_rate_history: {
         rate_title: '수입 시급',

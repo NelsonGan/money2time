@@ -669,6 +669,10 @@ const ms = {
         saved_per_year: '{{value}} disimpan tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori daripada pengiraan.',
         goal_hint: '20%+ dianggap sihat.',
+        month_by_month: 'Bulan demi bulan',
+        status_healthy: 'Sihat',
+        status_building: 'Hampir sampai',
+        status_overspent: 'Perbelanjaan berlebihan',
       },
       income_rate_history: {
         rate_title: 'Kadar pendapatan',

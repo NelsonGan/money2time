@@ -662,6 +662,10 @@ const hi = {
         saved_per_year: 'इस साल {{value}} बचाया',
         exclusions_active: '{{count}} श्रेणियां गणना से बाहर।',
         goal_hint: '20%+ स्वस्थ माना जाता है।',
+        month_by_month: 'महीने दर महीने',
+        status_healthy: 'स्वस्थ',
+        status_building: 'सही राह पर',
+        status_overspent: 'अधिक खर्च',
       },
       income_rate_history: {
         rate_title: 'आय दर',

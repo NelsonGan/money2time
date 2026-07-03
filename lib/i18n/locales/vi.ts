@@ -660,6 +660,10 @@ const vi = {
         saved_per_year: '{{value}} tiết kiệm năm nay',
         exclusions_active: 'Đang loại trừ {{count}} danh mục khỏi tính toán.',
         goal_hint: 'Trên 20% được coi là lành mạnh.',
+        month_by_month: 'Từng tháng',
+        status_healthy: 'Lành mạnh',
+        status_building: 'Đang tiến bộ',
+        status_overspent: 'Chi tiêu quá mức',
       },
       income_rate_history: {
         rate_title: 'Lương giờ',

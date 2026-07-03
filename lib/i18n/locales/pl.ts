@@ -668,6 +668,10 @@ const pl = {
         saved_per_year: '{{value}} oszczędzono w tym roku',
         exclusions_active: 'Wyłączono {{count}} kategorii z obliczeń.',
         goal_hint: '20%+ uważane jest za zdrowy poziom.',
+        month_by_month: 'Miesiąc po miesiącu',
+        status_healthy: 'Zdrowo',
+        status_building: 'Na dobrej drodze',
+        status_overspent: 'Nadmierne wydatki',
       },
       income_rate_history: {
         rate_title: 'Stawka przychodu',

@@ -673,6 +673,10 @@ const id = {
         saved_per_year: '{{value}} ditabung tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori dari perhitungan.',
         goal_hint: '20%+ dianggap sehat.',
+        month_by_month: 'Bulan demi bulan',
+        status_healthy: 'Sehat',
+        status_building: 'Hampir sampai',
+        status_overspent: 'Pengeluaran berlebih',
       },
       income_rate_history: {
         rate_title: 'Tarif pemasukan',

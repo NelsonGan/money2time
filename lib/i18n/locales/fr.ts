@@ -669,6 +669,10 @@ const fr = {
         saved_per_year: '{{value}} épargnés cette année',
         exclusions_active: '{{count}} catégories exclues du calcul.',
         goal_hint: '20 % ou plus est considéré comme sain.',
+        month_by_month: 'Mois par mois',
+        status_healthy: 'Sain',
+        status_building: 'En bonne voie',
+        status_overspent: 'Dépenses excessives',
       },
       income_rate_history: {
         rate_title: 'Taux horaire',

@@ -667,6 +667,10 @@ const ru = {
         saved_per_year: '{{value}} сохранено в этом году',
         exclusions_active: 'Исключены {{count}} категории из расчёта.',
         goal_hint: '20%+ считается здоровым показателем.',
+        month_by_month: 'Месяц за месяцем',
+        status_healthy: 'Здоровый уровень',
+        status_building: 'На верном пути',
+        status_overspent: 'Перерасход',
       },
       income_rate_history: {
         rate_title: 'Ставка дохода',

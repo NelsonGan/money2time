@@ -658,6 +658,10 @@ const ja = {
         saved_per_year: '今年 {{value}} 貯蓄',
         exclusions_active: '{{count}} 件のカテゴリを除外中。',
         goal_hint: '20%以上が健全とされています。',
+        month_by_month: '月ごと',
+        status_healthy: '健全',
+        status_building: 'あと少し',
+        status_overspent: '使いすぎ',
       },
       income_rate_history: {
         rate_title: '時給',
