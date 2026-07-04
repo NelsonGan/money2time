@@ -6588,9 +6588,12 @@ export function InsightsScreen({
                 onPress={openInsightMenu}
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('insights.insight_type')}
-                className="h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:scale-95"
+                className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
               >
                 {renderInsightTypeIcon(displaySelectedInsightType)}
+                <View className="absolute -bottom-1 -right-1 h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-background bg-primary shadow-sm">
+                  <ChevronDown size={11} color="#FFFFFF" strokeWidth={3} />
+                </View>
               </Pressable>
             </View>
             <View className="flex-1 items-center px-1">
