@@ -4945,7 +4945,7 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-0.5 gap-3">
+      <View className="gap-3">
         {renderTrendBucketTotal(selectedMonthRow.totalExpense, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
@@ -5050,7 +5050,7 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-0.5 gap-3">
+      <View className="gap-3">
         {renderTrendBucketTotal(selectedMonthRow.totalIncome, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
@@ -5157,7 +5157,7 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-0.5 gap-3">
+      <View className="gap-3">
         {renderTrendBucketTotal(selectedRow.totalExpense, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
