@@ -88,12 +88,26 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
     : null;
   const source = activeEntitlement ?? knownEntitlement;
 
+  // Only count subscriptions still set to auto-renew. A subscription the user
+  // has already cancelled stays in `activeSubscriptions` until it expires, but
+  // it will stop billing on its own — so it must not read as "renewing".
+  //
+  // This mirrors RevenueCat's recommended `willRenew && unsubscribeDetectedAt
+  // == nil` check: `willRenew` alone can lag behind an Apple-side cancellation
+  // when App Store Server Notifications aren't configured, so we also treat a
+  // detected unsubscribe as "not renewing" to avoid nagging a user who already
+  // cancelled.
+  const hasRenewingSubscription = customerInfo.activeSubscriptions.some((productIdentifier) => {
+    const subscription = customerInfo.subscriptionsByProductIdentifier?.[productIdentifier];
+    return !!subscription?.willRenew && !subscription.unsubscribeDetectedAt;
+  });
+
   return {
     activatedAt: source?.originalPurchaseDate ?? null,
     activeProductIdentifier: source?.productIdentifier ?? null,
     expirationDate: source?.expirationDate ?? null,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
-    hasActiveSubscription: customerInfo.activeSubscriptions.length > 0,
+    hasRenewingSubscription,
   };
 }
 
