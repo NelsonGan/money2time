@@ -1639,6 +1639,7 @@ const it = {
     active_label: 'Aggiungi nuove transazioni a',
     active_sheet_title: 'Viaggio attivo',
     active_none: 'Nessuno',
+    active_badge: 'Attivo',
     change_cover: 'Cambia copertina',
     edit_details_title: 'Modifica viaggio',
     start_date: 'Data di inizio',

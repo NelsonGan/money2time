@@ -1628,6 +1628,7 @@ const uk = {
     active_label: 'Додавати нові операції до',
     active_sheet_title: 'Активна подорож',
     active_none: 'Немає',
+    active_badge: 'Активно',
     change_cover: 'Змінити обкладинку',
     edit_details_title: 'Редагувати подорож',
     start_date: 'Дата початку',

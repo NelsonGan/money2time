@@ -1590,6 +1590,7 @@ const th = {
     active_label: 'เพิ่มรายการใหม่ไปยัง',
     active_sheet_title: 'ทริปที่ใช้งาน',
     active_none: 'ไม่มี',
+    active_badge: 'ใช้งานอยู่',
     change_cover: 'เปลี่ยนปก',
     edit_details_title: 'แก้ไขทริป',
     start_date: 'วันเริ่มต้น',

@@ -1649,6 +1649,7 @@ const nl = {
     active_label: 'Nieuwe transacties toevoegen aan',
     active_sheet_title: 'Actieve reis',
     active_none: 'Geen',
+    active_badge: 'Actief',
     change_cover: 'Omslag wijzigen',
     edit_details_title: 'Reis bewerken',
     start_date: 'Startdatum',

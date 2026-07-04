@@ -1634,6 +1634,7 @@ const ms = {
     active_label: 'Tambah transaksi baharu ke',
     active_sheet_title: 'Perjalanan aktif',
     active_none: 'Tiada',
+    active_badge: 'Aktif',
     change_cover: 'Tukar kulit',
     edit_details_title: 'Edit perjalanan',
     start_date: 'Tarikh mula',

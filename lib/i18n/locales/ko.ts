@@ -1597,6 +1597,7 @@ const ko = {
     active_label: '새 거래 자동 추가 대상',
     active_sheet_title: '활성 여행',
     active_none: '없음',
+    active_badge: '활성',
     change_cover: '커버 변경',
     edit_details_title: '여행 편집',
     start_date: '시작일',

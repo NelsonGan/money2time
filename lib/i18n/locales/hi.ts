@@ -1618,6 +1618,7 @@ const hi = {
     active_label: 'नए लेन-देन यहाँ जोड़ें',
     active_sheet_title: 'सक्रिय यात्रा',
     active_none: 'कोई नहीं',
+    active_badge: 'सक्रिय',
     change_cover: 'कवर बदलें',
     edit_details_title: 'यात्रा संपादित करें',
     start_date: 'आरंभ तिथि',

@@ -1611,6 +1611,7 @@ const vi = {
     active_label: 'Tự thêm giao dịch mới vào',
     active_sheet_title: 'Chuyến đi hiện tại',
     active_none: 'Không',
+    active_badge: 'Đang hoạt động',
     change_cover: 'Đổi ảnh bìa',
     edit_details_title: 'Sửa chuyến đi',
     start_date: 'Ngày bắt đầu',

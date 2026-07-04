@@ -1636,6 +1636,7 @@ const pl = {
     active_label: 'Dodawaj nowe transakcje do',
     active_sheet_title: 'Aktywna podróż',
     active_none: 'Brak',
+    active_badge: 'Aktywne',
     change_cover: 'Zmień okładkę',
     edit_details_title: 'Edytuj podróż',
     start_date: 'Data początkowa',

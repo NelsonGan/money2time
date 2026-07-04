@@ -1641,6 +1641,7 @@ const id = {
     active_label: 'Tambah transaksi baru ke',
     active_sheet_title: 'Perjalanan aktif',
     active_none: 'Tidak ada',
+    active_badge: 'Aktif',
     change_cover: 'Ganti sampul',
     edit_details_title: 'Edit perjalanan',
     start_date: 'Tanggal mulai',

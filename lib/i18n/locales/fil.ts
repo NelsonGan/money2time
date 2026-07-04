@@ -1655,6 +1655,7 @@ const fil = {
     active_label: 'Idagdag ang bagong transaksyon sa',
     active_sheet_title: 'Aktibong biyahe',
     active_none: 'Wala',
+    active_badge: 'Aktibo',
     change_cover: 'Palitan ang cover',
     edit_details_title: 'I-edit ang biyahe',
     start_date: 'Petsa ng simula',

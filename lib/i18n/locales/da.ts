@@ -1629,6 +1629,7 @@ const da = {
     active_label: 'Føj nye transaktioner til',
     active_sheet_title: 'Aktiv rejse',
     active_none: 'Ingen',
+    active_badge: 'Aktiv',
     change_cover: 'Skift forside',
     edit_details_title: 'Rediger rejse',
     start_date: 'Startdato',
