@@ -28,6 +28,8 @@ const da = {
     unknown: 'Ukendt',
     hour_unit: 't',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'år',
     none: 'Ingen',
     no_account: 'Ingen konto',
     uncategorized: 'Ukategoriseret',

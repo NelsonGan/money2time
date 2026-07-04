@@ -28,6 +28,8 @@ const ko = {
     unknown: '알 수 없음',
     hour_unit: '시간',
     minute_unit: '분',
+    day_unit: '일',
+    year_unit: '년',
     none: '없음',
     no_account: '계좌 없음',
     uncategorized: '미분류',

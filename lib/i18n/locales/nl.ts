@@ -28,6 +28,8 @@ const nl = {
     unknown: 'Onbekend',
     hour_unit: 'u',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'j',
     none: 'Geen',
     no_account: 'Geen rekening',
     uncategorized: 'Zonder categorie',

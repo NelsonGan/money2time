@@ -28,6 +28,8 @@ const hi = {
     unknown: 'अज्ञात',
     hour_unit: 'घ',
     minute_unit: 'मि',
+    day_unit: 'दि',
+    year_unit: 'सा',
     none: 'कोई नहीं',
     no_account: 'कोई खाता नहीं',
     uncategorized: 'बिना श्रेणी',

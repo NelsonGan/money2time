@@ -27,6 +27,8 @@ const zh = {
     other: '其他',
     hour_unit: '小时',
     minute_unit: '分',
+    day_unit: '天',
+    year_unit: '年',
     unknown: '未知',
     none: '无',
     no_account: '无账户',

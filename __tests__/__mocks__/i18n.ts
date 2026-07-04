@@ -5,6 +5,8 @@ const translations: Translations = {
   'common.yesterday': 'Yesterday',
   'common.hour_unit': 'h',
   'common.minute_unit': 'm',
+  'common.day_unit': 'd',
+  'common.year_unit': 'y',
   'errors.generic_operation_failed': 'Operation failed',
   'errors.recurring_fallback_name': 'Recurring rule',
   'widgets.saved': 'Saved',

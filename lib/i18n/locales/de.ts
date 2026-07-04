@@ -28,6 +28,8 @@ const de = {
     unknown: 'Unbekannt',
     hour_unit: 'h',
     minute_unit: 'min',
+    day_unit: 'Tg',
+    year_unit: 'J',
     none: 'Keine',
     no_account: 'Kein Konto',
     uncategorized: 'Unkategorisiert',

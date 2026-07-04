@@ -28,6 +28,8 @@ const pl = {
     unknown: 'Nieznany',
     hour_unit: 'g',
     minute_unit: 'min',
+    day_unit: 'd',
+    year_unit: 'r',
     none: 'Brak',
     no_account: 'Brak konta',
     uncategorized: 'Bez kategorii',

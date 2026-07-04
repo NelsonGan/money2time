@@ -28,6 +28,8 @@ const ja = {
     unknown: '不明',
     hour_unit: '時間',
     minute_unit: '分',
+    day_unit: '日',
+    year_unit: '年',
     none: 'なし',
     no_account: '口座なし',
     uncategorized: '未分類',

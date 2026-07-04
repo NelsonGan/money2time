@@ -28,6 +28,8 @@ const ru = {
     unknown: 'Неизвестно',
     hour_unit: 'ч',
     minute_unit: 'мин',
+    day_unit: 'д',
+    year_unit: 'г',
     none: 'Нет',
     no_account: 'Нет счёта',
     uncategorized: 'Без категории',

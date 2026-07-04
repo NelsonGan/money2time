@@ -288,6 +288,44 @@ export function formatTimeOfDay(hour: number, minute: number): string {
   return `${display}:${min} ${period}`;
 }
 
+/**
+ * Compact duration for tight spaces: rolls hours up into larger units and shows at
+ * most the two largest non-zero ones (years/days, days/hours, or hours/minutes) so a
+ * large time-value stays short instead of overflowing. Uses calendar conversions
+ * (24h/day, 365d/year); the years count itself abbreviates as K past 1000.
+ */
+export function formatDurationCompact(hours: number): string {
+  const y = String(I18n.t('common.year_unit'));
+  const d = String(I18n.t('common.day_unit'));
+  const h = String(I18n.t('common.hour_unit'));
+  const m = String(I18n.t('common.minute_unit'));
+
+  const totalMinutes = Math.round(Math.abs(hours) * 60);
+  if (totalMinutes < 1) return `0${m}`;
+
+  const MIN_PER_HOUR = 60;
+  const MIN_PER_DAY = MIN_PER_HOUR * 24;
+  const MIN_PER_YEAR = MIN_PER_DAY * 365;
+
+  if (totalMinutes >= MIN_PER_YEAR) {
+    const years = Math.floor(totalMinutes / MIN_PER_YEAR);
+    const days = Math.floor((totalMinutes % MIN_PER_YEAR) / MIN_PER_DAY);
+    const yearLabel = years < 1000 ? String(years) : formatCompactNumber(years);
+    return days > 0 ? `${yearLabel}${y} ${days}${d}` : `${yearLabel}${y}`;
+  }
+  if (totalMinutes >= MIN_PER_DAY) {
+    const days = Math.floor(totalMinutes / MIN_PER_DAY);
+    const hrs = Math.floor((totalMinutes % MIN_PER_DAY) / MIN_PER_HOUR);
+    return hrs > 0 ? `${days}${d} ${hrs}${h}` : `${days}${d}`;
+  }
+  if (totalMinutes >= MIN_PER_HOUR) {
+    const hrs = Math.floor(totalMinutes / MIN_PER_HOUR);
+    const mins = totalMinutes % MIN_PER_HOUR;
+    return mins > 0 ? `${hrs}${h} ${mins}${m}` : `${hrs}${h}`;
+  }
+  return `${totalMinutes}${m}`;
+}
+
 /** Short hours label for tight spaces: drops minutes and abbreviates 1000+ as K. */
 export function formatHoursCompact(hours: number): string {
   const abs = Math.abs(hours);

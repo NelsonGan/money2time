@@ -28,6 +28,8 @@ const id = {
     unknown: 'Tidak Diketahui',
     hour_unit: 'j',
     minute_unit: 'm',
+    day_unit: 'h',
+    year_unit: 'thn',
     none: 'Tidak Ada',
     no_account: 'Tanpa Akun',
     uncategorized: 'Tanpa Kategori',

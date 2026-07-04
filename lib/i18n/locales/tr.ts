@@ -28,6 +28,8 @@ const tr = {
     unknown: 'Bilinmiyor',
     hour_unit: 's',
     minute_unit: 'dk',
+    day_unit: 'g',
+    year_unit: 'y',
     none: 'Yok',
     no_account: 'Hesap yok',
     uncategorized: 'Kategorisiz',

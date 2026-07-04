@@ -110,6 +110,7 @@ import {
   formatCompactCurrency,
   formatCompactNumber,
   formatDateInput,
+  formatDurationCompact,
   formatHours,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
@@ -284,16 +285,13 @@ const SAVINGS_RATE_RING_STROKE_WIDTH = 11;
 const SAVINGS_RATE_ABBREVIATE_THRESHOLD = 1000;
 
 // Formats an already-computed savings-rate percentage (e.g. 20 → "20.0%"). When the
-// magnitude reaches 1000% (income tiny relative to net) it abbreviates to a compact
-// "k" form (e.g. 1234 → "1.2k%") so the label never overflows its row and breaks the
-// layout.
+// magnitude reaches 1000% (income tiny relative to net) it abbreviates via the shared
+// compact-number helper (e.g. 1234 → "1.2K%") so the label never overflows its row and
+// breaks the layout. formatCompactNumber drops the sign, so re-apply it here.
 const formatSavingsRatePercentLabel = (percent: number): string => {
-  const magnitude = Math.abs(percent);
-  if (magnitude >= SAVINGS_RATE_ABBREVIATE_THRESHOLD) {
+  if (Math.abs(percent) >= SAVINGS_RATE_ABBREVIATE_THRESHOLD) {
     const sign = percent < 0 ? '-' : '';
-    const thousands = magnitude / 1000;
-    const decimals = thousands >= 100 ? 0 : 1;
-    return `${sign}${thousands.toFixed(decimals)}k%`;
+    return `${sign}${formatCompactNumber(Math.abs(percent))}%`;
   }
   return `${percent.toFixed(1)}%`;
 };
@@ -4291,7 +4289,7 @@ export function InsightsScreen({
       if (settings.displayMode === 'time') {
         return (
           <TimeValueInline
-            value={formatHours(value)}
+            value={formatDurationCompact(value)}
             variant={variant}
             tone={tone}
             textClassName={textClassName}
@@ -5529,7 +5527,7 @@ export function InsightsScreen({
                     {I18n.t('calendar.income')}
                   </Text>
                 </View>
-                {renderValueNode(pageData.totalIncome, {
+                {renderCompactValueNode(pageData.totalIncome, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-success',
                   iconColor: themeColors.success,
@@ -5543,7 +5541,7 @@ export function InsightsScreen({
                     {I18n.t('calendar.expense')}
                   </Text>
                 </View>
-                {renderValueNode(pageData.totalExpense, {
+                {renderCompactValueNode(pageData.totalExpense, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-destructive',
                   iconColor: themeColors.error,
@@ -5562,7 +5560,7 @@ export function InsightsScreen({
                     {I18n.t('calendar.net')}
                   </Text>
                 </View>
-                {renderValueNode(Math.abs(pageData.totalNet), {
+                {renderCompactValueNode(Math.abs(pageData.totalNet), {
                   variant: 'caption',
                   textClassName: cn(
                     'mt-0.5',

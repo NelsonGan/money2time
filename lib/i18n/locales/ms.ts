@@ -28,6 +28,8 @@ const ms = {
     unknown: 'Tidak Diketahui',
     hour_unit: 'j',
     minute_unit: 'min',
+    day_unit: 'h',
+    year_unit: 'thn',
     none: 'Tiada',
     no_account: 'Tiada akaun',
     uncategorized: 'Tidak Dikategorikan',

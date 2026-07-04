@@ -28,6 +28,8 @@ const fr = {
     unknown: 'Inconnu',
     hour_unit: 'h',
     minute_unit: 'min',
+    day_unit: 'j',
+    year_unit: 'a',
     none: 'Aucun',
     no_account: 'Sans compte',
     uncategorized: 'Non catégorisé',

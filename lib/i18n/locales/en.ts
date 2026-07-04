@@ -28,6 +28,8 @@ const en = {
     unknown: 'Unknown',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'y',
     none: 'None',
     no_account: 'No account',
     uncategorized: 'Uncategorized',

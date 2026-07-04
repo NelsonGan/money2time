@@ -9,6 +9,7 @@ import {
   formatCompactNumber,
   formatCurrency,
   formatDateInput,
+  formatDurationCompact,
   formatHours,
   formatHoursCompact,
   formatMonthYearLabel,
@@ -287,6 +288,26 @@ describe('formatHoursCompact', () => {
 
   it('abbreviates large hour counts', () => {
     expect(formatHoursCompact(1500)).toBe('1.5Kh');
+  });
+});
+
+describe('formatDurationCompact', () => {
+  it('shows minutes and hours below a day', () => {
+    expect(formatDurationCompact(0)).toBe('0m');
+    expect(formatDurationCompact(0.5)).toBe('30m');
+    expect(formatDurationCompact(2)).toBe('2h');
+    expect(formatDurationCompact(2.5)).toBe('2h 30m');
+  });
+
+  it('rolls into days and years, showing at most two units', () => {
+    expect(formatDurationCompact(24)).toBe('1d');
+    expect(formatDurationCompact(30)).toBe('1d 6h');
+    expect(formatDurationCompact(24 * 365)).toBe('1y');
+    expect(formatDurationCompact(24 * 365 + 24 * 5)).toBe('1y 5d');
+  });
+
+  it('abbreviates very large year counts as K', () => {
+    expect(formatDurationCompact(24 * 365 * 1500)).toBe('1.5Ky');
   });
 });
 

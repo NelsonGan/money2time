@@ -28,6 +28,8 @@ const fil = {
     unknown: 'Hindi kilala',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'y',
     none: 'Wala',
     no_account: 'Walang account',
     uncategorized: 'Walang kategorya',

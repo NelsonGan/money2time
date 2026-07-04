@@ -28,6 +28,8 @@ const sv = {
     unknown: 'Okänt',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'å',
     none: 'Ingen',
     no_account: 'Inget konto',
     uncategorized: 'Okategoriserat',

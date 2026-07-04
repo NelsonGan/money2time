@@ -28,6 +28,8 @@ const th = {
     unknown: 'ไม่ทราบ',
     hour_unit: 'ชม.',
     minute_unit: 'น.',
+    day_unit: 'ว.',
+    year_unit: 'ปี',
     none: 'ไม่มี',
     no_account: 'ไม่มีบัญชี',
     uncategorized: 'ไม่มีหมวดหมู่',

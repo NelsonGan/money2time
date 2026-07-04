@@ -28,6 +28,8 @@ const vi = {
     unknown: 'Không xác định',
     hour_unit: 'g',
     minute_unit: 'ph',
+    day_unit: 'ng',
+    year_unit: 'n',
     none: 'Không có',
     no_account: 'Không có tài khoản',
     uncategorized: 'Chưa phân loại',

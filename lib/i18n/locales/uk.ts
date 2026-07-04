@@ -28,6 +28,8 @@ const uk = {
     unknown: 'Невідомо',
     hour_unit: 'год',
     minute_unit: 'хв',
+    day_unit: 'дн',
+    year_unit: 'р',
     none: 'Немає',
     no_account: 'Без рахунку',
     uncategorized: 'Без категорії',
