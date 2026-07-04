@@ -135,19 +135,18 @@ export function AlbumsScreen({
         {albums.length > 0 ? (
           <View
             onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-            className="flex-row items-center justify-between gap-3 border-t border-border/40 bg-background px-5 pt-2"
+            className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
             style={{ paddingBottom: bottomNavInset }}
           >
-            <View className="min-w-0 shrink flex-row items-center gap-2">
+            <View className="min-w-0 flex-1 flex-row items-center gap-2">
               <Sparkles size={15} color={themeColors.textMuted} />
-              <Text variant="label" tone="muted" numberOfLines={1}>
+              <Text variant="label" tone="muted" numberOfLines={2} className="flex-1">
                 {I18n.t('albums.active_label')}
               </Text>
             </View>
-            <View className="max-w-[62%]">
+            <View style={{ flexBasis: 148, flexGrow: 0, flexShrink: 1 }}>
               <SelectField
                 triggerSize="header"
-                triggerAutoWidth
                 triggerTone={activeAlbumId ? 'active' : 'default'}
                 sheetTitle={I18n.t('albums.active_sheet_title')}
                 value={activeAlbumId ?? ''}

@@ -45,8 +45,6 @@ interface SelectFieldProps {
   compact?: boolean;
   triggerSize?: 'default' | 'header';
   triggerVariant?: 'default' | 'header-plain';
-  /** Hug the trigger to its content width instead of filling the parent. */
-  triggerAutoWidth?: boolean;
   /** Accent the header trigger (e.g. to mark an active selection). */
   triggerTone?: 'default' | 'active';
   value: string | null;
@@ -69,7 +67,6 @@ export function SelectField({
   compact = false,
   triggerSize = 'default',
   triggerVariant = 'default',
-  triggerAutoWidth = false,
   triggerTone = 'default',
   value,
   options,
@@ -341,7 +338,7 @@ export function SelectField({
   };
 
   return (
-    <View className={triggerAutoWidth ? 'self-start' : 'w-full'}>
+    <View className="w-full">
       {label && !compact ? (
         <View className="mb-2.5 px-1 flex-row items-center">
           <Text variant="caption" tone="muted">
