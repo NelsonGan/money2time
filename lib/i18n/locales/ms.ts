@@ -880,7 +880,7 @@ const ms = {
     contact: {
       tile: 'Hubungi kami',
       title: 'Hubungi kami',
-      body: 'Ada soalan, jumpa pepijat, atau ingin berkongsi maklum balas? Sertai komuniti Discord kami — kami membaca semuanya dan membalas dengan pantas.',
+      body: 'Ada soalan, jumpa pepijat, atau ingin berkongsi maklum balas? Sertai komuniti Discord kami.',
       button: 'Sertai Discord kami',
       close: 'Mungkin nanti',
     },

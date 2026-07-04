@@ -850,7 +850,7 @@ const en = {
     contact: {
       tile: 'Contact us',
       title: 'Get in touch',
-      body: 'Have a question, found a bug, or want to share feedback? Join our Discord community — we read everything and reply fast.',
+      body: 'Have a question, found a bug, or want to share feedback? Join our Discord community.',
       button: 'Join our Discord',
       close: 'Maybe later',
     },

@@ -885,7 +885,7 @@ const nl = {
     contact: {
       tile: 'Neem contact op',
       title: 'Neem contact op',
-      body: 'Heb je een vraag, een bug gevonden of wil je feedback delen? Word lid van onze Discord-community — we lezen alles en reageren snel.',
+      body: 'Heb je een vraag, een bug gevonden of wil je feedback delen? Word lid van onze Discord-community.',
       button: 'Word lid van onze Discord',
       close: 'Misschien later',
     },

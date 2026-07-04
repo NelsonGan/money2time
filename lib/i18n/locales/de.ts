@@ -885,7 +885,7 @@ const de = {
     contact: {
       tile: 'Kontakt',
       title: 'Kontakt aufnehmen',
-      body: 'Hast du eine Frage, einen Fehler gefunden oder möchtest Feedback geben? Tritt unserer Discord-Community bei — wir lesen alles und antworten schnell.',
+      body: 'Hast du eine Frage, einen Fehler gefunden oder möchtest Feedback geben? Tritt unserer Discord-Community bei.',
       button: 'Discord beitreten',
       close: 'Vielleicht später',
     },

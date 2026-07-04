@@ -880,7 +880,7 @@ const pl = {
     contact: {
       tile: 'Skontaktuj się',
       title: 'Skontaktuj się z nami',
-      body: 'Masz pytanie, znalazłeś błąd lub chcesz podzielić się opinią? Dołącz do naszej społeczności na Discordzie — czytamy wszystko i szybko odpowiadamy.',
+      body: 'Masz pytanie, znalazłeś błąd lub chcesz podzielić się opinią? Dołącz do naszej społeczności na Discordzie.',
       button: 'Dołącz do naszego Discorda',
       close: 'Może później',
     },

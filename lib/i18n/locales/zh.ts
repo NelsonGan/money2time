@@ -830,7 +830,7 @@ const zh = {
     contact: {
       tile: '联系我们',
       title: '联系我们',
-      body: '有疑问、发现问题，或想分享反馈？加入我们的 Discord 社区——我们会阅读每条消息并快速回复。',
+      body: '有疑问、发现问题，或想分享反馈？加入我们的 Discord 社区。',
       button: '加入我们的 Discord',
       close: '以后再说',
     },

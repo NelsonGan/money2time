@@ -885,7 +885,7 @@ const id = {
     contact: {
       tile: 'Hubungi kami',
       title: 'Hubungi kami',
-      body: 'Punya pertanyaan, menemukan bug, atau ingin berbagi masukan? Bergabunglah dengan komunitas Discord kami — kami membaca semuanya dan membalas dengan cepat.',
+      body: 'Punya pertanyaan, menemukan bug, atau ingin berbagi masukan? Bergabunglah dengan komunitas Discord kami.',
       button: 'Gabung Discord kami',
       close: 'Nanti saja',
     },

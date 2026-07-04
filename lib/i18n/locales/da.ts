@@ -880,7 +880,7 @@ const da = {
     contact: {
       tile: 'Kontakt os',
       title: 'Kom i kontakt',
-      body: 'Har du et spørgsmål, fundet en fejl eller vil du dele feedback? Bliv en del af vores Discord-fællesskab — vi læser alt og svarer hurtigt.',
+      body: 'Har du et spørgsmål, fundet en fejl eller vil du dele feedback? Bliv en del af vores Discord-fællesskab.',
       button: 'Deltag i vores Discord',
       close: 'Måske senere',
     },

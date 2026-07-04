@@ -882,7 +882,7 @@ const fr = {
     contact: {
       tile: 'Nous contacter',
       title: 'Prenez contact',
-      body: 'Une question, un bug ou une suggestion ? Rejoignez notre communauté Discord — nous lisons tout et répondons rapidement.',
+      body: 'Une question, un bug ou une suggestion ? Rejoignez notre communauté Discord.',
       button: 'Rejoindre notre Discord',
       close: 'Plus tard',
     },

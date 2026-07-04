@@ -875,7 +875,7 @@ const sv = {
     contact: {
       tile: 'Kontakta oss',
       title: 'Hör av dig',
-      body: 'Har du en fråga, hittat en bugg eller vill dela feedback? Gå med i vår Discord-gemenskap — vi läser allt och svarar snabbt.',
+      body: 'Har du en fråga, hittat en bugg eller vill dela feedback? Gå med i vår Discord-gemenskap.',
       button: 'Gå med i vår Discord',
       close: 'Kanske senare',
     },

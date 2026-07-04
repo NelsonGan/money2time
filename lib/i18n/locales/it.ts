@@ -880,7 +880,7 @@ const it = {
     contact: {
       tile: 'Contattaci',
       title: 'Mettiti in contatto',
-      body: 'Hai una domanda, hai trovato un bug o vuoi condividere un feedback? Unisciti alla nostra community su Discord — leggiamo tutto e rispondiamo in fretta.',
+      body: 'Hai una domanda, hai trovato un bug o vuoi condividere un feedback? Unisciti alla nostra community su Discord.',
       button: 'Unisciti al nostro Discord',
       close: 'Forse più tardi',
     },

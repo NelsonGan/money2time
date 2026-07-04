@@ -883,7 +883,7 @@ const tr = {
     contact: {
       tile: 'Bize ulaşın',
       title: 'İletişime geçin',
-      body: 'Bir sorunuz mu var, bir hata mı buldunuz ya da geri bildirim mi paylaşmak istiyorsunuz? Discord topluluğumuza katılın — her şeyi okuyor ve hızlı yanıt veriyoruz.',
+      body: 'Bir sorunuz mu var, bir hata mı buldunuz ya da geri bildirim mi paylaşmak istiyorsunuz? Discord topluluğumuza katılın.',
       button: "Discord'umuza katıl",
       close: 'Belki sonra',
     },

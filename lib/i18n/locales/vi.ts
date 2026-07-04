@@ -868,7 +868,7 @@ const vi = {
     contact: {
       tile: 'Liên hệ',
       title: 'Liên hệ với chúng tôi',
-      body: 'Bạn có câu hỏi, phát hiện lỗi hoặc muốn chia sẻ phản hồi? Tham gia cộng đồng Discord của chúng tôi — chúng tôi đọc mọi thứ và phản hồi nhanh chóng.',
+      body: 'Bạn có câu hỏi, phát hiện lỗi hoặc muốn chia sẻ phản hồi? Tham gia cộng đồng Discord của chúng tôi.',
       button: 'Tham gia Discord',
       close: 'Để sau',
     },

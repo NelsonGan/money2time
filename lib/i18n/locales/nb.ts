@@ -876,7 +876,7 @@ const nb = {
     contact: {
       tile: 'Kontakt oss',
       title: 'Ta kontakt',
-      body: 'Har du et spørsmål, funnet en feil eller vil dele tilbakemelding? Bli med i Discord-fellesskapet vårt — vi leser alt og svarer raskt.',
+      body: 'Har du et spørsmål, funnet en feil eller vil dele tilbakemelding? Bli med i Discord-fellesskapet vårt.',
       button: 'Bli med i Discord',
       close: 'Kanskje senere',
     },

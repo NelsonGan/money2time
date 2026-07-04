@@ -883,7 +883,7 @@ const es = {
     contact: {
       tile: 'Contáctanos',
       title: 'Ponte en contacto',
-      body: '¿Tienes una pregunta, encontraste un error o quieres compartir tu opinión? Únete a nuestra comunidad de Discord: lo leemos todo y respondemos rápido.',
+      body: '¿Tienes una pregunta, encontraste un error o quieres compartir tu opinión? Únete a nuestra comunidad de Discord.',
       button: 'Únete a nuestro Discord',
       close: 'Quizás más tarde',
     },

@@ -888,7 +888,7 @@ const fil = {
     contact: {
       tile: 'Makipag-ugnayan',
       title: 'Makipag-ugnayan sa amin',
-      body: 'May tanong, nakakita ng bug, o gustong magbahagi ng feedback? Sumali sa aming Discord community — binabasa namin ang lahat at mabilis sumagot.',
+      body: 'May tanong, nakakita ng bug, o gustong magbahagi ng feedback? Sumali sa aming Discord community.',
       button: 'Sumali sa aming Discord',
       close: 'Sa susunod na lang',
     },
