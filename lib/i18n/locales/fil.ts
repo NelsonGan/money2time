@@ -670,7 +670,6 @@ const fil = {
         },
       },
       savings_rate: {
-        title: 'Savings rate',
         no_income_title: 'Walang kita sa panahong ito',
         no_income_short: 'Walang kita',
         saved_per_year: '{{value}} na nai-save ngayong taon',

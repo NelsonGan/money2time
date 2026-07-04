@@ -667,7 +667,6 @@ const id = {
         },
       },
       savings_rate: {
-        title: 'Tingkat tabungan',
         no_income_title: 'Tidak ada pemasukan periode ini',
         no_income_short: 'Tidak ada pemasukan',
         saved_per_year: '{{value}} ditabung tahun ini',

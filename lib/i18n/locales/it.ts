@@ -662,7 +662,6 @@ const it = {
         },
       },
       savings_rate: {
-        title: 'Tasso di risparmio',
         no_income_title: 'Nessuna entrata nel periodo',
         no_income_short: 'Nessuna entrata',
         saved_per_year: "{{value}} risparmiati quest'anno",

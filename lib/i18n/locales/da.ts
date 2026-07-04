@@ -664,7 +664,6 @@ const da = {
         },
       },
       savings_rate: {
-        title: 'Opsparingsrate',
         no_income_title: 'Ingen indtægt i denne periode',
         no_income_short: 'Ingen indtægt',
         saved_per_year: '{{value}} sparet i år',

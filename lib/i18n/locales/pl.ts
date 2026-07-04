@@ -663,7 +663,6 @@ const pl = {
         },
       },
       savings_rate: {
-        title: 'Stopa oszczędności',
         no_income_title: 'Brak przychodów w tym okresie',
         no_income_short: 'Brak przychodu',
         saved_per_year: '{{value}} oszczędzono w tym roku',

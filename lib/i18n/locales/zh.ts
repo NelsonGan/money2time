@@ -618,7 +618,6 @@ const zh = {
         },
       },
       savings_rate: {
-        title: '储蓄率',
         no_income_title: '本期无收入',
         no_income_short: '无收入',
         saved_per_year: '今年已节省 {{value}}',

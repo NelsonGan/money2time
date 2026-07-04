@@ -662,7 +662,6 @@ const nb = {
         },
       },
       savings_rate: {
-        title: 'Sparerate',
         no_income_title: 'Ingen inntekt i denne perioden',
         no_income_short: 'Ingen inntekt',
         saved_per_year: '{{value}} spart i år',

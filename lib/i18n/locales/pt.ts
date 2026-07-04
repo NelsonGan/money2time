@@ -665,7 +665,6 @@ const pt = {
         },
       },
       savings_rate: {
-        title: 'Taxa de poupança',
         no_income_title: 'Sem receita neste período',
         no_income_short: 'Sem receita',
         saved_per_year: '{{value}} economizado este ano',

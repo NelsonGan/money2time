@@ -657,7 +657,6 @@ const hi = {
         },
       },
       savings_rate: {
-        title: 'बचत दर',
         no_income_title: 'इस अवधि में कोई आय नहीं',
         no_income_short: 'कोई आय नहीं',
         saved_per_year: 'इस साल {{value}} बचाया',

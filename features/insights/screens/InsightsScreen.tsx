@@ -5460,9 +5460,6 @@ export function InsightsScreen({
               </SavingsRateRing>
 
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('insights.analytics.savings_rate.title')}
-                </Text>
                 <View className="mt-0.5">
                   {formattedSavingsRate === null ? (
                     <Text variant="monoLg" tone="muted">

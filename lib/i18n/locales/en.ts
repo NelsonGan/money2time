@@ -637,7 +637,6 @@ const en = {
         },
       },
       savings_rate: {
-        title: 'Savings rate',
         no_income_title: 'No income in this period',
         no_income_short: 'No income',
         saved_per_year: '{{value}} saved this year',

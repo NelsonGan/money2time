@@ -663,7 +663,6 @@ const ms = {
         },
       },
       savings_rate: {
-        title: 'Kadar simpanan',
         no_income_title: 'Tiada pendapatan dalam tempoh ini',
         no_income_short: 'Tiada pendapatan',
         saved_per_year: '{{value}} disimpan tahun ini',

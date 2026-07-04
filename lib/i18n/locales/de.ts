@@ -668,7 +668,6 @@ const de = {
         },
       },
       savings_rate: {
-        title: 'Sparquote',
         no_income_title: 'Keine Einnahmen in diesem Zeitraum',
         no_income_short: 'Keine Einnahmen',
         saved_per_year: '{{value}} dieses Jahr gespart',

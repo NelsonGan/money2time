@@ -660,7 +660,6 @@ const uk = {
         },
       },
       savings_rate: {
-        title: 'Норма заощаджень',
         no_income_title: 'Немає доходів за цей період',
         no_income_short: 'Немає доходів',
         saved_per_year: '{{value}} заощаджено цього року',

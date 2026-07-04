@@ -655,7 +655,6 @@ const vi = {
         },
       },
       savings_rate: {
-        title: 'Tỷ lệ tiết kiệm',
         no_income_title: 'Không có thu nhập trong kỳ',
         no_income_short: 'Không có thu nhập',
         saved_per_year: '{{value}} tiết kiệm năm nay',

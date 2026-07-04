@@ -666,7 +666,6 @@ const es = {
         },
       },
       savings_rate: {
-        title: 'Tasa de ahorro',
         no_income_title: 'Sin ingresos en este período',
         no_income_short: 'Sin ingresos',
         saved_per_year: '{{value}} ahorrado este año',

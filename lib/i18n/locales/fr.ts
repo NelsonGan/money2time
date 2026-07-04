@@ -664,7 +664,6 @@ const fr = {
         },
       },
       savings_rate: {
-        title: 'Taux d’épargne',
         no_income_title: 'Aucun revenu sur cette période',
         no_income_short: 'Aucun revenu',
         saved_per_year: '{{value}} épargnés cette année',

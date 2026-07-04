@@ -660,7 +660,6 @@ const sv = {
         },
       },
       savings_rate: {
-        title: 'Sparandegrad',
         no_income_title: 'Ingen inkomst under perioden',
         no_income_short: 'Ingen inkomst',
         saved_per_year: '{{value}} sparat i år',

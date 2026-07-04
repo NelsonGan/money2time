@@ -652,7 +652,6 @@ const ko = {
         },
       },
       savings_rate: {
-        title: '저축률',
         no_income_title: '이 기간 수입 없음',
         no_income_short: '수입 없음',
         saved_per_year: '올해 {{value}} 저축',

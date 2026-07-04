@@ -667,7 +667,6 @@ const tr = {
         },
       },
       savings_rate: {
-        title: 'Tasarruf oranı',
         no_income_title: 'Bu dönemde gelir yok',
         no_income_short: 'Gelir yok',
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',

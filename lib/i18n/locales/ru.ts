@@ -662,7 +662,6 @@ const ru = {
         },
       },
       savings_rate: {
-        title: 'Норма сбережений',
         no_income_title: 'Нет дохода за этот период',
         no_income_short: 'Нет дохода',
         saved_per_year: '{{value}} сохранено в этом году',

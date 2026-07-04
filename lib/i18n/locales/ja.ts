@@ -653,7 +653,6 @@ const ja = {
         },
       },
       savings_rate: {
-        title: '貯蓄率',
         no_income_title: 'この期間に収入がありません',
         no_income_short: '収入なし',
         saved_per_year: '今年 {{value}} 貯蓄',

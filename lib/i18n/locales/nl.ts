@@ -667,7 +667,6 @@ const nl = {
         },
       },
       savings_rate: {
-        title: 'Spaarquote',
         no_income_title: 'Geen inkomsten in deze periode',
         no_income_short: 'Geen inkomsten',
         saved_per_year: '{{value}} gespaard dit jaar',

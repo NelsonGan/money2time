@@ -650,7 +650,6 @@ const th = {
         },
       },
       savings_rate: {
-        title: 'อัตราการออม',
         no_income_title: 'ไม่มีรายรับในช่วงนี้',
         no_income_short: 'ไม่มีรายรับ',
         saved_per_year: 'ออมได้ {{value}} ปีนี้',
