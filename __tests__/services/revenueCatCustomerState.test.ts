@@ -15,7 +15,7 @@ function state(overrides: Partial<RevenueCatCustomerState>): RevenueCatCustomerS
     activeProductIdentifier: null,
     expirationDate: null,
     latestPurchaseDate: null,
-    hasActiveSubscription: false,
+    hasRenewingSubscription: false,
     ...overrides,
   };
 }
@@ -60,13 +60,22 @@ describe('revenueCat customer state classifiers', () => {
   });
 
   describe('hasRedundantSubscription', () => {
-    it('is true only for a lifetime owner still carrying an active subscription', () => {
+    it('is true only for a lifetime owner still carrying a renewing subscription', () => {
       const lifetimeWithSub = state({
         activeProductIdentifier: 'm2t_lifetime',
         expirationDate: null,
-        hasActiveSubscription: true,
+        hasRenewingSubscription: true,
       });
       expect(hasRedundantSubscription(lifetimeWithSub)).toBe(true);
+    });
+
+    it('is false for a lifetime owner whose lingering subscription is already cancelled', () => {
+      const lifetimeWithCancelledSub = state({
+        activeProductIdentifier: 'm2t_lifetime',
+        expirationDate: null,
+        hasRenewingSubscription: false,
+      });
+      expect(hasRedundantSubscription(lifetimeWithCancelledSub)).toBe(false);
     });
 
     it('is false for a plain lifetime owner with no lingering subscription', () => {
@@ -77,7 +86,7 @@ describe('revenueCat customer state classifiers', () => {
       const subscriberWithSub = state({
         activeProductIdentifier: 'm2t_monthly',
         expirationDate: FUTURE,
-        hasActiveSubscription: true,
+        hasRenewingSubscription: true,
       });
       expect(hasRedundantSubscription(subscriberWithSub)).toBe(false);
       expect(hasRedundantSubscription(null)).toBe(false);
