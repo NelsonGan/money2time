@@ -1606,7 +1606,7 @@ const en = {
   },
   albums: {
     title: 'Albums',
-    active_label: 'Auto-add new transactions to',
+    active_label: 'Auto-add transactions to',
     active_sheet_title: 'Active trip',
     active_none: 'None',
     active_badge: 'Active',

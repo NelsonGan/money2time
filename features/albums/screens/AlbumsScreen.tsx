@@ -133,17 +133,21 @@ export function AlbumsScreen({
         {albums.length > 0 ? (
           <View
             onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-            className="border-t border-border/40 bg-background px-5 pt-1.5"
+            className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-1.5"
             style={{ paddingBottom: bottomNavInset }}
           >
-            <SelectField
-              compact
-              label={I18n.t('albums.active_label')}
-              sheetTitle={I18n.t('albums.active_sheet_title')}
-              value={activeAlbumId ?? ''}
-              options={activeOptions}
-              onChange={(value) => setActiveAlbum(value || null)}
-            />
+            <Text variant="label" tone="muted" numberOfLines={1} className="shrink-0">
+              {I18n.t('albums.active_label')}:
+            </Text>
+            <View className="flex-1">
+              <SelectField
+                triggerSize="header"
+                sheetTitle={I18n.t('albums.active_sheet_title')}
+                value={activeAlbumId ?? ''}
+                options={activeOptions}
+                onChange={(value) => setActiveAlbum(value || null)}
+              />
+            </View>
           </View>
         ) : null}
       </TabletContentContainer>
