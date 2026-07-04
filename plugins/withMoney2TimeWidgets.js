@@ -1344,13 +1344,13 @@ public class Money2TimeWidgetPackage implements ReactPackage {
         `<?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
   android:minWidth="250dp"
-  android:minHeight="110dp"
+  android:minHeight="150dp"
   android:targetCellWidth="4"
-  android:targetCellHeight="2"
+  android:targetCellHeight="3"
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_monthly_expense_widget"
   android:previewLayout="@layout/money2time_monthly_expense_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1366,7 +1366,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_weekly_expense_widget"
   android:previewLayout="@layout/money2time_weekly_expense_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1382,7 +1382,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_calendar_widget"
   android:previewLayout="@layout/money2time_calendar_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1398,7 +1398,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_savings_rate_widget"
   android:previewLayout="@layout/money2time_savings_rate_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1414,7 +1414,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_quick_add_widget"
   android:previewLayout="@layout/money2time_quick_add_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1430,7 +1430,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_savings_history_widget"
   android:previewLayout="@layout/money2time_savings_history_widget"
-  android:resizeMode="none"
+  android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
       );
@@ -1444,11 +1444,11 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:layout_height="match_parent"
   android:background="@drawable/money2time_widget_background"
   android:orientation="vertical"
-  android:padding="18dp">
+  android:padding="14dp">
 
   <ImageView
-    android:layout_width="124dp"
-    android:layout_height="32dp"
+    android:layout_width="112dp"
+    android:layout_height="28dp"
     android:adjustViewBounds="true"
     android:contentDescription="Money2Time"
     android:scaleType="fitStart"
@@ -1470,14 +1470,17 @@ public class Money2TimeWidgetPackage implements ReactPackage {
 
   <TextView
     android:id="@+id/money2time_widget_amount"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
+    android:autoSizeMaxTextSize="38sp"
+    android:autoSizeMinTextSize="22sp"
+    android:autoSizeTextType="uniform"
     android:includeFontPadding="false"
     android:maxLines="1"
     android:text="$1,284"
     android:textColor="#D45F57"
-    android:textSize="40sp"
+    android:textSize="38sp"
     android:textStyle="bold" />
 
   <TextView
@@ -1513,7 +1516,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
     <LinearLayout
       android:id="@+id/money2time_widget_income"
       android:layout_width="0dp"
-      android:layout_height="50dp"
+      android:layout_height="46dp"
       android:layout_weight="1"
       android:background="@drawable/money2time_widget_income_button"
       android:gravity="center"
@@ -1540,7 +1543,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
     <LinearLayout
       android:id="@+id/money2time_widget_expense"
       android:layout_width="0dp"
-      android:layout_height="50dp"
+      android:layout_height="46dp"
       android:layout_weight="1"
       android:layout_marginStart="12dp"
       android:background="@drawable/money2time_widget_expense_button"
