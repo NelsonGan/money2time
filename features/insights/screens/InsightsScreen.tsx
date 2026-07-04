@@ -7,6 +7,7 @@ import {
   Landmark,
   PiggyBank,
   Smile,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   X,
@@ -50,6 +51,7 @@ import {
   Card,
   CategoryEmoji,
   CategoryPickerSheet,
+  GradientPercent,
   SelectField,
   Text,
   ThemeModal,
@@ -57,7 +59,7 @@ import {
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
-import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
+import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
@@ -67,6 +69,7 @@ import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
+import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import {
@@ -276,6 +279,21 @@ const Y_AXIS_LABEL_MIN_FONT_SIZE = 7.5;
 const CHART_SKELETON_READY_DELAY_MS = 180;
 const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
+const SAVINGS_RATE_RING_SIZE = 104;
+const SAVINGS_RATE_RING_STROKE_WIDTH = 11;
+const SAVINGS_RATE_ABBREVIATE_THRESHOLD = 1000;
+
+// Formats an already-computed savings-rate percentage (e.g. 20 → "20.0%"). When the
+// magnitude reaches 1000% (income tiny relative to net) it abbreviates via the shared
+// compact-number helper (e.g. 1234 → "1.2K%") so the label never overflows its row and
+// breaks the layout. formatCompactNumber drops the sign, so re-apply it here.
+const formatSavingsRatePercentLabel = (percent: number): string => {
+  if (Math.abs(percent) >= SAVINGS_RATE_ABBREVIATE_THRESHOLD) {
+    const sign = percent < 0 ? '-' : '';
+    return `${sign}${formatCompactNumber(Math.abs(percent))}%`;
+  }
+  return `${percent.toFixed(1)}%`;
+};
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
   lineHeight: 30,
@@ -372,6 +390,10 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1,
+  },
+  savingsRateRingIcon: {
+    width: 44,
+    height: 44,
   },
   insightsFilterModalHeader: {
     paddingHorizontal: spacing.screenHorizontal,
@@ -1234,6 +1256,22 @@ function withColorAlpha(hex: string, alpha: number) {
   const b = Number.parseInt(value.slice(4, 6), 16);
   const normalizedAlpha = Math.max(0, Math.min(1, alpha));
   return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
+}
+
+// Tone, icon, and status copy all derive from the same rounded percent the user
+// sees, so the label and colors can never disagree (e.g. a -0.04% year rounds to
+// '0.0%' and reads as the amber "getting there" state, not a red overspend).
+function resolveSavingsRateStatus(displayRatePercent: number | null, palette: ColorPalette) {
+  if (displayRatePercent === null) {
+    return { color: palette.textMuted, Icon: PiggyBank, labelKey: 'no_income_short' as const };
+  }
+  if (displayRatePercent >= HEALTHY_SAVINGS_RATE_THRESHOLD * 100) {
+    return { color: palette.success, Icon: PiggyBank, labelKey: 'status_healthy' as const };
+  }
+  if (displayRatePercent >= 0) {
+    return { color: palette.accent, Icon: TrendingUp, labelKey: 'status_building' as const };
+  }
+  return { color: palette.error, Icon: TrendingDown, labelKey: 'status_overspent' as const };
 }
 
 function isLegacyBalanceAdjustmentTransfer(
@@ -5358,28 +5396,17 @@ export function InsightsScreen({
     if (pageData.insightType === 'savings_rate') {
       const savingsRate =
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
-      const normalized = savingsRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(savingsRate)));
-
-      const toneClass =
-        savingsRate === null
-          ? 'text-muted-foreground'
-          : savingsRate >= 0.2
-            ? 'text-success'
-            : savingsRate >= 0
-              ? 'text-warning'
-              : 'text-destructive';
-      const rateBarClass =
-        savingsRate === null
-          ? 'bg-border'
-          : savingsRate >= 0.2
-            ? 'bg-success'
-            : savingsRate >= 0
-              ? 'bg-warning'
-              : 'bg-destructive';
+      const displayRatePercent =
+        savingsRate === null ? null : Number((savingsRate * 100).toFixed(1));
+      const {
+        color: toneColor,
+        Icon: StatusIcon,
+        labelKey: statusLabelKey,
+      } = resolveSavingsRateStatus(displayRatePercent, themeColors);
+      const statusLabel = I18n.t(`insights.analytics.savings_rate.${statusLabelKey}`);
+      const statusChipColor = withColorAlpha(toneColor, isDark ? 0.24 : 0.14);
       const formattedSavingsRate =
-        savingsRate === null
-          ? I18n.t('insights.analytics.savings_rate.no_income_short')
-          : `${(savingsRate * 100).toFixed(1)}%`;
+        displayRatePercent === null ? null : formatSavingsRatePercentLabel(displayRatePercent);
       const yearlySavedAmount = Math.abs(pageData.totalNet);
       const yearlySavedAmountClass =
         pageData.totalNet > 0
@@ -5395,58 +5422,108 @@ export function InsightsScreen({
             : 'border-border/35 bg-secondary/20';
       const healthyMarkerLeft = `${Math.round(HEALTHY_SAVINGS_RATE_THRESHOLD * 100)}%` as const;
       const healthyMarkerColor = withColorAlpha(themeColors.text, isDark ? 0.75 : 0.5);
+      const ringTrackColor = withColorAlpha(themeColors.textMuted, isDark ? 0.26 : 0.16);
+      const monthTrackSpentColor = withColorAlpha(themeColors.error, isDark ? 0.32 : 0.16);
+      const monthTrackIdleColor = withColorAlpha(themeColors.textMuted, isDark ? 0.24 : 0.14);
+      const piggyIconSource = UTILITY_ICON_SOURCES[INSIGHT_TYPE_ICON_NAME.savings_rate];
+      let bestMonthKey: string | null = null;
+      let bestMonthRate = 0;
+      pageData.savingsRateRows.forEach((row) => {
+        if (row.savingsRate !== null && row.savingsRate > bestMonthRate) {
+          bestMonthKey = row.monthKey;
+          bestMonthRate = row.savingsRate;
+        }
+      });
 
       return (
         <View className="mt-2 gap-3">
-          <Card className="gap-3 p-4">
-            <View>
-              <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.savings_rate.title')}
-              </Text>
-              <View className="mt-1 flex-row flex-wrap items-center gap-2">
-                <Text variant="heading" className={toneClass}>
-                  {formattedSavingsRate}
-                </Text>
-                <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
-                  {renderCompactValueNode(yearlySavedAmount, {
-                    variant: 'label',
-                    textClassName: cn(yearlySavedAmountClass),
-                    iconColor:
-                      pageData.totalNet > 0
-                        ? themeColors.success
-                        : pageData.totalNet < 0
-                          ? themeColors.error
-                          : themeColors.textMuted,
-                  })}
+          <Card className="gap-4 p-5">
+            <View className="flex-row items-center gap-4">
+              <SavingsRateRing
+                size={SAVINGS_RATE_RING_SIZE}
+                strokeWidth={SAVINGS_RATE_RING_STROKE_WIDTH}
+                progress={savingsRate ?? 0}
+                color={toneColor}
+                trackColor={ringTrackColor}
+                goal={HEALTHY_SAVINGS_RATE_THRESHOLD}
+                goalColor={themeColors.accent}
+              >
+                {piggyIconSource ? (
+                  <Image
+                    source={piggyIconSource}
+                    resizeMode="contain"
+                    style={styles.savingsRateRingIcon}
+                  />
+                ) : (
+                  <PiggyBank size={36} color={toneColor} strokeWidth={1.8} />
+                )}
+              </SavingsRateRing>
+
+              <View className="flex-1">
+                <View className="mt-0.5">
+                  {formattedSavingsRate === null ? (
+                    <Text variant="monoLg" tone="muted">
+                      {I18n.t('insights.analytics.savings_rate.no_income_short')}
+                    </Text>
+                  ) : (
+                    // The gradient number is SVG glyphs, invisible to screen
+                    // readers — announce the figure on the wrapper instead.
+                    <View
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel={formattedSavingsRate}
+                    >
+                      <GradientPercent
+                        label={formattedSavingsRate}
+                        color={toneColor}
+                        gradientId="insightsSavingsRateHero"
+                      />
+                    </View>
+                  )}
+                </View>
+                {savingsRate !== null ? (
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('widgets.of_income_saved')}
+                  </Text>
+                ) : null}
+                <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
+                  <View
+                    className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
+                    style={{ backgroundColor: statusChipColor }}
+                  >
+                    <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
+                    <Text
+                      variant="label"
+                      style={{ color: toneColor, fontFamily: FONT.semibold, fontWeight: '600' }}
+                    >
+                      {statusLabel}
+                    </Text>
+                  </View>
+                  <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
+                    {renderCompactValueNode(yearlySavedAmount, {
+                      variant: 'label',
+                      textClassName: cn(yearlySavedAmountClass),
+                      iconColor:
+                        pageData.totalNet > 0
+                          ? themeColors.success
+                          : pageData.totalNet < 0
+                            ? themeColors.error
+                            : themeColors.textMuted,
+                    })}
+                  </View>
                 </View>
               </View>
-              <View className="mt-2 h-3 rounded-full bg-secondary overflow-hidden">
-                <View
-                  className={cn('h-full rounded-full', rateBarClass)}
-                  style={[styles.progressFill, buildWidthStyle(`${Math.round(normalized * 100)}%`)]}
-                />
-                <View
-                  pointerEvents="none"
-                  style={[
-                    styles.savingsRateHealthyMarker,
-                    buildLeftStyle(healthyMarkerLeft),
-                    { backgroundColor: healthyMarkerColor },
-                  ]}
-                />
-              </View>
-              <Text variant="label" tone="muted" className="mt-2">
-                {savingsRate === null
-                  ? I18n.t('insights.analytics.savings_rate.no_income_message')
-                  : I18n.t('insights.analytics.savings_rate.goal_hint')}
-              </Text>
             </View>
 
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.income')}
-                </Text>
-                {renderValueNode(pageData.totalIncome, {
+                <View className="flex-row items-center gap-1.5">
+                  <View className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.income')}
+                  </Text>
+                </View>
+                {renderCompactValueNode(pageData.totalIncome, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-success',
                   iconColor: themeColors.success,
@@ -5454,10 +5531,13 @@ export function InsightsScreen({
               </View>
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.expense')}
-                </Text>
-                {renderValueNode(pageData.totalExpense, {
+                <View className="flex-row items-center gap-1.5">
+                  <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.expense')}
+                  </Text>
+                </View>
+                {renderCompactValueNode(pageData.totalExpense, {
                   variant: 'caption',
                   textClassName: 'mt-0.5 text-destructive',
                   iconColor: themeColors.error,
@@ -5465,10 +5545,18 @@ export function InsightsScreen({
               </View>
               <View className="mx-3 w-px bg-border/40" />
               <View className="flex-1">
-                <Text variant="label" tone="muted">
-                  {I18n.t('calendar.net')}
-                </Text>
-                {renderValueNode(Math.abs(pageData.totalNet), {
+                <View className="flex-row items-center gap-1.5">
+                  <View
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      pageData.totalNet >= 0 ? 'bg-success' : 'bg-destructive',
+                    )}
+                  />
+                  <Text variant="label" tone="muted">
+                    {I18n.t('calendar.net')}
+                  </Text>
+                </View>
+                {renderCompactValueNode(Math.abs(pageData.totalNet), {
                   variant: 'caption',
                   textClassName: cn(
                     'mt-0.5',
@@ -5483,41 +5571,44 @@ export function InsightsScreen({
           <View className="gap-1.5">
             {pageData.savingsRateRows.map((row) => {
               const monthlyRate = row.savingsRate;
+              const hasActivity =
+                row.transactions.length > 0 || row.income !== 0 || row.expense !== 0;
+              if (!hasActivity) {
+                return (
+                  <View
+                    key={row.monthKey}
+                    className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3 py-2 opacity-60"
+                  >
+                    <Text variant="caption" tone="muted">
+                      {row.label}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      —
+                    </Text>
+                  </View>
+                );
+              }
+
               const monthlySavedAmount = Math.abs(row.net);
+              const monthlyDisplayPercent =
+                monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
               const monthlyRateLabel =
-                monthlyRate === null
-                  ? I18n.t('insights.analytics.savings_rate.no_income_short')
-                  : `${(monthlyRate * 100).toFixed(1)}%`;
+                monthlyDisplayPercent === null
+                  ? '—'
+                  : formatSavingsRatePercentLabel(monthlyDisplayPercent);
               const monthlySavedAmountClass =
                 row.net > 0
                   ? 'text-success'
                   : row.net < 0
                     ? 'text-destructive'
                     : 'text-muted-foreground';
-              const monthlySavedBadgeClass =
-                row.net > 0
-                  ? 'border-success/30 bg-success/10'
-                  : row.net < 0
-                    ? 'border-destructive/30 bg-destructive/10'
-                    : 'border-border/35 bg-secondary/20';
-              const monthlyIntensity =
-                monthlyRate === null ? 0 : Math.max(0, Math.min(1, Math.abs(monthlyRate)));
-              const monthlyToneClass =
-                monthlyRate === null
-                  ? 'text-muted-foreground'
-                  : monthlyRate >= 0.2
-                    ? 'text-success'
-                    : monthlyRate >= 0
-                      ? 'text-warning'
-                      : 'text-destructive';
-              const monthlyBarClass =
-                monthlyRate === null
-                  ? 'bg-border'
-                  : monthlyRate >= 0.2
-                    ? 'bg-success'
-                    : monthlyRate >= 0
-                      ? 'bg-warning'
-                      : 'bg-destructive';
+              const monthlyFillFraction =
+                monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
+              const monthlyToneColor = resolveSavingsRateStatus(
+                monthlyDisplayPercent,
+                themeColors,
+              ).color;
+              const isBestMonth = row.monthKey === bestMonthKey;
               return (
                 <Pressable
                   key={row.monthKey}
@@ -5531,50 +5622,73 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={row.label}
-                  className="rounded-xl border border-border/30 bg-card/90 px-2.5 py-2 active:opacity-85"
+                  className="rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-85"
                 >
-                  <View className="flex-row items-center justify-between">
-                    <Text variant="caption">{row.label}</Text>
-                    <View className="flex-row items-center gap-1.5">
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-11">
+                      <View className="flex-row items-center gap-1">
+                        <Text variant="caption" numberOfLines={1}>
+                          {row.label}
+                        </Text>
+                        {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
+                      </View>
+                    </View>
+                    <View className="flex-1 gap-2">
                       <View
-                        className={cn('rounded-full border px-2 py-[3px]', monthlySavedBadgeClass)}
+                        className="h-2 overflow-hidden rounded-full"
+                        style={{
+                          backgroundColor:
+                            row.income > 0 || row.expense > 0
+                              ? monthTrackSpentColor
+                              : monthTrackIdleColor,
+                        }}
                       >
-                        {renderCompactValueNode(monthlySavedAmount, {
+                        <View
+                          style={[
+                            styles.progressFill,
+                            buildWidthStyle(`${Math.round(monthlyFillFraction * 100)}%`),
+                            { backgroundColor: themeColors.success },
+                          ]}
+                        />
+                        {row.income > 0 ? (
+                          <View
+                            pointerEvents="none"
+                            style={[
+                              styles.savingsRateHealthyMarker,
+                              buildLeftStyle(healthyMarkerLeft),
+                              { backgroundColor: healthyMarkerColor },
+                            ]}
+                          />
+                        ) : null}
+                      </View>
+                      <View className="flex-row items-center justify-between gap-2">
+                        {renderCompactValueNode(row.income, {
                           variant: 'label',
-                          textClassName: cn(monthlySavedAmountClass),
-                          iconColor:
-                            row.net > 0
-                              ? themeColors.success
-                              : row.net < 0
-                                ? themeColors.error
-                                : themeColors.textMuted,
+                          textClassName: 'text-success/90',
+                          iconColor: themeColors.success,
+                        })}
+                        {renderCompactValueNode(row.expense, {
+                          variant: 'label',
+                          textClassName: 'text-destructive/90',
+                          iconColor: themeColors.error,
                         })}
                       </View>
-                      <Text variant="caption" className={cn(monthlyToneClass)}>
+                    </View>
+                    <View className="w-20 items-end gap-0.5">
+                      <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
                         {monthlyRateLabel}
                       </Text>
+                      {renderCompactValueNode(monthlySavedAmount, {
+                        variant: 'label',
+                        textClassName: cn(monthlySavedAmountClass),
+                        iconColor:
+                          row.net > 0
+                            ? themeColors.success
+                            : row.net < 0
+                              ? themeColors.error
+                              : themeColors.textMuted,
+                      })}
                     </View>
-                  </View>
-                  <View className="mt-1.5 h-1.5 rounded-full bg-secondary overflow-hidden">
-                    <View
-                      className={cn('h-full rounded-full', monthlyBarClass)}
-                      style={[
-                        styles.progressFill,
-                        buildWidthStyle(`${Math.round(monthlyIntensity * 100)}%`),
-                      ]}
-                    />
-                  </View>
-                  <View className="mt-2 flex-row items-center justify-between gap-2">
-                    {renderValueNode(row.income, {
-                      variant: 'label',
-                      textClassName: 'text-success/90',
-                      iconColor: themeColors.success,
-                    })}
-                    {renderValueNode(row.expense, {
-                      variant: 'label',
-                      textClassName: 'text-destructive/90',
-                      iconColor: themeColors.error,
-                    })}
                   </View>
                 </Pressable>
               );

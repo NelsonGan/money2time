@@ -276,17 +276,26 @@ describe('formatHours', () => {
   it('treats negative values as positive', () => {
     expect(formatHours(-1.5)).toBe('1h 30m');
   });
+
+  it('rolls into days and years, showing at most two units', () => {
+    expect(formatHours(24)).toBe('1d');
+    expect(formatHours(30)).toBe('1d 6h');
+    expect(formatHours(24 * 365)).toBe('1y');
+    expect(formatHours(24 * 365 + 24 * 5)).toBe('1y 5d');
+  });
+
+  it('abbreviates very large year counts as K', () => {
+    expect(formatHours(24 * 365 * 1500)).toBe('1.5Ky');
+  });
 });
 
 describe('formatHoursCompact', () => {
-  it('returns minutes below an hour and drops minutes above', () => {
+  it('matches formatHours (shared years/days/hours/minutes cascade)', () => {
     expect(formatHoursCompact(0)).toBe('0m');
     expect(formatHoursCompact(0.5)).toBe('30m');
-    expect(formatHoursCompact(2.4)).toBe('2h');
-  });
-
-  it('abbreviates large hour counts', () => {
-    expect(formatHoursCompact(1500)).toBe('1.5Kh');
+    expect(formatHoursCompact(2.5)).toBe('2h 30m');
+    expect(formatHoursCompact(30)).toBe('1d 6h');
+    expect(formatHoursCompact(1500)).toBe('62d 12h');
   });
 });
 

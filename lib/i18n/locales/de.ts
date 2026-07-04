@@ -28,6 +28,8 @@ const de = {
     unknown: 'Unbekannt',
     hour_unit: 'h',
     minute_unit: 'min',
+    day_unit: 'Tg',
+    year_unit: 'J',
     none: 'Keine',
     no_account: 'Kein Konto',
     uncategorized: 'Unkategorisiert',
@@ -666,14 +668,14 @@ const de = {
         },
       },
       savings_rate: {
-        title: 'Sparquoten-Übersicht',
         no_income_title: 'Keine Einnahmen in diesem Zeitraum',
         no_income_short: 'Keine Einnahmen',
-        no_income_message:
-          'Füge Einnahmentransaktionen in diesem Zeitraum hinzu, um die Sparquote zu berechnen.',
         saved_per_year: '{{value}} dieses Jahr gespart',
         exclusions_active: '{{count}} Kategorien von der Berechnung ausgeschlossen.',
         goal_hint: '20 %+ gilt als gesund.',
+        status_healthy: 'Gesund',
+        status_building: 'Auf gutem Weg',
+        status_overspent: 'Zu viel ausgegeben',
       },
       income_rate_history: {
         rate_title: 'Einnahmenrate',

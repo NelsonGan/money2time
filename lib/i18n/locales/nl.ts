@@ -28,6 +28,8 @@ const nl = {
     unknown: 'Onbekend',
     hour_unit: 'u',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'j',
     none: 'Geen',
     no_account: 'Geen rekening',
     uncategorized: 'Zonder categorie',
@@ -665,14 +667,14 @@ const nl = {
         },
       },
       savings_rate: {
-        title: 'Spaarquote-overzicht',
         no_income_title: 'Geen inkomsten in deze periode',
         no_income_short: 'Geen inkomsten',
-        no_income_message:
-          'Voeg inkomstentransacties toe in deze periode om de spaarquote te berekenen.',
         saved_per_year: '{{value}} gespaard dit jaar',
         exclusions_active: '{{count}} categorieën uitgesloten van berekening.',
         goal_hint: '20%+ wordt als gezond beschouwd.',
+        status_healthy: 'Gezond',
+        status_building: 'Op de goede weg',
+        status_overspent: 'Te veel uitgegeven',
       },
       income_rate_history: {
         rate_title: 'Inkomstenpercentage',

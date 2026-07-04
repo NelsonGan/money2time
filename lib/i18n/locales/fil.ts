@@ -28,6 +28,8 @@ const fil = {
     unknown: 'Hindi kilala',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'y',
     none: 'Wala',
     no_account: 'Walang account',
     uncategorized: 'Walang kategorya',
@@ -668,14 +670,14 @@ const fil = {
         },
       },
       savings_rate: {
-        title: 'Snapshot ng savings rate',
         no_income_title: 'Walang kita sa panahong ito',
         no_income_short: 'Walang kita',
-        no_income_message:
-          'Magdagdag ng income transactions sa panahong ito para makalkula ang savings rate.',
         saved_per_year: '{{value}} na nai-save ngayong taon',
         exclusions_active: 'Inalis ang {{count}} kategorya mula sa kalkulasyon.',
         goal_hint: 'Ang 20%+ ay itinuturing na malusog.',
+        status_healthy: 'Malusog',
+        status_building: 'Papalapit na',
+        status_overspent: 'Sobra ang gastos',
       },
       income_rate_history: {
         rate_title: 'Income rate',

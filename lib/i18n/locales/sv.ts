@@ -28,6 +28,8 @@ const sv = {
     unknown: 'Okänt',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'å',
     none: 'Ingen',
     no_account: 'Inget konto',
     uncategorized: 'Okategoriserat',
@@ -658,14 +660,14 @@ const sv = {
         },
       },
       savings_rate: {
-        title: 'Sparandegradöversikt',
         no_income_title: 'Ingen inkomst under perioden',
         no_income_short: 'Ingen inkomst',
-        no_income_message:
-          'Lägg till inkomsttransaktioner under perioden för att beräkna sparandegraden.',
         saved_per_year: '{{value}} sparat i år',
         exclusions_active: 'Exkluderar {{count}} kategorier från beräkningen.',
         goal_hint: '20 %+ anses sunt.',
+        status_healthy: 'Sunt',
+        status_building: 'På god väg',
+        status_overspent: 'Överkonsumtion',
       },
       income_rate_history: {
         rate_title: 'Inkomstgrad',

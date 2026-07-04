@@ -28,6 +28,8 @@ const es = {
     unknown: 'Desconocido',
     hour_unit: 'h',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'a',
     none: 'Ninguno',
     no_account: 'Sin cuenta',
     uncategorized: 'Sin categoría',
@@ -664,14 +666,14 @@ const es = {
         },
       },
       savings_rate: {
-        title: 'Resumen de tasa de ahorro',
         no_income_title: 'Sin ingresos en este período',
         no_income_short: 'Sin ingresos',
-        no_income_message:
-          'Añade movimientos de ingreso en este período para calcular la tasa de ahorro.',
         saved_per_year: '{{value}} ahorrado este año',
         exclusions_active: 'Excluyendo {{count}} categorías del cálculo.',
         goal_hint: 'Un 20%+ se considera saludable.',
+        status_healthy: 'Saludable',
+        status_building: 'En camino',
+        status_overspent: 'Gastando de más',
       },
       income_rate_history: {
         rate_title: 'Tarifa por hora',
