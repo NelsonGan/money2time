@@ -2548,9 +2548,11 @@ function InsightTypeMenuPopover({
                   <Text numberOfLines={1} className="flex-1 text-foreground">
                     {option.label}
                   </Text>
-                  {option.badge ? (
+                  {isSelected ? (
+                    <Check size={16} color={themeColors.primary} />
+                  ) : option.badge ? (
                     <View
-                      className="rounded-full px-1.5 py-0.5"
+                      className="items-center justify-center rounded-full px-1.5 py-0.5"
                       style={{ backgroundColor: themeColors.primary }}
                     >
                       <Text
@@ -2559,14 +2561,13 @@ function InsightTypeMenuPopover({
                           lineHeight: 10,
                           fontWeight: '700',
                           color: '#FFFFFF',
-                          letterSpacing: 0.4,
+                          textAlign: 'center',
                         }}
                       >
                         {option.badge}
                       </Text>
                     </View>
                   ) : null}
-                  {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
                 </Pressable>
               );
             })}
