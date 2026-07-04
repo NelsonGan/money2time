@@ -886,6 +886,13 @@ const fil = {
       'Ipapakita muli ang setup guide sa susunod na pagbubukas. Hindi mabubura ang data.',
     replay_action: 'I-replay',
     rate_app: 'I-rate ang Money2Time',
+    contact: {
+      tile: 'Makipag-ugnayan',
+      title: 'Makipag-ugnayan sa amin',
+      body: 'May tanong, nakakita ng bug, o gustong magbahagi ng feedback? Sumali sa aming Discord community.',
+      button: 'Sumali sa aming Discord',
+      close: 'Sa susunod na lang',
+    },
     danger_zone: 'Danger Zone',
     danger_description: 'Kailangan ng bagong simula? Mabubura nito ang lahat ng lokal na data.',
     backup_fallback_name: 'Backup',

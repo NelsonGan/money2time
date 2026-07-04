@@ -868,6 +868,13 @@ const hi = {
     replay_message: 'अगली बार लॉन्च पर सेटअप गाइड फिर दिखेगा। कोई डेटा नहीं हटेगा।',
     replay_action: 'फिर से चलाएं',
     rate_app: 'Money2Time को रेट करें',
+    contact: {
+      tile: 'संपर्क करें',
+      title: 'संपर्क में रहें',
+      body: 'कोई सवाल है, कोई बग मिला, या फ़ीडबैक साझा करना चाहते हैं? हमारे Discord समुदाय से जुड़ें।',
+      button: 'हमारे Discord से जुड़ें',
+      close: 'बाद में',
+    },
     danger_zone: 'खतरनाक क्षेत्र',
     danger_description: 'नया शुरुआत चाहते हैं? यह सभी स्थानीय डेटा हटा देगा।',
     backup_fallback_name: 'बैकअप',

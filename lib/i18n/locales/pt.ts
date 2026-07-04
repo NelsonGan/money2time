@@ -880,6 +880,13 @@ const pt = {
       'O guia de configuração será exibido novamente na próxima abertura. Nenhum dado será excluído.',
     replay_action: 'Repetir',
     rate_app: 'Avaliar Money2Time',
+    contact: {
+      tile: 'Fale conosco',
+      title: 'Entre em contato',
+      body: 'Tem uma dúvida, encontrou um bug ou quer compartilhar feedback? Junte-se à nossa comunidade no Discord.',
+      button: 'Entrar no nosso Discord',
+      close: 'Talvez depois',
+    },
     danger_zone: 'Zona de perigo',
     danger_description: 'Precisa de um novo começo? Isso apaga todos os dados locais.',
     backup_fallback_name: 'Backup',

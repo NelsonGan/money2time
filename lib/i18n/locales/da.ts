@@ -878,6 +878,13 @@ const da = {
     replay_message: 'Opsætningsvejledningen vises igen ved næste start. Ingen data slettes.',
     replay_action: 'Gentag',
     rate_app: 'Bedøm Money2Time',
+    contact: {
+      tile: 'Kontakt os',
+      title: 'Kom i kontakt',
+      body: 'Har du et spørgsmål, fundet en fejl eller vil du dele feedback? Bliv en del af vores Discord-fællesskab.',
+      button: 'Deltag i vores Discord',
+      close: 'Måske senere',
+    },
     danger_zone: 'Farezonen',
     danger_description: 'Brug for en frisk start? Dette rydder alle lokale data.',
     backup_fallback_name: 'Backup',

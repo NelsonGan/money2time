@@ -873,6 +873,13 @@ const sv = {
     replay_message: 'Konfigurationsguiden visas igen vid nästa start. Ingen data tas bort.',
     replay_action: 'Spela upp igen',
     rate_app: 'Betygsätt Money2Time',
+    contact: {
+      tile: 'Kontakta oss',
+      title: 'Hör av dig',
+      body: 'Har du en fråga, hittat en bugg eller vill dela feedback? Gå med i vår Discord-gemenskap.',
+      button: 'Gå med i vår Discord',
+      close: 'Kanske senare',
+    },
     danger_zone: 'Farlig zon',
     danger_description: 'Behöver du börja om? Det här rensar all lokal data.',
     backup_fallback_name: 'Säkerhetskopia',

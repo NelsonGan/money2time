@@ -863,6 +863,13 @@ const ko = {
     replay_message: '다음 실행 시 설정 가이드가 다시 표시됩니다. 데이터는 삭제되지 않습니다.',
     replay_action: '다시 보기',
     rate_app: 'Money2Time 평가하기',
+    contact: {
+      tile: '문의하기',
+      title: '문의하기',
+      body: '질문이 있거나 버그를 발견했거나 의견을 나누고 싶으신가요? Discord 커뮤니티에 참여하세요.',
+      button: 'Discord 참여하기',
+      close: '나중에',
+    },
     danger_zone: '위험 구역',
     danger_description: '새로 시작하고 싶으세요? 모든 로컬 데이터가 삭제됩니다.',
     backup_fallback_name: '백업',

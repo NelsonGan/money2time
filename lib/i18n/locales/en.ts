@@ -848,6 +848,13 @@ const en = {
     replay_message: 'This will show the setup guide again on next launch. No data will be deleted.',
     replay_action: 'Replay',
     rate_app: 'Rate Money2Time',
+    contact: {
+      tile: 'Contact us',
+      title: 'Get in touch',
+      body: 'Have a question, found a bug, or want to share feedback? Join our Discord community.',
+      button: 'Join our Discord',
+      close: 'Maybe later',
+    },
     danger_zone: 'Danger Zone',
     danger_description: 'Need a fresh start? This clears all local data.',
     backup_fallback_name: 'Backup',

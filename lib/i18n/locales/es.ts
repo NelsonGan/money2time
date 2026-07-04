@@ -881,6 +881,13 @@ const es = {
       'Se mostrará la guía de configuración en el próximo inicio. No se eliminarán datos.',
     replay_action: 'Repetir',
     rate_app: 'Calificar Money2Time',
+    contact: {
+      tile: 'Contáctanos',
+      title: 'Ponte en contacto',
+      body: '¿Tienes una pregunta, encontraste un error o quieres compartir tu opinión? Únete a nuestra comunidad de Discord.',
+      button: 'Únete a nuestro Discord',
+      close: 'Quizás más tarde',
+    },
     danger_zone: 'Zona de peligro',
     danger_description: '¿Necesitas empezar de nuevo? Esto borra todos los datos locales.',
     backup_fallback_name: 'Respaldo',
