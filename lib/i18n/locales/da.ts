@@ -1651,6 +1651,7 @@ const da = {
     remove_selected_body: 'Fjern {{count}} transaktioner fra dette album? De slettes ikke.',
     tab_breakdown: 'Fordeling',
     tab_transactions: 'Transaktioner',
+    tab_map: 'Kort',
     show_cover: 'Vis omslagsbillede',
     show_details: 'Vis detaljer',
     no_expenses: 'Ingen udgifter at fordele endnu.',

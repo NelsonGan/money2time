@@ -1672,6 +1672,7 @@ const nl = {
       '{{count}} transacties uit dit album verwijderen? Ze worden niet verwijderd.',
     tab_breakdown: 'Verdeling',
     tab_transactions: 'Transacties',
+    tab_map: 'Kaart',
     show_cover: 'Omslagfoto tonen',
     show_details: 'Details tonen',
     no_expenses: 'Nog geen uitgaven om te verdelen.',

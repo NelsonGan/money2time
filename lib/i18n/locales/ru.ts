@@ -1655,6 +1655,7 @@ const ru = {
     remove_selected_body: 'Убрать {{count}} операций из этого альбома? Они не будут удалены.',
     tab_breakdown: 'Разбивка',
     tab_transactions: 'Операции',
+    tab_map: 'Карта',
     show_cover: 'Показать обложку',
     show_details: 'Показать детали',
     no_expenses: 'Пока нет расходов для разбивки.',

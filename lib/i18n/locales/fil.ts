@@ -1678,6 +1678,7 @@ const fil = {
       'Alisin ang {{count}} na transaksyon sa album na ito? Hindi ito buburahin.',
     tab_breakdown: 'Breakdown',
     tab_transactions: 'Mga transaksyon',
+    tab_map: 'Mapa',
     show_cover: 'Ipakita ang cover photo',
     show_details: 'Ipakita ang mga detalye',
     no_expenses: 'Wala pang gastusing maibbreakdown.',

@@ -1612,6 +1612,7 @@ const th = {
     remove_selected_body: 'นำ {{count}} รายการออกจากอัลบั้มนี้หรือไม่? รายการจะไม่ถูกลบ',
     tab_breakdown: 'สัดส่วน',
     tab_transactions: 'รายการ',
+    tab_map: 'แผนที่',
     show_cover: 'แสดงรูปปก',
     show_details: 'แสดงรายละเอียด',
     no_expenses: 'ยังไม่มีค่าใช้จ่ายให้แสดงสัดส่วน',

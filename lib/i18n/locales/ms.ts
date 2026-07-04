@@ -1657,6 +1657,7 @@ const ms = {
       'Keluarkan {{count}} transaksi daripada album ini? Ia tidak akan dipadam.',
     tab_breakdown: 'Pecahan',
     tab_transactions: 'Transaksi',
+    tab_map: 'Peta',
     show_cover: 'Tunjuk foto kulit',
     show_details: 'Tunjuk butiran',
     no_expenses: 'Belum ada perbelanjaan untuk dipecahkan.',

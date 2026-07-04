@@ -1658,6 +1658,7 @@ const pl = {
     remove_selected_body: 'Usunąć {{count}} transakcji z tego albumu? Nie zostaną skasowane.',
     tab_breakdown: 'Podział',
     tab_transactions: 'Transakcje',
+    tab_map: 'Mapa',
     show_cover: 'Pokaż zdjęcie okładki',
     show_details: 'Pokaż szczegóły',
     no_expenses: 'Brak wydatków do podziału.',

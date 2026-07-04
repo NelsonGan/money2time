@@ -49,7 +49,6 @@ import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
   AlbumDetailScreen,
-  AlbumLocationsScreen,
   AlbumsScreen,
   CreateAlbumScreen,
   EditAlbumDetailsScreen,
@@ -567,9 +566,6 @@ function MainShellScreen({
     },
     [navigation],
   );
-  const openAlbumLocations = useCallback(() => {
-    navigation.navigate('AlbumLocations');
-  }, [navigation]);
 
   const openAccountSettings = useCallback(() => {
     navigation.navigate('SettingsAccounts');
@@ -952,7 +948,6 @@ function MainShellScreen({
             scrollToTopToken={albumsScrollTopToken}
             onOpenCreateAlbum={openCreateAlbum}
             onOpenAlbumDetail={openAlbumDetail}
-            onOpenAlbumLocations={openAlbumLocations}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
@@ -1245,15 +1240,6 @@ function CreateAlbumRouteScreen({ route, navigation }: RootStackRouteProps<'Crea
       initialTransactionIds={route.params?.initialTransactionIds}
       onClose={() => navigation.goBack()}
       onCreated={(albumId) => navigation.replace('AlbumDetail', { albumId })}
-    />
-  );
-}
-
-function AlbumLocationsRouteScreen({ navigation }: RootStackRouteProps<'AlbumLocations'>) {
-  return (
-    <AlbumLocationsScreen
-      onClose={() => navigation.goBack()}
-      onOpenAlbumDetail={(albumId) => navigation.navigate('AlbumDetail', { albumId })}
     />
   );
 }
@@ -1840,7 +1826,6 @@ function AppContent() {
             component={SettingsWageCalculatorRouteScreen}
           />
           <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
-          <RootStack.Screen name="AlbumLocations" component={AlbumLocationsRouteScreen} />
           <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
           <RootStack.Screen
             name="EditAlbumTransactions"

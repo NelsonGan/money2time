@@ -1575,6 +1575,7 @@ const zh = {
     remove_selected_body: '从该相册中移除 {{count}} 笔交易？交易不会被删除。',
     tab_breakdown: '分类',
     tab_transactions: '交易',
+    tab_map: '地图',
     show_cover: '显示封面照片',
     show_details: '显示详情',
     no_expenses: '暂无可分类的支出。',

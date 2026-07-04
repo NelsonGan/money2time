@@ -1660,6 +1660,7 @@ const tr = {
     remove_selected_body: '{{count}} işlem bu albümden çıkarılsın mı? İşlemler silinmez.',
     tab_breakdown: 'Dağılım',
     tab_transactions: 'İşlemler',
+    tab_map: 'Harita',
     show_cover: 'Kapak fotoğrafını göster',
     show_details: 'Ayrıntıları göster',
     no_expenses: 'Henüz dağıtılacak harcama yok.',

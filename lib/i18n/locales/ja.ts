@@ -1632,6 +1632,7 @@ const ja = {
     remove_selected_body: 'このアルバムから{{count}}件の取引を外しますか？取引は削除されません。',
     tab_breakdown: '内訳',
     tab_transactions: '取引',
+    tab_map: '地図',
     show_cover: 'カバー写真を表示',
     show_details: '詳細を表示',
     no_expenses: '内訳できる支出がまだありません。',

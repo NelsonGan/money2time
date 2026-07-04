@@ -1,6 +1,13 @@
-import { Map as MapIcon, Sparkles } from 'lucide-react-native';
-import { type ElementRef, useEffect, useMemo, useState } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Sparkles } from 'lucide-react-native';
+import { type ElementRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -15,15 +22,18 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 
 import { AlbumCard } from '../components/AlbumCard';
+import { AlbumMapPanel } from '../components/AlbumMapPanel';
 
 interface AlbumsScreenProps {
   scrollToTopToken?: number;
   onOpenCreateAlbum: () => void;
   onOpenAlbumDetail: (albumId: string) => void;
-  onOpenAlbumLocations: () => void;
 }
+
+type AlbumsTab = 'albums' | 'map';
 
 const GRID_GAP = 14;
 const SCREEN_PADDING = 18;
@@ -32,7 +42,6 @@ export function AlbumsScreen({
   scrollToTopToken,
   onOpenCreateAlbum,
   onOpenAlbumDetail,
-  onOpenAlbumLocations,
 }: AlbumsScreenProps) {
   const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
   const { checkLimit } = useProGate();
@@ -42,15 +51,18 @@ export function AlbumsScreen({
   const { width: windowWidth } = useWindowDimensions();
   const isSmallScreen = windowWidth < 380;
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
-  // Measured height of the sticky footer so the map FAB can float above it.
-  const [footerHeight, setFooterHeight] = useState(0);
+
+  const [tab, setTab] = useState<AlbumsTab>('albums');
+  const pagerRef = useRef<ScrollView | null>(null);
+  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
+  const [pageHeight, setPageHeight] = useState(0);
 
   useEffect(() => {
     if (scrollToTopToken === undefined) return;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [scrollToTopToken]);
 
-  const contentWidth = Math.min(windowWidth, 640) - SCREEN_PADDING * 2;
+  const contentWidth = pageWidth - SCREEN_PADDING * 2;
 
   const activeOptions = useMemo(
     () => [
@@ -60,118 +72,194 @@ export function AlbumsScreen({
     [albums],
   );
 
+  // Tap a tab → animate the pager to that page (swipe is handled by the pager).
+  const selectTab = useCallback(
+    (value: AlbumsTab) => {
+      if (value !== tab) void triggerHaptic('selection');
+      setTab(value);
+      pagerRef.current?.scrollTo({ x: value === 'map' ? pageWidth : 0, animated: true });
+    },
+    [pageWidth, tab],
+  );
+
+  // Swipe settles on a page → sync the active tab.
+  const handlePagerMomentumEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const index = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, pageWidth));
+      const value: AlbumsTab = index === 1 ? 'map' : 'albums';
+      if (value === tab) return;
+      void triggerHaptic('selection');
+      setTab(value);
+    },
+    [pageWidth, tab],
+  );
+
+  // Keep the pager aligned to the active tab when the page width changes
+  // (tablet layout correction, orientation change).
+  const activeTabRef = useRef(tab);
+  activeTabRef.current = tab;
+  useEffect(() => {
+    if (activeTabRef.current !== 'map') return;
+    pagerRef.current?.scrollTo({ x: pageWidth, animated: false });
+  }, [pageWidth]);
+
+  const tabsBar = (
+    <View className="flex-row items-center justify-between px-5 pb-1 pt-3">
+      <View className="flex-row items-end gap-6">
+        {(
+          [
+            { value: 'albums', label: I18n.t('albums.title') },
+            { value: 'map', label: I18n.t('albums.tab_map') },
+          ] as const
+        ).map((option) => {
+          const active = tab === option.value;
+          return (
+            <Pressable
+              key={option.value}
+              onPress={() => selectTab(option.value)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+            >
+              <Text
+                variant={isSmallScreen ? 'subheading' : 'heading'}
+                numberOfLines={1}
+                className={cn(
+                  'tracking-tight',
+                  active ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
+                {option.label}
+              </Text>
+              <View
+                className="mt-1.5 h-1 rounded-full"
+                style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          if (!checkLimit('albums', albums.length)) return;
+          onOpenCreateAlbum();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('albums.create')}
+        className="h-10 w-10 items-center justify-center rounded-full bg-primary shadow-soft"
+      >
+        <PlusIcon size={20} color="#fff" />
+      </Pressable>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <TabletContentContainer style={{ flex: 1 }}>
-        <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
-          <Text
-            variant={isSmallScreen ? 'subheading' : 'heading'}
-            className="flex-1 pr-3 tracking-tight"
-            numberOfLines={1}
-          >
-            {I18n.t('albums.title')}
-          </Text>
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              if (!checkLimit('albums', albums.length)) return;
-              onOpenCreateAlbum();
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('albums.create')}
-            className="h-10 w-10 items-center justify-center rounded-full bg-primary shadow-soft"
-          >
-            <PlusIcon size={20} color="#fff" />
-          </Pressable>
-        </View>
+        {tabsBar}
 
-        {albums.length === 0 ? (
-          <EmptyState
-            title={I18n.t('albums.empty_title')}
-            message={I18n.t('albums.empty_message')}
-            mascotMood="curious"
-          />
-        ) : (
-          <Animated.ScrollView
-            ref={scrollRef}
-            className="flex-1"
-            contentContainerStyle={{
-              paddingHorizontal: SCREEN_PADDING,
-              paddingTop: 6,
-              paddingBottom: 24,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <Sortable.Flex
-              activeItemScale={1.02}
-              activeItemShadowOpacity={0.12}
-              customHandle
-              dragActivationDelay={0}
-              flexDirection="column"
-              flexWrap="nowrap"
-              gap={GRID_GAP}
-              inactiveItemOpacity={1}
-              onDragEnd={({ fromIndex, order, toIndex }) => {
-                if (fromIndex === toIndex) return;
-                reorderAlbums(order(albums).map((album) => album.id));
-                void triggerHaptic('selection');
-              }}
-              scrollableRef={scrollRef}
-              width="fill"
-            >
-              {albums.map((album) => (
-                <AlbumCard
-                  key={album.id}
-                  album={album}
-                  width={contentWidth}
-                  isActive={album.id === activeAlbumId}
-                  onPress={onOpenAlbumDetail}
-                />
-              ))}
-            </Sortable.Flex>
-          </Animated.ScrollView>
-        )}
-
-        {albums.length > 0 ? (
-          <View
-            onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-            className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
-            style={{ paddingBottom: bottomNavInset }}
-          >
-            <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
-              <Sparkles size={15} color={themeColors.textMuted} />
-              <Text variant="label" tone="muted" numberOfLines={2}>
-                {I18n.t('albums.active_label')}
-              </Text>
-            </View>
-            <View className="flex-1">
-              <SelectField
-                triggerSize="header"
-                triggerTone={activeAlbumId ? 'active' : 'default'}
-                sheetTitle={I18n.t('albums.active_sheet_title')}
-                value={activeAlbumId ?? ''}
-                options={activeOptions}
-                onChange={(value) => setActiveAlbum(value || null)}
-              />
-            </View>
-          </View>
-        ) : null}
-      </TabletContentContainer>
-
-      {albums.length > 0 ? (
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            onOpenAlbumLocations();
+        <View
+          className="flex-1"
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            if (width > 0 && width !== pageWidth) setPageWidth(width);
+            if (height > 0 && height !== pageHeight) setPageHeight(height);
           }}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('albums.location.screen_title')}
-          className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-soft active:opacity-85"
-          style={{ bottom: footerHeight + 16 }}
         >
-          <MapIcon size={24} color="#fff" />
-        </Pressable>
-      ) : null}
+          {pageHeight > 0 ? (
+            <ScrollView
+              ref={pagerRef}
+              horizontal
+              pagingEnabled
+              directionalLockEnabled
+              nestedScrollEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={32}
+              onMomentumScrollEnd={handlePagerMomentumEnd}
+            >
+              {/* Albums index page */}
+              <View style={{ width: pageWidth, height: pageHeight }}>
+                {albums.length === 0 ? (
+                  <EmptyState
+                    title={I18n.t('albums.empty_title')}
+                    message={I18n.t('albums.empty_message')}
+                    mascotMood="curious"
+                  />
+                ) : (
+                  <>
+                    <Animated.ScrollView
+                      ref={scrollRef}
+                      className="flex-1"
+                      contentContainerStyle={{
+                        paddingHorizontal: SCREEN_PADDING,
+                        paddingTop: 6,
+                        paddingBottom: 24,
+                      }}
+                      nestedScrollEnabled
+                      showsVerticalScrollIndicator={false}
+                    >
+                      <Sortable.Flex
+                        activeItemScale={1.02}
+                        activeItemShadowOpacity={0.12}
+                        customHandle
+                        dragActivationDelay={0}
+                        flexDirection="column"
+                        flexWrap="nowrap"
+                        gap={GRID_GAP}
+                        inactiveItemOpacity={1}
+                        onDragEnd={({ fromIndex, order, toIndex }) => {
+                          if (fromIndex === toIndex) return;
+                          reorderAlbums(order(albums).map((album) => album.id));
+                          void triggerHaptic('selection');
+                        }}
+                        scrollableRef={scrollRef}
+                        width="fill"
+                      >
+                        {albums.map((album) => (
+                          <AlbumCard
+                            key={album.id}
+                            album={album}
+                            width={contentWidth}
+                            isActive={album.id === activeAlbumId}
+                            onPress={onOpenAlbumDetail}
+                          />
+                        ))}
+                      </Sortable.Flex>
+                    </Animated.ScrollView>
+
+                    <View
+                      className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
+                      style={{ paddingBottom: bottomNavInset }}
+                    >
+                      <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
+                        <Sparkles size={15} color={themeColors.textMuted} />
+                        <Text variant="label" tone="muted" numberOfLines={2}>
+                          {I18n.t('albums.active_label')}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <SelectField
+                          triggerSize="header"
+                          triggerTone={activeAlbumId ? 'active' : 'default'}
+                          sheetTitle={I18n.t('albums.active_sheet_title')}
+                          value={activeAlbumId ?? ''}
+                          options={activeOptions}
+                          onChange={(value) => setActiveAlbum(value || null)}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
+              </View>
+
+              {/* Map page */}
+              <View style={{ width: pageWidth, height: pageHeight }}>
+                <AlbumMapPanel onOpenAlbumDetail={onOpenAlbumDetail} active={tab === 'map'} />
+              </View>
+            </ScrollView>
+          ) : null}
+        </View>
+      </TabletContentContainer>
     </View>
   );
 }

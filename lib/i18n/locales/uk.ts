@@ -1650,6 +1650,7 @@ const uk = {
     remove_selected_body: 'Прибрати {{count}} операцій з цього альбому? Їх не буде видалено.',
     tab_breakdown: 'Розподіл',
     tab_transactions: 'Операції',
+    tab_map: 'Карта',
     show_cover: 'Показати обкладинку',
     show_details: 'Показати деталі',
     no_expenses: 'Поки немає витрат для розподілу.',

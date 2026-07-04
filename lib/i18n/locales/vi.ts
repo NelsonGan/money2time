@@ -1633,6 +1633,7 @@ const vi = {
     remove_selected_body: 'Gỡ {{count}} giao dịch khỏi album này? Giao dịch sẽ không bị xóa.',
     tab_breakdown: 'Phân tích',
     tab_transactions: 'Giao dịch',
+    tab_map: 'Bản đồ',
     show_cover: 'Hiện ảnh bìa',
     show_details: 'Hiện chi tiết',
     no_expenses: 'Chưa có chi tiêu để phân tích.',
