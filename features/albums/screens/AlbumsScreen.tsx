@@ -133,8 +133,8 @@ export function AlbumsScreen({
         {albums.length > 0 ? (
           <View
             onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-            className="border-t border-border/40 bg-background px-5 pt-3"
-            style={{ paddingBottom: bottomNavInset + 12 }}
+            className="border-t border-border/40 bg-background px-5 pt-1.5"
+            style={{ paddingBottom: bottomNavInset }}
           >
             <SelectField
               compact
