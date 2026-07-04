@@ -6502,10 +6502,7 @@ export function InsightsScreen({
               null;
             if (!stickyOption) return null;
             return (
-              <View
-                className="bg-background px-5 pt-1.5"
-                style={{ paddingBottom: bottomNavInset }}
-              >
+              <View className="bg-background px-5 pt-1.5" style={{ paddingBottom: bottomNavInset }}>
                 <TabletContentContainer>
                   <Pressable
                     onPress={() => {
