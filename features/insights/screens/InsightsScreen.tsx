@@ -6611,6 +6611,10 @@ export function InsightsScreen({
                 onPress={openInsightMenu}
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('insights.insight_type')}
+                accessibilityValue={{
+                  text: String(I18n.t(`insights.${displaySelectedInsightType}`)),
+                }}
+                accessibilityState={{ expanded: isInsightMenuOpen }}
                 className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
               >
                 {renderInsightTypeIcon(displaySelectedInsightType)}
