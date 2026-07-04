@@ -28,6 +28,8 @@ const nb = {
     unknown: 'Ukjent',
     hour_unit: 't',
     minute_unit: 'm',
+    day_unit: 'd',
+    year_unit: 'år',
     none: 'Ingen',
     no_account: 'Ingen konto',
     uncategorized: 'Ukategorisert',
@@ -660,14 +662,14 @@ const nb = {
         },
       },
       savings_rate: {
-        title: 'Sparerateoversikt',
         no_income_title: 'Ingen inntekt i denne perioden',
         no_income_short: 'Ingen inntekt',
-        no_income_message:
-          'Legg til inntektstransaksjoner i denne perioden for å beregne sparerate.',
         saved_per_year: '{{value}} spart i år',
         exclusions_active: 'Ekskluderer {{count}} kategorier fra beregningen.',
         goal_hint: '20 %+ anses som sunt.',
+        status_healthy: 'Sunt',
+        status_building: 'På god vei',
+        status_overspent: 'Overforbruk',
       },
       income_rate_history: {
         rate_title: 'Inntektssats',

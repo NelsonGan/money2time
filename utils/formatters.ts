@@ -288,30 +288,52 @@ export function formatTimeOfDay(hour: number, minute: number): string {
   return `${display}:${min} ${period}`;
 }
 
-/** Short hours label for tight spaces: drops minutes and abbreviates 1000+ as K. */
-export function formatHoursCompact(hours: number): string {
-  const abs = Math.abs(hours);
+/**
+ * The app's standard time-value label. Rolls hours up into larger units and shows at
+ * most the two largest non-zero ones — years/days, days/hours, or hours/minutes — so a
+ * big time-value stays short (e.g. "1y 5d", "5d 5h", "2h 30m") instead of ballooning
+ * into thousands of hours. Uses calendar conversions (24h/day, 365d/year); the top
+ * unit's count itself abbreviates as K past 1000 ("1.5Ky"). Negative values format as
+ * their magnitude.
+ */
+export function formatHours(hours: number): string {
+  const y = String(I18n.t('common.year_unit'));
+  const d = String(I18n.t('common.day_unit'));
   const h = String(I18n.t('common.hour_unit'));
   const m = String(I18n.t('common.minute_unit'));
-  if (abs < 0.01) return `0${m}`;
-  const minutes = Math.round(abs * 60);
-  if (minutes < 60) return `${minutes}${m}`;
-  const wholeHours = Math.round(abs);
-  return wholeHours < 1000 ? `${wholeHours}${h}` : `${formatCompactNumber(wholeHours)}${h}`;
+
+  const totalMinutes = Math.round(Math.abs(hours) * 60);
+  if (totalMinutes < 1) return `0${m}`;
+
+  const MIN_PER_HOUR = 60;
+  const MIN_PER_DAY = MIN_PER_HOUR * 24;
+  const MIN_PER_YEAR = MIN_PER_DAY * 365;
+
+  if (totalMinutes >= MIN_PER_YEAR) {
+    const years = Math.floor(totalMinutes / MIN_PER_YEAR);
+    const days = Math.floor((totalMinutes % MIN_PER_YEAR) / MIN_PER_DAY);
+    const yearLabel = years < 1000 ? String(years) : formatCompactNumber(years);
+    return days > 0 ? `${yearLabel}${y} ${days}${d}` : `${yearLabel}${y}`;
+  }
+  if (totalMinutes >= MIN_PER_DAY) {
+    const days = Math.floor(totalMinutes / MIN_PER_DAY);
+    const hrs = Math.floor((totalMinutes % MIN_PER_DAY) / MIN_PER_HOUR);
+    return hrs > 0 ? `${days}${d} ${hrs}${h}` : `${days}${d}`;
+  }
+  if (totalMinutes >= MIN_PER_HOUR) {
+    const hrs = Math.floor(totalMinutes / MIN_PER_HOUR);
+    const mins = totalMinutes % MIN_PER_HOUR;
+    return mins > 0 ? `${hrs}${h} ${mins}${m}` : `${hrs}${h}`;
+  }
+  return `${totalMinutes}${m}`;
 }
 
-export function formatHours(hours: number): string {
-  const absHours = Math.abs(hours);
-  const h = String(I18n.t('common.hour_unit'));
-  const m = String(I18n.t('common.minute_unit'));
-  if (absHours < 0.01) return `0${m}`;
-
-  const wholeHours = Math.floor(absHours);
-  const minutes = Math.round((absHours - wholeHours) * 60);
-
-  if (wholeHours === 0) return `${minutes}${m}`;
-  if (minutes === 0) return `${wholeHours}${h}`;
-  return `${wholeHours}${h} ${minutes}${m}`;
+/**
+ * Time-value label for tight spaces. Uses the same years/days/hours/minutes cascade as
+ * {@link formatHours} so all durations read consistently across the app.
+ */
+export function formatHoursCompact(hours: number): string {
+  return formatHours(hours);
 }
 
 export function formatAmount(

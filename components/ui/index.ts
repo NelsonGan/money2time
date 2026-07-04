@@ -7,6 +7,7 @@ export { CategoryEmoji } from './CategoryEmoji';
 export { type CategoryPickerOption, CategoryPickerSheet } from './CategoryPickerSheet';
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
+export { GradientPercent } from './GradientPercent';
 export { Input } from './input';
 export { ItemIcon } from './ItemIcon';
 export { ItemIconPickerSheet } from './ItemIconPickerSheet';

@@ -28,6 +28,8 @@ const ms = {
     unknown: 'Tidak Diketahui',
     hour_unit: 'j',
     minute_unit: 'min',
+    day_unit: 'h',
+    year_unit: 'thn',
     none: 'Tiada',
     no_account: 'Tiada akaun',
     uncategorized: 'Tidak Dikategorikan',
@@ -661,14 +663,14 @@ const ms = {
         },
       },
       savings_rate: {
-        title: 'Gambaran kadar simpanan',
         no_income_title: 'Tiada pendapatan dalam tempoh ini',
         no_income_short: 'Tiada pendapatan',
-        no_income_message:
-          'Tambah transaksi pendapatan dalam tempoh ini untuk kira kadar simpanan.',
         saved_per_year: '{{value}} disimpan tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori daripada pengiraan.',
         goal_hint: '20%+ dianggap sihat.',
+        status_healthy: 'Sihat',
+        status_building: 'Hampir sampai',
+        status_overspent: 'Perbelanjaan berlebihan',
       },
       income_rate_history: {
         rate_title: 'Kadar pendapatan',

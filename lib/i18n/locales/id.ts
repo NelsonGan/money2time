@@ -28,6 +28,8 @@ const id = {
     unknown: 'Tidak Diketahui',
     hour_unit: 'j',
     minute_unit: 'm',
+    day_unit: 'h',
+    year_unit: 'thn',
     none: 'Tidak Ada',
     no_account: 'Tanpa Akun',
     uncategorized: 'Tanpa Kategori',
@@ -665,14 +667,14 @@ const id = {
         },
       },
       savings_rate: {
-        title: 'Cuplikan tingkat tabungan',
         no_income_title: 'Tidak ada pemasukan periode ini',
         no_income_short: 'Tidak ada pemasukan',
-        no_income_message:
-          'Tambahkan transaksi pemasukan di periode ini untuk menghitung tingkat tabungan.',
         saved_per_year: '{{value}} ditabung tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori dari perhitungan.',
         goal_hint: '20%+ dianggap sehat.',
+        status_healthy: 'Sehat',
+        status_building: 'Hampir sampai',
+        status_overspent: 'Pengeluaran berlebih',
       },
       income_rate_history: {
         rate_title: 'Tarif pemasukan',
