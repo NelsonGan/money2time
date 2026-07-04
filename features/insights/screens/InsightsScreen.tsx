@@ -5682,7 +5682,7 @@ export function InsightsScreen({
                         })}
                       </View>
                     </View>
-                    <View className="items-end gap-0.5">
+                    <View className="w-20 items-end gap-0.5">
                       <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
                         {monthlyRateLabel}
                       </Text>
