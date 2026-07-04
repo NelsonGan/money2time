@@ -138,13 +138,13 @@ export function AlbumsScreen({
             className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
             style={{ paddingBottom: bottomNavInset }}
           >
-            <View className="min-w-0 flex-1 flex-row items-center gap-2">
+            <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
               <Sparkles size={15} color={themeColors.textMuted} />
-              <Text variant="label" tone="muted" numberOfLines={2} className="flex-1">
+              <Text variant="label" tone="muted" numberOfLines={2}>
                 {I18n.t('albums.active_label')}
               </Text>
             </View>
-            <View style={{ flexBasis: 148, flexGrow: 0, flexShrink: 1 }}>
+            <View className="flex-1">
               <SelectField
                 triggerSize="header"
                 triggerTone={activeAlbumId ? 'active' : 'default'}
