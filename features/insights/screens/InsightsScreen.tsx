@@ -894,6 +894,7 @@ type InsightsPreferencesSnapshot = {
   excludedExpenseBreakdownCategoryIds: string[];
   excludedIncomeBreakdownCategoryIds: string[];
   excludedAssetHistoryAccountIds: string[];
+  excludedCategoryTrendAccountIds: string[];
   categoryTrendSelectedCategoryId: string | null;
 };
 
@@ -978,6 +979,9 @@ function parseInsightsPreferencesPayload(
         parsed.excludedAssetHistoryAccountIds,
       );
     }
+    next.excludedCategoryTrendAccountIds = toUniqueStringList(
+      parsed.excludedCategoryTrendAccountIds,
+    );
     if (typeof parsed.categoryTrendSelectedCategoryId === 'string') {
       const trimmed = parsed.categoryTrendSelectedCategoryId.trim();
       next.categoryTrendSelectedCategoryId = trimmed.length > 0 ? trimmed : null;
@@ -2630,6 +2634,9 @@ export function InsightsScreen({
   const [excludedAssetHistoryAccountIds, setExcludedAssetHistoryAccountIds] = useState<string[]>(
     () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
   );
+  const [excludedCategoryTrendAccountIds, setExcludedCategoryTrendAccountIds] = useState<string[]>(
+    [],
+  );
   const [expenseTrendScrubMonthByYear, setExpenseTrendScrubMonthByYear] = useState<
     Record<string, string>
   >({});
@@ -2654,6 +2661,7 @@ export function InsightsScreen({
     | 'expenseTrendExpenseCategories'
     | 'incomeTrendAccounts'
     | 'incomeTrendIncomeCategories'
+    | 'categoryTrendAccounts'
     | 'expenseBreakdownCategories'
     | 'incomeBreakdownCategories'
     | 'savingsIncomeCategories'
@@ -2915,6 +2923,9 @@ export function InsightsScreen({
       if (saved.excludedIncomeBreakdownCategoryIds) {
         setExcludedIncomeBreakdownCategoryIds(saved.excludedIncomeBreakdownCategoryIds);
       }
+      if (saved.excludedCategoryTrendAccountIds) {
+        setExcludedCategoryTrendAccountIds(saved.excludedCategoryTrendAccountIds);
+      }
       if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendSelectedCategoryId')) {
         setCategoryTrendSelectedCategoryId(saved.categoryTrendSelectedCategoryId ?? null);
       }
@@ -2955,6 +2966,7 @@ export function InsightsScreen({
       excludedExpenseBreakdownCategoryIds,
       excludedIncomeBreakdownCategoryIds,
       excludedAssetHistoryAccountIds,
+      excludedCategoryTrendAccountIds,
       categoryTrendSelectedCategoryId,
     }),
     [
@@ -2968,6 +2980,7 @@ export function InsightsScreen({
       excludedIncomeTrendAccountIds,
       excludedIncomeTrendIncomeCategoryIds,
       excludedAssetHistoryAccountIds,
+      excludedCategoryTrendAccountIds,
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
       excludedExpenseBreakdownCategoryIds,
@@ -3095,6 +3108,10 @@ export function InsightsScreen({
     () => new Set(excludedAssetHistoryAccountIds),
     [excludedAssetHistoryAccountIds],
   );
+  const excludedCategoryTrendAccountSet = useMemo(
+    () => new Set(excludedCategoryTrendAccountIds),
+    [excludedCategoryTrendAccountIds],
+  );
   const excludedExpenseBreakdownCategorySet = useMemo(
     () => new Set(excludedExpenseBreakdownCategoryIds),
     [excludedExpenseBreakdownCategoryIds],
@@ -3208,6 +3225,7 @@ export function InsightsScreen({
   const hasAccountFilter = activeInsightFilterConfig.allowAccountFilter;
   const hasExpenseTrendExclusionFilter = selectedInsightType === 'expense_trend';
   const hasIncomeTrendExclusionFilter = selectedInsightType === 'income_trend';
+  const hasCategoryTrendExclusionFilter = selectedInsightType === 'category_trend';
   const hasSavingsCategoryExclusionFilter = selectedInsightType === 'savings_rate';
   const hasExpenseBreakdownExclusionFilter = selectedInsightType === 'expense_breakdown';
   const hasIncomeBreakdownExclusionFilter = selectedInsightType === 'income_breakdown';
@@ -3217,6 +3235,7 @@ export function InsightsScreen({
     hasAccountFilter ||
     hasExpenseTrendExclusionFilter ||
     hasIncomeTrendExclusionFilter ||
+    hasCategoryTrendExclusionFilter ||
     hasSavingsCategoryExclusionFilter ||
     hasExpenseBreakdownExclusionFilter ||
     hasIncomeBreakdownExclusionFilter ||
@@ -3704,6 +3723,7 @@ export function InsightsScreen({
 
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'expense' || !tx.categoryId || !selectedCategoryId) return;
+          if (tx.accountId && excludedCategoryTrendAccountSet.has(tx.accountId)) return;
           const category = categoryById.get(tx.categoryId);
           const rootCategoryId = category?.parentId ?? tx.categoryId;
           if (rootCategoryId !== selectedCategoryId) return;
@@ -4124,6 +4144,7 @@ export function InsightsScreen({
       excludedSavingsIncomeCategorySet,
       excludedExpenseBreakdownCategorySet,
       excludedIncomeBreakdownCategorySet,
+      excludedCategoryTrendAccountSet,
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       includedAssetHistoryAccounts,
@@ -6084,6 +6105,14 @@ export function InsightsScreen({
     });
   }, [accounts, excludedIncomeTrendAccountIds.length]);
   useEffect(() => {
+    if (excludedCategoryTrendAccountIds.length === 0) return;
+    const validAccountIds = new Set(accounts.map((account) => account.id));
+    setExcludedCategoryTrendAccountIds((previous) => {
+      const next = previous.filter((accountId) => validAccountIds.has(accountId));
+      return next.length === previous.length ? previous : next;
+    });
+  }, [accounts, excludedCategoryTrendAccountIds.length]);
+  useEffect(() => {
     if (excludedIncomeTrendIncomeCategoryIds.length === 0) return;
     const validIncomeCategoryIds = new Set(
       categories.filter((category) => category.type === 'income').map((category) => category.id),
@@ -6117,6 +6146,7 @@ export function InsightsScreen({
   const displayHasAccountFilter = displayActiveInsightFilterConfig.allowAccountFilter;
   const displayHasExpenseTrendExclusionFilter = displaySelectedInsightType === 'expense_trend';
   const displayHasIncomeTrendExclusionFilter = displaySelectedInsightType === 'income_trend';
+  const displayHasCategoryTrendExclusionFilter = displaySelectedInsightType === 'category_trend';
   const displayHasSavingsCategoryExclusionFilter = displaySelectedInsightType === 'savings_rate';
   const displayHasExpenseBreakdownExclusionFilter =
     displaySelectedInsightType === 'expense_breakdown';
@@ -6129,6 +6159,7 @@ export function InsightsScreen({
     displayHasAccountFilter ||
     displayHasExpenseTrendExclusionFilter ||
     displayHasIncomeTrendExclusionFilter ||
+    displayHasCategoryTrendExclusionFilter ||
     displayHasSavingsCategoryExclusionFilter ||
     displayHasExpenseBreakdownExclusionFilter ||
     displayHasIncomeBreakdownExclusionFilter ||
@@ -6149,6 +6180,9 @@ export function InsightsScreen({
     if (displayHasIncomeTrendExclusionFilter) {
       count += excludedIncomeTrendAccountIds.length + excludedIncomeTrendIncomeCategoryIds.length;
     }
+    if (displayHasCategoryTrendExclusionFilter) {
+      count += excludedCategoryTrendAccountIds.length;
+    }
     if (displayHasAssetHistoryAccountExclusionFilter)
       count += excludedAssetHistoryAccountIds.length;
     if (displayHasSavingsCategoryExclusionFilter) {
@@ -6166,6 +6200,7 @@ export function InsightsScreen({
     displayHasAssetHistoryAccountExclusionFilter,
     displayHasExpenseTrendExclusionFilter,
     displayHasIncomeTrendExclusionFilter,
+    displayHasCategoryTrendExclusionFilter,
     displayHasInsightsFilters,
     displayHasPeriodFilter,
     displayHasSavingsCategoryExclusionFilter,
@@ -6174,6 +6209,7 @@ export function InsightsScreen({
     displayPeriodPreset,
     displaySelectedInsightType,
     excludedAssetHistoryAccountIds.length,
+    excludedCategoryTrendAccountIds.length,
     excludedExpenseTrendAccountIds.length,
     excludedExpenseTrendExpenseCategoryIds.length,
     excludedIncomeTrendAccountIds.length,
@@ -6212,6 +6248,7 @@ export function InsightsScreen({
     setExcludedSavingsExpenseCategoryIds([]);
     setExcludedExpenseBreakdownCategoryIds([]);
     setExcludedIncomeBreakdownCategoryIds([]);
+    setExcludedCategoryTrendAccountIds([]);
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setCategoryTrendSelectedCategoryId(null);
@@ -6823,6 +6860,28 @@ export function InsightsScreen({
               </View>
             ) : null}
 
+            {hasCategoryTrendExclusionFilter ? (
+              <View className="gap-2.5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('insights.filters.exclude_accounts')}
+                </Text>
+                <Pressable
+                  onPress={() => setActiveInsightsFilterPicker('categoryTrendAccounts')}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
+                >
+                  <Text
+                    variant="body"
+                    tone={excludedCategoryTrendAccountIds.length > 0 ? undefined : 'muted'}
+                  >
+                    {excludedCategoryTrendAccountIds.length > 0
+                      ? `${excludedCategoryTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+            ) : null}
+
             {hasExpenseBreakdownExclusionFilter ? (
               <View className="gap-2.5">
                 <Text variant="caption" tone="muted">
@@ -6961,6 +7020,18 @@ export function InsightsScreen({
               setExcludedIncomeTrendAccountIds((previous) => toggleStringId(previous, accountId))
             }
             onClear={() => setExcludedIncomeTrendAccountIds([])}
+          />
+          <AccountPickerSheet
+            overlay
+            visible={activeInsightsFilterPicker === 'categoryTrendAccounts'}
+            onClose={closeInsightsFilterPicker}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedIds={excludedCategoryTrendAccountIds}
+            onToggleSelect={(accountId) =>
+              setExcludedCategoryTrendAccountIds((previous) => toggleStringId(previous, accountId))
+            }
+            onClear={() => setExcludedCategoryTrendAccountIds([])}
           />
           <CategoryPickerSheet
             overlay
