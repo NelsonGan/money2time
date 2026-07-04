@@ -2459,15 +2459,39 @@ function InsightTypeMenuPopover({
   onClose: () => void;
 }) {
   const themeColors = useThemeColors();
+  const entrance = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    if (!visible) return;
+    entrance.setValue(0);
+    RNAnimated.spring(entrance, {
+      toValue: 1,
+      useNativeDriver: true,
+      damping: 20,
+      stiffness: 260,
+      mass: 0.8,
+    }).start();
+  }, [visible, entrance]);
 
   if (!visible) return null;
 
   const sideMargin = spacing.md;
   const cardWidth = Math.min(300, screenWidth - sideMargin * 2);
-  const anchorLeft = anchorRect?.x ?? sideMargin;
-  const cardLeft = clampNumber(anchorLeft, sideMargin, screenWidth - cardWidth - sideMargin);
-  const cardTop = (anchorRect ? anchorRect.y + anchorRect.height : spacing.xl * 2) + spacing.xs;
+  const cardLeft = clampNumber(
+    anchorRect?.x ?? sideMargin,
+    sideMargin,
+    screenWidth - cardWidth - sideMargin,
+  );
+  // Anchor the card to the button itself so it expands *in place* rather than
+  // dropping down beneath the icon.
+  const cardTop = clampNumber(
+    anchorRect?.y ?? spacing.xl * 2,
+    sideMargin,
+    screenHeight - 220 - sideMargin,
+  );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
+  const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.18, 1] });
+  const opacity = entrance.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 1, 1] });
 
   return (
     <ThemeModal
@@ -2485,7 +2509,7 @@ function InsightTypeMenuPopover({
           accessibilityLabel={I18n.t('common.close')}
         />
 
-        <View
+        <RNAnimated.View
           className="rounded-[24px] bg-background overflow-hidden"
           style={[
             styles.periodPickerCard,
@@ -2496,18 +2520,16 @@ function InsightTypeMenuPopover({
               maxHeight: maxCardHeight,
               borderColor: withColorAlpha(themeColors.border, 0.45),
               shadowColor: themeColors.text,
+              opacity,
+              transform: [{ scale }],
+              transformOrigin: 'top left',
             },
           ]}
         >
-          <View className="px-4 pb-2 pt-3.5">
-            <Text variant="label" tone="muted">
-              {I18n.t('insights.insight_type')}
-            </Text>
-          </View>
           <ScrollView
             showsVerticalScrollIndicator={false}
             bounces={false}
-            contentContainerStyle={{ paddingBottom: spacing.sm }}
+            contentContainerStyle={{ paddingVertical: spacing.xs }}
           >
             {options.map((option) => {
               const isSelected = option.value === selectedValue;
@@ -2549,7 +2571,7 @@ function InsightTypeMenuPopover({
               );
             })}
           </ScrollView>
-        </View>
+        </RNAnimated.View>
       </View>
     </ThemeModal>
   );
