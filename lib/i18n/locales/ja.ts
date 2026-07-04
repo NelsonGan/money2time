@@ -863,6 +863,13 @@ const ja = {
     replay_message: '次回起動時に設定ガイドが再度表示されます。データは削除されません。',
     replay_action: '再生',
     rate_app: 'Money2Time を評価',
+    contact: {
+      tile: 'お問い合わせ',
+      title: 'お問い合わせ',
+      body: 'ご質問、不具合の報告、ご意見はありませんか？Discord コミュニティにご参加ください。すべて拝見し、迅速に返信します。',
+      button: 'Discord に参加',
+      close: 'あとで',
+    },
     danger_zone: '危険ゾーン',
     danger_description: '新しく始めたいですか？すべてのローカルデータが消去されます。',
     backup_fallback_name: 'バックアップ',

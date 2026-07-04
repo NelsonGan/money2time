@@ -827,6 +827,13 @@ const zh = {
     replay_message: '下次启动时将再次显示设置向导。不会删除任何数据。',
     replay_action: '重播',
     rate_app: '评价 Money2Time',
+    contact: {
+      tile: '联系我们',
+      title: '联系我们',
+      body: '有疑问、发现问题，或想分享反馈？加入我们的 Discord 社区——我们会阅读每条消息并快速回复。',
+      button: '加入我们的 Discord',
+      close: '以后再说',
+    },
     danger_zone: '危险区域',
     danger_description: '需要重新开始？这将清除所有本地数据。',
     backup_fallback_name: '备份',

@@ -882,6 +882,13 @@ const de = {
       'Beim nächsten Start wird die Einrichtungsanleitung erneut angezeigt. Keine Daten werden gelöscht.',
     replay_action: 'Wiederholen',
     rate_app: 'Money2Time bewerten',
+    contact: {
+      tile: 'Kontakt',
+      title: 'Kontakt aufnehmen',
+      body: 'Hast du eine Frage, einen Fehler gefunden oder möchtest Feedback geben? Tritt unserer Discord-Community bei — wir lesen alles und antworten schnell.',
+      button: 'Discord beitreten',
+      close: 'Vielleicht später',
+    },
     danger_zone: 'Gefahrenzone',
     danger_description: 'Neu starten? Alle lokalen Daten werden gelöscht.',
     backup_fallback_name: 'Backup',

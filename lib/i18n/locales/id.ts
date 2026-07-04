@@ -882,6 +882,13 @@ const id = {
       'Panduan pengaturan akan ditampilkan lagi saat peluncuran berikutnya. Tidak ada data yang dihapus.',
     replay_action: 'Putar Ulang',
     rate_app: 'Nilai Money2Time',
+    contact: {
+      tile: 'Hubungi kami',
+      title: 'Hubungi kami',
+      body: 'Punya pertanyaan, menemukan bug, atau ingin berbagi masukan? Bergabunglah dengan komunitas Discord kami — kami membaca semuanya dan membalas dengan cepat.',
+      button: 'Gabung Discord kami',
+      close: 'Nanti saja',
+    },
     danger_zone: 'Zona Berbahaya',
     danger_description: 'Ingin mulai dari awal? Ini akan menghapus semua data lokal.',
     backup_fallback_name: 'Cadangan',

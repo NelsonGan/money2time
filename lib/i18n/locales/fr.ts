@@ -879,6 +879,13 @@ const fr = {
       'Le guide de configuration sera affiché à nouveau au prochain démarrage. Aucune donnée ne sera supprimée.',
     replay_action: 'Rejouer',
     rate_app: 'Évaluer Money2Time',
+    contact: {
+      tile: 'Nous contacter',
+      title: 'Prenez contact',
+      body: 'Une question, un bug ou une suggestion ? Rejoignez notre communauté Discord — nous lisons tout et répondons rapidement.',
+      button: 'Rejoindre notre Discord',
+      close: 'Plus tard',
+    },
     danger_zone: 'Zone dangereuse',
     danger_description: 'Besoin de repartir de zéro ? Ceci effacera toutes les données locales.',
     backup_fallback_name: 'Sauvegarde',

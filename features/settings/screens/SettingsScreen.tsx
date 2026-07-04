@@ -16,6 +16,7 @@ import {
   Gift,
   Heart,
   Landmark,
+  MessageCircle,
   Newspaper,
   Package,
   Palette,
@@ -33,6 +34,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   InteractionManager,
+  Linking,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Platform,
@@ -45,6 +47,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { DiscordIcon } from '~/components/icons/SocialIcons';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -56,6 +59,7 @@ import {
   SettingsSection,
   SettingsStatTile,
   Text,
+  ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
@@ -73,6 +77,9 @@ import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/s
 import { getErrorMessage } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
 import { monthKeyFromDateIso, monthKeyFromDateLocal } from '~/utils/formatters';
+
+const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
+const DISCORD_BRAND_COLOR = '#5865F2';
 
 type SettingsTutorialTargetId =
   | 'settings.start_tutorial'
@@ -199,6 +206,13 @@ export function SettingsScreen({
   );
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const [contactVisible, setContactVisible] = useState(false);
+
+  const handleJoinDiscord = useCallback(() => {
+    void triggerHaptic('selection');
+    void Linking.openURL(CONTACT_DISCORD_URL).catch(() => undefined);
+    setContactVisible(false);
+  }, []);
 
   const handleEditName = useCallback(() => {
     void triggerHaptic('selection');
@@ -773,6 +787,14 @@ export function SettingsScreen({
                   void openStoreReviewManually();
                 }}
               />
+              <SettingsGridTile
+                icon={<MessageCircle size={20} color={themeColors.primary} />}
+                label={I18n.t('settings.contact.tile')}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setContactVisible(true);
+                }}
+              />
             </SettingsGrid>
           </SettingsSection>
 
@@ -806,6 +828,64 @@ export function SettingsScreen({
           ) : null}
         </Animated.View>
       </ScrollView>
+
+      <ThemeModal
+        visible={contactVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setContactVisible(false)}
+      >
+        <Pressable
+          onPress={() => setContactVisible(false)}
+          className="flex-1 items-center justify-center px-6"
+          style={styles.modalBackdrop}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            className="w-full max-w-[380px] items-center rounded-[28px] border border-border/40 bg-card px-6 pb-6 pt-7"
+          >
+            <View
+              className="h-16 w-16 items-center justify-center rounded-3xl"
+              style={{ backgroundColor: DISCORD_BRAND_COLOR }}
+            >
+              <DiscordIcon size={34} color="#fff" />
+            </View>
+            <Text
+              variant="subheading"
+              className="mt-4 text-center text-lg"
+              style={{ fontFamily: FONT.extrabold, fontWeight: '800' }}
+            >
+              {I18n.t('settings.contact.title')}
+            </Text>
+            <Text variant="friendly" tone="muted" className="mt-2 text-center text-sm leading-5">
+              {I18n.t('settings.contact.body')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleJoinDiscord}
+              className="mt-5 w-full flex-row items-center justify-center gap-2 rounded-2xl px-5 py-3.5 active:scale-[0.98] active:opacity-90"
+              style={{ backgroundColor: DISCORD_BRAND_COLOR }}
+            >
+              <DiscordIcon size={18} color="#fff" />
+              <Text
+                className="text-sm"
+                style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+              >
+                {I18n.t('settings.contact.button')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setContactVisible(false)}
+              className="mt-2 w-full items-center justify-center rounded-2xl px-5 py-3 active:opacity-70"
+            >
+              <Text variant="friendly" tone="muted" className="text-sm">
+                {I18n.t('settings.contact.close')}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </ThemeModal>
     </SettingsPageLayout>
   );
 }
@@ -829,6 +909,9 @@ const styles = StyleSheet.create({
   },
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  modalBackdrop: {
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
   },
   ctaShadow: {
     ...(Platform.OS === 'ios'

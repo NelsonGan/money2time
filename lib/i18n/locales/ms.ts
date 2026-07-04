@@ -877,6 +877,13 @@ const ms = {
       'Panduan persediaan akan ditunjukkan semula pada pelancaran seterusnya. Tiada data yang dipadam.',
     replay_action: 'Ulang',
     rate_app: 'Nilai Money2Time',
+    contact: {
+      tile: 'Hubungi kami',
+      title: 'Hubungi kami',
+      body: 'Ada soalan, jumpa pepijat, atau ingin berkongsi maklum balas? Sertai komuniti Discord kami — kami membaca semuanya dan membalas dengan pantas.',
+      button: 'Sertai Discord kami',
+      close: 'Mungkin nanti',
+    },
     danger_zone: 'Zon Bahaya',
     danger_description: 'Nak mulakan semula? Ini akan padam semua data tempatan.',
     backup_fallback_name: 'Sandaran',

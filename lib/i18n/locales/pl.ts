@@ -877,6 +877,13 @@ const pl = {
       'Przewodnik konfiguracji pojawi się ponownie przy następnym uruchomieniu. Żadne dane nie zostaną usunięte.',
     replay_action: 'Powtórz',
     rate_app: 'Oceń Money2Time',
+    contact: {
+      tile: 'Skontaktuj się',
+      title: 'Skontaktuj się z nami',
+      body: 'Masz pytanie, znalazłeś błąd lub chcesz podzielić się opinią? Dołącz do naszej społeczności na Discordzie — czytamy wszystko i szybko odpowiadamy.',
+      button: 'Dołącz do naszego Discorda',
+      close: 'Może później',
+    },
     danger_zone: 'Strefa niebezpieczna',
     danger_description: 'Chcesz zacząć od nowa? To wyczyści wszystkie lokalne dane.',
     backup_fallback_name: 'Kopia zapasowa',
