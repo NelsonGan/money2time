@@ -1,6 +1,7 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   CalendarDays,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -52,7 +53,6 @@ import {
   CategoryEmoji,
   CategoryPickerSheet,
   GradientPercent,
-  SelectField,
   Text,
   ThemeModal,
   TimeValueInline,
@@ -77,7 +77,6 @@ import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
   type BulkTransactionChanges,
-  DisplayModeToggle,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -2433,6 +2432,129 @@ function PeriodPickerPopover({
   );
 }
 
+type InsightMenuOption = {
+  value: string;
+  label: string;
+  icon?: React.ReactNode;
+  badge?: string;
+};
+
+function InsightTypeMenuPopover({
+  visible,
+  anchorRect,
+  screenWidth,
+  screenHeight,
+  options,
+  selectedValue,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  anchorRect: PeriodPickerAnchorRect | null;
+  screenWidth: number;
+  screenHeight: number;
+  options: InsightMenuOption[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}) {
+  const themeColors = useThemeColors();
+
+  if (!visible) return null;
+
+  const sideMargin = spacing.md;
+  const cardWidth = Math.min(300, screenWidth - sideMargin * 2);
+  const anchorLeft = anchorRect?.x ?? sideMargin;
+  const cardLeft = clampNumber(anchorLeft, sideMargin, screenWidth - cardWidth - sideMargin);
+  const cardTop = (anchorRect ? anchorRect.y + anchorRect.height : spacing.xl * 2) + spacing.xs;
+  const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
+
+  return (
+    <ThemeModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <View className="flex-1" pointerEvents="box-none">
+        <Pressable
+          className="absolute inset-0 bg-black/15"
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.close')}
+        />
+
+        <View
+          className="rounded-[24px] bg-background overflow-hidden"
+          style={[
+            styles.periodPickerCard,
+            {
+              left: cardLeft,
+              top: cardTop,
+              width: cardWidth,
+              maxHeight: maxCardHeight,
+              borderColor: withColorAlpha(themeColors.border, 0.45),
+              shadowColor: themeColors.text,
+            },
+          ]}
+        >
+          <View className="px-4 pb-2 pt-3.5">
+            <Text variant="label" tone="muted">
+              {I18n.t('insights.insight_type')}
+            </Text>
+          </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            contentContainerStyle={{ paddingBottom: spacing.sm }}
+          >
+            {options.map((option) => {
+              const isSelected = option.value === selectedValue;
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => onSelect(option.value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  className={cn(
+                    'mx-2 flex-row items-center gap-3 rounded-2xl px-3 py-2.5',
+                    isSelected ? 'bg-primary/10' : 'active:bg-secondary/40',
+                  )}
+                >
+                  <View className="h-8 w-8 items-center justify-center">{option.icon}</View>
+                  <Text numberOfLines={1} className="flex-1 text-foreground">
+                    {option.label}
+                  </Text>
+                  {option.badge ? (
+                    <View
+                      className="rounded-full px-1.5 py-0.5"
+                      style={{ backgroundColor: themeColors.primary }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 8,
+                          lineHeight: 10,
+                          fontWeight: '700',
+                          color: '#FFFFFF',
+                          letterSpacing: 0.4,
+                        }}
+                      >
+                        {option.badge}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {isSelected ? <Check size={16} color={themeColors.primary} /> : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </View>
+    </ThemeModal>
+  );
+}
+
 const InsightsWindowPage = React.memo(
   function InsightsWindowPage({
     item,
@@ -2676,6 +2798,10 @@ export function InsightsScreen({
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
+  const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
+  const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
+    null,
+  );
   const [isChartScrubbing, setIsChartScrubbing] = useState(false);
   const breakdownHeaderDotPulse = useRef(new RNAnimated.Value(0)).current;
   const insightsTypeSelectorRef = useRef<View | null>(null);
@@ -2719,10 +2845,9 @@ export function InsightsScreen({
     () =>
       visibleInsightTypes.map((type) => ({
         value: type,
-        label: String(I18n.t(`insights.short_labels.${type}`)),
-        description: String(I18n.t(`insights.${type}_description`)),
+        label: String(I18n.t(`insights.${type}`)),
         icon: renderInsightTypeIcon(type),
-        badge: !isPro && proTrendTypeSet.has(type) ? I18n.t('pro.badge') : undefined,
+        badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
       })),
     [visibleInsightTypes, isPro, proTrendTypeSet],
   );
@@ -6351,6 +6476,32 @@ export function InsightsScreen({
     setIsPeriodPickerOpen(false);
     setIsFilterModalOpen(true);
   }, []);
+  const openInsightMenu = useCallback(() => {
+    void triggerHaptic('selection');
+    setIsPeriodPickerOpen(false);
+    const node = insightsTypeSelectorRef.current;
+    if (node) {
+      node.measureInWindow((x, y, measuredWidth, measuredHeight) => {
+        setInsightMenuAnchorRect(
+          measuredWidth > 0 && measuredHeight > 0
+            ? { x, y, width: measuredWidth, height: measuredHeight }
+            : null,
+        );
+        setIsInsightMenuOpen(true);
+      });
+      return;
+    }
+    setInsightMenuAnchorRect(null);
+    setIsInsightMenuOpen(true);
+  }, []);
+  const handleInsightMenuSelect = useCallback(
+    (value: string) => {
+      void triggerHaptic('selection');
+      setIsInsightMenuOpen(false);
+      handleInsightTypeChange(value);
+    },
+    [handleInsightTypeChange],
+  );
   const handleInsightTypeSelectorLayout = useCallback(() => {
     if (!onTutorialTargetLayout) return;
     insightsTypeSelectorRef.current?.measureInWindow((x, y, measuredWidth, measuredHeight) => {
@@ -6431,17 +6582,34 @@ export function InsightsScreen({
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
         titleNode={
-          <View ref={insightsTypeSelectorRef} onLayout={handleInsightTypeSelectorLayout}>
-            <SelectField
-              triggerSize="header"
-              triggerVariant="header-plain"
-              value={displaySelectedInsightType}
-              options={insightTypeOptions}
-              optionsLayout="icon-grid"
-              sheetTitle={I18n.t('insights.insight_type')}
-              onChange={handleInsightTypeChange}
-              fullHeight
-            />
+          <View className="flex-row items-center gap-2">
+            <View ref={insightsTypeSelectorRef} onLayout={handleInsightTypeSelectorLayout}>
+              <Pressable
+                onPress={openInsightMenu}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('insights.insight_type')}
+                className="h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:scale-95"
+              >
+                {renderInsightTypeIcon(displaySelectedInsightType)}
+              </Pressable>
+            </View>
+            <View className="flex-1 items-center px-1">
+              <Text
+                variant={width < 380 ? 'subheading' : 'heading'}
+                numberOfLines={1}
+                className="text-center tracking-tight"
+              >
+                {String(I18n.t(`insights.${displaySelectedInsightType}`))}
+              </Text>
+            </View>
+            <View className="w-10 items-end justify-center">
+              {displayHasInsightsFilters ? (
+                <FilterIconButton
+                  onPress={handleOpenFiltersModal}
+                  count={displayInsightsFilterCount}
+                />
+              ) : null}
+            </View>
           </View>
         }
         monthLabel={activePeriodLabel}
@@ -6451,17 +6619,6 @@ export function InsightsScreen({
         onMonthPress={displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker}
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
-        actions={
-          <View className="flex-row items-center gap-2">
-            {displayHasInsightsFilters && (
-              <FilterIconButton
-                onPress={handleOpenFiltersModal}
-                count={displayInsightsFilterCount}
-              />
-            )}
-            <DisplayModeToggle />
-          </View>
-        }
       />
 
       <View className="flex-1 overflow-hidden bg-background">
@@ -6591,6 +6748,17 @@ export function InsightsScreen({
         currentCustomDateField={activeCustomDateField}
         onClose={() => setIsPeriodPickerOpen(false)}
         onCommit={applyPeriodPickerSelection}
+      />
+
+      <InsightTypeMenuPopover
+        visible={isInsightMenuOpen}
+        anchorRect={insightMenuAnchorRect}
+        screenWidth={width}
+        screenHeight={height}
+        options={insightTypeOptions}
+        selectedValue={displaySelectedInsightType}
+        onSelect={handleInsightMenuSelect}
+        onClose={() => setIsInsightMenuOpen(false)}
       />
 
       <ThemeModal
