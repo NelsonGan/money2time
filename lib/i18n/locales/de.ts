@@ -717,6 +717,7 @@ const de = {
       none: 'Keine Ausschlüsse',
     },
     period: {
+      all_time: 'Gesamter Zeitraum',
       week: 'Woche',
       month: 'Monat',
       year: 'Jahr',

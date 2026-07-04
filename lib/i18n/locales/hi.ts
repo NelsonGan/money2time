@@ -706,6 +706,7 @@ const hi = {
       none: 'कोई बहिष्करण नहीं',
     },
     period: {
+      all_time: 'सभी समय',
       week: 'सप्ताह',
       month: 'महीना',
       year: 'साल',

@@ -713,6 +713,7 @@ const ms = {
       none: 'Tiada pengecualian',
     },
     period: {
+      all_time: 'Semua masa',
       week: 'Minggu',
       month: 'Bulan',
       year: 'Tahun',

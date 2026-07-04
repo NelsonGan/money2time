@@ -23,6 +23,7 @@ export function MonthControlsHeader({
   summary,
   children,
   hideNavigation = false,
+  disableNavArrows = false,
   hideTitleRow = false,
   showAccent = true,
 }: {
@@ -40,6 +41,8 @@ export function MonthControlsHeader({
   summary?: React.ReactNode;
   children?: React.ReactNode;
   hideNavigation?: boolean;
+  /** Render the prev/next chevrons but make them inert and dimmed (e.g. all-time). */
+  disableNavArrows?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
 }) {
@@ -99,7 +102,11 @@ export function MonthControlsHeader({
                     void triggerHaptic('selection');
                     onPrevMonth();
                   }}
-                  className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  disabled={disableNavArrows}
+                  className={cn(
+                    'h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft',
+                    disableNavArrows ? 'opacity-40' : 'active:scale-95',
+                  )}
                 >
                   <ChevronLeft size={16} color={themeColors.textSoft} />
                 </Pressable>
@@ -129,7 +136,11 @@ export function MonthControlsHeader({
                     void triggerHaptic('selection');
                     onNextMonth();
                   }}
-                  className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  disabled={disableNavArrows}
+                  className={cn(
+                    'h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft',
+                    disableNavArrows ? 'opacity-40' : 'active:scale-95',
+                  )}
                 >
                   <ChevronRight size={16} color={themeColors.textSoft} />
                 </Pressable>

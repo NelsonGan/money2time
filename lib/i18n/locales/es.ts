@@ -715,6 +715,7 @@ const es = {
       none: 'Sin exclusiones',
     },
     period: {
+      all_time: 'Todo el tiempo',
       week: 'Semana',
       month: 'Mes',
       year: 'Año',

@@ -717,6 +717,7 @@ const id = {
       none: 'Tidak ada pengecualian',
     },
     period: {
+      all_time: 'Sepanjang waktu',
       week: 'Minggu',
       month: 'Bulan',
       year: 'Tahun',
