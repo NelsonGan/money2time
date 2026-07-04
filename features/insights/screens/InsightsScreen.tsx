@@ -110,7 +110,6 @@ import {
   formatCompactCurrency,
   formatCompactNumber,
   formatDateInput,
-  formatDurationCompact,
   formatHours,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
@@ -4289,7 +4288,7 @@ export function InsightsScreen({
       if (settings.displayMode === 'time') {
         return (
           <TimeValueInline
-            value={formatDurationCompact(value)}
+            value={formatHours(value)}
             variant={variant}
             tone={tone}
             textClassName={textClassName}

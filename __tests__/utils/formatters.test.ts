@@ -9,7 +9,6 @@ import {
   formatCompactNumber,
   formatCurrency,
   formatDateInput,
-  formatDurationCompact,
   formatHours,
   formatHoursCompact,
   formatMonthYearLabel,
@@ -277,37 +276,26 @@ describe('formatHours', () => {
   it('treats negative values as positive', () => {
     expect(formatHours(-1.5)).toBe('1h 30m');
   });
-});
-
-describe('formatHoursCompact', () => {
-  it('returns minutes below an hour and drops minutes above', () => {
-    expect(formatHoursCompact(0)).toBe('0m');
-    expect(formatHoursCompact(0.5)).toBe('30m');
-    expect(formatHoursCompact(2.4)).toBe('2h');
-  });
-
-  it('abbreviates large hour counts', () => {
-    expect(formatHoursCompact(1500)).toBe('1.5Kh');
-  });
-});
-
-describe('formatDurationCompact', () => {
-  it('shows minutes and hours below a day', () => {
-    expect(formatDurationCompact(0)).toBe('0m');
-    expect(formatDurationCompact(0.5)).toBe('30m');
-    expect(formatDurationCompact(2)).toBe('2h');
-    expect(formatDurationCompact(2.5)).toBe('2h 30m');
-  });
 
   it('rolls into days and years, showing at most two units', () => {
-    expect(formatDurationCompact(24)).toBe('1d');
-    expect(formatDurationCompact(30)).toBe('1d 6h');
-    expect(formatDurationCompact(24 * 365)).toBe('1y');
-    expect(formatDurationCompact(24 * 365 + 24 * 5)).toBe('1y 5d');
+    expect(formatHours(24)).toBe('1d');
+    expect(formatHours(30)).toBe('1d 6h');
+    expect(formatHours(24 * 365)).toBe('1y');
+    expect(formatHours(24 * 365 + 24 * 5)).toBe('1y 5d');
   });
 
   it('abbreviates very large year counts as K', () => {
-    expect(formatDurationCompact(24 * 365 * 1500)).toBe('1.5Ky');
+    expect(formatHours(24 * 365 * 1500)).toBe('1.5Ky');
+  });
+});
+
+describe('formatHoursCompact', () => {
+  it('matches formatHours (shared years/days/hours/minutes cascade)', () => {
+    expect(formatHoursCompact(0)).toBe('0m');
+    expect(formatHoursCompact(0.5)).toBe('30m');
+    expect(formatHoursCompact(2.5)).toBe('2h 30m');
+    expect(formatHoursCompact(30)).toBe('1d 6h');
+    expect(formatHoursCompact(1500)).toBe('62d 12h');
   });
 });
 

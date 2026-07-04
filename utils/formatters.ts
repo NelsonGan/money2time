@@ -289,12 +289,14 @@ export function formatTimeOfDay(hour: number, minute: number): string {
 }
 
 /**
- * Compact duration for tight spaces: rolls hours up into larger units and shows at
- * most the two largest non-zero ones (years/days, days/hours, or hours/minutes) so a
- * large time-value stays short instead of overflowing. Uses calendar conversions
- * (24h/day, 365d/year); the years count itself abbreviates as K past 1000.
+ * The app's standard time-value label. Rolls hours up into larger units and shows at
+ * most the two largest non-zero ones — years/days, days/hours, or hours/minutes — so a
+ * big time-value stays short (e.g. "1y 5d", "5d 5h", "2h 30m") instead of ballooning
+ * into thousands of hours. Uses calendar conversions (24h/day, 365d/year); the top
+ * unit's count itself abbreviates as K past 1000 ("1.5Ky"). Negative values format as
+ * their magnitude.
  */
-export function formatDurationCompact(hours: number): string {
+export function formatHours(hours: number): string {
   const y = String(I18n.t('common.year_unit'));
   const d = String(I18n.t('common.day_unit'));
   const h = String(I18n.t('common.hour_unit'));
@@ -326,30 +328,12 @@ export function formatDurationCompact(hours: number): string {
   return `${totalMinutes}${m}`;
 }
 
-/** Short hours label for tight spaces: drops minutes and abbreviates 1000+ as K. */
+/**
+ * Time-value label for tight spaces. Uses the same years/days/hours/minutes cascade as
+ * {@link formatHours} so all durations read consistently across the app.
+ */
 export function formatHoursCompact(hours: number): string {
-  const abs = Math.abs(hours);
-  const h = String(I18n.t('common.hour_unit'));
-  const m = String(I18n.t('common.minute_unit'));
-  if (abs < 0.01) return `0${m}`;
-  const minutes = Math.round(abs * 60);
-  if (minutes < 60) return `${minutes}${m}`;
-  const wholeHours = Math.round(abs);
-  return wholeHours < 1000 ? `${wholeHours}${h}` : `${formatCompactNumber(wholeHours)}${h}`;
-}
-
-export function formatHours(hours: number): string {
-  const absHours = Math.abs(hours);
-  const h = String(I18n.t('common.hour_unit'));
-  const m = String(I18n.t('common.minute_unit'));
-  if (absHours < 0.01) return `0${m}`;
-
-  const wholeHours = Math.floor(absHours);
-  const minutes = Math.round((absHours - wholeHours) * 60);
-
-  if (wholeHours === 0) return `${minutes}${m}`;
-  if (minutes === 0) return `${wholeHours}${h}`;
-  return `${wholeHours}${h} ${minutes}${m}`;
+  return formatHours(hours);
 }
 
 export function formatAmount(
