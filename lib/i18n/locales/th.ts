@@ -699,6 +699,8 @@ const th = {
       none: 'ไม่มีการยกเว้น',
     },
     period: {
+      lifetime: 'ตลอดเวลา',
+      all_time: 'ทั้งหมด',
       week: 'สัปดาห์',
       month: 'เดือน',
       year: 'ปี',

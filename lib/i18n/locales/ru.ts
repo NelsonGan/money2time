@@ -711,6 +711,8 @@ const ru = {
       none: 'Нет исключений',
     },
     period: {
+      lifetime: 'За всё время',
+      all_time: 'За всё время',
       week: 'Неделя',
       month: 'Месяц',
       year: 'Год',

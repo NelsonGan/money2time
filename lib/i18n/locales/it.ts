@@ -711,6 +711,8 @@ const it = {
       none: 'Nessuna esclusione',
     },
     period: {
+      lifetime: 'Sempre',
+      all_time: 'Da sempre',
       week: 'Settimana',
       month: 'Mese',
       year: 'Anno',
