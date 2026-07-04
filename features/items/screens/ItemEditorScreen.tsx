@@ -187,12 +187,12 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
               />
             </View>
             <View className="w-[110px]">
-              <Text variant="label" tone="muted" className="mb-1.5">
+              <Text variant="label" tone="muted" className="mb-2.5 px-1">
                 {I18n.t('items.currency_label')}
               </Text>
               <Pressable
                 onPress={() => setShowCurrencyPicker(true)}
-                className="h-[52px] flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-3"
+                className="h-[54px] flex-row items-center justify-between rounded-[22px] border border-border/30 bg-secondary/30 px-3"
               >
                 <Text variant="body">{currency}</Text>
                 <ChevronRight size={16} color={themeColors.textMuted} />

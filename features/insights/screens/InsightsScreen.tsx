@@ -5571,11 +5571,6 @@ export function InsightsScreen({
             </View>
           </Card>
 
-          <View className="mt-1 px-1">
-            <Text variant="label" tone="muted">
-              {I18n.t('insights.analytics.savings_rate.month_by_month')}
-            </Text>
-          </View>
           <View className="gap-1.5">
             {pageData.savingsRateRows.map((row) => {
               const monthlyRate = row.savingsRate;
