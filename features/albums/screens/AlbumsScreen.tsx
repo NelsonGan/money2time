@@ -49,13 +49,15 @@ export function AlbumsScreen({
   const insets = useSafeAreaInsets();
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
-  const isSmallScreen = windowWidth < 380;
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
   const pagerRef = useRef<ScrollView | null>(null);
   const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
   const [pageHeight, setPageHeight] = useState(0);
+  // Measured height of the floating header, so the albums list can clear it
+  // (the map tab renders full-bleed behind it).
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
     if (scrollToTopToken === undefined) return;
@@ -121,17 +123,14 @@ export function AlbumsScreen({
               accessibilityState={{ selected: active }}
             >
               <Text
-                variant={isSmallScreen ? 'subheading' : 'heading'}
+                variant="subheading"
                 numberOfLines={1}
-                className={cn(
-                  'tracking-tight',
-                  active ? 'text-foreground' : 'text-muted-foreground',
-                )}
+                className={cn(active ? 'text-foreground' : 'text-muted-foreground')}
               >
                 {option.label}
               </Text>
               <View
-                className="mt-1.5 h-1 rounded-full"
+                className="mt-1.5 h-0.5 rounded-full"
                 style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
               />
             </Pressable>
@@ -154,10 +153,8 @@ export function AlbumsScreen({
   );
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-background">
       <TabletContentContainer style={{ flex: 1 }}>
-        {tabsBar}
-
         <View
           className="flex-1"
           onLayout={(e) => {
@@ -180,11 +177,13 @@ export function AlbumsScreen({
               {/* Albums index page */}
               <View style={{ width: pageWidth, height: pageHeight }}>
                 {albums.length === 0 ? (
-                  <EmptyState
-                    title={I18n.t('albums.empty_title')}
-                    message={I18n.t('albums.empty_message')}
-                    mascotMood="curious"
-                  />
+                  <View className="flex-1" style={{ paddingTop: headerHeight }}>
+                    <EmptyState
+                      title={I18n.t('albums.empty_title')}
+                      message={I18n.t('albums.empty_message')}
+                      mascotMood="curious"
+                    />
+                  </View>
                 ) : (
                   <>
                     <Animated.ScrollView
@@ -192,7 +191,7 @@ export function AlbumsScreen({
                       className="flex-1"
                       contentContainerStyle={{
                         paddingHorizontal: SCREEN_PADDING,
-                        paddingTop: 6,
+                        paddingTop: headerHeight + 6,
                         paddingBottom: 24,
                       }}
                       nestedScrollEnabled
@@ -260,6 +259,20 @@ export function AlbumsScreen({
           ) : null}
         </View>
       </TabletContentContainer>
+
+      {/* Floating header — solid on the albums tab, transparent over the map so
+          the map reads full-bleed behind the tabs and create button. */}
+      <View
+        pointerEvents="box-none"
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height;
+          if (h > 0 && h !== headerHeight) setHeaderHeight(h);
+        }}
+        className={cn('absolute left-0 right-0 top-0', tab === 'map' ? '' : 'bg-background')}
+        style={{ paddingTop: insets.top }}
+      >
+        <TabletContentContainer>{tabsBar}</TabletContentContainer>
+      </View>
     </View>
   );
 }

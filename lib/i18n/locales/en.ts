@@ -1649,10 +1649,8 @@ const en = {
       search_placeholder: 'Search city, state or country…',
       search_hint: 'Search by city, state or country to place this trip on the map.',
       no_results: 'No places found',
-      screen_title: 'Trip map',
       empty_title: 'No places yet',
       empty_message: 'Add a location to an album to see it on the globe and map.',
-      fit_all: 'Fit all',
     },
   },
   assets: {
