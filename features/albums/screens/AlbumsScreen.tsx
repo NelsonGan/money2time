@@ -1,5 +1,5 @@
 import { Map as MapIcon } from 'lucide-react-native';
-import { type ElementRef, useEffect, useMemo } from 'react';
+import { type ElementRef, useEffect, useMemo, useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,6 +40,8 @@ export function AlbumsScreen({
   const { width: windowWidth } = useWindowDimensions();
   const isSmallScreen = windowWidth < 380;
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  // Measured height of the sticky footer so the map FAB can float above it.
+  const [footerHeight, setFooterHeight] = useState(0);
 
   useEffect(() => {
     if (scrollToTopToken === undefined) return;
@@ -90,23 +92,14 @@ export function AlbumsScreen({
         ) : (
           <Animated.ScrollView
             ref={scrollRef}
+            className="flex-1"
             contentContainerStyle={{
               paddingHorizontal: SCREEN_PADDING,
               paddingTop: 6,
-              paddingBottom: bottomNavInset + 24,
+              paddingBottom: 24,
             }}
             showsVerticalScrollIndicator={false}
           >
-            <View className="mb-3">
-              <SelectField
-                compact
-                label={I18n.t('albums.active_label')}
-                sheetTitle={I18n.t('albums.active_sheet_title')}
-                value={activeAlbumId ?? ''}
-                options={activeOptions}
-                onChange={(value) => setActiveAlbum(value || null)}
-              />
-            </View>
             <Sortable.Flex
               activeItemScale={1.02}
               activeItemShadowOpacity={0.12}
@@ -135,6 +128,23 @@ export function AlbumsScreen({
             </Sortable.Flex>
           </Animated.ScrollView>
         )}
+
+        {albums.length > 0 ? (
+          <View
+            onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
+            className="border-t border-border/40 bg-background px-5 pt-3"
+            style={{ paddingBottom: bottomNavInset + 12 }}
+          >
+            <SelectField
+              compact
+              label={I18n.t('albums.active_label')}
+              sheetTitle={I18n.t('albums.active_sheet_title')}
+              value={activeAlbumId ?? ''}
+              options={activeOptions}
+              onChange={(value) => setActiveAlbum(value || null)}
+            />
+          </View>
+        ) : null}
       </TabletContentContainer>
 
       {albums.length > 0 ? (
@@ -146,7 +156,7 @@ export function AlbumsScreen({
           accessibilityRole="button"
           accessibilityLabel={I18n.t('albums.location.screen_title')}
           className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-soft active:opacity-85"
-          style={{ bottom: bottomNavInset + 16 }}
+          style={{ bottom: footerHeight + 16 }}
         >
           <MapIcon size={24} color="#fff" />
         </Pressable>

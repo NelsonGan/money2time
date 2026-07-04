@@ -1638,6 +1638,7 @@ const tr = {
     active_label: 'Yeni işlemleri şuna ekle',
     active_sheet_title: 'Etkin gezi',
     active_none: 'Yok',
+    active_badge: 'Etkin',
     change_cover: 'Kapağı değiştir',
     edit_details_title: 'Geziyi düzenle',
     start_date: 'Başlangıç tarihi',

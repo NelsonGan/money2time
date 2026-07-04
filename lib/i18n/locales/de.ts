@@ -1653,6 +1653,7 @@ const de = {
     active_label: 'Neue Transaktionen hinzufügen zu',
     active_sheet_title: 'Aktive Reise',
     active_none: 'Keine',
+    active_badge: 'Aktiv',
     change_cover: 'Titelbild ändern',
     edit_details_title: 'Reise bearbeiten',
     start_date: 'Startdatum',

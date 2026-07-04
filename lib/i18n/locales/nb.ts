@@ -1631,6 +1631,7 @@ const nb = {
     active_label: 'Legg nye transaksjoner til',
     active_sheet_title: 'Aktiv reise',
     active_none: 'Ingen',
+    active_badge: 'Aktiv',
     change_cover: 'Endre forside',
     edit_details_title: 'Rediger reise',
     start_date: 'Startdato',

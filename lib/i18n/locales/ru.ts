@@ -1633,6 +1633,7 @@ const ru = {
     active_label: 'Добавлять новые операции в',
     active_sheet_title: 'Активная поездка',
     active_none: 'Нет',
+    active_badge: 'Активно',
     change_cover: 'Изменить обложку',
     edit_details_title: 'Изменить поездку',
     start_date: 'Дата начала',

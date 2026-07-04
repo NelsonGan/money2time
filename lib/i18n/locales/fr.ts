@@ -1650,6 +1650,7 @@ const fr = {
     active_label: 'Ajouter les nouvelles transactions à',
     active_sheet_title: 'Voyage actif',
     active_none: 'Aucun',
+    active_badge: 'Actif',
     change_cover: 'Changer la couverture',
     edit_details_title: 'Modifier le voyage',
     start_date: 'Date de début',

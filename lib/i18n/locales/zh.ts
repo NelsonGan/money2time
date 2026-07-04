@@ -1553,6 +1553,7 @@ const zh = {
     active_label: '新交易自动加入',
     active_sheet_title: '当前行程',
     active_none: '无',
+    active_badge: '进行中',
     change_cover: '更换封面',
     edit_details_title: '编辑行程',
     start_date: '开始日期',

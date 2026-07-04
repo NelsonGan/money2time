@@ -1641,6 +1641,7 @@ const es = {
     active_label: 'Añadir nuevas transacciones a',
     active_sheet_title: 'Viaje activo',
     active_none: 'Ninguno',
+    active_badge: 'Activo',
     change_cover: 'Cambiar portada',
     edit_details_title: 'Editar viaje',
     start_date: 'Fecha de inicio',

@@ -1610,6 +1610,7 @@ const ja = {
     active_label: '新しい取引の追加先',
     active_sheet_title: 'アクティブな旅行',
     active_none: 'なし',
+    active_badge: 'アクティブ',
     change_cover: 'カバーを変更',
     edit_details_title: '旅行を編集',
     start_date: '開始日',

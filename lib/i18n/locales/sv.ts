@@ -1628,6 +1628,7 @@ const sv = {
     active_label: 'Lägg nya transaktioner till',
     active_sheet_title: 'Aktiv resa',
     active_none: 'Ingen',
+    active_badge: 'Aktiv',
     change_cover: 'Byt omslag',
     edit_details_title: 'Redigera resa',
     start_date: 'Startdatum',

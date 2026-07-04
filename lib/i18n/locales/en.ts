@@ -1609,6 +1609,7 @@ const en = {
     active_label: 'Auto-add new transactions to',
     active_sheet_title: 'Active trip',
     active_none: 'None',
+    active_badge: 'Active',
     change_cover: 'Change cover',
     edit_details_title: 'Edit trip',
     start_date: 'Start date',
