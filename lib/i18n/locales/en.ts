@@ -526,31 +526,31 @@ const en = {
       asset_history: 'Assets',
       income_rate_history: 'Hourly rate',
     },
-    expense_breakdown: 'Expense breakdown',
+    expense_breakdown: 'Expense Breakdown',
     expense_breakdown_description:
       'See where your spending goes by category, with share and drilldown detail.',
-    income_breakdown: 'Income breakdown',
+    income_breakdown: 'Income Breakdown',
     income_breakdown_description:
       'See where your income comes from by category, with share and drilldown detail.',
     time_cost_leaderboard: 'Time cost leaderboard',
     time_cost_leaderboard_description:
       'Rank the expenses that consumed the most work-time in this period.',
-    savings_rate: 'Savings rate',
+    savings_rate: 'Savings Rate',
     savings_rate_description:
       'Measure how much of your income you kept after expenses in this period.',
-    expense_trend: 'Expense trend',
+    expense_trend: 'Expense Trend',
     expense_trend_description:
       'Track monthly spending across the year and spot pressure months fast.',
-    income_trend: 'Income trend',
+    income_trend: 'Income Trend',
     income_trend_description:
       'Track monthly income across the year and spot your strongest months fast.',
-    category_trend: 'Category trend',
+    category_trend: 'Category Trend',
     category_trend_description:
       'Pick a category and track how its spending trends over the month or year.',
-    expense_sentiment: 'Expense sentiment',
+    expense_sentiment: 'Expense Sentiment',
     expense_sentiment_description:
       'See the mood behind your spending — happy, neutral, or regretful — day by day.',
-    asset_history: 'Asset history',
+    asset_history: 'Asset History',
     asset_history_description:
       'Track your total assets across the year and review monthly balance trend.',
     income_rate_history: 'Income rate history',
