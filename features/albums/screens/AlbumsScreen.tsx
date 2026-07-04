@@ -1,4 +1,4 @@
-import { Map as MapIcon } from 'lucide-react-native';
+import { Map as MapIcon, Sparkles } from 'lucide-react-native';
 import { type ElementRef, useEffect, useMemo, useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -12,6 +12,7 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { SelectField, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -35,6 +36,7 @@ export function AlbumsScreen({
 }: AlbumsScreenProps) {
   const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
   const { checkLimit } = useProGate();
+  const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
@@ -133,15 +135,20 @@ export function AlbumsScreen({
         {albums.length > 0 ? (
           <View
             onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-            className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-1.5"
+            className="flex-row items-center justify-between gap-3 border-t border-border/40 bg-background px-5 pt-2"
             style={{ paddingBottom: bottomNavInset }}
           >
-            <Text variant="label" tone="muted" numberOfLines={1} className="shrink-0">
-              {I18n.t('albums.active_label')}:
-            </Text>
-            <View className="flex-1">
+            <View className="min-w-0 shrink flex-row items-center gap-2">
+              <Sparkles size={15} color={themeColors.textMuted} />
+              <Text variant="label" tone="muted" numberOfLines={1}>
+                {I18n.t('albums.active_label')}
+              </Text>
+            </View>
+            <View className="max-w-[62%]">
               <SelectField
                 triggerSize="header"
+                triggerAutoWidth
+                triggerTone={activeAlbumId ? 'active' : 'default'}
                 sheetTitle={I18n.t('albums.active_sheet_title')}
                 value={activeAlbumId ?? ''}
                 options={activeOptions}

@@ -45,6 +45,10 @@ interface SelectFieldProps {
   compact?: boolean;
   triggerSize?: 'default' | 'header';
   triggerVariant?: 'default' | 'header-plain';
+  /** Hug the trigger to its content width instead of filling the parent. */
+  triggerAutoWidth?: boolean;
+  /** Accent the header trigger (e.g. to mark an active selection). */
+  triggerTone?: 'default' | 'active';
   value: string | null;
   options: SelectOption[];
   optionGroups?: SelectOptionGroup[];
@@ -65,6 +69,8 @@ export function SelectField({
   compact = false,
   triggerSize = 'default',
   triggerVariant = 'default',
+  triggerAutoWidth = false,
+  triggerTone = 'default',
   value,
   options,
   optionGroups,
@@ -121,6 +127,7 @@ export function SelectField({
       iconGridColumns,
   );
   const isHeaderPlainTrigger = triggerVariant === 'header-plain';
+  const isActiveTone = triggerTone === 'active';
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const renderOptionIcon = (icon?: SelectOption['icon']) => {
     if (!icon) return null;
@@ -334,7 +341,7 @@ export function SelectField({
   };
 
   return (
-    <View className="w-full">
+    <View className={triggerAutoWidth ? 'self-start' : 'w-full'}>
       {label && !compact ? (
         <View className="mb-2.5 px-1 flex-row items-center">
           <Text variant="caption" tone="muted">
@@ -359,10 +366,17 @@ export function SelectField({
             : isHeaderPlainTrigger
               ? 'min-h-10 flex-row items-center justify-between gap-2'
               : triggerSize === 'header'
-                ? 'h-10 rounded-[22px] border bg-card/95 px-3.5 flex-row items-center justify-between'
+                ? cn(
+                    'h-10 rounded-[22px] border px-3.5 flex-row items-center justify-between',
+                    isActiveTone ? 'bg-primary/10' : 'bg-card/95',
+                  )
                 : 'h-[54px] rounded-3xl border bg-card/95 px-4 flex-row items-center justify-between',
           !isHeaderPlainTrigger &&
-            (error ? 'border-destructive/55 bg-destructive/5' : 'border-border/40'),
+            (error
+              ? 'border-destructive/55 bg-destructive/5'
+              : isActiveTone
+                ? 'border-primary/40'
+                : 'border-border/40'),
         )}
       >
         {compact ? (
@@ -422,7 +436,14 @@ export function SelectField({
                 : null}
               <Text
                 numberOfLines={1}
-                className={cn('flex-1', selected ? 'text-foreground' : 'text-muted-foreground')}
+                className={cn(
+                  'flex-1',
+                  isActiveTone
+                    ? 'text-primary font-medium'
+                    : selected
+                      ? 'text-foreground'
+                      : 'text-muted-foreground',
+                )}
               >
                 {selectedLabel}
               </Text>
@@ -442,7 +463,10 @@ export function SelectField({
             <ChevronDown size={15} color={themeColors.textMuted} />
           </View>
         ) : (
-          <ChevronDown size={16} color={themeColors.textMuted} />
+          <ChevronDown
+            size={16}
+            color={isActiveTone ? themeColors.primary : themeColors.textMuted}
+          />
         )}
       </Pressable>
       {error ? (
