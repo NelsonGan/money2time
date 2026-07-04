@@ -667,6 +667,7 @@ const zh = {
       none: '无排除项',
     },
     period: {
+      all_time: '全部时间',
       week: '周',
       month: '月',
       year: '年',

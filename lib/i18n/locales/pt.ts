@@ -714,6 +714,7 @@ const pt = {
       none: 'Sem exclusões',
     },
     period: {
+      all_time: 'Todo o período',
       week: 'Semana',
       month: 'Mês',
       year: 'Ano',

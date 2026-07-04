@@ -701,6 +701,7 @@ const ko = {
       none: '제외 항목 없음',
     },
     period: {
+      all_time: '전체 기간',
       week: '주',
       month: '월',
       year: '년',

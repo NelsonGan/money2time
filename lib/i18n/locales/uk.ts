@@ -709,6 +709,7 @@ const uk = {
       none: 'Без виключень',
     },
     period: {
+      all_time: 'За весь час',
       week: 'Тиждень',
       month: 'Місяць',
       year: 'Рік',

@@ -704,6 +704,7 @@ const vi = {
       none: 'Không loại trừ',
     },
     period: {
+      all_time: 'Tất cả thời gian',
       week: 'Tuần',
       month: 'Tháng',
       year: 'Năm',
