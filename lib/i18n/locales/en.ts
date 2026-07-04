@@ -686,6 +686,8 @@ const en = {
       none: 'No exclusions',
     },
     period: {
+      lifetime: 'Lifetime',
+      all_time: 'All time',
       week: 'Week',
       month: 'Month',
       year: 'Year',
