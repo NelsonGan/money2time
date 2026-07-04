@@ -664,7 +664,6 @@ const pl = {
         title: 'Snapshot stopy oszczędności',
         no_income_title: 'Brak przychodów w tym okresie',
         no_income_short: 'Brak przychodu',
-        no_income_message: 'Dodaj przychody w tym okresie, by obliczyć stopę oszczędności.',
         saved_per_year: '{{value}} oszczędzono w tym roku',
         exclusions_active: 'Wyłączono {{count}} kategorii z obliczeń.',
         goal_hint: '20%+ uważane jest za zdrowy poziom.',

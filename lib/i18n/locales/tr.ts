@@ -668,7 +668,6 @@ const tr = {
         title: 'Tasarruf oranı özeti',
         no_income_title: 'Bu dönemde gelir yok',
         no_income_short: 'Gelir yok',
-        no_income_message: 'Tasarruf oranını hesaplamak için bu döneme gelir işlemleri ekleyin.',
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',
         exclusions_active: '{{count}} kategori hesaplamadan çıkarıldı.',
         goal_hint: '%20 ve üzeri sağlıklı kabul edilir.',

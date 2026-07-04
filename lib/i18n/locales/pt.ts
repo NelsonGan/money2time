@@ -666,7 +666,6 @@ const pt = {
         title: 'Resumo da taxa de poupança',
         no_income_title: 'Sem receita neste período',
         no_income_short: 'Sem receita',
-        no_income_message: 'Adicione receitas neste período para calcular a taxa de poupança.',
         saved_per_year: '{{value}} economizado este ano',
         exclusions_active: 'Excluindo {{count}} categorias do cálculo.',
         goal_hint: '20%+ é considerado saudável.',

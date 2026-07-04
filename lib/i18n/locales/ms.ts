@@ -664,8 +664,6 @@ const ms = {
         title: 'Gambaran kadar simpanan',
         no_income_title: 'Tiada pendapatan dalam tempoh ini',
         no_income_short: 'Tiada pendapatan',
-        no_income_message:
-          'Tambah transaksi pendapatan dalam tempoh ini untuk kira kadar simpanan.',
         saved_per_year: '{{value}} disimpan tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori daripada pengiraan.',
         goal_hint: '20%+ dianggap sihat.',

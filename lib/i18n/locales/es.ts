@@ -667,8 +667,6 @@ const es = {
         title: 'Resumen de tasa de ahorro',
         no_income_title: 'Sin ingresos en este período',
         no_income_short: 'Sin ingresos',
-        no_income_message:
-          'Añade movimientos de ingreso en este período para calcular la tasa de ahorro.',
         saved_per_year: '{{value}} ahorrado este año',
         exclusions_active: 'Excluyendo {{count}} categorías del cálculo.',
         goal_hint: 'Un 20%+ se considera saludable.',

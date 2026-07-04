@@ -653,7 +653,6 @@ const ko = {
         title: '저축률 현황',
         no_income_title: '이 기간 수입 없음',
         no_income_short: '수입 없음',
-        no_income_message: '저축률 계산을 위해 이 기간에 수입 거래를 추가하세요.',
         saved_per_year: '올해 {{value}} 저축',
         exclusions_active: '{{count}}개 카테고리 제외 중.',
         goal_hint: '20% 이상이 건강한 저축률입니다.',

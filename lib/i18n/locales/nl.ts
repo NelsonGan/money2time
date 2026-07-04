@@ -668,8 +668,6 @@ const nl = {
         title: 'Spaarquote-overzicht',
         no_income_title: 'Geen inkomsten in deze periode',
         no_income_short: 'Geen inkomsten',
-        no_income_message:
-          'Voeg inkomstentransacties toe in deze periode om de spaarquote te berekenen.',
         saved_per_year: '{{value}} gespaard dit jaar',
         exclusions_active: '{{count}} categorieën uitgesloten van berekening.',
         goal_hint: '20%+ wordt als gezond beschouwd.',

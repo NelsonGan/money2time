@@ -663,7 +663,6 @@ const it = {
         title: 'Riepilogo tasso di risparmio',
         no_income_title: 'Nessuna entrata nel periodo',
         no_income_short: 'Nessuna entrata',
-        no_income_message: 'Aggiungi entrate nel periodo per calcolare il tasso di risparmio.',
         saved_per_year: "{{value}} risparmiati quest'anno",
         exclusions_active: 'Escludendo {{count}} categorie dal calcolo.',
         goal_hint: '20%+ è considerato sano.',

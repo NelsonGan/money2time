@@ -661,8 +661,6 @@ const sv = {
         title: 'Sparandegradöversikt',
         no_income_title: 'Ingen inkomst under perioden',
         no_income_short: 'Ingen inkomst',
-        no_income_message:
-          'Lägg till inkomsttransaktioner under perioden för att beräkna sparandegraden.',
         saved_per_year: '{{value}} sparat i år',
         exclusions_active: 'Exkluderar {{count}} kategorier från beräkningen.',
         goal_hint: '20 %+ anses sunt.',

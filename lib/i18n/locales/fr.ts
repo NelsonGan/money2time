@@ -665,7 +665,6 @@ const fr = {
         title: "Aperçu du taux d'épargne",
         no_income_title: 'Aucun revenu sur cette période',
         no_income_short: 'Aucun revenu',
-        no_income_message: "Ajoutez des revenus sur cette période pour calculer le taux d'épargne.",
         saved_per_year: '{{value}} épargnés cette année',
         exclusions_active: '{{count}} catégories exclues du calcul.',
         goal_hint: '20 % ou plus est considéré comme sain.',

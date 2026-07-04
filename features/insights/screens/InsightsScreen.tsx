@@ -281,6 +281,22 @@ const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const SAVINGS_RATE_RING_SIZE = 104;
 const SAVINGS_RATE_RING_STROKE_WIDTH = 11;
+const SAVINGS_RATE_ABBREVIATE_THRESHOLD = 1000;
+
+// Formats an already-computed savings-rate percentage (e.g. 20 → "20.0%"). When the
+// magnitude reaches 1000% (income tiny relative to net) it abbreviates to a compact
+// "k" form (e.g. 1234 → "1.2k%") so the label never overflows its row and breaks the
+// layout.
+const formatSavingsRatePercentLabel = (percent: number): string => {
+  const magnitude = Math.abs(percent);
+  if (magnitude >= SAVINGS_RATE_ABBREVIATE_THRESHOLD) {
+    const sign = percent < 0 ? '-' : '';
+    const thousands = magnitude / 1000;
+    const decimals = thousands >= 100 ? 0 : 1;
+    return `${sign}${thousands.toFixed(decimals)}k%`;
+  }
+  return `${percent.toFixed(1)}%`;
+};
 const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
   fontSize: 24,
   lineHeight: 30,
@@ -5393,7 +5409,7 @@ export function InsightsScreen({
       const statusLabel = I18n.t(`insights.analytics.savings_rate.${statusLabelKey}`);
       const statusChipColor = withColorAlpha(toneColor, isDark ? 0.24 : 0.14);
       const formattedSavingsRate =
-        displayRatePercent === null ? null : `${displayRatePercent.toFixed(1)}%`;
+        displayRatePercent === null ? null : formatSavingsRatePercentLabel(displayRatePercent);
       const yearlySavedAmount = Math.abs(pageData.totalNet);
       const yearlySavedAmountClass =
         pageData.totalNet > 0
@@ -5505,12 +5521,6 @@ export function InsightsScreen({
               </View>
             </View>
 
-            {savingsRate === null ? (
-              <Text variant="label" tone="muted">
-                {I18n.t('insights.analytics.savings_rate.no_income_message')}
-              </Text>
-            ) : null}
-
             <View className="flex-row items-stretch border-t border-border/40 pt-3">
               <View className="flex-1">
                 <View className="flex-row items-center gap-1.5">
@@ -5594,7 +5604,9 @@ export function InsightsScreen({
               const monthlyDisplayPercent =
                 monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
               const monthlyRateLabel =
-                monthlyDisplayPercent === null ? '—' : `${monthlyDisplayPercent.toFixed(1)}%`;
+                monthlyDisplayPercent === null
+                  ? '—'
+                  : formatSavingsRatePercentLabel(monthlyDisplayPercent);
               const monthlySavedAmountClass =
                 row.net > 0
                   ? 'text-success'
@@ -5674,7 +5686,7 @@ export function InsightsScreen({
                       </View>
                     </View>
                     <View className="items-end gap-0.5">
-                      <Text variant="mono" style={{ color: monthlyToneColor }}>
+                      <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
                         {monthlyRateLabel}
                       </Text>
                       {renderCompactValueNode(monthlySavedAmount, {

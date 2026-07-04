@@ -654,7 +654,6 @@ const ja = {
         title: '貯蓄率スナップショット',
         no_income_title: 'この期間に収入がありません',
         no_income_short: '収入なし',
-        no_income_message: '貯蓄率を計算するには、この期間に収入を追加してください。',
         saved_per_year: '今年 {{value}} 貯蓄',
         exclusions_active: '{{count}} 件のカテゴリを除外中。',
         goal_hint: '20%以上が健全とされています。',

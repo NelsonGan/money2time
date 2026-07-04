@@ -656,7 +656,6 @@ const vi = {
         title: 'Tổng quan tỷ lệ tiết kiệm',
         no_income_title: 'Không có thu nhập trong kỳ',
         no_income_short: 'Không có thu nhập',
-        no_income_message: 'Thêm giao dịch thu nhập trong kỳ để tính tỷ lệ tiết kiệm.',
         saved_per_year: '{{value}} tiết kiệm năm nay',
         exclusions_active: 'Đang loại trừ {{count}} danh mục khỏi tính toán.',
         goal_hint: 'Trên 20% được coi là lành mạnh.',

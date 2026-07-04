@@ -668,8 +668,6 @@ const id = {
         title: 'Cuplikan tingkat tabungan',
         no_income_title: 'Tidak ada pemasukan periode ini',
         no_income_short: 'Tidak ada pemasukan',
-        no_income_message:
-          'Tambahkan transaksi pemasukan di periode ini untuk menghitung tingkat tabungan.',
         saved_per_year: '{{value}} ditabung tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori dari perhitungan.',
         goal_hint: '20%+ dianggap sehat.',

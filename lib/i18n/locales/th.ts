@@ -651,7 +651,6 @@ const th = {
         title: 'ภาพรวมอัตราการออม',
         no_income_title: 'ไม่มีรายรับในช่วงนี้',
         no_income_short: 'ไม่มีรายรับ',
-        no_income_message: 'เพิ่มรายการรายรับในช่วงนี้เพื่อคำนวณอัตราการออม',
         saved_per_year: 'ออมได้ {{value}} ปีนี้',
         exclusions_active: 'ยกเว้น {{count}} หมวดหมู่จากการคำนวณ',
         goal_hint: '20% ขึ้นไปถือว่าดี',

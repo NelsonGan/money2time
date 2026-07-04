@@ -658,7 +658,6 @@ const hi = {
         title: 'बचत दर स्नैपशॉट',
         no_income_title: 'इस अवधि में कोई आय नहीं',
         no_income_short: 'कोई आय नहीं',
-        no_income_message: 'बचत दर गणना के लिए इस अवधि में आय लेनदेन जोड़ें।',
         saved_per_year: 'इस साल {{value}} बचाया',
         exclusions_active: '{{count}} श्रेणियां गणना से बाहर।',
         goal_hint: '20%+ स्वस्थ माना जाता है।',

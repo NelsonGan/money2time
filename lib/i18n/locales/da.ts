@@ -665,8 +665,6 @@ const da = {
         title: 'Opsparingsrate-oversigt',
         no_income_title: 'Ingen indtægt i denne periode',
         no_income_short: 'Ingen indtægt',
-        no_income_message:
-          'Tilføj indtægtstransaktioner i denne periode for at beregne opsparingsraten.',
         saved_per_year: '{{value}} sparet i år',
         exclusions_active: 'Udelukker {{count}} kategorier fra beregningen.',
         goal_hint: '20%+ anses for sundt.',

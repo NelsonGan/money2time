@@ -619,7 +619,6 @@ const zh = {
         title: '储蓄率概览',
         no_income_title: '本期无收入',
         no_income_short: '无收入',
-        no_income_message: '在本期添加收入交易以计算储蓄率。',
         saved_per_year: '今年已节省 {{value}}',
         exclusions_active: '已排除 {{count}} 个分类。',
         goal_hint: '20% 以上为健康储蓄。',

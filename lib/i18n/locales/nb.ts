@@ -663,8 +663,6 @@ const nb = {
         title: 'Sparerateoversikt',
         no_income_title: 'Ingen inntekt i denne perioden',
         no_income_short: 'Ingen inntekt',
-        no_income_message:
-          'Legg til inntektstransaksjoner i denne perioden for å beregne sparerate.',
         saved_per_year: '{{value}} spart i år',
         exclusions_active: 'Ekskluderer {{count}} kategorier fra beregningen.',
         goal_hint: '20 %+ anses som sunt.',
