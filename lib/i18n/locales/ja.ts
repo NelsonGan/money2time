@@ -702,7 +702,6 @@ const ja = {
       none: '除外なし',
     },
     period: {
-      lifetime: '全期間',
       all_time: '全期間',
       week: '週',
       month: '月',

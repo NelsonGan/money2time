@@ -711,7 +711,6 @@ const nb = {
       none: 'Ingen ekskluderinger',
     },
     period: {
-      lifetime: 'Hele tiden',
       all_time: 'Hele tiden',
       week: 'Uke',
       month: 'Måned',

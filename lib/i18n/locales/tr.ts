@@ -716,7 +716,6 @@ const tr = {
       none: 'Hariç tutulan yok',
     },
     period: {
-      lifetime: 'Tüm zamanlar',
       all_time: 'Tüm zamanlar',
       week: 'Hafta',
       month: 'Ay',

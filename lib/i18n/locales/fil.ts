@@ -720,7 +720,6 @@ const fil = {
       none: 'Walang exclusion',
     },
     period: {
-      lifetime: 'Habambuhay',
       all_time: 'Lahat ng panahon',
       week: 'Linggo',
       month: 'Buwan',

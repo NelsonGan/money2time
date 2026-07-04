@@ -713,7 +713,6 @@ const fr = {
       none: 'Aucune exclusion',
     },
     period: {
-      lifetime: 'Total',
       all_time: 'Depuis toujours',
       week: 'Semaine',
       month: 'Mois',

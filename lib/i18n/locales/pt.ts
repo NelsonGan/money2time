@@ -714,7 +714,6 @@ const pt = {
       none: 'Sem exclusões',
     },
     period: {
-      lifetime: 'Histórico',
       all_time: 'Todo o período',
       week: 'Semana',
       month: 'Mês',

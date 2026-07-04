@@ -713,7 +713,6 @@ const ms = {
       none: 'Tiada pengecualian',
     },
     period: {
-      lifetime: 'Sepanjang masa',
       all_time: 'Semua masa',
       week: 'Minggu',
       month: 'Bulan',

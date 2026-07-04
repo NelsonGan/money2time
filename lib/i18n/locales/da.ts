@@ -714,7 +714,6 @@ const da = {
       none: 'Ingen undtagelser',
     },
     period: {
-      lifetime: 'Al tid',
       all_time: 'Al tid',
       week: 'Uge',
       month: 'Måned',

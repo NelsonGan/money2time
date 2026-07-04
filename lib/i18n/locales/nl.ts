@@ -717,7 +717,6 @@ const nl = {
       none: 'Geen uitsluitingen',
     },
     period: {
-      lifetime: 'Totaal',
       all_time: 'Alle tijd',
       week: 'Week',
       month: 'Maand',

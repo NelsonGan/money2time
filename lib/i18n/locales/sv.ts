@@ -709,7 +709,6 @@ const sv = {
       none: 'Inga undantag',
     },
     period: {
-      lifetime: 'Alltid',
       all_time: 'Hela tiden',
       week: 'Vecka',
       month: 'Månad',

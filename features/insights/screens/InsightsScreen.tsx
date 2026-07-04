@@ -1744,12 +1744,8 @@ const TREND_TRANSACTIONS_PAGE = 10;
 // is owned by the screen (keyed per list) and grown as the page scrolls near its end,
 // so the non-virtualized list stays cheap to render while the chart is scrubbed.
 const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
-  monthLabel,
-  transactionsLabel,
   transactions,
   visibleCount,
-  accentColor,
-  isDark,
   locale,
   displaySettings,
   getDisplayValueForTransaction,
@@ -1761,12 +1757,8 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   emptyTitle,
   emptyMessage,
 }: {
-  monthLabel: string;
-  transactionsLabel: string;
   transactions: TransactionWithRelations[];
   visibleCount: number;
-  accentColor: string;
-  isDark: boolean;
   locale: string;
   displaySettings: Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
@@ -1792,46 +1784,27 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   const visibleTransactions = sortedTransactions.slice(0, visibleCount);
 
   return (
-    <View className="gap-2">
-      <View className="flex-row items-center gap-2 px-0.5">
-        <View
-          className="rounded-full px-2.5 py-1"
-          style={{ backgroundColor: withColorAlpha(accentColor, isDark ? 0.2 : 0.12) }}
-        >
-          <Text
-            variant="label"
-            style={{ color: accentColor, fontFamily: FONT.semibold, fontWeight: '600' }}
-          >
-            {monthLabel}
-          </Text>
-        </View>
-        <Text variant="label" tone="muted">
-          {transactionsLabel}
-        </Text>
-      </View>
-
-      <ActivityTransactionList
-        transactions={visibleTransactions}
-        locale={locale}
-        displaySettings={displaySettings}
-        getDisplayValueForTransaction={getDisplayValueForTransaction}
-        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-        onTransactionPress={onOpenTransaction}
-        onTransactionLongPress={onTransactionLongPress}
-        selectedTransactionIds={selectedTransactionIds}
-        selectionMode={selectionMode}
-        emptyTitle={emptyTitle}
-        emptyMessage={emptyMessage}
-        contentPaddingTop={0}
-        contentPaddingBottom={0}
-        contentPaddingHorizontal={0}
-        disableItemAnimations
-        disableScrollBounce
-        disableVirtualization
-        compactItems
-        groupByDate
-      />
-    </View>
+    <ActivityTransactionList
+      transactions={visibleTransactions}
+      locale={locale}
+      displaySettings={displaySettings}
+      getDisplayValueForTransaction={getDisplayValueForTransaction}
+      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+      onTransactionPress={onOpenTransaction}
+      onTransactionLongPress={onTransactionLongPress}
+      selectedTransactionIds={selectedTransactionIds}
+      selectionMode={selectionMode}
+      emptyTitle={emptyTitle}
+      emptyMessage={emptyMessage}
+      contentPaddingTop={0}
+      contentPaddingBottom={0}
+      contentPaddingHorizontal={0}
+      disableItemAnimations
+      disableScrollBounce
+      disableVirtualization
+      compactItems
+      groupByDate
+    />
   );
 });
 
@@ -2714,6 +2687,7 @@ export function InsightsScreen({
   const lastScrubHapticAtRef = useRef(0);
 
   const { width, height } = useWindowDimensions();
+  const bottomNavInset = useBottomNavContentInset();
   const { isTablet } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -4285,17 +4259,8 @@ export function InsightsScreen({
   // Prominent total for the bar the user is scrubbing on a trend chart. Mirrors
   // the breakdown "total on top" styling so the two insight families read alike.
   const renderTrendBucketTotal = useCallback(
-    (bucketLabel: string, totalValue: number, accentColor: string) => (
+    (totalValue: number, accentColor: string) => (
       <View className="items-center gap-0.5 py-1">
-        {bucketLabel ? (
-          <Text
-            variant="caption"
-            tone="muted"
-            style={{ fontFamily: FONT.semibold, fontWeight: '600' }}
-          >
-            {bucketLabel}
-          </Text>
-        ) : null}
         {renderValueNode(totalValue, {
           variant: 'heading',
           textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
@@ -4316,14 +4281,6 @@ export function InsightsScreen({
       </View>
     ),
     [isDark, renderValueNode],
-  );
-  const trendBucketDisplayLabel = useCallback(
-    (monthKey: string, granularity: TrendGranularity, fallbackLabel: string) => {
-      if (granularity === 'month') return monthLabelFromMonthKey(monthKey, activeLocale);
-      if (granularity === 'year') return monthKey;
-      return fallbackLabel;
-    },
-    [activeLocale],
   );
   const renderCompactValueNode = useCallback(
     (
@@ -4968,15 +4925,7 @@ export function InsightsScreen({
 
     return (
       <View className="mt-2 gap-3">
-        {renderTrendBucketTotal(
-          trendBucketDisplayLabel(
-            selectedMonthRow.monthKey,
-            pageData.granularity,
-            selectedMonthRow.label,
-          ),
-          selectedMonthRow.totalExpense,
-          trendAccentColor,
-        )}
+        {renderTrendBucketTotal(selectedMonthRow.totalExpense, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
             style={[
@@ -5019,17 +4968,11 @@ export function InsightsScreen({
 
         <TrendMonthTransactions
           key={`expense-${selectedMonthRow.monthKey}`}
-          monthLabel={selectedMonthRow.label}
-          transactionsLabel={I18n.t('insights.analytics.expense_trend.transactions', {
-            count: selectedMonthRow.transactionCount,
-          })}
           transactions={selectedMonthRow.transactions}
           visibleCount={
             trendListVisibleCounts[`expense|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
             TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
           }
-          accentColor={trendAccentColor}
-          isDark={isDark}
           locale={activeLocale}
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
@@ -5087,15 +5030,7 @@ export function InsightsScreen({
 
     return (
       <View className="mt-2 gap-3">
-        {renderTrendBucketTotal(
-          trendBucketDisplayLabel(
-            selectedMonthRow.monthKey,
-            pageData.granularity,
-            selectedMonthRow.label,
-          ),
-          selectedMonthRow.totalIncome,
-          trendAccentColor,
-        )}
+        {renderTrendBucketTotal(selectedMonthRow.totalIncome, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
             style={[
@@ -5138,17 +5073,11 @@ export function InsightsScreen({
 
         <TrendMonthTransactions
           key={`income-${selectedMonthRow.monthKey}`}
-          monthLabel={selectedMonthRow.label}
-          transactionsLabel={I18n.t('insights.analytics.income_trend.transactions', {
-            count: selectedMonthRow.transactionCount,
-          })}
           transactions={selectedMonthRow.transactions}
           visibleCount={
             trendListVisibleCounts[`income|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
             TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
           }
-          accentColor={trendAccentColor}
-          isDark={isDark}
           locale={activeLocale}
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
@@ -5208,11 +5137,7 @@ export function InsightsScreen({
 
     return (
       <View className="mt-2 gap-3">
-        {renderTrendBucketTotal(
-          trendBucketDisplayLabel(selectedRow.monthKey, pageData.granularity, selectedRow.label),
-          selectedRow.totalExpense,
-          trendAccentColor,
-        )}
+        {renderTrendBucketTotal(selectedRow.totalExpense, trendAccentColor)}
         <View style={lineChartSectionStyle} className="py-1">
           <View
             style={[
@@ -5255,21 +5180,11 @@ export function InsightsScreen({
 
         <TrendMonthTransactions
           key={`category-${selectedRow.monthKey}`}
-          monthLabel={trendBucketDisplayLabel(
-            selectedRow.monthKey,
-            pageData.granularity,
-            selectedRow.label,
-          )}
-          transactionsLabel={I18n.t('insights.analytics.expense_trend.transactions', {
-            count: selectedRow.transactionCount,
-          })}
           transactions={selectedRow.transactions}
           visibleCount={
             trendListVisibleCounts[`category|${selectedPeriodKey}|${selectedRow.monthKey}`] ??
             TREND_TRANSACTIONS_INITIAL
           }
-          accentColor={trendAccentColor}
-          isDark={isDark}
           locale={activeLocale}
           displaySettings={settings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
@@ -6495,6 +6410,7 @@ export function InsightsScreen({
         monthLabel={activePeriodLabel}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
+        hideNavArrows={displayPeriodPreset === 'lifetime'}
         onMonthPress={displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker}
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
@@ -6510,46 +6426,6 @@ export function InsightsScreen({
           </View>
         }
       />
-
-      {displaySelectedInsightType === 'category_trend'
-        ? (() => {
-            const stickyOption =
-              categoryTrendCategoryOptions.find(
-                (category) => category.id === effectiveCategoryTrendCategoryId,
-              ) ??
-              categoryTrendCategoryOptions[0] ??
-              null;
-            if (!stickyOption) return null;
-            return (
-              <View className="bg-background px-5 pb-1.5">
-                <TabletContentContainer>
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setIsCategoryTrendPickerOpen(true);
-                    }}
-                    className="flex-row items-center justify-between rounded-2xl border border-border/50 bg-card px-3.5 py-3 active:opacity-80"
-                  >
-                    <View className="flex-row items-center gap-2">
-                      <CategoryEmoji icon={stickyOption.emoji} size={20} />
-                      <Text
-                        variant="body"
-                        style={{
-                          color: themeColors.text,
-                          fontFamily: FONT.semibold,
-                          fontWeight: '600',
-                        }}
-                      >
-                        {stickyOption.label}
-                      </Text>
-                    </View>
-                    <ChevronDown size={18} color={themeColors.textMuted} />
-                  </Pressable>
-                </TabletContentContainer>
-              </View>
-            );
-          })()
-        : null}
 
       <View className="flex-1 overflow-hidden bg-background">
         {isLoading ? (
@@ -6568,7 +6444,9 @@ export function InsightsScreen({
             horizontal
             pagingEnabled
             disableIntervalMomentum
-            scrollEnabled={!isChartScrubbing && !isSelectionMode}
+            scrollEnabled={
+              !isChartScrubbing && !isSelectionMode && displayPeriodPreset !== 'lifetime'
+            }
             bounces={false}
             directionalLockEnabled
             decelerationRate="fast"
@@ -6613,6 +6491,49 @@ export function InsightsScreen({
           />
         ) : null}
       </View>
+
+      {displaySelectedInsightType === 'category_trend' && !isSelectionMode
+        ? (() => {
+            const stickyOption =
+              categoryTrendCategoryOptions.find(
+                (category) => category.id === effectiveCategoryTrendCategoryId,
+              ) ??
+              categoryTrendCategoryOptions[0] ??
+              null;
+            if (!stickyOption) return null;
+            return (
+              <View
+                className="bg-background px-5 pt-1.5"
+                style={{ paddingBottom: bottomNavInset }}
+              >
+                <TabletContentContainer>
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setIsCategoryTrendPickerOpen(true);
+                    }}
+                    className="flex-row items-center justify-between rounded-2xl border border-border/50 bg-card px-3.5 py-3 active:opacity-80"
+                  >
+                    <View className="flex-row items-center gap-2">
+                      <CategoryEmoji icon={stickyOption.emoji} size={20} />
+                      <Text
+                        variant="body"
+                        style={{
+                          color: themeColors.text,
+                          fontFamily: FONT.semibold,
+                          fontWeight: '600',
+                        }}
+                      >
+                        {stickyOption.label}
+                      </Text>
+                    </View>
+                    <ChevronDown size={18} color={themeColors.textMuted} />
+                  </Pressable>
+                </TabletContentContainer>
+              </View>
+            );
+          })()
+        : null}
 
       <BulkEditTransactionsSheet
         visible={showBulkUpdate}
@@ -6704,7 +6625,9 @@ export function InsightsScreen({
                   {(activeInsightFilterConfig.allowedPeriodPresets ?? PERIOD_TABS).map((tab) => (
                     <FilterPill
                       key={tab}
-                      label={I18n.t(`insights.period.${tab}`)}
+                      label={I18n.t(
+                        tab === 'lifetime' ? 'insights.period.all_time' : `insights.period.${tab}`,
+                      )}
                       active={periodPreset === tab}
                       onPress={() => {
                         if (tab === 'week' && periodPreset !== 'week') {

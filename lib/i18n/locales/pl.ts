@@ -712,7 +712,6 @@ const pl = {
       none: 'Brak wykluczeń',
     },
     period: {
-      lifetime: 'Całość',
       all_time: 'Cały czas',
       week: 'Tydzień',
       month: 'Miesiąc',

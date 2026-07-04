@@ -23,6 +23,7 @@ export function MonthControlsHeader({
   summary,
   children,
   hideNavigation = false,
+  hideNavArrows = false,
   hideTitleRow = false,
   showAccent = true,
 }: {
@@ -40,6 +41,8 @@ export function MonthControlsHeader({
   summary?: React.ReactNode;
   children?: React.ReactNode;
   hideNavigation?: boolean;
+  /** Hide only the prev/next chevrons, keeping the centered label capsule. */
+  hideNavArrows?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
 }) {
@@ -94,15 +97,17 @@ export function MonthControlsHeader({
           {!hideNavigation ? (
             <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
               <View className="flex-row items-center justify-between">
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    onPrevMonth();
-                  }}
-                  className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                >
-                  <ChevronLeft size={16} color={themeColors.textSoft} />
-                </Pressable>
+                {hideNavArrows ? null : (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      onPrevMonth();
+                    }}
+                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronLeft size={16} color={themeColors.textSoft} />
+                  </Pressable>
+                )}
                 <View className="flex-1 items-center">
                   <View ref={monthTriggerRef} onLayout={onMonthTriggerLayout}>
                     <Pressable
@@ -124,15 +129,17 @@ export function MonthControlsHeader({
                     </Pressable>
                   </View>
                 </View>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    onNextMonth();
-                  }}
-                  className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                >
-                  <ChevronRight size={16} color={themeColors.textSoft} />
-                </Pressable>
+                {hideNavArrows ? null : (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      onNextMonth();
+                    }}
+                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                  >
+                    <ChevronRight size={16} color={themeColors.textSoft} />
+                  </Pressable>
+                )}
               </View>
             </View>
           ) : null}
