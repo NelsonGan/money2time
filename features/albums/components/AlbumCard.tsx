@@ -14,15 +14,22 @@ import { getAlbumCoverUri } from '~/services/userAssets';
 import type { Album } from '~/types';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
+import { AlbumActiveDot } from './AlbumActiveDot';
 import { formatAlbumDateRange } from '../utils';
 
 interface AlbumCardProps {
   album: Album;
   width: number;
+  isActive: boolean;
   onPress: (albumId: string) => void;
 }
 
-export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: AlbumCardProps) {
+export const AlbumCard = memo(function AlbumCard({
+  album,
+  width,
+  isActive,
+  onPress,
+}: AlbumCardProps) {
   const { settings, getAlbumStats } = useApp();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.96 });
 
@@ -95,6 +102,13 @@ export const AlbumCard = memo(function AlbumCard({ album, width, onPress }: Albu
           </View>
         </View>
       </Pressable>
+
+      {/* Active marker — small blinking green dot pinned to the top-right. */}
+      {isActive ? (
+        <View className="absolute right-3 top-3" pointerEvents="none">
+          <AlbumActiveDot />
+        </View>
+      ) : null}
 
       {/* Handle must be a sibling of the Pressable — nesting it inside lets the
           Pressable swallow the touch so the drag gesture never activates. The

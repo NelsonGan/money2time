@@ -122,6 +122,7 @@ export function AlbumsScreen({
                   key={album.id}
                   album={album}
                   width={contentWidth}
+                  isActive={album.id === activeAlbumId}
                   onPress={onOpenAlbumDetail}
                 />
               ))}

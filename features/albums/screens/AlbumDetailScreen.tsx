@@ -49,7 +49,6 @@ import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
-import { AlbumActiveBadge } from '../components/AlbumActiveBadge';
 import { formatAlbumDateRange } from '../utils';
 
 type DetailTab = 'breakdown' | 'transactions';
@@ -81,8 +80,6 @@ export function AlbumDetailScreen({
 }: AlbumDetailScreenProps) {
   const {
     albums,
-    activeAlbumId,
-    setActiveAlbum,
     settings,
     getAlbumStats,
     getAlbumTransactions,
@@ -478,9 +475,6 @@ export function AlbumDetailScreen({
               <ChevronLeft size={20} color={themeColors.textMuted} />
             </Pressable>
             <View className="flex-row items-center gap-2">
-              {activeAlbumId === albumId ? (
-                <AlbumActiveBadge onPress={() => setActiveAlbum(null)} />
-              ) : null}
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
