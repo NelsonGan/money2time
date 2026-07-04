@@ -866,6 +866,13 @@ const vi = {
     replay_message: 'Hướng dẫn thiết lập sẽ hiện lại lần sau khi mở ứng dụng. Không xóa dữ liệu.',
     replay_action: 'Xem lại',
     rate_app: 'Đánh giá Money2Time',
+    contact: {
+      tile: 'Liên hệ',
+      title: 'Liên hệ với chúng tôi',
+      body: 'Bạn có câu hỏi, phát hiện lỗi hoặc muốn chia sẻ phản hồi? Tham gia cộng đồng Discord của chúng tôi.',
+      button: 'Tham gia Discord',
+      close: 'Để sau',
+    },
     danger_zone: 'Vùng nguy hiểm',
     danger_description: 'Muốn bắt đầu lại? Thao tác này xóa toàn bộ dữ liệu cục bộ.',
     backup_fallback_name: 'Bản sao lưu',

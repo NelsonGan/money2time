@@ -874,6 +874,13 @@ const nb = {
     replay_message: 'Dette viser oppsettsguiden igjen ved neste oppstart. Ingen data slettes.',
     replay_action: 'Gjenta',
     rate_app: 'Vurder Money2Time',
+    contact: {
+      tile: 'Kontakt oss',
+      title: 'Ta kontakt',
+      body: 'Har du et spørsmål, funnet en feil eller vil dele tilbakemelding? Bli med i Discord-fellesskapet vårt.',
+      button: 'Bli med i Discord',
+      close: 'Kanskje senere',
+    },
     danger_zone: 'Faresone',
     danger_description: 'Trenger du en ny start? Dette sletter alle lokale data.',
     backup_fallback_name: 'Sikkerhetskopi',

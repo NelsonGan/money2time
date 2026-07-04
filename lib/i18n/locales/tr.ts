@@ -881,6 +881,13 @@ const tr = {
       'Bir sonraki açılışta kurulum kılavuzu tekrar gösterilecek. Hiçbir veri silinmeyecek.',
     replay_action: 'Tekrarla',
     rate_app: "Money2Time'ı Değerlendirin",
+    contact: {
+      tile: 'Bize ulaşın',
+      title: 'İletişime geçin',
+      body: 'Bir sorunuz mu var, bir hata mı buldunuz ya da geri bildirim mi paylaşmak istiyorsunuz? Discord topluluğumuza katılın.',
+      button: "Discord'umuza katıl",
+      close: 'Belki sonra',
+    },
     danger_zone: 'Tehlikeli Bölge',
     danger_description: 'Sıfırdan başlamak mı istiyorsunuz? Bu tüm yerel verileri siler.',
     backup_fallback_name: 'Yedek',

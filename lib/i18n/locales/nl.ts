@@ -883,6 +883,13 @@ const nl = {
       'De installatiegids wordt opnieuw getoond bij de volgende start. Er worden geen gegevens verwijderd.',
     replay_action: 'Opnieuw afspelen',
     rate_app: 'Money2Time beoordelen',
+    contact: {
+      tile: 'Neem contact op',
+      title: 'Neem contact op',
+      body: 'Heb je een vraag, een bug gevonden of wil je feedback delen? Word lid van onze Discord-community.',
+      button: 'Word lid van onze Discord',
+      close: 'Misschien later',
+    },
     danger_zone: 'Gevaarzone',
     danger_description: 'Wil je opnieuw beginnen? Dit wist alle lokale gegevens.',
     backup_fallback_name: 'Back-up',
