@@ -16,6 +16,10 @@ name: App Store Release Notifier
 #     commit) so this job never triggers the Deploy workflow.
 #   - The first run just records a baseline and does NOT notify, so it won't
 #     announce the already-published version as if it were new.
+#   - Only a STRICTLY NEWER version (semver) triggers a notification. Apple's
+#     lookup API is CDN-cached and can briefly flap back to the previous version
+#     mid-rollout; that must not re-announce the old build or move the baseline
+#     backwards.
 
 on:
   schedule:
@@ -84,16 +88,33 @@ jobs:
           [ -f .appstore-version ] && prev="$(cat .appstore-version)"
           echo "Current App Store version: '$version' | previously notified: '${prev:-<none>}'"
 
-          if [ "$version" = "$prev" ] && [ "$force" != "true" ]; then
-            echo "No new release."
+          # Decide whether this is a STRICTLY NEWER release than the one we last
+          # recorded. The App Store lookup API is CDN-cached and, during a phased
+          # rollout, different edges can briefly serve the OLD version again after
+          # the new one appears. A plain "version != prev" check treats that flap
+          # as a release and re-announces the previous build (and, worse, rewrites
+          # the baseline downward so the real version gets announced twice). Guard
+          # with a semver comparison (`sort -V`) so only a higher version counts,
+          # and never move the baseline backwards.
+          is_newer=false
+          if [ -n "$version" ] && [ "$version" != "$prev" ]; then
+            if [ -z "$prev" ]; then
+              is_newer=true
+            elif [ "$(printf '%s\n%s\n' "$prev" "$version" | sort -V | tail -n1)" = "$version" ]; then
+              is_newer=true
+            fi
+          fi
+
+          if [ "$is_newer" != "true" ] && [ "$force" != "true" ]; then
+            echo "No newer release (current '$version', last notified '${prev:-<none>}')."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Persist the new version (only when it actually changed) so the next
-          # step saves it to the cache as the new baseline. A forced test run on
-          # an unchanged version leaves the baseline as-is.
-          if [ "$version" != "$prev" ]; then
+          # Persist the version only when it's strictly newer, so the next run
+          # saves it to the cache as the new baseline. A forced test run — or a
+          # rolled-back/flapping lookup — leaves the baseline as-is.
+          if [ "$is_newer" = "true" ]; then
             printf '%s' "$version" > .appstore-version
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
