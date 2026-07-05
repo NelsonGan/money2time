@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Animated as RNAnimated,
+  Easing as RNEasing,
   FlatList,
   Image,
   InteractionManager,
@@ -2464,12 +2465,12 @@ function InsightTypeMenuPopover({
   useEffect(() => {
     if (!visible) return;
     entrance.setValue(0);
-    RNAnimated.spring(entrance, {
+    // A gentle fade + subtle scale-in — smoother than a spring, no overshoot.
+    RNAnimated.timing(entrance, {
       toValue: 1,
+      duration: 160,
+      easing: RNEasing.out(RNEasing.cubic),
       useNativeDriver: true,
-      damping: 20,
-      stiffness: 260,
-      mass: 0.8,
     }).start();
   }, [visible, entrance]);
 
@@ -2490,14 +2491,13 @@ function InsightTypeMenuPopover({
     screenHeight - 220 - sideMargin,
   );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
-  const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.18, 1] });
-  const opacity = entrance.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 1, 1] });
+  const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
 
   return (
     <ThemeModal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
@@ -2520,7 +2520,7 @@ function InsightTypeMenuPopover({
               maxHeight: maxCardHeight,
               borderColor: withColorAlpha(themeColors.border, 0.45),
               shadowColor: themeColors.text,
-              opacity,
+              opacity: entrance,
               transform: [{ scale }],
               transformOrigin: 'top left',
             },
@@ -6625,7 +6625,7 @@ export function InsightsScreen({
             </View>
             <View className="flex-1 items-center px-1">
               <Text
-                variant={width < 380 ? 'subheading' : 'heading'}
+                variant={width < 380 ? 'subheading' : 'headingSm'}
                 numberOfLines={1}
                 className="text-center tracking-tight"
               >

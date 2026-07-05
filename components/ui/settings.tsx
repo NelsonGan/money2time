@@ -1,7 +1,8 @@
-import { ChevronLeft, X } from 'lucide-react-native';
+import { ChevronLeft, Info, X } from 'lucide-react-native';
 import React from 'react';
 import {
   type LayoutChangeEvent,
+  Modal,
   Platform,
   Pressable,
   StatusBar,
@@ -124,71 +125,115 @@ function HeaderIconButton({
 
 interface SettingsHeaderProps {
   title: string;
-  subtitle?: string;
-  subtitleNode?: React.ReactNode;
+  /** Optional description revealed in a popover when the info button beside the title is pressed. */
+  infoTooltip?: string;
   onBack?: () => void;
   onClose?: () => void;
   closeRowAccessory?: React.ReactNode;
   rightAccessory?: React.ReactNode;
   className?: string;
-  reserveActionRow?: boolean;
 }
 
 export function SettingsHeader({
   title,
-  subtitle,
-  subtitleNode,
+  infoTooltip,
   onBack,
   onClose,
   closeRowAccessory,
   rightAccessory,
   className,
-  reserveActionRow = false,
 }: SettingsHeaderProps) {
   const themeColors = useThemeColors();
-  const showActionRow = reserveActionRow || !!onBack || !!onClose;
+  const [tooltipVisible, setTooltipVisible] = React.useState(false);
 
   return (
     <View className={cn('px-5 pt-3 pb-2', className)}>
-      {showActionRow ? (
-        <View className="mb-3 flex-row items-center justify-between">
-          <View className="h-10 w-10 justify-center">
-            {onBack ? (
-              <HeaderIconButton
-                onPress={onBack}
-                icon={<ChevronLeft size={20} color={themeColors.textMuted} />}
-                label={I18n.t('common.back')}
-              />
-            ) : null}
-          </View>
-          <View className="flex-row items-center gap-2">
-            {closeRowAccessory}
-            {onClose ? (
-              <HeaderIconButton
-                onPress={onClose}
-                icon={<X size={18} color={themeColors.textMuted} />}
-                label={I18n.t('common.close')}
-              />
-            ) : null}
-          </View>
+      {/* Back button (left), centered title, and actions (right) all share one
+          row. The left/right slots are equal-width (flex-1) so the title stays
+          visually centered regardless of what each side holds. */}
+      <View className="flex-row items-center gap-2" style={{ minHeight: 40 }}>
+        <View className="flex-1 flex-row items-center justify-start">
+          {onBack ? (
+            <HeaderIconButton
+              onPress={onBack}
+              icon={<ChevronLeft size={20} color={themeColors.textMuted} />}
+              label={I18n.t('common.back')}
+            />
+          ) : null}
         </View>
-      ) : null}
 
-      <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-        <View className="min-h-10 flex-1 justify-center">
-          <Text variant="heading" className="tracking-tight">
+        <View className="flex-row items-center justify-center gap-1.5" style={{ flexShrink: 1 }}>
+          <Text variant="subheading" numberOfLines={1} className="tracking-tight text-center">
             {title}
           </Text>
+          {infoTooltip ? (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setTooltipVisible(true);
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={title}
+              accessibilityHint={infoTooltip}
+            >
+              <Info size={16} color={themeColors.textMuted} />
+            </Pressable>
+          ) : null}
         </View>
-        {rightAccessory ? <View className="h-10 justify-center">{rightAccessory}</View> : null}
+
+        <View className="flex-1 flex-row items-center justify-end gap-2">
+          {rightAccessory}
+          {closeRowAccessory}
+          {onClose ? (
+            <HeaderIconButton
+              onPress={onClose}
+              icon={<X size={18} color={themeColors.textMuted} />}
+              label={I18n.t('common.close')}
+            />
+          ) : null}
+        </View>
       </View>
 
-      {subtitleNode ? (
-        <View className="mt-1">{subtitleNode}</View>
-      ) : subtitle ? (
-        <Text variant="caption" tone="muted" className="mt-1">
-          {subtitle}
-        </Text>
+      {infoTooltip ? (
+        <Modal
+          visible={tooltipVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setTooltipVisible(false)}
+        >
+          {/* Backdrop dismisses; the card swallows its own taps so only the
+              explicit close control (or the backdrop) dismisses the modal. */}
+          <Pressable
+            className="flex-1 items-center justify-center bg-black/40 px-8"
+            onPress={() => setTooltipVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.close')}
+          >
+            <Pressable
+              className="w-full max-w-[340px] rounded-3xl border border-border/40 bg-background p-5 shadow-soft"
+              onPress={() => {}}
+            >
+              <View className="mb-2 flex-row items-center justify-between gap-3">
+                <Text variant="subheading" numberOfLines={1} className="flex-1">
+                  {title}
+                </Text>
+                <Pressable
+                  onPress={() => setTooltipVisible(false)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.close')}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
+                >
+                  <X size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+              <Text variant="friendly" tone="muted">
+                {infoTooltip}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Modal>
       ) : null}
     </View>
   );

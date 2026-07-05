@@ -158,7 +158,6 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('settings.display')}
-          subtitle={I18n.t('settings.display_subtitle')}
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>

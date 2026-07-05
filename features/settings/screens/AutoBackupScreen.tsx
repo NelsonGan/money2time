@@ -399,7 +399,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('auto_backup.title')}
-          subtitle={I18n.t('auto_backup.subtitle')}
+          infoTooltip={I18n.t('auto_backup.subtitle')}
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>

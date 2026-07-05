@@ -71,7 +71,7 @@ export function MonthControlsHeader({
                           />
                         ) : null}
                         <Text
-                          variant={isSmallScreen ? 'subheading' : 'heading'}
+                          variant={isSmallScreen ? 'subheading' : 'headingSm'}
                           className="tracking-tight"
                           numberOfLines={1}
                         >

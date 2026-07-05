@@ -611,7 +611,7 @@ function AccountEditorSheet({
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
         <SettingsHeader
-          className="px-5 pt-5 pb-2"
+          className="px-5 pt-5 pb-3"
           title={isEdit ? I18n.t('accounts.edit_account') : I18n.t('accounts.new_account')}
           onBack={onClose}
           closeRowAccessory={
@@ -1149,7 +1149,7 @@ function PayCreditCardSheet({
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
         <SettingsHeader
-          className="px-5 pt-5 pb-2"
+          className="px-5 pt-5 pb-3"
           title={I18n.t('accounts.pay_credit_card')}
           onBack={onClose}
         />
@@ -1283,7 +1283,7 @@ export function AccountGroupEditorScreen({ onClose }: { onClose: () => void }) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <SettingsHeader
-        className="px-5 pt-5 pb-2"
+        className="px-5 pt-5 pb-3"
         title={I18n.t('accounts.create_group')}
         onBack={onClose}
       />
@@ -2501,18 +2501,9 @@ export function AccountsScreen({
         <View className="flex-1">
           <View style={styles.headerContainer}>
             <SettingsHeader
-              className="px-0 pt-5 pb-2"
+              className="px-0 pt-5 pb-3"
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
-              reserveActionRow
-              title={I18n.t('accounts.title')}
-              subtitleNode={
-                <View className="flex-row items-center gap-1.5">
-                  <AccountLogo logoId={account.logoId} type={account.type} size={20} />
-                  <Text variant="friendly" tone="muted" numberOfLines={1}>
-                    {account.name}
-                  </Text>
-                </View>
-              }
+              title={account.name}
               rightAccessory={
                 !isSelectionMode ? (
                   <Button
@@ -2785,10 +2776,9 @@ export function AccountsScreen({
       {managementOnly ? (
         <View style={styles.headerContainer}>
           <SettingsHeader
-            className="px-0 pt-5 pb-1"
+            className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('accounts.title')}
-            subtitle={I18n.t('accounts.manage_accounts_subtitle')}
             rightAccessory={
               <Button size="icon" onPress={startCreateGroup}>
                 <Plus size={18} color="#fff" />

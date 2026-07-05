@@ -82,7 +82,13 @@ export const AlbumCard = memo(function AlbumCard({
           <Text variant="caption" numberOfLines={1} className="text-white/80">
             {album.name}
           </Text>
-          <View className="mt-0.5 flex-row items-baseline justify-between gap-2">
+          {/* Time mode renders a View (icon + text) which has no text baseline,
+              so bottom-align it; money mode keeps baseline alignment. */}
+          <View
+            className={`mt-0.5 flex-row justify-between gap-2 ${
+              isTimeMode ? 'items-end' : 'items-baseline'
+            }`}
+          >
             {isTimeMode ? (
               <TimeValueInline
                 value={formatHours(stats.totalSpent)}
@@ -90,13 +96,14 @@ export const AlbumCard = memo(function AlbumCard({
                 textClassName="text-white"
                 iconColor="#fff"
                 iconSize={16}
+                numberOfLines={1}
               />
             ) : (
-              <Text variant="subheading" className="text-white">
+              <Text variant="subheading" numberOfLines={1} className="text-white">
                 {formatAmount(stats.totalSpent, settings, { showSign: false })}
               </Text>
             )}
-            <Text variant="label" numberOfLines={1} className="text-white/70">
+            <Text variant="label" numberOfLines={1} className="shrink text-white/70">
               {metaLabel}
             </Text>
           </View>

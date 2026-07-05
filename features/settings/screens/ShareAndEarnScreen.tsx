@@ -146,7 +146,7 @@ export function ShareAndEarnScreen({ onBack }: ShareAndEarnScreenProps) {
         className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={I18n.t('shareEarn.title')}
-        subtitle={I18n.t('shareEarn.subtitle')}
+        infoTooltip={I18n.t('shareEarn.subtitle')}
       />
 
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
@@ -339,7 +339,6 @@ const styles = StyleSheet.create({
   },
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-    paddingTop: spacing.md,
   },
   tierList: {
     gap: spacing.sm,
