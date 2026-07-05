@@ -822,7 +822,13 @@ export function StatementImportListScreen({
         className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={title}
-        subtitle={`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
+        rightAccessory={
+          <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
+            <Text variant="label" tone="muted">
+              {`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
+            </Text>
+          </View>
+        }
       />
       <ScrollView className="flex-1" contentContainerStyle={[styles.listContent, listNavInset]}>
         {indices.map((idx) => {

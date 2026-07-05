@@ -86,7 +86,7 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('settings.account_settings')}
-          subtitle={I18n.t('settings.account_settings_subtitle')}
+          infoTooltip={I18n.t('settings.account_settings_subtitle')}
         />
       </View>
 

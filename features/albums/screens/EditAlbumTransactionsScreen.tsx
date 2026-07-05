@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FatButton, SettingsHeader } from '~/components/ui';
+import { FatButton, SettingsHeader, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -65,8 +65,14 @@ export function EditAlbumTransactionsScreen({
         <SettingsHeader
           className="px-5 pt-5 pb-3"
           title={I18n.t('albums.edit_transactions_title')}
-          subtitle={I18n.t('albums.transaction_count', { count: albumTransactions.length })}
           onBack={onClose}
+          rightAccessory={
+            <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
+              <Text variant="label" tone="muted">
+                {I18n.t('albums.transaction_count', { count: albumTransactions.length })}
+              </Text>
+            </View>
+          }
         />
 
         <View className="flex-1">

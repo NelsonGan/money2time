@@ -51,7 +51,7 @@ export function NewsScreen({ onBack, onOpenShareEarn }: NewsScreenProps) {
         className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={I18n.t('settings.news')}
-        subtitle={I18n.t('settings.news_subtitle')}
+        infoTooltip={I18n.t('settings.news_subtitle')}
       />
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>

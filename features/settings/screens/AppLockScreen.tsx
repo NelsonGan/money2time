@@ -187,7 +187,7 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
             className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('settings.app_lock.title')}
-            subtitle={I18n.t('settings.app_lock.subtitle')}
+            infoTooltip={I18n.t('settings.app_lock.subtitle')}
           />
 
           <View className="mt-4">

@@ -353,7 +353,7 @@ export function ItemsScreen({
             className="px-0 pt-5 pb-1"
             onBack={onBack}
             title={I18n.t('items.title')}
-            subtitle={I18n.t('items.subtitle')}
+            infoTooltip={I18n.t('items.subtitle')}
             rightAccessory={
               <Button size="icon" onPress={handleAdd} accessibilityLabel={I18n.t('items.add')}>
                 <Plus size={18} color="#fff" />

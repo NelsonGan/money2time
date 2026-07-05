@@ -230,7 +230,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('data_management.title')}
-          subtitle={I18n.t('data_management.subtitle')}
+          infoTooltip={I18n.t('data_management.subtitle')}
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>

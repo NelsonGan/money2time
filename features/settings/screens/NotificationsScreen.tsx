@@ -138,7 +138,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
             className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('notifications.title')}
-            subtitle={I18n.t('notifications.subtitle')}
+            infoTooltip={I18n.t('notifications.subtitle')}
           />
 
           <View className="items-center pt-1 pb-3">

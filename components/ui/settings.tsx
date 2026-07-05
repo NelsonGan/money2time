@@ -125,10 +125,6 @@ function HeaderIconButton({
 
 interface SettingsHeaderProps {
   title: string;
-  /** @deprecated No longer rendered. Use `infoTooltip` for important descriptions. */
-  subtitle?: string;
-  /** @deprecated No longer rendered. */
-  subtitleNode?: React.ReactNode;
   /** Optional description revealed in a popover when the info button beside the title is pressed. */
   infoTooltip?: string;
   onBack?: () => void;

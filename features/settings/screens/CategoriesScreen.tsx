@@ -920,7 +920,7 @@ export function CategoriesScreen({
           className="px-0 pt-5 pb-1"
           onBack={onBack}
           title={I18n.t('settings.categories')}
-          subtitle={I18n.t('settings.categories_subtitle')}
+          infoTooltip={I18n.t('settings.categories_subtitle')}
           rightAccessory={
             <Button
               size="icon"
