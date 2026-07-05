@@ -18,7 +18,15 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  type ProfilerOnRenderCallback,
+  Profiler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Appearance,
   InteractionManager,
@@ -280,6 +288,14 @@ const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoAlbumsScreen = React.memo(AlbumsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 const MemoAssetsTab = React.memo(AssetsTab);
+
+// TEMP diagnostic: logs each Insights commit's duration so we can tell a single
+// slow render from a render loop (many fast commits) during the cold-start hang.
+const logInsightsCommit: ProfilerOnRenderCallback = (_id, phase, actualDuration) => {
+  if (actualDuration >= 30) {
+    perfMark(`Insights commit (${phase}) ${Math.round(actualDuration)}ms`);
+  }
+};
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -980,16 +996,18 @@ function MainShellScreen({
           />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
-          <MemoInsightsScreen
-            resetToCurrentMonthToken={insightsResetToMonthToken}
-            onOpenDrilldown={openInsightsDrilldown}
-            onOpenTransaction={openTransactionEditor}
-            onOpenProPaywall={openInsightsTrendPaywall}
-            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-            isSimpleMode={isSimpleMode}
-            onTutorialTargetLayout={handleTutorialTargetLayout}
-            tutorialSpotlightRequest={tutorialSpotlightRequest}
-          />
+          <Profiler id="Insights" onRender={logInsightsCommit}>
+            <MemoInsightsScreen
+              resetToCurrentMonthToken={insightsResetToMonthToken}
+              onOpenDrilldown={openInsightsDrilldown}
+              onOpenTransaction={openTransactionEditor}
+              onOpenProPaywall={openInsightsTrendPaywall}
+              activityBreakdownInsightRequest={activityBreakdownInsightRequest}
+              isSimpleMode={isSimpleMode}
+              onTutorialTargetLayout={handleTutorialTargetLayout}
+              tutorialSpotlightRequest={tutorialSpotlightRequest}
+            />
+          </Profiler>
         </MountedTab>
         <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
           <MemoAlbumsScreen

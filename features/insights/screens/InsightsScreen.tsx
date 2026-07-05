@@ -2727,6 +2727,9 @@ interface InsightsScreenProps {
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
+// TEMP diagnostic: counts InsightsScreen renders to expose a render loop.
+const insightsRenderCountRef = { current: 0 };
+
 export function InsightsScreen({
   resetToCurrentMonthToken = 0,
   onOpenDrilldown,
@@ -2737,6 +2740,10 @@ export function InsightsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: InsightsScreenProps) {
+  insightsRenderCountRef.current += 1;
+  if (insightsRenderCountRef.current % 20 === 0 || insightsRenderCountRef.current <= 5) {
+    perfMark(`InsightsScreen: render #${insightsRenderCountRef.current}`);
+  }
   const {
     isLoading,
     settings,
