@@ -46,7 +46,6 @@ export type RootStackParamList = {
   ShareAndEarn: undefined;
   ProPaywall: { source?: string; flashMessage?: string } | undefined;
   CreateAlbum: { initialTransactionIds?: string[] } | undefined;
-  AlbumLocations: undefined;
   AlbumDetail: { albumId: string };
   EditAlbumTransactions: { albumId: string };
   AddAlbumTransactions: { albumId: string };

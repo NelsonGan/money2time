@@ -1,13 +1,10 @@
 import { Camera, type CameraRef, Map, Marker } from '@maplibre/maplibre-react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
-import { Maximize2 } from 'lucide-react-native';
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 
 import type { ColorPalette } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { I18n } from '~/lib/i18n';
 
 import type { AlbumPin } from '../utils';
 import { AlbumMapMarker } from './AlbumMapMarker';
@@ -136,7 +133,6 @@ const STACK_SHIFT_X = 7;
 
 export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
   const themeColors = useThemeColors();
-  const insets = useSafeAreaInsets();
   const cameraRef = useRef<CameraRef>(null);
   const mapStyle = useMemo(() => buildThemedMapStyle(themeColors), [themeColors]);
 
@@ -147,11 +143,6 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
     }
     return { bounds: boundsOf(pins) };
   }, [pins]);
-
-  const fitAll = () => {
-    if (pins.length < 2) return;
-    cameraRef.current?.fitBounds(boundsOf(pins), { duration: 600 });
-  };
 
   // Group co-located pins so we can fan them out and tell front from behind.
   // (A plain record, since the `Map` identifier is the MapLibre component here.)
@@ -254,18 +245,6 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
         <Camera ref={cameraRef} initialViewState={initialViewState} />
         {markers}
       </Map>
-
-      {pins.length > 1 ? (
-        <Pressable
-          onPress={fitAll}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('albums.location.fit_all')}
-          className="absolute right-4 h-11 w-11 items-center justify-center rounded-full bg-card border border-border/40 shadow-soft active:opacity-80"
-          style={{ top: insets.top + 8 }}
-        >
-          <Maximize2 size={20} color={themeColors.text} />
-        </Pressable>
-      ) : null}
     </View>
   );
 }
