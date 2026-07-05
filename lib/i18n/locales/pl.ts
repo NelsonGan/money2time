@@ -1745,7 +1745,7 @@ const pl = {
     name_placeholder: 'np. Codzienne',
     total_label: 'Budżet całkowity',
     allocate_title: 'Rozdziel na kategorie',
-    allocate_hint: 'Rozdziel całość na kategorie wydatków — suma musi się dokładnie zgadzać.',
+    allocate_hint: 'Rozdziel całość na kategorie. Dotknij kategorii, aby ustawić kwotę.',
     allocated_summary: 'Rozdzielono {{allocated}} z {{total}}',
     allocated_left: 'Pozostało {{amount}}',
     allocated_over: '{{amount}} ponad',
@@ -1753,14 +1753,16 @@ const pl = {
     fill_remainder: 'Uzupełnij',
     back_populate_title: 'Uzupełnij poprzednie miesiące',
     back_populate_caption:
-      'Tworzy budżety dla {{first}} – {{last}} ({{count}} mies.). Miesiące z budżetem są pomijane.',
+      'Tworzy budżety dla {{first}} - {{last}} ({{count}} mies.). Miesiące z budżetem są pomijane.',
     choose_emoji: 'Wybierz emoji',
     count_unbudgeted_title: 'Licz wydatki poza budżetem',
     count_unbudgeted_caption:
       'Uwzględniaj w sumie miesiąca wydatki z kategorii bez pozycji budżetu.',
     children_hint: 'Opcjonalnie rozdziel tę kwotę na podkategorie.',
     children_matched: 'Podkategorie się zgadzają',
-    children_mismatch: 'Podkategorie muszą sumować się do {{total}} — różnica {{delta}}.',
+    children_mismatch: 'Podkategorie muszą sumować się do {{total}} (różnica {{delta}}).',
+    subcategories: 'Podkategorie',
+    edit_budget: 'Edytuj budżet',
     not_counted: 'nieliczone',
   },
   items: {

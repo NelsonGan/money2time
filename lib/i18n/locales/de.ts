@@ -1763,7 +1763,8 @@ const de = {
     name_placeholder: 'z. B. Alltag',
     total_label: 'Gesamtbudget',
     allocate_title: 'Auf Kategorien verteilen',
-    allocate_hint: 'Verteile die Summe auf deine Ausgabenkategorien — sie muss genau aufgehen.',
+    allocate_hint:
+      'Verteile die Summe auf deine Kategorien. Tippe auf eine Kategorie, um den Betrag festzulegen.',
     allocated_summary: '{{allocated}} von {{total}} verteilt',
     allocated_left: '{{amount}} übrig',
     allocated_over: '{{amount}} darüber',
@@ -1771,14 +1772,16 @@ const de = {
     fill_remainder: 'Auffüllen',
     back_populate_title: 'Vergangene Monate auffüllen',
     back_populate_caption:
-      'Erstellt Budgets für {{first}} – {{last}} ({{count}} Monate). Monate mit vorhandenem Budget werden übersprungen.',
+      'Erstellt Budgets für {{first}} - {{last}} ({{count}} Monate). Monate mit vorhandenem Budget werden übersprungen.',
     choose_emoji: 'Emoji wählen',
     count_unbudgeted_title: 'Nicht budgetierte Ausgaben zählen',
     count_unbudgeted_caption:
       'Ausgaben aus Kategorien ohne Budgetposten in die Monatssumme einrechnen.',
     children_hint: 'Diesen Betrag optional auf Unterkategorien aufteilen.',
     children_matched: 'Unterkategorien gehen auf',
-    children_mismatch: 'Unterkategorien müssen {{total}} ergeben — {{delta}} Abweichung.',
+    children_mismatch: 'Unterkategorien müssen {{total}} ergeben ({{delta}} Abweichung).',
+    subcategories: 'Unterkategorien',
+    edit_budget: 'Budget bearbeiten',
     not_counted: 'nicht gezählt',
   },
   items: {

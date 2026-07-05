@@ -60,6 +60,7 @@ import {
   BudgetScreen,
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
+  MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { AssetsTab } from '~/features/items/components';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
@@ -603,6 +604,13 @@ function MainShellScreen({
     [navigation],
   );
 
+  const openMonthlyBudgetEditor = useCallback(
+    (budgetId: string) => {
+      navigation.navigate('BudgetMonthEditor', { budgetId });
+    },
+    [navigation],
+  );
+
   const openProPaywall = useCallback(
     (source?: string) => {
       navigation.navigate('ProPaywall', source ? { source } : undefined);
@@ -1013,6 +1021,7 @@ function MainShellScreen({
             onOpenRecurringEditor={openRecurringEditor}
             onOpenItemEditor={openItemEditor}
             onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
+            onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
             onOpenAccountEditor={openAccountEditor}
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
@@ -1299,6 +1308,19 @@ function SettingsBudgetRouteScreen({ navigation }: RootStackRouteProps<'Settings
       onBack={() => navigation.goBack()}
       onOpenTemplates={() => navigation.navigate('SettingsBudgetTemplates')}
       onOpenTemplateEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
+      onOpenBudgetEditor={(budgetId) => navigation.navigate('BudgetMonthEditor', { budgetId })}
+    />
+  );
+}
+
+function BudgetMonthEditorRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'BudgetMonthEditor'>) {
+  return (
+    <MonthlyBudgetEditorScreen
+      budgetId={route.params.budgetId}
+      onClose={() => navigation.goBack()}
     />
   );
 }
@@ -1938,6 +1960,7 @@ function AppContent() {
             component={BudgetTemplateEditorRouteScreen}
           />
           <RootStack.Screen name="SettingsBudget" component={SettingsBudgetRouteScreen} />
+          <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
           <RootStack.Screen
             name="SettingsBudgetTemplates"
             component={SettingsBudgetTemplatesRouteScreen}

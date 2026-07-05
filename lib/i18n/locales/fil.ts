@@ -1767,7 +1767,7 @@ const fil = {
     total_label: 'Kabuuang badyet',
     allocate_title: 'Ilaan sa mga kategorya',
     allocate_hint:
-      'Hatiin ang kabuuan sa iyong mga kategorya ng gastos — dapat eksaktong magtugma.',
+      'Hatiin ang kabuuan sa iyong mga kategorya. I-tap ang kategorya para itakda ang halaga.',
     allocated_summary: '{{allocated}} sa {{total}} ang nailaan',
     allocated_left: '{{amount}} na natitira',
     allocated_over: 'Lampas ng {{amount}}',
@@ -1775,14 +1775,16 @@ const fil = {
     fill_remainder: 'Punan',
     back_populate_title: 'Punan ang mga nakaraang buwan',
     back_populate_caption:
-      'Gagawa ng badyet para sa {{first}} – {{last}} ({{count}} buwan). Lalaktawan ang mga buwang may badyet na.',
+      'Gagawa ng badyet para sa {{first}} - {{last}} ({{count}} buwan). Lalaktawan ang mga buwang may badyet na.',
     choose_emoji: 'Pumili ng emoji',
     count_unbudgeted_title: 'Bilangin ang gastos na walang badyet',
     count_unbudgeted_caption:
       'Isama sa kabuuan ng buwan ang gastos mula sa mga kategoryang walang linya ng badyet.',
     children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
     children_matched: 'Tugma ang mga subkategorya',
-    children_mismatch: 'Ang mga subkategorya ay dapat umabot sa {{total}} — {{delta}} ang layo.',
+    children_mismatch: 'Ang mga subkategorya ay dapat umabot sa {{total}} ({{delta}} ang layo).',
+    subcategories: 'Mga subkategorya',
+    edit_budget: 'I-edit ang badyet',
     not_counted: 'hindi binibilang',
   },
   items: {

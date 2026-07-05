@@ -1491,7 +1491,7 @@ const ru = {
     limit_items:
       'На бесплатном плане можно отслеживать до {{count}} предметов. Оформите Pro для безлимита.',
     limit_budget_templates:
-      'В бесплатном плане можно создать {{count}} шаблон бюджета. В Pro — без ограничений.',
+      'В бесплатном плане можно создать {{count}} шаблон бюджета. В Pro без ограничений.',
     badge: 'PRO',
     trend_preview_title: 'Разблокировать долгосрочные тренды',
     trend_preview_message:
@@ -1742,7 +1742,7 @@ const ru = {
     name_placeholder: 'напр. Повседневный',
     total_label: 'Общий бюджет',
     allocate_title: 'Распределить по категориям',
-    allocate_hint: 'Распределите сумму по категориям расходов — она должна сойтись точно.',
+    allocate_hint: 'Распределите сумму по категориям. Нажмите на категорию, чтобы задать сумму.',
     allocated_summary: 'Распределено {{allocated}} из {{total}}',
     allocated_left: 'Осталось {{amount}}',
     allocated_over: '{{amount}} сверх',
@@ -1750,13 +1750,15 @@ const ru = {
     fill_remainder: 'Добить',
     back_populate_title: 'Заполнить прошлые месяцы',
     back_populate_caption:
-      'Создаст бюджеты за {{first}} – {{last}} ({{count}} мес.). Месяцы с бюджетом пропускаются.',
+      'Создаст бюджеты за {{first}} - {{last}} ({{count}} мес.). Месяцы с бюджетом пропускаются.',
     choose_emoji: 'Выберите эмодзи',
     count_unbudgeted_title: 'Учитывать расходы вне бюджета',
     count_unbudgeted_caption: 'Включать в итог месяца расходы из категорий без строки бюджета.',
     children_hint: 'При желании распределите эту сумму по подкатегориям.',
     children_matched: 'Подкатегории сходятся',
-    children_mismatch: 'Подкатегории должны давать {{total}} — расхождение {{delta}}.',
+    children_mismatch: 'Подкатегории должны давать {{total}} (расхождение {{delta}}).',
+    subcategories: 'Подкатегории',
+    edit_budget: 'Изменить бюджет',
     not_counted: 'не учитывается',
   },
   items: {

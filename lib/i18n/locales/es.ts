@@ -1750,7 +1750,8 @@ const es = {
     name_placeholder: 'p. ej. Día a día',
     total_label: 'Presupuesto total',
     allocate_title: 'Asignar a categorías',
-    allocate_hint: 'Reparte el total entre tus categorías de gasto: debe cuadrar exactamente.',
+    allocate_hint:
+      'Reparte el total entre tus categorías. Toca una categoría para fijar su importe.',
     allocated_summary: '{{allocated}} de {{total}} asignado',
     allocated_left: '{{amount}} restante',
     allocated_over: '{{amount}} de más',
@@ -1758,14 +1759,16 @@ const es = {
     fill_remainder: 'Rellenar',
     back_populate_title: 'Rellenar meses anteriores',
     back_populate_caption:
-      'Crea presupuestos para {{first}} – {{last}} ({{count}} meses). Se omiten los meses que ya tienen presupuesto.',
+      'Crea presupuestos para {{first}} - {{last}} ({{count}} meses). Se omiten los meses que ya tienen presupuesto.',
     choose_emoji: 'Elige un emoji',
     count_unbudgeted_title: 'Contar gasto sin presupuestar',
     count_unbudgeted_caption:
       'Incluir en el total del mes el gasto de categorías sin partida de presupuesto.',
     children_hint: 'Opcionalmente reparte este importe entre subcategorías.',
     children_matched: 'Las subcategorías cuadran',
-    children_mismatch: 'Las subcategorías deben sumar {{total}} — desviación de {{delta}}.',
+    children_mismatch: 'Las subcategorías deben sumar {{total}} (desviación de {{delta}}).',
+    subcategories: 'Subcategorías',
+    edit_budget: 'Editar presupuesto',
     not_counted: 'no contado',
   },
   items: {

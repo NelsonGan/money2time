@@ -57,6 +57,7 @@ export const AnalyticsEvents = {
   BUDGET_TEMPLATE_DELETED: 'Budget Template Deleted',
   BUDGET_DEFAULT_CHANGED: 'Budget Default Changed',
   BUDGET_MONTH_CREATED: 'Budget Month Created',
+  BUDGET_MONTH_UPDATED: 'Budget Month Updated',
   BUDGET_MONTH_DELETED: 'Budget Month Deleted',
 
   // Recurring rules

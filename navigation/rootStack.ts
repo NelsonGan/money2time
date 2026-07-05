@@ -52,6 +52,7 @@ export type RootStackParamList = {
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
+  BudgetMonthEditor: { budgetId: string };
   // Root-level budget screens for imperative opens (widget deep link).
   SettingsBudget: undefined;
   SettingsBudgetTemplates: undefined;

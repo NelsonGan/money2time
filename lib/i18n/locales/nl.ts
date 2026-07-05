@@ -1759,7 +1759,8 @@ const nl = {
     name_placeholder: 'bijv. Dagelijks',
     total_label: 'Totaalbudget',
     allocate_title: 'Verdeel over categorieën',
-    allocate_hint: 'Verdeel het totaal over je uitgavencategorieën — het moet precies kloppen.',
+    allocate_hint:
+      'Verdeel het totaal over je categorieën. Tik op een categorie om het bedrag in te stellen.',
     allocated_summary: '{{allocated}} van {{total}} verdeeld',
     allocated_left: '{{amount}} over',
     allocated_over: '{{amount}} erover',
@@ -1767,14 +1768,16 @@ const nl = {
     fill_remainder: 'Aanvullen',
     back_populate_title: 'Vorige maanden invullen',
     back_populate_caption:
-      'Maakt budgetten voor {{first}} – {{last}} ({{count}} maanden). Maanden met een budget worden overgeslagen.',
+      'Maakt budgetten voor {{first}} - {{last}} ({{count}} maanden). Maanden met een budget worden overgeslagen.',
     choose_emoji: 'Kies een emoji',
     count_unbudgeted_title: 'Niet-gebudgetteerde uitgaven meetellen',
     count_unbudgeted_caption:
       'Tel uitgaven uit categorieën zonder budgetregel mee in het maandtotaal.',
     children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
     children_matched: 'Subcategorieën kloppen',
-    children_mismatch: 'Subcategorieën moeten optellen tot {{total}} — {{delta}} verschil.',
+    children_mismatch: 'Subcategorieën moeten optellen tot {{total}} ({{delta}} verschil).',
+    subcategories: 'Subcategorieën',
+    edit_budget: 'Budget bewerken',
     not_counted: 'niet meegeteld',
   },
   items: {

@@ -1730,7 +1730,7 @@ const en = {
     name_placeholder: 'e.g. Everyday',
     total_label: 'Total budget',
     allocate_title: 'Allocate to categories',
-    allocate_hint: 'Distribute the total across your expense categories — it must add up exactly.',
+    allocate_hint: 'Distribute the total across your categories. Tap a category to set its amount.',
     allocated_summary: '{{allocated}} of {{total}} allocated',
     allocated_left: '{{amount}} left',
     allocated_over: '{{amount}} over',
@@ -1738,14 +1738,16 @@ const en = {
     fill_remainder: 'Fill',
     back_populate_title: 'Back-fill past months',
     back_populate_caption:
-      'Creates budgets for {{first}} – {{last}} ({{count}} months). Months that already have a budget are skipped.',
+      'Creates budgets for {{first}} - {{last}} ({{count}} months). Months that already have a budget are skipped.',
     choose_emoji: 'Choose an emoji',
     count_unbudgeted_title: 'Count unbudgeted spending',
     count_unbudgeted_caption:
       'Include spending from categories without a budget line in the month’s total.',
     children_hint: 'Optionally split this amount across subcategories.',
     children_matched: 'Subcategories add up',
-    children_mismatch: 'Subcategories must add up to {{total}} — {{delta}} off.',
+    children_mismatch: 'Subcategories must add up to {{total}} ({{delta}} off).',
+    subcategories: 'Subcategories',
+    edit_budget: 'Edit budget',
     not_counted: 'not counted',
   },
   items: {

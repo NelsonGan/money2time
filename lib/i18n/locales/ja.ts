@@ -1718,7 +1718,7 @@ const ja = {
     name_placeholder: '例：ふだん使い',
     total_label: '予算総額',
     allocate_title: 'カテゴリに割り当て',
-    allocate_hint: '総額を支出カテゴリに配分してください。合計はぴったり一致する必要があります。',
+    allocate_hint: '総額をカテゴリに配分しましょう。カテゴリをタップして金額を設定します。',
     allocated_summary: '{{total}}中{{allocated}}を割り当て済み',
     allocated_left: '残り{{amount}}',
     allocated_over: '{{amount}}超過',
@@ -1733,6 +1733,8 @@ const ja = {
     children_hint: '必要ならこの金額をサブカテゴリに配分できます。',
     children_matched: 'サブカテゴリの合計が一致',
     children_mismatch: 'サブカテゴリの合計は{{total}}にする必要があります（{{delta}}のずれ）。',
+    subcategories: 'サブカテゴリ',
+    edit_budget: '予算を編集',
     not_counted: '集計外',
   },
   items: {

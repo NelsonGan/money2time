@@ -1,4 +1,4 @@
-import { SlidersHorizontal, Trash2 } from 'lucide-react-native';
+import { Pencil, SlidersHorizontal, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -39,6 +39,8 @@ interface BudgetScreenProps {
   onBack?: () => void;
   onOpenTemplates: () => void;
   onOpenTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
+  /** Opens the month-budget editor (edits that month only, not the template). */
+  onOpenBudgetEditor: (budgetId: string) => void;
   safeAreaEdges?: Edge[];
 }
 
@@ -89,12 +91,14 @@ function BudgetSummaryCard({
   summary,
   settings,
   themeColors,
+  onEdit,
   onDelete,
 }: {
   budget: MonthlyBudget;
   summary: BudgetMonthSummary;
   settings: UserSettings;
   themeColors: ColorPalette;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   const isOver = summary.remaining < 0;
@@ -123,15 +127,26 @@ function BudgetSummaryCard({
               </Text>
             </View>
           </View>
-          <Pressable
-            onPress={onDelete}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('budget.delete_budget')}
-            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
-          >
-            <Trash2 size={14} color={themeColors.textMuted} />
-          </Pressable>
+          <View className="flex-row items-center gap-1.5">
+            <Pressable
+              onPress={onEdit}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('budget.edit_budget')}
+              className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
+            >
+              <Pencil size={14} color={themeColors.textMuted} />
+            </Pressable>
+            <Pressable
+              onPress={onDelete}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('budget.delete_budget')}
+              className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
+            >
+              <Trash2 size={14} color={themeColors.textMuted} />
+            </Pressable>
+          </View>
         </View>
 
         <View className="mt-3">
@@ -331,6 +346,7 @@ export function BudgetScreen({
   onBack,
   onOpenTemplates,
   onOpenTemplateEditor,
+  onOpenBudgetEditor,
   safeAreaEdges = ['top'],
 }: BudgetScreenProps) {
   const {
@@ -462,6 +478,7 @@ export function BudgetScreen({
               summary={summary}
               settings={settings}
               themeColors={themeColors}
+              onEdit={() => onOpenBudgetEditor(budget.id)}
               onDelete={() => handleDeleteBudget(budget)}
             />
 
@@ -507,6 +524,7 @@ export function BudgetScreen({
       handleCreateForMonth,
       handleDeleteBudget,
       listNavInset,
+      onOpenBudgetEditor,
       months,
       pageWidth,
       settings,

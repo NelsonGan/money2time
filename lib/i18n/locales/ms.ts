@@ -1744,7 +1744,7 @@ const ms = {
     name_placeholder: 'cth. Harian',
     total_label: 'Jumlah bajet',
     allocate_title: 'Agihkan kepada kategori',
-    allocate_hint: 'Agihkan jumlah kepada kategori perbelanjaan anda — mesti tepat.',
+    allocate_hint: 'Agihkan jumlah kepada kategori anda. Ketik kategori untuk menetapkan amaunnya.',
     allocated_summary: '{{allocated}} daripada {{total}} diagihkan',
     allocated_left: 'Baki {{amount}}',
     allocated_over: 'Lebih {{amount}}',
@@ -1752,14 +1752,16 @@ const ms = {
     fill_remainder: 'Isi',
     back_populate_title: 'Isi bulan-bulan lepas',
     back_populate_caption:
-      'Mencipta bajet untuk {{first}} – {{last}} ({{count}} bulan). Bulan yang sudah ada bajet dilangkau.',
+      'Mencipta bajet untuk {{first}} - {{last}} ({{count}} bulan). Bulan yang sudah ada bajet dilangkau.',
     choose_emoji: 'Pilih emoji',
     count_unbudgeted_title: 'Kira perbelanjaan luar bajet',
     count_unbudgeted_caption:
       'Masukkan perbelanjaan daripada kategori tanpa baris bajet ke dalam jumlah bulan.',
     children_hint: 'Jika mahu, agihkan jumlah ini kepada subkategori.',
     children_matched: 'Subkategori sepadan',
-    children_mismatch: 'Subkategori mesti berjumlah {{total}} — beza {{delta}}.',
+    children_mismatch: 'Subkategori mesti berjumlah {{total}} (beza {{delta}}).',
+    subcategories: 'Subkategori',
+    edit_budget: 'Edit bajet',
     not_counted: 'tidak dikira',
   },
   items: {

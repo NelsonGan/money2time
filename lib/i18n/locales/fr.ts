@@ -1761,7 +1761,7 @@ const fr = {
     total_label: 'Budget total',
     allocate_title: 'Répartir entre les catégories',
     allocate_hint:
-      'Répartissez le total entre vos catégories de dépenses — il doit correspondre exactement.',
+      'Répartissez le total entre vos catégories. Touchez une catégorie pour définir son montant.',
     allocated_summary: '{{allocated}} sur {{total}} répartis',
     allocated_left: '{{amount}} restant',
     allocated_over: '{{amount}} de trop',
@@ -1769,14 +1769,16 @@ const fr = {
     fill_remainder: 'Compléter',
     back_populate_title: 'Remplir les mois passés',
     back_populate_caption:
-      'Crée des budgets pour {{first}} – {{last}} ({{count}} mois). Les mois ayant déjà un budget sont ignorés.',
+      'Crée des budgets pour {{first}} - {{last}} ({{count}} mois). Les mois ayant déjà un budget sont ignorés.',
     choose_emoji: 'Choisir un emoji',
     count_unbudgeted_title: 'Compter les dépenses hors budget',
     count_unbudgeted_caption:
       'Inclure dans le total du mois les dépenses des catégories sans ligne de budget.',
     children_hint: 'Répartissez éventuellement ce montant entre les sous-catégories.',
     children_matched: 'Les sous-catégories correspondent',
-    children_mismatch: 'Les sous-catégories doivent totaliser {{total}} — écart de {{delta}}.',
+    children_mismatch: 'Les sous-catégories doivent totaliser {{total}} (écart de {{delta}}).',
+    subcategories: 'Sous-catégories',
+    edit_budget: 'Modifier le budget',
     not_counted: 'non compté',
   },
   items: {

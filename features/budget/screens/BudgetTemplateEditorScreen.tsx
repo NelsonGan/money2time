@@ -1,11 +1,17 @@
 import { SmilePlus } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader, Text } from '~/components/ui';
-import type { ColorPalette } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import {
+  AllocationCategoryList,
+  AllocationOptionRow,
+  AllocationStatusBar,
+  parseAllocationAmount,
+} from '~/features/budget/components/AllocationEditor';
+import { CategoryAllocationSheet } from '~/features/budget/components/CategoryAllocationSheet';
 import { EmojiPickerSheet } from '~/features/budget/components/EmojiPickerSheet';
 import {
   computeAllocationRemaining,
@@ -15,10 +21,9 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, UserSettings } from '~/types';
-import { cn } from '~/utils';
+import type { Category } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatAmount, formatMonthYearLabel, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatMonthYearLabel } from '~/utils/formatters';
 
 interface BudgetTemplateEditorScreenProps {
   templateId?: string;
@@ -28,205 +33,8 @@ interface BudgetTemplateEditorScreenProps {
 
 const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 
-function money(value: number, settings: UserSettings): string {
-  return formatAmount(value, { ...settings, displayMode: 'money' });
-}
-
 function monthKeyToDate(monthKey: string): Date {
   return new Date(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 1, 1);
-}
-
-function parseAmount(value: string): number {
-  const parsed = Number.parseFloat(value.replace(',', '.'));
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function FillChip({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={() => {
-        void triggerHaptic('selection');
-        onPress();
-      }}
-      hitSlop={6}
-      accessibilityRole="button"
-      accessibilityLabel={I18n.t('budget.fill_remainder')}
-      className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 active:opacity-80"
-    >
-      <Text variant="label" className="text-[10px] text-primary">
-        {I18n.t('budget.fill_remainder')}
-      </Text>
-    </Pressable>
-  );
-}
-
-function AmountField({
-  value,
-  onChange,
-  currencySymbol,
-  accessibilityLabel,
-  compact = false,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  currencySymbol: string;
-  accessibilityLabel: string;
-  compact?: boolean;
-}) {
-  return (
-    <View className={compact ? 'w-[96px]' : 'w-[112px]'}>
-      <Input
-        variant="currency"
-        currencySymbol={currencySymbol}
-        value={value}
-        onChangeText={onChange}
-        placeholder="0"
-        accessibilityLabel={accessibilityLabel}
-      />
-    </View>
-  );
-}
-
-/**
- * One root expense category: emoji + name + amount on the first row; once an
- * amount is set and the category has subcategories, an optional child
- * breakdown expands below (child amounts must sum to the parent when used).
- */
-function AllocationGroup({
-  category,
-  childCategories,
-  amounts,
-  onChangeAmount,
-  rootRemaining,
-  currencySymbol,
-  settings,
-  themeColors,
-}: {
-  category: Category;
-  childCategories: Category[];
-  amounts: Record<string, string>;
-  onChangeAmount: (categoryId: string, next: string) => void;
-  rootRemaining: number;
-  currencySymbol: string;
-  settings: UserSettings;
-  themeColors: ColorPalette;
-}) {
-  const parentAmount = parseAmount(amounts[category.id] ?? '');
-  const childAllocations = childCategories.map((child) => ({
-    amount: parseAmount(amounts[child.id] ?? ''),
-  }));
-  const childGap = computeChildAllocationGap(parentAmount, childAllocations);
-  const anyChildAllocated = childAllocations.some((allocation) => allocation.amount > 0);
-  const showChildren = parentAmount > 0 && childCategories.length > 0;
-
-  return (
-    <View
-      className={cn(
-        'rounded-2xl border bg-card',
-        childGap !== 0 ? 'border-destructive/40' : 'border-border/40',
-      )}
-    >
-      <View className="flex-row items-center gap-3 py-2.5 pl-3.5 pr-2.5">
-        <CategoryEmoji icon={category.icon} size={18} />
-        <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
-          {category.name}
-        </Text>
-        {parentAmount === 0 && rootRemaining > 0 ? (
-          <FillChip
-            onPress={() => onChangeAmount(category.id, String(normalizeMoneyAmount(rootRemaining)))}
-          />
-        ) : null}
-        <AmountField
-          value={amounts[category.id] ?? ''}
-          onChange={(next) => onChangeAmount(category.id, next)}
-          currencySymbol={currencySymbol}
-          accessibilityLabel={category.name}
-        />
-      </View>
-
-      {showChildren ? (
-        <View className="border-t border-border/30 px-3.5 pb-2.5 pt-1.5">
-          {childCategories.map((child) => {
-            const childAmount = parseAmount(amounts[child.id] ?? '');
-            return (
-              <View key={child.id} className="flex-row items-center gap-2.5 py-1">
-                <View className="h-4 w-3.5 rounded-bl-lg border-b border-l border-border/50" />
-                <CategoryEmoji icon={child.icon} parentIcon={category.icon} size={14} />
-                <Text
-                  variant="caption"
-                  numberOfLines={1}
-                  className="min-w-0 flex-1 text-foreground"
-                >
-                  {child.name}
-                </Text>
-                {childAmount === 0 && anyChildAllocated && childGap > 0 ? (
-                  <FillChip
-                    onPress={() => onChangeAmount(child.id, String(normalizeMoneyAmount(childGap)))}
-                  />
-                ) : null}
-                <AmountField
-                  value={amounts[child.id] ?? ''}
-                  onChange={(next) => onChangeAmount(child.id, next)}
-                  currencySymbol={currencySymbol}
-                  accessibilityLabel={child.name}
-                  compact
-                />
-              </View>
-            );
-          })}
-          {childGap !== 0 ? (
-            <Text variant="caption" className="mt-1.5" style={{ color: themeColors.error }}>
-              {I18n.t('budget.children_mismatch', {
-                total: money(parentAmount, settings),
-                delta: money(Math.abs(childGap), settings),
-              })}
-            </Text>
-          ) : anyChildAllocated ? (
-            <Text variant="caption" tone="muted" className="mt-1.5">
-              {I18n.t('budget.children_matched')}
-            </Text>
-          ) : (
-            <Text variant="caption" tone="muted" className="mt-1.5">
-              {I18n.t('budget.children_hint')}
-            </Text>
-          )}
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function OptionRow({
-  title,
-  caption,
-  value,
-  onChange,
-  themeColors,
-}: {
-  title: string;
-  caption: string;
-  value: boolean;
-  onChange: (next: boolean) => void;
-  themeColors: ColorPalette;
-}) {
-  return (
-    <View className="flex-row items-center justify-between gap-3 rounded-2xl border border-border/40 bg-card px-4 py-3">
-      <View className="min-w-0 flex-1">
-        <Text variant="body">{title}</Text>
-        <Text variant="caption" tone="muted" className="mt-0.5">
-          {caption}
-        </Text>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={(next) => {
-          void triggerHaptic('selection');
-          onChange(next);
-        }}
-        trackColor={{ true: themeColors.primary }}
-      />
-    </View>
-  );
 }
 
 export function BudgetTemplateEditorScreen({
@@ -287,9 +95,10 @@ export function BudgetTemplateEditorScreen({
     return initial;
   });
   const [backPopulate, setBackPopulate] = useState(false);
+  const [sheetCategoryId, setSheetCategoryId] = useState<string | null>(null);
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
-  const parsedTotal = parseAmount(total);
+  const parsedTotal = parseAllocationAmount(total);
 
   // Only root allocations count toward the template total; child allocations
   // are a breakdown *within* their parent and are validated per group.
@@ -298,7 +107,7 @@ export function BudgetTemplateEditorScreen({
       rootExpenseCategories
         .map((category) => ({
           categoryId: category.id,
-          amount: parseAmount(amounts[category.id] ?? ''),
+          amount: parseAllocationAmount(amounts[category.id] ?? ''),
         }))
         .filter((allocation) => allocation.amount > 0),
     [amounts, rootExpenseCategories],
@@ -313,7 +122,7 @@ export function BudgetTemplateEditorScreen({
       if (children.length === 0) continue;
       const gap = computeChildAllocationGap(
         allocation.amount,
-        children.map((child) => ({ amount: parseAmount(amounts[child.id] ?? '') })),
+        children.map((child) => ({ amount: parseAllocationAmount(amounts[child.id] ?? '') })),
       );
       if (gap !== 0) gaps.set(allocation.categoryId, gap);
     }
@@ -349,7 +158,7 @@ export function BudgetTemplateEditorScreen({
     const allocations = [...rootAllocations];
     for (const rootAllocation of rootAllocations) {
       for (const child of childrenByParent.get(rootAllocation.categoryId) ?? []) {
-        const amount = parseAmount(amounts[child.id] ?? '');
+        const amount = parseAllocationAmount(amounts[child.id] ?? '');
         if (amount > 0) allocations.push({ categoryId: child.id, amount });
       }
     }
@@ -384,14 +193,9 @@ export function BudgetTemplateEditorScreen({
     updateBudgetTemplate,
   ]);
 
-  const remainingLabel =
-    remaining > 0
-      ? I18n.t('budget.allocated_left', { amount: money(remaining, settings) })
-      : remaining < 0
-        ? I18n.t('budget.allocated_over', { amount: money(Math.abs(remaining), settings) })
-        : I18n.t('budget.allocated_done');
-  const remainingColor =
-    remaining > 0 ? themeColors.coral : remaining < 0 ? themeColors.error : themeColors.success;
+  const sheetCategory = sheetCategoryId
+    ? (rootExpenseCategories.find((category) => category.id === sheetCategoryId) ?? null)
+    : null;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -403,8 +207,8 @@ export function BudgetTemplateEditorScreen({
         />
       </View>
 
-      {/* The allocation status row (index 1) pins to the top while the
-          category list scrolls, so "how much is left" is never off-screen. */}
+      {/* The allocation bar (index 1) pins to the top while the category list
+          scrolls, so how much is left is never off-screen. */}
       <ScrollView
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
@@ -457,42 +261,29 @@ export function BudgetTemplateEditorScreen({
           ) : null}
         </View>
 
-        {/* Sticky allocation status. */}
         {parsedTotal > 0 ? (
           <View className="bg-background px-5 py-2">
-            <View className="flex-row items-center justify-between gap-3 rounded-2xl border border-border/40 bg-secondary/25 px-4 py-3">
-              <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 shrink">
-                {I18n.t('budget.allocated_summary', {
-                  allocated: money(normalizeMoneyAmount(parsedTotal - remaining), settings),
-                  total: money(parsedTotal, settings),
-                })}
-              </Text>
-              <Text variant="caption" numberOfLines={1} style={{ color: remainingColor }}>
-                {remainingLabel}
-              </Text>
-            </View>
+            <AllocationStatusBar
+              total={parsedTotal}
+              remaining={remaining}
+              settings={settings}
+              themeColors={themeColors}
+            />
           </View>
         ) : null}
 
         {parsedTotal > 0 ? (
           <View className="gap-4 px-5">
-            <View className="gap-2">
-              {rootExpenseCategories.map((category) => (
-                <AllocationGroup
-                  key={category.id}
-                  category={category}
-                  childCategories={childrenByParent.get(category.id) ?? []}
-                  amounts={amounts}
-                  onChangeAmount={handleChangeAmount}
-                  rootRemaining={remaining}
-                  currencySymbol={currencySymbol}
-                  settings={settings}
-                  themeColors={themeColors}
-                />
-              ))}
-            </View>
+            <AllocationCategoryList
+              rootCategories={rootExpenseCategories}
+              amounts={amounts}
+              childGaps={childGaps}
+              onPressCategory={setSheetCategoryId}
+              settings={settings}
+              themeColors={themeColors}
+            />
 
-            <OptionRow
+            <AllocationOptionRow
               title={I18n.t('budget.count_unbudgeted_title')}
               caption={I18n.t('budget.count_unbudgeted_caption')}
               value={countUnbudgeted}
@@ -501,7 +292,7 @@ export function BudgetTemplateEditorScreen({
             />
 
             {backPopulateRange ? (
-              <OptionRow
+              <AllocationOptionRow
                 title={I18n.t('budget.back_populate_title')}
                 caption={I18n.t('budget.back_populate_caption', {
                   first: formatMonthYearLabel(
@@ -530,6 +321,18 @@ export function BudgetTemplateEditorScreen({
         onClose={() => setShowEmojiPicker(false)}
         selected={emoji}
         onSelect={setEmoji}
+      />
+
+      <CategoryAllocationSheet
+        visible={sheetCategory != null}
+        onClose={() => setSheetCategoryId(null)}
+        category={sheetCategory}
+        childCategories={sheetCategory ? (childrenByParent.get(sheetCategory.id) ?? []) : []}
+        amounts={amounts}
+        onChangeAmount={handleChangeAmount}
+        rootRemaining={remaining}
+        currencySymbol={currencySymbol}
+        settings={settings}
       />
     </SafeAreaView>
   );

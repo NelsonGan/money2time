@@ -106,6 +106,66 @@ class MonthlyBudgetsRepository {
     }
   }
 
+  /**
+   * Edits one month's frozen budget in place (total, options, and line rows).
+   * Deliberately does not touch the source template: a month edit is a local
+   * override, not a template change.
+   */
+  update(
+    id: string,
+    input: {
+      totalAmount: number;
+      countUnbudgeted: boolean;
+      lines: { categoryId: string; amount: number }[];
+    },
+  ) {
+    const db = getDb();
+    const sqlite = getSQLite();
+    const now = nowIso();
+
+    sqlite.execSync('BEGIN');
+    try {
+      db.update(monthlyBudgetsTable)
+        .set({
+          totalAmount: input.totalAmount,
+          countUnbudgeted: input.countUnbudgeted,
+          updatedAt: now,
+        })
+        .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
+        .run();
+
+      db.update(monthlyBudgetCategoriesTable)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(
+          and(
+            eq(monthlyBudgetCategoriesTable.budgetId, id),
+            isNull(monthlyBudgetCategoriesTable.deletedAt),
+          ),
+        )
+        .run();
+
+      input.lines.forEach((line, index) => {
+        db.insert(monthlyBudgetCategoriesTable)
+          .values({
+            id: newId(),
+            budgetId: id,
+            categoryId: line.categoryId,
+            amount: line.amount,
+            sortOrder: index,
+            createdAt: now,
+            updatedAt: now,
+            deletedAt: null,
+          })
+          .run();
+      });
+
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();

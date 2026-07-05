@@ -317,6 +317,14 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   reorderBudgetTemplates: (ids: string[]) => void;
   /** Creates a month's budget from a template; no-ops if the month has one. */
   createMonthlyBudget: (month: string, templateId: string) => void;
+  /**
+   * Edits one month's frozen budget in place (total, options, lines). A local
+   * override for that month only; the source template is untouched.
+   */
+  updateMonthlyBudget: (
+    id: string,
+    input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
+  ) => void;
   deleteMonthlyBudget: (id: string) => void;
 
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
@@ -3287,6 +3295,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshBudgets],
   );
 
+  const updateMonthlyBudget = useCallback(
+    (
+      id: string,
+      input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
+    ) => {
+      monthlyBudgetsRepository.update(id, input);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_MONTH_UPDATED, { categories: input.lines.length });
+    },
+    [refreshBudgets],
+  );
+
   const deleteMonthlyBudget = useCallback(
     (id: string) => {
       monthlyBudgetsRepository.softDelete(id);
@@ -3535,6 +3555,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setDefaultBudgetTemplate,
             reorderBudgetTemplates,
             createMonthlyBudget,
+            updateMonthlyBudget,
             deleteMonthlyBudget,
             createTransaction,
             updateTransaction,
@@ -3648,6 +3669,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setDefaultBudgetTemplate,
       reorderBudgetTemplates,
       createMonthlyBudget,
+      updateMonthlyBudget,
       deleteMonthlyBudget,
       createTransaction,
       updateTransaction,

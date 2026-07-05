@@ -1485,7 +1485,7 @@ const uk = {
     limit_items:
       'У безкоштовному плані можна відстежувати до {{count}} речей. Оформте Pro для безлімітного.',
     limit_budget_templates:
-      'У безкоштовному плані можна створити {{count}} шаблон бюджету. У Pro — без обмежень.',
+      'У безкоштовному плані можна створити {{count}} шаблон бюджету. У Pro без обмежень.',
     badge: 'PRO',
     trend_preview_title: 'Розблокуйте довгострокові тренди',
     trend_preview_message:
@@ -1737,7 +1737,7 @@ const uk = {
     name_placeholder: 'напр. Повсякденний',
     total_label: 'Загальний бюджет',
     allocate_title: 'Розподілити за категоріями',
-    allocate_hint: 'Розподіліть суму за категоріями витрат — вона має зійтися точно.',
+    allocate_hint: 'Розподіліть суму за категоріями. Торкніться категорії, щоб задати суму.',
     allocated_summary: 'Розподілено {{allocated}} із {{total}}',
     allocated_left: 'Залишилось {{amount}}',
     allocated_over: '{{amount}} понад',
@@ -1745,13 +1745,15 @@ const uk = {
     fill_remainder: 'Заповнити',
     back_populate_title: 'Заповнити минулі місяці',
     back_populate_caption:
-      'Створить бюджети за {{first}} – {{last}} ({{count}} міс.). Місяці з бюджетом пропускаються.',
+      'Створить бюджети за {{first}} - {{last}} ({{count}} міс.). Місяці з бюджетом пропускаються.',
     choose_emoji: 'Виберіть емодзі',
     count_unbudgeted_title: 'Враховувати витрати поза бюджетом',
     count_unbudgeted_caption: 'Включати до підсумку місяця витрати з категорій без рядка бюджету.',
     children_hint: 'За бажанням розподіліть цю суму між підкатегоріями.',
     children_matched: 'Підкатегорії сходяться',
-    children_mismatch: 'Підкатегорії мають давати {{total}} — розбіжність {{delta}}.',
+    children_mismatch: 'Підкатегорії мають давати {{total}} (розбіжність {{delta}}).',
+    subcategories: 'Підкатегорії',
+    edit_budget: 'Редагувати бюджет',
     not_counted: 'не враховується',
   },
   items: {

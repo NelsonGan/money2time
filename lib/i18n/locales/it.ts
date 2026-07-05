@@ -1750,7 +1750,7 @@ const it = {
     total_label: 'Budget totale',
     allocate_title: 'Assegna alle categorie',
     allocate_hint:
-      'Distribuisci il totale tra le tue categorie di spesa: deve corrispondere esattamente.',
+      'Distribuisci il totale tra le tue categorie. Tocca una categoria per impostarne l’importo.',
     allocated_summary: '{{allocated}} di {{total}} assegnati',
     allocated_left: '{{amount}} rimanente',
     allocated_over: '{{amount}} in più',
@@ -1758,14 +1758,16 @@ const it = {
     fill_remainder: 'Riempi',
     back_populate_title: 'Compila i mesi passati',
     back_populate_caption:
-      'Crea budget per {{first}} – {{last}} ({{count}} mesi). I mesi che hanno già un budget vengono saltati.',
+      'Crea budget per {{first}} - {{last}} ({{count}} mesi). I mesi che hanno già un budget vengono saltati.',
     choose_emoji: 'Scegli un’emoji',
     count_unbudgeted_title: 'Conta la spesa fuori budget',
     count_unbudgeted_caption:
       'Includi nel totale del mese la spesa delle categorie senza voce di budget.',
     children_hint: 'Facoltativamente suddividi questo importo tra le sottocategorie.',
     children_matched: 'Le sottocategorie tornano',
-    children_mismatch: 'Le sottocategorie devono sommare a {{total}} — scarto di {{delta}}.',
+    children_mismatch: 'Le sottocategorie devono sommare a {{total}} (scarto di {{delta}}).',
+    subcategories: 'Sottocategorie',
+    edit_budget: 'Modifica budget',
     not_counted: 'non contato',
   },
   items: {

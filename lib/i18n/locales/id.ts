@@ -1750,7 +1750,7 @@ const id = {
     name_placeholder: 'mis. Sehari-hari',
     total_label: 'Total anggaran',
     allocate_title: 'Alokasikan ke kategori',
-    allocate_hint: 'Bagikan total ke kategori pengeluaranmu — jumlahnya harus pas.',
+    allocate_hint: 'Bagikan total ke kategorimu. Ketuk kategori untuk mengatur jumlahnya.',
     allocated_summary: '{{allocated}} dari {{total}} teralokasi',
     allocated_left: 'Sisa {{amount}}',
     allocated_over: 'Lebih {{amount}}',
@@ -1758,14 +1758,16 @@ const id = {
     fill_remainder: 'Isi',
     back_populate_title: 'Isi bulan-bulan sebelumnya',
     back_populate_caption:
-      'Membuat anggaran untuk {{first}} – {{last}} ({{count}} bulan). Bulan yang sudah punya anggaran dilewati.',
+      'Membuat anggaran untuk {{first}} - {{last}} ({{count}} bulan). Bulan yang sudah punya anggaran dilewati.',
     choose_emoji: 'Pilih emoji',
     count_unbudgeted_title: 'Hitung pengeluaran di luar anggaran',
     count_unbudgeted_caption:
       'Sertakan pengeluaran dari kategori tanpa pos anggaran ke total bulan.',
     children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
     children_matched: 'Subkategori sudah pas',
-    children_mismatch: 'Subkategori harus berjumlah {{total}} — selisih {{delta}}.',
+    children_mismatch: 'Subkategori harus berjumlah {{total}} (selisih {{delta}}).',
+    subcategories: 'Subkategori',
+    edit_budget: 'Edit anggaran',
     not_counted: 'tidak dihitung',
   },
   items: {

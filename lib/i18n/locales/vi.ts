@@ -1720,7 +1720,7 @@ const vi = {
     name_placeholder: 'VD: Hằng ngày',
     total_label: 'Tổng ngân sách',
     allocate_title: 'Phân bổ cho danh mục',
-    allocate_hint: 'Chia tổng số cho các danh mục chi tiêu — phải khớp chính xác.',
+    allocate_hint: 'Chia tổng số cho các danh mục. Chạm vào một danh mục để đặt số tiền.',
     allocated_summary: 'Đã phân bổ {{allocated}} / {{total}}',
     allocated_left: 'Còn lại {{amount}}',
     allocated_over: 'Vượt {{amount}}',
@@ -1728,14 +1728,16 @@ const vi = {
     fill_remainder: 'Điền',
     back_populate_title: 'Điền các tháng trước',
     back_populate_caption:
-      'Tạo ngân sách cho {{first}} – {{last}} ({{count}} tháng). Bỏ qua các tháng đã có ngân sách.',
+      'Tạo ngân sách cho {{first}} - {{last}} ({{count}} tháng). Bỏ qua các tháng đã có ngân sách.',
     choose_emoji: 'Chọn emoji',
     count_unbudgeted_title: 'Tính chi tiêu ngoài ngân sách',
     count_unbudgeted_caption:
       'Gộp chi tiêu từ các danh mục không có dòng ngân sách vào tổng của tháng.',
     children_hint: 'Tùy chọn: chia số tiền này cho các danh mục con.',
     children_matched: 'Danh mục con khớp tổng',
-    children_mismatch: 'Danh mục con phải cộng đúng bằng {{total}} — lệch {{delta}}.',
+    children_mismatch: 'Danh mục con phải cộng đúng bằng {{total}} (lệch {{delta}}).',
+    subcategories: 'Danh mục con',
+    edit_budget: 'Sửa ngân sách',
     not_counted: 'không tính',
   },
   items: {

@@ -1746,7 +1746,7 @@ const tr = {
     name_placeholder: 'örn. Günlük',
     total_label: 'Toplam bütçe',
     allocate_title: 'Kategorilere dağıt',
-    allocate_hint: 'Toplamı harcama kategorilerine dağıt — tam olarak denk gelmeli.',
+    allocate_hint: 'Toplamı kategorilere dağıt. Tutarını belirlemek için bir kategoriye dokun.',
     allocated_summary: '{{total}} içinden {{allocated}} dağıtıldı',
     allocated_left: '{{amount}} kaldı',
     allocated_over: '{{amount}} aşım',
@@ -1754,14 +1754,16 @@ const tr = {
     fill_remainder: 'Doldur',
     back_populate_title: 'Geçmiş ayları doldur',
     back_populate_caption:
-      '{{first}} – {{last}} için bütçeler oluşturur ({{count}} ay). Zaten bütçesi olan aylar atlanır.',
+      '{{first}} - {{last}} için bütçeler oluşturur ({{count}} ay). Zaten bütçesi olan aylar atlanır.',
     choose_emoji: 'Bir emoji seç',
     count_unbudgeted_title: 'Bütçelenmemiş harcamayı say',
     count_unbudgeted_caption:
       'Bütçe kalemi olmayan kategorilerin harcamasını ay toplamına dahil et.',
     children_hint: 'İstersen bu tutarı alt kategorilere dağıt.',
     children_matched: 'Alt kategoriler tutuyor',
-    children_mismatch: 'Alt kategoriler {{total}} etmeli — {{delta}} fark var.',
+    children_mismatch: 'Alt kategoriler {{total}} etmeli ({{delta}} fark var).',
+    subcategories: 'Alt kategoriler',
+    edit_budget: 'Bütçeyi düzenle',
     not_counted: 'sayılmıyor',
   },
   items: {

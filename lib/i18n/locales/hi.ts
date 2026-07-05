@@ -1726,7 +1726,8 @@ const hi = {
     name_placeholder: 'जैसे रोज़मर्रा',
     total_label: 'कुल बजट',
     allocate_title: 'श्रेणियों में बाँटें',
-    allocate_hint: 'कुल राशि अपनी खर्च श्रेणियों में बाँटें — यह बिल्कुल बराबर होनी चाहिए।',
+    allocate_hint:
+      'कुल राशि अपनी श्रेणियों में बाँटें। राशि तय करने के लिए किसी श्रेणी पर टैप करें।',
     allocated_summary: '{{total}} में से {{allocated}} बाँटा गया',
     allocated_left: '{{amount}} शेष',
     allocated_over: '{{amount}} अधिक',
@@ -1734,13 +1735,15 @@ const hi = {
     fill_remainder: 'भरें',
     back_populate_title: 'पिछले महीने भरें',
     back_populate_caption:
-      '{{first}} – {{last}} के लिए बजट बनाता है ({{count}} महीने)। जिन महीनों में बजट है वे छोड़ दिए जाते हैं।',
+      '{{first}} - {{last}} के लिए बजट बनाता है ({{count}} महीने)। जिन महीनों में बजट है वे छोड़ दिए जाते हैं।',
     choose_emoji: 'इमोजी चुनें',
     count_unbudgeted_title: 'बिना बजट का खर्च गिनें',
     count_unbudgeted_caption: 'बिना बजट लाइन वाली श्रेणियों का खर्च महीने के कुल में शामिल करें।',
     children_hint: 'चाहें तो यह राशि उप-श्रेणियों में बाँटें।',
     children_matched: 'उप-श्रेणियाँ मेल खाती हैं',
-    children_mismatch: 'उप-श्रेणियों का योग {{total}} होना चाहिए — {{delta}} का अंतर।',
+    children_mismatch: 'उप-श्रेणियों का योग {{total}} होना चाहिए ({{delta}} का अंतर)।',
+    subcategories: 'उप-श्रेणियाँ',
+    edit_budget: 'बजट संपादित करें',
     not_counted: 'गिना नहीं गया',
   },
   items: {
