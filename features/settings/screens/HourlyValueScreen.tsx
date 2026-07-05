@@ -243,7 +243,7 @@ export function HourlyValueScreen({
           className="px-0 pt-5 pb-3"
           onBack={onClose}
           title={I18n.t('settings.hourly_value')}
-          subtitle={I18n.t('settings.manage_formulas')}
+          infoTooltip={I18n.t('settings.manage_formulas')}
           rightAccessory={
             <Button
               size="icon"
