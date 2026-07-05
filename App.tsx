@@ -149,7 +149,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
-import { perfMark } from '~/utils/perfDebug';
+import { perfMark, perfSpan } from '~/utils/perfDebug';
 
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
@@ -1162,15 +1162,18 @@ function WidgetSnapshotSync() {
 
   useEffect(() => {
     const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
-    const snapshot = buildMoney2TimeWidgetSnapshot({
-      transactions,
-      settings,
-      isPro,
-      getTrueHourlyRateForDate,
-      categories,
-      excludedSavingsIncomeCategoryIds: savingsExclusions.income,
-      excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
-    });
+    perfMark(`WidgetSnapshotSync: effect run (isPro=${isPro}, txns=${transactions.length})`);
+    const snapshot = perfSpan('buildMoney2TimeWidgetSnapshot', () =>
+      buildMoney2TimeWidgetSnapshot({
+        transactions,
+        settings,
+        isPro,
+        getTrueHourlyRateForDate,
+        categories,
+        excludedSavingsIncomeCategoryIds: savingsExclusions.income,
+        excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+      }),
+    );
 
     void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
   }, [
