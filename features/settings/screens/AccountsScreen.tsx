@@ -2503,15 +2503,7 @@ export function AccountsScreen({
             <SettingsHeader
               className="px-0 pt-5 pb-2"
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
-              title={I18n.t('accounts.title')}
-              subtitleNode={
-                <View className="flex-row items-center gap-1.5">
-                  <AccountLogo logoId={account.logoId} type={account.type} size={20} />
-                  <Text variant="friendly" tone="muted" numberOfLines={1}>
-                    {account.name}
-                  </Text>
-                </View>
-              }
+              title={account.name}
               rightAccessory={
                 !isSelectionMode ? (
                   <Button
