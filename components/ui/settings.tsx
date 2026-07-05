@@ -167,7 +167,7 @@ export function SettingsHeader({
         </View>
 
         <View className="flex-row items-center justify-center gap-1.5" style={{ flexShrink: 1 }}>
-          <Text variant="heading" numberOfLines={1} className="tracking-tight text-center">
+          <Text variant="subheading" numberOfLines={1} className="tracking-tight text-center">
             {title}
           </Text>
           {infoTooltip ? (
@@ -205,20 +205,36 @@ export function SettingsHeader({
           animationType="fade"
           onRequestClose={() => setTooltipVisible(false)}
         >
+          {/* Backdrop dismisses; the card swallows its own taps so only the
+              explicit close control (or the backdrop) dismisses the modal. */}
           <Pressable
-            className="flex-1 items-center justify-center bg-black/20 px-10"
+            className="flex-1 items-center justify-center bg-black/40 px-8"
             onPress={() => setTooltipVisible(false)}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
           >
-            <View
-              className="rounded-2xl border border-border/40 bg-background p-4 shadow-soft"
-              style={{ maxWidth: 320 }}
+            <Pressable
+              className="w-full max-w-[340px] rounded-3xl border border-border/40 bg-background p-5 shadow-soft"
+              onPress={() => {}}
             >
-              <Text variant="friendly" tone="muted" className="text-center">
+              <View className="mb-2 flex-row items-center justify-between gap-3">
+                <Text variant="subheading" numberOfLines={1} className="flex-1">
+                  {title}
+                </Text>
+                <Pressable
+                  onPress={() => setTooltipVisible(false)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.close')}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
+                >
+                  <X size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+              <Text variant="friendly" tone="muted">
                 {infoTooltip}
               </Text>
-            </View>
+            </Pressable>
           </Pressable>
         </Modal>
       ) : null}
