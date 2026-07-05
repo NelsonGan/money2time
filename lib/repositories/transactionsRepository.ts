@@ -117,10 +117,19 @@ export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSu
   return { count, paidCount, unpaidAmount, totalOwed };
 }
 
+// Above this count, a `WHERE id IN (…)` clause carries so many bound parameters
+// that preparing the statement costs more than scanning the relevant table once
+// and grouping in JS. The full-table paths return supersets that are filtered by
+// the per-transaction map lookups below, so the result is identical either way.
+const IN_CLAUSE_SCAN_THRESHOLD = 900;
+
 function attachSplits(transactions: TransactionWithRelations[]): void {
   if (transactions.length === 0) return;
   const ids = transactions.map((t) => t.id);
-  const grouped = transactionSplitsRepository.listByTransactionIds(ids);
+  const grouped =
+    ids.length > IN_CLAUSE_SCAN_THRESHOLD
+      ? transactionSplitsRepository.listAllActiveGrouped()
+      : transactionSplitsRepository.listByTransactionIds(ids);
   for (const transaction of transactions) {
     const splits = grouped.get(transaction.id);
     if (splits && splits.length > 0) {
@@ -138,7 +147,14 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     txIds.push(transaction.id);
   });
   const sqlite = getSQLite();
-  const inClausePlaceholders = getInClausePlaceholders(txIds.length);
+  // For large sets (startup full-load), a WHERE t.id IN (…thousands…) clause is
+  // slow to prepare; scan all non-deleted transactions instead. The relation map
+  // is keyed by id, so the per-transaction lookup below still yields the exact
+  // same result whether the query returned a superset or an exact match.
+  const scanAllNonDeleted = txIds.length > IN_CLAUSE_SCAN_THRESHOLD;
+  const relationFilterSql = scanAllNonDeleted
+    ? 't.deleted_at IS NULL'
+    : `t.id IN (${getInClausePlaceholders(txIds.length)})`;
 
   const rows = sqlite.getAllSync<{
     txId: string;
@@ -174,9 +190,9 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
     LEFT JOIN categories c ON c.id = t.category_id
     LEFT JOIN categories p ON p.id = c.parent_id
-    WHERE t.id IN (${inClausePlaceholders})
+    WHERE ${relationFilterSql}
   `,
-    txIds,
+    scanAllNonDeleted ? [] : txIds,
   );
 
   const relationMap = new Map<string, RelationRow>();
