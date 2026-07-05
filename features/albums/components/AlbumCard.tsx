@@ -82,7 +82,13 @@ export const AlbumCard = memo(function AlbumCard({
           <Text variant="caption" numberOfLines={1} className="text-white/80">
             {album.name}
           </Text>
-          <View className="mt-0.5 flex-row items-end justify-between gap-2">
+          {/* Time mode renders a View (icon + text) which has no text baseline,
+              so bottom-align it; money mode keeps baseline alignment. */}
+          <View
+            className={`mt-0.5 flex-row justify-between gap-2 ${
+              isTimeMode ? 'items-end' : 'items-baseline'
+            }`}
+          >
             {isTimeMode ? (
               <TimeValueInline
                 value={formatHours(stats.totalSpent)}

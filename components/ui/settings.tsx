@@ -174,7 +174,8 @@ export function SettingsHeader({
               }}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={infoTooltip}
+              accessibilityLabel={title}
+              accessibilityHint={infoTooltip}
             >
               <Info size={16} color={themeColors.textMuted} />
             </Pressable>
