@@ -2459,19 +2459,6 @@ function InsightTypeMenuPopover({
   onClose: () => void;
 }) {
   const themeColors = useThemeColors();
-  const entrance = useRef(new RNAnimated.Value(0)).current;
-
-  useEffect(() => {
-    if (!visible) return;
-    entrance.setValue(0);
-    RNAnimated.spring(entrance, {
-      toValue: 1,
-      useNativeDriver: true,
-      damping: 20,
-      stiffness: 260,
-      mass: 0.8,
-    }).start();
-  }, [visible, entrance]);
 
   if (!visible) return null;
 
@@ -2490,14 +2477,12 @@ function InsightTypeMenuPopover({
     screenHeight - 220 - sideMargin,
   );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
-  const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.18, 1] });
-  const opacity = entrance.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 1, 1] });
 
   return (
     <ThemeModal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
@@ -2509,7 +2494,7 @@ function InsightTypeMenuPopover({
           accessibilityLabel={I18n.t('common.close')}
         />
 
-        <RNAnimated.View
+        <View
           className="rounded-[24px] bg-background overflow-hidden"
           style={[
             styles.periodPickerCard,
@@ -2520,9 +2505,6 @@ function InsightTypeMenuPopover({
               maxHeight: maxCardHeight,
               borderColor: withColorAlpha(themeColors.border, 0.45),
               shadowColor: themeColors.text,
-              opacity,
-              transform: [{ scale }],
-              transformOrigin: 'top left',
             },
           ]}
         >
@@ -2572,7 +2554,7 @@ function InsightTypeMenuPopover({
               );
             })}
           </ScrollView>
-        </RNAnimated.View>
+        </View>
       </View>
     </ThemeModal>
   );
