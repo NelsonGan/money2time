@@ -3,13 +3,15 @@ import { type ElementRef, useCallback, useEffect, useMemo, useRef, useState } fr
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -47,6 +49,12 @@ export function AlbumsScreen({
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // Match the accounts/items page's top inset exactly.
+  const topInset = Math.max(
+    insets.top,
+    initialWindowMetrics?.insets.top ?? 0,
+    Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
+  );
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
@@ -111,8 +119,8 @@ export function AlbumsScreen({
   }, [pageWidth]);
 
   const tabsBar = (
-    <View className="flex-row items-center justify-between px-5 pb-1 pt-3">
-      <View className="flex-row items-end gap-6">
+    <View className="flex-row items-center justify-between pr-5 pt-2">
+      <View className="flex-row px-5 pt-2" style={{ gap: 24 }}>
         {(
           [
             { value: 'albums', label: I18n.t('albums.title') },
@@ -126,16 +134,16 @@ export function AlbumsScreen({
               onPress={() => selectTab(option.value)}
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
+              className="pb-2"
             >
               <Text
                 variant="subheading"
-                numberOfLines={1}
                 className={cn(active ? 'text-foreground' : 'text-muted-foreground')}
               >
                 {option.label}
               </Text>
               <View
-                className="mt-1.5 h-0.5 rounded-full"
+                className="h-0.5 mt-1.5 rounded-full"
                 style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
               />
             </Pressable>
@@ -150,7 +158,7 @@ export function AlbumsScreen({
         }}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('albums.create')}
-        className="h-10 w-10 items-center justify-center rounded-full bg-primary shadow-soft"
+        className="h-11 w-11 items-center justify-center rounded-full bg-primary shadow-soft"
       >
         <PlusIcon size={20} color="#fff" />
       </Pressable>
@@ -279,7 +287,7 @@ export function AlbumsScreen({
           if (h > 0 && h !== headerHeight) setHeaderHeight(h);
         }}
         className={cn('absolute left-0 right-0 top-0', tab === 'map' ? '' : 'bg-background')}
-        style={{ paddingTop: insets.top }}
+        style={{ paddingTop: topInset }}
       >
         <TabletContentContainer>{tabsBar}</TabletContentContainer>
       </View>
