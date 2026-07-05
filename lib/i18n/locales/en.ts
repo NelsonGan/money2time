@@ -328,6 +328,27 @@ const en = {
       bullet_weekly_title: 'Weekly summary',
       bullet_weekly_subtitle: 'See how much you spent in the last 7 days.',
     },
+    backup: {
+      title: 'Back up your data',
+      subtitle:
+        'Everything you track lives only on this phone. Back up to {{provider}} so a lost or broken phone never means lost data.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatic daily backups',
+      bullet_automatic_subtitle: 'Your data is saved to {{provider}} every day, hands-free.',
+      bullet_private_title: 'Private and secure',
+      bullet_private_subtitle: 'Backups stay in your own {{provider}} account.',
+      bullet_restore_title: 'Restore in seconds',
+      bullet_restore_subtitle: 'Get a new phone? Bring everything back with one tap.',
+      enable_icloud: 'Back up to iCloud',
+      enable_google: 'Back up to Google Drive',
+      not_now: 'Not now',
+      confirm_title: 'Skip backup?',
+      confirm_message:
+        'money2time stores everything only on this device. If you lose or replace your phone, all your data will be gone for good. We strongly recommend turning on {{provider}} backup.',
+      confirm_enable: 'Turn on backup',
+      confirm_skip: 'Skip anyway',
+    },
   },
   transactions: {
     title: 'Transactions',

@@ -355,6 +355,27 @@ const id = {
       bullet_weekly_title: 'Ringkasan mingguan',
       bullet_weekly_subtitle: 'Lihat berapa yang kamu belanjakan dalam 7 hari terakhir.',
     },
+    backup: {
+      title: 'Cadangkan data Anda',
+      subtitle:
+        'Semua yang Anda catat hanya ada di ponsel ini. Cadangkan ke {{provider}} agar ponsel hilang atau rusak tidak pernah berarti data hilang.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Pencadangan harian otomatis',
+      bullet_automatic_subtitle: 'Data Anda disimpan ke {{provider}} setiap hari, tanpa repot.',
+      bullet_private_title: 'Pribadi dan aman',
+      bullet_private_subtitle: 'Cadangan tetap di akun {{provider}} Anda sendiri.',
+      bullet_restore_title: 'Pulihkan dalam hitungan detik',
+      bullet_restore_subtitle: 'Ponsel baru? Kembalikan semuanya dengan satu ketukan.',
+      enable_icloud: 'Cadangkan ke iCloud',
+      enable_google: 'Cadangkan ke Google Drive',
+      not_now: 'Nanti saja',
+      confirm_title: 'Lewati pencadangan?',
+      confirm_message:
+        'money2time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
+      confirm_enable: 'Aktifkan pencadangan',
+      confirm_skip: 'Tetap lewati',
+    },
   },
   transactions: {
     title: 'Transaksi',

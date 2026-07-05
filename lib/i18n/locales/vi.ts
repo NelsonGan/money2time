@@ -351,6 +351,28 @@ const vi = {
       bullet_weekly_title: 'Tổng kết tuần',
       bullet_weekly_subtitle: 'Xem bạn đã chi bao nhiêu trong 7 ngày qua.',
     },
+    backup: {
+      title: 'Sao lưu dữ liệu của bạn',
+      subtitle:
+        'Mọi thứ bạn ghi lại chỉ nằm trên điện thoại này. Sao lưu lên {{provider}} để điện thoại mất hay hỏng không bao giờ đồng nghĩa với mất dữ liệu.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Tự động sao lưu hằng ngày',
+      bullet_automatic_subtitle:
+        'Dữ liệu của bạn được lưu lên {{provider}} mỗi ngày, không cần thao tác.',
+      bullet_private_title: 'Riêng tư và an toàn',
+      bullet_private_subtitle: 'Bản sao lưu nằm trong tài khoản {{provider}} của riêng bạn.',
+      bullet_restore_title: 'Khôi phục trong vài giây',
+      bullet_restore_subtitle: 'Điện thoại mới? Lấy lại mọi thứ chỉ với một chạm.',
+      enable_icloud: 'Sao lưu lên iCloud',
+      enable_google: 'Sao lưu lên Google Drive',
+      not_now: 'Để sau',
+      confirm_title: 'Bỏ qua sao lưu?',
+      confirm_message:
+        'money2time lưu mọi thứ chỉ trên thiết bị này. Nếu bạn làm mất hoặc thay điện thoại, toàn bộ dữ liệu của bạn sẽ mất vĩnh viễn. Chúng tôi thực sự khuyên bạn nên bật sao lưu {{provider}}.',
+      confirm_enable: 'Bật sao lưu',
+      confirm_skip: 'Vẫn bỏ qua',
+    },
   },
   transactions: {
     title: 'Giao dịch',

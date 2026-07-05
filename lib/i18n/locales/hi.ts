@@ -352,6 +352,27 @@ const hi = {
       bullet_weekly_title: 'साप्ताहिक सारांश',
       bullet_weekly_subtitle: 'पिछले 7 दिनों का खर्च देखें।',
     },
+    backup: {
+      title: 'अपना डेटा बैकअप करें',
+      subtitle:
+        'आप जो कुछ भी रिकॉर्ड करते हैं वह केवल इसी फ़ोन में रहता है। {{provider}} पर बैकअप लें ताकि फ़ोन खोने या टूटने पर आपका डेटा कभी न खोए।',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'स्वचालित दैनिक बैकअप',
+      bullet_automatic_subtitle: 'आपका डेटा हर दिन अपने-आप {{provider}} पर सहेजा जाता है।',
+      bullet_private_title: 'निजी और सुरक्षित',
+      bullet_private_subtitle: 'बैकअप आपके अपने {{provider}} खाते में रहते हैं।',
+      bullet_restore_title: 'सेकंडों में पुनर्स्थापित करें',
+      bullet_restore_subtitle: 'नया फ़ोन? एक टैप में सब कुछ वापस लाएँ।',
+      enable_icloud: 'iCloud पर बैकअप करें',
+      enable_google: 'Google Drive पर बैकअप करें',
+      not_now: 'अभी नहीं',
+      confirm_title: 'बैकअप छोड़ें?',
+      confirm_message:
+        'money2time सब कुछ केवल इसी डिवाइस पर संग्रहीत करता है। यदि आप अपना फ़ोन खो देते हैं या बदल देते हैं, तो आपका सारा डेटा हमेशा के लिए चला जाएगा। हम दृढ़ता से {{provider}} बैकअप चालू करने की सलाह देते हैं।',
+      confirm_enable: 'बैकअप चालू करें',
+      confirm_skip: 'फिर भी छोड़ें',
+    },
   },
   transactions: {
     title: 'लेनदेन',

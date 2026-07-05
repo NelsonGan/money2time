@@ -352,6 +352,28 @@ const ru = {
       bullet_weekly_title: 'Еженедельная сводка',
       bullet_weekly_subtitle: 'Обзор расходов за последние 7 дней.',
     },
+    backup: {
+      title: 'Сделайте резервную копию данных',
+      subtitle:
+        'Всё, что вы записываете, хранится только на этом телефоне. Создайте резервную копию в {{provider}}, чтобы потеря или поломка телефона никогда не означала потерю данных.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Автоматическое ежедневное резервное копирование',
+      bullet_automatic_subtitle:
+        'Ваши данные сохраняются в {{provider}} каждый день автоматически.',
+      bullet_private_title: 'Конфиденциально и безопасно',
+      bullet_private_subtitle: 'Резервные копии остаются в вашей учётной записи {{provider}}.',
+      bullet_restore_title: 'Восстановление за секунды',
+      bullet_restore_subtitle: 'Новый телефон? Верните всё одним касанием.',
+      enable_icloud: 'Копировать в iCloud',
+      enable_google: 'Копировать в Google Drive',
+      not_now: 'Не сейчас',
+      confirm_title: 'Пропустить резервное копирование?',
+      confirm_message:
+        'money2time хранит всё только на этом устройстве. Если вы потеряете или замените телефон, все ваши данные будут утеряны навсегда. Настоятельно рекомендуем включить резервное копирование в {{provider}}.',
+      confirm_enable: 'Включить копирование',
+      confirm_skip: 'Всё равно пропустить',
+    },
   },
   transactions: {
     title: 'Транзакции',

@@ -354,6 +354,28 @@ const pl = {
       bullet_weekly_title: 'Tygodniowe podsumowanie',
       bullet_weekly_subtitle: 'Zobacz, ile wydałeś w ostatnich 7 dniach.',
     },
+    backup: {
+      title: 'Utwórz kopię zapasową danych',
+      subtitle:
+        'Wszystko, co zapisujesz, istnieje tylko na tym telefonie. Utwórz kopię zapasową w {{provider}}, aby zgubiony lub zepsuty telefon nigdy nie oznaczał utraty danych.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatyczne codzienne kopie zapasowe',
+      bullet_automatic_subtitle:
+        'Twoje dane są zapisywane w {{provider}} każdego dnia, bez wysiłku.',
+      bullet_private_title: 'Prywatnie i bezpiecznie',
+      bullet_private_subtitle: 'Kopie zapasowe pozostają na Twoim własnym koncie {{provider}}.',
+      bullet_restore_title: 'Przywróć w kilka sekund',
+      bullet_restore_subtitle: 'Nowy telefon? Przywróć wszystko jednym dotknięciem.',
+      enable_icloud: 'Kopia zapasowa w iCloud',
+      enable_google: 'Kopia zapasowa w Google Drive',
+      not_now: 'Nie teraz',
+      confirm_title: 'Pominąć kopię zapasową?',
+      confirm_message:
+        'money2time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
+      confirm_enable: 'Włącz kopię zapasową',
+      confirm_skip: 'Pomiń mimo to',
+    },
   },
   transactions: {
     title: 'Transakcje',

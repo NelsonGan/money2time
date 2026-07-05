@@ -352,6 +352,27 @@ const ja = {
       bullet_weekly_title: '週次サマリー',
       bullet_weekly_subtitle: '過去7日間の支出を確認。',
     },
+    backup: {
+      title: 'データをバックアップ',
+      subtitle:
+        '記録したすべてはこの端末にのみ保存されます。{{provider}}にバックアップすれば、端末を紛失・破損してもデータを失いません。',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: '毎日自動でバックアップ',
+      bullet_automatic_subtitle: 'データは毎日自動で{{provider}}に保存されます。',
+      bullet_private_title: 'プライベートで安全',
+      bullet_private_subtitle: 'バックアップはあなた自身の{{provider}}アカウントに保存されます。',
+      bullet_restore_title: '数秒で復元',
+      bullet_restore_subtitle: '新しい端末でも、ワンタップですべてを復元。',
+      enable_icloud: 'iCloudにバックアップ',
+      enable_google: 'Google Driveにバックアップ',
+      not_now: '後で',
+      confirm_title: 'バックアップをスキップ？',
+      confirm_message:
+        'money2timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
+      confirm_enable: 'バックアップを有効にする',
+      confirm_skip: 'スキップする',
+    },
   },
   transactions: {
     title: '取引',

@@ -352,6 +352,27 @@ const ko = {
       bullet_weekly_title: '주간 요약',
       bullet_weekly_subtitle: '지난 7일 지출을 확인하세요.',
     },
+    backup: {
+      title: '데이터 백업하기',
+      subtitle:
+        '기록한 모든 것은 이 휴대폰에만 저장됩니다. {{provider}}에 백업하면 휴대폰을 잃어버리거나 고장 나도 데이터를 잃지 않습니다.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: '매일 자동 백업',
+      bullet_automatic_subtitle: '데이터가 매일 자동으로 {{provider}}에 저장됩니다.',
+      bullet_private_title: '개인적이고 안전하게',
+      bullet_private_subtitle: '백업은 본인의 {{provider}} 계정에 보관됩니다.',
+      bullet_restore_title: '몇 초 만에 복원',
+      bullet_restore_subtitle: '새 휴대폰인가요? 한 번의 탭으로 모두 되돌리세요.',
+      enable_icloud: 'iCloud에 백업',
+      enable_google: 'Google Drive에 백업',
+      not_now: '나중에',
+      confirm_title: '백업을 건너뛸까요?',
+      confirm_message:
+        'money2time은 모든 것을 이 기기에만 저장합니다. 휴대폰을 잃어버리거나 교체하면 모든 데이터가 영구히 사라집니다. {{provider}} 백업을 켜는 것을 강력히 권장합니다.',
+      confirm_enable: '백업 켜기',
+      confirm_skip: '그래도 건너뛰기',
+    },
   },
   transactions: {
     title: '거래',

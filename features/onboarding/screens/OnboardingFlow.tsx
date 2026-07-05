@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,6 +12,13 @@ import { WageCalculatorFlowScreen } from '~/features/settings/screens';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import {
+  isGoogleDriveConfigured,
+  isGoogleSignedIn,
+  isTargetAvailable,
+  runAutoBackupIfDue,
+  signInWithGoogle,
+} from '~/services/autoBackup';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
 import { requestPermissions } from '~/services/notifications';
@@ -19,6 +26,7 @@ import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
+import { OnboardingBackupStep } from './OnboardingBackupStep';
 import {
   type BootstrapChoice,
   type BootstrapView,
@@ -29,7 +37,7 @@ import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -67,7 +75,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
   const visualStep = step;
-  const totalVisualSteps = 5;
+  const totalVisualSteps = 6;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -170,6 +178,59 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
     onComplete();
   }, [completeOnboarding, onComplete]);
+
+  const handleEnableBackup = useCallback(async () => {
+    const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
+    try {
+      if (target === 'icloud') {
+        const available = await isTargetAvailable('icloud');
+        if (!available) {
+          Alert.alert(
+            I18n.t('auto_backup.icloud_unavailable_title'),
+            I18n.t('auto_backup.icloud_unavailable_message'),
+          );
+          return;
+        }
+      } else {
+        if (!isGoogleDriveConfigured()) {
+          Alert.alert(
+            I18n.t('auto_backup.google_drive_unconfigured_title'),
+            I18n.t('auto_backup.google_drive_unconfigured_message'),
+          );
+          return;
+        }
+        if (!isGoogleSignedIn()) {
+          const result = await signInWithGoogle();
+          if (!result.ok) {
+            if (result.reason !== 'cancelled') {
+              Alert.alert(
+                I18n.t('auto_backup.google_drive_sign_in_failed_title'),
+                result.message ?? '',
+              );
+            }
+            return;
+          }
+        }
+      }
+
+      updateSettings({ autoBackupEnabled: true, autoBackupTarget: target });
+      void triggerHaptic('success');
+      void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_ENABLED, { target });
+      // Kick off the first backup in the background; don't block advancing.
+      void runAutoBackupIfDue({ force: true });
+      setStep(6);
+    } catch (error) {
+      void triggerHaptic('error');
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+    }
+  }, [updateSettings]);
+
+  const handleSkipBackup = useCallback(() => {
+    void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_SKIPPED, {
+      target: Platform.OS === 'ios' ? 'icloud' : 'googleDrive',
+    });
+    setStep(6);
+  }, []);
 
   const handleStartFresh = useCallback(() => {
     try {
@@ -299,8 +360,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
         {step === 5 && (
           <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+            <OnboardingBackupStep
+              onEnable={() => {
+                void handleEnableBackup();
+              }}
+              onSkip={handleSkipBackup}
+            />
+          </Animated.View>
+        )}
+
+        {step === 6 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
             <OnboardingBootstrapStep
-              onBack={() => setStep(4)}
+              onBack={() => setStep(5)}
               onImport={() => {
                 void handleImport();
               }}

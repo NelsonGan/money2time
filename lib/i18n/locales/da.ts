@@ -353,6 +353,27 @@ const da = {
       bullet_weekly_title: 'Ugentligt overblik',
       bullet_weekly_subtitle: 'Se, hvad du har brugt de seneste 7 dage.',
     },
+    backup: {
+      title: 'Sikkerhedskopiér dine data',
+      subtitle:
+        'Alt du registrerer, findes kun på denne telefon. Sikkerhedskopiér til {{provider}}, så en mistet eller ødelagt telefon aldrig betyder tabte data.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatiske daglige sikkerhedskopier',
+      bullet_automatic_subtitle: 'Dine data gemmes til {{provider}} hver dag, helt automatisk.',
+      bullet_private_title: 'Privat og sikkert',
+      bullet_private_subtitle: 'Sikkerhedskopier bliver på din egen {{provider}}-konto.',
+      bullet_restore_title: 'Gendan på sekunder',
+      bullet_restore_subtitle: 'Ny telefon? Hent det hele tilbage med ét tryk.',
+      enable_icloud: 'Sikkerhedskopiér til iCloud',
+      enable_google: 'Sikkerhedskopiér til Google Drive',
+      not_now: 'Ikke nu',
+      confirm_title: 'Spring sikkerhedskopi over?',
+      confirm_message:
+        'money2time gemmer alt kun på denne enhed. Hvis du mister eller udskifter din telefon, er alle dine data væk for altid. Vi anbefaler kraftigt at slå {{provider}}-sikkerhedskopi til.',
+      confirm_enable: 'Slå sikkerhedskopi til',
+      confirm_skip: 'Spring over alligevel',
+    },
   },
   transactions: {
     title: 'Transaktioner',

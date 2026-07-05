@@ -353,6 +353,28 @@ const pt = {
       bullet_weekly_title: 'Resumo semanal',
       bullet_weekly_subtitle: 'Veja quanto você gastou nos últimos 7 dias.',
     },
+    backup: {
+      title: 'Faça backup dos seus dados',
+      subtitle:
+        'Tudo o que você registra fica apenas neste telefone. Faça backup no {{provider}} para que um telefone perdido ou quebrado nunca signifique dados perdidos.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Backups diários automáticos',
+      bullet_automatic_subtitle:
+        'Seus dados são salvos no {{provider}} todos os dias, sem esforço.',
+      bullet_private_title: 'Privado e seguro',
+      bullet_private_subtitle: 'Os backups ficam na sua própria conta do {{provider}}.',
+      bullet_restore_title: 'Restaure em segundos',
+      bullet_restore_subtitle: 'Telefone novo? Recupere tudo com um toque.',
+      enable_icloud: 'Fazer backup no iCloud',
+      enable_google: 'Fazer backup no Google Drive',
+      not_now: 'Agora não',
+      confirm_title: 'Pular o backup?',
+      confirm_message:
+        'O money2time armazena tudo apenas neste dispositivo. Se você perder ou trocar de telefone, todos os seus dados serão perdidos para sempre. Recomendamos fortemente ativar o backup no {{provider}}.',
+      confirm_enable: 'Ativar backup',
+      confirm_skip: 'Pular mesmo assim',
+    },
   },
   transactions: {
     title: 'Transações',

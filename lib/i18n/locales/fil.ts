@@ -356,6 +356,28 @@ const fil = {
       bullet_weekly_title: 'Weekly summary',
       bullet_weekly_subtitle: 'Tingnan kung magkano ang nagastos mo sa nakaraang 7 araw.',
     },
+    backup: {
+      title: 'I-back up ang iyong data',
+      subtitle:
+        'Lahat ng nirerekord mo ay nasa teleponong ito lang. I-back up sa {{provider}} para hindi mangahulugan ng nawalang data ang nawala o sirang telepono.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Awtomatikong araw-araw na backup',
+      bullet_automatic_subtitle:
+        'Ini-save ang iyong data sa {{provider}} araw-araw, nang walang gagawin.',
+      bullet_private_title: 'Pribado at ligtas',
+      bullet_private_subtitle: 'Nananatili ang mga backup sa sarili mong account sa {{provider}}.',
+      bullet_restore_title: 'Mag-restore sa ilang segundo',
+      bullet_restore_subtitle: 'Bagong telepono? Ibalik lahat sa isang tap.',
+      enable_icloud: 'I-back up sa iCloud',
+      enable_google: 'I-back up sa Google Drive',
+      not_now: 'Hindi ngayon',
+      confirm_title: 'Laktawan ang backup?',
+      confirm_message:
+        'Ini-store ng money2time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
+      confirm_enable: 'I-on ang backup',
+      confirm_skip: 'Laktawan pa rin',
+    },
   },
   transactions: {
     title: 'Mga Transaksyon',
