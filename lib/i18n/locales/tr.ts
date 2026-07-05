@@ -1755,6 +1755,14 @@ const tr = {
     back_populate_title: 'Geçmiş ayları doldur',
     back_populate_caption:
       '{{first}} – {{last}} için bütçeler oluşturur ({{count}} ay). Zaten bütçesi olan aylar atlanır.',
+    choose_emoji: 'Bir emoji seç',
+    count_unbudgeted_title: 'Bütçelenmemiş harcamayı say',
+    count_unbudgeted_caption:
+      'Bütçe kalemi olmayan kategorilerin harcamasını ay toplamına dahil et.',
+    children_hint: 'İstersen bu tutarı alt kategorilere dağıt.',
+    children_matched: 'Alt kategoriler tutuyor',
+    children_mismatch: 'Alt kategoriler {{total}} etmeli — {{delta}} fark var.',
+    not_counted: 'sayılmıyor',
   },
   items: {
     title: 'Eşyalar',

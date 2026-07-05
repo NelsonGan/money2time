@@ -1759,6 +1759,14 @@ const it = {
     back_populate_title: 'Compila i mesi passati',
     back_populate_caption:
       'Crea budget per {{first}} – {{last}} ({{count}} mesi). I mesi che hanno già un budget vengono saltati.',
+    choose_emoji: 'Scegli un’emoji',
+    count_unbudgeted_title: 'Conta la spesa fuori budget',
+    count_unbudgeted_caption:
+      'Includi nel totale del mese la spesa delle categorie senza voce di budget.',
+    children_hint: 'Facoltativamente suddividi questo importo tra le sottocategorie.',
+    children_matched: 'Le sottocategorie tornano',
+    children_mismatch: 'Le sottocategorie devono sommare a {{total}} — scarto di {{delta}}.',
+    not_counted: 'non contato',
   },
   items: {
     title: 'Oggetti',

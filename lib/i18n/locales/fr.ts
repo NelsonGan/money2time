@@ -1770,6 +1770,14 @@ const fr = {
     back_populate_title: 'Remplir les mois passés',
     back_populate_caption:
       'Crée des budgets pour {{first}} – {{last}} ({{count}} mois). Les mois ayant déjà un budget sont ignorés.',
+    choose_emoji: 'Choisir un emoji',
+    count_unbudgeted_title: 'Compter les dépenses hors budget',
+    count_unbudgeted_caption:
+      'Inclure dans le total du mois les dépenses des catégories sans ligne de budget.',
+    children_hint: 'Répartissez éventuellement ce montant entre les sous-catégories.',
+    children_matched: 'Les sous-catégories correspondent',
+    children_mismatch: 'Les sous-catégories doivent totaliser {{total}} — écart de {{delta}}.',
+    not_counted: 'non compté',
   },
   items: {
     title: 'Objets',

@@ -219,9 +219,14 @@ export const itemsTable = sqliteTable('items', {
 export const budgetTemplatesTable = sqliteTable('budget_templates', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  // Optional emoji shown next to the template name (category-style picker).
+  emoji: text('emoji'),
   totalAmount: real('total_amount').notNull().default(0),
   // Exactly one live template has is_default = 1 while any template exists.
   isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+  // Whether spending in categories without a budget line counts toward the
+  // month's total (the original behavior).
+  countUnbudgeted: integer('count_unbudgeted', { mode: 'boolean' }).notNull().default(true),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -248,8 +253,10 @@ export const monthlyBudgetsTable = sqliteTable('monthly_budgets', {
   // Provenance only — the source template may be renamed or deleted later.
   templateId: text('template_id'),
   templateName: text('template_name'),
+  templateEmoji: text('template_emoji'),
   // Frozen at creation; never rewritten when the template changes.
   totalAmount: real('total_amount').notNull().default(0),
+  countUnbudgeted: integer('count_unbudgeted', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

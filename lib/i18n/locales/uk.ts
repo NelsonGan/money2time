@@ -1746,6 +1746,13 @@ const uk = {
     back_populate_title: 'Заповнити минулі місяці',
     back_populate_caption:
       'Створить бюджети за {{first}} – {{last}} ({{count}} міс.). Місяці з бюджетом пропускаються.',
+    choose_emoji: 'Виберіть емодзі',
+    count_unbudgeted_title: 'Враховувати витрати поза бюджетом',
+    count_unbudgeted_caption: 'Включати до підсумку місяця витрати з категорій без рядка бюджету.',
+    children_hint: 'За бажанням розподіліть цю суму між підкатегоріями.',
+    children_matched: 'Підкатегорії сходяться',
+    children_mismatch: 'Підкатегорії мають давати {{total}} — розбіжність {{delta}}.',
+    not_counted: 'не враховується',
   },
   items: {
     title: 'Речі',

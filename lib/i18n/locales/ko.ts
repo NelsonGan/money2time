@@ -1714,6 +1714,13 @@ const ko = {
     back_populate_title: '지난달 채우기',
     back_populate_caption:
       '{{first}} – {{last}}({{count}}개월)의 예산을 만듭니다. 이미 예산이 있는 달은 건너뜁니다.',
+    choose_emoji: '이모지 선택',
+    count_unbudgeted_title: '예산 외 지출 포함',
+    count_unbudgeted_caption: '예산 항목이 없는 카테고리의 지출을 월 합계에 포함합니다.',
+    children_hint: '원하면 이 금액을 하위 카테고리에 배분할 수 있어요.',
+    children_matched: '하위 카테고리 합계 일치',
+    children_mismatch: '하위 카테고리 합계가 {{total}}이어야 해요 — {{delta}} 차이.',
+    not_counted: '미포함',
   },
   items: {
     title: '물건',

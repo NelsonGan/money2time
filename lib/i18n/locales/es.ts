@@ -1759,6 +1759,14 @@ const es = {
     back_populate_title: 'Rellenar meses anteriores',
     back_populate_caption:
       'Crea presupuestos para {{first}} – {{last}} ({{count}} meses). Se omiten los meses que ya tienen presupuesto.',
+    choose_emoji: 'Elige un emoji',
+    count_unbudgeted_title: 'Contar gasto sin presupuestar',
+    count_unbudgeted_caption:
+      'Incluir en el total del mes el gasto de categorías sin partida de presupuesto.',
+    children_hint: 'Opcionalmente reparte este importe entre subcategorías.',
+    children_matched: 'Las subcategorías cuadran',
+    children_mismatch: 'Las subcategorías deben sumar {{total}} — desviación de {{delta}}.',
+    not_counted: 'no contado',
   },
   items: {
     title: 'Objetos',

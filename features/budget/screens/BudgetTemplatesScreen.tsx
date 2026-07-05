@@ -1,4 +1,4 @@
-import { Copy, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Copy, Plus, Trash2 } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import type { Edge } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
   Button,
+  CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -67,11 +68,13 @@ function TemplateCard({
 }) {
   return (
     <View className="rounded-2xl border border-border/45 bg-card">
+      {/* Row tap edits; the radio marks/changes the default; actions are
+          compact icon buttons so the card stays one glanceable unit. */}
       <Pressable
         onPress={onEdit}
         accessibilityRole="button"
         accessibilityLabel={template.name}
-        className="flex-row items-center gap-3 px-4 pt-3.5 pb-2.5"
+        className="flex-row items-center gap-3 px-4 py-3.5 active:opacity-85"
       >
         <Pressable
           onPress={(e) => {
@@ -80,7 +83,7 @@ function TemplateCard({
             void triggerHaptic('selection');
             onSetDefault();
           }}
-          hitSlop={10}
+          hitSlop={12}
           accessibilityRole="radio"
           accessibilityState={{ selected: template.isDefault }}
           accessibilityLabel={I18n.t('budget.make_default')}
@@ -88,66 +91,47 @@ function TemplateCard({
           <DefaultRadio selected={template.isDefault} themeColors={themeColors} />
         </Pressable>
 
-        <View className="flex-1">
-          <View className="flex-row items-center gap-2">
-            <Text variant="bodyStrong" numberOfLines={1} className="shrink">
-              {template.name}
-            </Text>
-            {template.isDefault ? (
-              <View className="rounded-full bg-primary/12 px-2 py-0.5">
-                <Text variant="label" className="text-[9px] text-primary">
-                  {I18n.t('budget.template_default_badge')}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-          <Text variant="caption" tone="muted" className="mt-0.5">
+        {template.emoji ? <CategoryEmoji icon={template.emoji} size={20} /> : null}
+
+        <View className="min-w-0 flex-1">
+          <Text variant="bodyStrong" numberOfLines={1}>
+            {template.name}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
             {money(template.totalAmount, settings)} ·{' '}
             {I18n.t('budget.categories_count', { count: template.allocations.length })}
+            {template.isDefault ? ` · ${I18n.t('budget.template_default_badge')}` : ''}
           </Text>
         </View>
+
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              void triggerHaptic('selection');
+              onDuplicate();
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('budget.duplicate')}
+            className="h-9 w-9 items-center justify-center rounded-full active:opacity-70"
+          >
+            <Copy size={15} color={themeColors.textMuted} />
+          </Pressable>
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.delete')}
+            className="h-9 w-9 items-center justify-center rounded-full active:opacity-70"
+          >
+            <Trash2 size={15} color={themeColors.coral} />
+          </Pressable>
+        </View>
       </Pressable>
-
-      <View className="h-px bg-border/30" />
-
-      <View className="flex-row items-center justify-end gap-1 px-2 py-1">
-        <Pressable
-          onPress={onEdit}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('common.edit')}
-          className="h-9 flex-row items-center gap-1.5 rounded-full px-3 active:opacity-70"
-        >
-          <Pencil size={14} color={themeColors.textMuted} />
-          <Text variant="caption" tone="muted">
-            {I18n.t('common.edit')}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={onDuplicate}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('budget.duplicate')}
-          className="h-9 flex-row items-center gap-1.5 rounded-full px-3 active:opacity-70"
-        >
-          <Copy size={14} color={themeColors.textMuted} />
-          <Text variant="caption" tone="muted">
-            {I18n.t('budget.duplicate')}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={onDelete}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('common.delete')}
-          className="h-9 flex-row items-center gap-1.5 rounded-full px-3 active:opacity-70"
-        >
-          <Trash2 size={14} color={themeColors.coral} />
-          <Text variant="caption" style={{ color: themeColors.coral }}>
-            {I18n.t('common.delete')}
-          </Text>
-        </Pressable>
-      </View>
     </View>
   );
 }

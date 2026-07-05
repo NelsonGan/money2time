@@ -1668,6 +1668,13 @@ const zh = {
     back_populate_title: '回填过去的月份',
     back_populate_caption:
       '将为 {{first}} – {{last}}（{{count}} 个月）创建预算。已有预算的月份会跳过。',
+    choose_emoji: '选择表情符号',
+    count_unbudgeted_title: '计入预算外支出',
+    count_unbudgeted_caption: '将没有预算项的分类支出计入当月总额。',
+    children_hint: '可选：将此金额分配到子分类。',
+    children_matched: '子分类金额相符',
+    children_mismatch: '子分类合计必须等于 {{total}}——相差 {{delta}}。',
+    not_counted: '不计入',
   },
   items: {
     title: '物品',

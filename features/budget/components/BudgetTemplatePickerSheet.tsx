@@ -3,7 +3,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text, ThemeModal } from '~/components/ui';
+import { CategoryEmoji, Text, ThemeModal } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -76,7 +76,8 @@ export function BudgetTemplatePickerSheet({
                     accessibilityLabel={template.name}
                     className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-secondary/20 px-4 py-3.5 active:opacity-80"
                   >
-                    <View className="flex-1">
+                    {template.emoji ? <CategoryEmoji icon={template.emoji} size={20} /> : null}
+                    <View className="min-w-0 flex-1">
                       <View className="flex-row items-center gap-2">
                         <Text variant="bodyStrong" numberOfLines={1} className="shrink">
                           {template.name}

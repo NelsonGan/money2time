@@ -1757,6 +1757,14 @@ const pt = {
     back_populate_title: 'Preencher meses anteriores',
     back_populate_caption:
       'Cria orçamentos para {{first}} – {{last}} ({{count}} meses). Meses que já têm orçamento são ignorados.',
+    choose_emoji: 'Escolher um emoji',
+    count_unbudgeted_title: 'Contar gasto fora do orçamento',
+    count_unbudgeted_caption:
+      'Incluir no total do mês o gasto de categorias sem linha de orçamento.',
+    children_hint: 'Opcionalmente, distribua este valor pelas subcategorias.',
+    children_matched: 'As subcategorias batem certo',
+    children_mismatch: 'As subcategorias têm de somar {{total}} — desvio de {{delta}}.',
+    not_counted: 'não contado',
   },
   items: {
     title: 'Itens',

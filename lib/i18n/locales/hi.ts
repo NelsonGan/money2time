@@ -1735,6 +1735,13 @@ const hi = {
     back_populate_title: 'पिछले महीने भरें',
     back_populate_caption:
       '{{first}} – {{last}} के लिए बजट बनाता है ({{count}} महीने)। जिन महीनों में बजट है वे छोड़ दिए जाते हैं।',
+    choose_emoji: 'इमोजी चुनें',
+    count_unbudgeted_title: 'बिना बजट का खर्च गिनें',
+    count_unbudgeted_caption: 'बिना बजट लाइन वाली श्रेणियों का खर्च महीने के कुल में शामिल करें।',
+    children_hint: 'चाहें तो यह राशि उप-श्रेणियों में बाँटें।',
+    children_matched: 'उप-श्रेणियाँ मेल खाती हैं',
+    children_mismatch: 'उप-श्रेणियों का योग {{total}} होना चाहिए — {{delta}} का अंतर।',
+    not_counted: 'गिना नहीं गया',
   },
   items: {
     title: 'चीज़ें',

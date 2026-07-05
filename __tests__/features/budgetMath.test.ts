@@ -1,6 +1,7 @@
 import {
   buildBudgetMonthSummary,
   computeAllocationRemaining,
+  computeChildAllocationGap,
   computeBackPopulateRange,
   computeBudgetPagerMonths,
   pickAutoCreateTemplate,
@@ -52,7 +53,9 @@ function makeBudget(overrides: Partial<MonthlyBudget>): MonthlyBudget {
     month: '2026-07',
     templateId: 'tpl1',
     templateName: 'Everyday',
+    templateEmoji: null,
     totalAmount: 1000,
+    countUnbudgeted: true,
     lines: [],
     createdAt: '2026-07-01T00:00:00.000Z',
     updatedAt: '2026-07-01T00:00:00.000Z',
@@ -65,8 +68,10 @@ function makeTemplate(overrides: Partial<BudgetTemplate>): BudgetTemplate {
   return {
     id: 'tpl1',
     name: 'Everyday',
+    emoji: null,
     totalAmount: 1000,
     isDefault: false,
+    countUnbudgeted: true,
     sortOrder: 0,
     allocations: [],
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -168,6 +173,79 @@ describe('buildBudgetMonthSummary', () => {
       categories,
     });
     expect(summary!.categories).toEqual([]);
+  });
+
+  it('excludes unbudgeted spend from the total when the budget does not count it', () => {
+    const noCountBudget = makeBudget({
+      countUnbudgeted: false,
+      lines: [{ id: 'l1', categoryId: 'food', amount: 600, sortOrder: 0 }],
+    });
+    const transactions = [
+      makeTransaction({ id: 'a', categoryId: 'food', amount: 100 }),
+      makeTransaction({ id: 'b', categoryId: 'fun', amount: 75 }),
+      makeTransaction({ id: 'c', categoryId: null, amount: 25 }),
+    ];
+    const summary = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget: noCountBudget,
+      transactions,
+      categories,
+    });
+    expect(summary!.countUnbudgeted).toBe(false);
+    expect(summary!.budgetedSpent).toBe(100);
+    expect(summary!.unbudgetedSpent).toBe(100); // still reported...
+    expect(summary!.totalSpent).toBe(100); // ...but not counted
+    expect(summary!.remaining).toBe(900);
+  });
+
+  it('nests subcategory lines under their root with own (non-rolled-up) spend', () => {
+    const nestedBudget = makeBudget({
+      lines: [
+        { id: 'l1', categoryId: 'food', amount: 600, sortOrder: 0 },
+        { id: 'l2', categoryId: 'food-coffee', amount: 150, sortOrder: 1 },
+      ],
+    });
+    const transactions = [
+      makeTransaction({ id: 'a', categoryId: 'food', amount: 100 }),
+      makeTransaction({ id: 'b', categoryId: 'food-coffee', amount: 160 }),
+    ];
+    const summary = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget: nestedBudget,
+      transactions,
+      categories,
+    });
+    // Only the root line is a top-level row; the child nests inside it.
+    expect(summary!.categories.map((line) => line.categoryId)).toEqual(['food']);
+    const food = summary!.categories[0];
+    expect(food.spent).toBe(260); // parent still rolls everything up
+    expect(food.children).toHaveLength(1);
+    expect(food.children[0]).toMatchObject({
+      categoryId: 'food-coffee',
+      budgeted: 150,
+      spent: 160, // own spend only
+      isOver: true,
+    });
+    // budgetedSpent counts root roll-ups once, not root + child double-counting.
+    expect(summary!.budgetedSpent).toBe(260);
+  });
+
+  it('drops child lines whose parent has no budget line', () => {
+    const orphanBudget = makeBudget({
+      lines: [
+        { id: 'l1', categoryId: 'transport', amount: 400, sortOrder: 0 },
+        { id: 'l2', categoryId: 'food-coffee', amount: 150, sortOrder: 1 }, // parent food unbudgeted
+      ],
+    });
+    const summary = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget: orphanBudget,
+      transactions: [makeTransaction({ id: 'a', categoryId: 'food-coffee', amount: 50 })],
+      categories,
+    });
+    expect(summary!.categories.map((line) => line.categoryId)).toEqual(['transport']);
+    // The orphan's spend still shows up as unbudgeted (rolled to its root).
+    expect(summary!.unbudgeted).toEqual([{ categoryId: 'food', spent: 50 }]);
   });
 
   it('renders a zero-activity month as all-zero usage', () => {
@@ -284,6 +362,25 @@ describe('computeAllocationRemaining', () => {
 
   it('goes negative when over-allocated', () => {
     expect(computeAllocationRemaining(100, [{ amount: 150 }])).toBe(-50);
+  });
+});
+
+describe('computeChildAllocationGap', () => {
+  it('is zero when no child is allocated (children are optional)', () => {
+    expect(computeChildAllocationGap(500, [])).toBe(0);
+    expect(computeChildAllocationGap(500, [{ amount: 0 }, { amount: 0 }])).toBe(0);
+  });
+
+  it('reports the unassigned remainder while children are partially allocated', () => {
+    expect(computeChildAllocationGap(500, [{ amount: 200 }, { amount: 100 }])).toBe(200);
+  });
+
+  it('is exactly zero when children sum to the parent despite float dust', () => {
+    expect(computeChildAllocationGap(0.3, [{ amount: 0.1 }, { amount: 0.2 }])).toBe(0);
+  });
+
+  it('goes negative when children exceed the parent', () => {
+    expect(computeChildAllocationGap(100, [{ amount: 150 }])).toBe(-50);
   });
 });
 

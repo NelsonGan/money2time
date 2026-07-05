@@ -18,8 +18,13 @@ import {
 /**
  * Aggregates one month's expense spend against its (possibly absent) budget.
  * Spend is valued at the frozen reporting-currency amount so budget numbers
- * always agree with Insights. Subcategory spend rolls up to its root category.
- * Returns null when there is no budget for the month.
+ * always agree with Insights.
+ *
+ * Lines on root categories are the primary rows; their spend rolls all
+ * subcategory activity up. Lines on subcategories render as children of their
+ * root line with that category's own spend (no roll-up). Whether unbudgeted
+ * spend counts toward the month total follows the frozen `countUnbudgeted`
+ * flag. Returns null when there is no budget for the month.
  */
 export function buildBudgetMonthSummary({
   month,
@@ -34,6 +39,7 @@ export function buildBudgetMonthSummary({
 }): BudgetMonthSummary | null {
   if (!budget) return null;
 
+  const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
   const rootById = new Map(
     categories.map((category) => [category.id, category.parentId ?? category.id]),
   );
@@ -42,9 +48,21 @@ export function buildBudgetMonthSummary({
   // Drop lines whose category no longer resolves (defensive on top of the
   // delete cascade) so a stale line can't render a ghost row.
   const lines = budget.lines.filter((line) => knownCategoryIds.has(line.categoryId));
-  const budgetedByCategory = new Map(lines.map((line) => [line.categoryId, line.amount]));
+  const rootLines = lines.filter((line) => !parentById.get(line.categoryId));
+  const rootLineIds = new Set(rootLines.map((line) => line.categoryId));
+  // Child lines only make sense under a budgeted root; orphans are dropped
+  // (their spend still counts via the parent roll-up / unbudgeted bucket).
+  const childLinesByRoot = new Map<string, typeof lines>();
+  for (const line of lines) {
+    const parentId = parentById.get(line.categoryId);
+    if (!parentId || !rootLineIds.has(parentId)) continue;
+    const list = childLinesByRoot.get(parentId) ?? [];
+    list.push(line);
+    childLinesByRoot.set(parentId, list);
+  }
 
   const spentByRoot = new Map<string, number>();
+  const spentByCategory = new Map<string, number>();
   let uncategorizedSpent = 0;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
@@ -58,28 +76,48 @@ export function buildBudgetMonthSummary({
     }
     const rootId = rootById.get(categoryId) ?? categoryId;
     spentByRoot.set(rootId, (spentByRoot.get(rootId) ?? 0) + value);
+    spentByCategory.set(categoryId, (spentByCategory.get(categoryId) ?? 0) + value);
   }
 
-  let budgetedSpent = 0;
-  const progress: BudgetCategoryProgress[] = lines.map((line) => {
-    const spent = normalizeMoneyAmount(spentByRoot.get(line.categoryId) ?? 0);
-    budgetedSpent += spent;
-    const budgeted = normalizeMoneyAmount(line.amount);
-    const remaining = normalizeMoneyAmount(budgeted - spent);
+  const toProgress = (
+    categoryId: string,
+    amount: number,
+    spent: number,
+    children: BudgetCategoryProgress[],
+  ): BudgetCategoryProgress => {
+    const budgeted = normalizeMoneyAmount(amount);
+    const normalizedSpent = normalizeMoneyAmount(spent);
+    const remaining = normalizeMoneyAmount(budgeted - normalizedSpent);
     return {
-      categoryId: line.categoryId,
+      categoryId,
       budgeted,
-      spent,
+      spent: normalizedSpent,
       remaining,
-      usageRatio: budgeted > 0 ? spent / budgeted : 0,
+      usageRatio: budgeted > 0 ? normalizedSpent / budgeted : 0,
       isOver: remaining < 0,
+      children,
     };
+  };
+
+  let budgetedSpent = 0;
+  const progress: BudgetCategoryProgress[] = rootLines.map((line) => {
+    const spent = spentByRoot.get(line.categoryId) ?? 0;
+    budgetedSpent += normalizeMoneyAmount(spent);
+    const children = (childLinesByRoot.get(line.categoryId) ?? []).map((childLine) =>
+      toProgress(
+        childLine.categoryId,
+        childLine.amount,
+        spentByCategory.get(childLine.categoryId) ?? 0,
+        [],
+      ),
+    );
+    return toProgress(line.categoryId, line.amount, spent, children);
   });
 
   const unbudgeted: UnbudgetedCategorySpend[] = [];
   let unbudgetedSpent = uncategorizedSpent;
   for (const [rootId, spent] of spentByRoot) {
-    if (budgetedByCategory.has(rootId)) continue;
+    if (rootLineIds.has(rootId)) continue;
     unbudgetedSpent += spent;
     unbudgeted.push({ categoryId: rootId, spent: normalizeMoneyAmount(spent) });
   }
@@ -90,8 +128,9 @@ export function buildBudgetMonthSummary({
 
   budgetedSpent = normalizeMoneyAmount(budgetedSpent);
   unbudgetedSpent = normalizeMoneyAmount(unbudgetedSpent);
+  const countUnbudgeted = budget.countUnbudgeted;
   const totalBudget = normalizeMoneyAmount(budget.totalAmount);
-  const totalSpent = normalizeMoneyAmount(budgetedSpent + unbudgetedSpent);
+  const totalSpent = normalizeMoneyAmount(budgetedSpent + (countUnbudgeted ? unbudgetedSpent : 0));
   const remaining = normalizeMoneyAmount(totalBudget - totalSpent);
 
   return {
@@ -100,12 +139,28 @@ export function buildBudgetMonthSummary({
     totalSpent,
     budgetedSpent,
     unbudgetedSpent,
+    countUnbudgeted,
     remaining,
     exceededBy: remaining < 0 ? Math.abs(remaining) : 0,
     usageRatio: totalBudget > 0 ? totalSpent / totalBudget : 0,
     categories: progress,
     unbudgeted,
   };
+}
+
+/**
+ * Editor helper: how far a parent's subcategory allocations are from the
+ * parent amount. Zero when no child is allocated (children are optional) or
+ * when they sum exactly to the parent; positive = still unassigned, negative
+ * = over-assigned. Save must be blocked while any parent is non-zero.
+ */
+export function computeChildAllocationGap(
+  parentAmount: number,
+  childAllocations: { amount: number }[],
+): number {
+  const allocated = childAllocations.reduce((sum, allocation) => sum + allocation.amount, 0);
+  if (allocated === 0) return 0;
+  return normalizeMoneyAmount(parentAmount - allocated);
 }
 
 export interface BackPopulateRange {

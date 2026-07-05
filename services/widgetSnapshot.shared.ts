@@ -981,7 +981,9 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
     month: monthKey,
     templateId: null,
     templateName: 'Everyday',
+    templateEmoji: null,
     totalAmount: 1200,
+    countUnbudgeted: true,
     lines: [
       { id: 'sb-food', categoryId: 'sample-cat-food', amount: 450, sortOrder: 0 },
       { id: 'sb-transport', categoryId: 'sample-cat-transport', amount: 250, sortOrder: 1 },

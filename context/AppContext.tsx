@@ -182,7 +182,11 @@ export interface CreateItemInput {
 
 export interface CreateBudgetTemplateInput {
   name: string;
+  /** Optional emoji shown next to the template name. */
+  emoji?: string | null;
   totalAmount: number;
+  /** Whether unbudgeted spend counts toward the month total (default true). */
+  countUnbudgeted?: boolean;
   allocations: BudgetAllocationInput[];
   /** Also create budgets for missing past months (first expense month → last month). */
   backPopulate?: boolean;
@@ -306,7 +310,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   createBudgetTemplate: (input: CreateBudgetTemplateInput) => string;
   updateBudgetTemplate: (
     id: string,
-    input: { name: string; totalAmount: number; allocations: BudgetAllocationInput[] },
+    input: Omit<CreateBudgetTemplateInput, 'backPopulate'>,
   ) => void;
   deleteBudgetTemplate: (id: string) => void;
   setDefaultBudgetTemplate: (id: string) => void;
@@ -3181,7 +3185,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (input: CreateBudgetTemplateInput) => {
       const id = budgetTemplatesRepository.create({
         name: input.name,
+        emoji: input.emoji ?? null,
         totalAmount: input.totalAmount,
+        countUnbudgeted: input.countUnbudgeted ?? true,
         allocations: input.allocations,
       });
       const templates = budgetTemplatesRepository.list();
@@ -3226,11 +3232,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateBudgetTemplate = useCallback(
-    (
-      id: string,
-      input: { name: string; totalAmount: number; allocations: BudgetAllocationInput[] },
-    ) => {
-      budgetTemplatesRepository.update(id, input);
+    (id: string, input: Omit<CreateBudgetTemplateInput, 'backPopulate'>) => {
+      budgetTemplatesRepository.update(id, {
+        name: input.name,
+        emoji: input.emoji ?? null,
+        totalAmount: input.totalAmount,
+        countUnbudgeted: input.countUnbudgeted ?? true,
+        allocations: input.allocations,
+      });
       refreshBudgets();
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
         categories: input.allocations.length,

@@ -1746,6 +1746,13 @@ const da = {
     back_populate_title: 'Udfyld tidligere måneder',
     back_populate_caption:
       'Opretter budgetter for {{first}} – {{last}} ({{count}} måneder). Måneder med et budget springes over.',
+    choose_emoji: 'Vælg en emoji',
+    count_unbudgeted_title: 'Tæl ikke-budgetteret forbrug med',
+    count_unbudgeted_caption: 'Medregn forbrug fra kategorier uden budgetpost i månedens total.',
+    children_hint: 'Fordel eventuelt dette beløb på underkategorier.',
+    children_matched: 'Underkategorierne stemmer',
+    children_mismatch: 'Underkategorier skal give {{total}} — {{delta}} i afvigelse.',
+    not_counted: 'ikke medregnet',
   },
   items: {
     title: 'Ting',

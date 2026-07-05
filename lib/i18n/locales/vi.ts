@@ -1729,6 +1729,14 @@ const vi = {
     back_populate_title: 'Điền các tháng trước',
     back_populate_caption:
       'Tạo ngân sách cho {{first}} – {{last}} ({{count}} tháng). Bỏ qua các tháng đã có ngân sách.',
+    choose_emoji: 'Chọn emoji',
+    count_unbudgeted_title: 'Tính chi tiêu ngoài ngân sách',
+    count_unbudgeted_caption:
+      'Gộp chi tiêu từ các danh mục không có dòng ngân sách vào tổng của tháng.',
+    children_hint: 'Tùy chọn: chia số tiền này cho các danh mục con.',
+    children_matched: 'Danh mục con khớp tổng',
+    children_mismatch: 'Danh mục con phải cộng đúng bằng {{total}} — lệch {{delta}}.',
+    not_counted: 'không tính',
   },
   items: {
     title: 'Vật dụng',

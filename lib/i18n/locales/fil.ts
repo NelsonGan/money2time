@@ -1776,6 +1776,14 @@ const fil = {
     back_populate_title: 'Punan ang mga nakaraang buwan',
     back_populate_caption:
       'Gagawa ng badyet para sa {{first}} – {{last}} ({{count}} buwan). Lalaktawan ang mga buwang may badyet na.',
+    choose_emoji: 'Pumili ng emoji',
+    count_unbudgeted_title: 'Bilangin ang gastos na walang badyet',
+    count_unbudgeted_caption:
+      'Isama sa kabuuan ng buwan ang gastos mula sa mga kategoryang walang linya ng badyet.',
+    children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
+    children_matched: 'Tugma ang mga subkategorya',
+    children_mismatch: 'Ang mga subkategorya ay dapat umabot sa {{total}} — {{delta}} ang layo.',
+    not_counted: 'hindi binibilang',
   },
   items: {
     title: 'Mga item',

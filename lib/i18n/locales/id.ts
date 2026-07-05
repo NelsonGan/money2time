@@ -1759,6 +1759,14 @@ const id = {
     back_populate_title: 'Isi bulan-bulan sebelumnya',
     back_populate_caption:
       'Membuat anggaran untuk {{first}} – {{last}} ({{count}} bulan). Bulan yang sudah punya anggaran dilewati.',
+    choose_emoji: 'Pilih emoji',
+    count_unbudgeted_title: 'Hitung pengeluaran di luar anggaran',
+    count_unbudgeted_caption:
+      'Sertakan pengeluaran dari kategori tanpa pos anggaran ke total bulan.',
+    children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
+    children_matched: 'Subkategori sudah pas',
+    children_mismatch: 'Subkategori harus berjumlah {{total}} — selisih {{delta}}.',
+    not_counted: 'tidak dihitung',
   },
   items: {
     title: 'Barang',

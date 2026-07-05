@@ -1748,6 +1748,13 @@ const nb = {
     back_populate_title: 'Fyll ut tidligere måneder',
     back_populate_caption:
       'Oppretter budsjetter for {{first}} – {{last}} ({{count}} måneder). Måneder som allerede har budsjett hoppes over.',
+    choose_emoji: 'Velg en emoji',
+    count_unbudgeted_title: 'Tell ikke-budsjettert forbruk',
+    count_unbudgeted_caption: 'Ta med forbruk fra kategorier uten budsjettpost i månedens total.',
+    children_hint: 'Fordel eventuelt beløpet på underkategorier.',
+    children_matched: 'Underkategoriene stemmer',
+    children_mismatch: 'Underkategoriene må summere til {{total}} — {{delta}} avvik.',
+    not_counted: 'ikke medregnet',
   },
   items: {
     title: 'Gjenstander',

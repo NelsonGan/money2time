@@ -1754,6 +1754,14 @@ const pl = {
     back_populate_title: 'Uzupełnij poprzednie miesiące',
     back_populate_caption:
       'Tworzy budżety dla {{first}} – {{last}} ({{count}} mies.). Miesiące z budżetem są pomijane.',
+    choose_emoji: 'Wybierz emoji',
+    count_unbudgeted_title: 'Licz wydatki poza budżetem',
+    count_unbudgeted_caption:
+      'Uwzględniaj w sumie miesiąca wydatki z kategorii bez pozycji budżetu.',
+    children_hint: 'Opcjonalnie rozdziel tę kwotę na podkategorie.',
+    children_matched: 'Podkategorie się zgadzają',
+    children_mismatch: 'Podkategorie muszą sumować się do {{total}} — różnica {{delta}}.',
+    not_counted: 'nieliczone',
   },
   items: {
     title: 'Przedmioty',

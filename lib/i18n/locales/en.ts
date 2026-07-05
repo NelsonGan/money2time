@@ -1739,6 +1739,14 @@ const en = {
     back_populate_title: 'Back-fill past months',
     back_populate_caption:
       'Creates budgets for {{first}} – {{last}} ({{count}} months). Months that already have a budget are skipped.',
+    choose_emoji: 'Choose an emoji',
+    count_unbudgeted_title: 'Count unbudgeted spending',
+    count_unbudgeted_caption:
+      'Include spending from categories without a budget line in the month’s total.',
+    children_hint: 'Optionally split this amount across subcategories.',
+    children_matched: 'Subcategories add up',
+    children_mismatch: 'Subcategories must add up to {{total}} — {{delta}} off.',
+    not_counted: 'not counted',
   },
   items: {
     title: 'Items',

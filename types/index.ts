@@ -377,9 +377,13 @@ export interface BudgetTemplateAllocation {
 export interface BudgetTemplate {
   id: string;
   name: string;
+  /** Optional emoji shown next to the template name. */
+  emoji: string | null;
   totalAmount: number;
   /** Exactly one live template is the default while any template exists. */
   isDefault: boolean;
+  /** Whether spend in categories without a budget line counts toward the total. */
+  countUnbudgeted: boolean;
   sortOrder: number;
   allocations: BudgetTemplateAllocation[];
   createdAt: string;
@@ -403,7 +407,10 @@ export interface MonthlyBudget {
   /** Provenance only; the template may have been renamed or deleted since. */
   templateId: string | null;
   templateName: string | null;
+  templateEmoji: string | null;
   totalAmount: number;
+  /** Frozen from the template: whether unbudgeted spend counts toward the total. */
+  countUnbudgeted: boolean;
   lines: MonthlyBudgetLine[];
   createdAt: string;
   updatedAt: string;
@@ -420,6 +427,11 @@ export interface BudgetCategoryProgress {
   /** spent / budgeted; 0 when budgeted is 0. */
   usageRatio: number;
   isOver: boolean;
+  /**
+   * Optional per-subcategory lines nested under a root line. Child spend is
+   * that category's own (no roll-up); the parent still rolls everything up.
+   */
+  children: BudgetCategoryProgress[];
 }
 
 /** Expense spend in a category with no budget line (null = uncategorized). */
@@ -432,10 +444,15 @@ export interface UnbudgetedCategorySpend {
 export interface BudgetMonthSummary {
   month: string;
   totalBudget: number;
-  /** Budgeted + unbudgeted expense spend for the month. */
+  /**
+   * Spend counted against the budget: budgeted + unbudgeted when the budget
+   * counts unbudgeted spend, budgeted only otherwise.
+   */
   totalSpent: number;
   budgetedSpent: number;
   unbudgetedSpent: number;
+  /** Frozen from the template: whether unbudgetedSpent is part of totalSpent. */
+  countUnbudgeted: boolean;
   /** totalBudget − totalSpent; negative when the month is over budget. */
   remaining: number;
   /** max(0, −remaining). */

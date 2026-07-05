@@ -25,7 +25,13 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { BudgetMonthSummary, Category, MonthlyBudget, UserSettings } from '~/types';
+import type {
+  BudgetCategoryProgress,
+  BudgetMonthSummary,
+  Category,
+  MonthlyBudget,
+  UserSettings,
+} from '~/types';
 import { withColorAlpha } from '~/utils/color';
 import { formatAmount, formatMonthYearLabel, monthKeyFromDateLocal } from '~/utils/formatters';
 
@@ -103,26 +109,28 @@ function BudgetSummaryCard({
       />
 
       <View className="px-4 pb-3.5 pt-3.5">
-        <View className="flex-row items-start justify-between gap-2">
-          <View className="flex-1">
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="min-w-0 flex-1">
             <Text variant="label" className="text-[10px] text-primary">
               {I18n.t('budget.summary_spent')}
             </Text>
             <View className="mt-1 flex-row items-baseline gap-1.5">
-              <Text variant="monoLg">{money(summary.totalSpent, settings)}</Text>
-              <Text variant="caption" tone="muted">
+              <Text variant="monoLg" numberOfLines={1} className="shrink">
+                {money(summary.totalSpent, settings)}
+              </Text>
+              <Text variant="caption" tone="muted" numberOfLines={1}>
                 / {money(summary.totalBudget, settings)}
               </Text>
             </View>
           </View>
           <Pressable
             onPress={onDelete}
-            hitSlop={8}
+            hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('budget.delete_budget')}
-            className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-card"
+            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
           >
-            <Trash2 size={15} color={themeColors.textMuted} />
+            <Trash2 size={14} color={themeColors.textMuted} />
           </Pressable>
         </View>
 
@@ -134,15 +142,24 @@ function BudgetSummaryCard({
           />
         </View>
 
-        <View className="mt-2 flex-row items-center justify-between">
-          <Text variant="caption" style={{ color: isOver ? themeColors.error : barColor }}>
+        <View className="mt-2 flex-row items-center justify-between gap-3">
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            className="min-w-0 shrink-0"
+            style={{ color: isOver ? themeColors.error : barColor }}
+          >
             {isOver
               ? I18n.t('budget.summary_exceeded', { amount: money(summary.exceededBy, settings) })
               : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
           </Text>
           {budget.templateName ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t('budget.from_template', { name: budget.templateName })}
+            <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 shrink">
+              {I18n.t('budget.from_template', {
+                name: budget.templateEmoji
+                  ? `${budget.templateEmoji} ${budget.templateName}`
+                  : budget.templateName,
+              })}
             </Text>
           ) : null}
         </View>
@@ -152,19 +169,21 @@ function BudgetSummaryCard({
 
       <View className="flex-row">
         <View className="flex-1 px-4 py-2.5">
-          <Text variant="label" className="text-[10px]" tone="muted">
+          <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
             {I18n.t('budget.summary_budgeted')}
           </Text>
-          <Text variant="mono" className="mt-1">
+          <Text variant="mono" className="mt-1" numberOfLines={1}>
             {money(summary.budgetedSpent, settings)}
           </Text>
         </View>
         <View className="w-px bg-border/40" />
         <View className="flex-1 px-4 py-2.5">
-          <Text variant="label" className="text-[10px]" tone="muted">
-            {I18n.t('budget.summary_unbudgeted')}
+          <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
+            {summary.countUnbudgeted
+              ? I18n.t('budget.summary_unbudgeted')
+              : `${I18n.t('budget.summary_unbudgeted')} · ${I18n.t('budget.not_counted')}`}
           </Text>
-          <Text variant="mono" className="mt-1">
+          <Text variant="mono" className="mt-1" numberOfLines={1}>
             {money(summary.unbudgetedSpent, settings)}
           </Text>
         </View>
@@ -173,59 +192,112 @@ function BudgetSummaryCard({
   );
 }
 
-function BudgetCategoryRow({
-  categoryId,
-  budgeted,
-  spent,
-  remaining,
-  usageRatio,
-  isOver,
+function BudgetChildRow({
+  line,
+  parentIcon,
   categoriesById,
   settings,
   themeColors,
 }: {
-  categoryId: string;
-  budgeted: number;
-  spent: number;
-  remaining: number;
-  usageRatio: number;
-  isOver: boolean;
+  line: BudgetCategoryProgress;
+  parentIcon: string | undefined;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
 }) {
-  const category = categoriesById.get(categoryId);
-  const barColor = usageColor(usageRatio, themeColors);
+  const category = categoriesById.get(line.categoryId);
+  const barColor = usageColor(line.usageRatio, themeColors);
+
+  return (
+    <View className="flex-row items-center gap-2.5 py-1.5">
+      <View className="h-4 w-3.5 rounded-bl-lg border-b border-l border-border/50" />
+      <CategoryEmoji icon={category?.icon} parentIcon={parentIcon} size={14} />
+      <Text variant="caption" numberOfLines={1} className="min-w-0 flex-[1.2] text-foreground">
+        {category?.name ?? I18n.t('budget.uncategorized')}
+      </Text>
+      <View className="flex-1">
+        <ProgressBar
+          ratio={line.usageRatio}
+          color={barColor}
+          trackColor={withColorAlpha(barColor, 0.14)}
+          height={4}
+        />
+      </View>
+      <Text
+        variant="caption"
+        numberOfLines={1}
+        className="shrink-0 text-right"
+        style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
+      >
+        {money(line.spent, settings)} / {money(line.budgeted, settings)}
+      </Text>
+    </View>
+  );
+}
+
+function BudgetCategoryRow({
+  line,
+  categoriesById,
+  settings,
+  themeColors,
+}: {
+  line: BudgetCategoryProgress;
+  categoriesById: Map<string, Category>;
+  settings: UserSettings;
+  themeColors: ColorPalette;
+}) {
+  const category = categoriesById.get(line.categoryId);
+  const barColor = usageColor(line.usageRatio, themeColors);
 
   return (
     <View className="rounded-2xl border border-border/45 bg-card px-4 py-3">
       <View className="flex-row items-center gap-2.5">
         <CategoryEmoji icon={category?.icon} size={18} />
-        <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+        <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
           {category?.name ?? I18n.t('budget.uncategorized')}
         </Text>
-        <Text variant="caption" style={{ color: isOver ? themeColors.error : barColor }}>
-          {isOver
-            ? I18n.t('budget.over', { amount: money(Math.abs(remaining), settings) })
-            : I18n.t('budget.left', { amount: money(remaining, settings) })}
+        <Text
+          variant="caption"
+          numberOfLines={1}
+          className="shrink-0"
+          style={{ color: line.isOver ? themeColors.error : barColor }}
+        >
+          {line.isOver
+            ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+            : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
         </Text>
       </View>
       <View className="mt-2.5">
         <ProgressBar
-          ratio={usageRatio}
+          ratio={line.usageRatio}
           color={barColor}
           trackColor={withColorAlpha(barColor, 0.14)}
           height={5}
         />
       </View>
-      <View className="mt-1.5 flex-row items-center justify-between">
-        <Text variant="caption" tone="muted">
-          {money(spent, settings)} / {money(budgeted, settings)}
+      <View className="mt-1.5 flex-row items-center justify-between gap-3">
+        <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 shrink">
+          {money(line.spent, settings)} / {money(line.budgeted, settings)}
         </Text>
-        <Text variant="caption" tone="muted">
-          {Math.round(usageRatio * 100)}%
+        <Text variant="caption" tone="muted" className="shrink-0">
+          {Math.round(line.usageRatio * 100)}%
         </Text>
       </View>
+
+      {line.children.length > 0 ? (
+        <View className="mt-2 border-t border-border/30 pt-1">
+          {line.children.map((child) => (
+            <BudgetChildRow
+              key={child.categoryId}
+              line={child}
+              parentIcon={category?.icon}
+              categoriesById={categoriesById}
+              settings={settings}
+              themeColors={themeColors}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -397,7 +469,7 @@ export function BudgetScreen({
               {orderedCategories.map((line) => (
                 <BudgetCategoryRow
                   key={line.categoryId}
-                  {...line}
+                  line={line}
                   categoriesById={categoriesById}
                   settings={settings}
                   themeColors={themeColors}

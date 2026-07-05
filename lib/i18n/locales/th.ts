@@ -1708,6 +1708,13 @@ const th = {
     back_populate_title: 'เติมเดือนก่อนหน้า',
     back_populate_caption:
       'สร้างงบประมาณสำหรับ {{first}} – {{last}} ({{count}} เดือน) เดือนที่มีงบอยู่แล้วจะถูกข้าม',
+    choose_emoji: 'เลือกอิโมจิ',
+    count_unbudgeted_title: 'นับรายจ่ายนอกงบ',
+    count_unbudgeted_caption: 'รวมรายจ่ายจากหมวดหมู่ที่ไม่มีรายการงบไว้ในยอดรวมของเดือน',
+    children_hint: 'เลือกแบ่งจำนวนนี้ให้หมวดหมู่ย่อยได้',
+    children_matched: 'หมวดหมู่ย่อยลงตัว',
+    children_mismatch: 'หมวดหมู่ย่อยต้องรวมเป็น {{total}} — ต่างอยู่ {{delta}}',
+    not_counted: 'ไม่ถูกนับ',
   },
   items: {
     title: 'ของใช้',

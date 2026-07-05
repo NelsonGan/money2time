@@ -1753,6 +1753,14 @@ const ms = {
     back_populate_title: 'Isi bulan-bulan lepas',
     back_populate_caption:
       'Mencipta bajet untuk {{first}} – {{last}} ({{count}} bulan). Bulan yang sudah ada bajet dilangkau.',
+    choose_emoji: 'Pilih emoji',
+    count_unbudgeted_title: 'Kira perbelanjaan luar bajet',
+    count_unbudgeted_caption:
+      'Masukkan perbelanjaan daripada kategori tanpa baris bajet ke dalam jumlah bulan.',
+    children_hint: 'Jika mahu, agihkan jumlah ini kepada subkategori.',
+    children_matched: 'Subkategori sepadan',
+    children_mismatch: 'Subkategori mesti berjumlah {{total}} — beza {{delta}}.',
+    not_counted: 'tidak dikira',
   },
   items: {
     title: 'Item',

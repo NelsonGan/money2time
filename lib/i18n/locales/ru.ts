@@ -1751,6 +1751,13 @@ const ru = {
     back_populate_title: 'Заполнить прошлые месяцы',
     back_populate_caption:
       'Создаст бюджеты за {{first}} – {{last}} ({{count}} мес.). Месяцы с бюджетом пропускаются.',
+    choose_emoji: 'Выберите эмодзи',
+    count_unbudgeted_title: 'Учитывать расходы вне бюджета',
+    count_unbudgeted_caption: 'Включать в итог месяца расходы из категорий без строки бюджета.',
+    children_hint: 'При желании распределите эту сумму по подкатегориям.',
+    children_matched: 'Подкатегории сходятся',
+    children_mismatch: 'Подкатегории должны давать {{total}} — расхождение {{delta}}.',
+    not_counted: 'не учитывается',
   },
   items: {
     title: 'Вещи',

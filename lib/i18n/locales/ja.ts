@@ -1727,6 +1727,13 @@ const ja = {
     back_populate_title: '過去の月にも作成',
     back_populate_caption:
       '{{first}}〜{{last}}（{{count}}か月）の予算を作成します。すでに予算がある月はスキップされます。',
+    choose_emoji: '絵文字を選択',
+    count_unbudgeted_title: '予算外の支出を含める',
+    count_unbudgeted_caption: '予算項目のないカテゴリの支出を月の合計に含めます。',
+    children_hint: '必要ならこの金額をサブカテゴリに配分できます。',
+    children_matched: 'サブカテゴリの合計が一致',
+    children_mismatch: 'サブカテゴリの合計は{{total}}にする必要があります（{{delta}}のずれ）。',
+    not_counted: '集計外',
   },
   items: {
     title: 'アイテム',

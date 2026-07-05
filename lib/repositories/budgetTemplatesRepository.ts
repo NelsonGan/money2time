@@ -14,7 +14,9 @@ export interface BudgetAllocationInput {
 
 interface CreateBudgetTemplateInput {
   name: string;
+  emoji: string | null;
   totalAmount: number;
+  countUnbudgeted: boolean;
   allocations: BudgetAllocationInput[];
 }
 
@@ -80,8 +82,10 @@ class BudgetTemplatesRepository {
         .values({
           id,
           name: input.name,
+          emoji: input.emoji,
           totalAmount: input.totalAmount,
           isDefault: (liveCount?.count ?? 0) === 0,
+          countUnbudgeted: input.countUnbudgeted,
           sortOrder: (maxSort?.maxSort ?? -1) + 1,
           createdAt: now,
           updatedAt: now,
@@ -108,7 +112,13 @@ class BudgetTemplatesRepository {
     sqlite.execSync('BEGIN');
     try {
       db.update(budgetTemplatesTable)
-        .set({ name: input.name, totalAmount: input.totalAmount, updatedAt: now })
+        .set({
+          name: input.name,
+          emoji: input.emoji,
+          totalAmount: input.totalAmount,
+          countUnbudgeted: input.countUnbudgeted,
+          updatedAt: now,
+        })
         .where(and(eq(budgetTemplatesTable.id, id), isNull(budgetTemplatesTable.deletedAt)))
         .run();
 

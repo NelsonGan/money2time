@@ -1768,6 +1768,14 @@ const nl = {
     back_populate_title: 'Vorige maanden invullen',
     back_populate_caption:
       'Maakt budgetten voor {{first}} – {{last}} ({{count}} maanden). Maanden met een budget worden overgeslagen.',
+    choose_emoji: 'Kies een emoji',
+    count_unbudgeted_title: 'Niet-gebudgetteerde uitgaven meetellen',
+    count_unbudgeted_caption:
+      'Tel uitgaven uit categorieën zonder budgetregel mee in het maandtotaal.',
+    children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
+    children_matched: 'Subcategorieën kloppen',
+    children_mismatch: 'Subcategorieën moeten optellen tot {{total}} — {{delta}} verschil.',
+    not_counted: 'niet meegeteld',
   },
   items: {
     title: 'Items',

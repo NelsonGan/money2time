@@ -1745,6 +1745,14 @@ const sv = {
     back_populate_title: 'Fyll i tidigare månader',
     back_populate_caption:
       'Skapar budgetar för {{first}} – {{last}} ({{count}} månader). Månader som redan har en budget hoppas över.',
+    choose_emoji: 'Välj en emoji',
+    count_unbudgeted_title: 'Räkna obudgeterade utgifter',
+    count_unbudgeted_caption:
+      'Räkna med utgifter från kategorier utan budgetpost i månadens total.',
+    children_hint: 'Fördela eventuellt beloppet på underkategorier.',
+    children_matched: 'Underkategorierna stämmer',
+    children_mismatch: 'Underkategorierna måste summera till {{total}} — {{delta}} fel.',
+    not_counted: 'räknas inte',
   },
   items: {
     title: 'Föremål',
