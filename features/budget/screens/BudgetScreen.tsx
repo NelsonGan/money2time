@@ -537,10 +537,10 @@ export function BudgetScreen({
     <SettingsPageLayout edges={safeAreaEdges}>
       <View className="px-5">
         <SettingsHeader
-          className="px-0 pt-5 pb-1"
+          className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('budget.title')}
-          subtitle={I18n.t('budget.subtitle')}
+          infoTooltip={I18n.t('budget.subtitle')}
           rightAccessory={
             <Pressable
               onPress={() => {

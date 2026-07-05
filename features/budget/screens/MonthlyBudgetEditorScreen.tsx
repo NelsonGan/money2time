@@ -152,7 +152,7 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
           className="px-0 pt-5 pb-3"
           onBack={onClose}
           title={monthLabel}
-          subtitle={
+          infoTooltip={
             budget.templateName
               ? I18n.t('budget.from_template', {
                   name: budget.templateEmoji

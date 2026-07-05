@@ -177,10 +177,10 @@ export function BudgetTemplatesScreen({
     <SettingsPageLayout edges={safeAreaEdges}>
       <View className="px-5">
         <SettingsHeader
-          className="px-0 pt-5 pb-1"
+          className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('budget.templates_title')}
-          subtitle={I18n.t('budget.templates_subtitle')}
+          infoTooltip={I18n.t('budget.templates_subtitle')}
           rightAccessory={
             <Button
               size="icon"
