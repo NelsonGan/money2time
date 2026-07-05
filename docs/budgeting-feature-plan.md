@@ -152,7 +152,7 @@ and a **large "Budget Breakdown"**.
 
 ## 2. Data model
 
-Migration `040_budgets.ts` (append-only, next after `039`), four tables, all
+Migration `041_budgets.ts` (append-only, next after `039`), four tables, all
 with the standard `created_at / updated_at / deleted_at` soft-delete columns:
 
 ```sql
@@ -579,7 +579,7 @@ Per the `tdd` skill (node env, native deps mocked):
 Everything ships together in one change on this branch. The order below is
 just the dependency order to build in — not separate deliveries:
 
-1. **Foundation** — migration `040_budgets.ts` + registration, `schema.ts`
+1. **Foundation** — migration `041_budgets.ts` + registration, `schema.ts`
    tables/Row types, `mappers.ts`, domain types in `types/index.ts`,
    `PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES`.
 2. **Repositories** — `budgetTemplatesRepository` (default invariant,

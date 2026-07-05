@@ -58,12 +58,12 @@ const BUDGETS_SQL = `
     WHERE deleted_at IS NULL;
 `;
 
-export const migration040Budgets: DbMigration = {
-  version: 40,
-  name: '040_budgets',
+export const migration041Budgets: DbMigration = {
+  version: 41,
+  name: '041_budgets',
   up(db) {
     db.execSync(BUDGETS_SQL);
   },
 };
 
-export default migration040Budgets;
+export default migration041Budgets;
