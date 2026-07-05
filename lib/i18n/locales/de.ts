@@ -1746,8 +1746,9 @@ const de = {
     no_budget_message: 'Erstelle eines aus einer Vorlage, um diesen Monat zu verfolgen.',
     create_budget: 'Budget erstellen',
     choose_template: 'Vorlage wählen',
+    custom_option: 'Eigenes',
+    custom_option_caption: 'Erstelle ein einmaliges Budget nur für diesen Monat.',
     categories_count: '{{count}} Kategorien',
-    summary_spent: 'Diesen Monat ausgegeben',
     summary_budgeted: 'Budgetierte Ausgaben',
     summary_unbudgeted: 'Nicht budgetierte Ausgaben',
     summary_exceeded: '{{amount}} über Budget',
@@ -1762,9 +1763,6 @@ const de = {
     name_label: 'Name',
     name_placeholder: 'z. B. Alltag',
     total_label: 'Gesamtbudget',
-    allocate_title: 'Auf Kategorien verteilen',
-    allocate_hint:
-      'Verteile die Summe auf deine Kategorien. Tippe auf eine Kategorie, um den Betrag festzulegen.',
     allocated_summary: '{{allocated}} von {{total}} verteilt',
     allocated_left: '{{amount}} übrig',
     allocated_over: '{{amount}} darüber',
@@ -1778,11 +1776,8 @@ const de = {
     count_unbudgeted_caption:
       'Ausgaben aus Kategorien ohne Budgetposten in die Monatssumme einrechnen.',
     children_hint: 'Diesen Betrag optional auf Unterkategorien aufteilen.',
-    children_matched: 'Unterkategorien gehen auf',
-    children_mismatch: 'Unterkategorien müssen {{total}} ergeben ({{delta}} Abweichung).',
     subcategories: 'Unterkategorien',
     edit_budget: 'Budget bearbeiten',
-    not_counted: 'nicht gezählt',
   },
   items: {
     title: 'Artikel',

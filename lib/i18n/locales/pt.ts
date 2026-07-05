@@ -1731,8 +1731,9 @@ const pt = {
     no_budget_message: 'Crie um a partir de um modelo para acompanhar este mês.',
     create_budget: 'Criar orçamento',
     choose_template: 'Escolha um modelo',
+    custom_option: 'Personalizado',
+    custom_option_caption: 'Crie um orçamento único apenas para este mês.',
     categories_count: '{{count}} categorias',
-    summary_spent: 'Gasto este mês',
     summary_budgeted: 'Gasto orçamentado',
     summary_unbudgeted: 'Gasto fora do orçamento',
     summary_exceeded: '{{amount}} acima do orçamento',
@@ -1747,9 +1748,6 @@ const pt = {
     name_label: 'Nome',
     name_placeholder: 'ex.: Dia a dia',
     total_label: 'Orçamento total',
-    allocate_title: 'Distribuir pelas categorias',
-    allocate_hint:
-      'Distribua o total pelas suas categorias. Toque numa categoria para definir o valor.',
     allocated_summary: '{{allocated}} de {{total}} distribuído',
     allocated_left: '{{amount}} restante',
     allocated_over: '{{amount}} a mais',
@@ -1763,11 +1761,8 @@ const pt = {
     count_unbudgeted_caption:
       'Incluir no total do mês o gasto de categorias sem linha de orçamento.',
     children_hint: 'Opcionalmente, distribua este valor pelas subcategorias.',
-    children_matched: 'As subcategorias batem certo',
-    children_mismatch: 'As subcategorias têm de somar {{total}} (desvio de {{delta}}).',
     subcategories: 'Subcategorias',
     edit_budget: 'Editar orçamento',
-    not_counted: 'não contado',
   },
   items: {
     title: 'Itens',

@@ -52,7 +52,9 @@ export type RootStackParamList = {
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
-  BudgetMonthEditor: { budgetId: string };
+  // Edit an existing month budget (budgetId) or create a one-off custom
+  // budget for a month with no live budget (createForMonth, 'YYYY-MM').
+  BudgetMonthEditor: { budgetId: string } | { createForMonth: string };
   // Full-page per-category allocation editor. Carries the hosting editor's
   // draft slice + commit callback (non-serializable, like StatementImportList).
   BudgetCategoryAllocation: {

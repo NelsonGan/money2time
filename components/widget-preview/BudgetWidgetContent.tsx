@@ -54,6 +54,15 @@ export function BudgetRingWidgetContent({
 
   return (
     <View style={styles.ringPad}>
+      {data.monthShortLabel ? (
+        <Text
+          allowFontScaling={false}
+          numberOfLines={1}
+          style={[styles.ringMonth, { color: themeColors.textMuted }]}
+        >
+          {data.monthShortLabel.toUpperCase()}
+        </Text>
+      ) : null}
       <Svg width={ringSize} height={ringSize}>
         <Circle
           cx={center}
@@ -261,11 +270,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 6,
+    paddingTop: 4,
+  },
+  ringMonth: {
+    fontSize: 9,
+    lineHeight: 12,
+    fontFamily: FONT.bold,
+    letterSpacing: 1,
+    marginBottom: 3,
   },
   ringCenter: {
     position: 'absolute',
-    top: 0,
+    top: 15,
     left: 12,
     right: 12,
     bottom: 22,

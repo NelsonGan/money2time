@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Input, SettingsActionBar, SettingsHeader, Text } from '~/components/ui';
+import { Input, SettingsActionBar, SettingsHeader } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
   AllocationCategoryList,
@@ -20,7 +20,10 @@ import { currencySymbolForCode } from '~/utils/currency';
 import { formatMonthYearLabel, parseMonthKey } from '~/utils/formatters';
 
 interface MonthlyBudgetEditorScreenProps {
-  budgetId: string;
+  /** Existing month budget to edit in place. */
+  budgetId?: string;
+  /** 'YYYY-MM' month to create a one-off custom budget for (no template). */
+  createForMonth?: string;
   /** Pushes the full-page per-category allocation editor. */
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
   onClose: () => void;
@@ -29,20 +32,24 @@ interface MonthlyBudgetEditorScreenProps {
 const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 
 /**
- * Edits one month's frozen budget in place: total, allocations (including
- * subcategory breakdowns), and the count-unbudgeted option. A local override
- * for that month only; the source template is untouched.
+ * Edits one month's frozen budget in place (total, allocations including
+ * subcategory breakdowns, count-unbudgeted) — or, with `createForMonth`,
+ * creates a custom budget for that month only. Neither mode touches any
+ * template.
  */
 export function MonthlyBudgetEditorScreen({
   budgetId,
+  createForMonth,
   onOpenCategoryAllocation,
   onClose,
 }: MonthlyBudgetEditorScreenProps) {
-  const { settings, categories, monthlyBudgets, updateMonthlyBudget } = useApp();
+  const { settings, categories, monthlyBudgets, updateMonthlyBudget, createCustomMonthlyBudget } =
+    useApp();
   const themeColors = useThemeColors();
 
   const budget = useMemo(
-    () => monthlyBudgets.find((candidate) => candidate.id === budgetId) ?? null,
+    () =>
+      budgetId ? (monthlyBudgets.find((candidate) => candidate.id === budgetId) ?? null) : null,
     [budgetId, monthlyBudgets],
   );
 
@@ -62,25 +69,37 @@ export function MonthlyBudgetEditorScreen({
   });
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
-  const canSave = budget != null && draft.allocationsValid;
+  const month = budget?.month ?? createForMonth ?? null;
+  const canSave = (budget != null || createForMonth != null) && draft.allocationsValid;
 
   const handleSave = useCallback(() => {
-    if (!canSave || !budget) return;
+    if (!canSave) return;
     void triggerHaptic('success');
-    updateMonthlyBudget(budget.id, {
+    const input = {
       totalAmount: draft.parsedTotal,
       countUnbudgeted,
       lines: draft.buildAllocations(),
-    });
+    };
+    if (budget) {
+      updateMonthlyBudget(budget.id, input);
+    } else if (createForMonth) {
+      createCustomMonthlyBudget(createForMonth, input);
+    }
     onClose();
-  }, [budget, canSave, countUnbudgeted, draft, onClose, updateMonthlyBudget]);
+  }, [
+    budget,
+    canSave,
+    countUnbudgeted,
+    createCustomMonthlyBudget,
+    createForMonth,
+    draft,
+    onClose,
+    updateMonthlyBudget,
+  ]);
 
-  if (!budget) return null;
+  if (!month) return null;
 
-  const monthLabel = formatMonthYearLabel(
-    parseMonthKey(budget.month) ?? new Date(),
-    settings.locale,
-  );
+  const monthLabel = formatMonthYearLabel(parseMonthKey(month) ?? new Date(), settings.locale);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -90,7 +109,7 @@ export function MonthlyBudgetEditorScreen({
           onBack={onClose}
           title={monthLabel}
           infoTooltip={
-            budget.templateName
+            budget?.templateName
               ? I18n.t('budget.from_template', {
                   name: budget.templateEmoji
                     ? `${budget.templateEmoji} ${budget.templateName}`
@@ -104,7 +123,6 @@ export function MonthlyBudgetEditorScreen({
       <ScrollView
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
-        stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-4 px-5 pt-1">
@@ -117,24 +135,6 @@ export function MonthlyBudgetEditorScreen({
             placeholder="0.00"
           />
 
-          <View className="gap-1 pt-1">
-            <Text variant="bodyStrong">{I18n.t('budget.allocate_title')}</Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('budget.allocate_hint')}
-            </Text>
-          </View>
-        </View>
-
-        <View className="bg-background px-5 py-2">
-          <AllocationStatusBar
-            total={draft.parsedTotal}
-            remaining={draft.remaining}
-            settings={settings}
-            themeColors={themeColors}
-          />
-        </View>
-
-        <View className="gap-4 px-5">
           <AllocationCategoryList
             rootCategories={draft.rootExpenseCategories}
             amounts={draft.amounts}
@@ -154,7 +154,26 @@ export function MonthlyBudgetEditorScreen({
         </View>
       </ScrollView>
 
-      <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
+      {/* The remaining-to-allocate bar sits right above Cancel/Save so the
+          running tally is visible while amounts are entered. */}
+      <View className="border-t border-border/25 bg-background">
+        {draft.parsedTotal > 0 ? (
+          <View className="px-5 pt-3">
+            <AllocationStatusBar
+              total={draft.parsedTotal}
+              remaining={draft.remaining}
+              settings={settings}
+              themeColors={themeColors}
+            />
+          </View>
+        ) : null}
+        <SettingsActionBar
+          className="border-t-0"
+          onCancel={onClose}
+          onSave={handleSave}
+          saveDisabled={!canSave}
+        />
+      </View>
     </SafeAreaView>
   );
 }

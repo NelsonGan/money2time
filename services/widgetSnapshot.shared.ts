@@ -166,6 +166,8 @@ export interface BudgetRingSnapshot {
   title: string;
   monthKey: string;
   monthLabel: string;
+  /** Compact month + year ("Jul 26") for the small widget's header. */
+  monthShortLabel: string;
   /** False when the current month has no budget — render the setup state. */
   hasBudget: boolean;
   totalBudget: number;
@@ -286,6 +288,22 @@ function getMonthLabelFormatter(locale: string): Intl.DateTimeFormat {
     formatter = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
   }
   monthLabelFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+const shortMonthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+/** "Jul 26" — the compact month+year for space-starved widget corners. */
+function getShortMonthYearFormatter(locale: string): Intl.DateTimeFormat {
+  const cached = shortMonthYearFormatterByLocale.get(locale);
+  if (cached) return cached;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(locale, { month: 'short', year: '2-digit' });
+  } catch {
+    formatter = new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' });
+  }
+  shortMonthYearFormatterByLocale.set(locale, formatter);
   return formatter;
 }
 
@@ -661,7 +679,8 @@ function categoryEmojiForWidget(icon: string | undefined): string {
   return /[^\u0000-\u007f]/.test(icon) ? icon : '';
 }
 
-const BUDGET_BREAKDOWN_MAX_LINES = 5;
+// 4 lines: the fifth clipped on smaller Android widget grids.
+const BUDGET_BREAKDOWN_MAX_LINES = 4;
 
 function buildBudgetWidgetSnapshots(
   transactions: TransactionWithRelations[],
@@ -696,6 +715,7 @@ function buildBudgetWidgetSnapshots(
     title: 'Budget',
     monthKey,
     monthLabel,
+    monthShortLabel: getShortMonthYearFormatter(settings.locale).format(now),
     hasBudget,
     totalBudget: summary?.totalBudget ?? 0,
     totalSpent: summary?.totalSpent ?? 0,

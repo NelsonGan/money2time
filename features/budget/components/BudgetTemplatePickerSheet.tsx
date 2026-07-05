@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react-native';
+import { Check, SquarePen, X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +19,8 @@ interface BudgetTemplatePickerSheetProps {
   categories: Pick<Category, 'id' | 'parentId'>[];
   settings: UserSettings;
   onSelect: (templateId: string) => void;
+  /** Builds a one-off custom budget for the month instead (no template). */
+  onSelectCustom: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -40,6 +42,7 @@ export function BudgetTemplatePickerSheet({
   categories,
   settings,
   onSelect,
+  onSelectCustom,
 }: BudgetTemplatePickerSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -104,6 +107,28 @@ export function BudgetTemplatePickerSheet({
                     {template.isDefault ? <Check size={18} color={themeColors.primary} /> : null}
                   </Pressable>
                 ))}
+
+                {/* One-off custom budget for this month only — dashed to read
+                    as "start from scratch" next to the saved templates. */}
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onSelectCustom();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('budget.custom_option')}
+                  className="flex-row items-center gap-3 rounded-2xl border border-dashed border-border/60 px-4 py-3.5 active:opacity-80"
+                >
+                  <SquarePen size={18} color={themeColors.textMuted} />
+                  <View className="min-w-0 flex-1">
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {I18n.t('budget.custom_option')}
+                    </Text>
+                    <Text variant="caption" tone="muted" className="mt-0.5">
+                      {I18n.t('budget.custom_option_caption')}
+                    </Text>
+                  </View>
+                </Pressable>
               </View>
             </ScrollView>
           </View>

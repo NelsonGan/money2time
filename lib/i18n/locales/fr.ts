@@ -1743,8 +1743,9 @@ const fr = {
     no_budget_message: 'Créez-en un depuis un modèle pour suivre ce mois.',
     create_budget: 'Créer un budget',
     choose_template: 'Choisir un modèle',
+    custom_option: 'Personnalisé',
+    custom_option_caption: 'Créez un budget ponctuel pour ce mois uniquement.',
     categories_count: '{{count}} catégories',
-    summary_spent: 'Dépensé ce mois-ci',
     summary_budgeted: 'Dépenses budgétées',
     summary_unbudgeted: 'Dépenses hors budget',
     summary_exceeded: 'Dépassement de {{amount}}',
@@ -1759,9 +1760,6 @@ const fr = {
     name_label: 'Nom',
     name_placeholder: 'ex. Quotidien',
     total_label: 'Budget total',
-    allocate_title: 'Répartir entre les catégories',
-    allocate_hint:
-      'Répartissez le total entre vos catégories. Touchez une catégorie pour définir son montant.',
     allocated_summary: '{{allocated}} sur {{total}} répartis',
     allocated_left: '{{amount}} restant',
     allocated_over: '{{amount}} de trop',
@@ -1775,11 +1773,8 @@ const fr = {
     count_unbudgeted_caption:
       'Inclure dans le total du mois les dépenses des catégories sans ligne de budget.',
     children_hint: 'Répartissez éventuellement ce montant entre les sous-catégories.',
-    children_matched: 'Les sous-catégories correspondent',
-    children_mismatch: 'Les sous-catégories doivent totaliser {{total}} (écart de {{delta}}).',
     subcategories: 'Sous-catégories',
     edit_budget: 'Modifier le budget',
-    not_counted: 'non compté',
   },
   items: {
     title: 'Objets',

@@ -1,16 +1,18 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { parseAllocationAmount } from '~/features/budget/components/AllocationEditor';
+import {
+  AllocationStatusBar,
+  parseAllocationAmount,
+} from '~/features/budget/components/AllocationEditor';
 import { computeChildAllocationGap } from '~/features/budget/lib/budgetMath';
 import { money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { withColorAlpha } from '~/utils/color';
 import { currencySymbolForCode } from '~/utils/currency';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
@@ -29,8 +31,9 @@ const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 
 /**
  * Full-page allocation editor for one root category: the amount plus every
- * subcategory, with a live children-vs-parent bar. Edits stay local until
- * Save commits them back into the hosting template/month editor.
+ * subcategory. The children-vs-parent tally uses the same status bar as the
+ * hosting editor, pinned above Save. Edits stay local until Save commits them
+ * back into the hosting template/month editor.
  */
 export function CategoryAllocationScreen({
   categoryId,
@@ -42,14 +45,8 @@ export function CategoryAllocationScreen({
   const { settings, categories } = useApp();
   const themeColors = useThemeColors();
 
-  const category = useMemo(
-    () => categories.find((candidate) => candidate.id === categoryId) ?? null,
-    [categories, categoryId],
-  );
-  const childCategories = useMemo(
-    () => categories.filter((candidate) => candidate.parentId === categoryId),
-    [categories, categoryId],
-  );
+  const category = categories.find((candidate) => candidate.id === categoryId) ?? null;
+  const childCategories = categories.filter((candidate) => candidate.parentId === categoryId);
 
   const [amounts, setAmounts] = useState<Record<string, string>>(initialAmounts);
 
@@ -60,16 +57,7 @@ export function CategoryAllocationScreen({
   }));
   const childAllocated = childAllocations.reduce((sum, entry) => sum + entry.amount, 0);
   const childGap = computeChildAllocationGap(parentAmount, childAllocations);
-  const anyChildAllocated = childAllocated > 0;
   const remainingLeft = normalizeMoneyAmount(remainingExcludingThis - parentAmount);
-
-  const childRatio = parentAmount > 0 ? childAllocated / parentAmount : 0;
-  const childBarColor =
-    childGap === 0 && anyChildAllocated
-      ? themeColors.success
-      : childGap < 0
-        ? themeColors.error
-        : themeColors.primary;
 
   const handleChange = useCallback((id: string, next: string) => {
     setAmounts((previous) => ({ ...previous, [id]: next }));
@@ -146,10 +134,12 @@ export function CategoryAllocationScreen({
                 {childCategories.map((child) => (
                   <View key={child.id} className="flex-row items-center gap-2.5">
                     <CategoryEmoji icon={child.icon} parentIcon={category.icon} size={16} />
+                    {/* Label truncates; the input keeps a fixed width so rows
+                        never shift or squeeze as names vary. */}
                     <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
                       {child.name}
                     </Text>
-                    <View className="w-[112px]">
+                    <View className="w-[148px] shrink-0">
                       <Input
                         variant="currency"
                         currencySymbol={currencySymbol}
@@ -162,41 +152,31 @@ export function CategoryAllocationScreen({
                   </View>
                 ))}
               </View>
-
-              {anyChildAllocated || childGap !== 0 ? (
-                <View className="mt-3">
-                  <View
-                    className="h-1.5 w-full overflow-hidden rounded-full"
-                    style={{ backgroundColor: withColorAlpha(childBarColor, 0.15) }}
-                  >
-                    <View
-                      className="h-1.5 rounded-full"
-                      style={{
-                        width: `${Math.max(0, Math.min(childRatio, 1)) * 100}%`,
-                        backgroundColor: childBarColor,
-                      }}
-                    />
-                  </View>
-                  <Text
-                    variant="caption"
-                    className="mt-1.5"
-                    style={{ color: childGap === 0 ? themeColors.textMuted : themeColors.error }}
-                  >
-                    {childGap === 0
-                      ? I18n.t('budget.children_matched')
-                      : I18n.t('budget.children_mismatch', {
-                          total: money(parentAmount, settings),
-                          delta: money(Math.abs(childGap), settings),
-                        })}
-                  </Text>
-                </View>
-              ) : null}
             </View>
           ) : null}
         </View>
       </ScrollView>
 
-      <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={childGap !== 0} />
+      {/* Same tally bar as the hosting editor, pinned above Save: how much of
+          the parent amount the subcategory breakdown has claimed. */}
+      <View className="border-t border-border/25 bg-background">
+        {childCategories.length > 0 && parentAmount > 0 ? (
+          <View className="px-5 pt-3">
+            <AllocationStatusBar
+              total={parentAmount}
+              remaining={normalizeMoneyAmount(parentAmount - childAllocated)}
+              settings={settings}
+              themeColors={themeColors}
+            />
+          </View>
+        ) : null}
+        <SettingsActionBar
+          className="border-t-0"
+          onCancel={onClose}
+          onSave={handleSave}
+          saveDisabled={childGap !== 0}
+        />
+      </View>
     </SafeAreaView>
   );
 }

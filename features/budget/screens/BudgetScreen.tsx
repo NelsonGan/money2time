@@ -42,6 +42,8 @@ interface BudgetScreenProps {
   onOpenTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
   /** Opens the month-budget editor (edits that month only, not the template). */
   onOpenBudgetEditor: (budgetId: string) => void;
+  /** Opens the month-budget creator for a one-off custom budget (no template). */
+  onCreateCustomBudget: (month: string) => void;
   safeAreaEdges?: Edge[];
 }
 
@@ -104,10 +106,7 @@ function BudgetSummaryCard({
       <View className="px-4 pb-3.5 pt-3.5">
         <View className="flex-row items-start justify-between gap-3">
           <View className="min-w-0 flex-1">
-            <Text variant="label" className="text-[10px] text-primary">
-              {I18n.t('budget.summary_spent')}
-            </Text>
-            <View className="mt-1 flex-row items-baseline gap-1.5">
+            <View className="flex-row items-baseline gap-1.5">
               <Text variant="monoLg" numberOfLines={1} className="shrink">
                 {money(summary.totalSpent, settings)}
               </Text>
@@ -169,29 +168,34 @@ function BudgetSummaryCard({
         </View>
       </View>
 
-      <View className="h-px bg-border/40" />
+      {/* The budgeted/unbudgeted split only makes sense when unbudgeted spend
+          counts toward the month; when it doesn't, the month total already
+          says everything. */}
+      {summary.countUnbudgeted ? (
+        <>
+          <View className="h-px bg-border/40" />
 
-      <View className="flex-row">
-        <View className="flex-1 px-4 py-2.5">
-          <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
-            {I18n.t('budget.summary_budgeted')}
-          </Text>
-          <Text variant="mono" className="mt-1" numberOfLines={1}>
-            {money(summary.budgetedSpent, settings)}
-          </Text>
-        </View>
-        <View className="w-px bg-border/40" />
-        <View className="flex-1 px-4 py-2.5">
-          <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
-            {summary.countUnbudgeted
-              ? I18n.t('budget.summary_unbudgeted')
-              : `${I18n.t('budget.summary_unbudgeted')} · ${I18n.t('budget.not_counted')}`}
-          </Text>
-          <Text variant="mono" className="mt-1" numberOfLines={1}>
-            {money(summary.unbudgetedSpent, settings)}
-          </Text>
-        </View>
-      </View>
+          <View className="flex-row">
+            <View className="flex-1 px-4 py-2.5">
+              <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
+                {I18n.t('budget.summary_budgeted')}
+              </Text>
+              <Text variant="mono" className="mt-1" numberOfLines={1}>
+                {money(summary.budgetedSpent, settings)}
+              </Text>
+            </View>
+            <View className="w-px bg-border/40" />
+            <View className="flex-1 px-4 py-2.5">
+              <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
+                {I18n.t('budget.summary_unbudgeted')}
+              </Text>
+              <Text variant="mono" className="mt-1" numberOfLines={1}>
+                {money(summary.unbudgetedSpent, settings)}
+              </Text>
+            </View>
+          </View>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -336,6 +340,7 @@ export function BudgetScreen({
   onOpenTemplates,
   onOpenTemplateEditor,
   onOpenBudgetEditor,
+  onCreateCustomBudget,
   safeAreaEdges = ['top'],
 }: BudgetScreenProps) {
   const {
@@ -420,20 +425,17 @@ export function BudgetScreen({
   const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
   const monthLabel = monthKeyLabel(activeMonth, settings.locale);
 
+  // Always route through the picker (even with one template) so the Custom
+  // one-off option is always reachable.
   const handleCreateForMonth = useCallback(
     (month: string) => {
       if (budgetTemplates.length === 0) {
         onOpenTemplateEditor();
         return;
       }
-      if (budgetTemplates.length === 1) {
-        void triggerHaptic('success');
-        createMonthlyBudget(month, budgetTemplates[0].id);
-        return;
-      }
       setPickerMonth(month);
     },
-    [budgetTemplates, createMonthlyBudget, onOpenTemplateEditor],
+    [budgetTemplates.length, onOpenTemplateEditor],
   );
 
   const handleDeleteBudget = useCallback(
@@ -518,7 +520,7 @@ export function BudgetScreen({
               ))}
             </View>
 
-            {summary.unbudgeted.length > 0 ? (
+            {summary.countUnbudgeted && summary.unbudgeted.length > 0 ? (
               <View className="mt-5">
                 <Text variant="label" tone="muted" className="mb-2 px-1 uppercase">
                   {I18n.t('budget.unbudgeted_section')}
@@ -618,6 +620,10 @@ export function BudgetScreen({
             void triggerHaptic('success');
             createMonthlyBudget(pickerMonth, templateId);
           }
+          setPickerMonth(null);
+        }}
+        onSelectCustom={() => {
+          if (pickerMonth) onCreateCustomBudget(pickerMonth);
           setPickerMonth(null);
         }}
       />

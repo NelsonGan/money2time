@@ -1742,8 +1742,9 @@ const nl = {
     no_budget_message: 'Maak er een vanuit een sjabloon om deze maand te volgen.',
     create_budget: 'Budget maken',
     choose_template: 'Kies een sjabloon',
+    custom_option: 'Aangepast',
+    custom_option_caption: 'Maak een eenmalig budget alleen voor deze maand.',
     categories_count: '{{count}} categorieën',
-    summary_spent: 'Deze maand uitgegeven',
     summary_budgeted: 'Gebudgetteerde uitgaven',
     summary_unbudgeted: 'Niet-gebudgetteerde uitgaven',
     summary_exceeded: '{{amount}} boven budget',
@@ -1758,9 +1759,6 @@ const nl = {
     name_label: 'Naam',
     name_placeholder: 'bijv. Dagelijks',
     total_label: 'Totaalbudget',
-    allocate_title: 'Verdeel over categorieën',
-    allocate_hint:
-      'Verdeel het totaal over je categorieën. Tik op een categorie om het bedrag in te stellen.',
     allocated_summary: '{{allocated}} van {{total}} verdeeld',
     allocated_left: '{{amount}} over',
     allocated_over: '{{amount}} erover',
@@ -1774,11 +1772,8 @@ const nl = {
     count_unbudgeted_caption:
       'Tel uitgaven uit categorieën zonder budgetregel mee in het maandtotaal.',
     children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
-    children_matched: 'Subcategorieën kloppen',
-    children_mismatch: 'Subcategorieën moeten optellen tot {{total}} ({{delta}} verschil).',
     subcategories: 'Subcategorieën',
     edit_budget: 'Budget bewerken',
-    not_counted: 'niet meegeteld',
   },
   items: {
     title: 'Items',

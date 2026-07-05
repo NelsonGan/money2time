@@ -612,6 +612,13 @@ function MainShellScreen({
     [navigation],
   );
 
+  const openCustomBudgetCreator = useCallback(
+    (month: string) => {
+      navigation.navigate('BudgetMonthEditor', { createForMonth: month });
+    },
+    [navigation],
+  );
+
   const openProPaywall = useCallback(
     (source?: string) => {
       navigation.navigate('ProPaywall', source ? { source } : undefined);
@@ -1023,6 +1030,7 @@ function MainShellScreen({
             onOpenItemEditor={openItemEditor}
             onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
             onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
+            onCreateCustomBudget={openCustomBudgetCreator}
             onOpenAccountEditor={openAccountEditor}
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
@@ -1326,6 +1334,9 @@ function SettingsBudgetRouteScreen({ navigation }: RootStackRouteProps<'Settings
       onOpenTemplates={() => navigation.navigate('SettingsBudgetTemplates')}
       onOpenTemplateEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
       onOpenBudgetEditor={(budgetId) => navigation.navigate('BudgetMonthEditor', { budgetId })}
+      onCreateCustomBudget={(month) =>
+        navigation.navigate('BudgetMonthEditor', { createForMonth: month })
+      }
     />
   );
 }
@@ -1336,7 +1347,8 @@ function BudgetMonthEditorRouteScreen({
 }: RootStackRouteProps<'BudgetMonthEditor'>) {
   return (
     <MonthlyBudgetEditorScreen
-      budgetId={route.params.budgetId}
+      budgetId={'budgetId' in route.params ? route.params.budgetId : undefined}
+      createForMonth={'createForMonth' in route.params ? route.params.createForMonth : undefined}
       onOpenCategoryAllocation={(params) => navigation.navigate('BudgetCategoryAllocation', params)}
       onClose={() => navigation.goBack()}
     />

@@ -1732,8 +1732,9 @@ const it = {
     no_budget_message: 'Creane uno da un modello per monitorare questo mese.',
     create_budget: 'Crea budget',
     choose_template: 'Scegli un modello',
+    custom_option: 'Personalizzato',
+    custom_option_caption: 'Crea un budget una tantum solo per questo mese.',
     categories_count: '{{count}} categorie',
-    summary_spent: 'Speso questo mese',
     summary_budgeted: 'Spesa a budget',
     summary_unbudgeted: 'Spesa fuori budget',
     summary_exceeded: '{{amount}} oltre il budget',
@@ -1748,9 +1749,6 @@ const it = {
     name_label: 'Nome',
     name_placeholder: 'es. Quotidiano',
     total_label: 'Budget totale',
-    allocate_title: 'Assegna alle categorie',
-    allocate_hint:
-      'Distribuisci il totale tra le tue categorie. Tocca una categoria per impostarne l’importo.',
     allocated_summary: '{{allocated}} di {{total}} assegnati',
     allocated_left: '{{amount}} rimanente',
     allocated_over: '{{amount}} in più',
@@ -1764,11 +1762,8 @@ const it = {
     count_unbudgeted_caption:
       'Includi nel totale del mese la spesa delle categorie senza voce di budget.',
     children_hint: 'Facoltativamente suddividi questo importo tra le sottocategorie.',
-    children_matched: 'Le sottocategorie tornano',
-    children_mismatch: 'Le sottocategorie devono sommare a {{total}} (scarto di {{delta}}).',
     subcategories: 'Sottocategorie',
     edit_budget: 'Modifica budget',
-    not_counted: 'non contato',
   },
   items: {
     title: 'Oggetti',

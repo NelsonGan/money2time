@@ -107,6 +107,75 @@ class MonthlyBudgetsRepository {
   }
 
   /**
+   * Creates a one-off custom budget for the month: no source template, the
+   * lines are exactly what the user entered. Returns null when the month
+   * already has a live budget.
+   */
+  createCustom(
+    month: string,
+    input: {
+      totalAmount: number;
+      countUnbudgeted: boolean;
+      lines: { categoryId: string; amount: number }[];
+    },
+  ): string | null {
+    const db = getDb();
+    const sqlite = getSQLite();
+
+    sqlite.execSync('BEGIN');
+    try {
+      const existing = db
+        .select({ id: monthlyBudgetsTable.id })
+        .from(monthlyBudgetsTable)
+        .where(and(eq(monthlyBudgetsTable.month, month), isNull(monthlyBudgetsTable.deletedAt)))
+        .get();
+      if (existing) {
+        sqlite.execSync('COMMIT');
+        return null;
+      }
+
+      const id = newId();
+      const now = nowIso();
+
+      db.insert(monthlyBudgetsTable)
+        .values({
+          id,
+          month,
+          templateId: null,
+          templateName: null,
+          templateEmoji: null,
+          totalAmount: input.totalAmount,
+          countUnbudgeted: input.countUnbudgeted,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        })
+        .run();
+
+      input.lines.forEach((line, index) => {
+        db.insert(monthlyBudgetCategoriesTable)
+          .values({
+            id: newId(),
+            budgetId: id,
+            categoryId: line.categoryId,
+            amount: line.amount,
+            sortOrder: index,
+            createdAt: now,
+            updatedAt: now,
+            deletedAt: null,
+          })
+          .run();
+      });
+
+      sqlite.execSync('COMMIT');
+      return id;
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
+  }
+
+  /**
    * Edits one month's frozen budget in place (total, options, and line rows).
    * Deliberately does not touch the source template: a month edit is a local
    * override, not a template change.

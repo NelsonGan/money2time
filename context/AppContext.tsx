@@ -321,6 +321,11 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   reorderBudgetTemplates: (ids: string[]) => void;
   /** Creates a month's budget from a template; no-ops if the month has one. */
   createMonthlyBudget: (month: string, templateId: string) => void;
+  /** Creates a one-off custom budget for the month (no template involved). */
+  createCustomMonthlyBudget: (
+    month: string,
+    input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
+  ) => void;
   /**
    * Edits one month's frozen budget in place (total, options, lines). A local
    * override for that month only; the source template is untouched.
@@ -3346,6 +3351,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshBudgets, runMutation],
   );
 
+  const createCustomMonthlyBudget = useCallback(
+    (
+      month: string,
+      input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
+    ) => {
+      const id = runMutation(() => monthlyBudgetsRepository.createCustom(month, input), {
+        refresh: refreshBudgets,
+      });
+      if (id) {
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'custom' });
+      }
+    },
+    [refreshBudgets, runMutation],
+  );
+
   const updateMonthlyBudget = useCallback(
     (
       id: string,
@@ -3614,6 +3634,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setDefaultBudgetTemplate,
             reorderBudgetTemplates,
             createMonthlyBudget,
+            createCustomMonthlyBudget,
             updateMonthlyBudget,
             deleteMonthlyBudget,
             createTransaction,
@@ -3728,6 +3749,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setDefaultBudgetTemplate,
       reorderBudgetTemplates,
       createMonthlyBudget,
+      createCustomMonthlyBudget,
       updateMonthlyBudget,
       deleteMonthlyBudget,
       createTransaction,

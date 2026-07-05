@@ -1749,8 +1749,9 @@ const fil = {
     no_budget_message: 'Gumawa mula sa template para subaybayan ang buwang ito.',
     create_budget: 'Gumawa ng badyet',
     choose_template: 'Pumili ng template',
+    custom_option: 'Custom',
+    custom_option_caption: 'Gumawa ng one-time na budget para sa buwang ito lang.',
     categories_count: '{{count}} kategorya',
-    summary_spent: 'Nagastos ngayong buwan',
     summary_budgeted: 'Nakabadyet na gastos',
     summary_unbudgeted: 'Gastos na walang badyet',
     summary_exceeded: 'Lampas sa badyet nang {{amount}}',
@@ -1765,9 +1766,6 @@ const fil = {
     name_label: 'Pangalan',
     name_placeholder: 'hal. Pang-araw-araw',
     total_label: 'Kabuuang badyet',
-    allocate_title: 'Ilaan sa mga kategorya',
-    allocate_hint:
-      'Hatiin ang kabuuan sa iyong mga kategorya. I-tap ang kategorya para itakda ang halaga.',
     allocated_summary: '{{allocated}} sa {{total}} ang nailaan',
     allocated_left: '{{amount}} na natitira',
     allocated_over: 'Lampas ng {{amount}}',
@@ -1781,11 +1779,8 @@ const fil = {
     count_unbudgeted_caption:
       'Isama sa kabuuan ng buwan ang gastos mula sa mga kategoryang walang linya ng badyet.',
     children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
-    children_matched: 'Tugma ang mga subkategorya',
-    children_mismatch: 'Ang mga subkategorya ay dapat umabot sa {{total}} ({{delta}} ang layo).',
     subcategories: 'Mga subkategorya',
     edit_budget: 'I-edit ang badyet',
-    not_counted: 'hindi binibilang',
   },
   items: {
     title: 'Mga item',

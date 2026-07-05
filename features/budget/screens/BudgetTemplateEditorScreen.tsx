@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader, Text } from '~/components/ui';
+import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   AllocationCategoryList,
@@ -136,12 +136,9 @@ export function BudgetTemplateEditorScreen({
         />
       </View>
 
-      {/* The allocation bar (index 1) pins to the top while the category list
-          scrolls, so how much is left is never off-screen. */}
       <ScrollView
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
-        stickyHeaderIndices={draft.parsedTotal > 0 ? [1] : undefined}
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-4 px-5 pt-1">
@@ -180,18 +177,50 @@ export function BudgetTemplateEditorScreen({
             placeholder="0.00"
           />
 
-          {draft.parsedTotal > 0 ? (
-            <View className="gap-1 pt-1">
-              <Text variant="bodyStrong">{I18n.t('budget.allocate_title')}</Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('budget.allocate_hint')}
-              </Text>
-            </View>
+          <AllocationCategoryList
+            rootCategories={draft.rootExpenseCategories}
+            amounts={draft.amounts}
+            childGaps={draft.childGaps}
+            onPressCategory={draft.openCategoryAllocation}
+            settings={settings}
+            themeColors={themeColors}
+          />
+
+          <AllocationOptionRow
+            title={I18n.t('budget.count_unbudgeted_title')}
+            caption={I18n.t('budget.count_unbudgeted_caption')}
+            value={countUnbudgeted}
+            onChange={setCountUnbudgeted}
+            themeColors={themeColors}
+          />
+
+          {backPopulateRange ? (
+            <AllocationOptionRow
+              title={I18n.t('budget.back_populate_title')}
+              caption={I18n.t('budget.back_populate_caption', {
+                first: formatMonthYearLabel(
+                  parseMonthKey(backPopulateRange.firstMonthKey) ?? new Date(),
+                  settings.locale,
+                ),
+                last: formatMonthYearLabel(
+                  parseMonthKey(backPopulateRange.lastMonthKey) ?? new Date(),
+                  settings.locale,
+                ),
+                count: backPopulateRange.months.length,
+              })}
+              value={backPopulate}
+              onChange={setBackPopulate}
+              themeColors={themeColors}
+            />
           ) : null}
         </View>
+      </ScrollView>
 
+      {/* The remaining-to-allocate bar sits right above Cancel/Save so the
+          running tally is visible while amounts are entered. */}
+      <View className="border-t border-border/25 bg-background">
         {draft.parsedTotal > 0 ? (
-          <View className="bg-background px-5 py-2">
+          <View className="px-5 pt-3">
             <AllocationStatusBar
               total={draft.parsedTotal}
               remaining={draft.remaining}
@@ -200,50 +229,13 @@ export function BudgetTemplateEditorScreen({
             />
           </View>
         ) : null}
-
-        {draft.parsedTotal > 0 ? (
-          <View className="gap-4 px-5">
-            <AllocationCategoryList
-              rootCategories={draft.rootExpenseCategories}
-              amounts={draft.amounts}
-              childGaps={draft.childGaps}
-              onPressCategory={draft.openCategoryAllocation}
-              settings={settings}
-              themeColors={themeColors}
-            />
-
-            <AllocationOptionRow
-              title={I18n.t('budget.count_unbudgeted_title')}
-              caption={I18n.t('budget.count_unbudgeted_caption')}
-              value={countUnbudgeted}
-              onChange={setCountUnbudgeted}
-              themeColors={themeColors}
-            />
-
-            {backPopulateRange ? (
-              <AllocationOptionRow
-                title={I18n.t('budget.back_populate_title')}
-                caption={I18n.t('budget.back_populate_caption', {
-                  first: formatMonthYearLabel(
-                    parseMonthKey(backPopulateRange.firstMonthKey) ?? new Date(),
-                    settings.locale,
-                  ),
-                  last: formatMonthYearLabel(
-                    parseMonthKey(backPopulateRange.lastMonthKey) ?? new Date(),
-                    settings.locale,
-                  ),
-                  count: backPopulateRange.months.length,
-                })}
-                value={backPopulate}
-                onChange={setBackPopulate}
-                themeColors={themeColors}
-              />
-            ) : null}
-          </View>
-        ) : null}
-      </ScrollView>
-
-      <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
+        <SettingsActionBar
+          className="border-t-0"
+          onCancel={onClose}
+          onSave={handleSave}
+          saveDisabled={!canSave}
+        />
+      </View>
 
       <EmojiPickerSheet
         visible={showEmojiPicker}

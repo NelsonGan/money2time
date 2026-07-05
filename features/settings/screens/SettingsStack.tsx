@@ -42,6 +42,7 @@ interface SettingsStackProps {
   onOpenItemEditor: (itemId?: string) => void;
   onOpenBudgetTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
   onOpenMonthlyBudgetEditor: (budgetId: string) => void;
+  onCreateCustomBudget: (month: string) => void;
   onOpenAccountEditor: (params?: { accountId?: string; presetGroupName?: string }) => void;
   onOpenPayCreditCard: (accountId: string) => void;
   onOpenCreateGroup: () => void;
@@ -133,6 +134,7 @@ export function SettingsStack({
   onOpenItemEditor,
   onOpenBudgetTemplateEditor,
   onOpenMonthlyBudgetEditor,
+  onCreateCustomBudget,
   onOpenAccountEditor,
   onOpenPayCreditCard,
   onOpenCreateGroup,
@@ -271,6 +273,7 @@ export function SettingsStack({
               onOpenTemplates={() => props.navigation.navigate('BudgetTemplates')}
               onOpenTemplateEditor={onOpenBudgetTemplateEditor}
               onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
+              onCreateCustomBudget={onCreateCustomBudget}
             />
           );
         }}

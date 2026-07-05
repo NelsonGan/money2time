@@ -32,6 +32,7 @@ function buildSampleSnapshotJson() {
   const firstWeekday = new Date(year, month, 1).getDay(); // 0 Sun .. 6 Sat
   const leadingSpacers = (firstWeekday - weekStartsOn + 7) % 7;
   const monthLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const monthShortLabel = now.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
   const weekdayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
 
@@ -224,6 +225,7 @@ function buildSampleSnapshotJson() {
       title: 'Budget',
       monthKey,
       monthLabel,
+      monthShortLabel,
       hasBudget: true,
       totalBudget: budgetTotal,
       totalSpent: budgetSpent,
@@ -1430,6 +1432,10 @@ public class Money2TimeBudgetRingWidgetProvider extends AppWidgetProvider {
       views.setTextColor(R.id.ring_amount, amountColor);
       views.setTextViewText(R.id.ring_caption, br.optString("captionLabel", ""));
       views.setTextViewText(R.id.ring_days, br.optString("daysLeftLabel", ""));
+      String shortMonth = br.optString("monthShortLabel", "");
+      if (!shortMonth.isEmpty()) {
+        views.setTextViewText(R.id.ring_month, shortMonth.toUpperCase(java.util.Locale.ROOT));
+      }
 
       int progress = (int) Math.round(Math.max(0, Math.min(1, ratio)) * 100);
       if (isOver || ratio >= 0.8) {
@@ -2777,6 +2783,7 @@ ${historyRows}
     android:orientation="vertical">
 
     <TextView
+      android:id="@+id/ring_month"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:letterSpacing="0.12"
@@ -3569,6 +3576,8 @@ private struct SavingsHistoryData: Decodable {
 
 private struct BudgetRingData: Decodable {
   let monthLabel: String
+  // Optional: snapshots written before the short header existed lack it.
+  let monthShortLabel: String?
   let hasBudget: Bool
   let usageRatio: Double
   let isOver: Bool
@@ -4394,7 +4403,14 @@ private struct BudgetRingView: View {
     let color = budgetUsageColor(data.usageRatio, palette: palette)
     let used = CGFloat(max(0, min(data.usageRatio, 1)))
 
-    VStack(spacing: 5) {
+    VStack(spacing: 4) {
+      if let shortMonth = data.monthShortLabel, !shortMonth.isEmpty {
+        Text(shortMonth.uppercased())
+          .font(.system(size: 9, weight: .heavy))
+          .kerning(0.8)
+          .foregroundStyle(palette.textMuted)
+          .lineLimit(1)
+      }
       ZStack {
         Circle().stroke(color.opacity(0.15), lineWidth: 9)
         Circle()

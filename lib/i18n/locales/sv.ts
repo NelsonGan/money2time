@@ -1719,8 +1719,9 @@ const sv = {
     no_budget_message: 'Skapa en från en mall för att följa den här månaden.',
     create_budget: 'Skapa budget',
     choose_template: 'Välj en mall',
+    custom_option: 'Anpassad',
+    custom_option_caption: 'Skapa en engångsbudget bara för den här månaden.',
     categories_count: '{{count}} kategorier',
-    summary_spent: 'Spenderat denna månad',
     summary_budgeted: 'Budgeterade utgifter',
     summary_unbudgeted: 'Obudgeterade utgifter',
     summary_exceeded: '{{amount}} över budget',
@@ -1735,9 +1736,6 @@ const sv = {
     name_label: 'Namn',
     name_placeholder: 't.ex. Vardag',
     total_label: 'Total budget',
-    allocate_title: 'Fördela på kategorier',
-    allocate_hint:
-      'Fördela totalen på dina kategorier. Tryck på en kategori för att ange beloppet.',
     allocated_summary: '{{allocated}} av {{total}} fördelat',
     allocated_left: '{{amount}} kvar',
     allocated_over: '{{amount}} över',
@@ -1751,11 +1749,8 @@ const sv = {
     count_unbudgeted_caption:
       'Räkna med utgifter från kategorier utan budgetpost i månadens total.',
     children_hint: 'Fördela eventuellt beloppet på underkategorier.',
-    children_matched: 'Underkategorierna stämmer',
-    children_mismatch: 'Underkategorierna måste summera till {{total}} ({{delta}} fel).',
     subcategories: 'Underkategorier',
     edit_budget: 'Redigera budget',
-    not_counted: 'räknas inte',
   },
   items: {
     title: 'Föremål',
