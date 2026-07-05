@@ -144,6 +144,12 @@ export interface UserSettings {
   lastRateFetchError: string | null;
   /** JSON array of currency codes the user has added on the Multi currency page. */
   fxCurrenciesJson: string | null;
+  /**
+   * ISO timestamp of the user's first app open. Set to `now` on a fresh install;
+   * for upgrading users it is backfilled to their earliest transaction date
+   * (floored at 2026-03-01) on first load. Null only until that backfill runs.
+   */
+  firstAppOpen: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

@@ -132,6 +132,9 @@ export const settingsTable = sqliteTable('settings', {
   lastRateFetchAt: text('last_rate_fetch_at'),
   lastRateFetchError: text('last_rate_fetch_error'),
   fxCurrenciesJson: text('fx_currencies_json'),
+  // ISO timestamp of the user's first app open. Set to `now` on fresh installs;
+  // backfilled from the earliest transaction date for upgrading users.
+  firstAppOpen: text('first_app_open'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
