@@ -333,7 +333,6 @@ export function AccountLogoPickerSheet({
         <SettingsHeader
           className="px-5 pt-5 pb-2"
           title={I18n.t('accounts.logo.choose_title')}
-          infoTooltip={I18n.t('accounts.logo.choose_subtitle')}
           onClose={onClose}
           rightAccessory={
             <View className="flex-row items-end" style={{ gap: spacing.md }}>

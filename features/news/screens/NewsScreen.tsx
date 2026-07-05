@@ -47,12 +47,7 @@ export function NewsScreen({ onBack, onOpenShareEarn }: NewsScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader
-        className="px-5 pt-5 pb-3"
-        onBack={onBack}
-        title={I18n.t('settings.news')}
-        infoTooltip={I18n.t('settings.news_subtitle')}
-      />
+      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={I18n.t('settings.news')} />
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <View style={styles.list}>

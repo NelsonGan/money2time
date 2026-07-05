@@ -2779,7 +2779,6 @@ export function AccountsScreen({
             className="px-0 pt-5 pb-1"
             onBack={onBack}
             title={I18n.t('accounts.title')}
-            infoTooltip={I18n.t('accounts.manage_accounts_subtitle')}
             rightAccessory={
               <Button size="icon" onPress={startCreateGroup}>
                 <Plus size={18} color="#fff" />

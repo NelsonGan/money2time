@@ -360,7 +360,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
             className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('settings.quick_entry.title')}
-            infoTooltip={I18n.t('settings.quick_entry.subtitle')}
           />
 
           <View className="mt-4">
