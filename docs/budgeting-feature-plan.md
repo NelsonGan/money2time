@@ -16,6 +16,34 @@ against a budget.
 
 ## 1. Product behavior (requirements, resolved)
 
+### Adjustments to the original request
+
+Where the raw requirements were ambiguous or would behave illogically, the
+plan deliberately deviates:
+
+- **Deleting a month's budget must stick.** Auto-create on month rollover
+  respects a deletion tombstone — otherwise "delete this month's budget"
+  would silently resurrect on the next app launch. Explicit user actions
+  (manual create, back-populate) may recreate over tombstones.
+- **Saving the first template creates the current month's budget
+  immediately**, not on the next launch — the request's "upon first
+  creation, user should only see one budget row for the current month" only
+  works if creation is synchronous with the template save.
+- **"Unbudgeted expenses" compare against the month's frozen budget lines,
+  not the template.** Templates can be edited after a month was created;
+  the month row is the source of truth for that month.
+- **"There must always be one default template" holds only while at least
+  one template exists.** With zero templates there is nothing to default;
+  auto-create simply no-ops.
+- **Back-populate ranges over past months only** (first _expense_-transaction
+  month → last month; budgets ignore income, so income-only history doesn't
+  extend the range). The current month is excluded because it's already
+  created by the template save; months that already have a budget are
+  skipped; the option hides entirely when the resulting range is empty.
+- **Editing a template never rewrites already-created months.** The request
+  doesn't say either way; retroactively mutating past months would corrupt
+  history, so months are frozen copies (same principle as the FX snapshot).
+
 ### Templates
 
 - A user can create budget templates. **Free: 1 template. Pro: unlimited**
@@ -47,7 +75,9 @@ against a budget.
   has no budget row (and never had one — a user-deleted month is a tombstone
   and is _not_ resurrected), and at least one template exists, a budget for the
   current month is created from the **default template**. This runs in the
-  same load path as `runDueTransactions` (see §4.3).
+  same load path as `runDueTransactions`, and also immediately after every
+  template save — so saving the very first template instantly produces the
+  current month's budget row (see §4.3).
 - If the month already has a budget (auto- or user-created), rollover does
   nothing.
 - **Back-populate at template creation:** the create-template flow offers an
@@ -315,7 +345,8 @@ A pure helper `ensureCurrentMonthBudget({ monthKey, templates, hasEverExisted })
 decides create-or-skip; AppContext calls it in the **same load path that runs
 `runDueTransactions`** (initial `refreshAll` / load), so it fires on every cold
 start and on the restore/import/reset paths that already funnel through
-`refreshAll`. Rules:
+`refreshAll` — and **after every template create/save**, so the first template
+immediately yields the current month's budget. Rules:
 
 1. Current month has a live budget → no-op.
 2. Current month has a tombstone (user deleted it) → no-op.
@@ -348,10 +379,10 @@ Also here: `computeBackPopulateRange(transactions, existingLiveMonths, now)`
 → `{ months: string[], firstMonthKey, lastMonthKey } | null` used by both the
 template-editor UI copy and the actual back-populate write.
 
-The Budget screen holds its inputs with `useValueWhileTabVisible()` is **not**
-needed (it's a settings-stack screen, always "visible" when mounted), but the
-summary is memoized keyed on `useTransactions().transactions` +
-`monthlyBudgets`, per the identity-stability rule in CLAUDE.md.
+`useValueWhileTabVisible()` is **not** needed for the Budget screen (it's a
+settings-stack screen, always "visible" when mounted), but the summary is
+memoized keyed on `useTransactions().transactions` + `monthlyBudgets`, per the
+identity-stability rule in CLAUDE.md.
 
 ---
 
@@ -451,7 +482,7 @@ budget`.
 - **Pacing tick**: a small notch on the ring at `dayOfMonth / daysInMonth`,
   so users see "ahead of pace / behind pace" without any text — the ring vs.
   the tick tells the story.
-- Footer微copy: `12 days left`.
+- Footer microcopy: `12 days left`.
 - Tap → `money2time://budget` deep link (new route in `services/deepLinks.ts`
   → settings-stack Budget screen).
 - **No-budget state**: mascot + "Set a budget" CTA deep-linking into the app
@@ -540,25 +571,46 @@ Per the `tdd` skill (node env, native deps mocked):
 
 ---
 
-## 9. Delivery phases
+## 9. Implementation (single pass)
 
-Each phase leaves `npm run check && npm test` green and is a mergeable PR.
+Everything ships together in one change on this branch. The order below is
+just the dependency order to build in — not separate deliveries:
 
-1. **Data + domain** — migration 040, schema/mappers/types, both
-   repositories, AppContext state/ops/`refreshBudgets`, category-delete
-   cascade, `ensureCurrentMonthBudget` in the load path, `budgetMath.ts`,
-   full test coverage. (No UI yet; safe to merge.)
-2. **Core UI** — settings tile, `BudgetScreen` with month pager + summary +
-   category rows + empty/create states, `BudgetTemplatesScreen`,
+1. **Foundation** — migration `040_budgets.ts` + registration, `schema.ts`
+   tables/Row types, `mappers.ts`, domain types in `types/index.ts`,
+   `PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES`.
+2. **Repositories** — `budgetTemplatesRepository` (default invariant,
+   allocation replacement, cascade) and `monthlyBudgetsRepository` (freeze,
+   tombstone checks, bulk back-populate), with their unit tests written
+   alongside (`tdd` skill).
+3. **Pure logic** — `features/budget/lib/budgetMath.ts`
+   (`buildBudgetMonthSummary`, `computeBackPopulateRange`,
+   `ensureCurrentMonthBudget`) + tests.
+4. **AppContext** — state, ops, `refreshBudgets`, category-delete cascade,
+   `ensureCurrentMonthBudget` wired into the load path and template saves,
+   analytics events.
+5. **UI** — navigation entries (settings stack `Budget` /
+   `BudgetTemplates`, root stack `BudgetTemplateEditor`), settings tile,
+   `BudgetScreen` (pager, summary card, category rows, unbudgeted section,
+   empty/create states, picker sheet), `BudgetTemplatesScreen`,
    `BudgetTemplateEditorScreen` (total → allocate → back-populate,
-   duplicate-from), template picker sheet, Pro gating + paywall string,
-   i18n across 23 locales, analytics events.
-3. **Widgets** — registry + snapshots + sample data, native SwiftUI/Compose
-   in the config plugin, RN previews, deep link, prebuild bump.
-4. **Polish** — news announcement + showcase, review of over-budget
-   color semantics in all 8 palettes/dark mode (`frontend-design` skill),
-   optional time-display-mode follow-up.
+   duplicate-from), Pro gating + paywall string.
+6. **Widgets** — `widgetRegistry` entries, snapshot interfaces/builders +
+   sample data + tests, native SwiftUI/Compose in
+   `plugins/withMoney2TimeWidgets.js`, RN previews in
+   `components/widget-preview/` + `WidgetPreviewsScreen`,
+   `money2time://budget` deep link.
+7. **Strings & announcement** — `budget.*` i18n namespace across all 23
+   locales (`add-i18n-string` skill; parity test enforces), news
+   announcement entry + `BudgetShowcase`.
+8. **Verification** — `npm run check && npm test` green; dev-client
+   **prebuild rebuild** (native widget code changed); manual QA of the full
+   flow (create template → current-month budget appears → swipe months →
+   create-for-month → back-populate → delete category cascade → widgets)
+   via the Argent tooling; visual pass over the 8 palettes/dark mode
+   (`frontend-design` skill).
 
-Rough size: phase 1 ≈ the albums data layer; phase 2 is the bulk (3 screens +
-sheet); phase 3 is mostly native plugin work (the only part needing a
-dev-client rebuild).
+Rough size: steps 1–4 ≈ the albums data layer; step 5 is the bulk (3 screens
+
+- a sheet); step 6 is mostly native plugin work — the only part that forces
+  the dev-client rebuild, which is why it verifies last.
