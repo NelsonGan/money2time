@@ -12,6 +12,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { requestOpenTab } from '~/services/tabNavigation';
 import type { CategoryType, WageConfig } from '~/types';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
@@ -100,6 +101,7 @@ function SettingsHomeRoute({
       onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenItems={() => navigation.navigate('Items')}
+      onOpenAlbums={() => requestOpenTab('albums')}
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
