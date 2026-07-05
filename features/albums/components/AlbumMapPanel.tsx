@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
@@ -35,26 +35,36 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps)
 
   const isTimeMode = settings.displayMode === 'time';
 
-  const pins = useMemo<AlbumPin[]>(
-    () =>
-      locatedAlbums.map((album) => {
-        const stats = getAlbumStats(album.id);
-        return {
-          albumId: album.id,
-          name: album.name,
-          latitude: album.latitude,
-          longitude: album.longitude,
-          coverUri: getAlbumCoverUri(album.coverPhotoUri),
-          spendLabel: isTimeMode
-            ? formatHoursCompact(stats.totalSpent)
-            : formatAmount(stats.totalSpent, settings, { showSign: false, compact: true }),
-          // Default the badge to the album's start month/year. stats.startDate
-          // already resolves the manual override, else the first transaction.
-          monthLabel: formatAlbumMonthYear(stats.startDate),
-        };
-      }),
-    [locatedAlbums, getAlbumStats, isTimeMode, settings],
-  );
+  // MapLibre is a large native+JS module. Importing it (via the lazy
+  // AlbumMapView below) synchronously evaluates its module graph on the JS
+  // thread — a multi-second hit with real data. The albums tab is pre-mounted
+  // in the background during cold start, so touching the map here would block
+  // startup even though the map tab is not visible. Latch on first activation
+  // and only build pins / mount the map once the user actually opens the Map
+  // tab, keeping the whole map subsystem off the cold-start path.
+  const hasActivatedRef = useRef(active);
+  if (active) hasActivatedRef.current = true;
+  const shouldRenderMap = hasActivatedRef.current;
+
+  const pins = useMemo<AlbumPin[]>(() => {
+    if (!shouldRenderMap) return [];
+    return locatedAlbums.map((album) => {
+      const stats = getAlbumStats(album.id);
+      return {
+        albumId: album.id,
+        name: album.name,
+        latitude: album.latitude,
+        longitude: album.longitude,
+        coverUri: getAlbumCoverUri(album.coverPhotoUri),
+        spendLabel: isTimeMode
+          ? formatHoursCompact(stats.totalSpent)
+          : formatAmount(stats.totalSpent, settings, { showSign: false, compact: true }),
+        // Default the badge to the album's start month/year. stats.startDate
+        // already resolves the manual override, else the first transaction.
+        monthLabel: formatAlbumMonthYear(stats.startDate),
+      };
+    });
+  }, [shouldRenderMap, locatedAlbums, getAlbumStats, isTimeMode, settings]);
 
   useEffect(() => {
     if (!active) return;
@@ -70,6 +80,13 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps)
     },
     [onOpenAlbumDetail],
   );
+
+  // Until the Map tab has been opened, render nothing heavy — this keeps the
+  // lazy MapLibre import (and the per-album stat queries) off the cold-start
+  // preload path. A plain View is enough for the hidden, pre-mounted tab.
+  if (!shouldRenderMap) {
+    return <View className="flex-1" />;
+  }
 
   if (pins.length === 0) {
     return (
