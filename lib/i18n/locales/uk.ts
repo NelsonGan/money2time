@@ -353,6 +353,31 @@ const uk = {
       bullet_weekly_title: 'Тижневий підсумок',
       bullet_weekly_subtitle: 'Переглядайте витрати за останні 7 днів.',
     },
+    backup: {
+      title: 'Зробіть резервну копію даних',
+      subtitle:
+        'Усе, що ви записуєте, зберігається лише на цьому телефоні. Створіть резервну копію в {{provider}}, щоб втрата чи поломка телефона ніколи не означала втрату даних.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Автоматичні щоденні резервні копії',
+      bullet_automatic_subtitle: 'Ваші дані щодня автоматично зберігаються в {{provider}}.',
+      bullet_private_title: 'Приватно й безпечно',
+      bullet_private_subtitle:
+        'Резервні копії залишаються у вашому власному обліковому записі {{provider}}.',
+      bullet_restore_title: 'Відновлення за секунди',
+      bullet_restore_subtitle: 'Новий телефон? Поверніть усе одним дотиком.',
+      enable_icloud: 'Копіювати в iCloud',
+      enable_google: 'Копіювати в Google Drive',
+      not_now: 'Не зараз',
+      confirm_title: 'Пропустити резервне копіювання?',
+      confirm_message:
+        'money2time зберігає все лише на цьому пристрої. Якщо ви втратите або заміните телефон, усі ваші дані зникнуть назавжди. Наполегливо рекомендуємо ввімкнути резервне копіювання в {{provider}}.',
+      confirm_enable: 'Увімкнути копіювання',
+      confirm_skip: 'Усе одно пропустити',
+      icloud_pending_title: 'Резервне копіювання ввімкнено',
+      icloud_pending_message:
+        'Увійдіть в iCloud і ввімкніть iCloud Drive у Налаштуваннях — резервне копіювання розпочнеться автоматично, щойно стане доступним.',
+    },
   },
   transactions: {
     title: 'Операції',

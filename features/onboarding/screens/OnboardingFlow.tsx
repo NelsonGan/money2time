@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,6 +12,12 @@ import { WageCalculatorFlowScreen } from '~/features/settings/screens';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import {
+  isGoogleDriveConfigured,
+  isGoogleSignedIn,
+  isTargetAvailable,
+  signInWithGoogle,
+} from '~/services/autoBackup';
 import { triggerHaptic } from '~/services/haptics';
 import type { MMImportSummary } from '~/services/mmbakImportService';
 import { requestPermissions } from '~/services/notifications';
@@ -19,6 +25,7 @@ import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
+import { OnboardingBackupStep } from './OnboardingBackupStep';
 import {
   type BootstrapChoice,
   type BootstrapView,
@@ -29,7 +36,7 @@ import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -67,7 +74,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
   const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
   const visualStep = step;
-  const totalVisualSteps = 5;
+  const totalVisualSteps = 6;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
@@ -170,6 +177,77 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
     onComplete();
   }, [completeOnboarding, onComplete]);
+
+  const handleEnableBackup = useCallback(async () => {
+    const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
+    try {
+      // Whether the destination is ready to receive a backup right now.
+      let readyToBackUp = true;
+
+      if (target === 'icloud') {
+        // iCloud sign-in is a system-level action the app can't trigger, so we
+        // never block onboarding on it. Turn backup on regardless; the
+        // foreground auto-backup trigger in AppContext runs the first backup as
+        // soon as iCloud Drive becomes available.
+        readyToBackUp = await isTargetAvailable('icloud');
+      } else {
+        if (!isGoogleDriveConfigured()) {
+          Alert.alert(
+            I18n.t('auto_backup.google_drive_unconfigured_title'),
+            I18n.t('auto_backup.google_drive_unconfigured_message'),
+          );
+          return;
+        }
+        // Google sign-in IS app-triggerable, so prompt for it inline. Bail only
+        // if the user cancels or it errors out.
+        if (!isGoogleSignedIn()) {
+          const result = await signInWithGoogle();
+          if (!result.ok) {
+            if (result.reason !== 'cancelled') {
+              Alert.alert(
+                I18n.t('auto_backup.google_drive_sign_in_failed_title'),
+                result.message ?? '',
+              );
+            }
+            return;
+          }
+        }
+      }
+
+      updateSettings({ autoBackupEnabled: true, autoBackupTarget: target });
+      void triggerHaptic('success');
+      void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_ENABLED, {
+        target,
+        pending: !readyToBackUp,
+      });
+
+      // Deliberately no immediate backup here. This step runs before the
+      // import/seed step, so there's nothing meaningful to back up yet, and
+      // forcing one would upload an empty snapshot and stamp lastAutoBackupAt —
+      // suppressing the real first backup for a day. The due-based auto-backup
+      // in AppContext picks it up once onboarding leaves the user with data,
+      // then follows the daily cadence.
+      if (!readyToBackUp) {
+        // iCloud not signed in yet — let the user know backup is on and will
+        // start once they enable iCloud Drive, then advance anyway.
+        Alert.alert(
+          I18n.t('onboarding.backup.icloud_pending_title'),
+          I18n.t('onboarding.backup.icloud_pending_message'),
+        );
+      }
+      setStep(6);
+    } catch (error) {
+      void triggerHaptic('error');
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+    }
+  }, [updateSettings]);
+
+  const handleSkipBackup = useCallback(() => {
+    void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_SKIPPED, {
+      target: Platform.OS === 'ios' ? 'icloud' : 'googleDrive',
+    });
+    setStep(6);
+  }, []);
 
   const handleStartFresh = useCallback(() => {
     try {
@@ -299,8 +377,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
         {step === 5 && (
           <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+            <OnboardingBackupStep
+              onEnable={() => {
+                void handleEnableBackup();
+              }}
+              onSkip={handleSkipBackup}
+            />
+          </Animated.View>
+        )}
+
+        {step === 6 && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
             <OnboardingBootstrapStep
-              onBack={() => setStep(4)}
+              onBack={() => setStep(5)}
               onImport={() => {
                 void handleImport();
               }}

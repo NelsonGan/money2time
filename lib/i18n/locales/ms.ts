@@ -353,6 +353,31 @@ const ms = {
       bullet_weekly_title: 'Ringkasan mingguan',
       bullet_weekly_subtitle: 'Lihat berapa banyak yang dibelanjakan dalam 7 hari lepas.',
     },
+    backup: {
+      title: 'Sandarkan data anda',
+      subtitle:
+        'Semua yang anda rekod hanya ada pada telefon ini. Sandarkan ke {{provider}} supaya telefon hilang atau rosak tidak sekali-kali bermakna data hilang.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Sandaran harian automatik',
+      bullet_automatic_subtitle:
+        'Data anda disimpan ke {{provider}} setiap hari, tanpa susah payah.',
+      bullet_private_title: 'Peribadi dan selamat',
+      bullet_private_subtitle: 'Sandaran kekal dalam akaun {{provider}} anda sendiri.',
+      bullet_restore_title: 'Pulihkan dalam beberapa saat',
+      bullet_restore_subtitle: 'Telefon baharu? Kembalikan semuanya dengan satu ketikan.',
+      enable_icloud: 'Sandarkan ke iCloud',
+      enable_google: 'Sandarkan ke Google Drive',
+      not_now: 'Bukan sekarang',
+      confirm_title: 'Langkau sandaran?',
+      confirm_message:
+        'money2time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
+      confirm_enable: 'Aktifkan sandaran',
+      confirm_skip: 'Langkau juga',
+      icloud_pending_title: 'Sandaran dihidupkan',
+      icloud_pending_message:
+        'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
+    },
   },
   transactions: {
     title: 'Transaksi',

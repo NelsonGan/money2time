@@ -354,6 +354,31 @@ const nl = {
       bullet_weekly_title: 'Wekelijkse samenvatting',
       bullet_weekly_subtitle: 'Zie hoeveel je de afgelopen 7 dagen hebt uitgegeven.',
     },
+    backup: {
+      title: 'Maak een back-up van je gegevens',
+      subtitle:
+        'Alles wat je vastlegt, staat alleen op deze telefoon. Maak een back-up naar {{provider}} zodat een verloren of kapotte telefoon nooit verloren gegevens betekent.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatische dagelijkse back-ups',
+      bullet_automatic_subtitle:
+        'Je gegevens worden elke dag automatisch opgeslagen in {{provider}}.',
+      bullet_private_title: 'Privé en veilig',
+      bullet_private_subtitle: 'Back-ups blijven in je eigen {{provider}}-account.',
+      bullet_restore_title: 'Herstel in seconden',
+      bullet_restore_subtitle: 'Nieuwe telefoon? Zet alles terug met één tik.',
+      enable_icloud: 'Back-up naar iCloud',
+      enable_google: 'Back-up naar Google Drive',
+      not_now: 'Niet nu',
+      confirm_title: 'Back-up overslaan?',
+      confirm_message:
+        'money2time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
+      confirm_enable: 'Back-up inschakelen',
+      confirm_skip: 'Toch overslaan',
+      icloud_pending_title: 'Back-up ingeschakeld',
+      icloud_pending_message:
+        'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
+    },
   },
   transactions: {
     title: 'Transacties',

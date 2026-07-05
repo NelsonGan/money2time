@@ -320,6 +320,30 @@ const zh = {
       bullet_weekly_title: '每周总结',
       bullet_weekly_subtitle: '查看过去 7 天的支出情况。',
     },
+    backup: {
+      title: '备份你的数据',
+      subtitle:
+        '你记录的一切都只保存在这部手机上。备份到 {{provider}}，这样手机丢失或损坏也绝不会丢失数据。',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: '每日自动备份',
+      bullet_automatic_subtitle: '你的数据每天自动保存到 {{provider}}。',
+      bullet_private_title: '私密且安全',
+      bullet_private_subtitle: '备份保存在你自己的 {{provider}} 账户中。',
+      bullet_restore_title: '几秒即可恢复',
+      bullet_restore_subtitle: '换新手机？一键找回所有数据。',
+      enable_icloud: '备份到 iCloud',
+      enable_google: '备份到 Google Drive',
+      not_now: '暂不',
+      confirm_title: '跳过备份？',
+      confirm_message:
+        'money2time 仅将所有数据保存在此设备上。如果你丢失或更换手机，所有数据将永久丢失。我们强烈建议开启 {{provider}} 备份。',
+      confirm_enable: '开启备份',
+      confirm_skip: '仍然跳过',
+      icloud_pending_title: '已开启备份',
+      icloud_pending_message:
+        '登录 iCloud 并在“设置”中开启 iCloud 云盘 — 一旦可用，备份将自动开始。',
+    },
   },
   transactions: {
     title: '交易',

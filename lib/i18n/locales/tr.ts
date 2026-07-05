@@ -355,6 +355,30 @@ const tr = {
       bullet_weekly_title: 'Haftalık özet',
       bullet_weekly_subtitle: 'Son 7 günde ne kadar harcadığınızı görün.',
     },
+    backup: {
+      title: 'Verilerini yedekle',
+      subtitle:
+        "Kaydettiğin her şey yalnızca bu telefonda bulunur. {{provider}}'a yedekle ki kayıp veya bozulan bir telefon asla veri kaybı anlamına gelmesin.",
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Otomatik günlük yedeklemeler',
+      bullet_automatic_subtitle: "Verilerin her gün otomatik olarak {{provider}}'a kaydedilir.",
+      bullet_private_title: 'Özel ve güvenli',
+      bullet_private_subtitle: 'Yedekler kendi {{provider}} hesabında kalır.',
+      bullet_restore_title: 'Saniyeler içinde geri yükle',
+      bullet_restore_subtitle: 'Yeni telefon mu? Tek dokunuşla her şeyi geri getir.',
+      enable_icloud: "iCloud'a yedekle",
+      enable_google: "Google Drive'a yedekle",
+      not_now: 'Şimdi değil',
+      confirm_title: 'Yedekleme atlansın mı?',
+      confirm_message:
+        'money2time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
+      confirm_enable: 'Yedeklemeyi aç',
+      confirm_skip: 'Yine de atla',
+      icloud_pending_title: 'Yedekleme açıldı',
+      icloud_pending_message:
+        "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
+    },
   },
   transactions: {
     title: 'İşlemler',

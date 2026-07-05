@@ -353,6 +353,30 @@ const nb = {
       bullet_weekly_title: 'Ukentlig sammendrag',
       bullet_weekly_subtitle: 'Se hvor mye du brukte de siste 7 dagene.',
     },
+    backup: {
+      title: 'Sikkerhetskopier dataene dine',
+      subtitle:
+        'Alt du registrerer, finnes bare på denne telefonen. Sikkerhetskopier til {{provider}} slik at en mistet eller ødelagt telefon aldri betyr tapte data.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatiske daglige sikkerhetskopier',
+      bullet_automatic_subtitle: 'Dataene dine lagres til {{provider}} hver dag, helt automatisk.',
+      bullet_private_title: 'Privat og sikkert',
+      bullet_private_subtitle: 'Sikkerhetskopier blir værende i din egen {{provider}}-konto.',
+      bullet_restore_title: 'Gjenopprett på sekunder',
+      bullet_restore_subtitle: 'Ny telefon? Hent alt tilbake med ett trykk.',
+      enable_icloud: 'Sikkerhetskopier til iCloud',
+      enable_google: 'Sikkerhetskopier til Google Drive',
+      not_now: 'Ikke nå',
+      confirm_title: 'Hoppe over sikkerhetskopi?',
+      confirm_message:
+        'money2time lagrer alt bare på denne enheten. Hvis du mister eller bytter telefon, er alle dataene dine borte for godt. Vi anbefaler på det sterkeste å slå på {{provider}}-sikkerhetskopiering.',
+      confirm_enable: 'Slå på sikkerhetskopi',
+      confirm_skip: 'Hopp over likevel',
+      icloud_pending_title: 'Sikkerhetskopi slått på',
+      icloud_pending_message:
+        'Logg inn på iCloud og slå på iCloud Drive i Innstillinger — sikkerhetskopien starter automatisk så snart den er tilgjengelig.',
+    },
   },
   transactions: {
     title: 'Transaksjoner',

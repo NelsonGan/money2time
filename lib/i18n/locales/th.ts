@@ -350,6 +350,31 @@ const th = {
       bullet_weekly_title: 'สรุปรายสัปดาห์',
       bullet_weekly_subtitle: 'ดูยอดใช้จ่ายใน 7 วันที่ผ่านมา',
     },
+    backup: {
+      title: 'สำรองข้อมูลของคุณ',
+      subtitle:
+        'ทุกสิ่งที่คุณบันทึกอยู่บนโทรศัพท์เครื่องนี้เท่านั้น สำรองข้อมูลไปยัง {{provider}} เพื่อว่าเมื่อโทรศัพท์หายหรือเสีย ข้อมูลของคุณจะไม่สูญหาย',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'สำรองข้อมูลอัตโนมัติทุกวัน',
+      bullet_automatic_subtitle: 'ข้อมูลของคุณจะถูกบันทึกไปยัง {{provider}} ทุกวันโดยอัตโนมัติ',
+      bullet_private_title: 'เป็นส่วนตัวและปลอดภัย',
+      bullet_private_subtitle: 'ข้อมูลสำรองจะอยู่ในบัญชี {{provider}} ของคุณเอง',
+      bullet_restore_title: 'กู้คืนได้ในไม่กี่วินาที',
+      bullet_restore_subtitle:
+        'โทรศัพท์เครื่องใหม่ใช่ไหม? นำทุกอย่างกลับมาได้ด้วยการแตะเพียงครั้งเดียว',
+      enable_icloud: 'สำรองข้อมูลไปยัง iCloud',
+      enable_google: 'สำรองข้อมูลไปยัง Google Drive',
+      not_now: 'ไว้ทีหลัง',
+      confirm_title: 'ข้ามการสำรองข้อมูล?',
+      confirm_message:
+        'money2time จัดเก็บทุกอย่างไว้บนอุปกรณ์นี้เท่านั้น หากคุณทำโทรศัพท์หายหรือเปลี่ยนเครื่อง ข้อมูลทั้งหมดของคุณจะหายไปอย่างถาวร เราขอแนะนำอย่างยิ่งให้เปิดการสำรองข้อมูล {{provider}}',
+      confirm_enable: 'เปิดการสำรองข้อมูล',
+      confirm_skip: 'ข้ามไปเลย',
+      icloud_pending_title: 'เปิดการสำรองข้อมูลแล้ว',
+      icloud_pending_message:
+        'ลงชื่อเข้าใช้ iCloud และเปิด iCloud Drive ในการตั้งค่า — การสำรองข้อมูลของคุณจะเริ่มโดยอัตโนมัติทันทีที่พร้อมใช้งาน',
+    },
   },
   transactions: {
     title: 'รายการ',
