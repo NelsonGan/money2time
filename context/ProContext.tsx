@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AppState } from 'react-native';
+import { AppState, InteractionManager } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import {
@@ -66,7 +66,16 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setRevenueCatAppUserId(appUserId);
-    void refresh();
+    // RevenueCat's native `Purchases.configure` (triggered lazily by `refresh`)
+    // does synchronous StoreKit setup on the main thread. Firing it during the
+    // cold-start burst has produced multi-second main-thread App Hangs on
+    // constrained devices (Sentry MONEY2TIME-8). Defer past first interactions
+    // so it no longer competes with initial render/layout — Pro state is not
+    // needed to paint the first screen.
+    const task = InteractionManager.runAfterInteractions(() => {
+      void refresh();
+    });
+    return () => task.cancel();
   }, [appUserId, refresh]);
 
   useEffect(() => {
