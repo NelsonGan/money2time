@@ -55,6 +55,10 @@ export function AlbumsScreen({
   const pagerRef = useRef<ScrollView | null>(null);
   const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
   const [pageHeight, setPageHeight] = useState(0);
+  // Defer mounting the (native, GL-backed) map until the user first swipes
+  // toward or taps the Map tab, then keep it mounted. Avoids paying MapLibre's
+  // cost just for viewing the album list.
+  const [mapMounted, setMapMounted] = useState(false);
   // Measured height of the floating header, so the albums list can clear it
   // (the map tab renders full-bleed behind it).
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -78,6 +82,7 @@ export function AlbumsScreen({
   const selectTab = useCallback(
     (value: AlbumsTab) => {
       if (value !== tab) void triggerHaptic('selection');
+      if (value === 'map') setMapMounted(true);
       setTab(value);
       pagerRef.current?.scrollTo({ x: value === 'map' ? pageWidth : 0, animated: true });
     },
@@ -172,6 +177,9 @@ export function AlbumsScreen({
               nestedScrollEnabled
               showsHorizontalScrollIndicator={false}
               scrollEventThrottle={32}
+              onScroll={(e) => {
+                if (e.nativeEvent.contentOffset.x > 1) setMapMounted(true);
+              }}
               onMomentumScrollEnd={handlePagerMomentumEnd}
             >
               {/* Albums index page */}
@@ -251,9 +259,11 @@ export function AlbumsScreen({
                 )}
               </View>
 
-              {/* Map page */}
+              {/* Map page — mounted lazily on first approach (see mapMounted). */}
               <View style={{ width: pageWidth, height: pageHeight }}>
-                <AlbumMapPanel onOpenAlbumDetail={onOpenAlbumDetail} active={tab === 'map'} />
+                {mapMounted ? (
+                  <AlbumMapPanel onOpenAlbumDetail={onOpenAlbumDetail} active={tab === 'map'} />
+                ) : null}
               </View>
             </ScrollView>
           ) : null}
