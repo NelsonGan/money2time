@@ -131,7 +131,6 @@ interface SettingsHeaderProps {
   closeRowAccessory?: React.ReactNode;
   rightAccessory?: React.ReactNode;
   className?: string;
-  reserveActionRow?: boolean;
 }
 
 export function SettingsHeader({
@@ -143,25 +142,33 @@ export function SettingsHeader({
   closeRowAccessory,
   rightAccessory,
   className,
-  reserveActionRow = false,
 }: SettingsHeaderProps) {
   const themeColors = useThemeColors();
-  const showActionRow = reserveActionRow || !!onBack || !!onClose;
+  const hasRightControls = !!rightAccessory || !!closeRowAccessory || !!onClose;
+  // Indent the subtitle so it lines up under the title when a leading back
+  // button offsets the title (icon 40 + row gap 8).
+  const subtitleIndent = onBack ? 48 : 0;
 
   return (
     <View className={cn('px-5 pt-3 pb-2', className)}>
-      {showActionRow ? (
-        <View className="mb-3 flex-row items-center justify-between">
-          <View className="h-10 w-10 justify-center">
-            {onBack ? (
-              <HeaderIconButton
-                onPress={onBack}
-                icon={<ChevronLeft size={20} color={themeColors.textMuted} />}
-                label={I18n.t('common.back')}
-              />
-            ) : null}
-          </View>
+      {/* Back button, title, and any actions all share one row so the title is
+          in-line with the back button rather than stacked below it. */}
+      <View className="flex-row items-center gap-2" style={{ minHeight: 40 }}>
+        {onBack ? (
+          <HeaderIconButton
+            onPress={onBack}
+            icon={<ChevronLeft size={20} color={themeColors.textMuted} />}
+            label={I18n.t('common.back')}
+          />
+        ) : null}
+        <View className="flex-1 justify-center">
+          <Text variant="heading" className="tracking-tight" numberOfLines={1}>
+            {title}
+          </Text>
+        </View>
+        {hasRightControls ? (
           <View className="flex-row items-center gap-2">
+            {rightAccessory}
             {closeRowAccessory}
             {onClose ? (
               <HeaderIconButton
@@ -171,22 +178,20 @@ export function SettingsHeader({
               />
             ) : null}
           </View>
-        </View>
-      ) : null}
-
-      <View className="flex-row items-center justify-between gap-3" style={{ minHeight: 40 }}>
-        <View className="min-h-10 flex-1 justify-center">
-          <Text variant="heading" className="tracking-tight">
-            {title}
-          </Text>
-        </View>
-        {rightAccessory ? <View className="h-10 justify-center">{rightAccessory}</View> : null}
+        ) : null}
       </View>
 
       {subtitleNode ? (
-        <View className="mt-1">{subtitleNode}</View>
+        <View className="mt-1" style={{ paddingLeft: subtitleIndent }}>
+          {subtitleNode}
+        </View>
       ) : subtitle ? (
-        <Text variant="caption" tone="muted" className="mt-1">
+        <Text
+          variant="caption"
+          tone="muted"
+          className="mt-1"
+          style={{ paddingLeft: subtitleIndent }}
+        >
           {subtitle}
         </Text>
       ) : null}
