@@ -45,7 +45,7 @@ against a budget.
   It remembers which template it came from (`templateId`) for display only.
 - **Auto-create on month rollover:** when the app loads and the current month
   has no budget row (and never had one — a user-deleted month is a tombstone
-  and is *not* resurrected), and at least one template exists, a budget for the
+  and is _not_ resurrected), and at least one template exists, a budget for the
   current month is created from the **default template**. This runs in the
   same load path as `runDueTransactions` (see §4.3).
 - If the month already has a budget (auto- or user-created), rollover does
@@ -55,7 +55,7 @@ against a budget.
   the month of the user's earliest expense transaction up to last month**,
   shown explicitly in the UI (e.g. "Will create budgets for Mar 2025 – Jun
   2026, 16 months"). Months that already have a live budget are skipped;
-  explicitly back-populating *does* recreate over tombstones (deliberate user
+  explicitly back-populating _does_ recreate over tombstones (deliberate user
   action beats the no-resurrect rule).
 
 ### Budget view
@@ -169,7 +169,7 @@ Design notes:
 
 - **Soft-deleted `monthly_budgets` rows double as tombstones** for the
   auto-create rule: "has this month ever had a budget?" =
-  `EXISTS (… WHERE month = ? )` *including* deleted rows.
+  `EXISTS (… WHERE month = ? )` _including_ deleted rows.
 - `template_name` is denormalized onto the month row so "Created from
   ‹Everyday›" still renders after the template is renamed or deleted —
   same denormalization pattern the transaction list uses for relation names.
@@ -200,7 +200,9 @@ export interface BudgetTemplate {
   isDefault: boolean;
   sortOrder: number;
   allocations: BudgetTemplateAllocation[];
-  createdAt: string; updatedAt: string; deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 export interface MonthlyBudgetLine {
@@ -212,39 +214,41 @@ export interface MonthlyBudgetLine {
 
 export interface MonthlyBudget {
   id: string;
-  month: string;               // 'YYYY-MM'
+  month: string; // 'YYYY-MM'
   templateId: string | null;
   templateName: string | null;
   totalAmount: number;
   lines: MonthlyBudgetLine[];
-  createdAt: string; updatedAt: string; deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 /** Pure computation output for one month's budget page (see §4.4). */
 export interface BudgetMonthSummary {
   month: string;
   totalBudget: number;
-  totalSpent: number;          // budgeted + unbudgeted expense spend
+  totalSpent: number; // budgeted + unbudgeted expense spend
   budgetedSpent: number;
-  unbudgetedSpent: number;     // categories w/o a line + uncategorized
-  remaining: number;           // totalBudget - totalSpent (can be negative)
-  exceededBy: number;          // max(0, -remaining)
-  usageRatio: number;          // totalSpent / totalBudget, 0 when no budget
-  categories: BudgetCategoryProgress[];   // one per budget line
-  unbudgeted: UnbudgetedCategorySpend[];  // spend with no line
+  unbudgetedSpent: number; // categories w/o a line + uncategorized
+  remaining: number; // totalBudget - totalSpent (can be negative)
+  exceededBy: number; // max(0, -remaining)
+  usageRatio: number; // totalSpent / totalBudget, 0 when no budget
+  categories: BudgetCategoryProgress[]; // one per budget line
+  unbudgeted: UnbudgetedCategorySpend[]; // spend with no line
 }
 
 export interface BudgetCategoryProgress {
   categoryId: string;
   budgeted: number;
-  spent: number;               // includes subcategory roll-up
+  spent: number; // includes subcategory roll-up
   remaining: number;
   usageRatio: number;
   isOver: boolean;
 }
 
 export interface UnbudgetedCategorySpend {
-  categoryId: string | null;   // null = uncategorized
+  categoryId: string | null; // null = uncategorized
   spent: number;
 }
 ```
@@ -284,7 +288,7 @@ Both are thin Drizzle wrappers in the style of `albumsRepository` /
 
 ### 4.2 AppContext (`context/AppContext.tsx`)
 
-New state on **`useApp()`** (budgets are low-churn; per-month *spend* is
+New state on **`useApp()`** (budgets are low-churn; per-month _spend_ is
 computed in the screen from `useTransactions().transactions`, so budget state
 must not live in `TransactionsContext`):
 
@@ -362,7 +366,7 @@ summary is memoized keyed on `useTransactions().transactions` +
 - **Settings stack** (`navigation/settingsStack.ts`): `Budget: undefined`
   (month view) and `BudgetTemplates: undefined` (template list).
 - **Root stack** (`navigation/rootStack.ts`): `BudgetTemplateEditor:
-  { templateId?: string; duplicateFromId?: string } | undefined` — full-screen
+{ templateId?: string; duplicateFromId?: string } | undefined` — full-screen
   editor reachable from anywhere (template list, empty states), like
   `ItemEditor`.
 - Feature folder: `features/budget/` with `screens/`, `components/`, `lib/`.
@@ -374,7 +378,7 @@ summary is memoized keyed on `useTransactions().transactions` +
 - Body: horizontal pager (`useMonthPager`) over the month range from §1.
 - **Month page with budget**: `BudgetSummaryCard` (totals, progress,
   remaining / "Exceeded by X", unbudgeted spend, "from ‹template›" caption,
-  overflow menu with *Delete budget*), then `BudgetCategoryRow[]`
+  overflow menu with _Delete budget_), then `BudgetCategoryRow[]`
   (emoji + name via `CategoryEmoji`, `spent / budgeted`, right-aligned
   remaining, progress bar: theme primary → amber ≥ 80% → red when over), then
   an **Unbudgeted** section of `UnbudgetedRow[]`.
@@ -393,7 +397,7 @@ summary is memoized keyed on `useTransactions().transactions` +
   deleting the default).
 - "New template" button: gated by `useProGate().checkLimit` against
   `FREE_MAX_BUDGET_TEMPLATES` → `ProPaywall` (`source:
-  'budget_templates_limit'`, new `pro.limit_budget_templates` string).
+'budget_templates_limit'`, new `pro.limit_budget_templates` string).
 
 ### 5.4 `BudgetTemplateEditorScreen` (root stack)
 
@@ -409,8 +413,8 @@ Two-phase single screen (matches the "total first, then allocate" requirement):
    remaining === 0** (exact match, using `normalizeMoneyAmount` to dodge
    float dust).
 3. **Back-populate (create mode only)**: toggle + explanatory caption
-   computed by `computeBackPopulateRange`, e.g. *"Create budgets for Mar 2025
-   – Jun 2026 (16 months). Months that already have a budget are skipped."*
+   computed by `computeBackPopulateRange`, e.g. _"Create budgets for Mar 2025
+   – Jun 2026 (16 months). Months that already have a budget are skipped."_
    Hidden when there are no past expense months or no missing months.
 4. Edit mode: same screen, prefilled; if allocations no longer sum to total
    (e.g. a category was deleted since), the header shows the unallocated gap
@@ -439,8 +443,8 @@ preview component in `components/widget-preview/` for
 A single glanceable dial answering "am I okay this month?":
 
 - **Center**: remaining amount (compact, e.g. `$418`), caption `left of
-  $2.4K` — or, when over, the exceeded amount in red with caption `over
-  budget`.
+$2.4K` — or, when over, the exceeded amount in red with caption `over
+budget`.
 - **Ring**: budget-used arc in the theme palette, shifting amber past 80% and
   red past 100% (the over-spill draws as a second, desaturated lap so 130%
   reads differently from 95%).
@@ -507,7 +511,7 @@ The month page in miniature:
   category no longer resolves (defensive, in addition to the cascade).
 - **Simple mode**: budgets work identically (categories exist in both modes);
   the tile shows in both.
-- **Reporting-currency change**: budget amounts are *not* rescaled; the
+- **Reporting-currency change**: budget amounts are _not_ rescaled; the
   Exchange-Rates flow's existing "history re-snapshots" note gains a line
   about budgets keeping their entered numbers.
 - **Month with budget but zero transactions**: valid, renders 0% everywhere.
