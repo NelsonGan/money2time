@@ -253,9 +253,9 @@ export const CalendarYearView = memo(function CalendarYearView({
       renderItem={renderItem}
       initialScrollIndex={CENTER_YEAR_INDEX}
       showsVerticalScrollIndicator={false}
-      initialNumToRender={3}
-      maxToRenderPerBatch={3}
-      windowSize={5}
+      initialNumToRender={1}
+      maxToRenderPerBatch={2}
+      windowSize={3}
       removeClippedSubviews
     />
   );
