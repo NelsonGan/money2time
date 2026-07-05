@@ -8,28 +8,21 @@ import {
   AllocationCategoryList,
   AllocationOptionRow,
   AllocationStatusBar,
-  parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
 import {
-  computeAllocationRemaining,
-  computeChildAllocationGap,
-} from '~/features/budget/lib/budgetMath';
+  type OpenCategoryAllocationParams,
+  useAllocationDraft,
+} from '~/features/budget/hooks/useAllocationDraft';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatMonthYearLabel, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatMonthYearLabel, parseMonthKey } from '~/utils/formatters';
 
 interface MonthlyBudgetEditorScreenProps {
   budgetId: string;
   /** Pushes the full-page per-category allocation editor. */
-  onOpenCategoryAllocation: (params: {
-    categoryId: string;
-    initialAmounts: Record<string, string>;
-    remainingExcludingThis: number;
-    onDone: (amounts: Record<string, string>) => void;
-  }) => void;
+  onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
   onClose: () => void;
 }
 
@@ -53,122 +46,39 @@ export function MonthlyBudgetEditorScreen({
     [budgetId, monthlyBudgets],
   );
 
-  const rootExpenseCategories = useMemo(
-    () => categories.filter((category) => category.type === 'expense' && !category.parentId),
-    [categories],
-  );
-  const childrenByParent = useMemo(() => {
-    const map = new Map<string, Category[]>();
-    for (const category of categories) {
-      if (category.type !== 'expense' || !category.parentId) continue;
-      const list = map.get(category.parentId) ?? [];
-      list.push(category);
-      map.set(category.parentId, list);
-    }
-    return map;
-  }, [categories]);
-
-  const [total, setTotal] = useState(budget ? String(budget.totalAmount) : '');
   const [countUnbudgeted, setCountUnbudgeted] = useState(budget?.countUnbudgeted ?? true);
-  const [amounts, setAmounts] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {};
-    for (const line of budget?.lines ?? []) {
-      if (line.amount > 0) initial[line.categoryId] = String(line.amount);
-    }
-    return initial;
+
+  const draft = useAllocationDraft({
+    categories,
+    initialTotal: budget ? String(budget.totalAmount) : '',
+    initialAmounts: () => {
+      const initial: Record<string, string> = {};
+      for (const line of budget?.lines ?? []) {
+        if (line.amount > 0) initial[line.categoryId] = String(line.amount);
+      }
+      return initial;
+    },
+    onOpenCategoryAllocation,
   });
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
-  const parsedTotal = parseAllocationAmount(total);
-
-  const rootAllocations = useMemo(
-    () =>
-      rootExpenseCategories
-        .map((category) => ({
-          categoryId: category.id,
-          amount: parseAllocationAmount(amounts[category.id] ?? ''),
-        }))
-        .filter((allocation) => allocation.amount > 0),
-    [amounts, rootExpenseCategories],
-  );
-
-  const remaining = computeAllocationRemaining(parsedTotal, rootAllocations);
-
-  const childGaps = useMemo(() => {
-    const gaps = new Map<string, number>();
-    for (const allocation of rootAllocations) {
-      const children = childrenByParent.get(allocation.categoryId) ?? [];
-      if (children.length === 0) continue;
-      const gap = computeChildAllocationGap(
-        allocation.amount,
-        children.map((child) => ({ amount: parseAllocationAmount(amounts[child.id] ?? '') })),
-      );
-      if (gap !== 0) gaps.set(allocation.categoryId, gap);
-    }
-    return gaps;
-  }, [amounts, childrenByParent, rootAllocations]);
-
-  const canSave =
-    budget != null &&
-    parsedTotal > 0 &&
-    rootAllocations.length > 0 &&
-    remaining === 0 &&
-    childGaps.size === 0;
-
-  const handleChangeAmount = useCallback((categoryId: string, next: string) => {
-    setAmounts((previous) => ({ ...previous, [categoryId]: next }));
-  }, []);
-
-  // Pushes the full-page per-category editor with this category's draft slice;
-  // Save there merges the slice back into the shared draft here.
-  const openCategoryAllocation = useCallback(
-    (categoryId: string) => {
-      const initialAmounts: Record<string, string> = {
-        [categoryId]: amounts[categoryId] ?? '',
-      };
-      for (const child of childrenByParent.get(categoryId) ?? []) {
-        initialAmounts[child.id] = amounts[child.id] ?? '';
-      }
-      onOpenCategoryAllocation({
-        categoryId,
-        initialAmounts,
-        remainingExcludingThis: normalizeMoneyAmount(
-          remaining + parseAllocationAmount(amounts[categoryId] ?? ''),
-        ),
-        onDone: (next) => setAmounts((previous) => ({ ...previous, ...next })),
-      });
-    },
-    [amounts, childrenByParent, onOpenCategoryAllocation, remaining],
-  );
+  const canSave = budget != null && draft.allocationsValid;
 
   const handleSave = useCallback(() => {
     if (!canSave || !budget) return;
     void triggerHaptic('success');
-    const lines = [...rootAllocations];
-    for (const rootAllocation of rootAllocations) {
-      for (const child of childrenByParent.get(rootAllocation.categoryId) ?? []) {
-        const amount = parseAllocationAmount(amounts[child.id] ?? '');
-        if (amount > 0) lines.push({ categoryId: child.id, amount });
-      }
-    }
-    updateMonthlyBudget(budget.id, { totalAmount: parsedTotal, countUnbudgeted, lines });
+    updateMonthlyBudget(budget.id, {
+      totalAmount: draft.parsedTotal,
+      countUnbudgeted,
+      lines: draft.buildAllocations(),
+    });
     onClose();
-  }, [
-    amounts,
-    budget,
-    canSave,
-    childrenByParent,
-    countUnbudgeted,
-    onClose,
-    parsedTotal,
-    rootAllocations,
-    updateMonthlyBudget,
-  ]);
+  }, [budget, canSave, countUnbudgeted, draft, onClose, updateMonthlyBudget]);
 
   if (!budget) return null;
 
   const monthLabel = formatMonthYearLabel(
-    new Date(Number(budget.month.slice(0, 4)), Number(budget.month.slice(5, 7)) - 1, 1),
+    parseMonthKey(budget.month) ?? new Date(),
     settings.locale,
   );
 
@@ -202,8 +112,8 @@ export function MonthlyBudgetEditorScreen({
             label={I18n.t('budget.total_label')}
             variant="currency"
             currencySymbol={currencySymbol}
-            value={total}
-            onChangeText={setTotal}
+            value={draft.total}
+            onChangeText={draft.setTotal}
             placeholder="0.00"
           />
 
@@ -217,8 +127,8 @@ export function MonthlyBudgetEditorScreen({
 
         <View className="bg-background px-5 py-2">
           <AllocationStatusBar
-            total={parsedTotal}
-            remaining={remaining}
+            total={draft.parsedTotal}
+            remaining={draft.remaining}
             settings={settings}
             themeColors={themeColors}
           />
@@ -226,10 +136,10 @@ export function MonthlyBudgetEditorScreen({
 
         <View className="gap-4 px-5">
           <AllocationCategoryList
-            rootCategories={rootExpenseCategories}
-            amounts={amounts}
-            childGaps={childGaps}
-            onPressCategory={openCategoryAllocation}
+            rootCategories={draft.rootExpenseCategories}
+            amounts={draft.amounts}
+            childGaps={draft.childGaps}
+            onPressCategory={draft.openCategoryAllocation}
             settings={settings}
             themeColors={themeColors}
           />

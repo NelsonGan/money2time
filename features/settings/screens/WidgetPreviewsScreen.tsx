@@ -651,7 +651,13 @@ function DataSourceToggle({
 }
 
 export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
-  const { settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } = useApp();
+  const {
+    settings,
+    categories,
+    monthlyBudgets,
+    insightsPreferencesJson,
+    getTrueHourlyRateForDate,
+  } = useApp();
   const { transactions } = useTransactions();
   const { isPro } = usePro();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -667,6 +673,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
       isPro,
       getTrueHourlyRateForDate,
       categories,
+      monthlyBudgets,
       excludedSavingsIncomeCategoryIds: savingsExclusions.income,
       excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
     });
@@ -676,6 +683,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,
+    monthlyBudgets,
     settings,
     transactions,
   ]);

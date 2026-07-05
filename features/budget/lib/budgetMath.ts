@@ -235,6 +235,19 @@ export function pickAutoCreateTemplate({
 }
 
 /**
+ * Number of root-category allocations. A template's stored allocations also
+ * include subcategory breakdown rows, which are a split *within* their parent
+ * — display counts must not include them.
+ */
+export function countRootAllocations(
+  allocations: { categoryId: string }[],
+  categories: Pick<Category, 'id' | 'parentId'>[],
+): number {
+  const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
+  return allocations.filter((allocation) => !parentById.get(allocation.categoryId)).length;
+}
+
+/**
  * Editor helper: how much of the total is still unallocated (positive), fully
  * allocated (zero), or over-allocated (negative). Normalized so float dust
  * can't keep a fully-allocated template from saving.

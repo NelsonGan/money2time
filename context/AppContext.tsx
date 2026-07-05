@@ -34,8 +34,12 @@ import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import {
   accountGroupsTable,
   accountsTable,
+  budgetTemplateCategoriesTable,
+  budgetTemplatesTable,
   categoriesTable,
   itemsTable,
+  monthlyBudgetCategoriesTable,
+  monthlyBudgetsTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
   transactionsTable,
@@ -648,6 +652,12 @@ function purgeAllData() {
   db.delete(accountGroupsTable).run();
   db.delete(monthlyWageSettingsTable).run();
   db.delete(itemsTable).run();
+  // Budgets must go too — a surviving default template would auto-recreate a
+  // ghost budget (pointing at deleted categories) on the very next load.
+  db.delete(budgetTemplateCategoriesTable).run();
+  db.delete(budgetTemplatesTable).run();
+  db.delete(monthlyBudgetCategoriesTable).run();
+  db.delete(monthlyBudgetsTable).run();
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
@@ -661,6 +671,12 @@ function purgeDataForImport() {
   db.delete(accountsTable).run();
   db.delete(recurringRulesTable).run();
   db.delete(accountGroupsTable).run();
+  // The import replaces every category id, so budget allocation lines can't
+  // survive it — drop budgets rather than leave them pointing at ghosts.
+  db.delete(budgetTemplateCategoriesTable).run();
+  db.delete(budgetTemplatesTable).run();
+  db.delete(monthlyBudgetCategoriesTable).run();
+  db.delete(monthlyBudgetsTable).run();
 }
 
 function purgeTransactionsOnly() {
@@ -3191,108 +3207,143 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createBudgetTemplate = useCallback(
     (input: CreateBudgetTemplateInput) => {
-      const id = budgetTemplatesRepository.create({
-        name: input.name,
-        emoji: input.emoji ?? null,
-        totalAmount: input.totalAmount,
-        countUnbudgeted: input.countUnbudgeted ?? true,
-        allocations: input.allocations,
-      });
-      const templates = budgetTemplatesRepository.list();
-      const template = templates.find((candidate) => candidate.id === id);
+      const result = runMutation(
+        () => {
+          const id = budgetTemplatesRepository.create({
+            name: input.name,
+            emoji: input.emoji ?? null,
+            totalAmount: input.totalAmount,
+            countUnbudgeted: input.countUnbudgeted ?? true,
+            allocations: input.allocations,
+          });
+          const templates = budgetTemplatesRepository.list();
+          const template = templates.find((candidate) => candidate.id === id);
 
-      if (template && input.backPopulate) {
-        const range = computeBackPopulateRange({
-          transactions: transactionsRef.current,
-          existingLiveMonths: monthlyBudgetsRepository.existingLiveMonths(),
-        });
-        if (range) {
-          const created = monthlyBudgetsRepository.createManyFromTemplate(range.months, template);
-          if (created.length > 0) {
-            void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, {
-              source: 'backfill',
-              months: created.length,
+          let backfilledMonths = 0;
+          if (template && input.backPopulate) {
+            const range = computeBackPopulateRange({
+              transactions: transactionsRef.current,
+              existingLiveMonths: monthlyBudgetsRepository.existingLiveMonths(),
             });
+            if (range) {
+              backfilledMonths = monthlyBudgetsRepository.createManyFromTemplate(
+                range.months,
+                template,
+              ).length;
+            }
           }
-        }
-      }
 
-      // Saving a template (especially the first) materializes the current
-      // month's budget right away — rollover isn't deferred to the next launch.
-      const currentMonth = monthKeyFromDateLocal(new Date());
-      const autoTemplate = pickAutoCreateTemplate({
-        currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(currentMonth),
-        templates,
-      });
-      if (autoTemplate) {
-        monthlyBudgetsRepository.createFromTemplate(currentMonth, autoTemplate);
+          // Saving a template (especially the first) materializes the current
+          // month's budget right away — rollover isn't deferred to the next launch.
+          const currentMonth = monthKeyFromDateLocal(new Date());
+          const autoTemplate = pickAutoCreateTemplate({
+            currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(currentMonth),
+            templates,
+          });
+          if (autoTemplate) {
+            monthlyBudgetsRepository.createFromTemplate(currentMonth, autoTemplate);
+          }
+
+          return { id, backfilledMonths, autoCreated: autoTemplate != null };
+        },
+        { refresh: refreshBudgets },
+      );
+
+      if (result.backfilledMonths > 0) {
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, {
+          source: 'backfill',
+          months: result.backfilledMonths,
+        });
+      }
+      if (result.autoCreated) {
         void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto' });
       }
-
-      refreshBudgets();
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_CREATED, {
         categories: input.allocations.length,
         backPopulate: Boolean(input.backPopulate),
       });
-      return id;
+      return result.id;
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const updateBudgetTemplate = useCallback(
     (id: string, input: Omit<CreateBudgetTemplateInput, 'backPopulate'>) => {
-      budgetTemplatesRepository.update(id, {
-        name: input.name,
-        emoji: input.emoji ?? null,
-        totalAmount: input.totalAmount,
-        countUnbudgeted: input.countUnbudgeted ?? true,
-        allocations: input.allocations,
-      });
-      refreshBudgets();
+      runMutation(
+        () => {
+          budgetTemplatesRepository.update(id, {
+            name: input.name,
+            emoji: input.emoji ?? null,
+            totalAmount: input.totalAmount,
+            countUnbudgeted: input.countUnbudgeted ?? true,
+            allocations: input.allocations,
+          });
+        },
+        { refresh: refreshBudgets },
+      );
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
         categories: input.allocations.length,
       });
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const deleteBudgetTemplate = useCallback(
     (id: string) => {
-      budgetTemplatesRepository.softDelete(id);
-      refreshBudgets();
+      runMutation(
+        () => {
+          budgetTemplatesRepository.softDelete(id);
+        },
+        { refresh: refreshBudgets },
+      );
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_DELETED);
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const setDefaultBudgetTemplate = useCallback(
     (id: string) => {
-      budgetTemplatesRepository.setDefault(id);
-      refreshBudgets();
+      runMutation(
+        () => {
+          budgetTemplatesRepository.setDefault(id);
+        },
+        { refresh: refreshBudgets },
+      );
       void trackEvent(AnalyticsEvents.BUDGET_DEFAULT_CHANGED);
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const reorderBudgetTemplates = useCallback(
     (ids: string[]) => {
-      budgetTemplatesRepository.reorder(ids);
-      refreshBudgets();
+      runMutation(
+        () => {
+          budgetTemplatesRepository.reorder(ids);
+        },
+        { refresh: refreshBudgets },
+      );
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const createMonthlyBudget = useCallback(
     (month: string, templateId: string) => {
-      const template = budgetTemplatesRepository
-        .list()
-        .find((candidate) => candidate.id === templateId);
-      if (!template) return;
-      monthlyBudgetsRepository.createFromTemplate(month, template);
-      refreshBudgets();
-      void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'manual' });
+      const created = runMutation(
+        () => {
+          const template = budgetTemplatesRepository
+            .list()
+            .find((candidate) => candidate.id === templateId);
+          if (!template) return false;
+          monthlyBudgetsRepository.createFromTemplate(month, template);
+          return true;
+        },
+        { refresh: refreshBudgets },
+      );
+      if (created) {
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'manual' });
+      }
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const updateMonthlyBudget = useCallback(
@@ -3300,20 +3351,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: string,
       input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
     ) => {
-      monthlyBudgetsRepository.update(id, input);
-      refreshBudgets();
+      runMutation(
+        () => {
+          monthlyBudgetsRepository.update(id, input);
+        },
+        { refresh: refreshBudgets },
+      );
       void trackEvent(AnalyticsEvents.BUDGET_MONTH_UPDATED, { categories: input.lines.length });
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const deleteMonthlyBudget = useCallback(
     (id: string) => {
-      monthlyBudgetsRepository.softDelete(id);
-      refreshBudgets();
+      runMutation(
+        () => {
+          monthlyBudgetsRepository.softDelete(id);
+        },
+        { refresh: refreshBudgets },
+      );
       void trackEvent(AnalyticsEvents.BUDGET_MONTH_DELETED);
     },
-    [refreshBudgets],
+    [refreshBudgets, runMutation],
   );
 
   const getTransfersBetweenAccounts = useCallback(

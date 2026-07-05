@@ -4,16 +4,13 @@ import { Pressable, Switch, View } from 'react-native';
 
 import { CategoryEmoji, Text } from '~/components/ui';
 import type { ColorPalette } from '~/constants/designSystem';
+import { money } from '~/features/budget/lib/format';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
-import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
-
-function money(value: number, settings: UserSettings): string {
-  return formatAmount(value, { ...settings, displayMode: 'money' });
-}
+import { normalizeMoneyAmount } from '~/utils/formatters';
 
 export function parseAllocationAmount(value: string): number {
   const parsed = Number.parseFloat(value.replace(',', '.'));

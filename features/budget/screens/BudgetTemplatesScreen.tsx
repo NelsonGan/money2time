@@ -16,21 +16,18 @@ import {
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { countRootAllocations } from '~/features/budget/lib/budgetMath';
+import { money } from '~/features/budget/lib/format';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { BudgetTemplate, UserSettings } from '~/types';
-import { formatAmount } from '~/utils/formatters';
+import type { BudgetTemplate, Category, UserSettings } from '~/types';
 
 interface BudgetTemplatesScreenProps {
   onBack?: () => void;
   onOpenEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
   safeAreaEdges?: Edge[];
-}
-
-function money(value: number, settings: UserSettings): string {
-  return formatAmount(value, { ...settings, displayMode: 'money' });
 }
 
 function DefaultRadio({ selected, themeColors }: { selected: boolean; themeColors: ColorPalette }) {
@@ -51,6 +48,7 @@ function DefaultRadio({ selected, themeColors }: { selected: boolean; themeColor
 
 function TemplateCard({
   template,
+  categories,
   settings,
   themeColors,
   onSetDefault,
@@ -59,6 +57,7 @@ function TemplateCard({
   onDelete,
 }: {
   template: BudgetTemplate;
+  categories: Pick<Category, 'id' | 'parentId'>[];
   settings: UserSettings;
   themeColors: ColorPalette;
   onSetDefault: () => void;
@@ -99,7 +98,9 @@ function TemplateCard({
           </Text>
           <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
             {money(template.totalAmount, settings)} ·{' '}
-            {I18n.t('budget.categories_count', { count: template.allocations.length })}
+            {I18n.t('budget.categories_count', {
+              count: countRootAllocations(template.allocations, categories),
+            })}
             {template.isDefault ? ` · ${I18n.t('budget.template_default_badge')}` : ''}
           </Text>
         </View>
@@ -141,7 +142,8 @@ export function BudgetTemplatesScreen({
   onOpenEditor,
   safeAreaEdges = ['top'],
 }: BudgetTemplatesScreenProps) {
-  const { settings, budgetTemplates, setDefaultBudgetTemplate, deleteBudgetTemplate } = useApp();
+  const { settings, categories, budgetTemplates, setDefaultBudgetTemplate, deleteBudgetTemplate } =
+    useApp();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
@@ -215,6 +217,7 @@ export function BudgetTemplatesScreen({
               <TemplateCard
                 key={template.id}
                 template={template}
+                categories={categories}
                 settings={settings}
                 themeColors={themeColors}
                 onSetDefault={() => setDefaultBudgetTemplate(template.id)}

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
 import { Text } from '~/components/ui';
+import { usageColor } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { BudgetBreakdownSnapshot, BudgetRingSnapshot } from '~/services/widgetSnapshot.shared';
 import { withColorAlpha } from '~/utils/color';
@@ -11,12 +12,6 @@ import { FONT } from '~/utils/fonts';
 
 const BANNER_SOURCE = require('../../assets/banner.png');
 const WIDGET_PADDING = 16;
-
-function usageColor(ratio: number, themeColors: ReturnType<typeof useThemeColors>): string {
-  if (ratio > 1) return themeColors.error;
-  if (ratio >= 0.8) return themeColors.coral;
-  return themeColors.primary;
-}
 
 /**
  * Small "Budget Ring": remaining amount inside a usage arc, with a pacing tick

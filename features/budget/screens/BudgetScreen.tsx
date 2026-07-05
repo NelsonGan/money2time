@@ -1,5 +1,5 @@
 import { Pencil, SlidersHorizontal, Trash2 } from 'lucide-react-native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import type { Edge } from 'react-native-safe-area-context';
 
@@ -20,6 +20,7 @@ import {
   buildBudgetMonthSummary,
   computeBudgetPagerMonths,
 } from '~/features/budget/lib/budgetMath';
+import { money, usageColor } from '~/features/budget/lib/format';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { ColorPalette } from '~/constants/designSystem';
@@ -33,7 +34,7 @@ import type {
   UserSettings,
 } from '~/types';
 import { withColorAlpha } from '~/utils/color';
-import { formatAmount, formatMonthYearLabel, monthKeyFromDateLocal } from '~/utils/formatters';
+import { formatMonthYearLabel, monthKeyFromDateLocal, parseMonthKey } from '~/utils/formatters';
 
 interface BudgetScreenProps {
   onBack?: () => void;
@@ -44,21 +45,9 @@ interface BudgetScreenProps {
   safeAreaEdges?: Edge[];
 }
 
-/** Local Date at the first of a 'YYYY-MM' month key. */
-function monthKeyToDate(monthKey: string): Date {
-  return new Date(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 1, 1);
-}
-
-/** Money formatting regardless of the global time display mode. */
-function money(value: number, settings: UserSettings): string {
-  return formatAmount(value, { ...settings, displayMode: 'money' });
-}
-
-/** primary while healthy, coral when nearly depleted (≥80%), error when over. */
-function usageColor(ratio: number, themeColors: ColorPalette): string {
-  if (ratio > 1) return themeColors.error;
-  if (ratio >= 0.8) return themeColors.coral;
-  return themeColors.primary;
+/** Month label for a 'YYYY-MM' key (keys are always locally generated). */
+function monthKeyLabel(monthKey: string, locale: string | undefined): string {
+  return formatMonthYearLabel(parseMonthKey(monthKey) ?? new Date(), locale);
 }
 
 function ProgressBar({
@@ -383,9 +372,44 @@ export function BudgetScreen({
     initialIndex: currentMonthIndex,
   });
 
+  // The pager tracks a bare slot index, but `months` can gain/lose leading
+  // entries while mounted (a backdated expense, an import, a bulk delete).
+  // Re-anchor the index to the month the user was actually viewing so the
+  // page doesn't silently jump.
+  const previousMonthsRef = useRef(months);
+  useEffect(() => {
+    const previousMonths = previousMonthsRef.current;
+    if (previousMonths === months) return;
+    previousMonthsRef.current = months;
+    const previousActiveMonth = previousMonths[pager.activeIndexRef.current];
+    if (!previousActiveMonth) return;
+    const nextIndex = months.indexOf(previousActiveMonth);
+    if (nextIndex < 0 || nextIndex === pager.activeIndexRef.current) return;
+    pager.setActiveIndex(nextIndex);
+    listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: false });
+  }, [months, pageWidth, pager]);
+
   const budgetsByMonth = useMemo(
     () => new Map(monthlyBudgets.map((budget) => [budget.month, budget])),
     [monthlyBudgets],
+  );
+
+  // Precomputed once per data change — renderItem runs per page swipe and
+  // must not re-aggregate a month's transactions each time.
+  const summariesByMonth = useMemo(
+    () =>
+      new Map(
+        months.map((month) => [
+          month,
+          buildBudgetMonthSummary({
+            month,
+            budget: budgetsByMonth.get(month) ?? null,
+            transactions,
+            categories,
+          }),
+        ]),
+      ),
+    [budgetsByMonth, categories, months, transactions],
   );
 
   const categoriesById = useMemo(
@@ -394,7 +418,7 @@ export function BudgetScreen({
   );
 
   const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
-  const monthLabel = formatMonthYearLabel(monthKeyToDate(activeMonth), settings.locale);
+  const monthLabel = monthKeyLabel(activeMonth, settings.locale);
 
   const handleCreateForMonth = useCallback(
     (month: string) => {
@@ -431,14 +455,14 @@ export function BudgetScreen({
     ({ item: slotIndex }: { item: number }) => {
       const month = months[slotIndex];
       const budget = budgetsByMonth.get(month) ?? null;
-      const summary = buildBudgetMonthSummary({ month, budget, transactions, categories });
+      const summary = summariesByMonth.get(month) ?? null;
 
       if (!budget || !summary) {
         return (
           <View style={{ width: pageWidth }} className="flex-1">
             <EmptyState
               title={I18n.t('budget.no_budget_title', {
-                month: formatMonthYearLabel(monthKeyToDate(month), settings.locale),
+                month: monthKeyLabel(month, settings.locale),
               })}
               message={
                 budgetTemplates.length === 0
@@ -519,7 +543,6 @@ export function BudgetScreen({
     [
       budgetsByMonth,
       budgetTemplates.length,
-      categories,
       categoriesById,
       handleCreateForMonth,
       handleDeleteBudget,
@@ -528,8 +551,8 @@ export function BudgetScreen({
       months,
       pageWidth,
       settings,
+      summariesByMonth,
       themeColors,
-      transactions,
     ],
   );
 
@@ -588,6 +611,7 @@ export function BudgetScreen({
         visible={pickerMonth != null}
         onClose={() => setPickerMonth(null)}
         templates={budgetTemplates}
+        categories={categories}
         settings={settings}
         onSelect={(templateId) => {
           if (pickerMonth) {

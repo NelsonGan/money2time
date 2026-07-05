@@ -6,13 +6,13 @@ import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader, Text } from '~
 import { useApp } from '~/context/AppContext';
 import { parseAllocationAmount } from '~/features/budget/components/AllocationEditor';
 import { computeChildAllocationGap } from '~/features/budget/lib/budgetMath';
+import { money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { UserSettings } from '~/types';
 import { withColorAlpha } from '~/utils/color';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 
 interface CategoryAllocationScreenProps {
   categoryId: string;
@@ -26,10 +26,6 @@ interface CategoryAllocationScreenProps {
 }
 
 const SCROLL_CONTENT = { paddingBottom: 40 } as const;
-
-function money(value: number, settings: UserSettings): string {
-  return formatAmount(value, { ...settings, displayMode: 'money' });
-}
 
 /**
  * Full-page allocation editor for one root category: the amount plus every
@@ -99,9 +95,12 @@ export function CategoryAllocationScreen({
         />
       </View>
 
+      {/* Subcategory inputs sit low on the page and the amount field autofocuses,
+          so let iOS inset the scroll view by the keyboard height. */}
       <ScrollView
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-4 px-5 pt-1">

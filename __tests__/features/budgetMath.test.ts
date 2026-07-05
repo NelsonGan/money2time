@@ -4,6 +4,7 @@ import {
   computeChildAllocationGap,
   computeBackPopulateRange,
   computeBudgetPagerMonths,
+  countRootAllocations,
   pickAutoCreateTemplate,
 } from '~/features/budget/lib/budgetMath';
 import type { BudgetTemplate, Category, MonthlyBudget, TransactionWithRelations } from '~/types';
@@ -381,6 +382,29 @@ describe('computeChildAllocationGap', () => {
 
   it('goes negative when children exceed the parent', () => {
     expect(computeChildAllocationGap(100, [{ amount: 150 }])).toBe(-50);
+  });
+});
+
+describe('countRootAllocations', () => {
+  const categories = [
+    makeCategory('food'),
+    makeCategory('groceries', 'food'),
+    makeCategory('dining', 'food'),
+    makeCategory('transport'),
+  ];
+
+  it('counts only root allocations, not subcategory breakdown rows', () => {
+    const allocations = [
+      { categoryId: 'food' },
+      { categoryId: 'groceries' },
+      { categoryId: 'dining' },
+      { categoryId: 'transport' },
+    ];
+    expect(countRootAllocations(allocations, categories)).toBe(2);
+  });
+
+  it('counts an allocation for an unknown category as a root', () => {
+    expect(countRootAllocations([{ categoryId: 'ghost' }], categories)).toBe(1);
   });
 });
 

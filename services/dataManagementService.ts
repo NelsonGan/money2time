@@ -32,6 +32,12 @@ interface BackupTables {
   // Cost-per-day items. Optional so older backups still parse; absent on
   // restore means "no items".
   items?: Record<string, unknown>[];
+  // Budget templates and frozen monthly budgets. Optional so backups written
+  // before budgets existed still parse; absent on restore means "no budgets".
+  budget_templates?: Record<string, unknown>[];
+  budget_template_categories?: Record<string, unknown>[];
+  monthly_budgets?: Record<string, unknown>[];
+  monthly_budget_categories?: Record<string, unknown>[];
 }
 
 export interface BackupData {
@@ -105,6 +111,11 @@ export async function buildBackupData(): Promise<BackupData> {
       album_transactions: tryReadTable(sqlite, 'album_transactions'),
       // Items were added in a later migration and may be absent on old databases.
       items: tryReadTable(sqlite, 'items'),
+      // Budget tables were added in a later migration and may be absent too.
+      budget_templates: tryReadTable(sqlite, 'budget_templates'),
+      budget_template_categories: tryReadTable(sqlite, 'budget_template_categories'),
+      monthly_budgets: tryReadTable(sqlite, 'monthly_budgets'),
+      monthly_budget_categories: tryReadTable(sqlite, 'monthly_budget_categories'),
     },
   };
 }
@@ -249,6 +260,20 @@ export function applyBackupData(backup: BackupData): ImportResult {
     } catch {
       // Older databases without the table — ignore.
     }
+    // Budget tables — clear even when the backup has no budgets, so a restore
+    // can't leave stale budget lines pointing at replaced category ids.
+    for (const budgetTable of [
+      'budget_template_categories',
+      'budget_templates',
+      'monthly_budget_categories',
+      'monthly_budgets',
+    ]) {
+      try {
+        sqlite.execSync(`DELETE FROM ${budgetTable}`);
+      } catch {
+        // Older databases without the table — ignore.
+      }
+    }
     sqlite.execSync('DELETE FROM recurring_rules');
     sqlite.execSync('DELETE FROM transactions');
     sqlite.execSync('DELETE FROM accounts');
@@ -271,6 +296,12 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'album_transactions', backup.tables.album_transactions);
     // Items are standalone (no FK dependencies).
     insertRows(sqlite, 'items', backup.tables.items);
+    // Budgets after categories (allocation lines reference category ids);
+    // parents before their line rows.
+    insertRows(sqlite, 'budget_templates', backup.tables.budget_templates);
+    insertRows(sqlite, 'budget_template_categories', backup.tables.budget_template_categories);
+    insertRows(sqlite, 'monthly_budgets', backup.tables.monthly_budgets);
+    insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
