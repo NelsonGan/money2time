@@ -372,6 +372,9 @@ const vi = {
         'money2time lưu mọi thứ chỉ trên thiết bị này. Nếu bạn làm mất hoặc thay điện thoại, toàn bộ dữ liệu của bạn sẽ mất vĩnh viễn. Chúng tôi thực sự khuyên bạn nên bật sao lưu {{provider}}.',
       confirm_enable: 'Bật sao lưu',
       confirm_skip: 'Vẫn bỏ qua',
+      icloud_pending_title: 'Đã bật sao lưu',
+      icloud_pending_message:
+        'Đăng nhập iCloud và bật iCloud Drive trong Cài đặt — bản sao lưu của bạn sẽ tự động bắt đầu ngay khi khả dụng.',
     },
   },
   transactions: {

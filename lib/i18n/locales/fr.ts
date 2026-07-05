@@ -374,6 +374,9 @@ const fr = {
         "money2time stocke tout uniquement sur cet appareil. Si vous perdez ou changez de téléphone, toutes vos données seront perdues à jamais. Nous vous recommandons vivement d'activer la sauvegarde {{provider}}.",
       confirm_enable: 'Activer la sauvegarde',
       confirm_skip: 'Ignorer quand même',
+      icloud_pending_title: 'Sauvegarde activée',
+      icloud_pending_message:
+        "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages — votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
     },
   },
   transactions: {

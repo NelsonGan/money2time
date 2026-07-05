@@ -375,6 +375,9 @@ const es = {
         'money2time guarda todo solo en este dispositivo. Si pierdes o cambias de teléfono, todos tus datos desaparecerán para siempre. Te recomendamos activar la copia de seguridad en {{provider}}.',
       confirm_enable: 'Activar copia',
       confirm_skip: 'Omitir de todos modos',
+      icloud_pending_title: 'Copia activada',
+      icloud_pending_message:
+        'Inicia sesión en iCloud y activa iCloud Drive en Ajustes: tu copia de seguridad comenzará automáticamente en cuanto esté disponible.',
     },
   },
   transactions: {

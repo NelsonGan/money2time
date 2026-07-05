@@ -375,6 +375,9 @@ const pl = {
         'money2time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
       confirm_enable: 'Włącz kopię zapasową',
       confirm_skip: 'Pomiń mimo to',
+      icloud_pending_title: 'Kopia zapasowa włączona',
+      icloud_pending_message:
+        'Zaloguj się do iCloud i włącz iCloud Drive w Ustawieniach — kopia zapasowa rozpocznie się automatycznie, gdy tylko będzie dostępna.',
     },
   },
   transactions: {

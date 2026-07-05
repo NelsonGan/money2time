@@ -373,6 +373,9 @@ const da = {
         'money2time gemmer alt kun på denne enhed. Hvis du mister eller udskifter din telefon, er alle dine data væk for altid. Vi anbefaler kraftigt at slå {{provider}}-sikkerhedskopi til.',
       confirm_enable: 'Slå sikkerhedskopi til',
       confirm_skip: 'Spring over alligevel',
+      icloud_pending_title: 'Sikkerhedskopi slået til',
+      icloud_pending_message:
+        'Log ind på iCloud og slå iCloud Drive til i Indstillinger — din sikkerhedskopi starter automatisk, så snart den er tilgængelig.',
     },
   },
   transactions: {

@@ -375,6 +375,9 @@ const id = {
         'money2time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
       confirm_enable: 'Aktifkan pencadangan',
       confirm_skip: 'Tetap lewati',
+      icloud_pending_title: 'Pencadangan diaktifkan',
+      icloud_pending_message:
+        'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan — pencadangan Anda akan dimulai otomatis begitu tersedia.',
     },
   },
   transactions: {

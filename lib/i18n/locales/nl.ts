@@ -375,6 +375,9 @@ const nl = {
         'money2time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
       confirm_enable: 'Back-up inschakelen',
       confirm_skip: 'Toch overslaan',
+      icloud_pending_title: 'Back-up ingeschakeld',
+      icloud_pending_message:
+        'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
     },
   },
   transactions: {

@@ -372,6 +372,9 @@ const ko = {
         'money2time은 모든 것을 이 기기에만 저장합니다. 휴대폰을 잃어버리거나 교체하면 모든 데이터가 영구히 사라집니다. {{provider}} 백업을 켜는 것을 강력히 권장합니다.',
       confirm_enable: '백업 켜기',
       confirm_skip: '그래도 건너뛰기',
+      icloud_pending_title: '백업이 켜졌습니다',
+      icloud_pending_message:
+        'iCloud에 로그인하고 설정에서 iCloud Drive를 켜세요 — 사용 가능해지는 즉시 백업이 자동으로 시작됩니다.',
     },
   },
   transactions: {

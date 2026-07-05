@@ -348,6 +348,9 @@ const en = {
         'money2time stores everything only on this device. If you lose or replace your phone, all your data will be gone for good. We strongly recommend turning on {{provider}} backup.',
       confirm_enable: 'Turn on backup',
       confirm_skip: 'Skip anyway',
+      icloud_pending_title: 'Backup turned on',
+      icloud_pending_message:
+        "Sign in to iCloud and turn on iCloud Drive in Settings — your backup will start automatically as soon as it's available.",
     },
   },
   transactions: {

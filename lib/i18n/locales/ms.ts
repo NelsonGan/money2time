@@ -374,6 +374,9 @@ const ms = {
         'money2time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
       confirm_enable: 'Aktifkan sandaran',
       confirm_skip: 'Langkau juga',
+      icloud_pending_title: 'Sandaran dihidupkan',
+      icloud_pending_message:
+        'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
     },
   },
   transactions: {

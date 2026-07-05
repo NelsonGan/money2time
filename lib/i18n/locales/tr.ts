@@ -375,6 +375,9 @@ const tr = {
         'money2time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
       confirm_enable: 'Yedeklemeyi aç',
       confirm_skip: 'Yine de atla',
+      icloud_pending_title: 'Yedekleme açıldı',
+      icloud_pending_message:
+        "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
     },
   },
   transactions: {

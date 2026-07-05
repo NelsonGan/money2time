@@ -377,6 +377,9 @@ const fil = {
         'Ini-store ng money2time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
       confirm_enable: 'I-on ang backup',
       confirm_skip: 'Laktawan pa rin',
+      icloud_pending_title: 'Naka-on ang backup',
+      icloud_pending_message:
+        'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings — awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
     },
   },
   transactions: {

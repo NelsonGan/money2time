@@ -374,6 +374,9 @@ const pt = {
         'O money2time armazena tudo apenas neste dispositivo. Se você perder ou trocar de telefone, todos os seus dados serão perdidos para sempre. Recomendamos fortemente ativar o backup no {{provider}}.',
       confirm_enable: 'Ativar backup',
       confirm_skip: 'Pular mesmo assim',
+      icloud_pending_title: 'Backup ativado',
+      icloud_pending_message:
+        'Faça login no iCloud e ative o iCloud Drive em Ajustes — seu backup começará automaticamente assim que estiver disponível.',
     },
   },
   transactions: {

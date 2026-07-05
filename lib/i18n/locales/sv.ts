@@ -372,6 +372,9 @@ const sv = {
         'money2time lagrar allt bara på den här enheten. Om du tappar bort eller byter telefon försvinner alla dina data för alltid. Vi rekommenderar starkt att du aktiverar {{provider}}-säkerhetskopiering.',
       confirm_enable: 'Aktivera säkerhetskopiering',
       confirm_skip: 'Hoppa över ändå',
+      icloud_pending_title: 'Säkerhetskopiering påslagen',
+      icloud_pending_message:
+        'Logga in på iCloud och slå på iCloud Drive i Inställningar — din säkerhetskopiering startar automatiskt så snart den är tillgänglig.',
     },
   },
   transactions: {

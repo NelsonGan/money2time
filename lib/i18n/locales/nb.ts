@@ -373,6 +373,9 @@ const nb = {
         'money2time lagrer alt bare på denne enheten. Hvis du mister eller bytter telefon, er alle dataene dine borte for godt. Vi anbefaler på det sterkeste å slå på {{provider}}-sikkerhetskopiering.',
       confirm_enable: 'Slå på sikkerhetskopi',
       confirm_skip: 'Hopp over likevel',
+      icloud_pending_title: 'Sikkerhetskopi slått på',
+      icloud_pending_message:
+        'Logg inn på iCloud og slå på iCloud Drive i Innstillinger — sikkerhetskopien starter automatisk så snart den er tilgjengelig.',
     },
   },
   transactions: {

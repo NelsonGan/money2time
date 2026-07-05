@@ -182,15 +182,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
     try {
+      // Whether the destination is ready to receive a backup right now.
+      let readyToBackUp = true;
+
       if (target === 'icloud') {
-        const available = await isTargetAvailable('icloud');
-        if (!available) {
-          Alert.alert(
-            I18n.t('auto_backup.icloud_unavailable_title'),
-            I18n.t('auto_backup.icloud_unavailable_message'),
-          );
-          return;
-        }
+        // iCloud sign-in is a system-level action the app can't trigger, so we
+        // never block onboarding on it. Turn backup on regardless; the
+        // foreground auto-backup trigger in AppContext runs the first backup as
+        // soon as iCloud Drive becomes available.
+        readyToBackUp = await isTargetAvailable('icloud');
       } else {
         if (!isGoogleDriveConfigured()) {
           Alert.alert(
@@ -199,6 +199,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           );
           return;
         }
+        // Google sign-in IS app-triggerable, so prompt for it inline. Bail only
+        // if the user cancels or it errors out.
         if (!isGoogleSignedIn()) {
           const result = await signInWithGoogle();
           if (!result.ok) {
@@ -215,9 +217,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       updateSettings({ autoBackupEnabled: true, autoBackupTarget: target });
       void triggerHaptic('success');
-      void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_ENABLED, { target });
-      // Kick off the first backup in the background; don't block advancing.
-      void runAutoBackupIfDue({ force: true });
+      void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_ENABLED, {
+        target,
+        pending: !readyToBackUp,
+      });
+
+      if (readyToBackUp) {
+        // Kick off the first backup in the background; don't block advancing.
+        void runAutoBackupIfDue({ force: true });
+      } else {
+        // iCloud not signed in yet — let the user know backup is on and will
+        // start once they enable iCloud Drive, then advance anyway.
+        Alert.alert(
+          I18n.t('onboarding.backup.icloud_pending_title'),
+          I18n.t('onboarding.backup.icloud_pending_message'),
+        );
+      }
       setStep(6);
     } catch (error) {
       void triggerHaptic('error');

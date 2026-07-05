@@ -372,6 +372,9 @@ const ja = {
         'money2timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
       confirm_enable: 'バックアップを有効にする',
       confirm_skip: 'スキップする',
+      icloud_pending_title: 'バックアップを有効にしました',
+      icloud_pending_message:
+        'iCloudにサインインし、設定でiCloud Driveをオンにしてください。利用可能になり次第、バックアップが自動的に開始されます。',
     },
   },
   transactions: {

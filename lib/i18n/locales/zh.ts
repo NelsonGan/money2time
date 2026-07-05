@@ -340,6 +340,9 @@ const zh = {
         'money2time 仅将所有数据保存在此设备上。如果你丢失或更换手机，所有数据将永久丢失。我们强烈建议开启 {{provider}} 备份。',
       confirm_enable: '开启备份',
       confirm_skip: '仍然跳过',
+      icloud_pending_title: '已开启备份',
+      icloud_pending_message:
+        '登录 iCloud 并在“设置”中开启 iCloud 云盘 — 一旦可用，备份将自动开始。',
     },
   },
   transactions: {
