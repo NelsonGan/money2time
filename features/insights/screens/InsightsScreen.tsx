@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Animated as RNAnimated,
+  Easing as RNEasing,
   FlatList,
   Image,
   InteractionManager,
@@ -2459,6 +2460,19 @@ function InsightTypeMenuPopover({
   onClose: () => void;
 }) {
   const themeColors = useThemeColors();
+  const entrance = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    if (!visible) return;
+    entrance.setValue(0);
+    // A gentle fade + subtle scale-in — smoother than a spring, no overshoot.
+    RNAnimated.timing(entrance, {
+      toValue: 1,
+      duration: 160,
+      easing: RNEasing.out(RNEasing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [visible, entrance]);
 
   if (!visible) return null;
 
@@ -2477,6 +2491,7 @@ function InsightTypeMenuPopover({
     screenHeight - 220 - sideMargin,
   );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
+  const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
 
   return (
     <ThemeModal
@@ -2494,7 +2509,7 @@ function InsightTypeMenuPopover({
           accessibilityLabel={I18n.t('common.close')}
         />
 
-        <View
+        <RNAnimated.View
           className="rounded-[24px] bg-background overflow-hidden"
           style={[
             styles.periodPickerCard,
@@ -2505,6 +2520,9 @@ function InsightTypeMenuPopover({
               maxHeight: maxCardHeight,
               borderColor: withColorAlpha(themeColors.border, 0.45),
               shadowColor: themeColors.text,
+              opacity: entrance,
+              transform: [{ scale }],
+              transformOrigin: 'top left',
             },
           ]}
         >
@@ -2554,7 +2572,7 @@ function InsightTypeMenuPopover({
               );
             })}
           </ScrollView>
-        </View>
+        </RNAnimated.View>
       </View>
     </ThemeModal>
   );
