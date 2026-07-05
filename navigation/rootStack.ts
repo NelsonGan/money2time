@@ -51,6 +51,10 @@ export type RootStackParamList = {
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
+  BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
+  // Root-level budget screens for imperative opens (widget deep link).
+  SettingsBudget: undefined;
+  SettingsBudgetTemplates: undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

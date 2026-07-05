@@ -10,6 +10,8 @@ export const WIDGET_IDS = {
   calendarMonth: 'calendar_month',
   savingsRate: 'savings_rate',
   savingsHistory: 'savings_history',
+  budgetRing: 'budget_ring',
+  budgetBreakdown: 'budget_breakdown',
 } as const;
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS];
@@ -70,6 +72,21 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     snapshotKey: 'savingsHistory',
     proSource: 'widget_savings_history',
   },
+  {
+    id: WIDGET_IDS.budgetRing,
+    title: 'Budget',
+    access: 'free',
+    supportedSizes: ['small'],
+    snapshotKey: 'budgetRing',
+  },
+  {
+    id: WIDGET_IDS.budgetBreakdown,
+    title: 'Budget Breakdown',
+    access: 'pro',
+    supportedSizes: ['large'],
+    snapshotKey: 'budgetBreakdown',
+    proSource: 'widget_budget_breakdown',
+  },
 ];
 
 export function buildQuickAddWidgetUrl(type: 'income' | 'expense') {
@@ -78,4 +95,8 @@ export function buildQuickAddWidgetUrl(type: 'income' | 'expense') {
 
 export function buildWidgetProUrl(widgetId: WidgetId) {
   return `${WIDGET_DEEP_LINK_SCHEME}://pro?source=widget_${widgetId}`;
+}
+
+export function buildBudgetWidgetUrl() {
+  return `${WIDGET_DEEP_LINK_SCHEME}://budget`;
 }

@@ -216,6 +216,56 @@ export const itemsTable = sqliteTable('items', {
   deletedAt: text('deleted_at'),
 });
 
+export const budgetTemplatesTable = sqliteTable('budget_templates', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  totalAmount: real('total_amount').notNull().default(0),
+  // Exactly one live template has is_default = 1 while any template exists.
+  isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const budgetTemplateCategoriesTable = sqliteTable('budget_template_categories', {
+  id: text('id').primaryKey(),
+  templateId: text('template_id').notNull(),
+  categoryId: text('category_id').notNull(),
+  amount: real('amount').notNull().default(0),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const monthlyBudgetsTable = sqliteTable('monthly_budgets', {
+  id: text('id').primaryKey(),
+  // 'YYYY-MM' month key. A partial unique index allows one live row per month;
+  // soft-deleted rows double as tombstones so auto-create never resurrects a
+  // month the user deleted.
+  month: text('month').notNull(),
+  // Provenance only — the source template may be renamed or deleted later.
+  templateId: text('template_id'),
+  templateName: text('template_name'),
+  // Frozen at creation; never rewritten when the template changes.
+  totalAmount: real('total_amount').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const monthlyBudgetCategoriesTable = sqliteTable('monthly_budget_categories', {
+  id: text('id').primaryKey(),
+  budgetId: text('budget_id').notNull(),
+  categoryId: text('category_id').notNull(),
+  amount: real('amount').notNull().default(0),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -243,3 +293,7 @@ export type ExchangeRateRow = typeof exchangeRatesTable.$inferSelect;
 export type AlbumRow = typeof albumsTable.$inferSelect;
 export type AlbumTransactionRow = typeof albumTransactionsTable.$inferSelect;
 export type ItemRow = typeof itemsTable.$inferSelect;
+export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
+export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;
+export type MonthlyBudgetRow = typeof monthlyBudgetsTable.$inferSelect;
+export type MonthlyBudgetCategoryRow = typeof monthlyBudgetCategoriesTable.$inferSelect;

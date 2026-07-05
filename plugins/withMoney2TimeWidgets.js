@@ -136,8 +136,14 @@ function buildSampleSnapshotJson() {
       ? `${historyRateSum / historyRateCount < 0 ? '−' : ''}${Math.abs(Math.round((historyRateSum / historyRateCount) * 100))}%`
       : '—';
 
+  // Budget sample: a plausible mid-month plan (~78% used, one category over).
+  const budgetTotal = 1200;
+  const budgetSpent = 942;
+  const budgetRemaining = budgetTotal - budgetSpent;
+  const budgetPace = todayNum / daysInMonth;
+
   return JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: now.toISOString(),
     isPro: true,
     locale: 'en',
@@ -213,11 +219,94 @@ function buildSampleSnapshotJson() {
       totalSavedLabel: `$${shortNum(Math.abs(historyTotalSaved))}`,
       totalIsPositive: historyTotalSaved >= 0,
     },
+    budgetRing: {
+      widgetId: 'budget_ring',
+      title: 'Budget',
+      monthKey,
+      monthLabel,
+      hasBudget: true,
+      totalBudget: budgetTotal,
+      totalSpent: budgetSpent,
+      usageRatio: budgetSpent / budgetTotal,
+      isOver: false,
+      remainingLabel: `$${shortNum(budgetRemaining)}`,
+      captionLabel: `left of $${shortNum(budgetTotal)}`,
+      paceRatio: budgetPace,
+      daysLeftLabel: `${daysInMonth - todayNum} days left`,
+      setupLabel: 'Set a monthly budget',
+      budgetUrl: 'money2time://budget',
+    },
+    budgetBreakdown: {
+      widgetId: 'budget_breakdown',
+      title: 'Budget Breakdown',
+      monthKey,
+      monthLabel,
+      hasBudget: true,
+      totalSpentLabel: `$${shortNum(budgetSpent)}`,
+      totalBudgetLabel: `$${shortNum(budgetTotal)}`,
+      usageRatio: budgetSpent / budgetTotal,
+      isOver: false,
+      remainingLabel: `$${shortNum(budgetRemaining)} left`,
+      paceRatio: budgetPace,
+      categories: [
+        // Over-budget line floats to the top, matching the JS snapshot builder.
+        {
+          categoryId: 'fun',
+          name: 'Fun',
+          emoji: '🎬',
+          spent: 236,
+          budgeted: 200,
+          usageRatio: 1.18,
+          isOver: true,
+          spentLabel: '$236',
+          budgetedLabel: '$200',
+        },
+        {
+          categoryId: 'food',
+          name: 'Food',
+          emoji: '🍜',
+          spent: 320,
+          budgeted: 450,
+          usageRatio: 0.71,
+          isOver: false,
+          spentLabel: '$320',
+          budgetedLabel: '$450',
+        },
+        {
+          categoryId: 'shopping',
+          name: 'Shopping',
+          emoji: '🛍️',
+          spent: 143,
+          budgeted: 300,
+          usageRatio: 0.48,
+          isOver: false,
+          spentLabel: '$143',
+          budgetedLabel: '$300',
+        },
+        {
+          categoryId: 'transport',
+          name: 'Transport',
+          emoji: '🚌',
+          spent: 96,
+          budgeted: 250,
+          usageRatio: 0.38,
+          isOver: false,
+          spentLabel: '$96',
+          budgetedLabel: '$250',
+        },
+      ],
+      moreCount: 0,
+      moreLabel: '',
+      unbudgetedLabel: '+$147 unbudgeted',
+      setupLabel: 'Set a monthly budget',
+      budgetUrl: 'money2time://budget',
+    },
     proUnlockUrlByWidgetId: {
       weekly_expense: 'money2time://pro?source=widget_weekly_expense',
       calendar_month: 'money2time://pro?source=widget_calendar_month',
       savings_rate: 'money2time://pro?source=widget_savings_rate',
       savings_history: 'money2time://pro?source=widget_savings_history',
+      budget_breakdown: 'money2time://pro?source=widget_budget_breakdown',
     },
   });
 }
@@ -306,6 +395,14 @@ const ANDROID_WIDGET_RECEIVERS = [
   {
     name: '.widgets.Money2TimeSavingsHistoryWidgetProvider',
     resource: '@xml/money2time_savings_history_widget',
+  },
+  {
+    name: '.widgets.Money2TimeBudgetRingWidgetProvider',
+    resource: '@xml/money2time_budget_ring_widget',
+  },
+  {
+    name: '.widgets.Money2TimeBudgetBreakdownWidgetProvider',
+    resource: '@xml/money2time_budget_breakdown_widget',
   },
 ];
 
@@ -1251,6 +1348,279 @@ public class Money2TimeSavingsHistoryWidgetProvider extends AppWidgetProvider {
 `,
       );
 
+      // --- Budget ring provider (free, small) -------------------------------
+      writeFileIfChanged(
+        path.join(widgetRoot, 'Money2TimeBudgetRingWidgetProvider.java'),
+        `package com.nelsongan.money2time.widgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.view.View;
+import android.widget.RemoteViews;
+
+import com.nelsongan.money2time.R;
+
+import org.json.JSONObject;
+
+public class Money2TimeBudgetRingWidgetProvider extends AppWidgetProvider {
+  static final String PREFS_NAME = "${SNAPSHOT_PREFS}";
+  static final String SNAPSHOT_KEY = "${SNAPSHOT_KEY}";
+
+  @Override
+  public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
+    for (int appWidgetId : appWidgetIds) {
+      updateWidget(context, manager, appWidgetId);
+    }
+  }
+
+  static void updateAll(Context context) {
+    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+    ComponentName provider = new ComponentName(context, Money2TimeBudgetRingWidgetProvider.class);
+    int[] ids = manager.getAppWidgetIds(provider);
+    for (int id : ids) {
+      updateWidget(context, manager, id);
+    }
+  }
+
+  private static PendingIntent linkIntent(Context context, String url, int code) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+    intent.setPackage(context.getPackageName());
+    return PendingIntent.getActivity(
+      context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+  }
+
+  private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
+    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_budget_ring_widget);
+    SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    String json = prefs.getString(SNAPSHOT_KEY, null);
+
+    views.setOnClickPendingIntent(R.id.ring_root, linkIntent(context, "money2time://budget", 701));
+
+    try {
+      if (json == null) json = Money2TimeWidgetSampleData.JSON;
+      JSONObject root = new JSONObject(json);
+      JSONObject br = root.optJSONObject("budgetRing");
+      // Snapshots from an older app version have no budget section — treat as no budget.
+      boolean hasBudget = br != null && br.optBoolean("hasBudget", false);
+
+      if (!hasBudget) {
+        views.setViewVisibility(R.id.ring_content, View.GONE);
+        views.setViewVisibility(R.id.ring_setup, View.VISIBLE);
+        manager.updateAppWidget(appWidgetId, views);
+        return;
+      }
+
+      views.setViewVisibility(R.id.ring_setup, View.GONE);
+      views.setViewVisibility(R.id.ring_content, View.VISIBLE);
+
+      boolean isOver = br.optBoolean("isOver", false);
+      double ratio = br.optDouble("usageRatio", 0);
+      int amountColor = isOver
+        ? Color.parseColor("#D45F57")
+        : Color.parseColor("#1A2E2A");
+
+      views.setTextViewText(R.id.ring_amount, br.optString("remainingLabel", ""));
+      views.setTextColor(R.id.ring_amount, amountColor);
+      views.setTextViewText(R.id.ring_caption, br.optString("captionLabel", ""));
+      views.setTextViewText(R.id.ring_days, br.optString("daysLeftLabel", ""));
+
+      int progress = (int) Math.round(Math.max(0, Math.min(1, ratio)) * 100);
+      if (isOver || ratio >= 0.8) {
+        views.setViewVisibility(R.id.ring_bar_pos, View.GONE);
+        views.setViewVisibility(R.id.ring_bar_neg, View.VISIBLE);
+        views.setProgressBar(R.id.ring_bar_neg, 100, Math.max(6, progress), false);
+      } else {
+        views.setViewVisibility(R.id.ring_bar_neg, View.GONE);
+        views.setViewVisibility(R.id.ring_bar_pos, View.VISIBLE);
+        views.setProgressBar(R.id.ring_bar_pos, 100, Math.max(3, progress), false);
+      }
+    } catch (Exception e) {
+      views.setViewVisibility(R.id.ring_content, View.GONE);
+      views.setViewVisibility(R.id.ring_setup, View.VISIBLE);
+    }
+
+    manager.updateAppWidget(appWidgetId, views);
+  }
+}
+`,
+      );
+
+      // --- Budget breakdown provider (pro, large) ---------------------------
+      const BUD_ROWS = 5;
+      const budRowIds = joinIds('bud_row_', BUD_ROWS);
+      const budEmojiIds = joinIds('bud_emoji_', BUD_ROWS);
+      const budNameIds = joinIds('bud_name_', BUD_ROWS);
+      const budValsIds = joinIds('bud_vals_', BUD_ROWS);
+      const budBarPosIds = joinIds('bud_bar_pos_', BUD_ROWS);
+      const budBarNegIds = joinIds('bud_bar_neg_', BUD_ROWS);
+
+      writeFileIfChanged(
+        path.join(widgetRoot, 'Money2TimeBudgetBreakdownWidgetProvider.java'),
+        `package com.nelsongan.money2time.widgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.view.View;
+import android.widget.RemoteViews;
+
+import com.nelsongan.money2time.R;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class Money2TimeBudgetBreakdownWidgetProvider extends AppWidgetProvider {
+  static final String PREFS_NAME = "${SNAPSHOT_PREFS}";
+  static final String SNAPSHOT_KEY = "${SNAPSHOT_KEY}";
+
+  private static final int[] ROW_IDS = { ${budRowIds} };
+  private static final int[] EMOJI_IDS = { ${budEmojiIds} };
+  private static final int[] NAME_IDS = { ${budNameIds} };
+  private static final int[] VALS_IDS = { ${budValsIds} };
+  private static final int[] BAR_POS_IDS = { ${budBarPosIds} };
+  private static final int[] BAR_NEG_IDS = { ${budBarNegIds} };
+
+  @Override
+  public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
+    for (int appWidgetId : appWidgetIds) {
+      updateWidget(context, manager, appWidgetId);
+    }
+  }
+
+  static void updateAll(Context context) {
+    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+    ComponentName provider = new ComponentName(context, Money2TimeBudgetBreakdownWidgetProvider.class);
+    int[] ids = manager.getAppWidgetIds(provider);
+    for (int id : ids) {
+      updateWidget(context, manager, id);
+    }
+  }
+
+  private static PendingIntent linkIntent(Context context, String url, int code) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+    intent.setPackage(context.getPackageName());
+    return PendingIntent.getActivity(
+      context, code, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+  }
+
+  private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
+    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_budget_breakdown_widget);
+    views.setViewVisibility(R.id.bud_pro_badge, View.GONE);
+    SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    String json = prefs.getString(SNAPSHOT_KEY, null);
+
+    try {
+      if (json == null) json = Money2TimeWidgetSampleData.JSON;
+      JSONObject root = new JSONObject(json);
+      boolean isPro = root.optBoolean("isPro", false);
+
+      if (!isPro) {
+        views.setViewVisibility(R.id.bud_content, View.GONE);
+        views.setViewVisibility(R.id.bud_locked, View.VISIBLE);
+        views.setTextViewText(R.id.bud_locked_text, "Available with Money2Time Pro");
+        String url = "money2time://pro";
+        JSONObject unlock = root.optJSONObject("proUnlockUrlByWidgetId");
+        if (unlock != null) url = unlock.optString("budget_breakdown", url);
+        views.setOnClickPendingIntent(R.id.bud_root, linkIntent(context, url, 801));
+        manager.updateAppWidget(appWidgetId, views);
+        return;
+      }
+
+      views.setViewVisibility(R.id.bud_locked, View.GONE);
+      views.setViewVisibility(R.id.bud_content, View.VISIBLE);
+      views.setOnClickPendingIntent(R.id.bud_root, linkIntent(context, "money2time://budget", 802));
+
+      JSONObject bb = root.optJSONObject("budgetBreakdown");
+      // Snapshots from an older app version have no budget section — treat as no budget.
+      boolean hasBudget = bb != null && bb.optBoolean("hasBudget", false);
+      if (!hasBudget) {
+        views.setViewVisibility(R.id.bud_body, View.GONE);
+        views.setViewVisibility(R.id.bud_setup, View.VISIBLE);
+        manager.updateAppWidget(appWidgetId, views);
+        return;
+      }
+      views.setViewVisibility(R.id.bud_setup, View.GONE);
+      views.setViewVisibility(R.id.bud_body, View.VISIBLE);
+
+      boolean isOver = bb.optBoolean("isOver", false);
+      double ratio = bb.optDouble("usageRatio", 0);
+
+      views.setTextViewText(R.id.bud_month, bb.optString("monthLabel", ""));
+      views.setTextViewText(
+        R.id.bud_totals,
+        bb.optString("totalSpentLabel", "$0") + " / " + bb.optString("totalBudgetLabel", "$0"));
+      views.setTextViewText(R.id.bud_remaining, bb.optString("remainingLabel", ""));
+      views.setTextColor(
+        R.id.bud_remaining,
+        isOver ? Color.parseColor("#D45F57") : Color.parseColor("#1F8A6F"));
+
+      int progress = (int) Math.round(Math.max(0, Math.min(1, ratio)) * 100);
+      if (isOver || ratio >= 0.8) {
+        views.setViewVisibility(R.id.bud_total_bar_pos, View.GONE);
+        views.setViewVisibility(R.id.bud_total_bar_neg, View.VISIBLE);
+        views.setProgressBar(R.id.bud_total_bar_neg, 100, Math.max(6, progress), false);
+      } else {
+        views.setViewVisibility(R.id.bud_total_bar_neg, View.GONE);
+        views.setViewVisibility(R.id.bud_total_bar_pos, View.VISIBLE);
+        views.setProgressBar(R.id.bud_total_bar_pos, 100, Math.max(3, progress), false);
+      }
+
+      JSONArray categories = bb.getJSONArray("categories");
+      for (int i = 0; i < ROW_IDS.length; i++) {
+        if (i >= categories.length()) {
+          views.setViewVisibility(ROW_IDS[i], View.GONE);
+          continue;
+        }
+        views.setViewVisibility(ROW_IDS[i], View.VISIBLE);
+        JSONObject line = categories.getJSONObject(i);
+        boolean lineOver = line.optBoolean("isOver", false);
+        double lineRatio = line.optDouble("usageRatio", 0);
+        String emoji = line.optString("emoji", "");
+        views.setTextViewText(EMOJI_IDS[i], emoji.isEmpty() ? "\\u2022" : emoji);
+        views.setTextViewText(NAME_IDS[i], line.optString("name", ""));
+        views.setTextViewText(
+          VALS_IDS[i],
+          line.optString("spentLabel", "$0") + " / " + line.optString("budgetedLabel", "$0"));
+
+        int linePct = (int) Math.round(Math.max(0, Math.min(1, lineRatio)) * 100);
+        if (lineOver || lineRatio >= 0.8) {
+          views.setViewVisibility(BAR_POS_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_NEG_IDS[i], View.VISIBLE);
+          views.setProgressBar(BAR_NEG_IDS[i], 100, Math.max(6, linePct), false);
+        } else {
+          views.setViewVisibility(BAR_NEG_IDS[i], View.GONE);
+          views.setViewVisibility(BAR_POS_IDS[i], View.VISIBLE);
+          views.setProgressBar(BAR_POS_IDS[i], 100, Math.max(3, linePct), false);
+        }
+      }
+
+      views.setTextViewText(R.id.bud_unbudgeted, bb.optString("unbudgetedLabel", ""));
+      views.setTextViewText(R.id.bud_more, bb.optString("moreLabel", ""));
+    } catch (Exception e) {
+      views.setViewVisibility(R.id.bud_content, View.GONE);
+      views.setViewVisibility(R.id.bud_locked, View.VISIBLE);
+      views.setTextViewText(R.id.bud_locked_text, "Open Money2Time to get started.");
+    }
+
+    manager.updateAppWidget(appWidgetId, views);
+  }
+}
+`,
+      );
+
       // --- Native module + package ----------------------------------------
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetModule.java'),
@@ -1283,6 +1653,8 @@ public class Money2TimeWidgetModule extends ReactContextBaseJavaModule {
     Money2TimeCalendarWidgetProvider.updateAll(context);
     Money2TimeSavingsRateWidgetProvider.updateAll(context);
     Money2TimeSavingsHistoryWidgetProvider.updateAll(context);
+    Money2TimeBudgetRingWidgetProvider.updateAll(context);
+    Money2TimeBudgetBreakdownWidgetProvider.updateAll(context);
   }
 
   @ReactMethod
@@ -1430,6 +1802,38 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:updatePeriodMillis="0"
   android:initialLayout="@layout/money2time_savings_history_widget"
   android:previewLayout="@layout/money2time_savings_history_widget"
+  android:resizeMode="horizontal|vertical"
+  android:widgetCategory="home_screen" />
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'xml/money2time_budget_ring_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="110dp"
+  android:minHeight="110dp"
+  android:targetCellWidth="2"
+  android:targetCellHeight="2"
+  android:updatePeriodMillis="0"
+  android:initialLayout="@layout/money2time_budget_ring_widget"
+  android:previewLayout="@layout/money2time_budget_ring_widget"
+  android:resizeMode="horizontal|vertical"
+  android:widgetCategory="home_screen" />
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'xml/money2time_budget_breakdown_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="250dp"
+  android:minHeight="250dp"
+  android:targetCellWidth="4"
+  android:targetCellHeight="4"
+  android:updatePeriodMillis="0"
+  android:initialLayout="@layout/money2time_budget_breakdown_widget"
+  android:previewLayout="@layout/money2time_budget_breakdown_widget"
   android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
 `,
@@ -2353,6 +2757,366 @@ ${historyRows}
 `,
       );
 
+      // --- Budget ring layout (small, free) ---------------------------------
+      writeFileIfChanged(
+        path.join(resRoot, 'layout/money2time_budget_ring_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/ring_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/money2time_widget_background"
+  android:clipToOutline="true"
+  android:padding="14dp">
+
+  <LinearLayout
+    android:id="@+id/ring_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:letterSpacing="0.12"
+      android:text="BUDGET"
+      android:textColor="#94A39F"
+      android:textSize="10sp"
+      android:textStyle="bold" />
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <TextView
+      android:id="@+id/ring_amount"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:autoSizeMaxTextSize="26sp"
+      android:autoSizeMinTextSize="16sp"
+      android:autoSizeTextType="uniform"
+      android:gravity="center"
+      android:includeFontPadding="false"
+      android:maxLines="1"
+      android:text="$258"
+      android:textColor="#1A2E2A"
+      android:textSize="26sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/ring_caption"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="2dp"
+      android:maxLines="1"
+      android:text="left of $1.2K"
+      android:textColor="#94A39F"
+      android:textSize="10sp"
+      android:textStyle="bold" />
+
+    <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="10dp"
+      android:layout_marginTop="10dp">
+      <ProgressBar android:id="@+id/ring_bar_pos" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="10dp" android:max="100" android:progress="78" android:progressDrawable="@drawable/money2time_budget_progress" />
+      <ProgressBar android:id="@+id/ring_bar_neg" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="10dp" android:max="100" android:progress="78" android:progressDrawable="@drawable/money2time_budget_progress_over" android:visibility="gone" />
+    </FrameLayout>
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <TextView
+      android:id="@+id/ring_days"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:maxLines="1"
+      android:text="12 days left"
+      android:textColor="#94A39F"
+      android:textSize="10sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/ring_setup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:visibility="gone">
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:text="Set a monthly budget"
+      android:textColor="#1A2E2A"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="3dp"
+      android:gravity="center"
+      android:text="Open Money2Time"
+      android:textColor="#6B7A77"
+      android:textSize="11sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+</FrameLayout>
+`,
+      );
+
+      // --- Budget breakdown layout (large, pro) ------------------------------
+      // Sample rows baked into the static layout so the widget picker shows a
+      // populated breakdown (provider overrides every row on placement).
+      const BUD_SAMPLE_ROWS = [
+        { emoji: '🎬', name: 'Fun', vals: '$236 / $200', pct: 100, over: true },
+        { emoji: '🍜', name: 'Food', vals: '$320 / $450', pct: 71, over: false },
+        { emoji: '🛍️', name: 'Shopping', vals: '$143 / $300', pct: 48, over: false },
+        { emoji: '🚌', name: 'Transport', vals: '$96 / $250', pct: 38, over: false },
+        { emoji: '•', name: '', vals: '', pct: 0, over: false, hidden: true },
+      ];
+      const budgetRows = BUD_SAMPLE_ROWS.map(
+        (row, i) => `      <LinearLayout
+        android:id="@+id/bud_row_${i}"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="${row.hidden ? 'gone' : 'visible'}">
+        <TextView android:id="@+id/bud_emoji_${i}" android:layout_width="22dp" android:layout_height="wrap_content" android:gravity="center" android:textSize="13sp" android:text="${row.emoji}" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="6dp" android:orientation="vertical">
+          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <TextView android:id="@+id/bud_name_${i}" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:maxLines="1" android:textSize="11sp" android:textStyle="bold" android:textColor="#1A2E2A" android:text="${row.name}" />
+            <TextView android:id="@+id/bud_vals_${i}" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:textSize="10sp" android:textStyle="bold" android:textColor="#6B7A77" android:text="${row.vals}" />
+          </LinearLayout>
+          <FrameLayout android:layout_width="match_parent" android:layout_height="5dp" android:layout_marginTop="3dp">
+            <ProgressBar android:id="@+id/bud_bar_pos_${i}" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="5dp" android:max="100" android:progress="${row.over ? 0 : row.pct}" android:progressDrawable="@drawable/money2time_budget_progress" android:visibility="${row.over ? 'gone' : 'visible'}" />
+            <ProgressBar android:id="@+id/bud_bar_neg_${i}" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="5dp" android:max="100" android:progress="${row.over ? row.pct : 0}" android:progressDrawable="@drawable/money2time_budget_progress_over" android:visibility="${row.over ? 'visible' : 'gone'}" />
+          </FrameLayout>
+        </LinearLayout>
+      </LinearLayout>`,
+      ).join('\n');
+
+      writeFileIfChanged(
+        path.join(resRoot, 'layout/money2time_budget_breakdown_widget.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/bud_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/money2time_widget_background"
+  android:clipToPadding="false"
+  android:clipToOutline="true"
+  android:padding="16dp">
+
+  <LinearLayout
+    android:id="@+id/bud_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="top">
+      <ImageView
+        android:layout_width="116dp"
+        android:layout_height="32dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Money2Time"
+        android:scaleType="fitStart"
+        android:src="@drawable/banner" />
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="end"
+        android:orientation="vertical">
+        <TextView
+          android:id="@+id/bud_month"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text="July 2026"
+          android:textColor="#1A2E2A"
+          android:textSize="14sp"
+          android:textStyle="bold" />
+        <TextView
+          android:id="@+id/bud_totals"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text="$942 / $1.2K"
+          android:textColor="#1F8A6F"
+          android:textSize="15sp"
+          android:textStyle="bold" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/bud_body"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:orientation="vertical">
+
+      <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_marginTop="10dp">
+        <ProgressBar android:id="@+id/bud_total_bar_pos" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="10dp" android:max="100" android:progress="78" android:progressDrawable="@drawable/money2time_budget_progress" />
+        <ProgressBar android:id="@+id/bud_total_bar_neg" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="10dp" android:max="100" android:progress="78" android:progressDrawable="@drawable/money2time_budget_progress_over" android:visibility="gone" />
+      </FrameLayout>
+
+      <TextView
+        android:id="@+id/bud_remaining"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:maxLines="1"
+        android:text="$258 left"
+        android:textColor="#1F8A6F"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="6dp"
+        android:orientation="vertical">
+${budgetRows}
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+        <TextView
+          android:id="@+id/bud_unbudgeted"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:maxLines="1"
+          android:text="+$147 unbudgeted"
+          android:textColor="#94A39F"
+          android:textSize="10sp"
+          android:textStyle="bold" />
+        <TextView
+          android:id="@+id/bud_more"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:maxLines="1"
+          android:text=""
+          android:textColor="#94A39F"
+          android:textSize="10sp"
+          android:textStyle="bold" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/bud_setup"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="vertical"
+      android:visibility="gone">
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Set a monthly budget"
+        android:textColor="#1A2E2A"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:text="Open Money2Time"
+        android:textColor="#6B7A77"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+    </LinearLayout>
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/bud_locked"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:visibility="gone">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <ImageView
+      android:layout_width="104dp"
+      android:layout_height="104dp"
+      android:adjustViewBounds="true"
+      android:contentDescription="Money2Time Pro"
+      android:src="@drawable/widget_mascot" />
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:text="Budget Breakdown"
+      android:textColor="#1A2E2A"
+      android:textSize="21sp"
+      android:textStyle="bold" />
+    <TextView
+      android:id="@+id/bud_locked_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="3dp"
+      android:gravity="center"
+      android:text="Available with Money2Time Pro"
+      android:textColor="#6B7A77"
+      android:textSize="13sp"
+      android:textStyle="bold" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/money2time_cta_pill"
+      android:gravity="center"
+      android:paddingVertical="12dp"
+      android:text="✨ Unlock Pro"
+      android:textColor="#FFFFFF"
+      android:textSize="15sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <FrameLayout
+    android:id="@+id/bud_pro_badge"
+    android:layout_width="58dp"
+    android:layout_height="58dp"
+    android:layout_gravity="top|end"
+    android:layout_marginTop="-16dp"
+    android:layout_marginEnd="-16dp"
+    android:clipChildren="true">
+    <TextView
+      android:layout_width="120dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:background="#F6B750"
+      android:gravity="center"
+      android:includeFontPadding="false"
+      android:paddingVertical="3dp"
+      android:rotation="45"
+      android:text="PRO"
+      android:textColor="#FFFFFF"
+      android:textSize="9sp"
+      android:textStyle="bold"
+      android:translationX="15dp"
+      android:translationY="-15dp" />
+  </FrameLayout>
+</FrameLayout>
+`,
+      );
+
       // --- Drawables --------------------------------------------------------
       writeFileIfChanged(
         path.join(resRoot, 'drawable/money2time_widget_background.xml'),
@@ -2638,6 +3402,52 @@ ${historyRows}
 `,
       );
 
+      // Budget usage bars: primary fill on a soft track, red variant when
+      // depleted (≥80%) or over budget.
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_budget_progress.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@android:id/background">
+    <shape>
+      <solid android:color="#E0F5EE" />
+      <corners android:radius="999dp" />
+    </shape>
+  </item>
+  <item android:id="@android:id/progress">
+    <clip>
+      <shape>
+        <solid android:color="#1F8A6F" />
+        <corners android:radius="999dp" />
+      </shape>
+    </clip>
+  </item>
+</layer-list>
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_budget_progress_over.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@android:id/background">
+    <shape>
+      <solid android:color="#F4D6D2" />
+      <corners android:radius="999dp" />
+    </shape>
+  </item>
+  <item android:id="@android:id/progress">
+    <clip>
+      <shape>
+        <solid android:color="#D45F57" />
+        <corners android:radius="999dp" />
+      </shape>
+    </clip>
+  </item>
+</layer-list>
+`,
+      );
+
       writeFileIfChanged(
         path.join(widgetRoot, 'Money2TimeWidgetSampleData.java'),
         `package com.nelsongan.money2time.widgets;
@@ -2757,6 +3567,45 @@ private struct SavingsHistoryData: Decodable {
   let totalIsPositive: Bool
 }
 
+private struct BudgetRingData: Decodable {
+  let monthLabel: String
+  let hasBudget: Bool
+  let usageRatio: Double
+  let isOver: Bool
+  let remainingLabel: String
+  let captionLabel: String
+  let paceRatio: Double
+  let daysLeftLabel: String
+  let setupLabel: String
+  let budgetUrl: String
+}
+
+private struct BudgetBreakdownCategoryData: Decodable {
+  let categoryId: String
+  let name: String
+  let emoji: String
+  let usageRatio: Double
+  let isOver: Bool
+  let spentLabel: String
+  let budgetedLabel: String
+}
+
+private struct BudgetBreakdownData: Decodable {
+  let monthLabel: String
+  let hasBudget: Bool
+  let totalSpentLabel: String
+  let totalBudgetLabel: String
+  let usageRatio: Double
+  let isOver: Bool
+  let remainingLabel: String
+  let paceRatio: Double
+  let categories: [BudgetBreakdownCategoryData]
+  let moreLabel: String
+  let unbudgetedLabel: String
+  let setupLabel: String
+  let budgetUrl: String
+}
+
 private struct WidgetSnapshot: Decodable {
   let isPro: Bool
   let monthlyExpenseQuickLog: MonthlySpendData
@@ -2765,6 +3614,10 @@ private struct WidgetSnapshot: Decodable {
   let calendarMonth: CalendarMonthData
   let savingsRate: SavingsRateData
   let savingsHistory: SavingsHistoryData
+  // Optional so a schema-v1 snapshot written by an older app still decodes;
+  // the budget widgets then render their set-up state instead of crashing.
+  let budgetRing: BudgetRingData?
+  let budgetBreakdown: BudgetBreakdownData?
   let proUnlockUrlByWidgetId: [String: String]
 }
 
@@ -3503,6 +4356,195 @@ private struct CalendarView: View {
   }
 }
 
+// MARK: - Budget (ring + breakdown)
+
+private func budgetUsageColor(_ ratio: Double, palette: Palette) -> Color {
+  if ratio > 1 { return palette.error }
+  if ratio >= 0.8 { return palette.coral }
+  return palette.primary
+}
+
+private struct BudgetSetupView: View {
+  let title: String
+  let monthLabel: String
+  let palette: Palette
+
+  var body: some View {
+    VStack(spacing: 4) {
+      Spacer(minLength: 0)
+      Text(title)
+        .font(.system(size: 15, weight: .heavy, design: .rounded))
+        .foregroundStyle(palette.text)
+        .multilineTextAlignment(.center)
+      Text(monthLabel)
+        .font(.system(size: 11, weight: .semibold, design: .rounded))
+        .foregroundStyle(palette.textSoft)
+      Spacer(minLength: 0)
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+private struct BudgetRingView: View {
+  let data: BudgetRingData
+  let palette: Palette
+
+  var body: some View {
+    let color = budgetUsageColor(data.usageRatio, palette: palette)
+    let used = CGFloat(max(0, min(data.usageRatio, 1)))
+
+    VStack(spacing: 5) {
+      ZStack {
+        Circle().stroke(color.opacity(0.15), lineWidth: 9)
+        Circle()
+          .trim(from: 0, to: used)
+          .stroke(color, style: StrokeStyle(lineWidth: 9, lineCap: .round))
+          .rotationEffect(.degrees(-90))
+        // Pacing tick at day-of-month around the ring: ahead/behind pace reads
+        // from the gap between the arc tip and this notch.
+        VStack(spacing: 0) {
+          RoundedRectangle(cornerRadius: 1)
+            .fill(palette.text.opacity(0.55))
+            .frame(width: 2, height: 13)
+            .offset(y: -6)
+          Spacer(minLength: 0)
+        }
+        .rotationEffect(.degrees(data.paceRatio * 360))
+        VStack(spacing: 1) {
+          Text(data.remainingLabel)
+            .font(.system(size: 21, weight: .bold, design: .rounded))
+            .foregroundStyle(data.isOver ? palette.error : palette.text)
+            .lineLimit(1)
+            .minimumScaleFactor(0.55)
+          Text(data.captionLabel)
+            .font(.system(size: 8.5, weight: .heavy))
+            .foregroundStyle(palette.textMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, 18)
+      }
+      .aspectRatio(1, contentMode: .fit)
+      Text(data.daysLeftLabel)
+        .font(.system(size: 9.5, weight: .heavy))
+        .foregroundStyle(palette.textMuted)
+        .lineLimit(1)
+    }
+    .padding(13)
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+private struct BudgetBreakdownRowView: View {
+  let line: BudgetBreakdownCategoryData
+  let palette: Palette
+
+  var body: some View {
+    let color = budgetUsageColor(line.usageRatio, palette: palette)
+    let fill = CGFloat(max(0.03, min(line.usageRatio, 1)))
+    HStack(spacing: 8) {
+      Text(line.emoji.isEmpty ? "\\u{2022}" : line.emoji)
+        .font(.system(size: 13))
+        .frame(width: 20)
+      VStack(alignment: .leading, spacing: 3) {
+        HStack(spacing: 8) {
+          Text(line.name)
+            .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(palette.text)
+            .lineLimit(1)
+          Spacer(minLength: 0)
+          (Text(line.spentLabel).foregroundColor(color)
+            + Text(" / " + line.budgetedLabel).foregroundColor(palette.textMuted))
+            .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+            .lineLimit(1)
+        }
+        GeometryReader { geo in
+          ZStack(alignment: .leading) {
+            Capsule().fill(color.opacity(0.14))
+            Capsule().fill(color).frame(width: geo.size.width * fill)
+          }
+        }
+        .frame(height: 5)
+      }
+    }
+  }
+}
+
+private struct BudgetBreakdownView: View {
+  let data: BudgetBreakdownData
+  let palette: Palette
+
+  var body: some View {
+    let color = budgetUsageColor(data.usageRatio, palette: palette)
+    let used = CGFloat(max(0, min(data.usageRatio, 1)))
+    let pace = CGFloat(max(0, min(data.paceRatio, 1)))
+
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .top) {
+        Wordmark(width: 104)
+        Spacer(minLength: 8)
+        VStack(alignment: .trailing, spacing: 2) {
+          Text(data.monthLabel)
+            .font(.system(size: 14, weight: .heavy, design: .rounded))
+            .foregroundStyle(palette.text)
+            .lineLimit(1)
+          (Text(data.totalSpentLabel).foregroundColor(color)
+            + Text(" / " + data.totalBudgetLabel).foregroundColor(palette.textMuted))
+            .font(.system(size: 15, weight: .heavy, design: .rounded))
+            .lineLimit(1)
+        }
+      }
+
+      // Overall usage bar with the pacing tick.
+      GeometryReader { geo in
+        ZStack(alignment: .leading) {
+          Capsule().fill(color.opacity(0.14))
+          Capsule().fill(color).frame(width: geo.size.width * used)
+          RoundedRectangle(cornerRadius: 1)
+            .fill(palette.text.opacity(0.55))
+            .frame(width: 2, height: 12)
+            .offset(x: geo.size.width * pace - 1)
+        }
+      }
+      .frame(height: 10)
+      .padding(.top, 10)
+
+      Text(data.remainingLabel)
+        .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+        .foregroundStyle(data.isOver ? palette.error : color)
+        .lineLimit(1)
+        .padding(.top, 5)
+
+      VStack(spacing: 0) {
+        ForEach(Array(data.categories.enumerated()), id: \\.offset) { _, line in
+          Spacer(minLength: 4)
+          BudgetBreakdownRowView(line: line, palette: palette)
+        }
+        Spacer(minLength: 4)
+      }
+      .frame(maxHeight: .infinity)
+
+      if !data.unbudgetedLabel.isEmpty || !data.moreLabel.isEmpty {
+        HStack {
+          Text(data.unbudgetedLabel)
+            .font(.system(size: 9.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(palette.textMuted)
+            .lineLimit(1)
+          Spacer(minLength: 8)
+          Text(data.moreLabel)
+            .font(.system(size: 9.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(palette.textMuted)
+            .lineLimit(1)
+        }
+        .padding(.top, 4)
+      }
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+}
+
 // MARK: - Timeline
 
 private struct SnapshotEntry: TimelineEntry {
@@ -3686,6 +4728,61 @@ private struct SavingsHistoryRoot: View {
   }
 }
 
+private struct BudgetRingRoot: View {
+  var entry: SnapshotEntry
+  @Environment(\\.colorScheme) private var scheme
+  var body: some View {
+    let palette = Palette.current(scheme)
+    Group {
+      if let snapshot = entry.snapshot, let data = snapshot.budgetRing {
+        Group {
+          if data.hasBudget {
+            BudgetRingView(data: data, palette: palette)
+          } else {
+            BudgetSetupView(title: data.setupLabel, monthLabel: data.monthLabel, palette: palette)
+          }
+        }
+        .widgetURL(URL(string: data.budgetUrl))
+      } else {
+        EmptyStateView(palette: palette)
+      }
+    }
+    .money2TimeWidgetBackground(palette.background)
+  }
+}
+
+private struct BudgetBreakdownRoot: View {
+  var entry: SnapshotEntry
+  @Environment(\\.colorScheme) private var scheme
+  var body: some View {
+    let palette = Palette.current(scheme)
+    Group {
+      if let snapshot = entry.snapshot, let data = snapshot.budgetBreakdown {
+        if snapshot.isPro {
+          Group {
+            if data.hasBudget {
+              BudgetBreakdownView(data: data, palette: palette)
+            } else {
+              BudgetSetupView(title: data.setupLabel, monthLabel: data.monthLabel, palette: palette)
+            }
+          }
+          .proCornerRibbon(entry.isPreview, palette: palette)
+          .widgetURL(URL(string: data.budgetUrl))
+        } else {
+          ProLockView(
+            title: "Budget Breakdown",
+            url: snapshot.proUnlockUrlByWidgetId["budget_breakdown"] ?? "money2time://pro",
+            palette: palette,
+            compact: false)
+        }
+      } else {
+        EmptyStateView(palette: palette)
+      }
+    }
+    .money2TimeWidgetBackground(palette.background)
+  }
+}
+
 // MARK: - Widgets
 
 struct Money2TimeMonthlyWidget: Widget {
@@ -3772,6 +4869,34 @@ struct Money2TimeSavingsHistoryWidget: Widget {
   }
 }
 
+struct Money2TimeBudgetRingWidget: Widget {
+  let kind = "Money2TimeBudgetRing"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: SnapshotProvider()) { entry in
+      BudgetRingRoot(entry: entry)
+    }
+    .configurationDisplayName("Budget")
+    .description("How much of this month's budget is left, with a pace marker.")
+    .supportedFamilies([.systemSmall])
+    .contentMarginsDisabled()
+  }
+}
+
+struct Money2TimeBudgetBreakdownWidget: Widget {
+  let kind = "Money2TimeBudgetBreakdown"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: SnapshotProvider()) { entry in
+      BudgetBreakdownRoot(entry: entry)
+    }
+    .configurationDisplayName("Budget Breakdown")
+    .description("Your top budget categories and how fast they're depleting.")
+    .supportedFamilies([.systemLarge])
+    .contentMarginsDisabled()
+  }
+}
+
 @main
 struct Money2TimeWidgetBundle: WidgetBundle {
   var body: some Widget {
@@ -3781,6 +4906,8 @@ struct Money2TimeWidgetBundle: WidgetBundle {
     Money2TimeCalendarWidget()
     Money2TimeSavingsRateWidget()
     Money2TimeSavingsHistoryWidget()
+    Money2TimeBudgetRingWidget()
+    Money2TimeBudgetBreakdownWidget()
   }
 }
 `,

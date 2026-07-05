@@ -360,6 +360,92 @@ export interface ItemStats {
 
 export interface ItemWithStats extends Item, ItemStats {}
 
+/** One category's share of a budget template's total. */
+export interface BudgetTemplateAllocation {
+  id: string;
+  /** Root (top-level) expense category id. */
+  categoryId: string;
+  amount: number;
+  sortOrder: number;
+}
+
+/**
+ * A reusable monthly budget definition: a total amount fully allocated across
+ * root expense categories. Monthly budgets are frozen copies of a template
+ * taken at creation time — editing a template never rewrites created months.
+ */
+export interface BudgetTemplate {
+  id: string;
+  name: string;
+  totalAmount: number;
+  /** Exactly one live template is the default while any template exists. */
+  isDefault: boolean;
+  sortOrder: number;
+  allocations: BudgetTemplateAllocation[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** One category line of a month's frozen budget. */
+export interface MonthlyBudgetLine {
+  id: string;
+  categoryId: string;
+  amount: number;
+  sortOrder: number;
+}
+
+/** A single month's budget — a frozen copy of a template at creation time. */
+export interface MonthlyBudget {
+  id: string;
+  /** 'YYYY-MM' month key. */
+  month: string;
+  /** Provenance only; the template may have been renamed or deleted since. */
+  templateId: string | null;
+  templateName: string | null;
+  totalAmount: number;
+  lines: MonthlyBudgetLine[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** Depletion of one budget line for a month (subcategory spend rolled up). */
+export interface BudgetCategoryProgress {
+  categoryId: string;
+  budgeted: number;
+  spent: number;
+  /** budgeted − spent; negative when over. */
+  remaining: number;
+  /** spent / budgeted; 0 when budgeted is 0. */
+  usageRatio: number;
+  isOver: boolean;
+}
+
+/** Expense spend in a category with no budget line (null = uncategorized). */
+export interface UnbudgetedCategorySpend {
+  categoryId: string | null;
+  spent: number;
+}
+
+/** Everything the budget month page / widgets need, computed in one pass. */
+export interface BudgetMonthSummary {
+  month: string;
+  totalBudget: number;
+  /** Budgeted + unbudgeted expense spend for the month. */
+  totalSpent: number;
+  budgetedSpent: number;
+  unbudgetedSpent: number;
+  /** totalBudget − totalSpent; negative when the month is over budget. */
+  remaining: number;
+  /** max(0, −remaining). */
+  exceededBy: number;
+  /** totalSpent / totalBudget; 0 when there is no budget total. */
+  usageRatio: number;
+  categories: BudgetCategoryProgress[];
+  unbudgeted: UnbudgetedCategorySpend[];
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;

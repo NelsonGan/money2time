@@ -2,9 +2,13 @@ import type {
   AccountGroupRow,
   AccountRow,
   AlbumRow,
+  BudgetTemplateCategoryRow,
+  BudgetTemplateRow,
   CategoryRow,
   ExchangeRateRow,
   ItemRow,
+  MonthlyBudgetCategoryRow,
+  MonthlyBudgetRow,
   MonthlyWageSettingsRow,
   RecurringRuleRow,
   SettingsRow,
@@ -16,10 +20,14 @@ import type {
   AccountGroup,
   Album,
   BackupTarget,
+  BudgetTemplate,
+  BudgetTemplateAllocation,
   Category,
   ExchangeRate,
   ExchangeRateSource,
   Item,
+  MonthlyBudget,
+  MonthlyBudgetLine,
   MonthlyWageSettings,
   RecurringTransactionRule,
   ThemeColor,
@@ -202,6 +210,57 @@ export function toItem(row: ItemRow): Item {
     salePrice: row.salePrice ?? null,
     note: row.note ?? null,
     sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toBudgetTemplateAllocation(
+  row: BudgetTemplateCategoryRow,
+): BudgetTemplateAllocation {
+  return {
+    id: row.id,
+    categoryId: row.categoryId,
+    amount: row.amount ?? 0,
+    sortOrder: row.sortOrder ?? 0,
+  };
+}
+
+export function toBudgetTemplate(
+  row: BudgetTemplateRow,
+  allocations: BudgetTemplateAllocation[],
+): BudgetTemplate {
+  return {
+    id: row.id,
+    name: row.name,
+    totalAmount: row.totalAmount ?? 0,
+    isDefault: row.isDefault ?? false,
+    sortOrder: row.sortOrder ?? 0,
+    allocations,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toMonthlyBudgetLine(row: MonthlyBudgetCategoryRow): MonthlyBudgetLine {
+  return {
+    id: row.id,
+    categoryId: row.categoryId,
+    amount: row.amount ?? 0,
+    sortOrder: row.sortOrder ?? 0,
+  };
+}
+
+export function toMonthlyBudget(row: MonthlyBudgetRow, lines: MonthlyBudgetLine[]): MonthlyBudget {
+  return {
+    id: row.id,
+    month: row.month,
+    templateId: row.templateId ?? null,
+    templateName: row.templateName ?? null,
+    totalAmount: row.totalAmount ?? 0,
+    lines,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

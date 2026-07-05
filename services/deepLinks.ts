@@ -74,6 +74,12 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     return true;
   }
 
+  if (parsed.action === 'budget') {
+    runDeepLinkNavigation(navigationRef, { name: 'SettingsBudget' });
+    void trackEvent(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' });
+    return true;
+  }
+
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
     runDeepLinkNavigation(navigationRef, { name: 'ProPaywall', params: { source } });

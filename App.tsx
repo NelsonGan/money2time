@@ -56,6 +56,11 @@ import {
 } from '~/features/albums/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import {
+  BudgetScreen,
+  BudgetTemplateEditorScreen,
+  BudgetTemplatesScreen,
+} from '~/features/budget/screens';
 import { AssetsTab } from '~/features/items/components';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
@@ -591,6 +596,13 @@ function MainShellScreen({
     [checkLimit, items.length, navigation],
   );
 
+  const openBudgetTemplateEditor = useCallback(
+    (params?: { templateId?: string; duplicateFromId?: string }) => {
+      navigation.navigate('BudgetTemplateEditor', params);
+    },
+    [navigation],
+  );
+
   const openProPaywall = useCallback(
     (source?: string) => {
       navigation.navigate('ProPaywall', source ? { source } : undefined);
@@ -1000,6 +1012,7 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenItemEditor={openItemEditor}
+            onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
             onOpenAccountEditor={openAccountEditor}
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
@@ -1152,7 +1165,13 @@ function AddTransactionDetailedRouteScreen({
 }
 
 function WidgetSnapshotSync() {
-  const { settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } = useApp();
+  const {
+    settings,
+    categories,
+    monthlyBudgets,
+    insightsPreferencesJson,
+    getTrueHourlyRateForDate,
+  } = useApp();
   const { transactions } = useTransactions();
   const { isPro } = usePro();
 
@@ -1173,6 +1192,7 @@ function WidgetSnapshotSync() {
         isPro,
         getTrueHourlyRateForDate,
         categories,
+        monthlyBudgets,
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
       });
@@ -1187,6 +1207,7 @@ function WidgetSnapshotSync() {
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,
+    monthlyBudgets,
     settings,
     transactions,
   ]);
@@ -1255,6 +1276,40 @@ function ItemEditorRouteScreen({ route, navigation }: RootStackRouteProps<'ItemE
       itemId={route.params?.itemId}
       onClose={() => navigation.goBack()}
       onLimitReached={() => navigation.navigate('ProPaywall', { source: 'items' })}
+    />
+  );
+}
+
+function BudgetTemplateEditorRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'BudgetTemplateEditor'>) {
+  return (
+    <BudgetTemplateEditorScreen
+      templateId={route.params?.templateId}
+      duplicateFromId={route.params?.duplicateFromId}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
+function SettingsBudgetRouteScreen({ navigation }: RootStackRouteProps<'SettingsBudget'>) {
+  return (
+    <BudgetScreen
+      onBack={() => navigation.goBack()}
+      onOpenTemplates={() => navigation.navigate('SettingsBudgetTemplates')}
+      onOpenTemplateEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
+    />
+  );
+}
+
+function SettingsBudgetTemplatesRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsBudgetTemplates'>) {
+  return (
+    <BudgetTemplatesScreen
+      onBack={() => navigation.goBack()}
+      onOpenEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
     />
   );
 }
@@ -1878,6 +1933,15 @@ function AppContent() {
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
+          <RootStack.Screen
+            name="BudgetTemplateEditor"
+            component={BudgetTemplateEditorRouteScreen}
+          />
+          <RootStack.Screen name="SettingsBudget" component={SettingsBudgetRouteScreen} />
+          <RootStack.Screen
+            name="SettingsBudgetTemplates"
+            component={SettingsBudgetTemplatesRouteScreen}
+          />
           <RootStack.Screen
             name="SettingsWageCalculator"
             component={SettingsWageCalculatorRouteScreen}

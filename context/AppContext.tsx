@@ -27,6 +27,7 @@ import {
   ONBOARDING_POWER_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
+import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
@@ -43,9 +44,14 @@ import { I18n, setAppLocale } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { albumsRepository } from '~/lib/repositories/albumsRepository';
+import {
+  type BudgetAllocationInput,
+  budgetTemplatesRepository,
+} from '~/lib/repositories/budgetTemplatesRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
+import { monthlyBudgetsRepository } from '~/lib/repositories/monthlyBudgetsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
   type CreateRecurringRuleInput,
@@ -94,6 +100,7 @@ import {
   type AlbumStats,
   type AppState,
   type BreakdownItem,
+  type BudgetTemplate,
   type CashflowSummary,
   type Category,
   type DateRange,
@@ -103,6 +110,7 @@ import {
   type Item,
   type ItemWithStats,
   type LocatedAlbum,
+  type MonthlyBudget,
   type MonthlyWageSettings,
   type NotificationPreferences,
   type QuickEntryPrefs,
@@ -170,6 +178,14 @@ export interface CreateItemInput {
   endDate?: string | null;
   salePrice?: number | null;
   note?: string | null;
+}
+
+export interface CreateBudgetTemplateInput {
+  name: string;
+  totalAmount: number;
+  allocations: BudgetAllocationInput[];
+  /** Also create budgets for missing past months (first expense month → last month). */
+  backPopulate?: boolean;
 }
 
 /**
@@ -282,6 +298,22 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   updateItem: (id: string, updates: Partial<CreateItemInput>) => void;
   deleteItem: (id: string) => void;
   reorderItems: (ids: string[]) => void;
+
+  /** Reusable budget definitions; exactly one is default while any exist. */
+  budgetTemplates: BudgetTemplate[];
+  /** Frozen per-month budgets, ascending by month. */
+  monthlyBudgets: MonthlyBudget[];
+  createBudgetTemplate: (input: CreateBudgetTemplateInput) => string;
+  updateBudgetTemplate: (
+    id: string,
+    input: { name: string; totalAmount: number; allocations: BudgetAllocationInput[] },
+  ) => void;
+  deleteBudgetTemplate: (id: string) => void;
+  setDefaultBudgetTemplate: (id: string) => void;
+  reorderBudgetTemplates: (ids: string[]) => void;
+  /** Creates a month's budget from a template; no-ops if the month has one. */
+  createMonthlyBudget: (month: string, templateId: string) => void;
+  deleteMonthlyBudget: (id: string) => void;
 
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
@@ -806,6 +838,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [rawAccountBalances, setRawAccountBalances] = useState<AccountBalance[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [budgetTemplates, setBudgetTemplates] = useState<BudgetTemplate[]>([]);
+  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
     DEFAULT_TRANSACTION_FILTERS,
   );
@@ -945,6 +979,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextTransactions = transactionsRepository.list();
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
+
+      // Month-rollover auto-create: materialize the current month's budget from
+      // the default template. Runs on every load — idempotent (one indexed
+      // lookup) and tombstone-aware, so a user-deleted month never resurrects.
+      const nextBudgetTemplates = budgetTemplatesRepository.list();
+      const budgetMonthKey = monthKeyFromDateLocal(new Date());
+      const autoCreateTemplate = pickAutoCreateTemplate({
+        currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(budgetMonthKey),
+        templates: nextBudgetTemplates,
+      });
+      if (autoCreateTemplate) {
+        monthlyBudgetsRepository.createFromTemplate(budgetMonthKey, autoCreateTemplate);
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto' });
+      }
+      const nextMonthlyBudgets = monthlyBudgetsRepository.list();
+
       const nextRawAccountBalances = accountsRepository.getBalances();
 
       // Compute last 7 days spending for weekly notification body
@@ -988,6 +1038,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(nextTransactions);
       setAlbums(nextAlbums);
       setItems(nextItems);
+      setBudgetTemplates(nextBudgetTemplates);
+      setMonthlyBudgets(nextMonthlyBudgets);
       setRawAccountBalances(nextRawAccountBalances);
       setLoadError(null);
     } catch (error) {
@@ -1050,6 +1102,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAlbums = useCallback(() => {
     setAlbums(albumsRepository.list());
+  }, []);
+
+  const refreshBudgets = useCallback(() => {
+    setBudgetTemplates(budgetTemplatesRepository.list());
+    setMonthlyBudgets(monthlyBudgetsRepository.list());
   }, []);
 
   const refreshWages = useCallback(() => {
@@ -1359,11 +1416,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             transactionsRepository.reassignCategory([id], options.reassignToCategoryId);
           }
           categoriesRepository.softDelete(id);
+          // Budgets cascade: drop the category's allocation from every template
+          // and every month's frozen budget. The freed amount becomes
+          // unallocated (templates) / unbudgeted spend (months).
+          budgetTemplatesRepository.removeCategoryFromAllTemplates(id);
+          monthlyBudgetsRepository.removeCategoryFromAllBudgets(id);
         },
         {
           refresh: () => {
             refreshCategories();
             refreshTransactions();
+            refreshBudgets();
           },
         },
       );
@@ -1371,7 +1434,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reassigned: Boolean(options?.reassignToCategoryId),
       });
     },
-    [refreshCategories, refreshTransactions, runMutation],
+    [refreshBudgets, refreshCategories, refreshTransactions, runMutation],
   );
 
   const reorderCategories = useCallback(
@@ -3114,6 +3177,116 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setItems(itemsRepository.list());
   }, []);
 
+  const createBudgetTemplate = useCallback(
+    (input: CreateBudgetTemplateInput) => {
+      const id = budgetTemplatesRepository.create({
+        name: input.name,
+        totalAmount: input.totalAmount,
+        allocations: input.allocations,
+      });
+      const templates = budgetTemplatesRepository.list();
+      const template = templates.find((candidate) => candidate.id === id);
+
+      if (template && input.backPopulate) {
+        const range = computeBackPopulateRange({
+          transactions: transactionsRef.current,
+          existingLiveMonths: monthlyBudgetsRepository.existingLiveMonths(),
+        });
+        if (range) {
+          const created = monthlyBudgetsRepository.createManyFromTemplate(range.months, template);
+          if (created.length > 0) {
+            void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, {
+              source: 'backfill',
+              months: created.length,
+            });
+          }
+        }
+      }
+
+      // Saving a template (especially the first) materializes the current
+      // month's budget right away — rollover isn't deferred to the next launch.
+      const currentMonth = monthKeyFromDateLocal(new Date());
+      const autoTemplate = pickAutoCreateTemplate({
+        currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(currentMonth),
+        templates,
+      });
+      if (autoTemplate) {
+        monthlyBudgetsRepository.createFromTemplate(currentMonth, autoTemplate);
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto' });
+      }
+
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_CREATED, {
+        categories: input.allocations.length,
+        backPopulate: Boolean(input.backPopulate),
+      });
+      return id;
+    },
+    [refreshBudgets],
+  );
+
+  const updateBudgetTemplate = useCallback(
+    (
+      id: string,
+      input: { name: string; totalAmount: number; allocations: BudgetAllocationInput[] },
+    ) => {
+      budgetTemplatesRepository.update(id, input);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
+        categories: input.allocations.length,
+      });
+    },
+    [refreshBudgets],
+  );
+
+  const deleteBudgetTemplate = useCallback(
+    (id: string) => {
+      budgetTemplatesRepository.softDelete(id);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_DELETED);
+    },
+    [refreshBudgets],
+  );
+
+  const setDefaultBudgetTemplate = useCallback(
+    (id: string) => {
+      budgetTemplatesRepository.setDefault(id);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_DEFAULT_CHANGED);
+    },
+    [refreshBudgets],
+  );
+
+  const reorderBudgetTemplates = useCallback(
+    (ids: string[]) => {
+      budgetTemplatesRepository.reorder(ids);
+      refreshBudgets();
+    },
+    [refreshBudgets],
+  );
+
+  const createMonthlyBudget = useCallback(
+    (month: string, templateId: string) => {
+      const template = budgetTemplatesRepository
+        .list()
+        .find((candidate) => candidate.id === templateId);
+      if (!template) return;
+      monthlyBudgetsRepository.createFromTemplate(month, template);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'manual' });
+    },
+    [refreshBudgets],
+  );
+
+  const deleteMonthlyBudget = useCallback(
+    (id: string) => {
+      monthlyBudgetsRepository.softDelete(id);
+      refreshBudgets();
+      void trackEvent(AnalyticsEvents.BUDGET_MONTH_DELETED);
+    },
+    [refreshBudgets],
+  );
+
   const getTransfersBetweenAccounts = useCallback(
     (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
       return transactionsRepository.getTransfersBetweenAccounts(
@@ -3345,6 +3518,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateItem,
             deleteItem,
             reorderItems,
+            budgetTemplates,
+            monthlyBudgets,
+            createBudgetTemplate,
+            updateBudgetTemplate,
+            deleteBudgetTemplate,
+            setDefaultBudgetTemplate,
+            reorderBudgetTemplates,
+            createMonthlyBudget,
+            deleteMonthlyBudget,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -3449,6 +3631,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateItem,
       deleteItem,
       reorderItems,
+      budgetTemplates,
+      monthlyBudgets,
+      createBudgetTemplate,
+      updateBudgetTemplate,
+      deleteBudgetTemplate,
+      setDefaultBudgetTemplate,
+      reorderBudgetTemplates,
+      createMonthlyBudget,
+      deleteMonthlyBudget,
       createTransaction,
       updateTransaction,
       deleteTransaction,

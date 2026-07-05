@@ -1,5 +1,12 @@
+import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
 import { I18n } from '~/lib/i18n';
-import type { Category, TransactionWithRelations, UserSettings, WeekStartsOn } from '~/types';
+import type {
+  Category,
+  MonthlyBudget,
+  TransactionWithRelations,
+  UserSettings,
+  WeekStartsOn,
+} from '~/types';
 import {
   addMonthsAtMonthStart,
   amountToHoursByRate,
@@ -15,6 +22,7 @@ import {
 } from '~/utils/formatters';
 
 import {
+  buildBudgetWidgetUrl,
   buildQuickAddWidgetUrl,
   buildWidgetProUrl,
   WIDGET_DEFINITIONS,
@@ -153,8 +161,69 @@ export interface SavingsHistorySnapshot {
   totalIsPositive: boolean;
 }
 
+export interface BudgetRingSnapshot {
+  widgetId: typeof WIDGET_IDS.budgetRing;
+  title: string;
+  monthKey: string;
+  monthLabel: string;
+  /** False when the current month has no budget — render the setup state. */
+  hasBudget: boolean;
+  totalBudget: number;
+  totalSpent: number;
+  /** totalSpent / totalBudget; may exceed 1 when over budget. */
+  usageRatio: number;
+  isOver: boolean;
+  /** Compact remaining (or exceeded, when over) amount, always non-negative. */
+  remainingLabel: string;
+  /** "left of $2.4K" / "over budget" caption under the center figure. */
+  captionLabel: string;
+  /** Day-of-month progress (0..1); the pacing tick on the ring. 0 for future months. */
+  paceRatio: number;
+  daysLeftLabel: string;
+  /** "Set a monthly budget" CTA for the no-budget state. */
+  setupLabel: string;
+  budgetUrl: string;
+}
+
+export interface BudgetBreakdownCategorySnapshot {
+  categoryId: string;
+  name: string;
+  /** Category emoji when the icon is a literal emoji; empty otherwise. */
+  emoji: string;
+  spent: number;
+  budgeted: number;
+  usageRatio: number;
+  isOver: boolean;
+  spentLabel: string;
+  budgetedLabel: string;
+}
+
+export interface BudgetBreakdownSnapshot {
+  widgetId: typeof WIDGET_IDS.budgetBreakdown;
+  title: string;
+  monthKey: string;
+  monthLabel: string;
+  hasBudget: boolean;
+  totalSpentLabel: string;
+  totalBudgetLabel: string;
+  usageRatio: number;
+  isOver: boolean;
+  /** "$418 left" / "Over budget by $200", preformatted. */
+  remainingLabel: string;
+  paceRatio: number;
+  /** Top lines by usage, over-budget lines first. */
+  categories: BudgetBreakdownCategorySnapshot[];
+  /** Budget lines beyond the ones shown. */
+  moreCount: number;
+  moreLabel: string;
+  /** "+$214 unbudgeted"; empty when zero. */
+  unbudgetedLabel: string;
+  setupLabel: string;
+  budgetUrl: string;
+}
+
 export interface Money2TimeWidgetSnapshot {
-  schemaVersion: 1;
+  schemaVersion: 2;
   generatedAt: string;
   isPro: boolean;
   locale: string;
@@ -166,6 +235,8 @@ export interface Money2TimeWidgetSnapshot {
   calendarMonth: CalendarMonthSnapshot;
   savingsRate: SavingsRateSnapshot;
   savingsHistory: SavingsHistorySnapshot;
+  budgetRing: BudgetRingSnapshot;
+  budgetBreakdown: BudgetBreakdownSnapshot;
   proUnlockUrlByWidgetId: Record<string, string>;
 }
 
@@ -584,12 +655,121 @@ function buildSavingsRateSnapshot(
   };
 }
 
+/** Category icons are either literal emoji or ASCII icon ids; only emoji render natively. */
+function categoryEmojiForWidget(icon: string | undefined): string {
+  if (!icon) return '';
+  return /[^\u0000-\u007f]/.test(icon) ? icon : '';
+}
+
+const BUDGET_BREAKDOWN_MAX_LINES = 5;
+
+function buildBudgetWidgetSnapshots(
+  transactions: TransactionWithRelations[],
+  settings: UserSettings,
+  monthlyBudgets: MonthlyBudget[],
+  categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
+  now: Date,
+): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
+  const monthKey = monthKeyFromDateLocal(now);
+  const monthLabel = getMonthLabelFormatter(settings.locale).format(now);
+  const budget = monthlyBudgets.find((entry) => entry.month === monthKey) ?? null;
+  const summary = buildBudgetMonthSummary({
+    month: monthKey,
+    budget,
+    transactions,
+    categories,
+  });
+
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const paceRatio = Math.max(0, Math.min(now.getDate() / daysInMonth, 1));
+  const daysLeft = Math.max(daysInMonth - now.getDate(), 0);
+  const budgetUrl = buildBudgetWidgetUrl();
+  const setupLabel = I18n.t('widgets.budget_setup');
+
+  const hasBudget = summary != null;
+  const isOver = (summary?.remaining ?? 0) < 0;
+  const remainingAmount = isOver ? (summary?.exceededBy ?? 0) : (summary?.remaining ?? 0);
+  const remainingCompact = formatCompactCurrency(remainingAmount, settings.currencySymbol);
+
+  const budgetRing: BudgetRingSnapshot = {
+    widgetId: WIDGET_IDS.budgetRing,
+    title: 'Budget',
+    monthKey,
+    monthLabel,
+    hasBudget,
+    totalBudget: summary?.totalBudget ?? 0,
+    totalSpent: summary?.totalSpent ?? 0,
+    usageRatio: summary?.usageRatio ?? 0,
+    isOver,
+    remainingLabel: remainingCompact,
+    captionLabel: isOver
+      ? I18n.t('widgets.budget_over')
+      : I18n.t('widgets.budget_left_of', {
+          total: formatCompactCurrency(summary?.totalBudget ?? 0, settings.currencySymbol),
+        }),
+    paceRatio,
+    daysLeftLabel: I18n.t('widgets.budget_days_left', { count: daysLeft }),
+    setupLabel,
+    budgetUrl,
+  };
+
+  const categoriesById = new Map(categories.map((category) => [category.id, category]));
+  const orderedLines = [...(summary?.categories ?? [])].sort((a, b) =>
+    a.isOver !== b.isOver ? Number(b.isOver) - Number(a.isOver) : b.usageRatio - a.usageRatio,
+  );
+  const shownLines = orderedLines.slice(0, BUDGET_BREAKDOWN_MAX_LINES);
+  const moreCount = Math.max(orderedLines.length - shownLines.length, 0);
+
+  const budgetBreakdown: BudgetBreakdownSnapshot = {
+    widgetId: WIDGET_IDS.budgetBreakdown,
+    title: 'Budget Breakdown',
+    monthKey,
+    monthLabel,
+    hasBudget,
+    totalSpentLabel: formatCompactCurrency(summary?.totalSpent ?? 0, settings.currencySymbol),
+    totalBudgetLabel: formatCompactCurrency(summary?.totalBudget ?? 0, settings.currencySymbol),
+    usageRatio: summary?.usageRatio ?? 0,
+    isOver,
+    remainingLabel: isOver
+      ? I18n.t('widgets.budget_over_by', { amount: remainingCompact })
+      : I18n.t('widgets.budget_left', { amount: remainingCompact }),
+    paceRatio,
+    categories: shownLines.map((line) => {
+      const category = categoriesById.get(line.categoryId);
+      return {
+        categoryId: line.categoryId,
+        name: category?.name ?? '',
+        emoji: categoryEmojiForWidget(category?.icon),
+        spent: line.spent,
+        budgeted: line.budgeted,
+        usageRatio: line.usageRatio,
+        isOver: line.isOver,
+        spentLabel: formatCompactCurrency(line.spent, settings.currencySymbol),
+        budgetedLabel: formatCompactCurrency(line.budgeted, settings.currencySymbol),
+      };
+    }),
+    moreCount,
+    moreLabel: moreCount > 0 ? I18n.t('widgets.budget_more_categories', { count: moreCount }) : '',
+    unbudgetedLabel:
+      (summary?.unbudgetedSpent ?? 0) > 0
+        ? I18n.t('widgets.budget_unbudgeted', {
+            amount: formatCompactCurrency(summary?.unbudgetedSpent ?? 0, settings.currencySymbol),
+          })
+        : '',
+    setupLabel,
+    budgetUrl,
+  };
+
+  return { budgetRing, budgetBreakdown };
+}
+
 export function buildMoney2TimeWidgetSnapshot({
   transactions,
   settings,
   isPro,
   getTrueHourlyRateForDate,
   categories = [],
+  monthlyBudgets = [],
   excludedSavingsIncomeCategoryIds = [],
   excludedSavingsExpenseCategoryIds = [],
 }: {
@@ -597,8 +777,11 @@ export function buildMoney2TimeWidgetSnapshot({
   settings: UserSettings;
   isPro: boolean;
   getTrueHourlyRateForDate: (dateIso: string) => number;
-  /** Used to resolve a transaction's root category for the savings filter. */
-  categories?: Pick<Category, 'id' | 'parentId'>[];
+  /** Used to resolve a transaction's root category for the savings filter,
+   *  and for the budget widgets' names/emoji and subcategory roll-up. */
+  categories?: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[];
+  /** Frozen per-month budgets; the budget widgets read the current month's. */
+  monthlyBudgets?: MonthlyBudget[];
   /** Insights "Savings rate" category exclusions; applied to the savings widgets. */
   excludedSavingsIncomeCategoryIds?: string[];
   excludedSavingsExpenseCategoryIds?: string[];
@@ -608,7 +791,8 @@ export function buildMoney2TimeWidgetSnapshot({
     excludedSavingsIncomeCategoryIds,
     excludedSavingsExpenseCategoryIds,
   );
-  const monthKey = monthKeyFromDateLocal(new Date());
+  const now = new Date();
+  const monthKey = monthKeyFromDateLocal(now);
   const expenseAmount = normalizeMoneyAmount(
     transactions.reduce((total, transaction) => {
       if (transaction.deletedAt) return total;
@@ -618,9 +802,16 @@ export function buildMoney2TimeWidgetSnapshot({
     }, 0),
   );
   const hourlyRate = getTrueHourlyRateForDate(`${monthKey}-15T12:00:00`);
+  const budgetSnapshots = buildBudgetWidgetSnapshots(
+    transactions,
+    settings,
+    monthlyBudgets,
+    categories,
+    now,
+  );
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: new Date().toISOString(),
     isPro,
     locale: settings.locale,
@@ -658,6 +849,8 @@ export function buildMoney2TimeWidgetSnapshot({
       includeInSavings,
     ),
     savingsHistory: buildSavingsHistorySnapshot(transactions, settings, includeInSavings),
+    budgetRing: budgetSnapshots.budgetRing,
+    budgetBreakdown: budgetSnapshots.budgetBreakdown,
     proUnlockUrlByWidgetId: Object.fromEntries(
       WIDGET_DEFINITIONS.filter((definition) => definition.access === 'pro').map((definition) => [
         definition.id,
@@ -774,10 +967,53 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
     );
   });
 
+  // A plausible mid-month budget (~partially used, one category over) so the
+  // budget widgets render populated in the gallery/preview.
+  const monthKey = monthKeyFromDateLocal(today);
+  const sampleCategories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[] = [
+    { id: 'sample-cat-food', parentId: null, name: 'Food', icon: '🍜' },
+    { id: 'sample-cat-transport', parentId: null, name: 'Transport', icon: '🚌' },
+    { id: 'sample-cat-fun', parentId: null, name: 'Fun', icon: '🎬' },
+    { id: 'sample-cat-shopping', parentId: null, name: 'Shopping', icon: '🛍️' },
+  ];
+  const sampleBudget: MonthlyBudget = {
+    id: 'sample-budget',
+    month: monthKey,
+    templateId: null,
+    templateName: 'Everyday',
+    totalAmount: 1200,
+    lines: [
+      { id: 'sb-food', categoryId: 'sample-cat-food', amount: 450, sortOrder: 0 },
+      { id: 'sb-transport', categoryId: 'sample-cat-transport', amount: 250, sortOrder: 1 },
+      { id: 'sb-fun', categoryId: 'sample-cat-fun', amount: 200, sortOrder: 2 },
+      { id: 'sb-shopping', categoryId: 'sample-cat-shopping', amount: 300, sortOrder: 3 },
+    ],
+    createdAt: today.toISOString(),
+    updatedAt: today.toISOString(),
+    deletedAt: null,
+  };
+  const sampleBudgetSpend: { categoryId: string; amount: number; day: number }[] = [
+    { categoryId: 'sample-cat-food', amount: 320, day: 4 },
+    { categoryId: 'sample-cat-transport', amount: 96, day: 7 },
+    { categoryId: 'sample-cat-fun', amount: 236, day: 9 }, // over its 200 line
+    { categoryId: 'sample-cat-shopping', amount: 143, day: 11 },
+  ];
+  sampleBudgetSpend.forEach(({ categoryId, amount, day }, index) => {
+    const transaction = sampleTransaction(
+      `sample-budget-exp-${index}`,
+      'expense',
+      amount,
+      new Date(year, month, Math.min(day, today.getDate()), 12),
+    );
+    transactions.push({ ...transaction, categoryId });
+  });
+
   return buildMoney2TimeWidgetSnapshot({
     transactions,
     settings,
     isPro: true,
     getTrueHourlyRateForDate: () => 15,
+    categories: sampleCategories,
+    monthlyBudgets: [sampleBudget],
   });
 }
