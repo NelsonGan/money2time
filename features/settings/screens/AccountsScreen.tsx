@@ -92,6 +92,7 @@ import {
   normalizeMoneyAmount,
   startOfMonthDate,
 } from '~/utils/formatters';
+import { perfMark, perfSpan } from '~/utils/perfDebug';
 import {
   bucketTransactionsByAccountPeriod,
   DAY_IN_MS,
@@ -1634,6 +1635,11 @@ export function AccountsScreen({
   onToggleBalances,
   hideOverviewHeader = false,
 }: AccountsScreenProps = {}) {
+  perfMark(`AccountsScreen: render (managementOnly=${managementOnly})`);
+  useEffect(() => {
+    perfMark(`AccountsScreen: mounted (managementOnly=${managementOnly})`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { contentWidth: windowWidth } = useDeviceLayout();
@@ -2103,14 +2109,16 @@ export function AccountsScreen({
     const creditAccounts = accounts.filter((account) => account.type === 'credit');
     if (creditAccounts.length === 0) return new Map<string, CreditSummary>();
 
-    const now = new Date();
-    const next = new Map<string, CreditSummary>();
-    creditAccounts.forEach((account) => {
-      const accountTxns = getTransactionsByAccount(account.id);
-      const balance = balanceMap.get(account.id) ?? account.startingBalance;
-      next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
+    return perfSpan('AccountsScreen.creditSummaryByAccountId', () => {
+      const now = new Date();
+      const next = new Map<string, CreditSummary>();
+      creditAccounts.forEach((account) => {
+        const accountTxns = getTransactionsByAccount(account.id);
+        const balance = balanceMap.get(account.id) ?? account.startingBalance;
+        next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
+      });
+      return next;
     });
-    return next;
     // getTransactionsByAccount is identity-stable; `transactions` is the dep
     // that signals the underlying data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps

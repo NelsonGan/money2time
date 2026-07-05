@@ -7,7 +7,7 @@ import {
   Plus,
   Wallet,
 } from 'lucide-react-native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import type { Edge } from 'react-native-safe-area-context';
@@ -37,6 +37,7 @@ import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
 import { formatAmount, formatHours, formatShortMonthYearLabel } from '~/utils/formatters';
+import { perfMark } from '~/utils/perfDebug';
 
 interface ItemsScreenProps {
   /** When provided, renders a standalone header with this back action (settings push). */
@@ -305,6 +306,9 @@ export function ItemsScreen({
   embedded = false,
   safeAreaEdges = ['top'],
 }: ItemsScreenProps) {
+  useEffect(() => {
+    perfMark('ItemsScreen: mounted');
+  }, []);
   const { items, settings, rateTable, reorderItems } = useApp();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
