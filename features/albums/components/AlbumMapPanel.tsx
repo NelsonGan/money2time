@@ -1,7 +1,5 @@
-import { ChevronLeft } from 'lucide-react-native';
 import { lazy, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, View } from 'react-native';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -17,18 +15,23 @@ import { type AlbumPin, formatAlbumMonthYear } from '../utils';
 // MapLibre is a native module; lazy-load it so the rest of the app keeps working
 // on a dev client that hasn't been rebuilt with the native pod yet.
 const AlbumMapView = lazy(() =>
-  import('../components/AlbumMapView').then((m) => ({ default: m.AlbumMapView })),
+  import('./AlbumMapView').then((m) => ({ default: m.AlbumMapView })),
 );
 
-interface AlbumLocationsScreenProps {
-  onClose: () => void;
+interface AlbumMapPanelProps {
   onOpenAlbumDetail: (albumId: string) => void;
+  /** True while this panel is the visible tab — gates the analytics event. */
+  active: boolean;
 }
 
-export function AlbumLocationsScreen({ onClose, onOpenAlbumDetail }: AlbumLocationsScreenProps) {
+/**
+ * The album locations map, rendered inside the Albums screen's Map tab. Holds
+ * the pins/empty/suspense/error-boundary chrome so both the map itself and its
+ * degraded fallbacks live in one place.
+ */
+export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps) {
   const { locatedAlbums, getAlbumStats, settings } = useApp();
   const themeColors = useThemeColors();
-  const insets = useSafeAreaInsets();
 
   const isTimeMode = settings.displayMode === 'time';
 
@@ -54,10 +57,11 @@ export function AlbumLocationsScreen({ onClose, onOpenAlbumDetail }: AlbumLocati
   );
 
   useEffect(() => {
+    if (!active) return;
     void trackEvent(AnalyticsEvents.ALBUM_LOCATIONS_OPENED, { count: pins.length });
-    // Only on mount.
+    // Fire once per activation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active]);
 
   const handleSelectAlbum = useCallback(
     (albumId: string) => {
@@ -67,49 +71,38 @@ export function AlbumLocationsScreen({ onClose, onOpenAlbumDetail }: AlbumLocati
     [onOpenAlbumDetail],
   );
 
-  return (
-    <View className="flex-1 bg-background">
-      {pins.length === 0 ? (
-        <EmptyState
-          title={I18n.t('albums.location.empty_title')}
-          message={I18n.t('albums.location.empty_message')}
-          mascotMood="curious"
-        />
-      ) : (
-        // The native MapLibre module may be missing on a dev client that hasn't
-        // been rebuilt — degrade to a message instead of crashing the whole app
-        // (the lazy import would otherwise reject past Suspense to the root).
-        <AppErrorBoundary
-          fallback={
-            <EmptyState
-              title={I18n.t('errors.data_load_failed_title')}
-              message={I18n.t('errors.generic_operation_failed')}
-              mascotMood="thinking"
-            />
-          }
-        >
-          <Suspense
-            fallback={
-              <View className="flex-1 items-center justify-center">
-                <ActivityIndicator color={themeColors.primary} />
-              </View>
-            }
-          >
-            <AlbumMapView pins={pins} onSelectAlbum={handleSelectAlbum} />
-          </Suspense>
-        </AppErrorBoundary>
-      )}
+  if (pins.length === 0) {
+    return (
+      <EmptyState
+        title={I18n.t('albums.location.empty_title')}
+        message={I18n.t('albums.location.empty_message')}
+        mascotMood="curious"
+      />
+    );
+  }
 
-      <Pressable
-        onPress={onClose}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('common.back')}
-        hitSlop={8}
-        className="absolute left-4 h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:opacity-80"
-        style={{ top: insets.top + 8 }}
+  return (
+    // The native MapLibre module may be missing on a dev client that hasn't been
+    // rebuilt — degrade to a message instead of crashing the whole app (the lazy
+    // import would otherwise reject past Suspense to the root).
+    <AppErrorBoundary
+      fallback={
+        <EmptyState
+          title={I18n.t('errors.data_load_failed_title')}
+          message={I18n.t('errors.generic_operation_failed')}
+          mascotMood="thinking"
+        />
+      }
+    >
+      <Suspense
+        fallback={
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator color={themeColors.primary} />
+          </View>
+        }
       >
-        <ChevronLeft size={22} color={themeColors.text} />
-      </Pressable>
-    </View>
+        <AlbumMapView pins={pins} onSelectAlbum={handleSelectAlbum} />
+      </Suspense>
+    </AppErrorBoundary>
   );
 }
