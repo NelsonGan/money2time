@@ -32,12 +32,6 @@ interface ProContextValue {
 
 const ProContext = createContext<ProContextValue | null>(null);
 
-// Hold RevenueCat init until the cold-start tab-preload burst has settled, so
-// its (auto) offerings/StoreKit-product fetch can't stall the launch sequence.
-// Pro state defaults to false until this resolves, which is fine for the first
-// couple of seconds after launch.
-const REVENUECAT_INIT_DELAY_MS = 4000;
-
 export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
@@ -95,24 +89,14 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setRevenueCatAppUserId(appUserId);
-    // `Purchases.configure` does synchronous StoreKit setup and then RevenueCat
-    // *auto-prefetches offerings* — which on a cold cache issues a StoreKit
-    // product request. On a simulator with no StoreKit config that request stalls
-    // ~6s, and running it during the cold-start burst starves the tab-preload
-    // chain (Sentry MONEY2TIME-8). Pro state isn't needed to paint the first
-    // screens, so hold the whole init until after the launch preloads settle,
-    // then still use the status-only refresh. `perfMark` traces when it fires.
-    let task: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
-    const timer = setTimeout(() => {
-      perfMark('ProContext: init deferred timer fired');
-      task = InteractionManager.runAfterInteractions(() => {
-        void refreshStatus();
-      });
-    }, REVENUECAT_INIT_DELAY_MS);
-    return () => {
-      clearTimeout(timer);
-      task?.cancel();
-    };
+    // `Purchases.configure` does synchronous StoreKit setup on the main thread
+    // (Sentry MONEY2TIME-8), so defer past first interactions — Pro state isn't
+    // needed to paint the first screen. Use the status-only refresh so we skip
+    // the offerings/StoreKit-product fetch (needed only on the paywall).
+    const task = InteractionManager.runAfterInteractions(() => {
+      void refreshStatus();
+    });
+    return () => task.cancel();
   }, [appUserId, refreshStatus]);
 
   useEffect(() => {

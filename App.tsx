@@ -161,7 +161,7 @@ import { perfMark, perfSpan } from '~/utils/perfDebug';
 
 // TEMP: bump this tag on each diagnostic push so the log confirms which build
 // is actually running on the device (rules out a stale JS bundle).
-perfMark('BUILD MARKER: revenuecat-defer-v8');
+perfMark('BUILD MARKER: commit-fix-v9');
 
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left

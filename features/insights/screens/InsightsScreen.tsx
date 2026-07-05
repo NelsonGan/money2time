@@ -6743,6 +6743,17 @@ export function InsightsScreen({
               {I18n.t('insights.loading')}
             </Text>
           </View>
+        ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
+          // Locked Pro trend: every pager page would just render the paywall
+          // overlay, so skip the horizontal VirtualizedList (4801 slots) entirely
+          // and mount a single static overlay. Mounting that windowed list — with
+          // its layout pass — during the cold-start preload was a large chunk of
+          // the launch commit, especially on the New-Architecture iOS simulator.
+          <View className="flex-1">
+            <TabletContentContainer>
+              <ProTrendPreviewOverlay onUpgrade={handleTrendUpgrade} />
+            </TabletContentContainer>
+          </View>
         ) : (
           <FlatList
             ref={horizontalListRef}
