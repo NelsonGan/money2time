@@ -49,6 +49,10 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     setIsPro(isRevenueCatCustomerStateActive(state));
   }, []);
 
+  // Full refresh: subscription status AND the offering catalogue. Only needed
+  // where prices are shown (the paywall), because fetching offerings triggers a
+  // StoreKit product request that can block for several seconds on its first,
+  // uncached call (measured ~6.9s on a cold-started simulator) — see refreshStatus.
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -64,19 +68,33 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     }
   }, [applyCustomerState]);
 
+  // Status-only refresh: resolves whether Pro is active without touching the
+  // offering catalogue. `getCustomerInfo` is fast (~200ms) while `getOfferings`
+  // blocks on a StoreKit product fetch. This is what runs on the cold-start and
+  // resume paths, where we only need `isPro` and must not stall the launch. The
+  // paywall (ProPaywallScreen) calls the full `refresh()` itself, with a loading
+  // state, so prices load lazily the first time it opens.
+  const refreshStatus = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const nextState = await fetchRevenueCatCustomerState();
+      applyCustomerState(nextState);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [applyCustomerState]);
+
   useEffect(() => {
     setRevenueCatAppUserId(appUserId);
-    // RevenueCat's native `Purchases.configure` (triggered lazily by `refresh`)
-    // does synchronous StoreKit setup on the main thread. Firing it during the
-    // cold-start burst has produced multi-second main-thread App Hangs on
-    // constrained devices (Sentry MONEY2TIME-8). Defer past first interactions
-    // so it no longer competes with initial render/layout — Pro state is not
-    // needed to paint the first screen.
+    // `Purchases.configure` does synchronous StoreKit setup on the main thread
+    // (Sentry MONEY2TIME-8), so defer past first interactions — Pro state isn't
+    // needed to paint the first screen. Use the status-only refresh so we skip
+    // the offerings/StoreKit-product fetch (needed only on the paywall).
     const task = InteractionManager.runAfterInteractions(() => {
-      void refresh();
+      void refreshStatus();
     });
     return () => task.cancel();
-  }, [appUserId, refresh]);
+  }, [appUserId, refreshStatus]);
 
   useEffect(() => {
     const unsubscribe = subscribeToRevenueCatCustomerStateUpdates((nextState) => {
@@ -89,12 +107,14 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
-        void refresh();
+        // Re-check Pro status on resume, but skip offerings — they rarely change
+        // and re-fetching them would re-introduce the StoreKit stall on resume.
+        void refreshStatus();
       }
     });
 
     return () => subscription.remove();
-  }, [refresh]);
+  }, [refreshStatus]);
 
   useEffect(() => {
     if (!customerState?.activeProductIdentifier || !customerState.expirationDate) {
@@ -108,7 +128,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
       if (msUntilExpiration <= 0) {
         setIsPro(false);
-        void refresh();
+        void refreshStatus();
         return;
       }
 
@@ -120,7 +140,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
           if (stillActive) {
             syncExpiration();
           } else {
-            void refresh();
+            void refreshStatus();
           }
         },
         Math.min(msUntilExpiration, 60 * 60 * 1000),
@@ -134,7 +154,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(timeoutId);
       }
     };
-  }, [customerState, refresh]);
+  }, [customerState, refreshStatus]);
 
   const purchasePackage = useCallback(
     async (packageIdentifier: string): Promise<RevenueCatActionResult> => {

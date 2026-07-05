@@ -165,23 +165,29 @@ class AlbumsRepository {
   }
 
   /**
-   * Minimal rows for an album's transactions in a single join query — used for
-   * index-card stats so we avoid loading full transaction relations per card.
+   * Stat rows for every album in a single join query, tagged with the owning
+   * album id. Callers group by `albumId` in memory. This replaces the per-card
+   * N+1 (one stat query + one `getById` per album) that blocked the JS thread
+   * whenever the albums index mounted or re-rendered.
    */
-  getStatRows(
-    albumId: string,
-  ): { type: string; date: string; amount: number; reportingAmount: number | null }[] {
+  getAllStatRows(): {
+    albumId: string;
+    type: string;
+    date: string;
+    amount: number;
+    reportingAmount: number | null;
+  }[] {
     return getSQLite().getAllSync<{
+      albumId: string;
       type: string;
       date: string;
       amount: number;
       reportingAmount: number | null;
     }>(
-      `SELECT t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount
+      `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount
        FROM album_transactions axn
        INNER JOIN transactions t ON t.id = axn.transaction_id
-       WHERE axn.album_id = ? AND axn.deleted_at IS NULL AND t.deleted_at IS NULL`,
-      [albumId],
+       WHERE axn.deleted_at IS NULL AND t.deleted_at IS NULL`,
     );
   }
 

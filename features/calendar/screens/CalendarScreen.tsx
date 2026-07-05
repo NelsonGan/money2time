@@ -249,6 +249,16 @@ export function CalendarScreen({
   // the same month-index space (same anchor + centre), so zooming between them
   // is a direct index hand-off.
   const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
+  // The year overview (a paged list of 12-mini-month grids) is expensive to
+  // mount with a lot of data (~900ms on a cold start) and is never visible in
+  // the default 'day' home view. Keep it off the cold-start critical path by
+  // mounting it lazily the first time the user zooms out of the list. Zoom-out
+  // always steps day → month → year, so mounting once we leave 'day' guarantees
+  // the layer is ready before it is ever shown.
+  const [yearLayerMounted, setYearLayerMounted] = useState(false);
+  useEffect(() => {
+    if (viewMode !== 'day') setYearLayerMounted(true);
+  }, [viewMode]);
   // The focused day — used by the year view, the grid→list scroll target, and
   // "today". The list view itself is paged by month (see the list month pager).
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
@@ -1446,15 +1456,17 @@ export function CalendarScreen({
           style={[styles.zoomLayer, styles.yearLayerZ, yearLayerStyle]}
           pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
         >
-          <CalendarYearView
-            centerYear={centerYear}
-            todayDayKey={todayDayKey}
-            dailyByDayKey={globalDailyByDayKey}
-            weekStartsOn={settings.weekStartsOn}
-            locale={activeLocale}
-            onSelectMonth={handleSelectMonthFromYear}
-            onListRef={handleYearListRef}
-          />
+          {yearLayerMounted ? (
+            <CalendarYearView
+              centerYear={centerYear}
+              todayDayKey={todayDayKey}
+              dailyByDayKey={globalDailyByDayKey}
+              weekStartsOn={settings.weekStartsOn}
+              locale={activeLocale}
+              onSelectMonth={handleSelectMonthFromYear}
+              onListRef={handleYearListRef}
+            />
+          ) : null}
         </Reanimated.View>
 
         {/* Search results — overlays every calendar layer the moment search
