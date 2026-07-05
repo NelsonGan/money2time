@@ -354,6 +354,31 @@ const de = {
       bullet_weekly_title: 'Wochenzusammenfassung',
       bullet_weekly_subtitle: 'Sieh, wie viel du in den letzten 7 Tagen ausgegeben hast.',
     },
+    backup: {
+      title: 'Sichere deine Daten',
+      subtitle:
+        'Alles, was du erfasst, existiert nur auf diesem Telefon. Sichere es in {{provider}}, damit ein verlorenes oder defektes Telefon nie zu Datenverlust führt.',
+      provider_icloud: 'iCloud',
+      provider_google: 'Google Drive',
+      bullet_automatic_title: 'Automatische tägliche Backups',
+      bullet_automatic_subtitle:
+        'Deine Daten werden jeden Tag automatisch in {{provider}} gesichert.',
+      bullet_private_title: 'Privat und sicher',
+      bullet_private_subtitle: 'Backups bleiben in deinem eigenen {{provider}}-Konto.',
+      bullet_restore_title: 'In Sekunden wiederherstellen',
+      bullet_restore_subtitle: 'Neues Telefon? Hole alles mit einem Tippen zurück.',
+      enable_icloud: 'In iCloud sichern',
+      enable_google: 'In Google Drive sichern',
+      not_now: 'Nicht jetzt',
+      confirm_title: 'Backup überspringen?',
+      confirm_message:
+        'money2time speichert alles nur auf diesem Gerät. Wenn du dein Telefon verlierst oder ersetzt, sind alle deine Daten für immer weg. Wir empfehlen dringend, das {{provider}}-Backup zu aktivieren.',
+      confirm_enable: 'Backup aktivieren',
+      confirm_skip: 'Trotzdem überspringen',
+      icloud_pending_title: 'Backup aktiviert',
+      icloud_pending_message:
+        'Melde dich bei iCloud an und aktiviere iCloud Drive in den Einstellungen — dein Backup startet automatisch, sobald es verfügbar ist.',
+    },
   },
   transactions: {
     title: 'Transaktionen',

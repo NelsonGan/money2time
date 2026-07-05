@@ -20,6 +20,8 @@ export const AnalyticsEvents = {
   ONBOARDING_IMPORT_FAILED: 'Onboarding Import Failed',
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
+  ONBOARDING_BACKUP_ENABLED: 'Onboarding Backup Enabled',
+  ONBOARDING_BACKUP_SKIPPED: 'Onboarding Backup Skipped',
 
   // Home-screen widget deep-link opens
   WIDGET_OPENED: 'Widget Opened',
