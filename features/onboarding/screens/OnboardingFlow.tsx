@@ -16,7 +16,6 @@ import {
   isGoogleDriveConfigured,
   isGoogleSignedIn,
   isTargetAvailable,
-  runAutoBackupIfDue,
   signInWithGoogle,
 } from '~/services/autoBackup';
 import { triggerHaptic } from '~/services/haptics';
@@ -222,10 +221,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         pending: !readyToBackUp,
       });
 
-      if (readyToBackUp) {
-        // Kick off the first backup in the background; don't block advancing.
-        void runAutoBackupIfDue({ force: true });
-      } else {
+      // Deliberately no immediate backup here. This step runs before the
+      // import/seed step, so there's nothing meaningful to back up yet, and
+      // forcing one would upload an empty snapshot and stamp lastAutoBackupAt —
+      // suppressing the real first backup for a day. The due-based auto-backup
+      // in AppContext picks it up once onboarding leaves the user with data,
+      // then follows the daily cadence.
+      if (!readyToBackUp) {
         // iCloud not signed in yet — let the user know backup is on and will
         // start once they enable iCloud Drive, then advance anyway.
         Alert.alert(
