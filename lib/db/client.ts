@@ -1,5 +1,6 @@
 import { and, eq, isNull } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
+import type { Logger } from 'drizzle-orm/logger';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
 import { getDeviceLocale } from '~/lib/i18n';
@@ -15,6 +16,22 @@ export const SIMPLE_WALLET_NAME = 'Simple Wallet';
 
 let sqlite: SQLiteDatabase | null = null;
 let initialized = false;
+
+// Dev-only SQL logger. Prints every Drizzle query to the Metro console with a
+// since-boot timestamp and a running count, so query storms (e.g. an N+1) are
+// obvious while developing. Compiled out of release builds via __DEV__. Params
+// are intentionally omitted to keep the log readable and avoid logging any
+// financial data.
+let devSqlCount = 0;
+const DEV_SQL_START = Date.now();
+const devSqlLogger: Logger | undefined = __DEV__
+  ? {
+      logQuery(query: string): void {
+        devSqlCount += 1;
+        console.warn(`[sql #${devSqlCount} +${Date.now() - DEV_SQL_START}ms] ${query}`);
+      },
+    }
+  : undefined;
 
 function ensureCoreData() {
   const db = getDb();
@@ -84,7 +101,7 @@ export function getSQLite(): SQLiteDatabase {
 }
 
 export function getDb() {
-  return drizzle(getSQLite());
+  return drizzle(getSQLite(), devSqlLogger ? { logger: devSqlLogger } : undefined);
 }
 
 export function initializeDatabase() {
