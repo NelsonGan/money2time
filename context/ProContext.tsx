@@ -15,6 +15,7 @@ import {
   type RevenueCatOffering,
   type RevenueCatPackage,
 } from '~/services/revenueCat';
+import { perfMark } from '~/utils/perfDebug';
 
 interface ProContextValue {
   isPro: boolean;
@@ -51,16 +52,18 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
+    perfMark('ProContext.refresh: start (configure + StoreKit fetch)');
     try {
-      const [nextState, nextOffering] = await Promise.all([
-        fetchRevenueCatCustomerState(),
-        fetchRevenueCatOfferings(),
-      ]);
+      const nextState = await fetchRevenueCatCustomerState();
+      perfMark('ProContext.refresh: customerState fetched');
+      const nextOffering = await fetchRevenueCatOfferings();
+      perfMark('ProContext.refresh: offerings fetched');
 
       applyCustomerState(nextState);
       setOffering(nextOffering);
     } finally {
       setIsLoading(false);
+      perfMark('ProContext.refresh: end');
     }
   }, [applyCustomerState]);
 
