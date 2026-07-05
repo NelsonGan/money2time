@@ -6,6 +6,7 @@ import { getDeviceLocale } from '~/lib/i18n';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { newAppUserId, nowIso } from '~/utils/id';
 
+import { backfillFirstAppOpen } from './backfillFirstAppOpen';
 import { runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
@@ -49,6 +50,7 @@ function ensureCoreData() {
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,
         lastAutoBackupError: null,
+        firstAppOpen: now,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -86,11 +88,14 @@ export function getDb() {
 }
 
 export function initializeDatabase() {
-  runMigrations(getSQLite());
+  const sqliteDb = getSQLite();
+  runMigrations(sqliteDb);
   if (!initialized) {
     ensureCoreData();
+    backfillFirstAppOpen(sqliteDb);
     initialized = true;
     return;
   }
   ensureCoreData();
+  backfillFirstAppOpen(sqliteDb);
 }

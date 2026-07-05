@@ -338,6 +338,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     lastRateFetchAt: row.lastRateFetchAt ?? null,
     lastRateFetchError: row.lastRateFetchError ?? null,
     fxCurrenciesJson: row.fxCurrenciesJson ?? null,
+    firstAppOpen: row.firstAppOpen ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
