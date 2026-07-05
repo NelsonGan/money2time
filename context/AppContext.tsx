@@ -378,6 +378,12 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 const AppContext = createContext<AppContextValue | null>(null);
 const TransactionsContext = createContext<TransactionsContextValue | null>(null);
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
+const EMPTY_ALBUM_STATS: AlbumStats = {
+  totalSpent: 0,
+  transactionCount: 0,
+  startDate: null,
+  endDate: null,
+};
 
 // Defer a persist/refresh task off the critical render path (so the optimistic
 // UI paint and any in-flight close/navigation animation stay smooth) without
@@ -3023,11 +3029,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [buildBreakdown],
   );
 
-  const getAlbumStats = useCallback(
-    (albumId: string): AlbumStats => {
-      // Lightweight single-query rows (no relation/split loading) — this runs
-      // per album card on the index, so it must stay cheap.
-      const rows = albumsRepository.getStatRows(albumId);
+  // Stats for every album, computed in one batched pass instead of per card.
+  // Previously each `AlbumCard` (and map pin) called `getAlbumStats`, which ran
+  // two synchronous SQLite queries (a stat-rows join + `getById`) during render —
+  // so mounting the 12-album index fired ~24 blocking queries in a burst that
+  // froze the JS thread on tab activation. Here a single `getAllStatRows` query
+  // feeds an in-memory group-by; override dates come from the already-loaded
+  // `albums` array (no `getById`). Keyed on `transactions` so totals stay live
+  // after edits, and on `valueForDisplay` for the money/time-mode conversion.
+  const albumStatsById = useMemo(() => {
+    const map = new Map<string, AlbumStats>();
+    if (albums.length === 0) return map;
+
+    const rowsByAlbum = new Map<
+      string,
+      { type: string; date: string; amount: number; reportingAmount: number | null }[]
+    >();
+    albumsRepository.getAllStatRows().forEach((row) => {
+      const list = rowsByAlbum.get(row.albumId);
+      if (list) {
+        list.push(row);
+      } else {
+        rowsByAlbum.set(row.albumId, [row]);
+      }
+    });
+
+    albums.forEach((album) => {
+      const rows = rowsByAlbum.get(album.id) ?? [];
       let totalSpent = 0;
       let startDate: string | null = null;
       let endDate: string | null = null;
@@ -3039,15 +3067,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (endDate === null || row.date > endDate) endDate = row.date;
       });
       // Manual overrides win over the computed first/last transaction dates.
-      const album = albumsRepository.getById(albumId);
-      return {
+      map.set(album.id, {
         totalSpent,
         transactionCount: rows.length,
-        startDate: album?.startDate ?? startDate,
-        endDate: album?.endDate ?? endDate,
-      };
-    },
-    [valueForDisplay],
+        startDate: album.startDate ?? startDate,
+        endDate: album.endDate ?? endDate,
+      });
+    });
+
+    return map;
+  }, [albums, transactions, valueForDisplay]);
+
+  const getAlbumStats = useCallback(
+    (albumId: string): AlbumStats => albumStatsById.get(albumId) ?? EMPTY_ALBUM_STATS,
+    [albumStatsById],
   );
 
   const locatedAlbums = useMemo<LocatedAlbum[]>(() => albums.filter(isLocatedAlbum), [albums]);
