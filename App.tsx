@@ -278,6 +278,7 @@ const MemoCalendarScreen = React.memo(CalendarScreen);
 const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoAlbumsScreen = React.memo(AlbumsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
+const MemoAssetsTab = React.memo(AssetsTab);
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -597,6 +598,31 @@ function MainShellScreen({
     },
     [navigation],
   );
+  // Stable per-tab prop wrappers. The five tab screens stay mounted for the
+  // app's lifetime and are wrapped in React.memo, but inline arrow/render props
+  // gave them a fresh identity on every MainShellScreen render — so each of the
+  // ~7 app-level state settles during cold-start hydration re-rendered all five
+  // tabs (100–390ms per cascade). Hoisting these to stable callbacks lets the
+  // memo bail out so hidden tabs no longer recompute on unrelated churn.
+  const openInsightsTrendPaywall = useCallback(
+    () => openProPaywall('insights_trend'),
+    [openProPaywall],
+  );
+  const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
+  const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
+  const openAddTransactionForAccount = useCallback(
+    (accountId: string) =>
+      navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId }),
+    [navigation],
+  );
+  const openNetAssetsInsight = useCallback(
+    () => openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date())),
+    [openActivityBreakdownInsight],
+  );
+  const renderAssetsItems = useCallback(
+    () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,
+    [openItemEditor],
+  );
 
   const openAccountEditor = useCallback(
     (params?: { accountId?: string; presetGroupName?: string }) => {
@@ -613,6 +639,49 @@ function MainShellScreen({
   const openAccountGroupEditor = useCallback(() => {
     navigation.navigate('AccountGroupEditor');
   }, [navigation]);
+  // Stable render prop for the accounts pane (see openInsightsTrendPaywall note).
+  // Declared here so its deps on openAccountEditor/openPayCreditCard/
+  // openAccountGroupEditor are already initialized.
+  const renderAssetsAccounts = useCallback(
+    ({
+      hideBalances,
+      onToggleBalances,
+    }: {
+      hideBalances: boolean;
+      onToggleBalances: () => void;
+    }) => (
+      <MemoAccountsScreen
+        safeAreaEdges={[]}
+        hideOverviewHeader
+        hideBalances={hideBalances}
+        onToggleBalances={onToggleBalances}
+        resetToRootToken={accountsResetToken}
+        scrollToTopToken={accountsScrollTopToken}
+        onOpenAccount={openAccountDetail}
+        onOpenAddTransaction={openAddTransactionForAccount}
+        onOpenTransaction={openTransactionEditor}
+        onOpenTransactionSplitBadge={openTransactionSplitBill}
+        onOpenSettings={openAccountSettings}
+        onOpenAccountEditor={openAccountEditor}
+        onOpenPayCreditCard={openPayCreditCard}
+        onOpenCreateGroup={openAccountGroupEditor}
+        onOpenNetAssetsInsight={openNetAssetsInsight}
+      />
+    ),
+    [
+      accountsResetToken,
+      accountsScrollTopToken,
+      openAccountDetail,
+      openAddTransactionForAccount,
+      openTransactionEditor,
+      openTransactionSplitBill,
+      openAccountSettings,
+      openAccountEditor,
+      openPayCreditCard,
+      openAccountGroupEditor,
+      openNetAssetsInsight,
+    ],
+  );
   const openCategoryEditor = useCallback(
     (params?: { categoryId?: string; parentId?: string; type?: CategoryType }) => {
       navigation.navigate('CategoryEditor', params);
@@ -889,36 +958,12 @@ function MainShellScreen({
     <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
-          <AssetsTab
+          <MemoAssetsTab
             resetToAccountsToken={accountsResetToken}
-            onAddItem={() => openItemEditor()}
+            onAddItem={openItemEditorFromAssets}
             onOpenAccountSettings={openAccountSettings}
-            renderAccounts={({ hideBalances, onToggleBalances }) => (
-              <MemoAccountsScreen
-                safeAreaEdges={[]}
-                hideOverviewHeader
-                hideBalances={hideBalances}
-                onToggleBalances={onToggleBalances}
-                resetToRootToken={accountsResetToken}
-                scrollToTopToken={accountsScrollTopToken}
-                onOpenAccount={openAccountDetail}
-                onOpenAddTransaction={(accountId) =>
-                  navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId })
-                }
-                onOpenTransaction={openTransactionEditor}
-                onOpenTransactionSplitBadge={openTransactionSplitBill}
-                onOpenSettings={openAccountSettings}
-                onOpenAccountEditor={openAccountEditor}
-                onOpenPayCreditCard={openPayCreditCard}
-                onOpenCreateGroup={openAccountGroupEditor}
-                onOpenNetAssetsInsight={() =>
-                  openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date()))
-                }
-              />
-            )}
-            renderItems={() => (
-              <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />
-            )}
+            renderAccounts={renderAssetsAccounts}
+            renderItems={renderAssetsItems}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'calendar'}>
@@ -936,7 +981,7 @@ function MainShellScreen({
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
-            onOpenProPaywall={() => openProPaywall('insights_trend')}
+            onOpenProPaywall={openInsightsTrendPaywall}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
             onTutorialTargetLayout={handleTutorialTargetLayout}
@@ -962,7 +1007,7 @@ function MainShellScreen({
             onOpenCategoryEditor={openCategoryEditor}
             onOpenAddWageMonth={openAddWageMonth}
             onOpenWageCalculator={openWageCalculator}
-            onOpenProPaywall={() => openProPaywall('settings')}
+            onOpenProPaywall={openSettingsPaywall}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
