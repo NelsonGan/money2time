@@ -12,6 +12,7 @@ type TextVariant =
   | 'display'
   | 'title'
   | 'heading'
+  | 'headingSm'
   | 'subheading'
   | 'friendly'
   | 'body'
@@ -59,6 +60,7 @@ const variantMap: Record<TextVariant, VariantConfig> = {
   },
   title: { className: 'text-[30px] leading-[36px]', fontFamily: FONT.extrabold, fontWeight: '800' },
   heading: { className: 'text-[24px] leading-[30px]', fontFamily: FONT.bold, fontWeight: '700' },
+  headingSm: { className: 'text-[22px] leading-[28px]', fontFamily: FONT.bold, fontWeight: '700' },
   subheading: { className: 'text-[19px] leading-[26px]', fontFamily: FONT.bold, fontWeight: '700' },
   friendly: { className: 'text-[17px] leading-[24px]', fontFamily: FONT.medium, fontWeight: '500' },
   body: { className: 'text-[16px] leading-6', fontFamily: FONT.regular, fontWeight: '400' },

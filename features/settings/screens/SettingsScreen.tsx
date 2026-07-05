@@ -15,6 +15,7 @@ import {
   FolderTree,
   Gift,
   Heart,
+  Images,
   Landmark,
   MessageCircle,
   Newspaper,
@@ -105,6 +106,7 @@ interface SettingsScreenProps {
   onOpenAccountSettings: () => void;
   onOpenAccounts: () => void;
   onOpenItems: () => void;
+  onOpenAlbums: () => void;
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
@@ -130,6 +132,7 @@ export function SettingsScreen({
   onOpenAccountSettings,
   onOpenAccounts,
   onOpenItems,
+  onOpenAlbums,
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
@@ -685,6 +688,11 @@ export function SettingsScreen({
                 icon={<Package size={20} color={themeColors.primary} />}
                 label={I18n.t('items.title')}
                 onPress={onOpenItems}
+              />
+              <SettingsGridTile
+                icon={<Images size={20} color={themeColors.primary} />}
+                label={I18n.t('albums.title')}
+                onPress={onOpenAlbums}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile

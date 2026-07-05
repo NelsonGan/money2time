@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -17,9 +17,16 @@ interface AssetsTabBarProps {
 /** Underline tab bar that switches the assets page between accounts and items. */
 export function AssetsTabBar({ active, onChange, tabs }: AssetsTabBarProps) {
   const themeColors = useThemeColors();
+  const { width: screenWidth } = useWindowDimensions();
+  const isSmallScreen = screenWidth < 380;
 
   return (
-    <View className="flex-row px-5 pt-2" style={{ gap: 24 }}>
+    <ScrollView
+      horizontal
+      className="flex-1"
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ gap: 24, paddingHorizontal: 20, paddingTop: 8 }}
+    >
       {tabs.map((tab) => {
         const isActive = tab.value === active;
         return (
@@ -35,8 +42,11 @@ export function AssetsTabBar({ active, onChange, tabs }: AssetsTabBarProps) {
             className="pb-2"
           >
             <Text
-              variant="subheading"
-              className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}
+              variant={isSmallScreen ? 'subheading' : 'headingSm'}
+              className={cn(
+                'tracking-tight',
+                isActive ? 'text-foreground' : 'text-muted-foreground',
+              )}
             >
               {tab.label}
             </Text>
@@ -47,6 +57,6 @@ export function AssetsTabBar({ active, onChange, tabs }: AssetsTabBarProps) {
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }

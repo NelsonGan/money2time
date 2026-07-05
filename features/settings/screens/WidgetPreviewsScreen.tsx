@@ -660,16 +660,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader
-        className="px-5 pt-5 pb-3"
-        onBack={onBack}
-        title="Widget previews"
-        subtitle={
-          dataSource === 'sample'
-            ? 'Dev-only — sample data, as shown in the widget gallery.'
-            : 'Dev-only — built from your real transactions.'
-        }
-      />
+      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title="Widget previews" />
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.contentBody}>
           <View style={styles.toggleWrap}>

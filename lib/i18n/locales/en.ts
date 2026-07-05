@@ -119,7 +119,7 @@ const en = {
       voice_logged: 'Logged by voice',
       voice_example: 'uber 30',
       album_trip: 'Tokyo Trip',
-      album_trip_meta: 'Mar 4 – Mar 11',
+      album_trip_meta: 'Mar 4 - Mar 11',
       album_celebration: "Mom's Birthday",
       album_celebration_meta: '8 transactions',
     },
@@ -143,7 +143,7 @@ const en = {
       },
       savings: {
         title: 'How much you keep',
-        body: 'Your savings rate this month at a glance — what you kept versus what you spent, in money and hours of work.',
+        body: 'Your savings rate this month at a glance: what you kept versus what you spent, in money and hours of work.',
       },
       trend: {
         title: 'Your savings trend',
@@ -573,7 +573,7 @@ const en = {
       'Pick a category and track how its spending trends over the month or year.',
     expense_sentiment: 'Expense Sentiment',
     expense_sentiment_description:
-      'See the mood behind your spending — happy, neutral, or regretful — day by day.',
+      'See the mood behind your spending: happy, neutral, or regretful, day by day.',
     asset_history: 'Asset History',
     asset_history_description:
       'Track your total assets across the year and review monthly balance trend.',
@@ -858,7 +858,7 @@ const en = {
     },
     hourly_value: 'Hourly value',
     notifications: 'Notifications',
-    manage_formulas: 'Only add an entry when your income changes — no need to update every month.',
+    manage_formulas: 'Only add an entry when your income changes. No need to update every month.',
     accounts: 'Accounts',
     categories: 'Categories',
     categories_subtitle: 'Edit categories and subcategories',
@@ -966,8 +966,8 @@ const en = {
     user_mode_power: 'Power Mode',
     haptics: 'Haptics',
     haptics_subtitle: 'Turn touch feedback on or off across the app.',
-    user_mode_subtitle_simple: 'Currently: Simple — tap to switch to Power',
-    user_mode_subtitle_power: 'Currently: Power — tap to switch to Simple',
+    user_mode_subtitle_simple: 'Currently: Simple. Tap to switch to Power',
+    user_mode_subtitle_power: 'Currently: Power. Tap to switch to Simple',
     user_mode_simple_description: 'Single wallet setup.',
     user_mode_power_description: 'Full account setup.',
     switch_to_simple_title: 'Switch to Simple Mode?',
@@ -1048,7 +1048,7 @@ const en = {
       '- If multiple files are uploaded, process each file fully then merge all transactions into the single "transactions" array.\n' +
       '- If the statement spans a year boundary and only shows month/day, infer the year from the statement period.\n' +
       '- Do not ask questions, do not refuse, do not offer to split into multiple responses.\n' +
-      "- If your output gets cut off, stop mid-JSON and I will reply 'continue' so you can finish. Do not stop early to avoid being cut off — just keep going.",
+      "- If your output gets cut off, stop mid-JSON and I will reply 'continue' so you can finish. Do not stop early to avoid being cut off, just keep going.",
   },
   data_management: {
     title: 'Data Management',
@@ -1108,7 +1108,7 @@ const en = {
     coach_steps: {
       add_title: 'Add transaction',
       add_body:
-        'Tap + and just type something like "Uber 30" — we\'ll fill in the amount, category, and account for you.',
+        'Tap + and just type something like "Uber 30" and we\'ll fill in the amount, category, and account for you.',
       tabs_title: 'Get around',
       tabs_body: 'Use these tabs to jump between your activity, calendar, insights, and settings.',
       insights_title: 'Insight type',
@@ -1528,8 +1528,8 @@ const en = {
       daily_title: 'How was your spending today?',
       daily_body: 'Take a moment to log your transactions.',
       recurring_title: 'Recurring transaction processed',
-      recurring_body: '{{name}} — {{amount}}',
-      recurring_body_with_hours: '{{name}} — {{amount}} · {{hours}}',
+      recurring_body: '{{name}} · {{amount}}',
+      recurring_body_with_hours: '{{name}} · {{amount}} · {{hours}}',
       weekly_title: 'Your week in review',
       weekly_body: 'Tap to see your spending from the last 7 days.',
     },
@@ -1618,7 +1618,7 @@ const en = {
     preprompt_happy: 'Yes, I like it',
     preprompt_unhappy: 'Not really',
     preprompt_dismiss: 'Maybe later',
-    feedback_prompt: 'Sorry to hear that — mind sharing what would make it better?',
+    feedback_prompt: 'Sorry to hear that. Mind sharing what would make it better?',
     feedback_open: 'Share feedback',
     feedback_skip: 'No thanks',
   },

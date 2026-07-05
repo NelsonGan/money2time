@@ -350,10 +350,9 @@ export function ItemsScreen({
       {!embedded ? (
         <View className="px-5">
           <SettingsHeader
-            className="px-0 pt-5 pb-1"
+            className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('items.title')}
-            subtitle={I18n.t('items.subtitle')}
             rightAccessory={
               <Button size="icon" onPress={handleAdd} accessibilityLabel={I18n.t('items.add')}>
                 <Plus size={18} color="#fff" />

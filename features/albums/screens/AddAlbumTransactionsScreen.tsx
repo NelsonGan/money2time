@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FatButton, SettingsHeader, Text } from '~/components/ui';
+import { FatButton, SettingsHeader } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 
@@ -49,13 +49,6 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
           className="px-5 pt-5 pb-3"
           title={I18n.t('albums.add_transactions_title')}
           onBack={onClose}
-          rightAccessory={
-            <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
-              <Text variant="label" tone="muted">
-                {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
-              </Text>
-            </View>
-          }
         />
 
         <AlbumMonthPicker selectedIds={selectedIds} onChange={setSelectedIds} />
@@ -64,7 +57,13 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
           className="border-t border-border/30 bg-background px-5 pt-3"
           style={{ paddingBottom: Math.max(insets.bottom, 12) }}
         >
-          <FatButton label={I18n.t('common.save')} onPress={handleSave} haptic="success" />
+          <FatButton
+            label={`${I18n.t('common.save')} · ${I18n.t('albums.transactions_selected', {
+              count: selectedIds.length,
+            })}`}
+            onPress={handleSave}
+            haptic="success"
+          />
         </View>
       </TabletContentContainer>
     </View>

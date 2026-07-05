@@ -65,7 +65,6 @@ export function EditAlbumTransactionsScreen({
         <SettingsHeader
           className="px-5 pt-5 pb-3"
           title={I18n.t('albums.edit_transactions_title')}
-          subtitle={I18n.t('albums.transaction_count', { count: albumTransactions.length })}
           onBack={onClose}
         />
 

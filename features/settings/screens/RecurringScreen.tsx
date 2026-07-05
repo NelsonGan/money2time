@@ -418,7 +418,6 @@ export function RecurringScreen({
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('recurring.title')}
-          subtitle={I18n.t('recurring.subtitle')}
           rightAccessory={
             <Button size="icon" onPress={openCreate}>
               <Plus size={18} color="#fff" />
