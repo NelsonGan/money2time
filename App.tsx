@@ -60,6 +60,7 @@ import {
   BudgetScreen,
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
+  CategoryAllocationScreen,
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { AssetsTab } from '~/features/items/components';
@@ -1297,6 +1298,22 @@ function BudgetTemplateEditorRouteScreen({
     <BudgetTemplateEditorScreen
       templateId={route.params?.templateId}
       duplicateFromId={route.params?.duplicateFromId}
+      onOpenCategoryAllocation={(params) => navigation.navigate('BudgetCategoryAllocation', params)}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
+function BudgetCategoryAllocationRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'BudgetCategoryAllocation'>) {
+  return (
+    <CategoryAllocationScreen
+      categoryId={route.params.categoryId}
+      initialAmounts={route.params.initialAmounts}
+      remainingExcludingThis={route.params.remainingExcludingThis}
+      onDone={route.params.onDone}
       onClose={() => navigation.goBack()}
     />
   );
@@ -1320,6 +1337,7 @@ function BudgetMonthEditorRouteScreen({
   return (
     <MonthlyBudgetEditorScreen
       budgetId={route.params.budgetId}
+      onOpenCategoryAllocation={(params) => navigation.navigate('BudgetCategoryAllocation', params)}
       onClose={() => navigation.goBack()}
     />
   );
@@ -1961,6 +1979,10 @@ function AppContent() {
           />
           <RootStack.Screen name="SettingsBudget" component={SettingsBudgetRouteScreen} />
           <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
+          <RootStack.Screen
+            name="BudgetCategoryAllocation"
+            component={BudgetCategoryAllocationRouteScreen}
+          />
           <RootStack.Screen
             name="SettingsBudgetTemplates"
             component={SettingsBudgetTemplatesRouteScreen}

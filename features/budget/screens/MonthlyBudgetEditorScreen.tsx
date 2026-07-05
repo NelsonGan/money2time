@@ -10,7 +10,6 @@ import {
   AllocationStatusBar,
   parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
-import { CategoryAllocationSheet } from '~/features/budget/components/CategoryAllocationSheet';
 import {
   computeAllocationRemaining,
   computeChildAllocationGap,
@@ -20,10 +19,17 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatMonthYearLabel } from '~/utils/formatters';
+import { formatMonthYearLabel, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface MonthlyBudgetEditorScreenProps {
   budgetId: string;
+  /** Pushes the full-page per-category allocation editor. */
+  onOpenCategoryAllocation: (params: {
+    categoryId: string;
+    initialAmounts: Record<string, string>;
+    remainingExcludingThis: number;
+    onDone: (amounts: Record<string, string>) => void;
+  }) => void;
   onClose: () => void;
 }
 
@@ -34,7 +40,11 @@ const SCROLL_CONTENT = { paddingBottom: 40 } as const;
  * subcategory breakdowns), and the count-unbudgeted option. A local override
  * for that month only; the source template is untouched.
  */
-export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEditorScreenProps) {
+export function MonthlyBudgetEditorScreen({
+  budgetId,
+  onOpenCategoryAllocation,
+  onClose,
+}: MonthlyBudgetEditorScreenProps) {
   const { settings, categories, monthlyBudgets, updateMonthlyBudget } = useApp();
   const themeColors = useThemeColors();
 
@@ -67,7 +77,6 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
     }
     return initial;
   });
-  const [sheetCategoryId, setSheetCategoryId] = useState<string | null>(null);
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
   const parsedTotal = parseAllocationAmount(total);
@@ -110,6 +119,28 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
     setAmounts((previous) => ({ ...previous, [categoryId]: next }));
   }, []);
 
+  // Pushes the full-page per-category editor with this category's draft slice;
+  // Save there merges the slice back into the shared draft here.
+  const openCategoryAllocation = useCallback(
+    (categoryId: string) => {
+      const initialAmounts: Record<string, string> = {
+        [categoryId]: amounts[categoryId] ?? '',
+      };
+      for (const child of childrenByParent.get(categoryId) ?? []) {
+        initialAmounts[child.id] = amounts[child.id] ?? '';
+      }
+      onOpenCategoryAllocation({
+        categoryId,
+        initialAmounts,
+        remainingExcludingThis: normalizeMoneyAmount(
+          remaining + parseAllocationAmount(amounts[categoryId] ?? ''),
+        ),
+        onDone: (next) => setAmounts((previous) => ({ ...previous, ...next })),
+      });
+    },
+    [amounts, childrenByParent, onOpenCategoryAllocation, remaining],
+  );
+
   const handleSave = useCallback(() => {
     if (!canSave || !budget) return;
     void triggerHaptic('success');
@@ -140,10 +171,6 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
     new Date(Number(budget.month.slice(0, 4)), Number(budget.month.slice(5, 7)) - 1, 1),
     settings.locale,
   );
-
-  const sheetCategory = sheetCategoryId
-    ? (rootExpenseCategories.find((category) => category.id === sheetCategoryId) ?? null)
-    : null;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -202,7 +229,7 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
             rootCategories={rootExpenseCategories}
             amounts={amounts}
             childGaps={childGaps}
-            onPressCategory={setSheetCategoryId}
+            onPressCategory={openCategoryAllocation}
             settings={settings}
             themeColors={themeColors}
           />
@@ -218,18 +245,6 @@ export function MonthlyBudgetEditorScreen({ budgetId, onClose }: MonthlyBudgetEd
       </ScrollView>
 
       <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
-
-      <CategoryAllocationSheet
-        visible={sheetCategory != null}
-        onClose={() => setSheetCategoryId(null)}
-        category={sheetCategory}
-        childCategories={sheetCategory ? (childrenByParent.get(sheetCategory.id) ?? []) : []}
-        amounts={amounts}
-        onChangeAmount={handleChangeAmount}
-        rootRemaining={remaining}
-        currencySymbol={currencySymbol}
-        settings={settings}
-      />
     </SafeAreaView>
   );
 }

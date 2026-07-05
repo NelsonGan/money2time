@@ -53,6 +53,14 @@ export type RootStackParamList = {
   ItemEditor: { itemId?: string } | undefined;
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
   BudgetMonthEditor: { budgetId: string };
+  // Full-page per-category allocation editor. Carries the hosting editor's
+  // draft slice + commit callback (non-serializable, like StatementImportList).
+  BudgetCategoryAllocation: {
+    categoryId: string;
+    initialAmounts: Record<string, string>;
+    remainingExcludingThis: number;
+    onDone: (amounts: Record<string, string>) => void;
+  };
   // Root-level budget screens for imperative opens (widget deep link).
   SettingsBudget: undefined;
   SettingsBudgetTemplates: undefined;

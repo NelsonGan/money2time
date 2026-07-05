@@ -11,7 +11,6 @@ import {
   AllocationStatusBar,
   parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
-import { CategoryAllocationSheet } from '~/features/budget/components/CategoryAllocationSheet';
 import { EmojiPickerSheet } from '~/features/budget/components/EmojiPickerSheet';
 import {
   computeAllocationRemaining,
@@ -23,11 +22,18 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatMonthYearLabel } from '~/utils/formatters';
+import { formatMonthYearLabel, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface BudgetTemplateEditorScreenProps {
   templateId?: string;
   duplicateFromId?: string;
+  /** Pushes the full-page per-category allocation editor. */
+  onOpenCategoryAllocation: (params: {
+    categoryId: string;
+    initialAmounts: Record<string, string>;
+    remainingExcludingThis: number;
+    onDone: (amounts: Record<string, string>) => void;
+  }) => void;
   onClose: () => void;
 }
 
@@ -40,6 +46,7 @@ function monthKeyToDate(monthKey: string): Date {
 export function BudgetTemplateEditorScreen({
   templateId,
   duplicateFromId,
+  onOpenCategoryAllocation,
   onClose,
 }: BudgetTemplateEditorScreenProps) {
   const {
@@ -95,7 +102,6 @@ export function BudgetTemplateEditorScreen({
     return initial;
   });
   const [backPopulate, setBackPopulate] = useState(false);
-  const [sheetCategoryId, setSheetCategoryId] = useState<string | null>(null);
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
   const parsedTotal = parseAllocationAmount(total);
@@ -150,6 +156,28 @@ export function BudgetTemplateEditorScreen({
     setAmounts((previous) => ({ ...previous, [categoryId]: next }));
   }, []);
 
+  // Pushes the full-page per-category editor with this category's draft slice;
+  // Save there merges the slice back into the shared draft here.
+  const openCategoryAllocation = useCallback(
+    (categoryId: string) => {
+      const initialAmounts: Record<string, string> = {
+        [categoryId]: amounts[categoryId] ?? '',
+      };
+      for (const child of childrenByParent.get(categoryId) ?? []) {
+        initialAmounts[child.id] = amounts[child.id] ?? '';
+      }
+      onOpenCategoryAllocation({
+        categoryId,
+        initialAmounts,
+        remainingExcludingThis: normalizeMoneyAmount(
+          remaining + parseAllocationAmount(amounts[categoryId] ?? ''),
+        ),
+        onDone: (next) => setAmounts((previous) => ({ ...previous, ...next })),
+      });
+    },
+    [amounts, childrenByParent, onOpenCategoryAllocation, remaining],
+  );
+
   const handleSave = useCallback(() => {
     if (!canSave) return;
     void triggerHaptic('success');
@@ -192,10 +220,6 @@ export function BudgetTemplateEditorScreen({
     rootAllocations,
     updateBudgetTemplate,
   ]);
-
-  const sheetCategory = sheetCategoryId
-    ? (rootExpenseCategories.find((category) => category.id === sheetCategoryId) ?? null)
-    : null;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -278,7 +302,7 @@ export function BudgetTemplateEditorScreen({
               rootCategories={rootExpenseCategories}
               amounts={amounts}
               childGaps={childGaps}
-              onPressCategory={setSheetCategoryId}
+              onPressCategory={openCategoryAllocation}
               settings={settings}
               themeColors={themeColors}
             />
@@ -321,18 +345,6 @@ export function BudgetTemplateEditorScreen({
         onClose={() => setShowEmojiPicker(false)}
         selected={emoji}
         onSelect={setEmoji}
-      />
-
-      <CategoryAllocationSheet
-        visible={sheetCategory != null}
-        onClose={() => setSheetCategoryId(null)}
-        category={sheetCategory}
-        childCategories={sheetCategory ? (childrenByParent.get(sheetCategory.id) ?? []) : []}
-        amounts={amounts}
-        onChangeAmount={handleChangeAmount}
-        rootRemaining={remaining}
-        currencySymbol={currencySymbol}
-        settings={settings}
       />
     </SafeAreaView>
   );
