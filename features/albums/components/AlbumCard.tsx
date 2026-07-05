@@ -82,7 +82,7 @@ export const AlbumCard = memo(function AlbumCard({
           <Text variant="caption" numberOfLines={1} className="text-white/80">
             {album.name}
           </Text>
-          <View className="mt-0.5 flex-row items-baseline justify-between gap-2">
+          <View className="mt-0.5 flex-row items-end justify-between gap-2">
             {isTimeMode ? (
               <TimeValueInline
                 value={formatHours(stats.totalSpent)}
@@ -90,13 +90,14 @@ export const AlbumCard = memo(function AlbumCard({
                 textClassName="text-white"
                 iconColor="#fff"
                 iconSize={16}
+                numberOfLines={1}
               />
             ) : (
-              <Text variant="subheading" className="text-white">
+              <Text variant="subheading" numberOfLines={1} className="text-white">
                 {formatAmount(stats.totalSpent, settings, { showSign: false })}
               </Text>
             )}
-            <Text variant="label" numberOfLines={1} className="text-white/70">
+            <Text variant="label" numberOfLines={1} className="shrink text-white/70">
               {metaLabel}
             </Text>
           </View>

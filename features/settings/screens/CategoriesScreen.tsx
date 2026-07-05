@@ -311,7 +311,7 @@ function CategoryEditor({
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
         <SettingsHeader
-          className="px-5 pt-5 pb-2"
+          className="px-5 pt-5 pb-3"
           title={
             mode === 'create'
               ? I18n.t('categories.new_category')
@@ -917,7 +917,7 @@ export function CategoriesScreen({
     <SettingsPageLayout>
       <View style={styles.headerContainer}>
         <SettingsHeader
-          className="px-0 pt-5 pb-1"
+          className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('settings.categories')}
           rightAccessory={

@@ -68,7 +68,7 @@ export function EditAlbumTransactionsScreen({
           onBack={onClose}
           rightAccessory={
             <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
-              <Text variant="label" tone="muted">
+              <Text variant="label" tone="muted" numberOfLines={1}>
                 {I18n.t('albums.transaction_count', { count: albumTransactions.length })}
               </Text>
             </View>

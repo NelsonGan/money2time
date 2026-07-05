@@ -350,7 +350,7 @@ export function ItemsScreen({
       {!embedded ? (
         <View className="px-5">
           <SettingsHeader
-            className="px-0 pt-5 pb-1"
+            className="px-0 pt-5 pb-3"
             onBack={onBack}
             title={I18n.t('items.title')}
             rightAccessory={

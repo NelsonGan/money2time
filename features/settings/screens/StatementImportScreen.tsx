@@ -824,7 +824,7 @@ export function StatementImportListScreen({
         title={title}
         rightAccessory={
           <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
-            <Text variant="label" tone="muted">
+            <Text variant="label" tone="muted" numberOfLines={1}>
               {`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
             </Text>
           </View>

@@ -331,7 +331,7 @@ export function AccountLogoPickerSheet({
     >
       <SafeAreaView className="flex-1 bg-background">
         <SettingsHeader
-          className="px-5 pt-5 pb-2"
+          className="px-5 pt-5 pb-3"
           title={I18n.t('accounts.logo.choose_title')}
           onClose={onClose}
           rightAccessory={

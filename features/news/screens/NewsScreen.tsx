@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
   },
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-    paddingTop: spacing.md,
   },
   list: {
     gap: spacing.xs,
