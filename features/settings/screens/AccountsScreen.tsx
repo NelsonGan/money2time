@@ -2503,7 +2503,6 @@ export function AccountsScreen({
             <SettingsHeader
               className="px-0 pt-5 pb-2"
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
-              reserveActionRow
               title={I18n.t('accounts.title')}
               subtitleNode={
                 <View className="flex-row items-center gap-1.5">
