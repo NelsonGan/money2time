@@ -27,7 +27,6 @@ const devSqlLogger: Logger | undefined = __DEV__
   ? {
       logQuery(query: string): void {
         devSqlCount += 1;
-        // eslint-disable-next-line no-console
         console.warn(`[sql #${devSqlCount} +${Date.now() - DEV_SQL_START}ms] ${query}`);
       },
     }
