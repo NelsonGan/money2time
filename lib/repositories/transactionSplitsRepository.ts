@@ -94,6 +94,26 @@ class TransactionSplitsRepository {
       .map(toTransactionSplit);
   }
 
+  // All active splits grouped by transaction id. Used when attaching splits to a
+  // large transaction set (e.g. the full-table load at startup) where a
+  // WHERE transaction_id IN (…thousands of ids…) clause is far slower to prepare
+  // than scanning the sparse splits table once.
+  listAllActiveGrouped(): Map<string, TransactionSplit[]> {
+    const grouped = new Map<string, TransactionSplit[]>();
+    for (const split of this.listAllActive()) {
+      const existing = grouped.get(split.transactionId);
+      if (existing) {
+        existing.push(split);
+      } else {
+        grouped.set(split.transactionId, [split]);
+      }
+    }
+    for (const list of grouped.values()) {
+      list.sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+    return grouped;
+  }
+
   findByPaidTransactionId(paidTransactionId: string): TransactionSplit | null {
     const db = getDb();
     const row = db

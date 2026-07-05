@@ -149,7 +149,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
-import { perfMark, perfSpan } from '~/utils/perfDebug';
+import { perfMark } from '~/utils/perfDebug';
 
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
@@ -1161,10 +1161,17 @@ function WidgetSnapshotSync() {
   const { isPro } = usePro();
 
   useEffect(() => {
-    const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
-    perfMark(`WidgetSnapshotSync: effect run (isPro=${isPro}, txns=${transactions.length})`);
-    const snapshot = perfSpan('buildMoney2TimeWidgetSnapshot', () =>
-      buildMoney2TimeWidgetSnapshot({
+    // Building the snapshot walks every transaction. During cold-start hydration
+    // its inputs (settings, isPro, transactions) settle across several renders,
+    // so running synchronously here rebuilt it 3+ times on the JS thread mid-
+    // startup. Defer past interactions and let each dep change cancel the pending
+    // run, so the rapid startup churn coalesces into a single build that lands
+    // off the render-blocking path — the widget data isn't needed to paint.
+    let cancelled = false;
+    const handle = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
+      const snapshot = buildMoney2TimeWidgetSnapshot({
         transactions,
         settings,
         isPro,
@@ -1172,10 +1179,13 @@ function WidgetSnapshotSync() {
         categories,
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
-      }),
-    );
-
-    void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
+      });
+      void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
+    });
+    return () => {
+      cancelled = true;
+      handle.cancel();
+    };
   }, [
     categories,
     getTrueHourlyRateForDate,
