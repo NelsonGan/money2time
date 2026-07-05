@@ -137,8 +137,11 @@ export function AlbumsScreen({
               className="pb-2"
             >
               <Text
-                variant="subheading"
-                className={cn(active ? 'text-foreground' : 'text-muted-foreground')}
+                variant={windowWidth < 380 ? 'subheading' : 'heading'}
+                className={cn(
+                  'tracking-tight',
+                  active ? 'text-foreground' : 'text-muted-foreground',
+                )}
               >
                 {option.label}
               </Text>
