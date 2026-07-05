@@ -62,7 +62,7 @@ import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
-import { PRO_TREND_TYPES } from '~/constants/proLimits';
+import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
@@ -845,6 +845,68 @@ type InsightPageData =
   | ExpenseSentimentPageData
   | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
+
+// Empty page-data shells for the Pro-gated trends. A non-Pro user only ever
+// sees the ProTrendPreviewOverlay for these (renderInsightsPane short-circuits
+// on `pageData.kind`), so there is no reason to crunch the full trend series
+// over every transaction — for a large imported history that per-page build,
+// run across the pager window on cold-start restore, is what froze the JS
+// thread. Returning a single stable shell per kind keeps the locked path O(1)
+// and reference-stable (so it can't feed a render loop). Pro users bypass this
+// entirely and build the real data.
+const LOCKED_TREND_EMPTY_RANGE = { start: '', end: '' } as const;
+const LOCKED_TREND_PLACEHOLDERS: Record<ProTrendType, InsightPageData> = {
+  expense_trend: {
+    kind: 'expense_trend',
+    range: LOCKED_TREND_EMPTY_RANGE,
+    filteredForRange: [],
+    year: 0,
+    periodKey: '',
+    granularity: 'month',
+    monthRows: [],
+    averageMonthExpense: 0,
+    activeMonths: 0,
+    peakMonthKey: null,
+  },
+  income_trend: {
+    kind: 'income_trend',
+    range: LOCKED_TREND_EMPTY_RANGE,
+    filteredForRange: [],
+    year: 0,
+    periodKey: '',
+    granularity: 'month',
+    monthRows: [],
+    averageMonthIncome: 0,
+    activeMonths: 0,
+    peakMonthKey: null,
+  },
+  category_trend: {
+    kind: 'category_trend',
+    range: LOCKED_TREND_EMPTY_RANGE,
+    filteredForRange: [],
+    year: 0,
+    periodKey: '',
+    granularity: 'month',
+    monthRows: [],
+    selectedCategoryId: null,
+    selectableCategories: [],
+  },
+  expense_sentiment: {
+    kind: 'expense_sentiment',
+    range: LOCKED_TREND_EMPTY_RANGE,
+    filteredForRange: [],
+    dayRows: [],
+    totals: { happy: 0, neutral: 0, sad: 0 },
+  },
+  asset_history: {
+    kind: 'asset_history',
+    range: LOCKED_TREND_EMPTY_RANGE,
+    filteredForRange: [],
+    year: 0,
+    monthRows: [],
+    includedAccountsCount: 0,
+  },
+};
 
 function startOfDayDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -4319,6 +4381,14 @@ export function InsightsScreen({
       insightType: InsightType,
       periodPresetOverride: PeriodPreset,
     ): InsightPageData => {
+      // A non-Pro user only sees the paywall overlay for locked trends, so skip
+      // the expensive per-period series build entirely and hand back the stable
+      // empty shell. This is the cold-start freeze fix: the pager builds data
+      // for its whole window on the restored insight, and for a large imported
+      // history that build (× several pages) blocked the JS thread for seconds.
+      if (!isPro && proTrendTypeSet.has(insightType)) {
+        return LOCKED_TREND_PLACEHOLDERS[insightType as ProTrendType];
+      }
       const cacheKey = [
         insightType,
         periodPresetOverride,
@@ -4338,7 +4408,7 @@ export function InsightsScreen({
       pageDataCacheRef.current.set(cacheKey, nextPageData);
       return nextPageData;
     },
-    [buildPageData],
+    [buildPageData, isPro, proTrendTypeSet],
   );
   const currentPeriodState = useMemo<PeriodState>(
     () => ({ anchorDate, customStart, customEnd }),
