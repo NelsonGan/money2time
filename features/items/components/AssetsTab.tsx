@@ -11,7 +11,6 @@ import {
 } from '~/features/items/components/AssetsTabBar';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { perfMark } from '~/utils/perfDebug';
 
 interface AccountsRenderOptions {
   hideBalances: boolean;
@@ -65,10 +64,6 @@ export function AssetsTab({
   onOpenAccountSettings,
   resetToAccountsToken,
 }: AssetsTabProps) {
-  perfMark('AssetsTab: render');
-  useEffect(() => {
-    perfMark('AssetsTab: mounted');
-  }, []);
   const insets = useSafeAreaInsets();
   const themeColors = useThemeColors();
   const [tab, setTab] = useState<AssetsTabName>('accounts');

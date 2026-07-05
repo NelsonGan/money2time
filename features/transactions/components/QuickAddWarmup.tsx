@@ -4,7 +4,6 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { perfMark, perfSpan } from '~/utils/perfDebug';
 
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
@@ -40,22 +39,17 @@ const styles = StyleSheet.create({
  * the session, so the host can unmount this shortly after.
  */
 export function QuickAddWarmup() {
-  perfMark('QuickAddWarmup: render');
   // Subscribing warms the keyboard-controller provider's animated view, which
   // is otherwise mounted lazily during the first real open.
   useReanimatedKeyboardAnimation();
 
   useEffect(() => {
-    perfMark('QuickAddWarmup: effect start');
     // Touch the inline-required modules so their factories evaluate now rather
     // than on the first keystroke/open. Empty inputs return immediately.
-    perfSpan('QuickAddWarmup.modules', () => {
-      parseQuickInput('warm 1');
-      matchCategoryByKeywords('warm', [], {});
-      categorizeFromHistory('warm', [], { type: 'expense' });
-      resolveCategoryIcon(undefined, undefined, '🏷️');
-    });
-    perfMark('QuickAddWarmup: effect done');
+    parseQuickInput('warm 1');
+    matchCategoryByKeywords('warm', [], {});
+    categorizeFromHistory('warm', [], { type: 'expense' });
+    resolveCategoryIcon(undefined, undefined, '🏷️');
   }, []);
 
   return (

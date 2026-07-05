@@ -15,7 +15,6 @@ import {
   type RevenueCatOffering,
   type RevenueCatPackage,
 } from '~/services/revenueCat';
-import { perfMark } from '~/utils/perfDebug';
 
 interface ProContextValue {
   isPro: boolean;
@@ -77,13 +76,11 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   // state, so prices load lazily the first time it opens.
   const refreshStatus = useCallback(async () => {
     setIsLoading(true);
-    perfMark('ProContext.refreshStatus: start');
     try {
       const nextState = await fetchRevenueCatCustomerState();
       applyCustomerState(nextState);
     } finally {
       setIsLoading(false);
-      perfMark('ProContext.refreshStatus: end');
     }
   }, [applyCustomerState]);
 

@@ -118,7 +118,6 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
-import { perfMark, perfSpan } from '~/utils/perfDebug';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
@@ -2727,9 +2726,6 @@ interface InsightsScreenProps {
   tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
-// TEMP diagnostic: counts InsightsScreen renders to expose a render loop.
-const insightsRenderCountRef = { current: 0 };
-
 export function InsightsScreen({
   resetToCurrentMonthToken = 0,
   onOpenDrilldown,
@@ -2740,10 +2736,6 @@ export function InsightsScreen({
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: InsightsScreenProps) {
-  insightsRenderCountRef.current += 1;
-  if (insightsRenderCountRef.current % 20 === 0 || insightsRenderCountRef.current <= 5) {
-    perfMark(`InsightsScreen: render #${insightsRenderCountRef.current}`);
-  }
   const {
     isLoading,
     settings,
@@ -2761,10 +2753,6 @@ export function InsightsScreen({
     deleteTransactionsBulk,
   } = useApp();
   const { transactions: liveTransactions } = useTransactions();
-  useEffect(() => {
-    perfMark('InsightsScreen: mounted');
-    return () => perfMark('InsightsScreen: unmounted');
-  }, []);
   // While the insights tab is hidden (it stays mounted behind the other tabs),
   // hold the last-seen snapshot so every write doesn't re-run the full insight
   // memo chain in the background; it catches up once when re-activated.
@@ -4406,9 +4394,7 @@ export function InsightsScreen({
       const cachedPageData = pageDataCacheRef.current.get(cacheKey);
       if (cachedPageData) return cachedPageData;
 
-      const nextPageData = perfSpan(`buildPageData:${insightType}`, () =>
-        buildPageData(state, insightType, periodPresetOverride),
-      );
+      const nextPageData = buildPageData(state, insightType, periodPresetOverride);
       if (pageDataCacheRef.current.size >= 72) {
         pageDataCacheRef.current.clear();
       }

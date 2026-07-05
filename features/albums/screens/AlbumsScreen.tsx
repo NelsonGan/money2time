@@ -25,7 +25,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { perfMark } from '~/utils/perfDebug';
 
 import { AlbumCard } from '../components/AlbumCard';
 import { AlbumMapPanel } from '../components/AlbumMapPanel';
@@ -47,9 +46,6 @@ export function AlbumsScreen({
   onOpenAlbumDetail,
 }: AlbumsScreenProps) {
   const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
-  useEffect(() => {
-    perfMark(`AlbumsScreen: mounted (albums=${albums.length})`);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();

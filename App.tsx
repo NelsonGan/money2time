@@ -18,15 +18,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
-import React, {
-  type ProfilerOnRenderCallback,
-  Profiler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Appearance,
   InteractionManager,
@@ -157,12 +149,6 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
-import { perfMark, perfSpan } from '~/utils/perfDebug';
-
-// TEMP: bump this tag on each diagnostic push so the log confirms which build
-// is actually running on the device (rules out a stale JS bundle).
-perfMark('BUILD MARKER: commit-fix-v9');
-
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
   // undefined when unset, which disables Sentry rather than crashing.
@@ -292,14 +278,6 @@ const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoAlbumsScreen = React.memo(AlbumsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 const MemoAssetsTab = React.memo(AssetsTab);
-
-// TEMP diagnostic: logs each Insights commit's duration so we can tell a single
-// slow render from a render loop (many fast commits) during the cold-start hang.
-const logInsightsCommit: ProfilerOnRenderCallback = (_id, phase, actualDuration) => {
-  if (actualDuration >= 30) {
-    perfMark(`Insights commit (${phase}) ${Math.round(actualDuration)}ms`);
-  }
-};
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -459,7 +437,6 @@ function MainShellScreen({
       pendingInteraction = InteractionManager.runAfterInteractions(() => {
         if (cancelled) return;
         const tab = order[index];
-        perfMark(`preload tab -> ${tab}`);
         setPreloadedTabs((prev) => {
           if (prev.has(tab)) return prev;
           const next = new Set(prev);
@@ -492,7 +469,6 @@ function MainShellScreen({
     const mountTimer = setTimeout(() => {
       interaction = InteractionManager.runAfterInteractions(() => {
         if (cancelled) return;
-        perfMark('warmupQuickAdd: mount');
         setWarmupQuickAdd(true);
         unmountTimer = setTimeout(() => setWarmupQuickAdd(false), 3000);
       });
@@ -1000,18 +976,16 @@ function MainShellScreen({
           />
         </MountedTab>
         <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
-          <Profiler id="Insights" onRender={logInsightsCommit}>
-            <MemoInsightsScreen
-              resetToCurrentMonthToken={insightsResetToMonthToken}
-              onOpenDrilldown={openInsightsDrilldown}
-              onOpenTransaction={openTransactionEditor}
-              onOpenProPaywall={openInsightsTrendPaywall}
-              activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-              isSimpleMode={isSimpleMode}
-              onTutorialTargetLayout={handleTutorialTargetLayout}
-              tutorialSpotlightRequest={tutorialSpotlightRequest}
-            />
-          </Profiler>
+          <MemoInsightsScreen
+            resetToCurrentMonthToken={insightsResetToMonthToken}
+            onOpenDrilldown={openInsightsDrilldown}
+            onOpenTransaction={openTransactionEditor}
+            onOpenProPaywall={openInsightsTrendPaywall}
+            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
+            isSimpleMode={isSimpleMode}
+            onTutorialTargetLayout={handleTutorialTargetLayout}
+            tutorialSpotlightRequest={tutorialSpotlightRequest}
+          />
         </MountedTab>
         <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
           <MemoAlbumsScreen
@@ -1192,19 +1166,16 @@ function WidgetSnapshotSync() {
     let cancelled = false;
     const handle = InteractionManager.runAfterInteractions(() => {
       if (cancelled) return;
-      perfMark('WidgetSnapshotSync: run');
       const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
-      const snapshot = perfSpan('WidgetSnapshotSync.build', () =>
-        buildMoney2TimeWidgetSnapshot({
-          transactions,
-          settings,
-          isPro,
-          getTrueHourlyRateForDate,
-          categories,
-          excludedSavingsIncomeCategoryIds: savingsExclusions.income,
-          excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
-        }),
-      );
+      const snapshot = buildMoney2TimeWidgetSnapshot({
+        transactions,
+        settings,
+        isPro,
+        getTrueHourlyRateForDate,
+        categories,
+        excludedSavingsIncomeCategoryIds: savingsExclusions.income,
+        excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+      });
       void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
     });
     return () => {
@@ -1829,7 +1800,6 @@ function AppContent() {
   if (isLoading) {
     return null;
   }
-  perfMark('AppContent: rendering real UI (isLoading=false)');
 
   if (!settings.onboardingCompleted) {
     return (
