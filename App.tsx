@@ -34,6 +34,7 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { KeyboardDismissOnBackground } from '~/components/KeyboardDismissOnBackground';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import {
@@ -1931,6 +1932,7 @@ export default Sentry.wrap(function App() {
             </AppProvider>
           </AppErrorBoundary>
           <MascotWarmup />
+          <KeyboardDismissOnBackground />
         </SafeAreaProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
