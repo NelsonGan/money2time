@@ -1,6 +1,9 @@
 # Budgeting — Design & Implementation Plan
 
-Status: **Planned** · Branch: `claude/budgeting-feature-plan-sez16k`
+Status: **Implemented** (same branch/PR) · Branch: `claude/budgeting-feature-plan-sez16k`
+
+Everything below is built except the news feature announcement (release-time
+follow-up). 510 tests green; native widget code needs a dev-client prebuild.
 
 Monthly, expense-only budgets built from reusable **budget templates**. A
 template defines a total budget and how it is allocated across expense
