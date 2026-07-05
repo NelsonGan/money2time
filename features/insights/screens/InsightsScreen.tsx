@@ -6607,7 +6607,7 @@ export function InsightsScreen({
             </View>
             <View className="flex-1 items-center px-1">
               <Text
-                variant={width < 380 ? 'subheading' : 'heading'}
+                variant={width < 380 ? 'subheading' : 'headingSm'}
                 numberOfLines={1}
                 className="text-center tracking-tight"
               >

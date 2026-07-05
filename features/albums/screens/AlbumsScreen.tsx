@@ -120,7 +120,12 @@ export function AlbumsScreen({
 
   const tabsBar = (
     <View className="flex-row items-center justify-between pr-5 pt-2">
-      <View className="flex-row px-5 pt-2" style={{ gap: 24 }}>
+      <ScrollView
+        horizontal
+        className="flex-1"
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 24, paddingHorizontal: 20, paddingTop: 8 }}
+      >
         {(
           [
             { value: 'albums', label: I18n.t('albums.title') },
@@ -137,7 +142,7 @@ export function AlbumsScreen({
               className="pb-2"
             >
               <Text
-                variant={windowWidth < 380 ? 'subheading' : 'heading'}
+                variant={windowWidth < 380 ? 'subheading' : 'headingSm'}
                 className={cn(
                   'tracking-tight',
                   active ? 'text-foreground' : 'text-muted-foreground',
@@ -152,7 +157,7 @@ export function AlbumsScreen({
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
       <Pressable
         onPress={() => {
           void triggerHaptic('selection');
