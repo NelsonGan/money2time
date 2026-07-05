@@ -138,6 +138,7 @@ import {
   normalizeMonthKey,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
+import { perfMark, perfSpan } from '~/utils/perfDebug';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 export interface SplitDraftInput {
@@ -861,7 +862,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAll = useCallback(() => {
     try {
-      initializeDatabase();
+      perfMark('refreshAll:start');
+      perfSpan('refreshAll.initializeDatabase', () => initializeDatabase());
 
       const allWages = monthlyWageRepository.list();
       const effectiveCurrentWage = selectEffectiveCurrentWage(allWages);
@@ -917,7 +919,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
-      const processedRules = recurringRulesRepository.runDueTransactions();
+      const processedRules = perfSpan('refreshAll.runDueTransactions', () =>
+        recurringRulesRepository.runDueTransactions(),
+      );
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
 
       // Fire notifications for processed recurring rules
@@ -936,10 +940,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextRecurringRules = recurringRulesRepository.list();
       const nextAccounts = accountsRepository.list();
       const nextCategories = categoriesRepository.list();
-      const nextTransactions = transactionsRepository.list();
+      const nextTransactions = perfSpan('refreshAll.transactions.list', () =>
+        transactionsRepository.list(),
+      );
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
-      const nextRawAccountBalances = accountsRepository.getBalances();
+      const nextRawAccountBalances = perfSpan('refreshAll.getBalances', () =>
+        accountsRepository.getBalances(),
+      );
 
       // Compute last 7 days spending for weekly notification body
       const sevenDaysAgoKey = (() => {
@@ -984,6 +992,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setItems(nextItems);
       setRawAccountBalances(nextRawAccountBalances);
       setLoadError(null);
+      perfMark('refreshAll:end (state queued)');
     } catch (error) {
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }

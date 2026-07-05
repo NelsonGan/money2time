@@ -149,6 +149,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
+import { perfMark } from '~/utils/perfDebug';
 
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
@@ -438,6 +439,7 @@ function MainShellScreen({
       pendingInteraction = InteractionManager.runAfterInteractions(() => {
         if (cancelled) return;
         const tab = order[index];
+        perfMark(`preload tab -> ${tab}`);
         setPreloadedTabs((prev) => {
           if (prev.has(tab)) return prev;
           const next = new Set(prev);
@@ -470,6 +472,7 @@ function MainShellScreen({
     const mountTimer = setTimeout(() => {
       interaction = InteractionManager.runAfterInteractions(() => {
         if (cancelled) return;
+        perfMark('warmupQuickAdd: mount');
         setWarmupQuickAdd(true);
         unmountTimer = setTimeout(() => setWarmupQuickAdd(false), 3000);
       });
@@ -1788,6 +1791,7 @@ function AppContent() {
   if (isLoading) {
     return null;
   }
+  perfMark('AppContent: rendering real UI (isLoading=false)');
 
   if (!settings.onboardingCompleted) {
     return (
