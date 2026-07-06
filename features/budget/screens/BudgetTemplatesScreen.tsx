@@ -85,7 +85,10 @@ function TemplateCard({
         </Pressable>
 
         <Pressable
-          onPress={onEdit}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onEdit();
+          }}
           accessibilityRole="button"
           accessibilityLabel={template.name}
           className="min-w-0 flex-1 flex-row items-center gap-3 active:opacity-85"

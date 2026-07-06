@@ -26,18 +26,54 @@ export function useAllocationDraft({
   categories,
   initialTotal,
   initialAmounts,
+  initialOrder,
   onOpenCategoryAllocation,
 }: {
   categories: Category[];
   initialTotal: string;
   /** Lazy so the seed lines are only flattened once, on first render. */
   initialAmounts: () => Record<string, string>;
+  /**
+   * Lazy seed of the root-category display order (by id), e.g. an existing
+   * template's saved allocation order. Ids not listed here fall in after, in
+   * the global category order.
+   */
+  initialOrder?: () => string[];
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
 }) {
-  const rootExpenseCategories = useMemo(
+  const baseRootCategories = useMemo(
     () => categories.filter((category) => category.type === 'expense' && !category.parentId),
     [categories],
   );
+
+  // The user-controlled order (root category ids). Reordering in the editor
+  // updates this, and the saved allocations' sortOrder follows it — so the
+  // budget renders in the order the user arranged.
+  const [orderedRootIds, setOrderedRootIds] = useState<string[]>(() => initialOrder?.() ?? []);
+
+  // Root categories in the chosen order: placed ids first (in their saved
+  // order), then any not-yet-placed categories appended in the global order so
+  // a category added after seeding still appears.
+  const rootExpenseCategories = useMemo(() => {
+    const byId = new Map(baseRootCategories.map((category) => [category.id, category]));
+    const ordered: Category[] = [];
+    const placed = new Set<string>();
+    for (const id of orderedRootIds) {
+      const category = byId.get(id);
+      if (category && !placed.has(id)) {
+        ordered.push(category);
+        placed.add(id);
+      }
+    }
+    for (const category of baseRootCategories) {
+      if (!placed.has(category.id)) ordered.push(category);
+    }
+    return ordered;
+  }, [baseRootCategories, orderedRootIds]);
+
+  const reorderRootCategories = useCallback((orderedIds: string[]) => {
+    setOrderedRootIds(orderedIds);
+  }, []);
   const childrenByParent = useMemo(() => {
     const map = new Map<string, Category[]>();
     for (const category of categories) {
@@ -152,6 +188,7 @@ export function useAllocationDraft({
     childGaps,
     allocationsValid,
     openCategoryAllocation,
+    reorderRootCategories,
     buildAllocations,
   };
 }

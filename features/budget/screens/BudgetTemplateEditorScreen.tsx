@@ -1,6 +1,7 @@
 import { SmilePlus } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
+import { Pressable, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Input, SettingsHeader } from '~/components/ui';
@@ -48,6 +49,7 @@ export function BudgetTemplateEditorScreen({
   } = useApp();
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
+  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   const existing = useMemo(
     () => budgetTemplates.find((template) => template.id === templateId) ?? null,
@@ -78,6 +80,14 @@ export function BudgetTemplateEditorScreen({
         if (allocation.amount > 0) initial[allocation.categoryId] = String(allocation.amount);
       }
       return initial;
+    },
+    initialOrder: () => {
+      // The seed's allocations arrive in saved sortOrder; keep the root order so
+      // an edited/duplicated template opens in the arrangement it was saved in.
+      const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
+      return (seed?.allocations ?? [])
+        .filter((allocation) => !parentById.get(allocation.categoryId))
+        .map((allocation) => allocation.categoryId);
     },
     onOpenCategoryAllocation,
   });
@@ -137,7 +147,8 @@ export function BudgetTemplateEditorScreen({
         />
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
+        ref={scrollRef}
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -183,6 +194,8 @@ export function BudgetTemplateEditorScreen({
             amounts={draft.amounts}
             childGaps={draft.childGaps}
             onPressCategory={draft.openCategoryAllocation}
+            onReorder={draft.reorderRootCategories}
+            scrollableRef={scrollRef}
             settings={settings}
             themeColors={themeColors}
           />
@@ -209,7 +222,7 @@ export function BudgetTemplateEditorScreen({
             />
           ) : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* The remaining-to-allocate bar sits right above Cancel/Save (and rides
           the keyboard) so the running tally is visible while amounts are
