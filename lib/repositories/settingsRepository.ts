@@ -54,6 +54,8 @@ class SettingsRepository {
         | 'lastRateFetchAt'
         | 'lastRateFetchError'
         | 'fxCurrenciesJson'
+        | 'paymentQrUri'
+        | 'paymentQrLabel'
       >
     >,
   ) {
@@ -175,6 +177,8 @@ class SettingsRepository {
         autoFxRefreshEnabled: true,
         lastRateFetchAt: null,
         lastRateFetchError: null,
+        paymentQrUri: null,
+        paymentQrLabel: null,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

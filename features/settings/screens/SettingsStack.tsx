@@ -30,6 +30,8 @@ import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
+import { SettleUpScreen } from '~/features/transactions/screens';
+
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
@@ -115,6 +117,7 @@ function SettingsHomeRoute({
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
+      onOpenSettleUp={() => navigation.navigate('SettleUp')}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -372,6 +375,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <ShareAndEarnScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="SettleUp">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <SettleUpScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="QuickEntrySettings">

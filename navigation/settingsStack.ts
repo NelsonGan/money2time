@@ -37,6 +37,7 @@ export type SettingsStackParamList = {
   };
   ProManagement: undefined;
   ShareAndEarn: undefined;
+  SettleUp: undefined;
   QuickEntrySettings: undefined;
   AppLock: undefined;
   WidgetPreviews: undefined;

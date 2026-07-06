@@ -14,6 +14,7 @@ import {
   Fingerprint,
   FolderTree,
   Gift,
+  HandCoins,
   Heart,
   Images,
   Landmark,
@@ -119,6 +120,7 @@ interface SettingsScreenProps {
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
+  onOpenSettleUp: () => void;
   onOpenWidgetPreviews?: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
@@ -145,6 +147,7 @@ export function SettingsScreen({
   onOpenProPaywall,
   onOpenProManagement,
   onOpenShareAndEarn,
+  onOpenSettleUp,
   onOpenWidgetPreviews,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -717,6 +720,11 @@ export function SettingsScreen({
                 icon={<Zap size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.quick_entry.title')}
                 onPress={onOpenQuickEntry}
+              />
+              <SettingsGridTile
+                icon={<HandCoins size={20} color={themeColors.primary} />}
+                label={I18n.t('transactions.settleUp.title')}
+                onPress={onOpenSettleUp}
               />
             </SettingsGrid>
           </SettingsSection>
