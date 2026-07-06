@@ -1,7 +1,10 @@
-import { AlertCircle, ChevronRight } from 'lucide-react-native';
+import { AlertCircle, GripVertical } from 'lucide-react-native';
 import React from 'react';
 import { Platform, Pressable, Switch, View } from 'react-native';
+import type { AnimatedRef } from 'react-native-reanimated';
+import type Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, SettingsActionBar, Text } from '~/components/ui';
 import type { ColorPalette } from '~/constants/designSystem';
@@ -97,14 +100,17 @@ function AllocationStatusBar({
 
 /**
  * Compact, merged category list: one card, one row per root category. The
- * amount is read-only here; tapping a row opens the per-category sheet
- * (which also holds the subcategory breakdown).
+ * amount is read-only here; tapping a row opens the per-category sheet (which
+ * also holds the subcategory breakdown). Rows drag-reorder by their grip
+ * handle; the chosen order is what the saved budget renders in.
  */
 export function AllocationCategoryList({
   rootCategories,
   amounts,
   childGaps,
   onPressCategory,
+  onReorder,
+  scrollableRef,
   settings,
   themeColors,
 }: {
@@ -113,44 +119,79 @@ export function AllocationCategoryList({
   /** Root category ids whose subcategory breakdown doesn't sum to the parent. */
   childGaps: Map<string, number>;
   onPressCategory: (categoryId: string) => void;
+  /** Receives the reordered root category ids after a drag. */
+  onReorder: (orderedIds: string[]) => void;
+  /** The enclosing scroll view, so a drag near the edge auto-scrolls. */
+  scrollableRef: AnimatedRef<Animated.ScrollView>;
   settings: UserSettings;
   themeColors: ColorPalette;
 }) {
   return (
     <View className="overflow-hidden rounded-2xl border border-border/40 bg-card">
-      {rootCategories.map((category, index) => {
-        const amount = parseAllocationAmount(amounts[category.id] ?? '');
-        const hasGap = childGaps.has(category.id);
-        return (
-          <Pressable
-            key={category.id}
-            onPress={() => {
-              void triggerHaptic('selection');
-              onPressCategory(category.id);
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={category.name}
-            className={cn(
-              'flex-row items-center gap-3 px-4 py-3 active:bg-secondary/30',
-              index > 0 && 'border-t border-border/25',
-            )}
-          >
-            <CategoryEmoji icon={category.icon} size={18} />
-            <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
-              {category.name}
-            </Text>
-            {hasGap ? <AlertCircle size={14} color={themeColors.error} /> : null}
-            <Text
-              variant={amount > 0 ? 'bodyStrong' : 'body'}
-              numberOfLines={1}
-              className={cn('shrink-0', amount > 0 ? '' : 'text-muted-foreground')}
+      <Sortable.Flex
+        activeItemScale={1.02}
+        activeItemShadowOpacity={0.08}
+        customHandle
+        dragActivationDelay={0}
+        flexDirection="column"
+        flexWrap="nowrap"
+        gap={0}
+        inactiveItemOpacity={1}
+        scrollableRef={scrollableRef}
+        width="fill"
+        onDragEnd={({ fromIndex, order, toIndex }) => {
+          if (fromIndex === toIndex) return;
+          onReorder(order(rootCategories).map((category) => category.id));
+          void triggerHaptic('selection');
+        }}
+      >
+        {rootCategories.map((category, index) => {
+          const amount = parseAllocationAmount(amounts[category.id] ?? '');
+          const hasGap = childGaps.has(category.id);
+          return (
+            <View
+              key={category.id}
+              className={cn(
+                'flex-row items-center bg-card',
+                index > 0 && 'border-t border-border/25',
+              )}
             >
-              {money(amount, settings)}
-            </Text>
-            <ChevronRight size={15} color={themeColors.textMuted} />
-          </Pressable>
-        );
-      })}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onPressCategory(category.id);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={category.name}
+                className="min-w-0 flex-1 flex-row items-center gap-3 py-3 pl-4 active:bg-secondary/30"
+              >
+                <CategoryEmoji icon={category.icon} size={18} />
+                <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
+                  {category.name}
+                </Text>
+                {hasGap ? <AlertCircle size={14} color={themeColors.error} /> : null}
+                <Text
+                  variant={amount > 0 ? 'bodyStrong' : 'body'}
+                  numberOfLines={1}
+                  className={cn('shrink-0', amount > 0 ? '' : 'text-muted-foreground')}
+                >
+                  {money(amount, settings)}
+                </Text>
+              </Pressable>
+              <Sortable.Handle>
+                <View
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel={`${I18n.t('common.reorder')} ${category.name}`}
+                  className="py-3 pl-2 pr-3"
+                >
+                  <GripVertical size={16} color={themeColors.textMuted} />
+                </View>
+              </Sortable.Handle>
+            </View>
+          );
+        })}
+      </Sortable.Flex>
     </View>
   );
 }

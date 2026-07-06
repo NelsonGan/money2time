@@ -48,7 +48,7 @@ export function BudgetTemplatePickerSheet({
   const insets = useSafeAreaInsets();
 
   return (
-    <ThemeModal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
           <View
