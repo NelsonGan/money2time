@@ -1711,7 +1711,6 @@ const ko = {
     summary_budgeted: '예산 내 지출',
     summary_unbudgeted: '예산 외 지출',
     summary_exceeded: '예산 {{amount}} 초과',
-    from_template: '{{name}}에서 생성',
     delete_budget: '예산 삭제',
     delete_budget_title: '이번 달 예산을 삭제할까요?',
     delete_budget_message: '이번 달에는 자동으로 다시 생성되지 않습니다.',

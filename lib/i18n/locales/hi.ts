@@ -1732,7 +1732,6 @@ const hi = {
     summary_budgeted: 'बजट में खर्च',
     summary_unbudgeted: 'बिना बजट का खर्च',
     summary_exceeded: 'बजट से {{amount}} अधिक',
-    from_template: '{{name}} से',
     delete_budget: 'बजट हटाएँ',
     delete_budget_title: 'इस महीने का बजट हटाएँ?',
     delete_budget_message: 'यह इस महीने के लिए अपने आप दोबारा नहीं बनेगा।',

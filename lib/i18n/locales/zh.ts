@@ -1665,7 +1665,6 @@ const zh = {
     summary_budgeted: '预算内支出',
     summary_unbudgeted: '预算外支出',
     summary_exceeded: '超出预算 {{amount}}',
-    from_template: '来自{{name}}',
     delete_budget: '删除预算',
     delete_budget_title: '删除本月预算？',
     delete_budget_message: '本月不会自动重新创建。',

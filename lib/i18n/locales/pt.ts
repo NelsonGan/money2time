@@ -1754,7 +1754,6 @@ const pt = {
     summary_budgeted: 'Gasto orçamentado',
     summary_unbudgeted: 'Gasto fora do orçamento',
     summary_exceeded: '{{amount}} acima do orçamento',
-    from_template: 'De {{name}}',
     delete_budget: 'Eliminar orçamento',
     delete_budget_title: 'Eliminar o orçamento deste mês?',
     delete_budget_message: 'Não será recriado automaticamente para este mês.',

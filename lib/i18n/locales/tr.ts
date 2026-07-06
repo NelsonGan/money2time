@@ -1752,7 +1752,6 @@ const tr = {
     summary_budgeted: 'Bütçelenen harcama',
     summary_unbudgeted: 'Bütçelenmemiş harcama',
     summary_exceeded: 'Bütçe {{amount}} aşıldı',
-    from_template: '{{name}} şablonundan',
     delete_budget: 'Bütçeyi sil',
     delete_budget_title: 'Bu ayın bütçesi silinsin mi?',
     delete_budget_message: 'Bu ay için otomatik olarak yeniden oluşturulmaz.',

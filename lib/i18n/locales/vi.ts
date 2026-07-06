@@ -1726,7 +1726,6 @@ const vi = {
     summary_budgeted: 'Chi tiêu trong ngân sách',
     summary_unbudgeted: 'Chi tiêu ngoài ngân sách',
     summary_exceeded: 'Vượt ngân sách {{amount}}',
-    from_template: 'Từ {{name}}',
     delete_budget: 'Xóa ngân sách',
     delete_budget_title: 'Xóa ngân sách tháng này?',
     delete_budget_message: 'Nó sẽ không được tự động tạo lại cho tháng này.',

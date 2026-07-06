@@ -1743,7 +1743,6 @@ const uk = {
     summary_budgeted: 'Витрати за бюджетом',
     summary_unbudgeted: 'Витрати поза бюджетом',
     summary_exceeded: 'Перевищення на {{amount}}',
-    from_template: 'Із «{{name}}»',
     delete_budget: 'Видалити бюджет',
     delete_budget_title: 'Видалити бюджет цього місяця?',
     delete_budget_message: 'Він не буде автоматично створений знову для цього місяця.',

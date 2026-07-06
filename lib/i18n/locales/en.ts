@@ -1736,7 +1736,6 @@ const en = {
     summary_budgeted: 'Budgeted spend',
     summary_unbudgeted: 'Unbudgeted spend',
     summary_exceeded: 'Over budget by {{amount}}',
-    from_template: 'From {{name}}',
     delete_budget: 'Delete budget',
     delete_budget_title: 'Delete this month’s budget?',
     delete_budget_message: 'It won’t be recreated automatically for this month.',

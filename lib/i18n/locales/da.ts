@@ -1743,7 +1743,6 @@ const da = {
     summary_budgeted: 'Budgetteret forbrug',
     summary_unbudgeted: 'Ikke-budgetteret forbrug',
     summary_exceeded: '{{amount}} over budget',
-    from_template: 'Fra {{name}}',
     delete_budget: 'Slet budget',
     delete_budget_title: 'Slet denne måneds budget?',
     delete_budget_message: 'Det genoprettes ikke automatisk for denne måned.',

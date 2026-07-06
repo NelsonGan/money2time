@@ -1724,7 +1724,6 @@ const ja = {
     summary_budgeted: '予算内の支出',
     summary_unbudgeted: '予算外の支出',
     summary_exceeded: '予算を{{amount}}超過',
-    from_template: '{{name}}から作成',
     delete_budget: '予算を削除',
     delete_budget_title: '今月の予算を削除しますか？',
     delete_budget_message: '今月分は自動では再作成されません。',

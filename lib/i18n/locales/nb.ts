@@ -1745,7 +1745,6 @@ const nb = {
     summary_budgeted: 'Budsjettert forbruk',
     summary_unbudgeted: 'Ikke-budsjettert forbruk',
     summary_exceeded: '{{amount}} over budsjett',
-    from_template: 'Fra {{name}}',
     delete_budget: 'Slett budsjett',
     delete_budget_title: 'Slette denne månedens budsjett?',
     delete_budget_message: 'Det gjenopprettes ikke automatisk for denne måneden.',

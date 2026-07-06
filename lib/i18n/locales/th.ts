@@ -1705,7 +1705,6 @@ const th = {
     summary_budgeted: 'รายจ่ายตามงบ',
     summary_unbudgeted: 'รายจ่ายนอกงบ',
     summary_exceeded: 'เกินงบ {{amount}}',
-    from_template: 'จาก {{name}}',
     delete_budget: 'ลบงบประมาณ',
     delete_budget_title: 'ลบงบประมาณของเดือนนี้?',
     delete_budget_message: 'จะไม่ถูกสร้างใหม่โดยอัตโนมัติสำหรับเดือนนี้',

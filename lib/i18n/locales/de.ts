@@ -1769,7 +1769,6 @@ const de = {
     summary_budgeted: 'Budgetierte Ausgaben',
     summary_unbudgeted: 'Nicht budgetierte Ausgaben',
     summary_exceeded: '{{amount}} über Budget',
-    from_template: 'Aus {{name}}',
     delete_budget: 'Budget löschen',
     delete_budget_title: 'Budget dieses Monats löschen?',
     delete_budget_message: 'Es wird für diesen Monat nicht automatisch neu erstellt.',

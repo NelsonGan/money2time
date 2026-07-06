@@ -1772,7 +1772,6 @@ const fil = {
     summary_budgeted: 'Nakabadyet na gastos',
     summary_unbudgeted: 'Gastos na walang badyet',
     summary_exceeded: 'Lampas sa badyet nang {{amount}}',
-    from_template: 'Mula sa {{name}}',
     delete_budget: 'Burahin ang badyet',
     delete_budget_title: 'Burahin ang badyet ng buwang ito?',
     delete_budget_message: 'Hindi ito awtomatikong gagawin muli para sa buwang ito.',

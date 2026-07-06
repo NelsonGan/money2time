@@ -104,20 +104,7 @@ export function MonthlyBudgetEditorScreen({
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="px-5">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onClose}
-          title={monthLabel}
-          infoTooltip={
-            budget?.templateName
-              ? I18n.t('budget.from_template', {
-                  name: budget.templateEmoji
-                    ? `${budget.templateEmoji} ${budget.templateName}`
-                    : budget.templateName,
-                })
-              : undefined
-          }
-        />
+        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onClose} title={monthLabel} />
       </View>
 
       <ScrollView

@@ -1742,7 +1742,6 @@ const sv = {
     summary_budgeted: 'Budgeterade utgifter',
     summary_unbudgeted: 'Obudgeterade utgifter',
     summary_exceeded: '{{amount}} över budget',
-    from_template: 'Från {{name}}',
     delete_budget: 'Ta bort budget',
     delete_budget_title: 'Ta bort denna månads budget?',
     delete_budget_message: 'Den återskapas inte automatiskt för den här månaden.',

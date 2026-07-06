@@ -1765,7 +1765,6 @@ const nl = {
     summary_budgeted: 'Gebudgetteerde uitgaven',
     summary_unbudgeted: 'Niet-gebudgetteerde uitgaven',
     summary_exceeded: '{{amount}} boven budget',
-    from_template: 'Van {{name}}',
     delete_budget: 'Budget verwijderen',
     delete_budget_title: 'Budget van deze maand verwijderen?',
     delete_budget_message: 'Het wordt voor deze maand niet automatisch opnieuw aangemaakt.',

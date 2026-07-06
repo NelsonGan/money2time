@@ -1750,7 +1750,6 @@ const ms = {
     summary_budgeted: 'Perbelanjaan berbajet',
     summary_unbudgeted: 'Perbelanjaan luar bajet',
     summary_exceeded: 'Melebihi bajet {{amount}}',
-    from_template: 'Daripada {{name}}',
     delete_budget: 'Padam bajet',
     delete_budget_title: 'Padam bajet bulan ini?',
     delete_budget_message: 'Ia tidak akan dicipta semula secara automatik untuk bulan ini.',

@@ -1766,7 +1766,6 @@ const fr = {
     summary_budgeted: 'Dépenses budgétées',
     summary_unbudgeted: 'Dépenses hors budget',
     summary_exceeded: 'Dépassement de {{amount}}',
-    from_template: 'Depuis {{name}}',
     delete_budget: 'Supprimer le budget',
     delete_budget_title: 'Supprimer le budget de ce mois ?',
     delete_budget_message: 'Il ne sera pas recréé automatiquement pour ce mois.',

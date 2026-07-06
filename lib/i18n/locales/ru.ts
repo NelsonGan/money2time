@@ -1748,7 +1748,6 @@ const ru = {
     summary_budgeted: 'Расходы по бюджету',
     summary_unbudgeted: 'Расходы вне бюджета',
     summary_exceeded: 'Превышение на {{amount}}',
-    from_template: 'Из «{{name}}»',
     delete_budget: 'Удалить бюджет',
     delete_budget_title: 'Удалить бюджет этого месяца?',
     delete_budget_message: 'Он не будет создан заново автоматически для этого месяца.',

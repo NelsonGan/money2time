@@ -1756,7 +1756,6 @@ const id = {
     summary_budgeted: 'Pengeluaran teranggarkan',
     summary_unbudgeted: 'Pengeluaran di luar anggaran',
     summary_exceeded: 'Melebihi anggaran {{amount}}',
-    from_template: 'Dari {{name}}',
     delete_budget: 'Hapus anggaran',
     delete_budget_title: 'Hapus anggaran bulan ini?',
     delete_budget_message: 'Tidak akan dibuat ulang secara otomatis untuk bulan ini.',

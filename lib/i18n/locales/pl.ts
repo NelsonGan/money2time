@@ -1751,7 +1751,6 @@ const pl = {
     summary_budgeted: 'Wydatki w budżecie',
     summary_unbudgeted: 'Wydatki poza budżetem',
     summary_exceeded: '{{amount}} ponad budżet',
-    from_template: 'Z {{name}}',
     delete_budget: 'Usuń budżet',
     delete_budget_title: 'Usunąć budżet tego miesiąca?',
     delete_budget_message: 'Nie zostanie automatycznie utworzony ponownie dla tego miesiąca.',
