@@ -1,6 +1,7 @@
 import {
   aggregateUnpaidSplitsByPerson,
   buildReceiptText,
+  recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
@@ -229,8 +230,8 @@ describe('buildReceiptText', () => {
     ).people;
 
     const text = buildReceiptText(sarah, { strings, formatMoney });
-    expect(text).toContain('• Concert tickets — USD 80.00');
-    expect(text).toContain('• Dining — USD 32.00');
+    expect(text).toContain('• Concert tickets: USD 80.00');
+    expect(text).toContain('• Dining: USD 32.00');
     expect(text).toContain('You owe: USD 112.00');
     expect(text.startsWith('Split summary\nAlex → Sarah')).toBe(true);
     expect(text.endsWith('Sent from money2time')).toBe(true);
@@ -268,5 +269,79 @@ describe('buildReceiptText', () => {
     expect(text).toContain('You owe: SGD 80.00 + USD 32.00');
     expect(text).toContain('Pay me back: PayNow · +65 ••4821');
     expect(text).toContain('Scan the QR I attached to pay me back.');
+  });
+
+  it('carries no long dashes in the rendered receipt', () => {
+    const [sarah] = aggregateUnpaidSplitsByPerson(
+      [
+        makeTx({
+          id: 't1',
+          note: 'Dinner',
+          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 32 })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    ).people;
+    const text = buildReceiptText(sarah, { strings, formatMoney });
+    expect(text).not.toMatch(/[—–─]/);
+  });
+});
+
+describe('aggregateUnpaidSplitsByPerson — payback account', () => {
+  it("carries the split's payback account, falling back to the parent's", () => {
+    const summary = aggregateUnpaidSplitsByPerson(
+      [
+        makeTx({
+          id: 't1',
+          accountId: 'acct-parent',
+          splits: [
+            makeSplit({ id: 's1', personName: 'Sarah', amount: 10, paybackAccountId: 'acct-cash' }),
+          ],
+        }),
+        makeTx({
+          id: 't2',
+          accountId: 'acct-parent',
+          splits: [
+            makeSplit({ id: 's2', personName: 'Sarah', amount: 20, paybackAccountId: null }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    const bills = summary.people[0].bills;
+    expect(bills.find((b) => b.splitId === 's1')?.paybackAccountId).toBe('acct-cash');
+    expect(bills.find((b) => b.splitId === 's2')?.paybackAccountId).toBe('acct-parent');
+  });
+});
+
+describe('recentSplitPersonNames', () => {
+  it('returns distinct names most-recently-used first, skipping self and blanks', () => {
+    const names = recentSplitPersonNames([
+      makeTx({
+        id: 't1',
+        date: '2026-05-01',
+        splits: [makeSplit({ id: 's1', personName: 'Marcus', amount: 10 })],
+      }),
+      makeTx({
+        id: 't2',
+        date: '2026-06-10',
+        splits: [
+          makeSplit({ id: 's2', personName: 'Sarah', amount: 10 }),
+          makeSplit({ id: 's3', personName: 'Me', isSelf: true, amount: 10 }),
+          makeSplit({ id: 's4', personName: '   ', amount: 10 }),
+        ],
+      }),
+      makeTx({
+        id: 't3',
+        date: '2026-06-20',
+        // Duplicate of Marcus, more recent → bumps Marcus to the front.
+        splits: [makeSplit({ id: 's5', personName: 'marcus', amount: 10 })],
+      }),
+    ]);
+    expect(names).toEqual(['marcus', 'Sarah']);
+  });
+
+  it('returns an empty list when there are no named splits', () => {
+    expect(recentSplitPersonNames([makeTx({})])).toEqual([]);
   });
 });
