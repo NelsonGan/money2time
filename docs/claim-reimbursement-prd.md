@@ -13,6 +13,19 @@ feature, which already models the closest thing we have: "someone owes me
 money, mark it settled." Claims reuse that settlement pattern but diverge in
 two deliberate ways (see §3 and §6).
 
+### Terminology (read first)
+
+The word "claim" is overloaded, so this doc fixes it:
+
+| Term                  | Means                                                                                                     | Code identifiers                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Claimable expense** | A single expense transaction flagged as recoverable. The V1 unit of the feature.                          | `claimStatus`, `claimAmount` on `transactionsTable` |
+| **Reimbursement**     | An inbound (income) transaction that settles some or all of a claimable expense.                          | inflow row with `reimbursesTransactionId` set       |
+| **Claim (report)**    | **V2, Pro.** A named bundle of claimable expenses submitted together (an expense report). Not part of V1. | `claimsTable`, `claimId`                            |
+
+User-facing copy avoids "claim" as a noun for the unit — it says
+"claimable," "reimburse," "reimbursement," and (V2) "expense report."
+
 ---
 
 ## 1. Problem & motivation
@@ -46,9 +59,10 @@ activity list _cannot_ filter by owed status. For claims we want:
 - A **filterable** status ("show me everything I can still claim").
 - Gross spend preserved for expense reports / per-diem / tax, with an opt-in
   net view.
+- **Multiple settlements** per expense (a $600 flight refunded in two tranches).
 
-So claims get **first-class status columns on the transaction** plus an optional
-**claim grouping** (an expense report). We reuse the split _settlement_
+So claims get **first-class status columns on the transaction** plus a
+**back-pointer** from each reimbursement inflow. We reuse the split _settlement_
 mechanics, not the split _data model_.
 
 ---
@@ -60,22 +74,25 @@ mechanics, not the split _data model_.
 - Mark any expense as **claimable** in one tap, from the editor or a row swipe.
 - Track a running **"pending reimbursement"** total (money and hours) across all
   claimable expenses.
-- Support **partial** claims (claim $50/night of a $70/night hotel; per-diem caps).
-- Record reimbursement as a real inflow into a chosen account when it lands.
+- Support **partial and multiple** settlements (claim $50/night of a $70/night
+  hotel; a refund that arrives in two tranches).
+- Record each reimbursement as a real inflow into a chosen account when it lands.
 - **Filter** the activity list and search by claim status.
-- (Pro) Group claimable expenses into a **claim / expense report** with a title,
-  submission date, and one-tap "mark all reimbursed."
-- Keep historical aggregates correct — gross spend stays gross; net-of-
-  reimbursement is an explicit toggle, never a silent mutation.
+- Keep historical aggregates correct — gross spend stays gross, reimbursement
+  inflows never inflate income, and "net of reimbursements" is an explicit
+  toggle, never a silent mutation.
 
 ### Non-goals (V1)
 
+- **No claim grouping / expense reports.** Bundling claimable expenses into a
+  submittable report is **V2, Pro** (see §11). V1 reimburses expenses
+  individually.
 - No integrations with employer/expense systems (Expensify, SAP Concur, etc.).
 - No PDF/CSV expense-report export (V2 candidate — see §11).
 - No OCR/receipt auto-detection of reimbursable-ness (the app already has
   `receiptUri`; auto-suggestion is V2).
-- No multi-party claims (one transaction, one reimburser). If you split _and_
-  claim the same expense, see the edge case in §9.
+- No multi-party reimbursers on one expense (one claimable expense, one
+  logical reimburser). If you split _and_ claim the same expense, see §9.
 - No approval workflow / partial-approval states beyond "reimbursed amount ≤
   claimed amount."
 
@@ -83,64 +100,79 @@ mechanics, not the split _data model_.
 
 ## 3. Concepts & state model
 
-A claimable transaction moves through a small status machine. Status lives in a
+A claimable expense moves through a small status machine. Status lives in a
 single filterable column, `claimStatus`, on the transaction.
 
 ```
-none ──mark claimable──▶ claimable ──(optional)submit──▶ submitted
-                              │                              │
-                              └──────── mark reimbursed ─────┤
-                                                             ▼
-                                          reimbursed  /  partially_reimbursed
+none ──mark claimable──▶ claimable ──(V2) submit──▶ submitted
+                              │                          │
+                              └──── reimburse (partial) ──┤
+                                                          ▼
+                                     partially_reimbursed ──reimburse (rest)──▶ reimbursed
 ```
 
-| Status                 | Meaning                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `none`                 | Ordinary expense (default). Not shown as claimable anywhere.                             |
-| `claimable`            | Flagged; money is outstanding. Counts toward "pending reimbursement."                    |
-| `submitted`            | (Pro, optional) Added to a claim/expense report and marked submitted. Still outstanding. |
-| `partially_reimbursed` | Some but not all of `claimAmount` has come back.                                         |
-| `reimbursed`           | Fully settled. No longer outstanding; a reimbursement inflow exists.                     |
+| Status                 | Meaning                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `none`                 | Ordinary expense (default). Not shown as claimable anywhere.                              |
+| `claimable`            | Flagged; full `claimAmount` outstanding. Counts toward "pending reimbursement."           |
+| `submitted`            | **V2** — added to an expense report and marked submitted. Still outstanding. Inert in V1. |
+| `partially_reimbursed` | Some but not all of `claimAmount` has come back.                                          |
+| `reimbursed`           | Fully settled. No longer outstanding; one or more reimbursement inflows exist.            |
 
-Only **expenses** are claimable. Income/transfer/balance_adjustment rows never
-get a claim status (enforced in the editor and repository).
+Only **expenses** are claimable. Income / transfer / balance_adjustment rows
+never get a claim status (enforced in the editor and repository). The
+`submitted` value ships in the V1 enum for forward-compatibility but is
+unreachable until V2 grouping lands.
 
 ### The claim amount
 
 `claimAmount` is what you expect back and defaults to the **full expense
 amount** in the transaction's own currency. Editable for partial claims. It is
-always `> 0` and `≤ amount`. `reimbursedAmount` accumulates what has actually
-been settled (`0 → claimAmount`).
+always `> 0` and `≤ amount`. `reimbursedAmount` is a **denormalized running sum**
+of settled inflows (`0 → claimAmount`):
 
-- `reimbursedAmount === 0` → `claimable`/`submitted`
+- `reimbursedAmount === 0` → `claimable` (or `submitted` in V2)
 - `0 < reimbursedAmount < claimAmount` → `partially_reimbursed`
 - `reimbursedAmount === claimAmount` → `reimbursed`
 
+`reimbursedAmount` is denormalized for a cheap outstanding-total query; it is
+always recomputable as the sum of live reimbursement inflows pointing at the
+expense, so a reconciliation pass can rebuild it if it ever drifts.
+
 ### Reimbursement is an inflow, not an expense reversal (key divergence)
 
-Unlike splits — which shrink the parent expense — a reimbursement **creates a
+Unlike splits — which shrink the parent expense — each reimbursement **creates a
 separate inbound transaction** and leaves the original expense untouched. Why:
 
 - **Expense reports & per-diem** need the _gross_ amount ("I spent $600, claiming
   $600"). Shrinking the expense to $0 destroys that record.
 - **Tax / audit**: gross spend and the matching refund should both be visible.
+- **Multiple settlements**: one expense can be refunded in several tranches;
+  each is its own inflow row.
 - **Insights** can net them on demand (a toggle), but the raw history stays honest.
 
-Mechanically we mirror `markSplitPaid`'s same-account-vs-cross-account logic:
+Each reimbursement inflow is a `type: 'income'` transaction into the chosen
+account, carrying a **back-pointer** `reimbursesTransactionId` → the claimable
+expense it settles. `reportingAmount`/`fxRate` are snapshotted at settlement
+time (per the multi-currency rule). The back-pointer does triple duty:
 
-- **Cross-account** (refund lands in a _different_ account than the expense
-  was paid from, or into any explicitly chosen account): create a
-  `type: 'income'` transaction into `reimbursementAccountId`, category
-  "Reimbursement," `reportingAmount`/`fxRate` snapshotted at settlement time
-  (per the multi-currency rule). Store its id in `reimbursementTransactionId`.
-- **Same-account** default (refund lands back where you paid): still create an
-  `income` row so the balance rises and the inflow is visible in history. (We do
-  **not** adopt the split "silently reduce the parent" path — it hides the
-  event, which is wrong for reimbursements.)
+1. **One-to-many settlements** — an expense can have many inflows; the FK lives
+   on the inflow, not a single column on the expense.
+2. **Insights exclusion** — any row with `reimbursesTransactionId` set is a
+   reimbursement, so income aggregates exclude it (§8) and it never inflates
+   "income."
+3. **Reverse lookup** — deleting an inflow finds its expense to rewind status
+   (mirrors `findByPaidTransactionId`, `transactionSplitsRepository.ts:117`).
 
-Reversing ("mark unclaimed" / "undo reimbursed") soft-deletes the linked inflow
-and rewinds `reimbursedAmount`/`claimStatus`, exactly as `markSplitUnpaid`
-reverses a payback (`context/AppContext.tsx:2433`).
+Same-account vs cross-account is just the inflow's `accountId`: if the refund
+lands back in the paying account, the −expense/+income pair nets to zero on that
+balance while both rows stay visible in history. We deliberately do **not** adopt
+the split "silently reduce the parent" path — it hides the event, which is wrong
+for a reimbursement.
+
+Reversing ("mark unclaimable" / "undo a reimbursement") soft-deletes the linked
+inflow(s) and rewinds `reimbursedAmount`/`claimStatus`, in the spirit of
+`markSplitUnpaid` (`context/AppContext.tsx:2433`).
 
 ---
 
@@ -148,15 +180,15 @@ reverses a payback (`context/AppContext.tsx:2433`).
 
 - _As a consultant_, I pay for a client dinner, tap **Claimable** in the editor,
   and see it land in "Pending reimbursement: $84 · 3.2 hrs of your time."
-- _As a frequent traveller_, I open **Claims**, see six outstanding expenses
-  totalling $1,240, group them into "Berlin trip — March," mark it submitted,
-  and two weeks later tap **Mark all reimbursed** into my checking account.
+- _As a frequent traveller_, my $600 flight is refunded in two tranches; I mark
+  $300 reimbursed twice and watch the status go `claimable → partially_reimbursed
+→ reimbursed`.
 - _As someone on a per-diem_, I spent $70 on a hotel but can only claim $50, so I
   set the claim amount to $50; the other $20 stays as real spend.
 - _As a careful budgeter_, I toggle Insights to **net of reimbursements** so my
   category spend reflects only what I actually bore.
-- _As anyone_, I filter the activity list to **Claimable → outstanding** to chase
-  down what I'm still owed.
+- _As anyone_, I filter the activity list to **Outstanding** to chase down what
+  I'm still owed.
 
 ---
 
@@ -169,34 +201,42 @@ Split-bill entry (`features/transactions/components/editor/`). When on, it
 reveals:
 
 - **Claim amount** (defaults to full amount, editable, capped at amount).
-- **Reimburse into** account picker (defaults to the paying account) — used when
-  settling. Reuses `AccountPickerSheet`.
-- Read-only status chip once it has history ("Outstanding," "Reimbursed on …").
+- **Reimburse into** account picker (defaults to the paying account) — the
+  target when settling. Reuses `AccountPickerSheet`. **Simple mode:** the picker
+  is hidden; reimbursements land in the single wallet automatically (§9).
+- Read-only status chip once it has history ("Outstanding $x," "Reimbursed on …").
 
-Marking reimbursed from the editor: a **Mark reimbursed** pill (mirrors the
-split "Mark paid" pill at `SplitBillModal.tsx:592`) → opens a small amount +
-account confirm (defaulting to the full outstanding amount / chosen account) →
-calls `markReimbursed`.
+Marking a reimbursement from the editor: a **Mark reimbursed** pill (mirrors the
+split "Mark paid" pill at `SplitBillModal.tsx:592`) → a small amount + account +
+date confirm (defaulting to the full outstanding amount / chosen account /
+today) → calls `markReimbursed`. A **partially_reimbursed** expense shows the
+remaining outstanding amount and lets you record another tranche.
 
 ### 5.2 Activity row (`TransactionItem.tsx`)
 
 - A subtle **badge/chip** on claimable rows — an amber "claimable" dot when
-  outstanding, a green check when reimbursed — modeled on the existing red
-  unpaid-split badge (`TransactionItem.tsx:113`).
+  outstanding (with the outstanding amount), a green check when fully reimbursed
+  — modeled on the existing red unpaid-split badge (`TransactionItem.tsx:113`).
 - **Swipe action**: "Claimable" / "Mark reimbursed" as a quick action, matching
   existing row affordances.
+- Reimbursement **inflow** rows render with a small "reimbursement" affordance
+  linking back to the source expense (they are excluded from income insights,
+  §8, so the row should read as a refund, not salary).
 
-### 5.3 Claims hub (new screen, Pro for grouping)
+### 5.3 Reimbursements hub (new screen)
 
-Reached from Settings and/or an Insights entry (follow the budgeting precedent
-where a feature screen is both a route and an embedded Insights page). Shows:
+A dedicated screen (nav label **"Reimbursements"**), reached from Settings
+and/or an Insights entry (following the budgeting precedent where a feature
+screen is both a route and an embedded Insights page). V1 shows:
 
-- **Summary header**: total outstanding (money + hours), count, largest claim.
-- **Outstanding** list of claimable expenses (ungrouped + grouped).
-- **Claims (expense reports)** — Pro: named groups with a date range, status,
-  and totals. Create a claim, add/remove transactions, mark submitted, mark all
-  reimbursed in one action.
-- **History** of settled claims.
+- **Summary header**: total outstanding (money + hours), count, largest
+  outstanding expense.
+- **Outstanding** — claimable + partially_reimbursed expenses, each with its
+  remaining amount and a one-tap reimburse action.
+- **History** — fully reimbursed expenses.
+
+**V2 (Pro)** adds an **Expense reports** section: named claims (`claimsTable`)
+with a date range, submit state, and a **Mark all reimbursed** batch action.
 
 The "hours of your time" framing is the money2time hook: outstanding money is
 converted through `getTrueHourlyRateForDate` so a pending $600 reads as, e.g.,
@@ -205,45 +245,58 @@ converted through `getTrueHourlyRateForDate` so a pending $600 reads as, e.g.,
 ### 5.4 Filters
 
 Add claim status to `TransactionFilters` (see §7) so the activity list and
-search can scope to Claimable / Outstanding / Reimbursed. A filter chip in the
-existing filter UI.
+search can scope by claim state. A filter chip in the existing filter UI.
 
 ---
 
 ## 6. Data model & migration
 
-Next migration is **`043_claim_reimbursement.ts`** (version 43 — latest is
-`042_budget_template_options.ts`). Follow the **`add-db-migration`** skill
-(migration file + `schema.ts` + `mappers.ts` + `types/index.ts` + backfill).
-Existing rows default to `claimStatus = 'none'`, so no data migration is needed
-beyond column adds.
+**V1 migration is `043_claimable_expenses.ts`** (version 43 — latest is
+`042_budget_template_options.ts`). It adds **columns to `transactionsTable`
+only**; the `claimsTable` and `claimId` FK ship with **V2** in their own
+migration (append-only convention — no reason to ship an unused table now).
+Follow the **`add-db-migration`** skill (migration file + `schema.ts` +
+`mappers.ts` + `types/index.ts`). Existing rows default to `claimStatus = 'none'`
+and `reimbursedAmount = 0`, so no data backfill is needed.
 
-### 6.1 Columns on `transactionsTable` (`lib/db/schema.ts`)
+### 6.1 Columns on `transactionsTable` (`lib/db/schema.ts`) — V1
 
 ```ts
 // added to transactionsTable
 claimStatus: text('claim_status').notNull().default('none'),
   // 'none' | 'claimable' | 'submitted' | 'partially_reimbursed' | 'reimbursed'
 claimAmount: real('claim_amount'),          // expected back, tx currency; null when not claimable
-reimbursedAmount: real('reimbursed_amount').notNull().default(0),
-reimbursedAt: text('reimbursed_at'),        // ISO ts of full settlement; null until reimbursed
-reimbursementTxId: text('reimbursement_tx_id'),   // FK -> transactions.id of the inflow
-reimbursementAccountId: text('reimbursement_account_id'), // where the refund lands
-claimId: text('claim_id'),                  // nullable FK -> claims.id (Pro grouping)
+reimbursedAmount: real('reimbursed_amount').notNull().default(0), // denormalized Σ of inflows
+reimbursedAt: text('reimbursed_at'),        // ISO ts when fully settled; null otherwise
+reimbursementAccountId: text('reimbursement_account_id'), // preferred settle-into account
+reimbursesTransactionId: text('reimburses_transaction_id'),
+  // set ONLY on reimbursement-inflow (income) rows -> the claimable expense they settle
+```
+
+Two partial indexes:
+
+```sql
+-- fast "what's outstanding" scan
+CREATE INDEX idx_transactions_claim_outstanding
+  ON transactions (claim_status)
+  WHERE deleted_at IS NULL
+    AND claim_status IN ('claimable','submitted','partially_reimbursed');
+
+-- reverse lookup expense -> its reimbursement inflows
+CREATE INDEX idx_transactions_reimburses
+  ON transactions (reimburses_transaction_id)
+  WHERE deleted_at IS NULL AND reimburses_transaction_id IS NOT NULL;
 ```
 
 Rationale for status-on-transaction (vs a splits-style side table): it makes
 claim status **filterable in the SQL predicate layer** (`buildSqlPredicates`,
-`transactionsRepository.ts:242`), which the splits design explicitly can't do.
-Partial index for the outstanding query:
+`transactionsRepository.ts:242`), which the splits design explicitly can't do —
+and the back-pointer keeps one-to-many settlements clean without a join table.
 
-```sql
-CREATE INDEX idx_transactions_claim_outstanding
-  ON transactions (claim_status)
-  WHERE deleted_at IS NULL AND claim_status IN ('claimable','submitted','partially_reimbursed');
-```
+### 6.2 New `claimsTable` (V2, Pro grouping — expense reports)
 
-### 6.2 New `claimsTable` (Pro grouping — expense reports)
+Ships with V2, not V1. Recorded here so the V1 columns are chosen with it in
+mind (V2 adds a nullable `claimId` column to `transactionsTable`).
 
 ```ts
 export const claimsTable = sqliteTable('claims', {
@@ -260,9 +313,9 @@ export const claimsTable = sqliteTable('claims', {
 });
 ```
 
-Membership is the `transactions.claimId` FK (one transaction ∈ at most one
-claim), avoiding a join table since the relationship is 1-to-many. A claim's
-totals are computed from its member transactions (like `getAlbumStats`).
+Membership is the `transactions.claimId` FK (one expense ∈ at most one claim),
+avoiding a join table since the relationship is 1-to-many. A claim's totals are
+computed from its member expenses (like `getAlbumStats`).
 
 ### 6.3 Types (`types/index.ts`)
 
@@ -274,6 +327,10 @@ export type ClaimStatus =
   | 'partially_reimbursed'
   | 'reimbursed';
 
+// The claim fields map straight from the transaction row onto
+// Transaction / TransactionWithRelations — no attach step (a win over splits).
+
+// V2:
 export interface Claim {
   id: string;
   name: string;
@@ -297,107 +354,138 @@ export interface ClaimStats {
 }
 ```
 
-Extend `TransactionWithRelations` with the claim fields (they map straight from
-the row, no attach step needed — another win over the splits approach).
-
 ---
 
 ## 7. Repository & context API
 
-### `claimsRepository` (new, `lib/repositories/claimsRepository.ts`)
+### `transactionsRepository` additions
 
-CRUD mirroring `albumsRepository`: `findById`, `listActive`, `create`,
-`update`, `softDelete`, plus `listOutstandingTransactions()` and stats helpers.
+- `listClaimable(status?)` — outstanding / reimbursed claimable expenses.
+- `listReimbursementsFor(expenseId)` — inflows where
+  `reimbursesTransactionId = expenseId` (for rewind + net calcs).
+- Claim predicates in `buildSqlPredicates` / `normalizeTransactionFilters`
+  (`transactionsRepository.ts:85,242`).
 
 ### `AppContext` additions (`useApp()`)
 
-Claim state is settings/grouping-shaped (low churn), so it belongs on
-`useApp()`, not `useTransactions()`. But the per-transaction mutations touch
-transaction rows, so they must call `refreshTransactions()`.
+Claim mutations write transaction rows, so every one calls `refreshTransactions()`
+(the CLAUDE.md rule: include `refreshTransactions()` only when the write changes
+transaction rows — these do). The reimburse mutations reuse the `markSplitPaid`
+deferred-write pattern (`runDeferredWrite` + `scheduleRefreshTransactions`) to
+dodge the React-19 batching race.
 
-- `markClaimable(txId, claimAmount?)` — set `claimStatus='claimable'`,
-  `claimAmount` (default full), `reimbursementAccountId` default.
-- `markUnclaimable(txId)` — back to `none` (only if not yet reimbursed).
+- `markClaimable(txId, opts?: { claimAmount?, reimbursementAccountId? })` —
+  set `claimStatus='claimable'`, default `claimAmount` to full amount.
+- `markUnclaimable(txId)` — back to `none`; only allowed while
+  `reimbursedAmount === 0` (otherwise the user must undo reimbursements first).
 - `markReimbursed(txId, { amount, accountId, date })` — create the inflow
-  (§3), bump `reimbursedAmount`, set status, snapshot FX. Reuses the
-  `markSplitPaid` deferred-write pattern (`runDeferredWrite` +
-  `scheduleRefreshTransactions`) to dodge the React-19 batching race.
-- `undoReimbursed(txId, reimbursementTxId)` — soft-delete inflow, rewind status.
-- Claim grouping (Pro): `createClaim`, `updateClaim`, `deleteClaim`,
-  `addToClaim(claimId, txIds)`, `removeFromClaim(txIds)`,
-  `submitClaim(claimId)`, `markClaimReimbursed(claimId, accountId)` (settles
-  every outstanding member).
-- Selectors: `outstandingClaimTotal` (money + hours), `getClaimStats(claimId)`,
-  `claims`.
+  (§3) with `reimbursesTransactionId=txId`, add to `reimbursedAmount` (clamped
+  ≤ `claimAmount`), set status, snapshot FX.
+- `undoReimbursement(inflowTxId)` — soft-delete the inflow, subtract its amount
+  from the expense's `reimbursedAmount`, recompute status (reverse lookup via
+  `reimbursesTransactionId`).
+- Selector `outstandingReimbursementTotal` (money + hours). **Per the CLAUDE.md
+  memo rule, this selector is transaction-derived, so it must key on
+  `useTransactions().transactions`** even though the action functions live on
+  `useApp()`.
+
+**V2:** `claimsRepository` (mirrors `albumsRepository`) + `createClaim`,
+`updateClaim`, `deleteClaim`, `addToClaim`, `removeFromClaim`, `submitClaim`,
+`markClaimReimbursed(claimId, accountId)` (settles every outstanding member).
 
 ### `TransactionFilters` (`types/index.ts:570`)
 
-Add:
+Add a single field:
 
 ```ts
-claimStatus: 'all' | 'claimable_any' | 'outstanding' | 'reimbursed' | 'none';
+claimStatus: 'all' | 'outstanding' | 'reimbursed' | 'claimable_any' | 'none';
+//  all        -> no filter (default)
+//  outstanding-> claimStatus IN ('claimable','submitted','partially_reimbursed')
+//  reimbursed -> claimStatus = 'reimbursed'
+//  claimable_any-> claimStatus != 'none' (ever flagged)
+//  none       -> claimStatus = 'none' (ordinary expenses only)
 ```
 
-Handle it in `normalizeTransactionFilters` and `buildSqlPredicates`
-(`transactionsRepository.ts:85,242`) as a real SQL predicate.
+Handle it in `normalizeTransactionFilters` and `buildSqlPredicates` as a real
+SQL predicate. Reimbursement **inflow** rows (`reimbursesTransactionId` set) are
+not themselves claimable and are unaffected by this filter.
 
 ---
 
 ## 8. Insights, widgets, analytics, i18n
 
-- **Insights**: a **"Net of reimbursements"** toggle that subtracts reimbursed
-  inflows from category/expense totals (never mutates data — computed at query
-  time, consistent with the frozen-FX rule). A small "Reimbursements" strip
-  showing pending vs settled over time.
-- **Widget** (optional, V2): a "Pending reimbursement" glance via
-  `widgetSnapshot.ts`.
+- **Income integrity (required, not optional):** reimbursement inflows carry
+  `reimbursesTransactionId`, so `getIncomeBreakdown` / `getCashflowSummary` /
+  the insights income series **exclude** them by default. A reimbursement is
+  recovered spend, not earnings — counting it as income would overstate both
+  income and net savings.
+- **"Net of reimbursements" toggle** on Insights: subtracts each reimbursement
+  inflow from the linked expense's category/expense total (computed at query
+  time via the back-pointer and frozen FX — never mutates data, consistent with
+  the frozen-FX rule). Off by default so gross spend stays visible.
+- **Reimbursement category:** reimbursement inflows use a reserved, non-deletable
+  **"Reimbursement"** income category, auto-seeded on migration (resolves §12
+  Q4 — chosen over free-pick so the exclusion/netting logic has a stable anchor
+  and users don't have to think about it). It is hidden from the normal
+  category pickers.
+- **Widget** (V2): a "Pending reimbursement" glance via `widgetSnapshot.ts`.
 - **Analytics** (`services/analytics.ts`, `AnalyticsEvents`): mirror the split
-  events — `CLAIM_MARKED_CLAIMABLE`, `CLAIM_MARKED_REIMBURSED`,
-  `CLAIM_MARKED_UNCLAIMED`, `CLAIM_CREATED`, `CLAIM_SUBMITTED`,
-  `CLAIM_SETTLED`, plus `PRO_LIMIT_HIT` on the grouping gate.
+  events — `CLAIM_MARKED_CLAIMABLE`, `CLAIM_MARKED_UNCLAIMABLE`,
+  `CLAIM_REIMBURSED` (prop: `isPartial`, `isFull`), `CLAIM_REIMBURSEMENT_UNDONE`.
+  V2 adds `CLAIM_REPORT_CREATED`, `CLAIM_REPORT_SUBMITTED`,
+  `CLAIM_REPORT_SETTLED`, plus `PRO_LIMIT_HIT` on the grouping gate.
 - **i18n**: all strings via `I18n.t` added to `en.ts` and all 23 locales
   (**`add-i18n-string`** skill keeps `localeParity.test.ts` green). Keys under
-  `claims.*` and `transactions.editor.claim.*`.
+  `reimbursements.*` and `transactions.editor.claim.*`, plus the seeded
+  category name `categories.reimbursement`.
 
 ---
 
 ## 9. Edge cases & rules
 
+- **Simple mode.** Simple mode hides the accounts tab and uses one wallet
+  (`simpleWalletId`). The "reimburse into" picker is hidden and reimbursements
+  land in the simple wallet automatically. The feature otherwise works
+  unchanged; the Reimbursements hub is reachable from Settings.
 - **Split _and_ claim the same expense.** Allowed but distinct: a split reduces
   the parent (a friend paid their share); the claim amount then defaults to the
   _remaining_ parent amount, not the original. Guard: `claimAmount ≤` current
   `amount`.
-- **Delete a claimable/reimbursed expense.** Soft-deleting the expense should
-  also soft-delete its reimbursement inflow (and detach from any claim), so the
-  refund doesn't dangle. Reversal path already exists for splits.
-- **Delete the reimbursement inflow directly.** Rewind the source transaction to
-  `partially_reimbursed`/`claimable` (reverse lookup by
-  `reimbursementTxId`, like `findByPaidTransactionId`).
-- **Multi-currency.** `claimAmount` is in the transaction currency; the inflow
+- **Delete a claimable / reimbursed expense.** Soft-deleting the expense also
+  soft-deletes its reimbursement inflows (found via `reimbursesTransactionId`)
+  and detaches it from any V2 claim, so no refund dangles.
+- **Delete a reimbursement inflow directly.** Rewind the source expense:
+  subtract the inflow amount from `reimbursedAmount`, recompute `claimStatus`
+  (`reimbursed → partially_reimbursed → claimable`), clear `reimbursedAt` if it
+  is no longer fully settled.
+- **Multi-currency.** `claimAmount` is in the expense's currency; each inflow
   snapshots its own `reportingAmount`/`fxRate` at settlement. Outstanding totals
   aggregate in reporting currency via the frozen snapshots — never recompute
   from live rates.
 - **Editing `amount` after claiming.** If the new amount `< claimAmount`, clamp
-  `claimAmount` down and warn.
-- **Reimbursed amount can't exceed claimed.** Enforced in `markReimbursed`.
+  `claimAmount` down (and never below `reimbursedAmount`) and warn.
+- **Over-reimbursement.** `reimbursedAmount` can never exceed `claimAmount`; the
+  reimburse sheet caps the entered amount at the remaining outstanding.
 - **Non-expense types** can never be claimable (editor + repository guard).
+- **Recurring expenses.** A recurring rule that generates claimable instances is
+  out of scope for V1 (V3, §11); generated instances start at `claimStatus='none'`.
 
 ---
 
 ## 10. Pro gating
 
-Per-transaction **marking, tracking, and single-tap reimbursement are free** —
-this is core value and drives the "time you'll get back" hook. The **claim
-grouping / expense-report** layer is **Pro**, matching how albums and budget
-templates gate (`useProGate`, `constants/proLimits.ts`).
+Per-transaction **marking, tracking, and reimbursing are free** — this is core
+value and drives the "time you'll get back" hook. The **claim grouping /
+expense-report** layer (V2) is **Pro**, matching how albums and budget templates
+gate (`useProGate`, `constants/proLimits.ts`).
 
-- Add `FREE_MAX_CLAIMS` (proposal: **1** open claim on free, unlimited on Pro)
-  to `PRO_LIMITS`, a `'claims'` `LimitType` + `LIMIT_MAP` entry
+- Add `FREE_MAX_CLAIMS` (proposal: **1** open expense report on free, unlimited
+  on Pro) to `PRO_LIMITS`, a `'claims'` `LimitType` + `LIMIT_MAP` entry
   (`hooks/useProGate.ts:9`), and a `pro.limit_claims` string.
-- Gate at claim creation: `if (!checkLimit('claims', openClaims.length)) return;`
+- Gate at report creation: `if (!checkLimit('claims', openReports.length)) return;`
 
-Open question (§12): whether grouping should be Pro at all, or whether a
-gentler cap (free single active claim) is enough.
+V1 ships **entirely free** — there is nothing to gate until grouping arrives.
+See §12 Q1 for whether grouping should be Pro at all.
 
 ---
 
@@ -405,22 +493,23 @@ gentler cap (free single active claim) is enough.
 
 **V1 (this effort) — the core loop, free:**
 
-- Migration 043 (transaction columns only; ship `claimsTable` in the same
-  migration but the grouping UI can follow).
-- Editor toggle + claim amount + reimburse-into account.
-- `markClaimable` / `markUnclaimable` / `markReimbursed` / `undoReimbursed`.
-- Activity-row badge + swipe action.
+- Migration 043 (transaction claim columns + two indexes; seed the
+  "Reimbursement" category).
+- Editor toggle + claim amount + reimburse-into account (simple-mode aware).
+- `markClaimable` / `markUnclaimable` / `markReimbursed` / `undoReimbursement`.
+- Activity-row badge + swipe action; reimbursement inflow rows link back.
 - `TransactionFilters.claimStatus` + filter chip.
-- Claims hub screen: outstanding list + running total (money + hours) + history.
-- Insights "net of reimbursements" toggle.
-- Analytics + i18n (23 locales) + tests.
+- Reimbursements hub: outstanding list + running total (money + hours) + history.
+- Insights income exclusion (required) + "net of reimbursements" toggle.
+- Analytics + i18n (23 locales) + tests (see §14).
 
 **V2:**
 
-- Claim grouping / expense reports (Pro) with submit + batch-settle.
+- Claim grouping / expense reports (Pro): `claimsTable`, `claimId` migration,
+  submit + batch-settle, the hub's Expense-reports section.
 - CSV/PDF expense-report export (share sheet).
 - Receipt-aware suggestion ("this has a receipt — claimable?").
-- "Pending reimbursement" home-screen widget.
+- "Pending reimbursement" home-screen widget + a `news` feature announcement.
 - Reminders ("$1,240 outstanding for 30+ days — chase it?") via `notifications`.
 
 **V3 / exploratory:**
@@ -432,44 +521,71 @@ gentler cap (free single active claim) is enough.
 
 ## 12. Open questions
 
-1. **Grouping = Pro?** Or free single active claim + Pro for multiple? (Leaning:
-   marking/settling free, multi-claim grouping Pro.)
-2. **Same-account reimbursement**: always create a visible income inflow (this
-   PRD's recommendation) vs. offer the split-style "silently net it out" option?
-3. **Default reimburse-into account**: paying account vs. a user-set default
-   "reimbursements land here" account in settings?
-4. **Reimbursement category**: a reserved default "Reimbursement" income
-   category (auto-seeded) vs. let the user pick?
-5. **Where does the Claims hub live** — Settings route, Insights page, or both
-   (budgeting precedent)?
+1. **Grouping = Pro?** V1 is fully free; should V2 expense-report grouping be
+   Pro, or free-with-a-cap? (Leaning: marking/reimbursing free forever,
+   multi-report grouping Pro.)
+2. **Default reimburse-into account**: paying account (current default) vs. a
+   user-set "reimbursements land here" account in settings?
+3. **Reimbursed inflow visibility in cashflow**: excluded from income entirely
+   (this PRD) — but should the hub still show a lifetime "recovered" total so
+   users feel the wins? (Leaning: yes, in the hub only.)
+4. **Where does the Reimbursements hub live** — Settings route, Insights page,
+   or both (budgeting precedent)?
+5. **Onboarding surface**: a `news` announcement + a one-time coach-mark on the
+   editor toggle, or announcement only?
+
+_(Resolved during review: reimbursement is always a visible inflow, never a
+silent net-out; the inflow uses a reserved auto-seeded "Reimbursement" category;
+partial/multiple settlements are modeled via a back-pointer, not a single FK.)_
 
 ---
 
 ## 13. Success metrics
 
 - **Adoption**: % of active users who mark ≥1 expense claimable in 30 days.
-- **Loop completion**: % of claimable expenses that reach `reimbursed`
-  (`CLAIM_MARKED_REIMBURSED / CLAIM_MARKED_CLAIMABLE`).
+- **Loop completion**: of expenses marked claimable in a cohort, the % that
+  reach `reimbursed` within 90 days (cohort ratio, not a raw event ratio).
 - **Time to settle**: median days `claimable → reimbursed`.
-- **Pro pull** (if grouped-claims are Pro): `PRO_LIMIT_HIT` on `claims` →
-  paywall → conversion.
+- **Pro pull** (if V2 grouping is Pro): `PRO_LIMIT_HIT` on `claims` → paywall →
+  conversion.
 - **Retention proxy**: outstanding-total surfaced (money + hours) as a recurring
   reason to reopen the app.
 
 ---
 
+## 14. Testing
+
+Per the repo's Jest + ts-jest setup (node env, native deps mocked), the
+testable surface is pure logic — not RN render. Target:
+
+- **Status machine** — `claimable → partially_reimbursed → reimbursed` across
+  single, partial, and multiple settlements; clamping at `claimAmount`.
+- **Rewind** — `undoReimbursement` and expense deletion correctly recompute
+  `reimbursedAmount`/`claimStatus` and cascade inflow soft-deletes.
+- **Repository predicates** — `TransactionFilters.claimStatus` SQL for each
+  enum value.
+- **Insights** — income aggregates exclude `reimbursesTransactionId` rows;
+  "net of reimbursements" subtracts correctly under multi-currency (frozen FX).
+- **Mappers** — new columns round-trip row ↔ domain.
+- **i18n parity** — new keys present in all 23 locales.
+
+---
+
 ## Appendix — how this reuses the split-bill feature
 
-| Concern        | Split-bill (existing)                               | Claim/reimbursement (this PRD)                    |
-| -------------- | --------------------------------------------------- | ------------------------------------------------- |
-| Counterparty   | A named friend, per share                           | A reimburser (employer/insurer), whole tx         |
-| Data location  | `transaction_splits` side table                     | Columns on `transactions` (filterable)            |
-| Settlement     | Reduces parent expense; transfer only cross-account | Creates a visible income inflow; parent untouched |
-| Reverse        | `markSplitUnpaid` restores parent, deletes transfer | `undoReimbursed` rewinds status, deletes inflow   |
-| Deferred write | `runDeferredWrite` + refresh (React-19 race)        | Same pattern                                      |
-| Filterable     | No (attached post-query)                            | Yes (SQL predicate)                               |
-| Gating         | Free                                                | Marking free; grouping Pro                        |
+| Concern        | Split-bill (existing)                               | Claim/reimbursement (this PRD)                         |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------ |
+| Counterparty   | A named friend, per share                           | A reimburser (employer/insurer), whole expense         |
+| Data location  | `transaction_splits` side table                     | Columns on `transactions` + inflow back-pointer        |
+| Settlement     | Reduces parent expense; transfer only cross-account | Creates visible income inflow(s); parent untouched     |
+| Cardinality    | One payback per split                               | Many reimbursements per expense (partial tranches)     |
+| Reverse        | `markSplitUnpaid` restores parent, deletes transfer | `undoReimbursement` rewinds status, deletes inflow     |
+| Deferred write | `runDeferredWrite` + refresh (React-19 race)        | Same pattern                                           |
+| Filterable     | No (attached post-query)                            | Yes (SQL predicate on `claimStatus`)                   |
+| Insights       | Reduces spend directly                              | Excluded from income; optional net-of toggle for spend |
+| Gating         | Free                                                | V1 free; V2 grouping Pro                               |
 
 The settlement plumbing (`markSplitPaid`/`markSplitUnpaid`,
 `context/AppContext.tsx:2285`) is the reference implementation to copy; the data
-model deliberately differs to make claims filterable and to preserve gross spend.
+model deliberately differs to make claims filterable, support multiple
+settlements, and preserve gross spend without inflating income.
