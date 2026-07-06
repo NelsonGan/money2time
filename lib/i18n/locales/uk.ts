@@ -1700,7 +1700,6 @@ const uk = {
   },
   budget: {
     title: 'Бюджет',
-    subtitle: 'Плануйте та відстежуйте місячні витрати',
     templates_title: 'Шаблони бюджету',
     templates_subtitle: 'Багаторазові місячні плани',
     template_default_badge: 'За замовчуванням',

@@ -1700,7 +1700,6 @@ const da = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Planlæg og følg månedens forbrug',
     templates_title: 'Budgetskabeloner',
     templates_subtitle: 'Genbrugelige månedsplaner',
     template_default_badge: 'Standard',

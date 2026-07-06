@@ -1683,7 +1683,6 @@ const vi = {
   },
   budget: {
     title: 'Ngân sách',
-    subtitle: 'Lập kế hoạch và theo dõi chi tiêu hằng tháng',
     templates_title: 'Mẫu ngân sách',
     templates_subtitle: 'Kế hoạch tháng dùng lại được',
     template_default_badge: 'Mặc định',

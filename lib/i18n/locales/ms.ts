@@ -1707,7 +1707,6 @@ const ms = {
   },
   budget: {
     title: 'Bajet',
-    subtitle: 'Rancang dan jejak perbelanjaan bulanan',
     templates_title: 'Templat bajet',
     templates_subtitle: 'Pelan bulanan boleh guna semula',
     template_default_badge: 'Lalai',

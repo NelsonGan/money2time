@@ -1699,7 +1699,6 @@ const sv = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Planera och följ månadens utgifter',
     templates_title: 'Budgetmallar',
     templates_subtitle: 'Återanvändbara månadsplaner',
     template_default_badge: 'Standard',

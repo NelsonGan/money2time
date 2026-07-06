@@ -1713,7 +1713,6 @@ const id = {
   },
   budget: {
     title: 'Anggaran',
-    subtitle: 'Rencanakan dan pantau pengeluaran bulanan',
     templates_title: 'Templat anggaran',
     templates_subtitle: 'Rencana bulanan yang dapat dipakai ulang',
     template_default_badge: 'Default',

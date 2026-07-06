@@ -1726,7 +1726,6 @@ const de = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Monatliche Ausgaben planen und verfolgen',
     templates_title: 'Budget-Vorlagen',
     templates_subtitle: 'Wiederverwendbare Monatspläne',
     template_default_badge: 'Standard',

@@ -1668,7 +1668,6 @@ const ko = {
   },
   budget: {
     title: '예산',
-    subtitle: '월간 지출을 계획하고 추적하세요',
     templates_title: '예산 템플릿',
     templates_subtitle: '재사용 가능한 월간 플랜',
     template_default_badge: '기본',

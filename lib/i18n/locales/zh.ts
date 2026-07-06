@@ -1623,7 +1623,6 @@ const zh = {
   },
   budget: {
     title: '预算',
-    subtitle: '规划并跟踪每月支出',
     templates_title: '预算模板',
     templates_subtitle: '可复用的月度计划',
     template_default_badge: '默认',

@@ -1705,7 +1705,6 @@ const ru = {
   },
   budget: {
     title: 'Бюджет',
-    subtitle: 'Планируйте и отслеживайте месячные расходы',
     templates_title: 'Шаблоны бюджета',
     templates_subtitle: 'Многоразовые планы на месяц',
     template_default_badge: 'По умолчанию',

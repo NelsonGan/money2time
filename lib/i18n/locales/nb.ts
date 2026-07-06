@@ -1702,7 +1702,6 @@ const nb = {
   },
   budget: {
     title: 'Budsjett',
-    subtitle: 'Planlegg og følg månedens forbruk',
     templates_title: 'Budsjettmaler',
     templates_subtitle: 'Gjenbrukbare månedsplaner',
     template_default_badge: 'Standard',

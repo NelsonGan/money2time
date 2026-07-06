@@ -1722,7 +1722,6 @@ const nl = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Plan en volg je maandelijkse uitgaven',
     templates_title: 'Budgetsjablonen',
     templates_subtitle: 'Herbruikbare maandplannen',
     template_default_badge: 'Standaard',

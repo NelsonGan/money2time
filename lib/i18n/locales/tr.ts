@@ -1709,7 +1709,6 @@ const tr = {
   },
   budget: {
     title: 'Bütçe',
-    subtitle: 'Aylık harcamaları planla ve takip et',
     templates_title: 'Bütçe şablonları',
     templates_subtitle: 'Yeniden kullanılabilir aylık planlar',
     template_default_badge: 'Varsayılan',

@@ -1723,7 +1723,6 @@ const fr = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Planifiez et suivez vos dépenses mensuelles',
     templates_title: 'Modèles de budget',
     templates_subtitle: 'Plans mensuels réutilisables',
     template_default_badge: 'Par défaut',

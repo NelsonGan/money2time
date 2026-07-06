@@ -1711,7 +1711,6 @@ const pt = {
   },
   budget: {
     title: 'Orçamento',
-    subtitle: 'Planeie e acompanhe os gastos mensais',
     templates_title: 'Modelos de orçamento',
     templates_subtitle: 'Planos mensais reutilizáveis',
     template_default_badge: 'Padrão',

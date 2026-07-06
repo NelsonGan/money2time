@@ -1681,7 +1681,6 @@ const ja = {
   },
   budget: {
     title: '予算',
-    subtitle: '毎月の支出を計画・管理',
     templates_title: '予算テンプレート',
     templates_subtitle: '再利用できる月間プラン',
     template_default_badge: 'デフォルト',

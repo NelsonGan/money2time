@@ -1689,7 +1689,6 @@ const hi = {
   },
   budget: {
     title: 'बजट',
-    subtitle: 'मासिक खर्च की योजना बनाएँ और नज़र रखें',
     templates_title: 'बजट टेम्पलेट',
     templates_subtitle: 'दोबारा इस्तेमाल होने वाली मासिक योजनाएँ',
     template_default_badge: 'डिफ़ॉल्ट',

@@ -1708,7 +1708,6 @@ const pl = {
   },
   budget: {
     title: 'Budżet',
-    subtitle: 'Planuj i śledź miesięczne wydatki',
     templates_title: 'Szablony budżetu',
     templates_subtitle: 'Wielokrotnego użytku plany miesięczne',
     template_default_badge: 'Domyślny',

@@ -1713,7 +1713,6 @@ const es = {
   },
   budget: {
     title: 'Presupuesto',
-    subtitle: 'Planifica y controla el gasto mensual',
     templates_title: 'Plantillas de presupuesto',
     templates_subtitle: 'Planes mensuales reutilizables',
     template_default_badge: 'Predeterminada',

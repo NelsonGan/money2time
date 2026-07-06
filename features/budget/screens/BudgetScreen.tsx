@@ -33,6 +33,7 @@ import type {
   MonthlyBudget,
   UserSettings,
 } from '~/types';
+import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { formatMonthYearLabel, monthKeyFromDateLocal, parseMonthKey } from '~/utils/formatters';
 
@@ -145,26 +146,16 @@ function BudgetSummaryCard({
           />
         </View>
 
-        <View className="mt-2 flex-row items-center justify-between gap-3">
+        <View className="mt-2">
           <Text
             variant="caption"
             numberOfLines={1}
-            className="min-w-0 shrink-0"
             style={{ color: isOver ? themeColors.error : barColor }}
           >
             {isOver
               ? I18n.t('budget.summary_exceeded', { amount: money(summary.exceededBy, settings) })
               : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
           </Text>
-          {budget.templateName ? (
-            <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 shrink">
-              {I18n.t('budget.from_template', {
-                name: budget.templateEmoji
-                  ? `${budget.templateEmoji} ${budget.templateName}`
-                  : budget.templateName,
-              })}
-            </Text>
-          ) : null}
         </View>
       </View>
 
@@ -202,13 +193,11 @@ function BudgetSummaryCard({
 
 function BudgetChildRow({
   line,
-  parentIcon,
   categoriesById,
   settings,
   themeColors,
 }: {
   line: BudgetCategoryProgress;
-  parentIcon: string | undefined;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
@@ -217,39 +206,49 @@ function BudgetChildRow({
   const barColor = usageColor(line.usageRatio, themeColors);
 
   return (
-    <View className="flex-row items-center gap-2.5 py-1.5">
-      <View className="h-4 w-3.5 rounded-bl-lg border-b border-l border-border/50" />
-      <CategoryEmoji icon={category?.icon} parentIcon={parentIcon} size={14} />
-      <Text variant="caption" numberOfLines={1} className="min-w-0 flex-[1.2] text-foreground">
-        {category?.name ?? I18n.t('budget.uncategorized')}
-      </Text>
-      <View className="flex-1">
-        <ProgressBar
-          ratio={line.usageRatio}
-          color={barColor}
-          trackColor={withColorAlpha(barColor, 0.14)}
-          height={4}
-        />
+    <View className="py-1.5">
+      <View className="flex-row items-center gap-2">
+        <View className="h-4 w-3.5 rounded-bl-lg border-b border-l border-border/50" />
+        {/* Only an explicitly-set emoji renders — no falling back to the
+            parent's icon, which just repeated it on every child row. */}
+        {category?.icon ? <CategoryEmoji icon={category.icon} size={14} /> : null}
+        <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
+          {category?.name ?? I18n.t('budget.uncategorized')}
+        </Text>
       </View>
-      <Text
-        variant="caption"
-        numberOfLines={1}
-        className="shrink-0 text-right"
-        style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
-      >
-        {money(line.spent, settings)} / {money(line.budgeted, settings)}
-      </Text>
+      {/* Bar + amounts on their own line: the bar flexes and the amounts sit
+          right-aligned, so rows line up regardless of amount width. */}
+      <View className="mt-1.5 flex-row items-center gap-2.5 pl-6">
+        <View className="flex-1">
+          <ProgressBar
+            ratio={line.usageRatio}
+            color={barColor}
+            trackColor={withColorAlpha(barColor, 0.14)}
+            height={4}
+          />
+        </View>
+        <Text
+          variant="caption"
+          numberOfLines={1}
+          className="shrink-0 text-right"
+          style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
+        >
+          {money(line.spent, settings)} / {money(line.budgeted, settings)}
+        </Text>
+      </View>
     </View>
   );
 }
 
 function BudgetCategoryRow({
   line,
+  first,
   categoriesById,
   settings,
   themeColors,
 }: {
   line: BudgetCategoryProgress;
+  first: boolean;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
@@ -258,7 +257,7 @@ function BudgetCategoryRow({
   const barColor = usageColor(line.usageRatio, themeColors);
 
   return (
-    <View className="rounded-2xl border border-border/45 bg-card px-4 py-3">
+    <View className={cn('px-4 py-3', !first && 'border-t border-border/25')}>
       <View className="flex-row items-center gap-2.5">
         <CategoryEmoji icon={category?.icon} size={18} />
         <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
@@ -293,12 +292,11 @@ function BudgetCategoryRow({
       </View>
 
       {line.children.length > 0 ? (
-        <View className="mt-2 border-t border-border/30 pt-1">
+        <View className="mt-2 pt-1">
           {line.children.map((child) => (
             <BudgetChildRow
               key={child.categoryId}
               line={child}
-              parentIcon={category?.icon}
               categoriesById={categoriesById}
               settings={settings}
               themeColors={themeColors}
@@ -508,11 +506,12 @@ export function BudgetScreen({
               onDelete={() => handleDeleteBudget(budget)}
             />
 
-            <View className="mt-4 gap-2.5">
-              {orderedCategories.map((line) => (
+            <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
+              {orderedCategories.map((line, index) => (
                 <BudgetCategoryRow
                   key={line.categoryId}
                   line={line}
+                  first={index === 0}
                   categoriesById={categoriesById}
                   settings={settings}
                   themeColors={themeColors}
@@ -565,7 +564,6 @@ export function BudgetScreen({
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('budget.title')}
-          infoTooltip={I18n.t('budget.subtitle')}
           rightAccessory={
             <Pressable
               onPress={() => {

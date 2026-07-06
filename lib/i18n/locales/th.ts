@@ -1662,7 +1662,6 @@ const th = {
   },
   budget: {
     title: 'งบประมาณ',
-    subtitle: 'วางแผนและติดตามรายจ่ายรายเดือน',
     templates_title: 'เทมเพลตงบประมาณ',
     templates_subtitle: 'แผนรายเดือนที่ใช้ซ้ำได้',
     template_default_badge: 'ค่าเริ่มต้น',

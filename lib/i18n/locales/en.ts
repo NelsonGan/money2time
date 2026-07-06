@@ -1693,7 +1693,6 @@ const en = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Plan and track monthly spending',
     templates_title: 'Budget templates',
     templates_subtitle: 'Reusable monthly plans',
     template_default_badge: 'Default',

@@ -1712,7 +1712,6 @@ const it = {
   },
   budget: {
     title: 'Budget',
-    subtitle: 'Pianifica e monitora le spese mensili',
     templates_title: 'Modelli di budget',
     templates_subtitle: 'Piani mensili riutilizzabili',
     template_default_badge: 'Predefinito',

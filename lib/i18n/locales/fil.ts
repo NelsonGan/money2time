@@ -1728,7 +1728,6 @@ const fil = {
   },
   budget: {
     title: 'Badyet',
-    subtitle: 'Planuhin at subaybayan ang buwanang gastos',
     templates_title: 'Mga template ng badyet',
     templates_subtitle: 'Mga buwanang planong magagamit muli',
     template_default_badge: 'Default',

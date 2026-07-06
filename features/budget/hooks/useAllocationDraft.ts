@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { parseAllocationAmount } from '~/features/budget/components/AllocationEditor';
 import {
@@ -49,8 +49,17 @@ export function useAllocationDraft({
     return map;
   }, [categories]);
 
-  const [total, setTotal] = useState(initialTotal);
+  const [total, setTotalState] = useState(initialTotal);
+  // Whether the user has typed a total themselves (or one was seeded). Until
+  // then the total follows the allocated sum, so filling out category amounts
+  // without a budget just builds the budget.
+  const [totalTouched, setTotalTouched] = useState(initialTotal !== '');
   const [amounts, setAmounts] = useState<Record<string, string>>(initialAmounts);
+
+  const setTotal = useCallback((next: string) => {
+    setTotalTouched(true);
+    setTotalState(next);
+  }, []);
 
   const parsedTotal = parseAllocationAmount(total);
 
@@ -66,6 +75,12 @@ export function useAllocationDraft({
         .filter((allocation) => allocation.amount > 0),
     [amounts, rootExpenseCategories],
   );
+
+  useEffect(() => {
+    if (totalTouched) return;
+    const allocated = rootAllocations.reduce((sum, allocation) => sum + allocation.amount, 0);
+    setTotalState(allocated > 0 ? String(normalizeMoneyAmount(allocated)) : '');
+  }, [rootAllocations, totalTouched]);
 
   const remaining = computeAllocationRemaining(parsedTotal, rootAllocations);
 
