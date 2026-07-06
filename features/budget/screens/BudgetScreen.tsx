@@ -321,24 +321,28 @@ function BudgetCategoryRow({
         )}
       >
         <View className="flex-row items-start gap-2.5">
-          <CategoryEmoji icon={category?.icon} size={18} />
-          <View className="min-w-0 flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {category?.name ?? I18n.t('common.uncategorized')}
-            </Text>
-            {/* Spent / total with the usage percent in a health-tinted badge
-                right beside it (green → amber from 80% → red when over). */}
-            <View className="mt-0.5 flex-row items-center gap-1.5">
-              <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
-                {money(line.spent, settings)} / {money(line.budgeted, settings)}
+          {/* Emoji + text share a row centered against each other so the icon
+              sits vertically centered next to the two text lines. */}
+          <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+            <CategoryEmoji icon={category?.icon} size={22} />
+            <View className="min-w-0 flex-1">
+              <Text variant="bodyStrong" numberOfLines={1}>
+                {category?.name ?? I18n.t('common.uncategorized')}
               </Text>
-              <View
-                className="shrink-0 rounded-full px-1.5 py-0.5"
-                style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
-              >
-                <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
-                  {usagePercentLabel(line.usageRatio)}
+              {/* Spent / total with the usage percent in a health-tinted badge
+                  right beside it (green → amber from 80% → red when over). */}
+              <View className="mt-0.5 flex-row items-center gap-1.5">
+                <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                  {money(line.spent, settings)} / {money(line.budgeted, settings)}
                 </Text>
+                <View
+                  className="shrink-0 rounded-full px-1.5 py-0.5"
+                  style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
+                >
+                  <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
+                    {usagePercentLabel(line.usageRatio)}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
