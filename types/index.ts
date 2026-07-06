@@ -550,6 +550,8 @@ export interface GoalStats {
   savedHours: number | null;
   /** Work-hours the remaining amount represents, or null when no wage is set. */
   remainingHours: number | null;
+  /** Work-hours the full target represents, or null when no wage is set. */
+  targetHours: number | null;
 }
 
 export interface GoalWithStats extends Goal, GoalStats {}

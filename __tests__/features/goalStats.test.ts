@@ -179,9 +179,10 @@ describe('computeGoalStats — work-hours', () => {
     const stats = computeGoalStats(makeInput({ hourlyRate: 0 }));
     expect(stats.savedHours).toBeNull();
     expect(stats.remainingHours).toBeNull();
+    expect(stats.targetHours).toBeNull();
   });
 
-  it('expresses saved and remaining amounts in work-hours', () => {
+  it('expresses saved, remaining, and target amounts in work-hours', () => {
     const stats = computeGoalStats(
       makeInput({
         hourlyRate: 20,
@@ -190,6 +191,19 @@ describe('computeGoalStats — work-hours', () => {
     );
     expect(stats.savedHours).toBeCloseTo(20); // 400 / 20
     expect(stats.remainingHours).toBeCloseTo(30); // 600 / 20
+    expect(stats.targetHours).toBeCloseTo(50); // 1000 / 20
+  });
+
+  it('keeps target-hours fixed at the target even when over-saved', () => {
+    const stats = computeGoalStats(
+      makeInput({
+        hourlyRate: 20,
+        contributions: [{ date: '2026-01-10', reportingAmount: 1400 }],
+      }),
+    );
+    expect(stats.savedHours).toBeCloseTo(70); // 1400 / 20
+    expect(stats.remainingHours).toBeCloseTo(0);
+    expect(stats.targetHours).toBeCloseTo(50); // still 1000 / 20, not saved
   });
 });
 

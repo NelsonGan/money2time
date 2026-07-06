@@ -1333,7 +1333,7 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
       goalId={route.params.goalId}
       onClose={() => navigation.goBack()}
       onEdit={(goalId) => navigation.navigate('GoalEditor', { goalId })}
-      onAddContribution={(goalId) => navigation.navigate('AddContribution', { goalId })}
+      onAddContribution={(goalId, mode) => navigation.navigate('AddContribution', { goalId, mode })}
     />
   );
 }
@@ -1343,7 +1343,13 @@ function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalE
 }
 
 function AddContributionRouteScreen({ route, navigation }: RootStackRouteProps<'AddContribution'>) {
-  return <AddContributionScreen goalId={route.params.goalId} onClose={() => navigation.goBack()} />;
+  return (
+    <AddContributionScreen
+      goalId={route.params.goalId}
+      initialMode={route.params.mode}
+      onClose={() => navigation.goBack()}
+    />
+  );
 }
 
 function BudgetTemplateEditorRouteScreen({

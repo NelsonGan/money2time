@@ -86,11 +86,7 @@ export function GoalCard({
             </Text>
             <GoalValue
               money={goal.targetReportingAmount}
-              hours={
-                goal.savedHours != null && goal.remainingHours != null
-                  ? goal.savedHours + goal.remainingHours
-                  : null
-              }
+              hours={goal.targetHours}
               settings={settings}
               variant="caption"
               className="text-muted-foreground"

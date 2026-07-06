@@ -116,8 +116,10 @@ export function computeGoalStats(input: GoalStatsInput): GoalStats {
     todayDayKey,
   });
 
-  const savedHours = hourlyRate > 0 ? amountToHoursByRate(savedPositive, hourlyRate) : null;
-  const remainingHours = hourlyRate > 0 ? amountToHoursByRate(remainingAmount, hourlyRate) : null;
+  const hasWage = hourlyRate > 0;
+  const savedHours = hasWage ? amountToHoursByRate(savedPositive, hourlyRate) : null;
+  const remainingHours = hasWage ? amountToHoursByRate(remainingAmount, hourlyRate) : null;
+  const targetHours = hasWage ? amountToHoursByRate(targetReportingAmount, hourlyRate) : null;
 
   return {
     savedAmount,
@@ -131,6 +133,7 @@ export function computeGoalStats(input: GoalStatsInput): GoalStats {
     deadlineStatus,
     savedHours,
     remainingHours,
+    targetHours,
   };
 }
 

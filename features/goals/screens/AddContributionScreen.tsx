@@ -12,22 +12,27 @@ import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromDateLocal, formatRelativeDate } from '~/utils/formatters';
 
+type Direction = 'deposit' | 'withdraw';
+
 interface AddContributionScreenProps {
   goalId: string;
+  initialMode?: Direction;
   onClose: () => void;
 }
 
-type Direction = 'deposit' | 'withdraw';
-
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
 
-export function AddContributionScreen({ goalId, onClose }: AddContributionScreenProps) {
+export function AddContributionScreen({
+  goalId,
+  initialMode = 'deposit',
+  onClose,
+}: AddContributionScreenProps) {
   const { goals, settings, addContribution } = useApp();
   const themeColors = useThemeColors();
 
   const goal = useMemo(() => goals.find((g) => g.id === goalId) ?? null, [goalId, goals]);
 
-  const [direction, setDirection] = useState<Direction>('deposit');
+  const [direction, setDirection] = useState<Direction>(initialMode);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(dayKeyFromDateLocal(new Date()));
   const [note, setNote] = useState('');

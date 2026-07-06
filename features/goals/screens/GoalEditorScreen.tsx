@@ -136,7 +136,7 @@ export function GoalEditorScreen({ goalId, onClose }: GoalEditorScreenProps) {
               <Input
                 label={I18n.t('goals.emoji_label')}
                 value={emoji}
-                onChangeText={(text) => setEmoji([...text].slice(-1).join(''))}
+                onChangeText={(text) => setEmoji(text.slice(0, 8))}
                 placeholder="🎯"
                 autoCapitalize="none"
               />
