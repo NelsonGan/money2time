@@ -1,6 +1,21 @@
 # Claim / Reimbursement — Product Requirements (PRD)
 
-Status: **Proposed** · Branch: `claude/claim-reimbursement-prd-nqduk4`
+Status: **V1 core implemented** · Branch: `claude/claim-reimbursement-prd-nqduk4`
+
+> **Implementation status.** The V1 backend and core UI are built on this branch:
+> migration 043 + schema/types/mappers, the `claimStatus` filter predicate and
+> income-inflow exclusion, `markClaimable` / `markUnclaimable` / `markReimbursed`
+> / `undoReimbursement` (+ delete cascade) on `useApp()`, `utils/claims.ts` with
+> Jest coverage, analytics events, i18n across all 23 locales, a **Claimable
+> toggle + Mark-reimbursed action** in the transaction editor, and the
+> **activity-row badge**. Two divergences from the plan below, both deliberate:
+> (1) **no seeded "Reimbursement" category** — the `reimbursesTransactionId`
+> back-pointer is a more robust anchor for identification/exclusion than a
+> user-deletable category; (2) reimbursement inflows are modeled via that
+> back-pointer (one expense → many settlements) rather than a single forward FK.
+> **Deferred to a follow-up:** the standalone **Reimbursements hub** screen
+> (§5.3) and the **CalendarScreen claim-status filter chip** (§5.4) — the
+> `TransactionFilters.claimStatus` predicate itself is implemented.
 
 Let users flag an expense they expect to get back — a work trip, a client
 lunch, a medical bill their insurer covers — track how much is outstanding,
