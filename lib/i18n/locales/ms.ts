@@ -93,7 +93,7 @@ const ms = {
       title: 'Bajet & Barangan',
       budget: {
         title: 'Tetapkan bajet bulanan',
-        body: 'Bina bajet daripada templat boleh guna semula dan lihat setiap kategori terisi apabila anda berbelanja. Lihat baki sepintas lalu—mengikut bulan atau terus pada skrin utama.',
+        body: 'Bina bajet daripada templat boleh guna semula dan lihat setiap kategori terisi apabila anda berbelanja. Lihat baki sepintas lalu, mengikut bulan atau terus pada skrin utama.',
       },
       items: {
         title: 'Kos barang anda sehari',

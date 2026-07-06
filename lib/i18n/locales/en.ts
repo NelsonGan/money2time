@@ -68,7 +68,7 @@ const en = {
       title: 'Budgets & Items',
       budget: {
         title: 'Set a monthly budget',
-        body: "Build a budget from reusable templates and watch each category fill as you spend. See what's left at a glance — by month, or right on your home screen.",
+        body: "Build a budget from reusable templates and watch each category fill as you spend. See what's left at a glance, by month, or right on your home screen.",
       },
       items: {
         title: 'What your things cost per day',

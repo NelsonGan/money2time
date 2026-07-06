@@ -93,7 +93,7 @@ const nl = {
       title: 'Budgetten & spullen',
       budget: {
         title: 'Stel een maandbudget in',
-        body: 'Bouw een budget met herbruikbare sjablonen en zie elke categorie vollopen terwijl je uitgeeft. Zie in één oogopslag wat er over is—per maand of direct op je startscherm.',
+        body: 'Bouw een budget met herbruikbare sjablonen en zie elke categorie vollopen terwijl je uitgeeft. Zie in één oogopslag wat er over is, per maand of direct op je startscherm.',
       },
       items: {
         title: 'Wat je spullen per dag kosten',

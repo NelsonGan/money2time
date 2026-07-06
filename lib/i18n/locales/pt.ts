@@ -93,7 +93,7 @@ const pt = {
       title: 'Orçamentos e itens',
       budget: {
         title: 'Defina um orçamento mensal',
-        body: 'Crie um orçamento a partir de modelos reutilizáveis e veja cada categoria encher à medida que gasta. Veja o que resta num relance—por mês ou direto na tela inicial.',
+        body: 'Crie um orçamento a partir de modelos reutilizáveis e veja cada categoria encher à medida que gasta. Veja o que resta num relance, por mês ou direto na tela inicial.',
       },
       items: {
         title: 'Quanto suas coisas custam por dia',

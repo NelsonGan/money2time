@@ -93,7 +93,7 @@ const id = {
       title: 'Anggaran & Barang',
       budget: {
         title: 'Tetapkan anggaran bulanan',
-        body: 'Buat anggaran dari templat yang bisa dipakai ulang dan lihat setiap kategori terisi saat kamu belanja. Lihat sisa anggaran sekilas—per bulan atau langsung di layar utama.',
+        body: 'Buat anggaran dari templat yang bisa dipakai ulang dan lihat setiap kategori terisi saat kamu belanja. Lihat sisa anggaran sekilas, per bulan atau langsung di layar utama.',
       },
       items: {
         title: 'Berapa biaya barangmu per hari',

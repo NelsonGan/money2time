@@ -93,7 +93,7 @@ const nb = {
       title: 'Budsjetter og ting',
       budget: {
         title: 'Sett et månedlig budsjett',
-        body: 'Lag et budsjett fra gjenbrukbare maler, og se hver kategori fylles opp mens du bruker penger. Se hva som er igjen med et blikk – per måned eller rett på startskjermen.',
+        body: 'Lag et budsjett fra gjenbrukbare maler, og se hver kategori fylles opp mens du bruker penger. Se hva som er igjen med et blikk, per måned eller rett på startskjermen.',
       },
       items: {
         title: 'Hva tingene dine koster per dag',

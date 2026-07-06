@@ -93,7 +93,7 @@ const sv = {
       title: 'Budgetar och prylar',
       budget: {
         title: 'Ange en månadsbudget',
-        body: 'Skapa en budget från återanvändbara mallar och se varje kategori fyllas medan du spenderar. Se vad som är kvar med en blick – per månad eller direkt på hemskärmen.',
+        body: 'Skapa en budget från återanvändbara mallar och se varje kategori fyllas medan du spenderar. Se vad som är kvar med en blick, per månad eller direkt på hemskärmen.',
       },
       items: {
         title: 'Vad dina prylar kostar per dag',

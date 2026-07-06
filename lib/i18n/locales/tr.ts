@@ -93,7 +93,7 @@ const tr = {
       title: 'Bütçeler ve eşyalar',
       budget: {
         title: 'Aylık bütçe belirle',
-        body: 'Yeniden kullanılabilir şablonlardan bütçe oluştur ve harcadıkça her kategorinin dolmasını izle. Kalanı bir bakışta gör—aylık olarak ya da doğrudan ana ekranında.',
+        body: 'Yeniden kullanılabilir şablonlardan bütçe oluştur ve harcadıkça her kategorinin dolmasını izle. Kalanı bir bakışta gör, aylık olarak ya da doğrudan ana ekranında.',
       },
       items: {
         title: 'Eşyalarının günlük maliyeti',

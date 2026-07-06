@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import { ItemIcon, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -14,25 +14,25 @@ interface ItemsShowcaseProps {
 
 interface SampleItem {
   labelKey: string;
-  emoji: string;
+  iconId: string;
   perDay: number;
   days: number;
   tint: (colors: ReturnType<typeof useThemeColors>) => string;
 }
 
-// Static sample; only the currency symbol follows the user's settings so the
-// "cost per day" idea reads the same everywhere.
+// Static sample using real item icons; only the currency symbol follows the
+// user's settings so the "cost per day" idea reads the same everywhere.
 const ITEMS: SampleItem[] = [
   {
     labelKey: 'news.showcase.item_headphones',
-    emoji: '🎧',
+    iconId: 'headphones',
     perDay: 0.82,
     days: 412,
     tint: (c) => c.lavender,
   },
   {
     labelKey: 'news.showcase.item_jacket',
-    emoji: '🧥',
+    iconId: 'coat',
     perDay: 1.4,
     days: 56,
     tint: (c) => c.sky,
@@ -56,8 +56,10 @@ export function ItemsShowcase({ width }: ItemsShowcaseProps) {
               { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.08) },
             ]}
           >
-            <View style={[styles.iconBadge, { backgroundColor: withColorAlpha(tint, 0.16) }]}>
-              <Text style={styles.emoji}>{item.emoji}</Text>
+            <View
+              style={[styles.iconBadge, { backgroundColor: withColorAlpha(colors.text, 0.05) }]}
+            >
+              <ItemIcon iconId={item.iconId} size={30} />
             </View>
             <View style={styles.textCol}>
               <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.text }}>
@@ -101,9 +103,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  emoji: {
-    fontSize: 22,
   },
   textCol: {
     flex: 1,

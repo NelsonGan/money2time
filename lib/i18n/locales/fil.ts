@@ -93,7 +93,7 @@ const fil = {
       title: 'Mga Budget at Gamit',
       budget: {
         title: 'Magtakda ng buwanang budget',
-        body: 'Gumawa ng budget mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap—bawat buwan o mismo sa iyong home screen.',
+        body: 'Gumawa ng budget mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap, bawat buwan o mismo sa iyong home screen.',
       },
       items: {
         title: 'Kung magkano ang gamit mo kada araw',

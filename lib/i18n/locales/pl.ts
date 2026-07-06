@@ -93,7 +93,7 @@ const pl = {
       title: 'Budżety i rzeczy',
       budget: {
         title: 'Ustaw miesięczny budżet',
-        body: 'Twórz budżet z szablonów wielokrotnego użytku i patrz, jak każda kategoria się zapełnia w miarę wydatków. Sprawdź, ile zostało, jednym spojrzeniem—miesięcznie lub na ekranie głównym.',
+        body: 'Twórz budżet z szablonów wielokrotnego użytku i patrz, jak każda kategoria się zapełnia w miarę wydatków. Sprawdź, ile zostało, jednym spojrzeniem, miesięcznie lub na ekranie głównym.',
       },
       items: {
         title: 'Ile Twoje rzeczy kosztują dziennie',

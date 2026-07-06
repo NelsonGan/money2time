@@ -93,7 +93,7 @@ const da = {
       title: 'Budgetter & ejendele',
       budget: {
         title: 'Sæt et månedligt budget',
-        body: 'Byg et budget ud fra genanvendelige skabeloner, og se hver kategori fyldes, mens du bruger. Se hvad der er tilbage med et blik – pr. måned eller direkte på din startskærm.',
+        body: 'Byg et budget ud fra genanvendelige skabeloner, og se hver kategori fyldes, mens du bruger. Se hvad der er tilbage med et blik, pr. måned eller direkte på din startskærm.',
       },
       items: {
         title: 'Hvad dine ting koster pr. dag',

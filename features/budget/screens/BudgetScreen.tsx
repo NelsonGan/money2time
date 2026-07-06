@@ -320,44 +320,40 @@ function BudgetCategoryRow({
           line.children.length > 0 ? 'pb-1' : 'pb-3.5',
         )}
       >
-        <View className="flex-row items-center gap-2.5">
+        <View className="flex-row items-start gap-2.5">
           <CategoryEmoji icon={category?.icon} size={18} />
           <View className="min-w-0 flex-1">
             <Text variant="bodyStrong" numberOfLines={1}>
               {category?.name ?? I18n.t('common.uncategorized')}
             </Text>
-            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-              {money(line.spent, settings)} / {money(line.budgeted, settings)}
-            </Text>
-          </View>
-          {/* Health unit: a mini ring + percent up top, the remaining amount as
-            a quiet caption below — small colored accents (green → amber from
-            80% → red when over) instead of a heavy tinted block. */}
-          <View className="shrink-0 items-end gap-1">
-            <View className="flex-row items-center gap-1.5">
-              <SavingsRateRing
-                size={16}
-                strokeWidth={3.5}
-                progress={Math.min(line.usageRatio, 1)}
-                color={healthColor}
-                trackColor={withColorAlpha(healthColor, 0.18)}
-              />
-              <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
-                {usagePercentLabel(line.usageRatio)}
+            {/* Spent / total with the usage percent in a health-tinted badge
+                right beside it (green → amber from 80% → red when over). */}
+            <View className="mt-0.5 flex-row items-center gap-1.5">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                {money(line.spent, settings)} / {money(line.budgeted, settings)}
               </Text>
+              <View
+                className="shrink-0 rounded-full px-1.5 py-0.5"
+                style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
+              >
+                <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
+                  {usagePercentLabel(line.usageRatio)}
+                </Text>
+              </View>
             </View>
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              className="text-[10px]"
-              tone={line.isOver ? undefined : 'muted'}
-              style={line.isOver ? { color: themeColors.error } : undefined}
-            >
-              {line.isOver
-                ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-                : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-            </Text>
           </View>
+          {/* Remaining (or exceeded) amount pinned to the top-right corner. */}
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            className="shrink-0 text-[11px]"
+            tone={line.isOver ? undefined : 'muted'}
+            style={line.isOver ? { color: themeColors.error } : undefined}
+          >
+            {line.isOver
+              ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+              : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
+          </Text>
         </View>
         <View className="mt-2.5">
           <ProgressBar

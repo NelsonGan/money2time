@@ -93,7 +93,7 @@ const vi = {
       title: 'Ngân sách & Đồ dùng',
       budget: {
         title: 'Đặt ngân sách hàng tháng',
-        body: 'Tạo ngân sách từ các mẫu dùng lại được và xem từng danh mục đầy dần khi bạn chi tiêu. Xem số còn lại chỉ trong nháy mắt—theo tháng hoặc ngay trên màn hình chính.',
+        body: 'Tạo ngân sách từ các mẫu dùng lại được và xem từng danh mục đầy dần khi bạn chi tiêu. Xem số còn lại chỉ trong nháy mắt, theo tháng hoặc ngay trên màn hình chính.',
       },
       items: {
         title: 'Đồ của bạn tốn bao nhiêu mỗi ngày',

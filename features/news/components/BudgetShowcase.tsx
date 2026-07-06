@@ -7,7 +7,6 @@ import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing'
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
-import { formatAmount } from '~/utils/formatters';
 
 interface BudgetShowcaseProps {
   width: number;
@@ -22,9 +21,12 @@ const REMAINING = 2092;
 export function BudgetShowcase({ width }: BudgetShowcaseProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
-  // Always render in money mode so the showcase shows the user's currency even
-  // when the app is in time-display mode.
-  const money = { currencySymbol: settings.currencySymbol, displayMode: 'money' as const };
+  // Whole-number amounts in the user's currency (no cents), so the sample card
+  // reads clean regardless of time-display mode.
+  const whole = (value: number) =>
+    `${settings.currencySymbol}${Math.round(value)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
   const rows = [
     { labelKey: 'news.showcase.budget_food', emoji: '🍔', ratio: 0.68, color: colors.success },
@@ -54,16 +56,14 @@ export function BudgetShowcase({ width }: BudgetShowcaseProps) {
         </View>
         <View style={styles.figures}>
           <Text variant="subheading" numberOfLines={1} style={{ color: colors.text }}>
-            {formatAmount(SPENT, money, { showSign: false })}
+            {whole(SPENT)}
           </Text>
           <Text variant="caption" tone="muted" numberOfLines={1}>
-            / {formatAmount(TOTAL, money, { showSign: false })}
+            / {whole(TOTAL)}
           </Text>
           <View style={[styles.chip, { backgroundColor: withColorAlpha(colors.primary, 0.12) }]}>
             <Text variant="caption" numberOfLines={1} style={{ color: colors.primary }}>
-              {I18n.t('budget.left', {
-                amount: formatAmount(REMAINING, money, { showSign: false }),
-              })}
+              {I18n.t('budget.left', { amount: whole(REMAINING) })}
             </Text>
           </View>
         </View>

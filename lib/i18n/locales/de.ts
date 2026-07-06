@@ -93,7 +93,7 @@ const de = {
       title: 'Budgets & Gegenstände',
       budget: {
         title: 'Monatsbudget festlegen',
-        body: 'Erstelle ein Budget aus wiederverwendbaren Vorlagen und sieh zu, wie sich jede Kategorie beim Ausgeben füllt. Sieh auf einen Blick, was übrig ist – pro Monat oder direkt auf deinem Homescreen.',
+        body: 'Erstelle ein Budget aus wiederverwendbaren Vorlagen und sieh zu, wie sich jede Kategorie beim Ausgeben füllt. Sieh auf einen Blick, was übrig ist, pro Monat oder direkt auf deinem Homescreen.',
       },
       items: {
         title: 'Was deine Dinge pro Tag kosten',
