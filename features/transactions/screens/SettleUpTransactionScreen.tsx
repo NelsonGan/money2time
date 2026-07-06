@@ -107,13 +107,13 @@ export function SettleUpTransactionScreen({
     `${I18n.t('transactions.settleUp.untitled_bill')}`;
 
   // Receipt: title is the bill, the date sits on top, one line per person.
+  // No grand total — the card goes to a group, so each person only cares about
+  // their own line.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!bill) return null;
     return {
       title,
       subtitle: formatShortDate(bill.date),
-      totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-      totalText: formatNative(bill.totalNative, bill.currency),
       lines: bill.splits.map((split) => ({
         key: split.splitId,
         initial: personInitial(split.personName),

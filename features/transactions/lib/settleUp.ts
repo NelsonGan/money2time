@@ -254,10 +254,10 @@ export interface ReceiptTextInput {
   /** Optional secondary line under the title, e.g. a date; null to omit. */
   subtitle?: string | null;
   lines: ReceiptTextLine[];
-  /** e.g. "You owe". */
-  totalLabel: string;
+  /** e.g. "You owe". Omit (with totalText) to drop the total line entirely. */
+  totalLabel?: string | null;
   /** Pre-formatted total, e.g. "$112.00" or "SGD 80.00 + USD 32.00". */
-  totalText: string;
+  totalText?: string | null;
   /** Optional note shown when a QR image is attached; null to omit. */
   qrNote?: string | null;
 }
@@ -276,7 +276,9 @@ export function buildReceiptText(input: ReceiptTextInput): string {
     out.push(`• ${line.label}: ${line.amount}`);
   }
 
-  out.push('', `${input.totalLabel}: ${input.totalText}`);
+  if (input.totalLabel && input.totalText) {
+    out.push('', `${input.totalLabel}: ${input.totalText}`);
+  }
   if (input.qrNote) {
     out.push('', input.qrNote);
   }

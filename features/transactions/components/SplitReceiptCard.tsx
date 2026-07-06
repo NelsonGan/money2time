@@ -28,9 +28,10 @@ export interface ReceiptContent {
   title: string;
   /** Optional muted line under the title, e.g. the bill date. */
   subtitle?: string | null;
-  totalLabel: string;
+  /** e.g. "You owe". Omit (with totalText) to drop the total row entirely. */
+  totalLabel?: string | null;
   /** Pre-formatted total, e.g. "$112.00". */
-  totalText: string;
+  totalText?: string | null;
   lines: ReceiptLine[];
 }
 
@@ -122,12 +123,15 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
         ))}
       </View>
 
-      <View style={styles.divider} />
-
-      <View style={styles.totalRow}>
-        <Text style={styles.totalLabel}>{content.totalLabel}</Text>
-        <Text style={styles.totalAmount}>{content.totalText}</Text>
-      </View>
+      {content.totalLabel && content.totalText ? (
+        <>
+          <View style={styles.divider} />
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>{content.totalLabel}</Text>
+            <Text style={styles.totalAmount}>{content.totalText}</Text>
+          </View>
+        </>
+      ) : null}
     </View>
   );
 });
@@ -154,8 +158,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   qrImage: {
-    width: 188,
-    height: 188,
+    width: 212,
+    height: 212,
     borderRadius: 8,
   },
   scan: {
