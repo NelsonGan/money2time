@@ -36,7 +36,7 @@ import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import { PieChart } from 'react-native-gifted-charts';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { G, Image as SvgImage, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -2533,6 +2533,7 @@ function InsightTypeMenuPopover({
   onClose: () => void;
 }) {
   const themeColors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const entrance = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
@@ -2557,11 +2558,13 @@ function InsightTypeMenuPopover({
     screenWidth - cardWidth - sideMargin,
   );
   // Anchor the card to the button itself so it expands *in place* rather than
-  // dropping down beneath the icon.
+  // dropping down beneath the icon. Floor at the top safe-area inset so the
+  // full-screen modal never tucks the first row under the Android status bar.
+  const topLimit = insets.top + sideMargin;
   const cardTop = clampNumber(
     anchorRect?.y ?? spacing.xl * 2,
-    sideMargin,
-    screenHeight - 220 - sideMargin,
+    topLimit,
+    Math.max(topLimit, screenHeight - 220 - sideMargin),
   );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
   const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });

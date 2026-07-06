@@ -3184,30 +3184,22 @@ ${budgetRows}
       android:textStyle="bold" />
   </LinearLayout>
 
-  <FrameLayout
+  <TextView
     android:id="@+id/bud_pro_badge"
-    android:layout_width="58dp"
-    android:layout_height="58dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="top|end"
-    android:layout_marginTop="-16dp"
-    android:layout_marginEnd="-16dp"
-    android:clipChildren="true">
-    <TextView
-      android:layout_width="120dp"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:background="#F6B750"
-      android:gravity="center"
-      android:includeFontPadding="false"
-      android:paddingVertical="3dp"
-      android:rotation="45"
-      android:text="PRO"
-      android:textColor="#FFFFFF"
-      android:textSize="9sp"
-      android:textStyle="bold"
-      android:translationX="15dp"
-      android:translationY="-15dp" />
-  </FrameLayout>
+    android:layout_marginTop="10dp"
+    android:layout_marginEnd="10dp"
+    android:background="@drawable/money2time_pro_pill"
+    android:includeFontPadding="false"
+    android:letterSpacing="0.08"
+    android:paddingHorizontal="7dp"
+    android:paddingVertical="2dp"
+    android:text="PRO"
+    android:textColor="#FFFFFF"
+    android:textSize="9sp"
+    android:textStyle="bold" />
 </FrameLayout>
 `,
       );
@@ -3420,6 +3412,17 @@ ${budgetRows}
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
   <solid android:color="#FDF0D8" />
   <corners android:radius="999dp" />
+</shape>
+`,
+      );
+
+      // Filled accent pill for the "PRO" corner badge (picker preview only).
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_pro_pill.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+  <solid android:color="#F6B750" />
+  <corners android:radius="7dp" />
 </shape>
 `,
       );
