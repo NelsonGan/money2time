@@ -128,34 +128,41 @@ export function AllocationCategoryList({
 }) {
   return (
     <View className="overflow-hidden rounded-2xl border border-border/40 bg-card">
-      <Sortable.Flex
+      <Sortable.Grid
         activeItemScale={1.02}
         activeItemShadowOpacity={0.08}
+        columns={1}
         customHandle
+        data={rootCategories}
         dragActivationDelay={0}
-        flexDirection="column"
-        flexWrap="nowrap"
-        gap={0}
         inactiveItemOpacity={1}
+        keyExtractor={(category) => category.id}
+        rowGap={0}
         scrollableRef={scrollableRef}
-        width="fill"
-        onDragEnd={({ fromIndex, order, toIndex }) => {
-          if (fromIndex === toIndex) return;
-          onReorder(order(rootCategories).map((category) => category.id));
+        onDragEnd={({ data }) => {
+          onReorder(data.map((category) => category.id));
           void triggerHaptic('selection');
         }}
-      >
-        {rootCategories.map((category, index) => {
+        renderItem={({ item: category, index }) => {
           const amount = parseAllocationAmount(amounts[category.id] ?? '');
           const hasGap = childGaps.has(category.id);
           return (
             <View
-              key={category.id}
               className={cn(
                 'flex-row items-center bg-card',
                 index > 0 && 'border-t border-border/25',
               )}
             >
+              <Sortable.Handle>
+                <View
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel={`${I18n.t('common.reorder')} ${category.name}`}
+                  className="py-3 pl-3 pr-1"
+                >
+                  <GripVertical size={16} color={themeColors.textMuted} />
+                </View>
+              </Sortable.Handle>
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
@@ -163,7 +170,7 @@ export function AllocationCategoryList({
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={category.name}
-                className="min-w-0 flex-1 flex-row items-center gap-3 py-3 pl-4 active:bg-secondary/30"
+                className="min-w-0 flex-1 flex-row items-center gap-3 py-3 pr-4 active:bg-secondary/30"
               >
                 <CategoryEmoji icon={category.icon} size={18} />
                 <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
@@ -178,20 +185,10 @@ export function AllocationCategoryList({
                   {money(amount, settings)}
                 </Text>
               </Pressable>
-              <Sortable.Handle>
-                <View
-                  accessible
-                  accessibilityRole="button"
-                  accessibilityLabel={`${I18n.t('common.reorder')} ${category.name}`}
-                  className="py-3 pl-2 pr-3"
-                >
-                  <GripVertical size={16} color={themeColors.textMuted} />
-                </View>
-              </Sortable.Handle>
             </View>
           );
-        })}
-      </Sortable.Flex>
+        }}
+      />
     </View>
   );
 }
