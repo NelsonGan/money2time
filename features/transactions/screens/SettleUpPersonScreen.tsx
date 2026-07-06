@@ -1,6 +1,6 @@
 import { Check, ChevronDown, Send, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, Share, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
   AccountLogo,
@@ -13,12 +13,10 @@ import {
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { getPaymentQrUri } from '~/services/userAssets';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
-import { buildReceiptText } from '~/features/transactions/lib/settleUp';
+import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 
 interface SettleUpPersonScreenProps {
@@ -39,6 +37,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
   } = useApp();
 
   const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
+  const [shareVisible, setShareVisible] = useState(false);
 
   const summary = useSettleUpSummary();
 
@@ -62,36 +61,10 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     [],
   );
 
-  const handleShare = useCallback(async () => {
-    if (!person) return;
+  const handleShare = useCallback(() => {
     void triggerHaptic('selection');
-    const fromName = settings.profileName?.trim() || null;
-    const toName = person.name ?? I18n.t('transactions.settleUp.someone');
-    const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
-    const resolvedQr = getPaymentQrUri(settings.paymentQrUri);
-    // RN Share only attaches an image (`url`) on iOS; on Android it is dropped,
-    // so only promise a "scan the attached QR" note where it will actually ride along.
-    const canAttachQr = !!resolvedQr && Platform.OS === 'ios';
-    const text = buildReceiptText(person, {
-      strings: {
-        heading: I18n.t('transactions.settleUp.receipt_heading'),
-        fromTo,
-        totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-        qrNote: canAttachQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
-        footer: I18n.t('transactions.settleUp.receipt_footer'),
-      },
-      formatMoney: formatNative,
-    });
-    try {
-      await Share.share(canAttachQr ? { message: text, url: resolvedQr } : { message: text });
-      trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
-        billCount: person.billCount,
-        hasQr: !!resolvedQr,
-      });
-    } catch {
-      // User cancelled the share sheet.
-    }
-  }, [formatNative, person, settings.paymentQrUri, settings.profileName]);
+    setShareVisible(true);
+  }, []);
 
   const handleMarkPaid = useCallback(
     (splitId: string) => {
@@ -242,6 +215,12 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
               if (pickerForSplitId) updateSplitPaybackAccount(pickerForSplitId, accountId);
               setPickerForSplitId(null);
             }}
+          />
+
+          <SplitReceiptShareModal
+            visible={shareVisible}
+            onClose={() => setShareVisible(false)}
+            person={person}
           />
         </>
       ) : null}
