@@ -152,7 +152,7 @@ export interface UserSettings {
   firstAppOpen: string | null;
   /**
    * Relative path (within the user-assets store) of the user's own payment QR
-   * image — PayNow / PromptPay / UPI / PayPal.me / etc. — or null when unset.
+   * image (PayNow / PromptPay / UPI / PayPal.me / etc.), or null when unset.
    * Resolve to a file uri with `getPaymentQrUri`. Shared onto split-bill
    * payback receipts so friends can pay the user back directly.
    */
@@ -563,6 +563,8 @@ export interface PersonDebtBill {
   note: string | null;
   categoryName: string | null;
   categoryIcon: string | null;
+  /** Account the payback lands in (split's own, falling back to the parent's). */
+  paybackAccountId: string | null;
 }
 
 /** Everything one person owes the user, rolled up across every transaction. */

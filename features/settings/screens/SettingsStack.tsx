@@ -30,7 +30,7 @@ import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
-import { SettleUpScreen } from '~/features/transactions/screens';
+import { SettleUpPersonScreen, SettleUpScreen } from '~/features/transactions/screens';
 
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
@@ -380,7 +380,25 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="SettleUp">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <SettleUpScreen onBack={() => props.navigation.goBack()} />;
+          return (
+            <SettleUpScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenPerson={(personKey) =>
+                props.navigation.navigate('SettleUpPerson', { personKey })
+              }
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="SettleUpPerson">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <SettleUpPersonScreen
+              personKey={props.route.params.personKey}
+              onBack={() => props.navigation.goBack()}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="QuickEntrySettings">

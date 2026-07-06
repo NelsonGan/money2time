@@ -115,6 +115,7 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  SettleUpPersonScreen,
   SettleUpScreen,
 } from '~/features/transactions/screens';
 import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
@@ -1612,7 +1613,18 @@ function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEa
 }
 
 function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
-  return <SettleUpScreen onBack={() => navigation.goBack()} />;
+  return (
+    <SettleUpScreen
+      onBack={() => navigation.goBack()}
+      onOpenPerson={(personKey) => navigation.navigate('SettleUpPerson', { personKey })}
+    />
+  );
+}
+
+function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'SettleUpPerson'>) {
+  return (
+    <SettleUpPersonScreen personKey={route.params.personKey} onBack={() => navigation.goBack()} />
+  );
 }
 
 function SettingsWageCalculatorRouteScreen({
@@ -2058,6 +2070,7 @@ function AppContent() {
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
+          <RootStack.Screen name="SettleUpPerson" component={SettleUpPersonRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
           <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
           <RootStack.Screen

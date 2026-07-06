@@ -1,0 +1,198 @@
+import { Check, Clock3, Send } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { Platform, Pressable, ScrollView, Share, View } from 'react-native';
+
+import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { triggerHaptic } from '~/services/haptics';
+import { getPaymentQrUri } from '~/services/userAssets';
+import { convert, currencySymbolForCode } from '~/utils/currency';
+import {
+  amountToHoursByRate,
+  dayKeyFromDateLocal,
+  formatCurrency,
+  formatHours,
+  formatRelativeDate,
+} from '~/utils/formatters';
+import {
+  aggregateUnpaidSplitsByPerson,
+  buildReceiptText,
+} from '~/features/transactions/lib/settleUp';
+
+interface SettleUpPersonScreenProps {
+  personKey: string;
+  onBack: () => void;
+}
+
+export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreenProps) {
+  const themeColors = useThemeColors();
+  const { settings, rateTable, getAccountById, getTrueHourlyRateForDate, markSplitPaid } = useApp();
+  const { transactions } = useTransactions();
+
+  const reportingCurrency = settings.currencyCode;
+
+  const rateToReporting = useCallback(
+    (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
+    [rateTable, reportingCurrency],
+  );
+
+  const summary = useMemo(
+    () => aggregateUnpaidSplitsByPerson(transactions, { reportingCurrency, rateToReporting }),
+    [transactions, reportingCurrency, rateToReporting],
+  );
+
+  const person = useMemo(
+    () => summary.people.find((p) => p.key === personKey) ?? null,
+    [summary.people, personKey],
+  );
+
+  // When the last bill is settled the person drops out of the summary; leave the
+  // page so we never sit on an empty tab.
+  useEffect(() => {
+    if (!person) onBack();
+  }, [person, onBack]);
+
+  const hourlyRate = getTrueHourlyRateForDate(dayKeyFromDateLocal(new Date()));
+  const totalHours =
+    person && hourlyRate > 0 ? amountToHoursByRate(person.totalReporting, hourlyRate) : 0;
+
+  const formatReporting = useCallback(
+    (value: number) => formatCurrency(value, settings.currencySymbol),
+    [settings.currencySymbol],
+  );
+  const formatNative = useCallback(
+    (amount: number, currency: string) => formatCurrency(amount, currencySymbolForCode(currency)),
+    [],
+  );
+
+  const handleShare = useCallback(async () => {
+    if (!person) return;
+    void triggerHaptic('selection');
+    const fromName = settings.profileName?.trim() || null;
+    const toName = person.name ?? I18n.t('transactions.settleUp.someone');
+    const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
+    const label = settings.paymentQrLabel?.trim();
+    const resolvedQr = getPaymentQrUri(settings.paymentQrUri);
+    // RN Share only attaches an image (`url`) on iOS; on Android it is dropped,
+    // so only promise a "scan the attached QR" note where it will actually ride
+    // along. The payment label (text) still travels on both platforms.
+    const canAttachQr = !!resolvedQr && Platform.OS === 'ios';
+    const text = buildReceiptText(person, {
+      strings: {
+        heading: I18n.t('transactions.settleUp.receipt_heading'),
+        fromTo,
+        totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
+        payLine: label ? I18n.t('transactions.settleUp.receipt_pay_line', { label }) : null,
+        qrNote: canAttachQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
+        footer: I18n.t('transactions.settleUp.receipt_footer'),
+      },
+      formatMoney: formatNative,
+    });
+    try {
+      await Share.share(canAttachQr ? { message: text, url: resolvedQr } : { message: text });
+      trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
+        billCount: person.billCount,
+        hasQr: !!resolvedQr,
+      });
+    } catch {
+      // User cancelled the share sheet.
+    }
+  }, [formatNative, person, settings.paymentQrLabel, settings.paymentQrUri, settings.profileName]);
+
+  const handleMarkPaid = useCallback(
+    (splitId: string) => {
+      void triggerHaptic('success');
+      markSplitPaid(splitId);
+    },
+    [markSplitPaid],
+  );
+
+  const title = person?.name ?? `${I18n.t('transactions.settleUp.someone')}`;
+
+  return (
+    <SettingsPageLayout>
+      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={title} />
+      {person ? (
+        <>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
+          >
+            <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
+              <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+                {I18n.t('transactions.settleUp.person_owes_label')}
+              </Text>
+              <Text variant="heading" className="mt-1 text-3xl">
+                {formatReporting(person.totalReporting)}
+              </Text>
+              {totalHours > 0 ? (
+                <View className="mt-1 flex-row items-center gap-1">
+                  <Clock3 size={12} color={themeColors.textMuted} />
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.settleUp.time_equiv', { time: formatHours(totalHours) })}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View className="mt-4 gap-2">
+              {person.bills.map((bill) => {
+                const account = bill.paybackAccountId
+                  ? getAccountById(bill.paybackAccountId)
+                  : null;
+                return (
+                  <View
+                    key={bill.splitId}
+                    className="rounded-2xl border border-border/25 bg-card/60 px-3.5 py-3"
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-1">
+                        <Text variant="body" numberOfLines={1}>
+                          {bill.note?.trim() ||
+                            bill.categoryName ||
+                            I18n.t('transactions.settleUp.untitled_bill')}
+                        </Text>
+                        <Text variant="caption" tone="muted">
+                          {formatRelativeDate(bill.date)}
+                          {account
+                            ? ` · ${I18n.t('transactions.settleUp.payback_to', { account: account.name })}`
+                            : ''}
+                        </Text>
+                      </View>
+                      <Text variant="bodyStrong">{formatNative(bill.amount, bill.currency)}</Text>
+                      <Pressable
+                        onPress={() => handleMarkPaid(bill.splitId)}
+                        hitSlop={6}
+                        className="flex-row items-center gap-1 rounded-full bg-success/15 px-3 py-1.5 active:opacity-70"
+                      >
+                        <Check size={13} color={themeColors.success} />
+                        <Text variant="caption" className="text-success font-medium">
+                          {I18n.t('transactions.editor.split.mark_paid')}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </ScrollView>
+
+          <View className="px-5 pb-8 pt-2">
+            <Pressable
+              onPress={handleShare}
+              className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-90"
+            >
+              <Send size={18} color="#fff" />
+              <Text variant="bodyStrong" className="text-primary-foreground">
+                {I18n.t('transactions.settleUp.share_receipt')}
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      ) : null}
+    </SettingsPageLayout>
+  );
+}

@@ -1,23 +1,13 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Check, ChevronRight, Clock3, ImagePlus, QrCode, Send } from 'lucide-react-native';
+import { ChevronRight, Clock3, ImagePlus, QrCode } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  Share,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
-  ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
@@ -28,7 +18,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/userAssets';
 import type { PersonDebt } from '~/types';
-import { convert, currencySymbolForCode } from '~/utils/currency';
+import { convert } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
@@ -37,13 +27,11 @@ import {
   formatHours,
   formatRelativeDate,
 } from '~/utils/formatters';
-import {
-  aggregateUnpaidSplitsByPerson,
-  buildReceiptText,
-} from '~/features/transactions/lib/settleUp';
+import { aggregateUnpaidSplitsByPerson } from '~/features/transactions/lib/settleUp';
 
 interface SettleUpScreenProps {
   onBack: () => void;
+  onOpenPerson: (personKey: string) => void;
 }
 
 const AVATAR_COLORS = [
@@ -68,14 +56,13 @@ function personInitial(person: PersonDebt): string {
   return name ? name[0]!.toUpperCase() : '?';
 }
 
-export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
+export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const { settings, rateTable, getTrueHourlyRateForDate, markSplitPaid, updateSettings } = useApp();
+  const { settings, rateTable, getTrueHourlyRateForDate, updateSettings } = useApp();
   const { transactions } = useTransactions();
 
   const reportingCurrency = settings.currencyCode;
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const rateToReporting = useCallback(
     (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
@@ -87,21 +74,6 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
     [transactions, reportingCurrency, rateToReporting],
   );
 
-  const selectedPerson = useMemo(
-    () => summary.people.find((p) => p.key === selectedKey) ?? null,
-    [summary.people, selectedKey],
-  );
-
-  // Once a person's last bill is settled they drop out of the summary; clear the
-  // dangling selection so the sheet closes cleanly instead of holding a stale key.
-  useEffect(() => {
-    if (selectedKey && !selectedPerson) setSelectedKey(null);
-  }, [selectedKey, selectedPerson]);
-
-  useEffect(() => {
-    trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
-  }, []);
-
   const hourlyRate = getTrueHourlyRateForDate(dayKeyFromDateLocal(new Date()));
   const totalHours = hourlyRate > 0 ? amountToHoursByRate(summary.totalReporting, hourlyRate) : 0;
 
@@ -112,10 +84,10 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
     (value: number) => formatCurrency(value, settings.currencySymbol),
     [settings.currencySymbol],
   );
-  const formatNative = useCallback(
-    (amount: number, currency: string) => formatCurrency(amount, currencySymbolForCode(currency)),
-    [],
-  );
+
+  useEffect(() => {
+    trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
+  }, []);
 
   const handlePickQr = useCallback(async () => {
     void triggerHaptic('selection');
@@ -160,50 +132,6 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
     }
   }, [qrLabelDraft, settings.paymentQrLabel, updateSettings]);
 
-  const handleShare = useCallback(
-    async (person: PersonDebt) => {
-      void triggerHaptic('selection');
-      const fromName = settings.profileName?.trim() || null;
-      const toName = person.name ?? I18n.t('transactions.settleUp.someone');
-      const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
-      const label = settings.paymentQrLabel?.trim();
-      const resolvedQr = getPaymentQrUri(settings.paymentQrUri);
-      // RN Share only attaches an image (`url`) on iOS; on Android it's dropped,
-      // so only promise a "scan the attached QR" note where it will actually ride
-      // along. The payment label (text) still travels on both platforms.
-      const canAttachQr = !!resolvedQr && Platform.OS === 'ios';
-      const text = buildReceiptText(person, {
-        strings: {
-          heading: I18n.t('transactions.settleUp.receipt_heading'),
-          fromTo,
-          totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-          payLine: label ? I18n.t('transactions.settleUp.receipt_pay_line', { label }) : null,
-          qrNote: canAttachQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
-          footer: I18n.t('transactions.settleUp.receipt_footer'),
-        },
-        formatMoney: formatNative,
-      });
-      try {
-        await Share.share(canAttachQr ? { message: text, url: resolvedQr } : { message: text });
-        trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
-          billCount: person.billCount,
-          hasQr: !!resolvedQr,
-        });
-      } catch {
-        // User cancelled the share sheet — no-op.
-      }
-    },
-    [formatNative, settings.paymentQrLabel, settings.paymentQrUri, settings.profileName],
-  );
-
-  const handleMarkPaid = useCallback(
-    (splitId: string) => {
-      void triggerHaptic('success');
-      markSplitPaid(splitId);
-    },
-    [markSplitPaid],
-  );
-
   return (
     <SettingsPageLayout>
       <SettingsHeader
@@ -217,7 +145,7 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
         className="flex-1"
         contentContainerStyle={[{ paddingHorizontal: 20, paddingTop: 4 }, bottomNavInset]}
       >
-        {/* Outstanding hero — only when someone actually owes */}
+        {/* Outstanding hero, shown only when someone actually owes */}
         {summary.personCount > 0 ? (
           <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
             <Text variant="caption" tone="muted" className="uppercase tracking-wide">
@@ -260,7 +188,7 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
                 key={person.key}
                 onPress={() => {
                   void triggerHaptic('selection');
-                  setSelectedKey(person.key);
+                  onOpenPerson(person.key);
                 }}
                 className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
               >
@@ -295,7 +223,7 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
           </View>
         )}
 
-        {/* Payment QR card — attach once, rides on every shared receipt */}
+        {/* Payment QR card, attached once and shared onto every receipt */}
         <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
           <View className="flex-row items-center gap-3">
             <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
@@ -317,16 +245,22 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
                 resizeMode="contain"
               />
               <View className="flex-1">
-                <TextInput
-                  value={qrLabelDraft}
-                  onChangeText={setQrLabelDraft}
-                  onEndEditing={handleCommitLabel}
-                  onBlur={handleCommitLabel}
-                  placeholder={I18n.t('transactions.settleUp.qr_label_placeholder')}
-                  placeholderTextColor={`${themeColors.mutedForeground}99`}
-                  style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text, fontSize: 14 }]}
-                />
-                <View className="mt-1 flex-row gap-3">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.settleUp.qr_label_caption')}
+                </Text>
+                <View className="mt-0.5 rounded-lg border border-border/40 px-2.5 py-1.5">
+                  <TextInput
+                    value={qrLabelDraft}
+                    onChangeText={setQrLabelDraft}
+                    onEndEditing={handleCommitLabel}
+                    onBlur={handleCommitLabel}
+                    style={[
+                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                      { color: themeColors.text, fontSize: 14 },
+                    ]}
+                  />
+                </View>
+                <View className="mt-1.5 flex-row gap-3">
                   <Pressable onPress={handlePickQr} hitSlop={6}>
                     <Text variant="caption" className="text-primary font-medium">
                       {I18n.t('transactions.settleUp.qr_replace')}
@@ -353,112 +287,6 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
           )}
         </View>
       </ScrollView>
-
-      <PersonDebtSheet
-        person={selectedPerson}
-        onClose={() => setSelectedKey(null)}
-        onShare={handleShare}
-        onMarkPaid={handleMarkPaid}
-        formatReporting={formatReporting}
-        formatNative={formatNative}
-      />
     </SettingsPageLayout>
-  );
-}
-
-interface PersonDebtSheetProps {
-  person: PersonDebt | null;
-  onClose: () => void;
-  onShare: (person: PersonDebt) => void;
-  onMarkPaid: (splitId: string) => void;
-  formatReporting: (value: number) => string;
-  formatNative: (amount: number, currency: string) => string;
-}
-
-function PersonDebtSheet({
-  person,
-  onClose,
-  onShare,
-  onMarkPaid,
-  formatReporting,
-  formatNative,
-}: PersonDebtSheetProps) {
-  const themeColors = useThemeColors();
-
-  return (
-    <ThemeModal
-      visible={person !== null}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SettingsPageLayout>
-        <SettingsHeader
-          className="px-5 pt-5 pb-3"
-          onBack={onClose}
-          title={person?.name ?? I18n.t('transactions.settleUp.someone')}
-        />
-        {person ? (
-          <>
-            <ScrollView
-              className="flex-1"
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
-            >
-              <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
-                <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-                  {I18n.t('transactions.settleUp.person_owes_label')}
-                </Text>
-                <Text variant="heading" className="mt-1 text-3xl">
-                  {formatReporting(person.totalReporting)}
-                </Text>
-              </View>
-
-              <View className="mt-4 gap-2">
-                {person.bills.map((bill) => (
-                  <View
-                    key={bill.splitId}
-                    className="flex-row items-center gap-3 rounded-2xl border border-border/25 bg-card/60 px-3.5 py-3"
-                  >
-                    <View className="flex-1">
-                      <Text variant="body" numberOfLines={1}>
-                        {bill.note?.trim() ||
-                          bill.categoryName ||
-                          I18n.t('transactions.settleUp.untitled_bill')}
-                      </Text>
-                      <Text variant="caption" tone="muted">
-                        {formatRelativeDate(bill.date)}
-                      </Text>
-                    </View>
-                    <Text variant="bodyStrong">{formatNative(bill.amount, bill.currency)}</Text>
-                    <Pressable
-                      onPress={() => onMarkPaid(bill.splitId)}
-                      hitSlop={6}
-                      className="flex-row items-center gap-1 rounded-full bg-success/15 px-3 py-1.5 active:opacity-70"
-                    >
-                      <Check size={13} color={themeColors.success} />
-                      <Text variant="caption" className="text-success font-medium">
-                        {I18n.t('transactions.editor.split.mark_paid')}
-                      </Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-
-            <View className="px-5 pb-8 pt-2">
-              <Pressable
-                onPress={() => onShare(person)}
-                className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-90"
-              >
-                <Send size={18} color="#fff" />
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {I18n.t('transactions.settleUp.share_receipt')}
-                </Text>
-              </Pressable>
-            </View>
-          </>
-        ) : null}
-      </SettingsPageLayout>
-    </ThemeModal>
   );
 }

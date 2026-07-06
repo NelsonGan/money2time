@@ -9,7 +9,7 @@ import type {
 export const UNNAMED_PERSON_KEY = '__unnamed__';
 
 export interface AggregateSettleUpOptions {
-  /** The user's reporting currency — the roll-up total is expressed in it. */
+  /** The user's reporting currency; the roll-up total is expressed in it. */
   reportingCurrency: string;
   /**
    * Live fallback conversion: 1 unit of `currency` → the reporting currency, or
@@ -40,14 +40,14 @@ function splitReportingAmount(
   }
   const rate = rateToReporting?.(tx.currency);
   if (rate != null && Number.isFinite(rate)) return amount * rate;
-  // Give up gracefully — count the native amount rather than dropping the bill.
+  // Give up gracefully: count the native amount rather than dropping the bill.
   return amount;
 }
 
 interface MutablePerson {
   key: string;
   name: string | null;
-  /** Date of the bill the display name came from — most recent wins on casing drift. */
+  /** Date of the bill the display name came from; most recent wins on casing drift. */
   nameDate: string;
   totalReporting: number;
   byCurrency: Map<string, number>;
@@ -93,6 +93,7 @@ export function aggregateUnpaidSplitsByPerson(
         note: tx.note ?? null,
         categoryName: tx.categoryName ?? null,
         categoryIcon: tx.categoryIcon ?? null,
+        paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
       };
 
       let person = people.get(key);
@@ -199,10 +200,10 @@ export function buildReceiptText(person: PersonDebt, options: BuildReceiptTextOp
   const lines: string[] = [strings.heading, strings.fromTo, ''];
 
   for (const bill of person.bills) {
-    lines.push(`• ${billLabel(bill)} — ${formatMoney(bill.amount, bill.currency)}`);
+    lines.push(`• ${billLabel(bill)}: ${formatMoney(bill.amount, bill.currency)}`);
   }
 
-  lines.push('──────────');
+  lines.push('');
   const totalText = person.byCurrency.map((c) => formatMoney(c.amount, c.currency)).join(' + ');
   lines.push(`${strings.totalLabel}: ${totalText}`);
 
@@ -214,4 +215,30 @@ export function buildReceiptText(person: PersonDebt, options: BuildReceiptTextOp
 
   lines.push('', strings.footer);
   return lines.join('\n');
+}
+
+/**
+ * Distinct person names previously entered on splits, most-recently-used first.
+ * Powers the name autocomplete in the split editor. Self splits and blank names
+ * are skipped; for a given name the casing from its most recent use wins.
+ */
+export function recentSplitPersonNames(transactions: TransactionWithRelations[]): string[] {
+  const seen = new Map<string, { display: string; date: string }>();
+  for (const tx of transactions) {
+    const splits = tx.splits;
+    if (!splits || splits.length === 0) continue;
+    for (const split of splits) {
+      if (split.isSelf) continue;
+      const name = split.personName?.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      const existing = seen.get(key);
+      if (!existing || tx.date > existing.date) {
+        seen.set(key, { display: name, date: tx.date });
+      }
+    }
+  }
+  return Array.from(seen.values())
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .map((entry) => entry.display);
 }
