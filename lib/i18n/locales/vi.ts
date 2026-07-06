@@ -1371,6 +1371,7 @@ const vi = {
   pro: {
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
+    budget_templates_label: 'Mẫu ngân sách',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',

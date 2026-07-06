@@ -1387,6 +1387,7 @@ const ms = {
   pro: {
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
+    budget_templates_label: 'Templat belanjawan',
     custom_item_images_label: 'Imej item tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',

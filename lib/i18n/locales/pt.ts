@@ -1393,6 +1393,7 @@ const pt = {
   pro: {
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
+    budget_templates_label: 'Modelos de orçamento',
     custom_item_images_label: 'Imagens de itens personalizadas',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
