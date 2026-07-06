@@ -561,6 +561,7 @@ const fil = {
       claim: {
         toggle_title: 'Claimable',
         toggle_subtitle: "Track an expense you'll get back",
+        reimburse_into: 'Reimburse into',
       },
     },
   },
@@ -1840,10 +1841,20 @@ const fil = {
     },
   },
   reimbursements: {
+    title: 'Reimbursements',
+    subtitle: 'Expenses you expect to get back',
     inflow_label: 'Reimbursement',
     badge_outstanding: 'Claimable, awaiting reimbursement',
     badge_reimbursed: 'Reimbursed',
     mark_reimbursed: 'Mark reimbursed',
+    claim: 'Claim',
+    outstanding_total: 'Pending reimbursement',
+    outstanding_hours: '{{hours}} of your time',
+    outstanding_count: '{{count}} to claim',
+    remaining: '{{amount}} left',
+    empty_title: 'Nothing to claim',
+    empty_message:
+      'Flag an expense as claimable and it shows up here until you get the money back.',
   },
 };
 

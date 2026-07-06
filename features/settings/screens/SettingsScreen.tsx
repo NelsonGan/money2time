@@ -110,6 +110,7 @@ interface SettingsScreenProps {
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
+  onOpenReimbursements: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onOpenNews: () => void;
@@ -136,6 +137,7 @@ export function SettingsScreen({
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
+  onOpenReimbursements,
   onOpenNotifications,
   onOpenDataManagement,
   onOpenNews,
@@ -713,6 +715,11 @@ export function SettingsScreen({
                   onPress={onOpenRecurring}
                 />
               </View>
+              <SettingsGridTile
+                icon={<ReceiptText size={20} color={themeColors.primary} />}
+                label={I18n.t('reimbursements.title')}
+                onPress={onOpenReimbursements}
+              />
               <SettingsGridTile
                 icon={<Zap size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.quick_entry.title')}
