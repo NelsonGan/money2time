@@ -315,57 +315,58 @@ function BudgetCategoryRow({
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
-        className={cn(
-          'px-4 pt-3.5 active:bg-secondary/20',
-          line.children.length > 0 ? 'pb-1' : 'pb-3.5',
-        )}
+        className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
       >
-        <View className="flex-row items-start gap-2.5">
-          {/* Emoji + text share a row centered against each other so the icon
-              sits vertically centered next to the two text lines. */}
-          <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
-            <CategoryEmoji icon={category?.icon} size={22} />
-            <View className="min-w-0 flex-1">
-              <Text variant="bodyStrong" numberOfLines={1}>
+        {/* Compact two-line band (savings-rate inspired): name + remaining up
+            top, then a thin depletion bar flanked by the spent/total figures
+            and a usage badge — so the row stays light instead of stacking
+            three separate rows. */}
+        <View className="flex-row items-center gap-2.5">
+          <CategoryEmoji icon={category?.icon} size={22} />
+          <View className="min-w-0 flex-1 gap-2">
+            <View className="flex-row items-center gap-2">
+              <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
                 {category?.name ?? I18n.t('common.uncategorized')}
               </Text>
-              {/* Spent / total with the usage percent in a health-tinted badge
-                  right beside it (green → amber from 80% → red when over). */}
-              <View className="mt-0.5 flex-row items-center gap-1.5">
-                <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
-                  {money(line.spent, settings)} / {money(line.budgeted, settings)}
+              <Text
+                variant="caption"
+                numberOfLines={1}
+                className="shrink-0 text-[11px]"
+                tone={line.isOver ? undefined : 'muted'}
+                style={line.isOver ? { color: themeColors.error } : undefined}
+              >
+                {line.isOver
+                  ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+                  : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1">
+                <ProgressBar
+                  ratio={line.usageRatio}
+                  color={barColor}
+                  trackColor={withColorAlpha(barColor, 0.14)}
+                  height={6}
+                />
+              </View>
+              <Text
+                variant="caption"
+                tone="muted"
+                numberOfLines={1}
+                className="shrink-0 text-[11px]"
+              >
+                {money(line.spent, settings)} / {money(line.budgeted, settings)}
+              </Text>
+              <View
+                className="shrink-0 rounded-full px-1.5 py-0.5"
+                style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
+              >
+                <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
+                  {usagePercentLabel(line.usageRatio)}
                 </Text>
-                <View
-                  className="shrink-0 rounded-full px-1.5 py-0.5"
-                  style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
-                >
-                  <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
-                    {usagePercentLabel(line.usageRatio)}
-                  </Text>
-                </View>
               </View>
             </View>
           </View>
-          {/* Remaining (or exceeded) amount pinned to the top-right corner. */}
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            className="shrink-0 text-[11px]"
-            tone={line.isOver ? undefined : 'muted'}
-            style={line.isOver ? { color: themeColors.error } : undefined}
-          >
-            {line.isOver
-              ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-              : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-          </Text>
-        </View>
-        <View className="mt-2.5">
-          <ProgressBar
-            ratio={line.usageRatio}
-            color={barColor}
-            trackColor={withColorAlpha(barColor, 0.14)}
-            height={5}
-          />
         </View>
       </Pressable>
 
