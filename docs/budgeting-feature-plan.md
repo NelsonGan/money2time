@@ -3,7 +3,22 @@
 Status: **Implemented** (same branch/PR) · Branch: `claude/budgeting-feature-plan-sez16k`
 
 Everything below is built except the news feature announcement (release-time
-follow-up). 510 tests green; native widget code needs a dev-client prebuild.
+follow-up); native widget code needs a dev-client prebuild.
+
+> **Where the shipped code diverges from this plan** (the plan below is kept
+> as-written; trust the code):
+>
+> - **Navigation**: no budget routes live in the settings stack. All budget
+>   screens are **root-stack** routes (`SettingsBudget`,
+>   `SettingsBudgetTemplates`, `BudgetTemplateEditor`, `BudgetMonthEditor`,
+>   `CategoryAllocation` in `navigation/rootStack.ts`), and the month view is
+>   primarily an **embedded Insights page**: `BudgetPagerView` renders inside
+>   `InsightsScreen` (picked from the insights type menu), while the
+>   standalone `BudgetScreen` remains only for the `money2time://budget`
+>   widget deep link. The Settings tile was removed.
+> - `reorderBudgetTemplates` was cut (no reorder UI shipped).
+> - Back-populate skips months that **ever had** a budget (tombstones), not
+>   just live ones.
 
 Monthly, expense-only budgets built from reusable **budget templates**. A
 template defines a total budget and how it is allocated across expense

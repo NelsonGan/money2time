@@ -1,7 +1,6 @@
 import { Copy, Plus, Trash2 } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import type { Edge } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -17,7 +16,7 @@ import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
-import { money } from '~/features/budget/lib/format';
+import { categoriesCountLabel, money } from '~/features/budget/lib/format';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -27,7 +26,6 @@ import type { BudgetTemplate, Category, UserSettings } from '~/types';
 interface BudgetTemplatesScreenProps {
   onBack?: () => void;
   onOpenEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
-  safeAreaEdges?: Edge[];
 }
 
 function DefaultRadio({ selected, themeColors }: { selected: boolean; themeColors: ColorPalette }) {
@@ -67,17 +65,13 @@ function TemplateCard({
 }) {
   return (
     <View className="rounded-2xl border border-border/45 bg-card">
-      {/* Row tap edits; the radio marks/changes the default; actions are
-          compact icon buttons so the card stays one glanceable unit. */}
-      <Pressable
-        onPress={onEdit}
-        accessibilityRole="button"
-        accessibilityLabel={template.name}
-        className="flex-row items-center gap-3 px-4 py-3.5 active:opacity-85"
-      >
+      {/* The radio and icon actions are siblings of the edit Pressable, not
+          descendants — an accessible Pressable collapses its subtree for
+          screen readers, which would make them unreachable (and their taps
+          needed stopPropagation to not also trigger the edit). */}
+      <View className="flex-row items-center gap-3 px-4 py-3.5">
         <Pressable
-          onPress={(e) => {
-            e.stopPropagation();
+          onPress={() => {
             if (template.isDefault) return;
             void triggerHaptic('selection');
             onSetDefault();
@@ -90,25 +84,29 @@ function TemplateCard({
           <DefaultRadio selected={template.isDefault} themeColors={themeColors} />
         </Pressable>
 
-        {template.emoji ? <CategoryEmoji icon={template.emoji} size={20} /> : null}
+        <Pressable
+          onPress={onEdit}
+          accessibilityRole="button"
+          accessibilityLabel={template.name}
+          className="min-w-0 flex-1 flex-row items-center gap-3 active:opacity-85"
+        >
+          {template.emoji ? <CategoryEmoji icon={template.emoji} size={20} /> : null}
 
-        <View className="min-w-0 flex-1">
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {template.name}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-            {money(template.totalAmount, settings)} ·{' '}
-            {I18n.t('budget.categories_count', {
-              count: countRootAllocations(template.allocations, categories),
-            })}
-            {template.isDefault ? ` · ${I18n.t('budget.template_default_badge')}` : ''}
-          </Text>
-        </View>
+          <View className="min-w-0 flex-1">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {template.name}
+            </Text>
+            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+              {money(template.totalAmount, settings)} ·{' '}
+              {categoriesCountLabel(countRootAllocations(template.allocations, categories))}
+              {template.isDefault ? ` · ${I18n.t('budget.template_default_badge')}` : ''}
+            </Text>
+          </View>
+        </Pressable>
 
         <View className="flex-row items-center">
           <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
+            onPress={() => {
               void triggerHaptic('selection');
               onDuplicate();
             }}
@@ -120,10 +118,7 @@ function TemplateCard({
             <Copy size={15} color={themeColors.textMuted} />
           </Pressable>
           <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
+            onPress={onDelete}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.delete')}
@@ -132,16 +127,12 @@ function TemplateCard({
             <Trash2 size={15} color={themeColors.coral} />
           </Pressable>
         </View>
-      </Pressable>
+      </View>
     </View>
   );
 }
 
-export function BudgetTemplatesScreen({
-  onBack,
-  onOpenEditor,
-  safeAreaEdges = ['top'],
-}: BudgetTemplatesScreenProps) {
+export function BudgetTemplatesScreen({ onBack, onOpenEditor }: BudgetTemplatesScreenProps) {
   const { settings, categories, budgetTemplates, setDefaultBudgetTemplate, deleteBudgetTemplate } =
     useApp();
   const { checkLimit } = useProGate();
@@ -176,7 +167,7 @@ export function BudgetTemplatesScreen({
   );
 
   return (
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout edges={['top']}>
       <View className="px-5">
         <SettingsHeader
           className="px-0 pt-5 pb-3"

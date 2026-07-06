@@ -103,7 +103,12 @@ class BudgetTemplatesRepository {
     return id;
   }
 
-  /** Updates name/total and replaces the allocation rows. */
+  /**
+   * Updates name/total and replaces the allocation rows. No-ops when the
+   * template is gone (soft-deleted from another path while an editor was
+   * open) — inserting fresh allocation rows for a dead template would leave
+   * live orphans behind.
+   */
   update(id: string, input: CreateBudgetTemplateInput) {
     const db = getDb();
     const sqlite = getSQLite();
@@ -111,6 +116,16 @@ class BudgetTemplatesRepository {
 
     sqlite.execSync('BEGIN');
     try {
+      const existing = db
+        .select({ id: budgetTemplatesTable.id })
+        .from(budgetTemplatesTable)
+        .where(and(eq(budgetTemplatesTable.id, id), isNull(budgetTemplatesTable.deletedAt)))
+        .get();
+      if (!existing) {
+        sqlite.execSync('COMMIT');
+        return;
+      }
+
       db.update(budgetTemplatesTable)
         .set({
           name: input.name,
@@ -233,28 +248,6 @@ class BudgetTemplatesRepository {
         ),
       )
       .run();
-  }
-
-  reorder(ids: string[]) {
-    if (ids.length === 0) return;
-
-    const db = getDb();
-    const sqlite = getSQLite();
-    const now = nowIso();
-
-    sqlite.execSync('BEGIN');
-    try {
-      ids.forEach((id, index) => {
-        db.update(budgetTemplatesTable)
-          .set({ sortOrder: index, updatedAt: now })
-          .where(and(eq(budgetTemplatesTable.id, id), isNull(budgetTemplatesTable.deletedAt)))
-          .run();
-      });
-      sqlite.execSync('COMMIT');
-    } catch (error) {
-      sqlite.execSync('ROLLBACK');
-      throw error;
-    }
   }
 
   private insertAllocations(templateId: string, allocations: BudgetAllocationInput[], now: string) {

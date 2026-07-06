@@ -83,10 +83,15 @@ export function CategoryAllocationScreen({
         />
       </View>
 
+      {/* automaticallyAdjustKeyboardInsets keeps a low subcategory input
+          scrollable above the keyboard + lifted footer on iOS (Android's
+          adjustResize handles it natively). */}
       <ScrollView
+        className="flex-1"
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets
       >
         <View className="gap-4 px-5 pt-1">
           <View className="flex-row items-end gap-3">

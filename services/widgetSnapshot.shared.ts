@@ -170,8 +170,6 @@ export interface BudgetRingSnapshot {
   monthShortLabel: string;
   /** False when the current month has no budget — render the setup state. */
   hasBudget: boolean;
-  totalBudget: number;
-  totalSpent: number;
   /** totalSpent / totalBudget; may exceed 1 when over budget. */
   usageRatio: number;
   isOver: boolean;
@@ -192,8 +190,6 @@ export interface BudgetBreakdownCategorySnapshot {
   name: string;
   /** Category emoji when the icon is a literal emoji; empty otherwise. */
   emoji: string;
-  spent: number;
-  budgeted: number;
   usageRatio: number;
   isOver: boolean;
   spentLabel: string;
@@ -215,8 +211,6 @@ export interface BudgetBreakdownSnapshot {
   paceRatio: number;
   /** Top lines by usage, over-budget lines first. */
   categories: BudgetBreakdownCategorySnapshot[];
-  /** Budget lines beyond the ones shown. */
-  moreCount: number;
   moreLabel: string;
   /** "+$214 unbudgeted"; empty when zero. */
   unbudgetedLabel: string;
@@ -717,8 +711,6 @@ function buildBudgetWidgetSnapshots(
     monthLabel,
     monthShortLabel: getShortMonthYearFormatter(settings.locale).format(now),
     hasBudget,
-    totalBudget: summary?.totalBudget ?? 0,
-    totalSpent: summary?.totalSpent ?? 0,
     usageRatio: summary?.usageRatio ?? 0,
     isOver,
     remainingLabel: remainingCompact,
@@ -728,7 +720,10 @@ function buildBudgetWidgetSnapshots(
           total: formatCompactCurrency(summary?.totalBudget ?? 0, settings.currencySymbol),
         }),
     paceRatio,
-    daysLeftLabel: I18n.t('widgets.budget_days_left', { count: daysLeft }),
+    daysLeftLabel: I18n.t(
+      daysLeft === 1 ? 'widgets.budget_days_left_one' : 'widgets.budget_days_left_other',
+      { count: daysLeft },
+    ),
     setupLabel,
     budgetUrl,
   };
@@ -760,16 +755,21 @@ function buildBudgetWidgetSnapshots(
         categoryId: line.categoryId,
         name: category?.name ?? '',
         emoji: categoryEmojiForWidget(category?.icon),
-        spent: line.spent,
-        budgeted: line.budgeted,
         usageRatio: line.usageRatio,
         isOver: line.isOver,
         spentLabel: formatCompactCurrency(line.spent, settings.currencySymbol),
         budgetedLabel: formatCompactCurrency(line.budgeted, settings.currencySymbol),
       };
     }),
-    moreCount,
-    moreLabel: moreCount > 0 ? I18n.t('widgets.budget_more_categories', { count: moreCount }) : '',
+    moreLabel:
+      moreCount > 0
+        ? I18n.t(
+            moreCount === 1
+              ? 'widgets.budget_more_categories_one'
+              : 'widgets.budget_more_categories_other',
+            { count: moreCount },
+          )
+        : '',
     unbudgetedLabel:
       (summary?.unbudgetedSpent ?? 0) > 0
         ? I18n.t('widgets.budget_unbudgeted', {

@@ -265,16 +265,16 @@ describe('computeBackPopulateRange', () => {
   const now = new Date(2026, 6, 15); // July 2026
 
   it('returns null with no expense history', () => {
-    expect(computeBackPopulateRange({ transactions: [], existingLiveMonths: [], now })).toBeNull();
+    expect(computeBackPopulateRange({ transactions: [], existingMonths: [], now })).toBeNull();
     const incomeOnly = [makeTransaction({ type: 'income', date: '2026-03-01T12:00:00.000Z' })];
     expect(
-      computeBackPopulateRange({ transactions: incomeOnly, existingLiveMonths: [], now }),
+      computeBackPopulateRange({ transactions: incomeOnly, existingMonths: [], now }),
     ).toBeNull();
   });
 
   it('returns null when the first expense is in the current month', () => {
     const transactions = [makeTransaction({ date: '2026-07-02T12:00:00.000Z' })];
-    expect(computeBackPopulateRange({ transactions, existingLiveMonths: [], now })).toBeNull();
+    expect(computeBackPopulateRange({ transactions, existingMonths: [], now })).toBeNull();
   });
 
   it('spans from the first expense month through last month', () => {
@@ -282,7 +282,7 @@ describe('computeBackPopulateRange', () => {
       makeTransaction({ id: 'a', date: '2026-03-20T12:00:00.000Z' }),
       makeTransaction({ id: 'b', date: '2026-05-02T12:00:00.000Z' }),
     ];
-    const range = computeBackPopulateRange({ transactions, existingLiveMonths: [], now });
+    const range = computeBackPopulateRange({ transactions, existingMonths: [], now });
     expect(range!.months).toEqual(['2026-03', '2026-04', '2026-05', '2026-06']);
     expect(range!.firstMonthKey).toBe('2026-03');
     expect(range!.lastMonthKey).toBe('2026-06');
@@ -292,7 +292,7 @@ describe('computeBackPopulateRange', () => {
     const transactions = [makeTransaction({ date: '2026-03-20T12:00:00.000Z' })];
     const range = computeBackPopulateRange({
       transactions,
-      existingLiveMonths: ['2026-04', '2026-06'],
+      existingMonths: ['2026-04', '2026-06'],
       now,
     });
     expect(range!.months).toEqual(['2026-03', '2026-05']);
@@ -303,7 +303,7 @@ describe('computeBackPopulateRange', () => {
     expect(
       computeBackPopulateRange({
         transactions,
-        existingLiveMonths: ['2026-05', '2026-06'],
+        existingMonths: ['2026-05', '2026-06'],
         now,
       }),
     ).toBeNull();
@@ -313,7 +313,7 @@ describe('computeBackPopulateRange', () => {
     const transactions = [makeTransaction({ date: '2025-11-20T12:00:00.000Z' })];
     const range = computeBackPopulateRange({
       transactions,
-      existingLiveMonths: [],
+      existingMonths: [],
       now: new Date(2026, 1, 10),
     });
     expect(range!.months).toEqual(['2025-11', '2025-12', '2026-01']);

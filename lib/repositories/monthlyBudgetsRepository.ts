@@ -57,13 +57,16 @@ class MonthlyBudgetsRepository {
     return (row?.count ?? 0) > 0;
   }
 
-  /** Months that currently have a live budget (for back-populate skipping). */
-  existingLiveMonths(): string[] {
+  /**
+   * Months that have or ever had a budget (soft-deleted rows count). Used to
+   * skip months during back-populate so a deliberately deleted month isn't
+   * silently resurrected by a bulk fill — same tombstone rule as auto-create.
+   */
+  everExistedMonths(): string[] {
     const db = getDb();
     return db
-      .select({ month: monthlyBudgetsTable.month })
+      .selectDistinct({ month: monthlyBudgetsTable.month })
       .from(monthlyBudgetsTable)
-      .where(isNull(monthlyBudgetsTable.deletedAt))
       .all()
       .map((row) => row.month);
   }
@@ -237,22 +240,31 @@ class MonthlyBudgetsRepository {
 
   softDelete(id: string) {
     const db = getDb();
+    const sqlite = getSQLite();
     const now = nowIso();
 
-    db.update(monthlyBudgetsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
-      .run();
+    sqlite.execSync('BEGIN');
+    try {
+      db.update(monthlyBudgetsTable)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
+        .run();
 
-    db.update(monthlyBudgetCategoriesTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(
-        and(
-          eq(monthlyBudgetCategoriesTable.budgetId, id),
-          isNull(monthlyBudgetCategoriesTable.deletedAt),
-        ),
-      )
-      .run();
+      db.update(monthlyBudgetCategoriesTable)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(
+          and(
+            eq(monthlyBudgetCategoriesTable.budgetId, id),
+            isNull(monthlyBudgetCategoriesTable.deletedAt),
+          ),
+        )
+        .run();
+
+      sqlite.execSync('COMMIT');
+    } catch (error) {
+      sqlite.execSync('ROLLBACK');
+      throw error;
+    }
   }
 
   /** Category-delete cascade: drop the category's line from every month. */

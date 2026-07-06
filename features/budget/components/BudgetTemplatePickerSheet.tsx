@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Text, ThemeModal } from '~/components/ui';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
-import { money } from '~/features/budget/lib/format';
+import { categoriesCountLabel, money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -99,9 +99,9 @@ export function BudgetTemplatePickerSheet({
                       </View>
                       <Text variant="caption" tone="muted" className="mt-0.5">
                         {money(template.totalAmount, settings)} ·{' '}
-                        {I18n.t('budget.categories_count', {
-                          count: countRootAllocations(template.allocations, categories),
-                        })}
+                        {categoriesCountLabel(
+                          countRootAllocations(template.allocations, categories),
+                        )}
                       </Text>
                     </View>
                     {template.isDefault ? <Check size={18} color={themeColors.primary} /> : null}

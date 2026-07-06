@@ -16,11 +16,11 @@ import {
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
 import { computeBackPopulateRange } from '~/features/budget/lib/budgetMath';
+import { monthKeyLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatMonthYearLabel, parseMonthKey } from '~/utils/formatters';
 
 interface BudgetTemplateEditorScreenProps {
   templateId?: string;
@@ -42,7 +42,7 @@ export function BudgetTemplateEditorScreen({
     settings,
     categories,
     budgetTemplates,
-    monthlyBudgets,
+    getBudgetMonthsEverExisted,
     createBudgetTemplate,
     updateBudgetTemplate,
   } = useApp();
@@ -86,14 +86,15 @@ export function BudgetTemplateEditorScreen({
   const canSave = name.trim().length > 0 && draft.allocationsValid;
 
   // Back-populate is only offered on create, and only when there are missing
-  // past months to fill (range copy names the exact span).
+  // past months to fill (range copy names the exact span). Tombstoned months
+  // count as existing so the preview matches what the fill will actually skip.
   const backPopulateRange = useMemo(() => {
     if (isEditing) return null;
     return computeBackPopulateRange({
       transactions,
-      existingLiveMonths: monthlyBudgets.map((budget) => budget.month),
+      existingMonths: getBudgetMonthsEverExisted(),
     });
-  }, [isEditing, monthlyBudgets, transactions]);
+  }, [getBudgetMonthsEverExisted, isEditing, transactions]);
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
@@ -198,14 +199,8 @@ export function BudgetTemplateEditorScreen({
             <AllocationOptionRow
               title={I18n.t('budget.back_populate_title')}
               caption={I18n.t('budget.back_populate_caption', {
-                first: formatMonthYearLabel(
-                  parseMonthKey(backPopulateRange.firstMonthKey) ?? new Date(),
-                  settings.locale,
-                ),
-                last: formatMonthYearLabel(
-                  parseMonthKey(backPopulateRange.lastMonthKey) ?? new Date(),
-                  settings.locale,
-                ),
+                first: monthKeyLabel(backPopulateRange.firstMonthKey, settings.locale),
+                last: monthKeyLabel(backPopulateRange.lastMonthKey, settings.locale),
                 count: backPopulateRange.months.length,
               })}
               value={backPopulate}

@@ -14,17 +14,37 @@ import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
+/**
+ * Parses a typed/pasted amount, tolerating both decimal commas ("12,5") and
+ * thousands separators ("1,000" / "1,234.56") — naively swapping the first
+ * comma for a dot would silently turn "1,000" into 1.
+ */
 export function parseAllocationAmount(value: string): number {
-  const parsed = Number.parseFloat(value.replace(',', '.'));
+  const text = value.trim();
+  let normalized: string;
+  if (text.includes('.')) {
+    // A dot is the decimal point; any commas are thousands separators.
+    normalized = text.replace(/,/g, '');
+  } else {
+    const commaGroups = text.split(',');
+    // A single comma followed by exactly three digits reads as a thousands
+    // separator ("1,000"); one or two trailing digits read as decimals
+    // ("12,5"). Multiple commas are always thousands separators.
+    normalized =
+      commaGroups.length === 2 && commaGroups[1].length !== 3
+        ? commaGroups.join('.')
+        : commaGroups.join('');
+  }
+  const parsed = Number.parseFloat(normalized);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
 /**
  * Visual allocation state: a bar filling as the total gets distributed, with
- * the allocated/remaining figures underneath. Designed to sit sticky above
- * the category list.
+ * the allocated/remaining figures underneath. Rendered inside
+ * `AllocationFooter`, pinned above the Cancel/Save bar.
  */
-export function AllocationStatusBar({
+function AllocationStatusBar({
   total,
   remaining,
   settings,
@@ -41,9 +61,9 @@ export function AllocationStatusBar({
     remaining < 0 ? themeColors.error : remaining === 0 ? themeColors.success : themeColors.primary;
   const remainingLabel =
     remaining > 0
-      ? I18n.t('budget.allocated_left', { amount: money(remaining, settings) })
+      ? I18n.t('budget.left', { amount: money(remaining, settings) })
       : remaining < 0
-        ? I18n.t('budget.allocated_over', { amount: money(Math.abs(remaining), settings) })
+        ? I18n.t('budget.over', { amount: money(Math.abs(remaining), settings) })
         : I18n.t('budget.allocated_done');
 
   return (

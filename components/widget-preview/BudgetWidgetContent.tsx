@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
 import { Text } from '~/components/ui';
-import { usageColor } from '~/features/budget/lib/format';
+import type { ColorPalette } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { BudgetBreakdownSnapshot, BudgetRingSnapshot } from '~/services/widgetSnapshot.shared';
 import { withColorAlpha } from '~/utils/color';
@@ -12,6 +12,17 @@ import { FONT } from '~/utils/fonts';
 
 const BANNER_SOURCE = require('../../assets/banner.png');
 const WIDGET_PADDING = 16;
+
+/**
+ * Mirrors the native widgets' `budgetUsageColor` (primary/coral/error), which
+ * intentionally differs from the in-app rows' traffic-light scale. isOver wins
+ * so a zero-budget overspend (ratio 0) still reads as over.
+ */
+function widgetUsageColor(ratio: number, isOver: boolean, themeColors: ColorPalette): string {
+  if (isOver || ratio > 1) return themeColors.error;
+  if (ratio >= 0.8) return themeColors.coral;
+  return themeColors.primary;
+}
 
 /**
  * Small "Budget Ring": remaining amount inside a usage arc, with a pacing tick
@@ -45,7 +56,7 @@ export function BudgetRingWidgetContent({
   const center = ringSize / 2;
   const circumference = 2 * Math.PI * radius;
   const usedFraction = Math.max(0, Math.min(data.usageRatio, 1));
-  const color = usageColor(data.usageRatio, themeColors);
+  const color = widgetUsageColor(data.usageRatio, data.isOver, themeColors);
 
   // Pacing tick: a notch at dayOfMonth / daysInMonth around the ring.
   const paceAngle = data.paceRatio * 2 * Math.PI - Math.PI / 2;
@@ -130,7 +141,7 @@ function BreakdownRow({
   line: BudgetBreakdownSnapshot['categories'][number];
   themeColors: ReturnType<typeof useThemeColors>;
 }) {
-  const color = usageColor(line.usageRatio, themeColors);
+  const color = widgetUsageColor(line.usageRatio, line.isOver, themeColors);
   const fillPct = Math.max(3, Math.min(line.usageRatio, 1) * 100);
 
   return (
@@ -180,7 +191,7 @@ export function BudgetBreakdownWidgetContent({ data }: { data: BudgetBreakdownSn
     );
   }
 
-  const color = usageColor(data.usageRatio, themeColors);
+  const color = widgetUsageColor(data.usageRatio, data.isOver, themeColors);
   const usedPct = Math.max(0, Math.min(data.usageRatio, 1)) * 100;
   const pacePct = Math.max(0, Math.min(data.paceRatio, 1)) * 100;
 

@@ -122,10 +122,7 @@ import {
 } from '~/utils/formatters';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
-import {
-  BudgetPagerView,
-  type BudgetPagerViewHandle,
-} from '~/features/budget/screens/BudgetScreen';
+import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
@@ -3053,6 +3050,8 @@ export function InsightsScreen({
     activeBreakdownSliceIdRef.current = null;
     setActiveBreakdownSliceId(null);
     setIsFilterModalOpen(false);
+    // The budget takeover would otherwise sit on top of the requested insight.
+    setIsBudgetViewActive(false);
     setSelectedInsightType(targetInsightType);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3074,6 +3073,7 @@ export function InsightsScreen({
     const focus = (insightType: string) => {
       if (!isInsightType(insightType)) return;
       setIsFilterModalOpen(false);
+      setIsBudgetViewActive(false);
       setSelectedInsightType(insightType);
     };
     const pending = consumePendingFocusInsight();

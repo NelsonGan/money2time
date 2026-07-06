@@ -9,7 +9,6 @@ import React, {
   useState,
 } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
-import type { Edge } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -25,12 +24,13 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
 import {
   buildBudgetMonthSummary,
   computeBudgetPagerMonths,
 } from '~/features/budget/lib/budgetMath';
-import { money, usageColor, usagePercentLabel } from '~/features/budget/lib/format';
+import { money, monthKeyLabel, usageColor, usagePercentLabel } from '~/features/budget/lib/format';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -42,16 +42,12 @@ import type {
   BudgetMonthSummary,
   Category,
   MonthlyBudget,
+  TransactionWithRelations,
   UserSettings,
 } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
-import {
-  formatMonthYearLabel,
-  monthKeyFromDateLocal,
-  monthKeyFromIsoLocal,
-  parseMonthKey,
-} from '~/utils/formatters';
+import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 
 interface BudgetScreenProps {
   onBack?: () => void;
@@ -63,24 +59,18 @@ interface BudgetScreenProps {
   onCreateCustomBudget: (month: string) => void;
   /** Opens the transactions drilldown for a tapped category. */
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
-  safeAreaEdges?: Edge[];
-}
-
-/** Month label for a 'YYYY-MM' key (keys are always locally generated). */
-function monthKeyLabel(monthKey: string, locale: string | undefined): string {
-  return formatMonthYearLabel(parseMonthKey(monthKey) ?? new Date(), locale);
 }
 
 function ProgressBar({
   ratio,
   color,
   trackColor,
-  height = 6,
+  height,
 }: {
   ratio: number;
   color: string;
   trackColor: string;
-  height?: number;
+  height: number;
 }) {
   const clamped = Math.max(0, Math.min(ratio, 1));
   return (
@@ -252,7 +242,7 @@ function BudgetChildRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={category?.name ?? I18n.t('budget.uncategorized')}
+        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
         className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
         style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
@@ -272,7 +262,7 @@ function BudgetChildRow({
               parent's icon, which just repeated it on every child row. */}
           {category?.icon ? <CategoryEmoji icon={category.icon} size={13} /> : null}
           <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
-            {category?.name ?? I18n.t('budget.uncategorized')}
+            {category?.name ?? I18n.t('common.uncategorized')}
           </Text>
           <Text
             variant="caption"
@@ -316,62 +306,71 @@ function BudgetCategoryRow({
   const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
 
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={category?.name ?? I18n.t('budget.uncategorized')}
-      className={cn('px-4 py-3.5 active:bg-secondary/20', !first && 'border-t border-border/25')}
-    >
-      <View className="flex-row items-center gap-2.5">
-        <CategoryEmoji icon={category?.icon} size={18} />
-        <View className="min-w-0 flex-1">
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {category?.name ?? I18n.t('budget.uncategorized')}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-            {money(line.spent, settings)} / {money(line.budgeted, settings)}
-          </Text>
-        </View>
-        {/* Health unit: a mini ring + percent up top, the remaining amount as
-            a quiet caption below — small colored accents (green → amber from
-            80% → red when over) instead of a heavy tinted block. */}
-        <View className="shrink-0 items-end gap-1">
-          <View className="flex-row items-center gap-1.5">
-            <SavingsRateRing
-              size={16}
-              strokeWidth={3.5}
-              progress={Math.min(line.usageRatio, 1)}
-              color={healthColor}
-              trackColor={withColorAlpha(healthColor, 0.18)}
-            />
-            <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
-              {usagePercentLabel(line.usageRatio)}
+    // The child pills are siblings of the root Pressable, not descendants:
+    // an accessible Pressable collapses its subtree for screen readers, which
+    // would make the per-subcategory drilldowns unreachable (and pressing a
+    // pill would flash the parent's press feedback).
+    <View className={cn(!first && 'border-t border-border/25')}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
+        className={cn(
+          'px-4 pt-3.5 active:bg-secondary/20',
+          line.children.length > 0 ? 'pb-1' : 'pb-3.5',
+        )}
+      >
+        <View className="flex-row items-center gap-2.5">
+          <CategoryEmoji icon={category?.icon} size={18} />
+          <View className="min-w-0 flex-1">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {category?.name ?? I18n.t('common.uncategorized')}
+            </Text>
+            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+              {money(line.spent, settings)} / {money(line.budgeted, settings)}
             </Text>
           </View>
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            className="text-[10px]"
-            tone={line.isOver ? undefined : 'muted'}
-            style={line.isOver ? { color: themeColors.error } : undefined}
-          >
-            {line.isOver
-              ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-              : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-          </Text>
+          {/* Health unit: a mini ring + percent up top, the remaining amount as
+            a quiet caption below — small colored accents (green → amber from
+            80% → red when over) instead of a heavy tinted block. */}
+          <View className="shrink-0 items-end gap-1">
+            <View className="flex-row items-center gap-1.5">
+              <SavingsRateRing
+                size={16}
+                strokeWidth={3.5}
+                progress={Math.min(line.usageRatio, 1)}
+                color={healthColor}
+                trackColor={withColorAlpha(healthColor, 0.18)}
+              />
+              <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
+                {usagePercentLabel(line.usageRatio)}
+              </Text>
+            </View>
+            <Text
+              variant="caption"
+              numberOfLines={1}
+              className="text-[10px]"
+              tone={line.isOver ? undefined : 'muted'}
+              style={line.isOver ? { color: themeColors.error } : undefined}
+            >
+              {line.isOver
+                ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+                : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
+            </Text>
+          </View>
         </View>
-      </View>
-      <View className="mt-2.5">
-        <ProgressBar
-          ratio={line.usageRatio}
-          color={barColor}
-          trackColor={withColorAlpha(barColor, 0.14)}
-          height={5}
-        />
-      </View>
+        <View className="mt-2.5">
+          <ProgressBar
+            ratio={line.usageRatio}
+            color={barColor}
+            trackColor={withColorAlpha(barColor, 0.14)}
+            height={5}
+          />
+        </View>
+      </Pressable>
 
       {line.children.length > 0 ? (
-        <View className="mt-2.5 gap-1.5 pl-2">
+        <View className="gap-1.5 px-4 pt-1.5 pb-3.5 pl-6">
           {line.children.map((child) => (
             <BudgetChildRow
               key={child.categoryId}
@@ -385,7 +384,7 @@ function BudgetCategoryRow({
           ))}
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 }
 
@@ -407,12 +406,12 @@ function UnbudgetedRow({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={category?.name ?? I18n.t('budget.uncategorized')}
+      accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
       className="flex-row items-center gap-2.5 rounded-2xl border border-border/30 bg-secondary/20 px-4 py-2.5 active:opacity-80"
     >
       <CategoryEmoji icon={category?.icon} size={16} />
       <Text variant="body" numberOfLines={1} className="flex-1">
-        {category?.name ?? I18n.t('budget.uncategorized')}
+        {category?.name ?? I18n.t('common.uncategorized')}
       </Text>
       <Text variant="mono" className="text-sm">
         {money(spent, settings)}
@@ -464,7 +463,12 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       createMonthlyBudget,
       deleteMonthlyBudget,
     } = useApp();
-    const { transactions } = useTransactions();
+    const { transactions: liveTransactions } = useTransactions();
+    // Tabs stay mounted for the app's lifetime, so when this pager is embedded
+    // in the Insights tab it must freeze its transaction input while hidden —
+    // otherwise every write re-runs the full month aggregation in the
+    // background. Root-stack hosts (the standalone screen) are always visible.
+    const transactions = useValueWhileTabVisible(liveTransactions);
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
     const { width: pageWidth } = useWindowDimensions();
@@ -505,8 +509,15 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       previousMonthsRef.current = months;
       const previousActiveMonth = previousMonths[pager.activeIndexRef.current];
       if (!previousActiveMonth) return;
-      const nextIndex = months.indexOf(previousActiveMonth);
-      if (nextIndex < 0 || nextIndex === pager.activeIndexRef.current) return;
+      // If the viewed month itself disappeared (its anchoring data was
+      // deleted), land on the nearest surviving month instead of letting the
+      // slot index silently point at a different month.
+      let nextIndex = months.indexOf(previousActiveMonth);
+      if (nextIndex < 0) {
+        const nearest = months.findIndex((month) => month >= previousActiveMonth);
+        nextIndex = nearest >= 0 ? nearest : months.length - 1;
+      }
+      if (nextIndex === pager.activeIndexRef.current) return;
       pager.setActiveIndex(nextIndex);
       listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: false });
     }, [months, pageWidth, pager]);
@@ -516,23 +527,54 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [monthlyBudgets],
     );
 
+    // One O(N) pass bucketing expenses by month, so the per-month summaries
+    // below don't each rescan the full transaction list (months × N).
+    const expensesByMonth = useMemo(() => {
+      const map = new Map<string, TransactionWithRelations[]>();
+      for (const transaction of transactions) {
+        if (transaction.deletedAt || transaction.type !== 'expense') continue;
+        const key = monthKeyFromIsoLocal(transaction.date);
+        const list = map.get(key);
+        if (list) list.push(transaction);
+        else map.set(key, [transaction]);
+      }
+      return map;
+    }, [transactions]);
+
     // Precomputed once per data change — renderItem runs per page swipe and
-    // must not re-aggregate a month's transactions each time.
-    const summariesByMonth = useMemo(
-      () =>
-        new Map(
-          months.map((month) => [
-            month,
-            buildBudgetMonthSummary({
-              month,
-              budget: budgetsByMonth.get(month) ?? null,
-              transactions,
-              categories,
-            }),
-          ]),
-        ),
-      [budgetsByMonth, categories, months, transactions],
-    );
+    // must not re-aggregate a month's transactions or rebuild display maps.
+    const pageModelByMonth = useMemo(() => {
+      const map = new Map<
+        string,
+        {
+          summary: BudgetMonthSummary;
+          /** Over-budget lines floated to the top for display. */
+          orderedCategories: BudgetCategoryProgress[];
+          /** Colors follow the frozen line order (stable across months from
+           *  the same template). */
+          colorByCategoryId: Map<string, string>;
+        }
+      >();
+      for (const month of months) {
+        const summary = buildBudgetMonthSummary({
+          month,
+          budget: budgetsByMonth.get(month) ?? null,
+          transactions: expensesByMonth.get(month) ?? [],
+          categories,
+        });
+        if (!summary) continue;
+        map.set(month, {
+          summary,
+          orderedCategories: [...summary.categories].sort(
+            (a, b) => Number(b.isOver) - Number(a.isOver),
+          ),
+          colorByCategoryId: new Map(
+            summary.categories.map((line, index) => [line.categoryId, chartCategoryColor(index)]),
+          ),
+        });
+      }
+      return map;
+    }, [budgetsByMonth, categories, expensesByMonth, months]);
 
     const categoriesById = useMemo(
       () => new Map(categories.map((category) => [category.id, category])),
@@ -544,10 +586,8 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     // own, and `null` is the uncategorized bucket.
     const openCategoryDrilldown = useCallback(
       (month: string, categoryId: string | null, includeChildren: boolean) => {
-        const transactionIds = transactions
+        const transactionIds = (expensesByMonth.get(month) ?? [])
           .filter((transaction) => {
-            if (transaction.deletedAt || transaction.type !== 'expense') return false;
-            if (monthKeyFromIsoLocal(transaction.date) !== month) return false;
             if (categoryId === null) return !transaction.categoryId;
             if (!transaction.categoryId) return false;
             if (!includeChildren) return transaction.categoryId === categoryId;
@@ -558,7 +598,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const category = categoryId ? categoriesById.get(categoryId) : undefined;
         void triggerHaptic('selection');
         onOpenDrilldown({
-          label: category?.name ?? I18n.t('budget.uncategorized'),
+          label: category?.name ?? I18n.t('common.uncategorized'),
           transactionIds,
           showTypeFilter: false,
           ...(includeChildren && category
@@ -570,7 +610,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
             : {}),
         });
       },
-      [categoriesById, onOpenDrilldown, transactions],
+      [categoriesById, expensesByMonth, onOpenDrilldown],
     );
 
     const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
@@ -612,9 +652,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       ({ item: slotIndex }: { item: number }) => {
         const month = months[slotIndex];
         const budget = budgetsByMonth.get(month) ?? null;
-        const summary = summariesByMonth.get(month) ?? null;
+        const model = pageModelByMonth.get(month) ?? null;
 
-        if (!budget || !summary) {
+        if (!budget || !model) {
           return (
             <View style={{ width: pageWidth }} className="flex-1">
               <EmptyState
@@ -640,14 +680,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           );
         }
 
-        // Colors follow the frozen line order (stable across months from the
-        // same template); over-budget lines then float to the top for display.
-        const colorByCategoryId = new Map(
-          summary.categories.map((line, index) => [line.categoryId, chartCategoryColor(index)]),
-        );
-        const orderedCategories = [...summary.categories].sort(
-          (a, b) => Number(b.isOver) - Number(a.isOver),
-        );
+        const { summary, orderedCategories, colorByCategoryId } = model;
 
         return (
           <View style={{ width: pageWidth }} className="flex-1">
@@ -666,21 +699,25 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                 onDelete={() => handleDeleteBudget(budget)}
               />
 
-              <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
-                {orderedCategories.map((line, index) => (
-                  <BudgetCategoryRow
-                    key={line.categoryId}
-                    line={line}
-                    color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
-                    first={index === 0}
-                    categoriesById={categoriesById}
-                    settings={settings}
-                    themeColors={themeColors}
-                    onPress={() => openCategoryDrilldown(month, line.categoryId, true)}
-                    onPressChild={(childId) => openCategoryDrilldown(month, childId, false)}
-                  />
-                ))}
-              </View>
+              {/* A budget can lose all its lines (category-delete cascade);
+                  don't render an empty bordered shell. */}
+              {orderedCategories.length > 0 ? (
+                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
+                  {orderedCategories.map((line, index) => (
+                    <BudgetCategoryRow
+                      key={line.categoryId}
+                      line={line}
+                      color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
+                      first={index === 0}
+                      categoriesById={categoriesById}
+                      settings={settings}
+                      themeColors={themeColors}
+                      onPress={() => openCategoryDrilldown(month, line.categoryId, true)}
+                      onPressChild={(childId) => openCategoryDrilldown(month, childId, false)}
+                    />
+                  ))}
+                </View>
+              ) : null}
 
               {summary.countUnbudgeted && summary.unbudgeted.length > 0 ? (
                 <View className="mt-5">
@@ -715,9 +752,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         onOpenBudgetEditor,
         openCategoryDrilldown,
         months,
+        pageModelByMonth,
         pageWidth,
         settings,
-        summariesByMonth,
         themeColors,
       ],
     );
@@ -749,6 +786,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           bounces={false}
+          initialNumToRender={3}
+          maxToRenderPerBatch={3}
+          windowSize={3}
           className="flex-1"
         />
 
@@ -783,12 +823,11 @@ export function BudgetScreen({
   onOpenBudgetEditor,
   onCreateCustomBudget,
   onOpenDrilldown,
-  safeAreaEdges = ['top'],
 }: BudgetScreenProps) {
   const themeColors = useThemeColors();
 
   return (
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout edges={['top']}>
       <View className="px-5">
         <SettingsHeader
           className="px-0 pt-5 pb-3"

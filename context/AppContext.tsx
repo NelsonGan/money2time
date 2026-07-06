@@ -318,7 +318,9 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   deleteBudgetTemplate: (id: string) => void;
   setDefaultBudgetTemplate: (id: string) => void;
-  reorderBudgetTemplates: (ids: string[]) => void;
+  /** Months that have or ever had a budget (deletion tombstones included) —
+   *  the back-populate preview must skip exactly what the fill will skip. */
+  getBudgetMonthsEverExisted: () => string[];
   /** Creates a month's budget from a template; no-ops if the month has one. */
   createMonthlyBudget: (month: string, templateId: string) => void;
   /** Creates a one-off custom budget for the month (no template involved). */
@@ -3228,7 +3230,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (template && input.backPopulate) {
             const range = computeBackPopulateRange({
               transactions: transactionsRef.current,
-              existingLiveMonths: monthlyBudgetsRepository.existingLiveMonths(),
+              existingMonths: monthlyBudgetsRepository.everExistedMonths(),
             });
             if (range) {
               backfilledMonths = monthlyBudgetsRepository.createManyFromTemplate(
@@ -3319,16 +3321,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshBudgets, runMutation],
   );
 
-  const reorderBudgetTemplates = useCallback(
-    (ids: string[]) => {
-      runMutation(
-        () => {
-          budgetTemplatesRepository.reorder(ids);
-        },
-        { refresh: refreshBudgets },
-      );
-    },
-    [refreshBudgets, runMutation],
+  const getBudgetMonthsEverExisted = useCallback(
+    () => monthlyBudgetsRepository.everExistedMonths(),
+    [],
   );
 
   const createMonthlyBudget = useCallback(
@@ -3339,8 +3334,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             .list()
             .find((candidate) => candidate.id === templateId);
           if (!template) return false;
-          monthlyBudgetsRepository.createFromTemplate(month, template);
-          return true;
+          // null = the month already had a live budget (double-tap, or the
+          // auto-create raced us) — nothing was written, so don't report one.
+          return monthlyBudgetsRepository.createFromTemplate(month, template) != null;
         },
         { refresh: refreshBudgets },
       );
@@ -3632,7 +3628,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateBudgetTemplate,
             deleteBudgetTemplate,
             setDefaultBudgetTemplate,
-            reorderBudgetTemplates,
+            getBudgetMonthsEverExisted,
             createMonthlyBudget,
             createCustomMonthlyBudget,
             updateMonthlyBudget,
@@ -3747,7 +3743,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateBudgetTemplate,
       deleteBudgetTemplate,
       setDefaultBudgetTemplate,
-      reorderBudgetTemplates,
+      getBudgetMonthsEverExisted,
       createMonthlyBudget,
       createCustomMonthlyBudget,
       updateMonthlyBudget,

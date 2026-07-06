@@ -227,8 +227,6 @@ function buildSampleSnapshotJson() {
       monthLabel,
       monthShortLabel,
       hasBudget: true,
-      totalBudget: budgetTotal,
-      totalSpent: budgetSpent,
       usageRatio: budgetSpent / budgetTotal,
       isOver: false,
       remainingLabel: `$${shortNum(budgetRemaining)}`,
@@ -256,8 +254,6 @@ function buildSampleSnapshotJson() {
           categoryId: 'fun',
           name: 'Fun',
           emoji: '🎬',
-          spent: 236,
-          budgeted: 200,
           usageRatio: 1.18,
           isOver: true,
           spentLabel: '$236',
@@ -267,8 +263,6 @@ function buildSampleSnapshotJson() {
           categoryId: 'food',
           name: 'Food',
           emoji: '🍜',
-          spent: 320,
-          budgeted: 450,
           usageRatio: 0.71,
           isOver: false,
           spentLabel: '$320',
@@ -278,8 +272,6 @@ function buildSampleSnapshotJson() {
           categoryId: 'shopping',
           name: 'Shopping',
           emoji: '🛍️',
-          spent: 143,
-          budgeted: 300,
           usageRatio: 0.48,
           isOver: false,
           spentLabel: '$143',
@@ -289,15 +281,12 @@ function buildSampleSnapshotJson() {
           categoryId: 'transport',
           name: 'Transport',
           emoji: '🚌',
-          spent: 96,
-          budgeted: 250,
           usageRatio: 0.38,
           isOver: false,
           spentLabel: '$96',
           budgetedLabel: '$250',
         },
       ],
-      moreCount: 0,
       moreLabel: '',
       unbudgetedLabel: '+$147 unbudgeted',
       setupLabel: 'Set a monthly budget',
@@ -1413,6 +1402,10 @@ public class Money2TimeBudgetRingWidgetProvider extends AppWidgetProvider {
       boolean hasBudget = br != null && br.optBoolean("hasBudget", false);
 
       if (!hasBudget) {
+        // The snapshot carries the localized CTA; the layout text is only the
+        // fallback for stale (pre-budget) snapshots.
+        String setupLabel = br != null ? br.optString("setupLabel", "") : "";
+        if (!setupLabel.isEmpty()) views.setTextViewText(R.id.ring_setup_title, setupLabel);
         views.setViewVisibility(R.id.ring_content, View.GONE);
         views.setViewVisibility(R.id.ring_setup, View.VISIBLE);
         manager.updateAppWidget(appWidgetId, views);
@@ -1553,6 +1546,10 @@ public class Money2TimeBudgetBreakdownWidgetProvider extends AppWidgetProvider {
       // Snapshots from an older app version have no budget section — treat as no budget.
       boolean hasBudget = bb != null && bb.optBoolean("hasBudget", false);
       if (!hasBudget) {
+        // The snapshot carries the localized CTA; the layout text is only the
+        // fallback for stale (pre-budget) snapshots.
+        String setupLabel = bb != null ? bb.optString("setupLabel", "") : "";
+        if (!setupLabel.isEmpty()) views.setTextViewText(R.id.bud_setup_title, setupLabel);
         views.setViewVisibility(R.id.bud_body, View.GONE);
         views.setViewVisibility(R.id.bud_setup, View.VISIBLE);
         manager.updateAppWidget(appWidgetId, views);
@@ -2849,6 +2846,7 @@ ${historyRows}
     android:orientation="vertical"
     android:visibility="gone">
     <TextView
+      android:id="@+id/ring_setup_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:gravity="center"
@@ -3031,6 +3029,7 @@ ${budgetRows}
       android:orientation="vertical"
       android:visibility="gone">
       <TextView
+        android:id="@+id/bud_setup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -4367,8 +4366,9 @@ private struct CalendarView: View {
 
 // MARK: - Budget (ring + breakdown)
 
-private func budgetUsageColor(_ ratio: Double, palette: Palette) -> Color {
-  if ratio > 1 { return palette.error }
+// isOver wins so a zero-budget overspend (ratio 0) still reads as over.
+private func budgetUsageColor(_ ratio: Double, isOver: Bool, palette: Palette) -> Color {
+  if isOver || ratio > 1 { return palette.error }
   if ratio >= 0.8 { return palette.coral }
   return palette.primary
 }
@@ -4400,7 +4400,7 @@ private struct BudgetRingView: View {
   let palette: Palette
 
   var body: some View {
-    let color = budgetUsageColor(data.usageRatio, palette: palette)
+    let color = budgetUsageColor(data.usageRatio, isOver: data.isOver, palette: palette)
     let used = CGFloat(max(0, min(data.usageRatio, 1)))
 
     VStack(spacing: 4) {
@@ -4457,7 +4457,7 @@ private struct BudgetBreakdownRowView: View {
   let palette: Palette
 
   var body: some View {
-    let color = budgetUsageColor(line.usageRatio, palette: palette)
+    let color = budgetUsageColor(line.usageRatio, isOver: line.isOver, palette: palette)
     let fill = CGFloat(max(0.03, min(line.usageRatio, 1)))
     HStack(spacing: 8) {
       Text(line.emoji.isEmpty ? "\\u{2022}" : line.emoji)
@@ -4492,7 +4492,7 @@ private struct BudgetBreakdownView: View {
   let palette: Palette
 
   var body: some View {
-    let color = budgetUsageColor(data.usageRatio, palette: palette)
+    let color = budgetUsageColor(data.usageRatio, isOver: data.isOver, palette: palette)
     let used = CGFloat(max(0, min(data.usageRatio, 1)))
     let pace = CGFloat(max(0, min(data.paceRatio, 1)))
 

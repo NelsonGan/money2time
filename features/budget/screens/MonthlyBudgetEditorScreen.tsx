@@ -13,11 +13,11 @@ import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
+import { monthKeyLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatMonthYearLabel, parseMonthKey } from '~/utils/formatters';
 
 interface MonthlyBudgetEditorScreenProps {
   /** Existing month budget to edit in place. */
@@ -99,7 +99,7 @@ export function MonthlyBudgetEditorScreen({
 
   if (!month) return null;
 
-  const monthLabel = formatMonthYearLabel(parseMonthKey(month) ?? new Date(), settings.locale);
+  const monthLabel = monthKeyLabel(month, settings.locale);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>

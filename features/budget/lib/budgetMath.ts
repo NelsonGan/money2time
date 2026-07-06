@@ -12,6 +12,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
   normalizeMoneyAmount,
+  parseMonthKey,
   startOfMonthDate,
 } from '~/utils/formatters';
 
@@ -171,24 +172,27 @@ export interface BackPopulateRange {
 }
 
 function addMonthsToKey(monthKey: string, offset: number): string {
-  const year = Number(monthKey.slice(0, 4));
-  const monthIndex = Number(monthKey.slice(5, 7)) - 1;
-  return monthKeyFromDateLocal(addMonthsAtMonthStart(new Date(year, monthIndex, 1), offset));
+  return monthKeyFromDateLocal(
+    addMonthsAtMonthStart(parseMonthKey(monthKey) ?? new Date(), offset),
+  );
 }
 
 /**
  * Past months a back-populate would create budgets for: from the month of the
  * earliest live expense transaction through last month, skipping months that
- * already have a live budget. Returns null when there is nothing to fill
- * (no expense history, or the first expense is in the current month).
+ * have or ever had a budget (deletion tombstones stick, same as auto-create,
+ * so a bulk fill can't resurrect a deliberately deleted month). Returns null
+ * when there is nothing to fill (no expense history, or the first expense is
+ * in the current month).
  */
 export function computeBackPopulateRange({
   transactions,
-  existingLiveMonths,
+  existingMonths,
   now = new Date(),
 }: {
   transactions: TransactionWithRelations[];
-  existingLiveMonths: string[];
+  /** Months that have or ever had a budget, soft-deleted included. */
+  existingMonths: string[];
   now?: Date;
 }): BackPopulateRange | null {
   let firstExpenseMonth: string | null = null;
@@ -203,7 +207,7 @@ export function computeBackPopulateRange({
   const currentMonth = monthKeyFromDateLocal(startOfMonthDate(now));
   if (firstExpenseMonth >= currentMonth) return null;
 
-  const taken = new Set(existingLiveMonths);
+  const taken = new Set(existingMonths);
   const months: string[] = [];
   for (let month = firstExpenseMonth; month < currentMonth; month = addMonthsToKey(month, 1)) {
     if (!taken.has(month)) months.push(month);
