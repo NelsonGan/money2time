@@ -500,10 +500,40 @@ export interface Transaction {
   recurrenceEndDate: string | null;
   recurrenceParentId: string | null;
   sentiment: TransactionSentiment;
+  /**
+   * Claim / reimbursement status of a claimable expense. `'none'` for ordinary
+   * transactions. See {@link ClaimStatus}.
+   */
+  claimStatus: ClaimStatus;
+  /** Amount expected back (in this transaction's currency); null when not claimable. */
+  claimAmount: number | null;
+  /** Denormalized running sum of settled reimbursement inflows. */
+  reimbursedAmount: number;
+  /** ISO timestamp when the claim was fully settled; null otherwise. */
+  reimbursedAt: string | null;
+  /** Preferred account a reimbursement should land in. */
+  reimbursementAccountId: string | null;
+  /**
+   * Set only on reimbursement-inflow (income) rows: the id of the claimable
+   * expense this inflow settles. A non-null value marks the row as a
+   * reimbursement, so income aggregates exclude it.
+   */
+  reimbursesTransactionId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
 }
+
+/**
+ * Lifecycle of a claimable expense. `submitted` ships for forward-compatibility
+ * with V2 expense-report grouping and is unreachable in V1.
+ */
+export type ClaimStatus =
+  | 'none'
+  | 'claimable'
+  | 'submitted'
+  | 'partially_reimbursed'
+  | 'reimbursed';
 
 export interface TransactionWithRelations extends Transaction {
   accountName?: string | null;
@@ -580,6 +610,15 @@ export interface TransactionFilters {
   categoryId: string | null;
   minAmount: number | null;
   maxAmount: number | null;
+  /**
+   * Claim-status scope for the activity list:
+   * - `all` — no claim filter (default)
+   * - `outstanding` — claimable | submitted | partially_reimbursed
+   * - `reimbursed` — fully reimbursed
+   * - `claimable_any` — ever flagged (claimStatus !== 'none')
+   * - `none` — ordinary (non-claimable) transactions only
+   */
+  claimStatus: 'all' | 'outstanding' | 'reimbursed' | 'claimable_any' | 'none';
   sortBy: 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc';
 }
 
