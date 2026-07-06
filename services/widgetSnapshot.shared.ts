@@ -483,6 +483,8 @@ function buildCalendarMonthSnapshot(
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
+    // Reimbursement inflows are recovered spend, not income.
+    if (transaction.reimbursesTransactionId) continue;
     const dayKey = dayKeyFromIsoLocal(transaction.date);
     if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
     if (transaction.type === 'income') {
@@ -569,12 +571,17 @@ export function buildSavingsIncludePredicate(
 ): SavingsIncludePredicate {
   const incomeSet = new Set(excludedSavingsIncomeCategoryIds);
   const expenseSet = new Set(excludedSavingsExpenseCategoryIds);
-  if (incomeSet.size === 0 && expenseSet.size === 0) return () => true;
+  // Reimbursement inflows are recovered spend, not income — always excluded from
+  // savings/income so they never overstate earnings.
+  if (incomeSet.size === 0 && expenseSet.size === 0) {
+    return (transaction) => !transaction.reimbursesTransactionId;
+  }
 
   const rootById = new Map(
     categories.map((category) => [category.id, category.parentId ?? category.id]),
   );
   return (transaction) => {
+    if (transaction.reimbursesTransactionId) return false;
     const categoryId = transaction.categoryId;
     if (!categoryId) return true;
     const rootId = rootById.get(categoryId) ?? categoryId;
