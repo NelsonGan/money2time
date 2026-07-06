@@ -106,7 +106,6 @@ function SettingsHomeRoute({
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenItems={() => navigation.navigate('Items')}
       onOpenAlbums={() => requestOpenTab('albums')}
-      onOpenBudget={() => navigation.navigate('Budget')}
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}

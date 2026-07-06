@@ -60,6 +60,7 @@ import {
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
+import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
@@ -239,20 +240,7 @@ function renderInsightTypeIcon(insightType: InsightType) {
   );
 }
 
-const INSIGHTS_CHART_COLORS = [
-  '#E53935', // red
-  '#FB8C00', // orange
-  '#FDD835', // yellow
-  '#43A047', // green
-  '#00897B', // teal
-  '#00ACC1', // cyan
-  '#1E88E5', // blue
-  '#3949AB', // indigo
-  '#8E24AA', // violet
-  '#D81B60', // magenta
-  '#6D4C41', // brown
-  '#546E7A', // slate
-];
+const INSIGHTS_CHART_COLORS = CHART_CATEGORY_COLORS;
 
 const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
 const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
@@ -2712,6 +2700,8 @@ interface InsightsScreenProps {
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onOpenProPaywall?: () => void;
+  /** Opens the monthly budget view (listed in the insight-type menu). */
+  onOpenBudget?: () => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
     anchorDateKey?: string;
@@ -2731,6 +2721,7 @@ export function InsightsScreen({
   onOpenDrilldown,
   onOpenTransaction,
   onOpenProPaywall,
+  onOpenBudget,
   activityBreakdownInsightRequest = null,
   isSimpleMode = false,
   onTutorialTargetLayout,
@@ -2926,16 +2917,35 @@ export function InsightsScreen({
     lastScrubHapticAtRef.current = now;
     void triggerHaptic('selection');
   }, []);
-  const insightTypeOptions = useMemo(
-    () =>
-      visibleInsightTypes.map((type) => ({
-        value: type,
-        label: String(I18n.t(`insights.${type}`)),
-        icon: renderInsightTypeIcon(type),
-        badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
-      })),
-    [visibleInsightTypes, isPro, proTrendTypeSet],
-  );
+  const insightTypeOptions = useMemo(() => {
+    const options: {
+      value: string;
+      label: string;
+      icon: React.ReactNode;
+      badge?: string;
+    }[] = visibleInsightTypes.map((type) => ({
+      value: type,
+      label: String(I18n.t(`insights.${type}`)),
+      icon: renderInsightTypeIcon(type),
+      badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
+    }));
+    // The budget view lives on its own screen; the menu entry navigates there
+    // instead of switching the in-place insight.
+    if (onOpenBudget) {
+      options.push({
+        value: 'budget',
+        label: String(I18n.t('budget.title')),
+        icon: (
+          <Image
+            source={UTILITY_ICON_SOURCES['time-money']}
+            resizeMode="contain"
+            style={styles.insightTypeIconImage}
+          />
+        ),
+      });
+    }
+    return options;
+  }, [visibleInsightTypes, isPro, onOpenBudget, proTrendTypeSet]);
   useEffect(() => {
     if (isSimpleMode && selectedInsightType === 'asset_history') {
       setSelectedInsightType('expense_breakdown');
@@ -6591,9 +6601,13 @@ export function InsightsScreen({
     (value: string) => {
       void triggerHaptic('selection');
       setIsInsightMenuOpen(false);
+      if (value === 'budget') {
+        onOpenBudget?.();
+        return;
+      }
       handleInsightTypeChange(value);
     },
-    [handleInsightTypeChange],
+    [handleInsightTypeChange, onOpenBudget],
   );
   const handleInsightTypeSelectorLayout = useCallback(() => {
     if (!onTutorialTargetLayout) return;

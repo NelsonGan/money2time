@@ -22,7 +22,6 @@ import {
   Package,
   Palette,
   Pencil,
-  PiggyBank,
   ReceiptText,
   RefreshCcw,
   Repeat2,
@@ -108,7 +107,6 @@ interface SettingsScreenProps {
   onOpenAccounts: () => void;
   onOpenItems: () => void;
   onOpenAlbums: () => void;
-  onOpenBudget: () => void;
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
@@ -135,7 +133,6 @@ export function SettingsScreen({
   onOpenAccounts,
   onOpenItems,
   onOpenAlbums,
-  onOpenBudget,
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
@@ -696,11 +693,6 @@ export function SettingsScreen({
                 icon={<Images size={20} color={themeColors.primary} />}
                 label={I18n.t('albums.title')}
                 onPress={onOpenAlbums}
-              />
-              <SettingsGridTile
-                icon={<PiggyBank size={20} color={themeColors.primary} />}
-                label={I18n.t('budget.title')}
-                onPress={onOpenBudget}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile

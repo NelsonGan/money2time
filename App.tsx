@@ -619,6 +619,10 @@ function MainShellScreen({
     [navigation],
   );
 
+  const openBudgetScreen = useCallback(() => {
+    navigation.navigate('SettingsBudget');
+  }, [navigation]);
+
   const openProPaywall = useCallback(
     (source?: string) => {
       navigation.navigate('ProPaywall', source ? { source } : undefined);
@@ -1009,6 +1013,7 @@ function MainShellScreen({
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
             onOpenProPaywall={openInsightsTrendPaywall}
+            onOpenBudget={openBudgetScreen}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
             onTutorialTargetLayout={handleTutorialTargetLayout}

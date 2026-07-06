@@ -16,11 +16,13 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
+import { chartCategoryColor } from '~/constants/chartColors';
 import {
   buildBudgetMonthSummary,
   computeBudgetPagerMonths,
 } from '~/features/budget/lib/budgetMath';
 import { money, usageColor } from '~/features/budget/lib/format';
+import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { ColorPalette } from '~/constants/designSystem';
@@ -104,58 +106,62 @@ function BudgetSummaryCard({
         style={{ backgroundColor: barColor, opacity: 0.1 }}
       />
 
-      <View className="px-4 pb-3.5 pt-3.5">
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="min-w-0 flex-1">
-            <View className="flex-row items-baseline gap-1.5">
-              <Text variant="monoLg" numberOfLines={1} className="shrink">
-                {money(summary.totalSpent, settings)}
-              </Text>
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                / {money(summary.totalBudget, settings)}
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-1.5">
-            <Pressable
-              onPress={onEdit}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('budget.edit_budget')}
-              className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
-            >
-              <Pencil size={14} color={themeColors.textMuted} />
-            </Pressable>
-            <Pressable
-              onPress={onDelete}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('budget.delete_budget')}
-              className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
-            >
-              <Trash2 size={14} color={themeColors.textMuted} />
-            </Pressable>
-          </View>
-        </View>
+      {/* Ring gauge (savings-rate style) + figures side by side. */}
+      <View className="flex-row items-center gap-4 px-4 py-4">
+        <SavingsRateRing
+          size={92}
+          strokeWidth={9}
+          progress={Math.min(summary.usageRatio, 1)}
+          color={barColor}
+          trackColor={withColorAlpha(barColor, 0.15)}
+        >
+          <Text
+            variant="bodyStrong"
+            className="text-base"
+            style={{ color: isOver ? themeColors.error : themeColors.text }}
+          >
+            {Math.round(summary.usageRatio * 100)}%
+          </Text>
+        </SavingsRateRing>
 
-        <View className="mt-3">
-          <ProgressBar
-            ratio={summary.usageRatio}
-            color={barColor}
-            trackColor={withColorAlpha(barColor, 0.14)}
-          />
-        </View>
-
-        <View className="mt-2">
+        <View className="min-w-0 flex-1">
+          <Text variant="monoLg" numberOfLines={1}>
+            {money(summary.totalSpent, settings)}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+            / {money(summary.totalBudget, settings)}
+          </Text>
           <Text
             variant="caption"
             numberOfLines={1}
+            className="mt-2"
             style={{ color: isOver ? themeColors.error : barColor }}
           >
             {isOver
               ? I18n.t('budget.summary_exceeded', { amount: money(summary.exceededBy, settings) })
               : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
           </Text>
+        </View>
+
+        <View className="gap-1.5">
+          <Pressable
+            onPress={onEdit}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('budget.edit_budget')}
+            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
+          >
+            <Pencil size={14} color={themeColors.textMuted} />
+          </Pressable>
+          <Pressable
+            onPress={onDelete}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('budget.delete_budget')}
+            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
+          >
+            <Trash2 size={14} color={themeColors.textMuted} />
+          </Pressable>
         </View>
       </View>
 
@@ -193,40 +199,45 @@ function BudgetSummaryCard({
 
 function BudgetChildRow({
   line,
+  color,
   categoriesById,
   settings,
   themeColors,
 }: {
   line: BudgetCategoryProgress;
+  color: string;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
 }) {
   const category = categoriesById.get(line.categoryId);
-  const barColor = usageColor(line.usageRatio, themeColors);
+  const fillColor = line.isOver ? themeColors.error : color;
+  const fillPct = Math.max(0, Math.min(line.usageRatio, 1)) * 100;
 
   return (
-    <View className="py-1.5">
-      <View className="flex-row items-center gap-2">
-        <View className="h-4 w-3.5 rounded-bl-lg border-b border-l border-border/50" />
+    // One-line pill: the tinted fill behind the content IS the progress bar.
+    <View
+      className="relative overflow-hidden rounded-xl"
+      style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
+    >
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: `${fillPct}%`,
+          backgroundColor: withColorAlpha(fillColor, 0.2),
+        }}
+      />
+      <View className="flex-row items-center gap-2 px-3 py-2">
         {/* Only an explicitly-set emoji renders — no falling back to the
             parent's icon, which just repeated it on every child row. */}
-        {category?.icon ? <CategoryEmoji icon={category.icon} size={14} /> : null}
+        {category?.icon ? <CategoryEmoji icon={category.icon} size={13} /> : null}
         <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
           {category?.name ?? I18n.t('budget.uncategorized')}
         </Text>
-      </View>
-      {/* Bar + amounts on their own line: the bar flexes and the amounts sit
-          right-aligned, so rows line up regardless of amount width. */}
-      <View className="mt-1.5 flex-row items-center gap-2.5 pl-6">
-        <View className="flex-1">
-          <ProgressBar
-            ratio={line.usageRatio}
-            color={barColor}
-            trackColor={withColorAlpha(barColor, 0.14)}
-            height={4}
-          />
-        </View>
         <Text
           variant="caption"
           numberOfLines={1}
@@ -242,19 +253,22 @@ function BudgetChildRow({
 
 function BudgetCategoryRow({
   line,
+  color,
   first,
   categoriesById,
   settings,
   themeColors,
 }: {
   line: BudgetCategoryProgress;
+  /** Palette color for this category, shared with the breakdown pie. */
+  color: string;
   first: boolean;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
 }) {
   const category = categoriesById.get(line.categoryId);
-  const barColor = usageColor(line.usageRatio, themeColors);
+  const barColor = line.isOver ? themeColors.error : color;
 
   return (
     <View className={cn('px-4 py-3', !first && 'border-t border-border/25')}>
@@ -292,11 +306,12 @@ function BudgetCategoryRow({
       </View>
 
       {line.children.length > 0 ? (
-        <View className="mt-2 pt-1">
+        <View className="mt-2.5 gap-1 pl-4">
           {line.children.map((child) => (
             <BudgetChildRow
               key={child.categoryId}
               line={child}
+              color={color}
               categoriesById={categoriesById}
               settings={settings}
               themeColors={themeColors}
@@ -483,7 +498,11 @@ export function BudgetScreen({
         );
       }
 
-      // Over-budget lines float to the top; otherwise keep the frozen order.
+      // Colors follow the frozen line order (stable across months from the
+      // same template); over-budget lines then float to the top for display.
+      const colorByCategoryId = new Map(
+        summary.categories.map((line, index) => [line.categoryId, chartCategoryColor(index)]),
+      );
       const orderedCategories = [...summary.categories].sort(
         (a, b) => Number(b.isOver) - Number(a.isOver),
       );
@@ -511,6 +530,7 @@ export function BudgetScreen({
                 <BudgetCategoryRow
                   key={line.categoryId}
                   line={line}
+                  color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
                   first={index === 0}
                   categoriesById={categoriesById}
                   settings={settings}
