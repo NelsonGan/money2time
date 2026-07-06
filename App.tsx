@@ -57,12 +57,15 @@ import {
 import { CalendarScreen } from '~/features/calendar/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import {
-  BudgetScreen,
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
   CategoryAllocationScreen,
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
+import {
+  consumePendingCategoryAllocation,
+  setPendingCategoryAllocation,
+} from '~/features/budget/lib/categoryAllocationBridge';
 import { AssetsTab } from '~/features/items/components';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
@@ -1311,38 +1314,34 @@ function BudgetTemplateEditorRouteScreen({
     <BudgetTemplateEditorScreen
       templateId={route.params?.templateId}
       duplicateFromId={route.params?.duplicateFromId}
-      onOpenCategoryAllocation={(params) => navigation.navigate('BudgetCategoryAllocation', params)}
+      onOpenCategoryAllocation={(params) => {
+        setPendingCategoryAllocation(params);
+        navigation.navigate('BudgetCategoryAllocation');
+      }}
       onClose={() => navigation.goBack()}
     />
   );
 }
 
 function BudgetCategoryAllocationRouteScreen({
-  route,
   navigation,
 }: RootStackRouteProps<'BudgetCategoryAllocation'>) {
+  // The hand-off (draft slice + onDone callback) rides a module bridge, not
+  // navigation params, so nothing non-serializable enters the nav state. Read
+  // it once on mount; a cold state-restore leaves it empty, so just pop back.
+  const sessionRef = useRef(consumePendingCategoryAllocation());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
   return (
     <CategoryAllocationScreen
-      categoryId={route.params.categoryId}
-      initialAmounts={route.params.initialAmounts}
-      remainingExcludingThis={route.params.remainingExcludingThis}
-      onDone={route.params.onDone}
+      categoryId={session.categoryId}
+      initialAmounts={session.initialAmounts}
+      remainingExcludingThis={session.remainingExcludingThis}
+      onDone={session.onDone}
       onClose={() => navigation.goBack()}
-    />
-  );
-}
-
-function SettingsBudgetRouteScreen({ navigation }: RootStackRouteProps<'SettingsBudget'>) {
-  return (
-    <BudgetScreen
-      onBack={() => navigation.goBack()}
-      onOpenTemplates={() => navigation.navigate('SettingsBudgetTemplates')}
-      onOpenTemplateEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
-      onOpenBudgetEditor={(budgetId) => navigation.navigate('BudgetMonthEditor', { budgetId })}
-      onCreateCustomBudget={(month) =>
-        navigation.navigate('BudgetMonthEditor', { createForMonth: month })
-      }
-      onOpenDrilldown={(payload) => navigation.navigate('InsightsDrilldown', payload)}
     />
   );
 }
@@ -1355,7 +1354,10 @@ function BudgetMonthEditorRouteScreen({
     <MonthlyBudgetEditorScreen
       budgetId={'budgetId' in route.params ? route.params.budgetId : undefined}
       createForMonth={'createForMonth' in route.params ? route.params.createForMonth : undefined}
-      onOpenCategoryAllocation={(params) => navigation.navigate('BudgetCategoryAllocation', params)}
+      onOpenCategoryAllocation={(params) => {
+        setPendingCategoryAllocation(params);
+        navigation.navigate('BudgetCategoryAllocation');
+      }}
       onClose={() => navigation.goBack()}
     />
   );
@@ -1995,7 +1997,6 @@ function AppContent() {
             name="BudgetTemplateEditor"
             component={BudgetTemplateEditorRouteScreen}
           />
-          <RootStack.Screen name="SettingsBudget" component={SettingsBudgetRouteScreen} />
           <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
           <RootStack.Screen
             name="BudgetCategoryAllocation"

@@ -2904,10 +2904,6 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
-  // Budget is a first-class insight type that renders a full-page takeover:
-  // it swaps the pager body and drives the header's month controls while the
-  // 'budget' insight is selected.
-  const isBudgetView = selectedInsightType === 'budget';
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
@@ -4449,6 +4445,12 @@ export function InsightsScreen({
   );
   const displaySelectedInsightType =
     pendingActivityBreakdownTarget?.insightType ?? selectedInsightType;
+  // Budget is a first-class insight type that renders a full-page takeover:
+  // it swaps the pager body and drives the header's month controls. Keyed on
+  // the *display* type so the header and body stay consistent through an
+  // in-flight activity-breakdown transition (which points display away from a
+  // still-selected budget for one render).
+  const isBudgetView = displaySelectedInsightType === 'budget';
   const displayPeriodPreset = pendingActivityBreakdownTarget
     ? (pendingActivityBreakdownTarget.periodPreset ??
       getInsightFilterConfig(pendingActivityBreakdownTarget.insightType).fixedPeriodPreset ??
@@ -4462,6 +4464,16 @@ export function InsightsScreen({
   const displayHeaderPreviewPageIndex = pendingActivityBreakdownTarget
     ? INSIGHTS_PAGER_CENTER_INDEX
     : headerPreviewPageIndex;
+  // Leaving the budget takeover remounts the period pager at its center slot
+  // (initialScrollIndex), so realign the committed/preview indices — otherwise
+  // the first swipe back computes its step count from a stale offset and jumps
+  // several periods at once.
+  useEffect(() => {
+    if (isBudgetView) return;
+    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+  }, [isBudgetView]);
   const currentPage = useMemo(
     () =>
       getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),

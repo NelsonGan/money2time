@@ -1,4 +1,4 @@
-import { Pencil, SlidersHorizontal, Trash2 } from 'lucide-react-native';
+import { Pencil, Trash2 } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -11,12 +11,9 @@ import React, {
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
-  SettingsHeader,
-  SettingsPageLayout,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
@@ -48,18 +45,6 @@ import type {
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
-
-interface BudgetScreenProps {
-  onBack?: () => void;
-  onOpenTemplates: () => void;
-  onOpenTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
-  /** Opens the month-budget editor (edits that month only, not the template). */
-  onOpenBudgetEditor: (budgetId: string) => void;
-  /** Opens the month-budget creator for a one-off custom budget (no template). */
-  onCreateCustomBudget: (month: string) => void;
-  /** Opens the transactions drilldown for a tapped category. */
-  onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
-}
 
 function ProgressBar({
   ratio,
@@ -345,8 +330,8 @@ function BudgetCategoryRow({
               trackColor={withColorAlpha(barColor, 0.14)}
               height={6}
             />
-            <View className="flex-row items-center justify-between gap-2">
-              <Text variant="caption" tone="muted" numberOfLines={1} className="text-[11px]">
+            <View className="flex-row items-center gap-2">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1 text-[11px]">
                 {money(line.spent, settings)} / {money(line.budgeted, settings)}
               </Text>
               <View
@@ -423,9 +408,7 @@ interface BudgetPagerViewProps {
   onCreateCustomBudget: (month: string) => void;
   /** Opens the transactions drilldown for a tapped category. */
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
-  /** Render the built-in month prev/next row (the standalone screen). */
-  showMonthControls?: boolean;
-  /** Reports the active month's label so an embedding host (Insights) can
+  /** Reports the active month's label so the embedding host (Insights) can
    *  drive the pager from its own header controls. */
   onActiveMonthLabelChange?: (label: string) => void;
 }
@@ -433,8 +416,7 @@ interface BudgetPagerViewProps {
 /**
  * The budget month pager without any screen chrome: month pages (summary
  * ring card, per-category depletion, unbudgeted section) plus the
- * create-from-template picker. Hosted by the standalone BudgetScreen and
- * embedded as an insights page.
+ * create-from-template picker. Embedded as an insights page.
  */
 export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerViewProps>(
   function BudgetPagerView(
@@ -443,7 +425,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       onOpenBudgetEditor,
       onCreateCustomBudget,
       onOpenDrilldown,
-      showMonthControls = false,
       onActiveMonthLabelChange,
     },
     ref,
@@ -758,17 +739,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
 
     return (
       <>
-        {showMonthControls ? (
-          <MonthControlsHeader
-            title=""
-            monthLabel={monthLabel}
-            onPrevMonth={() => pager.scrollToRelative(-1)}
-            onNextMonth={() => pager.scrollToRelative(1)}
-            hideTitleRow
-            showAccent={false}
-          />
-        ) : null}
-
         <FlatList
           ref={listRef}
           data={pager.slots}
@@ -811,49 +781,3 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     );
   },
 );
-
-/** Standalone budget screen (widget deep link and direct navigation). */
-export function BudgetScreen({
-  onBack,
-  onOpenTemplates,
-  onOpenTemplateEditor,
-  onOpenBudgetEditor,
-  onCreateCustomBudget,
-  onOpenDrilldown,
-}: BudgetScreenProps) {
-  const themeColors = useThemeColors();
-
-  return (
-    <SettingsPageLayout edges={['top']}>
-      <View className="px-5">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t('budget.title')}
-          rightAccessory={
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenTemplates();
-              }}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('budget.templates_title')}
-              className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
-            >
-              <SlidersHorizontal size={18} color={themeColors.primary} />
-            </Pressable>
-          }
-        />
-      </View>
-
-      <BudgetPagerView
-        showMonthControls
-        onOpenTemplateEditor={onOpenTemplateEditor}
-        onOpenBudgetEditor={onOpenBudgetEditor}
-        onCreateCustomBudget={onCreateCustomBudget}
-        onOpenDrilldown={onOpenDrilldown}
-      />
-    </SettingsPageLayout>
-  );
-}

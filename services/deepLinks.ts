@@ -75,7 +75,12 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   }
 
   if (parsed.action === 'budget') {
-    runDeepLinkNavigation(navigationRef, { name: 'SettingsBudget' });
+    // Budget is an Insights page now, so open the Insights tab focused on it
+    // rather than a dedicated screen.
+    runDeepLinkNavigation(navigationRef, null, () => {
+      requestOpenTab('insights');
+      requestFocusInsight('budget');
+    });
     void trackEvent(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' });
     return true;
   }

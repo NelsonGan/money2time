@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { InteractionManager, Pressable, ScrollView, type TextInput, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Input, SettingsHeader, Text } from '~/components/ui';
@@ -63,17 +63,6 @@ export function CategoryAllocationScreen({
     setAmounts((previous) => ({ ...previous, [id]: next }));
   }, []);
 
-  // Focus the amount only after the push animation settles. Focusing on mount
-  // (autoFocus) opens the keyboard mid-transition, which fights the slide-in
-  // and the keyboard-adjusting scroll/footer and reads as lag + flashing.
-  const amountInputRef = useRef<TextInput>(null);
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => {
-      amountInputRef.current?.focus();
-    });
-    return () => task.cancel();
-  }, []);
-
   const handleSave = useCallback(() => {
     if (childGap !== 0) return;
     void triggerHaptic('success');
@@ -108,7 +97,6 @@ export function CategoryAllocationScreen({
           <View className="flex-row items-end gap-3">
             <View className="flex-1">
               <Input
-                ref={amountInputRef}
                 label={I18n.t('transactions.editor.amount')}
                 variant="currency"
                 currencySymbol={currencySymbol}

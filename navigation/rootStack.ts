@@ -55,16 +55,11 @@ export type RootStackParamList = {
   // Edit an existing month budget (budgetId) or create a one-off custom
   // budget for a month with no live budget (createForMonth, 'YYYY-MM').
   BudgetMonthEditor: { budgetId: string } | { createForMonth: string };
-  // Full-page per-category allocation editor. Carries the hosting editor's
-  // draft slice + commit callback (non-serializable, like StatementImportList).
-  BudgetCategoryAllocation: {
-    categoryId: string;
-    initialAmounts: Record<string, string>;
-    remainingExcludingThis: number;
-    onDone: (amounts: Record<string, string>) => void;
-  };
-  // Root-level budget screens for imperative opens (widget deep link).
-  SettingsBudget: undefined;
+  // Full-page per-category allocation editor. Its draft slice + commit callback
+  // ride a module bridge (categoryAllocationBridge) rather than params, so the
+  // route stays serializable.
+  BudgetCategoryAllocation: undefined;
+  // Budget templates manager (opened from the Insights budget header).
   SettingsBudgetTemplates: undefined;
 };
 

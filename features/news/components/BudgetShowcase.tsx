@@ -16,7 +16,7 @@ interface BudgetShowcaseProps {
 // symbol follows the user's settings.
 const SPENT = 3971;
 const TOTAL = 6064;
-const REMAINING = 2092;
+const REMAINING = TOTAL - SPENT;
 
 export function BudgetShowcase({ width }: BudgetShowcaseProps) {
   const colors = useThemeColors();
