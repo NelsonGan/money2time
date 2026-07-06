@@ -430,7 +430,7 @@ const hi = {
       share_receipt: 'Send receipt',
       receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
-      receipt_scan_short: 'Scan to pay me back',
+      receipt_scan_short: 'Scan to pay',
     },
     title: 'लेनदेन',
     empty_month_title: 'इस महीने कोई लेनदेन नहीं',

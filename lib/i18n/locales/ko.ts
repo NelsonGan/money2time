@@ -430,7 +430,7 @@ const ko = {
       share_receipt: 'Send receipt',
       receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
-      receipt_scan_short: 'Scan to pay me back',
+      receipt_scan_short: 'Scan to pay',
     },
     title: '거래',
     empty_month_title: '이번 달 거래 없음',
