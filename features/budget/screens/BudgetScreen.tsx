@@ -317,44 +317,36 @@ function BudgetCategoryRow({
         accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
         className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
       >
-        {/* Compact two-line band (savings-rate inspired): name + remaining up
-            top, then a thin depletion bar flanked by the spent/total figures
-            and a usage badge — so the row stays light instead of stacking
-            three separate rows. */}
-        <View className="flex-row items-center gap-2.5">
-          <CategoryEmoji icon={category?.icon} size={22} />
-          <View className="min-w-0 flex-1 gap-2">
-            <View className="flex-row items-center gap-2">
-              <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-                {category?.name ?? I18n.t('common.uncategorized')}
-              </Text>
-              <Text
-                variant="caption"
-                numberOfLines={1}
-                className="shrink-0 text-[11px]"
-                tone={line.isOver ? undefined : 'muted'}
-                style={line.isOver ? { color: themeColors.error } : undefined}
-              >
-                {line.isOver
-                  ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-                  : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <View className="flex-1">
-                <ProgressBar
-                  ratio={line.usageRatio}
-                  color={barColor}
-                  trackColor={withColorAlpha(barColor, 0.14)}
-                  height={6}
-                />
-              </View>
-              <Text
-                variant="caption"
-                tone="muted"
-                numberOfLines={1}
-                className="shrink-0 text-[11px]"
-              >
+        {/* Emoji inline with the title, then a full-width depletion bar with
+            the spent/total figures and usage badge beneath it — the bar spans
+            the whole row so its length is comparable across categories. */}
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <CategoryEmoji icon={category?.icon} size={20} />
+            <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+              {category?.name ?? I18n.t('common.uncategorized')}
+            </Text>
+            <Text
+              variant="caption"
+              numberOfLines={1}
+              className="shrink-0 text-[11px]"
+              tone={line.isOver ? undefined : 'muted'}
+              style={line.isOver ? { color: themeColors.error } : undefined}
+            >
+              {line.isOver
+                ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+                : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
+            </Text>
+          </View>
+          <View className="gap-1">
+            <ProgressBar
+              ratio={line.usageRatio}
+              color={barColor}
+              trackColor={withColorAlpha(barColor, 0.14)}
+              height={6}
+            />
+            <View className="flex-row items-center justify-between gap-2">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="text-[11px]">
                 {money(line.spent, settings)} / {money(line.budgeted, settings)}
               </Text>
               <View
