@@ -89,6 +89,17 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    budget_items_update: {
+      title: 'Bütçeler ve eşyalar',
+      budget: {
+        title: 'Aylık bütçe belirle',
+        body: 'Yeniden kullanılabilir şablonlardan bütçe oluştur ve harcadıkça her kategorinin dolmasını izle. Kalanı bir bakışta gör, aylık olarak ya da doğrudan ana ekranında.',
+      },
+      items: {
+        title: 'Eşyalarının günlük maliyeti',
+        body: 'Satın aldıklarını takip et ve sahip olduğun her günle maliyetin küçülmesini izle. Her birinin günde gerçekte ne kadara mal olduğunu gör.',
+      },
+    },
     calendar_albums_update: {
       title: 'Takvim ana ekranı ve albümler',
       calendar: {
@@ -135,6 +146,10 @@ const tr = {
       open_share_earn: 'Pro’yu ücretsiz al',
     },
     showcase: {
+      budget_food: 'Yemek',
+      budget_transport: 'Ulaşım',
+      item_headphones: 'Kulaklık',
+      item_jacket: 'Ceket',
       this_month: 'Bu ay',
       past_7_days: 'Son 7 gün',
       income: 'Gelir',
@@ -193,6 +208,16 @@ const tr = {
     of_work: '{{hours}} çalışma',
     of_work_kept: '≈ {{hours}} çalışma korundu',
     of_work_behind: '≈ {{hours}} çalışma açık',
+    budget_setup: 'Aylık bütçe belirle',
+    budget_over: 'bütçe aşıldı',
+    budget_left_of: '{{total}} içinden kalan',
+    budget_left: '{{amount}} kaldı',
+    budget_over_by: 'Bütçe {{amount}} aşıldı',
+    budget_days_left_one: '{{count}} gün kaldı',
+    budget_days_left_other: '{{count}} gün kaldı',
+    budget_more_categories_one: '{{count}} kategori daha',
+    budget_more_categories_other: '{{count}} kategori daha',
+    budget_unbudgeted: '+{{amount}} bütçelenmemiş',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const tr = {
     },
   },
   insights: {
+    budget: 'Bütçe',
     title: 'Para hikâyeniz',
     loading: 'Analizler yükleniyor...',
     insight_type: 'Analiz türü',
@@ -1484,6 +1510,8 @@ const tr = {
       "Ücretsiz plan {{count}} sesli giriş içerir. Sınırsız sesli giriş için Pro'ya yükseltin.",
     limit_items:
       'Ücretsiz planda {{count}} eşyaya kadar takip edebilirsin. Sınırsız için Pro’ya geç.',
+    limit_budget_templates:
+      'Ücretsiz planda {{count}} bütçe şablonu oluşturabilirsin. Pro ile sınırsız.',
     badge: 'PRO',
     trend_preview_title: 'Uzun vadeli eğilimlerin kilidini açın',
     trend_preview_message:
@@ -1696,6 +1724,57 @@ const tr = {
   assets: {
     tab_accounts: 'Hesaplar',
     tab_items: 'Eşyalar',
+  },
+  budget: {
+    title: 'Bütçe',
+    templates_title: 'Bütçe şablonları',
+    templates_subtitle: 'Yeniden kullanılabilir aylık planlar',
+    template_default_badge: 'Varsayılan',
+    make_default: 'Varsayılan yap',
+    new_template: 'Yeni şablon',
+    create_template: 'Şablon oluştur',
+    add_title: 'Yeni şablon',
+    edit_title: 'Şablonu düzenle',
+    duplicate: 'Çoğalt',
+    duplicate_suffix: 'kopya',
+    delete_template_title: 'Şablon silinsin mi?',
+    delete_template_message:
+      'Bu şablondan oluşturulmuş aylık bütçeler korunur. Varsayılansa, sıradaki şablon varsayılan olur.',
+    no_templates_title: 'Henüz şablon yok',
+    no_templates_message: 'Aylarını planlamaya başlamak için bir bütçe şablonu oluştur.',
+    no_budget_title: '{{month}} için bütçe yok',
+    no_budget_message: 'Bu ayı takip etmek için bir şablondan oluştur.',
+    create_budget: 'Bütçe oluştur',
+    choose_template: 'Bir şablon seç',
+    custom_option: 'Özel',
+    custom_option_caption: 'Yalnızca bu aya özel tek seferlik bir bütçe oluşturun.',
+    categories_count_one: '{{count}} kategori',
+    categories_count_other: '{{count}} kategori',
+    summary_budgeted: 'Bütçelenen harcama',
+    summary_unbudgeted: 'Bütçelenmemiş harcama',
+    summary_exceeded: 'Bütçe {{amount}} aşıldı',
+    delete_budget: 'Bütçeyi sil',
+    delete_budget_title: 'Bu ayın bütçesi silinsin mi?',
+    delete_budget_message: 'Bu ay için otomatik olarak yeniden oluşturulmaz.',
+    unbudgeted_section: 'Bütçelenmemiş harcamalar',
+    left: '{{amount}} kaldı',
+    over: '{{amount}} aşım',
+    name_label: 'Ad',
+    name_placeholder: 'örn. Günlük',
+    total_label: 'Toplam bütçe',
+    allocated_summary: '{{total}} içinden {{allocated}} dağıtıldı',
+    allocated_done: 'Tamamı dağıtıldı',
+    fill_remainder: 'Doldur',
+    back_populate_title: 'Geçmiş ayları doldur',
+    back_populate_caption:
+      '{{first}} - {{last}} için bütçeler oluşturur ({{count}} ay). Zaten bütçesi olan aylar atlanır.',
+    choose_emoji: 'Bir emoji seç',
+    count_unbudgeted_title: 'Bütçelenmemiş harcamayı say',
+    count_unbudgeted_caption:
+      'Bütçe kalemi olmayan kategorilerin harcamasını ay toplamına dahil et.',
+    children_hint: 'İstersen bu tutarı alt kategorilere dağıt.',
+    subcategories: 'Alt kategoriler',
+    edit_budget: 'Bütçeyi düzenle',
   },
   items: {
     title: 'Eşyalar',

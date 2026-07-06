@@ -89,6 +89,17 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    budget_items_update: {
+      title: '예산 및 물건',
+      budget: {
+        title: '월 예산 설정',
+        body: '재사용 가능한 템플릿으로 예산을 만들고 지출할 때마다 각 카테고리가 채워지는 것을 확인하세요. 남은 금액을 한눈에, 월별로 또는 홈 화면에서 바로.',
+      },
+      items: {
+        title: '물건의 하루 비용',
+        body: '구매한 물건을 기록하면 소유한 날이 늘수록 비용이 줄어듭니다. 각 물건이 하루에 실제로 얼마인지 확인하세요.',
+      },
+    },
     calendar_albums_update: {
       title: '캘린더 홈 & 앨범',
       calendar: {
@@ -135,6 +146,10 @@ const ko = {
       open_share_earn: 'Pro 무료로 받기',
     },
     showcase: {
+      budget_food: '식비',
+      budget_transport: '교통',
+      item_headphones: '헤드폰',
+      item_jacket: '재킷',
       this_month: '이번 달',
       past_7_days: '지난 7일',
       income: '수입',
@@ -193,6 +208,16 @@ const ko = {
     of_work: '노동 {{hours}}',
     of_work_kept: '≈ 노동 {{hours}} 확보',
     of_work_behind: '≈ 노동 {{hours}} 부족',
+    budget_setup: '월 예산을 설정하세요',
+    budget_over: '예산 초과',
+    budget_left_of: '{{total}} 중 남음',
+    budget_left: '{{amount}} 남음',
+    budget_over_by: '예산 {{amount}} 초과',
+    budget_days_left_one: '{{count}}일 남음',
+    budget_days_left_other: '{{count}}일 남음',
+    budget_more_categories_one: '카테고리 {{count}}개 더',
+    budget_more_categories_other: '카테고리 {{count}}개 더',
+    budget_unbudgeted: '+{{amount}} 예산 외',
   },
   home: {
     converter: {
@@ -548,6 +573,7 @@ const ko = {
     },
   },
   insights: {
+    budget: '예산',
     title: '나의 자금 이야기',
     loading: '분석 불러오는 중...',
     insight_type: '분석 유형',
@@ -1448,6 +1474,8 @@ const ko = {
       '무료 플랜에는 음성 입력 {{count}}회가 포함됩니다. Pro로 업그레이드하면 무제한 음성 입력을 사용할 수 있습니다.',
     limit_items:
       '무료 플랜에서는 최대 {{count}}개까지 추적할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
+    limit_budget_templates:
+      '무료 플랜에서는 예산 템플릿을 {{count}}개 만들 수 있어요. Pro는 무제한입니다.',
     badge: 'PRO',
     trend_preview_title: '장기 추세 잠금 해제',
     trend_preview_message:
@@ -1655,6 +1683,56 @@ const ko = {
   assets: {
     tab_accounts: '계정',
     tab_items: '물건',
+  },
+  budget: {
+    title: '예산',
+    templates_title: '예산 템플릿',
+    templates_subtitle: '재사용 가능한 월간 플랜',
+    template_default_badge: '기본',
+    make_default: '기본으로 설정',
+    new_template: '새 템플릿',
+    create_template: '템플릿 만들기',
+    add_title: '새 템플릿',
+    edit_title: '템플릿 편집',
+    duplicate: '복제',
+    duplicate_suffix: '사본',
+    delete_template_title: '템플릿을 삭제할까요?',
+    delete_template_message:
+      '이미 만들어진 월 예산은 유지됩니다. 기본 템플릿이라면 다음 템플릿이 기본이 됩니다.',
+    no_templates_title: '아직 템플릿이 없어요',
+    no_templates_message: '예산 템플릿을 만들어 매달 계획을 시작해 보세요.',
+    no_budget_title: '{{month}} 예산 없음',
+    no_budget_message: '템플릿에서 만들어 이번 달을 추적해 보세요.',
+    create_budget: '예산 만들기',
+    choose_template: '템플릿 선택',
+    custom_option: '커스텀',
+    custom_option_caption: '이번 달에만 적용되는 일회성 예산을 만듭니다.',
+    categories_count_one: '카테고리 {{count}}개',
+    categories_count_other: '카테고리 {{count}}개',
+    summary_budgeted: '예산 내 지출',
+    summary_unbudgeted: '예산 외 지출',
+    summary_exceeded: '예산 {{amount}} 초과',
+    delete_budget: '예산 삭제',
+    delete_budget_title: '이번 달 예산을 삭제할까요?',
+    delete_budget_message: '이번 달에는 자동으로 다시 생성되지 않습니다.',
+    unbudgeted_section: '예산 외 지출',
+    left: '{{amount}} 남음',
+    over: '{{amount}} 초과',
+    name_label: '이름',
+    name_placeholder: '예: 일상',
+    total_label: '총 예산',
+    allocated_summary: '{{total}} 중 {{allocated}} 배분됨',
+    allocated_done: '모두 배분됨',
+    fill_remainder: '채우기',
+    back_populate_title: '지난달 채우기',
+    back_populate_caption:
+      '{{first}} - {{last}}({{count}}개월)의 예산을 만듭니다. 이미 예산이 있는 달은 건너뜁니다.',
+    choose_emoji: '이모지 선택',
+    count_unbudgeted_title: '예산 외 지출 포함',
+    count_unbudgeted_caption: '예산 항목이 없는 카테고리의 지출을 월 합계에 포함합니다.',
+    children_hint: '원하면 이 금액을 하위 카테고리에 배분할 수 있어요.',
+    subcategories: '하위 카테고리',
+    edit_budget: '예산 편집',
   },
   items: {
     title: '물건',

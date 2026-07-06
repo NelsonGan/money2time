@@ -89,6 +89,17 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    budget_items_update: {
+      title: 'बजट और वस्तुएँ',
+      budget: {
+        title: 'मासिक बजट सेट करें',
+        body: 'पुन: उपयोग होने वाले टेम्पलेट से बजट बनाएँ और खर्च करते ही हर श्रेणी को भरते देखें। एक नज़र में देखें कि कितना बचा है, महीने के हिसाब से या सीधे अपनी होम स्क्रीन पर।',
+      },
+      items: {
+        title: 'आपकी चीज़ें प्रतिदिन कितनी पड़ती हैं',
+        body: 'जो चीज़ें आप खरीदते हैं उन्हें ट्रैक करें और हर दिन के साथ उनकी लागत घटते देखें। देखें कि हर चीज़ असल में प्रतिदिन कितनी पड़ती है।',
+      },
+    },
     calendar_albums_update: {
       title: 'कैलेंडर होम और एल्बम',
       calendar: {
@@ -135,6 +146,10 @@ const hi = {
       open_share_earn: 'मुफ़्त Pro पाएं',
     },
     showcase: {
+      budget_food: 'भोजन',
+      budget_transport: 'परिवहन',
+      item_headphones: 'हेडफ़ोन',
+      item_jacket: 'जैकेट',
       this_month: 'इस महीने',
       past_7_days: 'पिछले 7 दिन',
       income: 'आय',
@@ -193,6 +208,16 @@ const hi = {
     of_work: '{{hours}} का काम',
     of_work_kept: '≈ {{hours}} का काम बचाया',
     of_work_behind: '≈ {{hours}} का काम पीछे',
+    budget_setup: 'मासिक बजट सेट करें',
+    budget_over: 'बजट से अधिक',
+    budget_left_of: '{{total}} में से शेष',
+    budget_left: '{{amount}} शेष',
+    budget_over_by: 'बजट से {{amount}} अधिक',
+    budget_days_left_one: '{{count}} दिन शेष',
+    budget_days_left_other: '{{count}} दिन शेष',
+    budget_more_categories_one: '{{count}} और श्रेणी',
+    budget_more_categories_other: '{{count}} और श्रेणियाँ',
+    budget_unbudgeted: '+{{amount}} बिना बजट',
   },
   home: {
     converter: {
@@ -548,6 +573,7 @@ const hi = {
     },
   },
   insights: {
+    budget: 'बजट',
     title: 'आपकी पैसे की कहानी',
     loading: 'इनसाइट्स लोड हो रही हैं...',
     insight_type: 'इनसाइट प्रकार',
@@ -1465,6 +1491,8 @@ const hi = {
       'फ्री प्लान में {{count}} वॉयस एंट्री शामिल हैं। असीमित वॉयस इनपुट के लिए Pro में अपग्रेड करें।',
     limit_items:
       'मुफ़्त प्लान में आप {{count}} तक चीज़ें ट्रैक कर सकते हैं। असीमित के लिए Pro लें।',
+    limit_budget_templates:
+      'मुफ़्त प्लान में आप {{count}} बजट टेम्पलेट बना सकते हैं। Pro में असीमित।',
     badge: 'PRO',
     trend_preview_title: 'दीर्घकालिक ट्रेंड अनलॉक करें',
     trend_preview_message:
@@ -1676,6 +1704,56 @@ const hi = {
   assets: {
     tab_accounts: 'खाते',
     tab_items: 'चीज़ें',
+  },
+  budget: {
+    title: 'बजट',
+    templates_title: 'बजट टेम्पलेट',
+    templates_subtitle: 'दोबारा इस्तेमाल होने वाली मासिक योजनाएँ',
+    template_default_badge: 'डिफ़ॉल्ट',
+    make_default: 'डिफ़ॉल्ट बनाएँ',
+    new_template: 'नया टेम्पलेट',
+    create_template: 'टेम्पलेट बनाएँ',
+    add_title: 'नया टेम्पलेट',
+    edit_title: 'टेम्पलेट संपादित करें',
+    duplicate: 'डुप्लिकेट',
+    duplicate_suffix: 'प्रति',
+    delete_template_title: 'टेम्पलेट हटाएँ?',
+    delete_template_message:
+      'पहले से बने मासिक बजट बने रहेंगे। अगर यह डिफ़ॉल्ट है, तो अगला टेम्पलेट डिफ़ॉल्ट बन जाएगा।',
+    no_templates_title: 'अभी कोई टेम्पलेट नहीं',
+    no_templates_message: 'अपने महीनों की योजना शुरू करने के लिए एक बजट टेम्पलेट बनाएँ।',
+    no_budget_title: '{{month}} के लिए कोई बजट नहीं',
+    no_budget_message: 'इस महीने पर नज़र रखने के लिए टेम्पलेट से एक बनाएँ।',
+    create_budget: 'बजट बनाएँ',
+    choose_template: 'एक टेम्पलेट चुनें',
+    custom_option: 'कस्टम',
+    custom_option_caption: 'सिर्फ़ इस महीने के लिए एक बार का बजट बनाएँ।',
+    categories_count_one: '{{count}} श्रेणी',
+    categories_count_other: '{{count}} श्रेणियाँ',
+    summary_budgeted: 'बजट में खर्च',
+    summary_unbudgeted: 'बिना बजट का खर्च',
+    summary_exceeded: 'बजट से {{amount}} अधिक',
+    delete_budget: 'बजट हटाएँ',
+    delete_budget_title: 'इस महीने का बजट हटाएँ?',
+    delete_budget_message: 'यह इस महीने के लिए अपने आप दोबारा नहीं बनेगा।',
+    unbudgeted_section: 'बिना बजट का खर्च',
+    left: '{{amount}} शेष',
+    over: '{{amount}} अधिक',
+    name_label: 'नाम',
+    name_placeholder: 'जैसे रोज़मर्रा',
+    total_label: 'कुल बजट',
+    allocated_summary: '{{total}} में से {{allocated}} बाँटा गया',
+    allocated_done: 'पूरी तरह बाँटा गया',
+    fill_remainder: 'भरें',
+    back_populate_title: 'पिछले महीने भरें',
+    back_populate_caption:
+      '{{first}} - {{last}} के लिए बजट बनाता है ({{count}} महीने)। जिन महीनों में बजट है वे छोड़ दिए जाते हैं।',
+    choose_emoji: 'इमोजी चुनें',
+    count_unbudgeted_title: 'बिना बजट का खर्च गिनें',
+    count_unbudgeted_caption: 'बिना बजट लाइन वाली श्रेणियों का खर्च महीने के कुल में शामिल करें।',
+    children_hint: 'चाहें तो यह राशि उप-श्रेणियों में बाँटें।',
+    subcategories: 'उप-श्रेणियाँ',
+    edit_budget: 'बजट संपादित करें',
   },
   items: {
     title: 'चीज़ें',

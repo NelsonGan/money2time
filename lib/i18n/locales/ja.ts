@@ -89,6 +89,17 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    budget_items_update: {
+      title: '予算とアイテム',
+      budget: {
+        title: '月の予算を設定',
+        body: '再利用できるテンプレートから予算を作成し、支出に応じて各カテゴリが埋まっていく様子を確認できます。残額はひと目で、月ごと、またはホーム画面で。',
+      },
+      items: {
+        title: 'モノの1日あたりのコスト',
+        body: '買ったモノを記録すると、持っている日数が増えるほどコストが下がっていきます。それぞれが実際に1日あたりいくらかを確認しましょう。',
+      },
+    },
     calendar_albums_update: {
       title: 'カレンダーホームとアルバム',
       calendar: {
@@ -135,6 +146,10 @@ const ja = {
       open_share_earn: 'Proを無料で手に入れる',
     },
     showcase: {
+      budget_food: '食費',
+      budget_transport: '交通',
+      item_headphones: 'ヘッドホン',
+      item_jacket: 'ジャケット',
       this_month: '今月',
       past_7_days: '過去7日間',
       income: '収入',
@@ -193,6 +208,16 @@ const ja = {
     of_work: '労働{{hours}}',
     of_work_kept: '≈ 労働{{hours}}を確保',
     of_work_behind: '≈ 労働{{hours}}の不足',
+    budget_setup: '月間予算を設定',
+    budget_over: '予算超過',
+    budget_left_of: '{{total}}中の残り',
+    budget_left: '残り{{amount}}',
+    budget_over_by: '予算を{{amount}}超過',
+    budget_days_left_one: '残り{{count}}日',
+    budget_days_left_other: '残り{{count}}日',
+    budget_more_categories_one: 'ほか{{count}}カテゴリ',
+    budget_more_categories_other: 'ほか{{count}}カテゴリ',
+    budget_unbudgeted: '+{{amount}} 予算外',
   },
   home: {
     converter: {
@@ -548,6 +573,7 @@ const ja = {
     },
   },
   insights: {
+    budget: '予算',
     title: 'あなたのお金の話',
     loading: '分析を読み込み中...',
     insight_type: '分析の種類',
@@ -1457,6 +1483,8 @@ const ja = {
       '無料プランでは {{count}} 回の音声入力が含まれます。無制限は Pro にアップグレードしてください。',
     limit_items:
       '無料プランでは最大 {{count}} 個まで記録できます。無制限にするには Pro にアップグレードしてください。',
+    limit_budget_templates:
+      '無料プランでは予算テンプレートを{{count}}件作成できます。Proなら無制限です。',
     badge: 'PRO',
     trend_preview_title: '長期トレンドを解放',
     trend_preview_message:
@@ -1668,6 +1696,56 @@ const ja = {
   assets: {
     tab_accounts: '口座',
     tab_items: 'アイテム',
+  },
+  budget: {
+    title: '予算',
+    templates_title: '予算テンプレート',
+    templates_subtitle: '再利用できる月間プラン',
+    template_default_badge: 'デフォルト',
+    make_default: 'デフォルトにする',
+    new_template: '新しいテンプレート',
+    create_template: 'テンプレートを作成',
+    add_title: '新しいテンプレート',
+    edit_title: 'テンプレートを編集',
+    duplicate: '複製',
+    duplicate_suffix: 'コピー',
+    delete_template_title: 'テンプレートを削除しますか？',
+    delete_template_message:
+      '作成済みの月間予算は残ります。これがデフォルトの場合、次のテンプレートがデフォルトになります。',
+    no_templates_title: 'テンプレートはまだありません',
+    no_templates_message: '予算テンプレートを作成して、毎月の計画を始めましょう。',
+    no_budget_title: '{{month}}の予算がありません',
+    no_budget_message: 'テンプレートから作成して今月を管理しましょう。',
+    create_budget: '予算を作成',
+    choose_template: 'テンプレートを選択',
+    custom_option: 'カスタム',
+    custom_option_caption: 'この月だけの単発予算を作成します。',
+    categories_count_one: '{{count}}件のカテゴリ',
+    categories_count_other: '{{count}}件のカテゴリ',
+    summary_budgeted: '予算内の支出',
+    summary_unbudgeted: '予算外の支出',
+    summary_exceeded: '予算を{{amount}}超過',
+    delete_budget: '予算を削除',
+    delete_budget_title: '今月の予算を削除しますか？',
+    delete_budget_message: '今月分は自動では再作成されません。',
+    unbudgeted_section: '予算外の支出',
+    left: '残り{{amount}}',
+    over: '{{amount}}超過',
+    name_label: '名前',
+    name_placeholder: '例：ふだん使い',
+    total_label: '予算総額',
+    allocated_summary: '{{total}}中{{allocated}}を割り当て済み',
+    allocated_done: 'すべて割り当て済み',
+    fill_remainder: '埋める',
+    back_populate_title: '過去の月にも作成',
+    back_populate_caption:
+      '{{first}}〜{{last}}（{{count}}か月）の予算を作成します。すでに予算がある月はスキップされます。',
+    choose_emoji: '絵文字を選択',
+    count_unbudgeted_title: '予算外の支出を含める',
+    count_unbudgeted_caption: '予算項目のないカテゴリの支出を月の合計に含めます。',
+    children_hint: '必要ならこの金額をサブカテゴリに配分できます。',
+    subcategories: 'サブカテゴリ',
+    edit_budget: '予算を編集',
   },
   items: {
     title: 'アイテム',

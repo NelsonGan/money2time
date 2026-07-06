@@ -266,10 +266,10 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
       isPro: true,
       getTrueHourlyRateForDate: () => 20,
       categories: [
-        { id: 'salary', parentId: null },
-        { id: 'food', parentId: null },
-        { id: 'rent', parentId: null },
-        { id: 'rent-sub', parentId: 'rent' },
+        { id: 'salary', parentId: null, name: 'Salary', icon: '💼' },
+        { id: 'food', parentId: null, name: 'Food', icon: '🍜' },
+        { id: 'rent', parentId: null, name: 'Rent', icon: '🏠' },
+        { id: 'rent-sub', parentId: 'rent', name: 'Utilities', icon: '💡' },
       ],
       excludedSavingsExpenseCategoryIds: ['rent'],
     });

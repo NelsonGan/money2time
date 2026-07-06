@@ -89,6 +89,17 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetter & ejendele',
+      budget: {
+        title: 'Sæt et månedligt budget',
+        body: 'Byg et budget ud fra genanvendelige skabeloner, og se hver kategori fyldes, mens du bruger. Se hvad der er tilbage med et blik, pr. måned eller direkte på din startskærm.',
+      },
+      items: {
+        title: 'Hvad dine ting koster pr. dag',
+        body: 'Følg de ting, du køber, og se prisen skrumpe for hver dag, du ejer dem. Se, hvad hver ting reelt koster pr. dag.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalender-hjem & album',
       calendar: {
@@ -135,6 +146,10 @@ const da = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      budget_food: 'Mad',
+      budget_transport: 'Transport',
+      item_headphones: 'Høretelefoner',
+      item_jacket: 'Jakke',
       this_month: 'Denne måned',
       past_7_days: 'Sidste 7 dage',
       income: 'Indtægt',
@@ -193,6 +208,16 @@ const da = {
     of_work: '{{hours}} arbejde',
     of_work_kept: '≈ {{hours}} arbejde beholdt',
     of_work_behind: '≈ {{hours}} arbejde bagud',
+    budget_setup: 'Sæt et månedsbudget',
+    budget_over: 'over budget',
+    budget_left_of: 'tilbage af {{total}}',
+    budget_left: '{{amount}} tilbage',
+    budget_over_by: '{{amount}} over budget',
+    budget_days_left_one: '{{count}} dag tilbage',
+    budget_days_left_other: '{{count}} dage tilbage',
+    budget_more_categories_one: '{{count}} kategori mere',
+    budget_more_categories_other: '{{count}} kategorier mere',
+    budget_unbudgeted: '+{{amount}} ikke budgetteret',
   },
   home: {
     converter: {
@@ -549,6 +574,7 @@ const da = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Din pengehistorie',
     loading: 'Indlæser indsigt...',
     insight_type: 'Indsigtstype',
@@ -1477,6 +1503,8 @@ const da = {
     limit_voice:
       'Gratis plan inkluderer {{count}} stemmeposteringer. Opgrader til Pro for ubegrænset stemmeinput.',
     limit_items: 'Du kan spore op til {{count}} ting i gratisplanen. Få Pro for ubegrænset.',
+    limit_budget_templates:
+      'Med gratisplanen kan du oprette {{count}} budgetskabelon. Ubegrænset med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås langsigtede tendenser op',
     trend_preview_message:
@@ -1687,6 +1715,56 @@ const da = {
   assets: {
     tab_accounts: 'Konti',
     tab_items: 'Ting',
+  },
+  budget: {
+    title: 'Budget',
+    templates_title: 'Budgetskabeloner',
+    templates_subtitle: 'Genbrugelige månedsplaner',
+    template_default_badge: 'Standard',
+    make_default: 'Gør til standard',
+    new_template: 'Ny skabelon',
+    create_template: 'Opret skabelon',
+    add_title: 'Ny skabelon',
+    edit_title: 'Rediger skabelon',
+    duplicate: 'Duplikér',
+    duplicate_suffix: 'kopi',
+    delete_template_title: 'Slet skabelon?',
+    delete_template_message:
+      'Allerede oprettede månedsbudgetter bevares. Er dette standarden, bliver den næste skabelon standard.',
+    no_templates_title: 'Ingen skabeloner endnu',
+    no_templates_message: 'Opret en budgetskabelon for at planlægge dine måneder.',
+    no_budget_title: 'Intet budget for {{month}}',
+    no_budget_message: 'Opret et ud fra en skabelon for at følge denne måned.',
+    create_budget: 'Opret budget',
+    choose_template: 'Vælg en skabelon',
+    custom_option: 'Tilpasset',
+    custom_option_caption: 'Lav et engangsbudget kun for denne måned.',
+    categories_count_one: '{{count}} kategori',
+    categories_count_other: '{{count}} kategorier',
+    summary_budgeted: 'Budgetteret forbrug',
+    summary_unbudgeted: 'Ikke-budgetteret forbrug',
+    summary_exceeded: '{{amount}} over budget',
+    delete_budget: 'Slet budget',
+    delete_budget_title: 'Slet denne måneds budget?',
+    delete_budget_message: 'Det genoprettes ikke automatisk for denne måned.',
+    unbudgeted_section: 'Ikke-budgetteret forbrug',
+    left: '{{amount}} tilbage',
+    over: '{{amount}} over',
+    name_label: 'Navn',
+    name_placeholder: 'f.eks. Hverdag',
+    total_label: 'Samlet budget',
+    allocated_summary: '{{allocated}} af {{total}} fordelt',
+    allocated_done: 'Fuldt fordelt',
+    fill_remainder: 'Udfyld',
+    back_populate_title: 'Udfyld tidligere måneder',
+    back_populate_caption:
+      'Opretter budgetter for {{first}} - {{last}} ({{count}} måneder). Måneder med et budget springes over.',
+    choose_emoji: 'Vælg en emoji',
+    count_unbudgeted_title: 'Tæl ikke-budgetteret forbrug med',
+    count_unbudgeted_caption: 'Medregn forbrug fra kategorier uden budgetpost i månedens total.',
+    children_hint: 'Fordel eventuelt dette beløb på underkategorier.',
+    subcategories: 'Underkategorier',
+    edit_budget: 'Rediger budget',
   },
   items: {
     title: 'Ting',

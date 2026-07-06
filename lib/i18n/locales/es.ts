@@ -89,6 +89,17 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    budget_items_update: {
+      title: 'Presupuestos y objetos',
+      budget: {
+        title: 'Fija un presupuesto mensual',
+        body: 'Crea un presupuesto a partir de plantillas reutilizables y mira cómo se llena cada categoría a medida que gastas. Ve lo que queda de un vistazo, por mes o en tu pantalla de inicio.',
+      },
+      items: {
+        title: 'Lo que cuestan tus cosas por día',
+        body: 'Registra lo que compras y mira cómo su coste se reduce con cada día que lo tienes. Descubre lo que cada cosa cuesta realmente por día.',
+      },
+    },
     calendar_albums_update: {
       title: 'Inicio en calendario y álbumes',
       calendar: {
@@ -135,6 +146,10 @@ const es = {
       open_share_earn: 'Consigue Pro gratis',
     },
     showcase: {
+      budget_food: 'Comida',
+      budget_transport: 'Transporte',
+      item_headphones: 'Auriculares',
+      item_jacket: 'Chaqueta',
       this_month: 'Este mes',
       past_7_days: 'Últimos 7 días',
       income: 'Ingreso',
@@ -193,6 +208,16 @@ const es = {
     of_work: '{{hours}} de trabajo',
     of_work_kept: '≈ {{hours}} de trabajo conservadas',
     of_work_behind: '≈ {{hours}} de trabajo de déficit',
+    budget_setup: 'Configura un presupuesto mensual',
+    budget_over: 'sobre el presupuesto',
+    budget_left_of: 'restante de {{total}}',
+    budget_left: '{{amount}} restante',
+    budget_over_by: '{{amount}} por encima del presupuesto',
+    budget_days_left_one: 'Queda {{count}} día',
+    budget_days_left_other: 'Quedan {{count}} días',
+    budget_more_categories_one: '{{count}} categoría más',
+    budget_more_categories_other: '{{count}} categorías más',
+    budget_unbudgeted: '+{{amount}} sin presupuestar',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const es = {
     },
   },
   insights: {
+    budget: 'Presupuesto',
     title: 'Tu historia financiera',
     loading: 'Cargando análisis...',
     insight_type: 'Tipo de análisis',
@@ -1489,6 +1515,8 @@ const es = {
       'El plan gratuito incluye {{count}} entradas de voz. Actualiza a Pro para entrada de voz ilimitada.',
     limit_items:
       'Puedes seguir hasta {{count}} objetos en el plan gratuito. Hazte Pro para tener ilimitados.',
+    limit_budget_templates:
+      'En el plan gratuito puedes crear {{count}} plantilla de presupuesto. Con Pro, ilimitadas.',
     badge: 'PRO',
     trend_preview_title: 'Desbloquea tendencias a largo plazo',
     trend_preview_message:
@@ -1700,6 +1728,57 @@ const es = {
   assets: {
     tab_accounts: 'Cuentas',
     tab_items: 'Objetos',
+  },
+  budget: {
+    title: 'Presupuesto',
+    templates_title: 'Plantillas de presupuesto',
+    templates_subtitle: 'Planes mensuales reutilizables',
+    template_default_badge: 'Predeterminada',
+    make_default: 'Hacer predeterminada',
+    new_template: 'Nueva plantilla',
+    create_template: 'Crear plantilla',
+    add_title: 'Nueva plantilla',
+    edit_title: 'Editar plantilla',
+    duplicate: 'Duplicar',
+    duplicate_suffix: 'copia',
+    delete_template_title: '¿Eliminar plantilla?',
+    delete_template_message:
+      'Los presupuestos mensuales ya creados se conservan. Si es la predeterminada, la siguiente plantilla pasará a serlo.',
+    no_templates_title: 'Aún no hay plantillas',
+    no_templates_message: 'Crea una plantilla de presupuesto para empezar a planificar tus meses.',
+    no_budget_title: 'Sin presupuesto para {{month}}',
+    no_budget_message: 'Crea uno desde una plantilla para controlar este mes.',
+    create_budget: 'Crear presupuesto',
+    choose_template: 'Elige una plantilla',
+    custom_option: 'Personalizado',
+    custom_option_caption: 'Crea un presupuesto único solo para este mes.',
+    categories_count_one: '{{count}} categoría',
+    categories_count_other: '{{count}} categorías',
+    summary_budgeted: 'Gasto presupuestado',
+    summary_unbudgeted: 'Gasto sin presupuestar',
+    summary_exceeded: '{{amount}} por encima del presupuesto',
+    delete_budget: 'Eliminar presupuesto',
+    delete_budget_title: '¿Eliminar el presupuesto de este mes?',
+    delete_budget_message: 'No se volverá a crear automáticamente para este mes.',
+    unbudgeted_section: 'Gasto sin presupuestar',
+    left: '{{amount}} restante',
+    over: '{{amount}} de más',
+    name_label: 'Nombre',
+    name_placeholder: 'p. ej. Día a día',
+    total_label: 'Presupuesto total',
+    allocated_summary: '{{allocated}} de {{total}} asignado',
+    allocated_done: 'Totalmente asignado',
+    fill_remainder: 'Rellenar',
+    back_populate_title: 'Rellenar meses anteriores',
+    back_populate_caption:
+      'Crea presupuestos para {{first}} - {{last}} ({{count}} meses). Se omiten los meses que ya tienen presupuesto.',
+    choose_emoji: 'Elige un emoji',
+    count_unbudgeted_title: 'Contar gasto sin presupuestar',
+    count_unbudgeted_caption:
+      'Incluir en el total del mes el gasto de categorías sin partida de presupuesto.',
+    children_hint: 'Opcionalmente reparte este importe entre subcategorías.',
+    subcategories: 'Subcategorías',
+    edit_budget: 'Editar presupuesto',
   },
   items: {
     title: 'Objetos',

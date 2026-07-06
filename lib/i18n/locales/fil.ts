@@ -89,6 +89,17 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    budget_items_update: {
+      title: 'Mga Budget at Gamit',
+      budget: {
+        title: 'Magtakda ng buwanang budget',
+        body: 'Gumawa ng budget mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap, bawat buwan o mismo sa iyong home screen.',
+      },
+      items: {
+        title: 'Kung magkano ang gamit mo kada araw',
+        body: 'Subaybayan ang mga binibili mo at panoorin ang halaga na lumiliit sa bawat araw na pag-aari mo ito. Tingnan kung magkano talaga ang bawat isa kada araw.',
+      },
+    },
     calendar_albums_update: {
       title: 'Calendar home at Albums',
       calendar: {
@@ -135,6 +146,10 @@ const fil = {
       open_share_earn: 'Kunin ang Pro nang libre',
     },
     showcase: {
+      budget_food: 'Pagkain',
+      budget_transport: 'Transportasyon',
+      item_headphones: 'Headphone',
+      item_jacket: 'Jacket',
       this_month: 'Ngayong buwan',
       past_7_days: 'Nakaraang 7 araw',
       income: 'Kita',
@@ -193,6 +208,16 @@ const fil = {
     of_work: '{{hours}} trabaho',
     of_work_kept: '≈ {{hours}} trabaho ang naitabi',
     of_work_behind: '≈ {{hours}} trabaho ang kulang',
+    budget_setup: 'Magtakda ng buwanang badyet',
+    budget_over: 'lampas sa badyet',
+    budget_left_of: 'natitira sa {{total}}',
+    budget_left: '{{amount}} na natitira',
+    budget_over_by: 'Lampas sa badyet nang {{amount}}',
+    budget_days_left_one: '{{count}} araw na natitira',
+    budget_days_left_other: '{{count}} araw na natitira',
+    budget_more_categories_one: '{{count}} pang kategorya',
+    budget_more_categories_other: '{{count}} pang kategorya',
+    budget_unbudgeted: '+{{amount}} walang badyet',
   },
   home: {
     converter: {
@@ -554,6 +579,7 @@ const fil = {
     },
   },
   insights: {
+    budget: 'Badyet',
     title: 'Ang iyong kwento sa pera',
     loading: 'Nilo-load ang mga insight...',
     insight_type: 'Uri ng insight',
@@ -1501,6 +1527,8 @@ const fil = {
       'Ang libreng plano ay may kasamang {{count}} voice entry. Mag-upgrade sa Pro para sa unlimited na voice input.',
     limit_items:
       'Maaari kang mag-track ng hanggang {{count}} item sa libreng plano. Mag-Pro para walang limitasyon.',
+    limit_budget_templates:
+      'Sa libreng plan, makakagawa ka ng {{count}} template ng badyet. Walang limitasyon sa Pro.',
     badge: 'PRO',
     trend_preview_title: 'I-unlock ang pangmatagalang trend',
     trend_preview_message:
@@ -1715,6 +1743,58 @@ const fil = {
   assets: {
     tab_accounts: 'Mga account',
     tab_items: 'Mga item',
+  },
+  budget: {
+    title: 'Badyet',
+    templates_title: 'Mga template ng badyet',
+    templates_subtitle: 'Mga buwanang planong magagamit muli',
+    template_default_badge: 'Default',
+    make_default: 'Gawing default',
+    new_template: 'Bagong template',
+    create_template: 'Gumawa ng template',
+    add_title: 'Bagong template',
+    edit_title: 'I-edit ang template',
+    duplicate: 'I-duplicate',
+    duplicate_suffix: 'kopya',
+    delete_template_title: 'Burahin ang template?',
+    delete_template_message:
+      'Mananatili ang mga buwanang badyet na nagawa na. Kung ito ang default, ang susunod na template ang magiging default.',
+    no_templates_title: 'Wala pang template',
+    no_templates_message:
+      'Gumawa ng template ng badyet para simulan ang pagpaplano ng iyong mga buwan.',
+    no_budget_title: 'Walang badyet para sa {{month}}',
+    no_budget_message: 'Gumawa mula sa template para subaybayan ang buwang ito.',
+    create_budget: 'Gumawa ng badyet',
+    choose_template: 'Pumili ng template',
+    custom_option: 'Custom',
+    custom_option_caption: 'Gumawa ng one-time na budget para sa buwang ito lang.',
+    categories_count_one: '{{count}} kategorya',
+    categories_count_other: '{{count}} kategorya',
+    summary_budgeted: 'Nakabadyet na gastos',
+    summary_unbudgeted: 'Gastos na walang badyet',
+    summary_exceeded: 'Lampas sa badyet nang {{amount}}',
+    delete_budget: 'Burahin ang badyet',
+    delete_budget_title: 'Burahin ang badyet ng buwang ito?',
+    delete_budget_message: 'Hindi ito awtomatikong gagawin muli para sa buwang ito.',
+    unbudgeted_section: 'Gastos na walang badyet',
+    left: '{{amount}} na natitira',
+    over: 'Lampas ng {{amount}}',
+    name_label: 'Pangalan',
+    name_placeholder: 'hal. Pang-araw-araw',
+    total_label: 'Kabuuang badyet',
+    allocated_summary: '{{allocated}} sa {{total}} ang nailaan',
+    allocated_done: 'Ganap nang nailaan',
+    fill_remainder: 'Punan',
+    back_populate_title: 'Punan ang mga nakaraang buwan',
+    back_populate_caption:
+      'Gagawa ng badyet para sa {{first}} - {{last}} ({{count}} buwan). Lalaktawan ang mga buwang may badyet na.',
+    choose_emoji: 'Pumili ng emoji',
+    count_unbudgeted_title: 'Bilangin ang gastos na walang badyet',
+    count_unbudgeted_caption:
+      'Isama sa kabuuan ng buwan ang gastos mula sa mga kategoryang walang linya ng badyet.',
+    children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
+    subcategories: 'Mga subkategorya',
+    edit_budget: 'I-edit ang badyet',
   },
   items: {
     title: 'Mga item',

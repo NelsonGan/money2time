@@ -22,7 +22,9 @@ export interface FeatureAnnouncementPage {
     | 'accountLogos'
     | 'multiCurrency'
     | 'redesign'
-    | 'appLock';
+    | 'appLock'
+    | 'budget'
+    | 'items';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'enableVoice' | 'openShareEarn';
   /**

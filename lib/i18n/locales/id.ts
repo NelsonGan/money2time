@@ -89,6 +89,17 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    budget_items_update: {
+      title: 'Anggaran & Barang',
+      budget: {
+        title: 'Tetapkan anggaran bulanan',
+        body: 'Buat anggaran dari templat yang bisa dipakai ulang dan lihat setiap kategori terisi saat kamu belanja. Lihat sisa anggaran sekilas, per bulan atau langsung di layar utama.',
+      },
+      items: {
+        title: 'Berapa biaya barangmu per hari',
+        body: 'Lacak barang yang kamu beli dan lihat biayanya menyusut setiap hari kamu memilikinya. Lihat berapa biaya sebenarnya tiap barang per hari.',
+      },
+    },
     calendar_albums_update: {
       title: 'Beranda kalender & Album',
       calendar: {
@@ -135,6 +146,10 @@ const id = {
       open_share_earn: 'Dapatkan Pro gratis',
     },
     showcase: {
+      budget_food: 'Makanan',
+      budget_transport: 'Transportasi',
+      item_headphones: 'Headphone',
+      item_jacket: 'Jaket',
       this_month: 'Bulan ini',
       past_7_days: '7 hari terakhir',
       income: 'Pemasukan',
@@ -193,6 +208,16 @@ const id = {
     of_work: '{{hours}} kerja',
     of_work_kept: '≈ {{hours}} kerja disisihkan',
     of_work_behind: '≈ {{hours}} kerja tekor',
+    budget_setup: 'Atur anggaran bulanan',
+    budget_over: 'melebihi anggaran',
+    budget_left_of: 'sisa dari {{total}}',
+    budget_left: 'Sisa {{amount}}',
+    budget_over_by: 'Melebihi anggaran {{amount}}',
+    budget_days_left_one: '{{count}} hari lagi',
+    budget_days_left_other: '{{count}} hari lagi',
+    budget_more_categories_one: '{{count}} kategori lainnya',
+    budget_more_categories_other: '{{count}} kategori lainnya',
+    budget_unbudgeted: '+{{amount}} di luar anggaran',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const id = {
     },
   },
   insights: {
+    budget: 'Anggaran',
     title: 'Kisah uangmu',
     loading: 'Memuat wawasan...',
     insight_type: 'Jenis wawasan',
@@ -1487,6 +1513,8 @@ const id = {
       'Paket gratis mencakup {{count}} entri suara. Upgrade ke Pro untuk input suara tanpa batas.',
     limit_items:
       'Kamu bisa melacak hingga {{count}} barang di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
+    limit_budget_templates:
+      'Paket gratis memungkinkan {{count}} templat anggaran. Tanpa batas dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:
@@ -1700,6 +1728,57 @@ const id = {
   assets: {
     tab_accounts: 'Akun',
     tab_items: 'Barang',
+  },
+  budget: {
+    title: 'Anggaran',
+    templates_title: 'Templat anggaran',
+    templates_subtitle: 'Rencana bulanan yang dapat dipakai ulang',
+    template_default_badge: 'Default',
+    make_default: 'Jadikan default',
+    new_template: 'Templat baru',
+    create_template: 'Buat templat',
+    add_title: 'Templat baru',
+    edit_title: 'Edit templat',
+    duplicate: 'Duplikat',
+    duplicate_suffix: 'salinan',
+    delete_template_title: 'Hapus templat?',
+    delete_template_message:
+      'Anggaran bulanan yang sudah dibuat tetap disimpan. Jika ini default, templat berikutnya menjadi default.',
+    no_templates_title: 'Belum ada templat',
+    no_templates_message: 'Buat templat anggaran untuk mulai merencanakan bulan-bulanmu.',
+    no_budget_title: 'Tidak ada anggaran untuk {{month}}',
+    no_budget_message: 'Buat dari templat untuk memantau bulan ini.',
+    create_budget: 'Buat anggaran',
+    choose_template: 'Pilih templat',
+    custom_option: 'Kustom',
+    custom_option_caption: 'Buat anggaran sekali pakai khusus bulan ini.',
+    categories_count_one: '{{count}} kategori',
+    categories_count_other: '{{count}} kategori',
+    summary_budgeted: 'Pengeluaran teranggarkan',
+    summary_unbudgeted: 'Pengeluaran di luar anggaran',
+    summary_exceeded: 'Melebihi anggaran {{amount}}',
+    delete_budget: 'Hapus anggaran',
+    delete_budget_title: 'Hapus anggaran bulan ini?',
+    delete_budget_message: 'Tidak akan dibuat ulang secara otomatis untuk bulan ini.',
+    unbudgeted_section: 'Pengeluaran di luar anggaran',
+    left: 'Sisa {{amount}}',
+    over: 'Lebih {{amount}}',
+    name_label: 'Nama',
+    name_placeholder: 'mis. Sehari-hari',
+    total_label: 'Total anggaran',
+    allocated_summary: '{{allocated}} dari {{total}} teralokasi',
+    allocated_done: 'Teralokasi penuh',
+    fill_remainder: 'Isi',
+    back_populate_title: 'Isi bulan-bulan sebelumnya',
+    back_populate_caption:
+      'Membuat anggaran untuk {{first}} - {{last}} ({{count}} bulan). Bulan yang sudah punya anggaran dilewati.',
+    choose_emoji: 'Pilih emoji',
+    count_unbudgeted_title: 'Hitung pengeluaran di luar anggaran',
+    count_unbudgeted_caption:
+      'Sertakan pengeluaran dari kategori tanpa pos anggaran ke total bulan.',
+    children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
+    subcategories: 'Subkategori',
+    edit_budget: 'Edit anggaran',
   },
   items: {
     title: 'Barang',

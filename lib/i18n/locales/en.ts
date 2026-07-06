@@ -64,6 +64,17 @@ const en = {
     },
   },
   news: {
+    budget_items_update: {
+      title: 'Budgets & Items',
+      budget: {
+        title: 'Set a monthly budget',
+        body: "Build a budget from reusable templates and watch each category fill as you spend. See what's left at a glance, by month, or right on your home screen.",
+      },
+      items: {
+        title: 'What your things cost per day',
+        body: 'Track the things you buy and watch their cost shrink with every day you own them. See what each one really costs per day.',
+      },
+    },
     calendar_albums_update: {
       title: 'Calendar home & Albums',
       calendar: {
@@ -110,6 +121,10 @@ const en = {
       open_share_earn: 'Get Pro for free',
     },
     showcase: {
+      budget_food: 'Food',
+      budget_transport: 'Transport',
+      item_headphones: 'Headphones',
+      item_jacket: 'Jacket',
       this_month: 'This month',
       past_7_days: 'Past 7 days',
       income: 'Income',
@@ -168,6 +183,16 @@ const en = {
     of_work: '{{hours}} of work',
     of_work_kept: '≈ {{hours}} of work kept',
     of_work_behind: '≈ {{hours}} of work behind',
+    budget_setup: 'Set a monthly budget',
+    budget_over: 'over budget',
+    budget_left_of: 'left of {{total}}',
+    budget_left: '{{amount}} left',
+    budget_over_by: 'Over budget by {{amount}}',
+    budget_days_left_one: '{{count}} day left',
+    budget_days_left_other: '{{count}} days left',
+    budget_more_categories_one: '{{count}} more category',
+    budget_more_categories_other: '{{count}} more categories',
+    budget_unbudgeted: '+{{amount}} unbudgeted',
   },
   home: {
     converter: {
@@ -524,6 +549,7 @@ const en = {
     },
   },
   insights: {
+    budget: 'Budgeting',
     title: 'Your money story',
     loading: 'Loading insights...',
     insight_type: 'Insight type',
@@ -1446,6 +1472,8 @@ const en = {
       'You can create up to {{count}} albums on the free plan. Upgrade to Pro for unlimited.',
     limit_items:
       'You can track up to {{count}} items on the free plan. Upgrade to Pro for unlimited.',
+    limit_budget_templates:
+      'You can create {{count}} budget template on the free plan. Upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:
@@ -1680,6 +1708,57 @@ const en = {
   assets: {
     tab_accounts: 'Accounts',
     tab_items: 'Items',
+  },
+  budget: {
+    title: 'Budget',
+    templates_title: 'Budget templates',
+    templates_subtitle: 'Reusable monthly plans',
+    template_default_badge: 'Default',
+    make_default: 'Make default',
+    new_template: 'New template',
+    create_template: 'Create template',
+    add_title: 'New template',
+    edit_title: 'Edit template',
+    duplicate: 'Duplicate',
+    duplicate_suffix: 'copy',
+    delete_template_title: 'Delete template?',
+    delete_template_message:
+      'Monthly budgets already created from it are kept. If this is the default, the next template becomes the default.',
+    no_templates_title: 'No templates yet',
+    no_templates_message: 'Create a budget template to start planning your months.',
+    no_budget_title: 'No budget for {{month}}',
+    no_budget_message: 'Create one from a template to track this month.',
+    create_budget: 'Create budget',
+    choose_template: 'Choose a template',
+    custom_option: 'Custom',
+    custom_option_caption: 'Build a one-off budget for this month only.',
+    categories_count_one: '{{count}} category',
+    categories_count_other: '{{count}} categories',
+    summary_budgeted: 'Budgeted spend',
+    summary_unbudgeted: 'Unbudgeted spend',
+    summary_exceeded: 'Over budget by {{amount}}',
+    delete_budget: 'Delete budget',
+    delete_budget_title: 'Delete this month’s budget?',
+    delete_budget_message: 'It won’t be recreated automatically for this month.',
+    unbudgeted_section: 'Unbudgeted spending',
+    left: '{{amount}} left',
+    over: '{{amount}} over',
+    name_label: 'Name',
+    name_placeholder: 'e.g. Everyday',
+    total_label: 'Total budget',
+    allocated_summary: '{{allocated}} of {{total}} allocated',
+    allocated_done: 'Fully allocated',
+    fill_remainder: 'Fill',
+    back_populate_title: 'Back-fill past months',
+    back_populate_caption:
+      'Creates budgets for {{first}} - {{last}} ({{count}} months). Months that already have a budget are skipped.',
+    choose_emoji: 'Choose an emoji',
+    count_unbudgeted_title: 'Count unbudgeted spending',
+    count_unbudgeted_caption:
+      'Include spending from categories without a budget line in the month’s total.',
+    children_hint: 'Optionally split this amount across subcategories.',
+    subcategories: 'Subcategories',
+    edit_budget: 'Edit budget',
   },
   items: {
     title: 'Items',

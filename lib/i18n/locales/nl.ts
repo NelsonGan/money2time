@@ -89,6 +89,17 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetten & spullen',
+      budget: {
+        title: 'Stel een maandbudget in',
+        body: 'Bouw een budget met herbruikbare sjablonen en zie elke categorie vollopen terwijl je uitgeeft. Zie in één oogopslag wat er over is, per maand of direct op je startscherm.',
+      },
+      items: {
+        title: 'Wat je spullen per dag kosten',
+        body: 'Houd bij wat je koopt en zie de kosten krimpen met elke dag dat je het bezit. Ontdek wat elk ding echt per dag kost.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalender-start & albums',
       calendar: {
@@ -135,6 +146,10 @@ const nl = {
       open_share_earn: 'Pro gratis krijgen',
     },
     showcase: {
+      budget_food: 'Eten',
+      budget_transport: 'Vervoer',
+      item_headphones: 'Koptelefoon',
+      item_jacket: 'Jas',
       this_month: 'Deze maand',
       past_7_days: 'Afgelopen 7 dagen',
       income: 'Inkomsten',
@@ -193,6 +208,16 @@ const nl = {
     of_work: '{{hours}} werk',
     of_work_kept: '≈ {{hours}} werk behouden',
     of_work_behind: '≈ {{hours}} werk achterstand',
+    budget_setup: 'Stel een maandbudget in',
+    budget_over: 'boven budget',
+    budget_left_of: 'over van {{total}}',
+    budget_left: '{{amount}} over',
+    budget_over_by: '{{amount}} boven budget',
+    budget_days_left_one: 'Nog {{count}} dag',
+    budget_days_left_other: 'Nog {{count}} dagen',
+    budget_more_categories_one: 'Nog {{count}} categorie',
+    budget_more_categories_other: 'Nog {{count}} categorieën',
+    budget_unbudgeted: '+{{amount}} niet gebudgetteerd',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const nl = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Jouw geldverhaal',
     loading: 'Inzichten laden...',
     insight_type: 'Type inzicht',
@@ -1496,6 +1522,8 @@ const nl = {
       'Het gratis abonnement bevat {{count}} spraakinvoeren. Upgrade naar Pro voor onbeperkte spraakinvoer.',
     limit_items:
       'Je kunt tot {{count}} items volgen met het gratis abonnement. Word Pro voor onbeperkt.',
+    limit_budget_templates:
+      'Met het gratis abonnement kun je {{count}} budgetsjabloon maken. Onbeperkt met Pro.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:
@@ -1709,6 +1737,57 @@ const nl = {
   assets: {
     tab_accounts: 'Rekeningen',
     tab_items: 'Items',
+  },
+  budget: {
+    title: 'Budget',
+    templates_title: 'Budgetsjablonen',
+    templates_subtitle: 'Herbruikbare maandplannen',
+    template_default_badge: 'Standaard',
+    make_default: 'Als standaard instellen',
+    new_template: 'Nieuw sjabloon',
+    create_template: 'Sjabloon maken',
+    add_title: 'Nieuw sjabloon',
+    edit_title: 'Sjabloon bewerken',
+    duplicate: 'Dupliceren',
+    duplicate_suffix: 'kopie',
+    delete_template_title: 'Sjabloon verwijderen?',
+    delete_template_message:
+      'Al gemaakte maandbudgetten blijven bewaard. Is dit de standaard, dan wordt het volgende sjabloon standaard.',
+    no_templates_title: 'Nog geen sjablonen',
+    no_templates_message: 'Maak een budgetsjabloon om je maanden te plannen.',
+    no_budget_title: 'Geen budget voor {{month}}',
+    no_budget_message: 'Maak er een vanuit een sjabloon om deze maand te volgen.',
+    create_budget: 'Budget maken',
+    choose_template: 'Kies een sjabloon',
+    custom_option: 'Aangepast',
+    custom_option_caption: 'Maak een eenmalig budget alleen voor deze maand.',
+    categories_count_one: '{{count}} categorie',
+    categories_count_other: '{{count}} categorieën',
+    summary_budgeted: 'Gebudgetteerde uitgaven',
+    summary_unbudgeted: 'Niet-gebudgetteerde uitgaven',
+    summary_exceeded: '{{amount}} boven budget',
+    delete_budget: 'Budget verwijderen',
+    delete_budget_title: 'Budget van deze maand verwijderen?',
+    delete_budget_message: 'Het wordt voor deze maand niet automatisch opnieuw aangemaakt.',
+    unbudgeted_section: 'Niet-gebudgetteerde uitgaven',
+    left: '{{amount}} over',
+    over: '{{amount}} erover',
+    name_label: 'Naam',
+    name_placeholder: 'bijv. Dagelijks',
+    total_label: 'Totaalbudget',
+    allocated_summary: '{{allocated}} van {{total}} verdeeld',
+    allocated_done: 'Volledig verdeeld',
+    fill_remainder: 'Aanvullen',
+    back_populate_title: 'Vorige maanden invullen',
+    back_populate_caption:
+      'Maakt budgetten voor {{first}} - {{last}} ({{count}} maanden). Maanden met een budget worden overgeslagen.',
+    choose_emoji: 'Kies een emoji',
+    count_unbudgeted_title: 'Niet-gebudgetteerde uitgaven meetellen',
+    count_unbudgeted_caption:
+      'Tel uitgaven uit categorieën zonder budgetregel mee in het maandtotaal.',
+    children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
+    subcategories: 'Subcategorieën',
+    edit_budget: 'Budget bewerken',
   },
   items: {
     title: 'Items',

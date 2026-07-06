@@ -89,6 +89,17 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    budget_items_update: {
+      title: 'Bajet & Barangan',
+      budget: {
+        title: 'Tetapkan bajet bulanan',
+        body: 'Bina bajet daripada templat boleh guna semula dan lihat setiap kategori terisi apabila anda berbelanja. Lihat baki sepintas lalu, mengikut bulan atau terus pada skrin utama.',
+      },
+      items: {
+        title: 'Kos barang anda sehari',
+        body: 'Jejaki barang yang anda beli dan lihat kosnya mengecil setiap hari anda memilikinya. Lihat kos sebenar setiap satu sehari.',
+      },
+    },
     calendar_albums_update: {
       title: 'Laman kalendar & Album',
       calendar: {
@@ -135,6 +146,10 @@ const ms = {
       open_share_earn: 'Dapatkan Pro percuma',
     },
     showcase: {
+      budget_food: 'Makanan',
+      budget_transport: 'Pengangkutan',
+      item_headphones: 'Fon kepala',
+      item_jacket: 'Jaket',
       this_month: 'Bulan ini',
       past_7_days: '7 hari lepas',
       income: 'Pendapatan',
@@ -193,6 +208,16 @@ const ms = {
     of_work: '{{hours}} kerja',
     of_work_kept: '≈ {{hours}} kerja disimpan',
     of_work_behind: '≈ {{hours}} kerja tertunggak',
+    budget_setup: 'Tetapkan bajet bulanan',
+    budget_over: 'melebihi bajet',
+    budget_left_of: 'baki daripada {{total}}',
+    budget_left: 'Baki {{amount}}',
+    budget_over_by: 'Melebihi bajet {{amount}}',
+    budget_days_left_one: '{{count}} hari lagi',
+    budget_days_left_other: '{{count}} hari lagi',
+    budget_more_categories_one: '{{count}} lagi kategori',
+    budget_more_categories_other: '{{count}} lagi kategori',
+    budget_unbudgeted: '+{{amount}} luar bajet',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const ms = {
     },
   },
   insights: {
+    budget: 'Bajet',
     title: 'Cerita wang anda',
     loading: 'Memuatkan analitik...',
     insight_type: 'Jenis analitik',
@@ -1482,6 +1508,8 @@ const ms = {
       'Pelan percuma termasuk {{count}} entri suara. Naik taraf ke Pro untuk input suara tanpa had.',
     limit_items:
       'Anda boleh menjejak sehingga {{count}} item dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
+    limit_budget_templates:
+      'Pelan percuma membenarkan {{count}} templat bajet. Tanpa had dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka kunci trend jangka panjang',
     trend_preview_message:
@@ -1694,6 +1722,57 @@ const ms = {
   assets: {
     tab_accounts: 'Akaun',
     tab_items: 'Item',
+  },
+  budget: {
+    title: 'Bajet',
+    templates_title: 'Templat bajet',
+    templates_subtitle: 'Pelan bulanan boleh guna semula',
+    template_default_badge: 'Lalai',
+    make_default: 'Jadikan lalai',
+    new_template: 'Templat baharu',
+    create_template: 'Cipta templat',
+    add_title: 'Templat baharu',
+    edit_title: 'Edit templat',
+    duplicate: 'Duplikat',
+    duplicate_suffix: 'salinan',
+    delete_template_title: 'Padam templat?',
+    delete_template_message:
+      'Bajet bulanan yang telah dicipta dikekalkan. Jika ini lalai, templat seterusnya menjadi lalai.',
+    no_templates_title: 'Tiada templat lagi',
+    no_templates_message: 'Cipta templat bajet untuk mula merancang bulan anda.',
+    no_budget_title: 'Tiada bajet untuk {{month}}',
+    no_budget_message: 'Cipta daripada templat untuk menjejak bulan ini.',
+    create_budget: 'Cipta bajet',
+    choose_template: 'Pilih templat',
+    custom_option: 'Tersuai',
+    custom_option_caption: 'Bina bajet sekali sahaja untuk bulan ini.',
+    categories_count_one: '{{count}} kategori',
+    categories_count_other: '{{count}} kategori',
+    summary_budgeted: 'Perbelanjaan berbajet',
+    summary_unbudgeted: 'Perbelanjaan luar bajet',
+    summary_exceeded: 'Melebihi bajet {{amount}}',
+    delete_budget: 'Padam bajet',
+    delete_budget_title: 'Padam bajet bulan ini?',
+    delete_budget_message: 'Ia tidak akan dicipta semula secara automatik untuk bulan ini.',
+    unbudgeted_section: 'Perbelanjaan luar bajet',
+    left: 'Baki {{amount}}',
+    over: 'Lebih {{amount}}',
+    name_label: 'Nama',
+    name_placeholder: 'cth. Harian',
+    total_label: 'Jumlah bajet',
+    allocated_summary: '{{allocated}} daripada {{total}} diagihkan',
+    allocated_done: 'Diagihkan sepenuhnya',
+    fill_remainder: 'Isi',
+    back_populate_title: 'Isi bulan-bulan lepas',
+    back_populate_caption:
+      'Mencipta bajet untuk {{first}} - {{last}} ({{count}} bulan). Bulan yang sudah ada bajet dilangkau.',
+    choose_emoji: 'Pilih emoji',
+    count_unbudgeted_title: 'Kira perbelanjaan luar bajet',
+    count_unbudgeted_caption:
+      'Masukkan perbelanjaan daripada kategori tanpa baris bajet ke dalam jumlah bulan.',
+    children_hint: 'Jika mahu, agihkan jumlah ini kepada subkategori.',
+    subcategories: 'Subkategori',
+    edit_budget: 'Edit bajet',
   },
   items: {
     title: 'Item',

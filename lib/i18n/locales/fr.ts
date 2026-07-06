@@ -89,6 +89,17 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgets et objets',
+      budget: {
+        title: 'Définir un budget mensuel',
+        body: "Créez un budget à partir de modèles réutilisables et voyez chaque catégorie se remplir à mesure que vous dépensez. Voyez ce qu'il reste d'un coup d'œil, par mois ou directement sur votre écran d'accueil.",
+      },
+      items: {
+        title: 'Ce que vos objets coûtent par jour',
+        body: 'Suivez ce que vous achetez et voyez leur coût diminuer chaque jour que vous les possédez. Découvrez ce que chacun coûte vraiment par jour.',
+      },
+    },
     calendar_albums_update: {
       title: 'Accueil calendrier & albums',
       calendar: {
@@ -135,6 +146,10 @@ const fr = {
       open_share_earn: 'Obtenir Pro gratuitement',
     },
     showcase: {
+      budget_food: 'Alimentation',
+      budget_transport: 'Transport',
+      item_headphones: 'Casque',
+      item_jacket: 'Veste',
       this_month: 'Ce mois-ci',
       past_7_days: '7 derniers jours',
       income: 'Revenu',
@@ -193,6 +208,16 @@ const fr = {
     of_work: '{{hours}} de travail',
     of_work_kept: '≈ {{hours}} de travail gardées',
     of_work_behind: '≈ {{hours}} de travail en déficit',
+    budget_setup: 'Définir un budget mensuel',
+    budget_over: 'budget dépassé',
+    budget_left_of: 'restant sur {{total}}',
+    budget_left: '{{amount}} restant',
+    budget_over_by: 'Dépassement de {{amount}}',
+    budget_days_left_one: '{{count}} jour restant',
+    budget_days_left_other: '{{count}} jours restants',
+    budget_more_categories_one: '{{count}} autre catégorie',
+    budget_more_categories_other: '{{count}} autres catégories',
+    budget_unbudgeted: '+{{amount}} hors budget',
   },
   home: {
     converter: {
@@ -550,6 +575,7 @@ const fr = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Votre histoire financière',
     loading: 'Chargement des analyses...',
     insight_type: "Type d'analyse",
@@ -1496,6 +1522,8 @@ const fr = {
       "L'offre gratuite inclut {{count}} saisies vocales. Passez à Pro pour une saisie vocale illimitée.",
     limit_items:
       "Vous pouvez suivre jusqu'à {{count}} objets avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
+    limit_budget_templates:
+      'Le plan gratuit permet {{count}} modèle de budget. Passez à Pro pour un nombre illimité.',
     badge: 'PRO',
     trend_preview_title: 'Débloquez les tendances long terme',
     trend_preview_message:
@@ -1710,6 +1738,57 @@ const fr = {
   assets: {
     tab_accounts: 'Comptes',
     tab_items: 'Objets',
+  },
+  budget: {
+    title: 'Budget',
+    templates_title: 'Modèles de budget',
+    templates_subtitle: 'Plans mensuels réutilisables',
+    template_default_badge: 'Par défaut',
+    make_default: 'Définir par défaut',
+    new_template: 'Nouveau modèle',
+    create_template: 'Créer un modèle',
+    add_title: 'Nouveau modèle',
+    edit_title: 'Modifier le modèle',
+    duplicate: 'Dupliquer',
+    duplicate_suffix: 'copie',
+    delete_template_title: 'Supprimer le modèle ?',
+    delete_template_message:
+      'Les budgets mensuels déjà créés sont conservés. S’il s’agit du modèle par défaut, le suivant le devient.',
+    no_templates_title: 'Aucun modèle pour l’instant',
+    no_templates_message: 'Créez un modèle de budget pour planifier vos mois.',
+    no_budget_title: 'Pas de budget pour {{month}}',
+    no_budget_message: 'Créez-en un depuis un modèle pour suivre ce mois.',
+    create_budget: 'Créer un budget',
+    choose_template: 'Choisir un modèle',
+    custom_option: 'Personnalisé',
+    custom_option_caption: 'Créez un budget ponctuel pour ce mois uniquement.',
+    categories_count_one: '{{count}} catégorie',
+    categories_count_other: '{{count}} catégories',
+    summary_budgeted: 'Dépenses budgétées',
+    summary_unbudgeted: 'Dépenses hors budget',
+    summary_exceeded: 'Dépassement de {{amount}}',
+    delete_budget: 'Supprimer le budget',
+    delete_budget_title: 'Supprimer le budget de ce mois ?',
+    delete_budget_message: 'Il ne sera pas recréé automatiquement pour ce mois.',
+    unbudgeted_section: 'Dépenses hors budget',
+    left: '{{amount}} restant',
+    over: '{{amount}} de trop',
+    name_label: 'Nom',
+    name_placeholder: 'ex. Quotidien',
+    total_label: 'Budget total',
+    allocated_summary: '{{allocated}} sur {{total}} répartis',
+    allocated_done: 'Entièrement réparti',
+    fill_remainder: 'Compléter',
+    back_populate_title: 'Remplir les mois passés',
+    back_populate_caption:
+      'Crée des budgets pour {{first}} - {{last}} ({{count}} mois). Les mois ayant déjà un budget sont ignorés.',
+    choose_emoji: 'Choisir un emoji',
+    count_unbudgeted_title: 'Compter les dépenses hors budget',
+    count_unbudgeted_caption:
+      'Inclure dans le total du mois les dépenses des catégories sans ligne de budget.',
+    children_hint: 'Répartissez éventuellement ce montant entre les sous-catégories.',
+    subcategories: 'Sous-catégories',
+    edit_budget: 'Modifier le budget',
   },
   items: {
     title: 'Objets',

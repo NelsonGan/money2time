@@ -74,6 +74,17 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     return true;
   }
 
+  if (parsed.action === 'budget') {
+    // Budget is an Insights page now, so open the Insights tab focused on it
+    // rather than a dedicated screen.
+    runDeepLinkNavigation(navigationRef, null, () => {
+      requestOpenTab('insights');
+      requestFocusInsight('budget');
+    });
+    void trackEvent(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' });
+    return true;
+  }
+
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
     runDeepLinkNavigation(navigationRef, { name: 'ProPaywall', params: { source } });

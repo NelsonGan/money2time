@@ -17,14 +17,20 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import {
+  BudgetBreakdownWidgetContent,
+  BudgetRingWidgetContent,
+} from '~/components/widget-preview/BudgetWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { WIDGET_DEFINITIONS, WIDGET_IDS, type WidgetSize } from '~/services/widgetRegistry';
 import {
+  type BudgetBreakdownSnapshot,
+  type BudgetRingSnapshot,
   buildMoney2TimeWidgetSnapshot,
   buildSampleWidgetSnapshot,
-  parseSavingsExclusions,
   type CalendarMonthSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
+  parseSavingsExclusions,
   type QuickAddSmallSnapshot,
   type SavingsHistorySnapshot,
   type SavingsRateSnapshot,
@@ -433,6 +439,22 @@ function SavingsRateWidgetPreview({ data }: { data: SavingsRateSnapshot }) {
   );
 }
 
+function BudgetRingWidgetPreview({ data }: { data: BudgetRingSnapshot }) {
+  return (
+    <WidgetFrame size="small" pro>
+      {({ width: frameWidth }) => <BudgetRingWidgetContent data={data} size={frameWidth} />}
+    </WidgetFrame>
+  );
+}
+
+function BudgetBreakdownWidgetPreview({ data }: { data: BudgetBreakdownSnapshot }) {
+  return (
+    <WidgetFrame size="large" pro>
+      {() => <BudgetBreakdownWidgetContent data={data} />}
+    </WidgetFrame>
+  );
+}
+
 function IoChip({ tone, label }: { tone: 'income' | 'expense'; label: string }) {
   const themeColors = useThemeColors();
   const isIncome = tone === 'income';
@@ -629,7 +651,13 @@ function DataSourceToggle({
 }
 
 export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
-  const { settings, categories, insightsPreferencesJson, getTrueHourlyRateForDate } = useApp();
+  const {
+    settings,
+    categories,
+    monthlyBudgets,
+    insightsPreferencesJson,
+    getTrueHourlyRateForDate,
+  } = useApp();
   const { transactions } = useTransactions();
   const { isPro } = usePro();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -645,6 +673,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
       isPro,
       getTrueHourlyRateForDate,
       categories,
+      monthlyBudgets,
       excludedSavingsIncomeCategoryIds: savingsExclusions.income,
       excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
     });
@@ -654,6 +683,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,
+    monthlyBudgets,
     settings,
     transactions,
   ]);
@@ -683,6 +713,10 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
                 <SavingsRateWidgetPreview data={snapshot.savingsRate} />
               ) : widget.id === WIDGET_IDS.savingsHistory ? (
                 <SavingsHistoryWidgetPreview data={snapshot.savingsHistory} />
+              ) : widget.id === WIDGET_IDS.budgetRing ? (
+                <BudgetRingWidgetPreview data={snapshot.budgetRing} />
+              ) : widget.id === WIDGET_IDS.budgetBreakdown ? (
+                <BudgetBreakdownWidgetPreview data={snapshot.budgetBreakdown} />
               ) : (
                 <CalendarWidgetPreview data={snapshot.calendarMonth} />
               )}
