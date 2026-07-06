@@ -57,3 +57,6 @@ skills-lock.json
 
 # training data
 /training
+
+# worktrees
+.claude/worktrees/
