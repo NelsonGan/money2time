@@ -6,6 +6,8 @@ import type {
   BudgetTemplateRow,
   CategoryRow,
   ExchangeRateRow,
+  GoalContributionRow,
+  GoalRow,
   ItemRow,
   MonthlyBudgetCategoryRow,
   MonthlyBudgetRow,
@@ -25,6 +27,10 @@ import type {
   Category,
   ExchangeRate,
   ExchangeRateSource,
+  Goal,
+  GoalContribution,
+  GoalStatus,
+  GoalTrackingMode,
   Item,
   MonthlyBudget,
   MonthlyBudgetLine,
@@ -210,6 +216,64 @@ export function toItem(row: ItemRow): Item {
     salePrice: row.salePrice ?? null,
     note: row.note ?? null,
     sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+function asGoalTrackingMode(value: string): GoalTrackingMode {
+  return value === 'account' ? 'account' : 'manual';
+}
+
+function asGoalStatus(value: string): GoalStatus {
+  switch (value) {
+    case 'completed':
+    case 'archived':
+      return value;
+    default:
+      return 'active';
+  }
+}
+
+export function toGoal(row: GoalRow): Goal {
+  return {
+    id: row.id,
+    name: row.name,
+    targetAmount: row.targetAmount ?? 0,
+    currency: row.currency,
+    fxRate: row.fxRate ?? 1,
+    targetReportingAmount: row.targetReportingAmount ?? 0,
+    startingAmount: row.startingAmount ?? 0,
+    deadline: row.deadline ?? null,
+    coverPhotoUri: row.coverPhotoUri ?? null,
+    emoji: row.emoji ?? null,
+    note: row.note ?? null,
+    trackingMode: asGoalTrackingMode(row.trackingMode),
+    linkedAccountId: row.linkedAccountId ?? null,
+    countExistingBalance: row.countExistingBalance ?? false,
+    baselineAmount: row.baselineAmount ?? null,
+    status: asGoalStatus(row.status),
+    completedAt: row.completedAt ?? null,
+    sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toGoalContribution(row: GoalContributionRow): GoalContribution {
+  return {
+    id: row.id,
+    goalId: row.goalId,
+    amount: row.amount ?? 0,
+    currency: row.currency,
+    reportingCurrency: row.reportingCurrency ?? null,
+    reportingAmount: row.reportingAmount ?? null,
+    fxRate: row.fxRate ?? null,
+    date: row.date,
+    note: row.note ?? null,
+    linkedTransactionId: row.linkedTransactionId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

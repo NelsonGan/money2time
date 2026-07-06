@@ -51,6 +51,14 @@ export const AnalyticsEvents = {
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
   MAP_PIN_TAPPED: 'Map Pin Tapped',
 
+  // Goals
+  GOAL_CREATED: 'Goal Created',
+  GOAL_UPDATED: 'Goal Updated',
+  GOAL_DELETED: 'Goal Deleted',
+  GOAL_COMPLETED: 'Goal Completed',
+  GOAL_ARCHIVED: 'Goal Archived',
+  GOAL_CONTRIBUTION_ADDED: 'Goal Contribution Added',
+
   // Budgets
   BUDGET_TEMPLATE_CREATED: 'Budget Template Created',
   BUDGET_TEMPLATE_UPDATED: 'Budget Template Updated',
