@@ -1,8 +1,14 @@
-import { Check, Clock3, Send } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { Platform, Pressable, ScrollView, Share, View } from 'react-native';
+import { Check, ChevronDown, Send, Trash2 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, Share, View } from 'react-native';
 
-import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import {
+  AccountPickerSheet,
+  CategoryEmoji,
+  SettingsHeader,
+  SettingsPageLayout,
+  Text,
+} from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -10,13 +16,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { getPaymentQrUri } from '~/services/userAssets';
 import { convert, currencySymbolForCode } from '~/utils/currency';
-import {
-  amountToHoursByRate,
-  dayKeyFromDateLocal,
-  formatCurrency,
-  formatHours,
-  formatRelativeDate,
-} from '~/utils/formatters';
+import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 import {
   aggregateUnpaidSplitsByPerson,
   buildReceiptText,
@@ -29,10 +29,20 @@ interface SettleUpPersonScreenProps {
 
 export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreenProps) {
   const themeColors = useThemeColors();
-  const { settings, rateTable, getAccountById, getTrueHourlyRateForDate, markSplitPaid } = useApp();
+  const {
+    settings,
+    rateTable,
+    accounts,
+    accountGroups,
+    getAccountById,
+    markSplitPaid,
+    updateSplitPaybackAccount,
+    deleteSplit,
+  } = useApp();
   const { transactions } = useTransactions();
 
   const reportingCurrency = settings.currencyCode;
+  const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
 
   const rateToReporting = useCallback(
     (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
@@ -54,10 +64,6 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
   useEffect(() => {
     if (!person) onBack();
   }, [person, onBack]);
-
-  const hourlyRate = getTrueHourlyRateForDate(dayKeyFromDateLocal(new Date()));
-  const totalHours =
-    person && hourlyRate > 0 ? amountToHoursByRate(person.totalReporting, hourlyRate) : 0;
 
   const formatReporting = useCallback(
     (value: number) => formatCurrency(value, settings.currencySymbol),
@@ -110,6 +116,30 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     [markSplitPaid],
   );
 
+  const handleDelete = useCallback(
+    (splitId: string) => {
+      void triggerHaptic('warning');
+      Alert.alert(
+        I18n.t('transactions.settleUp.remove_bill_title'),
+        I18n.t('transactions.settleUp.remove_bill_message'),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.remove'),
+            style: 'destructive',
+            onPress: () => deleteSplit(splitId),
+          },
+        ],
+      );
+    },
+    [deleteSplit],
+  );
+
+  const pickerBill = useMemo(
+    () => person?.bills.find((b) => b.splitId === pickerForSplitId) ?? null,
+    [person, pickerForSplitId],
+  );
+
   const title = person?.name ?? `${I18n.t('transactions.settleUp.someone')}`;
 
   return (
@@ -128,14 +158,6 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
               <Text variant="heading" className="mt-1 text-3xl">
                 {formatReporting(person.totalReporting)}
               </Text>
-              {totalHours > 0 ? (
-                <View className="mt-1 flex-row items-center gap-1">
-                  <Clock3 size={12} color={themeColors.textMuted} />
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.settleUp.time_equiv', { time: formatHours(totalHours) })}
-                  </Text>
-                </View>
-              ) : null}
             </View>
 
             <View className="mt-4 gap-2">
@@ -149,6 +171,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                     className="rounded-2xl border border-border/25 bg-card/60 px-3.5 py-3"
                   >
                     <View className="flex-row items-center gap-3">
+                      <CategoryEmoji icon={bill.categoryIcon} size={26} className="text-[17px]" />
                       <View className="flex-1">
                         <Text variant="body" numberOfLines={1}>
                           {bill.note?.trim() ||
@@ -157,12 +180,39 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                         </Text>
                         <Text variant="caption" tone="muted">
                           {formatRelativeDate(bill.date)}
-                          {account
-                            ? ` · ${I18n.t('transactions.settleUp.payback_to', { account: account.name })}`
-                            : ''}
                         </Text>
                       </View>
                       <Text variant="bodyStrong">{formatNative(bill.amount, bill.currency)}</Text>
+                    </View>
+
+                    <View className="mt-2 flex-row items-center gap-2 pl-[38px]">
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setPickerForSplitId(bill.splitId);
+                        }}
+                        className="min-w-0 flex-shrink flex-row items-center gap-1 rounded-full bg-secondary/50 px-2.5 py-1 active:opacity-70"
+                      >
+                        <Text
+                          variant="caption"
+                          tone="muted"
+                          numberOfLines={1}
+                          className="max-w-[140px]"
+                        >
+                          {I18n.t('transactions.settleUp.payback_to', {
+                            account: account?.name ?? I18n.t('common.no_account'),
+                          })}
+                        </Text>
+                        <ChevronDown size={12} color={themeColors.textMuted} />
+                      </Pressable>
+                      <View className="flex-1" />
+                      <Pressable
+                        onPress={() => handleDelete(bill.splitId)}
+                        hitSlop={6}
+                        className="h-7 w-7 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
+                      >
+                        <Trash2 size={13} color={themeColors.error} />
+                      </Pressable>
                       <Pressable
                         onPress={() => handleMarkPaid(bill.splitId)}
                         hitSlop={6}
@@ -191,6 +241,18 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
               </Text>
             </Pressable>
           </View>
+
+          <AccountPickerSheet
+            visible={pickerForSplitId !== null}
+            onClose={() => setPickerForSplitId(null)}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedAccountId={pickerBill?.paybackAccountId ?? null}
+            onSelect={(accountId) => {
+              if (pickerForSplitId) updateSplitPaybackAccount(pickerForSplitId, accountId);
+              setPickerForSplitId(null);
+            }}
+          />
         </>
       ) : null}
     </SettingsPageLayout>

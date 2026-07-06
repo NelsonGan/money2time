@@ -352,6 +352,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
   ) => void;
   markSplitUnpaid: (splitId: string) => void;
+  updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
+  deleteSplit: (splitId: string) => void;
 
   updateSettings: (
     updates: Partial<
@@ -2486,6 +2488,82 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [scheduleRefreshTransactions],
   );
 
+  // Re-point an unpaid split's payback account (no amount/transfer change). Only
+  // used for still-owed splits, so there is no linked transfer to move.
+  const updateSplitPaybackAccount = useCallback(
+    (splitId: string, paybackAccountId: string | null) => {
+      const now = nowIso();
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          if (!tx.splits?.some((s) => s.id === splitId)) return tx;
+          const updatedSplits = tx.splits.map((s) =>
+            s.id === splitId ? { ...s, paybackAccountId, updatedAt: now } : s,
+          );
+          return { ...tx, splits: updatedSplits };
+        }),
+      );
+      runDeferredWrite(() => {
+        try {
+          transactionSplitsRepository.update(splitId, { paybackAccountId });
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  // Remove a single split request. If it had already been marked paid, reverse
+  // that first (restore the parent's amount and drop the linked transfer) so the
+  // books stay consistent, then soft-delete the split.
+  const deleteSplit = useCallback(
+    (splitId: string) => {
+      const now = nowIso();
+      setTransactions((prev) => {
+        const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
+        const split = parent?.splits?.find((s) => s.id === splitId);
+        if (!parent || !split) return prev;
+        const transferTxId = split.paidAt ? split.paidTransactionId : null;
+        const restoreAmount = split.paidAt ? split.amount : 0;
+        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        return filtered.map((tx) => {
+          if (tx.id !== parent.id) return tx;
+          const updatedSplits = (tx.splits ?? []).filter((s) => s.id !== splitId);
+          return {
+            ...tx,
+            amount: normalizeMoneyAmount(tx.amount + restoreAmount),
+            updatedAt: now,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        });
+      });
+      runDeferredWrite(() => {
+        try {
+          const split = transactionSplitsRepository.findById(splitId);
+          if (!split) return;
+          if (split.paidAt) {
+            const parent = transactionsRepository.getById(split.transactionId);
+            if (parent) {
+              transactionsRepository.update(parent.id, {
+                amount: normalizeMoneyAmount(parent.amount + split.amount),
+              });
+            }
+            if (split.paidTransactionId) {
+              transactionsRepository.softDelete(split.paidTransactionId);
+            }
+          }
+          transactionSplitsRepository.softDelete(splitId);
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
   const canUseTimeDisplayMode = useMemo(
     () =>
       (currentMonthWage?.trueHourlyRate ?? 0) > 0 ||
@@ -3646,6 +3724,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionSplits,
             markSplitPaid,
             markSplitUnpaid,
+            updateSplitPaybackAccount,
+            deleteSplit,
             updateSettings,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -3761,6 +3841,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionSplits,
       markSplitPaid,
       markSplitUnpaid,
+      updateSplitPaybackAccount,
+      deleteSplit,
       updateSettings,
       updateWageConfig,
       updateWageConfigForMonth,

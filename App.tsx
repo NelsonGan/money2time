@@ -659,6 +659,7 @@ function MainShellScreen({
     [openProPaywall],
   );
   const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
+  const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
@@ -1062,6 +1063,7 @@ function MainShellScreen({
             onOpenAddWageMonth={openAddWageMonth}
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
+            onOpenSettleUp={openSettleUp}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}

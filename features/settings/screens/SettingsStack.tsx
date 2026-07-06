@@ -30,8 +30,6 @@ import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
-import { SettleUpPersonScreen, SettleUpScreen } from '~/features/transactions/screens';
-
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
@@ -52,6 +50,7 @@ interface SettingsStackProps {
   onOpenAddWageMonth: () => void;
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
+  onOpenSettleUp: () => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -78,12 +77,14 @@ function SettingsHomeRoute({
   navigation,
   scrollToTopToken,
   onOpenProPaywall,
+  onOpenSettleUp,
   onStartTutorial,
   onTutorialTargetLayout,
   tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: () => void;
+  onOpenSettleUp: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
     targetId:
@@ -117,7 +118,7 @@ function SettingsHomeRoute({
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
-      onOpenSettleUp={() => navigation.navigate('SettleUp')}
+      onOpenSettleUp={onOpenSettleUp}
       onStartTutorial={onStartTutorial}
       onTutorialTargetLayout={onTutorialTargetLayout}
       tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -137,6 +138,7 @@ export function SettingsStack({
   onOpenAddWageMonth,
   onOpenWageCalculator,
   onOpenProPaywall,
+  onOpenSettleUp,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -199,6 +201,7 @@ export function SettingsStack({
               {...props}
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
+              onOpenSettleUp={onOpenSettleUp}
               onStartTutorial={onStartTutorial}
               onTutorialTargetLayout={onTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -375,30 +378,6 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <ShareAndEarnScreen onBack={() => props.navigation.goBack()} />;
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="SettleUp">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return (
-            <SettleUpScreen
-              onBack={() => props.navigation.goBack()}
-              onOpenPerson={(personKey) =>
-                props.navigation.navigate('SettleUpPerson', { personKey })
-              }
-            />
-          );
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="SettleUpPerson">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return (
-            <SettleUpPersonScreen
-              personKey={props.route.params.personKey}
-              onBack={() => props.navigation.goBack()}
-            />
-          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="QuickEntrySettings">
