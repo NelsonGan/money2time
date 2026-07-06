@@ -577,9 +577,10 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [categories],
     );
 
-    // Tap-through to the transactions behind a line, mirroring the breakdown
-    // pie: a root includes its subcategories' spend, a subcategory only its
-    // own, and `null` is the uncategorized bucket.
+    // Tap-through to the transactions behind a line: a root includes its
+    // subcategories' spend, a subcategory only its own, and `null` is the
+    // uncategorized bucket. Unlike the breakdown pie, tapping a parent goes
+    // straight to its transactions (no subcategory-selection stage).
     const openCategoryDrilldown = useCallback(
       (month: string, categoryId: string | null, includeChildren: boolean) => {
         const transactionIds = (expensesByMonth.get(month) ?? [])
@@ -602,6 +603,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                 categoryRootId: category.id,
                 categoryRootLabel: category.name,
                 categoryRootEmoji: category.icon,
+                // Show the rolled-up transactions directly; skip the
+                // subcategory picker the breakdown pie uses.
+                showSubcategorySelection: false,
               }
             : {}),
         });
