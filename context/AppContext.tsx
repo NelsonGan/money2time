@@ -3433,6 +3433,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       let income = 0;
       let expense = 0;
       txns.forEach((transaction) => {
+        // Reimbursement inflows are recovered spend, not income — exclude them
+        // so cashflow income never overstates earnings.
+        if (transaction.reimbursesTransactionId) return;
         const value = valueForDisplay(
           transaction.reportingAmount ?? transaction.amount,
           transaction.date,
@@ -3457,7 +3460,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
       });
 
-      return aggregateBreakdown(txns, {
+      // Reimbursement inflows are income-typed but represent recovered spend,
+      // not earnings — exclude them from income breakdowns so they never inflate
+      // income totals (the raw activity list still shows them).
+      const scoped = type === 'income' ? txns.filter((t) => !t.reimbursesTransactionId) : txns;
+
+      return aggregateBreakdown(scoped, {
         resolveCategory: (id) => categoryByIdMap.get(id),
         valueOf: valueForDisplay,
         groupByRoot,
