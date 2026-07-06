@@ -341,4 +341,17 @@ describe('recentSplitPersonNames', () => {
   it('returns an empty list when there are no named splits', () => {
     expect(recentSplitPersonNames([makeTx({})])).toEqual([]);
   });
+
+  it('still suggests names from splits that were marked paid', () => {
+    const names = recentSplitPersonNames([
+      makeTx({
+        id: 't1',
+        date: '2026-06-01',
+        splits: [
+          makeSplit({ id: 's1', personName: 'Alice', amount: 20, paidAt: '2026-06-05T00:00:00Z' }),
+        ],
+      }),
+    ]);
+    expect(names).toEqual(['Alice']);
+  });
 });
