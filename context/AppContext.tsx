@@ -151,7 +151,6 @@ import {
 } from '~/utils/formatters';
 import {
   claimStatusForReimbursedAmount,
-  clampClaimAmount,
   clampReimbursementAmount,
   outstandingClaimAmount,
 } from '~/utils/claims';
@@ -359,17 +358,14 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   markSplitUnpaid: (splitId: string) => void;
 
-  // Claim / reimbursement (V1)
-  markClaimable: (
-    txId: string,
-    options?: { claimAmount?: number | null; reimbursementAccountId?: string | null },
-  ) => void;
-  markUnclaimable: (txId: string) => void;
+  // Claim / reimbursement (V1). Flagging an expense as claimable happens
+  // atomically via the create/update payload (claimStatus/claimAmount); this
+  // records a reimbursement as a visible income inflow. Undo is via deleting the
+  // inflow row (the delete cascade rewinds the claim).
   markReimbursed: (
     txId: string,
     options?: { amount?: number; accountId?: string | null; date?: string },
   ) => void;
-  undoReimbursement: (inflowTxId: string) => void;
 
   updateSettings: (
     updates: Partial<
@@ -2578,100 +2574,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [scheduleRefreshTransactions],
   );
 
-  // --- Claim / reimbursement (V1) --------------------------------------------
-  // Flag an expense as claimable. `claimAmount` defaults to the full amount and
-  // is clamped to (0, amount] for partial claims.
-  const markClaimable = useCallback(
-    (
-      txId: string,
-      options?: { claimAmount?: number | null; reimbursementAccountId?: string | null },
-    ) => {
-      const now = nowIso();
-      setTransactions((prev) =>
-        prev.map((tx) => {
-          if (tx.id !== txId || tx.type !== 'expense') return tx;
-          return {
-            ...tx,
-            claimStatus: 'claimable',
-            claimAmount: clampClaimAmount(options?.claimAmount, tx.amount),
-            reimbursedAmount: 0,
-            reimbursedAt: null,
-            reimbursementAccountId:
-              options?.reimbursementAccountId !== undefined
-                ? options.reimbursementAccountId
-                : (tx.reimbursementAccountId ?? tx.accountId ?? null),
-            updatedAt: now,
-          };
-        }),
-      );
-      runDeferredWrite(() => {
-        try {
-          const tx = transactionsRepository.getById(txId);
-          if (!tx || tx.type !== 'expense') return;
-          const claimAmount = clampClaimAmount(options?.claimAmount, tx.amount);
-          transactionsRepository.update(txId, {
-            claimStatus: 'claimable',
-            claimAmount,
-            reimbursedAmount: 0,
-            reimbursedAt: null,
-            reimbursementAccountId:
-              options?.reimbursementAccountId !== undefined
-                ? options.reimbursementAccountId
-                : (tx.reimbursementAccountId ?? tx.accountId ?? null),
-          });
-          void trackEvent(AnalyticsEvents.CLAIM_MARKED_CLAIMABLE, {
-            is_partial: claimAmount < tx.amount,
-          });
-        } catch {
-          // ignore; refresh restores truth
-        }
-        scheduleRefreshTransactions();
-      });
-    },
-    [scheduleRefreshTransactions],
-  );
-
-  // Clear the claimable flag. Only allowed while nothing has been reimbursed —
-  // the caller must undo reimbursements first.
-  const markUnclaimable = useCallback(
-    (txId: string) => {
-      const now = nowIso();
-      setTransactions((prev) =>
-        prev.map((tx) => {
-          if (tx.id !== txId) return tx;
-          if ((tx.reimbursedAmount ?? 0) > 0) return tx;
-          return {
-            ...tx,
-            claimStatus: 'none',
-            claimAmount: null,
-            reimbursedAmount: 0,
-            reimbursedAt: null,
-            reimbursementAccountId: null,
-            updatedAt: now,
-          };
-        }),
-      );
-      runDeferredWrite(() => {
-        try {
-          const tx = transactionsRepository.getById(txId);
-          if (!tx || (tx.reimbursedAmount ?? 0) > 0) return;
-          transactionsRepository.update(txId, {
-            claimStatus: 'none',
-            claimAmount: null,
-            reimbursedAmount: 0,
-            reimbursedAt: null,
-            reimbursementAccountId: null,
-          });
-          void trackEvent(AnalyticsEvents.CLAIM_MARKED_UNCLAIMABLE, {});
-        } catch {
-          // ignore
-        }
-        scheduleRefreshTransactions();
-      });
-    },
-    [scheduleRefreshTransactions],
-  );
-
   // Record a reimbursement: create a visible income inflow (back-pointing at the
   // expense via reimbursesTransactionId) and advance the claim's status. The
   // original expense is never reduced — gross spend stays gross.
@@ -2695,6 +2597,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newReimbursed = normalizeMoneyAmount((expense.reimbursedAmount ?? 0) + applied);
         const newStatus = claimStatusForReimbursedAmount(expense.claimAmount, newReimbursed);
         const snapshot = buildSnapshot('income', applied, expense.currency);
+        // Freeze the account-currency value when the reimbursement lands in an
+        // account whose currency differs from the expense currency.
+        const acctCurrency = accountId
+          ? (accounts.find((a) => a.id === accountId)?.currency ?? reportingCurrencyRef.current)
+          : reportingCurrencyRef.current;
+        const accountAmount =
+          expense.currency === acctCurrency
+            ? null
+            : convert(applied, expense.currency, acctCurrency, rateTableRef.current).value;
         const inflow: TransactionWithRelations = {
           id: inflowId,
           type: 'income',
@@ -2704,7 +2615,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reportingAmount: snapshot.reportingAmount,
           fxRate: snapshot.fxRate,
           toAmount: null,
-          accountAmount: null,
+          accountAmount,
           date,
           accountId,
           fromAccountId: null,
@@ -2758,6 +2669,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const newReimbursed = normalizeMoneyAmount((expense.reimbursedAmount ?? 0) + applied);
           const newStatus = claimStatusForReimbursedAmount(expense.claimAmount, newReimbursed);
           const snapshot = buildSnapshot('income', applied, expense.currency);
+          const acctCurrency = accountId
+            ? (accounts.find((a) => a.id === accountId)?.currency ?? reportingCurrencyRef.current)
+            : reportingCurrencyRef.current;
+          const accountAmount =
+            expense.currency === acctCurrency
+              ? null
+              : convert(applied, expense.currency, acctCurrency, rateTableRef.current).value;
           transactionsRepository.createWithId(inflowId, {
             type: 'income',
             amount: applied,
@@ -2765,6 +2683,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reportingCurrency: snapshot.reportingCurrency,
             reportingAmount: snapshot.reportingAmount,
             fxRate: snapshot.fxRate,
+            accountAmount,
             date,
             accountId,
             categoryId: null,
@@ -2788,65 +2707,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [buildSnapshot, resolveRelationNames, scheduleRefreshTransactions],
-  );
-
-  // Undo a single reimbursement inflow: soft-delete it and rewind the source
-  // expense's reimbursed total / status.
-  const undoReimbursement = useCallback(
-    (inflowTxId: string) => {
-      setTransactions((prev) => {
-        const inflow = prev.find((tx) => tx.id === inflowTxId);
-        if (!inflow || !inflow.reimbursesTransactionId) return prev;
-        const expenseId = inflow.reimbursesTransactionId;
-        const amount = inflow.amount;
-        const now = nowIso();
-        return prev
-          .filter((tx) => tx.id !== inflowTxId)
-          .map((tx) => {
-            if (tx.id !== expenseId || tx.claimAmount == null) return tx;
-            const newReimbursed = Math.max(
-              0,
-              normalizeMoneyAmount((tx.reimbursedAmount ?? 0) - amount),
-            );
-            const newStatus = claimStatusForReimbursedAmount(tx.claimAmount, newReimbursed);
-            return {
-              ...tx,
-              reimbursedAmount: newReimbursed,
-              claimStatus: newStatus,
-              reimbursedAt: newStatus === 'reimbursed' ? tx.reimbursedAt : null,
-              updatedAt: now,
-            };
-          });
-      });
-      runDeferredWrite(() => {
-        try {
-          const inflow = transactionsRepository.getById(inflowTxId);
-          if (!inflow || !inflow.reimbursesTransactionId) return;
-          const expenseId = inflow.reimbursesTransactionId;
-          const amount = inflow.amount;
-          transactionsRepository.softDelete(inflowTxId);
-          const expense = transactionsRepository.getById(expenseId);
-          if (expense && expense.claimAmount != null) {
-            const newReimbursed = Math.max(
-              0,
-              normalizeMoneyAmount((expense.reimbursedAmount ?? 0) - amount),
-            );
-            const newStatus = claimStatusForReimbursedAmount(expense.claimAmount, newReimbursed);
-            transactionsRepository.update(expenseId, {
-              reimbursedAmount: newReimbursed,
-              claimStatus: newStatus,
-              reimbursedAt: newStatus === 'reimbursed' ? expense.reimbursedAt : null,
-            });
-          }
-          void trackEvent(AnalyticsEvents.CLAIM_REIMBURSEMENT_UNDONE, {});
-        } catch {
-          // ignore
-        }
-        scheduleRefreshTransactions();
-      });
-    },
-    [scheduleRefreshTransactions],
+    [accounts, buildSnapshot, resolveRelationNames, scheduleRefreshTransactions],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -4015,10 +3876,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionSplits,
             markSplitPaid,
             markSplitUnpaid,
-            markClaimable,
-            markUnclaimable,
             markReimbursed,
-            undoReimbursement,
             updateSettings,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -4134,10 +3992,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionSplits,
       markSplitPaid,
       markSplitUnpaid,
-      markClaimable,
-      markUnclaimable,
       markReimbursed,
-      undoReimbursement,
       updateSettings,
       updateWageConfig,
       updateWageConfigForMonth,

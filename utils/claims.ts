@@ -22,11 +22,6 @@ export function claimStatusForReimbursedAmount(
   return 'partially_reimbursed';
 }
 
-/** True once the claim is fully settled. */
-export function isFullyReimbursed(claimAmount: number, reimbursedAmount: number): boolean {
-  return claimAmount > 0 && reimbursedAmount >= claimAmount - CLAIM_EPSILON;
-}
-
 /** Remaining amount still owed on a claimable expense (never negative). */
 export function outstandingClaimAmount(
   tx: Pick<Transaction, 'claimStatus' | 'claimAmount' | 'reimbursedAmount'>,

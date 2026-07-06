@@ -2,7 +2,6 @@ import {
   claimStatusForReimbursedAmount,
   clampClaimAmount,
   clampReimbursementAmount,
-  isFullyReimbursed,
   isOutstandingClaim,
   isReimbursementInflow,
   outstandingClaimAmount,
@@ -58,7 +57,7 @@ describe('outstandingClaimAmount', () => {
   });
 });
 
-describe('isOutstandingClaim / isFullyReimbursed', () => {
+describe('isOutstandingClaim', () => {
   it('flags claimable, submitted and partial as outstanding', () => {
     expect(
       isOutstandingClaim({ claimStatus: 'claimable', claimAmount: 10, reimbursedAmount: 0 }),
@@ -82,12 +81,6 @@ describe('isOutstandingClaim / isFullyReimbursed', () => {
     expect(
       isOutstandingClaim({ claimStatus: 'none', claimAmount: null, reimbursedAmount: 0 }),
     ).toBe(false);
-  });
-
-  it('isFullyReimbursed matches the claim boundary', () => {
-    expect(isFullyReimbursed(100, 100)).toBe(true);
-    expect(isFullyReimbursed(100, 99)).toBe(false);
-    expect(isFullyReimbursed(0, 0)).toBe(false);
   });
 });
 

@@ -666,26 +666,6 @@ class TransactionsRepository {
     return { income, expense };
   }
 
-  /**
-   * Reimbursement inflows that settle `expenseId` (reverse of the
-   * `reimbursesTransactionId` back-pointer). Used to rewind claim state when a
-   * reimbursement or its source expense is deleted.
-   */
-  listReimbursementsFor(expenseId: string): Transaction[] {
-    const db = getDb();
-    return db
-      .select()
-      .from(transactionsTable)
-      .where(
-        and(
-          isNull(transactionsTable.deletedAt),
-          eq(transactionsTable.reimbursesTransactionId, expenseId),
-        ),
-      )
-      .all()
-      .map(toTransaction);
-  }
-
   getTransfersBetweenAccounts(
     fromAccountId: string,
     toAccountId: string,
