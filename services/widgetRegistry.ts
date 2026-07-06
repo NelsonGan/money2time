@@ -75,9 +75,10 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   {
     id: WIDGET_IDS.budgetRing,
     title: 'Budget',
-    access: 'free',
+    access: 'pro',
     supportedSizes: ['small'],
     snapshotKey: 'budgetRing',
+    proSource: 'widget_budget_ring',
   },
   {
     id: WIDGET_IDS.budgetBreakdown,

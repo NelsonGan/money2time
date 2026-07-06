@@ -297,6 +297,7 @@ function buildSampleSnapshotJson() {
       calendar_month: 'money2time://pro?source=widget_calendar_month',
       savings_rate: 'money2time://pro?source=widget_savings_rate',
       savings_history: 'money2time://pro?source=widget_savings_history',
+      budget_ring: 'money2time://pro?source=widget_budget_ring',
       budget_breakdown: 'money2time://pro?source=widget_budget_breakdown',
     },
   });
@@ -1389,6 +1390,8 @@ public class Money2TimeBudgetRingWidgetProvider extends AppWidgetProvider {
 
   private static void updateWidget(Context context, AppWidgetManager manager, int appWidgetId) {
     RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.money2time_budget_ring_widget);
+    // The PRO ribbon only rides the static picker preview; a placed widget hides it.
+    views.setViewVisibility(R.id.ring_pro_badge, View.GONE);
     SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     String json = prefs.getString(SNAPSHOT_KEY, null);
 
@@ -1397,6 +1400,21 @@ public class Money2TimeBudgetRingWidgetProvider extends AppWidgetProvider {
     try {
       if (json == null) json = Money2TimeWidgetSampleData.JSON;
       JSONObject root = new JSONObject(json);
+      boolean isPro = root.optBoolean("isPro", false);
+
+      if (!isPro) {
+        views.setViewVisibility(R.id.ring_content, View.GONE);
+        views.setViewVisibility(R.id.ring_setup, View.GONE);
+        views.setViewVisibility(R.id.ring_locked, View.VISIBLE);
+        String url = "money2time://pro";
+        JSONObject unlock = root.optJSONObject("proUnlockUrlByWidgetId");
+        if (unlock != null) url = unlock.optString("budget_ring", url);
+        views.setOnClickPendingIntent(R.id.ring_root, linkIntent(context, url, 703));
+        manager.updateAppWidget(appWidgetId, views);
+        return;
+      }
+      views.setViewVisibility(R.id.ring_locked, View.GONE);
+
       JSONObject br = root.optJSONObject("budgetRing");
       // Snapshots from an older app version have no budget section — treat as no budget.
       boolean hasBudget = br != null && br.optBoolean("hasBudget", false);
@@ -2864,6 +2882,77 @@ ${historyRows}
       android:textSize="11sp"
       android:textStyle="bold" />
   </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/ring_locked"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:visibility="gone">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <ImageView
+      android:layout_width="44dp"
+      android:layout_height="44dp"
+      android:adjustViewBounds="true"
+      android:contentDescription="Money2Time Pro"
+      android:src="@drawable/widget_mascot" />
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:maxLines="1"
+      android:text="Budget"
+      android:textColor="#1A2E2A"
+      android:textSize="15sp"
+      android:textStyle="bold" />
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="1dp"
+      android:maxLines="1"
+      android:text="Money2Time Pro"
+      android:textColor="#6B7A77"
+      android:textSize="10sp"
+      android:textStyle="bold" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/money2time_cta_pill"
+      android:gravity="center"
+      android:maxLines="1"
+      android:paddingVertical="10dp"
+      android:text="✨ Unlock Pro"
+      android:textColor="#FFFFFF"
+      android:textSize="13sp"
+      android:textStyle="bold" />
+  </LinearLayout>
+
+  <FrameLayout
+    android:id="@+id/ring_pro_badge"
+    android:layout_width="58dp"
+    android:layout_height="58dp"
+    android:layout_gravity="top|end"
+    android:layout_marginTop="-14dp"
+    android:layout_marginEnd="-14dp"
+    android:clipChildren="true">
+    <TextView
+      android:layout_width="120dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:background="#F6B750"
+      android:gravity="center"
+      android:includeFontPadding="false"
+      android:paddingVertical="3dp"
+      android:rotation="45"
+      android:text="PRO"
+      android:textColor="#FFFFFF"
+      android:textSize="9sp"
+      android:textStyle="bold"
+      android:translationX="15dp"
+      android:translationY="-15dp" />
+  </FrameLayout>
 </FrameLayout>
 `,
       );
@@ -3787,13 +3876,31 @@ private struct ProLockView: View {
   let url: String
   let palette: Palette
   var compact: Bool = false
+  // A centered vertical layout tuned for the small (square) widget family, so
+  // the mascot + title + unlock button never clip the way the medium compact
+  // or large full layouts would at 2x2.
+  var small: Bool = false
 
   var body: some View {
     let mascotSize: CGFloat = compact ? 58 : 104
     Link(destination: URL(string: url) ?? URL(string: "money2time://pro")!) {
       VStack(spacing: 0) {
         Spacer(minLength: 0)
-        if compact {
+        if small {
+          mascot(size: 44)
+          Text(title)
+            .font(.system(size: 15, weight: .heavy, design: .rounded))
+            .foregroundStyle(palette.text)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.top, 6)
+          Text("Money2Time Pro")
+            .font(.system(size: 10.5, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.textSoft)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(.top, 1)
+        } else if compact {
           HStack(spacing: 12) {
             mascot(size: mascotSize)
             VStack(alignment: .leading, spacing: 2) {
@@ -3827,7 +3934,7 @@ private struct ProLockView: View {
         Spacer(minLength: 0)
         unlockButton
       }
-      .padding(compact ? 14 : 18)
+      .padding(compact || small ? 14 : 18)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
   }
@@ -3847,15 +3954,16 @@ private struct ProLockView: View {
   }
 
   private var unlockButton: some View {
-    HStack(spacing: 6) {
+    let dense = compact || small
+    return HStack(spacing: 6) {
       Image(systemName: "sparkles")
-        .font(.system(size: compact ? 12 : 14, weight: .bold))
+        .font(.system(size: dense ? 12 : 14, weight: .bold))
       Text("Unlock Pro")
-        .font(.system(size: compact ? 14 : 15, weight: .heavy, design: .rounded))
+        .font(.system(size: dense ? 14 : 15, weight: .heavy, design: .rounded))
     }
     .foregroundStyle(.white)
     .frame(maxWidth: .infinity)
-    .frame(height: compact ? 38 : 44)
+    .frame(height: dense ? 38 : 44)
     .background(
       LinearGradient(
         colors: [palette.primary, palette.success],
@@ -4751,14 +4859,23 @@ private struct BudgetRingRoot: View {
     let palette = Palette.current(scheme)
     Group {
       if let snapshot = entry.snapshot, let data = snapshot.budgetRing {
-        Group {
-          if data.hasBudget {
-            BudgetRingView(data: data, palette: palette)
-          } else {
-            BudgetSetupView(title: data.setupLabel, monthLabel: data.monthLabel, palette: palette)
+        if snapshot.isPro {
+          Group {
+            if data.hasBudget {
+              BudgetRingView(data: data, palette: palette)
+            } else {
+              BudgetSetupView(title: data.setupLabel, monthLabel: data.monthLabel, palette: palette)
+            }
           }
+          .proCornerRibbon(entry.isPreview, palette: palette)
+          .widgetURL(URL(string: data.budgetUrl))
+        } else {
+          ProLockView(
+            title: "Budget",
+            url: snapshot.proUnlockUrlByWidgetId["budget_ring"] ?? "money2time://pro",
+            palette: palette,
+            small: true)
         }
-        .widgetURL(URL(string: data.budgetUrl))
       } else {
         EmptyStateView(palette: palette)
       }

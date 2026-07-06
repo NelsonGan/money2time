@@ -441,7 +441,7 @@ function SavingsRateWidgetPreview({ data }: { data: SavingsRateSnapshot }) {
 
 function BudgetRingWidgetPreview({ data }: { data: BudgetRingSnapshot }) {
   return (
-    <WidgetFrame size="small">
+    <WidgetFrame size="small" pro>
       {({ width: frameWidth }) => <BudgetRingWidgetContent data={data} size={frameWidth} />}
     </WidgetFrame>
   );
