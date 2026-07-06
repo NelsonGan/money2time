@@ -54,6 +54,7 @@ import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
+import type { PreviewSeedProfile } from '~/services/previewData';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
@@ -66,6 +67,50 @@ import { FONT } from '~/utils/fonts';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 const DISCORD_BRAND_COLOR = '#5865F2';
+
+const PREVIEW_SCREEN_COPY = {
+  en: {
+    rowLabel: 'Generate preview data',
+    confirmTitle: 'Generate preview data?',
+    confirmMessage:
+      'Choose a profile. This replaces your local accounts, categories, transactions, budgets, recurring rules, and wage history with screenshot-ready sample data.',
+    americanProfile: 'American',
+    chineseProfile: 'Chinese',
+    malaysianEnProfile: 'Malaysian (EN)',
+    malaysianZhProfile: 'Malaysian (中文)',
+    failedMessage: 'Unable to generate preview data. Please try again.',
+    doneTitle: 'Preview data ready',
+    doneMessage:
+      '{{profile}} preview loaded with {{transactions}} transactions across {{accounts}} accounts, {{categories}} categories, {{recurringRules}} recurring rules, and {{wageMonths}} months of income history.',
+  },
+  zh: {
+    rowLabel: '生成预览数据',
+    confirmTitle: '生成预览数据？',
+    confirmMessage:
+      '请选择一个配置。这会用适合截图的样例数据替换你当前的本地账户、分类、交易、预算、循环规则和收入历史。',
+    americanProfile: '美式',
+    chineseProfile: '中文',
+    malaysianEnProfile: '马来西亚 (EN)',
+    malaysianZhProfile: '马来西亚 (中文)',
+    failedMessage: '无法生成预览数据，请重试。',
+    doneTitle: '预览数据已准备好',
+    doneMessage:
+      '已加载 {{profile}} 预览：包含 {{transactions}} 条交易、{{accounts}} 个账户、{{categories}} 个分类、{{recurringRules}} 条循环规则，以及 {{wageMonths}} 个月的收入历史。',
+  },
+} as const;
+
+function formatPreviewDoneMessage(
+  template: string,
+  values: Record<
+    'profile' | 'transactions' | 'accounts' | 'categories' | 'recurringRules' | 'wageMonths',
+    string | number
+  >,
+) {
+  return template.replace(
+    /\{\{(profile|transactions|accounts|categories|recurringRules|wageMonths)\}\}/g,
+    (_, key: keyof typeof values) => String(values[key]),
+  );
+}
 
 interface SettingsScreenProps {
   scrollToTopToken?: number;
@@ -127,7 +172,7 @@ export function SettingsScreen({
   onOpenWidgets,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, generatePreviewData } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
   const { isPro, setDevProOverride } = usePro();
@@ -227,6 +272,47 @@ export function SettingsScreen({
     },
     [reportBottomNavScroll],
   );
+
+  const previewCopy = settings.locale === 'zh' ? PREVIEW_SCREEN_COPY.zh : PREVIEW_SCREEN_COPY.en;
+
+  const handleGeneratePreviewData = useCallback(() => {
+    const profileLabels: Record<PreviewSeedProfile, string> = {
+      american: previewCopy.americanProfile,
+      chinese: previewCopy.chineseProfile,
+      malaysian_en: previewCopy.malaysianEnProfile,
+      malaysian_zh: previewCopy.malaysianZhProfile,
+    };
+
+    const runPreviewSeed = (profile: PreviewSeedProfile) => {
+      try {
+        const summary = generatePreviewData(profile);
+        Alert.alert(
+          previewCopy.doneTitle,
+          formatPreviewDoneMessage(previewCopy.doneMessage, {
+            profile: profileLabels[profile],
+            accounts: summary.accounts,
+            categories: summary.categories,
+            recurringRules: summary.recurringRules,
+            transactions: summary.transactions,
+            wageMonths: summary.wageMonths,
+          }),
+        );
+      } catch (error) {
+        Alert.alert(
+          I18n.t('errors.generic_operation_failed'),
+          getErrorMessage(error, previewCopy.failedMessage),
+        );
+      }
+    };
+
+    Alert.alert(previewCopy.confirmTitle, previewCopy.confirmMessage, [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      { text: previewCopy.americanProfile, onPress: () => runPreviewSeed('american') },
+      { text: previewCopy.chineseProfile, onPress: () => runPreviewSeed('chinese') },
+      { text: previewCopy.malaysianEnProfile, onPress: () => runPreviewSeed('malaysian_en') },
+      { text: previewCopy.malaysianZhProfile, onPress: () => runPreviewSeed('malaysian_zh') },
+    ]);
+  }, [generatePreviewData, previewCopy]);
 
   return (
     <SettingsPageLayout>
@@ -674,6 +760,12 @@ export function SettingsScreen({
                     onPress={onOpenWidgetPreviews}
                   />
                 ) : null}
+                <SettingsGridTile
+                  emoji="🧪"
+                  label={previewCopy.rowLabel}
+                  haptic="warning"
+                  onPress={handleGeneratePreviewData}
+                />
                 <SettingsGridTile
                   icon={<RefreshCcw size={20} color={themeColors.primary} />}
                   label="Reset cloud prompt"
