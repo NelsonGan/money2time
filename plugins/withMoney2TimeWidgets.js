@@ -2787,6 +2787,7 @@ ${historyRows}
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@drawable/money2time_widget_background"
+  android:clipToPadding="false"
   android:clipToOutline="true"
   android:padding="14dp">
 
