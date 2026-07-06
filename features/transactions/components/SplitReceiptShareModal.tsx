@@ -12,56 +12,51 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { getPaymentQrUri } from '~/services/userAssets';
-import type { PersonDebt } from '~/types';
-import { currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { formatCurrency } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
 import { buildReceiptText } from '../lib/settleUp';
+import type { ReceiptContent } from './SplitReceiptCard';
 import { SplitReceiptCard } from './SplitReceiptCard';
 
 interface SplitReceiptShareModalProps {
   visible: boolean;
   onClose: () => void;
-  person: PersonDebt | null;
+  content: ReceiptContent | null;
+  /** Number of line items on the receipt, for analytics. */
+  itemCount: number;
 }
 
-export function SplitReceiptShareModal({ visible, onClose, person }: SplitReceiptShareModalProps) {
+export function SplitReceiptShareModal({
+  visible,
+  onClose,
+  content,
+  itemCount,
+}: SplitReceiptShareModalProps) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
   const cardRef = useRef<View>(null);
   const [busy, setBusy] = useState(false);
 
-  const formatNative = useCallback(
-    (amount: number, currency: string) => formatCurrency(amount, currencySymbolForCode(currency)),
-    [],
-  );
-
-  const fromName = settings.profileName?.trim() || null;
-  const toName = person?.name ?? I18n.t('transactions.settleUp.someone');
-  const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
   const qrUri = getPaymentQrUri(settings.paymentQrUri);
 
   const shareAsText = useCallback(
-    async (target: PersonDebt) => {
-      const text = buildReceiptText(target, {
-        strings: {
-          heading: I18n.t('transactions.settleUp.receipt_heading'),
-          fromTo,
-          totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-          qrNote: qrUri ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
-          footer: I18n.t('transactions.settleUp.receipt_footer'),
-        },
-        formatMoney: formatNative,
+    async (target: ReceiptContent) => {
+      const text = buildReceiptText({
+        title: target.title,
+        subtitle: target.subtitle,
+        lines: target.lines.map((line) => ({ label: line.label, amount: line.amount })),
+        totalLabel: target.totalLabel,
+        totalText: target.totalText,
+        qrNote: qrUri ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
       });
       await Share.share({ message: text });
     },
-    [formatNative, fromTo, qrUri],
+    [qrUri],
   );
 
   const handleShare = useCallback(async () => {
-    if (!person || busy) return;
+    if (!content || busy) return;
     void triggerHaptic('selection');
     setBusy(true);
     let sharedAsImage = false;
@@ -86,10 +81,10 @@ export function SplitReceiptShareModal({ visible, onClose, person }: SplitReceip
         }
         sharedAsImage = true;
       } else {
-        await shareAsText(person);
+        await shareAsText(content);
       }
       trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
-        billCount: person.billCount,
+        itemCount,
         hasQr: !!qrUri,
         asImage: sharedAsImage,
       });
@@ -97,9 +92,9 @@ export function SplitReceiptShareModal({ visible, onClose, person }: SplitReceip
     } catch {
       // Image capture / share failed — fall back to the plain-text receipt.
       try {
-        await shareAsText(person);
+        await shareAsText(content);
         trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
-          billCount: person.billCount,
+          itemCount,
           hasQr: !!qrUri,
           asImage: false,
         });
@@ -110,7 +105,7 @@ export function SplitReceiptShareModal({ visible, onClose, person }: SplitReceip
     } finally {
       setBusy(false);
     }
-  }, [busy, onClose, person, qrUri, shareAsText]);
+  }, [busy, content, itemCount, onClose, qrUri, shareAsText]);
 
   return (
     <ThemeModal
@@ -134,23 +129,15 @@ export function SplitReceiptShareModal({ visible, onClose, person }: SplitReceip
           className="flex-1"
           contentContainerStyle={{ alignItems: 'center', paddingVertical: 28 }}
         >
-          {person ? (
-            <SplitReceiptCard
-              ref={cardRef}
-              person={person}
-              fromTo={fromTo}
-              qrUri={qrUri}
-              formatNative={formatNative}
-            />
-          ) : null}
+          {content ? <SplitReceiptCard ref={cardRef} content={content} qrUri={qrUri} /> : null}
         </ScrollView>
 
         <View className="px-5 pb-8 pt-2">
           <Pressable
             onPress={handleShare}
-            disabled={busy || !person}
+            disabled={busy || !content}
             className="h-14 flex-row items-center justify-center gap-2 rounded-2xl bg-primary active:opacity-90"
-            style={{ opacity: busy || !person ? 0.6 : 1 }}
+            style={{ opacity: busy || !content ? 0.6 : 1 }}
           >
             {busy ? (
               <ActivityIndicator color="#fff" />

@@ -16,6 +16,7 @@ const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const shortMonthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeWeekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const relativeMonthDayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+const shortDateFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 
 function resolveLocale(locale?: string) {
   return locale ?? I18n.locale ?? I18n.defaultLocale ?? 'en';
@@ -403,6 +404,23 @@ export function formatRelativeDate(dateString: string, locale?: string): string 
   const daysDiff = Math.floor((todayOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
   if (daysDiff < 7) return getRelativeWeekdayFormatter(resolvedLocale).format(date);
   return getRelativeMonthDayFormatter(resolvedLocale).format(date);
+}
+
+function getShortDateFormatter(locale: string) {
+  const cached = shortDateFormatterByLocale.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  shortDateFormatterByLocale.set(locale, formatter);
+  return formatter;
+}
+
+/** Absolute day/month/year, e.g. "9 Jun 2026". Used on shareable receipts. */
+export function formatShortDate(dateString: string, locale?: string): string {
+  return getShortDateFormatter(resolveLocale(locale)).format(new Date(dateString));
 }
 
 export function formatDateInput(date: Date): string {
