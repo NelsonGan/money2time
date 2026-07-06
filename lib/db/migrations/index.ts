@@ -80,6 +80,8 @@ function resetSchemaToBaseline(db: SQLiteDatabase) {
   db.execSync(`
     PRAGMA foreign_keys = OFF;
     BEGIN TRANSACTION;
+    DROP TABLE IF EXISTS goal_contributions;
+    DROP TABLE IF EXISTS goals;
     DROP TABLE IF EXISTS monthly_budget_categories;
     DROP TABLE IF EXISTS monthly_budgets;
     DROP TABLE IF EXISTS budget_template_categories;

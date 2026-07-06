@@ -463,6 +463,97 @@ export interface BudgetMonthSummary {
   unbudgeted: UnbudgetedCategorySpend[];
 }
 
+export type GoalTrackingMode = 'manual' | 'account';
+export type GoalStatus = 'active' | 'completed' | 'archived';
+/**
+ * Relationship between the current contribution pace and a goal's deadline.
+ * `none` = no deadline set; `met` = already reached; `pastDue` = deadline
+ * passed unmet; `onTrack`/`behind` = forecast lands on-or-before / after it.
+ */
+export type GoalDeadlineStatus = 'none' | 'onTrack' | 'behind' | 'met' | 'pastDue';
+
+/**
+ * A savings target the user contributes toward over time. Standalone — a goal
+ * never creates transactions on its own (a contribution may optionally mirror a
+ * real transfer via `GoalContribution.linkedTransactionId`).
+ */
+export interface Goal {
+  id: string;
+  name: string;
+  /** Target in the user's entered `currency`. */
+  targetAmount: number;
+  currency: string;
+  /** Frozen goal-currency -> reporting-currency rate, captured at creation. */
+  fxRate: number;
+  /** `targetAmount * fxRate`, frozen so progress never drifts with live rates. */
+  targetReportingAmount: number;
+  /** Amount already saved at creation, in `currency`. */
+  startingAmount: number;
+  /** Optional target date (YYYY-MM-DD). */
+  deadline: string | null;
+  coverPhotoUri: string | null;
+  emoji: string | null;
+  note: string | null;
+  trackingMode: GoalTrackingMode;
+  /** Set only when `trackingMode === 'account'`. */
+  linkedAccountId: string | null;
+  /** Account mode: count the linked account's pre-existing balance vs baseline. */
+  countExistingBalance: boolean;
+  /** Account mode: balance snapshot taken when the goal was linked. */
+  baselineAmount: number | null;
+  status: GoalStatus;
+  completedAt: string | null;
+  sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** A signed deposit/withdrawal against a `manual` goal's ledger. */
+export interface GoalContribution {
+  id: string;
+  goalId: string;
+  /** Signed: positive = deposit, negative = withdrawal, in `currency`. */
+  amount: number;
+  currency: string;
+  /** Frozen reporting-currency snapshot, captured at write time. */
+  reportingCurrency: string | null;
+  reportingAmount: number | null;
+  fxRate: number | null;
+  date: string;
+  note: string | null;
+  /** Real transfer this contribution also moved (power mode), or null. */
+  linkedTransactionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** Derived progress for a goal, all monetary figures in the reporting currency. */
+export interface GoalStats {
+  /** Total saved (starting + contributions), reporting currency; may be < 0. */
+  savedAmount: number;
+  /** `max(0, targetReportingAmount − max(0, savedAmount))`. */
+  remainingAmount: number;
+  /** `max(0, savedAmount) / targetReportingAmount`; may exceed 1 (over-saved). */
+  percentComplete: number;
+  isComplete: boolean;
+  contributionCount: number;
+  /** Average net contribution per week over the trailing pace window. */
+  weeklyPace: number;
+  /** Projected completion day-key, or null when pace ≤ 0 or already complete. */
+  forecastDate: string | null;
+  /** Contribution/week needed to hit the deadline, or null. */
+  requiredWeeklyRate: number | null;
+  deadlineStatus: GoalDeadlineStatus;
+  /** Work-hours the saved amount represents, or null when no wage is set. */
+  savedHours: number | null;
+  /** Work-hours the remaining amount represents, or null when no wage is set. */
+  remainingHours: number | null;
+}
+
+export interface GoalWithStats extends Goal, GoalStats {}
+
 export interface Transaction {
   id: string;
   type: TransactionType;

@@ -28,6 +28,7 @@ import {
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
+import { computeGoalStats, type GoalContributionPoint } from '~/features/goals/utils';
 import { computeItemStats } from '~/features/items/utils';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
@@ -37,6 +38,8 @@ import {
   budgetTemplateCategoriesTable,
   budgetTemplatesTable,
   categoriesTable,
+  goalContributionsTable,
+  goalsTable,
   itemsTable,
   monthlyBudgetCategoriesTable,
   monthlyBudgetsTable,
@@ -54,6 +57,11 @@ import {
 } from '~/lib/repositories/budgetTemplatesRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
+import {
+  type CreateGoalContributionInput,
+  goalContributionsRepository,
+} from '~/lib/repositories/goalContributionsRepository';
+import { type CreateGoalInput, goalsRepository } from '~/lib/repositories/goalsRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { monthlyBudgetsRepository } from '~/lib/repositories/monthlyBudgetsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
@@ -110,6 +118,9 @@ import {
   type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
   type ExchangeRate,
+  type Goal,
+  type GoalContribution,
+  type GoalWithStats,
   isLocatedAlbum,
   type Item,
   type ItemWithStats,
@@ -306,6 +317,20 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   updateItem: (id: string, updates: Partial<CreateItemInput>) => void;
   deleteItem: (id: string) => void;
   reorderItems: (ids: string[]) => void;
+
+  /** Savings goals, each enriched with derived progress/pace/forecast stats. */
+  goals: GoalWithStats[];
+  /** Number of live goals still in the `active` status (drives the free-tier gate). */
+  activeGoalCount: number;
+  createGoal: (input: CreateGoalInput) => string;
+  updateGoal: (id: string, updates: Partial<CreateGoalInput>) => void;
+  deleteGoal: (id: string) => void;
+  archiveGoal: (id: string) => void;
+  reorderGoals: (ids: string[]) => void;
+  addContribution: (input: CreateGoalContributionInput) => string;
+  updateContribution: (id: string, updates: Partial<CreateGoalContributionInput>) => void;
+  deleteContribution: (id: string) => void;
+  getGoalContributions: (goalId: string) => GoalContribution[];
 
   /** Reusable budget definitions; exactly one is default while any exist. */
   budgetTemplates: BudgetTemplate[];
@@ -659,6 +684,8 @@ function purgeAllData() {
   db.delete(accountGroupsTable).run();
   db.delete(monthlyWageSettingsTable).run();
   db.delete(itemsTable).run();
+  db.delete(goalContributionsTable).run();
+  db.delete(goalsTable).run();
   // Budgets must go too — a surviving default template would auto-recreate a
   // ghost budget (pointing at deleted categories) on the very next load.
   db.delete(budgetTemplateCategoriesTable).run();
@@ -873,6 +900,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [rawAccountBalances, setRawAccountBalances] = useState<AccountBalance[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalContributions, setGoalContributions] = useState<GoalContribution[]>([]);
   const [budgetTemplates, setBudgetTemplates] = useState<BudgetTemplate[]>([]);
   const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
@@ -1014,6 +1043,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextTransactions = transactionsRepository.list();
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
+      const nextGoals = goalsRepository.list();
+      const nextGoalContributions = goalContributionsRepository.list();
 
       // Month-rollover auto-create: materialize the current month's budget from
       // the default template. Runs on every load — idempotent (one indexed
@@ -1073,6 +1104,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(nextTransactions);
       setAlbums(nextAlbums);
       setItems(nextItems);
+      setGoals(nextGoals);
+      setGoalContributions(nextGoalContributions);
       setBudgetTemplates(nextBudgetTemplates);
       setMonthlyBudgets(nextMonthlyBudgets);
       setRawAccountBalances(nextRawAccountBalances);
@@ -1142,6 +1175,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshBudgets = useCallback(() => {
     setBudgetTemplates(budgetTemplatesRepository.list());
     setMonthlyBudgets(monthlyBudgetsRepository.list());
+  }, []);
+
+  const refreshGoals = useCallback(() => {
+    setGoals(goalsRepository.list());
+    setGoalContributions(goalContributionsRepository.list());
   }, []);
 
   const refreshWages = useCallback(() => {
@@ -3212,6 +3250,137 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setItems(itemsRepository.list());
   }, []);
 
+  // Savings goals — progress/pace/forecast are derived here so cards and the
+  // detail screen share one source of truth. All amounts are already in the
+  // reporting currency (contributions freeze a reporting snapshot at write
+  // time); the wage rate lets us express saved/remaining as work-hours.
+  const goalsWithStats = useMemo<GoalWithStats[]>(() => {
+    const todayKey = dayKeyFromDateLocal(new Date());
+    const hourlyRate = getTrueHourlyRateForDate(todayKey);
+    const pointsByGoal = new Map<string, GoalContributionPoint[]>();
+    goalContributions.forEach((contribution) => {
+      const points = pointsByGoal.get(contribution.goalId) ?? [];
+      points.push({
+        date: contribution.date,
+        reportingAmount: contribution.reportingAmount ?? contribution.amount,
+      });
+      pointsByGoal.set(contribution.goalId, points);
+    });
+    return goals.map((goal) => {
+      const stats = computeGoalStats({
+        targetReportingAmount: goal.targetReportingAmount,
+        startingReportingAmount: goal.startingAmount * (goal.fxRate || 1),
+        contributions: pointsByGoal.get(goal.id) ?? [],
+        createdAtDayKey: dayKeyFromDateLocal(new Date(goal.createdAt)),
+        deadline: goal.deadline,
+        todayDayKey: todayKey,
+        hourlyRate,
+      });
+      return { ...goal, ...stats };
+    });
+  }, [goalContributions, goals, getTrueHourlyRateForDate]);
+
+  const activeGoalCount = useMemo(
+    () => goals.filter((goal) => goal.status === 'active').length,
+    [goals],
+  );
+
+  const createGoal = useCallback(
+    (input: CreateGoalInput) => {
+      const id = goalsRepository.create(input);
+      refreshGoals();
+      void trackEvent(AnalyticsEvents.GOAL_CREATED, {
+        trackingMode: input.trackingMode ?? 'manual',
+        hasDeadline: input.deadline != null,
+      });
+      return id;
+    },
+    [refreshGoals],
+  );
+
+  const updateGoal = useCallback(
+    (id: string, updates: Partial<CreateGoalInput>) => {
+      goalsRepository.update(id, updates);
+      refreshGoals();
+      void trackEvent(AnalyticsEvents.GOAL_UPDATED);
+    },
+    [refreshGoals],
+  );
+
+  const deleteGoal = useCallback(
+    (id: string) => {
+      // Cascade to the goal's contributions; a linked transfer (if any) is real
+      // money and is left intact.
+      goalContributionsRepository.softDeleteByGoal(id);
+      goalsRepository.softDelete(id);
+      refreshGoals();
+      void trackEvent(AnalyticsEvents.GOAL_DELETED);
+    },
+    [refreshGoals],
+  );
+
+  const archiveGoal = useCallback(
+    (id: string) => {
+      goalsRepository.update(id, { status: 'archived' });
+      refreshGoals();
+      void trackEvent(AnalyticsEvents.GOAL_ARCHIVED);
+    },
+    [refreshGoals],
+  );
+
+  const reorderGoals = useCallback(
+    (ids: string[]) => {
+      goalsRepository.reorder(ids);
+      refreshGoals();
+    },
+    [refreshGoals],
+  );
+
+  const addContribution = useCallback(
+    (input: CreateGoalContributionInput) => {
+      const id = goalContributionsRepository.create(input);
+      // Auto-complete when this contribution reaches the target.
+      const goal = goalsRepository.list().find((candidate) => candidate.id === input.goalId);
+      if (goal && goal.status === 'active' && goal.targetReportingAmount > 0) {
+        const contributions = goalContributionsRepository.listByGoal(goal.id);
+        const saved =
+          goal.startingAmount * (goal.fxRate || 1) +
+          contributions.reduce((sum, c) => sum + (c.reportingAmount ?? c.amount), 0);
+        if (saved >= goal.targetReportingAmount) {
+          goalsRepository.update(goal.id, { status: 'completed', completedAt: nowIso() });
+          void trackEvent(AnalyticsEvents.GOAL_COMPLETED);
+        }
+      }
+      refreshGoals();
+      void trackEvent(AnalyticsEvents.GOAL_CONTRIBUTION_ADDED, {
+        isWithdrawal: input.amount < 0,
+      });
+      return id;
+    },
+    [refreshGoals],
+  );
+
+  const updateContribution = useCallback(
+    (id: string, updates: Partial<CreateGoalContributionInput>) => {
+      goalContributionsRepository.update(id, updates);
+      refreshGoals();
+    },
+    [refreshGoals],
+  );
+
+  const deleteContribution = useCallback(
+    (id: string) => {
+      goalContributionsRepository.softDelete(id);
+      refreshGoals();
+    },
+    [refreshGoals],
+  );
+
+  const getGoalContributions = useCallback(
+    (goalId: string) => goalContributions.filter((contribution) => contribution.goalId === goalId),
+    [goalContributions],
+  );
+
   const createBudgetTemplate = useCallback(
     (input: CreateBudgetTemplateInput) => {
       const result = runMutation(
@@ -3622,6 +3791,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateItem,
             deleteItem,
             reorderItems,
+            goals: goalsWithStats,
+            activeGoalCount,
+            createGoal,
+            updateGoal,
+            deleteGoal,
+            archiveGoal,
+            reorderGoals,
+            addContribution,
+            updateContribution,
+            deleteContribution,
+            getGoalContributions,
             budgetTemplates,
             monthlyBudgets,
             createBudgetTemplate,
@@ -3737,6 +3917,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateItem,
       deleteItem,
       reorderItems,
+      goalsWithStats,
+      activeGoalCount,
+      createGoal,
+      updateGoal,
+      deleteGoal,
+      archiveGoal,
+      reorderGoals,
+      addContribution,
+      updateContribution,
+      deleteContribution,
+      getGoalContributions,
       budgetTemplates,
       monthlyBudgets,
       createBudgetTemplate,

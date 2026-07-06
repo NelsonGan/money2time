@@ -273,6 +273,54 @@ export const monthlyBudgetCategoriesTable = sqliteTable('monthly_budget_categori
   deletedAt: text('deleted_at'),
 });
 
+export const goalsTable = sqliteTable('goals', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  targetAmount: real('target_amount').notNull().default(0),
+  currency: text('currency').notNull(),
+  // Frozen goal-currency -> reporting-currency rate + amount, captured at
+  // creation so target vs saved compare in the same space and never drift.
+  fxRate: real('fx_rate').notNull().default(1),
+  targetReportingAmount: real('target_reporting_amount').notNull().default(0),
+  startingAmount: real('starting_amount').notNull().default(0),
+  deadline: text('deadline'),
+  coverPhotoUri: text('cover_photo_uri'),
+  emoji: text('emoji'),
+  note: text('note'),
+  // 'manual' (own contribution ledger) or 'account' (mirrors a linked account).
+  trackingMode: text('tracking_mode').notNull().default('manual'),
+  linkedAccountId: text('linked_account_id'),
+  countExistingBalance: integer('count_existing_balance', { mode: 'boolean' })
+    .notNull()
+    .default(false),
+  baselineAmount: real('baseline_amount'),
+  // 'active' | 'completed' | 'archived'.
+  status: text('status').notNull().default('active'),
+  completedAt: text('completed_at'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const goalContributionsTable = sqliteTable('goal_contributions', {
+  id: text('id').primaryKey(),
+  goalId: text('goal_id').notNull(),
+  // Signed: positive = deposit, negative = withdrawal, in `currency`.
+  amount: real('amount').notNull().default(0),
+  currency: text('currency').notNull(),
+  // Frozen FX snapshot at write time (mirrors transactions).
+  reportingCurrency: text('reporting_currency'),
+  reportingAmount: real('reporting_amount'),
+  fxRate: real('fx_rate'),
+  date: text('date').notNull(),
+  note: text('note'),
+  linkedTransactionId: text('linked_transaction_id'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -304,3 +352,5 @@ export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
 export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;
 export type MonthlyBudgetRow = typeof monthlyBudgetsTable.$inferSelect;
 export type MonthlyBudgetCategoryRow = typeof monthlyBudgetCategoriesTable.$inferSelect;
+export type GoalRow = typeof goalsTable.$inferSelect;
+export type GoalContributionRow = typeof goalContributionsTable.$inferSelect;

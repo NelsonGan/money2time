@@ -15,6 +15,8 @@ export const PRO_LIMITS = {
   FREE_MAX_ITEMS: 5,
   /** Free users can create this many budget templates. */
   FREE_MAX_BUDGET_TEMPLATES: 1,
+  /** Free users can keep this many active savings goals (completing/archiving frees a slot). */
+  FREE_MAX_GOALS: 2,
 } as const;
 
 export const PRO_TREND_TYPES = [
