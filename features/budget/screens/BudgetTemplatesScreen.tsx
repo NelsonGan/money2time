@@ -93,13 +93,21 @@ function TemplateCard({
           {template.emoji ? <CategoryEmoji icon={template.emoji} size={20} /> : null}
 
           <View className="min-w-0 flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {template.name}
-            </Text>
+            <View className="flex-row items-center gap-2">
+              <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+                {template.name}
+              </Text>
+              {template.isDefault ? (
+                <View className="shrink-0 rounded-full bg-primary/12 px-2 py-0.5">
+                  <Text variant="label" className="text-[9px] text-primary">
+                    {I18n.t('budget.template_default_badge')}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
             <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
               {money(template.totalAmount, settings)} ·{' '}
               {categoriesCountLabel(countRootAllocations(template.allocations, categories))}
-              {template.isDefault ? ` · ${I18n.t('budget.template_default_badge')}` : ''}
             </Text>
           </View>
         </Pressable>
