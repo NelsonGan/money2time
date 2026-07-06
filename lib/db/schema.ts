@@ -135,6 +135,11 @@ export const settingsTable = sqliteTable('settings', {
   // ISO timestamp of the user's first app open. Set to `now` on fresh installs;
   // backfilled from the earliest transaction date for upgrading users.
   firstAppOpen: text('first_app_open'),
+  // Relative path of the user's own payment QR image within the user-assets
+  // store (e.g. `payment-qr/9f3c.png`), plus an optional caption. Attached once
+  // and composited onto split-bill payback receipts.
+  paymentQrUri: text('payment_qr_uri'),
+  paymentQrLabel: text('payment_qr_label'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

@@ -34,6 +34,9 @@ export const AnalyticsEvents = {
   // Split bills (Pay First)
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
+  SETTLE_UP_OPENED: 'Settle Up Opened',
+  SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
+  SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 
   // Accounts
   ACCOUNT_CREATED: 'Account Created',

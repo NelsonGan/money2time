@@ -115,6 +115,7 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  SettleUpScreen,
 } from '~/features/transactions/screens';
 import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
 import type {
@@ -1610,6 +1611,10 @@ function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEa
   return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
 }
 
+function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
+  return <SettleUpScreen onBack={() => navigation.goBack()} />;
+}
+
 function SettingsWageCalculatorRouteScreen({
   route,
   navigation,
@@ -2052,6 +2057,7 @@ function AppContent() {
           />
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
+          <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
           <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
           <RootStack.Screen
