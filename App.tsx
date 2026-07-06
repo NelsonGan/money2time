@@ -1036,9 +1036,6 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenItemEditor={openItemEditor}
-            onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
-            onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
-            onCreateCustomBudget={openCustomBudgetCreator}
             onOpenAccountEditor={openAccountEditor}
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
@@ -1345,6 +1342,7 @@ function SettingsBudgetRouteScreen({ navigation }: RootStackRouteProps<'Settings
       onCreateCustomBudget={(month) =>
         navigation.navigate('BudgetMonthEditor', { createForMonth: month })
       }
+      onOpenDrilldown={(payload) => navigation.navigate('InsightsDrilldown', payload)}
     />
   );
 }

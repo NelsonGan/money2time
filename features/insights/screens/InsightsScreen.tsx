@@ -2948,7 +2948,8 @@ export function InsightsScreen({
     }));
     // The budget view renders in place of the insight pager (it drives the
     // same header's month controls) rather than being an INSIGHT_TYPES entry.
-    options.push({
+    // Listed right after savings rate — its planning sibling.
+    const budgetOption = {
       value: 'budget',
       label: String(I18n.t('budget.title')),
       icon: (
@@ -2958,7 +2959,9 @@ export function InsightsScreen({
           style={styles.insightTypeIconImage}
         />
       ),
-    });
+    };
+    const savingsRateIndex = options.findIndex((option) => option.value === 'savings_rate');
+    options.splice(savingsRateIndex >= 0 ? savingsRateIndex + 1 : options.length, 0, budgetOption);
     return options;
   }, [visibleInsightTypes, isPro, proTrendTypeSet]);
   useEffect(() => {
@@ -6798,6 +6801,7 @@ export function InsightsScreen({
             onOpenTemplateEditor={onOpenBudgetTemplateEditor}
             onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
             onCreateCustomBudget={onCreateCustomBudget}
+            onOpenDrilldown={onOpenDrilldown}
             onActiveMonthLabelChange={setBudgetMonthLabel}
           />
         ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (

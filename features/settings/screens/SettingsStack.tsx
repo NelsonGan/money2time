@@ -1,7 +1,6 @@
 import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { BudgetScreen, BudgetTemplatesScreen } from '~/features/budget/screens';
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -40,9 +39,6 @@ interface SettingsStackProps {
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
   onOpenItemEditor: (itemId?: string) => void;
-  onOpenBudgetTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
-  onOpenMonthlyBudgetEditor: (budgetId: string) => void;
-  onCreateCustomBudget: (month: string) => void;
   onOpenAccountEditor: (params?: { accountId?: string; presetGroupName?: string }) => void;
   onOpenPayCreditCard: (accountId: string) => void;
   onOpenCreateGroup: () => void;
@@ -131,9 +127,6 @@ export function SettingsStack({
   scrollToTopToken = 0,
   onOpenRecurringEditor,
   onOpenItemEditor,
-  onOpenBudgetTemplateEditor,
-  onOpenMonthlyBudgetEditor,
-  onCreateCustomBudget,
   onOpenAccountEditor,
   onOpenPayCreditCard,
   onOpenCreateGroup,
@@ -260,31 +253,6 @@ export function SettingsStack({
           stackNavigationRef.current = props.navigation;
           return (
             <ItemsScreen onBack={() => props.navigation.goBack()} onOpenItem={onOpenItemEditor} />
-          );
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="Budget">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return (
-            <BudgetScreen
-              onBack={() => props.navigation.goBack()}
-              onOpenTemplates={() => props.navigation.navigate('BudgetTemplates')}
-              onOpenTemplateEditor={onOpenBudgetTemplateEditor}
-              onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
-              onCreateCustomBudget={onCreateCustomBudget}
-            />
-          );
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="BudgetTemplates">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return (
-            <BudgetTemplatesScreen
-              onBack={() => props.navigation.goBack()}
-              onOpenEditor={onOpenBudgetTemplateEditor}
-            />
           );
         }}
       </SettingsStackNavigator.Screen>

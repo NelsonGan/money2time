@@ -61,8 +61,6 @@ export function useAllocationDraft({
     setTotalState(next);
   }, []);
 
-  const parsedTotal = parseAllocationAmount(total);
-
   // Only root allocations count toward the total; child allocations are a
   // breakdown *within* their parent and are validated per group.
   const rootAllocations = useMemo(
@@ -76,11 +74,19 @@ export function useAllocationDraft({
     [amounts, rootExpenseCategories],
   );
 
+  const allocatedSum = normalizeMoneyAmount(
+    rootAllocations.reduce((sum, allocation) => sum + allocation.amount, 0),
+  );
+
+  // A blank/zero total defaults to the allocated sum, so a category-first
+  // budget always saves — even if the user typed a total and cleared it.
+  const typedTotal = parseAllocationAmount(total);
+  const parsedTotal = typedTotal > 0 ? typedTotal : allocatedSum;
+
   useEffect(() => {
     if (totalTouched) return;
-    const allocated = rootAllocations.reduce((sum, allocation) => sum + allocation.amount, 0);
-    setTotalState(allocated > 0 ? String(normalizeMoneyAmount(allocated)) : '');
-  }, [rootAllocations, totalTouched]);
+    setTotalState(allocatedSum > 0 ? String(allocatedSum) : '');
+  }, [allocatedSum, totalTouched]);
 
   const remaining = computeAllocationRemaining(parsedTotal, rootAllocations);
 
