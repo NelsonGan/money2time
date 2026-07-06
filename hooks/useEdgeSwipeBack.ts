@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { Gesture } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
 import { triggerHaptic } from '~/services/haptics';
 
@@ -14,6 +14,11 @@ const EDGE_BACK_COOLDOWN_MS = 420;
 let lastEdgeBackTriggerAt = 0;
 
 export function useEdgeSwipeBack(onBack?: () => void) {
+  // Peak horizontal velocity seen during the swipe. The velocity sampled at the
+  // instant the finger lifts is unreliable on a fast flick (it often reads low),
+  // so we compare against the peak instead so quick swipes still trigger back.
+  const peakVelocityX = useSharedValue(0);
+
   const handleBack = useCallback(() => {
     const now = Date.now();
     if (now - lastEdgeBackTriggerAt < EDGE_BACK_COOLDOWN_MS) {
@@ -33,14 +38,24 @@ export function useEdgeSwipeBack(onBack?: () => void) {
       .hitSlop({ left: 0, width: EDGE_START_ZONE })
       .activeOffsetX([EDGE_ACTIVATION_X, Infinity])
       .failOffsetY([-EDGE_MAX_VERTICAL_DRIFT, EDGE_MAX_VERTICAL_DRIFT])
+      .onBegin(() => {
+        'worklet';
+        peakVelocityX.value = 0;
+      })
+      .onUpdate((e) => {
+        'worklet';
+        if (e.velocityX > peakVelocityX.value) {
+          peakVelocityX.value = e.velocityX;
+        }
+      })
       .onEnd((e, success) => {
         'worklet';
-        if (
-          success &&
-          (e.translationX > EDGE_BACK_TRIGGER_X || e.velocityX > EDGE_BACK_TRIGGER_VELOCITY_X)
-        ) {
+        const flungFast =
+          e.velocityX > EDGE_BACK_TRIGGER_VELOCITY_X ||
+          peakVelocityX.value > EDGE_BACK_TRIGGER_VELOCITY_X;
+        if (success && (e.translationX > EDGE_BACK_TRIGGER_X || flungFast)) {
           runOnJS(handleBack)();
         }
       });
-  }, [onBack, handleBack]);
+  }, [onBack, handleBack, peakVelocityX]);
 }
