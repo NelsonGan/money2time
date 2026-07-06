@@ -75,7 +75,7 @@ makes this app unique.
    days ahead of your deadline") from contribution pace.
 5. Goals work in both **simple** and **power** mode, and respect
    **multi-currency** (frozen FX snapshot on each contribution).
-6. Free users get 1 goal; Pro users get unlimited (+ milestone notifications).
+6. Free users get 2 goals; Pro users get unlimited (+ milestone notifications).
 
 ### Non-goals (v1)
 
@@ -127,6 +127,16 @@ A **goal** is a standalone record (like an Item) with:
 the linked account balance). This is the same freeze-vs-derive discipline used
 across the codebase; storing a running total invites drift.
 
+**Currency.** All progress math runs in the **reporting currency** — the same
+canonical space every other aggregate in the app uses. A goal stores its
+target in the user's entered `currency` _plus_ a frozen reporting snapshot
+(`fxRate` + `targetReportingAmount = targetAmount × fxRate`) captured at
+creation, exactly like a transaction. `savedAmount`, `remaining`, and
+`percentComplete` are therefore always reporting-vs-reporting and never drift
+when rates move; the UI still labels the figures in the goal's own currency.
+For the common case where the goal is in the reporting currency, `fxRate = 1`
+and this is a no-op.
+
 ### 4.2 Contributions & withdrawals (`manual` mode)
 
 A **contribution** is a signed entry against a goal:
@@ -152,7 +162,8 @@ accounts**.
 For power users who already keep a real savings account:
 
 - Progress is read live from `accountBalances` for `linkedAccountId`, converted
-  to the goal's currency at the latest cached rate.
+  to the **reporting currency** at the latest cached rate (then displayed in the
+  goal's currency), so it compares like-for-like against `targetReportingAmount`.
 - `savedAmount = linkedAccount.convertedBalance` (optionally minus a
   `baselineAmount` captured when the goal was created, so a goal can represent
   "grow this account by $5k from where it is today" rather than "reach a $5k
@@ -197,7 +208,10 @@ The goal card and detail screen show:
   weeks; falls back to since-creation if younger). Manual mode uses the
   contribution ledger; account mode uses net inflow to the linked account.
 - **Forecast completion date** = `today + remaining / weeklyPace`. Shown as
-  "On track for ~Nov 2026".
+  "On track for ~Nov 2026". When pace is **zero or negative** (no net
+  contributions yet, or only withdrawals) the forecast is undefined — show a
+  neutral "add a contribution to see a forecast" prompt, never a
+  divide-by-zero or an infinite ETA.
 - **Deadline status** (when a deadline is set): ahead / behind, and the
   **required rate to hit the deadline** ("$155/week to finish by Mar 1"). Card
   shows a subtle amber state when behind pace.
@@ -220,10 +234,15 @@ The goal card and detail screen show:
 
 ### 4.7 Pro gating
 
-New `PRO_LIMITS.FREE_MAX_GOALS = 1` (sits alongside `FREE_MAX_ALBUMS: 3`,
+New `PRO_LIMITS.FREE_MAX_GOALS = 2` (sits alongside `FREE_MAX_ALBUMS: 3`,
 `FREE_MAX_BUDGET_TEMPLATES: 1`). Gate creation with `useProGate()` exactly like
-albums/items/budgets — free users can keep 1 active goal; creating a 2nd opens
-the `ProPaywall`.
+albums/items/budgets — free users can keep **2 active goals**; creating a 3rd
+opens the `ProPaywall`. The limit counts **active** goals only, so completing or
+archiving a goal frees a slot (a free user who finishes their emergency fund can
+start a new goal without paying). Two free goals let a user run a realistic
+pairing — e.g. an emergency fund _and_ one aspirational goal — so the feature
+proves its value before the paywall, which tends to lift activation more than a
+single-goal gate.
 
 Pro-only enhancements:
 
@@ -317,8 +336,10 @@ first-class**, not buried in settings:
 | `id`                                    | `newId()`                                |
 | `name`                                  | required                                 |
 | `targetAmount`                          | required, in `currency`                  |
-| `currency`                              | goal currency                            |
-| `startingAmount`                        | default 0                                |
+| `currency`                              | goal currency (entered denomination)     |
+| `fxRate`                                | frozen goal→reporting rate at creation   |
+| `targetReportingAmount`                 | `targetAmount × fxRate`, frozen snapshot |
+| `startingAmount`                        | default 0, in `currency`                 |
 | `deadline`                              | `YYYY-MM-DD`, nullable                   |
 | `coverPhotoUri`                         | nullable (reuse album cover storage)     |
 | `emoji`                                 | nullable                                 |
@@ -415,17 +436,19 @@ measurement.
 
 ## 7. Edge cases & decisions
 
-| Case                                  | Resolution                                                                                                 |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Over-contributing past target         | Allowed; shows >100% and "$X over"; goal auto-completes at ≥100%.                                          |
-| Withdrawals below 0 net               | Ledger may net negative; progress clamps to $0 with a note; never shows negative %.                        |
-| No wage configured                    | Time-mode work-hours hidden gracefully (same as Items' `dailyWorkHours: null`); money framing still shown. |
-| Deadline in the past, not met         | Card shows "past due" amber; still contributable; no destructive action.                                   |
-| Foreign-currency goal, no FX rate     | Fall back to entered amount; flag "rate unavailable" like account `convertedBalance: null`.                |
-| Deleting a goal with linked transfers | Contributions soft-deleted; linked transfers left intact (real money) — offered per-row only.              |
-| Account-mode linked account deleted   | Goal reverts to manual, snapshotting last known progress as `startingAmount`.                              |
-| Free user at 1-goal limit             | 2nd creation opens `ProPaywall`; existing goal untouched.                                                  |
-| Editing target amount                 | Allowed anytime; recomputes % and forecast; never rewrites contribution history.                           |
+| Case                                  | Resolution                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Over-contributing past target         | Allowed; shows >100% and "$X over"; goal auto-completes at ≥100%.                                                   |
+| Withdrawals below 0 net               | Ledger may net negative; progress clamps to $0 with a note; never shows negative %.                                 |
+| No wage configured                    | Time-mode work-hours hidden gracefully (same as Items' `dailyWorkHours: null`); money framing still shown.          |
+| Deadline in the past, not met         | Card shows "past due" amber; still contributable; no destructive action.                                            |
+| Foreign-currency goal, no FX rate     | Fall back to entered amount; flag "rate unavailable" like account `convertedBalance: null`.                         |
+| Deleting a goal with linked transfers | Contributions soft-deleted; linked transfers left intact (real money) — offered per-row only.                       |
+| Account-mode linked account deleted   | Goal reverts to manual, snapshotting last known progress as `startingAmount`.                                       |
+| Free user at 2-goal limit             | 3rd creation opens `ProPaywall`; existing goals untouched. Completing/archiving a goal frees a slot.                |
+| Editing target amount                 | Allowed anytime; recomputes % and forecast; never rewrites contribution history.                                    |
+| Editing a goal's target currency      | Locked once the goal has contributions (their reporting snapshots are already frozen); freely editable while empty. |
+| Zero or negative contribution pace    | Forecast suppressed with a "add a contribution" prompt; no divide-by-zero, no infinite ETA.                         |
 
 ---
 
@@ -463,9 +486,10 @@ measurement.
 
 1. **Primary surface:** Insights-embedded (budget model) vs standalone list
    screen as home. Proposed: Insights-embedded primary + standalone `Goals`.
-2. **Free limit:** 1 goal (proposed, matches budgets) vs 2.
-3. **Account-mode default:** "balance since baseline" (proposed) vs "reach
+2. **Account-mode default:** "balance since baseline" (proposed) vs "reach
    total balance."
-4. **Debt-payoff sibling:** in scope later, or explicitly never?
-5. **Home surfacing:** show the top goal on the calendar/home surface in v1, or
+3. **Debt-payoff sibling:** in scope later, or explicitly never?
+4. **Home surfacing:** show the top goal on the calendar/home surface in v1, or
    defer with the widget?
+
+**Resolved:** free-tier limit is **2 active goals** (`FREE_MAX_GOALS = 2`).
