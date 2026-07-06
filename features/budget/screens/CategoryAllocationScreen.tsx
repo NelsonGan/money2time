@@ -134,7 +134,8 @@ export function CategoryAllocationScreen({
               <View className="mt-3 gap-2">
                 {childCategories.map((child) => (
                   <View key={child.id} className="flex-row items-center gap-2.5">
-                    <CategoryEmoji icon={child.icon} parentIcon={category.icon} size={16} />
+                    {/* Only a subcategory's own emoji — no parent fallback. */}
+                    <CategoryEmoji icon={child.icon} size={16} hidePlaceholder />
                     {/* Label truncates; the input keeps a fixed width so rows
                         never shift or squeeze as names vary. */}
                     <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
