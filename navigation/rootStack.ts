@@ -51,6 +51,9 @@ export type RootStackParamList = {
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
+  GoalDetail: { goalId: string };
+  GoalEditor: { goalId?: string } | undefined;
+  AddContribution: { goalId: string };
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
   // Edit an existing month budget (budgetId) or create a one-off custom
   // budget for a month with no live budget (createForMonth, 'YYYY-MM').

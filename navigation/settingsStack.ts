@@ -13,6 +13,7 @@ export type SettingsStackParamList = {
   AccountSettings: undefined;
   Accounts: undefined;
   Items: undefined;
+  Goals: undefined;
   ExchangeRates: undefined;
   Categories: undefined;
   Recurring: undefined;
