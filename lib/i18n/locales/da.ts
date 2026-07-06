@@ -407,6 +407,10 @@ const da = {
     settleUp: {
       title: 'Who owes you',
       subtitle: 'Every unpaid split from friends and family, in one place.',
+      tab_by_person: 'By person',
+      tab_by_transaction: 'By transaction',
+      transactions_one: '1 transaction',
+      transactions_other: '{{count}} transactions',
       outstanding_label: 'Outstanding to you',
       people_one: '1 person',
       people_other: '{{count}} people',
@@ -425,11 +429,9 @@ const da = {
       remove_bill_message:
         'This clears what they owe you for this bill. The transaction itself is unchanged.',
       share_receipt: 'Send receipt',
-      receipt_heading: 'Split summary',
       receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
       receipt_scan_short: 'Scan to pay me back',
-      receipt_footer: 'Tracked with money2time',
     },
     title: 'Transaktioner',
     empty_month_title: 'Ingen transaktioner denne måned',

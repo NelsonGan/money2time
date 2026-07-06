@@ -30,6 +30,7 @@ export type RootStackParamList = {
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;
   SettleUpPerson: { personKey: string };
+  SettleUpTransaction: { transactionId: string };
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
   PayCreditCard: { accountId: string };

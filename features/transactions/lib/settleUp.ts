@@ -1,7 +1,10 @@
 import type {
   PersonDebt,
   PersonDebtBill,
+  SettleUpByTransactionSummary,
   SettleUpSummary,
+  TransactionDebt,
+  TransactionDebtSplit,
   TransactionWithRelations,
 } from '~/types';
 
@@ -162,55 +165,123 @@ export function aggregateUnpaidSplitsByPerson(
   };
 }
 
-export interface ReceiptTextStrings {
-  /** e.g. "Split summary". */
-  heading: string;
-  /** Caller-composed subject line, e.g. "Alex → Sarah" or just "Sarah". */
-  fromTo: string;
+/**
+ * Rolls unpaid, non-self splits up by transaction: one entry per bill that still
+ * has money owed on it, each carrying every person's outstanding share. Mirrors
+ * {@link aggregateUnpaidSplitsByPerson}'s filtering and reporting-currency logic.
+ */
+export function aggregateUnpaidSplitsByTransaction(
+  transactions: TransactionWithRelations[],
+  options: AggregateSettleUpOptions,
+): SettleUpByTransactionSummary {
+  const { reportingCurrency, rateToReporting } = options;
+  const result: TransactionDebt[] = [];
+  let grandTotal = 0;
+  let splitCount = 0;
+
+  for (const tx of transactions) {
+    const splits = tx.splits;
+    if (!splits || splits.length === 0) continue;
+
+    const owed: TransactionDebtSplit[] = [];
+    let totalReporting = 0;
+    let totalNative = 0;
+    for (const split of splits) {
+      if (split.isSelf) continue;
+      if (split.paidAt) continue;
+      if (!(split.amount > 0)) continue;
+
+      const trimmed = split.personName?.trim() ?? '';
+      const reportingAmount = roundCents(
+        splitReportingAmount(split.amount, tx, reportingCurrency, rateToReporting),
+      );
+      owed.push({
+        splitId: split.id,
+        personName: trimmed.length > 0 ? trimmed : null,
+        amount: split.amount,
+        currency: tx.currency,
+        reportingAmount,
+        paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
+      });
+      totalReporting = roundCents(totalReporting + reportingAmount);
+      totalNative = roundCents(totalNative + split.amount);
+    }
+    if (owed.length === 0) continue;
+
+    // Largest share first within a bill.
+    owed.sort((a, b) => b.reportingAmount - a.reportingAmount);
+    result.push({
+      transactionId: tx.id,
+      date: tx.date,
+      note: tx.note ?? null,
+      categoryName: tx.categoryName ?? null,
+      categoryIcon: tx.categoryIcon ?? null,
+      currency: tx.currency,
+      totalReporting,
+      totalNative,
+      splits: owed,
+      splitCount: owed.length,
+    });
+    grandTotal = roundCents(grandTotal + totalReporting);
+    splitCount += owed.length;
+  }
+
+  // Newest bill first; tie-break by amount then id so ordering is stable.
+  result.sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    if (b.totalReporting !== a.totalReporting) return b.totalReporting - a.totalReporting;
+    return a.transactionId < b.transactionId ? -1 : a.transactionId > b.transactionId ? 1 : 0;
+  });
+
+  return {
+    transactions: result,
+    totalReporting: grandTotal,
+    transactionCount: result.length,
+    splitCount,
+    reportingCurrency,
+  };
+}
+
+export interface ReceiptTextLine {
+  label: string;
+  /** Pre-formatted amount, e.g. "$32.00". */
+  amount: string;
+}
+
+export interface ReceiptTextInput {
+  /** Subject line, e.g. a person's name or a bill's description. */
+  title: string;
+  /** Optional secondary line under the title, e.g. a date; null to omit. */
+  subtitle?: string | null;
+  lines: ReceiptTextLine[];
   /** e.g. "You owe". */
   totalLabel: string;
+  /** Pre-formatted total, e.g. "$112.00" or "SGD 80.00 + USD 32.00". */
+  totalText: string;
   /** Optional note shown when a QR image is attached; null to omit. */
-  qrNote: string | null;
-  /** e.g. "Sent from money2time". */
-  footer: string;
-}
-
-export interface BuildReceiptTextOptions {
-  strings: ReceiptTextStrings;
-  /** Formats a native amount + currency, e.g. (32, 'USD') => "$32.00". */
-  formatMoney: (amount: number, currency: string) => string;
-}
-
-function billLabel(bill: PersonDebtBill): string {
-  const note = bill.note?.trim();
-  if (note) return note;
-  if (bill.categoryName) return bill.categoryName;
-  return bill.date;
+  qrNote?: string | null;
 }
 
 /**
- * Renders a person's unpaid tab as a plain-text receipt, ready to drop into a
- * share sheet / forwarded message. Pure: all labels come in via `strings` so it
- * carries no i18n dependency and is trivially testable.
+ * Renders a receipt as plain text for the share-sheet fallback (used when the
+ * image capture is unavailable). Pure and i18n-free: every label is passed in,
+ * so it is trivially testable and shared by the person and transaction screens.
  */
-export function buildReceiptText(person: PersonDebt, options: BuildReceiptTextOptions): string {
-  const { strings, formatMoney } = options;
-  const lines: string[] = [strings.heading, strings.fromTo, ''];
+export function buildReceiptText(input: ReceiptTextInput): string {
+  const out: string[] = [input.title];
+  if (input.subtitle) out.push(input.subtitle);
+  out.push('');
 
-  for (const bill of person.bills) {
-    lines.push(`• ${billLabel(bill)}: ${formatMoney(bill.amount, bill.currency)}`);
+  for (const line of input.lines) {
+    out.push(`• ${line.label}: ${line.amount}`);
   }
 
-  lines.push('');
-  const totalText = person.byCurrency.map((c) => formatMoney(c.amount, c.currency)).join(' + ');
-  lines.push(`${strings.totalLabel}: ${totalText}`);
-
-  if (strings.qrNote) {
-    lines.push('', strings.qrNote);
+  out.push('', `${input.totalLabel}: ${input.totalText}`);
+  if (input.qrNote) {
+    out.push('', input.qrNote);
   }
 
-  lines.push('', strings.footer);
-  return lines.join('\n');
+  return out.join('\n');
 }
 
 /**

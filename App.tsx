@@ -103,6 +103,7 @@ import {
   QuickAddScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
+  SettleUpTransactionScreen,
 } from '~/features/transactions/screens';
 import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
 import type {
@@ -1560,6 +1561,9 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
     <SettleUpScreen
       onBack={() => navigation.goBack()}
       onOpenPerson={(personKey) => navigation.navigate('SettleUpPerson', { personKey })}
+      onOpenTransaction={(transactionId) =>
+        navigation.navigate('SettleUpTransaction', { transactionId })
+      }
     />
   );
 }
@@ -1567,6 +1571,18 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
 function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'SettleUpPerson'>) {
   return (
     <SettleUpPersonScreen personKey={route.params.personKey} onBack={() => navigation.goBack()} />
+  );
+}
+
+function SettleUpTransactionRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'SettleUpTransaction'>) {
+  return (
+    <SettleUpTransactionScreen
+      transactionId={route.params.transactionId}
+      onBack={() => navigation.goBack()}
+    />
   );
 }
 
@@ -2013,6 +2029,7 @@ function AppContent() {
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
           <RootStack.Screen name="SettleUpPerson" component={SettleUpPersonRouteScreen} />
+          <RootStack.Screen name="SettleUpTransaction" component={SettleUpTransactionRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
           <RootStack.Screen
             name="BudgetTemplateEditor"

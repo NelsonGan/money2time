@@ -591,6 +591,47 @@ export interface SettleUpSummary {
   reportingCurrency: string;
 }
 
+/** One person's unpaid share of a single transaction (by-transaction view). */
+export interface TransactionDebtSplit {
+  splitId: string;
+  /** Person who owes, or null when the split was never named. */
+  personName: string | null;
+  /** The split amount, in the parent transaction's own entered currency. */
+  amount: number;
+  currency: string;
+  /** `amount` converted to the reporting currency (frozen fxRate when available). */
+  reportingAmount: number;
+  /** Account the payback lands in (split's own, falling back to the parent's). */
+  paybackAccountId: string | null;
+}
+
+/** A single transaction that still has unpaid, non-self splits owed to the user. */
+export interface TransactionDebt {
+  transactionId: string;
+  /** Transaction date (ISO / YYYY-MM-DD). */
+  date: string;
+  note: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  currency: string;
+  /** Total still owed on this bill, in the reporting currency. */
+  totalReporting: number;
+  /** Total still owed on this bill, in the transaction's own currency. */
+  totalNative: number;
+  splits: TransactionDebtSplit[];
+  splitCount: number;
+}
+
+/** The "who owes you" roll-up grouped by transaction instead of by person. */
+export interface SettleUpByTransactionSummary {
+  transactions: TransactionDebt[];
+  /** Grand total owed across every bill, in the reporting currency. */
+  totalReporting: number;
+  transactionCount: number;
+  splitCount: number;
+  reportingCurrency: string;
+}
+
 export interface RecurringTransactionRule {
   id: string;
   name: string;

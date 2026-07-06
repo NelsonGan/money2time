@@ -1,11 +1,11 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImagePlus, QrCode } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -13,13 +13,21 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/userAssets';
 import type { PersonDebt } from '~/types';
+import { cn } from '~/utils';
+import { currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
-import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
+import {
+  useSettleUpByTransaction,
+  useSettleUpSummary,
+} from '~/features/transactions/lib/useSettleUpSummary';
+
+type SettleUpTab = 'people' | 'transactions';
 
 interface SettleUpScreenProps {
   onBack: () => void;
   onOpenPerson: (personKey: string) => void;
+  onOpenTransaction: (transactionId: string) => void;
 }
 
 const AVATAR_COLORS = [
@@ -44,18 +52,24 @@ function personInitial(person: PersonDebt): string {
   return name ? name[0]!.toUpperCase() : '?';
 }
 
-export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
+export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useApp();
 
+  const [tab, setTab] = useState<SettleUpTab>('people');
   const summary = useSettleUpSummary();
+  const byTransaction = useSettleUpByTransaction();
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
 
   const formatReporting = useCallback(
     (value: number) => formatCurrency(value, settings.currencySymbol),
     [settings.currencySymbol],
+  );
+  const formatNative = useCallback(
+    (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
+    [],
   );
 
   useEffect(() => {
@@ -97,6 +111,13 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
     if (previous) deletePaymentQr(previous);
   }, [settings.paymentQrUri, updateSettings]);
 
+  const hasDebts = summary.personCount > 0;
+
+  const tabs: { value: SettleUpTab; label: string }[] = [
+    { value: 'people', label: I18n.t('transactions.settleUp.tab_by_person') },
+    { value: 'transactions', label: I18n.t('transactions.settleUp.tab_by_transaction') },
+  ];
+
   return (
     <SettingsPageLayout>
       <SettingsHeader
@@ -105,6 +126,37 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
         title={I18n.t('transactions.settleUp.title')}
         infoTooltip={I18n.t('transactions.settleUp.subtitle')}
       />
+
+      {/* Underline tabs: split the roll-up by person or by transaction */}
+      <View className="flex-row gap-6 border-b border-border/15 px-5">
+        {tabs.map((t) => {
+          const isActive = t.value === tab;
+          return (
+            <Pressable
+              key={t.value}
+              onPress={() => {
+                if (isActive) return;
+                void triggerHaptic('selection');
+                setTab(t.value);
+              }}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              className="pb-2.5"
+            >
+              <Text
+                variant="bodyStrong"
+                className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}
+              >
+                {t.label}
+              </Text>
+              <View
+                className="mt-2 h-0.5 rounded-full"
+                style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
 
       <ScrollView
         className="flex-1"
@@ -115,8 +167,8 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
         }}
       >
         {/* Outstanding hero, shown only when someone actually owes */}
-        {summary.personCount > 0 ? (
-          <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
+        {hasDebts ? (
+          <View className="mt-4 rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
             <Text variant="caption" tone="muted" className="uppercase tracking-wide">
               {I18n.t('transactions.settleUp.outstanding_label')}
             </Text>
@@ -124,15 +176,21 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
               {formatReporting(summary.totalReporting)}
             </Text>
             <Text variant="caption" tone="muted" className="mt-1">
-              {summary.personCount === 1
-                ? I18n.t('transactions.settleUp.people_one')
-                : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })}
+              {tab === 'people'
+                ? summary.personCount === 1
+                  ? I18n.t('transactions.settleUp.people_one')
+                  : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })
+                : byTransaction.transactionCount === 1
+                  ? I18n.t('transactions.settleUp.transactions_one')
+                  : I18n.t('transactions.settleUp.transactions_other', {
+                      count: byTransaction.transactionCount,
+                    })}
             </Text>
           </View>
         ) : null}
 
-        {/* People list */}
-        {summary.people.length === 0 ? (
+        {/* List: by person or by transaction */}
+        {!hasDebts ? (
           <View className="mt-6">
             <EmptyState
               title={I18n.t('transactions.settleUp.empty_title')}
@@ -140,7 +198,7 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
               mascotMood="happy"
             />
           </View>
-        ) : (
+        ) : tab === 'people' ? (
           <View className="mt-5 gap-2">
             {summary.people.map((person) => (
               <Pressable
@@ -174,6 +232,43 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
                 <View className="items-end">
                   <Text variant="bodyStrong" className="text-warning">
                     {formatReporting(person.totalReporting)}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <View className="mt-5 gap-2">
+            {byTransaction.transactions.map((bill) => (
+              <Pressable
+                key={bill.transactionId}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenTransaction(bill.transactionId);
+                }}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+              >
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
+                  <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyStrong" numberOfLines={1}>
+                    {bill.note?.trim() ||
+                      bill.categoryName ||
+                      I18n.t('transactions.settleUp.untitled_bill')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {bill.splitCount === 1
+                      ? I18n.t('transactions.settleUp.people_one')
+                      : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
+                    {' · '}
+                    {formatRelativeDate(bill.date)}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text variant="bodyStrong" className="text-warning">
+                    {formatNative(bill.totalNative, bill.currency)}
                   </Text>
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />

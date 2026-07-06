@@ -1,5 +1,6 @@
 import {
   aggregateUnpaidSplitsByPerson,
+  aggregateUnpaidSplitsByTransaction,
   buildReceiptText,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
@@ -199,88 +200,129 @@ describe('aggregateUnpaidSplitsByPerson', () => {
 });
 
 describe('buildReceiptText', () => {
-  const strings = {
-    heading: 'Split summary',
-    fromTo: 'Alex → Sarah',
-    totalLabel: 'You owe',
-    qrNote: null,
-    footer: 'Sent from money2time',
-  };
-  const formatMoney = (amount: number, currency: string) => `${currency} ${amount.toFixed(2)}`;
-
-  it('labels bills by note, then category, then date', () => {
-    const [sarah] = aggregateUnpaidSplitsByPerson(
-      [
-        makeTx({
-          id: 't1',
-          date: '2026-06-09',
-          note: 'Concert tickets',
-          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 80 })],
-        }),
-        makeTx({
-          id: 't2',
-          date: '2026-05-14',
-          note: null,
-          categoryName: 'Dining',
-          splits: [makeSplit({ id: 's2', personName: 'Sarah', amount: 32 })],
-        }),
+  it('renders title, bulleted lines and a total', () => {
+    const text = buildReceiptText({
+      title: 'Sarah',
+      lines: [
+        { label: 'Concert tickets', amount: 'USD 80.00' },
+        { label: 'Dining', amount: 'USD 32.00' },
       ],
-      { reportingCurrency: 'USD' },
-    ).people;
-
-    const text = buildReceiptText(sarah, { strings, formatMoney });
+      totalLabel: 'You owe',
+      totalText: 'USD 112.00',
+    });
     expect(text).toContain('• Concert tickets: USD 80.00');
     expect(text).toContain('• Dining: USD 32.00');
     expect(text).toContain('You owe: USD 112.00');
-    expect(text.startsWith('Split summary\nAlex → Sarah')).toBe(true);
-    expect(text.endsWith('Sent from money2time')).toBe(true);
+    expect(text.startsWith('Sarah\n')).toBe(true);
   });
 
-  it('joins multi-currency totals and includes the QR note when present', () => {
-    const [sarah] = aggregateUnpaidSplitsByPerson(
-      [
-        makeTx({
-          id: 't1',
-          currency: 'USD',
-          fxRate: 1,
-          reportingCurrency: 'USD',
-          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 32 })],
-        }),
-        makeTx({
-          id: 't2',
-          currency: 'SGD',
-          fxRate: 0.75,
-          reportingCurrency: 'USD',
-          splits: [makeSplit({ id: 's2', personName: 'Sarah', amount: 80 })],
-        }),
-      ],
-      { reportingCurrency: 'USD' },
-    ).people;
-
-    const text = buildReceiptText(sarah, {
-      strings: {
-        ...strings,
-        qrNote: 'Scan the QR I attached to pay me back.',
-      },
-      formatMoney,
+  it('adds a subtitle and QR note when provided', () => {
+    const text = buildReceiptText({
+      title: 'Dinner',
+      subtitle: '9 Jun 2026',
+      lines: [{ label: 'Sarah', amount: 'SGD 80.00' }],
+      totalLabel: 'You owe',
+      totalText: 'SGD 80.00',
+      qrNote: 'Scan the QR I attached to pay me back.',
     });
-    expect(text).toContain('You owe: SGD 80.00 + USD 32.00');
+    expect(text.startsWith('Dinner\n9 Jun 2026\n')).toBe(true);
     expect(text).toContain('Scan the QR I attached to pay me back.');
   });
 
   it('carries no long dashes in the rendered receipt', () => {
-    const [sarah] = aggregateUnpaidSplitsByPerson(
+    const text = buildReceiptText({
+      title: 'Sarah',
+      lines: [{ label: 'Dinner', amount: 'USD 32.00' }],
+      totalLabel: 'You owe',
+      totalText: 'USD 32.00',
+    });
+    expect(text).not.toMatch(/[—–─]/);
+  });
+});
+
+describe('aggregateUnpaidSplitsByTransaction', () => {
+  it('returns an empty summary when there are no unpaid splits', () => {
+    const summary = aggregateUnpaidSplitsByTransaction([makeTx({})], { reportingCurrency: 'USD' });
+    expect(summary).toEqual({
+      transactions: [],
+      totalReporting: 0,
+      transactionCount: 0,
+      splitCount: 0,
+      reportingCurrency: 'USD',
+    });
+  });
+
+  it('groups every unpaid share under its bill, largest share first', () => {
+    const summary = aggregateUnpaidSplitsByTransaction(
       [
         makeTx({
           id: 't1',
+          date: '2026-06-09',
           note: 'Dinner',
-          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 32 })],
+          splits: [
+            makeSplit({ id: 's1', transactionId: 't1', personName: 'Sarah', amount: 20 }),
+            makeSplit({ id: 's2', transactionId: 't1', personName: 'Marcus', amount: 45 }),
+            makeSplit({
+              id: 's-self',
+              transactionId: 't1',
+              personName: 'Me',
+              isSelf: true,
+              amount: 35,
+            }),
+          ],
         }),
       ],
       { reportingCurrency: 'USD' },
-    ).people;
-    const text = buildReceiptText(sarah, { strings, formatMoney });
-    expect(text).not.toMatch(/[—–─]/);
+    );
+    expect(summary.transactionCount).toBe(1);
+    expect(summary.splitCount).toBe(2);
+    expect(summary.totalReporting).toBe(65);
+    const [bill] = summary.transactions;
+    expect(bill.totalNative).toBe(65);
+    expect(bill.splits.map((s) => s.personName)).toEqual(['Marcus', 'Sarah']);
+  });
+
+  it('drops fully-paid bills and sorts remaining newest first', () => {
+    const summary = aggregateUnpaidSplitsByTransaction(
+      [
+        makeTx({
+          id: 't-old',
+          date: '2026-05-01',
+          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })],
+        }),
+        makeTx({
+          id: 't-paid',
+          date: '2026-06-01',
+          splits: [makeSplit({ id: 's2', personName: 'Marcus', amount: 10, paidAt: '2026-06-02' })],
+        }),
+        makeTx({
+          id: 't-new',
+          date: '2026-06-10',
+          splits: [makeSplit({ id: 's3', personName: 'Priya', amount: 10 })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    expect(summary.transactions.map((t) => t.transactionId)).toEqual(['t-new', 't-old']);
+  });
+
+  it('converts a foreign bill via the frozen fxRate', () => {
+    const summary = aggregateUnpaidSplitsByTransaction(
+      [
+        makeTx({
+          id: 't1',
+          currency: 'SGD',
+          reportingCurrency: 'USD',
+          fxRate: 0.75,
+          splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 80 })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    const [bill] = summary.transactions;
+    expect(bill.totalNative).toBe(80);
+    expect(bill.totalReporting).toBe(60);
+    expect(bill.splits[0].reportingAmount).toBe(60);
   });
 });
 

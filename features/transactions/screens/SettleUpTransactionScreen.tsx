@@ -15,20 +15,27 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, formatRelativeDate, formatShortDate } from '~/utils/formatters';
+import { formatCurrency, formatShortDate } from '~/utils/formatters';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
-import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
+import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 
-interface SettleUpPersonScreenProps {
-  personKey: string;
+interface SettleUpTransactionScreenProps {
+  transactionId: string;
   onBack: () => void;
 }
 
-export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreenProps) {
+function personInitial(name: string | null): string {
+  const trimmed = name?.trim();
+  return trimmed ? trimmed[0]!.toUpperCase() : '?';
+}
+
+export function SettleUpTransactionScreen({
+  transactionId,
+  onBack,
+}: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
-    settings,
     accounts,
     accountGroups,
     getAccountById,
@@ -40,23 +47,19 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
   const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
 
-  const summary = useSettleUpSummary();
+  const summary = useSettleUpByTransaction();
 
-  const person = useMemo(
-    () => summary.people.find((p) => p.key === personKey) ?? null,
-    [summary.people, personKey],
+  const bill = useMemo(
+    () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,
+    [summary.transactions, transactionId],
   );
 
-  // When the last bill is settled the person drops out of the summary; leave the
-  // page so we never sit on an empty tab.
+  // When the last share is settled the bill drops out of the summary; leave the
+  // page so we never sit on an empty screen.
   useEffect(() => {
-    if (!person) onBack();
-  }, [person, onBack]);
+    if (!bill) onBack();
+  }, [bill, onBack]);
 
-  const formatReporting = useCallback(
-    (value: number) => formatCurrency(value, settings.currencySymbol),
-    [settings.currencySymbol],
-  );
   const formatNative = useCallback(
     (amount: number, currency: string) => formatCurrency(amount, currencySymbolForCode(currency)),
     [],
@@ -94,75 +97,78 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     [deleteSplit],
   );
 
-  const pickerBill = useMemo(
-    () => person?.bills.find((b) => b.splitId === pickerForSplitId) ?? null,
-    [person, pickerForSplitId],
+  const pickerSplit = useMemo(
+    () => bill?.splits.find((s) => s.splitId === pickerForSplitId) ?? null,
+    [bill, pickerForSplitId],
   );
 
-  const title = person?.name ?? `${I18n.t('transactions.settleUp.someone')}`;
+  const title =
+    (bill && (bill.note?.trim() || bill.categoryName)) ||
+    `${I18n.t('transactions.settleUp.untitled_bill')}`;
 
-  // Receipt: title is the person's name, one line per bill with its date.
+  // Receipt: title is the bill, the date sits on top, one line per person.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
-    if (!person) return null;
+    if (!bill) return null;
     return {
       title,
-      subtitle: null,
+      subtitle: formatShortDate(bill.date),
       totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-      totalText: person.byCurrency.map((c) => formatNative(c.amount, c.currency)).join(' + '),
-      lines: person.bills.map((bill) => ({
-        key: bill.splitId,
-        categoryIcon: bill.categoryIcon,
-        label:
-          bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
-        sublabel: formatShortDate(bill.date),
-        amount: formatNative(bill.amount, bill.currency),
+      totalText: formatNative(bill.totalNative, bill.currency),
+      lines: bill.splits.map((split) => ({
+        key: split.splitId,
+        initial: personInitial(split.personName),
+        label: split.personName ?? I18n.t('transactions.settleUp.someone'),
+        amount: formatNative(split.amount, split.currency),
       })),
     };
-  }, [person, title, formatNative]);
+  }, [bill, title, formatNative]);
 
   return (
     <SettingsPageLayout>
       <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={title} />
-      {person ? (
+      {bill ? (
         <>
           <ScrollView
             className="flex-1"
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
             <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
-              <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-                {I18n.t('transactions.settleUp.person_owes_label')}
-              </Text>
+              <View className="flex-row items-center gap-2">
+                <CategoryEmoji icon={bill.categoryIcon} size={18} />
+                <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+                  {formatShortDate(bill.date)}
+                </Text>
+              </View>
               <Text variant="heading" className="mt-1 text-3xl">
-                {formatReporting(person.totalReporting)}
+                {formatNative(bill.totalNative, bill.currency)}
+              </Text>
+              <Text variant="caption" tone="muted" className="mt-1">
+                {bill.splitCount === 1
+                  ? I18n.t('transactions.settleUp.people_one')
+                  : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
               </Text>
             </View>
 
             <View className="mt-4 gap-2">
-              {person.bills.map((bill) => {
-                const account = bill.paybackAccountId
-                  ? getAccountById(bill.paybackAccountId)
+              {bill.splits.map((split) => {
+                const account = split.paybackAccountId
+                  ? getAccountById(split.paybackAccountId)
                   : null;
                 return (
                   <View
-                    key={bill.splitId}
+                    key={split.splitId}
                     className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
                   >
                     <View className="flex-row items-center gap-3">
                       <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-                        <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+                        <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
                       </View>
                       <View className="flex-1">
                         <Text variant="bodyStrong" numberOfLines={1}>
-                          {bill.note?.trim() ||
-                            bill.categoryName ||
-                            I18n.t('transactions.settleUp.untitled_bill')}
-                        </Text>
-                        <Text variant="caption" tone="muted">
-                          {formatRelativeDate(bill.date)}
+                          {split.personName ?? I18n.t('transactions.settleUp.someone')}
                         </Text>
                       </View>
-                      <Text variant="bodyStrong">{formatNative(bill.amount, bill.currency)}</Text>
+                      <Text variant="bodyStrong">{formatNative(split.amount, split.currency)}</Text>
                     </View>
 
                     <View className="my-3 h-px bg-border/15" />
@@ -171,7 +177,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('selection');
-                          setPickerForSplitId(bill.splitId);
+                          setPickerForSplitId(split.splitId);
                         }}
                         className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
                       >
@@ -190,14 +196,14 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                       </Pressable>
                       <View className="flex-1" />
                       <Pressable
-                        onPress={() => handleDelete(bill.splitId)}
+                        onPress={() => handleDelete(split.splitId)}
                         hitSlop={8}
                         className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
                       >
                         <Trash2 size={15} color={themeColors.error} />
                       </Pressable>
                       <Pressable
-                        onPress={() => handleMarkPaid(bill.splitId)}
+                        onPress={() => handleMarkPaid(split.splitId)}
                         hitSlop={8}
                         className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
                       >
@@ -230,7 +236,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
             onClose={() => setPickerForSplitId(null)}
             accounts={accounts}
             accountGroups={accountGroups}
-            selectedAccountId={pickerBill?.paybackAccountId ?? null}
+            selectedAccountId={pickerSplit?.paybackAccountId ?? null}
             onSelect={(accountId) => {
               if (pickerForSplitId) updateSplitPaybackAccount(pickerForSplitId, accountId);
               setPickerForSplitId(null);
@@ -241,7 +247,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
             visible={shareVisible}
             onClose={() => setShareVisible(false)}
             content={receiptContent}
-            itemCount={person.billCount}
+            itemCount={bill.splitCount}
           />
         </>
       ) : null}
