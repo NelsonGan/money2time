@@ -68,6 +68,21 @@ export const transactionsTable = sqliteTable('transactions', {
   recurrenceEndDate: text('recurrence_end_date'),
   recurrenceParentId: text('recurrence_parent_id'),
   sentiment: text('sentiment').notNull().default('neutral'),
+  // Claim / reimbursement (V1). `claimStatus` is the filterable status of a
+  // claimable expense: 'none' | 'claimable' | 'submitted' | 'partially_reimbursed'
+  // | 'reimbursed'. `claimAmount` is the amount expected back (tx currency; null
+  // when not claimable), `reimbursedAmount` is the denormalized running sum of
+  // settled reimbursement inflows, `reimbursedAt` the ISO ts when fully settled.
+  // `reimbursementAccountId` is the preferred settle-into account.
+  claimStatus: text('claim_status').notNull().default('none'),
+  claimAmount: real('claim_amount'),
+  reimbursedAmount: real('reimbursed_amount').notNull().default(0),
+  reimbursedAt: text('reimbursed_at'),
+  reimbursementAccountId: text('reimbursement_account_id'),
+  // Back-pointer set ONLY on reimbursement-inflow (income) rows -> the claimable
+  // expense they settle. Also marks a row as a reimbursement so income
+  // aggregates can exclude it. Enables one expense -> many settlement inflows.
+  reimbursesTransactionId: text('reimburses_transaction_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

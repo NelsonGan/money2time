@@ -23,6 +23,7 @@ import type {
   BudgetTemplate,
   BudgetTemplateAllocation,
   Category,
+  ClaimStatus,
   ExchangeRate,
   ExchangeRateSource,
   Item,
@@ -70,6 +71,18 @@ function asTransactionType(value: string): Transaction['type'] {
       return value;
     default:
       return 'expense';
+  }
+}
+
+function asClaimStatus(value: string | null | undefined): ClaimStatus {
+  switch (value) {
+    case 'claimable':
+    case 'submitted':
+    case 'partially_reimbursed':
+    case 'reimbursed':
+      return value;
+    default:
+      return 'none';
   }
 }
 
@@ -320,6 +333,12 @@ export function toTransaction(row: TransactionRow): Transaction {
     recurrenceEndDate: row.recurrenceEndDate,
     recurrenceParentId: row.recurrenceParentId,
     sentiment: asTransactionSentiment(row.sentiment),
+    claimStatus: asClaimStatus(row.claimStatus),
+    claimAmount: row.claimAmount ?? null,
+    reimbursedAmount: row.reimbursedAmount ?? 0,
+    reimbursedAt: row.reimbursedAt ?? null,
+    reimbursementAccountId: row.reimbursementAccountId ?? null,
+    reimbursesTransactionId: row.reimbursesTransactionId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

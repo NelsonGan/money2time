@@ -21,6 +21,7 @@ export const DEFAULT_TRANSACTION_FILTERS: TransactionFilters = {
   categoryId: null,
   minAmount: null,
   maxAmount: null,
+  claimStatus: 'all',
   sortBy: 'date_desc',
 };
 

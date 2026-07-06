@@ -1,9 +1,10 @@
-import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNull, lte, ne, or, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
+  ClaimStatus,
   Transaction,
   TransactionFilters,
   TransactionSentiment,
@@ -55,6 +56,13 @@ export interface CreateTransactionInput {
   /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
   receiptUri?: string | null;
   sentiment?: TransactionSentiment;
+  /** Claim / reimbursement fields (see schema.ts). */
+  claimStatus?: ClaimStatus;
+  claimAmount?: number | null;
+  reimbursedAmount?: number;
+  reimbursedAt?: string | null;
+  reimbursementAccountId?: string | null;
+  reimbursesTransactionId?: string | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -70,8 +78,15 @@ const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   categoryId: null,
   minAmount: null,
   maxAmount: null,
+  claimStatus: 'all',
   sortBy: 'date_desc',
 };
+
+const OUTSTANDING_CLAIM_STATUSES: ClaimStatus[] = [
+  'claimable',
+  'submitted',
+  'partially_reimbursed',
+];
 const inClausePlaceholdersByCount = new Map<number, string>();
 
 function getInClausePlaceholders(count: number): string {
@@ -260,6 +275,15 @@ function buildSqlPredicates(normalized: TransactionFilters) {
       : undefined,
     normalized.minAmount !== null ? gte(transactionsTable.amount, normalized.minAmount) : undefined,
     normalized.maxAmount !== null ? lte(transactionsTable.amount, normalized.maxAmount) : undefined,
+    normalized.claimStatus === 'outstanding'
+      ? inArray(transactionsTable.claimStatus, OUTSTANDING_CLAIM_STATUSES)
+      : normalized.claimStatus === 'reimbursed'
+        ? eq(transactionsTable.claimStatus, 'reimbursed')
+        : normalized.claimStatus === 'claimable_any'
+          ? ne(transactionsTable.claimStatus, 'none')
+          : normalized.claimStatus === 'none'
+            ? eq(transactionsTable.claimStatus, 'none')
+            : undefined,
   ];
 
   if (normalized.search.trim()) {
@@ -503,6 +527,12 @@ class TransactionsRepository {
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
+        claimStatus: normalizedInput.claimStatus ?? 'none',
+        claimAmount: normalizedInput.claimAmount ?? null,
+        reimbursedAmount: normalizedInput.reimbursedAmount ?? 0,
+        reimbursedAt: normalizedInput.reimbursedAt ?? null,
+        reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
+        reimbursesTransactionId: normalizedInput.reimbursesTransactionId ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -617,6 +647,8 @@ class TransactionsRepository {
           gte(transactionsTable.date, range.start),
           lte(transactionsTable.date, range.end),
           inArray(transactionsTable.type, ['income', 'expense']),
+          // Exclude reimbursement inflows: recovered spend is not income.
+          isNull(transactionsTable.reimbursesTransactionId),
         ),
       )
       .all();
@@ -632,6 +664,26 @@ class TransactionsRepository {
     });
 
     return { income, expense };
+  }
+
+  /**
+   * Reimbursement inflows that settle `expenseId` (reverse of the
+   * `reimbursesTransactionId` back-pointer). Used to rewind claim state when a
+   * reimbursement or its source expense is deleted.
+   */
+  listReimbursementsFor(expenseId: string): Transaction[] {
+    const db = getDb();
+    return db
+      .select()
+      .from(transactionsTable)
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          eq(transactionsTable.reimbursesTransactionId, expenseId),
+        ),
+      )
+      .all()
+      .map(toTransaction);
   }
 
   getTransfersBetweenAccounts(
