@@ -396,7 +396,6 @@ const en = {
       someone: 'Someone',
       person_owes_label: 'Owes you',
       untitled_bill: 'Split bill',
-      payback_to: 'to {{account}}',
       remove_bill_title: 'Remove this request?',
       remove_bill_message:
         'This clears what they owe you for this bill. The transaction itself is unchanged.',

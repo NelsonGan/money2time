@@ -191,9 +191,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                           numberOfLines={1}
                           className="max-w-[150px]"
                         >
-                          {I18n.t('transactions.settleUp.payback_to', {
-                            account: account?.name ?? I18n.t('common.no_account'),
-                          })}
+                          {account?.name ?? I18n.t('common.no_account')}
                         </Text>
                         <ChevronDown size={12} color={themeColors.textMuted} />
                       </Pressable>
