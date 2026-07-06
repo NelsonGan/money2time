@@ -53,7 +53,7 @@ export type RootStackParamList = {
   ItemEditor: { itemId?: string } | undefined;
   GoalDetail: { goalId: string };
   GoalEditor: { goalId?: string } | undefined;
-  AddContribution: { goalId: string };
+  AddContribution: { goalId: string; mode?: 'deposit' | 'withdraw' };
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
   // Edit an existing month budget (budgetId) or create a one-off custom
   // budget for a month with no live budget (createForMonth, 'YYYY-MM').

@@ -37,14 +37,16 @@ export function GoalsScreen({
   const { checkLimit } = useProGate();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
 
-  const { active, done } = useMemo(() => {
+  const { active, completed, archived } = useMemo(() => {
     const activeGoals: GoalWithStats[] = [];
-    const doneGoals: GoalWithStats[] = [];
+    const completedGoals: GoalWithStats[] = [];
+    const archivedGoals: GoalWithStats[] = [];
     goals.forEach((goal) => {
-      if (goal.status === 'active') activeGoals.push(goal);
-      else doneGoals.push(goal);
+      if (goal.status === 'archived') archivedGoals.push(goal);
+      else if (goal.status === 'completed') completedGoals.push(goal);
+      else activeGoals.push(goal);
     });
-    return { active: activeGoals, done: doneGoals };
+    return { active: activeGoals, completed: completedGoals, archived: archivedGoals };
   }, [goals]);
 
   const handleAdd = useCallback(() => {
@@ -92,12 +94,28 @@ export function GoalsScreen({
             />
           ))}
 
-          {done.length > 0 ? (
+          {completed.length > 0 ? (
             <>
               <Text variant="label" tone="muted" className="mt-4 px-1">
                 {I18n.t('goals.section_completed')}
               </Text>
-              {done.map((goal) => (
+              {completed.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  settings={settings}
+                  onPress={() => onOpenGoal(goal.id)}
+                />
+              ))}
+            </>
+          ) : null}
+
+          {archived.length > 0 ? (
+            <>
+              <Text variant="label" tone="muted" className="mt-4 px-1">
+                {I18n.t('goals.section_archived')}
+              </Text>
+              {archived.map((goal) => (
                 <GoalCard
                   key={goal.id}
                   goal={goal}

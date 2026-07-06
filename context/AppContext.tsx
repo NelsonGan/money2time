@@ -3285,6 +3285,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [goals],
   );
 
+  // Flips a goal between active and completed to match its saved-vs-target
+  // reality. Runs after any change that can move the needle (a contribution,
+  // an edit to the target). Never touches an archived goal, and only counts
+  // contributions dated on or before today so it agrees with computeGoalStats
+  // (a future-dated contribution must not complete a goal early). Writes to the
+  // repo only; the caller is responsible for the follow-up refreshGoals().
+  const reconcileGoalCompletion = useCallback((goalId: string) => {
+    const goal = goalsRepository.list().find((candidate) => candidate.id === goalId);
+    if (!goal || goal.status === 'archived' || goal.targetReportingAmount <= 0) return;
+    const todayKey = dayKeyFromDateLocal(new Date());
+    const saved =
+      goal.startingAmount * (goal.fxRate || 1) +
+      goalContributionsRepository
+        .listByGoal(goal.id)
+        .filter((c) => c.date <= todayKey)
+        .reduce((sum, c) => sum + (c.reportingAmount ?? c.amount), 0);
+    const shouldBeComplete = saved >= goal.targetReportingAmount;
+    if (shouldBeComplete && goal.status !== 'completed') {
+      goalsRepository.update(goal.id, { status: 'completed', completedAt: nowIso() });
+      void trackEvent(AnalyticsEvents.GOAL_COMPLETED);
+    } else if (!shouldBeComplete && goal.status === 'completed') {
+      goalsRepository.update(goal.id, { status: 'active', completedAt: null });
+    }
+  }, []);
+
   const createGoal = useCallback(
     (input: CreateGoalInput) => {
       const id = goalsRepository.create(input);
@@ -3301,10 +3326,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateGoal = useCallback(
     (id: string, updates: Partial<CreateGoalInput>) => {
       goalsRepository.update(id, updates);
+      // Editing the target can complete a goal (lowered) or re-open one (raised).
+      reconcileGoalCompletion(id);
       refreshGoals();
       void trackEvent(AnalyticsEvents.GOAL_UPDATED);
     },
-    [refreshGoals],
+    [reconcileGoalCompletion, refreshGoals],
   );
 
   const deleteGoal = useCallback(
@@ -3339,41 +3366,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addContribution = useCallback(
     (input: CreateGoalContributionInput) => {
       const id = goalContributionsRepository.create(input);
-      // Auto-complete when this contribution reaches the target.
-      const goal = goalsRepository.list().find((candidate) => candidate.id === input.goalId);
-      if (goal && goal.status === 'active' && goal.targetReportingAmount > 0) {
-        const contributions = goalContributionsRepository.listByGoal(goal.id);
-        const saved =
-          goal.startingAmount * (goal.fxRate || 1) +
-          contributions.reduce((sum, c) => sum + (c.reportingAmount ?? c.amount), 0);
-        if (saved >= goal.targetReportingAmount) {
-          goalsRepository.update(goal.id, { status: 'completed', completedAt: nowIso() });
-          void trackEvent(AnalyticsEvents.GOAL_COMPLETED);
-        }
-      }
+      reconcileGoalCompletion(input.goalId);
       refreshGoals();
       void trackEvent(AnalyticsEvents.GOAL_CONTRIBUTION_ADDED, {
         isWithdrawal: input.amount < 0,
       });
       return id;
     },
-    [refreshGoals],
+    [reconcileGoalCompletion, refreshGoals],
   );
 
   const updateContribution = useCallback(
     (id: string, updates: Partial<CreateGoalContributionInput>) => {
+      const goalId = goalContributions.find((c) => c.id === id)?.goalId;
       goalContributionsRepository.update(id, updates);
+      if (goalId) reconcileGoalCompletion(goalId);
       refreshGoals();
     },
-    [refreshGoals],
+    [goalContributions, reconcileGoalCompletion, refreshGoals],
   );
 
   const deleteContribution = useCallback(
     (id: string) => {
+      const goalId = goalContributions.find((c) => c.id === id)?.goalId;
       goalContributionsRepository.softDelete(id);
+      // Removing money can drop a completed goal back below its target.
+      if (goalId) reconcileGoalCompletion(goalId);
       refreshGoals();
     },
-    [refreshGoals],
+    [goalContributions, reconcileGoalCompletion, refreshGoals],
   );
 
   const getGoalContributions = useCallback(

@@ -18,7 +18,7 @@ interface GoalDetailScreenProps {
   goalId: string;
   onClose: () => void;
   onEdit: (goalId: string) => void;
-  onAddContribution: (goalId: string) => void;
+  onAddContribution: (goalId: string, mode: 'deposit' | 'withdraw') => void;
 }
 
 const MILESTONES = [0.25, 0.5, 0.75, 1] as const;
@@ -45,8 +45,15 @@ export function GoalDetailScreen({
   onEdit,
   onAddContribution,
 }: GoalDetailScreenProps) {
-  const { goals, settings, getGoalContributions, deleteContribution, archiveGoal, deleteGoal } =
-    useApp();
+  const {
+    goals,
+    settings,
+    getGoalContributions,
+    deleteContribution,
+    archiveGoal,
+    updateGoal,
+    deleteGoal,
+  } = useApp();
   const themeColors = useThemeColors();
 
   const goal = useMemo(() => goals.find((g) => g.id === goalId) ?? null, [goalId, goals]);
@@ -58,32 +65,31 @@ export function GoalDetailScreen({
   const handleOverflow = useCallback(() => {
     if (!goal) return;
     void triggerHaptic('selection');
-    Alert.alert(
-      goal.name,
-      undefined,
-      [
-        { text: I18n.t('goals.edit_title'), onPress: () => onEdit(goal.id) },
-        goal.status === 'active'
-          ? {
-              text: I18n.t('goals.archive'),
-              onPress: () => {
-                archiveGoal(goal.id);
-                onClose();
-              },
-            }
-          : undefined,
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            deleteGoal(goal.id);
-            onClose();
+    Alert.alert(goal.name, undefined, [
+      { text: I18n.t('goals.edit_title'), onPress: () => onEdit(goal.id) },
+      goal.status === 'archived'
+        ? {
+            text: I18n.t('goals.unarchive'),
+            onPress: () => updateGoal(goal.id, { status: 'active' }),
+          }
+        : {
+            text: I18n.t('goals.archive'),
+            onPress: () => {
+              archiveGoal(goal.id);
+              onClose();
+            },
           },
+      {
+        text: I18n.t('common.delete'),
+        style: 'destructive',
+        onPress: () => {
+          deleteGoal(goal.id);
+          onClose();
         },
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-      ].filter(Boolean) as { text: string }[],
-    );
-  }, [archiveGoal, deleteGoal, goal, onClose, onEdit]);
+      },
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+    ]);
+  }, [archiveGoal, deleteGoal, goal, onClose, onEdit, updateGoal]);
 
   const handleDeleteContribution = useCallback(
     (id: string) => {
@@ -236,7 +242,7 @@ export function GoalDetailScreen({
         {/* Actions */}
         <View className="mt-4 flex-row gap-3">
           <View className="flex-1">
-            <Button onPress={() => onAddContribution(goal.id)}>
+            <Button onPress={() => onAddContribution(goal.id, 'deposit')}>
               <View className="flex-row items-center gap-1.5">
                 <Plus size={16} color="#fff" />
                 <Text style={{ color: '#fff' }} variant="bodyStrong">
@@ -245,10 +251,21 @@ export function GoalDetailScreen({
               </View>
             </Button>
           </View>
-          <Button variant="secondary" size="icon" onPress={() => onAddContribution(goal.id)}>
+          <Button
+            variant="secondary"
+            size="icon"
+            onPress={() => onAddContribution(goal.id, 'withdraw')}
+            accessibilityLabel={I18n.t('goals.withdraw')}
+          >
             <Minus size={18} color={themeColors.textMuted} />
           </Button>
         </View>
+
+        {goal.note ? (
+          <Text variant="body" tone="muted" className="mt-4 px-1">
+            {goal.note}
+          </Text>
+        ) : null}
 
         {/* Contribution history */}
         {contributions.length > 0 ? (
