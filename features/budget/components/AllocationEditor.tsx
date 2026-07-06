@@ -127,7 +127,9 @@ export function AllocationCategoryList({
   themeColors: ColorPalette;
 }) {
   return (
-    <View className="overflow-hidden rounded-2xl border border-border/40 bg-card">
+    // No overflow-hidden: it would clip a row's lift/shadow mid-drag. Rows and
+    // the card share bg-card, so the rounded border still reads as one card.
+    <View className="rounded-2xl border border-border/40 bg-card">
       <Sortable.Grid
         activeItemScale={1.02}
         activeItemShadowOpacity={0.08}
