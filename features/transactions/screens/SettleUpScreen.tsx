@@ -2,14 +2,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImagePlus, QrCode } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import {
-  SettingsHeader,
-  SettingsPageLayout,
-  Text,
-  useSettingsBottomNavInset,
-} from '~/components/ui';
+import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,7 +46,7 @@ function personInitial(person: PersonDebt): string {
 
 export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
-  const bottomNavInset = useSettingsBottomNavInset();
+  const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useApp();
 
   const summary = useSettleUpSummary();
@@ -112,7 +108,11 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={[{ paddingHorizontal: 20, paddingTop: 4 }, bottomNavInset]}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 4,
+          paddingBottom: insets.bottom + 24,
+        }}
       >
         {/* Outstanding hero, shown only when someone actually owes */}
         {summary.personCount > 0 ? (
