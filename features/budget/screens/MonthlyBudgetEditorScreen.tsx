@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
+import { View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Input, SettingsHeader } from '~/components/ui';
@@ -46,6 +47,7 @@ export function MonthlyBudgetEditorScreen({
   const { settings, categories, monthlyBudgets, updateMonthlyBudget, createCustomMonthlyBudget } =
     useApp();
   const themeColors = useThemeColors();
+  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   const budget = useMemo(
     () =>
@@ -64,6 +66,14 @@ export function MonthlyBudgetEditorScreen({
         if (line.amount > 0) initial[line.categoryId] = String(line.amount);
       }
       return initial;
+    },
+    initialOrder: () => {
+      // Frozen lines arrive in saved sortOrder; keep the root order so editing
+      // a month opens in the arrangement it was saved in.
+      const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
+      return (budget?.lines ?? [])
+        .filter((line) => !parentById.get(line.categoryId))
+        .map((line) => line.categoryId);
     },
     onOpenCategoryAllocation,
   });
@@ -107,7 +117,8 @@ export function MonthlyBudgetEditorScreen({
         <SettingsHeader className="px-0 pt-5 pb-3" onBack={onClose} title={monthLabel} />
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
+        ref={scrollRef}
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -127,6 +138,8 @@ export function MonthlyBudgetEditorScreen({
             amounts={draft.amounts}
             childGaps={draft.childGaps}
             onPressCategory={draft.openCategoryAllocation}
+            onReorder={draft.reorderRootCategories}
+            scrollableRef={scrollRef}
             settings={settings}
             themeColors={themeColors}
           />
@@ -139,7 +152,7 @@ export function MonthlyBudgetEditorScreen({
             themeColors={themeColors}
           />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* The remaining-to-allocate bar sits right above Cancel/Save (and rides
           the keyboard) so the running tally is visible while amounts are
