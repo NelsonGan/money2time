@@ -24,17 +24,19 @@ milestone notifications.
 ## 1. Why build this
 
 ### Problem
+
 money2time is excellent at recording where money _went_ (transactions,
 budgets, albums, cost-per-day items) but has no first-class concept of money a
 user is deliberately **setting aside for a future target**. Users today fake
 it with a dedicated account and mental math. There is:
 
 - No target amount to measure progress against.
-- No projected "you'll get there by ___" date.
+- No projected "you'll get there by \_\_\_" date.
 - No way to see a savings goal in **work-hours**, which is the app's whole
   differentiator.
 
 ### Opportunity
+
 Savings goals are one of the most-requested primitives in personal finance
 apps, and they map perfectly onto money2time's existing architecture:
 
@@ -50,6 +52,7 @@ spending; goals grow savings), and it reuses the **money↔time** engine that
 makes this app unique.
 
 ### Strategic fit
+
 - Increases retention: a goal is a reason to reopen the app repeatedly over
   weeks/months and log contributions.
 - Strong **Pro** upsell surface (unlimited goals, milestone notifications,
@@ -61,6 +64,7 @@ makes this app unique.
 ## 2. Goals & non-goals
 
 ### Product goals
+
 1. A user can create a savings goal with a name, target amount, and optional
    deadline, currency, cover photo/emoji, and note.
 2. A user can **contribute** to a goal (add money set aside) and **withdraw**
@@ -74,6 +78,7 @@ makes this app unique.
 6. Free users get 1 goal; Pro users get unlimited (+ milestone notifications).
 
 ### Non-goals (v1)
+
 - **No investing / interest / APY projections.** A goal is a savings target,
   not a portfolio. (Reserved for a later "growth goals" iteration.)
 - **No shared/collaborative goals** across multiple users/devices.
@@ -87,12 +92,12 @@ makes this app unique.
 
 ## 3. Users & key scenarios
 
-| Persona | Scenario |
-| --- | --- |
-| **Simple-mode saver** | Wants an "Emergency fund — $3,000" goal. Taps + on the goal, types $200, done. No accounts, no categories. Sees "you're 74 hours of work away." |
-| **Power-mode planner** | Has a real "Savings" account. Links a "House down payment — $30,000" goal to it so progress tracks the account balance automatically. |
-| **Deadline-driven** | "Japan trip — $4,000 by March." App shows "$155/week to stay on track" and warns when they fall behind. |
-| **Multi-goal Pro user** | Runs 4 goals at once (emergency fund, new laptop, trip, gift), gets a push when each hits 25/50/75/100%. |
+| Persona                 | Scenario                                                                                                                                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Simple-mode saver**   | Wants an "Emergency fund — $3,000" goal. Taps + on the goal, types $200, done. No accounts, no categories. Sees "you're 74 hours of work away." |
+| **Power-mode planner**  | Has a real "Savings" account. Links a "House down payment — $30,000" goal to it so progress tracks the account balance automatically.           |
+| **Deadline-driven**     | "Japan trip — $4,000 by March." App shows "$155/week to stay on track" and warns when they fall behind.                                         |
+| **Multi-goal Pro user** | Runs 4 goals at once (emergency fund, new laptop, trip, gift), gets a push when each hits 25/50/75/100%.                                        |
 
 ---
 
@@ -221,6 +226,7 @@ albums/items/budgets — free users can keep 1 active goal; creating a 2nd opens
 the `ProPaywall`.
 
 Pro-only enhancements:
+
 - **Unlimited goals.**
 - **Milestone notifications** (25/50/75/100%) and deadline reminders, layered
   onto the existing `notifications` service + `NotificationPreferences`.
@@ -306,39 +312,39 @@ first-class**, not buried in settings:
 
 **`goalsTable`**
 
-| Column | Notes |
-| --- | --- |
-| `id` | `newId()` |
-| `name` | required |
-| `targetAmount` | required, in `currency` |
-| `currency` | goal currency |
-| `startingAmount` | default 0 |
-| `deadline` | `YYYY-MM-DD`, nullable |
-| `coverPhotoUri` | nullable (reuse album cover storage) |
-| `emoji` | nullable |
-| `note` | nullable |
-| `trackingMode` | `'manual' \| 'account'` |
-| `linkedAccountId` | nullable, FK-ish to accounts |
-| `countExistingBalance` | bool, account mode only (§4.3) |
-| `baselineAmount` | nullable, account mode baseline snapshot |
-| `status` | `'active' \| 'completed' \| 'archived'` |
-| `completedAt` | nullable |
-| `sortOrder` | ordering |
-| `createdAt` / `updatedAt` / `deletedAt` | standard |
+| Column                                  | Notes                                    |
+| --------------------------------------- | ---------------------------------------- |
+| `id`                                    | `newId()`                                |
+| `name`                                  | required                                 |
+| `targetAmount`                          | required, in `currency`                  |
+| `currency`                              | goal currency                            |
+| `startingAmount`                        | default 0                                |
+| `deadline`                              | `YYYY-MM-DD`, nullable                   |
+| `coverPhotoUri`                         | nullable (reuse album cover storage)     |
+| `emoji`                                 | nullable                                 |
+| `note`                                  | nullable                                 |
+| `trackingMode`                          | `'manual' \| 'account'`                  |
+| `linkedAccountId`                       | nullable, FK-ish to accounts             |
+| `countExistingBalance`                  | bool, account mode only (§4.3)           |
+| `baselineAmount`                        | nullable, account mode baseline snapshot |
+| `status`                                | `'active' \| 'completed' \| 'archived'`  |
+| `completedAt`                           | nullable                                 |
+| `sortOrder`                             | ordering                                 |
+| `createdAt` / `updatedAt` / `deletedAt` | standard                                 |
 
 **`goalContributionsTable`**
 
-| Column | Notes |
-| --- | --- |
-| `id` | `newId()` |
-| `goalId` | parent goal |
-| `amount` | signed (deposit +, withdrawal −), in `currency` |
-| `currency` | contribution currency |
+| Column                                             | Notes                                                       |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| `id`                                               | `newId()`                                                   |
+| `goalId`                                           | parent goal                                                 |
+| `amount`                                           | signed (deposit +, withdrawal −), in `currency`             |
+| `currency`                                         | contribution currency                                       |
 | `reportingCurrency` / `reportingAmount` / `fxRate` | **frozen FX snapshot** at write time (mirrors transactions) |
-| `date` | `YYYY-MM-DD` |
-| `note` | nullable |
-| `linkedTransactionId` | nullable (§4.4) |
-| `createdAt` / `updatedAt` / `deletedAt` | standard |
+| `date`                                             | `YYYY-MM-DD`                                                |
+| `note`                                             | nullable                                                    |
+| `linkedTransactionId`                              | nullable (§4.4)                                             |
+| `createdAt` / `updatedAt` / `deletedAt`            | standard                                                    |
 
 ### 6.2 Repository & mappers
 
@@ -409,17 +415,17 @@ measurement.
 
 ## 7. Edge cases & decisions
 
-| Case | Resolution |
-| --- | --- |
-| Over-contributing past target | Allowed; shows >100% and "$X over"; goal auto-completes at ≥100%. |
-| Withdrawals below 0 net | Ledger may net negative; progress clamps to $0 with a note; never shows negative %. |
-| No wage configured | Time-mode work-hours hidden gracefully (same as Items' `dailyWorkHours: null`); money framing still shown. |
-| Deadline in the past, not met | Card shows "past due" amber; still contributable; no destructive action. |
-| Foreign-currency goal, no FX rate | Fall back to entered amount; flag "rate unavailable" like account `convertedBalance: null`. |
-| Deleting a goal with linked transfers | Contributions soft-deleted; linked transfers left intact (real money) — offered per-row only. |
-| Account-mode linked account deleted | Goal reverts to manual, snapshotting last known progress as `startingAmount`. |
-| Free user at 1-goal limit | 2nd creation opens `ProPaywall`; existing goal untouched. |
-| Editing target amount | Allowed anytime; recomputes % and forecast; never rewrites contribution history. |
+| Case                                  | Resolution                                                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Over-contributing past target         | Allowed; shows >100% and "$X over"; goal auto-completes at ≥100%.                                          |
+| Withdrawals below 0 net               | Ledger may net negative; progress clamps to $0 with a note; never shows negative %.                        |
+| No wage configured                    | Time-mode work-hours hidden gracefully (same as Items' `dailyWorkHours: null`); money framing still shown. |
+| Deadline in the past, not met         | Card shows "past due" amber; still contributable; no destructive action.                                   |
+| Foreign-currency goal, no FX rate     | Fall back to entered amount; flag "rate unavailable" like account `convertedBalance: null`.                |
+| Deleting a goal with linked transfers | Contributions soft-deleted; linked transfers left intact (real money) — offered per-row only.              |
+| Account-mode linked account deleted   | Goal reverts to manual, snapshotting last known progress as `startingAmount`.                              |
+| Free user at 1-goal limit             | 2nd creation opens `ProPaywall`; existing goal untouched.                                                  |
+| Editing target amount                 | Allowed anytime; recomputes % and forecast; never rewrites contribution history.                           |
 
 ---
 
