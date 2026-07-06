@@ -37,9 +37,7 @@ export const AnalyticsEvents = {
 
   // Claims / reimbursements
   CLAIM_MARKED_CLAIMABLE: 'Claim Marked Claimable',
-  CLAIM_MARKED_UNCLAIMABLE: 'Claim Marked Unclaimable',
   CLAIM_REIMBURSED: 'Claim Reimbursed',
-  CLAIM_REIMBURSEMENT_UNDONE: 'Claim Reimbursement Undone',
 
   // Accounts
   ACCOUNT_CREATED: 'Account Created',

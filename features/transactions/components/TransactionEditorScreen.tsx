@@ -73,6 +73,7 @@ import {
   getDistinctNotesSuggestions,
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage } from '~/services/userAssets';
 import type { Category, ClaimStatus, TransactionSentiment, TransactionType } from '~/types';
@@ -1308,20 +1309,38 @@ export function TransactionEditorScreen({
           entryCurrency !== acctCurrency
             ? convert(numericAmount, entryCurrency, acctCurrency, rateTable).value
             : null;
-        // Claim / reimbursement flag (expenses only, and only while nothing has
-        // been reimbursed yet — settled claims are managed from the hub). An
-        // existing partial claimAmount is preserved; otherwise it defaults to
-        // the full amount.
+        // Claim / reimbursement flag. Expenses only: it is cleared when the row
+        // is not an expense (e.g. switching an expense to income) so no stale
+        // claim lingers. While reimbursements exist the claim is locked and left
+        // untouched here (settled from the reimbursement flow). An existing
+        // partial claimAmount is preserved; otherwise it defaults to the full
+        // amount.
+        const clearedClaim = {
+          claimStatus: 'none' as const,
+          claimAmount: null,
+          reimbursementAccountId: null,
+        };
+        const resolvedClaimAmount = clampClaimAmount(
+          initialValues?.claimAmount ?? null,
+          numericAmount,
+        );
         const claimFields =
-          type === 'expense' && !claimLocked
-            ? claimable
-              ? {
-                  claimStatus: 'claimable' as const,
-                  claimAmount: clampClaimAmount(initialValues?.claimAmount ?? null, numericAmount),
-                  reimbursementAccountId: accountId,
-                }
-              : { claimStatus: 'none' as const, claimAmount: null, reimbursementAccountId: null }
-            : {};
+          type !== 'expense'
+            ? clearedClaim
+            : claimLocked
+              ? {}
+              : claimable
+                ? {
+                    claimStatus: 'claimable' as const,
+                    claimAmount: resolvedClaimAmount,
+                    reimbursementAccountId: accountId,
+                  }
+                : clearedClaim;
+        if (type === 'expense' && !claimLocked && claimable && claimInitialStatus === 'none') {
+          void trackEvent(AnalyticsEvents.CLAIM_MARKED_CLAIMABLE, {
+            is_partial: resolvedClaimAmount < numericAmount,
+          });
+        }
         submitPayload = {
           type,
           amount: numericAmount,
@@ -2486,7 +2505,7 @@ export function TransactionEditorScreen({
                             {I18n.t('transactions.editor.claim.toggle_title')}
                           </Text>
                           <Text variant="caption" tone="muted">
-                            {claimLocked
+                            {claimLocked && !claimIsOutstanding
                               ? I18n.t('reimbursements.badge_reimbursed')
                               : I18n.t('transactions.editor.claim.toggle_subtitle')}
                           </Text>

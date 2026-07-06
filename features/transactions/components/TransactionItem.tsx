@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import { Check, Receipt } from 'lucide-react-native';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
@@ -122,9 +123,11 @@ function TransactionItemView({
 
   // Claim / reimbursement affordances. A claimable expense shows a small badge
   // (amber while outstanding, green once reimbursed); a reimbursement inflow
-  // (income back-pointing at an expense) reads as a refund, not salary.
+  // (income back-pointing at an expense) reads as a refund, not salary. The
+  // badge is gated to expenses so a stale claim on a converted row can't surface.
   const isReimbursement = isReimbursementInflow(transaction);
-  const isClaimableRow = transaction.claimStatus !== 'none' && !isReimbursement;
+  const isClaimableRow =
+    transaction.type === 'expense' && transaction.claimStatus !== 'none' && !isReimbursement;
   const claimOutstanding = isClaimableRow && isOutstandingClaim(transaction);
 
   const title = isTransfer
@@ -242,13 +245,15 @@ function TransactionItemView({
               : 'reimbursements.badge_reimbursed',
           )}
           className={cn(
-            'absolute z-10 -top-1.5 -left-1.5 min-w-[18px] h-[18px] px-1 rounded-full border-2 border-background items-center justify-center',
+            'absolute z-10 -top-1.5 -left-1.5 w-[18px] h-[18px] rounded-full border-2 border-background items-center justify-center',
             claimOutstanding ? 'bg-warning' : 'bg-success',
           )}
         >
-          <Text className="text-white text-[10px] font-bold leading-[12px]">
-            {claimOutstanding ? '🧾' : '✓'}
-          </Text>
+          {claimOutstanding ? (
+            <Receipt size={10} color="#FFFFFF" strokeWidth={2.5} />
+          ) : (
+            <Check size={11} color="#FFFFFF" strokeWidth={3} />
+          )}
         </View>
       ) : null}
       <Pressable
