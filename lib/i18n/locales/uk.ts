@@ -89,6 +89,17 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    budget_items_update: {
+      title: 'Бюджети та речі',
+      budget: {
+        title: 'Установіть місячний бюджет',
+        body: 'Створіть бюджет із багаторазових шаблонів і стежте, як кожна категорія заповнюється під час витрат. Дивіться залишок одним поглядом, за місяць або прямо на головному екрані.',
+      },
+      items: {
+        title: 'Скільки речі коштують на день',
+        body: 'Відстежуйте покупки й спостерігайте, як їхня вартість зменшується з кожним днем володіння. Дізнайтеся, скільки насправді коштує кожна річ на день.',
+      },
+    },
     calendar_albums_update: {
       title: 'Календар на головній та альбоми',
       calendar: {
@@ -135,6 +146,10 @@ const uk = {
       open_share_earn: 'Отримати Pro безкоштовно',
     },
     showcase: {
+      budget_food: 'Їжа',
+      budget_transport: 'Транспорт',
+      item_headphones: 'Навушники',
+      item_jacket: 'Куртка',
       this_month: 'Цього місяця',
       past_7_days: 'Останні 7 днів',
       income: 'Дохід',
@@ -193,6 +208,16 @@ const uk = {
     of_work: '{{hours}} роботи',
     of_work_kept: '≈ {{hours}} роботи збережено',
     of_work_behind: '≈ {{hours}} роботи в мінусі',
+    budget_setup: 'Задайте місячний бюджет',
+    budget_over: 'перевитрата',
+    budget_left_of: 'залишилось із {{total}}',
+    budget_left: 'Залишилось {{amount}}',
+    budget_over_by: 'Перевищення на {{amount}}',
+    budget_days_left_one: 'Залишився {{count}} день',
+    budget_days_left_other: 'Залишилось днів: {{count}}',
+    budget_more_categories_one: 'Ще {{count}} категорія',
+    budget_more_categories_other: 'Ще категорій: {{count}}',
+    budget_unbudgeted: '+{{amount}} поза бюджетом',
   },
   home: {
     converter: {
@@ -551,6 +576,7 @@ const uk = {
     },
   },
   insights: {
+    budget: 'Бюджет',
     title: 'Ваша фінансова картина',
     loading: 'Завантажуємо аналіз...',
     insight_type: 'Тип аналізу',
@@ -1476,6 +1502,8 @@ const uk = {
       'Безкоштовний план включає {{count}} голосових записів. Перейдіть на Pro для необмеженого введення голосом.',
     limit_items:
       'У безкоштовному плані можна відстежувати до {{count}} речей. Оформте Pro для безлімітного.',
+    limit_budget_templates:
+      'У безкоштовному плані можна створити {{count}} шаблон бюджету. У Pro без обмежень.',
     badge: 'PRO',
     trend_preview_title: 'Розблокуйте довгострокові тренди',
     trend_preview_message:
@@ -1687,6 +1715,56 @@ const uk = {
   assets: {
     tab_accounts: 'Рахунки',
     tab_items: 'Речі',
+  },
+  budget: {
+    title: 'Бюджет',
+    templates_title: 'Шаблони бюджету',
+    templates_subtitle: 'Багаторазові місячні плани',
+    template_default_badge: 'За замовчуванням',
+    make_default: 'Зробити за замовчуванням',
+    new_template: 'Новий шаблон',
+    create_template: 'Створити шаблон',
+    add_title: 'Новий шаблон',
+    edit_title: 'Редагувати шаблон',
+    duplicate: 'Дублювати',
+    duplicate_suffix: 'копія',
+    delete_template_title: 'Видалити шаблон?',
+    delete_template_message:
+      'Уже створені місячні бюджети збережуться. Якщо це шаблон за замовчуванням, ним стане наступний.',
+    no_templates_title: 'Шаблонів ще немає',
+    no_templates_message: 'Створіть шаблон бюджету, щоб планувати свої місяці.',
+    no_budget_title: 'Немає бюджету на {{month}}',
+    no_budget_message: 'Створіть його з шаблону, щоб відстежувати цей місяць.',
+    create_budget: 'Створити бюджет',
+    choose_template: 'Виберіть шаблон',
+    custom_option: 'Власний',
+    custom_option_caption: 'Створіть разовий бюджет лише для цього місяця.',
+    categories_count_one: '{{count}} категорія',
+    categories_count_other: 'Категорій: {{count}}',
+    summary_budgeted: 'Витрати за бюджетом',
+    summary_unbudgeted: 'Витрати поза бюджетом',
+    summary_exceeded: 'Перевищення на {{amount}}',
+    delete_budget: 'Видалити бюджет',
+    delete_budget_title: 'Видалити бюджет цього місяця?',
+    delete_budget_message: 'Він не буде автоматично створений знову для цього місяця.',
+    unbudgeted_section: 'Витрати поза бюджетом',
+    left: 'Залишилось {{amount}}',
+    over: '{{amount}} понад',
+    name_label: 'Назва',
+    name_placeholder: 'напр. Повсякденний',
+    total_label: 'Загальний бюджет',
+    allocated_summary: 'Розподілено {{allocated}} із {{total}}',
+    allocated_done: 'Повністю розподілено',
+    fill_remainder: 'Заповнити',
+    back_populate_title: 'Заповнити минулі місяці',
+    back_populate_caption:
+      'Створить бюджети за {{first}} - {{last}} ({{count}} міс.). Місяці з бюджетом пропускаються.',
+    choose_emoji: 'Виберіть емодзі',
+    count_unbudgeted_title: 'Враховувати витрати поза бюджетом',
+    count_unbudgeted_caption: 'Включати до підсумку місяця витрати з категорій без рядка бюджету.',
+    children_hint: 'За бажанням розподіліть цю суму між підкатегоріями.',
+    subcategories: 'Підкатегорії',
+    edit_budget: 'Редагувати бюджет',
   },
   items: {
     title: 'Речі',

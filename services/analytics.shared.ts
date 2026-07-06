@@ -51,6 +51,15 @@ export const AnalyticsEvents = {
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
   MAP_PIN_TAPPED: 'Map Pin Tapped',
 
+  // Budgets
+  BUDGET_TEMPLATE_CREATED: 'Budget Template Created',
+  BUDGET_TEMPLATE_UPDATED: 'Budget Template Updated',
+  BUDGET_TEMPLATE_DELETED: 'Budget Template Deleted',
+  BUDGET_DEFAULT_CHANGED: 'Budget Default Changed',
+  BUDGET_MONTH_CREATED: 'Budget Month Created',
+  BUDGET_MONTH_UPDATED: 'Budget Month Updated',
+  BUDGET_MONTH_DELETED: 'Budget Month Deleted',
+
   // Recurring rules
   RECURRING_RULE_CREATED: 'Recurring Rule Created',
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',

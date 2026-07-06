@@ -51,6 +51,16 @@ export type RootStackParamList = {
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
+  BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
+  // Edit an existing month budget (budgetId) or create a one-off custom
+  // budget for a month with no live budget (createForMonth, 'YYYY-MM').
+  BudgetMonthEditor: { budgetId: string } | { createForMonth: string };
+  // Full-page per-category allocation editor. Its draft slice + commit callback
+  // ride a module bridge (categoryAllocationBridge) rather than params, so the
+  // route stays serializable.
+  BudgetCategoryAllocation: undefined;
+  // Budget templates manager (opened from the Insights budget header).
+  SettingsBudgetTemplates: undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

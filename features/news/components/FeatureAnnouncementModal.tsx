@@ -22,6 +22,8 @@ import {
 import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
+import { BudgetShowcase } from './BudgetShowcase';
+import { ItemsShowcase } from './ItemsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
@@ -226,6 +228,10 @@ export function FeatureAnnouncementModal({
                 <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'albums' ? (
                 <AlbumShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'budget' ? (
+                <BudgetShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'items' ? (
+                <ItemsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'multiCurrency' ? (

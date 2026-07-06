@@ -89,6 +89,17 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    budget_items_update: {
+      title: 'Ngân sách & Đồ dùng',
+      budget: {
+        title: 'Đặt ngân sách hàng tháng',
+        body: 'Tạo ngân sách từ các mẫu dùng lại được và xem từng danh mục đầy dần khi bạn chi tiêu. Xem số còn lại chỉ trong nháy mắt, theo tháng hoặc ngay trên màn hình chính.',
+      },
+      items: {
+        title: 'Đồ của bạn tốn bao nhiêu mỗi ngày',
+        body: 'Theo dõi những thứ bạn mua và xem chi phí giảm dần theo từng ngày bạn sở hữu. Xem mỗi món thực sự tốn bao nhiêu mỗi ngày.',
+      },
+    },
     calendar_albums_update: {
       title: 'Trang chủ lịch & Album',
       calendar: {
@@ -135,6 +146,10 @@ const vi = {
       open_share_earn: 'Nhận Pro miễn phí',
     },
     showcase: {
+      budget_food: 'Ăn uống',
+      budget_transport: 'Đi lại',
+      item_headphones: 'Tai nghe',
+      item_jacket: 'Áo khoác',
       this_month: 'Tháng này',
       past_7_days: '7 ngày qua',
       income: 'Thu nhập',
@@ -193,6 +208,16 @@ const vi = {
     of_work: '{{hours}} làm việc',
     of_work_kept: '≈ {{hours}} làm việc giữ lại',
     of_work_behind: '≈ {{hours}} làm việc thiếu hụt',
+    budget_setup: 'Đặt ngân sách tháng',
+    budget_over: 'vượt ngân sách',
+    budget_left_of: 'còn lại trong {{total}}',
+    budget_left: 'Còn lại {{amount}}',
+    budget_over_by: 'Vượt ngân sách {{amount}}',
+    budget_days_left_one: 'Còn {{count}} ngày',
+    budget_days_left_other: 'Còn {{count}} ngày',
+    budget_more_categories_one: 'Còn {{count}} danh mục',
+    budget_more_categories_other: 'Còn {{count}} danh mục',
+    budget_unbudgeted: '+{{amount}} ngoài ngân sách',
   },
   home: {
     converter: {
@@ -548,6 +573,7 @@ const vi = {
     },
   },
   insights: {
+    budget: 'Ngân sách',
     title: 'Câu chuyện tài chính',
     loading: 'Đang tải phân tích...',
     insight_type: 'Loại phân tích',
@@ -1462,6 +1488,8 @@ const vi = {
       'Gói miễn phí có {{count}} lần nhập giọng nói. Nâng cấp lên Pro để nhập không giới hạn.',
     limit_items:
       'Bạn có thể theo dõi tối đa {{count}} món ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
+    limit_budget_templates:
+      'Gói miễn phí cho phép tạo {{count}} mẫu ngân sách. Không giới hạn với Pro.',
     badge: 'PRO',
     trend_preview_title: 'Mở khóa xu hướng dài hạn',
     trend_preview_message:
@@ -1670,6 +1698,57 @@ const vi = {
   assets: {
     tab_accounts: 'Tài khoản',
     tab_items: 'Vật dụng',
+  },
+  budget: {
+    title: 'Ngân sách',
+    templates_title: 'Mẫu ngân sách',
+    templates_subtitle: 'Kế hoạch tháng dùng lại được',
+    template_default_badge: 'Mặc định',
+    make_default: 'Đặt làm mặc định',
+    new_template: 'Mẫu mới',
+    create_template: 'Tạo mẫu',
+    add_title: 'Mẫu mới',
+    edit_title: 'Sửa mẫu',
+    duplicate: 'Nhân bản',
+    duplicate_suffix: 'bản sao',
+    delete_template_title: 'Xóa mẫu?',
+    delete_template_message:
+      'Các ngân sách tháng đã tạo vẫn được giữ. Nếu đây là mẫu mặc định, mẫu tiếp theo sẽ thành mặc định.',
+    no_templates_title: 'Chưa có mẫu nào',
+    no_templates_message: 'Tạo một mẫu ngân sách để bắt đầu lập kế hoạch cho các tháng.',
+    no_budget_title: 'Chưa có ngân sách cho {{month}}',
+    no_budget_message: 'Tạo từ một mẫu để theo dõi tháng này.',
+    create_budget: 'Tạo ngân sách',
+    choose_template: 'Chọn một mẫu',
+    custom_option: 'Tùy chỉnh',
+    custom_option_caption: 'Tạo ngân sách một lần chỉ cho tháng này.',
+    categories_count_one: '{{count}} danh mục',
+    categories_count_other: '{{count}} danh mục',
+    summary_budgeted: 'Chi tiêu trong ngân sách',
+    summary_unbudgeted: 'Chi tiêu ngoài ngân sách',
+    summary_exceeded: 'Vượt ngân sách {{amount}}',
+    delete_budget: 'Xóa ngân sách',
+    delete_budget_title: 'Xóa ngân sách tháng này?',
+    delete_budget_message: 'Nó sẽ không được tự động tạo lại cho tháng này.',
+    unbudgeted_section: 'Chi tiêu ngoài ngân sách',
+    left: 'Còn lại {{amount}}',
+    over: 'Vượt {{amount}}',
+    name_label: 'Tên',
+    name_placeholder: 'VD: Hằng ngày',
+    total_label: 'Tổng ngân sách',
+    allocated_summary: 'Đã phân bổ {{allocated}} / {{total}}',
+    allocated_done: 'Đã phân bổ đủ',
+    fill_remainder: 'Điền',
+    back_populate_title: 'Điền các tháng trước',
+    back_populate_caption:
+      'Tạo ngân sách cho {{first}} - {{last}} ({{count}} tháng). Bỏ qua các tháng đã có ngân sách.',
+    choose_emoji: 'Chọn emoji',
+    count_unbudgeted_title: 'Tính chi tiêu ngoài ngân sách',
+    count_unbudgeted_caption:
+      'Gộp chi tiêu từ các danh mục không có dòng ngân sách vào tổng của tháng.',
+    children_hint: 'Tùy chọn: chia số tiền này cho các danh mục con.',
+    subcategories: 'Danh mục con',
+    edit_budget: 'Sửa ngân sách',
   },
   items: {
     title: 'Vật dụng',

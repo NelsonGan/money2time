@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Landmark,
   PiggyBank,
+  SlidersHorizontal,
   Smile,
   Sparkles,
   TrendingDown,
@@ -35,7 +36,7 @@ import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import { PieChart } from 'react-native-gifted-charts';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { G, Image as SvgImage, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -60,6 +61,7 @@ import {
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { resolveCategoryIconSource } from '~/constants/categoryIcons';
+import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
@@ -120,6 +122,8 @@ import {
 } from '~/utils/formatters';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
+import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
 const PERIOD_TABS = ['week', 'month', 'year', 'custom'] as const;
@@ -134,6 +138,10 @@ const INSIGHT_TYPES = [
   'expense_breakdown',
   'income_breakdown',
   'savings_rate',
+  // Budget is a full-page takeover (its own month pager) rather than a period-
+  // paged chart, but it is a first-class insight type: selectable from the
+  // menu and persisted via `selectedInsightType` like every other page.
+  'budget',
   'expense_trend',
   'income_trend',
   'category_trend',
@@ -165,6 +173,14 @@ const INSIGHT_TYPE_VISUALS = {
     border: '#B5E5CA',
   },
   savings_rate: {
+    Icon: PiggyBank,
+    tint: '#1B8D74',
+    background: '#DFF6F1',
+    border: '#A4E0D3',
+  },
+  // Budget renders the `time-money` image icon (see INSIGHT_TYPE_ICON_NAME), so
+  // this Lucide fallback is never drawn; it exists only to satisfy the map.
+  budget: {
     Icon: PiggyBank,
     tint: '#1B8D74',
     background: '#DFF6F1',
@@ -214,6 +230,7 @@ const INSIGHT_TYPE_ICON_NAME: Record<InsightType, string> = {
   expense_breakdown: 'wallet-cash',
   income_breakdown: 'wallet-cash-blue',
   savings_rate: 'piggy-bank-coins',
+  budget: 'time-money',
   expense_trend: 'market-analysis',
   income_trend: 'growth-analysis',
   category_trend: 'pie-chart',
@@ -239,20 +256,7 @@ function renderInsightTypeIcon(insightType: InsightType) {
   );
 }
 
-const INSIGHTS_CHART_COLORS = [
-  '#E53935', // red
-  '#FB8C00', // orange
-  '#FDD835', // yellow
-  '#43A047', // green
-  '#00897B', // teal
-  '#00ACC1', // cyan
-  '#1E88E5', // blue
-  '#3949AB', // indigo
-  '#8E24AA', // violet
-  '#D81B60', // magenta
-  '#6D4C41', // brown
-  '#546E7A', // slate
-];
+const INSIGHTS_CHART_COLORS = CHART_CATEGORY_COLORS;
 
 const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
 const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
@@ -548,6 +552,13 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   },
   savings_rate: {
     fixedPeriodPreset: 'year',
+    allowAccountFilter: false,
+  },
+  // Budget has no period/account filters — its own month pager drives the
+  // header's month controls. A non-null fixedPeriodPreset hides the period
+  // picker; the value itself is unused since the budget pager owns navigation.
+  budget: {
+    fixedPeriodPreset: 'month',
     allowAccountFilter: false,
   },
   expense_trend: {
@@ -2522,6 +2533,7 @@ function InsightTypeMenuPopover({
   onClose: () => void;
 }) {
   const themeColors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const entrance = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
@@ -2546,11 +2558,13 @@ function InsightTypeMenuPopover({
     screenWidth - cardWidth - sideMargin,
   );
   // Anchor the card to the button itself so it expands *in place* rather than
-  // dropping down beneath the icon.
+  // dropping down beneath the icon. Floor at the top safe-area inset so the
+  // full-screen modal never tucks the first row under the Android status bar.
+  const topLimit = insets.top + sideMargin;
   const cardTop = clampNumber(
     anchorRect?.y ?? spacing.xl * 2,
-    sideMargin,
-    screenHeight - 220 - sideMargin,
+    topLimit,
+    Math.max(topLimit, screenHeight - 220 - sideMargin),
   );
   const maxCardHeight = Math.max(220, screenHeight - cardTop - spacing.xl);
   const scale = entrance.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
@@ -2712,6 +2726,11 @@ interface InsightsScreenProps {
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onOpenProPaywall?: () => void;
+  /** Budget view (embedded as an insights page via the type menu). */
+  onOpenBudgetTemplates: () => void;
+  onOpenBudgetTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
+  onOpenMonthlyBudgetEditor: (budgetId: string) => void;
+  onCreateCustomBudget: (month: string) => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
     anchorDateKey?: string;
@@ -2731,6 +2750,10 @@ export function InsightsScreen({
   onOpenDrilldown,
   onOpenTransaction,
   onOpenProPaywall,
+  onOpenBudgetTemplates,
+  onOpenBudgetTemplateEditor,
+  onOpenMonthlyBudgetEditor,
+  onCreateCustomBudget,
   activityBreakdownInsightRequest = null,
   isSimpleMode = false,
   onTutorialTargetLayout,
@@ -2884,6 +2907,8 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
+  const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
+  const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
     null,
   );
@@ -3025,6 +3050,7 @@ export function InsightsScreen({
     activeBreakdownSliceIdRef.current = null;
     setActiveBreakdownSliceId(null);
     setIsFilterModalOpen(false);
+    // Selecting the requested insight also leaves the budget takeover.
     setSelectedInsightType(targetInsightType);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3492,6 +3518,19 @@ export function InsightsScreen({
         state.customEnd,
         weekStartsOn,
       );
+      // Budget renders its own full-page takeover, never the period pager, so
+      // this cached page is never displayed — return an empty breakdown to keep
+      // it cheap (no transaction scan) and well-typed.
+      if (insightType === 'budget') {
+        return {
+          kind: 'breakdown',
+          range,
+          categoryRows: [],
+          filteredForRange: [],
+          breakdownTransactionsById: new Map(),
+          transactionType: 'expense',
+        };
+      }
       const rangeStartMs = Date.parse(range.start);
       const rangeEndMs = Date.parse(range.end);
       const inRangeTransactions: TransactionWithRelations[] = [];
@@ -4409,6 +4448,12 @@ export function InsightsScreen({
   );
   const displaySelectedInsightType =
     pendingActivityBreakdownTarget?.insightType ?? selectedInsightType;
+  // Budget is a first-class insight type that renders a full-page takeover:
+  // it swaps the pager body and drives the header's month controls. Keyed on
+  // the *display* type so the header and body stay consistent through an
+  // in-flight activity-breakdown transition (which points display away from a
+  // still-selected budget for one render).
+  const isBudgetView = displaySelectedInsightType === 'budget';
   const displayPeriodPreset = pendingActivityBreakdownTarget
     ? (pendingActivityBreakdownTarget.periodPreset ??
       getInsightFilterConfig(pendingActivityBreakdownTarget.insightType).fixedPeriodPreset ??
@@ -4422,6 +4467,16 @@ export function InsightsScreen({
   const displayHeaderPreviewPageIndex = pendingActivityBreakdownTarget
     ? INSIGHTS_PAGER_CENTER_INDEX
     : headerPreviewPageIndex;
+  // Leaving the budget takeover remounts the period pager at its center slot
+  // (initialScrollIndex), so realign the committed/preview indices — otherwise
+  // the first swipe back computes its step count from a stale offset and jumps
+  // several periods at once.
+  useEffect(() => {
+    if (isBudgetView) return;
+    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
+  }, [isBudgetView]);
   const currentPage = useMemo(
     () =>
       getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
@@ -6703,7 +6758,20 @@ export function InsightsScreen({
               </Text>
             </View>
             <View className="w-10 items-end justify-center">
-              {displayHasInsightsFilters ? (
+              {isBudgetView ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenBudgetTemplates();
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('budget.templates_title')}
+                  className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
+                >
+                  <SlidersHorizontal size={18} color={themeColors.primary} />
+                </Pressable>
+              ) : displayHasInsightsFilters ? (
                 <FilterIconButton
                   onPress={handleOpenFiltersModal}
                   count={displayInsightsFilterCount}
@@ -6712,11 +6780,17 @@ export function InsightsScreen({
             </View>
           </View>
         }
-        monthLabel={activePeriodLabel}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-        disableNavArrows={displayPeriodPreset === 'lifetime'}
-        onMonthPress={displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker}
+        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+        onPrevMonth={
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
+        }
+        onNextMonth={
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
+        }
+        disableNavArrows={!isBudgetView && displayPeriodPreset === 'lifetime'}
+        onMonthPress={
+          isBudgetView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
+        }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
       />
@@ -6729,6 +6803,15 @@ export function InsightsScreen({
               {I18n.t('insights.loading')}
             </Text>
           </View>
+        ) : isBudgetView ? (
+          <BudgetPagerView
+            ref={budgetPagerRef}
+            onOpenTemplateEditor={onOpenBudgetTemplateEditor}
+            onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
+            onCreateCustomBudget={onCreateCustomBudget}
+            onOpenDrilldown={onOpenDrilldown}
+            onActiveMonthLabelChange={setBudgetMonthLabel}
+          />
         ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
           // Locked Pro trend: every pager page would just render the paywall
           // overlay, so skip the horizontal VirtualizedList (4801 slots) entirely

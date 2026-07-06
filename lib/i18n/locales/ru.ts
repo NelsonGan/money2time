@@ -89,6 +89,17 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    budget_items_update: {
+      title: 'Бюджеты и вещи',
+      budget: {
+        title: 'Задайте месячный бюджет',
+        body: 'Создайте бюджет из повторно используемых шаблонов и следите, как заполняется каждая категория по мере трат. Смотрите остаток одним взглядом, по месяцам или прямо на домашнем экране.',
+      },
+      items: {
+        title: 'Сколько вещи стоят в день',
+        body: 'Отслеживайте покупки и смотрите, как их стоимость уменьшается с каждым днём владения. Узнайте, сколько на самом деле стоит каждая вещь в день.',
+      },
+    },
     calendar_albums_update: {
       title: 'Календарь на главной и альбомы',
       calendar: {
@@ -135,6 +146,10 @@ const ru = {
       open_share_earn: 'Получить Pro бесплатно',
     },
     showcase: {
+      budget_food: 'Еда',
+      budget_transport: 'Транспорт',
+      item_headphones: 'Наушники',
+      item_jacket: 'Куртка',
       this_month: 'В этом месяце',
       past_7_days: 'Последние 7 дней',
       income: 'Доход',
@@ -193,6 +208,16 @@ const ru = {
     of_work: '{{hours}} работы',
     of_work_kept: '≈ {{hours}} работы сохранено',
     of_work_behind: '≈ {{hours}} работы в минусе',
+    budget_setup: 'Задайте месячный бюджет',
+    budget_over: 'перерасход',
+    budget_left_of: 'осталось из {{total}}',
+    budget_left: 'Осталось {{amount}}',
+    budget_over_by: 'Превышение на {{amount}}',
+    budget_days_left_one: 'Остался {{count}} день',
+    budget_days_left_other: 'Осталось дней: {{count}}',
+    budget_more_categories_one: 'Ещё {{count}} категория',
+    budget_more_categories_other: 'Ещё категорий: {{count}}',
+    budget_unbudgeted: '+{{amount}} вне бюджета',
   },
   home: {
     converter: {
@@ -550,6 +575,7 @@ const ru = {
     },
   },
   insights: {
+    budget: 'Бюджет',
     title: 'Ваша финансовая история',
     loading: 'Загрузка аналитики...',
     insight_type: 'Тип аналитики',
@@ -1482,6 +1508,8 @@ const ru = {
       'Бесплатный план включает {{count}} голосовых записей. Обновитесь до Pro для безлимитного голосового ввода.',
     limit_items:
       'На бесплатном плане можно отслеживать до {{count}} предметов. Оформите Pro для безлимита.',
+    limit_budget_templates:
+      'В бесплатном плане можно создать {{count}} шаблон бюджета. В Pro без ограничений.',
     badge: 'PRO',
     trend_preview_title: 'Разблокировать долгосрочные тренды',
     trend_preview_message:
@@ -1692,6 +1720,56 @@ const ru = {
   assets: {
     tab_accounts: 'Счета',
     tab_items: 'Вещи',
+  },
+  budget: {
+    title: 'Бюджет',
+    templates_title: 'Шаблоны бюджета',
+    templates_subtitle: 'Многоразовые планы на месяц',
+    template_default_badge: 'По умолчанию',
+    make_default: 'Сделать по умолчанию',
+    new_template: 'Новый шаблон',
+    create_template: 'Создать шаблон',
+    add_title: 'Новый шаблон',
+    edit_title: 'Изменить шаблон',
+    duplicate: 'Дублировать',
+    duplicate_suffix: 'копия',
+    delete_template_title: 'Удалить шаблон?',
+    delete_template_message:
+      'Уже созданные месячные бюджеты сохранятся. Если это шаблон по умолчанию, им станет следующий.',
+    no_templates_title: 'Шаблонов пока нет',
+    no_templates_message: 'Создайте шаблон бюджета, чтобы планировать свои месяцы.',
+    no_budget_title: 'Нет бюджета на {{month}}',
+    no_budget_message: 'Создайте его из шаблона, чтобы отслеживать этот месяц.',
+    create_budget: 'Создать бюджет',
+    choose_template: 'Выберите шаблон',
+    custom_option: 'Свой',
+    custom_option_caption: 'Создайте разовый бюджет только для этого месяца.',
+    categories_count_one: '{{count}} категория',
+    categories_count_other: 'Категорий: {{count}}',
+    summary_budgeted: 'Расходы по бюджету',
+    summary_unbudgeted: 'Расходы вне бюджета',
+    summary_exceeded: 'Превышение на {{amount}}',
+    delete_budget: 'Удалить бюджет',
+    delete_budget_title: 'Удалить бюджет этого месяца?',
+    delete_budget_message: 'Он не будет создан заново автоматически для этого месяца.',
+    unbudgeted_section: 'Расходы вне бюджета',
+    left: 'Осталось {{amount}}',
+    over: '{{amount}} сверх',
+    name_label: 'Название',
+    name_placeholder: 'напр. Повседневный',
+    total_label: 'Общий бюджет',
+    allocated_summary: 'Распределено {{allocated}} из {{total}}',
+    allocated_done: 'Полностью распределено',
+    fill_remainder: 'Добить',
+    back_populate_title: 'Заполнить прошлые месяцы',
+    back_populate_caption:
+      'Создаст бюджеты за {{first}} - {{last}} ({{count}} мес.). Месяцы с бюджетом пропускаются.',
+    choose_emoji: 'Выберите эмодзи',
+    count_unbudgeted_title: 'Учитывать расходы вне бюджета',
+    count_unbudgeted_caption: 'Включать в итог месяца расходы из категорий без строки бюджета.',
+    children_hint: 'При желании распределите эту сумму по подкатегориям.',
+    subcategories: 'Подкатегории',
+    edit_budget: 'Изменить бюджет',
   },
   items: {
     title: 'Вещи',

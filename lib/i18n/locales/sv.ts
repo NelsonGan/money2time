@@ -89,6 +89,17 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetar och prylar',
+      budget: {
+        title: 'Ange en månadsbudget',
+        body: 'Skapa en budget från återanvändbara mallar och se varje kategori fyllas medan du spenderar. Se vad som är kvar med en blick, per månad eller direkt på hemskärmen.',
+      },
+      items: {
+        title: 'Vad dina prylar kostar per dag',
+        body: 'Håll koll på det du köper och se kostnaden krympa för varje dag du äger det. Se vad varje sak faktiskt kostar per dag.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalenderstart och album',
       calendar: {
@@ -135,6 +146,10 @@ const sv = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      budget_food: 'Mat',
+      budget_transport: 'Transport',
+      item_headphones: 'Hörlurar',
+      item_jacket: 'Jacka',
       this_month: 'Den här månaden',
       past_7_days: 'Senaste 7 dagarna',
       income: 'Inkomst',
@@ -193,6 +208,16 @@ const sv = {
     of_work: '{{hours}} arbete',
     of_work_kept: '≈ {{hours}} arbete behållet',
     of_work_behind: '≈ {{hours}} arbete back',
+    budget_setup: 'Sätt en månadsbudget',
+    budget_over: 'över budget',
+    budget_left_of: 'kvar av {{total}}',
+    budget_left: '{{amount}} kvar',
+    budget_over_by: '{{amount}} över budget',
+    budget_days_left_one: '{{count}} dag kvar',
+    budget_days_left_other: '{{count}} dagar kvar',
+    budget_more_categories_one: '{{count}} kategori till',
+    budget_more_categories_other: '{{count}} kategorier till',
+    budget_unbudgeted: '+{{amount}} obudgeterat',
   },
   home: {
     converter: {
@@ -548,6 +573,7 @@ const sv = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Din pengahistoria',
     loading: 'Laddar insikter...',
     insight_type: 'Insiktstyp',
@@ -1476,6 +1502,8 @@ const sv = {
       'Gratisplanen inkluderar {{count}} röstposter. Uppgradera till Pro för obegränsad röstinmatning.',
     limit_items:
       'Du kan spåra upp till {{count}} föremål i gratisplanen. Skaffa Pro för obegränsat.',
+    limit_budget_templates:
+      'Med gratisplanen kan du skapa {{count}} budgetmall. Obegränsat med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås upp långsiktiga trender',
     trend_preview_message:
@@ -1686,6 +1714,57 @@ const sv = {
   assets: {
     tab_accounts: 'Konton',
     tab_items: 'Föremål',
+  },
+  budget: {
+    title: 'Budget',
+    templates_title: 'Budgetmallar',
+    templates_subtitle: 'Återanvändbara månadsplaner',
+    template_default_badge: 'Standard',
+    make_default: 'Gör till standard',
+    new_template: 'Ny mall',
+    create_template: 'Skapa mall',
+    add_title: 'Ny mall',
+    edit_title: 'Redigera mall',
+    duplicate: 'Duplicera',
+    duplicate_suffix: 'kopia',
+    delete_template_title: 'Ta bort mall?',
+    delete_template_message:
+      'Redan skapade månadsbudgetar behålls. Om detta är standarden blir nästa mall standard.',
+    no_templates_title: 'Inga mallar ännu',
+    no_templates_message: 'Skapa en budgetmall för att börja planera dina månader.',
+    no_budget_title: 'Ingen budget för {{month}}',
+    no_budget_message: 'Skapa en från en mall för att följa den här månaden.',
+    create_budget: 'Skapa budget',
+    choose_template: 'Välj en mall',
+    custom_option: 'Anpassad',
+    custom_option_caption: 'Skapa en engångsbudget bara för den här månaden.',
+    categories_count_one: '{{count}} kategori',
+    categories_count_other: '{{count}} kategorier',
+    summary_budgeted: 'Budgeterade utgifter',
+    summary_unbudgeted: 'Obudgeterade utgifter',
+    summary_exceeded: '{{amount}} över budget',
+    delete_budget: 'Ta bort budget',
+    delete_budget_title: 'Ta bort denna månads budget?',
+    delete_budget_message: 'Den återskapas inte automatiskt för den här månaden.',
+    unbudgeted_section: 'Obudgeterade utgifter',
+    left: '{{amount}} kvar',
+    over: '{{amount}} över',
+    name_label: 'Namn',
+    name_placeholder: 't.ex. Vardag',
+    total_label: 'Total budget',
+    allocated_summary: '{{allocated}} av {{total}} fördelat',
+    allocated_done: 'Helt fördelad',
+    fill_remainder: 'Fyll',
+    back_populate_title: 'Fyll i tidigare månader',
+    back_populate_caption:
+      'Skapar budgetar för {{first}} - {{last}} ({{count}} månader). Månader som redan har en budget hoppas över.',
+    choose_emoji: 'Välj en emoji',
+    count_unbudgeted_title: 'Räkna obudgeterade utgifter',
+    count_unbudgeted_caption:
+      'Räkna med utgifter från kategorier utan budgetpost i månadens total.',
+    children_hint: 'Fördela eventuellt beloppet på underkategorier.',
+    subcategories: 'Underkategorier',
+    edit_budget: 'Redigera budget',
   },
   items: {
     title: 'Föremål',
