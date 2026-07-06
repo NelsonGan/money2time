@@ -2935,7 +2935,7 @@ ${historyRows}
     android:layout_width="58dp"
     android:layout_height="58dp"
     android:layout_gravity="top|end"
-    android:layout_marginTop="-16dp"
+    android:layout_marginTop="-4dp"
     android:layout_marginEnd="-16dp"
     android:clipChildren="true">
     <TextView
@@ -3190,7 +3190,7 @@ ${budgetRows}
     android:layout_width="58dp"
     android:layout_height="58dp"
     android:layout_gravity="top|end"
-    android:layout_marginTop="-16dp"
+    android:layout_marginTop="-4dp"
     android:layout_marginEnd="-16dp"
     android:clipChildren="true">
     <TextView
