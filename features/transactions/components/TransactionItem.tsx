@@ -10,6 +10,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
+import { isOutstandingClaim, isReimbursementInflow } from '~/utils/claims';
 import { currencySymbolForCode } from '~/utils/currency';
 import {
   amountToHoursByRate,
@@ -119,11 +120,20 @@ function TransactionItemView({
     : 0;
   const hasUnpaidSplits = unpaidSplitsCount > 0;
 
+  // Claim / reimbursement affordances. A claimable expense shows a small badge
+  // (amber while outstanding, green once reimbursed); a reimbursement inflow
+  // (income back-pointing at an expense) reads as a refund, not salary.
+  const isReimbursement = isReimbursementInflow(transaction);
+  const isClaimableRow = transaction.claimStatus !== 'none' && !isReimbursement;
+  const claimOutstanding = isClaimableRow && isOutstandingClaim(transaction);
+
   const title = isTransfer
     ? transaction.note || transferLabel
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
-      : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
+      : isReimbursement
+        ? transaction.note || I18n.t('reimbursements.inflow_label')
+        : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
   const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
     parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
@@ -223,6 +233,23 @@ function TransactionItemView({
             {unpaidSplitsCount}
           </Text>
         </Pressable>
+      ) : null}
+      {isClaimableRow ? (
+        <View
+          accessibilityLabel={I18n.t(
+            claimOutstanding
+              ? 'reimbursements.badge_outstanding'
+              : 'reimbursements.badge_reimbursed',
+          )}
+          className={cn(
+            'absolute z-10 -top-1.5 -left-1.5 min-w-[18px] h-[18px] px-1 rounded-full border-2 border-background items-center justify-center',
+            claimOutstanding ? 'bg-warning' : 'bg-success',
+          )}
+        >
+          <Text className="text-white text-[10px] font-bold leading-[12px]">
+            {claimOutstanding ? '🧾' : '✓'}
+          </Text>
+        </View>
       ) : null}
       <Pressable
         onPress={onPress}
