@@ -89,6 +89,17 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    budget_items_update: {
+      title: 'Budsjetter og ting',
+      budget: {
+        title: 'Sett et månedlig budsjett',
+        body: 'Lag et budsjett fra gjenbrukbare maler, og se hver kategori fylles opp mens du bruker penger. Se hva som er igjen med et blikk – per måned eller rett på startskjermen.',
+      },
+      items: {
+        title: 'Hva tingene dine koster per dag',
+        body: 'Følg med på det du kjøper, og se kostnaden krympe for hver dag du eier det. Se hva hver ting egentlig koster per dag.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalender-hjem og album',
       calendar: {
@@ -135,6 +146,10 @@ const nb = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      budget_food: 'Mat',
+      budget_transport: 'Transport',
+      item_headphones: 'Hodetelefoner',
+      item_jacket: 'Jakke',
       this_month: 'Denne måneden',
       past_7_days: 'Siste 7 dager',
       income: 'Inntekt',

@@ -4,6 +4,7 @@ import { shareEarnAnnouncement } from './003_share_earn';
 import { accountLogosAnnouncement } from './004_account_logos';
 import { multiCurrencyAnnouncement } from './005_multi_currency';
 import { calendarAlbumsAnnouncement } from './006_calendar_albums';
+import { budgetItemsAnnouncement } from './007_budget_items';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -12,4 +13,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   accountLogosAnnouncement,
   multiCurrencyAnnouncement,
   calendarAlbumsAnnouncement,
+  budgetItemsAnnouncement,
 ] as const;

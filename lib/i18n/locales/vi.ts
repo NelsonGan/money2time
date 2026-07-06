@@ -89,6 +89,17 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    budget_items_update: {
+      title: 'Ngân sách & Đồ dùng',
+      budget: {
+        title: 'Đặt ngân sách hàng tháng',
+        body: 'Tạo ngân sách từ các mẫu dùng lại được và xem từng danh mục đầy dần khi bạn chi tiêu. Xem số còn lại chỉ trong nháy mắt—theo tháng hoặc ngay trên màn hình chính.',
+      },
+      items: {
+        title: 'Đồ của bạn tốn bao nhiêu mỗi ngày',
+        body: 'Theo dõi những thứ bạn mua và xem chi phí giảm dần theo từng ngày bạn sở hữu. Xem mỗi món thực sự tốn bao nhiêu mỗi ngày.',
+      },
+    },
     calendar_albums_update: {
       title: 'Trang chủ lịch & Album',
       calendar: {
@@ -135,6 +146,10 @@ const vi = {
       open_share_earn: 'Nhận Pro miễn phí',
     },
     showcase: {
+      budget_food: 'Ăn uống',
+      budget_transport: 'Đi lại',
+      item_headphones: 'Tai nghe',
+      item_jacket: 'Áo khoác',
       this_month: 'Tháng này',
       past_7_days: '7 ngày qua',
       income: 'Thu nhập',

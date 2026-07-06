@@ -89,6 +89,17 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    budget_items_update: {
+      title: 'Budget e oggetti',
+      budget: {
+        title: 'Imposta un budget mensile',
+        body: "Crea un budget da modelli riutilizzabili e guarda ogni categoria riempirsi mentre spendi. Vedi quanto resta a colpo d'occhio, per mese o direttamente sulla schermata Home.",
+      },
+      items: {
+        title: 'Quanto ti costano le cose al giorno',
+        body: 'Tieni traccia di ciò che compri e guarda il costo ridursi ogni giorno che lo possiedi. Scopri quanto costa davvero ogni cosa al giorno.',
+      },
+    },
     calendar_albums_update: {
       title: 'Home a calendario e album',
       calendar: {
@@ -135,6 +146,10 @@ const it = {
       open_share_earn: 'Ottieni Pro gratis',
     },
     showcase: {
+      budget_food: 'Cibo',
+      budget_transport: 'Trasporti',
+      item_headphones: 'Cuffie',
+      item_jacket: 'Giacca',
       this_month: 'Questo mese',
       past_7_days: 'Ultimi 7 giorni',
       income: 'Entrata',

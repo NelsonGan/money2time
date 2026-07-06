@@ -89,6 +89,17 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    budget_items_update: {
+      title: 'Mga Budget at Gamit',
+      budget: {
+        title: 'Magtakda ng buwanang budget',
+        body: 'Gumawa ng budget mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap—bawat buwan o mismo sa iyong home screen.',
+      },
+      items: {
+        title: 'Kung magkano ang gamit mo kada araw',
+        body: 'Subaybayan ang mga binibili mo at panoorin ang halaga na lumiliit sa bawat araw na pag-aari mo ito. Tingnan kung magkano talaga ang bawat isa kada araw.',
+      },
+    },
     calendar_albums_update: {
       title: 'Calendar home at Albums',
       calendar: {
@@ -135,6 +146,10 @@ const fil = {
       open_share_earn: 'Kunin ang Pro nang libre',
     },
     showcase: {
+      budget_food: 'Pagkain',
+      budget_transport: 'Transportasyon',
+      item_headphones: 'Headphone',
+      item_jacket: 'Jacket',
       this_month: 'Ngayong buwan',
       past_7_days: 'Nakaraang 7 araw',
       income: 'Kita',

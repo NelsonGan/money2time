@@ -89,6 +89,17 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    budget_items_update: {
+      title: 'Budżety i rzeczy',
+      budget: {
+        title: 'Ustaw miesięczny budżet',
+        body: 'Twórz budżet z szablonów wielokrotnego użytku i patrz, jak każda kategoria się zapełnia w miarę wydatków. Sprawdź, ile zostało, jednym spojrzeniem—miesięcznie lub na ekranie głównym.',
+      },
+      items: {
+        title: 'Ile Twoje rzeczy kosztują dziennie',
+        body: 'Śledź rzeczy, które kupujesz, i patrz, jak ich koszt maleje z każdym dniem posiadania. Zobacz, ile naprawdę kosztuje każda rzecz dziennie.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalendarz na start i albumy',
       calendar: {
@@ -135,6 +146,10 @@ const pl = {
       open_share_earn: 'Zdobądź Pro za darmo',
     },
     showcase: {
+      budget_food: 'Jedzenie',
+      budget_transport: 'Transport',
+      item_headphones: 'Słuchawki',
+      item_jacket: 'Kurtka',
       this_month: 'W tym miesiącu',
       past_7_days: 'Ostatnie 7 dni',
       income: 'Przychód',

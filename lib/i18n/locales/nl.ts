@@ -89,6 +89,17 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetten & spullen',
+      budget: {
+        title: 'Stel een maandbudget in',
+        body: 'Bouw een budget met herbruikbare sjablonen en zie elke categorie vollopen terwijl je uitgeeft. Zie in één oogopslag wat er over is—per maand of direct op je startscherm.',
+      },
+      items: {
+        title: 'Wat je spullen per dag kosten',
+        body: 'Houd bij wat je koopt en zie de kosten krimpen met elke dag dat je het bezit. Ontdek wat elk ding echt per dag kost.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalender-start & albums',
       calendar: {
@@ -135,6 +146,10 @@ const nl = {
       open_share_earn: 'Pro gratis krijgen',
     },
     showcase: {
+      budget_food: 'Eten',
+      budget_transport: 'Vervoer',
+      item_headphones: 'Koptelefoon',
+      item_jacket: 'Jas',
       this_month: 'Deze maand',
       past_7_days: 'Afgelopen 7 dagen',
       income: 'Inkomsten',

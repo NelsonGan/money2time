@@ -89,6 +89,17 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    budget_items_update: {
+      title: 'Presupuestos y objetos',
+      budget: {
+        title: 'Fija un presupuesto mensual',
+        body: 'Crea un presupuesto a partir de plantillas reutilizables y mira cómo se llena cada categoría a medida que gastas. Ve lo que queda de un vistazo, por mes o en tu pantalla de inicio.',
+      },
+      items: {
+        title: 'Lo que cuestan tus cosas por día',
+        body: 'Registra lo que compras y mira cómo su coste se reduce con cada día que lo tienes. Descubre lo que cada cosa cuesta realmente por día.',
+      },
+    },
     calendar_albums_update: {
       title: 'Inicio en calendario y álbumes',
       calendar: {
@@ -135,6 +146,10 @@ const es = {
       open_share_earn: 'Consigue Pro gratis',
     },
     showcase: {
+      budget_food: 'Comida',
+      budget_transport: 'Transporte',
+      item_headphones: 'Auriculares',
+      item_jacket: 'Chaqueta',
       this_month: 'Este mes',
       past_7_days: 'Últimos 7 días',
       income: 'Ingreso',

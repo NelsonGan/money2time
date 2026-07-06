@@ -64,6 +64,17 @@ const zh = {
     },
   },
   news: {
+    budget_items_update: {
+      title: '预算与物品',
+      budget: {
+        title: '设置每月预算',
+        body: '用可重复使用的模板创建预算，随着支出看着每个类别逐渐填满。一眼看清还剩多少——按月查看，或直接放在主屏幕上。',
+      },
+      items: {
+        title: '你的物品每天花多少',
+        body: '记录你买的东西，随着拥有天数增加，看着成本不断摊薄。看看每件东西每天真正花多少。',
+      },
+    },
     calendar_albums_update: {
       title: '日历主页与相册',
       calendar: {
@@ -110,6 +121,10 @@ const zh = {
       open_share_earn: '免费获取 Pro',
     },
     showcase: {
+      budget_food: '餐饮',
+      budget_transport: '交通',
+      item_headphones: '耳机',
+      item_jacket: '外套',
       this_month: '本月',
       past_7_days: '过去 7 天',
       income: '收入',

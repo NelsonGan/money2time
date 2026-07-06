@@ -89,6 +89,17 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetter & ejendele',
+      budget: {
+        title: 'Sæt et månedligt budget',
+        body: 'Byg et budget ud fra genanvendelige skabeloner, og se hver kategori fyldes, mens du bruger. Se hvad der er tilbage med et blik – pr. måned eller direkte på din startskærm.',
+      },
+      items: {
+        title: 'Hvad dine ting koster pr. dag',
+        body: 'Følg de ting, du køber, og se prisen skrumpe for hver dag, du ejer dem. Se, hvad hver ting reelt koster pr. dag.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalender-hjem & album',
       calendar: {
@@ -135,6 +146,10 @@ const da = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      budget_food: 'Mad',
+      budget_transport: 'Transport',
+      item_headphones: 'Høretelefoner',
+      item_jacket: 'Jakke',
       this_month: 'Denne måned',
       past_7_days: 'Sidste 7 dage',
       income: 'Indtægt',

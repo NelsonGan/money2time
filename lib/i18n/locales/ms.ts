@@ -89,6 +89,17 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    budget_items_update: {
+      title: 'Bajet & Barangan',
+      budget: {
+        title: 'Tetapkan bajet bulanan',
+        body: 'Bina bajet daripada templat boleh guna semula dan lihat setiap kategori terisi apabila anda berbelanja. Lihat baki sepintas lalu—mengikut bulan atau terus pada skrin utama.',
+      },
+      items: {
+        title: 'Kos barang anda sehari',
+        body: 'Jejaki barang yang anda beli dan lihat kosnya mengecil setiap hari anda memilikinya. Lihat kos sebenar setiap satu sehari.',
+      },
+    },
     calendar_albums_update: {
       title: 'Laman kalendar & Album',
       calendar: {
@@ -135,6 +146,10 @@ const ms = {
       open_share_earn: 'Dapatkan Pro percuma',
     },
     showcase: {
+      budget_food: 'Makanan',
+      budget_transport: 'Pengangkutan',
+      item_headphones: 'Fon kepala',
+      item_jacket: 'Jaket',
       this_month: 'Bulan ini',
       past_7_days: '7 hari lepas',
       income: 'Pendapatan',

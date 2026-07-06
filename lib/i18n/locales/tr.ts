@@ -89,6 +89,17 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    budget_items_update: {
+      title: 'Bütçeler ve eşyalar',
+      budget: {
+        title: 'Aylık bütçe belirle',
+        body: 'Yeniden kullanılabilir şablonlardan bütçe oluştur ve harcadıkça her kategorinin dolmasını izle. Kalanı bir bakışta gör—aylık olarak ya da doğrudan ana ekranında.',
+      },
+      items: {
+        title: 'Eşyalarının günlük maliyeti',
+        body: 'Satın aldıklarını takip et ve sahip olduğun her günle maliyetin küçülmesini izle. Her birinin günde gerçekte ne kadara mal olduğunu gör.',
+      },
+    },
     calendar_albums_update: {
       title: 'Takvim ana ekranı ve albümler',
       calendar: {
@@ -135,6 +146,10 @@ const tr = {
       open_share_earn: 'Pro’yu ücretsiz al',
     },
     showcase: {
+      budget_food: 'Yemek',
+      budget_transport: 'Ulaşım',
+      item_headphones: 'Kulaklık',
+      item_jacket: 'Ceket',
       this_month: 'Bu ay',
       past_7_days: 'Son 7 gün',
       income: 'Gelir',

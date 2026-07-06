@@ -89,6 +89,17 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgetar och prylar',
+      budget: {
+        title: 'Ange en månadsbudget',
+        body: 'Skapa en budget från återanvändbara mallar och se varje kategori fyllas medan du spenderar. Se vad som är kvar med en blick – per månad eller direkt på hemskärmen.',
+      },
+      items: {
+        title: 'Vad dina prylar kostar per dag',
+        body: 'Håll koll på det du köper och se kostnaden krympa för varje dag du äger det. Se vad varje sak faktiskt kostar per dag.',
+      },
+    },
     calendar_albums_update: {
       title: 'Kalenderstart och album',
       calendar: {
@@ -135,6 +146,10 @@ const sv = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      budget_food: 'Mat',
+      budget_transport: 'Transport',
+      item_headphones: 'Hörlurar',
+      item_jacket: 'Jacka',
       this_month: 'Den här månaden',
       past_7_days: 'Senaste 7 dagarna',
       income: 'Inkomst',

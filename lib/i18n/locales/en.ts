@@ -64,6 +64,17 @@ const en = {
     },
   },
   news: {
+    budget_items_update: {
+      title: 'Budgets & Items',
+      budget: {
+        title: 'Set a monthly budget',
+        body: "Build a budget from reusable templates and watch each category fill as you spend. See what's left at a glance — by month, or right on your home screen.",
+      },
+      items: {
+        title: 'What your things cost per day',
+        body: 'Track the things you buy and watch their cost shrink with every day you own them. See what each one really costs per day.',
+      },
+    },
     calendar_albums_update: {
       title: 'Calendar home & Albums',
       calendar: {
@@ -110,6 +121,10 @@ const en = {
       open_share_earn: 'Get Pro for free',
     },
     showcase: {
+      budget_food: 'Food',
+      budget_transport: 'Transport',
+      item_headphones: 'Headphones',
+      item_jacket: 'Jacket',
       this_month: 'This month',
       past_7_days: 'Past 7 days',
       income: 'Income',

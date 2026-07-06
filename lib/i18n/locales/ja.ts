@@ -89,6 +89,17 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    budget_items_update: {
+      title: '予算とアイテム',
+      budget: {
+        title: '月の予算を設定',
+        body: '再利用できるテンプレートから予算を作成し、支出に応じて各カテゴリが埋まっていく様子を確認できます。残額はひと目で—月ごと、またはホーム画面で。',
+      },
+      items: {
+        title: 'モノの1日あたりのコスト',
+        body: '買ったモノを記録すると、持っている日数が増えるほどコストが下がっていきます。それぞれが実際に1日あたりいくらかを確認しましょう。',
+      },
+    },
     calendar_albums_update: {
       title: 'カレンダーホームとアルバム',
       calendar: {
@@ -135,6 +146,10 @@ const ja = {
       open_share_earn: 'Proを無料で手に入れる',
     },
     showcase: {
+      budget_food: '食費',
+      budget_transport: '交通',
+      item_headphones: 'ヘッドホン',
+      item_jacket: 'ジャケット',
       this_month: '今月',
       past_7_days: '過去7日間',
       income: '収入',

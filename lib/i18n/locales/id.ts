@@ -89,6 +89,17 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    budget_items_update: {
+      title: 'Anggaran & Barang',
+      budget: {
+        title: 'Tetapkan anggaran bulanan',
+        body: 'Buat anggaran dari templat yang bisa dipakai ulang dan lihat setiap kategori terisi saat kamu belanja. Lihat sisa anggaran sekilas—per bulan atau langsung di layar utama.',
+      },
+      items: {
+        title: 'Berapa biaya barangmu per hari',
+        body: 'Lacak barang yang kamu beli dan lihat biayanya menyusut setiap hari kamu memilikinya. Lihat berapa biaya sebenarnya tiap barang per hari.',
+      },
+    },
     calendar_albums_update: {
       title: 'Beranda kalender & Album',
       calendar: {
@@ -135,6 +146,10 @@ const id = {
       open_share_earn: 'Dapatkan Pro gratis',
     },
     showcase: {
+      budget_food: 'Makanan',
+      budget_transport: 'Transportasi',
+      item_headphones: 'Headphone',
+      item_jacket: 'Jaket',
       this_month: 'Bulan ini',
       past_7_days: '7 hari terakhir',
       income: 'Pemasukan',

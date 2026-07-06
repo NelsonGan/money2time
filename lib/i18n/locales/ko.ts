@@ -89,6 +89,17 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    budget_items_update: {
+      title: '예산 및 물건',
+      budget: {
+        title: '월 예산 설정',
+        body: '재사용 가능한 템플릿으로 예산을 만들고 지출할 때마다 각 카테고리가 채워지는 것을 확인하세요. 남은 금액을 한눈에—월별로 또는 홈 화면에서 바로.',
+      },
+      items: {
+        title: '물건의 하루 비용',
+        body: '구매한 물건을 기록하면 소유한 날이 늘수록 비용이 줄어듭니다. 각 물건이 하루에 실제로 얼마인지 확인하세요.',
+      },
+    },
     calendar_albums_update: {
       title: '캘린더 홈 & 앨범',
       calendar: {
@@ -135,6 +146,10 @@ const ko = {
       open_share_earn: 'Pro 무료로 받기',
     },
     showcase: {
+      budget_food: '식비',
+      budget_transport: '교통',
+      item_headphones: '헤드폰',
+      item_jacket: '재킷',
       this_month: '이번 달',
       past_7_days: '지난 7일',
       income: '수입',

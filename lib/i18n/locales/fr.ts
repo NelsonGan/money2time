@@ -89,6 +89,17 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    budget_items_update: {
+      title: 'Budgets et objets',
+      budget: {
+        title: 'Définir un budget mensuel',
+        body: "Créez un budget à partir de modèles réutilisables et voyez chaque catégorie se remplir à mesure que vous dépensez. Voyez ce qu'il reste d'un coup d'œil, par mois ou directement sur votre écran d'accueil.",
+      },
+      items: {
+        title: 'Ce que vos objets coûtent par jour',
+        body: 'Suivez ce que vous achetez et voyez leur coût diminuer chaque jour que vous les possédez. Découvrez ce que chacun coûte vraiment par jour.',
+      },
+    },
     calendar_albums_update: {
       title: 'Accueil calendrier & albums',
       calendar: {
@@ -135,6 +146,10 @@ const fr = {
       open_share_earn: 'Obtenir Pro gratuitement',
     },
     showcase: {
+      budget_food: 'Alimentation',
+      budget_transport: 'Transport',
+      item_headphones: 'Casque',
+      item_jacket: 'Veste',
       this_month: 'Ce mois-ci',
       past_7_days: '7 derniers jours',
       income: 'Revenu',
