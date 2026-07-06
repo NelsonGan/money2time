@@ -411,22 +411,25 @@ describe('countRootAllocations', () => {
 describe('computeBudgetPagerMonths', () => {
   const now = new Date(2026, 6, 15); // July 2026
 
-  it('spans current month + 1 with no history', () => {
-    expect(computeBudgetPagerMonths({ budgets: [], transactions: [], now })).toEqual([
-      '2026-07',
-      '2026-08',
-    ]);
+  it('spans current month through a year ahead with no history', () => {
+    const months = computeBudgetPagerMonths({ budgets: [], transactions: [], now });
+    expect(months[0]).toBe('2026-07');
+    expect(months[months.length - 1]).toBe('2027-07');
+    expect(months).toHaveLength(13);
   });
 
   it('starts at the earliest budget or expense month', () => {
     const budgets = [makeBudget({ month: '2026-05' })];
     const transactions = [makeTransaction({ date: '2026-04-10T12:00:00.000Z' })];
-    expect(computeBudgetPagerMonths({ budgets, transactions, now })).toEqual([
-      '2026-04',
-      '2026-05',
-      '2026-06',
-      '2026-07',
-      '2026-08',
-    ]);
+    const months = computeBudgetPagerMonths({ budgets, transactions, now });
+    expect(months[0]).toBe('2026-04');
+    expect(months).toContain('2026-05');
+    expect(months[months.length - 1]).toBe('2027-07');
+  });
+
+  it('extends past the future window to reach an existing later budget', () => {
+    const budgets = [makeBudget({ month: '2027-10' })];
+    const months = computeBudgetPagerMonths({ budgets, transactions: [], now });
+    expect(months[months.length - 1]).toBe('2027-10');
   });
 });

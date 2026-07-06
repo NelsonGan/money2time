@@ -260,7 +260,14 @@ export function computeAllocationRemaining(
   return normalizeMoneyAmount(totalAmount - allocated);
 }
 
-/** Months shown by the budget pager: earliest budget/expense month → current + 1. */
+/** How far past the current month the pager reaches, so future months can be
+ *  planned well ahead. */
+export const BUDGET_PAGER_FUTURE_MONTHS = 12;
+
+/**
+ * Months shown by the budget pager: earliest budget/expense month through a
+ * year ahead (or the latest existing budget, whichever is further).
+ */
 export function computeBudgetPagerMonths({
   budgets,
   transactions,
@@ -272,8 +279,10 @@ export function computeBudgetPagerMonths({
 }): string[] {
   const currentMonth = monthKeyFromDateLocal(startOfMonthDate(now));
   let firstMonth = currentMonth;
+  let lastMonth = addMonthsToKey(currentMonth, BUDGET_PAGER_FUTURE_MONTHS);
   for (const budget of budgets) {
     if (budget.month < firstMonth) firstMonth = budget.month;
+    if (budget.month > lastMonth) lastMonth = budget.month;
   }
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
@@ -282,7 +291,6 @@ export function computeBudgetPagerMonths({
     if (monthKey < firstMonth) firstMonth = monthKey;
   }
 
-  const lastMonth = addMonthsToKey(currentMonth, 1);
   const months: string[] = [];
   for (let month = firstMonth; month <= lastMonth; month = addMonthsToKey(month, 1)) {
     months.push(month);

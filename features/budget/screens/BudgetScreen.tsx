@@ -114,41 +114,59 @@ function BudgetSummaryCard({
 
   return (
     <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
-      {/* Ring gauge (savings-rate style) + figures side by side. */}
+      {/* Ring gauge (savings-rate style) on a soft tinted disc, figures and a
+          remaining chip beside it — structure over plain text lines. */}
       <View className="flex-row items-center gap-4 px-4 py-4">
-        <SavingsRateRing
-          size={92}
-          strokeWidth={9}
-          progress={Math.min(summary.usageRatio, 1)}
-          color={ringColor}
-          trackColor={withColorAlpha(ringColor, 0.15)}
+        <View
+          className="items-center justify-center rounded-full p-1.5"
+          style={{ backgroundColor: withColorAlpha(ringColor, 0.07) }}
         >
-          <Text
-            variant="bodyStrong"
-            className="text-base"
-            style={{ color: isOver ? themeColors.error : themeColors.text }}
+          <SavingsRateRing
+            size={88}
+            strokeWidth={9}
+            progress={Math.min(summary.usageRatio, 1)}
+            color={ringColor}
+            trackColor={withColorAlpha(ringColor, 0.16)}
           >
-            {Math.round(summary.usageRatio * 100)}%
-          </Text>
-        </SavingsRateRing>
+            <Text
+              variant="bodyStrong"
+              className="text-base"
+              style={{ color: isOver ? themeColors.error : themeColors.text }}
+            >
+              {Math.round(summary.usageRatio * 100)}%
+            </Text>
+          </SavingsRateRing>
+        </View>
 
         <View className="min-w-0 flex-1">
-          <Text variant="monoLg" numberOfLines={1}>
-            {money(summary.totalSpent, settings)}
-          </Text>
+          <View className="flex-row items-baseline gap-1.5">
+            <Text variant="monoLg" numberOfLines={1} className="shrink">
+              {money(summary.totalSpent, settings)}
+            </Text>
+          </View>
           <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
             / {money(summary.totalBudget, settings)}
           </Text>
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            className="mt-2"
-            style={{ color: isOver ? themeColors.error : ringColor }}
+          {/* Remaining as a tinted chip so the key number pops off the card. */}
+          <View
+            className="mt-2.5 self-start rounded-full px-2.5 py-1"
+            style={{
+              backgroundColor: withColorAlpha(isOver ? themeColors.error : ringColor, 0.12),
+            }}
           >
-            {isOver
-              ? I18n.t('budget.summary_exceeded', { amount: money(summary.exceededBy, settings) })
-              : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
-          </Text>
+            <Text
+              variant="caption"
+              numberOfLines={1}
+              className="text-[11px]"
+              style={{ color: isOver ? themeColors.error : ringColor }}
+            >
+              {isOver
+                ? I18n.t('budget.summary_exceeded', {
+                    amount: money(summary.exceededBy, settings),
+                  })
+                : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
+            </Text>
+          </View>
         </View>
 
         <View className="gap-1.5">
@@ -254,21 +272,13 @@ function BudgetChildRow({
           <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
             {category?.name ?? I18n.t('budget.uncategorized')}
           </Text>
-          {/* Fixed columns so spent, the slash, and budgeted line up down the
-              whole list instead of drifting with each amount's width. */}
           <Text
             variant="caption"
             numberOfLines={1}
-            className="w-[82px] text-right"
+            className="shrink-0 text-right"
             style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
           >
-            {money(line.spent, settings)}
-          </Text>
-          <Text variant="caption" tone="muted" className="shrink-0">
-            /
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1} className="w-[82px] text-right">
-            {money(line.budgeted, settings)}
+            {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
         </View>
       </Pressable>
@@ -308,14 +318,8 @@ function BudgetCategoryRow({
       accessibilityLabel={category?.name ?? I18n.t('budget.uncategorized')}
       className={cn('px-4 py-3.5 active:bg-secondary/20', !first && 'border-t border-border/25')}
     >
-      <View className="flex-row items-center gap-3">
-        {/* Emoji chip tinted with the category's palette color. */}
-        <View
-          className="h-9 w-9 items-center justify-center rounded-xl"
-          style={{ backgroundColor: withColorAlpha(color, 0.14) }}
-        >
-          <CategoryEmoji icon={category?.icon} size={17} />
-        </View>
+      <View className="flex-row items-center gap-2.5">
+        <CategoryEmoji icon={category?.icon} size={18} />
         <View className="min-w-0 flex-1">
           <Text variant="bodyStrong" numberOfLines={1}>
             {category?.name ?? I18n.t('budget.uncategorized')}
@@ -324,10 +328,10 @@ function BudgetCategoryRow({
             {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
         </View>
-        <View className="items-end gap-1">
-          {/* Neutral status chip; only over-budget tints red. */}
+        <View className="shrink-0 items-end gap-1">
+          {/* Compact status chip; only over-budget tints red. */}
           <View
-            className={cn('rounded-full px-2.5 py-1', !line.isOver && 'bg-secondary/50')}
+            className={cn('rounded-full px-2 py-0.5', !line.isOver && 'bg-secondary/50')}
             style={
               line.isOver ? { backgroundColor: withColorAlpha(themeColors.error, 0.12) } : undefined
             }
@@ -335,6 +339,7 @@ function BudgetCategoryRow({
             <Text
               variant="caption"
               numberOfLines={1}
+              className="text-[10px]"
               tone={line.isOver ? undefined : 'muted'}
               style={line.isOver ? { color: themeColors.error } : undefined}
             >
@@ -343,7 +348,12 @@ function BudgetCategoryRow({
                 : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
             </Text>
           </View>
-          <Text variant="caption" tone="muted" className="text-[10px]">
+          {/* Percent colored by usage health, not by the category palette. */}
+          <Text
+            variant="caption"
+            className="text-[10px]"
+            style={{ color: usageColor(line.usageRatio, themeColors) }}
+          >
             {Math.round(line.usageRatio * 100)}%
           </Text>
         </View>
