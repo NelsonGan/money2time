@@ -75,8 +75,9 @@ import {
 } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage } from '~/services/userAssets';
-import type { Category, TransactionSentiment, TransactionType } from '~/types';
+import type { Category, ClaimStatus, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
+import { clampClaimAmount } from '~/utils/claims';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -189,6 +190,10 @@ interface TransactionEditorInitialValues {
   /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
   receiptUri: string | null;
   sentiment: TransactionSentiment;
+  /** Claim / reimbursement state (edit mode) so the Claimable toggle round-trips. */
+  claimStatus?: ClaimStatus;
+  claimAmount?: number | null;
+  claimReimbursedAmount?: number;
 }
 
 interface TransactionEditorScreenProps {
@@ -198,6 +203,8 @@ interface TransactionEditorScreenProps {
   onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
+  /** Record a reimbursement for an outstanding claimable expense (edit mode). */
+  onMarkReimbursed?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
   titleOverride?: string;
@@ -404,6 +411,7 @@ export function TransactionEditorScreen({
   onSubmitWithSplits,
   onSubmitReady,
   onDelete,
+  onMarkReimbursed,
   initialValues,
   initialSplits,
   titleOverride,
@@ -543,6 +551,18 @@ export function TransactionEditorScreen({
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
+
+  // Claim / reimbursement. `claimLocked` means the expense already has
+  // reimbursements recorded, so its claim state is managed from the
+  // Reimbursements hub, not toggled off here.
+  const [claimable, setClaimable] = useState((initialValues?.claimStatus ?? 'none') !== 'none');
+  const claimReimbursedAmount = initialValues?.claimReimbursedAmount ?? 0;
+  const claimLocked = claimReimbursedAmount > 0;
+  const claimInitialStatus = initialValues?.claimStatus ?? 'none';
+  const claimIsOutstanding =
+    claimInitialStatus === 'claimable' ||
+    claimInitialStatus === 'submitted' ||
+    claimInitialStatus === 'partially_reimbursed';
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
   const [recurrencePattern, setRecurrencePattern] = useState<
@@ -1288,6 +1308,20 @@ export function TransactionEditorScreen({
           entryCurrency !== acctCurrency
             ? convert(numericAmount, entryCurrency, acctCurrency, rateTable).value
             : null;
+        // Claim / reimbursement flag (expenses only, and only while nothing has
+        // been reimbursed yet — settled claims are managed from the hub). An
+        // existing partial claimAmount is preserved; otherwise it defaults to
+        // the full amount.
+        const claimFields =
+          type === 'expense' && !claimLocked
+            ? claimable
+              ? {
+                  claimStatus: 'claimable' as const,
+                  claimAmount: clampClaimAmount(initialValues?.claimAmount ?? null, numericAmount),
+                  reimbursementAccountId: accountId,
+                }
+              : { claimStatus: 'none' as const, claimAmount: null, reimbursementAccountId: null }
+            : {};
         submitPayload = {
           type,
           amount: numericAmount,
@@ -1301,6 +1335,7 @@ export function TransactionEditorScreen({
           note: resolvedNote,
           receiptUri,
           sentiment,
+          ...claimFields,
         };
         preparedSubmitPayload = submitPayload;
       }
@@ -2422,6 +2457,67 @@ export function TransactionEditorScreen({
                             </Text>
                           </View>
                         ) : null}
+                      </Pressable>
+                    ) : null}
+
+                    {/* Claimable — flag an expense you expect to get back */}
+                    {type === 'expense' && !recurringOptions ? (
+                      <Pressable
+                        onPress={() => {
+                          if (claimLocked) return;
+                          void triggerHaptic('selection');
+                          setClaimable((value) => !value);
+                        }}
+                        disabled={claimLocked}
+                        accessibilityRole="switch"
+                        accessibilityState={{ checked: claimable }}
+                        accessibilityLabel={I18n.t('transactions.editor.claim.toggle_title')}
+                        className={cn(
+                          'mt-3 flex-row items-center gap-3 h-14 px-4 rounded-2xl border',
+                          claimable
+                            ? 'bg-warning/15 border-warning/40'
+                            : 'bg-secondary/60 border-border/30',
+                        )}
+                        style={{ opacity: claimLocked ? 0.6 : 1 }}
+                      >
+                        <Text className="text-[18px]">🧾</Text>
+                        <View className="flex-1">
+                          <Text variant="body">
+                            {I18n.t('transactions.editor.claim.toggle_title')}
+                          </Text>
+                          <Text variant="caption" tone="muted">
+                            {claimLocked
+                              ? I18n.t('reimbursements.badge_reimbursed')
+                              : I18n.t('transactions.editor.claim.toggle_subtitle')}
+                          </Text>
+                        </View>
+                        <View
+                          className={cn(
+                            'w-11 h-6 rounded-full p-0.5 justify-center',
+                            claimable ? 'bg-warning items-end' : 'bg-border/50 items-start',
+                          )}
+                        >
+                          <View className="w-5 h-5 rounded-full bg-background" />
+                        </View>
+                      </Pressable>
+                    ) : null}
+
+                    {/* Mark reimbursed — close the loop on an outstanding claim */}
+                    {mode === 'edit' &&
+                    claimIsOutstanding &&
+                    !recurringOptions &&
+                    onMarkReimbursed ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('success');
+                          onMarkReimbursed();
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('reimbursements.mark_reimbursed')}
+                        className="mt-3 flex-row items-center justify-center gap-2 h-12 rounded-2xl border border-success/40 bg-success/15"
+                      >
+                        <Text className="text-[16px]">✓</Text>
+                        <Text variant="body">{I18n.t('reimbursements.mark_reimbursed')}</Text>
                       </Pressable>
                     ) : null}
 

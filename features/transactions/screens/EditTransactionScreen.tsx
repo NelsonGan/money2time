@@ -33,6 +33,7 @@ export function EditTransactionScreen({
     deleteTransaction,
     markSplitPaid,
     markSplitUnpaid,
+    markReimbursed,
   } = useApp();
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&
@@ -196,6 +197,13 @@ export function EditTransactionScreen({
         note: transaction.note ?? '',
         receiptUri: transaction.receiptUri ?? null,
         sentiment: transaction.sentiment ?? 'neutral',
+        claimStatus: transaction.claimStatus,
+        claimAmount: transaction.claimAmount,
+        claimReimbursedAmount: transaction.reimbursedAmount,
+      }}
+      onMarkReimbursed={() => {
+        markReimbursed(transaction.id);
+        onClose();
       }}
     />
   );
