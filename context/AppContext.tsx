@@ -379,7 +379,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'lastAutoBackupAt'
         | 'lastAutoBackupError'
         | 'paymentQrUri'
-        | 'paymentQrLabel'
       >
     >,
   ) => void;
@@ -2596,7 +2595,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'lastAutoBackupAt'
           | 'lastAutoBackupError'
           | 'paymentQrUri'
-          | 'paymentQrLabel'
         >
       >,
     ) => {

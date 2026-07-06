@@ -203,7 +203,6 @@ describe('buildReceiptText', () => {
     heading: 'Split summary',
     fromTo: 'Alex → Sarah',
     totalLabel: 'You owe',
-    payLine: null,
     qrNote: null,
     footer: 'Sent from money2time',
   };
@@ -237,7 +236,7 @@ describe('buildReceiptText', () => {
     expect(text.endsWith('Sent from money2time')).toBe(true);
   });
 
-  it('joins multi-currency totals and includes the pay line + QR note when present', () => {
+  it('joins multi-currency totals and includes the QR note when present', () => {
     const [sarah] = aggregateUnpaidSplitsByPerson(
       [
         makeTx({
@@ -261,13 +260,11 @@ describe('buildReceiptText', () => {
     const text = buildReceiptText(sarah, {
       strings: {
         ...strings,
-        payLine: 'Pay me back: PayNow · +65 ••4821',
         qrNote: 'Scan the QR I attached to pay me back.',
       },
       formatMoney,
     });
     expect(text).toContain('You owe: SGD 80.00 + USD 32.00');
-    expect(text).toContain('Pay me back: PayNow · +65 ••4821');
     expect(text).toContain('Scan the QR I attached to pay me back.');
   });
 

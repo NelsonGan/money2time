@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImagePlus, QrCode } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -10,18 +10,16 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/userAssets';
 import type { PersonDebt } from '~/types';
-import { convert } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
-import { aggregateUnpaidSplitsByPerson } from '~/features/transactions/lib/settleUp';
+import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 
 interface SettleUpScreenProps {
   onBack: () => void;
@@ -53,23 +51,11 @@ function personInitial(person: PersonDebt): string {
 export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const { settings, rateTable, updateSettings } = useApp();
-  const { transactions } = useTransactions();
+  const { settings, updateSettings } = useApp();
 
-  const reportingCurrency = settings.currencyCode;
-
-  const rateToReporting = useCallback(
-    (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
-    [rateTable, reportingCurrency],
-  );
-
-  const summary = useMemo(
-    () => aggregateUnpaidSplitsByPerson(transactions, { reportingCurrency, rateToReporting }),
-    [transactions, reportingCurrency, rateToReporting],
-  );
+  const summary = useSettleUpSummary();
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
-  const [qrLabelDraft, setQrLabelDraft] = useState(settings.paymentQrLabel ?? '');
 
   const formatReporting = useCallback(
     (value: number) => formatCurrency(value, settings.currencySymbol),
@@ -111,17 +97,9 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
   const handleRemoveQr = useCallback(() => {
     void triggerHaptic('warning');
     const previous = settings.paymentQrUri;
-    updateSettings({ paymentQrUri: null, paymentQrLabel: null });
-    setQrLabelDraft('');
+    updateSettings({ paymentQrUri: null });
     if (previous) deletePaymentQr(previous);
   }, [settings.paymentQrUri, updateSettings]);
-
-  const handleCommitLabel = useCallback(() => {
-    const next = qrLabelDraft.trim() || null;
-    if (next !== (settings.paymentQrLabel ?? null)) {
-      updateSettings({ paymentQrLabel: next });
-    }
-  }, [qrLabelDraft, settings.paymentQrLabel, updateSettings]);
 
   return (
     <SettingsPageLayout>
@@ -219,40 +197,25 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
           </View>
 
           {qrUri ? (
-            <View className="mt-4 flex-row items-center gap-3">
-              <Image
-                source={{ uri: qrUri }}
-                style={{ width: 64, height: 64, borderRadius: 12, backgroundColor: '#fff' }}
-                resizeMode="contain"
-              />
-              <View className="flex-1">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.settleUp.qr_label_caption')}
-                </Text>
-                <View className="mt-0.5 rounded-lg border border-border/40 px-2.5 py-1.5">
-                  <TextInput
-                    value={qrLabelDraft}
-                    onChangeText={setQrLabelDraft}
-                    onEndEditing={handleCommitLabel}
-                    onBlur={handleCommitLabel}
-                    style={[
-                      SINGLE_LINE_TEXT_INPUT_STYLE,
-                      { color: themeColors.text, fontSize: 14 },
-                    ]}
-                  />
-                </View>
-                <View className="mt-1.5 flex-row gap-3">
-                  <Pressable onPress={handlePickQr} hitSlop={6}>
-                    <Text variant="caption" className="text-primary font-medium">
-                      {I18n.t('transactions.settleUp.qr_replace')}
-                    </Text>
-                  </Pressable>
-                  <Pressable onPress={handleRemoveQr} hitSlop={6}>
-                    <Text variant="caption" className="text-destructive font-medium">
-                      {I18n.t('common.remove')}
-                    </Text>
-                  </Pressable>
-                </View>
+            <View className="mt-4 items-center">
+              <Pressable onPress={handlePickQr} className="active:opacity-80">
+                <Image
+                  source={{ uri: qrUri }}
+                  style={{ width: 220, height: 220, borderRadius: 18, backgroundColor: '#fff' }}
+                  resizeMode="contain"
+                />
+              </Pressable>
+              <View className="mt-3.5 flex-row items-center gap-8">
+                <Pressable onPress={handlePickQr} hitSlop={8}>
+                  <Text variant="body" className="text-primary font-medium">
+                    {I18n.t('transactions.settleUp.qr_replace')}
+                  </Text>
+                </Pressable>
+                <Pressable onPress={handleRemoveQr} hitSlop={8}>
+                  <Text variant="body" className="text-destructive font-medium">
+                    {I18n.t('common.remove')}
+                  </Text>
+                </Pressable>
               </View>
             </View>
           ) : (

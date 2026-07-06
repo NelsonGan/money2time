@@ -157,8 +157,6 @@ export interface UserSettings {
    * payback receipts so friends can pay the user back directly.
    */
   paymentQrUri: string | null;
-  /** Optional caption shown beneath the payment QR (e.g. "PayNow · +65 ••4821"). */
-  paymentQrLabel: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

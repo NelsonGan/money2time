@@ -169,8 +169,6 @@ export interface ReceiptTextStrings {
   fromTo: string;
   /** e.g. "You owe". */
   totalLabel: string;
-  /** Optional "Pay me back: PayNow · +65 ••4821"; null to omit. */
-  payLine: string | null;
   /** Optional note shown when a QR image is attached; null to omit. */
   qrNote: string | null;
   /** e.g. "Sent from money2time". */
@@ -207,10 +205,8 @@ export function buildReceiptText(person: PersonDebt, options: BuildReceiptTextOp
   const totalText = person.byCurrency.map((c) => formatMoney(c.amount, c.currency)).join(' + ');
   lines.push(`${strings.totalLabel}: ${totalText}`);
 
-  if (strings.payLine || strings.qrNote) {
-    lines.push('');
-    if (strings.payLine) lines.push(strings.payLine);
-    if (strings.qrNote) lines.push(strings.qrNote);
+  if (strings.qrNote) {
+    lines.push('', strings.qrNote);
   }
 
   lines.push('', strings.footer);
