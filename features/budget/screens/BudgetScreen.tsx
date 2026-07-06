@@ -110,7 +110,9 @@ function BudgetSummaryCard({
   onDelete: () => void;
 }) {
   const isOver = summary.remaining < 0;
-  const ringColor = usageColor(summary.usageRatio, themeColors);
+  // Health-colored ring: green while healthy, amber from 80%, red when over;
+  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
+  const ringColor = isOver ? themeColors.error : usageColor(summary.usageRatio, themeColors);
 
   return (
     <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
@@ -310,6 +312,8 @@ function BudgetCategoryRow({
 }) {
   const category = categoriesById.get(line.categoryId);
   const barColor = line.isOver ? themeColors.error : color;
+  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
+  const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
 
   return (
     <Pressable
@@ -328,33 +332,24 @@ function BudgetCategoryRow({
             {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
         </View>
-        <View className="shrink-0 items-end gap-1">
-          {/* Compact status chip; only over-budget tints red. */}
-          <View
-            className={cn('rounded-full px-2 py-0.5', !line.isOver && 'bg-secondary/50')}
-            style={
-              line.isOver ? { backgroundColor: withColorAlpha(themeColors.error, 0.12) } : undefined
-            }
-          >
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              className="text-[10px]"
-              tone={line.isOver ? undefined : 'muted'}
-              style={line.isOver ? { color: themeColors.error } : undefined}
-            >
-              {line.isOver
-                ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-                : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-            </Text>
-          </View>
-          {/* Percent colored by usage health, not by the category palette. */}
+        {/* One health badge: usage % over the remaining amount, both tinted by
+            how healthy the line is (green → amber from 80% → red when over). */}
+        <View
+          className="shrink-0 items-end rounded-xl px-2.5 py-1"
+          style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
+        >
+          <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
+            {Math.round(line.usageRatio * 100)}%
+          </Text>
           <Text
             variant="caption"
+            numberOfLines={1}
             className="text-[10px]"
-            style={{ color: usageColor(line.usageRatio, themeColors) }}
+            style={{ color: healthColor }}
           >
-            {Math.round(line.usageRatio * 100)}%
+            {line.isOver
+              ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
+              : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
           </Text>
         </View>
       </View>
