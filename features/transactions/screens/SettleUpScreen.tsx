@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { ChevronRight, Clock3, ImagePlus, QrCode } from 'lucide-react-native';
+import { ChevronRight, ImagePlus, QrCode } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
 
@@ -20,13 +20,7 @@ import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/user
 import type { PersonDebt } from '~/types';
 import { convert } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
-import {
-  amountToHoursByRate,
-  dayKeyFromDateLocal,
-  formatCurrency,
-  formatHours,
-  formatRelativeDate,
-} from '~/utils/formatters';
+import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 import { aggregateUnpaidSplitsByPerson } from '~/features/transactions/lib/settleUp';
 
 interface SettleUpScreenProps {
@@ -59,7 +53,7 @@ function personInitial(person: PersonDebt): string {
 export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const { settings, rateTable, getTrueHourlyRateForDate, updateSettings } = useApp();
+  const { settings, rateTable, updateSettings } = useApp();
   const { transactions } = useTransactions();
 
   const reportingCurrency = settings.currencyCode;
@@ -73,9 +67,6 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
     () => aggregateUnpaidSplitsByPerson(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
   );
-
-  const hourlyRate = getTrueHourlyRateForDate(dayKeyFromDateLocal(new Date()));
-  const totalHours = hourlyRate > 0 ? amountToHoursByRate(summary.totalReporting, hourlyRate) : 0;
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
   const [qrLabelDraft, setQrLabelDraft] = useState(settings.paymentQrLabel ?? '');
@@ -154,21 +145,11 @@ export function SettleUpScreen({ onBack, onOpenPerson }: SettleUpScreenProps) {
             <Text variant="heading" className="mt-1 text-3xl">
               {formatReporting(summary.totalReporting)}
             </Text>
-            <View className="mt-1 flex-row items-center gap-2">
-              <Text variant="caption" tone="muted">
-                {summary.personCount === 1
-                  ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })}
-              </Text>
-              {totalHours > 0 ? (
-                <View className="flex-row items-center gap-1">
-                  <Clock3 size={12} color={themeColors.textMuted} />
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.settleUp.time_equiv', { time: formatHours(totalHours) })}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
+            <Text variant="caption" tone="muted" className="mt-1">
+              {summary.personCount === 1
+                ? I18n.t('transactions.settleUp.people_one')
+                : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })}
+            </Text>
           </View>
         ) : null}
 
