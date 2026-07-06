@@ -576,6 +576,7 @@ const uk = {
     },
   },
   insights: {
+    budget: 'Бюджет',
     title: 'Ваша фінансова картина',
     loading: 'Завантажуємо аналіз...',
     insight_type: 'Тип аналізу',

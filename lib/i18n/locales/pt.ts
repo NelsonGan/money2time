@@ -576,6 +576,7 @@ const pt = {
     },
   },
   insights: {
+    budget: 'Orçamento',
     title: 'Sua história financeira',
     loading: 'Carregando insights...',
     insight_type: 'Tipo de insight',

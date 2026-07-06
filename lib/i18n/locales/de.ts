@@ -577,6 +577,7 @@ const de = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Deine Geldgeschichte',
     loading: 'Einblicke werden geladen…',
     insight_type: 'Einblick-Typ',

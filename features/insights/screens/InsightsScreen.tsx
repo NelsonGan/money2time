@@ -138,6 +138,10 @@ const INSIGHT_TYPES = [
   'expense_breakdown',
   'income_breakdown',
   'savings_rate',
+  // Budget is a full-page takeover (its own month pager) rather than a period-
+  // paged chart, but it is a first-class insight type: selectable from the
+  // menu and persisted via `selectedInsightType` like every other page.
+  'budget',
   'expense_trend',
   'income_trend',
   'category_trend',
@@ -169,6 +173,14 @@ const INSIGHT_TYPE_VISUALS = {
     border: '#B5E5CA',
   },
   savings_rate: {
+    Icon: PiggyBank,
+    tint: '#1B8D74',
+    background: '#DFF6F1',
+    border: '#A4E0D3',
+  },
+  // Budget renders the `time-money` image icon (see INSIGHT_TYPE_ICON_NAME), so
+  // this Lucide fallback is never drawn; it exists only to satisfy the map.
+  budget: {
     Icon: PiggyBank,
     tint: '#1B8D74',
     background: '#DFF6F1',
@@ -218,6 +230,7 @@ const INSIGHT_TYPE_ICON_NAME: Record<InsightType, string> = {
   expense_breakdown: 'wallet-cash',
   income_breakdown: 'wallet-cash-blue',
   savings_rate: 'piggy-bank-coins',
+  budget: 'time-money',
   expense_trend: 'market-analysis',
   income_trend: 'growth-analysis',
   category_trend: 'pie-chart',
@@ -539,6 +552,13 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   },
   savings_rate: {
     fixedPeriodPreset: 'year',
+    allowAccountFilter: false,
+  },
+  // Budget has no period/account filters — its own month pager drives the
+  // header's month controls. A non-null fixedPeriodPreset hides the period
+  // picker; the value itself is unused since the budget pager owns navigation.
+  budget: {
+    fixedPeriodPreset: 'month',
     allowAccountFilter: false,
   },
   expense_trend: {
@@ -931,9 +951,6 @@ function buildDayPeriodState(targetDate: Date): PeriodState {
 type InsightsPreferencesSnapshot = {
   version: 1;
   selectedInsightType: InsightType;
-  /** The budget view is a takeover that sits over the insight pages; persist
-   *  it so reopening the app restores it like any other selected insight. */
-  budgetViewActive: boolean;
   periodPreset: PeriodPreset;
   periodPresetByInsight: Partial<Record<InsightType, PeriodPreset>>;
   anchorDate: string;
@@ -984,9 +1001,6 @@ function parseInsightsPreferencesPayload(
       isInsightType(parsed.selectedInsightType)
     ) {
       next.selectedInsightType = parsed.selectedInsightType;
-    }
-    if (typeof parsed.budgetViewActive === 'boolean') {
-      next.budgetViewActive = parsed.budgetViewActive;
     }
     if (typeof parsed.periodPreset === 'string' && isPeriodPreset(parsed.periodPreset)) {
       next.periodPreset = parsed.periodPreset;
@@ -2890,9 +2904,10 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
-  // Budget rendered as an insights page: swaps the pager body and takes over
-  // the header's month controls while active.
-  const [isBudgetViewActive, setIsBudgetViewActive] = useState(false);
+  // Budget is a first-class insight type that renders a full-page takeover:
+  // it swaps the pager body and drives the header's month controls while the
+  // 'budget' insight is selected.
+  const isBudgetView = selectedInsightType === 'budget';
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
@@ -2937,36 +2952,16 @@ export function InsightsScreen({
     lastScrubHapticAtRef.current = now;
     void triggerHaptic('selection');
   }, []);
-  const insightTypeOptions = useMemo(() => {
-    const options: {
-      value: string;
-      label: string;
-      icon: React.ReactNode;
-      badge?: string;
-    }[] = visibleInsightTypes.map((type) => ({
-      value: type,
-      label: String(I18n.t(`insights.${type}`)),
-      icon: renderInsightTypeIcon(type),
-      badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
-    }));
-    // The budget view renders in place of the insight pager (it drives the
-    // same header's month controls) rather than being an INSIGHT_TYPES entry.
-    // Listed right after savings rate — its planning sibling.
-    const budgetOption = {
-      value: 'budget',
-      label: String(I18n.t('budget.title')),
-      icon: (
-        <Image
-          source={UTILITY_ICON_SOURCES['time-money']}
-          resizeMode="contain"
-          style={styles.insightTypeIconImage}
-        />
-      ),
-    };
-    const savingsRateIndex = options.findIndex((option) => option.value === 'savings_rate');
-    options.splice(savingsRateIndex >= 0 ? savingsRateIndex + 1 : options.length, 0, budgetOption);
-    return options;
-  }, [visibleInsightTypes, isPro, proTrendTypeSet]);
+  const insightTypeOptions = useMemo(
+    () =>
+      visibleInsightTypes.map((type) => ({
+        value: type,
+        label: String(I18n.t(`insights.${type}`)),
+        icon: renderInsightTypeIcon(type),
+        badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
+      })),
+    [visibleInsightTypes, isPro, proTrendTypeSet],
+  );
   useEffect(() => {
     if (isSimpleMode && selectedInsightType === 'asset_history') {
       setSelectedInsightType('expense_breakdown');
@@ -3056,8 +3051,7 @@ export function InsightsScreen({
     activeBreakdownSliceIdRef.current = null;
     setActiveBreakdownSliceId(null);
     setIsFilterModalOpen(false);
-    // The budget takeover would otherwise sit on top of the requested insight.
-    setIsBudgetViewActive(false);
+    // Selecting the requested insight also leaves the budget takeover.
     setSelectedInsightType(targetInsightType);
     committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3079,7 +3073,6 @@ export function InsightsScreen({
     const focus = (insightType: string) => {
       if (!isInsightType(insightType)) return;
       setIsFilterModalOpen(false);
-      setIsBudgetViewActive(false);
       setSelectedInsightType(insightType);
     };
     const pending = consumePendingFocusInsight();
@@ -3137,9 +3130,6 @@ export function InsightsScreen({
         }));
       }
       if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
-      if (typeof saved.budgetViewActive === 'boolean') {
-        setIsBudgetViewActive(saved.budgetViewActive);
-      }
       if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
       if (saved.selectedAccountIds) setSelectedAccountIds(saved.selectedAccountIds);
       if (saved.excludedExpenseTrendAccountIds) {
@@ -3197,7 +3187,6 @@ export function InsightsScreen({
     () => ({
       version: INSIGHTS_PREFERENCES_VERSION,
       selectedInsightType,
-      budgetViewActive: isBudgetViewActive,
       periodPreset: persistedPeriodPreset,
       periodPresetByInsight,
       anchorDate: formatDateInput(anchorDate),
@@ -3233,7 +3222,6 @@ export function InsightsScreen({
       excludedSavingsIncomeCategoryIds,
       excludedExpenseBreakdownCategoryIds,
       excludedIncomeBreakdownCategoryIds,
-      isBudgetViewActive,
       persistedPeriodPreset,
       periodPresetByInsight,
       selectedAccountIds,
@@ -3531,6 +3519,19 @@ export function InsightsScreen({
         state.customEnd,
         weekStartsOn,
       );
+      // Budget renders its own full-page takeover, never the period pager, so
+      // this cached page is never displayed — return an empty breakdown to keep
+      // it cheap (no transaction scan) and well-typed.
+      if (insightType === 'budget') {
+        return {
+          kind: 'breakdown',
+          range,
+          categoryRows: [],
+          filteredForRange: [],
+          breakdownTransactionsById: new Map(),
+          transactionType: 'expense',
+        };
+      }
       const rangeStartMs = Date.parse(range.start);
       const rangeEndMs = Date.parse(range.end);
       const inRangeTransactions: TransactionWithRelations[] = [];
@@ -6630,11 +6631,6 @@ export function InsightsScreen({
     (value: string) => {
       void triggerHaptic('selection');
       setIsInsightMenuOpen(false);
-      if (value === 'budget') {
-        setIsBudgetViewActive(true);
-        return;
-      }
-      setIsBudgetViewActive(false);
       handleInsightTypeChange(value);
     },
     [handleInsightTypeChange],
@@ -6726,22 +6722,12 @@ export function InsightsScreen({
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('insights.insight_type')}
                 accessibilityValue={{
-                  text: isBudgetViewActive
-                    ? String(I18n.t('budget.title'))
-                    : String(I18n.t(`insights.${displaySelectedInsightType}`)),
+                  text: String(I18n.t(`insights.${displaySelectedInsightType}`)),
                 }}
                 accessibilityState={{ expanded: isInsightMenuOpen }}
                 className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
               >
-                {isBudgetViewActive ? (
-                  <Image
-                    source={UTILITY_ICON_SOURCES['time-money']}
-                    resizeMode="contain"
-                    style={styles.insightTypeIconImage}
-                  />
-                ) : (
-                  renderInsightTypeIcon(displaySelectedInsightType)
-                )}
+                {renderInsightTypeIcon(displaySelectedInsightType)}
                 <View className="absolute -bottom-1 -right-1 h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-background bg-primary shadow-sm">
                   <ChevronDown size={11} color="#FFFFFF" strokeWidth={3} />
                 </View>
@@ -6753,13 +6739,11 @@ export function InsightsScreen({
                 numberOfLines={1}
                 className="text-center tracking-tight"
               >
-                {isBudgetViewActive
-                  ? String(I18n.t('budget.title'))
-                  : String(I18n.t(`insights.${displaySelectedInsightType}`))}
+                {String(I18n.t(`insights.${displaySelectedInsightType}`))}
               </Text>
             </View>
             <View className="w-10 items-end justify-center">
-              {isBudgetViewActive ? (
+              {isBudgetView ? (
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -6781,18 +6765,16 @@ export function InsightsScreen({
             </View>
           </View>
         }
-        monthLabel={isBudgetViewActive ? budgetMonthLabel : activePeriodLabel}
+        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
         onPrevMonth={
-          isBudgetViewActive ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
         }
         onNextMonth={
-          isBudgetViewActive ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
         }
-        disableNavArrows={!isBudgetViewActive && displayPeriodPreset === 'lifetime'}
+        disableNavArrows={!isBudgetView && displayPeriodPreset === 'lifetime'}
         onMonthPress={
-          isBudgetViewActive || displayPeriodPreset === 'lifetime'
-            ? undefined
-            : handleOpenPeriodPicker
+          isBudgetView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
         }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
@@ -6806,7 +6788,7 @@ export function InsightsScreen({
               {I18n.t('insights.loading')}
             </Text>
           </View>
-        ) : isBudgetViewActive ? (
+        ) : isBudgetView ? (
           <BudgetPagerView
             ref={budgetPagerRef}
             onOpenTemplateEditor={onOpenBudgetTemplateEditor}
@@ -6953,7 +6935,7 @@ export function InsightsScreen({
         screenWidth={width}
         screenHeight={height}
         options={insightTypeOptions}
-        selectedValue={isBudgetViewActive ? 'budget' : displaySelectedInsightType}
+        selectedValue={displaySelectedInsightType}
         onSelect={handleInsightMenuSelect}
         onClose={() => setIsInsightMenuOpen(false)}
       />

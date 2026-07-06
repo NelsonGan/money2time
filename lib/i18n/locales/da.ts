@@ -574,6 +574,7 @@ const da = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Din pengehistorie',
     loading: 'Indlæser indsigt...',
     insight_type: 'Indsigtstype',

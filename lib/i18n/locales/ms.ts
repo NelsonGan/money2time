@@ -576,6 +576,7 @@ const ms = {
     },
   },
   insights: {
+    budget: 'Bajet',
     title: 'Cerita wang anda',
     loading: 'Memuatkan analitik...',
     insight_type: 'Jenis analitik',

@@ -576,6 +576,7 @@ const id = {
     },
   },
   insights: {
+    budget: 'Anggaran',
     title: 'Kisah uangmu',
     loading: 'Memuat wawasan...',
     insight_type: 'Jenis wawasan',

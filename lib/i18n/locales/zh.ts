@@ -541,6 +541,7 @@ const zh = {
     },
   },
   insights: {
+    budget: '预算',
     title: '你的资金故事',
     loading: '正在加载洞察...',
     insight_type: '洞察类型',

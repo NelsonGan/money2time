@@ -576,6 +576,7 @@ const pl = {
     },
   },
   insights: {
+    budget: 'Budżet',
     title: 'Twoja historia finansowa',
     loading: 'Ładowanie analiz...',
     insight_type: 'Typ analizy',

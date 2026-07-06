@@ -576,6 +576,7 @@ const tr = {
     },
   },
   insights: {
+    budget: 'Bütçe',
     title: 'Para hikâyeniz',
     loading: 'Analizler yükleniyor...',
     insight_type: 'Analiz türü',

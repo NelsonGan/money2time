@@ -576,6 +576,7 @@ const nl = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Jouw geldverhaal',
     loading: 'Inzichten laden...',
     insight_type: 'Type inzicht',

@@ -549,6 +549,7 @@ const en = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Your money story',
     loading: 'Loading insights...',
     insight_type: 'Insight type',

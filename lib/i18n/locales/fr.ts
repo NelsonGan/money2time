@@ -575,6 +575,7 @@ const fr = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Votre histoire financière',
     loading: 'Chargement des analyses...',
     insight_type: "Type d'analyse",

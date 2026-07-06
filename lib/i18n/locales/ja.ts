@@ -573,6 +573,7 @@ const ja = {
     },
   },
   insights: {
+    budget: '予算',
     title: 'あなたのお金の話',
     loading: '分析を読み込み中...',
     insight_type: '分析の種類',

@@ -573,6 +573,7 @@ const ko = {
     },
   },
   insights: {
+    budget: '예산',
     title: '나의 자금 이야기',
     loading: '분석 불러오는 중...',
     insight_type: '분석 유형',

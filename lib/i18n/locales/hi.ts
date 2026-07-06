@@ -573,6 +573,7 @@ const hi = {
     },
   },
   insights: {
+    budget: 'बजट',
     title: 'आपकी पैसे की कहानी',
     loading: 'इनसाइट्स लोड हो रही हैं...',
     insight_type: 'इनसाइट प्रकार',

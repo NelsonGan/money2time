@@ -573,6 +573,7 @@ const sv = {
     },
   },
   insights: {
+    budget: 'Budget',
     title: 'Din pengahistoria',
     loading: 'Laddar insikter...',
     insight_type: 'Insiktstyp',

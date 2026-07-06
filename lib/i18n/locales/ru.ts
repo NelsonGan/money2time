@@ -575,6 +575,7 @@ const ru = {
     },
   },
   insights: {
+    budget: 'Бюджет',
     title: 'Ваша финансовая история',
     loading: 'Загрузка аналитики...',
     insight_type: 'Тип аналитики',

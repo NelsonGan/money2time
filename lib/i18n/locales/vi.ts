@@ -573,6 +573,7 @@ const vi = {
     },
   },
   insights: {
+    budget: 'Ngân sách',
     title: 'Câu chuyện tài chính',
     loading: 'Đang tải phân tích...',
     insight_type: 'Loại phân tích',

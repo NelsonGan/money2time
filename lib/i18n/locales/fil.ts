@@ -579,6 +579,7 @@ const fil = {
     },
   },
   insights: {
+    budget: 'Badyet',
     title: 'Ang iyong kwento sa pera',
     loading: 'Nilo-load ang mga insight...',
     insight_type: 'Uri ng insight',
