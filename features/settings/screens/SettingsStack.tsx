@@ -1,6 +1,7 @@
 import { StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { GoalsScreen } from '~/features/goals/screens';
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
@@ -39,6 +40,8 @@ interface SettingsStackProps {
   scrollToTopToken?: number;
   onOpenRecurringEditor: (ruleId?: string) => void;
   onOpenItemEditor: (itemId?: string) => void;
+  onOpenGoalDetail: (goalId: string) => void;
+  onOpenGoalEditor: (goalId?: string) => void;
   onOpenAccountEditor: (params?: { accountId?: string; presetGroupName?: string }) => void;
   onOpenPayCreditCard: (accountId: string) => void;
   onOpenCreateGroup: () => void;
@@ -101,6 +104,7 @@ function SettingsHomeRoute({
       onOpenAccountSettings={() => navigation.navigate('AccountSettings')}
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenItems={() => navigation.navigate('Items')}
+      onOpenGoals={() => navigation.navigate('Goals')}
       onOpenAlbums={() => requestOpenTab('albums')}
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
@@ -127,6 +131,8 @@ export function SettingsStack({
   scrollToTopToken = 0,
   onOpenRecurringEditor,
   onOpenItemEditor,
+  onOpenGoalDetail,
+  onOpenGoalEditor,
   onOpenAccountEditor,
   onOpenPayCreditCard,
   onOpenCreateGroup,
@@ -253,6 +259,18 @@ export function SettingsStack({
           stackNavigationRef.current = props.navigation;
           return (
             <ItemsScreen onBack={() => props.navigation.goBack()} onOpenItem={onOpenItemEditor} />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Goals">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <GoalsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenGoal={onOpenGoalDetail}
+              onCreateGoal={() => onOpenGoalEditor()}
+            />
           );
         }}
       </SettingsStackNavigator.Screen>

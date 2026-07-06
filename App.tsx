@@ -67,6 +67,11 @@ import {
   setPendingCategoryAllocation,
 } from '~/features/budget/lib/categoryAllocationBridge';
 import { AssetsTab } from '~/features/items/components';
+import {
+  AddContributionScreen,
+  GoalDetailScreen,
+  GoalEditorScreen,
+} from '~/features/goals/screens';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
@@ -601,6 +606,20 @@ function MainShellScreen({
     [checkLimit, items.length, navigation],
   );
 
+  const openGoalDetail = useCallback(
+    (goalId: string) => {
+      navigation.navigate('GoalDetail', { goalId });
+    },
+    [navigation],
+  );
+
+  const openGoalEditor = useCallback(
+    (goalId?: string) => {
+      navigation.navigate('GoalEditor', goalId ? { goalId } : undefined);
+    },
+    [navigation],
+  );
+
   const openBudgetTemplateEditor = useCallback(
     (params?: { templateId?: string; duplicateFromId?: string }) => {
       navigation.navigate('BudgetTemplateEditor', params);
@@ -1039,6 +1058,8 @@ function MainShellScreen({
             scrollToTopToken={settingsScrollTopToken}
             onOpenRecurringEditor={openRecurringEditor}
             onOpenItemEditor={openItemEditor}
+            onOpenGoalDetail={openGoalDetail}
+            onOpenGoalEditor={openGoalEditor}
             onOpenAccountEditor={openAccountEditor}
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
@@ -1304,6 +1325,25 @@ function ItemEditorRouteScreen({ route, navigation }: RootStackRouteProps<'ItemE
       onLimitReached={() => navigation.navigate('ProPaywall', { source: 'items' })}
     />
   );
+}
+
+function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalDetail'>) {
+  return (
+    <GoalDetailScreen
+      goalId={route.params.goalId}
+      onClose={() => navigation.goBack()}
+      onEdit={(goalId) => navigation.navigate('GoalEditor', { goalId })}
+      onAddContribution={(goalId) => navigation.navigate('AddContribution', { goalId })}
+    />
+  );
+}
+
+function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalEditor'>) {
+  return <GoalEditorScreen goalId={route.params?.goalId} onClose={() => navigation.goBack()} />;
+}
+
+function AddContributionRouteScreen({ route, navigation }: RootStackRouteProps<'AddContribution'>) {
+  return <AddContributionScreen goalId={route.params.goalId} onClose={() => navigation.goBack()} />;
 }
 
 function BudgetTemplateEditorRouteScreen({
@@ -1993,6 +2033,9 @@ function AppContent() {
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
+          <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
+          <RootStack.Screen name="GoalEditor" component={GoalEditorRouteScreen} />
+          <RootStack.Screen name="AddContribution" component={AddContributionRouteScreen} />
           <RootStack.Screen
             name="BudgetTemplateEditor"
             component={BudgetTemplateEditorRouteScreen}

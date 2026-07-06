@@ -27,6 +27,7 @@ import {
   Repeat2,
   SlidersHorizontal,
   Sparkles,
+  Target,
   TrendingUp,
   UserRound,
   Zap,
@@ -106,6 +107,7 @@ interface SettingsScreenProps {
   onOpenAccountSettings: () => void;
   onOpenAccounts: () => void;
   onOpenItems: () => void;
+  onOpenGoals: () => void;
   onOpenAlbums: () => void;
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
@@ -132,6 +134,7 @@ export function SettingsScreen({
   onOpenAccountSettings,
   onOpenAccounts,
   onOpenItems,
+  onOpenGoals,
   onOpenAlbums,
   onOpenExchangeRates,
   onOpenCategories,
@@ -688,6 +691,11 @@ export function SettingsScreen({
                 icon={<Package size={20} color={themeColors.primary} />}
                 label={I18n.t('items.title')}
                 onPress={onOpenItems}
+              />
+              <SettingsGridTile
+                icon={<Target size={20} color={themeColors.primary} />}
+                label={I18n.t('goals.title')}
+                onPress={onOpenGoals}
               />
               <SettingsGridTile
                 icon={<Images size={20} color={themeColors.primary} />}

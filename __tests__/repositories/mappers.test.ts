@@ -2,6 +2,8 @@ import {
   toAccount,
   toAccountGroup,
   toCategory,
+  toGoal,
+  toGoalContribution,
   toItem,
   toMonthlyWageSettings,
   toRecurringRule,
@@ -467,5 +469,88 @@ describe('toItem', () => {
     expect(result.iconId).toBeNull();
     expect(result.salePrice).toBeNull();
     expect(result.sortOrder).toBe(0);
+  });
+});
+
+describe('toGoal', () => {
+  it('maps fields and normalizes tracking mode + status', () => {
+    const row: any = {
+      id: 'g1',
+      name: 'Emergency fund',
+      targetAmount: 3000,
+      currency: 'USD',
+      fxRate: 1,
+      targetReportingAmount: 3000,
+      startingAmount: 200,
+      deadline: '2026-12-31',
+      coverPhotoUri: null,
+      emoji: '🛟',
+      note: '3 months',
+      trackingMode: 'manual',
+      linkedAccountId: null,
+      countExistingBalance: false,
+      baselineAmount: null,
+      status: 'active',
+      completedAt: null,
+      sortOrder: 2,
+      ...STAMPS,
+    };
+    const goal = toGoal(row);
+    expect(goal.targetReportingAmount).toBe(3000);
+    expect(goal.trackingMode).toBe('manual');
+    expect(goal.status).toBe('active');
+    expect(goal.emoji).toBe('🛟');
+  });
+
+  it('falls back to safe defaults for unknown/null values', () => {
+    const row: any = {
+      id: 'g2',
+      name: 'x',
+      targetAmount: null,
+      currency: 'USD',
+      fxRate: null,
+      targetReportingAmount: null,
+      startingAmount: null,
+      deadline: null,
+      coverPhotoUri: null,
+      emoji: null,
+      note: null,
+      trackingMode: 'weird',
+      linkedAccountId: null,
+      countExistingBalance: null,
+      baselineAmount: null,
+      status: 'bogus',
+      completedAt: null,
+      sortOrder: null,
+      ...STAMPS,
+    };
+    const goal = toGoal(row);
+    expect(goal.trackingMode).toBe('manual');
+    expect(goal.status).toBe('active');
+    expect(goal.fxRate).toBe(1);
+    expect(goal.targetAmount).toBe(0);
+    expect(goal.sortOrder).toBe(0);
+  });
+});
+
+describe('toGoalContribution', () => {
+  it('maps a signed contribution with its frozen FX snapshot', () => {
+    const row: any = {
+      id: 'c1',
+      goalId: 'g1',
+      amount: -50,
+      currency: 'USD',
+      reportingCurrency: 'USD',
+      reportingAmount: -50,
+      fxRate: 1,
+      date: '2026-02-01',
+      note: 'oops',
+      linkedTransactionId: null,
+      ...STAMPS,
+    };
+    const contribution = toGoalContribution(row);
+    expect(contribution.amount).toBe(-50);
+    expect(contribution.reportingAmount).toBe(-50);
+    expect(contribution.date).toBe('2026-02-01');
   });
 });
