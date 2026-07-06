@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Calendar,
   ChevronLeft,
+  ChevronRight,
   Clock,
   CreditCard,
   FileText,
@@ -195,6 +196,7 @@ interface TransactionEditorInitialValues {
   claimStatus?: ClaimStatus;
   claimAmount?: number | null;
   claimReimbursedAmount?: number;
+  reimbursementAccountId?: string | null;
 }
 
 interface TransactionEditorScreenProps {
@@ -205,7 +207,7 @@ interface TransactionEditorScreenProps {
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
   /** Record a reimbursement for an outstanding claimable expense (edit mode). */
-  onMarkReimbursed?: () => void;
+  onMarkReimbursed?: (accountId: string | null) => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
   titleOverride?: string;
@@ -557,6 +559,12 @@ export function TransactionEditorScreen({
   // reimbursements recorded, so its claim state is managed from the
   // Reimbursements hub, not toggled off here.
   const [claimable, setClaimable] = useState((initialValues?.claimStatus ?? 'none') !== 'none');
+  // Account the reimbursement lands in (default: the paying account, changeable
+  // like split-bill's "paid back to"). Null falls back to the paying account.
+  const [reimburseAccountId, setReimburseAccountId] = useState<string | null>(
+    initialValues?.reimbursementAccountId ?? null,
+  );
+  const [reimburseAccountPickerVisible, setReimburseAccountPickerVisible] = useState(false);
   const claimReimbursedAmount = initialValues?.claimReimbursedAmount ?? 0;
   const claimLocked = claimReimbursedAmount > 0;
   const claimInitialStatus = initialValues?.claimStatus ?? 'none';
@@ -906,6 +914,12 @@ export function TransactionEditorScreen({
     [accounts],
   );
   const selectedAccount = accountId ? (accountById.get(accountId) ?? null) : null;
+  // Split and Claim are mutually exclusive on a single transaction.
+  const hasActiveSplits = splitMode && splits.some((s) => !s.isSelf);
+  const effectiveReimburseAccountId = reimburseAccountId ?? accountId;
+  const reimburseAccountName = effectiveReimburseAccountId
+    ? (accountById.get(effectiveReimburseAccountId)?.name ?? null)
+    : null;
   const selectedFromAccount = fromAccountId ? (accountById.get(fromAccountId) ?? null) : null;
   const selectedToAccount = toAccountId ? (accountById.get(toAccountId) ?? null) : null;
   const accountName = selectedAccount?.name ?? null;
@@ -1333,7 +1347,7 @@ export function TransactionEditorScreen({
                 ? {
                     claimStatus: 'claimable' as const,
                     claimAmount: resolvedClaimAmount,
-                    reimbursementAccountId: accountId,
+                    reimbursementAccountId: reimburseAccountId ?? accountId,
                   }
                 : clearedClaim;
         if (type === 'expense' && !claimLocked && claimable && claimInitialStatus === 'none') {
@@ -2450,73 +2464,82 @@ export function TransactionEditorScreen({
                       ) : null}
                     </View>
 
-                    {/* Split Bill — full-width action below the sentiment picker */}
-                    {!hideSplitMode && type === 'expense' && !recurringOptions ? (
-                      <Pressable
-                        onPress={handleOpenSplitBill}
-                        disabled={!canOpenSplitBill}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
-                        className={cn(
-                          'mt-3 flex-row items-center justify-center gap-2 h-12 rounded-2xl border',
-                          splitMode && splits.some((s) => !s.isSelf)
-                            ? 'bg-primary/15 border-primary/40'
-                            : 'bg-secondary/60 border-border/30',
-                        )}
-                        style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
-                      >
-                        <Text className="text-[18px]">🤝</Text>
-                        <Text variant="body">
-                          {I18n.t('transactions.editor.split.button_label')}
-                        </Text>
-                        {splitBillsUnpaidCount > 0 ? (
-                          <View className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-destructive items-center justify-center">
-                            <Text className="text-white text-[11px] font-bold leading-[14px]">
-                              {splitBillsUnpaidCount}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </Pressable>
-                    ) : null}
-
-                    {/* Claimable — flag an expense you expect to get back */}
+                    {/* Split Bill & Claim — two mutually-exclusive actions */}
                     {type === 'expense' && !recurringOptions ? (
-                      <Pressable
-                        onPress={() => {
-                          if (claimLocked) return;
-                          void triggerHaptic('selection');
-                          setClaimable((value) => !value);
-                        }}
-                        disabled={claimLocked}
-                        accessibilityRole="switch"
-                        accessibilityState={{ checked: claimable }}
-                        accessibilityLabel={I18n.t('transactions.editor.claim.toggle_title')}
-                        className={cn(
-                          'mt-3 flex-row items-center gap-3 h-14 px-4 rounded-2xl border',
-                          claimable
-                            ? 'bg-warning/15 border-warning/40'
-                            : 'bg-secondary/60 border-border/30',
-                        )}
-                        style={{ opacity: claimLocked ? 0.6 : 1 }}
-                      >
-                        <Text className="text-[18px]">🧾</Text>
-                        <View className="flex-1">
+                      <View className="mt-3 flex-row gap-2">
+                        {!hideSplitMode ? (
+                          <Pressable
+                            onPress={handleOpenSplitBill}
+                            disabled={!canOpenSplitBill || claimable}
+                            accessibilityRole="button"
+                            accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+                            className={cn(
+                              'flex-1 flex-row items-center justify-center gap-2 h-12 rounded-2xl border',
+                              hasActiveSplits
+                                ? 'bg-primary/15 border-primary/40'
+                                : 'bg-secondary/60 border-border/30',
+                            )}
+                            style={{ opacity: !canOpenSplitBill || claimable ? 0.4 : 1 }}
+                          >
+                            <Text className="text-[18px]">🤝</Text>
+                            <Text variant="body">
+                              {I18n.t('transactions.editor.split.button_label')}
+                            </Text>
+                            {splitBillsUnpaidCount > 0 ? (
+                              <View className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-destructive items-center justify-center">
+                                <Text className="text-white text-[11px] font-bold leading-[14px]">
+                                  {splitBillsUnpaidCount}
+                                </Text>
+                              </View>
+                            ) : null}
+                          </Pressable>
+                        ) : null}
+                        <Pressable
+                          onPress={() => {
+                            if (claimLocked || hasActiveSplits) return;
+                            void triggerHaptic('selection');
+                            setClaimable((value) => !value);
+                          }}
+                          disabled={claimLocked || hasActiveSplits}
+                          accessibilityRole="switch"
+                          accessibilityState={{ checked: claimable }}
+                          accessibilityLabel={I18n.t('transactions.editor.claim.toggle_title')}
+                          className={cn(
+                            'flex-1 flex-row items-center justify-center gap-2 h-12 rounded-2xl border',
+                            claimable
+                              ? 'bg-warning/15 border-warning/40'
+                              : 'bg-secondary/60 border-border/30',
+                          )}
+                          style={{ opacity: claimLocked || hasActiveSplits ? 0.4 : 1 }}
+                        >
+                          <Text className="text-[18px]">🧾</Text>
                           <Text variant="body">
                             {I18n.t('transactions.editor.claim.toggle_title')}
                           </Text>
-                          <Text variant="caption" tone="muted">
-                            {claimLocked && !claimIsOutstanding
-                              ? I18n.t('reimbursements.badge_reimbursed')
-                              : I18n.t('transactions.editor.claim.toggle_subtitle')}
+                        </Pressable>
+                      </View>
+                    ) : null}
+
+                    {/* Reimburse into — where the money lands, default the paying
+                        account and changeable like split-bill's "paid back to". */}
+                    {type === 'expense' && !recurringOptions && claimable && !claimLocked ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setReimburseAccountPickerVisible(true);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.claim.reimburse_into')}
+                        className="mt-2 flex-row items-center justify-between h-12 px-4 rounded-2xl border border-warning/30 bg-warning/5"
+                      >
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('transactions.editor.claim.reimburse_into')}
+                        </Text>
+                        <View className="flex-row items-center gap-1">
+                          <Text variant="body">
+                            {reimburseAccountName ?? I18n.t('common.no_account')}
                           </Text>
-                        </View>
-                        <View
-                          className={cn(
-                            'w-11 h-6 rounded-full p-0.5 justify-center',
-                            claimable ? 'bg-warning items-end' : 'bg-border/50 items-start',
-                          )}
-                        >
-                          <View className="w-5 h-5 rounded-full bg-background" />
+                          <ChevronRight size={16} color={themeColors.textMuted} />
                         </View>
                       </Pressable>
                     ) : null}
@@ -2529,11 +2552,11 @@ export function TransactionEditorScreen({
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('success');
-                          onMarkReimbursed();
+                          onMarkReimbursed(effectiveReimburseAccountId);
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('reimbursements.mark_reimbursed')}
-                        className="mt-3 flex-row items-center justify-center gap-2 h-12 rounded-2xl border border-success/40 bg-success/15"
+                        className="mt-2 flex-row items-center justify-center gap-2 h-12 rounded-2xl border border-success/40 bg-success/15"
                       >
                         <Text className="text-[16px]">✓</Text>
                         <Text variant="body">{I18n.t('reimbursements.mark_reimbursed')}</Text>
@@ -2915,6 +2938,17 @@ export function TransactionEditorScreen({
         accountGroups={accountGroups}
         selectedAccountId={accountId}
         onSelect={handleAccountSelect}
+      />
+      <AccountPickerSheet
+        visible={reimburseAccountPickerVisible}
+        onClose={() => setReimburseAccountPickerVisible(false)}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={effectiveReimburseAccountId}
+        onSelect={(id) => {
+          setReimburseAccountId(id);
+          setReimburseAccountPickerVisible(false);
+        }}
       />
       <AccountPickerSheet
         visible={activeField === 'fromAccount'}

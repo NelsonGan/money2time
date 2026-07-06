@@ -29,6 +29,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { RecurringScreen } from './RecurringScreen';
+import { ReimbursementsScreen } from './ReimbursementsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
@@ -105,6 +106,7 @@ function SettingsHomeRoute({
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
+      onOpenReimbursements={() => navigation.navigate('Reimbursements')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenNews={() => navigation.navigate('News')}
@@ -278,6 +280,12 @@ export function SettingsStack({
               useNativeBackGesture
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Reimbursements">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <ReimbursementsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="Notifications">

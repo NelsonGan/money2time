@@ -200,9 +200,10 @@ export function EditTransactionScreen({
         claimStatus: transaction.claimStatus,
         claimAmount: transaction.claimAmount,
         claimReimbursedAmount: transaction.reimbursedAmount,
+        reimbursementAccountId: transaction.reimbursementAccountId,
       }}
-      onMarkReimbursed={() => {
-        markReimbursed(transaction.id);
+      onMarkReimbursed={(accountId) => {
+        markReimbursed(transaction.id, { accountId });
         onClose();
       }}
     />
