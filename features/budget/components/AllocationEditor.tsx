@@ -1,10 +1,12 @@
 import { AlertCircle, ChevronRight } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, Switch, View } from 'react-native';
+import { Platform, Pressable, Switch, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CategoryEmoji, Text } from '~/components/ui';
+import { CategoryEmoji, SettingsActionBar, Text } from '~/components/ui';
 import type { ColorPalette } from '~/constants/designSystem';
 import { money } from '~/features/budget/lib/format';
+import { useKeyboardHeight } from '~/hooks/useKeyboardHeight';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, UserSettings } from '~/types';
@@ -129,6 +131,61 @@ export function AllocationCategoryList({
           </Pressable>
         );
       })}
+    </View>
+  );
+}
+
+/**
+ * Editor footer: the allocation status bar pinned above Cancel/Save. On iOS it
+ * lifts above the keyboard so the live tally stays visible while typing
+ * (Android resizes the window itself via adjustResize).
+ */
+export function AllocationFooter({
+  showBar,
+  total,
+  remaining,
+  settings,
+  themeColors,
+  onCancel,
+  onSave,
+  saveDisabled,
+}: {
+  showBar: boolean;
+  total: number;
+  remaining: number;
+  settings: UserSettings;
+  themeColors: ColorPalette;
+  onCancel: () => void;
+  onSave: () => void;
+  saveDisabled: boolean;
+}) {
+  const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  // The action bar's own safe-area padding already covers `insets.bottom` of
+  // the distance, so lift by the difference to land exactly on the keyboard.
+  const keyboardLift = Platform.OS === 'ios' ? Math.max(0, keyboardHeight - insets.bottom) : 0;
+
+  return (
+    <View
+      className="border-t border-border/25 bg-background"
+      style={{ paddingBottom: keyboardLift }}
+    >
+      {showBar ? (
+        <View className="px-5 pt-3">
+          <AllocationStatusBar
+            total={total}
+            remaining={remaining}
+            settings={settings}
+            themeColors={themeColors}
+          />
+        </View>
+      ) : null}
+      <SettingsActionBar
+        className="border-t-0"
+        onCancel={onCancel}
+        onSave={onSave}
+        saveDisabled={saveDisabled}
+      />
     </View>
   );
 }

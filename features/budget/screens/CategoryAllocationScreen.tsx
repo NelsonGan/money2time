@@ -2,10 +2,10 @@ import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader, Text } from '~/components/ui';
+import { CategoryEmoji, Input, SettingsHeader, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
-  AllocationStatusBar,
+  AllocationFooter,
   parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
 import { computeChildAllocationGap } from '~/features/budget/lib/budgetMath';
@@ -83,12 +83,9 @@ export function CategoryAllocationScreen({
         />
       </View>
 
-      {/* Subcategory inputs sit low on the page and the amount field autofocuses,
-          so let iOS inset the scroll view by the keyboard height. */}
       <ScrollView
         contentContainerStyle={SCROLL_CONTENT}
         keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-4 px-5 pt-1">
@@ -157,26 +154,19 @@ export function CategoryAllocationScreen({
         </View>
       </ScrollView>
 
-      {/* Same tally bar as the hosting editor, pinned above Save: how much of
-          the parent amount the subcategory breakdown has claimed. */}
-      <View className="border-t border-border/25 bg-background">
-        {childCategories.length > 0 && parentAmount > 0 ? (
-          <View className="px-5 pt-3">
-            <AllocationStatusBar
-              total={parentAmount}
-              remaining={normalizeMoneyAmount(parentAmount - childAllocated)}
-              settings={settings}
-              themeColors={themeColors}
-            />
-          </View>
-        ) : null}
-        <SettingsActionBar
-          className="border-t-0"
-          onCancel={onClose}
-          onSave={handleSave}
-          saveDisabled={childGap !== 0}
-        />
-      </View>
+      {/* Same tally bar as the hosting editor, pinned above Save (and riding
+          the keyboard): how much of the parent amount the subcategory
+          breakdown has claimed. */}
+      <AllocationFooter
+        showBar={childCategories.length > 0 && parentAmount > 0}
+        total={parentAmount}
+        remaining={normalizeMoneyAmount(parentAmount - childAllocated)}
+        settings={settings}
+        themeColors={themeColors}
+        onCancel={onClose}
+        onSave={handleSave}
+        saveDisabled={childGap !== 0}
+      />
     </SafeAreaView>
   );
 }

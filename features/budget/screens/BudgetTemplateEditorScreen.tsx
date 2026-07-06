@@ -3,12 +3,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CategoryEmoji, Input, SettingsActionBar, SettingsHeader } from '~/components/ui';
+import { CategoryEmoji, Input, SettingsHeader } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   AllocationCategoryList,
+  AllocationFooter,
   AllocationOptionRow,
-  AllocationStatusBar,
 } from '~/features/budget/components/AllocationEditor';
 import { EmojiPickerSheet } from '~/features/budget/components/EmojiPickerSheet';
 import {
@@ -216,26 +216,19 @@ export function BudgetTemplateEditorScreen({
         </View>
       </ScrollView>
 
-      {/* The remaining-to-allocate bar sits right above Cancel/Save so the
-          running tally is visible while amounts are entered. */}
-      <View className="border-t border-border/25 bg-background">
-        {draft.parsedTotal > 0 ? (
-          <View className="px-5 pt-3">
-            <AllocationStatusBar
-              total={draft.parsedTotal}
-              remaining={draft.remaining}
-              settings={settings}
-              themeColors={themeColors}
-            />
-          </View>
-        ) : null}
-        <SettingsActionBar
-          className="border-t-0"
-          onCancel={onClose}
-          onSave={handleSave}
-          saveDisabled={!canSave}
-        />
-      </View>
+      {/* The remaining-to-allocate bar sits right above Cancel/Save (and rides
+          the keyboard) so the running tally is visible while amounts are
+          entered. */}
+      <AllocationFooter
+        showBar={draft.parsedTotal > 0}
+        total={draft.parsedTotal}
+        remaining={draft.remaining}
+        settings={settings}
+        themeColors={themeColors}
+        onCancel={onClose}
+        onSave={handleSave}
+        saveDisabled={!canSave}
+      />
 
       <EmojiPickerSheet
         visible={showEmojiPicker}
