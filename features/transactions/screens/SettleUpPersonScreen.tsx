@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, Share, View } from 'react-native';
 
 import {
+  AccountLogo,
   AccountPickerSheet,
   CategoryEmoji,
   SettingsHeader,
@@ -179,13 +180,16 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                           void triggerHaptic('selection');
                           setPickerForSplitId(bill.splitId);
                         }}
-                        className="min-w-0 flex-shrink flex-row items-center gap-1 rounded-full bg-secondary/50 px-3 py-1.5 active:opacity-70"
+                        className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
                       >
+                        {account ? (
+                          <AccountLogo logoId={account.logoId} type={account.type} size={16} />
+                        ) : null}
                         <Text
                           variant="caption"
                           tone="muted"
                           numberOfLines={1}
-                          className="max-w-[160px]"
+                          className="max-w-[150px]"
                         >
                           {I18n.t('transactions.settleUp.payback_to', {
                             account: account?.name ?? I18n.t('common.no_account'),
