@@ -64,3 +64,6 @@ skills-lock.json
 
 # Raw simulator captures behind assets/tutorials (see scripts/annotate-tutorials.mjs)
 .tutorial-raw/
+
+# worktrees
+.claude/worktrees/
