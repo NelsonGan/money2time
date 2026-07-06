@@ -931,6 +931,9 @@ function buildDayPeriodState(targetDate: Date): PeriodState {
 type InsightsPreferencesSnapshot = {
   version: 1;
   selectedInsightType: InsightType;
+  /** The budget view is a takeover that sits over the insight pages; persist
+   *  it so reopening the app restores it like any other selected insight. */
+  budgetViewActive: boolean;
   periodPreset: PeriodPreset;
   periodPresetByInsight: Partial<Record<InsightType, PeriodPreset>>;
   anchorDate: string;
@@ -981,6 +984,9 @@ function parseInsightsPreferencesPayload(
       isInsightType(parsed.selectedInsightType)
     ) {
       next.selectedInsightType = parsed.selectedInsightType;
+    }
+    if (typeof parsed.budgetViewActive === 'boolean') {
+      next.budgetViewActive = parsed.budgetViewActive;
     }
     if (typeof parsed.periodPreset === 'string' && isPeriodPreset(parsed.periodPreset)) {
       next.periodPreset = parsed.periodPreset;
@@ -3131,6 +3137,9 @@ export function InsightsScreen({
         }));
       }
       if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
+      if (typeof saved.budgetViewActive === 'boolean') {
+        setIsBudgetViewActive(saved.budgetViewActive);
+      }
       if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
       if (saved.selectedAccountIds) setSelectedAccountIds(saved.selectedAccountIds);
       if (saved.excludedExpenseTrendAccountIds) {
@@ -3188,6 +3197,7 @@ export function InsightsScreen({
     () => ({
       version: INSIGHTS_PREFERENCES_VERSION,
       selectedInsightType,
+      budgetViewActive: isBudgetViewActive,
       periodPreset: persistedPeriodPreset,
       periodPresetByInsight,
       anchorDate: formatDateInput(anchorDate),
@@ -3223,6 +3233,7 @@ export function InsightsScreen({
       excludedSavingsIncomeCategoryIds,
       excludedExpenseBreakdownCategoryIds,
       excludedIncomeBreakdownCategoryIds,
+      isBudgetViewActive,
       persistedPeriodPreset,
       periodPresetByInsight,
       selectedAccountIds,
