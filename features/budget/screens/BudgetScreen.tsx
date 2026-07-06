@@ -30,7 +30,7 @@ import {
   buildBudgetMonthSummary,
   computeBudgetPagerMonths,
 } from '~/features/budget/lib/budgetMath';
-import { money, usageColor } from '~/features/budget/lib/format';
+import { money, usageColor, usagePercentLabel } from '~/features/budget/lib/format';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -135,7 +135,7 @@ function BudgetSummaryCard({
               className="text-base"
               style={{ color: isOver ? themeColors.error : themeColors.text }}
             >
-              {Math.round(summary.usageRatio * 100)}%
+              {usagePercentLabel(summary.usageRatio)}
             </Text>
           </SavingsRateRing>
         </View>
@@ -332,20 +332,28 @@ function BudgetCategoryRow({
             {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
         </View>
-        {/* One health badge: usage % over the remaining amount, both tinted by
-            how healthy the line is (green → amber from 80% → red when over). */}
-        <View
-          className="shrink-0 items-end rounded-xl px-2.5 py-1"
-          style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
-        >
-          <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
-            {Math.round(line.usageRatio * 100)}%
-          </Text>
+        {/* Health unit: a mini ring + percent up top, the remaining amount as
+            a quiet caption below — small colored accents (green → amber from
+            80% → red when over) instead of a heavy tinted block. */}
+        <View className="shrink-0 items-end gap-1">
+          <View className="flex-row items-center gap-1.5">
+            <SavingsRateRing
+              size={16}
+              strokeWidth={3.5}
+              progress={Math.min(line.usageRatio, 1)}
+              color={healthColor}
+              trackColor={withColorAlpha(healthColor, 0.18)}
+            />
+            <Text variant="bodyStrong" className="text-xs" style={{ color: healthColor }}>
+              {usagePercentLabel(line.usageRatio)}
+            </Text>
+          </View>
           <Text
             variant="caption"
             numberOfLines={1}
             className="text-[10px]"
-            style={{ color: healthColor }}
+            tone={line.isOver ? undefined : 'muted'}
+            style={line.isOver ? { color: themeColors.error } : undefined}
           >
             {line.isOver
               ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })

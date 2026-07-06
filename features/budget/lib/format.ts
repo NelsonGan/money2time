@@ -7,6 +7,12 @@ export function money(value: number, settings: UserSettings): string {
   return formatAmount(value, { ...settings, displayMode: 'money' });
 }
 
+/** '46%', capped at '999%+' so a wildly blown budget can't stretch layouts. */
+export function usagePercentLabel(ratio: number): string {
+  const percent = Math.round(ratio * 100);
+  return percent > 999 ? '999%+' : `${percent}%`;
+}
+
 /** Traffic-light health: green while healthy, amber from 80%, red when over. */
 export function usageColor(ratio: number, themeColors: ColorPalette): string {
   if (ratio > 1) return themeColors.error;
