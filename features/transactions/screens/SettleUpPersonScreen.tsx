@@ -9,18 +9,16 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { getPaymentQrUri } from '~/services/userAssets';
-import { convert, currencySymbolForCode } from '~/utils/currency';
+import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
-import {
-  aggregateUnpaidSplitsByPerson,
-  buildReceiptText,
-} from '~/features/transactions/lib/settleUp';
+import { buildReceiptText } from '~/features/transactions/lib/settleUp';
+import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 
 interface SettleUpPersonScreenProps {
   personKey: string;
@@ -31,7 +29,6 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
   const themeColors = useThemeColors();
   const {
     settings,
-    rateTable,
     accounts,
     accountGroups,
     getAccountById,
@@ -39,20 +36,10 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     updateSplitPaybackAccount,
     deleteSplit,
   } = useApp();
-  const { transactions } = useTransactions();
 
-  const reportingCurrency = settings.currencyCode;
   const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
 
-  const rateToReporting = useCallback(
-    (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
-    [rateTable, reportingCurrency],
-  );
-
-  const summary = useMemo(
-    () => aggregateUnpaidSplitsByPerson(transactions, { reportingCurrency, rateToReporting }),
-    [transactions, reportingCurrency, rateToReporting],
-  );
+  const summary = useSettleUpSummary();
 
   const person = useMemo(
     () => summary.people.find((p) => p.key === personKey) ?? null,
@@ -80,18 +67,15 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     const fromName = settings.profileName?.trim() || null;
     const toName = person.name ?? I18n.t('transactions.settleUp.someone');
     const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
-    const label = settings.paymentQrLabel?.trim();
     const resolvedQr = getPaymentQrUri(settings.paymentQrUri);
     // RN Share only attaches an image (`url`) on iOS; on Android it is dropped,
-    // so only promise a "scan the attached QR" note where it will actually ride
-    // along. The payment label (text) still travels on both platforms.
+    // so only promise a "scan the attached QR" note where it will actually ride along.
     const canAttachQr = !!resolvedQr && Platform.OS === 'ios';
     const text = buildReceiptText(person, {
       strings: {
         heading: I18n.t('transactions.settleUp.receipt_heading'),
         fromTo,
         totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
-        payLine: label ? I18n.t('transactions.settleUp.receipt_pay_line', { label }) : null,
         qrNote: canAttachQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
         footer: I18n.t('transactions.settleUp.receipt_footer'),
       },
@@ -106,7 +90,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     } catch {
       // User cancelled the share sheet.
     }
-  }, [formatNative, person, settings.paymentQrLabel, settings.paymentQrUri, settings.profileName]);
+  }, [formatNative, person, settings.paymentQrUri, settings.profileName]);
 
   const handleMarkPaid = useCallback(
     (splitId: string) => {
@@ -168,12 +152,14 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                 return (
                   <View
                     key={bill.splitId}
-                    className="rounded-2xl border border-border/25 bg-card/60 px-3.5 py-3"
+                    className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
                   >
                     <View className="flex-row items-center gap-3">
-                      <CategoryEmoji icon={bill.categoryIcon} size={26} className="text-[17px]" />
+                      <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
+                        <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+                      </View>
                       <View className="flex-1">
-                        <Text variant="body" numberOfLines={1}>
+                        <Text variant="bodyStrong" numberOfLines={1}>
                           {bill.note?.trim() ||
                             bill.categoryName ||
                             I18n.t('transactions.settleUp.untitled_bill')}
@@ -185,19 +171,21 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                       <Text variant="bodyStrong">{formatNative(bill.amount, bill.currency)}</Text>
                     </View>
 
-                    <View className="mt-2 flex-row items-center gap-2 pl-[38px]">
+                    <View className="my-3 h-px bg-border/15" />
+
+                    <View className="flex-row items-center gap-2">
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('selection');
                           setPickerForSplitId(bill.splitId);
                         }}
-                        className="min-w-0 flex-shrink flex-row items-center gap-1 rounded-full bg-secondary/50 px-2.5 py-1 active:opacity-70"
+                        className="min-w-0 flex-shrink flex-row items-center gap-1 rounded-full bg-secondary/50 px-3 py-1.5 active:opacity-70"
                       >
                         <Text
                           variant="caption"
                           tone="muted"
                           numberOfLines={1}
-                          className="max-w-[140px]"
+                          className="max-w-[160px]"
                         >
                           {I18n.t('transactions.settleUp.payback_to', {
                             account: account?.name ?? I18n.t('common.no_account'),
@@ -208,17 +196,17 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
                       <View className="flex-1" />
                       <Pressable
                         onPress={() => handleDelete(bill.splitId)}
-                        hitSlop={6}
-                        className="h-7 w-7 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
+                        hitSlop={8}
+                        className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
                       >
-                        <Trash2 size={13} color={themeColors.error} />
+                        <Trash2 size={15} color={themeColors.error} />
                       </Pressable>
                       <Pressable
                         onPress={() => handleMarkPaid(bill.splitId)}
-                        hitSlop={6}
-                        className="flex-row items-center gap-1 rounded-full bg-success/15 px-3 py-1.5 active:opacity-70"
+                        hitSlop={8}
+                        className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
                       >
-                        <Check size={13} color={themeColors.success} />
+                        <Check size={14} color={themeColors.success} />
                         <Text variant="caption" className="text-success font-medium">
                           {I18n.t('transactions.editor.split.mark_paid')}
                         </Text>
