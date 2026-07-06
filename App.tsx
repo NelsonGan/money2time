@@ -619,8 +619,8 @@ function MainShellScreen({
     [navigation],
   );
 
-  const openBudgetScreen = useCallback(() => {
-    navigation.navigate('SettingsBudget');
+  const openBudgetTemplates = useCallback(() => {
+    navigation.navigate('SettingsBudgetTemplates');
   }, [navigation]);
 
   const openProPaywall = useCallback(
@@ -1013,7 +1013,10 @@ function MainShellScreen({
             onOpenDrilldown={openInsightsDrilldown}
             onOpenTransaction={openTransactionEditor}
             onOpenProPaywall={openInsightsTrendPaywall}
-            onOpenBudget={openBudgetScreen}
+            onOpenBudgetTemplates={openBudgetTemplates}
+            onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
+            onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
+            onCreateCustomBudget={openCustomBudgetCreator}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
             onTutorialTargetLayout={handleTutorialTargetLayout}
