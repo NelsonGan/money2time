@@ -1399,6 +1399,7 @@ const fr = {
   pro: {
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
+    budget_templates_label: 'Modèles de budget',
     custom_item_images_label: "Images d'objets personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',

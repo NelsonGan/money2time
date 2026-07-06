@@ -1403,6 +1403,7 @@ const fil = {
   pro: {
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
+    budget_templates_label: 'Mga template ng budget',
     custom_item_images_label: 'Custom na larawan ng item',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
