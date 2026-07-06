@@ -1,7 +1,16 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronRight, Clock3, ImagePlus, QrCode, Send } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, Share, TextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -83,10 +92,20 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
     [summary.people, selectedKey],
   );
 
+  // Once a person's last bill is settled they drop out of the summary; clear the
+  // dangling selection so the sheet closes cleanly instead of holding a stale key.
+  useEffect(() => {
+    if (selectedKey && !selectedPerson) setSelectedKey(null);
+  }, [selectedKey, selectedPerson]);
+
+  useEffect(() => {
+    trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
+  }, []);
+
   const hourlyRate = getTrueHourlyRateForDate(dayKeyFromDateLocal(new Date()));
   const totalHours = hourlyRate > 0 ? amountToHoursByRate(summary.totalReporting, hourlyRate) : 0;
 
-  const qrUri = getPaymentQrUri(settings.paymentQrUri);
+  const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
   const [qrLabelDraft, setQrLabelDraft] = useState(settings.paymentQrLabel ?? '');
 
   const formatReporting = useCallback(
@@ -149,21 +168,23 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
       const fromTo = fromName ? `${fromName} → ${toName}` : `${toName}`;
       const label = settings.paymentQrLabel?.trim();
       const resolvedQr = getPaymentQrUri(settings.paymentQrUri);
+      // RN Share only attaches an image (`url`) on iOS; on Android it's dropped,
+      // so only promise a "scan the attached QR" note where it will actually ride
+      // along. The payment label (text) still travels on both platforms.
+      const canAttachQr = !!resolvedQr && Platform.OS === 'ios';
       const text = buildReceiptText(person, {
         strings: {
           heading: I18n.t('transactions.settleUp.receipt_heading'),
           fromTo,
           totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
           payLine: label ? I18n.t('transactions.settleUp.receipt_pay_line', { label }) : null,
-          qrNote: resolvedQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
+          qrNote: canAttachQr ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
           footer: I18n.t('transactions.settleUp.receipt_footer'),
         },
         formatMoney: formatNative,
       });
       try {
-        // On iOS `url` attaches the QR image alongside the text; Android shares
-        // the text (the receipt is self-contained without the image).
-        await Share.share(resolvedQr ? { message: text, url: resolvedQr } : { message: text });
+        await Share.share(canAttachQr ? { message: text, url: resolvedQr } : { message: text });
         trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
           billCount: person.billCount,
           hasQr: !!resolvedQr,
@@ -196,88 +217,32 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
         className="flex-1"
         contentContainerStyle={[{ paddingHorizontal: 20, paddingTop: 4 }, bottomNavInset]}
       >
-        {/* Outstanding hero */}
-        <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
-          <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-            {I18n.t('transactions.settleUp.outstanding_label')}
-          </Text>
-          <Text variant="heading" className="mt-1 text-3xl">
-            {formatReporting(summary.totalReporting)}
-          </Text>
-          <View className="mt-1 flex-row items-center gap-2">
-            <Text variant="caption" tone="muted">
-              {summary.personCount === 1
-                ? I18n.t('transactions.settleUp.people_one')
-                : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })}
+        {/* Outstanding hero — only when someone actually owes */}
+        {summary.personCount > 0 ? (
+          <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
+            <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+              {I18n.t('transactions.settleUp.outstanding_label')}
             </Text>
-            {totalHours > 0 ? (
-              <View className="flex-row items-center gap-1">
-                <Clock3 size={12} color={themeColors.textMuted} />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.settleUp.time_equiv', { time: formatHours(totalHours) })}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        {/* Payment QR card */}
-        <View className="mt-4 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
-          <View className="flex-row items-center gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
-              <QrCode size={20} color={themeColors.primary} />
-            </View>
-            <View className="flex-1">
-              <Text variant="bodyStrong">{I18n.t('transactions.settleUp.qr_card_title')}</Text>
+            <Text variant="heading" className="mt-1 text-3xl">
+              {formatReporting(summary.totalReporting)}
+            </Text>
+            <View className="mt-1 flex-row items-center gap-2">
               <Text variant="caption" tone="muted">
-                {I18n.t('transactions.settleUp.qr_card_subtitle')}
+                {summary.personCount === 1
+                  ? I18n.t('transactions.settleUp.people_one')
+                  : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })}
               </Text>
+              {totalHours > 0 ? (
+                <View className="flex-row items-center gap-1">
+                  <Clock3 size={12} color={themeColors.textMuted} />
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.settleUp.time_equiv', { time: formatHours(totalHours) })}
+                  </Text>
+                </View>
+              ) : null}
             </View>
           </View>
-
-          {qrUri ? (
-            <View className="mt-4 flex-row items-center gap-3">
-              <Image
-                source={{ uri: qrUri }}
-                style={{ width: 64, height: 64, borderRadius: 12 }}
-                resizeMode="cover"
-              />
-              <View className="flex-1">
-                <TextInput
-                  value={qrLabelDraft}
-                  onChangeText={setQrLabelDraft}
-                  onEndEditing={handleCommitLabel}
-                  onBlur={handleCommitLabel}
-                  placeholder={I18n.t('transactions.settleUp.qr_label_placeholder')}
-                  placeholderTextColor={`${themeColors.mutedForeground}99`}
-                  style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text, fontSize: 14 }]}
-                />
-                <View className="mt-1 flex-row gap-3">
-                  <Pressable onPress={handlePickQr} hitSlop={6}>
-                    <Text variant="caption" className="text-primary font-medium">
-                      {I18n.t('transactions.settleUp.qr_replace')}
-                    </Text>
-                  </Pressable>
-                  <Pressable onPress={handleRemoveQr} hitSlop={6}>
-                    <Text variant="caption" className="text-destructive font-medium">
-                      {I18n.t('common.remove')}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          ) : (
-            <Pressable
-              onPress={handlePickQr}
-              className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 py-3.5 active:opacity-70"
-            >
-              <ImagePlus size={16} color={themeColors.primary} />
-              <Text variant="body" className="text-primary font-medium">
-                {I18n.t('transactions.settleUp.qr_add')}
-              </Text>
-            </Pressable>
-          )}
-        </View>
+        ) : null}
 
         {/* People list */}
         {summary.people.length === 0 ? (
@@ -329,6 +294,64 @@ export function SettleUpScreen({ onBack }: SettleUpScreenProps) {
             ))}
           </View>
         )}
+
+        {/* Payment QR card — attach once, rides on every shared receipt */}
+        <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+              <QrCode size={20} color={themeColors.primary} />
+            </View>
+            <View className="flex-1">
+              <Text variant="bodyStrong">{I18n.t('transactions.settleUp.qr_card_title')}</Text>
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.qr_card_subtitle')}
+              </Text>
+            </View>
+          </View>
+
+          {qrUri ? (
+            <View className="mt-4 flex-row items-center gap-3">
+              <Image
+                source={{ uri: qrUri }}
+                style={{ width: 64, height: 64, borderRadius: 12, backgroundColor: '#fff' }}
+                resizeMode="contain"
+              />
+              <View className="flex-1">
+                <TextInput
+                  value={qrLabelDraft}
+                  onChangeText={setQrLabelDraft}
+                  onEndEditing={handleCommitLabel}
+                  onBlur={handleCommitLabel}
+                  placeholder={I18n.t('transactions.settleUp.qr_label_placeholder')}
+                  placeholderTextColor={`${themeColors.mutedForeground}99`}
+                  style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text, fontSize: 14 }]}
+                />
+                <View className="mt-1 flex-row gap-3">
+                  <Pressable onPress={handlePickQr} hitSlop={6}>
+                    <Text variant="caption" className="text-primary font-medium">
+                      {I18n.t('transactions.settleUp.qr_replace')}
+                    </Text>
+                  </Pressable>
+                  <Pressable onPress={handleRemoveQr} hitSlop={6}>
+                    <Text variant="caption" className="text-destructive font-medium">
+                      {I18n.t('common.remove')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <Pressable
+              onPress={handlePickQr}
+              className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 py-3.5 active:opacity-70"
+            >
+              <ImagePlus size={16} color={themeColors.primary} />
+              <Text variant="body" className="text-primary font-medium">
+                {I18n.t('transactions.settleUp.qr_add')}
+              </Text>
+            </Pressable>
+          )}
+        </View>
       </ScrollView>
 
       <PersonDebtSheet
