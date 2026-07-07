@@ -38,6 +38,11 @@ export interface SplitDraft {
 
 interface SplitBillModalProps {
   visible: boolean;
+  /**
+   * 'modal' wraps the body in a slide-up ThemeModal (legacy). 'page' renders
+   * the body bare so a navigation route can present it as a standard screen.
+   */
+  presentation?: 'modal' | 'page';
   /** Discard staged edits and close. Wired to the back chevron + system close. */
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
@@ -170,6 +175,7 @@ export const splitsHelpers = {
 
 export function SplitBillModal({
   visible,
+  presentation = 'modal',
   onCancel,
   onDone,
   total,
@@ -427,13 +433,8 @@ export function SplitBillModal({
             { count: friendCount - paidCount },
           );
 
-  return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={handleCancel}
-    >
+  const body = (
+    <>
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <View className="flex-row items-center justify-between px-4 py-3 border-b border-border/20">
           <Pressable
@@ -769,6 +770,19 @@ export function SplitBillModal({
           setAccountPickerForKey(null);
         }}
       />
+    </>
+  );
+
+  if (presentation === 'page') return body;
+
+  return (
+    <ThemeModal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={handleCancel}
+    >
+      {body}
     </ThemeModal>
   );
 }
