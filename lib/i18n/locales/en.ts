@@ -389,6 +389,8 @@ const en = {
       people_other: '{{count}} people',
       transactions_one: '1 transaction',
       transactions_other: '{{count}} transactions',
+      default_account_title: 'Default paid to',
+      default_account_subtitle: 'New splits are paid to this account by default.',
       qr_card_title: 'Your payment QR',
       qr_card_subtitle: 'Attach it once and it rides on every receipt you send.',
       qr_add: 'Add your payment QR',

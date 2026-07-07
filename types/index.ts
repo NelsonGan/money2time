@@ -157,6 +157,12 @@ export interface UserSettings {
    * payback receipts so friends can pay the user back directly.
    */
   paymentQrUri: string | null;
+  /**
+   * Account new split-bill payback rows default to (the "paid to" account on
+   * the Settle Up screen). Null until the user picks one; consumers fall back
+   * to the first account so the effective default is never empty.
+   */
+  defaultPaybackAccountId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

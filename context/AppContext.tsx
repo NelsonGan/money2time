@@ -379,6 +379,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'lastAutoBackupAt'
         | 'lastAutoBackupError'
         | 'paymentQrUri'
+        | 'defaultPaybackAccountId'
       >
     >,
   ) => void;
@@ -2595,6 +2596,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'lastAutoBackupAt'
           | 'lastAutoBackupError'
           | 'paymentQrUri'
+          | 'defaultPaybackAccountId'
         >
       >,
     ) => {
