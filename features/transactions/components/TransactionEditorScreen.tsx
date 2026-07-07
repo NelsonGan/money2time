@@ -817,6 +817,7 @@ export function TransactionEditorScreen({
   const handleTypeChange = useCallback(
     (nextType: TransactionType) => {
       if (nextType === type) return;
+      void triggerHaptic('selection');
       const previousType = type;
       fieldSelectionsByTypeRef.current[previousType] = {
         accountId: previousType === 'transfer' ? null : accountId,
