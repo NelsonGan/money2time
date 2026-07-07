@@ -1073,10 +1073,9 @@ export function TransactionEditorScreen({
     [categoryId, categoryPreviewById],
   );
 
-  // Nudge computed for expense semantics regardless of the current type, so the
-  // expense pager page shows the same work-time hint even while another type is
-  // active (keeps the pages layout-identical).
-  const expenseNudgeParts = useMemo(() => {
+  // Work-time hint for the entered amount ("that's ~2h of your work time").
+  // Shown for every type (expense / income / transfer), not just expense.
+  const workTimeNudgeParts = useMemo(() => {
     if (entryCurrency !== settings.currencyCode) return null;
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) return null;
@@ -2582,7 +2581,7 @@ export function TransactionEditorScreen({
         : pageType === 'income'
           ? ('success' as const)
           : ('default' as const);
-    const pageNudge = pageType === 'expense' ? expenseNudgeParts : null;
+    const pageNudge = isActive ? workTimeNudgeParts : null;
     const pageTransferReceived = isActive ? transferReceivedLabel : null;
     const pageReportingEquiv = isActive ? reportingEquivLabel : null;
     const pageActiveField = isActive ? activeField : null;
@@ -3608,13 +3607,13 @@ export function TransactionEditorScreen({
                 >
                   {amountDisplay}
                 </Text>
-                {type === 'expense' && expenseNudgeParts ? (
+                {workTimeNudgeParts ? (
                   <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
-                    {expenseNudgeParts.before}
+                    {workTimeNudgeParts.before}
                     <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
-                      {expenseNudgeParts.hours}
+                      {workTimeNudgeParts.hours}
                     </Text>
-                    {expenseNudgeParts.after}
+                    {workTimeNudgeParts.after}
                   </Text>
                 ) : null}
               </View>
