@@ -1623,7 +1623,10 @@ export function TransactionEditorScreen({
       autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || '';
     const resolvedNote = normalizedNote.length > 0 ? normalizedNote : fallbackDefaultNote || null;
     if (!amountDraft || !Number.isFinite(numericAmount)) {
+      // The inline field error can sit hidden behind the numpad, so also surface
+      // a toast instead of the tap appearing to fail silently.
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
+      showToast(I18n.t('transactions.editor.error.amount_required'));
       activateField('amount');
       return;
     }
@@ -3829,15 +3832,6 @@ export function TransactionEditorScreen({
               className="flex-row gap-2.5 px-4 pt-2"
               style={{ paddingBottom: numpadFooterBottomPad }}
             >
-              <Pressable
-                onPress={() => handleSubmit(false)}
-                accessibilityRole="button"
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
-              >
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {saveLabel}
-                </Text>
-              </Pressable>
               {showBulkToggle ? (
                 <Pressable
                   onPress={() => handleSubmit(true)}
@@ -3851,6 +3845,15 @@ export function TransactionEditorScreen({
                   </Text>
                 </Pressable>
               ) : null}
+              <Pressable
+                onPress={() => handleSubmit(false)}
+                accessibilityRole="button"
+                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+              >
+                <Text variant="bodyStrong" className="text-primary-foreground">
+                  {saveLabel}
+                </Text>
+              </Pressable>
             </View>
           </View>
         </Animated.View>
