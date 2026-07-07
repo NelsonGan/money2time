@@ -2,6 +2,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronDown, ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
@@ -19,7 +21,6 @@ import {
 } from '~/constants/accountLogos';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { useKeyboardHeight } from '~/hooks/useKeyboardHeight';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getDeviceRegionCode, I18n } from '~/lib/i18n';
@@ -188,10 +189,19 @@ export function AccountLogoPickerSheet({
   const [query, setQuery] = useState('');
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [customLogos, setCustomLogos] = useState<{ id: string; uri: string }[]>([]);
-  // The app is edge-to-edge on Android, so the keyboard overlays content on
-  // both platforms rather than resizing the window — lift the sticky search bar
-  // manually by the full keyboard height (see the search bar's marginBottom).
-  const keyboardHeight = useKeyboardHeight();
+
+  // The app is edge-to-edge on both platforms, so the keyboard overlays content
+  // rather than resizing the window. Lift the sticky search bar with the same
+  // approach as the quick-entry sheet: translate it up by the live keyboard
+  // frame (react-native-keyboard-controller tracks the true inset, which the JS
+  // Keyboard events under-report on edge-to-edge Android). `height` is 0 when
+  // closed and negative when open; `progress` runs 0→1, used to fold away the
+  // home-indicator padding as the keyboard rises so the bar lands flush on it.
+  const keyboard = useReanimatedKeyboardAnimation();
+  const searchBarAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: keyboard.height.value }],
+    paddingBottom: spacing.sm + insets.bottom * (1 - keyboard.progress.value),
+  }));
 
   const refreshCustomLogos = useCallback(() => {
     setCustomLogos(listCustomAccountLogos());
@@ -442,19 +452,12 @@ export function AccountLogoPickerSheet({
               )}
             />
 
-            <View
+            <Animated.View
               className="px-5 bg-background"
               style={[
                 styles.searchBar,
-                {
-                  borderTopColor: themeColors.border,
-                  // No bottom safe-area edge on this screen, so lift the bar by
-                  // the full keyboard height to sit flush above it (works the
-                  // same on iOS and edge-to-edge Android). When closed, pad past
-                  // the home indicator ourselves.
-                  marginBottom: keyboardHeight,
-                  paddingBottom: keyboardHeight > 0 ? spacing.sm : insets.bottom + spacing.sm,
-                },
+                { borderTopColor: themeColors.border },
+                searchBarAnimatedStyle,
               ]}
             >
               <View
@@ -500,7 +503,7 @@ export function AccountLogoPickerSheet({
                   </Pressable>
                 ) : null}
               </View>
-            </View>
+            </Animated.View>
           </View>
         )}
       </View>
