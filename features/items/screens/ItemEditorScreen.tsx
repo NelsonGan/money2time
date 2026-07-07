@@ -9,12 +9,12 @@ import {
   CurrencyPickerSheet,
   Input,
   ItemIcon,
-  ItemIconPickerSheet,
   SettingsActionBar,
   SettingsHeader,
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import type { ItemIconPickerSession } from '~/features/items/lib/itemIconPickerBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -24,13 +24,12 @@ import { dayKeyFromDateLocal, formatRelativeDate } from '~/utils/formatters';
 interface ItemEditorScreenProps {
   itemId?: string;
   onClose: () => void;
-  /** Called when the free item limit is hit while adding (host reveals paywall). */
-  onLimitReached?: () => void;
+  onOpenIconPicker: (session: ItemIconPickerSession) => void;
 }
 
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
 
-export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditorScreenProps) {
+export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEditorScreenProps) {
   const { items, settings, fxCurrencies, createItem, updateItem, deleteItem } = useApp();
   const themeColors = useThemeColors();
 
@@ -52,7 +51,6 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
   );
   const [note, setNote] = useState(existing?.note ?? '');
 
-  const [showIconPicker, setShowIconPicker] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showPurchasePicker, setShowPurchasePicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
@@ -153,7 +151,7 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
             <Pressable
               onPress={() => {
                 void triggerHaptic('selection');
-                setShowIconPicker(true);
+                onOpenIconPicker({ selectedIconId: iconId, onSelect: setIconId });
               }}
               className="items-center gap-2"
               accessibilityRole="button"
@@ -286,13 +284,6 @@ export function ItemEditorScreen({ itemId, onClose, onLimitReached }: ItemEditor
 
       <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
 
-      <ItemIconPickerSheet
-        visible={showIconPicker}
-        onClose={() => setShowIconPicker(false)}
-        selectedIconId={iconId}
-        onSelect={setIconId}
-        onLimitReached={onLimitReached}
-      />
       <CurrencyPickerSheet
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}

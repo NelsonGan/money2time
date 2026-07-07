@@ -36,7 +36,6 @@ import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackCon
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   AccountLogo,
-  AccountLogoPickerSheet,
   AccountPickerSheet,
   Button,
   CategoryEmoji,
@@ -60,6 +59,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
+import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
@@ -449,6 +449,7 @@ function AccountEditorSheet({
   onSave,
   onDelete,
   onOpenMultiCurrency,
+  onOpenLogoPicker,
 }: {
   account: Account | null;
   presetGroupName?: string | null;
@@ -459,6 +460,7 @@ function AccountEditorSheet({
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
   onOpenMultiCurrency?: () => void;
+  onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
 }) {
   const themeColors = useThemeColors();
   const isEdit = account !== null;
@@ -468,7 +470,6 @@ function AccountEditorSheet({
   const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
   const [logoId, setLogoId] = useState<string | null>(null);
-  const [showLogoPicker, setShowLogoPicker] = useState(false);
   const [includeInTotals, setIncludeInTotals] = useState(true);
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -647,7 +648,7 @@ function AccountEditorSheet({
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  setShowLogoPicker(true);
+                  onOpenLogoPicker({ selectedLogoId: logoId, onSelect: setLogoId });
                 }}
                 className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
                 accessibilityRole="button"
@@ -812,13 +813,6 @@ function AccountEditorSheet({
         </ScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
-      <AccountLogoPickerSheet
-        visible={showLogoPicker}
-        onClose={() => setShowLogoPicker(false)}
-        selectedLogoId={logoId}
-        onSelect={setLogoId}
-        onLimitReached={onClose}
-      />
       <CurrencyPickerSheet
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}
@@ -867,11 +861,13 @@ export function AccountEditorScreen({
   presetGroupName = null,
   onClose,
   onOpenMultiCurrency,
+  onOpenLogoPicker,
 }: {
   accountId?: string;
   presetGroupName?: string | null;
   onClose: () => void;
   onOpenMultiCurrency?: () => void;
+  onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
 }) {
   const {
     accounts,
@@ -1030,6 +1026,7 @@ export function AccountEditorScreen({
       onSave={handleSave}
       onDelete={account ? handleDelete : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
+      onOpenLogoPicker={onOpenLogoPicker}
     />
   );
 }
