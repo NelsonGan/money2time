@@ -38,7 +38,14 @@ import {
   View,
 } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   initialWindowMetrics,
   SafeAreaView,
@@ -53,6 +60,7 @@ import {
   AccountPickerSheet,
   Button,
   CategoryEmoji,
+  CategoryGrid,
   CategoryPickerSheet,
   CurrencyPickerSheet,
   SegmentedToggle,
@@ -63,10 +71,7 @@ import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
-  NUMPAD_HANDLE_HEIGHT,
-  NumpadDrawer,
   NumpadPanel,
-  ReceiptField,
   type SplitDraft,
   splitsHelpers,
   SummaryRow,
@@ -138,6 +143,9 @@ const SHEET_FIELDS: readonly NonNullActiveField[] = [
 // These fields open a popup modal calendar — no inline tool zone.
 const MODAL_FIELDS: readonly NonNullActiveField[] = ['date', 'endDate'];
 
+// Stable no-op for read-only (inactive) pager pages' category grids.
+const noopCategorySelect = () => {};
+
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
@@ -185,6 +193,37 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 30,
+  },
+  panel: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 16,
+  },
+  panelAmount: {
+    fontWeight: '700',
+  },
+  noteInput: {
+    flex: 1,
+  },
+  noteSuggestionsPanel: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  noteSuggestionRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 11,
   },
 });
 
@@ -607,9 +646,15 @@ export function TransactionEditorScreen({
     [],
   );
   const [amountExpression, setAmountExpression] = useState('');
-  // Whether the sticky numpad drawer is pulled open. Starts open so the user
-  // can type the amount immediately without tapping the field first.
-  const [numpadExpanded, setNumpadExpanded] = useState(true);
+  // Height of the software keyboard while the note field is focused. When > 0 we
+  // lift the pinned bottom panel above the keyboard and hide the numpad + save
+  // row, so the note input sits just over the keyboard. Restored to 0 on blur.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardVisible = keyboardHeight > 0;
+  // Measured height of the pinned bottom panel while the numpad is visible, used
+  // to reserve scroll padding under the background categories. Captured only when
+  // the numpad is showing so a keyboard-driven collapse doesn't shrink it.
+  const [panelHeight, setPanelHeight] = useState(0);
   // Currency picker (opened from the numpad toolbar) for expense/income entry.
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
@@ -971,10 +1016,44 @@ export function TransactionEditorScreen({
   );
   const selectedFromAccount = fromAccountId ? (accountById.get(fromAccountId) ?? null) : null;
   const selectedToAccount = toAccountId ? (accountById.get(toAccountId) ?? null) : null;
+  const selectedAccount = accountId ? (accountById.get(accountId) ?? null) : null;
 
   useEffect(() => {
     Keyboard.dismiss();
   }, []);
+
+  // Track the keyboard so the pinned bottom panel can ride just above it (and
+  // hide the numpad) while the note field is being typed. iOS fires *Will*
+  // events for a smooth, pre-animation lift; Android only has *Did*.
+  useEffect(() => {
+    if (!useStickyNumpad) return;
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [useStickyNumpad]);
+
+  // Drive the panel's upward lift as a Reanimated timing so it tracks the
+  // keyboard smoothly instead of snapping. Only iOS needs a manual lift: on
+  // Android the window resizes above the keyboard (default softInputMode), so
+  // the bottom-anchored panel is already raised and a translate would double it.
+  const panelLift = useSharedValue(0);
+  useEffect(() => {
+    const target = Platform.OS === 'ios' ? keyboardHeight : 0;
+    panelLift.value = withTiming(target, {
+      duration: Platform.OS === 'ios' ? 250 : 180,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [keyboardHeight, panelLift]);
+  const panelAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -panelLift.value }],
+  }));
 
   // Sync amount field when the parent transaction's amount changes externally
   // (e.g. after a Mark Paid commit reduces it). Only the amount string is mirrored.
@@ -1286,9 +1365,9 @@ export function TransactionEditorScreen({
     return [acct, ...Array.from(set).filter((code) => code !== acct)];
   }, [accountCurrency, accountId, accounts, fxCurrencies, settings.currencyCode]);
 
-  // "Amount is being entered right now": drives the live-expression display and,
-  // in sticky mode, the amount row's active highlight.
-  const amountLive = useStickyNumpad ? numpadExpanded : activeField === 'amount';
+  // "Amount is being entered right now": drives the live-expression display. In
+  // sticky mode the pad is always present unless the note keyboard has taken over.
+  const amountLive = useStickyNumpad ? !keyboardVisible : activeField === 'amount';
 
   const amountDisplay = useMemo(() => {
     if (amountLive && amountExpression) {
@@ -1366,7 +1445,6 @@ export function TransactionEditorScreen({
     if (!amountDraft || !Number.isFinite(numericAmount)) {
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
       activateField('amount');
-      if (useStickyNumpad) setNumpadExpanded(true);
       return;
     }
 
@@ -1591,8 +1669,6 @@ export function TransactionEditorScreen({
         }
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
-        // Re-open the sticky drawer so the next amount is ready to type.
-        if (useStickyNumpad) setNumpadExpanded(true);
         if (deferredSubmit) {
           setTimeout(deferredSubmit, BULK_CREATE_SUBMIT_DELAY_MS);
         }
@@ -1705,35 +1781,36 @@ export function TransactionEditorScreen({
     showToolZone && activeField === 'amount' ? Math.min(0.54, summaryFlex + 0.05) : summaryFlex;
   const recurringToolZonePadding =
     isRecurringEditor && showToolZone ? Math.max(520, Math.round(windowHeight * 0.62)) : 0;
-  // Sticky drawer geometry + toolbar. A compact button row (split / currency /
-  // bulk) rides above the pad; its buttons appear only when relevant.
+  // Pinned bottom panel action row. A compact button row (account / split /
+  // currency / sentiment / receipt) rides above the amount; buttons appear only
+  // when relevant to the active type.
+  const showAccountChip =
+    useStickyNumpad && !isTransferType && !isBalanceAdjustmentType && !hideAccountSelector;
   const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
-  // Receipt attach rides at the right end of the numpad toolbar (money-in/out).
+  // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
-  const showNumpadToolbar =
+  const showActionRow =
     useStickyNumpad &&
-    (showSplitButton || showCurrencyButton || showSentimentButton || showReceiptButton);
-  const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
+    (showAccountChip ||
+      showSplitButton ||
+      showCurrencyButton ||
+      showSentimentButton ||
+      showReceiptButton);
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
   // The save action(s) sit in a footer below the pad and own the bottom inset.
   // Trim the home-indicator gap so the buttons don't float too high off the edge.
   const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6);
-  const numpadFooterHeight = useStickyNumpad ? 8 + 48 + numpadFooterBottomPad : 0;
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
       : 196
-    : useStickyNumpad
-      ? // Clear the collapsed drawer's peek: the grab handle plus the header
-        // action row, which both stay visible when the pad is tucked away.
-        NUMPAD_HANDLE_HEIGHT + numpadHeaderHeight + 24
-      : showToolZone
-        ? 92
-        : 16;
+    : showToolZone
+      ? 92
+      : 16;
   const summaryContainerStyle = useMemo(
     () => ({ flex: showToolZone ? effectiveSummaryFlex : 1 }),
     [effectiveSummaryFlex, showToolZone],
@@ -1745,6 +1822,12 @@ export function TransactionEditorScreen({
   const toolZoneContainerStyle = useMemo(
     () => ({ flex: 1 - effectiveSummaryFlex }),
     [effectiveSummaryFlex],
+  );
+  // Bottom padding for the sticky background so its last row clears the pinned
+  // panel. Memoised so it doesn't bust CategoryGrid's memo on every keystroke.
+  const backgroundContentStyle = useMemo(
+    () => ({ paddingHorizontal: 16, paddingTop: 14, paddingBottom: panelHeight + 24 }),
+    [panelHeight],
   );
 
   const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
@@ -1874,10 +1957,9 @@ export function TransactionEditorScreen({
     (val: string) => {
       setAmount(formatMoney(Number(val)));
       setAmountExpression('');
-      // Sticky mode: Done just pulls the drawer down so the fields are visible;
-      // the user picks the next field themselves.
+      // Sticky mode: the pad is always present and the category grid / accounts
+      // sit behind it, so there is nothing to reveal — just settle the value.
       if (useStickyNumpad) {
-        setNumpadExpanded(false);
         return;
       }
       // Only auto-jump if the next field is empty — don't yank focus when the
@@ -1901,13 +1983,13 @@ export function TransactionEditorScreen({
     ],
   );
 
-  // Tapping the amount row pulls the sticky drawer open (and closes any other
-  // open field); in the classic layout it just activates the amount tool zone.
+  // Tapping the amount display dismisses the note keyboard (bringing the numpad
+  // back); in the classic layout it activates the amount tool zone.
   const handleAmountRowPress = useCallback(() => {
     if (useStickyNumpad) {
       void triggerHaptic('selection');
+      noteInputRef.current?.blur();
       activateField(null);
-      setNumpadExpanded(true);
       return;
     }
     activateField('amount');
@@ -1926,13 +2008,26 @@ export function TransactionEditorScreen({
       setAccountId(nextAccountId);
       // Default the entry currency to the newly chosen account's currency.
       setEntryCurrency(accountCurrency(nextAccountId));
+      // Sticky mode picks the category from the always-visible background grid,
+      // so just close the account sheet instead of opening the category modal.
+      if (useStickyNumpad) {
+        clearActiveField();
+        return;
+      }
       if (isBalanceAdjustmentType) {
         activateField('amount');
         return;
       }
       activateField(categoryId ? null : 'category');
     },
-    [accountCurrency, activateField, categoryId, isBalanceAdjustmentType],
+    [
+      accountCurrency,
+      activateField,
+      categoryId,
+      clearActiveField,
+      isBalanceAdjustmentType,
+      useStickyNumpad,
+    ],
   );
 
   const handleFromAccountSelect = useCallback(
@@ -1998,14 +2093,17 @@ export function TransactionEditorScreen({
     );
   }, []);
 
-  const handleCategorySelect = (nextCategoryId: string) => {
-    setCategoryId(nextCategoryId);
-    if (mode === 'create') {
-      autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
-    }
-    // Note is optional, so just close the picker instead of jumping into it.
-    clearActiveField();
-  };
+  const handleCategorySelect = useCallback(
+    (nextCategoryId: string) => {
+      setCategoryId(nextCategoryId);
+      if (mode === 'create') {
+        autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
+      }
+      // Note is optional, so just close the picker instead of jumping into it.
+      clearActiveField();
+    },
+    [categoryNoteLabel, clearActiveField, mode],
+  );
 
   const categoryPanelParents = useMemo(
     () =>
@@ -2029,6 +2127,42 @@ export function TransactionEditorScreen({
     });
     return panelChildrenByParent;
   }, [childCategoriesByParent, topLevelCategoryById]);
+
+  // Category grids for BOTH expense and income, built regardless of the active
+  // type so each swipeable pager page can render its own inline grid (the active
+  // type alone wouldn't populate the peeked page). Shape matches CategoryGrid.
+  const categoryDataByType = useMemo(() => {
+    const build = (targetType: 'expense' | 'income') => {
+      const parents: { id: string; name: string; icon: string }[] = [];
+      const parentRawIconById = new Map<string, string | null>();
+      const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
+      categories.forEach((category) => {
+        if (category.type !== targetType || category.parentId) return;
+        parents.push({
+          id: category.id,
+          name: category.name,
+          icon: resolveCategoryIcon(category.icon),
+        });
+        parentRawIconById.set(category.id, category.icon ?? null);
+      });
+      if (!hideSubcategories) {
+        categories.forEach((category) => {
+          if (category.type !== targetType || !category.parentId) return;
+          const parentIcon = parentRawIconById.get(category.parentId) ?? null;
+          const child = {
+            id: category.id,
+            name: category.name,
+            icon: resolveCategoryIcon(category.icon, parentIcon),
+          };
+          const existing = childByParent.get(category.parentId);
+          if (existing) existing.push(child);
+          else childByParent.set(category.parentId, [child]);
+        });
+      }
+      return { parents, childByParent };
+    };
+    return { expense: build('expense'), income: build('income') };
+  }, [categories, hideSubcategories]);
 
   const renderToolPanel = () => {
     switch (activeField) {
@@ -2178,6 +2312,135 @@ export function TransactionEditorScreen({
       default:
         return null;
     }
+  };
+
+  // A large tappable account card used on the transfer (From / To) and
+  // balance-adjustment backgrounds. Inactive pager pages render it read-only.
+  const renderAccountCard = (
+    label: string,
+    account: ReturnType<typeof accountById.get> | null,
+    field: 'account' | 'fromAccount' | 'toAccount',
+    isActive: boolean,
+    hasError: boolean,
+  ) => (
+    <Pressable
+      disabled={!isActive}
+      onPress={() => activateField(field)}
+      className={cn(
+        'flex-row items-center gap-3 rounded-3xl border bg-card/60 px-4 py-4',
+        hasError ? 'border-destructive/60' : 'border-border/40',
+      )}
+    >
+      <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/60">
+        {account ? (
+          <AccountLogo logoId={account.logoId} type={account.type} size={28} />
+        ) : (
+          <CreditCard size={20} color={themeColors.textMuted} />
+        )}
+      </View>
+      <View className="flex-1">
+        <Text variant="caption" tone="muted">
+          {label}
+        </Text>
+        <Text
+          variant="subheading"
+          numberOfLines={1}
+          className={cn(account ? '' : 'text-muted-foreground/60')}
+        >
+          {account?.name ?? I18n.t('transactions.editor.choose_account')}
+        </Text>
+      </View>
+    </Pressable>
+  );
+
+  // Sticky-mode background: the category grid fills the screen behind the pinned
+  // numpad for expense/income; transfers show From -> To; balance adjustments
+  // show the single account. Reserves bottom padding for the pinned panel.
+  const renderStickyBackground = (pageType: TransactionType, isActive: boolean) => {
+    const pageSel = isActive
+      ? { accountId, fromAccountId, toAccountId, categoryId }
+      : fieldSelectionsByTypeRef.current[pageType];
+
+    if (pageType === 'expense' || pageType === 'income') {
+      const data = categoryDataByType[pageType];
+      return (
+        <CategoryGrid
+          className="flex-1"
+          contentContainerStyle={backgroundContentStyle}
+          parents={data.parents}
+          childByParent={data.childByParent}
+          allowParentSelection
+          selectedCategoryId={pageSel.categoryId}
+          onSelect={isActive ? handleCategorySelect : noopCategorySelect}
+        />
+      );
+    }
+
+    if (pageType === 'transfer') {
+      const pageFromAccount = pageSel.fromAccountId
+        ? (accountById.get(pageSel.fromAccountId) ?? null)
+        : null;
+      const pageToAccount = pageSel.toAccountId
+        ? (accountById.get(pageSel.toAccountId) ?? null)
+        : null;
+      return (
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={backgroundContentStyle}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {renderAccountCard(
+            I18n.t('transactions.editor.from'),
+            pageFromAccount,
+            'fromAccount',
+            isActive,
+            isActive && !!fieldErrors.from_account,
+          )}
+          <View className="my-2 flex-row items-center">
+            <View className="h-[1px] flex-1 bg-border/15" />
+            <Pressable
+              disabled={!isActive}
+              onPress={handleSwapTransferAccounts}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
+              className="mx-2.5 h-9 w-9 items-center justify-center rounded-full border border-primary/35 bg-primary/10 active:opacity-85"
+            >
+              <ArrowLeftRight size={16} color={themeColors.primary} />
+            </Pressable>
+            <View className="h-[1px] flex-1 bg-border/15" />
+          </View>
+          {renderAccountCard(
+            I18n.t('transactions.editor.to'),
+            pageToAccount,
+            'toAccount',
+            isActive,
+            isActive && !!fieldErrors.to_account,
+          )}
+        </ScrollView>
+      );
+    }
+
+    // Balance adjustment: single account (unless the caller fixed it).
+    const pageAccount = pageSel.accountId ? (accountById.get(pageSel.accountId) ?? null) : null;
+    return (
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={backgroundContentStyle}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {hideAccountSelector
+          ? null
+          : renderAccountCard(
+              I18n.t('transactions.editor.account'),
+              pageAccount,
+              'account',
+              isActive,
+              isActive && !!fieldErrors.account,
+            )}
+      </ScrollView>
+    );
   };
 
   const renderFields = (pageType: TransactionType, isActive: boolean) => {
@@ -2593,17 +2856,6 @@ export function TransactionEditorScreen({
                         </View>
                       </SummaryRow>
                     </View>
-
-                    {/* Receipt is added from the numpad's camera button; the row
-                      only appears once something is attached (to show it). */}
-                    {(pageType === 'expense' || pageType === 'income') && receiptUri && isActive ? (
-                      <>
-                        <View className="h-[1px] bg-border/15 mx-4" />
-                        <ReceiptField receiptUri={receiptUri} onChange={handleReceiptChange} />
-                      </>
-                    ) : null}
-
-                    {/* Sentiment now cycles from the numpad toolbar. */}
                   </>
                 ) : null}
               </View>
@@ -3053,11 +3305,13 @@ export function TransactionEditorScreen({
               >
                 {availableTypeCards.map((card) => (
                   <View key={card.value} style={styles.pager}>
-                    {renderFields(card.value, card.value === type)}
+                    {renderStickyBackground(card.value, card.value === type)}
                   </View>
                 ))}
               </PagerView>
             </View>
+          ) : useStickyNumpad ? (
+            <View style={summaryContainerStyle}>{renderStickyBackground(type, true)}</View>
           ) : (
             <View style={summaryContainerStyle}>{renderFields(type, true)}</View>
           )}
@@ -3085,100 +3339,268 @@ export function TransactionEditorScreen({
         </TabletContentContainer>
       </View>
       {useStickyNumpad ? (
-        <NumpadDrawer
-          expanded={numpadExpanded}
-          onExpandedChange={setNumpadExpanded}
-          headerHeight={numpadHeaderHeight}
-          numpadHeight={numpadBodyHeight}
-          footerHeight={numpadFooterHeight}
-          resetNonce={bulkEntryNonce}
-          initialExpression={amount}
-          onValueChange={handleAmountValueChange}
-          onConfirm={handleAmountConfirm}
-          onDatePress={() => activateField('date')}
-          dateLabel={formatDateDisplay(date, activeLocale)}
-          header={
-            showNumpadToolbar ? (
-              <View
-                className="flex-row items-center gap-2 px-4"
-                style={{ height: numpadHeaderHeight }}
+        <Animated.View
+          style={[
+            styles.panel,
+            { backgroundColor: themeColors.card, borderColor: themeColors.border },
+            panelAnimatedStyle,
+          ]}
+          onLayout={(event) => {
+            // Reserve the background's bottom padding for the full panel; only
+            // capture height while the numpad shows so a keyboard-driven collapse
+            // (numpad hidden) doesn't shrink it.
+            if (keyboardVisible) return;
+            const measured = event.nativeEvent.layout.height;
+            setPanelHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+          }}
+        >
+          {/* Action row: account chip + split + currency + sentiment + receipt.
+              Wraps rather than clipping when the expense row gets crowded. */}
+          {showActionRow ? (
+            <View className="flex-row flex-wrap items-center gap-2 px-4 pt-2.5">
+              {showAccountChip ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    activateField('account');
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.account')}
+                  className={cn(
+                    'h-9 max-w-[46%] flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    fieldErrors.account
+                      ? 'border-destructive/50 bg-destructive/5'
+                      : 'border-border/30 bg-secondary/60',
+                  )}
+                >
+                  {selectedAccount ? (
+                    <AccountLogo
+                      logoId={selectedAccount.logoId}
+                      type={selectedAccount.type}
+                      size={16}
+                    />
+                  ) : (
+                    <CreditCard size={14} color={themeColors.textMuted} />
+                  )}
+                  <Text
+                    variant="caption"
+                    numberOfLines={1}
+                    className={cn('shrink', selectedAccount ? '' : 'text-muted-foreground')}
+                  >
+                    {selectedAccount?.name ?? I18n.t('transactions.editor.choose_account')}
+                  </Text>
+                  <ChevronDown size={12} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+              {showSplitButton ? (
+                <Pressable
+                  onPress={handleOpenSplitBill}
+                  disabled={!canOpenSplitBill}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+                  className={cn(
+                    'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    splitMode && splits.some((s) => !s.isSelf)
+                      ? 'bg-primary/15 border-primary/40'
+                      : 'bg-secondary/60 border-border/30',
+                  )}
+                  style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
+                >
+                  <Text className="text-[14px]">🤝</Text>
+                  <Text variant="caption" numberOfLines={1}>
+                    {I18n.t('transactions.editor.split.button_short')}
+                  </Text>
+                  {splitBillsUnpaidCount > 0 ? (
+                    <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1">
+                      <Text className="text-white text-[10px] font-bold leading-[13px]">
+                        {splitBillsUnpaidCount}
+                      </Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+              ) : null}
+              {showCurrencyButton ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setCurrencyPickerVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  className="h-9 flex-row items-center gap-1.5 rounded-full border border-border/30 bg-secondary/60 px-3 active:opacity-70"
+                >
+                  <Coins size={14} color={themeColors.textMuted} />
+                  <Text variant="caption">{entryCurrency}</Text>
+                  <ChevronDown size={12} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+              {showSentimentButton ? (
+                <Pressable
+                  onPress={cycleSentiment}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.expense_sentiment')}
+                  className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
+                >
+                  <SentimentIcon sentiment={sentiment} size={22} />
+                </Pressable>
+              ) : null}
+              {showReceiptButton ? (
+                <Pressable
+                  onPress={handleAddReceipt}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                  className={cn(
+                    'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
+                    receiptUri
+                      ? 'border-primary/40 bg-primary/15'
+                      : 'border-border/30 bg-secondary/60',
+                  )}
+                >
+                  <Camera
+                    size={16}
+                    color={receiptUri ? themeColors.primary : themeColors.textMuted}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* Amount — the headline of the panel, tapping brings the pad back */}
+          <Pressable
+            onPress={handleAmountRowPress}
+            accessibilityRole="button"
+            className="flex-row items-end justify-between px-4 pt-2"
+          >
+            <Text variant="caption" tone="muted" className="mb-1.5">
+              {I18n.t('transactions.editor.amount')}
+            </Text>
+            <View className="max-w-[68%] items-end">
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.panelAmount,
+                  { fontSize: amountDisplay.length > 12 ? 24 : amountDisplay.length > 9 ? 30 : 34 },
+                ]}
+                className={cn(
+                  amountTone === 'error'
+                    ? 'text-destructive'
+                    : amountTone === 'success'
+                      ? 'text-success'
+                      : 'text-foreground',
+                )}
               >
-                {showSplitButton ? (
+                {amountDisplay}
+              </Text>
+              {transferReceivedLabel ? (
+                <Pressable
+                  onPress={() => setTransferFxModalVisible(true)}
+                  hitSlop={6}
+                  className="mt-0.5 flex-row items-center gap-1"
+                >
+                  <Text variant="caption" numberOfLines={1} style={{ color: themeColors.primary }}>
+                    {transferReceivedLabel}
+                  </Text>
+                  <Pencil size={11} color={themeColors.primary} />
+                </Pressable>
+              ) : null}
+              {reportingEquivLabel ? (
+                <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+                  {reportingEquivLabel}
+                </Text>
+              ) : null}
+            </View>
+          </Pressable>
+          {type === 'expense' && expenseNudgeParts ? (
+            <Text
+              variant="caption"
+              tone="muted"
+              className="px-4 pt-0.5 text-right"
+              style={styles.nudgeLabel}
+            >
+              {expenseNudgeParts.before}
+              <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
+                {expenseNudgeParts.hours}
+              </Text>
+              {expenseNudgeParts.after}
+            </Text>
+          ) : null}
+
+          {/* Note suggestions drop-up, shown above the note while typing */}
+          {noteSuggestionsVisible ? (
+            <View
+              className="mx-4 mt-2 overflow-hidden rounded-2xl border border-border/25 bg-card"
+              style={styles.noteSuggestionsPanel}
+            >
+              {noteSuggestions.map((suggestion, index) => (
+                <React.Fragment key={suggestion}>
+                  {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
                   <Pressable
-                    onPress={handleOpenSplitBill}
-                    disabled={!canOpenSplitBill}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
-                    className={cn(
-                      'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
-                      splitMode && splits.some((s) => !s.isSelf)
-                        ? 'bg-primary/15 border-primary/40'
-                        : 'bg-secondary/60 border-border/30',
-                    )}
-                    style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
-                  >
-                    <Text className="text-[14px]">🤝</Text>
-                    <Text variant="caption" numberOfLines={1}>
-                      {I18n.t('transactions.editor.split.button_short')}
-                    </Text>
-                    {splitBillsUnpaidCount > 0 ? (
-                      <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1">
-                        <Text className="text-white text-[10px] font-bold leading-[13px]">
-                          {splitBillsUnpaidCount}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </Pressable>
-                ) : null}
-                {showCurrencyButton ? (
-                  <Pressable
+                    style={styles.noteSuggestionRow}
                     onPress={() => {
-                      void triggerHaptic('selection');
-                      setCurrencyPickerVisible(true);
+                      handleNoteChange(suggestion);
+                      setNoteSuggestions([]);
+                      noteInputRef.current?.blur();
+                      if (mode === 'create') {
+                        const fields = getLatestTransactionFieldsByNote(suggestion);
+                        if (fields) {
+                          if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
+                          if (!accountId && fields.accountId) setAccountId(fields.accountId);
+                          if (!amount && fields.amount != null) setAmount(String(fields.amount));
+                        }
+                      }
                     }}
-                    accessibilityRole="button"
-                    className="h-9 flex-row items-center gap-1.5 rounded-full border border-border/30 bg-secondary/60 px-3 active:opacity-70"
                   >
-                    <Coins size={14} color={themeColors.textMuted} />
-                    <Text variant="caption">{entryCurrency}</Text>
-                    <ChevronDown size={12} color={themeColors.textMuted} />
+                    <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                      {suggestion}
+                    </Text>
                   </Pressable>
-                ) : null}
-                {showSentimentButton ? (
-                  <Pressable
-                    onPress={cycleSentiment}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('transactions.editor.expense_sentiment')}
-                    className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
-                  >
-                    <SentimentIcon sentiment={sentiment} size={22} />
-                  </Pressable>
-                ) : null}
-                {showReceiptButton ? (
-                  <>
-                    <View className="flex-1" />
-                    <Pressable
-                      onPress={handleAddReceipt}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
-                      className={cn(
-                        'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
-                        receiptUri
-                          ? 'border-primary/40 bg-primary/15'
-                          : 'border-border/30 bg-secondary/60',
-                      )}
-                    >
-                      <Camera
-                        size={16}
-                        color={receiptUri ? themeColors.primary : themeColors.textMuted}
-                      />
-                    </Pressable>
-                  </>
-                ) : null}
-              </View>
-            ) : null
-          }
-          footer={
+                </React.Fragment>
+              ))}
+            </View>
+          ) : null}
+
+          {/* Note — one short line; focusing it raises the keyboard + hides pad */}
+          <View className="px-4 pb-2 pt-2">
+            <View className="flex-row items-center gap-2 rounded-2xl bg-secondary/40 px-3 py-2">
+              <FileText size={14} color={themeColors.textMuted} />
+              <TextInput
+                ref={noteInputRef}
+                value={note}
+                onChangeText={handleNoteChange}
+                placeholder={I18n.t('transactions.editor.optional')}
+                placeholderTextColor={`${themeColors.mutedForeground}99`}
+                returnKeyType="done"
+                onFocus={handleNoteFocus}
+                onBlur={handleNoteBlur}
+                onSubmitEditing={() => noteInputRef.current?.blur()}
+                autoCorrect={false}
+                autoComplete="off"
+                spellCheck={false}
+                style={[
+                  SINGLE_LINE_TEXT_INPUT_STYLE,
+                  styles.noteInput,
+                  { color: themeColors.text },
+                ]}
+              />
+            </View>
+          </View>
+
+          {/* Numpad — the panel's core; hidden while the note keyboard is up */}
+          {keyboardVisible ? null : (
+            <View style={{ height: numpadBodyHeight }}>
+              <NumpadPanel
+                compact
+                resetNonce={bulkEntryNonce}
+                initialExpression={amount}
+                onValueChange={handleAmountValueChange}
+                onConfirm={handleAmountConfirm}
+                onDatePress={() => activateField('date')}
+                dateLabel={formatDateDisplay(date, activeLocale)}
+              />
+            </View>
+          )}
+
+          {/* Save action(s) — hidden while typing a note */}
+          {keyboardVisible ? null : (
             <View
               className="flex-row gap-2.5 px-4 pt-2"
               style={{ paddingBottom: numpadFooterBottomPad }}
@@ -3206,8 +3628,8 @@ export function TransactionEditorScreen({
                 </Pressable>
               ) : null}
             </View>
-          }
-        />
+          )}
+        </Animated.View>
       ) : null}
       {isTransferType && selectedFromAccount && selectedToAccount ? (
         <TransferFxModal
