@@ -1,3 +1,6 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -34,6 +37,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
   initialWindowMetrics,
@@ -41,11 +45,6 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
-
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as ImagePicker from 'expo-image-picker';
-import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
@@ -81,11 +80,11 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import type { RootStackParamList } from '~/navigation/rootStack';
 import {
   getDistinctNotesSuggestions,
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage, saveReceiptImage } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
@@ -333,7 +332,15 @@ function TypePill({
   );
 }
 
-function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: string }) {
+function TransactionTypeGlyph({
+  type,
+  color,
+  size = 18,
+}: {
+  type: TransactionType;
+  color: string;
+  size?: number;
+}) {
   const strokeProps = {
     stroke: color,
     strokeWidth: 1.8,
@@ -343,7 +350,7 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
 
   if (type === 'expense') {
     return (
-      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+      <Svg width={size} height={size} viewBox="0 0 18 18" fill="none">
         <Circle cx={5.25} cy={5.25} r={2.35} {...strokeProps} />
         <Path d="M7.25 7.25 13.5 13.5" {...strokeProps} />
         <Path d="M10.7 13.5h2.8v-2.8" {...strokeProps} />
@@ -353,7 +360,7 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
 
   if (type === 'income') {
     return (
-      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+      <Svg width={size} height={size} viewBox="0 0 18 18" fill="none">
         <Circle cx={5.25} cy={12.75} r={2.35} {...strokeProps} />
         <Path d="M7.25 10.75 13.5 4.5" {...strokeProps} />
         <Path d="M10.7 4.5h2.8v2.8" {...strokeProps} />
@@ -363,7 +370,7 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
 
   if (type === 'transfer') {
     return (
-      <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+      <Svg width={size} height={size} viewBox="0 0 18 18" fill="none">
         <Path d="M3 6h10" {...strokeProps} />
         <Path d="m10.5 3.7 2.8 2.3-2.8 2.3" {...strokeProps} />
         <Path d="M15 12H5" {...strokeProps} />
@@ -373,7 +380,7 @@ function TransactionTypeGlyph({ type, color }: { type: TransactionType; color: s
   }
 
   return (
-    <Svg width={18} height={18} viewBox="0 0 18 18" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 18 18" fill="none">
       <Path d="M3.5 5.25h11" {...strokeProps} />
       <Path d="M3.5 12.75h11" {...strokeProps} />
       <Circle cx={6.5} cy={5.25} r={1.55} {...strokeProps} />
@@ -443,7 +450,6 @@ export function TransactionEditorScreen({
     rateTable,
     fxCurrencies,
     quickEntryPrefs,
-    updateQuickEntryPrefs,
   } = useApp();
 
   // Bulk create mode: when on, Save keeps the editor open in create mode so the
@@ -924,30 +930,6 @@ export function TransactionEditorScreen({
     [categoryId, categoryPreviewById],
   );
 
-  const nudgeMessageParts = useMemo(() => {
-    if (type !== 'expense') return null;
-    // For a subcurrency entry we surface the main-currency equivalent instead of
-    // the worktime nudge, so skip the nudge here.
-    if (effectiveEntryCurrency !== settings.currencyCode) return null;
-    const numericAmount = Number(amount);
-    if (!numericAmount || numericAmount <= 0) return null;
-    const rate = currentMonthWage?.trueHourlyRate ?? 0;
-    if (rate <= 0) return null;
-    const hours = amountToHoursByRate(numericAmount, rate);
-    const formattedHours = formatHours(hours);
-    if (hours < 0.25)
-      return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
-    if (hours < 1)
-      return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
-    return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
-  }, [
-    amount,
-    currentMonthWage?.trueHourlyRate,
-    effectiveEntryCurrency,
-    settings.currencyCode,
-    type,
-  ]);
-
   // Nudge computed for expense semantics regardless of the current type, so the
   // expense pager page shows the same work-time hint even while another type is
   // active (keeps the pages layout-identical).
@@ -970,12 +952,8 @@ export function TransactionEditorScreen({
     () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
   );
-  const selectedAccount = accountId ? (accountById.get(accountId) ?? null) : null;
   const selectedFromAccount = fromAccountId ? (accountById.get(fromAccountId) ?? null) : null;
   const selectedToAccount = toAccountId ? (accountById.get(toAccountId) ?? null) : null;
-  const accountName = selectedAccount?.name ?? null;
-  const fromAccountName = selectedFromAccount?.name ?? null;
-  const toAccountName = selectedToAccount?.name ?? null;
 
   useEffect(() => {
     Keyboard.dismiss();
@@ -1708,10 +1686,11 @@ export function TransactionEditorScreen({
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
-  const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
+  // Receipt attach now lives in the header top-right, so it is available
+  // regardless of numpad mode (but only for money-in/out types).
+  const showReceiptButton = type === 'expense' || type === 'income';
   const showNumpadToolbar =
-    useStickyNumpad &&
-    (showSplitButton || showCurrencyButton || showSentimentButton || showReceiptButton);
+    useStickyNumpad && (showSplitButton || showCurrencyButton || showSentimentButton);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
@@ -2932,7 +2911,7 @@ export function TransactionEditorScreen({
                 <ChevronLeft size={14} color={themeColors.textSoft} />
               </Pressable>
               {useTypeTabs ? (
-                <View className="flex-1 flex-row items-center gap-5">
+                <View className="flex-1 flex-row items-center justify-center gap-4">
                   {availableTypeCards.map((item) => {
                     const active = type === item.value;
                     return (
@@ -2943,14 +2922,18 @@ export function TransactionEditorScreen({
                         accessibilityState={{ selected: active }}
                         className="pb-1"
                       >
-                        <View className="flex-row items-center gap-1.5">
+                        <View className="flex-row items-center gap-1">
                           <TransactionTypeGlyph
                             type={item.value}
+                            size={13}
                             color={active ? typeTint(item.value) : themeColors.textMuted}
                           />
                           <Text
-                            variant="subheading"
-                            className={cn(active ? 'text-foreground' : 'text-muted-foreground')}
+                            variant="caption"
+                            className={cn(
+                              'font-semibold',
+                              active ? 'text-foreground' : 'text-muted-foreground',
+                            )}
                           >
                             {item.label}
                           </Text>
@@ -2977,6 +2960,24 @@ export function TransactionEditorScreen({
             {/* In sticky mode the save action lives below the numpad; here we
                 keep only Delete (edit) and the recurring editor's Save. */}
             <View className="flex-row items-center gap-2">
+              {showReceiptButton ? (
+                <Pressable
+                  onPress={handleAddReceipt}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                  className={cn(
+                    'h-10 w-10 items-center justify-center rounded-full border active:opacity-70',
+                    receiptUri
+                      ? 'border-primary/40 bg-primary/15'
+                      : 'border-border/30 bg-secondary',
+                  )}
+                >
+                  <Camera
+                    size={16}
+                    color={receiptUri ? themeColors.primary : themeColors.textSoft}
+                  />
+                </Pressable>
+              ) : null}
               {mode === 'edit' && onDelete ? (
                 <Pressable
                   onPress={onDelete}
@@ -3123,24 +3124,6 @@ export function TransactionEditorScreen({
                     className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
                   >
                     <SentimentIcon sentiment={sentiment} size={22} />
-                  </Pressable>
-                ) : null}
-                {showReceiptButton ? (
-                  <Pressable
-                    onPress={handleAddReceipt}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
-                    className={cn(
-                      'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
-                      receiptUri
-                        ? 'bg-primary/15 border-primary/40'
-                        : 'bg-secondary/60 border-border/30',
-                    )}
-                  >
-                    <Camera
-                      size={16}
-                      color={receiptUri ? themeColors.primary : themeColors.textMuted}
-                    />
                   </Pressable>
                 ) : null}
               </View>

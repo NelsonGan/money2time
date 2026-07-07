@@ -5,20 +5,21 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import {
   AccountLogo,
   AccountPickerSheet,
+  Button,
   CategoryEmoji,
   SettingsHeader,
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
+import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatShortDate } from '~/utils/formatters';
-import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
-import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
-import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 
 interface SettleUpTransactionScreenProps {
   transactionId: string;
@@ -220,15 +221,10 @@ export function SettleUpTransactionScreen({
           </ScrollView>
 
           <View className="px-5 pb-8 pt-2">
-            <Pressable
-              onPress={handleShare}
-              className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-90"
-            >
+            <Button onPress={handleShare} className="w-full gap-2">
               <Send size={18} color="#fff" />
-              <Text variant="bodyStrong" className="text-primary-foreground">
-                {I18n.t('transactions.settleUp.share_receipt')}
-              </Text>
-            </Pressable>
+              <Text>{I18n.t('transactions.settleUp.share_receipt')}</Text>
+            </Button>
           </View>
 
           <AccountPickerSheet
