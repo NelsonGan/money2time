@@ -166,6 +166,29 @@ export function aggregateUnpaidSplitsByPerson(
 }
 
 /**
+ * Cheap count of distinct people who still owe on at least one unpaid, non-self
+ * split. Mirrors {@link aggregateUnpaidSplitsByPerson}'s filtering and person-key
+ * derivation, but skips all the bill/byCurrency/sorting work — used by the
+ * always-mounted Settings badge so a transaction write anywhere in the app
+ * doesn't run the full per-person roll-up just to show a number.
+ */
+export function countUnpaidDebtors(transactions: TransactionWithRelations[]): number {
+  const keys = new Set<string>();
+  for (const tx of transactions) {
+    const splits = tx.splits;
+    if (!splits || splits.length === 0) continue;
+    for (const split of splits) {
+      if (split.isSelf) continue;
+      if (split.paidAt) continue;
+      if (!(split.amount > 0)) continue;
+      const trimmed = split.personName?.trim() ?? '';
+      keys.add(trimmed.length > 0 ? trimmed.toLowerCase() : UNNAMED_PERSON_KEY);
+    }
+  }
+  return keys.size;
+}
+
+/**
  * Rolls unpaid, non-self splits up by transaction: one entry per bill that still
  * has money owed on it, each carrying every person's outstanding share. Mirrors
  * {@link aggregateUnpaidSplitsByPerson}'s filtering and reporting-currency logic.

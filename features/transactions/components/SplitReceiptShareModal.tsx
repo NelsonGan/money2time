@@ -1,7 +1,7 @@
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 import { ChevronLeft } from 'lucide-react-native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -38,7 +38,7 @@ export function SplitReceiptShareModal({
   const cardRef = useRef<View>(null);
   const [busy, setBusy] = useState(false);
 
-  const qrUri = getPaymentQrUri(settings.paymentQrUri);
+  const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
 
   const shareAsText = useCallback(
     async (target: ReceiptContent) => {
@@ -76,10 +76,12 @@ export function SplitReceiptShareModal({
             UTI: 'public.png',
             dialogTitle: I18n.t('transactions.settleUp.share_receipt'),
           });
+          sharedAsImage = true;
         } else {
-          await Share.share({ url: file.uri });
+          // No file share sheet available — RN's Share.share ignores `url` on
+          // Android, so fall back to the plain-text receipt instead.
+          await shareAsText(content);
         }
-        sharedAsImage = true;
       } else {
         await shareAsText(content);
       }

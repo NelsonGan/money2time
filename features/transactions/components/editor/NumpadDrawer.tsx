@@ -82,6 +82,17 @@ export function NumpadDrawer({
   }, [expanded, collapsedOffset, translateY]);
 
   const gesture = useMemo(() => {
+    // Snap the position in the worklet directly (not only via the
+    // `expanded`-keyed effect): when a gesture resolves to the state the drawer
+    // is already in, the controlled prop doesn't change and the effect wouldn't
+    // re-run, which would otherwise leave the pad frozen at the mid-drag offset.
+    const snapTo = (collapsed: boolean) => {
+      'worklet';
+      translateY.value = withTiming(collapsed ? collapsedOffset : 0, {
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+      });
+    };
     const pan = Gesture.Pan()
       .onStart(() => {
         startY.value = translateY.value;
@@ -94,10 +105,12 @@ export function NumpadDrawer({
         const collapse =
           event.velocityY > 400 ||
           (event.velocityY >= -400 && translateY.value > collapsedOffset / 2);
+        snapTo(collapse);
         runOnJS(onExpandedChange)(!collapse);
       });
     const tap = Gesture.Tap().onEnd(() => {
       const expand = translateY.value > collapsedOffset / 2;
+      snapTo(!expand);
       runOnJS(onExpandedChange)(expand);
     });
     return Gesture.Race(pan, tap);

@@ -15,11 +15,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
+import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
+import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { useTransactions, type SplitDraftInput } from '~/context/AppContext';
-import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
@@ -302,9 +302,6 @@ export function SplitBillModal({
   }, [splits]);
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
-
-  const friendCount = splits.filter((s) => !s.isSelf).length;
-  const paidCount = splits.filter((s) => !s.isSelf && s.paid).length;
 
   const formatMoney = useCallback(
     (n: number) => {
