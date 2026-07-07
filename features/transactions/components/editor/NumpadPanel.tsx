@@ -229,6 +229,14 @@ export function NumpadPanel({
         setExpression(formatted);
         onConfirm(formatted);
         return;
+      } else if (key === '=') {
+        // Evaluate in place: fold the expression down to its result but keep the
+        // pad open (no confirm / auto-jump).
+        const formatted = formatMoney(evaluateExpression(currentExpression));
+        expressionRef.current = formatted;
+        setExpression(formatted);
+        onValueChange(formatted);
+        return;
       } else if (['+', '-', '×', '÷'].includes(key)) {
         nextExpression = appendOperator(currentExpression, key as Operator);
       }
@@ -282,14 +290,14 @@ export function NumpadPanel({
                 </Pressable>
               </View>
             ) : (
-              deleteKey
+              <View className="flex-1" />
             )}
           </View>
           <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="4" onPress={handleKeyPress} />
             <NumpadKey value="5" onPress={handleKeyPress} />
             <NumpadKey value="6" onPress={handleKeyPress} />
-            {onDatePress ? deleteKey : <View className="flex-1" />}
+            {deleteKey}
           </View>
           <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="1" onPress={handleKeyPress} />
@@ -307,8 +315,9 @@ export function NumpadPanel({
             />
           </View>
           <View className="flex-1 flex-row gap-1.5">
-            <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
             <NumpadKey value="." onPress={handleKeyPress} />
+            <NumpadKey value="0" onPress={handleKeyPress} />
+            <NumpadKey value="=" variant="utility" onPress={handleKeyPress} />
             <NumpadKey
               value="plusTimes"
               variant="operator"
