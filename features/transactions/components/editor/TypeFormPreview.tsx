@@ -1,6 +1,6 @@
 import { CreditCard, Hash } from 'lucide-react-native';
 import React from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AccountLogo, CategoryEmoji, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -13,6 +13,8 @@ interface TypeFormPreviewProps {
   /** Pre-formatted amount, e.g. "RM60.00". Shared across every type. */
   amountText: string;
   amountTone: 'default' | 'error' | 'success';
+  /** Work-time nudge under the amount (expense only), matching the live form. */
+  nudge?: { before: string; hours: string; after: string } | null;
   account: Account | null;
   fromAccount: Account | null;
   toAccount: Account | null;
@@ -54,6 +56,12 @@ function AccountValue({ account }: { account: Account | null }) {
 
 const DIVIDER = <View className="h-[1px] bg-border/15 mx-4" />;
 
+const styles = StyleSheet.create({
+  nudge: {
+    fontSize: 11,
+  },
+});
+
 /**
  * A read-only mirror of the editor form for a given type, shown on the
  * non-active pages of the type pager so the user can peek the next type's
@@ -63,6 +71,7 @@ export function TypeFormPreview({
   type,
   amountText,
   amountTone,
+  nudge,
   account,
   fromAccount,
   toAccount,
@@ -73,6 +82,7 @@ export function TypeFormPreview({
   const isTransfer = type === 'transfer';
   const isBalanceAdjustment = type === 'balance_adjustment';
   const showCategory = type === 'expense' || type === 'income';
+  const amountFontSize = amountText.length > 12 ? 14 : amountText.length > 9 ? 18 : 24;
 
   return (
     // Match the live form's inset (16px side gutters, flush to the top) so a
@@ -82,29 +92,40 @@ export function TypeFormPreview({
         className="bg-card/60 border border-border/25 overflow-hidden"
         style={{ borderRadius: 20 }}
       >
-        <View className="px-4 py-3.5 min-h-[52px] flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-              <Hash size={13} color={themeColors.textMuted} />
+        <View className="px-4 py-3.5 min-h-[52px] justify-center">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                <Hash size={13} color={themeColors.textMuted} />
+              </View>
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.editor.amount')}
+              </Text>
             </View>
-            <Text variant="caption" tone="muted">
-              {I18n.t('transactions.editor.amount')}
+            <Text
+              variant="heading"
+              numberOfLines={1}
+              className={cn(
+                amountTone === 'error'
+                  ? 'text-destructive'
+                  : amountTone === 'success'
+                    ? 'text-success'
+                    : 'text-foreground',
+              )}
+              style={{ fontSize: amountFontSize }}
+            >
+              {amountText}
             </Text>
           </View>
-          <Text
-            variant="heading"
-            numberOfLines={1}
-            className={cn(
-              amountTone === 'error'
-                ? 'text-destructive'
-                : amountTone === 'success'
-                  ? 'text-success'
-                  : 'text-foreground',
-            )}
-            style={{ fontSize: 24 }}
-          >
-            {amountText}
-          </Text>
+          {nudge ? (
+            <Text variant="caption" tone="muted" className="text-right mt-0.5" style={styles.nudge}>
+              {nudge.before}
+              <Text variant="caption" tone="primary" style={styles.nudge}>
+                {nudge.hours}
+              </Text>
+              {nudge.after}
+            </Text>
+          ) : null}
         </View>
 
         {DIVIDER}

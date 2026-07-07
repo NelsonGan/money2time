@@ -949,6 +949,24 @@ export function TransactionEditorScreen({
     type,
   ]);
 
+  // Nudge computed for expense semantics regardless of the current type, so the
+  // expense pager page shows the same work-time hint even while another type is
+  // active (keeps the pages layout-identical).
+  const expenseNudgeParts = useMemo(() => {
+    if (entryCurrency !== settings.currencyCode) return null;
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) return null;
+    const rate = currentMonthWage?.trueHourlyRate ?? 0;
+    if (rate <= 0) return null;
+    const hours = amountToHoursByRate(numericAmount, rate);
+    const formattedHours = formatHours(hours);
+    if (hours < 0.25)
+      return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
+    if (hours < 1)
+      return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
+    return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
+  }, [amount, currentMonthWage?.trueHourlyRate, entryCurrency, settings.currencyCode]);
+
   const accountById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
@@ -2981,6 +2999,7 @@ export function TransactionEditorScreen({
                       <TypeFormPreview
                         type={card.value}
                         amountText={amountDisplay}
+                        nudge={card.value === 'expense' ? expenseNudgeParts : null}
                         amountTone={
                           card.value === 'expense'
                             ? 'error'
