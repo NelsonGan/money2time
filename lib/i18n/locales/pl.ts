@@ -567,6 +567,7 @@ const pl = {
       split: {
         toggle_title: 'Podziel rachunek',
         button_label: 'Podziel rachunek',
+        button_short: 'Split',
         even_toggle: 'Podziel równo',
         add_person: 'Dodaj osobę',
         me_label: 'Ja',

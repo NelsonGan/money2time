@@ -566,6 +566,7 @@ const fr = {
       split: {
         toggle_title: 'Partager la facture',
         button_label: 'Partager la facture',
+        button_short: 'Split',
         even_toggle: 'Partager équitablement',
         add_person: 'Ajouter une personne',
         me_label: 'Moi',

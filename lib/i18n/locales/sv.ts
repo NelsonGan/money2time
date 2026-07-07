@@ -564,6 +564,7 @@ const sv = {
       split: {
         toggle_title: 'Dela notan',
         button_label: 'Dela notan',
+        button_short: 'Split',
         even_toggle: 'Dela lika',
         add_person: 'Lägg till person',
         me_label: 'Jag',

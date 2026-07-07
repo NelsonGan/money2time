@@ -26,6 +26,10 @@ interface NumpadDrawerProps {
   headerHeight: number;
   /** Fixed height of the numpad body below the handle + header. */
   numpadHeight: number;
+  /** Optional action row rendered below the pad (e.g. the save buttons); must
+   *  be `footerHeight` tall. It owns the bottom safe area. */
+  footer?: React.ReactNode;
+  footerHeight: number;
   // NumpadPanel passthrough.
   initialExpression: string;
   resetNonce?: number;
@@ -54,6 +58,8 @@ export function NumpadDrawer({
   header,
   headerHeight,
   numpadHeight,
+  footer,
+  footerHeight,
   initialExpression,
   resetNonce,
   onValueChange,
@@ -62,7 +68,7 @@ export function NumpadDrawer({
   dateLabel,
 }: NumpadDrawerProps) {
   const themeColors = useThemeColors();
-  const fullHeight = NUMPAD_HANDLE_HEIGHT + headerHeight + numpadHeight;
+  const fullHeight = NUMPAD_HANDLE_HEIGHT + headerHeight + numpadHeight + footerHeight;
   const collapsedOffset = fullHeight - NUMPAD_HANDLE_HEIGHT;
 
   const translateY = useSharedValue(expanded ? 0 : collapsedOffset);
@@ -130,6 +136,7 @@ export function NumpadDrawer({
           dateLabel={dateLabel}
         />
       </View>
+      {footer ? <View style={{ height: footerHeight }}>{footer}</View> : null}
     </Animated.View>
   );
 }

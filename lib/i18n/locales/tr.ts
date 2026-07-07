@@ -567,6 +567,7 @@ const tr = {
       split: {
         toggle_title: 'Hesabı Böl',
         button_label: 'Hesabı Böl',
+        button_short: 'Split',
         even_toggle: 'Eşit böl',
         add_person: 'Kişi ekle',
         me_label: 'Ben',

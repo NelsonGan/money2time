@@ -567,6 +567,7 @@ const pt = {
       split: {
         toggle_title: 'Dividir conta',
         button_label: 'Dividir conta',
+        button_short: 'Split',
         even_toggle: 'Dividir igualmente',
         add_person: 'Adicionar pessoa',
         me_label: 'Eu',

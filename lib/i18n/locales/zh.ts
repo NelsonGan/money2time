@@ -532,6 +532,7 @@ const zh = {
       split: {
         toggle_title: '分摊账单',
         button_label: '分摊账单',
+        button_short: 'Split',
         even_toggle: '平均分摊',
         add_person: '添加好友',
         me_label: '我',
