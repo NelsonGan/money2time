@@ -96,18 +96,32 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
+            const commit = context.payload.pull_request.head.sha.slice(0, 7);
             const marker = '<!-- eas-update-preview -->';
             const body = [
               marker,
-              '### 📱 EAS Update ready',
+              '## 📱 Preview this update',
               '',
-              `**👉 [Tap here to open this update](${link})** — open on your device, no scan needed.`,
+              'Your changes are published to a preview branch — open them on your device in one tap.',
               '',
-              'Or scan the QR code with your dev build / Expo Go:',
+              '<table>',
+              '<tr>',
+              `<td width="260" align="center"><a href="${link}"><img src="${qr}" width="220" alt="EAS Update QR code" /></a><br/><sub>Scan with your dev build</sub></td>`,
+              '<td valign="middle">',
               '',
-              `<img src="${qr}" width="250" alt="EAS Update QR code" />`,
+              `### 👉 [Tap to open this update](${link})`,
               '',
-              `Branch \`${branch}\` · Runtime \`${runtime}\` · Commit \`${context.payload.pull_request.head.sha.slice(0, 7)}\``,
+              'No scan needed — opens straight on your device.',
+              '',
+              '| | |',
+              '| --- | --- |',
+              `| **Branch** | \`${branch}\` |`,
+              `| **Runtime** | \`${runtime}\` |`,
+              `| **Commit** | \`${commit}\` |`,
+              '',
+              '</td>',
+              '</tr>',
+              '</table>',
             ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
