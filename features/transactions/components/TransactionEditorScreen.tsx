@@ -716,6 +716,14 @@ export function TransactionEditorScreen({
   // Measured height of the note row, so the floating suggestions can be anchored
   // just above it (rather than overlapping it).
   const [noteRowHeight, setNoteRowHeight] = useState(0);
+  // Whether the 4x4 numpad is pulled up. Create mode starts collapsed (the
+  // category grid leads; the pad appears once a category is picked); edit mode
+  // starts expanded since the amount is the thing being changed.
+  const [numpadExpanded, setNumpadExpanded] = useState(mode !== 'create');
+  const toggleNumpad = useCallback(() => {
+    void triggerHaptic('selection');
+    setNumpadExpanded((prev) => !prev);
+  }, []);
   // Currency picker (opened from the numpad toolbar) for expense/income entry.
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
@@ -2057,6 +2065,8 @@ export function TransactionEditorScreen({
     if (useStickyNumpad) {
       void triggerHaptic('selection');
       noteInputRef.current?.blur();
+      // Tapping the amount pulls the pad back up (and dismisses the note keyboard).
+      setNumpadExpanded(true);
       activateField(null);
       return;
     }
@@ -2167,6 +2177,8 @@ export function TransactionEditorScreen({
       if (mode === 'create') {
         autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
       }
+      // Picking a category is the cue to bring the amount pad up for entry.
+      setNumpadExpanded(true);
       // Note is optional, so just close the picker instead of jumping into it.
       clearActiveField();
     },
@@ -3694,27 +3706,38 @@ export function TransactionEditorScreen({
             ) : null}
           </View>
 
-          {/* Numpad + Save — everything below the note. It stays mounted and
-              tucks behind the keyboard (the keyboard overlays, edge-to-edge, on
-              both platforms) so the amount card only nudges up the minimum.
-              Measured to size the keyboard lift and the background padding. */}
+          {/* Handle + Numpad + Save — everything below the note. The handle
+              pulls the 4x4 pad down (collapse) / up (expand); collapsing keeps
+              the amount card, action row and Save visible. Measured to size the
+              keyboard lift and the background padding. */}
           <View
             onLayout={(event) => {
               const measured = event.nativeEvent.layout.height;
               setBelowNoteHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
             }}
           >
-            <View style={{ height: numpadBodyHeight }}>
-              <NumpadPanel
-                compact
-                resetNonce={bulkEntryNonce}
-                initialExpression={amount}
-                onValueChange={handleAmountValueChange}
-                onConfirm={handleAmountConfirm}
-                onDatePress={() => activateField('date')}
-                dateLabel={formatDateDisplay(date, activeLocale)}
-              />
-            </View>
+            <Pressable
+              onPress={toggleNumpad}
+              accessibilityRole="button"
+              accessibilityLabel={numpadExpanded ? 'Hide keypad' : 'Show keypad'}
+              hitSlop={8}
+              className="items-center pb-1 pt-2"
+            >
+              <View className="h-1 w-10 rounded-full bg-border/70" />
+            </Pressable>
+            {numpadExpanded ? (
+              <View style={{ height: numpadBodyHeight }}>
+                <NumpadPanel
+                  compact
+                  resetNonce={bulkEntryNonce}
+                  initialExpression={amount}
+                  onValueChange={handleAmountValueChange}
+                  onConfirm={handleAmountConfirm}
+                  onDatePress={() => activateField('date')}
+                  dateLabel={formatDateDisplay(date, activeLocale)}
+                />
+              </View>
+            ) : null}
             <View
               className="flex-row gap-2.5 px-4 pt-2"
               style={{ paddingBottom: numpadFooterBottomPad }}
