@@ -8,6 +8,7 @@ import {
   Camera,
   ChevronDown,
   ChevronLeft,
+  ChevronUp,
   Clock,
   Coins,
   CreditCard,
@@ -3721,9 +3722,14 @@ export function TransactionEditorScreen({
               accessibilityRole="button"
               accessibilityLabel={numpadExpanded ? 'Hide keypad' : 'Show keypad'}
               hitSlop={8}
-              className="items-center pb-1 pt-2"
+              className="items-center gap-0.5 pb-0.5 pt-2"
             >
               <View className="h-1 w-10 rounded-full bg-border/70" />
+              {numpadExpanded ? (
+                <ChevronDown size={16} color={themeColors.textMuted} />
+              ) : (
+                <ChevronUp size={16} color={themeColors.textMuted} />
+              )}
             </Pressable>
             {numpadExpanded ? (
               <View style={{ height: numpadBodyHeight }}>
