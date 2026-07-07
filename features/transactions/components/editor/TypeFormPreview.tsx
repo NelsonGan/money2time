@@ -1,0 +1,160 @@
+import { CreditCard, Hash } from 'lucide-react-native';
+import React from 'react';
+import { View } from 'react-native';
+
+import { AccountLogo, CategoryEmoji, Text } from '~/components/ui';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import type { Account, TransactionType } from '~/types';
+import { cn } from '~/utils';
+
+interface TypeFormPreviewProps {
+  type: TransactionType;
+  /** Pre-formatted amount, e.g. "RM60.00". Shared across every type. */
+  amountText: string;
+  amountTone: 'default' | 'error' | 'success';
+  account: Account | null;
+  fromAccount: Account | null;
+  toAccount: Account | null;
+  category: { icon: string; name: string } | null;
+  note: string;
+}
+
+function PreviewRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <View className="px-4 py-3.5 flex-row items-center justify-between">
+      <View className="flex-row items-center gap-2">
+        <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+          <Hash size={13} color="#9AA3A0" />
+        </View>
+        <Text variant="caption" tone="muted">
+          {label}
+        </Text>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function AccountValue({ account }: { account: Account | null }) {
+  if (!account) {
+    return (
+      <Text variant="body" tone="muted">
+        {I18n.t('common.no_account')}
+      </Text>
+    );
+  }
+  return (
+    <View className="flex-row items-center gap-2">
+      <AccountLogo logoId={account.logoId} type={account.type} size={18} />
+      <Text variant="body">{account.name}</Text>
+    </View>
+  );
+}
+
+const DIVIDER = <View className="h-[1px] bg-border/15 mx-4" />;
+
+/**
+ * A read-only mirror of the editor form for a given type, shown on the
+ * non-active pages of the type pager so the user can peek the next type's
+ * layout mid-swipe. The active page renders the real interactive form.
+ */
+export function TypeFormPreview({
+  type,
+  amountText,
+  amountTone,
+  account,
+  fromAccount,
+  toAccount,
+  category,
+  note,
+}: TypeFormPreviewProps) {
+  const themeColors = useThemeColors();
+  const isTransfer = type === 'transfer';
+  const isBalanceAdjustment = type === 'balance_adjustment';
+  const showCategory = type === 'expense' || type === 'income';
+
+  return (
+    <View className="px-5 pt-1">
+      <View
+        className="bg-card/60 border border-border/25 overflow-hidden"
+        style={{ borderRadius: 20 }}
+      >
+        <View className="px-4 py-3.5 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+              <Hash size={13} color={themeColors.textMuted} />
+            </View>
+            <Text variant="caption" tone="muted">
+              {I18n.t('transactions.editor.amount')}
+            </Text>
+          </View>
+          <Text
+            variant="heading"
+            numberOfLines={1}
+            className={cn(
+              amountTone === 'error'
+                ? 'text-destructive'
+                : amountTone === 'success'
+                  ? 'text-success'
+                  : 'text-foreground',
+            )}
+            style={{ fontSize: 24 }}
+          >
+            {amountText}
+          </Text>
+        </View>
+
+        {DIVIDER}
+
+        {isTransfer ? (
+          <>
+            <PreviewRow label={I18n.t('transactions.editor.from')}>
+              <AccountValue account={fromAccount} />
+            </PreviewRow>
+            {DIVIDER}
+            <PreviewRow label={I18n.t('transactions.editor.to')}>
+              <AccountValue account={toAccount} />
+            </PreviewRow>
+          </>
+        ) : (
+          <PreviewRow label={I18n.t('transactions.editor.account')}>
+            <View className="flex-row items-center gap-2">
+              <CreditCard size={16} color={themeColors.textMuted} />
+              <AccountValue account={account} />
+            </View>
+          </PreviewRow>
+        )}
+
+        {showCategory ? (
+          <>
+            {DIVIDER}
+            <PreviewRow label={I18n.t('transactions.editor.category')}>
+              {category ? (
+                <View className="flex-row items-center gap-2">
+                  <CategoryEmoji icon={category.icon} size={16} />
+                  <Text variant="body">{category.name}</Text>
+                </View>
+              ) : (
+                <Text variant="body" tone="muted">
+                  {I18n.t('transactions.editor.choose_category')}
+                </Text>
+              )}
+            </PreviewRow>
+          </>
+        ) : null}
+
+        {!isBalanceAdjustment ? (
+          <>
+            {DIVIDER}
+            <PreviewRow label={I18n.t('transaction_detail.note')}>
+              <Text variant="body" tone={note ? 'default' : 'muted'} numberOfLines={1}>
+                {note || I18n.t('transactions.editor.optional')}
+              </Text>
+            </PreviewRow>
+          </>
+        ) : null}
+      </View>
+    </View>
+  );
+}
