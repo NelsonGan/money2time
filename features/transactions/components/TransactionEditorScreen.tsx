@@ -40,6 +40,9 @@ import {
 } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
@@ -55,12 +58,12 @@ import {
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
+import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
   NUMPAD_HANDLE_HEIGHT,
   NumpadDrawer,
   NumpadPanel,
   ReceiptField,
-  SplitBillModal,
   type SplitDraft,
   splitsHelpers,
   SummaryRow,
@@ -74,6 +77,7 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import {
   getDistinctNotesSuggestions,
   getLatestTransactionFieldsByNote,
@@ -460,6 +464,8 @@ export function TransactionEditorScreen({
     [accounts, settings.currencyCode],
   );
   const themeColors = useThemeColors();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const setSplitSession = useSetSplitBillSession();
   const { height: windowHeight } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
   // This screen is presented as a transparentModal. When opened via a widget
@@ -981,16 +987,20 @@ export function TransactionEditorScreen({
     });
   }, [initialSplits]);
 
-  const [splitBillModalVisible, setSplitBillModalVisible] = useState(false);
+  // Whether the pushed Split Bill route is open. Drives the live session
+  // republish (below) so the screen mirrors edits made back here.
+  const [splitRouteOpen, setSplitRouteOpen] = useState(false);
+  // Set to the latest session publisher so handleOpenSplitBill (defined before
+  // the publisher) can push the session synchronously as it navigates.
+  const publishSessionRef = useRef<(rows: SplitDraft[], evenly: boolean) => void>(() => {});
 
-  const ensureSplitsInitialized = useCallback(() => {
-    if (splits.length > 0) return;
+  const buildInitialSplitRows = useCallback((): SplitDraft[] => {
     const numericAmount = Number(amount);
     const total = Number.isFinite(numericAmount) ? numericAmount : 0;
     const portions = splitsHelpers.distributeEvenly(total, 2);
-    // Pre-assign ids so Mark Paid is available even in create mode (the modal
+    // Pre-assign ids so Mark Paid is available even in create mode (the editor
     // gates the action on `row.id` being present).
-    setSplits([
+    return [
       {
         id: newId(),
         personName: I18n.t('transactions.editor.split.me_label'),
@@ -1005,9 +1015,8 @@ export function TransactionEditorScreen({
         isSelf: false,
         paybackAccountId: accountId,
       },
-    ]);
-    setSplitEvenly(true);
-  }, [accountId, amount, splits.length]);
+    ];
+  }, [accountId, amount]);
 
   const numericAmountForGate = Number(amount);
   const canOpenSplitBill =
@@ -1033,14 +1042,24 @@ export function TransactionEditorScreen({
     if (!canOpenSplitBill) return;
     void triggerHaptic('selection');
     Keyboard.dismiss();
+    const hadSplits = splits.length > 0;
+    const nextSplits = hadSplits ? splits : buildInitialSplitRows();
+    const nextEvenly = hadSplits ? splitEvenly : true;
     splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
     if (!splitMode) setSplitMode(true);
-    ensureSplitsInitialized();
-    setSplitBillModalVisible(true);
-  }, [amount, canOpenSplitBill, ensureSplitsInitialized, splitEvenly, splitMode, splits]);
+    if (!hadSplits) {
+      setSplits(nextSplits);
+      setSplitEvenly(true);
+    }
+    setSplitRouteOpen(true);
+    // Publish synchronously (batched with the navigation) so the pushed screen
+    // has data on its very first render.
+    publishSessionRef.current(nextSplits, nextEvenly);
+    navigation.navigate('SplitBill');
+  }, [amount, buildInitialSplitRows, canOpenSplitBill, navigation, splitEvenly, splitMode, splits]);
 
   const handleDoneSplitBill = useCallback(() => {
-    setSplitBillModalVisible(false);
+    setSplitRouteOpen(false);
     splitBillSnapshotRef.current = null;
     // If user committed an empty configuration, fold split mode back off.
     if (splits.filter((s) => !s.isSelf).length === 0) {
@@ -1050,7 +1069,7 @@ export function TransactionEditorScreen({
   }, [splits]);
 
   const handleCancelSplitBill = useCallback(() => {
-    setSplitBillModalVisible(false);
+    setSplitRouteOpen(false);
     const snapshot = splitBillSnapshotRef.current;
     splitBillSnapshotRef.current = null;
     if (!snapshot) return;
@@ -1137,6 +1156,61 @@ export function TransactionEditorScreen({
     () => currencySymbolForCode(effectiveEntryCurrency),
     [effectiveEntryCurrency],
   );
+
+  // Publish the editor's live split draft + callbacks for the pushed Split Bill
+  // route to consume. The editor only ever writes the session (never reads it),
+  // so republishing on every edit can't re-render this screen into a loop.
+  const publishSplitSession = useCallback(
+    (rows: SplitDraft[], evenly: boolean) => {
+      setSplitSession({
+        total: Number(amount) || 0,
+        defaultAccountId: accountId,
+        splits: rows,
+        onChange: setSplits,
+        splitEvenly: evenly,
+        onSplitEvenlyChange: setSplitEvenly,
+        accounts,
+        accountGroups,
+        currencySymbol: entryCurrencySymbol,
+        formatSettings: { ...settings, currencySymbol: entryCurrencySymbol },
+        onMarkPaid: handleSplitMarkPaidLocal,
+        onMarkUnpaid: handleSplitMarkUnpaidLocal,
+        newlyPaidIds,
+        onDone: handleDoneSplitBill,
+        onCancel: handleCancelSplitBill,
+      });
+    },
+    [
+      accountId,
+      accounts,
+      accountGroups,
+      amount,
+      entryCurrencySymbol,
+      handleCancelSplitBill,
+      handleDoneSplitBill,
+      handleSplitMarkPaidLocal,
+      handleSplitMarkUnpaidLocal,
+      newlyPaidIds,
+      setSplitSession,
+      settings,
+    ],
+  );
+
+  // Assign during render (not in an effect) so an auto-open-on-mount flow, whose
+  // effect runs before any post-render effect, still finds the real publisher.
+  publishSessionRef.current = publishSplitSession;
+
+  // Keep the pushed screen in sync with edits made here (amount, splits, etc.).
+  useEffect(() => {
+    if (splitRouteOpen) publishSplitSession(splits, splitEvenly);
+  }, [splitRouteOpen, splits, splitEvenly, publishSplitSession]);
+
+  // Tear the session down once the route closes (and on unmount).
+  useEffect(() => {
+    if (!splitRouteOpen) setSplitSession(null);
+  }, [splitRouteOpen, setSplitSession]);
+
+  useEffect(() => () => setSplitSession(null), [setSplitSession]);
 
   // Currencies offered on the numpad: the selected account's currency first,
   // then the reporting currency, the user's added currencies, and any other
@@ -2880,26 +2954,6 @@ export function TransactionEditorScreen({
               ) : null}
             </View>
           }
-        />
-      ) : null}
-      {!hideSplitMode ? (
-        <SplitBillModal
-          visible={splitBillModalVisible}
-          onCancel={handleCancelSplitBill}
-          onDone={handleDoneSplitBill}
-          total={Number(amount) || 0}
-          defaultAccountId={accountId}
-          splits={splits}
-          onChange={setSplits}
-          splitEvenly={splitEvenly}
-          onSplitEvenlyChange={setSplitEvenly}
-          accounts={accounts}
-          accountGroups={accountGroups}
-          currencySymbol={entryCurrencySymbol}
-          formatSettings={{ ...settings, currencySymbol: entryCurrencySymbol }}
-          onMarkPaid={handleSplitMarkPaidLocal}
-          onMarkUnpaid={handleSplitMarkUnpaidLocal}
-          newlyPaidIds={newlyPaidIds}
         />
       ) : null}
       {isTransferType && selectedFromAccount && selectedToAccount ? (

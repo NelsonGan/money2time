@@ -31,6 +31,7 @@ export type RootStackParamList = {
   SettleUp: undefined;
   SettleUpPerson: { personKey: string };
   SettleUpTransaction: { transactionId: string };
+  SplitBill: undefined;
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
   PayCreditCard: { accountId: string };
