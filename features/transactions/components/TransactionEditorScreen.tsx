@@ -1728,8 +1728,9 @@ export function TransactionEditorScreen({
       ? recurringToolZonePadding
       : 196
     : useStickyNumpad
-      ? // Clear the collapsed drawer's peeking handle.
-        NUMPAD_HANDLE_HEIGHT + 24
+      ? // Clear the collapsed drawer's peek: the grab handle plus the header
+        // action row, which both stay visible when the pad is tucked away.
+        NUMPAD_HANDLE_HEIGHT + numpadHeaderHeight + 24
       : showToolZone
         ? 92
         : 16;
@@ -1945,9 +1946,11 @@ export function TransactionEditorScreen({
   const handleToAccountSelect = useCallback(
     (nextAccountId: string) => {
       setToAccountId(nextAccountId);
-      focusNoteField();
+      // Note is optional — don't auto-jump into it after the last required
+      // transfer field is set; just dismiss the picker's active state.
+      clearActiveField();
     },
-    [focusNoteField],
+    [clearActiveField],
   );
 
   const handleSwapTransferAccounts = useCallback(() => {
