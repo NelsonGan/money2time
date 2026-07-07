@@ -53,6 +53,8 @@ import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { useApp } from '~/context/AppContext';
 import {
+  NUMPAD_HANDLE_HEIGHT,
+  NumpadDrawer,
   NumpadPanel,
   ReceiptField,
   SplitBillModal,
@@ -434,6 +436,10 @@ export function TransactionEditorScreen({
   // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
   // Only meaningful in create mode (not edit / recurring).
   const showBulkToggle = mode === 'create' && !recurringOptions;
+  // Sticky-numpad mode: the amount pad lives in an always-present, pull-down
+  // drawer instead of the shared bottom tool zone. Only the normal editor uses
+  // it; the recurring editor keeps the tool zone (it also hosts repeat/ends).
+  const useStickyNumpad = !recurringOptions;
   const bulkCreateEnabled = showBulkToggle && quickEntryPrefs.bulkCreateEnabled;
   // Bumped after each bulk save so the numpad clears in place (NumpadPanel
   // keeps its own internal expression and won't re-sync from an emptied
@@ -538,6 +544,9 @@ export function TransactionEditorScreen({
     [],
   );
   const [amountExpression, setAmountExpression] = useState('');
+  // Whether the sticky numpad drawer is pulled open. Starts open so the user
+  // can type the amount immediately without tapping the field first.
+  const [numpadExpanded, setNumpadExpanded] = useState(true);
 
   const hasInitialSplits = !!initialSplits && initialSplits.length > 0;
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
@@ -903,10 +912,20 @@ export function TransactionEditorScreen({
   }, [initialValues?.amount]);
 
   useEffect(() => {
+    // In sticky mode the pad persists, so the live expression is cleared on
+    // confirm / bulk-reset instead of when focus leaves the amount field.
+    if (useStickyNumpad) return;
     if (activeField !== 'amount') {
       setAmountExpression('');
     }
-  }, [activeField]);
+  }, [activeField, useStickyNumpad]);
+
+  // Sticky numpad: any field that opens its own surface (a picker sheet, the
+  // date modal, or the note keyboard) tucks the pad away so they don't stack.
+  useEffect(() => {
+    if (!useStickyNumpad) return;
+    if (activeField && activeField !== 'amount') setNumpadExpanded(false);
+  }, [activeField, useStickyNumpad]);
 
   // When the parent amount changes (user typing in the amount field), keep
   // the split rows in sync so the modal's sum bar doesn't show "unaccounted".
@@ -1126,14 +1145,18 @@ export function TransactionEditorScreen({
     return [acct, ...Array.from(set).filter((code) => code !== acct)];
   }, [accountCurrency, accountId, accounts, fxCurrencies, settings.currencyCode]);
 
+  // "Amount is being entered right now": drives the live-expression display and,
+  // in sticky mode, the amount row's active highlight.
+  const amountLive = useStickyNumpad ? numpadExpanded : activeField === 'amount';
+
   const amountDisplay = useMemo(() => {
-    if (activeField === 'amount' && amountExpression) {
+    if (amountLive && amountExpression) {
       return `${entryCurrencySymbol}${amountExpression}`;
     }
     const num = Number(amount);
     if (!amount || !Number.isFinite(num)) return `${entryCurrencySymbol}${formatMoney(0)}`;
     return `${entryCurrencySymbol}${formatMoney(num)}`;
-  }, [activeField, amount, amountExpression, entryCurrencySymbol]);
+  }, [amountLive, amount, amountExpression, entryCurrencySymbol]);
 
   // For a cross-currency transfer, the credited amount in the destination
   // currency — shown next to the main amount and editable via TransferFxModal.
@@ -1198,6 +1221,7 @@ export function TransactionEditorScreen({
     if (!amountDraft || !Number.isFinite(numericAmount)) {
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
       activateField('amount');
+      if (useStickyNumpad) setNumpadExpanded(true);
       return;
     }
 
@@ -1419,6 +1443,8 @@ export function TransactionEditorScreen({
         }
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
+        // Re-open the sticky drawer so the next amount is ready to type.
+        if (useStickyNumpad) setNumpadExpanded(true);
         if (deferredSubmit) {
           setTimeout(deferredSubmit, BULK_CREATE_SUBMIT_DELAY_MS);
         }
@@ -1457,6 +1483,8 @@ export function TransactionEditorScreen({
   const showToolZone =
     activeField !== null &&
     activeField !== 'note' &&
+    // In sticky mode the amount pad is its own drawer, not a tool-zone panel.
+    !(useStickyNumpad && activeField === 'amount') &&
     !inlineRecurringFields.includes(activeField) &&
     !SHEET_FIELDS.includes(activeField) &&
     !MODAL_FIELDS.includes(activeField);
@@ -1466,13 +1494,22 @@ export function TransactionEditorScreen({
     showToolZone && activeField === 'amount' ? Math.min(0.54, summaryFlex + 0.05) : summaryFlex;
   const recurringToolZonePadding =
     isRecurringEditor && showToolZone ? Math.max(520, Math.round(windowHeight * 0.62)) : 0;
+  // Sticky drawer geometry. The pad body is a fixed slice of the screen; a
+  // currency-chip header rides above it for multi-currency expense/income.
+  const showCurrencyChips =
+    useStickyNumpad && !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
+  const numpadHeaderHeight = showCurrencyChips ? 53 : 0;
+  const numpadBodyHeight = Math.round(Math.min(340, Math.max(248, windowHeight * 0.4)));
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
       : 196
-    : showToolZone
-      ? 92
-      : 16;
+    : useStickyNumpad
+      ? // Clear the collapsed drawer's peeking handle.
+        NUMPAD_HANDLE_HEIGHT + 24
+      : showToolZone
+        ? 92
+        : 16;
   const summaryContainerStyle = useMemo(
     () => ({ flex: showToolZone ? effectiveSummaryFlex : 1 }),
     [effectiveSummaryFlex, showToolZone],
@@ -1613,6 +1650,12 @@ export function TransactionEditorScreen({
     (val: string) => {
       setAmount(formatMoney(Number(val)));
       setAmountExpression('');
+      // Sticky mode: Done just pulls the drawer down so the fields are visible;
+      // the user picks the next field themselves.
+      if (useStickyNumpad) {
+        setNumpadExpanded(false);
+        return;
+      }
       // Only auto-jump if the next field is empty — don't yank focus when the
       // user is just touching up the amount on an already-filled transaction.
       if (hideAccountSelector) {
@@ -1623,8 +1666,28 @@ export function TransactionEditorScreen({
         activateField(accountId ? null : 'account');
       }
     },
-    [accountId, activateField, categoryId, fromAccountId, hideAccountSelector, isTransferType],
+    [
+      accountId,
+      activateField,
+      categoryId,
+      fromAccountId,
+      hideAccountSelector,
+      isTransferType,
+      useStickyNumpad,
+    ],
   );
+
+  // Tapping the amount row pulls the sticky drawer open (and closes any other
+  // open field); in the classic layout it just activates the amount tool zone.
+  const handleAmountRowPress = useCallback(() => {
+    if (useStickyNumpad) {
+      void triggerHaptic('selection');
+      activateField(null);
+      setNumpadExpanded(true);
+      return;
+    }
+    activateField('amount');
+  }, [activateField, useStickyNumpad]);
 
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
@@ -2045,8 +2108,8 @@ export function TransactionEditorScreen({
                       <View onLayout={registerFieldLayout('amount')}>
                         <SummaryRow
                           label={I18n.t('transactions.editor.amount')}
-                          isActive={activeField === 'amount'}
-                          onPress={() => activateField('amount')}
+                          isActive={amountLive}
+                          onPress={handleAmountRowPress}
                           rightElement={null}
                         >
                           <View className="flex-row items-center justify-between">
@@ -2761,6 +2824,63 @@ export function TransactionEditorScreen({
           ) : null}
         </TabletContentContainer>
       </View>
+      {useStickyNumpad ? (
+        <NumpadDrawer
+          expanded={numpadExpanded}
+          onExpandedChange={setNumpadExpanded}
+          headerHeight={numpadHeaderHeight}
+          numpadHeight={numpadBodyHeight}
+          resetNonce={bulkEntryNonce}
+          initialExpression={amount}
+          onValueChange={handleAmountValueChange}
+          onConfirm={handleAmountConfirm}
+          header={
+            showCurrencyChips ? (
+              <>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  style={{ flexGrow: 0, maxHeight: 52 }}
+                  contentContainerStyle={{
+                    gap: 8,
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    alignItems: 'center',
+                  }}
+                >
+                  {enabledCurrencies.map((code) => {
+                    const selected = code === entryCurrency;
+                    return (
+                      <Pressable
+                        key={code}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setEntryCurrency(code);
+                        }}
+                        className={cn(
+                          'px-3.5 py-1.5 rounded-full border',
+                          selected
+                            ? 'bg-primary/15 border-primary/50'
+                            : 'bg-secondary/40 border-transparent',
+                        )}
+                      >
+                        <Text
+                          variant="caption"
+                          className={selected ? 'text-primary' : 'text-muted-foreground'}
+                        >
+                          {code}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+                <View className="h-[1px] bg-border/40" />
+              </>
+            ) : null
+          }
+        />
+      ) : null}
       {!hideSplitMode ? (
         <SplitBillModal
           visible={splitBillModalVisible}
