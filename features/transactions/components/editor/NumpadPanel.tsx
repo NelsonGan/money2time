@@ -243,10 +243,19 @@ export function NumpadPanel({
         onConfirm(formatted);
         return;
       } else if (key === '=') {
-        // Evaluate in place: fold the expression down to its result but keep the
-        // pad open (no confirm / auto-jump).
+        // "=" only computes a pending operation. A plain number (no binary
+        // operator — a leading "-" is just a sign) is left untouched so it stays
+        // editable. After a real computation the result behaves like a pre-fill:
+        // the next digit replaces it, so the value never gets "stuck".
+        const body = currentExpression.startsWith('-')
+          ? currentExpression.slice(1)
+          : currentExpression;
+        if (!/[+\-×÷]/.test(body)) {
+          return;
+        }
         const formatted = formatMoney(evaluateExpression(currentExpression));
         expressionRef.current = formatted;
+        pristineRef.current = true;
         setExpression(formatted);
         onValueChange(formatted);
         return;
