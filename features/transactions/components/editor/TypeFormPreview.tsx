@@ -22,7 +22,7 @@ interface TypeFormPreviewProps {
 
 function PreviewRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <View className="px-4 py-3.5 flex-row items-center justify-between">
+    <View className="px-4 py-3.5 min-h-[52px] flex-row items-center justify-between">
       <View className="flex-row items-center gap-2">
         <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
           <Hash size={13} color="#9AA3A0" />
@@ -75,12 +75,14 @@ export function TypeFormPreview({
   const showCategory = type === 'expense' || type === 'income';
 
   return (
-    <View className="px-5 pt-1">
+    // Match the live form's inset (16px side gutters, flush to the top) so a
+    // swipe doesn't visibly re-flow when the page becomes active.
+    <View className="px-4">
       <View
         className="bg-card/60 border border-border/25 overflow-hidden"
         style={{ borderRadius: 20 }}
       >
-        <View className="px-4 py-3.5 flex-row items-center justify-between">
+        <View className="px-4 py-3.5 min-h-[52px] flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
               <Hash size={13} color={themeColors.textMuted} />

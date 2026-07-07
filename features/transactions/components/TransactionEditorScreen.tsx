@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Calendar,
+  Camera,
   ChevronDown,
   ChevronLeft,
   Clock,
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   type GestureResponderEvent,
   InteractionManager,
   Keyboard,
@@ -42,6 +44,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -85,7 +88,7 @@ import {
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
-import { deleteReceiptImage } from '~/services/userAssets';
+import { deleteReceiptImage, saveReceiptImage } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -541,6 +544,47 @@ export function TransactionEditorScreen({
     });
     receiptUriRef.current = nextReceiptUri;
   }, []);
+  // Snap / attach a receipt from the numpad toolbar (mirrors ReceiptField).
+  const pickReceiptFrom = useCallback(
+    async (source: 'camera' | 'library') => {
+      try {
+        const permission =
+          source === 'camera'
+            ? await ImagePicker.requestCameraPermissionsAsync()
+            : await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert(
+            I18n.t('accounts.logo.permission_title'),
+            I18n.t('accounts.logo.permission_message'),
+          );
+          return;
+        }
+        const result =
+          source === 'camera'
+            ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
+            : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+        if (result.canceled || !result.assets?.[0]) return;
+        handleReceiptChange(saveReceiptImage(result.assets[0].uri));
+      } catch {
+        Alert.alert(I18n.t('accounts.logo.upload_failed'));
+      }
+    },
+    [handleReceiptChange],
+  );
+  const handleAddReceipt = useCallback(() => {
+    void triggerHaptic('selection');
+    Alert.alert(I18n.t('transactions.editor.receipt.label'), undefined, [
+      {
+        text: I18n.t('transactions.editor.receipt.take_photo'),
+        onPress: () => void pickReceiptFrom('camera'),
+      },
+      {
+        text: I18n.t('transactions.editor.receipt.choose_from_library'),
+        onPress: () => void pickReceiptFrom('library'),
+      },
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+    ]);
+  }, [pickReceiptFrom]);
   // On unmount: if the editor closed without committing a Save, delete a
   // freshly-picked file that never became the persisted attachment (create-mode
   // attach-then-cancel, or a replace that was abandoned). The persisted file is
@@ -936,13 +980,8 @@ export function TransactionEditorScreen({
     }
   }, [activeField, useStickyNumpad]);
 
-  // Sticky numpad: only the native keyboard (note / rule name / interval) would
-  // fight the pad, so tuck it away just for those. Picker sheets and the date
-  // modal overlay it, so the pad stays put when you open Account / Category etc.
-  useEffect(() => {
-    if (!useStickyNumpad) return;
-    if (activeField && isNativeKeyboardField(activeField)) setNumpadExpanded(false);
-  }, [activeField, isNativeKeyboardField, useStickyNumpad]);
+  // Sticky numpad stays open no matter which field is active — sheets, the date
+  // modal, and even the note keyboard just overlay it.
 
   // When the parent amount changes (user typing in the amount field), keep
   // the split rows in sync so the modal's sum bar doesn't show "unaccounted".
@@ -1660,8 +1699,10 @@ export function TransactionEditorScreen({
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
+  const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   const showNumpadToolbar =
-    useStickyNumpad && (showSplitButton || showCurrencyButton || showSentimentButton);
+    useStickyNumpad &&
+    (showSplitButton || showCurrencyButton || showSentimentButton || showReceiptButton);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
@@ -2482,8 +2523,9 @@ export function TransactionEditorScreen({
                     </SummaryRow>
                   </View>
 
-                  {/* Receipt row (expense / income only) */}
-                  {type === 'expense' || type === 'income' ? (
+                  {/* Receipt is added from the numpad's camera button; the row
+                      only appears once something is attached (to show it). */}
+                  {(type === 'expense' || type === 'income') && receiptUri ? (
                     <>
                       <View className="h-[1px] bg-border/15 mx-4" />
                       <ReceiptField receiptUri={receiptUri} onChange={handleReceiptChange} />
@@ -3055,6 +3097,24 @@ export function TransactionEditorScreen({
                     className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
                   >
                     <SentimentIcon sentiment={sentiment} size={22} />
+                  </Pressable>
+                ) : null}
+                {showReceiptButton ? (
+                  <Pressable
+                    onPress={handleAddReceipt}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                    className={cn(
+                      'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
+                      receiptUri
+                        ? 'bg-primary/15 border-primary/40'
+                        : 'bg-secondary/60 border-border/30',
+                    )}
+                  >
+                    <Camera
+                      size={16}
+                      color={receiptUri ? themeColors.primary : themeColors.textMuted}
+                    />
                   </Pressable>
                 ) : null}
               </View>

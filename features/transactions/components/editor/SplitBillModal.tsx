@@ -421,18 +421,6 @@ export function SplitBillModal({
     onDone();
   }, [onDone]);
 
-  const subtitle =
-    friendCount === 0
-      ? null
-      : paidCount >= friendCount
-        ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
-        : I18n.t(
-            friendCount - paidCount === 1
-              ? 'transactions.editor.split.section_subtitle_unpaid'
-              : 'transactions.editor.split.section_subtitle_unpaid_plural',
-            { count: friendCount - paidCount },
-          );
-
   const body = (
     <>
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -445,11 +433,6 @@ export function SplitBillModal({
           </Pressable>
           <View className="items-center flex-1 px-2">
             <Text variant="bodyStrong">{I18n.t('transactions.editor.split.toggle_title')}</Text>
-            {subtitle ? (
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {subtitle}
-              </Text>
-            ) : null}
           </View>
           <Pressable
             onPress={handleDone}
