@@ -1507,7 +1507,8 @@ export function TransactionEditorScreen({
   const showNumpadToolbar =
     useStickyNumpad && (showSplitButton || showCurrencyButton || showBulkToggle);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
-  const numpadBodyHeight = Math.round(Math.min(340, Math.max(248, windowHeight * 0.4)));
+  // Compact 4-row pad with short keys — deliberately smaller than the old 5-row.
+  const numpadBodyHeight = Math.round(Math.min(252, Math.max(188, windowHeight * 0.27)));
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -2784,6 +2785,8 @@ export function TransactionEditorScreen({
           initialExpression={amount}
           onValueChange={handleAmountValueChange}
           onConfirm={handleAmountConfirm}
+          onDatePress={() => activateField('date')}
+          dateLabel={formatDateDisplay(date, activeLocale)}
           header={
             showNumpadToolbar ? (
               <View
