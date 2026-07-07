@@ -241,14 +241,15 @@ const styles = StyleSheet.create({
   },
   collapseChevron: {
     position: 'absolute',
-    top: -14,
-    right: 12,
+    // Float above the panel's top edge (above the handle), pinned to the right.
+    top: -44,
+    right: 16,
     zIndex: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    elevation: 8,
   },
   noteInput: {
     flex: 1,
@@ -1150,10 +1151,10 @@ export function TransactionEditorScreen({
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
-      // Note focused: pull the whole panel (numpad included) up with the
-      // keyboard so the pad stays visible just above it, rather than tucking
-      // behind. Ride the top of the keyboard.
-      target = -keyboardHeight;
+      // Note focused: the numpad sits at its expanded spot and the keyboard
+      // overlays it; lift the panel only enough for the note to clear the
+      // keyboard's top (the numpad tucks behind).
+      target = -Math.max(0, keyboardHeight - collapsibleHeight);
     } else if (!numpadExpanded) {
       target = Math.max(0, collapsibleHeight - COLLAPSE_PEEK);
     }
@@ -2043,6 +2044,9 @@ export function TransactionEditorScreen({
       cancelAnimationFrame(noteBlurFrameRef.current);
       noteBlurFrameRef.current = null;
     }
+    // Focusing the note pulls the numpad up to its spot (if collapsed) so the
+    // keyboard overlays it in place rather than opening onto empty space.
+    setNumpadExpanded(true);
     setActiveField('note');
   }, []);
 
@@ -3511,6 +3515,26 @@ export function TransactionEditorScreen({
             setPanelHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
           }}
         >
+          {/* Floating collapse chevron — sits above the whole panel at the top
+              right (above the handle), so it's reachable in both states. */}
+          <Pressable
+            onPress={toggleNumpad}
+            accessibilityRole="button"
+            accessibilityLabel={numpadExpanded ? 'Hide keypad' : 'Show keypad'}
+            hitSlop={10}
+            style={[
+              styles.collapseChevron,
+              { backgroundColor: themeColors.card, borderColor: themeColors.border },
+            ]}
+            className="h-9 w-9 items-center justify-center rounded-full border active:opacity-70"
+          >
+            {numpadExpanded ? (
+              <ChevronDown size={18} color={themeColors.textMuted} />
+            ) : (
+              <ChevronUp size={18} color={themeColors.textMuted} />
+            )}
+          </Pressable>
+
           {/* Grab handle at the very top of the panel — tap to toggle, or drag
               up/down to pull the numpad open / closed. */}
           <GestureDetector gesture={collapseGesture}>
@@ -3798,33 +3822,14 @@ export function TransactionEditorScreen({
           {/* Collapsible region (numpad + save). Always mounted — collapsing
               slides it off-screen via the panel translate rather than unmounting,
               so the amount card smoothly pulls down. The peek padding is the
-              margin left below the card when collapsed. A floating chevron at the
-              top-right of the pad also toggles the collapse. */}
+              margin left below the card when collapsed. */}
           <View
-            className="relative"
             style={styles.collapsible}
             onLayout={(event) => {
               const measured = event.nativeEvent.layout.height;
               setCollapsibleHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
             }}
           >
-            <Pressable
-              onPress={toggleNumpad}
-              accessibilityRole="button"
-              accessibilityLabel={numpadExpanded ? 'Hide keypad' : 'Show keypad'}
-              hitSlop={10}
-              style={[
-                styles.collapseChevron,
-                { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              ]}
-              className="h-8 w-8 items-center justify-center rounded-full border active:opacity-70"
-            >
-              {numpadExpanded ? (
-                <ChevronDown size={16} color={themeColors.textMuted} />
-              ) : (
-                <ChevronUp size={16} color={themeColors.textMuted} />
-              )}
-            </Pressable>
             <View style={{ height: numpadBodyHeight }}>
               <NumpadPanel
                 compact
