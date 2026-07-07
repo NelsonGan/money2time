@@ -216,13 +216,6 @@ const styles = StyleSheet.create({
   noteInput: {
     flex: 1,
   },
-  noteSuggestionsPanel: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
-  },
   noteSuggestionRow: {
     paddingHorizontal: 16,
     paddingVertical: 11,
@@ -3465,28 +3458,17 @@ export function TransactionEditorScreen({
                   <SentimentIcon sentiment={sentiment} size={22} />
                 </Pressable>
               ) : null}
-              {showReceiptButton && receiptUri ? (
+              {showReceiptButton ? (
+                // Once a receipt is attached the camera turns into a view button;
+                // replace/remove then live inside the full-screen preview.
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
-                    setReceiptViewerVisible(true);
+                    if (receiptUri) setReceiptViewerVisible(true);
+                    else handleAddReceipt();
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
-                  className="h-9 w-9 items-center justify-center rounded-full border border-primary/40 bg-primary/15 active:opacity-70"
-                >
-                  <Eye size={16} color={themeColors.primary} />
-                </Pressable>
-              ) : null}
-              {showReceiptButton ? (
-                <Pressable
-                  onPress={handleAddReceipt}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    receiptUri
-                      ? I18n.t('transactions.editor.receipt.replace')
-                      : I18n.t('transactions.editor.receipt.label')
-                  }
                   className={cn(
                     'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
                     receiptUri
@@ -3494,112 +3476,115 @@ export function TransactionEditorScreen({
                       : 'border-border/30 bg-secondary/60',
                   )}
                 >
-                  <Camera
-                    size={16}
-                    color={receiptUri ? themeColors.primary : themeColors.textMuted}
-                  />
+                  {receiptUri ? (
+                    <Eye size={16} color={themeColors.primary} />
+                  ) : (
+                    <Camera size={16} color={themeColors.textMuted} />
+                  )}
                 </Pressable>
               ) : null}
             </View>
           ) : null}
 
-          {/* Amount — the headline of the panel, tapping brings the pad back */}
-          <Pressable
-            onPress={handleAmountRowPress}
-            accessibilityRole="button"
-            className="flex-row items-end justify-between px-4 pt-2"
-          >
-            <Text variant="caption" tone="muted" className="mb-1.5">
-              {I18n.t('transactions.editor.amount')}
-            </Text>
-            <View className="max-w-[68%] items-end">
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.panelAmount,
-                  { fontSize: amountDisplay.length > 12 ? 24 : amountDisplay.length > 9 ? 30 : 34 },
-                ]}
-                className={cn(
-                  amountTone === 'error'
-                    ? 'text-destructive'
-                    : amountTone === 'success'
-                      ? 'text-success'
-                      : 'text-foreground',
-                )}
-              >
-                {amountDisplay}
-              </Text>
-              {transferReceivedLabel ? (
-                <Pressable
-                  onPress={() => setTransferFxModalVisible(true)}
-                  hitSlop={6}
-                  className="mt-0.5 flex-row items-center gap-1"
+          {/* Amount + Note — one card split by a divider. Amount sits on the
+              left (no label); tapping it brings the pad back. */}
+          <View className="mx-4 mt-2 overflow-hidden rounded-2xl border border-border/25 bg-secondary/30">
+            <Pressable
+              onPress={handleAmountRowPress}
+              accessibilityRole="button"
+              className="flex-row items-center justify-between px-4 pb-2 pt-2.5"
+            >
+              <View className="shrink">
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.panelAmount,
+                    {
+                      fontSize: amountDisplay.length > 12 ? 24 : amountDisplay.length > 9 ? 30 : 34,
+                    },
+                  ]}
+                  className={cn(
+                    amountTone === 'error'
+                      ? 'text-destructive'
+                      : amountTone === 'success'
+                        ? 'text-success'
+                        : 'text-foreground',
+                  )}
                 >
-                  <Text variant="caption" numberOfLines={1} style={{ color: themeColors.primary }}>
-                    {transferReceivedLabel}
-                  </Text>
-                  <Pencil size={11} color={themeColors.primary} />
-                </Pressable>
-              ) : null}
-              {reportingEquivLabel ? (
-                <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-                  {reportingEquivLabel}
+                  {amountDisplay}
                 </Text>
-              ) : null}
-            </View>
-          </Pressable>
-          {type === 'expense' && expenseNudgeParts ? (
-            <Text
-              variant="caption"
-              tone="muted"
-              className="px-4 pt-0.5 text-right"
-              style={styles.nudgeLabel}
-            >
-              {expenseNudgeParts.before}
-              <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
-                {expenseNudgeParts.hours}
-              </Text>
-              {expenseNudgeParts.after}
-            </Text>
-          ) : null}
-
-          {/* Note suggestions drop-up, shown above the note while typing */}
-          {noteSuggestionsVisible ? (
-            <View
-              className="mx-4 mt-2 overflow-hidden rounded-2xl border border-border/25 bg-card"
-              style={styles.noteSuggestionsPanel}
-            >
-              {noteSuggestions.map((suggestion, index) => (
-                <React.Fragment key={suggestion}>
-                  {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
-                  <Pressable
-                    style={styles.noteSuggestionRow}
-                    onPress={() => {
-                      handleNoteChange(suggestion);
-                      setNoteSuggestions([]);
-                      noteInputRef.current?.blur();
-                      if (mode === 'create') {
-                        const fields = getLatestTransactionFieldsByNote(suggestion);
-                        if (fields) {
-                          if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
-                          if (!accountId && fields.accountId) setAccountId(fields.accountId);
-                          if (!amount && fields.amount != null) setAmount(String(fields.amount));
-                        }
-                      }
-                    }}
-                  >
-                    <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
-                      {suggestion}
+                {type === 'expense' && expenseNudgeParts ? (
+                  <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
+                    {expenseNudgeParts.before}
+                    <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
+                      {expenseNudgeParts.hours}
                     </Text>
-                  </Pressable>
-                </React.Fragment>
-              ))}
-            </View>
-          ) : null}
+                    {expenseNudgeParts.after}
+                  </Text>
+                ) : null}
+              </View>
+              {transferReceivedLabel || reportingEquivLabel ? (
+                <View className="items-end pl-2">
+                  {transferReceivedLabel ? (
+                    <Pressable
+                      onPress={() => setTransferFxModalVisible(true)}
+                      hitSlop={6}
+                      className="flex-row items-center gap-1"
+                    >
+                      <Text
+                        variant="caption"
+                        numberOfLines={1}
+                        style={{ color: themeColors.primary }}
+                      >
+                        {transferReceivedLabel}
+                      </Text>
+                      <Pencil size={11} color={themeColors.primary} />
+                    </Pressable>
+                  ) : null}
+                  {reportingEquivLabel ? (
+                    <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+                      {reportingEquivLabel}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : null}
+            </Pressable>
 
-          {/* Note — one short line; focusing it raises the keyboard + hides pad */}
-          <View className="px-4 pb-2 pt-2">
-            <View className="flex-row items-center gap-2 rounded-2xl bg-secondary/40 px-3 py-2">
+            <View className="h-[1px] bg-border/20" />
+
+            {/* Note suggestions drop-up, shown above the note while typing */}
+            {noteSuggestionsVisible ? (
+              <View className="border-b border-border/15">
+                {noteSuggestions.map((suggestion, index) => (
+                  <React.Fragment key={suggestion}>
+                    {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+                    <Pressable
+                      style={styles.noteSuggestionRow}
+                      onPress={() => {
+                        handleNoteChange(suggestion);
+                        setNoteSuggestions([]);
+                        noteInputRef.current?.blur();
+                        if (mode === 'create') {
+                          const fields = getLatestTransactionFieldsByNote(suggestion);
+                          if (fields) {
+                            if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
+                            if (!accountId && fields.accountId) setAccountId(fields.accountId);
+                            if (!amount && fields.amount != null) setAmount(String(fields.amount));
+                          }
+                        }
+                      }}
+                    >
+                      <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                        {suggestion}
+                      </Text>
+                    </Pressable>
+                  </React.Fragment>
+                ))}
+              </View>
+            ) : null}
+
+            {/* Note — one short line; focusing it raises the keyboard + hides pad */}
+            <View className="flex-row items-center gap-2 px-4 py-2.5">
               <FileText size={14} color={themeColors.textMuted} />
               <TextInput
                 ref={noteInputRef}
