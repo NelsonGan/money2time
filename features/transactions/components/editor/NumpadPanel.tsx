@@ -1,4 +1,4 @@
-import { Delete } from 'lucide-react-native';
+import { Calendar, Delete } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -40,6 +40,15 @@ interface NumpadPanelProps {
   onValueChange: (expression: string) => void;
   onConfirm: (formatted: string) => void;
   onBackgroundPress?: () => void;
+  /**
+   * Compact 4x4 layout: digits + decimal + delete + a single +/- pair, no
+   * C / × / ÷ / Done. Used by the sticky amount drawer.
+   */
+  compact?: boolean;
+  /** Compact only: turns the top-right key into a date-picker button. */
+  onDatePress?: () => void;
+  /** Compact only: label shown on the date button (e.g. "Jul 7"). */
+  dateLabel?: string;
 }
 
 const NumpadKey = React.memo(function NumpadKey({
@@ -146,6 +155,9 @@ export function NumpadPanel({
   onValueChange,
   onConfirm,
   onBackgroundPress,
+  compact = false,
+  onDatePress,
+  dateLabel,
 }: NumpadPanelProps) {
   const themeColors = useThemeColors();
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -222,6 +234,70 @@ export function NumpadPanel({
   const handleDeleteLongPress = useCallback(() => {
     handleKeyPress('C');
   }, [handleKeyPress]);
+
+  const deleteKey = (
+    <NumpadKey
+      value="del"
+      variant="utility"
+      onPress={handleKeyPress}
+      onLongPress={handleDeleteLongPress}
+      icon={<Delete size={15} color={themeColors.textMuted} />}
+    />
+  );
+
+  if (compact) {
+    return (
+      <View className="flex-1 px-3 pt-0.5">
+        <View className="flex-1 gap-0.5">
+          <View className="flex-1 flex-row gap-0.5">
+            <NumpadKey value="7" onPress={handleKeyPress} />
+            <NumpadKey value="8" onPress={handleKeyPress} />
+            <NumpadKey value="9" onPress={handleKeyPress} />
+            {onDatePress ? (
+              <View className="flex-1">
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onDatePress();
+                  }}
+                  android_disableSound
+                  android_ripple={{ color: 'rgba(34, 138, 111, 0.2)', borderless: false }}
+                  className="flex-1 flex-col items-center justify-center gap-0.5 rounded-[18px] border border-border/45 bg-secondary active:opacity-70"
+                >
+                  <Calendar size={15} color={themeColors.textMuted} />
+                  {dateLabel ? (
+                    <Text variant="caption" tone="muted" className="text-[11px]">
+                      {dateLabel}
+                    </Text>
+                  ) : null}
+                </Pressable>
+              </View>
+            ) : (
+              deleteKey
+            )}
+          </View>
+          <View className="flex-1 flex-row gap-0.5">
+            <NumpadKey value="4" onPress={handleKeyPress} />
+            <NumpadKey value="5" onPress={handleKeyPress} />
+            <NumpadKey value="6" onPress={handleKeyPress} />
+            {onDatePress ? deleteKey : <View className="flex-1" />}
+          </View>
+          <View className="flex-1 flex-row gap-0.5">
+            <NumpadKey value="1" onPress={handleKeyPress} />
+            <NumpadKey value="2" onPress={handleKeyPress} />
+            <NumpadKey value="3" onPress={handleKeyPress} />
+            <NumpadKey value="-" variant="operator" onPress={handleKeyPress} />
+          </View>
+          <View className="flex-1 flex-row gap-0.5">
+            <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
+            <NumpadKey value="." onPress={handleKeyPress} />
+            <NumpadKey value="+" variant="operator" onPress={handleKeyPress} />
+          </View>
+        </View>
+        <View style={{ minHeight: Math.max(4, bottomInset) }} />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 px-3 pt-0.5">

@@ -31,6 +31,8 @@ interface NumpadDrawerProps {
   resetNonce?: number;
   onValueChange: (expression: string) => void;
   onConfirm: (formatted: string) => void;
+  onDatePress?: () => void;
+  dateLabel?: string;
 }
 
 function clampY(value: number, max: number): number {
@@ -56,6 +58,8 @@ export function NumpadDrawer({
   resetNonce,
   onValueChange,
   onConfirm,
+  onDatePress,
+  dateLabel,
 }: NumpadDrawerProps) {
   const themeColors = useThemeColors();
   const fullHeight = NUMPAD_HANDLE_HEIGHT + headerHeight + numpadHeight;
@@ -117,10 +121,13 @@ export function NumpadDrawer({
       {header ? <View style={{ height: headerHeight }}>{header}</View> : null}
       <View style={{ height: numpadHeight }}>
         <NumpadPanel
+          compact
           resetNonce={resetNonce}
           initialExpression={initialExpression}
           onValueChange={onValueChange}
           onConfirm={onConfirm}
+          onDatePress={onDatePress}
+          dateLabel={dateLabel}
         />
       </View>
     </Animated.View>
