@@ -1973,15 +1973,12 @@ export function TransactionEditorScreen({
     [effectiveSummaryFlex],
   );
   // Bottom padding for the sticky background so its last row clears the pinned
-  // panel. When the numpad is collapsed the panel slides down off-screen, so the
-  // background only needs to clear the still-visible portion. Memoised so it
-  // doesn't bust CategoryGrid's memo on every keystroke.
-  const visiblePanelHeight = numpadExpanded
-    ? panelHeight
-    : Math.max(0, panelHeight - Math.max(0, collapsibleHeight - COLLAPSE_PEEK));
+  // panel. Keyed only on the measured panel height (NOT the collapse state) so
+  // toggling the numpad doesn't change this style — which would bust CategoryGrid's
+  // memo and re-render every category tile mid-animation (a visible jank).
   const backgroundContentStyle = useMemo(
-    () => ({ paddingHorizontal: 16, paddingTop: 14, paddingBottom: visiblePanelHeight + 24 }),
-    [visiblePanelHeight],
+    () => ({ paddingHorizontal: 16, paddingTop: 14, paddingBottom: panelHeight + 24 }),
+    [panelHeight],
   );
 
   const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
