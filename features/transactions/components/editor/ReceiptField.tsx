@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, Receipt, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -36,6 +36,10 @@ const styles = StyleSheet.create({
 export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // Fall back to the synchronously-available window metrics so the controls
+  // never tuck under the notch if the in-modal context insets read 0.
+  const topInset = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 12);
+  const bottomInset = Math.max(insets.bottom, initialWindowMetrics?.insets.bottom ?? 0);
   const [viewerVisible, setViewerVisible] = useState(false);
   const fileUri = useMemo(() => getReceiptUri(receiptUri), [receiptUri]);
 
@@ -144,20 +148,21 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
       <ThemeModal
         visible={viewerVisible}
         animationType="fade"
-        transparent={false}
+        transparent
         onRequestClose={() => setViewerVisible(false)}
       >
-        {/* Pad with the app's safe-area insets directly (SafeAreaView inside a
-            Modal can't read the provider reliably); no statusBarTranslucent /
-            fullScreen presentation, which was pushing the editor's own layout
-            up after dismiss. The image lives in its own flex region so it never
-            overlaps the close/delete controls. */}
+        {/* Transparent modal with an opaque backdrop — matches the editor's
+            other sheets. An opaque (transparent={false}) modal presented over
+            the editor's own transparentModal was corrupting its safe area on
+            dismiss and shoving the whole screen up. Pad with the app insets so
+            the controls clear the notch; the image gets its own flex region so
+            it never overlaps the close/delete buttons. */}
         <View
           style={{
             flex: 1,
             backgroundColor: '#000',
-            paddingTop: Math.max(insets.top, 12),
-            paddingBottom: insets.bottom,
+            paddingTop: topInset,
+            paddingBottom: bottomInset,
           }}
         >
           <View className="flex-row items-center justify-between px-5 py-3">
