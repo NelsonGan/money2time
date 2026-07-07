@@ -215,10 +215,27 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     flex: 1,
+    fontSize: 16,
   },
   noteSuggestionRow: {
     paddingHorizontal: 16,
     paddingVertical: 11,
+  },
+  floatingSuggestions: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: '100%',
+    marginBottom: 8,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+    zIndex: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 8,
   },
 });
 
@@ -662,14 +679,22 @@ export function TransactionEditorScreen({
   );
   const [amountExpression, setAmountExpression] = useState('');
   // Height of the software keyboard while the note field is focused. When > 0 we
-  // lift the pinned bottom panel above the keyboard and hide the numpad + save
-  // row, so the note input sits just over the keyboard. Restored to 0 on blur.
+  // lift the pinned bottom panel just enough for the note to clear the keyboard.
+  // Restored to 0 on blur.
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const keyboardVisible = keyboardHeight > 0;
+  // On Android the window resizes above the keyboard, so the numpad can't just
+  // sit behind it — hide it there. On iOS the numpad stays mounted behind the
+  // keyboard so the amount card only nudges up (no jarring full-height jump).
+  const hideNumpadForKeyboard = keyboardVisible && Platform.OS === 'android';
   // Measured height of the pinned bottom panel while the numpad is visible, used
   // to reserve scroll padding under the background categories. Captured only when
   // the numpad is showing so a keyboard-driven collapse doesn't shrink it.
   const [panelHeight, setPanelHeight] = useState(0);
+  // Measured height of everything below the note (numpad + save row). The
+  // keyboard lift only needs to cover the gap the keyboard would hide beyond
+  // this, so the note clears it without flinging the whole card upward.
+  const [belowNoteHeight, setBelowNoteHeight] = useState(0);
   // Currency picker (opened from the numpad toolbar) for expense/income entry.
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
@@ -1037,9 +1062,9 @@ export function TransactionEditorScreen({
     Keyboard.dismiss();
   }, []);
 
-  // Track the keyboard so the pinned bottom panel can ride just above it (and
-  // hide the numpad) while the note field is being typed. iOS fires *Will*
-  // events for a smooth, pre-animation lift; Android only has *Did*.
+  // Track the keyboard so the pinned bottom panel can ride just above it while
+  // the note field is being typed. iOS fires *Will* events for a smooth,
+  // pre-animation lift; Android only has *Did*.
   useEffect(() => {
     if (!useStickyNumpad) return;
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -1055,17 +1080,23 @@ export function TransactionEditorScreen({
   }, [useStickyNumpad]);
 
   // Drive the panel's upward lift as a Reanimated timing so it tracks the
-  // keyboard smoothly instead of snapping. Only iOS needs a manual lift: on
-  // Android the window resizes above the keyboard (default softInputMode), so
-  // the bottom-anchored panel is already raised and a translate would double it.
+  // keyboard smoothly instead of snapping. Only iOS needs a manual lift (Android
+  // resizes the window). Lift the *minimum* so the note clears the keyboard: the
+  // numpad + save row already sit below the note, so we only cover whatever the
+  // keyboard would still hide beyond them — the amount card barely moves.
   const panelLift = useSharedValue(0);
   useEffect(() => {
-    const target = Platform.OS === 'ios' ? keyboardHeight : 0;
+    // Lift just enough to tuck the numpad exactly behind the keyboard; the card's
+    // own bottom margin then shows as a clean gap above the keyboard.
+    const target =
+      Platform.OS === 'ios' && keyboardHeight > 0
+        ? Math.max(0, keyboardHeight - belowNoteHeight)
+        : 0;
     panelLift.value = withTiming(target, {
       duration: Platform.OS === 'ios' ? 250 : 180,
       easing: Easing.out(Easing.cubic),
     });
-  }, [keyboardHeight, panelLift]);
+  }, [keyboardHeight, belowNoteHeight, panelLift]);
   const panelAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -panelLift.value }],
   }));
@@ -3487,21 +3518,24 @@ export function TransactionEditorScreen({
           ) : null}
 
           {/* Amount + Note — one card split by a divider. Amount sits on the
-              left (no label); tapping it brings the pad back. */}
-          <View className="mx-4 mt-2 overflow-hidden rounded-2xl border border-border/25 bg-secondary/30">
+              left (no label); tapping it brings the pad back. The bottom margin
+              doubles as the clean gap above the keyboard when the note is typed. */}
+          <View className="mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
             <Pressable
               onPress={handleAmountRowPress}
               accessibilityRole="button"
-              className="flex-row items-center justify-between px-4 pb-2 pt-2.5"
+              className="flex-row items-center justify-between px-4 pb-2 pt-3"
             >
               <View className="shrink">
                 <Text
                   numberOfLines={1}
                   style={[
                     styles.panelAmount,
-                    {
-                      fontSize: amountDisplay.length > 12 ? 24 : amountDisplay.length > 9 ? 30 : 34,
-                    },
+                    amountDisplay.length > 12
+                      ? { fontSize: 24, lineHeight: 30 }
+                      : amountDisplay.length > 9
+                        ? { fontSize: 30, lineHeight: 37 }
+                        : { fontSize: 34, lineHeight: 42 },
                   ]}
                   className={cn(
                     amountTone === 'error'
@@ -3552,40 +3586,46 @@ export function TransactionEditorScreen({
 
             <View className="h-[1px] bg-border/20" />
 
-            {/* Note suggestions drop-up, shown above the note while typing */}
-            {noteSuggestionsVisible ? (
-              <View className="border-b border-border/15">
-                {noteSuggestions.map((suggestion, index) => (
-                  <React.Fragment key={suggestion}>
-                    {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
-                    <Pressable
-                      style={styles.noteSuggestionRow}
-                      onPress={() => {
-                        handleNoteChange(suggestion);
-                        setNoteSuggestions([]);
-                        noteInputRef.current?.blur();
-                        if (mode === 'create') {
-                          const fields = getLatestTransactionFieldsByNote(suggestion);
-                          if (fields) {
-                            if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
-                            if (!accountId && fields.accountId) setAccountId(fields.accountId);
-                            if (!amount && fields.amount != null) setAmount(String(fields.amount));
+            {/* Note — focusing it raises the keyboard. The suggestions float
+                above it (absolute) so they never push the amount/note around. */}
+            <View className="relative flex-row items-center gap-2.5 px-4 py-3.5">
+              {noteSuggestionsVisible ? (
+                <View
+                  style={[
+                    styles.floatingSuggestions,
+                    { backgroundColor: themeColors.card, borderColor: themeColors.border },
+                  ]}
+                >
+                  {noteSuggestions.map((suggestion, index) => (
+                    <React.Fragment key={suggestion}>
+                      {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+                      <Pressable
+                        style={styles.noteSuggestionRow}
+                        onPress={() => {
+                          handleNoteChange(suggestion);
+                          setNoteSuggestions([]);
+                          noteInputRef.current?.blur();
+                          if (mode === 'create') {
+                            const fields = getLatestTransactionFieldsByNote(suggestion);
+                            if (fields) {
+                              if (!categoryId && fields.categoryId)
+                                setCategoryId(fields.categoryId);
+                              if (!accountId && fields.accountId) setAccountId(fields.accountId);
+                              if (!amount && fields.amount != null)
+                                setAmount(String(fields.amount));
+                            }
                           }
-                        }
-                      }}
-                    >
-                      <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
-                        {suggestion}
-                      </Text>
-                    </Pressable>
-                  </React.Fragment>
-                ))}
-              </View>
-            ) : null}
-
-            {/* Note — one short line; focusing it raises the keyboard + hides pad */}
-            <View className="flex-row items-center gap-2 px-4 py-2.5">
-              <FileText size={14} color={themeColors.textMuted} />
+                        }}
+                      >
+                        <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                          {suggestion}
+                        </Text>
+                      </Pressable>
+                    </React.Fragment>
+                  ))}
+                </View>
+              ) : null}
+              <FileText size={16} color={themeColors.textMuted} />
               <TextInput
                 ref={noteInputRef}
                 value={note}
@@ -3608,49 +3648,55 @@ export function TransactionEditorScreen({
             </View>
           </View>
 
-          {/* Numpad — the panel's core; hidden while the note keyboard is up */}
-          {keyboardVisible ? null : (
-            <View style={{ height: numpadBodyHeight }}>
-              <NumpadPanel
-                compact
-                resetNonce={bulkEntryNonce}
-                initialExpression={amount}
-                onValueChange={handleAmountValueChange}
-                onConfirm={handleAmountConfirm}
-                onDatePress={() => activateField('date')}
-                dateLabel={formatDateDisplay(date, activeLocale)}
-              />
-            </View>
-          )}
-
-          {/* Save action(s) — hidden while typing a note */}
-          {keyboardVisible ? null : (
+          {/* Numpad + Save — everything below the note. On iOS it stays mounted
+              behind the keyboard (so the amount card only nudges up); on Android
+              the window resizes, so hide it there. Measured to size the keyboard
+              lift and the background's bottom padding. */}
+          {hideNumpadForKeyboard ? null : (
             <View
-              className="flex-row gap-2.5 px-4 pt-2"
-              style={{ paddingBottom: numpadFooterBottomPad }}
+              onLayout={(event) => {
+                const measured = event.nativeEvent.layout.height;
+                setBelowNoteHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+              }}
             >
-              <Pressable
-                onPress={() => handleSubmit(false)}
-                accessibilityRole="button"
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+              <View style={{ height: numpadBodyHeight }}>
+                <NumpadPanel
+                  compact
+                  resetNonce={bulkEntryNonce}
+                  initialExpression={amount}
+                  onValueChange={handleAmountValueChange}
+                  onConfirm={handleAmountConfirm}
+                  onDatePress={() => activateField('date')}
+                  dateLabel={formatDateDisplay(date, activeLocale)}
+                />
+              </View>
+              <View
+                className="flex-row gap-2.5 px-4 pt-2"
+                style={{ paddingBottom: numpadFooterBottomPad }}
               >
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {saveLabel}
-                </Text>
-              </Pressable>
-              {showBulkToggle ? (
                 <Pressable
-                  onPress={() => handleSubmit(true)}
+                  onPress={() => handleSubmit(false)}
                   accessibilityRole="button"
-                  accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
-                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
                 >
-                  <Layers size={16} color={themeColors.primary} />
-                  <Text variant="bodyStrong" className="text-primary">
+                  <Text variant="bodyStrong" className="text-primary-foreground">
                     {saveLabel}
                   </Text>
                 </Pressable>
-              ) : null}
+                {showBulkToggle ? (
+                  <Pressable
+                    onPress={() => handleSubmit(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
+                    className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                  >
+                    <Layers size={16} color={themeColors.primary} />
+                    <Text variant="bodyStrong" className="text-primary">
+                      {saveLabel}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
           )}
         </Animated.View>
