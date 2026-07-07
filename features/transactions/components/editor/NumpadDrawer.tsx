@@ -69,7 +69,10 @@ export function NumpadDrawer({
 }: NumpadDrawerProps) {
   const themeColors = useThemeColors();
   const fullHeight = NUMPAD_HANDLE_HEIGHT + headerHeight + numpadHeight + footerHeight;
-  const collapsedOffset = fullHeight - NUMPAD_HANDLE_HEIGHT;
+  // Collapsing only tucks away the numpad body + footer; the grab handle and the
+  // header action row (split / currency / sentiment / receipt) stay peeking so
+  // the user keeps quick access to them while browsing the fields above.
+  const collapsedOffset = numpadHeight + footerHeight;
 
   const translateY = useSharedValue(expanded ? 0 : collapsedOffset);
   const startY = useSharedValue(0);
