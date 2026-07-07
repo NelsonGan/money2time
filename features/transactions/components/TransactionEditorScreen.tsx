@@ -1437,8 +1437,10 @@ export function TransactionEditorScreen({
   }, [accountCurrency, accountId, accounts, fxCurrencies, settings.currencyCode]);
 
   // "Amount is being entered right now": drives the live-expression display. In
-  // sticky mode the pad is always present unless the note keyboard has taken over.
-  const amountLive = useStickyNumpad ? !keyboardVisible : activeField === 'amount';
+  // sticky mode the pad always owns the amount, so keep showing the raw typed
+  // value (e.g. "656") the whole time — don't flip to a formatted "656.00" just
+  // because the note keyboard came up.
+  const amountLive = useStickyNumpad ? true : activeField === 'amount';
 
   const amountDisplay = useMemo(() => {
     if (amountLive && amountExpression) {
