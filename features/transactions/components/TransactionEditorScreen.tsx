@@ -42,6 +42,8 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
@@ -1569,6 +1571,41 @@ export function TransactionEditorScreen({
   const summaryFlex = windowHeight < 650 ? 0.38 : windowHeight < 750 ? 0.42 : 0.46;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
+  // The type selector lives in the header as swipeable tabs (create/edit). The
+  // recurring editor keeps its titled header + pill row.
+  const useTypeTabs = showTypeSelector && !isRecurringEditor;
+  const typeTint = useCallback(
+    (value: TransactionType) =>
+      value === 'expense'
+        ? themeColors.error
+        : value === 'income'
+          ? themeColors.success
+          : themeColors.primary,
+    [themeColors.error, themeColors.primary, themeColors.success],
+  );
+  const swipeType = useCallback(
+    (direction: 1 | -1) => {
+      const index = availableTypeCards.findIndex((c) => c.value === type);
+      if (index < 0) return;
+      const next = availableTypeCards[index + direction];
+      if (!next) return;
+      handleTypeChange(next.value);
+    },
+    [availableTypeCards, handleTypeChange, type],
+  );
+  const typeSwipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(useTypeTabs)
+        .activeOffsetX([-24, 24])
+        .failOffsetY([-16, 16])
+        .onEnd((event) => {
+          'worklet';
+          if (Math.abs(event.translationX) < 48) return;
+          runOnJS(swipeType)(event.translationX < 0 ? 1 : -1);
+        }),
+    [swipeType, useTypeTabs],
+  );
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
   const showToolZone =
     activeField !== null &&
@@ -2054,7 +2091,7 @@ export function TransactionEditorScreen({
             onStartShouldSetResponder={shouldHandleBackgroundPress}
             onResponderRelease={clearActiveField}
           >
-            <View className="flex-row items-center gap-3">
+            <View className="flex-1 flex-row items-center gap-3">
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('common.back')}
@@ -2066,14 +2103,48 @@ export function TransactionEditorScreen({
               >
                 <ChevronLeft size={14} color={themeColors.textSoft} />
               </Pressable>
-              <View>
-                <Text variant="subheading">{title}</Text>
-                {showSubtitle ? (
-                  <Text variant="caption" tone="muted">
-                    {subtitle}
-                  </Text>
-                ) : null}
-              </View>
+              {useTypeTabs ? (
+                <View className="flex-1 flex-row items-center gap-5">
+                  {availableTypeCards.map((item) => {
+                    const active = type === item.value;
+                    return (
+                      <Pressable
+                        key={item.value}
+                        onPress={() => handleTypeChange(item.value)}
+                        accessibilityRole="tab"
+                        accessibilityState={{ selected: active }}
+                        className="pb-1"
+                      >
+                        <View className="flex-row items-center gap-1.5">
+                          <TransactionTypeGlyph
+                            type={item.value}
+                            color={active ? typeTint(item.value) : themeColors.textMuted}
+                          />
+                          <Text
+                            variant="subheading"
+                            className={cn(active ? 'text-foreground' : 'text-muted-foreground')}
+                          >
+                            {item.label}
+                          </Text>
+                        </View>
+                        <View
+                          className="mt-1 h-0.5 rounded-full"
+                          style={{ backgroundColor: active ? typeTint(item.value) : 'transparent' }}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : (
+                <View>
+                  <Text variant="subheading">{title}</Text>
+                  {showSubtitle ? (
+                    <Text variant="caption" tone="muted">
+                      {subtitle}
+                    </Text>
+                  ) : null}
+                </View>
+              )}
             </View>
             {/* In sticky mode the save action lives below the numpad; here we
                 keep only Delete (edit) and the recurring editor's Save. */}
@@ -2096,7 +2167,7 @@ export function TransactionEditorScreen({
             </View>
           </View>
 
-          {showTypeSelector ? (
+          {showTypeSelector && !useTypeTabs ? (
             <View
               className="px-4 pb-2"
               onStartShouldSetResponder={shouldHandleBackgroundPress}
@@ -2115,155 +2186,258 @@ export function TransactionEditorScreen({
             </View>
           ) : null}
 
-          <View style={summaryContainerStyle}>
-            <ScrollView
-              ref={editorScrollRef}
-              className="flex-1"
-              contentContainerStyle={scrollContentStyle}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              onScrollBeginDrag={clearActiveField}
-            >
-              <View style={styles.summaryDismissLayout}>
-                <Pressable
-                  accessible={false}
-                  onPress={clearActiveField}
-                  style={styles.summaryDismissGutter}
-                />
-                <View style={styles.summaryDismissColumn}>
-                  <Pressable accessible={false} onPress={clearActiveField}>
-                    {/* Summary rows */}
-                    <View
-                      className="bg-card/60 border border-border/25 overflow-hidden"
-                      style={{
-                        borderRadius: 20,
-                      }}
-                    >
-                      {/* Sticky mode moves the date onto the numpad's date key. */}
-                      {!isBalanceAdjustmentType && !useStickyNumpad ? (
-                        <>
-                          {/* Date row */}
-                          <View onLayout={registerFieldLayout('date')}>
-                            <SummaryRow
-                              label={I18n.t('transactions.editor.date')}
-                              value={formatDateDisplay(date, activeLocale)}
-                              isActive={activeField === 'date'}
-                              onPress={() => activateField('date')}
-                              rightElement={null}
-                            >
-                              <View className="flex-row items-center justify-between">
-                                <View className="flex-row items-center gap-2">
-                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                    <Calendar size={13} color={themeColors.textMuted} />
+          <GestureDetector gesture={typeSwipeGesture}>
+            <View style={summaryContainerStyle}>
+              <ScrollView
+                ref={editorScrollRef}
+                className="flex-1"
+                contentContainerStyle={scrollContentStyle}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                onScrollBeginDrag={clearActiveField}
+              >
+                <View style={styles.summaryDismissLayout}>
+                  <Pressable
+                    accessible={false}
+                    onPress={clearActiveField}
+                    style={styles.summaryDismissGutter}
+                  />
+                  <View style={styles.summaryDismissColumn}>
+                    <Pressable accessible={false} onPress={clearActiveField}>
+                      {/* Summary rows */}
+                      <View
+                        className="bg-card/60 border border-border/25 overflow-hidden"
+                        style={{
+                          borderRadius: 20,
+                        }}
+                      >
+                        {/* Sticky mode moves the date onto the numpad's date key. */}
+                        {!isBalanceAdjustmentType && !useStickyNumpad ? (
+                          <>
+                            {/* Date row */}
+                            <View onLayout={registerFieldLayout('date')}>
+                              <SummaryRow
+                                label={I18n.t('transactions.editor.date')}
+                                value={formatDateDisplay(date, activeLocale)}
+                                isActive={activeField === 'date'}
+                                onPress={() => activateField('date')}
+                                rightElement={null}
+                              >
+                                <View className="flex-row items-center justify-between">
+                                  <View className="flex-row items-center gap-2">
+                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                      <Calendar size={13} color={themeColors.textMuted} />
+                                    </View>
+                                    <Text variant="caption" tone="muted">
+                                      {I18n.t('transactions.editor.date')}
+                                    </Text>
                                   </View>
-                                  <Text variant="caption" tone="muted">
-                                    {I18n.t('transactions.editor.date')}
+                                  <Text variant="body">
+                                    {formatDateDisplay(date, activeLocale)}
                                   </Text>
                                 </View>
-                                <Text variant="body">{formatDateDisplay(date, activeLocale)}</Text>
-                              </View>
-                            </SummaryRow>
-                          </View>
-
-                          <View className="h-[1px] bg-border/15 mx-4" />
-                        </>
-                      ) : null}
-
-                      {/* Amount row */}
-                      <View onLayout={registerFieldLayout('amount')}>
-                        <SummaryRow
-                          label={I18n.t('transactions.editor.amount')}
-                          isActive={amountLive}
-                          onPress={handleAmountRowPress}
-                          rightElement={null}
-                        >
-                          <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center gap-2">
-                              <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                <Hash size={13} color={themeColors.textMuted} />
-                              </View>
-                              <Text variant="caption" tone="muted">
-                                {I18n.t('transactions.editor.amount')}
-                              </Text>
+                              </SummaryRow>
                             </View>
-                            <View style={{ maxWidth: '55%' }} className="items-end">
-                              <Text
-                                variant="heading"
-                                numberOfLines={1}
-                                style={{
-                                  fontSize:
-                                    amountDisplay.length > 12
-                                      ? 14
-                                      : amountDisplay.length > 9
-                                        ? 18
-                                        : 24,
-                                }}
-                                className={cn(
-                                  amountTone === 'error'
-                                    ? 'text-destructive'
-                                    : amountTone === 'success'
-                                      ? 'text-success'
-                                      : 'text-foreground',
-                                )}
-                              >
-                                {amountDisplay}
-                              </Text>
-                              {transferReceivedLabel ? (
-                                <Pressable
-                                  onPress={() => setTransferFxModalVisible(true)}
-                                  hitSlop={6}
-                                  className="mt-0.5 flex-row items-center gap-1"
+
+                            <View className="h-[1px] bg-border/15 mx-4" />
+                          </>
+                        ) : null}
+
+                        {/* Amount row */}
+                        <View onLayout={registerFieldLayout('amount')}>
+                          <SummaryRow
+                            label={I18n.t('transactions.editor.amount')}
+                            isActive={amountLive}
+                            onPress={handleAmountRowPress}
+                            rightElement={null}
+                          >
+                            <View className="flex-row items-center justify-between">
+                              <View className="flex-row items-center gap-2">
+                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                  <Hash size={13} color={themeColors.textMuted} />
+                                </View>
+                                <Text variant="caption" tone="muted">
+                                  {I18n.t('transactions.editor.amount')}
+                                </Text>
+                              </View>
+                              <View style={{ maxWidth: '55%' }} className="items-end">
+                                <Text
+                                  variant="heading"
+                                  numberOfLines={1}
+                                  style={{
+                                    fontSize:
+                                      amountDisplay.length > 12
+                                        ? 14
+                                        : amountDisplay.length > 9
+                                          ? 18
+                                          : 24,
+                                  }}
+                                  className={cn(
+                                    amountTone === 'error'
+                                      ? 'text-destructive'
+                                      : amountTone === 'success'
+                                        ? 'text-success'
+                                        : 'text-foreground',
+                                  )}
                                 >
+                                  {amountDisplay}
+                                </Text>
+                                {transferReceivedLabel ? (
+                                  <Pressable
+                                    onPress={() => setTransferFxModalVisible(true)}
+                                    hitSlop={6}
+                                    className="mt-0.5 flex-row items-center gap-1"
+                                  >
+                                    <Text
+                                      variant="caption"
+                                      numberOfLines={1}
+                                      style={{ color: themeColors.primary }}
+                                    >
+                                      {transferReceivedLabel}
+                                    </Text>
+                                    <Pencil size={11} color={themeColors.primary} />
+                                  </Pressable>
+                                ) : null}
+                                {reportingEquivLabel ? (
                                   <Text
                                     variant="caption"
+                                    tone="muted"
                                     numberOfLines={1}
-                                    style={{ color: themeColors.primary }}
+                                    className="mt-0.5"
                                   >
-                                    {transferReceivedLabel}
+                                    {reportingEquivLabel}
                                   </Text>
-                                  <Pencil size={11} color={themeColors.primary} />
-                                </Pressable>
-                              ) : null}
-                              {reportingEquivLabel ? (
-                                <Text
-                                  variant="caption"
-                                  tone="muted"
-                                  numberOfLines={1}
-                                  className="mt-0.5"
-                                >
-                                  {reportingEquivLabel}
-                                </Text>
-                              ) : null}
+                                ) : null}
+                              </View>
                             </View>
-                          </View>
-                          {nudgeMessageParts ? (
-                            <Text
-                              variant="caption"
-                              tone="muted"
-                              className="text-right mt-0.5"
-                              style={styles.nudgeLabel}
-                            >
-                              {nudgeMessageParts.before}
-                              <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
-                                {nudgeMessageParts.hours}
+                            {nudgeMessageParts ? (
+                              <Text
+                                variant="caption"
+                                tone="muted"
+                                className="text-right mt-0.5"
+                                style={styles.nudgeLabel}
+                              >
+                                {nudgeMessageParts.before}
+                                <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
+                                  {nudgeMessageParts.hours}
+                                </Text>
+                                {nudgeMessageParts.after}
                               </Text>
-                              {nudgeMessageParts.after}
-                            </Text>
-                          ) : null}
-                        </SummaryRow>
-                      </View>
+                            ) : null}
+                          </SummaryRow>
+                        </View>
 
-                      {hideAccountSelector ? null : <View className="h-[1px] bg-border/15 mx-4" />}
+                        {hideAccountSelector ? null : (
+                          <View className="h-[1px] bg-border/15 mx-4" />
+                        )}
 
-                      {/* Account row(s) */}
-                      {hideAccountSelector ? null : isTransferType ? (
-                        <>
-                          <View onLayout={registerFieldLayout('fromAccount')}>
+                        {/* Account row(s) */}
+                        {hideAccountSelector ? null : isTransferType ? (
+                          <>
+                            <View onLayout={registerFieldLayout('fromAccount')}>
+                              <SummaryRow
+                                label={I18n.t('transactions.editor.from')}
+                                isActive={activeField === 'fromAccount'}
+                                onPress={() => activateField('fromAccount')}
+                                valueTone={fieldErrors.from_account ? 'error' : 'default'}
+                                rightElement={null}
+                              >
+                                <View className="flex-row items-center justify-between">
+                                  <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                      <CreditCard size={13} color={themeColors.textMuted} />
+                                    </View>
+                                    <Text variant="caption" tone="muted">
+                                      {I18n.t('transactions.editor.from')}
+                                    </Text>
+                                  </View>
+                                  <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                    {selectedFromAccount ? (
+                                      <AccountLogo
+                                        logoId={selectedFromAccount.logoId}
+                                        type={selectedFromAccount.type}
+                                        size={20}
+                                      />
+                                    ) : null}
+                                    <Text
+                                      variant="body"
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                      className={cn(
+                                        'text-right shrink',
+                                        fromAccountName ? '' : 'text-muted-foreground/60',
+                                      )}
+                                    >
+                                      {fromAccountName ??
+                                        I18n.t('transactions.editor.choose_account')}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </SummaryRow>
+                            </View>
+                            <View className="px-4 py-1">
+                              <View className="flex-row items-center">
+                                <View className="h-[1px] flex-1 bg-border/15" />
+                                <Pressable
+                                  onPress={handleSwapTransferAccounts}
+                                  accessibilityRole="button"
+                                  accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
+                                  className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
+                                >
+                                  <ArrowLeftRight size={14} color={themeColors.primary} />
+                                </Pressable>
+                                <View className="h-[1px] flex-1 bg-border/15" />
+                              </View>
+                            </View>
+                            <View onLayout={registerFieldLayout('toAccount')}>
+                              <SummaryRow
+                                label={I18n.t('transactions.editor.to')}
+                                isActive={activeField === 'toAccount'}
+                                onPress={() => activateField('toAccount')}
+                                valueTone={fieldErrors.to_account ? 'error' : 'default'}
+                                rightElement={null}
+                              >
+                                <View className="flex-row items-center justify-between">
+                                  <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                      <ArrowRight size={13} color={themeColors.textMuted} />
+                                    </View>
+                                    <Text variant="caption" tone="muted">
+                                      {I18n.t('transactions.editor.to')}
+                                    </Text>
+                                  </View>
+                                  <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                    {selectedToAccount ? (
+                                      <AccountLogo
+                                        logoId={selectedToAccount.logoId}
+                                        type={selectedToAccount.type}
+                                        size={20}
+                                      />
+                                    ) : null}
+                                    <Text
+                                      variant="body"
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                      className={cn(
+                                        'text-right shrink',
+                                        toAccountName ? '' : 'text-muted-foreground/60',
+                                      )}
+                                    >
+                                      {toAccountName ??
+                                        I18n.t('transactions.editor.choose_account')}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </SummaryRow>
+                            </View>
+                          </>
+                        ) : (
+                          <View onLayout={registerFieldLayout('account')}>
                             <SummaryRow
-                              label={I18n.t('transactions.editor.from')}
-                              isActive={activeField === 'fromAccount'}
-                              onPress={() => activateField('fromAccount')}
-                              valueTone={fieldErrors.from_account ? 'error' : 'default'}
+                              label={I18n.t('transactions.editor.account')}
+                              isActive={activeField === 'account'}
+                              onPress={() => activateField('account')}
+                              valueTone={fieldErrors.account ? 'error' : 'default'}
                               rightElement={null}
                             >
                               <View className="flex-row items-center justify-between">
@@ -2272,14 +2446,14 @@ export function TransactionEditorScreen({
                                     <CreditCard size={13} color={themeColors.textMuted} />
                                   </View>
                                   <Text variant="caption" tone="muted">
-                                    {I18n.t('transactions.editor.from')}
+                                    {I18n.t('transactions.editor.account')}
                                   </Text>
                                 </View>
                                 <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
-                                  {selectedFromAccount ? (
+                                  {selectedAccount ? (
                                     <AccountLogo
-                                      logoId={selectedFromAccount.logoId}
-                                      type={selectedFromAccount.type}
+                                      logoId={selectedAccount.logoId}
+                                      type={selectedAccount.type}
                                       size={20}
                                     />
                                   ) : null}
@@ -2289,192 +2463,189 @@ export function TransactionEditorScreen({
                                     ellipsizeMode="tail"
                                     className={cn(
                                       'text-right shrink',
-                                      fromAccountName ? '' : 'text-muted-foreground/60',
+                                      accountName ? '' : 'text-muted-foreground/60',
                                     )}
                                   >
-                                    {fromAccountName ??
-                                      I18n.t('transactions.editor.choose_account')}
+                                    {accountName ?? I18n.t('transactions.editor.choose_account')}
                                   </Text>
                                 </View>
                               </View>
                             </SummaryRow>
                           </View>
-                          <View className="px-4 py-1">
-                            <View className="flex-row items-center">
-                              <View className="h-[1px] flex-1 bg-border/15" />
-                              <Pressable
-                                onPress={handleSwapTransferAccounts}
-                                accessibilityRole="button"
-                                accessibilityLabel={I18n.t('transactions.editor.swap_accounts')}
-                                className="mx-2.5 h-8 w-8 rounded-full border border-primary/35 bg-primary/10 items-center justify-center active:opacity-85"
+                        )}
+
+                        {/* Category row (hidden for transfers and balance adjustments) */}
+                        {!isTransferType && !isBalanceAdjustmentType ? (
+                          <>
+                            <View className="h-[1px] bg-border/15 mx-4" />
+                            <View onLayout={registerFieldLayout('category')}>
+                              <SummaryRow
+                                label={I18n.t('transactions.editor.category')}
+                                isActive={activeField === 'category'}
+                                onPress={() => activateField('category')}
+                                valueTone={fieldErrors.category ? 'error' : 'default'}
+                                rightElement={null}
                               >
-                                <ArrowLeftRight size={14} color={themeColors.primary} />
-                              </Pressable>
-                              <View className="h-[1px] flex-1 bg-border/15" />
-                            </View>
-                          </View>
-                          <View onLayout={registerFieldLayout('toAccount')}>
-                            <SummaryRow
-                              label={I18n.t('transactions.editor.to')}
-                              isActive={activeField === 'toAccount'}
-                              onPress={() => activateField('toAccount')}
-                              valueTone={fieldErrors.to_account ? 'error' : 'default'}
-                              rightElement={null}
-                            >
-                              <View className="flex-row items-center justify-between">
-                                <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                    <ArrowRight size={13} color={themeColors.textMuted} />
+                                <View className="flex-row items-center justify-between">
+                                  <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                      <Hash size={13} color={themeColors.textMuted} />
+                                    </View>
+                                    <Text variant="caption" tone="muted">
+                                      {I18n.t('transactions.editor.category')}
+                                    </Text>
                                   </View>
-                                  <Text variant="caption" tone="muted">
-                                    {I18n.t('transactions.editor.to')}
-                                  </Text>
+                                  <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
+                                    {categoryPreview ? (
+                                      <CategoryEmoji icon={categoryPreview.icon} size={20} />
+                                    ) : null}
+                                    <Text
+                                      variant="body"
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                      className={cn(
+                                        'text-right shrink',
+                                        categoryPreview ? '' : 'text-muted-foreground/60',
+                                      )}
+                                    >
+                                      {categoryPreview?.name ??
+                                        I18n.t('transactions.editor.choose_category')}
+                                    </Text>
+                                  </View>
                                 </View>
-                                <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
-                                  {selectedToAccount ? (
-                                    <AccountLogo
-                                      logoId={selectedToAccount.logoId}
-                                      type={selectedToAccount.type}
-                                      size={20}
+                              </SummaryRow>
+                            </View>
+                          </>
+                        ) : null}
+
+                        {!isBalanceAdjustmentType ? (
+                          <>
+                            <View className="h-[1px] bg-border/15 mx-4" />
+
+                            {/* Note row */}
+                            <View onLayout={handleNoteFieldLayout}>
+                              <SummaryRow
+                                label={I18n.t('transaction_detail.note')}
+                                isActive={activeField === 'note'}
+                                onPress={focusNoteField}
+                                rightElement={null}
+                              >
+                                <View className="flex-row items-center justify-between">
+                                  <View className="flex-row items-center gap-2">
+                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                      <FileText size={13} color={themeColors.textMuted} />
+                                    </View>
+                                    <Text variant="caption" tone="muted">
+                                      {I18n.t('transaction_detail.note')}
+                                    </Text>
+                                  </View>
+                                  <View className="max-w-[66%] min-w-[40%]">
+                                    <TextInput
+                                      ref={noteInputRef}
+                                      value={note}
+                                      onChangeText={handleNoteChange}
+                                      placeholder={I18n.t('transactions.editor.optional')}
+                                      placeholderTextColor={`${themeColors.mutedForeground}99`}
+                                      returnKeyType="done"
+                                      onFocus={handleNoteFocus}
+                                      onBlur={handleNoteBlur}
+                                      autoCorrect={false}
+                                      autoComplete="off"
+                                      spellCheck={false}
+                                      style={[
+                                        SINGLE_LINE_TEXT_INPUT_STYLE,
+                                        styles.inlineSummaryInput,
+                                        { color: themeColors.text },
+                                      ]}
                                     />
-                                  ) : null}
-                                  <Text
-                                    variant="body"
-                                    numberOfLines={1}
-                                    ellipsizeMode="tail"
-                                    className={cn(
-                                      'text-right shrink',
-                                      toAccountName ? '' : 'text-muted-foreground/60',
-                                    )}
-                                  >
-                                    {toAccountName ?? I18n.t('transactions.editor.choose_account')}
-                                  </Text>
-                                </View>
-                              </View>
-                            </SummaryRow>
-                          </View>
-                        </>
-                      ) : (
-                        <View onLayout={registerFieldLayout('account')}>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.account')}
-                            isActive={activeField === 'account'}
-                            onPress={() => activateField('account')}
-                            valueTone={fieldErrors.account ? 'error' : 'default'}
-                            rightElement={null}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <CreditCard size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.account')}
-                                </Text>
-                              </View>
-                              <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
-                                {selectedAccount ? (
-                                  <AccountLogo
-                                    logoId={selectedAccount.logoId}
-                                    type={selectedAccount.type}
-                                    size={20}
-                                  />
-                                ) : null}
-                                <Text
-                                  variant="body"
-                                  numberOfLines={1}
-                                  ellipsizeMode="tail"
-                                  className={cn(
-                                    'text-right shrink',
-                                    accountName ? '' : 'text-muted-foreground/60',
-                                  )}
-                                >
-                                  {accountName ?? I18n.t('transactions.editor.choose_account')}
-                                </Text>
-                              </View>
-                            </View>
-                          </SummaryRow>
-                        </View>
-                      )}
-
-                      {/* Category row (hidden for transfers and balance adjustments) */}
-                      {!isTransferType && !isBalanceAdjustmentType ? (
-                        <>
-                          <View className="h-[1px] bg-border/15 mx-4" />
-                          <View onLayout={registerFieldLayout('category')}>
-                            <SummaryRow
-                              label={I18n.t('transactions.editor.category')}
-                              isActive={activeField === 'category'}
-                              onPress={() => activateField('category')}
-                              valueTone={fieldErrors.category ? 'error' : 'default'}
-                              rightElement={null}
-                            >
-                              <View className="flex-row items-center justify-between">
-                                <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                    <Hash size={13} color={themeColors.textMuted} />
                                   </View>
-                                  <Text variant="caption" tone="muted">
-                                    {I18n.t('transactions.editor.category')}
-                                  </Text>
                                 </View>
-                                <View className="flex-row items-center justify-end gap-1.5 max-w-[58%]">
-                                  {categoryPreview ? (
-                                    <CategoryEmoji icon={categoryPreview.icon} size={20} />
-                                  ) : null}
-                                  <Text
-                                    variant="body"
-                                    numberOfLines={1}
-                                    ellipsizeMode="tail"
-                                    className={cn(
-                                      'text-right shrink',
-                                      categoryPreview ? '' : 'text-muted-foreground/60',
-                                    )}
-                                  >
-                                    {categoryPreview?.name ??
-                                      I18n.t('transactions.editor.choose_category')}
-                                  </Text>
+                              </SummaryRow>
+                            </View>
+
+                            {/* Receipt row (expense / income only) */}
+                            {type === 'expense' || type === 'income' ? (
+                              <>
+                                <View className="h-[1px] bg-border/15 mx-4" />
+                                <ReceiptField
+                                  receiptUri={receiptUri}
+                                  onChange={handleReceiptChange}
+                                />
+                              </>
+                            ) : null}
+
+                            {/* Sentiment picker */}
+                            {type === 'expense' ? (
+                              <View className="items-center py-2.5">
+                                <View className="flex-row items-center gap-5">
+                                  {(['sad', 'neutral', 'happy'] as const).map((s) => {
+                                    const isActive = sentiment === s;
+                                    return (
+                                      <Pressable
+                                        key={s}
+                                        onPress={() => {
+                                          setSentiment(s);
+                                          void triggerHaptic('selection');
+                                        }}
+                                        className="items-center justify-center"
+                                        style={{ opacity: isActive ? 1 : 0.3 }}
+                                      >
+                                        <SentimentIcon sentiment={s} size={36} />
+                                      </Pressable>
+                                    );
+                                  })}
                                 </View>
                               </View>
-                            </SummaryRow>
-                          </View>
-                        </>
-                      ) : null}
+                            ) : null}
+                          </>
+                        ) : null}
+                      </View>
 
-                      {!isBalanceAdjustmentType ? (
-                        <>
-                          <View className="h-[1px] bg-border/15 mx-4" />
+                      {/* Split Bill now lives in the numpad drawer toolbar. */}
 
-                          {/* Note row */}
-                          <View onLayout={handleNoteFieldLayout}>
+                      {/* Recurring options (traditional form inputs, secondary) */}
+                      {recurringOptions ? (
+                        <View className="mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+                          {/* Rule name */}
+                          <View>
                             <SummaryRow
-                              label={I18n.t('transaction_detail.note')}
-                              isActive={activeField === 'note'}
-                              onPress={focusNoteField}
-                              rightElement={null}
+                              label={I18n.t('transactions.editor.rule_name')}
+                              isActive={activeField === 'ruleName'}
+                              onPress={() => {
+                                activateField('ruleName');
+                                requestAnimationFrame(() => recurrenceNameRef.current?.focus());
+                              }}
+                              rightElement={<View style={styles.trailingSpacer} />}
                             >
                               <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center gap-2">
                                   <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                    <FileText size={13} color={themeColors.textMuted} />
+                                    <Type size={13} color={themeColors.textMuted} />
                                   </View>
                                   <Text variant="caption" tone="muted">
-                                    {I18n.t('transaction_detail.note')}
+                                    {I18n.t('transactions.editor.rule_name')}
                                   </Text>
+                                  {fieldErrors.rule_name ? (
+                                    <Text variant="label" tone="error">
+                                      {' '}
+                                      *
+                                    </Text>
+                                  ) : null}
                                 </View>
-                                <View className="max-w-[66%] min-w-[40%]">
+                                <View className="max-w-[55%] min-w-[30%]">
                                   <TextInput
-                                    ref={noteInputRef}
-                                    value={note}
-                                    onChangeText={handleNoteChange}
-                                    placeholder={I18n.t('transactions.editor.optional')}
-                                    placeholderTextColor={`${themeColors.mutedForeground}99`}
+                                    ref={recurrenceNameRef}
+                                    value={recurrenceName}
+                                    onChangeText={setRecurrenceName}
+                                    placeholder={I18n.t(
+                                      'transactions.editor.rule_name_placeholder',
+                                    )}
+                                    placeholderTextColor={`${themeColors.muted}99`}
                                     returnKeyType="done"
-                                    onFocus={handleNoteFocus}
-                                    onBlur={handleNoteBlur}
-                                    autoCorrect={false}
-                                    autoComplete="off"
-                                    spellCheck={false}
+                                    onFocus={() => setActiveField('ruleName')}
+                                    onBlur={() =>
+                                      setActiveField((prev) => (prev === 'ruleName' ? null : prev))
+                                    }
                                     style={[
                                       SINGLE_LINE_TEXT_INPUT_STYLE,
                                       styles.inlineSummaryInput,
@@ -2486,359 +2657,268 @@ export function TransactionEditorScreen({
                             </SummaryRow>
                           </View>
 
-                          {/* Receipt row (expense / income only) */}
-                          {type === 'expense' || type === 'income' ? (
+                          <View className="h-[1px] bg-border/15 mx-4" />
+
+                          {/* Repeat pattern */}
+                          <View onLayout={registerFieldLayout('repeat')}>
+                            <SummaryRow
+                              label={I18n.t('transactions.editor.repeat')}
+                              isActive={activeField === 'repeat'}
+                              onPress={() => activateField('repeat')}
+                              rightElement={null}
+                            >
+                              <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-2">
+                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                    <Repeat size={13} color={themeColors.textMuted} />
+                                  </View>
+                                  <Text variant="caption" tone="muted">
+                                    {I18n.t('transactions.editor.repeat')}
+                                  </Text>
+                                </View>
+                                <Text variant="body">{patternLabels[recurrencePattern]}</Text>
+                              </View>
+                            </SummaryRow>
+                          </View>
+
+                          <View className="h-[1px] bg-border/15 mx-4" />
+
+                          {/* Every N interval */}
+                          <View>
+                            <SummaryRow
+                              label={I18n.t('transactions.editor.every_interval')}
+                              isActive={activeField === 'interval'}
+                              onPress={() => {
+                                activateField('interval');
+                                requestAnimationFrame(() => recurrenceIntervalRef.current?.focus());
+                              }}
+                              rightElement={<View style={styles.trailingSpacer} />}
+                            >
+                              <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-2">
+                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                    <Timer size={13} color={themeColors.textMuted} />
+                                  </View>
+                                  <Text variant="caption" tone="muted">
+                                    {I18n.t('transactions.editor.every_interval')}
+                                  </Text>
+                                </View>
+                                <View className="min-w-[40px]">
+                                  <TextInput
+                                    ref={recurrenceIntervalRef}
+                                    value={recurrenceInterval}
+                                    onChangeText={setRecurrenceInterval}
+                                    placeholder="1"
+                                    placeholderTextColor={`${themeColors.muted}99`}
+                                    keyboardType="number-pad"
+                                    returnKeyType="done"
+                                    onFocus={() => setActiveField('interval')}
+                                    onBlur={() =>
+                                      setActiveField((prev) => (prev === 'interval' ? null : prev))
+                                    }
+                                    style={[
+                                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                                      styles.inlineSummaryInput,
+                                      { color: themeColors.text },
+                                    ]}
+                                  />
+                                </View>
+                              </View>
+                            </SummaryRow>
+                          </View>
+
+                          <View className="h-[1px] bg-border/15 mx-4" />
+
+                          {/* Ends */}
+                          <View onLayout={registerFieldLayout('ends')}>
+                            <SummaryRow
+                              label={I18n.t('transactions.editor.ends')}
+                              isActive={activeField === 'ends'}
+                              onPress={() => activateField('ends')}
+                              rightElement={null}
+                            >
+                              <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-2">
+                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                    <Clock size={13} color={themeColors.textMuted} />
+                                  </View>
+                                  <Text variant="caption" tone="muted">
+                                    {I18n.t('transactions.editor.ends')}
+                                  </Text>
+                                </View>
+                                <Text variant="body">
+                                  {recurrenceEndMode === 'never'
+                                    ? I18n.t('transactions.editor.never')
+                                    : recurrenceEndDate || I18n.t('transactions.editor.on_date')}
+                                </Text>
+                              </View>
+                            </SummaryRow>
+                          </View>
+
+                          {recurrenceEndMode === 'on_date' ? (
                             <>
                               <View className="h-[1px] bg-border/15 mx-4" />
-                              <ReceiptField
-                                receiptUri={receiptUri}
-                                onChange={handleReceiptChange}
-                              />
+                              <View onLayout={registerFieldLayout('endDate')}>
+                                <SummaryRow
+                                  label={I18n.t('transactions.editor.end_date')}
+                                  isActive={activeField === 'endDate'}
+                                  valueTone={fieldErrors.end_date ? 'error' : 'default'}
+                                  onPress={() => {
+                                    activateField('endDate');
+                                  }}
+                                  rightElement={null}
+                                >
+                                  <View className="flex-row items-center justify-between">
+                                    <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                                      <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                        <Calendar size={13} color={themeColors.textMuted} />
+                                      </View>
+                                      <Text variant="caption" tone="muted">
+                                        {I18n.t('transactions.editor.end_date')}
+                                      </Text>
+                                    </View>
+                                    <Text
+                                      variant="body"
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                      className={cn(
+                                        'max-w-[58%] text-right',
+                                        recurrenceEndDate ? '' : 'text-muted-foreground/60',
+                                        fieldErrors.end_date ? 'text-destructive' : '',
+                                      )}
+                                    >
+                                      {recurrenceEndDate
+                                        ? formatDateDisplay(recurrenceEndDate, activeLocale)
+                                        : I18n.t('transactions.editor.on_date')}
+                                    </Text>
+                                  </View>
+                                </SummaryRow>
+                              </View>
                             </>
                           ) : null}
 
-                          {/* Sentiment picker */}
-                          {type === 'expense' ? (
-                            <View className="items-center py-2.5">
-                              <View className="flex-row items-center gap-5">
-                                {(['sad', 'neutral', 'happy'] as const).map((s) => {
-                                  const isActive = sentiment === s;
-                                  return (
-                                    <Pressable
-                                      key={s}
-                                      onPress={() => {
-                                        setSentiment(s);
-                                        void triggerHaptic('selection');
-                                      }}
-                                      className="items-center justify-center"
-                                      style={{ opacity: isActive ? 1 : 0.3 }}
-                                    >
-                                      <SentimentIcon sentiment={s} size={36} />
-                                    </Pressable>
-                                  );
-                                })}
-                              </View>
-                            </View>
-                          ) : null}
-                        </>
-                      ) : null}
-                    </View>
+                          <View className="h-[1px] bg-border/15 mx-4" />
 
-                    {/* Split Bill now lives in the numpad drawer toolbar. */}
-
-                    {/* Recurring options (traditional form inputs, secondary) */}
-                    {recurringOptions ? (
-                      <View className="mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-                        {/* Rule name */}
-                        <View>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.rule_name')}
-                            isActive={activeField === 'ruleName'}
-                            onPress={() => {
-                              activateField('ruleName');
-                              requestAnimationFrame(() => recurrenceNameRef.current?.focus());
-                            }}
-                            rightElement={<View style={styles.trailingSpacer} />}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <Type size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.rule_name')}
-                                </Text>
-                                {fieldErrors.rule_name ? (
-                                  <Text variant="label" tone="error">
-                                    {' '}
-                                    *
-                                  </Text>
-                                ) : null}
-                              </View>
-                              <View className="max-w-[55%] min-w-[30%]">
-                                <TextInput
-                                  ref={recurrenceNameRef}
-                                  value={recurrenceName}
-                                  onChangeText={setRecurrenceName}
-                                  placeholder={I18n.t('transactions.editor.rule_name_placeholder')}
-                                  placeholderTextColor={`${themeColors.muted}99`}
-                                  returnKeyType="done"
-                                  onFocus={() => setActiveField('ruleName')}
-                                  onBlur={() =>
-                                    setActiveField((prev) => (prev === 'ruleName' ? null : prev))
-                                  }
-                                  style={[
-                                    SINGLE_LINE_TEXT_INPUT_STYLE,
-                                    styles.inlineSummaryInput,
-                                    { color: themeColors.text },
-                                  ]}
-                                />
-                              </View>
-                            </View>
-                          </SummaryRow>
-                        </View>
-
-                        <View className="h-[1px] bg-border/15 mx-4" />
-
-                        {/* Repeat pattern */}
-                        <View onLayout={registerFieldLayout('repeat')}>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.repeat')}
-                            isActive={activeField === 'repeat'}
-                            onPress={() => activateField('repeat')}
-                            rightElement={null}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <Repeat size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.repeat')}
-                                </Text>
-                              </View>
-                              <Text variant="body">{patternLabels[recurrencePattern]}</Text>
-                            </View>
-                          </SummaryRow>
-                        </View>
-
-                        <View className="h-[1px] bg-border/15 mx-4" />
-
-                        {/* Every N interval */}
-                        <View>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.every_interval')}
-                            isActive={activeField === 'interval'}
-                            onPress={() => {
-                              activateField('interval');
-                              requestAnimationFrame(() => recurrenceIntervalRef.current?.focus());
-                            }}
-                            rightElement={<View style={styles.trailingSpacer} />}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <Timer size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.every_interval')}
-                                </Text>
-                              </View>
-                              <View className="min-w-[40px]">
-                                <TextInput
-                                  ref={recurrenceIntervalRef}
-                                  value={recurrenceInterval}
-                                  onChangeText={setRecurrenceInterval}
-                                  placeholder="1"
-                                  placeholderTextColor={`${themeColors.muted}99`}
-                                  keyboardType="number-pad"
-                                  returnKeyType="done"
-                                  onFocus={() => setActiveField('interval')}
-                                  onBlur={() =>
-                                    setActiveField((prev) => (prev === 'interval' ? null : prev))
-                                  }
-                                  style={[
-                                    SINGLE_LINE_TEXT_INPUT_STYLE,
-                                    styles.inlineSummaryInput,
-                                    { color: themeColors.text },
-                                  ]}
-                                />
-                              </View>
-                            </View>
-                          </SummaryRow>
-                        </View>
-
-                        <View className="h-[1px] bg-border/15 mx-4" />
-
-                        {/* Ends */}
-                        <View onLayout={registerFieldLayout('ends')}>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.ends')}
-                            isActive={activeField === 'ends'}
-                            onPress={() => activateField('ends')}
-                            rightElement={null}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <Clock size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.ends')}
-                                </Text>
-                              </View>
-                              <Text variant="body">
-                                {recurrenceEndMode === 'never'
-                                  ? I18n.t('transactions.editor.never')
-                                  : recurrenceEndDate || I18n.t('transactions.editor.on_date')}
-                              </Text>
-                            </View>
-                          </SummaryRow>
-                        </View>
-
-                        {recurrenceEndMode === 'on_date' ? (
-                          <>
-                            <View className="h-[1px] bg-border/15 mx-4" />
-                            <View onLayout={registerFieldLayout('endDate')}>
-                              <SummaryRow
-                                label={I18n.t('transactions.editor.end_date')}
-                                isActive={activeField === 'endDate'}
-                                valueTone={fieldErrors.end_date ? 'error' : 'default'}
-                                onPress={() => {
-                                  activateField('endDate');
-                                }}
-                                rightElement={null}
-                              >
-                                <View className="flex-row items-center justify-between">
-                                  <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                                    <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                      <Calendar size={13} color={themeColors.textMuted} />
-                                    </View>
-                                    <Text variant="caption" tone="muted">
-                                      {I18n.t('transactions.editor.end_date')}
-                                    </Text>
+                          {/* Status */}
+                          <View>
+                            <SummaryRow
+                              label={I18n.t('transactions.editor.status')}
+                              isActive={activeField === 'status'}
+                              onPress={() => {
+                                activateField('status');
+                              }}
+                              rightElement={null}
+                            >
+                              <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-2">
+                                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                    <Power size={13} color={themeColors.textMuted} />
                                   </View>
-                                  <Text
-                                    variant="body"
-                                    numberOfLines={1}
-                                    ellipsizeMode="tail"
-                                    className={cn(
-                                      'max-w-[58%] text-right',
-                                      recurrenceEndDate ? '' : 'text-muted-foreground/60',
-                                      fieldErrors.end_date ? 'text-destructive' : '',
-                                    )}
-                                  >
-                                    {recurrenceEndDate
-                                      ? formatDateDisplay(recurrenceEndDate, activeLocale)
-                                      : I18n.t('transactions.editor.on_date')}
+                                  <Text variant="caption" tone="muted">
+                                    {I18n.t('transactions.editor.status')}
                                   </Text>
                                 </View>
-                              </SummaryRow>
-                            </View>
-                          </>
-                        ) : null}
-
-                        <View className="h-[1px] bg-border/15 mx-4" />
-
-                        {/* Status */}
-                        <View>
-                          <SummaryRow
-                            label={I18n.t('transactions.editor.status')}
-                            isActive={activeField === 'status'}
-                            onPress={() => {
-                              activateField('status');
-                            }}
-                            rightElement={null}
-                          >
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                                  <Power size={13} color={themeColors.textMuted} />
-                                </View>
-                                <Text variant="caption" tone="muted">
-                                  {I18n.t('transactions.editor.status')}
-                                </Text>
+                                <SegmentedToggle
+                                  value={recurrenceStatusValue}
+                                  onChange={handleRecurrenceStatusChange}
+                                  options={recurrenceStatusOptions}
+                                  size="compact"
+                                  className="w-[138px]"
+                                />
                               </View>
-                              <SegmentedToggle
-                                value={recurrenceStatusValue}
-                                onChange={handleRecurrenceStatusChange}
-                                options={recurrenceStatusOptions}
-                                size="compact"
-                                className="w-[138px]"
-                              />
-                            </View>
-                          </SummaryRow>
+                            </SummaryRow>
+                          </View>
                         </View>
-                      </View>
-                    ) : null}
+                      ) : null}
 
-                    {/* Error message */}
-                    {error ? (
-                      <View className="mt-2 px-2">
-                        <Text variant="caption" tone="error">
-                          {error}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </Pressable>
+                      {/* Error message */}
+                      {error ? (
+                        <View className="mt-2 px-2">
+                          <Text variant="caption" tone="error">
+                            {error}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </Pressable>
 
-                  {/* Note suggestions dropdown — outside Pressable so taps aren't intercepted */}
-                  {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
-                    <Animated.View
-                      entering={FadeIn.duration(120)}
-                      exiting={FadeOut.duration(120)}
-                      style={[
-                        styles.noteSuggestionsDropdown,
-                        {
-                          top: noteSuggestionsTop,
-                          borderWidth: 1,
-                          borderColor: `${themeColors.border}25`,
-                          borderTopLeftRadius: 0,
-                          borderTopRightRadius: 0,
-                          borderBottomLeftRadius: 18,
-                          borderBottomRightRadius: 18,
-                          backgroundColor: themeColors.card,
-                          overflow: 'hidden',
-                          shadowColor: '#000',
-                          shadowOffset: { width: 0, height: 6 },
-                          shadowOpacity: 0.08,
-                          shadowRadius: 12,
-                          elevation: 6,
-                        },
-                      ]}
-                    >
-                      {noteSuggestions.map((suggestion, index) => (
-                        <React.Fragment key={suggestion}>
-                          {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
-                          <Pressable
-                            style={{ paddingHorizontal: 16, paddingVertical: 11 }}
-                            onPress={() => {
-                              handleNoteChange(suggestion);
-                              setNoteSuggestions([]);
-                              noteInputRef.current?.blur();
-                              if (mode === 'create') {
-                                const fields = getLatestTransactionFieldsByNote(suggestion);
-                                if (fields) {
-                                  if (!categoryId && fields.categoryId) {
-                                    setCategoryId(fields.categoryId);
-                                  }
-                                  if (!accountId && fields.accountId) {
-                                    setAccountId(fields.accountId);
-                                  }
-                                  if (!amount && fields.amount != null) {
-                                    setAmount(String(fields.amount));
+                    {/* Note suggestions dropdown — outside Pressable so taps aren't intercepted */}
+                    {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
+                      <Animated.View
+                        entering={FadeIn.duration(120)}
+                        exiting={FadeOut.duration(120)}
+                        style={[
+                          styles.noteSuggestionsDropdown,
+                          {
+                            top: noteSuggestionsTop,
+                            borderWidth: 1,
+                            borderColor: `${themeColors.border}25`,
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                            borderBottomLeftRadius: 18,
+                            borderBottomRightRadius: 18,
+                            backgroundColor: themeColors.card,
+                            overflow: 'hidden',
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 6 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 12,
+                            elevation: 6,
+                          },
+                        ]}
+                      >
+                        {noteSuggestions.map((suggestion, index) => (
+                          <React.Fragment key={suggestion}>
+                            {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
+                            <Pressable
+                              style={{ paddingHorizontal: 16, paddingVertical: 11 }}
+                              onPress={() => {
+                                handleNoteChange(suggestion);
+                                setNoteSuggestions([]);
+                                noteInputRef.current?.blur();
+                                if (mode === 'create') {
+                                  const fields = getLatestTransactionFieldsByNote(suggestion);
+                                  if (fields) {
+                                    if (!categoryId && fields.categoryId) {
+                                      setCategoryId(fields.categoryId);
+                                    }
+                                    if (!accountId && fields.accountId) {
+                                      setAccountId(fields.accountId);
+                                    }
+                                    if (!amount && fields.amount != null) {
+                                      setAmount(String(fields.amount));
+                                    }
                                   }
                                 }
-                              }
-                            }}
-                          >
-                            <Text
-                              variant="body"
-                              numberOfLines={1}
-                              style={{ color: themeColors.text }}
+                              }}
                             >
-                              {suggestion}
-                            </Text>
-                          </Pressable>
-                        </React.Fragment>
-                      ))}
-                    </Animated.View>
-                  ) : null}
+                              <Text
+                                variant="body"
+                                numberOfLines={1}
+                                style={{ color: themeColors.text }}
+                              >
+                                {suggestion}
+                              </Text>
+                            </Pressable>
+                          </React.Fragment>
+                        ))}
+                      </Animated.View>
+                    ) : null}
 
+                    <Pressable
+                      accessible={false}
+                      onPress={clearActiveField}
+                      style={styles.summaryDismissFiller}
+                    />
+                  </View>
                   <Pressable
                     accessible={false}
                     onPress={clearActiveField}
-                    style={styles.summaryDismissFiller}
+                    style={styles.summaryDismissGutter}
                   />
                 </View>
-                <Pressable
-                  accessible={false}
-                  onPress={clearActiveField}
-                  style={styles.summaryDismissGutter}
-                />
-              </View>
-            </ScrollView>
-          </View>
+              </ScrollView>
+            </View>
+          </GestureDetector>
 
           {showToolZone ? (
             <View
