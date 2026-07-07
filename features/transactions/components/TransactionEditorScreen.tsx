@@ -215,14 +215,16 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexGrow: 0,
-    maxHeight: 48,
+    maxHeight: 44,
+    // Inset to match the amount card (mx-4) so the chips scroll/clip within the
+    // card's horizontal bounds instead of running off the screen edges.
+    marginHorizontal: 16,
+    marginTop: 10,
   },
   actionRowContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 16,
-    paddingTop: 10,
   },
   accountChip: {
     maxWidth: 150,
@@ -1861,13 +1863,10 @@ export function TransactionEditorScreen({
   const showSentimentButton = useStickyNumpad && type === 'expense';
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
+  // Currency now lives on the amount card, not the action row.
   const showActionRow =
     useStickyNumpad &&
-    (showAccountChip ||
-      showSplitButton ||
-      showCurrencyButton ||
-      showSentimentButton ||
-      showReceiptButton);
+    (showAccountChip || showSplitButton || showSentimentButton || showReceiptButton);
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
   // The save action(s) sit in a footer below the pad and own the bottom inset.
@@ -3496,20 +3495,6 @@ export function TransactionEditorScreen({
                   ) : null}
                 </Pressable>
               ) : null}
-              {showCurrencyButton ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setCurrencyPickerVisible(true);
-                  }}
-                  accessibilityRole="button"
-                  className="h-9 flex-row items-center gap-1.5 rounded-full border border-border/30 bg-secondary/60 px-3 active:opacity-70"
-                >
-                  <Coins size={14} color={themeColors.textMuted} />
-                  <Text variant="caption">{entryCurrency}</Text>
-                  <ChevronDown size={12} color={themeColors.textMuted} />
-                </Pressable>
-              ) : null}
               {showSentimentButton ? (
                 <Pressable
                   onPress={cycleSentiment}
@@ -3588,8 +3573,27 @@ export function TransactionEditorScreen({
                   </Text>
                 ) : null}
               </View>
-              {transferReceivedLabel || reportingEquivLabel ? (
-                <View className="items-end pl-2">
+              {showCurrencyButton || transferReceivedLabel || reportingEquivLabel ? (
+                <View className="items-end gap-1 pl-2">
+                  {/* Currency selector lives here now — the amount row has room on
+                      its right, so it reads as "amount, in this currency". */}
+                  {showCurrencyButton ? (
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setCurrencyPickerVisible(true);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={entryCurrency}
+                      className="h-8 flex-row items-center gap-1 rounded-full border border-border/40 bg-card px-2.5 active:opacity-70"
+                    >
+                      <Coins size={13} color={themeColors.textMuted} />
+                      <Text variant="caption" className="font-medium">
+                        {entryCurrency}
+                      </Text>
+                      <ChevronDown size={11} color={themeColors.textMuted} />
+                    </Pressable>
+                  ) : null}
                   {transferReceivedLabel ? (
                     <Pressable
                       onPress={() => setTransferFxModalVisible(true)}
@@ -3607,7 +3611,7 @@ export function TransactionEditorScreen({
                     </Pressable>
                   ) : null}
                   {reportingEquivLabel ? (
-                    <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
                       {reportingEquivLabel}
                     </Text>
                   ) : null}
