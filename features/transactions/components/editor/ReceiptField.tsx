@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Receipt, Trash2, X } from 'lucide-react-native';
+import { ChevronRight, Receipt, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { getReceiptUri, saveReceiptImage } from '~/services/userAssets';
+
 import { SummaryRow } from './SummaryRow';
 
 interface ReceiptFieldProps {
@@ -21,20 +22,10 @@ interface ReceiptFieldProps {
 }
 
 const styles = StyleSheet.create({
-  preview: {
-    width: '100%',
-    height: 220,
-    borderRadius: 14,
-  },
-  removeBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+  thumb: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
   },
   viewerImage: {
     flex: 1,
@@ -111,10 +102,20 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
 
   return (
     <>
+      {/* Tapping the row opens the full-screen viewer; the small thumbnail is
+          just a peek. Adding/replacing happens from the header camera button
+          or from inside the viewer. */}
       <SummaryRow
         label={I18n.t('transactions.editor.receipt.label')}
         isActive={false}
-        onPress={handleAddReceipt}
+        onPress={() => {
+          if (!fileUri) {
+            handleAddReceipt();
+            return;
+          }
+          void triggerHaptic('selection');
+          setViewerVisible(true);
+        }}
         rightElement={null}
       >
         <View className="flex-row items-center justify-between">
@@ -126,38 +127,18 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
               {I18n.t('transactions.editor.receipt.label')}
             </Text>
           </View>
-          <Text variant="body" className={fileUri ? 'text-primary' : 'text-muted-foreground/60'}>
-            {fileUri
-              ? I18n.t('transactions.editor.receipt.replace')
-              : I18n.t('transactions.editor.receipt.add')}
-          </Text>
+          {fileUri ? (
+            <View className="flex-row items-center gap-2">
+              <Image source={{ uri: fileUri }} style={styles.thumb} contentFit="cover" />
+              <ChevronRight size={16} color={themeColors.textMuted} />
+            </View>
+          ) : (
+            <Text variant="body" className="text-muted-foreground/60">
+              {I18n.t('transactions.editor.receipt.add')}
+            </Text>
+          )}
         </View>
       </SummaryRow>
-
-      {/* Full-width preview so the receipt is actually legible inline. */}
-      {fileUri ? (
-        <View className="px-4 pb-3">
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              setViewerVisible(true);
-            }}
-            accessibilityRole="imagebutton"
-            accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
-          >
-            <Image source={{ uri: fileUri }} style={styles.preview} contentFit="cover" />
-            <Pressable
-              onPress={handleRemove}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
-              style={[styles.removeBadge, { backgroundColor: 'rgba(0,0,0,0.55)' }]}
-            >
-              <X size={16} color="#FFFFFF" />
-            </Pressable>
-          </Pressable>
-        </View>
-      ) : null}
 
       <ThemeModal
         visible={viewerVisible}
