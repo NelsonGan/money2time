@@ -2626,12 +2626,13 @@ export function TransactionEditorScreen({
     );
   };
 
-  const renderFields = (pageType: TransactionType, isActive: boolean) => {
-    const pageIsTransfer = pageType === 'transfer';
-    const pageIsBalanceAdj = pageType === 'balance_adjustment';
-    const pageSel = isActive
-      ? { accountId, fromAccountId, toAccountId, categoryId }
-      : fieldSelectionsByTypeRef.current[pageType];
+  // The single-page (recurring editor) field form. Unlike renderStickyBackground,
+  // this is only ever rendered for the active type, so it reads live editor state
+  // directly — there is no inactive/peeked-page variant to mirror.
+  const renderFields = () => {
+    const pageIsTransfer = isTransferType;
+    const pageIsBalanceAdj = isBalanceAdjustmentType;
+    const pageSel = { accountId, fromAccountId, toAccountId, categoryId };
     const pageAccount = pageSel.accountId ? (accountById.get(pageSel.accountId) ?? null) : null;
     const pageFromAccount = pageSel.fromAccountId
       ? (accountById.get(pageSel.fromAccountId) ?? null)
@@ -2645,24 +2646,16 @@ export function TransactionEditorScreen({
     const pageCategory = pageSel.categoryId
       ? (allCategoryPreviewById.get(pageSel.categoryId) ?? null)
       : null;
-    const pageTone = isActive
-      ? amountTone
-      : pageType === 'expense'
-        ? ('error' as const)
-        : pageType === 'income'
-          ? ('success' as const)
-          : ('default' as const);
-    const pageNudge = isActive ? workTimeNudgeParts : null;
-    const pageTransferReceived = isActive ? transferReceivedLabel : null;
-    const pageReportingEquiv = isActive ? reportingEquivLabel : null;
-    const pageActiveField = isActive ? activeField : null;
-    const pageFieldErrors = isActive ? fieldErrors : ({} as typeof fieldErrors);
-    const pageRegisterLayout = isActive
-      ? registerFieldLayout
-      : (_field: NonNullActiveField) => undefined;
+    const pageTone = amountTone;
+    const pageNudge = workTimeNudgeParts;
+    const pageTransferReceived = transferReceivedLabel;
+    const pageReportingEquiv = reportingEquivLabel;
+    const pageActiveField = activeField;
+    const pageFieldErrors = fieldErrors;
+    const pageRegisterLayout = registerFieldLayout;
     return (
       <ScrollView
-        ref={isActive ? editorScrollRef : undefined}
+        ref={editorScrollRef}
         className="flex-1"
         contentContainerStyle={scrollContentStyle}
         showsVerticalScrollIndicator={false}
@@ -2980,7 +2973,7 @@ export function TransactionEditorScreen({
                     <View className="h-[1px] bg-border/15 mx-4" />
 
                     {/* Note row */}
-                    <View onLayout={isActive ? handleNoteFieldLayout : undefined}>
+                    <View onLayout={handleNoteFieldLayout}>
                       <SummaryRow
                         label={I18n.t('transaction_detail.note')}
                         isActive={pageActiveField === 'note'}
@@ -2997,44 +2990,24 @@ export function TransactionEditorScreen({
                             </Text>
                           </View>
                           <View className="max-w-[66%] min-w-[40%]">
-                            {isActive ? (
-                              <TextInput
-                                ref={noteInputRef}
-                                value={note}
-                                onChangeText={handleNoteChange}
-                                placeholder={I18n.t('transactions.editor.optional')}
-                                placeholderTextColor={`${themeColors.mutedForeground}99`}
-                                returnKeyType="done"
-                                onFocus={handleNoteFocus}
-                                onBlur={handleNoteBlur}
-                                autoCorrect={false}
-                                autoComplete="off"
-                                spellCheck={false}
-                                style={[
-                                  SINGLE_LINE_TEXT_INPUT_STYLE,
-                                  styles.inlineSummaryInput,
-                                  { color: themeColors.text },
-                                ]}
-                              />
-                            ) : (
-                              // Mirror the TextInput's exact metrics so the row
-                              // height doesn't jump when a page swaps live/static
-                              // mid-swipe.
-                              <Text
-                                numberOfLines={1}
-                                style={[
-                                  SINGLE_LINE_TEXT_INPUT_STYLE,
-                                  styles.inlineSummaryInput,
-                                  {
-                                    color: note
-                                      ? themeColors.text
-                                      : `${themeColors.mutedForeground}99`,
-                                  },
-                                ]}
-                              >
-                                {note || I18n.t('transactions.editor.optional')}
-                              </Text>
-                            )}
+                            <TextInput
+                              ref={noteInputRef}
+                              value={note}
+                              onChangeText={handleNoteChange}
+                              placeholder={I18n.t('transactions.editor.optional')}
+                              placeholderTextColor={`${themeColors.mutedForeground}99`}
+                              returnKeyType="done"
+                              onFocus={handleNoteFocus}
+                              onBlur={handleNoteBlur}
+                              autoCorrect={false}
+                              autoComplete="off"
+                              spellCheck={false}
+                              style={[
+                                SINGLE_LINE_TEXT_INPUT_STYLE,
+                                styles.inlineSummaryInput,
+                                { color: themeColors.text },
+                              ]}
+                            />
                           </View>
                         </View>
                       </SummaryRow>
@@ -3282,7 +3255,7 @@ export function TransactionEditorScreen({
             </Pressable>
 
             {/* Note suggestions dropdown — outside Pressable so taps aren't intercepted */}
-            {isActive && noteSuggestionsVisible && noteSuggestionsTop !== null ? (
+            {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
               <Animated.View
                 entering={FadeIn.duration(120)}
                 exiting={FadeOut.duration(120)}
@@ -3478,7 +3451,7 @@ export function TransactionEditorScreen({
           ) : useStickyNumpad ? (
             <View style={summaryContainerStyle}>{renderStickyBackground(type, true)}</View>
           ) : (
-            <View style={summaryContainerStyle}>{renderFields(type, true)}</View>
+            <View style={summaryContainerStyle}>{renderFields()}</View>
           )}
 
           {showToolZone ? (

@@ -100,7 +100,9 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
     [person, pickerForSplitId],
   );
 
-  const title = person?.name ?? `${I18n.t('transactions.settleUp.someone')}`;
+  // Blank while the person is missing (the last bill just settled) so the header
+  // doesn't flash a fallback name for the one frame before the screen pops.
+  const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
   // Receipt: title is the person's name, one line per bill with its date.
   const receiptContent = useMemo<ReceiptContent | null>(() => {

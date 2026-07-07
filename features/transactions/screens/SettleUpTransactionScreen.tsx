@@ -103,9 +103,11 @@ export function SettleUpTransactionScreen({
     [bill, pickerForSplitId],
   );
 
-  const title =
-    (bill && (bill.note?.trim() || bill.categoryName)) ||
-    `${I18n.t('transactions.settleUp.untitled_bill')}`;
+  // Blank while the bill is missing (the last share just settled) so the header
+  // doesn't flash a fallback title for the one frame before the screen pops.
+  const title = bill
+    ? bill.note?.trim() || bill.categoryName || `${I18n.t('transactions.settleUp.untitled_bill')}`
+    : '';
 
   // Receipt: title is the bill, the date sits on top, one line per person.
   // No grand total — the card goes to a group, so each person only cares about
