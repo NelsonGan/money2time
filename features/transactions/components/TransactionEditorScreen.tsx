@@ -654,6 +654,22 @@ export function TransactionEditorScreen({
     >
   >({});
   const [error, setError] = useState<string | null>(null);
+  // Lightweight transient toast for validation failures — the inline field
+  // errors can sit hidden behind the numpad, so surface a clear message on top.
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = useCallback((message: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    void triggerHaptic('warning');
+    setToast(message);
+    toastTimerRef.current = setTimeout(() => setToast(null), 2600);
+  }, []);
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    },
+    [],
+  );
   const autoNoteFromCategoryRef = useRef<string | null>(null);
   const editorScrollRef = useRef<ScrollView>(null);
   const fieldOffsetsRef = useRef<Partial<Record<NonNullActiveField, number>>>({});
@@ -1064,14 +1080,14 @@ export function TransactionEditorScreen({
   }, [amount, defaultPaybackAccountId]);
 
   const numericAmountForGate = Number(amount);
+  // Splitting only needs a positive amount — the account/category can be filled
+  // in afterwards, and each split row carries its own payback account.
   const canOpenSplitBill =
     !hideSplitMode &&
     type === 'expense' &&
     !recurringOptions &&
     Number.isFinite(numericAmountForGate) &&
-    numericAmountForGate > 0 &&
-    !!accountId &&
-    !!categoryId;
+    numericAmountForGate > 0;
 
   // Snapshot taken when the modal opens so the user can discard everything
   // (edits + Mark Paid + new rows + split-evenly toggle) by tapping back.
@@ -1365,6 +1381,7 @@ export function TransactionEditorScreen({
         if (!accountId) {
           setError(I18n.t('transactions.editor.error.complete_required'));
           setFieldErrors({ account: I18n.t('transactions.editor.error.required') });
+          showToast(I18n.t('transactions.editor.error.complete_required'));
           activateField('account');
           return;
         }
@@ -1392,6 +1409,7 @@ export function TransactionEditorScreen({
         if (Object.keys(transferErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
           setFieldErrors(transferErrors);
+          showToast(I18n.t('transactions.editor.error.complete_required'));
           if (transferErrors.from_account) activateField('fromAccount');
           else if (transferErrors.to_account) activateField('toAccount');
           return;
@@ -1429,6 +1447,7 @@ export function TransactionEditorScreen({
         if (Object.keys(baseErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
           setFieldErrors(baseErrors);
+          showToast(I18n.t('transactions.editor.error.complete_required'));
           if (baseErrors.account) activateField('account');
           else if (baseErrors.category) activateField('category');
           return;
@@ -1980,7 +1999,8 @@ export function TransactionEditorScreen({
     if (mode === 'create') {
       autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
     }
-    focusNoteField();
+    // Note is optional, so just close the picker instead of jumping into it.
+    clearActiveField();
   };
 
   const categoryPanelParents = useMemo(
@@ -2547,12 +2567,20 @@ export function TransactionEditorScreen({
                                 ]}
                               />
                             ) : (
+                              // Mirror the TextInput's exact metrics so the row
+                              // height doesn't jump when a page swaps live/static
+                              // mid-swipe.
                               <Text
-                                variant="body"
                                 numberOfLines={1}
-                                className={
-                                  note ? 'text-right' : 'text-right text-muted-foreground/60'
-                                }
+                                style={[
+                                  SINGLE_LINE_TEXT_INPUT_STYLE,
+                                  styles.inlineSummaryInput,
+                                  {
+                                    color: note
+                                      ? themeColors.text
+                                      : `${themeColors.mutedForeground}99`,
+                                  },
+                                ]}
                               >
                                 {note || I18n.t('transactions.editor.optional')}
                               </Text>
@@ -2898,11 +2926,14 @@ export function TransactionEditorScreen({
       >
         <TabletContentContainer style={{ flex: 1 }}>
           <View
-            className="px-5 pb-2 flex-row items-start justify-between"
+            className="px-5 pb-2 flex-row items-center"
             style={{ paddingTop: topInset + (windowHeight < 700 ? 8 : 16) }}
             onStartShouldSetResponder={shouldHandleBackgroundPress}
             onResponderRelease={clearActiveField}
           >
+            {/* Left slot: back button, plus the title when not in tab mode.
+                Equal flex with the right slot keeps the centered tabs truly
+                centered regardless of how wide the actions are. */}
             <View className="flex-1 flex-row items-center gap-3">
               <Pressable
                 accessibilityRole="button"
@@ -2915,43 +2946,7 @@ export function TransactionEditorScreen({
               >
                 <ChevronLeft size={14} color={themeColors.textSoft} />
               </Pressable>
-              {useTypeTabs ? (
-                <View className="flex-1 flex-row items-center justify-center gap-4">
-                  {availableTypeCards.map((item) => {
-                    const active = type === item.value;
-                    return (
-                      <Pressable
-                        key={item.value}
-                        onPress={() => handleTypeChange(item.value)}
-                        accessibilityRole="tab"
-                        accessibilityState={{ selected: active }}
-                        className="pb-1"
-                      >
-                        <View className="flex-row items-center gap-1">
-                          <TransactionTypeGlyph
-                            type={item.value}
-                            size={13}
-                            color={active ? typeTint(item.value) : themeColors.textMuted}
-                          />
-                          <Text
-                            variant="caption"
-                            className={cn(
-                              'font-semibold',
-                              active ? 'text-foreground' : 'text-muted-foreground',
-                            )}
-                          >
-                            {item.label}
-                          </Text>
-                        </View>
-                        <View
-                          className="mt-1 h-0.5 rounded-full"
-                          style={{ backgroundColor: active ? typeTint(item.value) : 'transparent' }}
-                        />
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : (
+              {!useTypeTabs ? (
                 <View>
                   <Text variant="subheading">{title}</Text>
                   {showSubtitle ? (
@@ -2960,17 +2955,58 @@ export function TransactionEditorScreen({
                     </Text>
                   ) : null}
                 </View>
-              )}
+              ) : null}
             </View>
-            {/* In sticky mode the save action lives below the numpad; here we
-                keep only Delete (edit) and the recurring editor's Save. */}
-            <View className="flex-row items-center gap-2">
+
+            {useTypeTabs ? (
+              <View className="flex-row items-center justify-center gap-4">
+                {availableTypeCards.map((item) => {
+                  const active = type === item.value;
+                  return (
+                    <Pressable
+                      key={item.value}
+                      onPress={() => handleTypeChange(item.value)}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: active }}
+                      className="relative pb-1"
+                    >
+                      <View className="flex-row items-center gap-1">
+                        <TransactionTypeGlyph
+                          type={item.value}
+                          size={13}
+                          color={active ? typeTint(item.value) : themeColors.textMuted}
+                        />
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            'font-semibold',
+                            active ? 'text-foreground' : 'text-muted-foreground',
+                          )}
+                        >
+                          {item.label}
+                        </Text>
+                      </View>
+                      <View
+                        className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                        style={{ backgroundColor: active ? typeTint(item.value) : 'transparent' }}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+
+            {/* Right slot: in sticky mode the save action lives below the numpad,
+                so here we keep only Delete (edit) and the recurring Save. */}
+            <View className="flex-1 flex-row items-center justify-end gap-2">
               {mode === 'edit' && onDelete ? (
+                // Match the back button's footprint so the header reads
+                // symmetric (back left / delete right) with centered tabs.
                 <Pressable
                   onPress={onDelete}
                   accessibilityRole="button"
                   accessibilityLabel={deleteLabel}
-                  className="h-10 w-10 items-center justify-center rounded-full bg-destructive/12"
+                  className="h-8 w-8 items-center justify-center rounded-full bg-destructive/12"
                 >
                   <Trash2 size={14} color={themeColors.coral} />
                 </Pressable>
@@ -3240,6 +3276,27 @@ export function TransactionEditorScreen({
         onSelect={handleRecurrenceEndDateSelect}
         onClose={clearActiveField}
       />
+      {toast ? (
+        <Animated.View
+          entering={FadeIn.duration(140)}
+          exiting={FadeOut.duration(160)}
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 20,
+            right: 20,
+            top: topInset + 56,
+            alignItems: 'center',
+            zIndex: 50,
+          }}
+        >
+          <View className="max-w-full rounded-2xl bg-destructive px-4 py-2.5 shadow-lg">
+            <Text variant="bodyStrong" numberOfLines={2} className="text-center text-white">
+              {toast}
+            </Text>
+          </View>
+        </Animated.View>
+      ) : null}
     </SafeAreaView>
   );
 }
