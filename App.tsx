@@ -41,7 +41,13 @@ import {
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
-import { Button, Text, ThemeModal } from '~/components/ui';
+import {
+  AccountLogoPickerSheet,
+  Button,
+  ItemIconPickerSheet,
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
@@ -67,6 +73,10 @@ import {
   setPendingCategoryAllocation,
 } from '~/features/budget/lib/categoryAllocationBridge';
 import { AssetsTab } from '~/features/items/components';
+import {
+  consumePendingItemIconPicker,
+  setPendingItemIconPicker,
+} from '~/features/items/lib/itemIconPickerBridge';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
@@ -74,6 +84,10 @@ import { OnboardingFlow } from '~/features/onboarding/screens';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
+import {
+  consumePendingAccountLogoPicker,
+  setPendingAccountLogoPicker,
+} from '~/features/settings/lib/accountLogoPickerBridge';
 import {
   AccountEditorScreen,
   AccountGroupEditorScreen,
@@ -1301,7 +1315,29 @@ function ItemEditorRouteScreen({ route, navigation }: RootStackRouteProps<'ItemE
     <ItemEditorScreen
       itemId={route.params?.itemId}
       onClose={() => navigation.goBack()}
-      onLimitReached={() => navigation.navigate('ProPaywall', { source: 'items' })}
+      onOpenIconPicker={(session) => {
+        setPendingItemIconPicker(session);
+        navigation.navigate('ItemIconPicker');
+      }}
+    />
+  );
+}
+
+function ItemIconPickerRouteScreen({ navigation }: RootStackRouteProps<'ItemIconPicker'>) {
+  // The hand-off (selected id + onSelect callback) rides a module bridge, not
+  // navigation params, so nothing non-serializable enters the nav state. Read
+  // it once on mount; a cold state-restore leaves it empty, so just pop back.
+  const sessionRef = useRef(consumePendingItemIconPicker());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
+  return (
+    <ItemIconPickerSheet
+      selectedIconId={session.selectedIconId}
+      onSelect={session.onSelect}
+      onClose={() => navigation.goBack()}
     />
   );
 }
@@ -1381,6 +1417,29 @@ function AccountEditorRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       presetGroupName={route.params?.presetGroupName}
       onClose={() => navigation.goBack()}
       onOpenMultiCurrency={() => navigation.navigate('SettingsMultiCurrency')}
+      onOpenLogoPicker={(session) => {
+        setPendingAccountLogoPicker(session);
+        navigation.navigate('AccountLogoPicker');
+      }}
+    />
+  );
+}
+
+function AccountLogoPickerRouteScreen({ navigation }: RootStackRouteProps<'AccountLogoPicker'>) {
+  // The hand-off (selected id + onSelect callback) rides a module bridge, not
+  // navigation params, so nothing non-serializable enters the nav state. Read
+  // it once on mount; a cold state-restore leaves it empty, so just pop back.
+  const sessionRef = useRef(consumePendingAccountLogoPicker());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
+  return (
+    <AccountLogoPickerSheet
+      selectedLogoId={session.selectedLogoId}
+      onSelect={session.onSelect}
+      onClose={() => navigation.goBack()}
     />
   );
 }
@@ -1978,6 +2037,7 @@ function AppContent() {
           <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
           <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
           <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
+          <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
           <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
           <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
           <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
@@ -1993,6 +2053,7 @@ function AppContent() {
           <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
           <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
           <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
+          <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
           <RootStack.Screen
             name="BudgetTemplateEditor"
             component={BudgetTemplateEditorRouteScreen}

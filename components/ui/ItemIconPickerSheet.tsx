@@ -1,22 +1,14 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ItemIcon } from '~/components/ui/ItemIcon';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { spacing } from '~/constants/designSystem';
 import { type ItemIconMeta, searchItemIcons } from '~/constants/itemIcons';
 import { useProGate } from '~/hooks/useProGate';
@@ -28,17 +20,17 @@ import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 
 interface ItemIconPickerSheetProps {
-  visible: boolean;
+  /** Dismisses the screen (pops the root stack back to the editor). */
   onClose: () => void;
   selectedIconId: string | null;
   /** Receives the new icon id, or null when the user clears the icon. */
   onSelect: (iconId: string | null) => void;
-  /** Called when the free custom-upload limit is hit so the host can reveal the paywall. */
-  onLimitReached?: () => void;
 }
 
 const NUM_COLUMNS = 4;
 const UPLOAD_ITEM_ID = '__upload__';
+// Extra scroll band so the last row of the custom grid clears the home
+// indicator (this screen drops the bottom safe-area edge, so nothing else does).
 const GRID_BOTTOM_PADDING = spacing.xl + 40;
 
 type PickerTab = 'library' | 'custom';
@@ -59,8 +51,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   searchBar: {
+    // paddingBottom is set dynamically per keyboard state in the animated style.
     paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   flexOne: {
@@ -144,11 +136,9 @@ function IconCell({
 }
 
 export function ItemIconPickerSheet({
-  visible,
   onClose,
   selectedIconId,
   onSelect,
-  onLimitReached,
 }: ItemIconPickerSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -156,37 +146,29 @@ export function ItemIconPickerSheet({
   const [tab, setTab] = useState<PickerTab>('library');
   const [query, setQuery] = useState('');
   const [customIcons, setCustomIcons] = useState<{ id: string; uri: string }[]>([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // The app is edge-to-edge on both platforms, so the keyboard overlays content
+  // rather than resizing the window. Lift the sticky search bar with the same
+  // approach as the quick-entry sheet: translate it up by the live keyboard
+  // frame (react-native-keyboard-controller tracks the true inset, which the JS
+  // Keyboard events under-report on edge-to-edge Android). `height` is 0 when
+  // closed and negative when open; `progress` runs 0→1, used to fold away the
+  // home-indicator padding as the keyboard rises so the bar lands flush on it.
+  const keyboard = useReanimatedKeyboardAnimation();
+  const searchBarAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: keyboard.height.value }],
+    paddingBottom: spacing.sm + insets.bottom * (1 - keyboard.progress.value),
+  }));
 
   const refreshCustomIcons = useCallback(() => {
     setCustomIcons(listCustomItemIcons());
   }, []);
 
-  // KeyboardAvoidingView is unreliable inside a native Modal, so lift the sticky
-  // search bar manually by tracking the keyboard height.
+  // The screen is mounted fresh on each navigation (and torn down on back), so
+  // it always opens with default tab/query — just load the custom icons.
   useEffect(() => {
-    if (!visible) return;
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    const showSub = Keyboard.addListener(showEvent, (e) =>
-      setKeyboardHeight(e.endCoordinates?.height ?? 0),
-    );
-    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-      setKeyboardHeight(0);
-    };
-  }, [visible]);
-
-  useEffect(() => {
-    if (visible) {
-      refreshCustomIcons();
-    } else {
-      setQuery('');
-      setTab('library');
-    }
-  }, [refreshCustomIcons, visible]);
+    refreshCustomIcons();
+  }, [refreshCustomIcons]);
 
   const results = useMemo(() => searchItemIcons(query), [query]);
 
@@ -201,9 +183,10 @@ export function ItemIconPickerSheet({
 
   const handleUpload = useCallback(async () => {
     void triggerHaptic('selection');
+    // checkLimit pushes the (root) paywall over this screen when the free
+    // custom-upload limit is hit — leave the picker in place underneath so back
+    // returns here, not to a half-dismissed editor.
     if (!checkLimit('custom_item_images', customIcons.length)) {
-      onClose();
-      onLimitReached?.();
       return;
     }
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -227,7 +210,7 @@ export function ItemIconPickerSheet({
     } catch {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
-  }, [checkLimit, customIcons.length, onClose, onLimitReached, refreshCustomIcons]);
+  }, [checkLimit, customIcons.length, refreshCustomIcons]);
 
   const handleDeleteCustom = useCallback(
     (iconId: string) => {
@@ -249,52 +232,48 @@ export function ItemIconPickerSheet({
   );
 
   return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <View className="flex-1">
         <SettingsHeader
-          className="px-5 pt-5 pb-3"
+          className="px-5 pt-5 pb-2"
           title={I18n.t('items.icon.choose_title')}
-          onClose={onClose}
-          rightAccessory={
-            <View className="flex-row items-end" style={{ gap: spacing.md }}>
-              {(
-                [
-                  { value: 'library', label: I18n.t('accounts.logo.tab_library') },
-                  { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
-                ] as const
-              ).map((option) => {
-                const active = tab === option.value;
-                return (
-                  <Pressable
-                    key={option.value}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setTab(option.value);
-                    }}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: active }}
-                  >
-                    <Text
-                      variant="bodyStrong"
-                      className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                    >
-                      {option.label}
-                    </Text>
-                    <View
-                      className="h-0.5 mt-1 rounded-full"
-                      style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                    />
-                  </Pressable>
-                );
-              })}
-            </View>
-          }
+          onBack={onClose}
         />
+
+        {/* Tabs sit on their own row below the centered title so they don't
+            compete with it for the header's side slots. */}
+        <View className="flex-row px-5 pb-3" style={{ gap: spacing.lg }}>
+          {(
+            [
+              { value: 'library', label: I18n.t('accounts.logo.tab_library') },
+              { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
+            ] as const
+          ).map((option) => {
+            const active = tab === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setTab(option.value);
+                }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
+              >
+                <Text
+                  variant="bodyStrong"
+                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
+                >
+                  {option.label}
+                </Text>
+                <View
+                  className="h-0.5 mt-1 rounded-full"
+                  style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
 
         {tab === 'custom' ? (
           <FlatList
@@ -407,16 +386,12 @@ export function ItemIconPickerSheet({
               )}
             />
 
-            <View
+            <Animated.View
               className="px-5 bg-background"
               style={[
                 styles.searchBar,
-                {
-                  borderTopColor: themeColors.border,
-                  marginBottom:
-                    keyboardHeight > 0 ? Math.max(keyboardHeight - insets.bottom, 0) : 0,
-                  paddingBottom: keyboardHeight > 0 ? spacing.sm : spacing.md,
-                },
+                { borderTopColor: themeColors.border },
+                searchBarAnimatedStyle,
               ]}
             >
               <View
@@ -448,10 +423,10 @@ export function ItemIconPickerSheet({
                   </Pressable>
                 ) : null}
               </View>
-            </View>
+            </Animated.View>
           </View>
         )}
-      </SafeAreaView>
-    </ThemeModal>
+      </View>
+    </SafeAreaView>
   );
 }

@@ -30,6 +30,10 @@ export type RootStackParamList = {
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
+  // Full-page account logo picker. Its selected id + onSelect callback ride a
+  // module bridge (accountLogoPickerBridge) rather than params, so the route
+  // stays serializable.
+  AccountLogoPicker: undefined;
   PayCreditCard: { accountId: string };
   AccountGroupEditor: undefined;
   CategoryEditor: { categoryId?: string; parentId?: string; type?: CategoryType } | undefined;
@@ -51,6 +55,10 @@ export type RootStackParamList = {
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
+  // Full-page item icon picker. Its selected id + onSelect callback ride a
+  // module bridge (itemIconPickerBridge) rather than params, so the route stays
+  // serializable.
+  ItemIconPicker: undefined;
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
   // Edit an existing month budget (budgetId) or create a one-off custom
   // budget for a month with no live budget (createForMonth, 'YYYY-MM').
