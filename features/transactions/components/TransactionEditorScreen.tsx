@@ -705,10 +705,6 @@ export function TransactionEditorScreen({
   // Restored to 0 on blur.
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const keyboardVisible = keyboardHeight > 0;
-  // On Android the window resizes above the keyboard, so the numpad can't just
-  // sit behind it — hide it there. On iOS the numpad stays mounted behind the
-  // keyboard so the amount card only nudges up (no jarring full-height jump).
-  const hideNumpadForKeyboard = keyboardVisible && Platform.OS === 'android';
   // Measured height of the pinned bottom panel while the numpad is visible, used
   // to reserve scroll padding under the background categories. Captured only when
   // the numpad is showing so a keyboard-driven collapse doesn't shrink it.
@@ -1105,18 +1101,15 @@ export function TransactionEditorScreen({
   }, [useStickyNumpad]);
 
   // Drive the panel's upward lift as a Reanimated timing so it tracks the
-  // keyboard smoothly instead of snapping. Only iOS needs a manual lift (Android
-  // resizes the window). Lift the *minimum* so the note clears the keyboard: the
-  // numpad + save row already sit below the note, so we only cover whatever the
-  // keyboard would still hide beyond them — the amount card barely moves.
+  // keyboard smoothly instead of snapping. The app is edge-to-edge and this
+  // screen is a modal, so the keyboard overlays (the window doesn't resize) on
+  // BOTH platforms — mirror the other sheets and lift manually everywhere.
+  // Lift the *minimum* so the note clears the keyboard: the numpad + save row
+  // already sit below the note, so we only cover whatever the keyboard would
+  // still hide beyond them — the amount card barely moves.
   const panelLift = useSharedValue(0);
   useEffect(() => {
-    // Lift just enough to tuck the numpad exactly behind the keyboard; the card's
-    // own bottom margin then shows as a clean gap above the keyboard.
-    const target =
-      Platform.OS === 'ios' && keyboardHeight > 0
-        ? Math.max(0, keyboardHeight - belowNoteHeight)
-        : 0;
+    const target = keyboardHeight > 0 ? Math.max(0, keyboardHeight - belowNoteHeight) : 0;
     panelLift.value = withTiming(target, {
       duration: Platform.OS === 'ios' ? 250 : 180,
       easing: Easing.out(Easing.cubic),
@@ -1308,7 +1301,11 @@ export function TransactionEditorScreen({
 
   // Show a red notification badge on the Split Bills button with the count of
   // friends who still owe. Same affordance as the row tint in the activity list.
-  const splitBillsUnpaidCount = splitMode ? splits.filter((s) => !s.isSelf && !s.paid).length : 0;
+  // Suppressed while the Split Bill route is open (and during its opening
+  // transition) so the just-created draft row doesn't flash a "(1)" on the button
+  // behind the screen before it's actually committed.
+  const splitBillsUnpaidCount =
+    splitMode && !splitRouteOpen ? splits.filter((s) => !s.isSelf && !s.paid).length : 0;
 
   // Mark Paid / Undo only stage the change locally. They adjust the editor's
   // amount field and flip the row's paid badge. Nothing is persisted until the
@@ -1872,8 +1869,9 @@ export function TransactionEditorScreen({
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
   // The save action(s) sit in a footer below the pad and own the bottom inset.
-  // Trim the home-indicator gap so the buttons don't float too high off the edge.
-  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6);
+  // Keep a little breathing room below the button (also counts toward the
+  // measured below-note height, so the keyboard lift stays small).
+  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6) + 14;
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -3696,57 +3694,55 @@ export function TransactionEditorScreen({
             ) : null}
           </View>
 
-          {/* Numpad + Save — everything below the note. On iOS it stays mounted
-              behind the keyboard (so the amount card only nudges up); on Android
-              the window resizes, so hide it there. Measured to size the keyboard
-              lift and the background's bottom padding. */}
-          {hideNumpadForKeyboard ? null : (
+          {/* Numpad + Save — everything below the note. It stays mounted and
+              tucks behind the keyboard (the keyboard overlays, edge-to-edge, on
+              both platforms) so the amount card only nudges up the minimum.
+              Measured to size the keyboard lift and the background padding. */}
+          <View
+            onLayout={(event) => {
+              const measured = event.nativeEvent.layout.height;
+              setBelowNoteHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+            }}
+          >
+            <View style={{ height: numpadBodyHeight }}>
+              <NumpadPanel
+                compact
+                resetNonce={bulkEntryNonce}
+                initialExpression={amount}
+                onValueChange={handleAmountValueChange}
+                onConfirm={handleAmountConfirm}
+                onDatePress={() => activateField('date')}
+                dateLabel={formatDateDisplay(date, activeLocale)}
+              />
+            </View>
             <View
-              onLayout={(event) => {
-                const measured = event.nativeEvent.layout.height;
-                setBelowNoteHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
-              }}
+              className="flex-row gap-2.5 px-4 pt-2"
+              style={{ paddingBottom: numpadFooterBottomPad }}
             >
-              <View style={{ height: numpadBodyHeight }}>
-                <NumpadPanel
-                  compact
-                  resetNonce={bulkEntryNonce}
-                  initialExpression={amount}
-                  onValueChange={handleAmountValueChange}
-                  onConfirm={handleAmountConfirm}
-                  onDatePress={() => activateField('date')}
-                  dateLabel={formatDateDisplay(date, activeLocale)}
-                />
-              </View>
-              <View
-                className="flex-row gap-2.5 px-4 pt-2"
-                style={{ paddingBottom: numpadFooterBottomPad }}
+              <Pressable
+                onPress={() => handleSubmit(false)}
+                accessibilityRole="button"
+                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
               >
+                <Text variant="bodyStrong" className="text-primary-foreground">
+                  {saveLabel}
+                </Text>
+              </Pressable>
+              {showBulkToggle ? (
                 <Pressable
-                  onPress={() => handleSubmit(false)}
+                  onPress={() => handleSubmit(true)}
                   accessibilityRole="button"
-                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+                  accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
+                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
                 >
-                  <Text variant="bodyStrong" className="text-primary-foreground">
+                  <Layers size={16} color={themeColors.primary} />
+                  <Text variant="bodyStrong" className="text-primary">
                     {saveLabel}
                   </Text>
                 </Pressable>
-                {showBulkToggle ? (
-                  <Pressable
-                    onPress={() => handleSubmit(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
-                    className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
-                  >
-                    <Layers size={16} color={themeColors.primary} />
-                    <Text variant="bodyStrong" className="text-primary">
-                      {saveLabel}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
+              ) : null}
             </View>
-          )}
+          </View>
         </Animated.View>
       ) : null}
       {isTransferType && selectedFromAccount && selectedToAccount ? (
