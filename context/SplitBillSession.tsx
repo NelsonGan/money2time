@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 import type { SplitDraft } from '~/features/transactions/components/editor';
 import type { Account, AccountGroup } from '~/types';
@@ -38,10 +38,11 @@ const SetSplitBillSessionContext = createContext<(session: SplitBillSession | nu
 
 export function SplitBillSessionProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<SplitBillSession | null>(null);
-  const value = useMemo(() => session, [session]);
   return (
     <SetSplitBillSessionContext.Provider value={setSession}>
-      <SplitBillSessionContext.Provider value={value}>{children}</SplitBillSessionContext.Provider>
+      <SplitBillSessionContext.Provider value={session}>
+        {children}
+      </SplitBillSessionContext.Provider>
     </SetSplitBillSessionContext.Provider>
   );
 }

@@ -12,7 +12,6 @@ import {
   Clock,
   Coins,
   CreditCard,
-  Eye,
   FileText,
   Hash,
   Layers,
@@ -1148,16 +1147,24 @@ export function TransactionEditorScreen({
   // above it). The keyboard lift is the *minimum* — the numpad + save row sit
   // below the note, so we only cover whatever the keyboard would still hide
   // beyond them, and the amount card barely moves.
-  // Seed with a close estimate of the collapse offset (numpad body + save row)
-  // so create mode opens already collapsed instead of flashing the pad then
-  // sliding it down. The measured value corrects it a frame later.
+  // Seed with a close estimate of the collapse offset (numpad body + save row,
+  // less the peek) so create mode opens already collapsed instead of flashing
+  // the pad then sliding it down. The measured value corrects it a frame later.
   const panelTranslate = useSharedValue(
     numpadExpanded
       ? 0
-      : numpadBodyHeightFor(windowHeight) +
-          NUMPAD_SAVE_ROW_HEIGHT +
-          numpadFooterPadFor(safeAreaInsets.bottom),
+      : Math.max(
+          0,
+          numpadBodyHeightFor(windowHeight) +
+            NUMPAD_SAVE_ROW_HEIGHT +
+            numpadFooterPadFor(safeAreaInsets.bottom) -
+            COLLAPSE_PEEK,
+        ),
   );
+  // The first resting position is applied instantly (no timing) so opening the
+  // editor shows the pad already settled instead of animating it into place —
+  // and so cold-start jank doesn't stack two animations on top of the mount.
+  const panelSettledRef = useRef(false);
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
@@ -1166,7 +1173,18 @@ export function TransactionEditorScreen({
       // keyboard's top (the numpad tucks behind).
       target = -Math.max(0, keyboardHeight - collapsibleHeight);
     } else if (!numpadExpanded) {
+      // Until the collapsible region is measured we don't know the real resting
+      // offset. Animating toward the provisional 0 here would slide the pad up
+      // into view and then drop it back down once the measurement lands (the
+      // visible "numpad flashes then falls" on first open), so hold the seeded
+      // estimate until the measurement arrives.
+      if (collapsibleHeight === 0) return;
       target = Math.max(0, collapsibleHeight - COLLAPSE_PEEK);
+    }
+    if (!panelSettledRef.current) {
+      panelSettledRef.current = true;
+      panelTranslate.value = target;
+      return;
     }
     panelTranslate.value = withTiming(target, {
       duration: Platform.OS === 'ios' ? 250 : 200,
@@ -1177,37 +1195,45 @@ export function TransactionEditorScreen({
     transform: [{ translateY: panelTranslate.value }],
   }));
 
-  // Handle interactions: tap toggles the numpad; dragging the handle pulls the
-  // panel up/down live and snaps to expanded/collapsed on release. Disabled
-  // while the keyboard owns the offset.
+  // Handle interactions: tap toggles the numpad; dragging pulls the panel up/down
+  // live and snaps to expanded/collapsed on release. The handle takes a tap OR a
+  // drag from the first pixel; the whole amount card also drags, but only after a
+  // deliberate vertical move so taps on the amount / note still reach them.
+  // Disabled while the keyboard owns the offset.
   const dragStartTranslate = useSharedValue(0);
-  const collapseGesture = useMemo(() => {
+  const { handleGesture, cardDragGesture } = useMemo(() => {
     const collapseOffset = Math.max(0, collapsibleHeight - COLLAPSE_PEEK);
+    const makePan = () =>
+      Gesture.Pan()
+        .enabled(!keyboardVisible)
+        .onStart(() => {
+          dragStartTranslate.value = panelTranslate.value;
+        })
+        .onUpdate((event) => {
+          const next = dragStartTranslate.value + event.translationY;
+          panelTranslate.value = next < 0 ? 0 : next > collapseOffset ? collapseOffset : next;
+        })
+        .onEnd((event) => {
+          const collapsed =
+            event.velocityY > 400 ||
+            (event.velocityY > -400 && panelTranslate.value > collapseOffset / 2);
+          panelTranslate.value = withTiming(collapsed ? collapseOffset : 0, {
+            duration: 200,
+            easing: Easing.out(Easing.cubic),
+          });
+          runOnJS(setNumpadExpanded)(!collapsed);
+        });
     const tap = Gesture.Tap()
       .maxDistance(10)
       .onEnd(() => {
         runOnJS(toggleNumpad)();
       });
-    const pan = Gesture.Pan()
-      .enabled(!keyboardVisible)
-      .onStart(() => {
-        dragStartTranslate.value = panelTranslate.value;
-      })
-      .onUpdate((event) => {
-        const next = dragStartTranslate.value + event.translationY;
-        panelTranslate.value = next < 0 ? 0 : next > collapseOffset ? collapseOffset : next;
-      })
-      .onEnd((event) => {
-        const collapsed =
-          event.velocityY > 400 ||
-          (event.velocityY > -400 && panelTranslate.value > collapseOffset / 2);
-        panelTranslate.value = withTiming(collapsed ? collapseOffset : 0, {
-          duration: 200,
-          easing: Easing.out(Easing.cubic),
-        });
-        runOnJS(setNumpadExpanded)(!collapsed);
-      });
-    return Gesture.Race(pan, tap);
+    return {
+      handleGesture: Gesture.Race(makePan(), tap),
+      // Require ~8px of vertical travel before the card starts dragging, so a
+      // plain tap on the amount / note field is not swallowed by the drag.
+      cardDragGesture: makePan().activeOffsetY([-8, 8]),
+    };
   }, [collapsibleHeight, dragStartTranslate, keyboardVisible, panelTranslate, toggleNumpad]);
 
   // Sync amount field when the parent transaction's amount changes externally
@@ -1604,7 +1630,10 @@ export function TransactionEditorScreen({
       autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || '';
     const resolvedNote = normalizedNote.length > 0 ? normalizedNote : fallbackDefaultNote || null;
     if (!amountDraft || !Number.isFinite(numericAmount)) {
+      // The inline field error can sit hidden behind the numpad, so also surface
+      // a toast instead of the tap appearing to fail silently.
       setFieldErrors({ amount: I18n.t('transactions.editor.error.amount_required') });
+      showToast(I18n.t('transactions.editor.error.amount_required'));
       activateField('amount');
       return;
     }
@@ -2626,12 +2655,13 @@ export function TransactionEditorScreen({
     );
   };
 
-  const renderFields = (pageType: TransactionType, isActive: boolean) => {
-    const pageIsTransfer = pageType === 'transfer';
-    const pageIsBalanceAdj = pageType === 'balance_adjustment';
-    const pageSel = isActive
-      ? { accountId, fromAccountId, toAccountId, categoryId }
-      : fieldSelectionsByTypeRef.current[pageType];
+  // The single-page (recurring editor) field form. Unlike renderStickyBackground,
+  // this is only ever rendered for the active type, so it reads live editor state
+  // directly — there is no inactive/peeked-page variant to mirror.
+  const renderFields = () => {
+    const pageIsTransfer = isTransferType;
+    const pageIsBalanceAdj = isBalanceAdjustmentType;
+    const pageSel = { accountId, fromAccountId, toAccountId, categoryId };
     const pageAccount = pageSel.accountId ? (accountById.get(pageSel.accountId) ?? null) : null;
     const pageFromAccount = pageSel.fromAccountId
       ? (accountById.get(pageSel.fromAccountId) ?? null)
@@ -2645,24 +2675,16 @@ export function TransactionEditorScreen({
     const pageCategory = pageSel.categoryId
       ? (allCategoryPreviewById.get(pageSel.categoryId) ?? null)
       : null;
-    const pageTone = isActive
-      ? amountTone
-      : pageType === 'expense'
-        ? ('error' as const)
-        : pageType === 'income'
-          ? ('success' as const)
-          : ('default' as const);
-    const pageNudge = isActive ? workTimeNudgeParts : null;
-    const pageTransferReceived = isActive ? transferReceivedLabel : null;
-    const pageReportingEquiv = isActive ? reportingEquivLabel : null;
-    const pageActiveField = isActive ? activeField : null;
-    const pageFieldErrors = isActive ? fieldErrors : ({} as typeof fieldErrors);
-    const pageRegisterLayout = isActive
-      ? registerFieldLayout
-      : (_field: NonNullActiveField) => undefined;
+    const pageTone = amountTone;
+    const pageNudge = workTimeNudgeParts;
+    const pageTransferReceived = transferReceivedLabel;
+    const pageReportingEquiv = reportingEquivLabel;
+    const pageActiveField = activeField;
+    const pageFieldErrors = fieldErrors;
+    const pageRegisterLayout = registerFieldLayout;
     return (
       <ScrollView
-        ref={isActive ? editorScrollRef : undefined}
+        ref={editorScrollRef}
         className="flex-1"
         contentContainerStyle={scrollContentStyle}
         showsVerticalScrollIndicator={false}
@@ -2980,7 +3002,7 @@ export function TransactionEditorScreen({
                     <View className="h-[1px] bg-border/15 mx-4" />
 
                     {/* Note row */}
-                    <View onLayout={isActive ? handleNoteFieldLayout : undefined}>
+                    <View onLayout={handleNoteFieldLayout}>
                       <SummaryRow
                         label={I18n.t('transaction_detail.note')}
                         isActive={pageActiveField === 'note'}
@@ -2997,44 +3019,24 @@ export function TransactionEditorScreen({
                             </Text>
                           </View>
                           <View className="max-w-[66%] min-w-[40%]">
-                            {isActive ? (
-                              <TextInput
-                                ref={noteInputRef}
-                                value={note}
-                                onChangeText={handleNoteChange}
-                                placeholder={I18n.t('transactions.editor.optional')}
-                                placeholderTextColor={`${themeColors.mutedForeground}99`}
-                                returnKeyType="done"
-                                onFocus={handleNoteFocus}
-                                onBlur={handleNoteBlur}
-                                autoCorrect={false}
-                                autoComplete="off"
-                                spellCheck={false}
-                                style={[
-                                  SINGLE_LINE_TEXT_INPUT_STYLE,
-                                  styles.inlineSummaryInput,
-                                  { color: themeColors.text },
-                                ]}
-                              />
-                            ) : (
-                              // Mirror the TextInput's exact metrics so the row
-                              // height doesn't jump when a page swaps live/static
-                              // mid-swipe.
-                              <Text
-                                numberOfLines={1}
-                                style={[
-                                  SINGLE_LINE_TEXT_INPUT_STYLE,
-                                  styles.inlineSummaryInput,
-                                  {
-                                    color: note
-                                      ? themeColors.text
-                                      : `${themeColors.mutedForeground}99`,
-                                  },
-                                ]}
-                              >
-                                {note || I18n.t('transactions.editor.optional')}
-                              </Text>
-                            )}
+                            <TextInput
+                              ref={noteInputRef}
+                              value={note}
+                              onChangeText={handleNoteChange}
+                              placeholder={I18n.t('transactions.editor.optional')}
+                              placeholderTextColor={`${themeColors.mutedForeground}99`}
+                              returnKeyType="done"
+                              onFocus={handleNoteFocus}
+                              onBlur={handleNoteBlur}
+                              autoCorrect={false}
+                              autoComplete="off"
+                              spellCheck={false}
+                              style={[
+                                SINGLE_LINE_TEXT_INPUT_STYLE,
+                                styles.inlineSummaryInput,
+                                { color: themeColors.text },
+                              ]}
+                            />
                           </View>
                         </View>
                       </SummaryRow>
@@ -3282,7 +3284,7 @@ export function TransactionEditorScreen({
             </Pressable>
 
             {/* Note suggestions dropdown — outside Pressable so taps aren't intercepted */}
-            {isActive && noteSuggestionsVisible && noteSuggestionsTop !== null ? (
+            {noteSuggestionsVisible && noteSuggestionsTop !== null ? (
               <Animated.View
                 entering={FadeIn.duration(120)}
                 exiting={FadeOut.duration(120)}
@@ -3478,7 +3480,7 @@ export function TransactionEditorScreen({
           ) : useStickyNumpad ? (
             <View style={summaryContainerStyle}>{renderStickyBackground(type, true)}</View>
           ) : (
-            <View style={summaryContainerStyle}>{renderFields(type, true)}</View>
+            <View style={summaryContainerStyle}>{renderFields()}</View>
           )}
 
           {showToolZone ? (
@@ -3541,11 +3543,11 @@ export function TransactionEditorScreen({
 
           {/* Grab handle at the very top of the panel — tap to toggle, or drag
               up/down to pull the numpad open / closed. */}
-          <GestureDetector gesture={collapseGesture}>
+          <GestureDetector gesture={handleGesture}>
             <View
               accessibilityRole="button"
               accessibilityLabel={numpadExpanded ? 'Hide keypad' : 'Show keypad'}
-              className="items-center pb-1.5 pt-2.5"
+              className="items-center pb-0.5 pt-2.5"
             >
               <View className="h-1 w-10 rounded-full bg-border/70" />
             </View>
@@ -3611,7 +3613,7 @@ export function TransactionEditorScreen({
                   )}
                   style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
                 >
-                  <Text className="text-[14px]">🤝</Text>
+                  <CategoryEmoji icon="coins-checkmark" size={16} />
                   <Text variant="caption" numberOfLines={1}>
                     {I18n.t('transactions.editor.split.button_short')}
                   </Text>
@@ -3646,14 +3648,19 @@ export function TransactionEditorScreen({
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
                   className={cn(
-                    'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
+                    'h-9 flex-row items-center justify-center gap-1.5 rounded-full border active:opacity-70',
                     receiptUri
-                      ? 'border-primary/40 bg-primary/15'
-                      : 'border-border/30 bg-secondary/60',
+                      ? 'border-primary/40 bg-primary/15 px-3.5'
+                      : 'w-9 border-border/30 bg-secondary/60',
                   )}
                 >
                   {receiptUri ? (
-                    <Eye size={16} color={themeColors.primary} />
+                    <>
+                      <CategoryEmoji icon="invoice" size={15} />
+                      <Text variant="caption" className="font-medium text-primary">
+                        {I18n.t('transactions.editor.receipt.label')}
+                      </Text>
+                    </>
                   ) : (
                     <Camera size={16} color={themeColors.textMuted} />
                   )}
@@ -3664,152 +3671,156 @@ export function TransactionEditorScreen({
 
           {/* Amount + Note — one card split by a divider. Amount sits on the
               left (no label); tapping it brings the pad back. The bottom margin
-              doubles as the clean gap above the keyboard when the note is typed. */}
-          <View className="relative mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
-            <Pressable
-              onPress={handleAmountRowPress}
-              accessibilityRole="button"
-              className="flex-row items-center justify-between px-4 pb-2 pt-3"
-            >
-              <View className="shrink">
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.panelAmount,
-                    amountDisplay.length > 12
-                      ? { fontSize: 24, lineHeight: 30 }
-                      : amountDisplay.length > 9
-                        ? { fontSize: 30, lineHeight: 37 }
-                        : { fontSize: 34, lineHeight: 42 },
-                  ]}
-                  className={cn(
-                    amountTone === 'error'
-                      ? 'text-destructive'
-                      : amountTone === 'success'
-                        ? 'text-success'
-                        : 'text-foreground',
-                  )}
-                >
-                  {amountDisplay}
-                </Text>
-                {workTimeNudgeParts ? (
-                  <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
-                    {workTimeNudgeParts.before}
-                    <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
-                      {workTimeNudgeParts.hours}
-                    </Text>
-                    {workTimeNudgeParts.after}
+              doubles as the clean gap above the keyboard when the note is typed.
+              The whole card is a drag target for expand/collapse (see
+              cardDragGesture); taps on the amount / note still pass through. */}
+          <GestureDetector gesture={cardDragGesture}>
+            <View className="relative mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
+              <Pressable
+                onPress={handleAmountRowPress}
+                accessibilityRole="button"
+                className="flex-row items-center justify-between px-4 pb-2 pt-3"
+              >
+                <View className="shrink">
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.panelAmount,
+                      amountDisplay.length > 12
+                        ? { fontSize: 24, lineHeight: 30 }
+                        : amountDisplay.length > 9
+                          ? { fontSize: 30, lineHeight: 37 }
+                          : { fontSize: 34, lineHeight: 42 },
+                    ]}
+                    className={cn(
+                      amountTone === 'error'
+                        ? 'text-destructive'
+                        : amountTone === 'success'
+                          ? 'text-success'
+                          : 'text-foreground',
+                    )}
+                  >
+                    {amountDisplay}
                   </Text>
-                ) : null}
-              </View>
-              {showCurrencyButton || transferReceivedLabel || reportingEquivLabel ? (
-                <View className="items-end gap-1 pl-2">
-                  {/* Currency selector lives here now — the amount row has room on
-                      its right, so it reads as "amount, in this currency". */}
-                  {showCurrencyButton ? (
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setCurrencyPickerVisible(true);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={entryCurrency}
-                      className="h-8 flex-row items-center gap-1 rounded-full border border-border/40 bg-card px-2.5 active:opacity-70"
-                    >
-                      <Coins size={13} color={themeColors.textMuted} />
-                      <Text variant="caption" className="font-medium">
-                        {entryCurrency}
+                  {workTimeNudgeParts ? (
+                    <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
+                      {workTimeNudgeParts.before}
+                      <Text variant="caption" tone="primary" style={styles.nudgeLabel}>
+                        {workTimeNudgeParts.hours}
                       </Text>
-                      <ChevronDown size={11} color={themeColors.textMuted} />
-                    </Pressable>
-                  ) : null}
-                  {transferReceivedLabel ? (
-                    <Pressable
-                      onPress={() => setTransferFxModalVisible(true)}
-                      hitSlop={6}
-                      className="flex-row items-center gap-1"
-                    >
-                      <Text
-                        variant="caption"
-                        numberOfLines={1}
-                        style={{ color: themeColors.primary }}
-                      >
-                        {transferReceivedLabel}
-                      </Text>
-                      <Pencil size={11} color={themeColors.primary} />
-                    </Pressable>
-                  ) : null}
-                  {reportingEquivLabel ? (
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {reportingEquivLabel}
+                      {workTimeNudgeParts.after}
                     </Text>
                   ) : null}
                 </View>
-              ) : null}
-            </Pressable>
+                {showCurrencyButton || transferReceivedLabel || reportingEquivLabel ? (
+                  <View className="items-end gap-1 pl-2">
+                    {/* Currency selector lives here now — the amount row has room on
+                      its right, so it reads as "amount, in this currency". */}
+                    {showCurrencyButton ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setCurrencyPickerVisible(true);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={entryCurrency}
+                        className="h-8 flex-row items-center gap-1 rounded-full border border-border/40 bg-card px-2.5 active:opacity-70"
+                      >
+                        <Coins size={13} color={themeColors.textMuted} />
+                        <Text variant="caption" className="font-medium">
+                          {entryCurrency}
+                        </Text>
+                        <ChevronDown size={11} color={themeColors.textMuted} />
+                      </Pressable>
+                    ) : null}
+                    {transferReceivedLabel ? (
+                      <Pressable
+                        onPress={() => setTransferFxModalVisible(true)}
+                        hitSlop={6}
+                        className="flex-row items-center gap-1"
+                      >
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          style={{ color: themeColors.primary }}
+                        >
+                          {transferReceivedLabel}
+                        </Text>
+                        <Pencil size={11} color={themeColors.primary} />
+                      </Pressable>
+                    ) : null}
+                    {reportingEquivLabel ? (
+                      <Text variant="caption" tone="muted" numberOfLines={1}>
+                        {reportingEquivLabel}
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
+              </Pressable>
 
-            <View className="h-[1px] bg-border/20" />
+              <View className="h-[1px] bg-border/20" />
 
-            {/* Note — focusing it raises the keyboard. */}
-            <View
-              className="flex-row items-center gap-2.5 px-4 py-3.5"
-              onLayout={(event) => {
-                const measured = event.nativeEvent.layout.height;
-                setNoteRowHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
-              }}
-            >
-              <FileText size={16} color={themeColors.textMuted} />
-              <TextInput
-                ref={noteInputRef}
-                value={note}
-                onChangeText={handleNoteChange}
-                placeholder={I18n.t('transactions.editor.optional')}
-                placeholderTextColor={`${themeColors.mutedForeground}99`}
-                returnKeyType="done"
-                onFocus={handleNoteFocus}
-                onBlur={handleNoteBlur}
-                onSubmitEditing={() => noteInputRef.current?.blur()}
-                autoCorrect={false}
-                autoComplete="off"
-                spellCheck={false}
-                style={[
-                  SINGLE_LINE_TEXT_INPUT_STYLE,
-                  styles.noteInput,
-                  { color: themeColors.text },
-                ]}
-              />
-            </View>
+              {/* Note — focusing it raises the keyboard. */}
+              <View
+                className="flex-row items-center gap-2.5 px-4 py-3.5"
+                onLayout={(event) => {
+                  const measured = event.nativeEvent.layout.height;
+                  setNoteRowHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+                }}
+              >
+                <FileText size={16} color={themeColors.textMuted} />
+                <TextInput
+                  ref={noteInputRef}
+                  value={note}
+                  onChangeText={handleNoteChange}
+                  placeholder={I18n.t('transactions.editor.optional')}
+                  placeholderTextColor={`${themeColors.mutedForeground}99`}
+                  returnKeyType="done"
+                  onFocus={handleNoteFocus}
+                  onBlur={handleNoteBlur}
+                  onSubmitEditing={() => noteInputRef.current?.blur()}
+                  autoCorrect={false}
+                  autoComplete="off"
+                  spellCheck={false}
+                  style={[
+                    SINGLE_LINE_TEXT_INPUT_STYLE,
+                    styles.noteInput,
+                    { color: themeColors.text },
+                  ]}
+                />
+              </View>
 
-            {/* Suggestions float above the note row (absolute, anchored to its
+              {/* Suggestions float above the note row (absolute, anchored to its
                 measured height) so they never push the amount/note around and
                 never overlap the input. */}
-            {noteSuggestionsVisible ? (
-              <View
-                style={[
-                  styles.floatingSuggestions,
-                  {
-                    bottom: noteRowHeight + 8,
-                    backgroundColor: themeColors.card,
-                    borderColor: themeColors.border,
-                  },
-                ]}
-              >
-                {noteSuggestions.map((suggestion, index) => (
-                  <React.Fragment key={suggestion}>
-                    {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
-                    <Pressable
-                      style={styles.noteSuggestionRow}
-                      onPress={() => handleSelectNoteSuggestion(suggestion)}
-                    >
-                      <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
-                        {suggestion}
-                      </Text>
-                    </Pressable>
-                  </React.Fragment>
-                ))}
-              </View>
-            ) : null}
-          </View>
+              {noteSuggestionsVisible ? (
+                <View
+                  style={[
+                    styles.floatingSuggestions,
+                    {
+                      bottom: noteRowHeight + 8,
+                      backgroundColor: themeColors.card,
+                      borderColor: themeColors.border,
+                    },
+                  ]}
+                >
+                  {noteSuggestions.map((suggestion, index) => (
+                    <React.Fragment key={suggestion}>
+                      {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+                      <Pressable
+                        style={styles.noteSuggestionRow}
+                        onPress={() => handleSelectNoteSuggestion(suggestion)}
+                      >
+                        <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                          {suggestion}
+                        </Text>
+                      </Pressable>
+                    </React.Fragment>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </GestureDetector>
 
           {/* Collapsible region (numpad + save). Always mounted — collapsing
               slides it off-screen via the panel translate rather than unmounting,
@@ -3837,15 +3848,6 @@ export function TransactionEditorScreen({
               className="flex-row gap-2.5 px-4 pt-2"
               style={{ paddingBottom: numpadFooterBottomPad }}
             >
-              <Pressable
-                onPress={() => handleSubmit(false)}
-                accessibilityRole="button"
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
-              >
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {saveLabel}
-                </Text>
-              </Pressable>
               {showBulkToggle ? (
                 <Pressable
                   onPress={() => handleSubmit(true)}
@@ -3859,6 +3861,15 @@ export function TransactionEditorScreen({
                   </Text>
                 </Pressable>
               ) : null}
+              <Pressable
+                onPress={() => handleSubmit(false)}
+                accessibilityRole="button"
+                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+              >
+                <Text variant="bodyStrong" className="text-primary-foreground">
+                  {saveLabel}
+                </Text>
+              </Pressable>
             </View>
           </View>
         </Animated.View>

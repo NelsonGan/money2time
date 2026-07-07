@@ -21,15 +21,20 @@ export function SplitBillScreen() {
   // we pop — don't treat it as an orphaned mount and pop again.
   const hadSessionRef = useRef(false);
   if (session) hadSessionRef.current = true;
+  // The editor republishes a fresh session object on every split edit; hold it
+  // in a ref so the beforeRemove listener reads the latest onCancel without
+  // re-subscribing (and tearing down) on every keystroke.
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
 
   // Any removal that wasn't an explicit Done is a cancel — covers the header
   // back button and the edge-swipe-back gesture alike.
   useEffect(
     () =>
       navigation.addListener('beforeRemove', () => {
-        if (!doneRef.current) session?.onCancel();
+        if (!doneRef.current) sessionRef.current?.onCancel();
       }),
-    [navigation, session],
+    [navigation],
   );
 
   // Guard only the genuinely-orphaned case: navigated here with no session that

@@ -174,16 +174,13 @@ export function NumpadPanel({
 }: NumpadPanelProps) {
   const themeColors = useThemeColors();
   const { bottom: bottomInset } = useSafeAreaInsets();
-  const [expression, setExpression] = React.useState(() =>
-    sanitizeInitialAmount(initialExpression),
-  );
+  // The live expression is held only in a ref: it drives the key handlers but is
+  // never rendered (the entered value is displayed by the parent via
+  // onValueChange / onConfirm), so keeping it out of state avoids re-rendering
+  // the whole pad — and its ~16 animated keys — on every keystroke.
   const prevInitialRef = useRef(initialExpression);
-  const expressionRef = useRef(expression);
+  const expressionRef = useRef(sanitizeInitialAmount(initialExpression));
   const pristineRef = useRef(initialExpression.length > 0);
-
-  useEffect(() => {
-    expressionRef.current = expression;
-  }, [expression]);
 
   useEffect(() => {
     if (initialExpression === prevInitialRef.current) return;
@@ -192,7 +189,6 @@ export function NumpadPanel({
     const sanitized = sanitizeInitialAmount(initialExpression);
     if (sanitized === expressionRef.current) return;
     expressionRef.current = sanitized;
-    setExpression(sanitized);
     pristineRef.current = sanitized.length > 0;
   }, [initialExpression]);
 
@@ -202,7 +198,6 @@ export function NumpadPanel({
     prevResetNonceRef.current = resetNonce;
     expressionRef.current = '';
     pristineRef.current = false;
-    setExpression('');
   }, [resetNonce]);
 
   const handleKeyPress = useCallback(
@@ -239,7 +234,6 @@ export function NumpadPanel({
       } else if (key === 'enter') {
         const formatted = formatMoney(evaluateExpression(currentExpression));
         expressionRef.current = formatted;
-        setExpression(formatted);
         onConfirm(formatted);
         return;
       } else if (key === '=') {
@@ -256,7 +250,6 @@ export function NumpadPanel({
         const formatted = formatMoney(evaluateExpression(currentExpression));
         expressionRef.current = formatted;
         pristineRef.current = true;
-        setExpression(formatted);
         onValueChange(formatted);
         return;
       } else if (['+', '-', '×', '÷'].includes(key)) {
@@ -264,7 +257,6 @@ export function NumpadPanel({
       }
 
       expressionRef.current = nextExpression;
-      setExpression(nextExpression);
       onValueChange(nextExpression);
     },
     [onConfirm, onValueChange],
@@ -285,6 +277,16 @@ export function NumpadPanel({
       />
     ),
     [handleKeyPress, handleDeleteLongPress, themeColors.textMuted],
+  );
+  // Hoisted so the confirm key's icon keeps a stable identity and its
+  // React.memo bails out instead of re-rendering when the panel re-renders.
+  const enterIcon = useMemo(
+    () => (
+      <Text variant="bodyStrong" className="text-primary-foreground">
+        {I18n.t('common.done')}
+      </Text>
+    ),
+    [],
   );
 
   if (compact) {
@@ -358,13 +360,7 @@ export function NumpadPanel({
       <View className="flex-1 gap-0.5">
         <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="C" variant="utility" onPress={handleKeyPress} />
-          <NumpadKey
-            value="del"
-            variant="utility"
-            onPress={handleKeyPress}
-            onLongPress={handleDeleteLongPress}
-            icon={<Delete size={15} color={themeColors.textMuted} />}
-          />
+          {deleteKey}
           <NumpadKey value="÷" variant="operator" onPress={handleKeyPress} />
           <NumpadKey value="×" variant="operator" onPress={handleKeyPress} />
         </View>
@@ -384,16 +380,7 @@ export function NumpadPanel({
           <NumpadKey value="1" onPress={handleKeyPress} />
           <NumpadKey value="2" onPress={handleKeyPress} />
           <NumpadKey value="3" onPress={handleKeyPress} />
-          <NumpadKey
-            value="enter"
-            variant="confirm"
-            onPress={handleKeyPress}
-            icon={
-              <Text variant="bodyStrong" className="text-primary-foreground">
-                {I18n.t('common.done')}
-              </Text>
-            }
-          />
+          <NumpadKey value="enter" variant="confirm" onPress={handleKeyPress} icon={enterIcon} />
         </View>
         <View className="flex-1 flex-row gap-0.5">
           <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />

@@ -13,7 +13,6 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { getPaymentQrUri } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { newId } from '~/utils/id';
 
 import { buildReceiptText } from '../lib/settleUp';
 import type { ReceiptContent } from './SplitReceiptCard';
@@ -60,6 +59,13 @@ export function SplitReceiptShareModal({
     void triggerHaptic('selection');
     setBusy(true);
     let sharedAsImage = false;
+    // Set once the native share sheet has actually been presented. If the share
+    // itself then rejects we must NOT fall back to the text sheet, or the user
+    // would get a second share sheet popping up unprompted.
+    let nativeShareInvoked = false;
+    // Temp PNG written for the share; deleted afterwards so captures don't pile
+    // up in the cache. A fixed name also caps it at a single reused file.
+    let tempFile: File | null = null;
     try {
       // Skia is loaded lazily so the screen still works if the native module
       // isn't linked — capture then falls back to a plain-text receipt.
@@ -67,10 +73,12 @@ export function SplitReceiptShareModal({
       const image = await makeImageFromView(cardRef);
       const base64 = image?.encodeToBase64();
       if (base64) {
-        const file = new File(Paths.cache, `settle-up-${newId()}.png`);
+        const file = new File(Paths.cache, 'settle-up-receipt.png');
         file.create({ overwrite: true });
         file.write(base64, { encoding: 'base64' });
+        tempFile = file;
         if (await Sharing.isAvailableAsync()) {
+          nativeShareInvoked = true;
           await Sharing.shareAsync(file.uri, {
             mimeType: 'image/png',
             UTI: 'public.png',
@@ -91,20 +99,31 @@ export function SplitReceiptShareModal({
         asImage: sharedAsImage,
       });
       onClose();
-    } catch {
-      // Image capture / share failed — fall back to the plain-text receipt.
-      try {
-        await shareAsText(content);
-        trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
-          itemCount,
-          hasQr: !!qrUri,
-          asImage: false,
-        });
-        onClose();
-      } catch (fallbackError) {
-        Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(fallbackError));
+    } catch (shareError) {
+      // The native share sheet was already presented, so its failure isn't a
+      // capture problem — surface it rather than opening a second sheet.
+      if (nativeShareInvoked) {
+        Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(shareError));
+      } else {
+        // Image capture failed before sharing — fall back to the plain text.
+        try {
+          await shareAsText(content);
+          trackEvent(AnalyticsEvents.SETTLE_UP_RECEIPT_SHARED, {
+            itemCount,
+            hasQr: !!qrUri,
+            asImage: false,
+          });
+          onClose();
+        } catch (fallbackError) {
+          Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(fallbackError));
+        }
       }
     } finally {
+      try {
+        tempFile?.delete();
+      } catch {
+        // Best-effort cleanup; a leftover temp file is overwritten next share.
+      }
       setBusy(false);
     }
   }, [busy, content, itemCount, onClose, qrUri, shareAsText]);
