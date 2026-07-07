@@ -81,10 +81,43 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Publish PR update and comment QR
+      - name: Publish PR update
+        id: preview
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
+          comment: false
+
+      - name: Comment QR code and link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const link = `${{ steps.preview.outputs.link }}`;
+            const qr = `${{ steps.preview.outputs.qr }}`;
+            const branch = `${{ steps.preview.outputs.branchName }}`;
+            const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
+            const marker = '<!-- eas-update-preview -->';
+            const body = [
+              marker,
+              '### 📱 EAS Update ready',
+              '',
+              `**👉 [Tap here to open this update](${link})** — open on your device, no scan needed.`,
+              '',
+              'Or scan the QR code with your dev build / Expo Go:',
+              '',
+              `<img src="${qr}" width="250" alt="EAS Update QR code" />`,
+              '',
+              `Branch \`${branch}\` · Runtime \`${runtime}\` · Commit \`${context.payload.pull_request.head.sha.slice(0, 7)}\``,
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   plan:
     name: Plan
