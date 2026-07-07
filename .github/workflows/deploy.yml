@@ -92,38 +92,45 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const link = `${{ steps.preview.outputs.link }}`;
+            const scheme = `${{ steps.preview.outputs.projectScheme }}`;
             const qr = `${{ steps.preview.outputs.qr }}`;
+            const link = `${{ steps.preview.outputs.link }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
+            const iosManifest = `${{ steps.preview.outputs.iosManifestPermalink }}`;
+            const androidManifest = `${{ steps.preview.outputs.androidManifestPermalink }}`;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             const marker = '<!-- eas-update-preview -->';
-            const body = [
+            // Same deep link the QR encodes: opens the update straight in the dev build.
+            // GitHub strips custom-scheme (money2time://) links, so present it as copyable code.
+            const deepLink = (manifest) =>
+              `${scheme}://expo-development-client/?url=${encodeURIComponent(manifest)}`;
+            const lines = [
               marker,
               '## 📱 Preview this update',
               '',
-              'Your changes are published to a preview branch — open them on your device in one tap.',
+              'Scan the QR with your camera, **or** copy a link below and paste it into a browser on your phone to open it straight in your dev build:',
               '',
-              '<table>',
-              '<tr>',
-              `<td width="260" align="center"><a href="${link}"><img src="${qr}" width="220" alt="EAS Update QR code" /></a><br/><sub>Scan with your dev build</sub></td>`,
-              '<td valign="middle">',
+            ];
+            if (iosManifest) lines.push('- **iOS** — `' + deepLink(iosManifest) + '`');
+            if (androidManifest) lines.push('- **Android** — `' + deepLink(androidManifest) + '`');
+            lines.push(
               '',
-              `### 👉 [Tap to open this update](${link})`,
+              `<img src="${qr}" width="220" alt="EAS Update QR code" />`,
               '',
-              '| | |',
-              '| --- | --- |',
-              `| **Branch** | \`${branch}\` |`,
-              `| **Runtime** | \`${runtime}\` |`,
-              `| **Commit** | \`${commit}\` |`,
-              '',
-              '</td>',
-              '</tr>',
-              '</table>',
-            ].join('\n');
+              `Branch \`${branch}\` · Runtime \`${runtime}\` · Commit \`${commit}\` · [details on Expo ↗](${link})`,
+            );
+            const body = lines.join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            // Paginate: the sticky comment can fall off page 1 on a busy PR,
+            // which would otherwise create a duplicate on every push.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
             const existing = comments.find((c) => c.body && c.body.includes(marker));
             if (existing) {
               await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
