@@ -3000,13 +3000,14 @@ export function TransactionEditorScreen({
                 so here we keep only Delete (edit) and the recurring Save. */}
             <View className="flex-1 flex-row items-center justify-end gap-2">
               {mode === 'edit' && onDelete ? (
-                // Match the back button's footprint so the header reads
-                // symmetric (back left / delete right) with centered tabs.
+                // Match the back button exactly (size + secondary circle) so the
+                // header reads symmetric — back left / delete right — with the
+                // centered tabs between. The coral glyph keeps the delete intent.
                 <Pressable
                   onPress={onDelete}
                   accessibilityRole="button"
                   accessibilityLabel={deleteLabel}
-                  className="h-8 w-8 items-center justify-center rounded-full bg-destructive/12"
+                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary"
                 >
                   <Trash2 size={14} color={themeColors.coral} />
                 </Pressable>

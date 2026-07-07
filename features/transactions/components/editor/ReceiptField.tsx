@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, Receipt, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
 
 export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
   const themeColors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const [viewerVisible, setViewerVisible] = useState(false);
   const fileUri = useMemo(() => getReceiptUri(receiptUri), [receiptUri]);
 
@@ -142,53 +143,65 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
 
       <ThemeModal
         visible={viewerVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={false}
-        presentationStyle="fullScreen"
-        statusBarTranslucent
         onRequestClose={() => setViewerVisible(false)}
       >
-        <View className="flex-1 bg-black">
-          <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
-            <View className="flex-row items-center justify-between px-5 py-3">
-              <Pressable
-                onPress={() => setViewerVisible(false)}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.close')}
-                className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-              >
-                <X size={18} color="#FFFFFF" />
-              </Pressable>
-              <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-                {I18n.t('transactions.editor.receipt.label')}
-              </Text>
-              <Pressable
-                onPress={handleRemove}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
-                className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-              >
-                <Trash2 size={18} color="#FF6B6B" />
-              </Pressable>
-            </View>
+        {/* Pad with the app's safe-area insets directly (SafeAreaView inside a
+            Modal can't read the provider reliably); no statusBarTranslucent /
+            fullScreen presentation, which was pushing the editor's own layout
+            up after dismiss. The image lives in its own flex region so it never
+            overlaps the close/delete controls. */}
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: '#000',
+            paddingTop: Math.max(insets.top, 12),
+            paddingBottom: insets.bottom,
+          }}
+        >
+          <View className="flex-row items-center justify-between px-5 py-3">
+            <Pressable
+              onPress={() => setViewerVisible(false)}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            >
+              <X size={18} color="#FFFFFF" />
+            </Pressable>
+            <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
+              {I18n.t('transactions.editor.receipt.label')}
+            </Text>
+            <Pressable
+              onPress={handleRemove}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            >
+              <Trash2 size={18} color="#FF6B6B" />
+            </Pressable>
+          </View>
+          <View className="flex-1">
             {fileUri ? (
               <Image source={{ uri: fileUri }} style={styles.viewerImage} contentFit="contain" />
             ) : null}
-            <View className="px-5 py-4">
-              <Pressable
-                onPress={() => {
-                  setViewerVisible(false);
-                  handleAddReceipt();
-                }}
-                accessibilityRole="button"
-                className="items-center rounded-2xl bg-white/15 py-3.5"
-              >
-                <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-                  {I18n.t('transactions.editor.receipt.replace')}
-                </Text>
-              </Pressable>
-            </View>
-          </SafeAreaView>
+          </View>
+          <View className="px-5 py-4">
+            <Pressable
+              onPress={() => {
+                setViewerVisible(false);
+                handleAddReceipt();
+              }}
+              accessibilityRole="button"
+              className="items-center rounded-2xl bg-white/15 py-3.5"
+            >
+              <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
+                {I18n.t('transactions.editor.receipt.replace')}
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </ThemeModal>
     </>
