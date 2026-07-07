@@ -11,6 +11,7 @@ import {
   Clock,
   Coins,
   CreditCard,
+  Eye,
   FileText,
   Hash,
   Layers,
@@ -72,6 +73,7 @@ import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
   NumpadPanel,
+  ReceiptViewerModal,
   type SplitDraft,
   splitsHelpers,
   SummaryRow,
@@ -91,7 +93,7 @@ import {
 } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
-import { deleteReceiptImage, saveReceiptImage } from '~/services/userAssets';
+import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -629,6 +631,26 @@ export function TransactionEditorScreen({
       { text: I18n.t('common.cancel'), style: 'cancel' },
     ]);
   }, [pickReceiptFrom]);
+  // Full-screen preview opened from the action row's view-receipt button.
+  const [receiptViewerVisible, setReceiptViewerVisible] = useState(false);
+  const handleRemoveReceipt = useCallback(() => {
+    void triggerHaptic('warning');
+    Alert.alert(
+      I18n.t('transactions.editor.receipt.remove_title'),
+      I18n.t('transactions.editor.receipt.remove_message'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('transactions.editor.receipt.remove'),
+          style: 'destructive',
+          onPress: () => {
+            setReceiptViewerVisible(false);
+            handleReceiptChange(null);
+          },
+        },
+      ],
+    );
+  }, [handleReceiptChange]);
   // On unmount: if the editor closed without committing a Save, delete a
   // freshly-picked file that never became the persisted attachment (create-mode
   // attach-then-cancel, or a replace that was abandoned). The persisted file is
@@ -3443,11 +3465,28 @@ export function TransactionEditorScreen({
                   <SentimentIcon sentiment={sentiment} size={22} />
                 </Pressable>
               ) : null}
+              {showReceiptButton && receiptUri ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setReceiptViewerVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                  className="h-9 w-9 items-center justify-center rounded-full border border-primary/40 bg-primary/15 active:opacity-70"
+                >
+                  <Eye size={16} color={themeColors.primary} />
+                </Pressable>
+              ) : null}
               {showReceiptButton ? (
                 <Pressable
                   onPress={handleAddReceipt}
                   accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                  accessibilityLabel={
+                    receiptUri
+                      ? I18n.t('transactions.editor.receipt.replace')
+                      : I18n.t('transactions.editor.receipt.label')
+                  }
                   className={cn(
                     'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
                     receiptUri
@@ -3689,6 +3728,16 @@ export function TransactionEditorScreen({
           setEntryCurrency(code);
           setCurrencyPickerVisible(false);
         }}
+      />
+      <ReceiptViewerModal
+        visible={receiptViewerVisible}
+        fileUri={getReceiptUri(receiptUri)}
+        onClose={() => setReceiptViewerVisible(false)}
+        onReplace={() => {
+          setReceiptViewerVisible(false);
+          handleAddReceipt();
+        }}
+        onRemove={handleRemoveReceipt}
       />
       <DatePickerModal
         visible={activeField === 'date'}
