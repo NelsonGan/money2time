@@ -111,8 +111,6 @@ jobs:
               '',
               `### 👉 [Tap to open this update](${link})`,
               '',
-              'No scan needed — opens straight on your device.',
-              '',
               '| | |',
               '| --- | --- |',
               `| **Branch** | \`${branch}\` |`,
