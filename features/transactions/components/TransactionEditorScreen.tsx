@@ -149,6 +149,10 @@ const MODAL_FIELDS: readonly NonNullActiveField[] = ['date', 'endDate'];
 // Stable no-op for read-only (inactive) pager pages' category grids.
 const noopCategorySelect = () => {};
 
+// Empty margin kept below the handle when the numpad is collapsed (the visible
+// gap between the card/handle and the screen edge).
+const COLLAPSE_PEEK = 20;
+
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
@@ -229,6 +233,9 @@ const styles = StyleSheet.create({
   },
   accountChip: {
     maxWidth: 150,
+  },
+  collapsible: {
+    paddingTop: COLLAPSE_PEEK,
   },
   noteInput: {
     flex: 1,
@@ -717,6 +724,10 @@ export function TransactionEditorScreen({
   // Measured height of the note row, so the floating suggestions can be anchored
   // just above it (rather than overlapping it).
   const [noteRowHeight, setNoteRowHeight] = useState(0);
+  // Measured height of the collapsible region (numpad + save). Collapsing slides
+  // the panel down by this much so that region drops off-screen, leaving the
+  // amount/note card + handle peeking with a small bottom margin.
+  const [collapsibleHeight, setCollapsibleHeight] = useState(0);
   // Whether the 4x4 numpad is pulled up. Create mode starts collapsed (the
   // category grid leads; the pad appears once a category is picked); edit mode
   // starts expanded since the amount is the thing being changed.
@@ -1109,23 +1120,39 @@ export function TransactionEditorScreen({
     };
   }, [useStickyNumpad]);
 
-  // Drive the panel's upward lift as a Reanimated timing so it tracks the
-  // keyboard smoothly instead of snapping. The app is edge-to-edge and this
-  // screen is a modal, so the keyboard overlays (the window doesn't resize) on
-  // BOTH platforms — mirror the other sheets and lift manually everywhere.
-  // Lift the *minimum* so the note clears the keyboard: the numpad + save row
-  // already sit below the note, so we only cover whatever the keyboard would
-  // still hide beyond them — the amount card barely moves.
-  const panelLift = useSharedValue(0);
+  // Drive the panel's vertical offset as a Reanimated timing (signed: negative =
+  // up for the keyboard, positive = down to collapse the numpad). The app is
+  // edge-to-edge and this screen is a modal, so the keyboard overlays (the
+  // window doesn't resize) on BOTH platforms — mirror the other sheets and shift
+  // manually everywhere. Keyboard wins over collapse (typing a note always rises
+  // above it). The keyboard lift is the *minimum* — the numpad + save row sit
+  // below the note, so we only cover whatever the keyboard would still hide
+  // beyond them, and the amount card barely moves.
+  // Seed with a close estimate of the collapse offset (numpad body + save row)
+  // so create mode opens already collapsed instead of flashing the pad then
+  // sliding it down. The measured value corrects it a frame later.
+  const panelTranslate = useSharedValue(
+    numpadExpanded
+      ? 0
+      : Math.round(Math.min(224, Math.max(168, windowHeight * 0.24))) +
+          56 +
+          Math.max(safeAreaInsets.bottom - 12, 6) +
+          26,
+  );
   useEffect(() => {
-    const target = keyboardHeight > 0 ? Math.max(0, keyboardHeight - belowNoteHeight) : 0;
-    panelLift.value = withTiming(target, {
-      duration: Platform.OS === 'ios' ? 250 : 180,
+    let target = 0;
+    if (keyboardHeight > 0) {
+      target = -Math.max(0, keyboardHeight - belowNoteHeight);
+    } else if (!numpadExpanded) {
+      target = Math.max(0, collapsibleHeight - COLLAPSE_PEEK);
+    }
+    panelTranslate.value = withTiming(target, {
+      duration: Platform.OS === 'ios' ? 250 : 200,
       easing: Easing.out(Easing.cubic),
     });
-  }, [keyboardHeight, belowNoteHeight, panelLift]);
+  }, [keyboardHeight, belowNoteHeight, numpadExpanded, collapsibleHeight, panelTranslate]);
   const panelAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -panelLift.value }],
+    transform: [{ translateY: panelTranslate.value }],
   }));
 
   // Sync amount field when the parent transaction's amount changes externally
@@ -1878,9 +1905,9 @@ export function TransactionEditorScreen({
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
   // The save action(s) sit in a footer below the pad and own the bottom inset.
-  // Keep a little breathing room below the button (also counts toward the
-  // measured below-note height, so the keyboard lift stays small).
-  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6) + 14;
+  // Keep breathing room below the button — this also counts toward the measured
+  // below-note height, which shrinks the keyboard lift toward zero (less shift).
+  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6) + 26;
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -1901,10 +1928,15 @@ export function TransactionEditorScreen({
     [effectiveSummaryFlex],
   );
   // Bottom padding for the sticky background so its last row clears the pinned
-  // panel. Memoised so it doesn't bust CategoryGrid's memo on every keystroke.
+  // panel. When the numpad is collapsed the panel slides down off-screen, so the
+  // background only needs to clear the still-visible portion. Memoised so it
+  // doesn't bust CategoryGrid's memo on every keystroke.
+  const visiblePanelHeight = numpadExpanded
+    ? panelHeight
+    : Math.max(0, panelHeight - Math.max(0, collapsibleHeight - COLLAPSE_PEEK));
   const backgroundContentStyle = useMemo(
-    () => ({ paddingHorizontal: 16, paddingTop: 14, paddingBottom: panelHeight + 24 }),
-    [panelHeight],
+    () => ({ paddingHorizontal: 16, paddingTop: 14, paddingBottom: visiblePanelHeight + 24 }),
+    [visiblePanelHeight],
   );
 
   const scrollFieldIntoView = useCallback((field: NonNullActiveField) => {
@@ -3731,7 +3763,17 @@ export function TransactionEditorScreen({
                 <ChevronUp size={16} color={themeColors.textMuted} />
               )}
             </Pressable>
-            {numpadExpanded ? (
+            {/* Collapsible region (numpad + save). Always mounted — collapsing
+                slides it off-screen via the panel translate rather than
+                unmounting, so the amount card smoothly pulls down. The peek
+                padding is the margin left below the handle when collapsed. */}
+            <View
+              style={styles.collapsible}
+              onLayout={(event) => {
+                const measured = event.nativeEvent.layout.height;
+                setCollapsibleHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+              }}
+            >
               <View style={{ height: numpadBodyHeight }}>
                 <NumpadPanel
                   compact
@@ -3743,33 +3785,33 @@ export function TransactionEditorScreen({
                   dateLabel={formatDateDisplay(date, activeLocale)}
                 />
               </View>
-            ) : null}
-            <View
-              className="flex-row gap-2.5 px-4 pt-2"
-              style={{ paddingBottom: numpadFooterBottomPad }}
-            >
-              <Pressable
-                onPress={() => handleSubmit(false)}
-                accessibilityRole="button"
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+              <View
+                className="flex-row gap-2.5 px-4 pt-2"
+                style={{ paddingBottom: numpadFooterBottomPad }}
               >
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {saveLabel}
-                </Text>
-              </Pressable>
-              {showBulkToggle ? (
                 <Pressable
-                  onPress={() => handleSubmit(true)}
+                  onPress={() => handleSubmit(false)}
                   accessibilityRole="button"
-                  accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
-                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
                 >
-                  <Layers size={16} color={themeColors.primary} />
-                  <Text variant="bodyStrong" className="text-primary">
+                  <Text variant="bodyStrong" className="text-primary-foreground">
                     {saveLabel}
                   </Text>
                 </Pressable>
-              ) : null}
+                {showBulkToggle ? (
+                  <Pressable
+                    onPress={() => handleSubmit(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
+                    className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                  >
+                    <Layers size={16} color={themeColors.primary} />
+                    <Text variant="bodyStrong" className="text-primary">
+                      {saveLabel}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
           </View>
         </Animated.View>
