@@ -44,7 +44,7 @@ interface AccountLogoPickerSheetProps {
 const NUM_COLUMNS = 3;
 const UPLOAD_ITEM_ID = '__upload__';
 // Extra scroll band so the last row of the custom grid clears the home
-// indicator (SafeAreaView already reserves the bottom inset on top of this).
+// indicator (this screen drops the bottom safe-area edge, so nothing else does).
 const GRID_BOTTOM_PADDING = spacing.xl + 40;
 
 type PickerTab = 'library' | 'custom';
@@ -65,8 +65,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   searchBar: {
+    // paddingBottom is set dynamically per keyboard state in the animated style.
     paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   countryFlagButton: {
@@ -295,8 +295,6 @@ export function AccountLogoPickerSheet({
     [onSelect, refreshCustomLogos, selectedLogoId],
   );
 
-  const data = results;
-
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
@@ -423,7 +421,7 @@ export function AccountLogoPickerSheet({
         ) : (
           <View style={styles.flexOne}>
             <FlatList
-              data={data}
+              data={results}
               key={`cols-${NUM_COLUMNS}`}
               numColumns={NUM_COLUMNS}
               keyExtractor={(item) => item.id}

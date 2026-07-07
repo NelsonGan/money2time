@@ -30,7 +30,7 @@ interface ItemIconPickerSheetProps {
 const NUM_COLUMNS = 4;
 const UPLOAD_ITEM_ID = '__upload__';
 // Extra scroll band so the last row of the custom grid clears the home
-// indicator (SafeAreaView already reserves the bottom inset on top of this).
+// indicator (this screen drops the bottom safe-area edge, so nothing else does).
 const GRID_BOTTOM_PADDING = spacing.xl + 40;
 
 type PickerTab = 'library' | 'custom';
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   searchBar: {
+    // paddingBottom is set dynamically per keyboard state in the animated style.
     paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   flexOne: {
