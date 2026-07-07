@@ -1148,16 +1148,24 @@ export function TransactionEditorScreen({
   // above it). The keyboard lift is the *minimum* — the numpad + save row sit
   // below the note, so we only cover whatever the keyboard would still hide
   // beyond them, and the amount card barely moves.
-  // Seed with a close estimate of the collapse offset (numpad body + save row)
-  // so create mode opens already collapsed instead of flashing the pad then
-  // sliding it down. The measured value corrects it a frame later.
+  // Seed with a close estimate of the collapse offset (numpad body + save row,
+  // less the peek) so create mode opens already collapsed instead of flashing
+  // the pad then sliding it down. The measured value corrects it a frame later.
   const panelTranslate = useSharedValue(
     numpadExpanded
       ? 0
-      : numpadBodyHeightFor(windowHeight) +
-          NUMPAD_SAVE_ROW_HEIGHT +
-          numpadFooterPadFor(safeAreaInsets.bottom),
+      : Math.max(
+          0,
+          numpadBodyHeightFor(windowHeight) +
+            NUMPAD_SAVE_ROW_HEIGHT +
+            numpadFooterPadFor(safeAreaInsets.bottom) -
+            COLLAPSE_PEEK,
+        ),
   );
+  // The first resting position is applied instantly (no timing) so opening the
+  // editor shows the pad already settled instead of animating it into place —
+  // and so cold-start jank doesn't stack two animations on top of the mount.
+  const panelSettledRef = useRef(false);
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
@@ -1166,7 +1174,18 @@ export function TransactionEditorScreen({
       // keyboard's top (the numpad tucks behind).
       target = -Math.max(0, keyboardHeight - collapsibleHeight);
     } else if (!numpadExpanded) {
+      // Until the collapsible region is measured we don't know the real resting
+      // offset. Animating toward the provisional 0 here would slide the pad up
+      // into view and then drop it back down once the measurement lands (the
+      // visible "numpad flashes then falls" on first open), so hold the seeded
+      // estimate until the measurement arrives.
+      if (collapsibleHeight === 0) return;
       target = Math.max(0, collapsibleHeight - COLLAPSE_PEEK);
+    }
+    if (!panelSettledRef.current) {
+      panelSettledRef.current = true;
+      panelTranslate.value = target;
+      return;
     }
     panelTranslate.value = withTiming(target, {
       duration: Platform.OS === 'ios' ? 250 : 200,
