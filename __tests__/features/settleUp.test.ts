@@ -2,6 +2,7 @@ import {
   aggregateUnpaidSplitsByPerson,
   aggregateUnpaidSplitsByTransaction,
   buildReceiptText,
+  countUnpaidDebtors,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
@@ -395,5 +396,48 @@ describe('recentSplitPersonNames', () => {
       }),
     ]);
     expect(names).toEqual(['Alice']);
+  });
+});
+
+describe('countUnpaidDebtors', () => {
+  it('returns 0 when there are no unpaid, non-self splits', () => {
+    expect(countUnpaidDebtors([])).toBe(0);
+    expect(
+      countUnpaidDebtors([makeTx({ splits: [makeSplit({ isSelf: true, amount: 10 })] })]),
+    ).toBe(0);
+  });
+
+  it('counts distinct people case-insensitively and folds the unnamed bucket into one', () => {
+    const txs = [
+      makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'sarah', amount: 5 })] }),
+      makeTx({ id: 't3', splits: [makeSplit({ id: 's3', personName: 'Dana', amount: 5 })] }),
+      makeTx({ id: 't4', splits: [makeSplit({ id: 's4', personName: null, amount: 5 })] }),
+      makeTx({ id: 't5', splits: [makeSplit({ id: 's5', personName: '  ', amount: 5 })] }),
+    ];
+    // sarah (deduped) + Dana + unnamed bucket = 3
+    expect(countUnpaidDebtors(txs)).toBe(3);
+  });
+
+  it('ignores self, paid, and non-positive splits', () => {
+    const tx = makeTx({
+      splits: [
+        makeSplit({ id: 's1', personName: 'Me', isSelf: true, amount: 40 }),
+        makeSplit({ id: 's2', personName: 'Paid', paidAt: '2026-05-15T00:00:00.000Z', amount: 20 }),
+        makeSplit({ id: 's3', personName: 'Zero', amount: 0 }),
+        makeSplit({ id: 's4', personName: 'Owing', amount: 20 }),
+      ],
+    });
+    expect(countUnpaidDebtors([tx])).toBe(1);
+  });
+
+  it('matches aggregateUnpaidSplitsByPerson personCount', () => {
+    const txs = [
+      makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
+      makeTx({ id: 't3', splits: [makeSplit({ id: 's3', personName: null, amount: 5 })] }),
+    ];
+    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    expect(countUnpaidDebtors(txs)).toBe(summary.personCount);
   });
 });

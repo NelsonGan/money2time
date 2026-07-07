@@ -1,5 +1,5 @@
 import { Calendar, Delete } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   Easing,
@@ -27,6 +27,19 @@ import {
 
 type Operator = '+' | '-' | '×' | '÷';
 type KeyValue = string;
+
+// Stable icon elements for the combo operator keys — hoisted so their identity
+// doesn't change per keystroke, keeping NumpadKey's React.memo effective.
+const MINUS_DIVIDE_ICON = (
+  <Text variant="subheading" className="text-primary">
+    {'−   ÷'}
+  </Text>
+);
+const PLUS_TIMES_ICON = (
+  <Text variant="subheading" className="text-primary">
+    {'+   ×'}
+  </Text>
+);
 
 interface NumpadPanelProps {
   initialExpression: string;
@@ -252,14 +265,17 @@ export function NumpadPanel({
     handleKeyPress('C');
   }, [handleKeyPress]);
 
-  const deleteKey = (
-    <NumpadKey
-      value="del"
-      variant="utility"
-      onPress={handleKeyPress}
-      onLongPress={handleDeleteLongPress}
-      icon={<Delete size={15} color={themeColors.textMuted} />}
-    />
+  const deleteKey = useMemo(
+    () => (
+      <NumpadKey
+        value="del"
+        variant="utility"
+        onPress={handleKeyPress}
+        onLongPress={handleDeleteLongPress}
+        icon={<Delete size={15} color={themeColors.textMuted} />}
+      />
+    ),
+    [handleKeyPress, handleDeleteLongPress, themeColors.textMuted],
   );
 
   if (compact) {
@@ -307,11 +323,7 @@ export function NumpadPanel({
               value="minusDivide"
               variant="operator"
               onPress={handleKeyPress}
-              icon={
-                <Text variant="subheading" className="text-primary">
-                  {'−   ÷'}
-                </Text>
-              }
+              icon={MINUS_DIVIDE_ICON}
             />
           </View>
           <View className="flex-1 flex-row gap-1.5">
@@ -322,11 +334,7 @@ export function NumpadPanel({
               value="plusTimes"
               variant="operator"
               onPress={handleKeyPress}
-              icon={
-                <Text variant="subheading" className="text-primary">
-                  {'+   ×'}
-                </Text>
-              }
+              icon={PLUS_TIMES_ICON}
             />
           </View>
         </View>

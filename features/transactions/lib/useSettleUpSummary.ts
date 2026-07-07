@@ -4,7 +4,11 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import type { SettleUpByTransactionSummary, SettleUpSummary } from '~/types';
 import { convert } from '~/utils/currency';
 
-import { aggregateUnpaidSplitsByPerson, aggregateUnpaidSplitsByTransaction } from './settleUp';
+import {
+  aggregateUnpaidSplitsByPerson,
+  aggregateUnpaidSplitsByTransaction,
+  countUnpaidDebtors,
+} from './settleUp';
 
 /** Shared reporting-currency wiring for the Settle Up roll-ups. */
 function useSettleUpContext() {
@@ -43,4 +47,14 @@ export function useSettleUpByTransaction(): SettleUpByTransactionSummary {
     () => aggregateUnpaidSplitsByTransaction(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
   );
+}
+
+/**
+ * Just the count of people who still owe — no reporting-currency wiring, no
+ * bill/sort work. For the always-mounted Settings badge, which would otherwise
+ * run the full per-person roll-up on every transaction write across the app.
+ */
+export function useUnpaidPersonCount(): number {
+  const { transactions } = useTransactions();
+  return useMemo(() => countUnpaidDebtors(transactions), [transactions]);
 }
