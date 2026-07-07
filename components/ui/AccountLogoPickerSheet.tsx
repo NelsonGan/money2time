@@ -1,16 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronDown, ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
@@ -28,6 +19,7 @@ import {
 } from '~/constants/accountLogos';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useKeyboardHeight } from '~/hooks/useKeyboardHeight';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getDeviceRegionCode, I18n } from '~/lib/i18n';
@@ -196,26 +188,13 @@ export function AccountLogoPickerSheet({
   const [query, setQuery] = useState('');
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [customLogos, setCustomLogos] = useState<{ id: string; uri: string }[]>([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  // The app is edge-to-edge on Android, so the keyboard overlays content on
+  // both platforms rather than resizing the window — lift the sticky search bar
+  // manually by the full keyboard height (see the search bar's marginBottom).
+  const keyboardHeight = useKeyboardHeight();
 
   const refreshCustomLogos = useCallback(() => {
     setCustomLogos(listCustomAccountLogos());
-  }, []);
-
-  // iOS doesn't resize the window for the keyboard, so lift the sticky search
-  // bar manually by tracking the keyboard height. Android relies on the
-  // activity's adjustResize (Expo default), which pushes the bar up natively —
-  // adding the height there too would double-lift it, so listen on iOS only.
-  useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    const showSub = Keyboard.addListener('keyboardWillShow', (e) =>
-      setKeyboardHeight(e.endCoordinates?.height ?? 0),
-    );
-    const hideSub = Keyboard.addListener('keyboardWillHide', () => setKeyboardHeight(0));
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
   }, []);
 
   const deviceDefaultCountry = useMemo(() => regionToCountrySlug(getDeviceRegionCode()), []);
@@ -309,7 +288,7 @@ export function AccountLogoPickerSheet({
   const data = results;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
@@ -469,11 +448,12 @@ export function AccountLogoPickerSheet({
                 styles.searchBar,
                 {
                   borderTopColor: themeColors.border,
-                  // SafeAreaView already reserves the bottom inset, so lift only
-                  // by the remainder to sit flush above the keyboard.
-                  marginBottom:
-                    keyboardHeight > 0 ? Math.max(keyboardHeight - insets.bottom, 0) : 0,
-                  paddingBottom: keyboardHeight > 0 ? spacing.sm : spacing.md,
+                  // No bottom safe-area edge on this screen, so lift the bar by
+                  // the full keyboard height to sit flush above it (works the
+                  // same on iOS and edge-to-edge Android). When closed, pad past
+                  // the home indicator ourselves.
+                  marginBottom: keyboardHeight,
+                  paddingBottom: keyboardHeight > 0 ? spacing.sm : insets.bottom + spacing.sm,
                 },
               ]}
             >

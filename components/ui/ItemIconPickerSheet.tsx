@@ -1,16 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ItemIcon } from '~/components/ui/ItemIcon';
@@ -18,6 +9,7 @@ import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { spacing } from '~/constants/designSystem';
 import { type ItemIconMeta, searchItemIcons } from '~/constants/itemIcons';
+import { useKeyboardHeight } from '~/hooks/useKeyboardHeight';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -153,26 +145,13 @@ export function ItemIconPickerSheet({
   const [tab, setTab] = useState<PickerTab>('library');
   const [query, setQuery] = useState('');
   const [customIcons, setCustomIcons] = useState<{ id: string; uri: string }[]>([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  // The app is edge-to-edge on Android, so the keyboard overlays content on
+  // both platforms rather than resizing the window — lift the sticky search bar
+  // manually by the full keyboard height (see the search bar's marginBottom).
+  const keyboardHeight = useKeyboardHeight();
 
   const refreshCustomIcons = useCallback(() => {
     setCustomIcons(listCustomItemIcons());
-  }, []);
-
-  // iOS doesn't resize the window for the keyboard, so lift the sticky search
-  // bar manually by tracking the keyboard height. Android relies on the
-  // activity's adjustResize (Expo default), which pushes the bar up natively —
-  // adding the height there too would double-lift it, so listen on iOS only.
-  useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    const showSub = Keyboard.addListener('keyboardWillShow', (e) =>
-      setKeyboardHeight(e.endCoordinates?.height ?? 0),
-    );
-    const hideSub = Keyboard.addListener('keyboardWillHide', () => setKeyboardHeight(0));
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
   }, []);
 
   // The screen is mounted fresh on each navigation (and torn down on back), so
@@ -243,7 +222,7 @@ export function ItemIconPickerSheet({
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-2"
@@ -403,9 +382,12 @@ export function ItemIconPickerSheet({
                 styles.searchBar,
                 {
                   borderTopColor: themeColors.border,
-                  marginBottom:
-                    keyboardHeight > 0 ? Math.max(keyboardHeight - insets.bottom, 0) : 0,
-                  paddingBottom: keyboardHeight > 0 ? spacing.sm : spacing.md,
+                  // No bottom safe-area edge on this screen, so lift the bar by
+                  // the full keyboard height to sit flush above it (works the
+                  // same on iOS and edge-to-edge Android). When closed, pad past
+                  // the home indicator ourselves.
+                  marginBottom: keyboardHeight,
+                  paddingBottom: keyboardHeight > 0 ? spacing.sm : insets.bottom + spacing.sm,
                 },
               ]}
             >
