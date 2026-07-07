@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
 /**
  * Full-screen receipt preview. A transparent modal with an opaque black backdrop
  * (an opaque `transparent={false}` modal over the editor's own transparentModal
- * corrupts its safe area on dismiss). Shared by the inline ReceiptField and the
- * transaction editor's action-row view button.
+ * corrupts its safe area on dismiss). Opened from the editor's action-row receipt
+ * button once an image is attached.
  */
 export function ReceiptViewerModal({
   visible,
