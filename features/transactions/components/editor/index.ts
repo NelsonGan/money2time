@@ -1,3 +1,4 @@
+export { NUMPAD_HANDLE_HEIGHT, NumpadDrawer } from './NumpadDrawer';
 export { NumpadPanel } from './NumpadPanel';
 export { ReceiptField } from './ReceiptField';
 export { SplitBillModal, type SplitDraft, splitsHelpers } from './SplitBillModal';
