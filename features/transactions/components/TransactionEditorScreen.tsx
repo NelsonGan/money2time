@@ -154,6 +154,14 @@ const noopCategorySelect = () => {};
 // Empty margin kept below the handle when the numpad is collapsed (the visible
 // gap between the card/handle and the screen edge).
 const COLLAPSE_PEEK = 20;
+// Height of the save-button row (h-12 button = 48 + pt-2 = 8), used to estimate
+// the collapse offset before the real layout is measured.
+const NUMPAD_SAVE_ROW_HEIGHT = 56;
+const numpadBodyHeightFor = (windowHeight: number) =>
+  Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
+// Bottom inset below the save button; the extra 26 keeps breathing room and
+// counts toward the below-note height so the keyboard lift stays small.
+const numpadFooterPadFor = (safeAreaBottom: number) => Math.max(safeAreaBottom - 12, 6) + 26;
 
 const styles = StyleSheet.create({
   screenContainer: {
@@ -644,7 +652,7 @@ export function TransactionEditorScreen({
     });
     receiptUriRef.current = nextReceiptUri;
   }, []);
-  // Snap / attach a receipt from the numpad toolbar (mirrors ReceiptField).
+  // Snap / attach a receipt from the action-row camera button.
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library') => {
       try {
@@ -743,9 +751,12 @@ export function TransactionEditorScreen({
   // starts expanded since the amount is the thing being changed.
   const [numpadExpanded, setNumpadExpanded] = useState(mode !== 'create');
   const toggleNumpad = useCallback(() => {
+    // Ignore while the note keyboard owns the panel offset — otherwise the toggle
+    // is invisible now but silently flips the resting state after dismissal.
+    if (keyboardHeight > 0) return;
     void triggerHaptic('selection');
     setNumpadExpanded((prev) => !prev);
-  }, []);
+  }, [keyboardHeight]);
   // Currency picker (opened from the numpad toolbar) for expense/income entry.
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
@@ -1143,10 +1154,9 @@ export function TransactionEditorScreen({
   const panelTranslate = useSharedValue(
     numpadExpanded
       ? 0
-      : Math.round(Math.min(224, Math.max(168, windowHeight * 0.24))) +
-          56 +
-          Math.max(safeAreaInsets.bottom - 12, 6) +
-          26,
+      : numpadBodyHeightFor(windowHeight) +
+          NUMPAD_SAVE_ROW_HEIGHT +
+          numpadFooterPadFor(safeAreaInsets.bottom),
   );
   useEffect(() => {
     let target = 0;
@@ -1947,12 +1957,9 @@ export function TransactionEditorScreen({
   const showActionRow =
     useStickyNumpad &&
     (showAccountChip || showSplitButton || showSentimentButton || showReceiptButton);
-  // Compact 4-row pad with flat, short keys.
-  const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
-  // The save action(s) sit in a footer below the pad and own the bottom inset.
-  // Keep breathing room below the button — this also counts toward the measured
-  // below-note height, which shrinks the keyboard lift toward zero (less shift).
-  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6) + 26;
+  // Compact 4-row pad with flat, short keys; save row owns the bottom inset.
+  const numpadBodyHeight = numpadBodyHeightFor(windowHeight);
+  const numpadFooterBottomPad = numpadFooterPadFor(safeAreaInsets.bottom);
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -2233,6 +2240,24 @@ export function TransactionEditorScreen({
       setNoteSuggestions(getDistinctNotesSuggestions(nextNote.trim()));
     }, 150);
   }, []);
+
+  // Picking a note suggestion: set it directly (no lookup timer), close the
+  // list, and in create mode prefill empty fields from the last matching txn.
+  const handleSelectNoteSuggestion = useCallback(
+    (suggestion: string) => {
+      if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
+      setNote(suggestion);
+      setNoteSuggestions([]);
+      noteInputRef.current?.blur();
+      if (mode !== 'create') return;
+      const fields = getLatestTransactionFieldsByNote(suggestion);
+      if (!fields) return;
+      if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
+      if (!accountId && fields.accountId) setAccountId(fields.accountId);
+      if (!amount && fields.amount != null) setAmount(String(fields.amount));
+    },
+    [accountId, amount, categoryId, mode],
+  );
 
   useEffect(
     () => () => {
@@ -3285,26 +3310,8 @@ export function TransactionEditorScreen({
                   <React.Fragment key={suggestion}>
                     {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
                     <Pressable
-                      style={{ paddingHorizontal: 16, paddingVertical: 11 }}
-                      onPress={() => {
-                        handleNoteChange(suggestion);
-                        setNoteSuggestions([]);
-                        noteInputRef.current?.blur();
-                        if (mode === 'create') {
-                          const fields = getLatestTransactionFieldsByNote(suggestion);
-                          if (fields) {
-                            if (!categoryId && fields.categoryId) {
-                              setCategoryId(fields.categoryId);
-                            }
-                            if (!accountId && fields.accountId) {
-                              setAccountId(fields.accountId);
-                            }
-                            if (!amount && fields.amount != null) {
-                              setAmount(String(fields.amount));
-                            }
-                          }
-                        }
-                      }}
+                      style={styles.noteSuggestionRow}
+                      onPress={() => handleSelectNoteSuggestion(suggestion)}
                     >
                       <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
                         {suggestion}
@@ -3792,19 +3799,7 @@ export function TransactionEditorScreen({
                     {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
                     <Pressable
                       style={styles.noteSuggestionRow}
-                      onPress={() => {
-                        handleNoteChange(suggestion);
-                        setNoteSuggestions([]);
-                        noteInputRef.current?.blur();
-                        if (mode === 'create') {
-                          const fields = getLatestTransactionFieldsByNote(suggestion);
-                          if (fields) {
-                            if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
-                            if (!accountId && fields.accountId) setAccountId(fields.accountId);
-                            if (!amount && fields.amount != null) setAmount(String(fields.amount));
-                          }
-                        }
-                      }}
+                      onPress={() => handleSelectNoteSuggestion(suggestion)}
                     >
                       <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
                         {suggestion}
