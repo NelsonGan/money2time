@@ -1,5 +1,5 @@
 import { Check, ChevronLeft, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   type KeyboardEvent,
@@ -15,10 +15,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
+import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
+import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { SplitDraftInput } from '~/context/AppContext';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
@@ -37,6 +38,11 @@ export interface SplitDraft {
 
 interface SplitBillModalProps {
   visible: boolean;
+  /**
+   * 'modal' wraps the body in a slide-up ThemeModal (legacy). 'page' renders
+   * the body bare so a navigation route can present it as a standard screen.
+   */
+  presentation?: 'modal' | 'page';
   /** Discard staged edits and close. Wired to the back chevron + system close. */
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
@@ -169,6 +175,7 @@ export const splitsHelpers = {
 
 export function SplitBillModal({
   visible,
+  presentation = 'modal',
   onCancel,
   onDone,
   total,
@@ -219,6 +226,69 @@ export function SplitBillModal({
     return map;
   }, [accounts]);
 
+  // Name autocomplete: names entered on past splits, most-recent first.
+  const { transactions } = useTransactions();
+  const [focusedNameIndex, setFocusedNameIndex] = useState<number | null>(null);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const recentNames = useMemo(
+    () => (visible ? recentSplitPersonNames(transactions) : []),
+    [visible, transactions],
+  );
+
+  const handleNameFocus = useCallback((index: number) => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    setFocusedNameIndex(index);
+  }, []);
+  const handleNameBlur = useCallback(() => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    // Delay clearing so a tap on a suggestion chip lands before the bar unmounts.
+    blurTimer.current = setTimeout(() => setFocusedNameIndex(null), 120);
+  }, []);
+  useEffect(
+    () => () => {
+      if (blurTimer.current) clearTimeout(blurTimer.current);
+    },
+    [],
+  );
+  // Drop any stale focus when the modal hides so the drop-up can't linger.
+  useEffect(() => {
+    if (!visible) setFocusedNameIndex(null);
+  }, [visible]);
+
+  // Suggestions for the focused name field: recent names matching what has been
+  // typed and not already used by another row, most recent first.
+  const nameSuggestions = useMemo(() => {
+    if (focusedNameIndex === null) return [];
+    const row = splits[focusedNameIndex];
+    if (!row || row.isSelf || row.paid) return [];
+    const query = row.personName.trim().toLowerCase();
+    const usedByOthers = new Set(
+      splits
+        .filter((_, i) => i !== focusedNameIndex)
+        .map((s) => s.personName.trim().toLowerCase())
+        .filter((n) => n.length > 0),
+    );
+    return recentNames
+      .filter((n) => !usedByOthers.has(n.toLowerCase()))
+      .filter((n) => {
+        const lower = n.toLowerCase();
+        return query ? lower.includes(query) && lower !== query : true;
+      })
+      .slice(0, 6);
+  }, [focusedNameIndex, recentNames, splits]);
+
+  const applyNameSuggestion = useCallback(
+    (name: string) => {
+      if (focusedNameIndex === null) return;
+      void triggerHaptic('selection');
+      onChange(
+        splits.map((row, i) => (i === focusedNameIndex ? { ...row, personName: name } : row)),
+      );
+    },
+    [focusedNameIndex, onChange, splits],
+  );
+
   // Sum of UNPAID splits (Me + outstanding friends). Paid splits are settled
   // and have already reduced the parent amount.
   const unpaidSum = useMemo(() => {
@@ -232,9 +302,6 @@ export function SplitBillModal({
   }, [splits]);
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
-
-  const friendCount = splits.filter((s) => !s.isSelf).length;
-  const paidCount = splits.filter((s) => !s.isSelf && s.paid).length;
 
   const formatMoney = useCallback(
     (n: number) => {
@@ -351,25 +418,8 @@ export function SplitBillModal({
     onDone();
   }, [onDone]);
 
-  const subtitle =
-    friendCount === 0
-      ? null
-      : paidCount >= friendCount
-        ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
-        : I18n.t(
-            friendCount - paidCount === 1
-              ? 'transactions.editor.split.section_subtitle_unpaid'
-              : 'transactions.editor.split.section_subtitle_unpaid_plural',
-            { count: friendCount - paidCount },
-          );
-
-  return (
-    <ThemeModal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={handleCancel}
-    >
+  const body = (
+    <>
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <View className="flex-row items-center justify-between px-4 py-3 border-b border-border/20">
           <Pressable
@@ -380,11 +430,6 @@ export function SplitBillModal({
           </Pressable>
           <View className="items-center flex-1 px-2">
             <Text variant="bodyStrong">{I18n.t('transactions.editor.split.toggle_title')}</Text>
-            {subtitle ? (
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {subtitle}
-              </Text>
-            ) : null}
           </View>
           <Pressable
             onPress={handleDone}
@@ -484,6 +529,8 @@ export function SplitBillModal({
                           row.isSelf ? I18n.t('transactions.editor.split.me_label') : row.personName
                         }
                         editable={!row.isSelf && !disabledRow}
+                        onFocus={() => handleNameFocus(index)}
+                        onBlur={handleNameBlur}
                         onChangeText={(text) => handleNameChange(index, text)}
                         placeholder={
                           row.isSelf
@@ -627,7 +674,29 @@ export function SplitBillModal({
           </View>
         </ScrollView>
 
-        {/* Sum status — sticky bar tracked above the keyboard */}
+        {/* Name suggestions: drop-up above the sum bar / keyboard while typing a name */}
+        {focusedNameIndex !== null && nameSuggestions.length > 0 ? (
+          <View className="bg-card border-t border-border/20 py-2">
+            <ScrollView
+              horizontal
+              keyboardShouldPersistTaps="always"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+            >
+              {nameSuggestions.map((name) => (
+                <Pressable
+                  key={name}
+                  onPress={() => applyNameSuggestion(name)}
+                  className="px-3 py-1.5 rounded-full bg-secondary/60 active:opacity-70"
+                >
+                  <Text variant="caption">{name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+
+        {/* Sum status: sticky bar tracked above the keyboard */}
         <View
           className="bg-card border-t border-border/30"
           style={{
@@ -681,6 +750,19 @@ export function SplitBillModal({
           setAccountPickerForKey(null);
         }}
       />
+    </>
+  );
+
+  if (presentation === 'page') return body;
+
+  return (
+    <ThemeModal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={handleCancel}
+    >
+      {body}
     </ThemeModal>
   );
 }

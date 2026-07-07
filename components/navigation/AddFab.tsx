@@ -42,6 +42,10 @@ export function AddFab({
   const fabRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
   const longPressActiveRef = useRef(false);
+  // Guards against a rapid double-fire of the press — on a cold start the JS
+  // thread is busy and a single tap can register twice, opening two editors and
+  // buzzing the haptic twice. Ignore a second press within a short window.
+  const lastPressAtRef = useRef(0);
 
   const handlePress = useCallback(() => {
     // If a long-press just fired, suppress the synthetic onPress that
@@ -50,6 +54,9 @@ export function AddFab({
       longPressActiveRef.current = false;
       return;
     }
+    const now = Date.now();
+    if (now - lastPressAtRef.current < 500) return;
+    lastPressAtRef.current = now;
     void triggerHaptic('medium');
     onPress();
   }, [onPress]);

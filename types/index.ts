@@ -150,6 +150,19 @@ export interface UserSettings {
    * (floored at 2026-03-01) on first load. Null only until that backfill runs.
    */
   firstAppOpen: string | null;
+  /**
+   * Relative path (within the user-assets store) of the user's own payment QR
+   * image (PayNow / PromptPay / UPI / PayPal.me / etc.), or null when unset.
+   * Resolve to a file uri with `getPaymentQrUri`. Shared onto split-bill
+   * payback receipts so friends can pay the user back directly.
+   */
+  paymentQrUri: string | null;
+  /**
+   * Account new split-bill payback rows default to (the "paid to" account on
+   * the Settle Up screen). Null until the user picks one; consumers fall back
+   * to the first account so the effective default is never empty.
+   */
+  defaultPaybackAccountId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -537,6 +550,92 @@ export interface TransactionSplitsSummary {
   paidCount: number;
   unpaidAmount: number;
   totalOwed: number;
+}
+
+/** One unpaid split a person owes, tied back to its parent transaction. */
+export interface PersonDebtBill {
+  splitId: string;
+  transactionId: string;
+  /** Parent transaction date (ISO / YYYY-MM-DD). */
+  date: string;
+  /** The split amount, in the parent transaction's own entered currency. */
+  amount: number;
+  currency: string;
+  /** `amount` converted to the reporting currency (frozen fxRate when available). */
+  reportingAmount: number;
+  /** Denormalized parent fields for display. */
+  note: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  /** Account the payback lands in (split's own, falling back to the parent's). */
+  paybackAccountId: string | null;
+}
+
+/** Everything one person owes the user, rolled up across every transaction. */
+export interface PersonDebt {
+  /** Grouping key: trimmed + case-folded name, or the unnamed sentinel. */
+  key: string;
+  /** Display name (from the most recent bill), or null when the split was unnamed. */
+  name: string | null;
+  /** Total owed in the reporting currency. */
+  totalReporting: number;
+  /** Native per-currency subtotals, for tabs that span currencies. */
+  byCurrency: { currency: string; amount: number }[];
+  bills: PersonDebtBill[];
+  /** Oldest unpaid bill date. */
+  oldestDate: string;
+  billCount: number;
+}
+
+/** The whole "who owes you" roll-up across unpaid splits. */
+export interface SettleUpSummary {
+  people: PersonDebt[];
+  /** Grand total owed across everyone, in the reporting currency. */
+  totalReporting: number;
+  personCount: number;
+  billCount: number;
+  reportingCurrency: string;
+}
+
+/** One person's unpaid share of a single transaction (by-transaction view). */
+export interface TransactionDebtSplit {
+  splitId: string;
+  /** Person who owes, or null when the split was never named. */
+  personName: string | null;
+  /** The split amount, in the parent transaction's own entered currency. */
+  amount: number;
+  currency: string;
+  /** `amount` converted to the reporting currency (frozen fxRate when available). */
+  reportingAmount: number;
+  /** Account the payback lands in (split's own, falling back to the parent's). */
+  paybackAccountId: string | null;
+}
+
+/** A single transaction that still has unpaid, non-self splits owed to the user. */
+export interface TransactionDebt {
+  transactionId: string;
+  /** Transaction date (ISO / YYYY-MM-DD). */
+  date: string;
+  note: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  currency: string;
+  /** Total still owed on this bill, in the reporting currency. */
+  totalReporting: number;
+  /** Total still owed on this bill, in the transaction's own currency. */
+  totalNative: number;
+  splits: TransactionDebtSplit[];
+  splitCount: number;
+}
+
+/** The "who owes you" roll-up grouped by transaction instead of by person. */
+export interface SettleUpByTransactionSummary {
+  transactions: TransactionDebt[];
+  /** Grand total owed across every bill, in the reporting currency. */
+  totalReporting: number;
+  transactionCount: number;
+  splitCount: number;
+  reportingCurrency: string;
 }
 
 export interface RecurringTransactionRule {
