@@ -69,6 +69,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -725,6 +726,7 @@ export function SettingsScreen({
                 icon={<HandCoins size={20} color={themeColors.primary} />}
                 label={I18n.t('transactions.settleUp.title')}
                 onPress={onOpenSettleUp}
+                badge={<SettleUpTileBadge />}
               />
             </SettingsGrid>
           </SettingsSection>
