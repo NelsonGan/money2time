@@ -567,6 +567,7 @@ const uk = {
       split: {
         toggle_title: 'Розділити рахунок',
         button_label: 'Розділити рахунок',
+        button_short: 'Split',
         even_toggle: 'Рівномірно',
         add_person: 'Додати особу',
         me_label: 'Я',

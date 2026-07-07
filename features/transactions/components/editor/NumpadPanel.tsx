@@ -193,7 +193,16 @@ export function NumpadPanel({
   }, [resetNonce]);
 
   const handleKeyPress = useCallback(
-    (key: KeyValue) => {
+    (rawKey: KeyValue) => {
+      // Combo operator keys cycle on repeated taps: first tap inserts the
+      // primary operator, tapping again swaps it for the secondary.
+      let key = rawKey;
+      if (rawKey === 'plusTimes' || rawKey === 'minusDivide') {
+        const primary = rawKey === 'plusTimes' ? '+' : '-';
+        const secondary = rawKey === 'plusTimes' ? '×' : '÷';
+        key = expressionRef.current.slice(-1) === primary ? secondary : primary;
+      }
+
       let currentExpression = expressionRef.current;
       let nextExpression = currentExpression;
 
@@ -247,9 +256,9 @@ export function NumpadPanel({
 
   if (compact) {
     return (
-      <View className="flex-1 px-3 pt-0.5">
-        <View className="flex-1 gap-0.5">
-          <View className="flex-1 flex-row gap-0.5">
+      <View className="flex-1 px-3.5 pt-1">
+        <View className="flex-1 gap-1.5">
+          <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="7" onPress={handleKeyPress} />
             <NumpadKey value="8" onPress={handleKeyPress} />
             <NumpadKey value="9" onPress={handleKeyPress} />
@@ -276,25 +285,44 @@ export function NumpadPanel({
               deleteKey
             )}
           </View>
-          <View className="flex-1 flex-row gap-0.5">
+          <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="4" onPress={handleKeyPress} />
             <NumpadKey value="5" onPress={handleKeyPress} />
             <NumpadKey value="6" onPress={handleKeyPress} />
             {onDatePress ? deleteKey : <View className="flex-1" />}
           </View>
-          <View className="flex-1 flex-row gap-0.5">
+          <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="1" onPress={handleKeyPress} />
             <NumpadKey value="2" onPress={handleKeyPress} />
             <NumpadKey value="3" onPress={handleKeyPress} />
-            <NumpadKey value="-" variant="operator" onPress={handleKeyPress} />
+            <NumpadKey
+              value="minusDivide"
+              variant="operator"
+              onPress={handleKeyPress}
+              icon={
+                <Text variant="subheading" className="text-primary">
+                  {'−   ÷'}
+                </Text>
+              }
+            />
           </View>
-          <View className="flex-1 flex-row gap-0.5">
+          <View className="flex-1 flex-row gap-1.5">
             <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
             <NumpadKey value="." onPress={handleKeyPress} />
-            <NumpadKey value="+" variant="operator" onPress={handleKeyPress} />
+            <NumpadKey
+              value="plusTimes"
+              variant="operator"
+              onPress={handleKeyPress}
+              icon={
+                <Text variant="subheading" className="text-primary">
+                  {'+   ×'}
+                </Text>
+              }
+            />
           </View>
         </View>
-        <View style={{ minHeight: Math.max(4, bottomInset) }} />
+        {/* The drawer's action footer owns the bottom safe area. */}
+        <View style={{ height: 6 }} />
       </View>
     );
   }

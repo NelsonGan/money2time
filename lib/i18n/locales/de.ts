@@ -568,6 +568,7 @@ const de = {
       split: {
         toggle_title: 'Rechnung teilen',
         button_label: 'Rechnung teilen',
+        button_short: 'Split',
         even_toggle: 'Gleichmäßig aufteilen',
         add_person: 'Person hinzufügen',
         me_label: 'Ich',

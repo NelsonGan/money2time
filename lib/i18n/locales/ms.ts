@@ -567,6 +567,7 @@ const ms = {
       split: {
         toggle_title: 'Bahagi Bil',
         button_label: 'Bahagi Bil',
+        button_short: 'Split',
         even_toggle: 'Bahagi sama rata',
         add_person: 'Tambah orang',
         me_label: 'Saya',

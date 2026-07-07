@@ -564,6 +564,7 @@ const ko = {
       split: {
         toggle_title: '더치페이',
         button_label: '더치페이',
+        button_short: 'Split',
         even_toggle: '균등 분할',
         add_person: '사람 추가',
         me_label: '나',

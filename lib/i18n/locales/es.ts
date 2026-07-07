@@ -567,6 +567,7 @@ const es = {
       split: {
         toggle_title: 'Dividir gasto',
         button_label: 'Dividir gasto',
+        button_short: 'Split',
         even_toggle: 'Dividir en partes iguales',
         add_person: 'Añadir persona',
         me_label: 'Yo',

@@ -567,6 +567,7 @@ const id = {
       split: {
         toggle_title: 'Bagi Tagihan',
         button_label: 'Bagi Tagihan',
+        button_short: 'Split',
         even_toggle: 'Bagi rata',
         add_person: 'Tambah orang',
         me_label: 'Saya',

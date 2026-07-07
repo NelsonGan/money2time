@@ -564,6 +564,7 @@ const hi = {
       split: {
         toggle_title: 'बिल बांटें',
         button_label: 'बिल बांटें',
+        button_short: 'Split',
         even_toggle: 'बराबर बांटें',
         add_person: 'व्यक्ति जोड़ें',
         me_label: 'मैं',

@@ -565,6 +565,7 @@ const da = {
       split: {
         toggle_title: 'Del regning',
         button_label: 'Del regning',
+        button_short: 'Split',
         even_toggle: 'Del ligeligt',
         add_person: 'Tilføj person',
         me_label: 'Mig',

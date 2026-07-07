@@ -563,6 +563,7 @@ const th = {
       split: {
         toggle_title: 'แบ่งบิล',
         button_label: 'แบ่งบิล',
+        button_short: 'Split',
         even_toggle: 'แบ่งเท่ากัน',
         add_person: 'เพิ่มคน',
         me_label: 'ฉัน',

@@ -570,6 +570,7 @@ const fil = {
       split: {
         toggle_title: 'Split Bill',
         button_label: 'Split Bill',
+        button_short: 'Split',
         even_toggle: 'Hatiin nang pantay',
         add_person: 'Magdagdag ng tao',
         me_label: 'Ako',

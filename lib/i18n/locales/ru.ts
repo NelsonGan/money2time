@@ -566,6 +566,7 @@ const ru = {
       split: {
         toggle_title: 'Разделить счёт',
         button_label: 'Разделить счёт',
+        button_short: 'Split',
         even_toggle: 'Разделить поровну',
         add_person: 'Добавить человека',
         me_label: 'Я',

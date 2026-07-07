@@ -564,6 +564,7 @@ const ja = {
       split: {
         toggle_title: '割り勘',
         button_label: '割り勘',
+        button_short: 'Split',
         even_toggle: '均等に割り勘',
         add_person: '人を追加',
         me_label: '自分',

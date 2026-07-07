@@ -565,6 +565,7 @@ const nb = {
       split: {
         toggle_title: 'Del regning',
         button_label: 'Del regning',
+        button_short: 'Split',
         even_toggle: 'Del likt',
         add_person: 'Legg til person',
         me_label: 'Meg',

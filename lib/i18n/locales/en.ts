@@ -540,6 +540,7 @@ const en = {
       split: {
         toggle_title: 'Split Bill',
         button_label: 'Split Bill',
+        button_short: 'Split',
         even_toggle: 'Split evenly',
         add_person: 'Add person',
         me_label: 'Me',

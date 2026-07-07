@@ -567,6 +567,7 @@ const nl = {
       split: {
         toggle_title: 'Rekening splitsen',
         button_label: 'Rekening splitsen',
+        button_short: 'Split',
         even_toggle: 'Gelijk verdelen',
         add_person: 'Persoon toevoegen',
         me_label: 'Ik',

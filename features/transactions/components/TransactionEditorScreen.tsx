@@ -1216,7 +1216,11 @@ export function TransactionEditorScreen({
     return 'default' as const;
   }, [amount, isBalanceAdjustmentType, type]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (bulkOverride?: boolean) => {
+    // Two explicit save actions drive this: "Add" (bulk = false, closes) and
+    // "Add" + bulk icon (bulk = true, stays open). Falls back to the persisted
+    // pref for the recurring editor's single Save button.
+    const bulk = bulkOverride ?? bulkCreateEnabled;
     const numericAmount = normalizeMoneyAmount(Number(amount));
     const amountDraft = amount.trim();
     const normalizedNote = note.trim();
@@ -1428,7 +1432,7 @@ export function TransactionEditorScreen({
       // synchronously and the SQLite write is deferred), so nothing here waits
       // on the DB. Type / account / category / date / sentiment are kept for
       // the next entry.
-      if (bulkCreateEnabled) {
+      if (bulk) {
         // The captured payload already owns the receipt — detach it from the
         // editor without deleting the file, and reset the commit flag so the
         // next (not-yet-saved) entry starts clean.
@@ -1481,6 +1485,13 @@ export function TransactionEditorScreen({
       : I18n.t('transactions.editor.title_edit'));
   const subtitle = subtitleOverride ?? null;
   const submitLabel = submitLabelOverride ?? I18n.t('common.save');
+  // Label for the below-the-numpad action(s): "Add" on a new entry, "Update"
+  // when editing (honours an explicit override either way).
+  const saveLabel =
+    submitLabelOverride ??
+    (mode === 'create'
+      ? I18n.t('transactions.editor.title_create')
+      : I18n.t('transactions.editor.title_edit'));
   const summaryFlex = windowHeight < 650 ? 0.38 : windowHeight < 750 ? 0.42 : 0.46;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
@@ -1504,11 +1515,12 @@ export function TransactionEditorScreen({
   const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
-  const showNumpadToolbar =
-    useStickyNumpad && (showSplitButton || showCurrencyButton || showBulkToggle);
+  const showNumpadToolbar = useStickyNumpad && (showSplitButton || showCurrencyButton);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
   // Compact 4-row pad with short keys — deliberately smaller than the old 5-row.
   const numpadBodyHeight = Math.round(Math.min(252, Math.max(188, windowHeight * 0.27)));
+  // The save action(s) sit in a footer below the pad and own the bottom inset.
+  const numpadFooterHeight = useStickyNumpad ? 10 + 48 + Math.max(safeAreaInsets.bottom, 10) : 0;
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -1989,8 +2001,10 @@ export function TransactionEditorScreen({
                 ) : null}
               </View>
             </View>
-            {mode === 'edit' && onDelete ? (
-              <View className="flex-row items-center gap-2">
+            {/* In sticky mode the save action lives below the numpad; here we
+                keep only Delete (edit) and the recurring editor's Save. */}
+            <View className="flex-row items-center gap-2">
+              {mode === 'edit' && onDelete ? (
                 <Pressable
                   onPress={onDelete}
                   accessibilityRole="button"
@@ -1999,15 +2013,13 @@ export function TransactionEditorScreen({
                 >
                   <Trash2 size={14} color={themeColors.coral} />
                 </Pressable>
-                <Button size="sm" haptic="none" onPress={handleSubmit}>
+              ) : null}
+              {!useStickyNumpad ? (
+                <Button size="sm" haptic="none" onPress={() => handleSubmit()}>
                   <Text>{submitLabel}</Text>
                 </Button>
-              </View>
-            ) : (
-              <Button size="sm" haptic="none" onPress={handleSubmit}>
-                <Text>{submitLabel}</Text>
-              </Button>
-            )}
+              ) : null}
+            </View>
           </View>
 
           {showTypeSelector ? (
@@ -2053,7 +2065,8 @@ export function TransactionEditorScreen({
                         borderRadius: 20,
                       }}
                     >
-                      {!isBalanceAdjustmentType ? (
+                      {/* Sticky mode moves the date onto the numpad's date key. */}
+                      {!isBalanceAdjustmentType && !useStickyNumpad ? (
                         <>
                           {/* Date row */}
                           <View onLayout={registerFieldLayout('date')}>
@@ -2781,6 +2794,7 @@ export function TransactionEditorScreen({
           onExpandedChange={setNumpadExpanded}
           headerHeight={numpadHeaderHeight}
           numpadHeight={numpadBodyHeight}
+          footerHeight={numpadFooterHeight}
           resetNonce={bulkEntryNonce}
           initialExpression={amount}
           onValueChange={handleAmountValueChange}
@@ -2809,7 +2823,7 @@ export function TransactionEditorScreen({
                   >
                     <Text className="text-[14px]">🤝</Text>
                     <Text variant="caption" numberOfLines={1}>
-                      {I18n.t('transactions.editor.split.button_label')}
+                      {I18n.t('transactions.editor.split.button_short')}
                     </Text>
                     {splitBillsUnpaidCount > 0 ? (
                       <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1">
@@ -2834,37 +2848,37 @@ export function TransactionEditorScreen({
                     <ChevronDown size={12} color={themeColors.textMuted} />
                   </Pressable>
                 ) : null}
-                <View className="flex-1" />
-                {showBulkToggle ? (
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      updateQuickEntryPrefs({ bulkCreateEnabled: !bulkCreateEnabled });
-                    }}
-                    accessibilityRole="switch"
-                    accessibilityState={{ checked: bulkCreateEnabled }}
-                    accessibilityLabel={I18n.t('transactions.editor.bulk_mode')}
-                    className={cn(
-                      'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
-                      bulkCreateEnabled
-                        ? 'bg-primary/15 border-primary/40'
-                        : 'bg-secondary/60 border-border/30',
-                    )}
-                  >
-                    <Layers
-                      size={14}
-                      color={bulkCreateEnabled ? themeColors.primary : themeColors.textMuted}
-                    />
-                    <Text
-                      variant="caption"
-                      className={bulkCreateEnabled ? 'text-primary' : 'text-muted-foreground'}
-                    >
-                      {I18n.t('transactions.editor.bulk_mode')}
-                    </Text>
-                  </Pressable>
-                ) : null}
               </View>
             ) : null
+          }
+          footer={
+            <View
+              className="flex-row gap-2.5 px-4 pt-2.5"
+              style={{ paddingBottom: Math.max(safeAreaInsets.bottom, 10) }}
+            >
+              <Pressable
+                onPress={() => handleSubmit(false)}
+                accessibilityRole="button"
+                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+              >
+                <Text variant="bodyStrong" className="text-primary-foreground">
+                  {saveLabel}
+                </Text>
+              </Pressable>
+              {showBulkToggle ? (
+                <Pressable
+                  onPress={() => handleSubmit(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
+                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                >
+                  <Layers size={16} color={themeColors.primary} />
+                  <Text variant="bodyStrong" className="text-primary">
+                    {saveLabel}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
           }
         />
       ) : null}

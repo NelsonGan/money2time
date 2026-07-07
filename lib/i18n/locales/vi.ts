@@ -564,6 +564,7 @@ const vi = {
       split: {
         toggle_title: 'Chia hóa đơn',
         button_label: 'Chia hóa đơn',
+        button_short: 'Split',
         even_toggle: 'Chia đều',
         add_person: 'Thêm người',
         me_label: 'Tôi',
