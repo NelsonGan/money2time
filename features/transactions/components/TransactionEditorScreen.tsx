@@ -936,12 +936,13 @@ export function TransactionEditorScreen({
     }
   }, [activeField, useStickyNumpad]);
 
-  // Sticky numpad: any field that opens its own surface (a picker sheet, the
-  // date modal, or the note keyboard) tucks the pad away so they don't stack.
+  // Sticky numpad: only the native keyboard (note / rule name / interval) would
+  // fight the pad, so tuck it away just for those. Picker sheets and the date
+  // modal overlay it, so the pad stays put when you open Account / Category etc.
   useEffect(() => {
     if (!useStickyNumpad) return;
-    if (activeField && activeField !== 'amount') setNumpadExpanded(false);
-  }, [activeField, useStickyNumpad]);
+    if (activeField && isNativeKeyboardField(activeField)) setNumpadExpanded(false);
+  }, [activeField, isNativeKeyboardField, useStickyNumpad]);
 
   // When the parent amount changes (user typing in the amount field), keep
   // the split rows in sync so the modal's sum bar doesn't show "unaccounted".
@@ -1658,12 +1659,16 @@ export function TransactionEditorScreen({
   const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
-  const showNumpadToolbar = useStickyNumpad && (showSplitButton || showCurrencyButton);
+  const showSentimentButton = useStickyNumpad && type === 'expense';
+  const showNumpadToolbar =
+    useStickyNumpad && (showSplitButton || showCurrencyButton || showSentimentButton);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
-  // Compact 4-row pad with short keys — deliberately smaller than the old 5-row.
-  const numpadBodyHeight = Math.round(Math.min(252, Math.max(188, windowHeight * 0.27)));
+  // Compact 4-row pad with flat, short keys.
+  const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
   // The save action(s) sit in a footer below the pad and own the bottom inset.
-  const numpadFooterHeight = useStickyNumpad ? 10 + 48 + Math.max(safeAreaInsets.bottom, 10) : 0;
+  // Trim the home-indicator gap so the buttons don't float too high off the edge.
+  const numpadFooterBottomPad = Math.max(safeAreaInsets.bottom - 12, 6);
+  const numpadFooterHeight = useStickyNumpad ? 8 + 48 + numpadFooterBottomPad : 0;
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
       ? recurringToolZonePadding
@@ -1852,6 +1857,14 @@ export function TransactionEditorScreen({
     }
     activateField('amount');
   }, [activateField, useStickyNumpad]);
+
+  // Toolbar sentiment: neutral -> happy -> sad -> neutral.
+  const cycleSentiment = useCallback(() => {
+    void triggerHaptic('selection');
+    setSentiment((current) =>
+      current === 'neutral' ? 'happy' : current === 'happy' ? 'sad' : 'neutral',
+    );
+  }, []);
 
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
@@ -2167,7 +2180,7 @@ export function TransactionEditorScreen({
               <View onLayout={registerFieldLayout('amount')}>
                 <SummaryRow
                   label={I18n.t('transactions.editor.amount')}
-                  isActive={amountLive}
+                  isActive={false}
                   onPress={handleAmountRowPress}
                   rightElement={null}
                 >
@@ -2477,29 +2490,7 @@ export function TransactionEditorScreen({
                     </>
                   ) : null}
 
-                  {/* Sentiment picker */}
-                  {type === 'expense' ? (
-                    <View className="items-center py-2.5">
-                      <View className="flex-row items-center gap-5">
-                        {(['sad', 'neutral', 'happy'] as const).map((s) => {
-                          const isActive = sentiment === s;
-                          return (
-                            <Pressable
-                              key={s}
-                              onPress={() => {
-                                setSentiment(s);
-                                void triggerHaptic('selection');
-                              }}
-                              className="items-center justify-center"
-                              style={{ opacity: isActive ? 1 : 0.3 }}
-                            >
-                              <SentimentIcon sentiment={s} size={36} />
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  ) : null}
+                  {/* Sentiment now cycles from the numpad toolbar. */}
                 </>
               ) : null}
             </View>
@@ -3056,13 +3047,23 @@ export function TransactionEditorScreen({
                     <ChevronDown size={12} color={themeColors.textMuted} />
                   </Pressable>
                 ) : null}
+                {showSentimentButton ? (
+                  <Pressable
+                    onPress={cycleSentiment}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('transactions.editor.expense_sentiment')}
+                    className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
+                  >
+                    <SentimentIcon sentiment={sentiment} size={22} />
+                  </Pressable>
+                ) : null}
               </View>
             ) : null
           }
           footer={
             <View
-              className="flex-row gap-2.5 px-4 pt-2.5"
-              style={{ paddingBottom: Math.max(safeAreaInsets.bottom, 10) }}
+              className="flex-row gap-2.5 px-4 pt-2"
+              style={{ paddingBottom: numpadFooterBottomPad }}
             >
               <Pressable
                 onPress={() => handleSubmit(false)}
