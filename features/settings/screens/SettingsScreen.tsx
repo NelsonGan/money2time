@@ -14,6 +14,7 @@ import {
   Fingerprint,
   FolderTree,
   Gift,
+  HandCoins,
   Heart,
   Images,
   Landmark,
@@ -68,6 +69,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -119,6 +121,7 @@ interface SettingsScreenProps {
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
+  onOpenSettleUp: () => void;
   onOpenWidgetPreviews?: () => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
@@ -145,6 +148,7 @@ export function SettingsScreen({
   onOpenProPaywall,
   onOpenProManagement,
   onOpenShareAndEarn,
+  onOpenSettleUp,
   onOpenWidgetPreviews,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -717,6 +721,12 @@ export function SettingsScreen({
                 icon={<Zap size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.quick_entry.title')}
                 onPress={onOpenQuickEntry}
+              />
+              <SettingsGridTile
+                icon={<HandCoins size={20} color={themeColors.primary} />}
+                label={I18n.t('transactions.settleUp.title')}
+                onPress={onOpenSettleUp}
+                badge={<SettleUpTileBadge />}
               />
             </SettingsGrid>
           </SettingsSection>

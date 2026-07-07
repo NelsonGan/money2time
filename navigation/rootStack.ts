@@ -28,6 +28,10 @@ export type RootStackParamList = {
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
+  SettleUp: undefined;
+  SettleUpPerson: { personKey: string };
+  SettleUpTransaction: { transactionId: string };
+  SplitBill: undefined;
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
   // Full-page account logo picker. Its selected id + onSelect callback ride a

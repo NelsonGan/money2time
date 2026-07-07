@@ -402,6 +402,8 @@ export function toSettings(row: SettingsRow): UserSettings {
     lastRateFetchError: row.lastRateFetchError ?? null,
     fxCurrenciesJson: row.fxCurrenciesJson ?? null,
     firstAppOpen: row.firstAppOpen ?? null,
+    paymentQrUri: row.paymentQrUri ?? null,
+    defaultPaybackAccountId: row.defaultPaybackAccountId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

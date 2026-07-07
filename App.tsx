@@ -50,6 +50,7 @@ import {
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
+import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
@@ -115,6 +116,10 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  SettleUpPersonScreen,
+  SettleUpScreen,
+  SettleUpTransactionScreen,
+  SplitBillScreen,
 } from '~/features/transactions/screens';
 import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
 import type {
@@ -657,6 +662,7 @@ function MainShellScreen({
     [openProPaywall],
   );
   const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
+  const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
@@ -1060,6 +1066,7 @@ function MainShellScreen({
             onOpenAddWageMonth={openAddWageMonth}
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
+            onOpenSettleUp={openSettleUp}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}
@@ -1610,6 +1617,36 @@ function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEa
   return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
 }
 
+function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
+  return (
+    <SettleUpScreen
+      onBack={() => navigation.goBack()}
+      onOpenPerson={(personKey) => navigation.navigate('SettleUpPerson', { personKey })}
+      onOpenTransaction={(transactionId) =>
+        navigation.navigate('SettleUpTransaction', { transactionId })
+      }
+    />
+  );
+}
+
+function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'SettleUpPerson'>) {
+  return (
+    <SettleUpPersonScreen personKey={route.params.personKey} onBack={() => navigation.goBack()} />
+  );
+}
+
+function SettleUpTransactionRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'SettleUpTransaction'>) {
+  return (
+    <SettleUpTransactionScreen
+      transactionId={route.params.transactionId}
+      onBack={() => navigation.goBack()}
+    />
+  );
+}
+
 function SettingsWageCalculatorRouteScreen({
   route,
   navigation,
@@ -1993,99 +2030,111 @@ function AppContent() {
         onReady={syncRootActiveScreen}
         onStateChange={syncRootActiveScreen}
       >
-        <RootStack.Navigator
-          screenOptions={SHARED_NATIVE_STACK_OPTIONS}
-          screenListeners={rootScreenListeners}
-        >
-          <RootStack.Screen name="Main">
-            {(props) => (
-              <BottomNavMinimizeProvider>
-                <MainShellScreen
-                  navigation={props.navigation}
-                  onVisibleScreenChange={setMainShellCurrentScreen}
-                  onEnterSettingsTab={handleEnterSettingsTab}
-                  tutorialStartToken={tutorialStartToken}
-                />
-              </BottomNavMinimizeProvider>
-            )}
-          </RootStack.Screen>
-          <RootStack.Screen
-            name="AddTransaction"
-            component={AddTransactionRouteScreen}
-            options={
-              quickEntryPrefs.quickEntryEnabled
-                ? {
-                    presentation: 'transparentModal',
-                    // QuickAddSheet handles its own enter/exit animation (backdrop fade +
-                    // slide). Letting the navigator add its own fade on top stacks a
-                    // ~300ms tail on dismiss, which looks like a "lingering grey" lag
-                    // after submit. 'none' makes the route appear/disappear instantly
-                    // so the only visible animation is the sheet's own.
-                    animation: 'none',
-                    gestureEnabled: false,
-                    contentStyle: { backgroundColor: 'transparent' },
-                  }
-                : // With quick entry off, this route renders the full editor as a
-                  // normal card so the slide animation and edge-swipe-back work.
-                  SHARED_NATIVE_STACK_OPTIONS
-            }
-          />
-          <RootStack.Screen
-            name="AddTransactionDetailed"
-            component={AddTransactionDetailedRouteScreen}
-          />
-          <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
-          <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
-          <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
-          <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
-          <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
-          <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
-          <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
-          <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
-          <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
-          <RootStack.Screen name="SettingsHourlyValue" component={SettingsHourlyValueRouteScreen} />
-          <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
-          <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
-          <RootStack.Screen
-            name="SettingsMultiCurrency"
-            component={SettingsMultiCurrencyRouteScreen}
-          />
-          <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
-          <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
-          <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
-          <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
-          <RootStack.Screen
-            name="BudgetTemplateEditor"
-            component={BudgetTemplateEditorRouteScreen}
-          />
-          <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
-          <RootStack.Screen
-            name="BudgetCategoryAllocation"
-            component={BudgetCategoryAllocationRouteScreen}
-          />
-          <RootStack.Screen
-            name="SettingsBudgetTemplates"
-            component={SettingsBudgetTemplatesRouteScreen}
-          />
-          <RootStack.Screen
-            name="SettingsWageCalculator"
-            component={SettingsWageCalculatorRouteScreen}
-          />
-          <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
-          <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
-          <RootStack.Screen
-            name="EditAlbumTransactions"
-            component={EditAlbumTransactionsRouteScreen}
-          />
-          <RootStack.Screen
-            name="AddAlbumTransactions"
-            component={AddAlbumTransactionsRouteScreen}
-          />
-          <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
-          <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
-          <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
-          <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />
-        </RootStack.Navigator>
+        <SplitBillSessionProvider>
+          <RootStack.Navigator
+            screenOptions={SHARED_NATIVE_STACK_OPTIONS}
+            screenListeners={rootScreenListeners}
+          >
+            <RootStack.Screen name="Main">
+              {(props) => (
+                <BottomNavMinimizeProvider>
+                  <MainShellScreen
+                    navigation={props.navigation}
+                    onVisibleScreenChange={setMainShellCurrentScreen}
+                    onEnterSettingsTab={handleEnterSettingsTab}
+                    tutorialStartToken={tutorialStartToken}
+                  />
+                </BottomNavMinimizeProvider>
+              )}
+            </RootStack.Screen>
+            <RootStack.Screen
+              name="AddTransaction"
+              component={AddTransactionRouteScreen}
+              options={
+                quickEntryPrefs.quickEntryEnabled
+                  ? {
+                      presentation: 'transparentModal',
+                      // QuickAddSheet handles its own enter/exit animation (backdrop fade +
+                      // slide). Letting the navigator add its own fade on top stacks a
+                      // ~300ms tail on dismiss, which looks like a "lingering grey" lag
+                      // after submit. 'none' makes the route appear/disappear instantly
+                      // so the only visible animation is the sheet's own.
+                      animation: 'none',
+                      gestureEnabled: false,
+                      contentStyle: { backgroundColor: 'transparent' },
+                    }
+                  : // With quick entry off, this route renders the full editor as a
+                    // normal card so the slide animation and edge-swipe-back work.
+                    SHARED_NATIVE_STACK_OPTIONS
+              }
+            />
+            <RootStack.Screen
+              name="AddTransactionDetailed"
+              component={AddTransactionDetailedRouteScreen}
+            />
+            <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
+            <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
+            <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
+            <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
+            <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
+            <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
+            <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
+            <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
+            <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
+            <RootStack.Screen
+              name="SettingsHourlyValue"
+              component={SettingsHourlyValueRouteScreen}
+            />
+            <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
+            <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
+            <RootStack.Screen
+              name="SettingsMultiCurrency"
+              component={SettingsMultiCurrencyRouteScreen}
+            />
+            <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
+            <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
+            <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
+            <RootStack.Screen name="SettleUpPerson" component={SettleUpPersonRouteScreen} />
+            <RootStack.Screen
+              name="SettleUpTransaction"
+              component={SettleUpTransactionRouteScreen}
+            />
+            <RootStack.Screen name="SplitBill" component={SplitBillScreen} />
+            <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
+            <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
+            <RootStack.Screen
+              name="BudgetTemplateEditor"
+              component={BudgetTemplateEditorRouteScreen}
+            />
+            <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
+            <RootStack.Screen
+              name="BudgetCategoryAllocation"
+              component={BudgetCategoryAllocationRouteScreen}
+            />
+            <RootStack.Screen
+              name="SettingsBudgetTemplates"
+              component={SettingsBudgetTemplatesRouteScreen}
+            />
+            <RootStack.Screen
+              name="SettingsWageCalculator"
+              component={SettingsWageCalculatorRouteScreen}
+            />
+            <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
+            <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
+            <RootStack.Screen
+              name="EditAlbumTransactions"
+              component={EditAlbumTransactionsRouteScreen}
+            />
+            <RootStack.Screen
+              name="AddAlbumTransactions"
+              component={AddAlbumTransactionsRouteScreen}
+            />
+            <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
+            <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
+            <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
+            <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />
+          </RootStack.Navigator>
+        </SplitBillSessionProvider>
       </NavigationContainer>
 
       <ThemeModal
