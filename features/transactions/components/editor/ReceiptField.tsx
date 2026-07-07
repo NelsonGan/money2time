@@ -1,17 +1,16 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { ChevronRight, Receipt, Trash2, X } from 'lucide-react-native';
+import { ChevronRight, Receipt } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { getReceiptUri, saveReceiptImage } from '~/services/userAssets';
 
+import { ReceiptViewerModal } from './ReceiptViewerModal';
 import { SummaryRow } from './SummaryRow';
 
 interface ReceiptFieldProps {
@@ -27,19 +26,10 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 8,
   },
-  viewerImage: {
-    flex: 1,
-    width: '100%',
-  },
 });
 
 export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
   const themeColors = useThemeColors();
-  const insets = useSafeAreaInsets();
-  // Fall back to the synchronously-available window metrics so the controls
-  // never tuck under the notch if the in-modal context insets read 0.
-  const topInset = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 12);
-  const bottomInset = Math.max(insets.bottom, initialWindowMetrics?.insets.bottom ?? 0);
   const [viewerVisible, setViewerVisible] = useState(false);
   const fileUri = useMemo(() => getReceiptUri(receiptUri), [receiptUri]);
 
@@ -145,70 +135,16 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
         </View>
       </SummaryRow>
 
-      <ThemeModal
+      <ReceiptViewerModal
         visible={viewerVisible}
-        animationType="fade"
-        transparent
-        onRequestClose={() => setViewerVisible(false)}
-      >
-        {/* Transparent modal with an opaque backdrop — matches the editor's
-            other sheets. An opaque (transparent={false}) modal presented over
-            the editor's own transparentModal was corrupting its safe area on
-            dismiss and shoving the whole screen up. Pad with the app insets so
-            the controls clear the notch; the image gets its own flex region so
-            it never overlaps the close/delete buttons. */}
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: '#000',
-            paddingTop: topInset,
-            paddingBottom: bottomInset,
-          }}
-        >
-          <View className="flex-row items-center justify-between px-5 py-3">
-            <Pressable
-              onPress={() => setViewerVisible(false)}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.close')}
-              hitSlop={8}
-              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-            >
-              <X size={18} color="#FFFFFF" />
-            </Pressable>
-            <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-              {I18n.t('transactions.editor.receipt.label')}
-            </Text>
-            <Pressable
-              onPress={handleRemove}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
-              hitSlop={8}
-              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-            >
-              <Trash2 size={18} color="#FF6B6B" />
-            </Pressable>
-          </View>
-          <View className="flex-1">
-            {fileUri ? (
-              <Image source={{ uri: fileUri }} style={styles.viewerImage} contentFit="contain" />
-            ) : null}
-          </View>
-          <View className="px-5 py-4">
-            <Pressable
-              onPress={() => {
-                setViewerVisible(false);
-                handleAddReceipt();
-              }}
-              accessibilityRole="button"
-              className="items-center rounded-2xl bg-white/15 py-3.5"
-            >
-              <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-                {I18n.t('transactions.editor.receipt.replace')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </ThemeModal>
+        fileUri={fileUri}
+        onClose={() => setViewerVisible(false)}
+        onReplace={() => {
+          setViewerVisible(false);
+          handleAddReceipt();
+        }}
+        onRemove={handleRemove}
+      />
     </>
   );
 }
