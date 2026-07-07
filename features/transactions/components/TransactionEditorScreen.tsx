@@ -213,6 +213,20 @@ const styles = StyleSheet.create({
   panelAmount: {
     fontWeight: '700',
   },
+  actionRow: {
+    flexGrow: 0,
+    maxHeight: 48,
+  },
+  actionRowContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  accountChip: {
+    maxWidth: 150,
+  },
   noteInput: {
     flex: 1,
     fontSize: 16,
@@ -223,10 +237,8 @@ const styles = StyleSheet.create({
   },
   floatingSuggestions: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: '100%',
-    marginBottom: 8,
+    left: 8,
+    right: 8,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
@@ -547,10 +559,18 @@ export function TransactionEditorScreen({
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const initialType = initialValues?.type ?? 'expense';
+  // In create mode start on a real account — the one configured in Quick Entry
+  // (honoured even when Quick Entry itself is disabled), falling back to the
+  // first account so the full editor never opens with no account selected.
+  const quickDefaultAccountId =
+    quickEntryPrefs.defaultAccountId &&
+    accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId)
+      ? quickEntryPrefs.defaultAccountId
+      : (accounts[0]?.id ?? null);
   const initialSingleAccountId =
     initialValues?.accountId ??
     initialAccountId ??
-    (mode === 'create' ? null : (accounts[0]?.id ?? null));
+    (mode === 'create' ? quickDefaultAccountId : (accounts[0]?.id ?? null));
   const initialFromSelectionId =
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null));
   const initialToSelectionId =
@@ -695,6 +715,9 @@ export function TransactionEditorScreen({
   // keyboard lift only needs to cover the gap the keyboard would hide beyond
   // this, so the note clears it without flinging the whole card upward.
   const [belowNoteHeight, setBelowNoteHeight] = useState(0);
+  // Measured height of the note row, so the floating suggestions can be anchored
+  // just above it (rather than overlapping it).
+  const [noteRowHeight, setNoteRowHeight] = useState(0);
   // Currency picker (opened from the numpad toolbar) for expense/income entry.
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
@@ -3401,9 +3424,16 @@ export function TransactionEditorScreen({
           }}
         >
           {/* Action row: account chip + split + currency + sentiment + receipt.
-              Wraps rather than clipping when the expense row gets crowded. */}
+              Scrolls horizontally when the chips (e.g. a long account name) run
+              past the edge instead of wrapping. */}
           {showActionRow ? (
-            <View className="flex-row flex-wrap items-center gap-2 px-4 pt-2.5">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              style={styles.actionRow}
+              contentContainerStyle={styles.actionRowContent}
+            >
               {showAccountChip ? (
                 <Pressable
                   onPress={() => {
@@ -3412,8 +3442,9 @@ export function TransactionEditorScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.account')}
+                  style={styles.accountChip}
                   className={cn(
-                    'h-9 max-w-[46%] flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
                     fieldErrors.account
                       ? 'border-destructive/50 bg-destructive/5'
                       : 'border-border/30 bg-secondary/60',
@@ -3514,13 +3545,13 @@ export function TransactionEditorScreen({
                   )}
                 </Pressable>
               ) : null}
-            </View>
+            </ScrollView>
           ) : null}
 
           {/* Amount + Note — one card split by a divider. Amount sits on the
               left (no label); tapping it brings the pad back. The bottom margin
               doubles as the clean gap above the keyboard when the note is typed. */}
-          <View className="mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
+          <View className="relative mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
             <Pressable
               onPress={handleAmountRowPress}
               accessibilityRole="button"
@@ -3586,45 +3617,14 @@ export function TransactionEditorScreen({
 
             <View className="h-[1px] bg-border/20" />
 
-            {/* Note — focusing it raises the keyboard. The suggestions float
-                above it (absolute) so they never push the amount/note around. */}
-            <View className="relative flex-row items-center gap-2.5 px-4 py-3.5">
-              {noteSuggestionsVisible ? (
-                <View
-                  style={[
-                    styles.floatingSuggestions,
-                    { backgroundColor: themeColors.card, borderColor: themeColors.border },
-                  ]}
-                >
-                  {noteSuggestions.map((suggestion, index) => (
-                    <React.Fragment key={suggestion}>
-                      {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
-                      <Pressable
-                        style={styles.noteSuggestionRow}
-                        onPress={() => {
-                          handleNoteChange(suggestion);
-                          setNoteSuggestions([]);
-                          noteInputRef.current?.blur();
-                          if (mode === 'create') {
-                            const fields = getLatestTransactionFieldsByNote(suggestion);
-                            if (fields) {
-                              if (!categoryId && fields.categoryId)
-                                setCategoryId(fields.categoryId);
-                              if (!accountId && fields.accountId) setAccountId(fields.accountId);
-                              if (!amount && fields.amount != null)
-                                setAmount(String(fields.amount));
-                            }
-                          }
-                        }}
-                      >
-                        <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
-                          {suggestion}
-                        </Text>
-                      </Pressable>
-                    </React.Fragment>
-                  ))}
-                </View>
-              ) : null}
+            {/* Note — focusing it raises the keyboard. */}
+            <View
+              className="flex-row items-center gap-2.5 px-4 py-3.5"
+              onLayout={(event) => {
+                const measured = event.nativeEvent.layout.height;
+                setNoteRowHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
+              }}
+            >
               <FileText size={16} color={themeColors.textMuted} />
               <TextInput
                 ref={noteInputRef}
@@ -3646,6 +3646,48 @@ export function TransactionEditorScreen({
                 ]}
               />
             </View>
+
+            {/* Suggestions float above the note row (absolute, anchored to its
+                measured height) so they never push the amount/note around and
+                never overlap the input. */}
+            {noteSuggestionsVisible ? (
+              <View
+                style={[
+                  styles.floatingSuggestions,
+                  {
+                    bottom: noteRowHeight + 8,
+                    backgroundColor: themeColors.card,
+                    borderColor: themeColors.border,
+                  },
+                ]}
+              >
+                {noteSuggestions.map((suggestion, index) => (
+                  <React.Fragment key={suggestion}>
+                    {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+                    <Pressable
+                      style={styles.noteSuggestionRow}
+                      onPress={() => {
+                        handleNoteChange(suggestion);
+                        setNoteSuggestions([]);
+                        noteInputRef.current?.blur();
+                        if (mode === 'create') {
+                          const fields = getLatestTransactionFieldsByNote(suggestion);
+                          if (fields) {
+                            if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
+                            if (!accountId && fields.accountId) setAccountId(fields.accountId);
+                            if (!amount && fields.amount != null) setAmount(String(fields.amount));
+                          }
+                        }
+                      }}
+                    >
+                      <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                        {suggestion}
+                      </Text>
+                    </Pressable>
+                  </React.Fragment>
+                ))}
+              </View>
+            ) : null}
           </View>
 
           {/* Numpad + Save — everything below the note. On iOS it stays mounted
