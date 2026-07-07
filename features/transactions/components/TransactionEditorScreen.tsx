@@ -1034,6 +1034,11 @@ export function TransactionEditorScreen({
   // the publisher) can push the session synchronously as it navigates.
   const publishSessionRef = useRef<(rows: SplitDraft[], evenly: boolean) => void>(() => {});
 
+  // New split payback rows default to the user's chosen "paid to" account (set
+  // on the Settle Up screen), falling back to the first account so the value is
+  // never empty on a brand-new setup.
+  const defaultPaybackAccountId = settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null;
+
   const buildInitialSplitRows = useCallback((): SplitDraft[] => {
     const numericAmount = Number(amount);
     const total = Number.isFinite(numericAmount) ? numericAmount : 0;
@@ -1053,10 +1058,10 @@ export function TransactionEditorScreen({
         personName: '',
         amount: (portions[1] ?? 0).toFixed(2),
         isSelf: false,
-        paybackAccountId: accountId,
+        paybackAccountId: defaultPaybackAccountId,
       },
     ];
-  }, [accountId, amount]);
+  }, [amount, defaultPaybackAccountId]);
 
   const numericAmountForGate = Number(amount);
   const canOpenSplitBill =
@@ -1204,7 +1209,7 @@ export function TransactionEditorScreen({
     (rows: SplitDraft[], evenly: boolean) => {
       setSplitSession({
         total: Number(amount) || 0,
-        defaultAccountId: accountId,
+        defaultAccountId: defaultPaybackAccountId,
         splits: rows,
         onChange: setSplits,
         splitEvenly: evenly,
@@ -1221,7 +1226,7 @@ export function TransactionEditorScreen({
       });
     },
     [
-      accountId,
+      defaultPaybackAccountId,
       accounts,
       accountGroups,
       amount,

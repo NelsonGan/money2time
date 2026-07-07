@@ -139,6 +139,9 @@ export const settingsTable = sqliteTable('settings', {
   // store (e.g. `payment-qr/9f3c.png`), attached once and composited onto
   // split-bill payback receipts.
   paymentQrUri: text('payment_qr_uri'),
+  // Default account new split-bill payback rows are attributed to (chosen on
+  // the Settle Up screen). Null until the user picks one.
+  defaultPaybackAccountId: text('default_payback_account_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

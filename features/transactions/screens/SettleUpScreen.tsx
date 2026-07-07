@@ -1,12 +1,23 @@
 import * as ImagePicker from 'expo-image-picker';
-import { ChevronRight, ImagePlus, QrCode } from 'lucide-react-native';
+import { ChevronRight, ImagePlus, QrCode, Wallet } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import {
+  AccountLogo,
+  AccountPickerSheet,
+  CategoryEmoji,
+  SettingsHeader,
+  SettingsPageLayout,
+  Text,
+} from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import {
+  useSettleUpByTransaction,
+  useSettleUpSummary,
+} from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -17,10 +28,6 @@ import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
-import {
-  useSettleUpByTransaction,
-  useSettleUpSummary,
-} from '~/features/transactions/lib/useSettleUpSummary';
 
 type SettleUpTab = 'people' | 'transactions';
 
@@ -55,13 +62,33 @@ function personInitial(person: PersonDebt): string {
 export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, accounts, accountGroups, getAccountById } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
+  const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
+
+  // The effective default is never empty: fall back to the first account so a
+  // brand-new user still gets a sensible "paid to" on their first split.
+  const defaultPaybackAccountId = useMemo(
+    () => settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null,
+    [settings.defaultPaybackAccountId, accounts],
+  );
+  const defaultPaybackAccount = defaultPaybackAccountId
+    ? getAccountById(defaultPaybackAccountId)
+    : null;
+
+  const handlePickDefaultAccount = useCallback(
+    (accountId: string) => {
+      void triggerHaptic('selection');
+      updateSettings({ defaultPaybackAccountId: accountId });
+      setAccountPickerVisible(false);
+    },
+    [updateSettings],
+  );
 
   const formatReporting = useCallback(
     (value: number) => formatCurrency(value, settings.currencySymbol),
@@ -277,6 +304,44 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
           </View>
         )}
 
+        {/* Default paid-to account: new splits pre-fill their payback with it */}
+        <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+              <Wallet size={20} color={themeColors.primary} />
+            </View>
+            <View className="flex-1">
+              <Text variant="bodyStrong">
+                {I18n.t('transactions.settleUp.default_account_title')}
+              </Text>
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.default_account_subtitle')}
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setAccountPickerVisible(true);
+            }}
+            className="mt-4 flex-row items-center justify-between rounded-2xl bg-secondary/50 px-3.5 py-3 active:opacity-70"
+          >
+            <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+              {defaultPaybackAccount ? (
+                <AccountLogo
+                  logoId={defaultPaybackAccount.logoId}
+                  type={defaultPaybackAccount.type}
+                  size={22}
+                />
+              ) : null}
+              <Text variant="body" numberOfLines={1}>
+                {defaultPaybackAccount?.name ?? I18n.t('common.no_account')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color={themeColors.textMuted} />
+          </Pressable>
+        </View>
+
         {/* Payment QR card, attached once and shared onto every receipt */}
         <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
           <View className="flex-row items-center gap-3">
@@ -326,6 +391,15 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
           )}
         </View>
       </ScrollView>
+
+      <AccountPickerSheet
+        visible={accountPickerVisible}
+        onClose={() => setAccountPickerVisible(false)}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={defaultPaybackAccountId}
+        onSelect={handlePickDefaultAccount}
+      />
     </SettingsPageLayout>
   );
 }
