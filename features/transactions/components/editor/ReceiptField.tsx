@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, Receipt, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
@@ -142,12 +142,14 @@ export function ReceiptField({ receiptUri, onChange }: ReceiptFieldProps) {
 
       <ThemeModal
         visible={viewerVisible}
-        animationType="fade"
-        transparent={Platform.OS === 'ios'}
+        animationType="slide"
+        transparent={false}
+        presentationStyle="fullScreen"
+        statusBarTranslucent
         onRequestClose={() => setViewerVisible(false)}
       >
         <View className="flex-1 bg-black">
-          <SafeAreaView className="flex-1">
+          <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
             <View className="flex-row items-center justify-between px-5 py-3">
               <Pressable
                 onPress={() => setViewerVisible(false)}

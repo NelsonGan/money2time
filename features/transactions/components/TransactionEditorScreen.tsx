@@ -1691,11 +1691,11 @@ export function TransactionEditorScreen({
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
-  // Receipt attach now lives in the header top-right, so it is available
-  // regardless of numpad mode (but only for money-in/out types).
-  const showReceiptButton = type === 'expense' || type === 'income';
+  // Receipt attach rides at the right end of the numpad toolbar (money-in/out).
+  const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   const showNumpadToolbar =
-    useStickyNumpad && (showSplitButton || showCurrencyButton || showSentimentButton);
+    useStickyNumpad &&
+    (showSplitButton || showCurrencyButton || showSentimentButton || showReceiptButton);
   const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
   // Compact 4-row pad with flat, short keys.
   const numpadBodyHeight = Math.round(Math.min(224, Math.max(168, windowHeight * 0.24)));
@@ -2965,24 +2965,6 @@ export function TransactionEditorScreen({
             {/* In sticky mode the save action lives below the numpad; here we
                 keep only Delete (edit) and the recurring editor's Save. */}
             <View className="flex-row items-center gap-2">
-              {showReceiptButton ? (
-                <Pressable
-                  onPress={handleAddReceipt}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
-                  className={cn(
-                    'h-10 w-10 items-center justify-center rounded-full border active:opacity-70',
-                    receiptUri
-                      ? 'border-primary/40 bg-primary/15'
-                      : 'border-border/30 bg-secondary',
-                  )}
-                >
-                  <Camera
-                    size={16}
-                    color={receiptUri ? themeColors.primary : themeColors.textSoft}
-                  />
-                </Pressable>
-              ) : null}
               {mode === 'edit' && onDelete ? (
                 <Pressable
                   onPress={onDelete}
@@ -3130,6 +3112,27 @@ export function TransactionEditorScreen({
                   >
                     <SentimentIcon sentiment={sentiment} size={22} />
                   </Pressable>
+                ) : null}
+                {showReceiptButton ? (
+                  <>
+                    <View className="flex-1" />
+                    <Pressable
+                      onPress={handleAddReceipt}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('transactions.editor.receipt.label')}
+                      className={cn(
+                        'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
+                        receiptUri
+                          ? 'border-primary/40 bg-primary/15'
+                          : 'border-border/30 bg-secondary/60',
+                      )}
+                    >
+                      <Camera
+                        size={16}
+                        color={receiptUri ? themeColors.primary : themeColors.textMuted}
+                      />
+                    </Pressable>
+                  </>
                 ) : null}
               </View>
             ) : null
