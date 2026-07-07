@@ -3613,7 +3613,7 @@ export function TransactionEditorScreen({
                   )}
                   style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
                 >
-                  <Text className="text-[14px]">🤝</Text>
+                  <CategoryEmoji icon="coins-checkmark" size={16} />
                   <Text variant="caption" numberOfLines={1}>
                     {I18n.t('transactions.editor.split.button_short')}
                   </Text>
@@ -3655,9 +3655,12 @@ export function TransactionEditorScreen({
                   )}
                 >
                   {receiptUri ? (
-                    <Text variant="caption" className="font-medium text-primary">
-                      {I18n.t('transactions.editor.receipt.label')}
-                    </Text>
+                    <>
+                      <CategoryEmoji icon="invoice" size={15} />
+                      <Text variant="caption" className="font-medium text-primary">
+                        {I18n.t('transactions.editor.receipt.label')}
+                      </Text>
+                    </>
                   ) : (
                     <Camera size={16} color={themeColors.textMuted} />
                   )}
