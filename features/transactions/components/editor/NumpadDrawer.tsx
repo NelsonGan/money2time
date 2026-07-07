@@ -14,7 +14,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { NumpadPanel } from './NumpadPanel';
 
 /** Height of the always-visible grab handle strip (the peek when collapsed). */
-export const NUMPAD_HANDLE_HEIGHT = 30;
+export const NUMPAD_HANDLE_HEIGHT = 22;
 
 interface NumpadDrawerProps {
   /** Whether the drawer is snapped open. Controlled by the parent. */

@@ -2,8 +2,10 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Calendar,
+  ChevronDown,
   ChevronLeft,
   Clock,
+  Coins,
   CreditCard,
   FileText,
   Hash,
@@ -46,6 +48,7 @@ import {
   Button,
   CategoryEmoji,
   CategoryPickerSheet,
+  CurrencyPickerSheet,
   SegmentedToggle,
   Text,
 } from '~/components/ui';
@@ -547,6 +550,8 @@ export function TransactionEditorScreen({
   // Whether the sticky numpad drawer is pulled open. Starts open so the user
   // can type the amount immediately without tapping the field first.
   const [numpadExpanded, setNumpadExpanded] = useState(true);
+  // Currency picker (opened from the numpad toolbar) for expense/income entry.
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
   const hasInitialSplits = !!initialSplits && initialSplits.length > 0;
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
@@ -1494,11 +1499,14 @@ export function TransactionEditorScreen({
     showToolZone && activeField === 'amount' ? Math.min(0.54, summaryFlex + 0.05) : summaryFlex;
   const recurringToolZonePadding =
     isRecurringEditor && showToolZone ? Math.max(520, Math.round(windowHeight * 0.62)) : 0;
-  // Sticky drawer geometry. The pad body is a fixed slice of the screen; a
-  // currency-chip header rides above it for multi-currency expense/income.
-  const showCurrencyChips =
-    useStickyNumpad && !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
-  const numpadHeaderHeight = showCurrencyChips ? 53 : 0;
+  // Sticky drawer geometry + toolbar. A compact button row (split / currency /
+  // bulk) rides above the pad; its buttons appear only when relevant.
+  const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
+  const showCurrencyButton =
+    !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
+  const showNumpadToolbar =
+    useStickyNumpad && (showSplitButton || showCurrencyButton || showBulkToggle);
+  const numpadHeaderHeight = showNumpadToolbar ? 48 : 0;
   const numpadBodyHeight = Math.round(Math.min(340, Math.max(248, windowHeight * 0.4)));
   const summaryBottomPadding = isRecurringEditor
     ? showToolZone
@@ -1979,37 +1987,6 @@ export function TransactionEditorScreen({
                   </Text>
                 ) : null}
               </View>
-              {showBulkToggle ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    updateQuickEntryPrefs({ bulkCreateEnabled: !bulkCreateEnabled });
-                  }}
-                  accessibilityRole="switch"
-                  accessibilityState={{ checked: bulkCreateEnabled }}
-                  accessibilityLabel={I18n.t('transactions.editor.bulk_mode')}
-                  className={cn(
-                    'flex-row items-center gap-1.5 px-2.5 h-8 rounded-full border',
-                    bulkCreateEnabled
-                      ? 'bg-primary/15 border-primary/40'
-                      : 'bg-secondary/60 border-border/30',
-                  )}
-                >
-                  <Layers
-                    size={14}
-                    color={bulkCreateEnabled ? themeColors.primary : themeColors.textMuted}
-                  />
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      'text-[12px]',
-                      bulkCreateEnabled ? 'text-primary' : 'text-muted-foreground',
-                    )}
-                  >
-                    {I18n.t('transactions.editor.bulk_mode')}
-                  </Text>
-                </Pressable>
-              ) : null}
             </View>
             {mode === 'edit' && onDelete ? (
               <View className="flex-row items-center gap-2">
@@ -2459,34 +2436,7 @@ export function TransactionEditorScreen({
                       ) : null}
                     </View>
 
-                    {/* Split Bill — full-width action below the sentiment picker */}
-                    {!hideSplitMode && type === 'expense' && !recurringOptions ? (
-                      <Pressable
-                        onPress={handleOpenSplitBill}
-                        disabled={!canOpenSplitBill}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
-                        className={cn(
-                          'mt-3 flex-row items-center justify-center gap-2 h-12 rounded-2xl border',
-                          splitMode && splits.some((s) => !s.isSelf)
-                            ? 'bg-primary/15 border-primary/40'
-                            : 'bg-secondary/60 border-border/30',
-                        )}
-                        style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
-                      >
-                        <Text className="text-[18px]">🤝</Text>
-                        <Text variant="body">
-                          {I18n.t('transactions.editor.split.button_label')}
-                        </Text>
-                        {splitBillsUnpaidCount > 0 ? (
-                          <View className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-destructive items-center justify-center">
-                            <Text className="text-white text-[11px] font-bold leading-[14px]">
-                              {splitBillsUnpaidCount}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </Pressable>
-                    ) : null}
+                    {/* Split Bill now lives in the numpad drawer toolbar. */}
 
                     {/* Recurring options (traditional form inputs, secondary) */}
                     {recurringOptions ? (
@@ -2835,48 +2785,82 @@ export function TransactionEditorScreen({
           onValueChange={handleAmountValueChange}
           onConfirm={handleAmountConfirm}
           header={
-            showCurrencyChips ? (
-              <>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                  style={{ flexGrow: 0, maxHeight: 52 }}
-                  contentContainerStyle={{
-                    gap: 8,
-                    paddingHorizontal: 16,
-                    paddingVertical: 10,
-                    alignItems: 'center',
-                  }}
-                >
-                  {enabledCurrencies.map((code) => {
-                    const selected = code === entryCurrency;
-                    return (
-                      <Pressable
-                        key={code}
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setEntryCurrency(code);
-                        }}
-                        className={cn(
-                          'px-3.5 py-1.5 rounded-full border',
-                          selected
-                            ? 'bg-primary/15 border-primary/50'
-                            : 'bg-secondary/40 border-transparent',
-                        )}
-                      >
-                        <Text
-                          variant="caption"
-                          className={selected ? 'text-primary' : 'text-muted-foreground'}
-                        >
-                          {code}
+            showNumpadToolbar ? (
+              <View
+                className="flex-row items-center gap-2 px-4"
+                style={{ height: numpadHeaderHeight }}
+              >
+                {showSplitButton ? (
+                  <Pressable
+                    onPress={handleOpenSplitBill}
+                    disabled={!canOpenSplitBill}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('transactions.editor.split.button_label')}
+                    className={cn(
+                      'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                      splitMode && splits.some((s) => !s.isSelf)
+                        ? 'bg-primary/15 border-primary/40'
+                        : 'bg-secondary/60 border-border/30',
+                    )}
+                    style={{ opacity: canOpenSplitBill ? 1 : 0.4 }}
+                  >
+                    <Text className="text-[14px]">🤝</Text>
+                    <Text variant="caption" numberOfLines={1}>
+                      {I18n.t('transactions.editor.split.button_label')}
+                    </Text>
+                    {splitBillsUnpaidCount > 0 ? (
+                      <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1">
+                        <Text className="text-white text-[10px] font-bold leading-[13px]">
+                          {splitBillsUnpaidCount}
                         </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-                <View className="h-[1px] bg-border/40" />
-              </>
+                      </View>
+                    ) : null}
+                  </Pressable>
+                ) : null}
+                {showCurrencyButton ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setCurrencyPickerVisible(true);
+                    }}
+                    accessibilityRole="button"
+                    className="h-9 flex-row items-center gap-1.5 rounded-full border border-border/30 bg-secondary/60 px-3 active:opacity-70"
+                  >
+                    <Coins size={14} color={themeColors.textMuted} />
+                    <Text variant="caption">{entryCurrency}</Text>
+                    <ChevronDown size={12} color={themeColors.textMuted} />
+                  </Pressable>
+                ) : null}
+                <View className="flex-1" />
+                {showBulkToggle ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      updateQuickEntryPrefs({ bulkCreateEnabled: !bulkCreateEnabled });
+                    }}
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: bulkCreateEnabled }}
+                    accessibilityLabel={I18n.t('transactions.editor.bulk_mode')}
+                    className={cn(
+                      'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                      bulkCreateEnabled
+                        ? 'bg-primary/15 border-primary/40'
+                        : 'bg-secondary/60 border-border/30',
+                    )}
+                  >
+                    <Layers
+                      size={14}
+                      color={bulkCreateEnabled ? themeColors.primary : themeColors.textMuted}
+                    />
+                    <Text
+                      variant="caption"
+                      className={bulkCreateEnabled ? 'text-primary' : 'text-muted-foreground'}
+                    >
+                      {I18n.t('transactions.editor.bulk_mode')}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
             ) : null
           }
         />
@@ -2947,6 +2931,18 @@ export function TransactionEditorScreen({
         allowParentSelection
         selectedCategoryId={categoryId}
         onSelect={handleCategorySelect}
+      />
+      <CurrencyPickerSheet
+        visible={currencyPickerVisible}
+        onClose={() => setCurrencyPickerVisible(false)}
+        selectedCode={entryCurrency}
+        restrictToCodes={enabledCurrencies}
+        title={I18n.t('transactions.editor.amount')}
+        onSelect={(code) => {
+          void triggerHaptic('selection');
+          setEntryCurrency(code);
+          setCurrencyPickerVisible(false);
+        }}
       />
       <DatePickerModal
         visible={activeField === 'date'}
