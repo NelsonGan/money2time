@@ -1,24 +1,40 @@
-# Budgeting — Design & Implementation Plan
+# Budgeting — Design & Implementation Reference
 
-Status: **Implemented** (same branch/PR) · Branch: `claude/budgeting-feature-plan-sez16k`
+Status: **Shipped.** This document began as the design plan; the sections
+below have been reconciled with the code that actually shipped. Where the plan
+and the code disagree, this doc now reflects the code — but for anything not
+spelled out here, **trust the code**.
 
-Everything below is built except the news feature announcement (release-time
-follow-up); native widget code needs a dev-client prebuild.
+## What shipped vs. the original plan
 
-> **Where the shipped code diverges from this plan** (the plan below is kept
-> as-written; trust the code):
->
-> - **Navigation**: no budget routes live in the settings stack. All budget
->   screens are **root-stack** routes (`SettingsBudget`,
->   `SettingsBudgetTemplates`, `BudgetTemplateEditor`, `BudgetMonthEditor`,
->   `CategoryAllocation` in `navigation/rootStack.ts`), and the month view is
->   primarily an **embedded Insights page**: `BudgetPagerView` renders inside
->   `InsightsScreen` (picked from the insights type menu), while the
->   standalone `BudgetScreen` remains only for the `money2time://budget`
->   widget deep link. The Settings tile was removed.
-> - `reorderBudgetTemplates` was cut (no reorder UI shipped).
-> - Back-populate skips months that **ever had** a budget (tombstones), not
->   just live ones.
+The data model, frozen-month semantics, tombstone/auto-create rules, and the
+pure summary math all shipped as designed. The notable differences from the
+first-draft plan:
+
+- **Navigation — the month view is an embedded Insights page, not a Settings
+  screen.** `BudgetPagerView` (`features/budget/screens/BudgetScreen.tsx`)
+  renders inside `InsightsScreen` as a full-page takeover, chosen from the
+  insights **type menu** (`insightType === 'budget'`). No budget routes live
+  in the settings stack and the Settings tile was never shipped. The remaining
+  budget screens are **root-stack** routes (`navigation/rootStack.ts`):
+  `BudgetTemplateEditor`, `BudgetMonthEditor`, `BudgetCategoryAllocation`,
+  `SettingsBudgetTemplates`. The standalone `BudgetPagerView` also backs the
+  `money2time://budget` widget deep link.
+- **Per-month editing shipped** (was a v1 non-goal). `MonthlyBudgetEditorScreen`
+  + `BudgetMonthEditor` route allow editing an existing month's budget or
+  creating a **one-off custom budget** for a month with no live budget
+  (`updateMonthlyBudget`, `createCustomMonthlyBudget`).
+- **Template options added** (migration `042`): a template carries an optional
+  **emoji** and a **count-unbudgeted** toggle (whether spend in categories with
+  no budget line counts toward the month total). Both are frozen onto the
+  monthly-budget row at creation, like the rest of the snapshot.
+- **`reorderBudgetTemplates` was cut** — no reorder UI shipped.
+- **Back-populate skips months that _ever_ had a budget** (tombstones),
+  not just currently-live ones.
+- **The news announcement shipped** — `features/news/announcements/007_budget_items.ts`
+  (a combined budget + items entry) plus `BudgetShowcase`.
+
+Native widget code still requires a dev-client / prebuild rebuild to run.
 
 Monthly, expense-only budgets built from reusable **budget templates**. A
 template defines a total budget and how it is allocated across expense
@@ -153,8 +169,10 @@ and a **large "Budget Breakdown"**.
 
 ### Non-goals (v1)
 
-- No per-month manual editing of an existing budget row (delete + recreate
-  from a template covers it; direct month editing can come later).
+- ~~No per-month manual editing of an existing budget row.~~ **Shipped after
+  the initial plan** — `MonthlyBudgetEditorScreen` edits an existing month's
+  frozen budget and can create a one-off custom budget for a month with no
+  live budget.
 - No weekly/custom-period budgets, no income targets, no rollover of unspent
   amounts between months.
 - Budget amounts are entered and stored in the reporting currency; changing
@@ -167,8 +185,12 @@ and a **large "Budget Breakdown"**.
 
 ## 2. Data model
 
-Migration `041_budgets.ts` (append-only, next after `039`), four tables, all
-with the standard `created_at / updated_at / deleted_at` soft-delete columns:
+Migration `041_budgets.ts` creates four tables, all with the standard
+`created_at / updated_at / deleted_at` soft-delete columns. A follow-up
+migration `042_budget_template_options.ts` adds template personalization:
+`budget_templates.emoji` and `budget_templates.count_unbudgeted` (1 = spend in
+categories with no budget line counts toward the month total), both frozen onto
+`monthly_budgets` at creation (`template_emoji`, `count_unbudgeted`):
 
 ```sql
 CREATE TABLE budget_templates (
@@ -344,8 +366,9 @@ must not live in `TransactionsContext`):
 - Ops: `createBudgetTemplate` (with optional
   `{ duplicateFromTemplateId, backPopulate }`), `updateBudgetTemplate`,
   `deleteBudgetTemplate`, `setDefaultBudgetTemplate`,
-  `reorderBudgetTemplates`, `createMonthlyBudget(month, templateId)`,
-  `deleteMonthlyBudget(id)`.
+  `createMonthlyBudget(month, templateId)`, `createCustomMonthlyBudget`,
+  `updateMonthlyBudget`, `deleteMonthlyBudget(id)`. (`reorderBudgetTemplates`
+  was planned but cut — no reorder UI shipped.)
 - Scoped refresh: **`refreshBudgets`** (loads both tables), passed to
   `runMutation` via `options.refresh` — never `refreshAll()`. Category
   deletion adds `refreshBudgets()` to its existing
@@ -359,8 +382,9 @@ must not live in `TransactionsContext`):
 
 ### 4.3 Month-rollover auto-create
 
-A pure helper `ensureCurrentMonthBudget({ monthKey, templates, hasEverExisted })`
-decides create-or-skip; AppContext calls it in the **same load path that runs
+A pure helper (shipped as `pickAutoCreateTemplate` in
+`features/budget/lib/budgetMath.ts`) decides create-or-skip from the templates
++ "ever existed" check; AppContext calls it in the **same load path that runs
 `runDueTransactions`** (initial `refreshAll` / load), so it fires on every cold
 start and on the restore/import/reset paths that already funnel through
 `refreshAll` — and **after every template create/save**, so the first template
@@ -397,10 +421,8 @@ Also here: `computeBackPopulateRange(transactions, existingLiveMonths, now)`
 → `{ months: string[], firstMonthKey, lastMonthKey } | null` used by both the
 template-editor UI copy and the actual back-populate write.
 
-`useValueWhileTabVisible()` is **not** needed for the Budget screen (it's a
-settings-stack screen, always "visible" when mounted), but the summary is
-memoized keyed on `useTransactions().transactions` + `monthlyBudgets`, per the
-identity-stability rule in CLAUDE.md.
+The month summary is memoized keyed on `useTransactions().transactions` +
+`monthlyBudgets`, per the identity-stability rule in CLAUDE.md.
 
 ---
 
@@ -408,19 +430,30 @@ identity-stability rule in CLAUDE.md.
 
 ### 5.1 Navigation & entry points
 
-- **Settings tile**: `SettingsGridTile` in the Money section of
-  `SettingsScreen` (icon: Lucide `PiggyBank` or `Target`), label
-  `settings.budget` → navigates within the settings stack (same wiring as
-  Items).
-- **Settings stack** (`navigation/settingsStack.ts`): `Budget: undefined`
-  (month view) and `BudgetTemplates: undefined` (template list).
-- **Root stack** (`navigation/rootStack.ts`): `BudgetTemplateEditor:
-{ templateId?: string; duplicateFromId?: string } | undefined` — full-screen
-  editor reachable from anywhere (template list, empty states), like
-  `ItemEditor`.
-- Feature folder: `features/budget/` with `screens/`, `components/`, `lib/`.
+> Reconciled with the shipped code (the original plan put the month view in the
+> settings stack behind a Settings tile; neither shipped).
 
-### 5.2 `BudgetScreen` (month view, settings stack)
+- **Entry point**: the **Insights type menu**. Budget is a first-class insight
+  type (`insightType === 'budget'`); selecting it renders `BudgetPagerView`
+  inside `InsightsScreen` as a full-page takeover with its own month pager (no
+  period/account filters). There is no Settings tile.
+- **Root stack** (`navigation/rootStack.ts`):
+  - `BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined`
+    — full-screen template editor reachable from anywhere.
+  - `BudgetMonthEditor: { budgetId: string } | { createForMonth: string }` —
+    edit an existing month's budget or create a one-off custom budget.
+  - `BudgetCategoryAllocation: undefined` — per-category allocation editor; it
+    rides the `categoryAllocationBridge` module bridge rather than route params.
+  - `SettingsBudgetTemplates: undefined` — template manager, opened from the
+    Insights budget header.
+- **Deep link**: `money2time://budget` (`services/deepLinks.ts`) routes to the
+  standalone budget view, which is what the widgets link into.
+- Feature folder: `features/budget/` with `screens/`, `components/`
+  (`AllocationEditor`, `BudgetTemplatePickerSheet`, `EmojiPickerSheet`),
+  `hooks/` (`useAllocationDraft`), and `lib/` (`budgetMath`,
+  `categoryAllocationBridge`, `format`).
+
+### 5.2 `BudgetPagerView` (month view, embedded in `InsightsScreen`)
 
 - Header: month label + chevrons, plus a small "Templates" affordance
   (gear/list icon) → `BudgetTemplates`.
@@ -437,7 +470,7 @@ identity-stability rule in CLAUDE.md.
   none → route to `BudgetTemplateEditor`.
 - Haptics on create/delete (`triggerHaptic('success' | 'warning')`).
 
-### 5.3 `BudgetTemplatesScreen` (settings stack)
+### 5.3 `BudgetTemplatesScreen` (root stack — `SettingsBudgetTemplates`)
 
 - List of templates: name, total, allocation count, **Default** radio/badge —
   tapping a non-default row's radio calls `setDefaultBudgetTemplate`.
@@ -473,8 +506,8 @@ Two-phase single screen (matches the "total first, then allocate" requirement):
 
 - All new strings under a `budget.*` namespace in `en.ts`, propagated to all
   23 locales via the `add-i18n-string` skill (parity test enforces).
-- A `features/news/announcements/` entry + `BudgetShowcase` component for the
-  feature announcement (existing pattern).
+- Shipped: `features/news/announcements/007_budget_items.ts` (a combined budget
+  + items announcement) and the `BudgetShowcase` component.
 
 ---
 
