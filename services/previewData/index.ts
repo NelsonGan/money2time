@@ -11,6 +11,7 @@ import { malaysianZhProfile } from './profiles/malaysianZh';
 import { seedProfile } from './seed';
 import type { PreviewProfile, PreviewSeedProfile, PreviewSeedSummary } from './shared';
 
+export { preparePreviewReceipt } from './receipts';
 export { wageConfigForMonthsAgo } from './seed';
 export type { PreviewSeedProfile, PreviewSeedSummary } from './shared';
 export { CATEGORY_BLUEPRINT } from './shared';
@@ -22,6 +23,9 @@ export const PREVIEW_PROFILES: Record<PreviewSeedProfile, PreviewProfile> = {
   malaysian_zh: malaysianZhProfile,
 };
 
-export function seedPreviewData(profileName: PreviewSeedProfile): PreviewSeedSummary {
-  return seedProfile(profileName, PREVIEW_PROFILES[profileName]);
+export function seedPreviewData(
+  profileName: PreviewSeedProfile,
+  receiptRelativePath?: string | null,
+): PreviewSeedSummary {
+  return seedProfile(profileName, PREVIEW_PROFILES[profileName], receiptRelativePath);
 }
