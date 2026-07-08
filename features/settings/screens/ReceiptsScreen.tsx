@@ -241,10 +241,11 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
           {item.tiles.map((tile) => {
             const displayValue = getDisplayValueForTransaction(tile.transaction);
             const isIncome = tile.transaction.type === 'income';
-            // Expenses render as a negative amount (no forced "+" sign); income positive.
+            // No forced sign: only genuinely negative amounts show a "-"; color
+            // (red expense / mint income) carries the direction otherwise.
             const amountText = isTimeMode
               ? formatHours(displayValue)
-              : formatAmount(isIncome ? Math.abs(displayValue) : -Math.abs(displayValue), settings);
+              : formatAmount(displayValue, settings);
             return (
               <View key={tile.transaction.id} className="flex-1">
                 <ReceiptCard
