@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Trash2, X } from 'lucide-react-native';
+import { ImageOff, Trash2, X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -78,10 +78,14 @@ export function ReceiptViewerModal({
             <Trash2 size={18} color="#FF6B6B" />
           </Pressable>
         </View>
-        <View className="flex-1">
+        <View className="flex-1 items-center justify-center">
           {fileUri ? (
             <Image source={{ uri: fileUri }} style={styles.viewerImage} contentFit="contain" />
-          ) : null}
+          ) : (
+            // The file is missing on disk — show a placeholder rather than a
+            // blank screen so Replace/Remove are still discoverable.
+            <ImageOff size={48} color="rgba(255,255,255,0.5)" />
+          )}
         </View>
         <View className="px-5 py-4">
           <Pressable

@@ -1701,6 +1701,15 @@ const ru = {
     cta: 'Сделать копию в облаке',
     dismiss: 'Может, позже',
   },
+  receipts: {
+    title: 'Чеки',
+    view_transaction: 'Открыть операцию',
+    view_receipt: 'Показать чек',
+    image_missing: 'Изображение недоступно',
+    empty_title: 'Чеков пока нет',
+    empty_message: 'Прикрепите чек к операции, чтобы увидеть его здесь.',
+    no_matches: 'Нет чеков, соответствующих запросу.',
+  },
   albums: {
     location: {
       label: 'Местоположение',

@@ -1708,6 +1708,15 @@ const id = {
     cta: 'Cadangkan ke cloud',
     dismiss: 'Nanti saja',
   },
+  receipts: {
+    title: 'Struk',
+    view_transaction: 'Lihat transaksi',
+    view_receipt: 'Lihat struk',
+    image_missing: 'Gambar tidak tersedia',
+    empty_title: 'Belum ada struk',
+    empty_message: 'Lampirkan struk ke transaksi untuk melihatnya di sini.',
+    no_matches: 'Tidak ada struk yang cocok dengan pencarian Anda.',
+  },
   albums: {
     location: {
       label: 'Lokasi',

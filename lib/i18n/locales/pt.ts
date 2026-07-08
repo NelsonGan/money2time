@@ -1706,6 +1706,15 @@ const pt = {
     cta: 'Fazer backup na nuvem',
     dismiss: 'Talvez depois',
   },
+  receipts: {
+    title: 'Recibos',
+    view_transaction: 'Ver transação',
+    view_receipt: 'Ver recibo',
+    image_missing: 'Imagem indisponível',
+    empty_title: 'Ainda não há recibos',
+    empty_message: 'Anexe um recibo a uma transação para vê-lo aqui.',
+    no_matches: 'Nenhum recibo corresponde à sua pesquisa.',
+  },
   albums: {
     location: {
       label: 'Localização',

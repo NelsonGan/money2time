@@ -39,6 +39,7 @@ export type SettingsStackParamList = {
   ShareAndEarn: undefined;
   QuickEntrySettings: undefined;
   AppLock: undefined;
+  Receipts: undefined;
   WidgetPreviews: undefined;
 };
 

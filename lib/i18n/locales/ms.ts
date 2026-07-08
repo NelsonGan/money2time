@@ -1703,6 +1703,15 @@ const ms = {
     cta: 'Sandar ke awan',
     dismiss: 'Mungkin nanti',
   },
+  receipts: {
+    title: 'Resit',
+    view_transaction: 'Lihat transaksi',
+    view_receipt: 'Lihat resit',
+    image_missing: 'Imej tidak tersedia',
+    empty_title: 'Tiada resit lagi',
+    empty_message: 'Lampirkan resit pada transaksi untuk melihatnya di sini.',
+    no_matches: 'Tiada resit sepadan dengan carian anda.',
+  },
   albums: {
     location: {
       label: 'Lokasi',

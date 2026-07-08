@@ -23,6 +23,7 @@ import {
   Package,
   Palette,
   Pencil,
+  PiggyBank,
   ReceiptText,
   RefreshCcw,
   Repeat2,
@@ -118,6 +119,8 @@ interface SettingsScreenProps {
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
   onOpenAppLock: () => void;
+  onOpenReceipts: () => void;
+  onOpenBudget: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
@@ -145,6 +148,8 @@ export function SettingsScreen({
   onOpenStatementImport,
   onOpenQuickEntry,
   onOpenAppLock,
+  onOpenReceipts,
+  onOpenBudget,
   onOpenProPaywall,
   onOpenProManagement,
   onOpenShareAndEarn,
@@ -697,6 +702,16 @@ export function SettingsScreen({
                 icon={<Images size={20} color={themeColors.primary} />}
                 label={I18n.t('albums.title')}
                 onPress={onOpenAlbums}
+              />
+              <SettingsGridTile
+                icon={<ReceiptText size={20} color={themeColors.primary} />}
+                label={I18n.t('receipts.title')}
+                onPress={onOpenReceipts}
+              />
+              <SettingsGridTile
+                icon={<PiggyBank size={20} color={themeColors.primary} />}
+                label={I18n.t('budget.title')}
+                onPress={onOpenBudget}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile

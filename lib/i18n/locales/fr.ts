@@ -1718,6 +1718,15 @@ const fr = {
     cta: 'Sauvegarder dans le cloud',
     dismiss: 'Plus tard',
   },
+  receipts: {
+    title: 'Reçus',
+    view_transaction: 'Voir la transaction',
+    view_receipt: 'Voir le reçu',
+    image_missing: 'Image indisponible',
+    empty_title: 'Aucun reçu pour le moment',
+    empty_message: 'Joignez un reçu à une transaction pour le voir ici.',
+    no_matches: 'Aucun reçu ne correspond à votre recherche.',
+  },
   albums: {
     location: {
       label: 'Lieu',

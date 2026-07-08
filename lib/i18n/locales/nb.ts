@@ -1698,6 +1698,15 @@ const nb = {
     cta: 'Sikkerhetskopier til skyen',
     dismiss: 'Kanskje senere',
   },
+  receipts: {
+    title: 'Kvitteringer',
+    view_transaction: 'Vis transaksjon',
+    view_receipt: 'Vis kvittering',
+    image_missing: 'Bilde er utilgjengelig',
+    empty_title: 'Ingen kvitteringer ennå',
+    empty_message: 'Legg ved en kvittering på en transaksjon for å se den her.',
+    no_matches: 'Ingen kvitteringer samsvarer med søket ditt.',
+  },
   albums: {
     location: {
       label: 'Sted',

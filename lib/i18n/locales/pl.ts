@@ -1704,6 +1704,15 @@ const pl = {
     cta: 'Utwórz kopię w chmurze',
     dismiss: 'Może później',
   },
+  receipts: {
+    title: 'Paragony',
+    view_transaction: 'Zobacz transakcję',
+    view_receipt: 'Zobacz paragon',
+    image_missing: 'Obraz niedostępny',
+    empty_title: 'Brak paragonów',
+    empty_message: 'Dołącz paragon do transakcji, aby zobaczyć go tutaj.',
+    no_matches: 'Żaden paragon nie pasuje do wyszukiwania.',
+  },
   albums: {
     location: {
       label: 'Lokalizacja',

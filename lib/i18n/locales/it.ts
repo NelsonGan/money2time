@@ -1708,6 +1708,15 @@ const it = {
     cta: 'Esegui il backup nel cloud',
     dismiss: 'Forse più tardi',
   },
+  receipts: {
+    title: 'Ricevute',
+    view_transaction: 'Vedi transazione',
+    view_receipt: 'Vedi ricevuta',
+    image_missing: 'Immagine non disponibile',
+    empty_title: 'Ancora nessuna ricevuta',
+    empty_message: 'Allega una ricevuta a una transazione per vederla qui.',
+    no_matches: 'Nessuna ricevuta corrisponde alla tua ricerca.',
+  },
   albums: {
     location: {
       label: 'Luogo',

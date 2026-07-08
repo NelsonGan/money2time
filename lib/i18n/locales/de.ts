@@ -1722,6 +1722,15 @@ const de = {
     cta: 'In der Cloud sichern',
     dismiss: 'Vielleicht später',
   },
+  receipts: {
+    title: 'Belege',
+    view_transaction: 'Transaktion anzeigen',
+    view_receipt: 'Beleg anzeigen',
+    image_missing: 'Bild nicht verfügbar',
+    empty_title: 'Noch keine Belege',
+    empty_message: 'Füge einer Transaktion einen Beleg hinzu, um ihn hier zu sehen.',
+    no_matches: 'Keine Belege entsprechen deiner Suche.',
+  },
   albums: {
     location: {
       label: 'Ort',
