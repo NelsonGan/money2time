@@ -1695,6 +1695,15 @@ const sv = {
     cta: 'Säkerhetskopiera till molnet',
     dismiss: 'Kanske senare',
   },
+  receipts: {
+    title: 'Kvitton',
+    view_transaction: 'Visa transaktion',
+    view_receipt: 'Visa kvitto',
+    image_missing: 'Bilden är inte tillgänglig',
+    empty_title: 'Inga kvitton ännu',
+    empty_message: 'Bifoga ett kvitto till en transaktion för att se det här.',
+    no_matches: 'Inga kvitton matchar din sökning.',
+  },
   albums: {
     location: {
       label: 'Plats',

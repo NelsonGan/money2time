@@ -1618,6 +1618,15 @@ const zh = {
     cta: '备份到云端',
     dismiss: '以后再说',
   },
+  receipts: {
+    title: '收据',
+    view_transaction: '查看交易',
+    view_receipt: '查看收据',
+    image_missing: '图片不可用',
+    empty_title: '还没有收据',
+    empty_message: '为交易添加收据后即可在此查看。',
+    no_matches: '没有符合搜索条件的收据。',
+  },
   albums: {
     location: {
       label: '地点',

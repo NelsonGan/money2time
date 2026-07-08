@@ -1658,6 +1658,15 @@ const th = {
     cta: 'สำรองข้อมูลไปยังคลาวด์',
     dismiss: 'ไว้ทีหลัง',
   },
+  receipts: {
+    title: 'ใบเสร็จ',
+    view_transaction: 'ดูรายการ',
+    view_receipt: 'ดูใบเสร็จ',
+    image_missing: 'ไม่มีรูปภาพ',
+    empty_title: 'ยังไม่มีใบเสร็จ',
+    empty_message: 'แนบใบเสร็จกับรายการเพื่อดูที่นี่',
+    no_matches: 'ไม่มีใบเสร็จที่ตรงกับการค้นหาของคุณ',
+  },
   albums: {
     location: {
       label: 'สถานที่',

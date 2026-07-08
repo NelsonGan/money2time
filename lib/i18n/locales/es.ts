@@ -1709,6 +1709,15 @@ const es = {
     cta: 'Hacer copia en la nube',
     dismiss: 'Quizás más tarde',
   },
+  receipts: {
+    title: 'Recibos',
+    view_transaction: 'Ver transacción',
+    view_receipt: 'Ver recibo',
+    image_missing: 'Imagen no disponible',
+    empty_title: 'Aún no hay recibos',
+    empty_message: 'Adjunta un recibo a una transacción para verlo aquí.',
+    no_matches: 'Ningún recibo coincide con tu búsqueda.',
+  },
   albums: {
     location: {
       label: 'Ubicación',

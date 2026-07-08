@@ -1705,6 +1705,15 @@ const tr = {
     cta: 'Buluta yedekle',
     dismiss: 'Belki sonra',
   },
+  receipts: {
+    title: 'Fişler',
+    view_transaction: 'İşlemi görüntüle',
+    view_receipt: 'Fişi görüntüle',
+    image_missing: 'Görsel kullanılamıyor',
+    empty_title: 'Henüz fiş yok',
+    empty_message: 'Burada görmek için bir işleme fiş ekleyin.',
+    no_matches: 'Aramanızla eşleşen fiş yok.',
+  },
   albums: {
     location: {
       label: 'Konum',

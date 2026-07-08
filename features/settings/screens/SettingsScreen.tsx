@@ -118,6 +118,7 @@ interface SettingsScreenProps {
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
   onOpenAppLock: () => void;
+  onOpenReceipts: () => void;
   onOpenProPaywall: () => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
@@ -145,6 +146,7 @@ export function SettingsScreen({
   onOpenStatementImport,
   onOpenQuickEntry,
   onOpenAppLock,
+  onOpenReceipts,
   onOpenProPaywall,
   onOpenProManagement,
   onOpenShareAndEarn,
@@ -697,6 +699,11 @@ export function SettingsScreen({
                 icon={<Images size={20} color={themeColors.primary} />}
                 label={I18n.t('albums.title')}
                 onPress={onOpenAlbums}
+              />
+              <SettingsGridTile
+                icon={<ReceiptText size={20} color={themeColors.primary} />}
+                label={I18n.t('receipts.title')}
+                onPress={onOpenReceipts}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile

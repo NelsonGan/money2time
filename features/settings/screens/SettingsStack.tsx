@@ -28,6 +28,7 @@ import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
+import { ReceiptsScreen } from './ReceiptsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
@@ -51,6 +52,7 @@ interface SettingsStackProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
+  onOpenEditTransaction: (transactionId: string) => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -114,6 +116,7 @@ function SettingsHomeRoute({
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
       onOpenAppLock={() => navigation.navigate('AppLock')}
+      onOpenReceipts={() => navigation.navigate('Receipts')}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -139,6 +142,7 @@ export function SettingsStack({
   onOpenWageCalculator,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenEditTransaction,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -390,6 +394,17 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AppLockScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Receipts">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <ReceiptsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenEditTransaction={onOpenEditTransaction}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (

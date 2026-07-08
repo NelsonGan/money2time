@@ -1696,6 +1696,15 @@ const da = {
     cta: 'Sikkerhedskopiér til skyen',
     dismiss: 'Måske senere',
   },
+  receipts: {
+    title: 'Kvitteringer',
+    view_transaction: 'Vis transaktion',
+    view_receipt: 'Vis kvittering',
+    image_missing: 'Billede ikke tilgængeligt',
+    empty_title: 'Ingen kvitteringer endnu',
+    empty_message: 'Vedhæft en kvittering til en transaktion for at se den her.',
+    no_matches: 'Ingen kvitteringer matcher din søgning.',
+  },
   albums: {
     location: {
       label: 'Placering',

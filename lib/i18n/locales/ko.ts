@@ -1663,6 +1663,15 @@ const ko = {
     cta: '클라우드에 백업',
     dismiss: '나중에',
   },
+  receipts: {
+    title: '영수증',
+    view_transaction: '거래 보기',
+    view_receipt: '영수증 보기',
+    image_missing: '이미지를 사용할 수 없음',
+    empty_title: '아직 영수증이 없습니다',
+    empty_message: '거래에 영수증을 첨부하면 여기에 표시됩니다.',
+    no_matches: '검색과 일치하는 영수증이 없습니다.',
+  },
   albums: {
     location: {
       label: '위치',

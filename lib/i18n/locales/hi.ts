@@ -1685,6 +1685,15 @@ const hi = {
     cta: 'क्लाउड पर बैकअप लें',
     dismiss: 'शायद बाद में',
   },
+  receipts: {
+    title: 'रसीदें',
+    view_transaction: 'लेन-देन देखें',
+    view_receipt: 'रसीद देखें',
+    image_missing: 'छवि उपलब्ध नहीं',
+    empty_title: 'अभी तक कोई रसीद नहीं',
+    empty_message: 'यहाँ देखने के लिए किसी लेन-देन में रसीद संलग्न करें।',
+    no_matches: 'आपकी खोज से कोई रसीद मेल नहीं खाती।',
+  },
   albums: {
     location: {
       label: 'स्थान',

@@ -1723,6 +1723,15 @@ const fil = {
     cta: 'I-backup sa cloud',
     dismiss: 'Sa susunod na lang',
   },
+  receipts: {
+    title: 'Mga Resibo',
+    view_transaction: 'Tingnan ang transaksyon',
+    view_receipt: 'Tingnan ang resibo',
+    image_missing: 'Hindi available ang larawan',
+    empty_title: 'Wala pang resibo',
+    empty_message: 'Maglakip ng resibo sa isang transaksyon para makita ito rito.',
+    no_matches: 'Walang resibong tumutugma sa iyong paghahanap.',
+  },
   albums: {
     location: {
       label: 'Lokasyon',
