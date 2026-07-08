@@ -114,13 +114,19 @@ export const ReceiptCard = memo(function ReceiptCard({
               <TimeValueInline
                 value={amountText}
                 variant="bodyStrong"
+                textClassName="text-[14px]"
                 numberOfLines={1}
-                iconSize={15}
+                iconSize={13}
                 iconColor={amountColor}
                 style={{ color: amountColor }}
               />
             ) : (
-              <Text variant="bodyStrong" numberOfLines={1} style={{ color: amountColor }}>
+              <Text
+                variant="bodyStrong"
+                numberOfLines={1}
+                className="text-[14px]"
+                style={{ color: amountColor }}
+              >
                 {amountText}
               </Text>
             )}
