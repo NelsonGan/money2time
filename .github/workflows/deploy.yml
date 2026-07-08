@@ -53,6 +53,64 @@ jobs:
       - name: Run tests
         run: npm test
 
+  preview-pending:
+    name: Preview Pending
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Flag preview comment as pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commit = context.payload.pull_request.head.sha.slice(0, 7);
+            const marker = '<!-- eas-update-preview -->';
+            const body = [
+              marker,
+              '## 📱 Preview this update',
+              '',
+              '<table>',
+              '<tr>',
+              '<td width="260" align="center">',
+              '',
+              '### ⏳',
+              '',
+              '**Building preview…**',
+              '',
+              '<sub>The QR code refreshes<br/>once publishing finishes</sub>',
+              '',
+              '</td>',
+              '<td valign="middle">',
+              '',
+              '### 🚧 A newer version is on the way',
+              '',
+              `The preview for commit \`${commit}\` is publishing now. This comment updates **automatically** with a fresh QR code and link the moment it is ready.`,
+              '',
+              '| | |',
+              '| --- | --- |',
+              '| **Status** | ⏳ Publishing… |',
+              `| **Commit** | \`${commit}\` |`,
+              '',
+              '> [!WARNING]',
+              '> Any QR code or link shown earlier points to a **previous** build and is now out of date.',
+              '',
+              '</td>',
+              '</tr>',
+              '</table>',
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
   pr-update:
     name: PR Update
     needs: test
@@ -120,6 +178,7 @@ jobs:
               '',
               '| | |',
               '| --- | --- |',
+              '| **Status** | ✅ Up to date |',
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
               `| **Commit** | \`${commit}\` |`,
