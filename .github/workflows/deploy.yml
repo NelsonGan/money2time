@@ -97,6 +97,13 @@ jobs:
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
+            // This step runs right after the update is published, so "now" is
+            // effectively when the EAS update finished.
+            const publishedAt = new Date().toLocaleString('en-US', {
+              timeZone: 'Asia/Singapore',
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }) + ' GMT+8';
             const marker = '<!-- eas-update-preview -->';
             const body = [
               marker,
@@ -116,6 +123,7 @@ jobs:
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
               `| **Commit** | \`${commit}\` |`,
+              `| **Published** | ${publishedAt} |`,
               '',
               '</td>',
               '</tr>',
