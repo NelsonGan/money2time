@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import * as Updates from 'expo-updates';
 import {
   CalendarDays,
   Camera,
@@ -67,6 +68,16 @@ import { FONT } from '~/utils/fonts';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 const DISCORD_BRAND_COLOR = '#5865F2';
+
+// Developer tools (incl. the preview-data generator) are hidden from the App
+// Store / TestFlight build only. We can't use `__DEV__` alone: an `eas update`
+// ships a *release* JS bundle, so `__DEV__` is false even inside an internal
+// dev-client build — which is exactly where we want these tools available.
+// Store builds ship with expo-updates disabled (see app.config.ts), so their
+// channel reads `null` rather than `'production'`; `Updates.isEnabled` is what
+// keeps these tools out of the App Store build. Internal dev-client / preview
+// builds have updates enabled and keep the tools over EAS Update.
+const SHOW_DEV_TOOLS = __DEV__ || (Updates.isEnabled && Updates.channel !== 'production');
 
 const PREVIEW_SCREEN_COPY = {
   en: {
@@ -743,7 +754,7 @@ export function SettingsScreen({
             </SettingsGrid>
           </SettingsSection>
 
-          {__DEV__ ? (
+          {SHOW_DEV_TOOLS ? (
             <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
               <SettingsGrid>
                 <SettingsGridTile
