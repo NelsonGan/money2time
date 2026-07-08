@@ -30,6 +30,7 @@ import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import type { TransactionSentiment, WageConfig } from '~/types';
+import { newId } from '~/utils/id';
 
 import {
   ACCOUNT_GROUP_ORDER,
@@ -1056,6 +1057,8 @@ function seedTransactions(
 function seedAlbums(profile: PreviewProfile, trips: PreviewTrip[]) {
   if (profile.albums.length === 0 || trips.length === 0) return 0;
 
+  const db = getDb();
+
   // Pair albums (defined newest-first) with the most recent trips, newest first,
   // so each album card surfaces real flight/hotel/dining spend and its pin lands
   // on the destination.
@@ -1077,7 +1080,25 @@ function seedAlbums(profile: PreviewProfile, trips: PreviewTrip[]) {
       countryCode: seed.countryCode,
       sortOrder: index,
     });
-    albumsRepository.addTransactions(albumId, trip.transactionIds);
+
+    // Insert the album↔transaction join rows directly. albumsRepository
+    // .addTransactions opens its own SQLite transaction, which would nest
+    // inside the seed's outer BEGIN and throw ("cannot start a transaction
+    // within a transaction").
+    const now = new Date().toISOString();
+    trip.transactionIds.forEach((transactionId, sortOrder) => {
+      db.insert(albumTransactionsTable)
+        .values({
+          id: newId(),
+          albumId,
+          transactionId,
+          sortOrder,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        })
+        .run();
+    });
     created += 1;
   });
 
