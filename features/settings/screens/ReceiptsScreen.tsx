@@ -35,15 +35,16 @@ interface ReceiptsScreenProps {
 
 const PAGE_SIZE = 20;
 
+interface ReceiptTile {
+  transaction: TransactionWithRelations;
+  /** Resolved once here (off the recycle path) so the card renders no sync FS stat. */
+  receiptFileUri: string | null;
+}
+
 type ReceiptRow =
   | { kind: 'header'; id: string; monthLabel: string }
-  | {
-      kind: 'card';
-      id: string;
-      transaction: TransactionWithRelations;
-      /** Resolved once here (off the recycle path) so the card renders no sync FS stat. */
-      receiptFileUri: string | null;
-    };
+  // Up to two tiles rendered side by side; headers span the full width.
+  | { kind: 'row'; id: string; tiles: ReceiptTile[] };
 
 export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreenProps) {
   const { settings, getDisplayValueForTransaction } = useApp();
@@ -100,15 +101,26 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
 
   const hasMore = visibleCount < filteredReceipts.length;
 
-  // Windowed slice → flat month-grouped rows (header row per month change).
+  // Windowed slice → month-grouped rows: a full-width header per month change,
+  // then rows of up to two tiles each (the 2-column grid).
   const rows = useMemo(() => {
     const visible = filteredReceipts.slice(0, visibleCount);
     const built: ReceiptRow[] = [];
     let currentMonthKey: string | null = null;
+    let pending: ReceiptTile[] = [];
+    let rowSeq = 0;
+    const flushRow = () => {
+      if (pending.length === 0) return;
+      built.push({ kind: 'row', id: `row-${currentMonthKey}-${rowSeq}`, tiles: pending });
+      rowSeq += 1;
+      pending = [];
+    };
     for (const transaction of visible) {
       const monthKey = monthKeyFromIsoLocal(transaction.date);
       if (monthKey !== currentMonthKey) {
+        flushRow();
         currentMonthKey = monthKey;
+        rowSeq = 0;
         const monthDate = parseMonthKey(monthKey);
         built.push({
           kind: 'header',
@@ -116,13 +128,10 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
           monthLabel: monthDate ? formatMonthYearLabel(monthDate, locale) : monthKey,
         });
       }
-      built.push({
-        kind: 'card',
-        id: transaction.id,
-        transaction,
-        receiptFileUri: getReceiptUri(transaction.receiptUri),
-      });
+      pending.push({ transaction, receiptFileUri: getReceiptUri(transaction.receiptUri) });
+      if (pending.length === 2) flushRow();
     }
+    flushRow();
     return built;
   }, [filteredReceipts, visibleCount, locale]);
 
@@ -141,21 +150,29 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
           </Text>
         );
       }
-      const displayValue = getDisplayValueForTransaction(item.transaction);
-      const amountText = isTimeMode
-        ? formatHours(displayValue)
-        : formatAmount(displayValue, settings, { showSign: true });
       return (
-        <View className="pb-3">
-          <ReceiptCard
-            transaction={item.transaction}
-            receiptFileUri={item.receiptFileUri}
-            amountText={amountText}
-            isTimeMode={isTimeMode}
-            isIncome={item.transaction.type === 'income'}
-            onViewTransaction={onOpenEditTransaction}
-            onViewReceipt={setPreviewUri}
-          />
+        <View className="flex-row gap-3 pb-3">
+          {item.tiles.map((tile) => {
+            const displayValue = getDisplayValueForTransaction(tile.transaction);
+            const amountText = isTimeMode
+              ? formatHours(displayValue)
+              : formatAmount(displayValue, settings, { showSign: true });
+            return (
+              <View key={tile.transaction.id} className="flex-1">
+                <ReceiptCard
+                  transaction={tile.transaction}
+                  receiptFileUri={tile.receiptFileUri}
+                  amountText={amountText}
+                  isTimeMode={isTimeMode}
+                  isIncome={tile.transaction.type === 'income'}
+                  onViewTransaction={onOpenEditTransaction}
+                  onViewReceipt={setPreviewUri}
+                />
+              </View>
+            );
+          })}
+          {/* Keep a lone trailing tile at half width. */}
+          {item.tiles.length === 1 ? <View className="flex-1" /> : null}
         </View>
       );
     },
