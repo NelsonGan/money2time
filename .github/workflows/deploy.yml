@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
     inputs:
       platform:
@@ -31,7 +30,6 @@ concurrency:
 jobs:
   test:
     name: Test
-    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -57,7 +55,7 @@ jobs:
 
   preview-pending:
     name: Preview Pending
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -97,33 +95,10 @@ jobs:
               }
             }
 
-  preview-cleanup:
-    name: Preview Cleanup
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Delete preview comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const marker = '<!-- eas-update-preview -->';
-            const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
-            for (const c of comments) {
-              if (c.body && c.body.includes(marker)) {
-                await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
-              }
-            }
-
   pr-update:
     name: PR Update
     needs: test
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
