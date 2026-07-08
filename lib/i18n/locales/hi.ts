@@ -404,7 +404,7 @@ const hi = {
   },
   transactions: {
     settleUp: {
-      title: 'आप पर किसका बकाया है',
+      title: 'किस पर आपका बकाया है',
       subtitle: 'दोस्तों और परिवार से हर अनचुकता हिस्सा, एक ही जगह।',
       tab_by_person: 'व्यक्ति के अनुसार',
       tab_by_transaction: 'लेनदेन के अनुसार',

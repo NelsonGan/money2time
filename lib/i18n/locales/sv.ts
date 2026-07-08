@@ -420,7 +420,7 @@ const sv = {
       qr_add: 'Lägg till din betalnings-QR',
       qr_replace: 'Ersätt',
       empty_title: 'Allt är utjämnat',
-      empty_subtitle: 'När någon blir skyldig dig från en delning dyker de upp här.',
+      empty_subtitle: 'När någon är skyldig dig för en delning dyker de upp här.',
       bills_one: '1 nota',
       bills_other: '{{count}} notor',
       someone: 'Någon',

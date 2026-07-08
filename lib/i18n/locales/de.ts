@@ -413,7 +413,7 @@ const de = {
       tab_by_transaction: 'Nach Transaktion',
       transactions_one: '1 Transaktion',
       transactions_other: '{{count}} Transaktionen',
-      outstanding_label: 'Offen an dich',
+      outstanding_label: 'Dir geschuldet',
       people_one: '1 Person',
       people_other: '{{count}} Personen',
       default_account_title: 'Standardmäßig zahlbar an',

@@ -434,7 +434,7 @@ const id = {
         'Ini menghapus utang mereka padamu untuk tagihan ini. Transaksinya sendiri tidak berubah.',
       share_receipt: 'Kirim struk',
       receipt_total_label: 'Kamu berutang',
-      receipt_qr_note: 'Pindai QR yang saya lampirkan untuk membayar saya kembali.',
+      receipt_qr_note: 'Pindai QR yang aku lampirkan untuk membayarku kembali.',
       receipt_scan_short: 'Pindai untuk bayar',
     },
     title: 'Transaksi',

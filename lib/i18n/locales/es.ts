@@ -423,7 +423,7 @@ const es = {
       qr_add: 'Añadir tu QR de pago',
       qr_replace: 'Reemplazar',
       empty_title: 'Estás al día con todo',
-      empty_subtitle: 'Cuando alguien te deba de una división, aparecerá aquí.',
+      empty_subtitle: 'Cuando alguien te deba por una división, aparecerá aquí.',
       bills_one: '1 cuenta',
       bills_other: '{{count}} cuentas',
       someone: 'Alguien',
