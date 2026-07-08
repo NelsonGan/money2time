@@ -53,6 +53,48 @@ jobs:
       - name: Run tests
         run: npm test
 
+  preview-pending:
+    name: Preview Pending
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Flag preview comment as pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commit = context.payload.pull_request.head.sha.slice(0, 7);
+            const marker = '<!-- eas-update-preview -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            // Keep the previously published QR/link in place and only flip the
+            // status row, so the user can still scan the old build meanwhile but
+            // knows it isn't the latest commit yet.
+            const pendingStatus = `| **Status** | ⏳ Building \`${commit}\`… — the QR below is still the previous build |`;
+            const statusRe = /\| \*\*Status\*\* \|[^\n]*\|/;
+            if (existing && statusRe.test(existing.body)) {
+              const body = existing.body.replace(statusRe, pendingStatus);
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              // No preview published yet — post a lightweight placeholder.
+              const body = [
+                marker,
+                '## 📱 Preview this update',
+                '',
+                `⏳ **Building the first preview** for commit \`${commit}\`… This comment updates automatically with a QR code and link the moment it is ready.`,
+              ].join('\n');
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              }
+            }
+
   pr-update:
     name: PR Update
     needs: test
@@ -113,13 +155,12 @@ jobs:
               '',
               '<table>',
               '<tr>',
-              `<td width="260" align="center"><a href="${link}"><img src="${qr}" width="220" alt="EAS Update QR code" /></a><br/><sub>Scan with your dev build</sub></td>`,
+              `<td width="260" align="center"><a href="${link}"><img src="${qr}" width="220" alt="EAS Update QR code" /></a><br/><sub>Scan or tap to open with your dev build</sub></td>`,
               '<td valign="middle">',
-              '',
-              `### 👉 [Tap to open this update](${link})`,
               '',
               '| | |',
               '| --- | --- |',
+              '| **Status** | ✅ Up to date |',
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
               `| **Commit** | \`${commit}\` |`,
