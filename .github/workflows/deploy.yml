@@ -100,10 +100,10 @@ jobs:
             // This step runs right after the update is published, so "now" is
             // effectively when the EAS update finished.
             const publishedAt = new Date().toLocaleString('en-US', {
-              timeZone: 'UTC',
+              timeZone: 'Asia/Singapore',
               dateStyle: 'medium',
               timeStyle: 'short',
-            }) + ' UTC';
+            }) + ' GMT+8';
             const marker = '<!-- eas-update-preview -->';
             const body = [
               marker,
