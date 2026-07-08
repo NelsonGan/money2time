@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
     inputs:
       platform:
@@ -30,6 +31,7 @@ concurrency:
 jobs:
   test:
     name: Test
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -55,7 +57,7 @@ jobs:
 
   preview-pending:
     name: Preview Pending
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -68,53 +70,60 @@ jobs:
           script: |
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             const marker = '<!-- eas-update-preview -->';
-            const body = [
-              marker,
-              '## 📱 Preview this update',
-              '',
-              '<table>',
-              '<tr>',
-              '<td width="260" align="center">',
-              '',
-              '### ⏳',
-              '',
-              '**Building preview…**',
-              '',
-              '<sub>The QR code refreshes<br/>once publishing finishes</sub>',
-              '',
-              '</td>',
-              '<td valign="middle">',
-              '',
-              '### 🚧 A newer version is on the way',
-              '',
-              `The preview for commit \`${commit}\` is publishing now. This comment updates **automatically** with a fresh QR code and link the moment it is ready.`,
-              '',
-              '| | |',
-              '| --- | --- |',
-              '| **Status** | ⏳ Publishing… |',
-              `| **Commit** | \`${commit}\` |`,
-              '',
-              '> [!WARNING]',
-              '> Any QR code or link shown earlier points to a **previous** build and is now out of date.',
-              '',
-              '</td>',
-              '</tr>',
-              '</table>',
-            ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
             const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
             const existing = comments.find((c) => c.body && c.body.includes(marker));
-            if (existing) {
+            // Keep the previously published QR/link in place and only flip the
+            // status row, so the user can still scan the old build meanwhile but
+            // knows it isn't the latest commit yet.
+            const pendingStatus = `| **Status** | ⏳ Building \`${commit}\`… — the QR below is still the previous build |`;
+            const statusRe = /\| \*\*Status\*\* \|[^\n]*\|/;
+            if (existing && statusRe.test(existing.body)) {
+              const body = existing.body.replace(statusRe, pendingStatus);
               await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
             } else {
-              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              // No preview published yet — post a lightweight placeholder.
+              const body = [
+                marker,
+                '## 📱 Preview this update',
+                '',
+                `⏳ **Building the first preview** for commit \`${commit}\`… This comment updates automatically with a QR code and link the moment it is ready.`,
+              ].join('\n');
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              }
+            }
+
+  preview-cleanup:
+    name: Preview Cleanup
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Delete preview comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- eas-update-preview -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            for (const c of comments) {
+              if (c.body && c.body.includes(marker)) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: c.id });
+              }
             }
 
   pr-update:
     name: PR Update
     needs: test
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
