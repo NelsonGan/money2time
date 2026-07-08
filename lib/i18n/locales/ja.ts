@@ -1676,6 +1676,15 @@ const ja = {
     cta: 'クラウドにバックアップ',
     dismiss: 'あとで',
   },
+  receipts: {
+    title: 'レシート',
+    view_transaction: '取引を表示',
+    view_receipt: 'レシートを表示',
+    image_missing: '画像を利用できません',
+    empty_title: 'レシートはまだありません',
+    empty_message: '取引にレシートを添付すると、ここに表示されます。',
+    no_matches: '検索に一致するレシートはありません。',
+  },
   albums: {
     location: {
       label: '場所',

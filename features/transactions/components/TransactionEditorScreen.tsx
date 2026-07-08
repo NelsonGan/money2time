@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as ImagePicker from 'expo-image-picker';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -95,7 +94,8 @@ import {
 } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
-import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
+import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -654,27 +654,8 @@ export function TransactionEditorScreen({
   // Snap / attach a receipt from the action-row camera button.
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library') => {
-      try {
-        const permission =
-          source === 'camera'
-            ? await ImagePicker.requestCameraPermissionsAsync()
-            : await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-          Alert.alert(
-            I18n.t('accounts.logo.permission_title'),
-            I18n.t('accounts.logo.permission_message'),
-          );
-          return;
-        }
-        const result =
-          source === 'camera'
-            ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
-            : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
-        if (result.canceled || !result.assets?.[0]) return;
-        handleReceiptChange(saveReceiptImage(result.assets[0].uri));
-      } catch {
-        Alert.alert(I18n.t('accounts.logo.upload_failed'));
-      }
+      const next = await pickAndSaveReceiptImage(source);
+      if (next) handleReceiptChange(next);
     },
     [handleReceiptChange],
   );

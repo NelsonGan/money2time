@@ -1067,6 +1067,7 @@ function MainShellScreen({
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
             onOpenSettleUp={openSettleUp}
+            onOpenEditTransaction={openTransactionEditor}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}

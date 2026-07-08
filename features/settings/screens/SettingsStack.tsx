@@ -12,8 +12,9 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
-import type { CategoryType, WageConfig } from '~/types';
+import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
@@ -28,6 +29,7 @@ import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
+import { ReceiptsScreen } from './ReceiptsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
@@ -51,6 +53,7 @@ interface SettingsStackProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
+  onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (
@@ -114,6 +117,11 @@ function SettingsHomeRoute({
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
       onOpenAppLock={() => navigation.navigate('AppLock')}
+      onOpenReceipts={() => navigation.navigate('Receipts')}
+      onOpenBudget={() => {
+        requestOpenTab('insights');
+        requestFocusInsight('budget');
+      }}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -139,6 +147,7 @@ export function SettingsStack({
   onOpenWageCalculator,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenEditTransaction,
   onScreenChange,
   onStartTutorial,
   onTutorialTargetLayout,
@@ -390,6 +399,17 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AppLockScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Receipts">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <ReceiptsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenEditTransaction={onOpenEditTransaction}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (

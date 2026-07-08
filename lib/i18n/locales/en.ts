@@ -1689,6 +1689,15 @@ const en = {
     cta: 'Back up to the cloud',
     dismiss: 'Maybe later',
   },
+  receipts: {
+    title: 'Receipts',
+    view_transaction: 'View transaction',
+    view_receipt: 'View receipt',
+    image_missing: 'Image unavailable',
+    empty_title: 'No receipts yet',
+    empty_message: 'Attach a receipt to a transaction to see it here.',
+    no_matches: 'No receipts match your search.',
+  },
   albums: {
     title: 'Albums',
     active_label: 'Auto-add new transactions to',

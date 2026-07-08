@@ -1679,6 +1679,15 @@ const vi = {
     cta: 'Sao lưu lên đám mây',
     dismiss: 'Để sau',
   },
+  receipts: {
+    title: 'Biên lai',
+    view_transaction: 'Xem giao dịch',
+    view_receipt: 'Xem biên lai',
+    image_missing: 'Không có hình ảnh',
+    empty_title: 'Chưa có biên lai',
+    empty_message: 'Đính kèm biên lai vào giao dịch để xem tại đây.',
+    no_matches: 'Không có biên lai nào khớp với tìm kiếm của bạn.',
+  },
   albums: {
     location: {
       label: 'Vị trí',

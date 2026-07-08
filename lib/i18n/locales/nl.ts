@@ -1718,6 +1718,15 @@ const nl = {
     cta: 'Back-up naar de cloud',
     dismiss: 'Misschien later',
   },
+  receipts: {
+    title: 'Bonnen',
+    view_transaction: 'Transactie bekijken',
+    view_receipt: 'Bon bekijken',
+    image_missing: 'Afbeelding niet beschikbaar',
+    empty_title: 'Nog geen bonnen',
+    empty_message: 'Voeg een bon toe aan een transactie om deze hier te zien.',
+    no_matches: 'Geen bonnen komen overeen met je zoekopdracht.',
+  },
   albums: {
     location: {
       label: 'Locatie',
