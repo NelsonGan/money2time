@@ -96,30 +96,14 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
-            const sha = context.payload.pull_request.head.sha;
-            const commit = sha.slice(0, 7);
-            const { owner: repoOwner, repo: repoName } = context.repo;
-            // Fetch the head commit so we can show when it was authored. Fall
-            // back gracefully if the API call fails so the comment still posts.
-            let committedAt = '';
-            try {
-              const { data: headCommit } = await github.rest.repos.getCommit({
-                owner: repoOwner,
-                repo: repoName,
-                ref: sha,
-              });
-              const isoDate =
-                headCommit.commit.committer?.date || headCommit.commit.author?.date;
-              if (isoDate) {
-                committedAt = new Date(isoDate).toLocaleString('en-US', {
-                  timeZone: 'UTC',
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                }) + ' UTC';
-              }
-            } catch (e) {
-              console.log(`Could not fetch commit date: ${e.message}`);
-            }
+            const commit = context.payload.pull_request.head.sha.slice(0, 7);
+            // This step runs right after the update is published, so "now" is
+            // effectively when the EAS update finished.
+            const publishedAt = new Date().toLocaleString('en-US', {
+              timeZone: 'UTC',
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }) + ' UTC';
             const marker = '<!-- eas-update-preview -->';
             const body = [
               marker,
@@ -139,7 +123,7 @@ jobs:
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
               `| **Commit** | \`${commit}\` |`,
-              ...(committedAt ? [`| **Committed** | ${committedAt} |`] : []),
+              `| **Published** | ${publishedAt} |`,
               '',
               '</td>',
               '</tr>',
