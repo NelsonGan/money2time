@@ -240,9 +240,11 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         <View className="flex-row gap-3 pb-3">
           {item.tiles.map((tile) => {
             const displayValue = getDisplayValueForTransaction(tile.transaction);
+            const isIncome = tile.transaction.type === 'income';
+            // Expenses render as a negative amount (no forced "+" sign); income positive.
             const amountText = isTimeMode
               ? formatHours(displayValue)
-              : formatAmount(displayValue, settings, { showSign: true });
+              : formatAmount(isIncome ? Math.abs(displayValue) : -Math.abs(displayValue), settings);
             return (
               <View key={tile.transaction.id} className="flex-1">
                 <ReceiptCard
@@ -250,7 +252,7 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
                   receiptFileUri={tile.receiptFileUri}
                   amountText={amountText}
                   isTimeMode={isTimeMode}
-                  isIncome={tile.transaction.type === 'income'}
+                  isIncome={isIncome}
                   onOpenReceipt={openReceiptViewer}
                   onOpenTransaction={onOpenEditTransaction}
                 />

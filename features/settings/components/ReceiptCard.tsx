@@ -25,8 +25,9 @@ interface ReceiptCardProps {
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
-// Bright mint reads on the dark scrim for income; expense stays white.
+// Colors that read on the dark scrim: mint for income, red for expense.
 const INCOME_COLOR = '#5BE3A3';
+const EXPENSE_COLOR = '#FF6B6B';
 
 /**
  * A photo tile for the 2-column receipts grid: the receipt image fills the tile,
@@ -47,7 +48,7 @@ export const ReceiptCard = memo(function ReceiptCard({
   const locale = I18n.locale ?? 'en';
   const title =
     transaction.note?.trim() || transaction.categoryName || I18n.t('receipts.title') || '';
-  const amountColor = isIncome ? INCOME_COLOR : '#FFFFFF';
+  const amountColor = isIncome ? INCOME_COLOR : EXPENSE_COLOR;
 
   return (
     <Pressable
@@ -96,7 +97,8 @@ export const ReceiptCard = memo(function ReceiptCard({
           <SquarePen size={15} color="#FFFFFF" />
         </Pressable>
 
-        {/* Bottom scrim carrying the overlaid date / note / amount. */}
+        {/* Bottom scrim: date on top, then the note (left, truncated) with the
+            amount aligned to its bottom-right. */}
         <View
           className="absolute inset-x-0 bottom-0 px-3 pb-2 pt-3"
           style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
@@ -104,11 +106,11 @@ export const ReceiptCard = memo(function ReceiptCard({
           <Text variant="label" numberOfLines={1} className="text-white/70">
             {formatShortDate(transaction.date, locale)}
           </Text>
-          <Text variant="bodyStrong" numberOfLines={1} className="mt-0.5 text-white">
-            {title}
-          </Text>
-          {isTimeMode ? (
-            <View className="mt-0.5">
+          <View className="mt-0.5 flex-row items-end justify-between gap-2">
+            <Text variant="bodyStrong" numberOfLines={1} className="flex-1 text-white">
+              {title}
+            </Text>
+            {isTimeMode ? (
               <TimeValueInline
                 value={amountText}
                 variant="caption"
@@ -117,17 +119,12 @@ export const ReceiptCard = memo(function ReceiptCard({
                 iconColor={amountColor}
                 style={{ color: amountColor }}
               />
-            </View>
-          ) : (
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              className="mt-0.5"
-              style={{ color: amountColor }}
-            >
-              {amountText}
-            </Text>
-          )}
+            ) : (
+              <Text variant="caption" numberOfLines={1} style={{ color: amountColor }}>
+                {amountText}
+              </Text>
+            )}
+          </View>
         </View>
       </Animated.View>
     </Pressable>
