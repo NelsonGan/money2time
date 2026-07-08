@@ -548,12 +548,6 @@ function MainShellScreen({
     },
     [navigation],
   );
-  const openEditTransaction = useCallback(
-    (transactionId: string) => {
-      navigation.navigate('EditTransaction', { transactionId });
-    },
-    [navigation],
-  );
   const openTransactionSplitBill = useCallback(
     (transaction: TransactionWithRelations) => {
       navigation.navigate('EditTransaction', {
@@ -1073,7 +1067,7 @@ function MainShellScreen({
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
             onOpenSettleUp={openSettleUp}
-            onOpenEditTransaction={openEditTransaction}
+            onOpenEditTransaction={openTransactionEditor}
             onScreenChange={handleSettingsScreenChange}
             onStartTutorial={startGuidedTutorial}
             onTutorialTargetLayout={handleTutorialTargetLayout}

@@ -14,9 +14,12 @@ import { AlbumDateRangeFields } from '~/features/albums/components/AlbumDateRang
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { getReceiptUri } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
 import {
   dayKeyFromIsoLocal,
+  formatAmount,
+  formatHours,
   formatMonthYearLabel,
   monthKeyFromIsoLocal,
   parseMonthKey,
@@ -27,14 +30,20 @@ import { ReceiptPreviewModal } from '../components/ReceiptPreviewModal';
 
 interface ReceiptsScreenProps {
   onBack: () => void;
-  onOpenEditTransaction: (transactionId: string) => void;
+  onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
 }
 
 const PAGE_SIZE = 20;
 
 type ReceiptRow =
   | { kind: 'header'; id: string; monthLabel: string }
-  | { kind: 'card'; id: string; transaction: TransactionWithRelations };
+  | {
+      kind: 'card';
+      id: string;
+      transaction: TransactionWithRelations;
+      /** Resolved once here (off the recycle path) so the card renders no sync FS stat. */
+      receiptFileUri: string | null;
+    };
 
 export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreenProps) {
   const { settings, getDisplayValueForTransaction } = useApp();
@@ -62,12 +71,17 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
     return () => clearTimeout(handle);
   }, [searchInput]);
 
-  // Every transaction with a receipt, filtered by note-search + date range, newest first.
+  // Every transaction with a receipt, filtered by search + date range, newest first.
+  // Search matches the note plus the category name, so a card shown under its
+  // category title (when the note is empty) is still findable by that title.
   const filteredReceipts = useMemo(() => {
     const query = search.trim().toLowerCase();
     const result = transactions.filter((tx) => {
       if (!tx.receiptUri) return false;
-      if (query && !(tx.note ?? '').toLowerCase().includes(query)) return false;
+      if (query) {
+        const haystack = `${tx.note ?? ''}\n${tx.categoryName ?? ''}`.toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
       if (startDate || endDate) {
         const dayKey = dayKeyFromIsoLocal(tx.date);
         if (startDate && dayKey < startDate) return false;
@@ -102,7 +116,12 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
           monthLabel: monthDate ? formatMonthYearLabel(monthDate, locale) : monthKey,
         });
       }
-      built.push({ kind: 'card', id: transaction.id, transaction });
+      built.push({
+        kind: 'card',
+        id: transaction.id,
+        transaction,
+        receiptFileUri: getReceiptUri(transaction.receiptUri),
+      });
     }
     return built;
   }, [filteredReceipts, visibleCount, locale]);
@@ -110,6 +129,8 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const handleEndReached = useCallback(() => {
     setVisibleCount((count) => (count < filteredReceipts.length ? count + PAGE_SIZE : count));
   }, [filteredReceipts.length]);
+
+  const isTimeMode = settings.displayMode === 'time';
 
   const renderItem = useCallback(
     ({ item }: { item: ReceiptRow }) => {
@@ -120,19 +141,25 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
           </Text>
         );
       }
+      const displayValue = getDisplayValueForTransaction(item.transaction);
+      const amountText = isTimeMode
+        ? formatHours(displayValue)
+        : formatAmount(displayValue, settings, { showSign: true });
       return (
         <View className="pb-3">
           <ReceiptCard
             transaction={item.transaction}
-            displayValue={getDisplayValueForTransaction(item.transaction)}
-            settings={settings}
+            receiptFileUri={item.receiptFileUri}
+            amountText={amountText}
+            isTimeMode={isTimeMode}
+            isIncome={item.transaction.type === 'income'}
             onViewTransaction={onOpenEditTransaction}
             onViewReceipt={setPreviewUri}
           />
         </View>
       );
     },
-    [getDisplayValueForTransaction, settings, onOpenEditTransaction],
+    [getDisplayValueForTransaction, isTimeMode, settings, onOpenEditTransaction],
   );
 
   const isFiltering = search.trim().length > 0 || startDate !== null || endDate !== null;
@@ -145,6 +172,7 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         <ActivitySearchRow
           inputRef={searchInputRef}
           visible
+          autoFocus={false}
           value={searchInput}
           onChangeText={setSearchInput}
           onClose={() => setSearchInput('')}

@@ -13,7 +13,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { requestOpenTab } from '~/services/tabNavigation';
-import type { CategoryType, WageConfig } from '~/types';
+import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
@@ -52,7 +52,7 @@ interface SettingsStackProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
-  onOpenEditTransaction: (transactionId: string) => void;
+  onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onScreenChange?: (screen: string) => void;
   onStartTutorial: () => void;
   onTutorialTargetLayout?: (

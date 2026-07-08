@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Eye, ImageOff, Receipt } from 'lucide-react-native';
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -9,45 +9,43 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { getReceiptUri } from '~/services/userAssets';
-import type { TransactionWithRelations, UserSettings } from '~/types';
-import { formatAmount, formatHours, formatShortDate } from '~/utils/formatters';
+import type { TransactionWithRelations } from '~/types';
+import { formatShortDate } from '~/utils/formatters';
 
 interface ReceiptCardProps {
   transaction: TransactionWithRelations;
-  /** Value to render as the amount, already resolved for the active display mode. */
-  displayValue: number;
-  settings: UserSettings;
-  onViewTransaction: (transactionId: string) => void;
+  /** Receipt image file URI, pre-resolved by the parent (null when missing on disk). */
+  receiptFileUri: string | null;
+  /** Amount already formatted for the active display mode (money or time). */
+  amountText: string;
+  isTimeMode: boolean;
+  isIncome: boolean;
+  onViewTransaction: (transaction: TransactionWithRelations) => void;
   onViewReceipt: (fileUri: string) => void;
 }
 
 export const ReceiptCard = memo(function ReceiptCard({
   transaction,
-  displayValue,
-  settings,
+  receiptFileUri,
+  amountText,
+  isTimeMode,
+  isIncome,
   onViewTransaction,
   onViewReceipt,
 }: ReceiptCardProps) {
   const themeColors = useThemeColors();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
 
-  const receiptFileUri = useMemo(
-    () => getReceiptUri(transaction.receiptUri),
-    [transaction.receiptUri],
-  );
   const locale = I18n.locale ?? 'en';
-  const isTimeMode = settings.displayMode === 'time';
-  const isIncome = transaction.type === 'income';
-
   const title =
     transaction.note?.trim() || transaction.categoryName || I18n.t('receipts.title') || '';
+  const amountClassName = isIncome ? 'text-success' : 'text-foreground';
 
   return (
     <Pressable
       onPress={() => {
         void triggerHaptic('selection');
-        onViewTransaction(transaction.id);
+        onViewTransaction(transaction);
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -87,18 +85,16 @@ export const ReceiptCard = memo(function ReceiptCard({
             <View className="mt-1">
               {isTimeMode ? (
                 <TimeValueInline
-                  value={formatHours(displayValue)}
+                  value={amountText}
                   variant="caption"
                   numberOfLines={1}
                   iconSize={13}
+                  textClassName={amountClassName}
+                  iconColor={isIncome ? themeColors.success : undefined}
                 />
               ) : (
-                <Text
-                  variant="caption"
-                  numberOfLines={1}
-                  className={isIncome ? 'text-success' : 'text-foreground'}
-                >
-                  {formatAmount(displayValue, settings, { showSign: true })}
+                <Text variant="caption" numberOfLines={1} className={amountClassName}>
+                  {amountText}
                 </Text>
               )}
             </View>
@@ -110,7 +106,7 @@ export const ReceiptCard = memo(function ReceiptCard({
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
-              onViewTransaction(transaction.id);
+              onViewTransaction(transaction);
             }}
             accessibilityRole="button"
             className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-secondary/60 py-2.5"

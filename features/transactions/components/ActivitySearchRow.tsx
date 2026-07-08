@@ -14,6 +14,9 @@ interface ActivitySearchRowProps {
   value: string;
   onChangeText: (text: string) => void;
   onClose: () => void;
+  /** Auto-focus the input (opening the keyboard) when the row appears. Defaults
+   * to true for the toggled search overlay; pass false for an always-visible bar. */
+  autoFocus?: boolean;
 }
 
 export function ActivitySearchRow({
@@ -22,12 +25,13 @@ export function ActivitySearchRow({
   value,
   onChangeText,
   onClose,
+  autoFocus = true,
 }: ActivitySearchRowProps) {
   const themeColors = useThemeColors();
   const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!visible) {
+    if (!visible || !autoFocus) {
       return;
     }
 
@@ -41,7 +45,7 @@ export function ActivitySearchRow({
         focusTimeoutRef.current = null;
       }
     };
-  }, [inputRef, visible]);
+  }, [autoFocus, inputRef, visible]);
 
   if (!visible) {
     return null;
