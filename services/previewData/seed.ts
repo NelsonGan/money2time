@@ -351,10 +351,30 @@ interface PreviewTrip {
   transactionIds: string[];
 }
 
+// Hands out the same seeded receipt relative path a bounded number of times, so
+// a handful of transactions carry a receipt image without every row doing so.
+interface ReceiptAttacher {
+  next: () => string | null;
+  used: () => number;
+}
+
+function makeReceiptAttacher(relativePath: string | null | undefined, max = 10): ReceiptAttacher {
+  let used = 0;
+  return {
+    next: () => {
+      if (!relativePath || used >= max) return null;
+      used += 1;
+      return relativePath;
+    },
+    used: () => used,
+  };
+}
+
 function seedTransactions(
   profile: PreviewProfile,
   accounts: AccountRefs,
   categories: CategoryRefs,
+  receipts: ReceiptAttacher,
 ): { count: number; trips: PreviewTrip[] } {
   const random = createSeededRandom(profile.seed);
   const previewMonths = getPreviewMonths();
@@ -454,6 +474,10 @@ function seedTransactions(
   for (let index = 0; index < previewMonths.length; index += 1) {
     const monthDate = previewMonths[index];
     if (!monthDate) continue;
+
+    // Only attach receipts in the last couple of months, so the receipt images
+    // show up on the transactions a screenshot is most likely to land on.
+    const isRecentMonth = index >= previewMonths.length - 2;
 
     const monthNumber = monthDate.getUTCMonth();
     const salaryAmount = wageConfigForMonthsAgo(
@@ -636,6 +660,7 @@ function seedTransactions(
         accountId: accounts.checking,
         categoryId: categories.healthcare,
         note: pick(merchants.healthcare, random),
+        receiptUri: isRecentMonth ? receipts.next() : null,
       });
     }
 
@@ -692,6 +717,7 @@ function seedTransactions(
         accountId: accounts.card,
         categoryId: categories.groceries,
         note: pick(merchants.grocery, random),
+        receiptUri: isRecentMonth && week === 0 ? receipts.next() : null,
       });
       creditSpend += groceryAmount;
 
@@ -703,6 +729,7 @@ function seedTransactions(
         accountId: accounts.card,
         categoryId: categories.dining,
         note: pick(merchants.dining, random),
+        receiptUri: isRecentMonth && week === 0 ? receipts.next() : null,
       });
       creditSpend += diningAmount;
 
@@ -767,6 +794,7 @@ function seedTransactions(
         accountId: accounts.card,
         categoryId: categories.shopping,
         note: pick(merchants.shopping, random),
+        receiptUri: isRecentMonth && trip === 0 ? receipts.next() : null,
       });
       creditSpend += shoppingAmount;
     }
@@ -1085,7 +1113,12 @@ function seedItems(profile: PreviewProfile) {
 // Seed shared bills: one expense you fronted, split into per-person shares.
 // Paid participants get a `paidAt` a few days after the bill so the split-bill
 // summary shows a mix of settled and still-owed amounts.
-function seedSplits(profile: PreviewProfile, accounts: AccountRefs, categories: CategoryRefs) {
+function seedSplits(
+  profile: PreviewProfile,
+  accounts: AccountRefs,
+  categories: CategoryRefs,
+  receipts: ReceiptAttacher,
+) {
   const currentMonth = monthStart(new Date());
 
   profile.splits.forEach((split) => {
@@ -1106,6 +1139,7 @@ function seedSplits(profile: PreviewProfile, accounts: AccountRefs, categories: 
       categoryId: categories[split.categoryKey],
       note: split.note,
       sentiment: 'happy',
+      receiptUri: receipts.next(),
     });
 
     // Your own share sits first and is never "owed".
@@ -1205,12 +1239,15 @@ function seedBudgets(profile: PreviewProfile, categories: CategoryRefs): number 
 export function seedProfile(
   profileName: PreviewSeedProfile,
   profile: PreviewProfile,
+  receiptRelativePath?: string | null,
 ): PreviewSeedSummary {
   const sqlite = getSQLite();
 
   // Reporting currency + the foreign currencies spent abroad, so the FX picker
   // in settings is populated for screenshots.
   const trackedCurrencies = [profile.currencyCode, ...foreignCurrencyCodes(profile)];
+  // One seeded receipt image, reused across a handful of transactions.
+  const receipts = makeReceiptAttacher(receiptRelativePath);
 
   sqlite.execSync('BEGIN');
   let seededCategories: CategoryRefs;
@@ -1233,11 +1270,16 @@ export function seedProfile(
     seededCategories = categories;
     seedExchangeRates(profile);
     seedWageHistory(profile);
-    const { count: transactions, trips } = seedTransactions(profile, accounts, categories);
+    const { count: transactions, trips } = seedTransactions(
+      profile,
+      accounts,
+      categories,
+      receipts,
+    );
     const recurringRules = seedRecurringRules(profile, accounts, categories);
     const albums = seedAlbums(profile, trips);
     const items = seedItems(profile);
-    const splits = seedSplits(profile, accounts, categories);
+    const splits = seedSplits(profile, accounts, categories, receipts);
 
     sqlite.execSync('COMMIT');
 
@@ -1252,6 +1294,7 @@ export function seedProfile(
       albums,
       items,
       splits,
+      receipts: receipts.used(),
     };
   } catch (error) {
     sqlite.execSync('ROLLBACK');

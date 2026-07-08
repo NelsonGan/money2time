@@ -16,6 +16,7 @@ export interface PreviewSeedSummary {
   items: number;
   budgets: number;
   splits: number;
+  receipts: number;
 }
 
 export type RandomFn = () => number;
