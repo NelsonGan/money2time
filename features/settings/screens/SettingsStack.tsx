@@ -12,6 +12,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 
@@ -117,6 +118,10 @@ function SettingsHomeRoute({
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
       onOpenAppLock={() => navigation.navigate('AppLock')}
       onOpenReceipts={() => navigation.navigate('Receipts')}
+      onOpenBudget={() => {
+        requestOpenTab('insights');
+        requestFocusInsight('budget');
+      }}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
