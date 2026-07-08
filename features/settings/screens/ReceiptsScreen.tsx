@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
+import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
@@ -11,10 +12,12 @@ import {
 } from '~/components/ui/settings';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { AlbumDateRangeFields } from '~/features/albums/components/AlbumDateRangeFields';
+import { ReceiptViewerModal } from '~/features/transactions/components/editor';
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { getReceiptUri } from '~/services/userAssets';
+import { triggerHaptic } from '~/services/haptics';
+import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
 import {
   dayKeyFromIsoLocal,
@@ -26,7 +29,6 @@ import {
 } from '~/utils/formatters';
 
 import { ReceiptCard } from '../components/ReceiptCard';
-import { ReceiptPreviewModal } from '../components/ReceiptPreviewModal';
 
 interface ReceiptsScreenProps {
   onBack: () => void;
@@ -47,7 +49,7 @@ type ReceiptRow =
   | { kind: 'row'; id: string; tiles: ReceiptTile[] };
 
 export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreenProps) {
-  const { settings, getDisplayValueForTransaction } = useApp();
+  const { settings, getDisplayValueForTransaction, updateTransaction } = useApp();
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -59,7 +61,91 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [viewerTxId, setViewerTxId] = useState<string | null>(null);
+
+  // The receipt viewer reads the live transaction from the reactive list so its
+  // image updates after a Replace and it closes itself after a Remove.
+  const viewerTx = useMemo(
+    () => (viewerTxId ? (transactions.find((tx) => tx.id === viewerTxId) ?? null) : null),
+    [transactions, viewerTxId],
+  );
+  const viewerFileUri = viewerTx ? getReceiptUri(viewerTx.receiptUri) : null;
+
+  const openReceiptViewer = useCallback((tx: TransactionWithRelations) => {
+    setViewerTxId(tx.id);
+  }, []);
+
+  // Attach a picked image to an already-persisted transaction, then delete the
+  // old file. Eager (no draft/commit machinery — the row is already saved).
+  const pickReceiptFrom = useCallback(
+    async (source: 'camera' | 'library', tx: TransactionWithRelations) => {
+      try {
+        const permission =
+          source === 'camera'
+            ? await ImagePicker.requestCameraPermissionsAsync()
+            : await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert(
+            I18n.t('accounts.logo.permission_title'),
+            I18n.t('accounts.logo.permission_message'),
+          );
+          return;
+        }
+        const result =
+          source === 'camera'
+            ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
+            : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+        if (result.canceled || !result.assets?.[0]) return;
+        const previous = tx.receiptUri;
+        const next = saveReceiptImage(result.assets[0].uri);
+        updateTransaction(tx.id, { receiptUri: next });
+        if (previous && previous !== next) deleteReceiptImage(previous);
+      } catch {
+        Alert.alert(I18n.t('accounts.logo.upload_failed'));
+      }
+    },
+    [updateTransaction],
+  );
+
+  const handleReplaceReceipt = useCallback(() => {
+    const tx = viewerTx;
+    if (!tx) return;
+    void triggerHaptic('selection');
+    Alert.alert(I18n.t('transactions.editor.receipt.label'), undefined, [
+      {
+        text: I18n.t('transactions.editor.receipt.take_photo'),
+        onPress: () => void pickReceiptFrom('camera', tx),
+      },
+      {
+        text: I18n.t('transactions.editor.receipt.choose_from_library'),
+        onPress: () => void pickReceiptFrom('library', tx),
+      },
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+    ]);
+  }, [pickReceiptFrom, viewerTx]);
+
+  const handleRemoveReceipt = useCallback(() => {
+    const tx = viewerTx;
+    if (!tx) return;
+    void triggerHaptic('warning');
+    Alert.alert(
+      I18n.t('transactions.editor.receipt.remove_title'),
+      I18n.t('transactions.editor.receipt.remove_message'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('transactions.editor.receipt.remove'),
+          style: 'destructive',
+          onPress: () => {
+            const previous = tx.receiptUri;
+            updateTransaction(tx.id, { receiptUri: null });
+            if (previous) deleteReceiptImage(previous);
+            setViewerTxId(null);
+          },
+        },
+      ],
+    );
+  }, [updateTransaction, viewerTx]);
 
   // Debounce the search term so filtering doesn't run on every keystroke.
   useEffect(() => {
@@ -165,8 +251,8 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
                   amountText={amountText}
                   isTimeMode={isTimeMode}
                   isIncome={tile.transaction.type === 'income'}
-                  onViewTransaction={onOpenEditTransaction}
-                  onViewReceipt={setPreviewUri}
+                  onOpenReceipt={openReceiptViewer}
+                  onOpenTransaction={onOpenEditTransaction}
                 />
               </View>
             );
@@ -176,7 +262,7 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         </View>
       );
     },
-    [getDisplayValueForTransaction, isTimeMode, settings, onOpenEditTransaction],
+    [getDisplayValueForTransaction, isTimeMode, settings, openReceiptViewer, onOpenEditTransaction],
   );
 
   const isFiltering = search.trim().length > 0 || startDate !== null || endDate !== null;
@@ -230,10 +316,12 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         }
       />
 
-      <ReceiptPreviewModal
-        visible={previewUri !== null}
-        fileUri={previewUri}
-        onClose={() => setPreviewUri(null)}
+      <ReceiptViewerModal
+        visible={viewerTx !== null}
+        fileUri={viewerFileUri}
+        onClose={() => setViewerTxId(null)}
+        onReplace={handleReplaceReceipt}
+        onRemove={handleRemoveReceipt}
       />
     </SettingsPageLayout>
   );

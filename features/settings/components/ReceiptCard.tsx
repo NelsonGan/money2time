@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Eye, ImageOff, Receipt } from 'lucide-react-native';
+import { ImageOff, SquarePen } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -19,16 +19,19 @@ interface ReceiptCardProps {
   amountText: string;
   isTimeMode: boolean;
   isIncome: boolean;
-  onViewTransaction: (transaction: TransactionWithRelations) => void;
-  onViewReceipt: (fileUri: string) => void;
+  /** Tap the image → open the receipt viewer (replace / remove / close). */
+  onOpenReceipt: (transaction: TransactionWithRelations) => void;
+  /** Tap the top-right button → open the transaction editor. */
+  onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
 // Bright mint reads on the dark scrim for income; expense stays white.
 const INCOME_COLOR = '#5BE3A3';
 
 /**
- * A photo tile for the 2-column receipts grid: the receipt image fills the tile
- * with the date, note, amount and two action buttons overlaid on a bottom scrim.
+ * A photo tile for the 2-column receipts grid: the receipt image fills the tile,
+ * with the date, note and amount overlaid on a bottom scrim and a single edit
+ * button pinned to the top-right. Tapping the image opens the receipt viewer.
  */
 export const ReceiptCard = memo(function ReceiptCard({
   transaction,
@@ -36,8 +39,8 @@ export const ReceiptCard = memo(function ReceiptCard({
   amountText,
   isTimeMode,
   isIncome,
-  onViewTransaction,
-  onViewReceipt,
+  onOpenReceipt,
+  onOpenTransaction,
 }: ReceiptCardProps) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.97 });
 
@@ -50,12 +53,12 @@ export const ReceiptCard = memo(function ReceiptCard({
     <Pressable
       onPress={() => {
         void triggerHaptic('selection');
-        onViewTransaction(transaction);
+        onOpenReceipt(transaction);
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={I18n.t('receipts.view_receipt')}
     >
       <Animated.View
         style={[animatedStyle, { aspectRatio: 3 / 4 }]}
@@ -78,9 +81,24 @@ export const ReceiptCard = memo(function ReceiptCard({
           </View>
         )}
 
-        {/* Bottom scrim carrying the overlaid texts + action buttons. */}
+        {/* Edit button pinned to the top-right → opens the transaction. */}
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenTransaction(transaction);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('receipts.view_transaction')}
+          hitSlop={8}
+          className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full"
+          style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+        >
+          <SquarePen size={15} color="#FFFFFF" />
+        </Pressable>
+
+        {/* Bottom scrim carrying the overlaid date / note / amount. */}
         <View
-          className="absolute inset-x-0 bottom-0 px-3 pb-2.5 pt-6"
+          className="absolute inset-x-0 bottom-0 px-3 pb-2 pt-3"
           style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
         >
           <Text variant="label" numberOfLines={1} className="text-white/70">
@@ -110,35 +128,6 @@ export const ReceiptCard = memo(function ReceiptCard({
               {amountText}
             </Text>
           )}
-
-          {/* Action buttons overlaid on the image. */}
-          <View className="mt-2 flex-row gap-2">
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onViewTransaction(transaction);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('receipts.view_transaction')}
-              className="h-8 flex-1 flex-row items-center justify-center rounded-lg bg-white/20"
-            >
-              <Eye size={15} color="#FFFFFF" />
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                if (!receiptFileUri) return;
-                void triggerHaptic('selection');
-                onViewReceipt(receiptFileUri);
-              }}
-              disabled={!receiptFileUri}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('receipts.view_receipt')}
-              style={{ opacity: receiptFileUri ? 1 : 0.4 }}
-              className="h-8 flex-1 flex-row items-center justify-center rounded-lg bg-white/20"
-            >
-              <Receipt size={15} color="#FFFFFF" />
-            </Pressable>
-          </View>
         </View>
       </Animated.View>
     </Pressable>
