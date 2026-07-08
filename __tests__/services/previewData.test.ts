@@ -15,6 +15,8 @@ const rootExpenseKeys = new Set(
 
 const allCategoryKeys = new Set(CATEGORY_BLUEPRINT.map((item) => item.key));
 
+const accountKeys = new Set(['checking', 'savings', 'travel', 'card', 'cash', 'brokerage']);
+
 describe('preview profiles', () => {
   it('covers all four locale profiles', () => {
     expect(PROFILE_KEYS.sort()).toEqual(
@@ -109,6 +111,41 @@ describe('preview profiles', () => {
           'string',
         );
       });
+    });
+
+    it('has a display profile name', () => {
+      expect(typeof profile.profileName).toBe('string');
+      expect(profile.profileName.trim().length).toBeGreaterThan(0);
+    });
+
+    it('seeds split bills against valid categories and accounts', () => {
+      expect(profile.splits.length).toBeGreaterThan(0);
+      // At least one split should still have an unpaid participant, so the
+      // split-bill "owed" summary is non-empty in screenshots.
+      const hasOutstanding = profile.splits.some((split) =>
+        split.participants.some((person) => !person.paid),
+      );
+      expect(hasOutstanding).toBe(true);
+      profile.splits.forEach((split) => {
+        expect(allCategoryKeys.has(split.categoryKey)).toBe(true);
+        expect(accountKeys.has(split.account)).toBe(true);
+        expect(split.selfShare).toBeGreaterThan(0);
+        expect(split.participants.length).toBeGreaterThan(0);
+        split.participants.forEach((person) => {
+          expect(person.name.trim().length).toBeGreaterThan(0);
+          expect(person.share).toBeGreaterThan(0);
+        });
+      });
+    });
+
+    it('keeps the optional second budget on real root categories', () => {
+      if (!profile.secondBudget) return;
+      profile.secondBudget.allocations.forEach((allocation) => {
+        expect(rootExpenseKeys.has(allocation.categoryKey)).toBe(true);
+        expect(allocation.amount).toBeGreaterThan(0);
+      });
+      // Not frozen into any month — it only populates the template picker.
+      expect(profile.secondBudget.monthsToSeed).toBe(0);
     });
   });
 });
