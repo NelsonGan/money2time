@@ -289,6 +289,7 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
               mascotMood={isFiltering ? 'curious' : 'sleepy'}
               title={isFiltering ? I18n.t('receipts.no_matches') : I18n.t('receipts.empty_title')}
               message={isFiltering ? undefined : I18n.t('receipts.empty_message')}
+              animateIn={false}
             />
           </View>
         }
