@@ -291,9 +291,9 @@ export function SettingsScreen({
       malaysian_zh: previewCopy.malaysianZhProfile,
     };
 
-    const runPreviewSeed = (profile: PreviewSeedProfile) => {
+    const runPreviewSeed = async (profile: PreviewSeedProfile) => {
       try {
-        const summary = generatePreviewData(profile);
+        const summary = await generatePreviewData(profile);
         Alert.alert(
           previewCopy.doneTitle,
           formatPreviewDoneMessage(previewCopy.doneMessage, {
@@ -315,10 +315,10 @@ export function SettingsScreen({
 
     Alert.alert(previewCopy.confirmTitle, previewCopy.confirmMessage, [
       { text: I18n.t('common.cancel'), style: 'cancel' },
-      { text: previewCopy.americanProfile, onPress: () => runPreviewSeed('american') },
-      { text: previewCopy.chineseProfile, onPress: () => runPreviewSeed('chinese') },
-      { text: previewCopy.malaysianEnProfile, onPress: () => runPreviewSeed('malaysian_en') },
-      { text: previewCopy.malaysianZhProfile, onPress: () => runPreviewSeed('malaysian_zh') },
+      { text: previewCopy.americanProfile, onPress: () => void runPreviewSeed('american') },
+      { text: previewCopy.chineseProfile, onPress: () => void runPreviewSeed('chinese') },
+      { text: previewCopy.malaysianEnProfile, onPress: () => void runPreviewSeed('malaysian_en') },
+      { text: previewCopy.malaysianZhProfile, onPress: () => void runPreviewSeed('malaysian_zh') },
     ]);
   }, [generatePreviewData, previewCopy]);
 

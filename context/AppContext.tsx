@@ -105,6 +105,7 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import {
+  preparePreviewReceipt,
   type PreviewSeedProfile,
   type PreviewSeedSummary,
   seedPreviewData,
@@ -466,7 +467,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
-  generatePreviewData: (profile: PreviewSeedProfile) => PreviewSeedSummary;
+  generatePreviewData: (profile: PreviewSeedProfile) => Promise<PreviewSeedSummary>;
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
@@ -3822,8 +3823,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [resetTransactionFilters, runMutation]);
 
   const generatePreviewData = useCallback(
-    (profile: PreviewSeedProfile) => {
-      const summary = runMutation(() => seedPreviewData(profile));
+    async (profile: PreviewSeedProfile) => {
+      // Copy the bundled sample receipt into the asset store first (async), then
+      // run the synchronous seed with the resulting relative path.
+      const receiptPath = await preparePreviewReceipt();
+      const summary = runMutation(() => seedPreviewData(profile, receiptPath));
       setAppLocale(summary.locale);
       setActiveAccountFilter(null);
       resetTransactionFilters();
