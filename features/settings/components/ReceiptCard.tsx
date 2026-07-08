@@ -9,7 +9,6 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
-import { FONT } from '~/utils/fonts';
 import { formatShortDate } from '~/utils/formatters';
 
 interface ReceiptCardProps {
@@ -114,18 +113,14 @@ export const ReceiptCard = memo(function ReceiptCard({
             {isTimeMode ? (
               <TimeValueInline
                 value={amountText}
-                variant="caption"
+                variant="bodyStrong"
                 numberOfLines={1}
-                iconSize={13}
+                iconSize={15}
                 iconColor={amountColor}
-                style={{ color: amountColor, fontFamily: FONT.bold }}
+                style={{ color: amountColor }}
               />
             ) : (
-              <Text
-                variant="caption"
-                numberOfLines={1}
-                style={{ color: amountColor, fontFamily: FONT.bold }}
-              >
+              <Text variant="bodyStrong" numberOfLines={1} style={{ color: amountColor }}>
                 {amountText}
               </Text>
             )}
