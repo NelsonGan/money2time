@@ -1,5 +1,4 @@
 import { FlashList } from '@shopify/flash-list';
-import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
 
@@ -17,7 +16,8 @@ import { ActivitySearchRow } from '~/features/transactions/components/ActivitySe
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
+import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
 import {
   dayKeyFromIsoLocal,
@@ -69,7 +69,10 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
     () => (viewerTxId ? (transactions.find((tx) => tx.id === viewerTxId) ?? null) : null),
     [transactions, viewerTxId],
   );
-  const viewerFileUri = viewerTx ? getReceiptUri(viewerTx.receiptUri) : null;
+  const viewerFileUri = useMemo(
+    () => (viewerTx ? getReceiptUri(viewerTx.receiptUri) : null),
+    [viewerTx],
+  );
 
   const openReceiptViewer = useCallback((tx: TransactionWithRelations) => {
     setViewerTxId(tx.id);
@@ -79,30 +82,11 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   // old file. Eager (no draft/commit machinery — the row is already saved).
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library', tx: TransactionWithRelations) => {
-      try {
-        const permission =
-          source === 'camera'
-            ? await ImagePicker.requestCameraPermissionsAsync()
-            : await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-          Alert.alert(
-            I18n.t('accounts.logo.permission_title'),
-            I18n.t('accounts.logo.permission_message'),
-          );
-          return;
-        }
-        const result =
-          source === 'camera'
-            ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
-            : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
-        if (result.canceled || !result.assets?.[0]) return;
-        const previous = tx.receiptUri;
-        const next = saveReceiptImage(result.assets[0].uri);
-        updateTransaction(tx.id, { receiptUri: next });
-        if (previous && previous !== next) deleteReceiptImage(previous);
-      } catch {
-        Alert.alert(I18n.t('accounts.logo.upload_failed'));
-      }
+      const next = await pickAndSaveReceiptImage(source);
+      if (!next) return;
+      const previous = tx.receiptUri;
+      updateTransaction(tx.id, { receiptUri: next });
+      if (previous && previous !== next) deleteReceiptImage(previous);
     },
     [updateTransaction],
   );
@@ -240,9 +224,8 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         <View className="flex-row gap-3 pb-3">
           {item.tiles.map((tile) => {
             const displayValue = getDisplayValueForTransaction(tile.transaction);
-            const isIncome = tile.transaction.type === 'income';
-            // No forced sign: only genuinely negative amounts show a "-"; color
-            // (red expense / mint income) carries the direction otherwise.
+            // No forced sign: only genuinely negative amounts show a "-"; the
+            // amount color carries the expense/income direction instead.
             const amountText = isTimeMode
               ? formatHours(displayValue)
               : formatAmount(displayValue, settings);
@@ -253,7 +236,6 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
                   receiptFileUri={tile.receiptFileUri}
                   amountText={amountText}
                   isTimeMode={isTimeMode}
-                  isIncome={isIncome}
                   onOpenReceipt={openReceiptViewer}
                   onOpenTransaction={onOpenEditTransaction}
                 />

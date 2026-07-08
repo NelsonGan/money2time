@@ -18,16 +18,17 @@ interface ReceiptCardProps {
   /** Amount already formatted for the active display mode (money or time). */
   amountText: string;
   isTimeMode: boolean;
-  isIncome: boolean;
   /** Tap the image → open the receipt viewer (replace / remove / close). */
   onOpenReceipt: (transaction: TransactionWithRelations) => void;
   /** Tap the top-right button → open the transaction editor. */
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
 }
 
-// Colors that read on the dark scrim: mint for income, red for expense.
+// Colors that read on the dark scrim: mint for income, red for expense, and a
+// neutral white for transfers / balance adjustments (no expense/income direction).
 const INCOME_COLOR = '#5BE3A3';
 const EXPENSE_COLOR = '#FF6B6B';
+const NEUTRAL_COLOR = '#FFFFFF';
 
 /**
  * A photo tile for the 2-column receipts grid: the receipt image fills the tile,
@@ -39,7 +40,6 @@ export const ReceiptCard = memo(function ReceiptCard({
   receiptFileUri,
   amountText,
   isTimeMode,
-  isIncome,
   onOpenReceipt,
   onOpenTransaction,
 }: ReceiptCardProps) {
@@ -48,7 +48,12 @@ export const ReceiptCard = memo(function ReceiptCard({
   const locale = I18n.locale ?? 'en';
   const title =
     transaction.note?.trim() || transaction.categoryName || I18n.t('receipts.title') || '';
-  const amountColor = isIncome ? INCOME_COLOR : EXPENSE_COLOR;
+  const amountColor =
+    transaction.type === 'income'
+      ? INCOME_COLOR
+      : transaction.type === 'expense'
+        ? EXPENSE_COLOR
+        : NEUTRAL_COLOR;
 
   return (
     <Pressable
