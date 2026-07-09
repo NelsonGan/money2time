@@ -1558,6 +1558,8 @@ const nl = {
       'Je kunt tot {{count}} items volgen met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_budget_templates:
       'Met het gratis abonnement kun je {{count}} budgetsjabloon maken. Onbeperkt met Pro.',
+    limit_receipts:
+      'Met het gratis abonnement kun je maximaal {{count}} bonnen toevoegen. Onbeperkt met Pro.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:

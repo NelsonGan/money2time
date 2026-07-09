@@ -16,7 +16,8 @@ type LimitType =
   | 'subcurrencies'
   | 'albums'
   | 'items'
-  | 'budget_templates';
+  | 'budget_templates'
+  | 'receipts';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -29,6 +30,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   albums: PRO_LIMITS.FREE_MAX_ALBUMS,
   items: PRO_LIMITS.FREE_MAX_ITEMS,
   budget_templates: PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES,
+  receipts: PRO_LIMITS.FREE_MAX_RECEIPTS,
 };
 
 export function useProGate() {

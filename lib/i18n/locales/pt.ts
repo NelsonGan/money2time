@@ -1546,6 +1546,7 @@ const pt = {
       'Pode acompanhar até {{count}} itens no plano gratuito. Torne-se Pro para ter ilimitados.',
     limit_budget_templates:
       'No plano gratuito pode criar {{count}} modelo de orçamento. Com o Pro, ilimitados.',
+    limit_receipts: 'No plano gratuito pode anexar até {{count}} recibos. Com o Pro, ilimitados.',
     badge: 'PRO',
     trend_preview_title: 'Desbloqueie tendências de longo prazo',
     trend_preview_message:

@@ -1508,6 +1508,8 @@ const ko = {
       '무료 플랜에서는 최대 {{count}}개까지 추적할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_budget_templates:
       '무료 플랜에서는 예산 템플릿을 {{count}}개 만들 수 있어요. Pro는 무제한입니다.',
+    limit_receipts:
+      '무료 플랜에서는 영수증을 최대 {{count}}개 첨부할 수 있어요. Pro는 무제한입니다.',
     badge: 'PRO',
     trend_preview_title: '장기 추세 잠금 해제',
     trend_preview_message:

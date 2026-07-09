@@ -1557,6 +1557,8 @@ const fr = {
       "Vous pouvez suivre jusqu'à {{count}} objets avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_budget_templates:
       'Le plan gratuit permet {{count}} modèle de budget. Passez à Pro pour un nombre illimité.',
+    limit_receipts:
+      "Le plan gratuit permet d'ajouter jusqu'à {{count}} reçus. Passez à Pro pour un nombre illimité.",
     badge: 'PRO',
     trend_preview_title: 'Débloquez les tendances long terme',
     trend_preview_message:

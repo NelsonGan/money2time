@@ -1446,6 +1446,7 @@ const zh = {
     limit_voice: '免费版共可使用 {{count}} 次语音录入。升级到 Pro 即可无限使用语音输入。',
     limit_items: '免费版最多可追踪 {{count}} 件物品。升级 Pro 即可无限。',
     limit_budget_templates: '免费版可创建 {{count}} 个预算模板。升级 Pro 无限制。',
+    limit_receipts: '免费版最多可附加 {{count}} 张收据。升级 Pro 无限制。',
     badge: 'PRO',
     trend_preview_title: '解锁长期趋势',
     trend_preview_message: '解锁趋势功能，追踪规律、洞察变化，长期看清你的金钱走向。',

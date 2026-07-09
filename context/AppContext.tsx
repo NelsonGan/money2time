@@ -394,6 +394,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Non-reactive count of currently-loaded (non-deleted) transactions. Lets
    *  consumers gate on activity without subscribing to transaction churn. */
   getTransactionCount: () => number;
+  /** Non-reactive count of transactions carrying a receipt image. Lets the
+   *  editor gate receipt uploads on the free-plan limit without subscribing
+   *  to transaction churn. */
+  getReceiptCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
   queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
   getCashflowSummary: (range: DateRange) => CashflowSummary;
@@ -3009,6 +3013,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   transactionCountRef.current = transactions.length;
   const getTransactionCount = useCallback(() => transactionCountRef.current, []);
 
+  // Non-reactive count of transactions that carry a receipt image, read on
+  // demand so the editor can gate receipt uploads on the free-plan limit
+  // without subscribing to transaction churn.
+  const getReceiptCount = useCallback(
+    () => transactionsRef.current.reduce((total, tx) => (tx.receiptUri ? total + 1 : total), 0),
+    [],
+  );
+
   // Identity-stable: reads the render-synced map via a ref so transaction
   // churn doesn't rebuild the useApp() value. Consumers that memoize on the
   // result must key their memos on `useTransactions().transactions` (the
@@ -3735,6 +3747,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getAccountById,
             getCategoryById,
             getTransactionCount,
+            getReceiptCount,
             getTransactionsByAccount,
             queryTransactions,
             getCashflowSummary,
@@ -3852,6 +3865,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getAccountById,
       getCategoryById,
       getTransactionCount,
+      getReceiptCount,
       getTransactionsByAccount,
       queryTransactions,
       getCashflowSummary,

@@ -1517,6 +1517,7 @@ const ja = {
       '無料プランでは最大 {{count}} 個まで記録できます。無制限にするには Pro にアップグレードしてください。',
     limit_budget_templates:
       '無料プランでは予算テンプレートを{{count}}件作成できます。Proなら無制限です。',
+    limit_receipts: '無料プランではレシートを{{count}}件まで添付できます。Proなら無制限です。',
     badge: 'PRO',
     trend_preview_title: '長期トレンドを解放',
     trend_preview_message:

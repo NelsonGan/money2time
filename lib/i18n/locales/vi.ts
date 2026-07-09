@@ -1523,6 +1523,8 @@ const vi = {
       'Bạn có thể theo dõi tối đa {{count}} món ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_budget_templates:
       'Gói miễn phí cho phép tạo {{count}} mẫu ngân sách. Không giới hạn với Pro.',
+    limit_receipts:
+      'Gói miễn phí cho phép đính kèm tối đa {{count}} hóa đơn. Không giới hạn với Pro.',
     badge: 'PRO',
     trend_preview_title: 'Mở khóa xu hướng dài hạn',
     trend_preview_message:

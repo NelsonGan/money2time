@@ -1541,6 +1541,8 @@ const nb = {
     limit_items: 'Du kan spore opptil {{count}} gjenstander i gratisplanen. Få Pro for ubegrenset.',
     limit_budget_templates:
       'Med gratisplanen kan du opprette {{count}} budsjettmal. Ubegrenset med Pro.',
+    limit_receipts:
+      'Med gratisplanen kan du legge ved opptil {{count}} kvitteringer. Ubegrenset med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås opp langsiktige trender',
     trend_preview_message:

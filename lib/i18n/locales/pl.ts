@@ -1545,6 +1545,7 @@ const pl = {
       'W planie darmowym możesz śledzić do {{count}} przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_budget_templates:
       'W darmowym planie możesz utworzyć {{count}} szablon budżetu. W Pro bez limitu.',
+    limit_receipts: 'W darmowym planie możesz dołączyć do {{count}} paragonów. W Pro bez limitu.',
     badge: 'PRO',
     trend_preview_title: 'Odblokuj trendy długoterminowe',
     trend_preview_message:

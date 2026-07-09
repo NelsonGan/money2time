@@ -1545,6 +1545,7 @@ const tr = {
       'Ücretsiz planda {{count}} eşyaya kadar takip edebilirsin. Sınırsız için Pro’ya geç.',
     limit_budget_templates:
       'Ücretsiz planda {{count}} bütçe şablonu oluşturabilirsin. Pro ile sınırsız.',
+    limit_receipts: 'Ücretsiz planda en fazla {{count}} fiş ekleyebilirsin. Pro ile sınırsız.',
     badge: 'PRO',
     trend_preview_title: 'Uzun vadeli eğilimlerin kilidini açın',
     trend_preview_message:

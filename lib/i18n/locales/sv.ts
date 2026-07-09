@@ -1537,6 +1537,8 @@ const sv = {
       'Du kan spåra upp till {{count}} föremål i gratisplanen. Skaffa Pro för obegränsat.',
     limit_budget_templates:
       'Med gratisplanen kan du skapa {{count}} budgetmall. Obegränsat med Pro.',
+    limit_receipts:
+      'Med gratisplanen kan du bifoga upp till {{count}} kvitton. Obegränsat med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås upp långsiktiga trender',
     trend_preview_message:

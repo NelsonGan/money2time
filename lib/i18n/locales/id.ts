@@ -1548,6 +1548,7 @@ const id = {
       'Kamu bisa melacak hingga {{count}} barang di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_budget_templates:
       'Paket gratis memungkinkan {{count}} templat anggaran. Tanpa batas dengan Pro.',
+    limit_receipts: 'Paket gratis memungkinkan hingga {{count}} struk. Tanpa batas dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:

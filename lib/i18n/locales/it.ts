@@ -1548,6 +1548,8 @@ const it = {
       'Con il piano gratuito puoi tracciare fino a {{count}} oggetti. Passa a Pro per averne illimitati.',
     limit_budget_templates:
       'Con il piano gratuito puoi creare {{count}} modello di budget. Con Pro sono illimitati.',
+    limit_receipts:
+      'Con il piano gratuito puoi allegare fino a {{count}} scontrini. Con Pro sono illimitati.',
     badge: 'PRO',
     trend_preview_title: 'Sblocca tendenze a lungo termine',
     trend_preview_message:

@@ -1538,6 +1538,8 @@ const da = {
     limit_items: 'Du kan spore op til {{count}} ting i gratisplanen. Få Pro for ubegrænset.',
     limit_budget_templates:
       'Med gratisplanen kan du oprette {{count}} budgetskabelon. Ubegrænset med Pro.',
+    limit_receipts:
+      'Med gratisplanen kan du vedhæfte op til {{count}} kvitteringer. Ubegrænset med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås langsigtede tendenser op',
     trend_preview_message:

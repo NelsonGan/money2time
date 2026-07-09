@@ -85,6 +85,7 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { usePressScale } from '~/hooks/usePressScale';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -544,7 +545,9 @@ export function TransactionEditorScreen({
     rateTable,
     fxCurrencies,
     quickEntryPrefs,
+    getReceiptCount,
   } = useApp();
+  const { checkLimit } = useProGate();
 
   // Bulk create mode: when on, Save keeps the editor open in create mode so the
   // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
@@ -660,6 +663,12 @@ export function TransactionEditorScreen({
     [handleReceiptChange],
   );
   const handleAddReceipt = useCallback(() => {
+    // Attaching a receipt adds a new one to the free-plan total unless this
+    // transaction already has a persisted receipt (that row is already counted,
+    // so replacing it doesn't grow the total). Gate the former case only.
+    if (!persistedReceiptRef.current && !checkLimit('receipts', getReceiptCount())) {
+      return;
+    }
     void triggerHaptic('selection');
     Alert.alert(I18n.t('transactions.editor.receipt.label'), undefined, [
       {
@@ -672,7 +681,7 @@ export function TransactionEditorScreen({
       },
       { text: I18n.t('common.cancel'), style: 'cancel' },
     ]);
-  }, [pickReceiptFrom]);
+  }, [checkLimit, getReceiptCount, pickReceiptFrom]);
   // Full-screen preview opened from the action row's view-receipt button.
   const [receiptViewerVisible, setReceiptViewerVisible] = useState(false);
   const handleRemoveReceipt = useCallback(() => {

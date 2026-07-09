@@ -1526,6 +1526,8 @@ const hi = {
       'मुफ़्त प्लान में आप {{count}} तक चीज़ें ट्रैक कर सकते हैं। असीमित के लिए Pro लें।',
     limit_budget_templates:
       'मुफ़्त प्लान में आप {{count}} बजट टेम्पलेट बना सकते हैं। Pro में असीमित।',
+    limit_receipts:
+      'मुफ़्त प्लान में आप ज़्यादा से ज़्यादा {{count}} रसीदें जोड़ सकते हैं। Pro में असीमित।',
     badge: 'PRO',
     trend_preview_title: 'दीर्घकालिक ट्रेंड अनलॉक करें',
     trend_preview_message:

@@ -1507,6 +1507,8 @@ const en = {
       'You can track up to {{count}} items on the free plan. Upgrade to Pro for unlimited.',
     limit_budget_templates:
       'You can create {{count}} budget template on the free plan. Upgrade to Pro for unlimited.',
+    limit_receipts:
+      'You can attach up to {{count}} receipts on the free plan. Upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:

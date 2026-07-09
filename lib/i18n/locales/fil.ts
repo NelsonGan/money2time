@@ -1562,6 +1562,8 @@ const fil = {
       'Maaari kang mag-track ng hanggang {{count}} item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_budget_templates:
       'Sa libreng plan, makakagawa ka ng {{count}} template ng badyet. Walang limitasyon sa Pro.',
+    limit_receipts:
+      'Sa libreng plan, makakapaglakip ka ng hanggang {{count}} resibo. Walang limitasyon sa Pro.',
     badge: 'PRO',
     trend_preview_title: 'I-unlock ang pangmatagalang trend',
     trend_preview_message:

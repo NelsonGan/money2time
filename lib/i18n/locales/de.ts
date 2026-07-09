@@ -1560,6 +1560,8 @@ const de = {
       'Im kostenlosen Tarif kannst du bis zu {{count}} Artikel verfolgen. Hol dir Pro für unbegrenzte.',
     limit_budget_templates:
       'Im Gratis-Plan kannst du {{count}} Budget-Vorlage erstellen. Mit Pro unbegrenzt.',
+    limit_receipts:
+      'Im Gratis-Plan kannst du bis zu {{count}} Belege anhängen. Mit Pro unbegrenzt.',
     badge: 'PRO',
     trend_preview_title: 'Langfristige Trends freischalten',
     trend_preview_message:

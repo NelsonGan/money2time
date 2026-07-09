@@ -1503,6 +1503,7 @@ const th = {
     limit_items: 'แผนฟรีติดตามได้สูงสุด {{count}} ชิ้น อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_budget_templates:
       'แผนฟรีสร้างเทมเพลตงบประมาณได้ {{count}} รายการ อัปเกรดเป็น Pro เพื่อไม่จำกัด',
+    limit_receipts: 'แผนฟรีแนบใบเสร็จได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     badge: 'PRO',
     trend_preview_title: 'ปลดล็อกแนวโน้มระยะยาว',
     trend_preview_message:

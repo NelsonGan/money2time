@@ -1544,6 +1544,7 @@ const ms = {
       'Anda boleh menjejak sehingga {{count}} item dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_budget_templates:
       'Pelan percuma membenarkan {{count}} templat bajet. Tanpa had dengan Pro.',
+    limit_receipts: 'Pelan percuma membenarkan sehingga {{count}} resit. Tanpa had dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka kunci trend jangka panjang',
     trend_preview_message:
