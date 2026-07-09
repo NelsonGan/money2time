@@ -24,6 +24,7 @@ import { formatCurrency, formatShortDate } from '~/utils/formatters';
 interface SettleUpTransactionScreenProps {
   transactionId: string;
   onBack: () => void;
+  onOpenSettings: () => void;
 }
 
 function personInitial(name: string | null): string {
@@ -34,6 +35,7 @@ function personInitial(name: string | null): string {
 export function SettleUpTransactionScreen({
   transactionId,
   onBack,
+  onOpenSettings,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
@@ -246,6 +248,7 @@ export function SettleUpTransactionScreen({
             onClose={() => setShareVisible(false)}
             content={receiptContent}
             itemCount={bill.splitCount}
+            onSetupQr={onOpenSettings}
           />
         </>
       ) : null}

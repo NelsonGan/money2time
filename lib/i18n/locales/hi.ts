@@ -433,6 +433,12 @@ const hi = {
       receipt_total_label: 'आपको देना है',
       receipt_qr_note: 'मुझे वापस भुगतान करने के लिए मेरा जोड़ा गया QR स्कैन करें।',
       receipt_scan_short: 'भुगतान के लिए स्कैन करें',
+      settings_title: 'सेटल अप सेटिंग्स',
+      settings_action: 'सेटल अप सेटिंग्स',
+      qr_prompt_title: 'अपना पेमेंट QR जोड़ें?',
+      qr_prompt_message:
+        'अपना पेमेंट QR सेट करें ताकि दोस्त उसे स्कैन करके सीधे रसीद से आपको वापस भुगतान कर सकें।',
+      qr_prompt_cta: 'पेमेंट QR जोड़ें',
     },
     title: 'लेनदेन',
     empty_month_title: 'इस महीने कोई लेनदेन नहीं',
@@ -1526,6 +1532,8 @@ const hi = {
       'मुफ़्त प्लान में आप {{count}} तक चीज़ें ट्रैक कर सकते हैं। असीमित के लिए Pro लें।',
     limit_budget_templates:
       'मुफ़्त प्लान में आप {{count}} बजट टेम्पलेट बना सकते हैं। Pro में असीमित।',
+    limit_receipts:
+      'मुफ़्त प्लान में आप ज़्यादा से ज़्यादा {{count}} रसीदें जोड़ सकते हैं। Pro में असीमित।',
     badge: 'PRO',
     trend_preview_title: 'दीर्घकालिक ट्रेंड अनलॉक करें',
     trend_preview_message:

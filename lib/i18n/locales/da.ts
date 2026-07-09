@@ -434,6 +434,12 @@ const da = {
       receipt_total_label: 'Du skylder',
       receipt_qr_note: 'Scan den QR, jeg har vedhæftet, for at betale mig tilbage.',
       receipt_scan_short: 'Scan for at betale',
+      settings_title: 'Indstillinger for afregning',
+      settings_action: 'Indstillinger for afregning',
+      qr_prompt_title: 'Tilføj din betalings-QR?',
+      qr_prompt_message:
+        'Opsæt din betalings-QR, så venner kan scanne den og betale dig tilbage direkte fra kvitteringen.',
+      qr_prompt_cta: 'Tilføj betalings-QR',
     },
     title: 'Transaktioner',
     empty_month_title: 'Ingen transaktioner denne måned',
@@ -1538,6 +1544,8 @@ const da = {
     limit_items: 'Du kan spore op til {{count}} ting i gratisplanen. Få Pro for ubegrænset.',
     limit_budget_templates:
       'Med gratisplanen kan du oprette {{count}} budgetskabelon. Ubegrænset med Pro.',
+    limit_receipts:
+      'Med gratisplanen kan du vedhæfte op til {{count}} kvitteringer. Ubegrænset med Pro.',
     badge: 'PRO',
     trend_preview_title: 'Lås langsigtede tendenser op',
     trend_preview_message:

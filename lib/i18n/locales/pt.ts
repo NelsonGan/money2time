@@ -434,6 +434,12 @@ const pt = {
       receipt_total_label: 'Você deve',
       receipt_qr_note: 'Escaneie o QR que anexei para me pagar.',
       receipt_scan_short: 'Escaneie para pagar',
+      settings_title: 'Configurações de acerto de contas',
+      settings_action: 'Configurações de acerto de contas',
+      qr_prompt_title: 'Adicionar seu QR de pagamento?',
+      qr_prompt_message:
+        'Configure seu QR de pagamento para que os amigos possam escaneá-lo e pagar você direto pelo recibo.',
+      qr_prompt_cta: 'Adicionar QR de pagamento',
     },
     title: 'Transações',
     empty_month_title: 'Nenhuma transação este mês',
@@ -1546,6 +1552,7 @@ const pt = {
       'Pode acompanhar até {{count}} itens no plano gratuito. Torne-se Pro para ter ilimitados.',
     limit_budget_templates:
       'No plano gratuito pode criar {{count}} modelo de orçamento. Com o Pro, ilimitados.',
+    limit_receipts: 'No plano gratuito pode anexar até {{count}} recibos. Com o Pro, ilimitados.',
     badge: 'PRO',
     trend_preview_title: 'Desbloqueie tendências de longo prazo',
     trend_preview_message:

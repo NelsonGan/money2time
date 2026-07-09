@@ -436,6 +436,12 @@ const es = {
       receipt_total_label: 'Debes',
       receipt_qr_note: 'Escanea el QR que adjunté para devolverme el dinero.',
       receipt_scan_short: 'Escanea para pagar',
+      settings_title: 'Ajustes de saldar cuentas',
+      settings_action: 'Ajustes de saldar cuentas',
+      qr_prompt_title: '¿Añadir tu QR de pago?',
+      qr_prompt_message:
+        'Configura tu QR de pago para que tus amigos puedan escanearlo y pagarte directamente desde el recibo.',
+      qr_prompt_cta: 'Añadir QR de pago',
     },
     title: 'Movimientos',
     empty_month_title: 'Sin movimientos este mes',
@@ -1550,6 +1556,8 @@ const es = {
       'Puedes seguir hasta {{count}} objetos en el plan gratuito. Hazte Pro para tener ilimitados.',
     limit_budget_templates:
       'En el plan gratuito puedes crear {{count}} plantilla de presupuesto. Con Pro, ilimitadas.',
+    limit_receipts:
+      'En el plan gratuito puedes adjuntar hasta {{count}} recibos. Con Pro, ilimitados.',
     badge: 'PRO',
     trend_preview_title: 'Desbloquea tendencias a largo plazo',
     trend_preview_message:

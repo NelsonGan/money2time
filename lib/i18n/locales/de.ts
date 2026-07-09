@@ -437,6 +437,12 @@ const de = {
       receipt_qr_note:
         'Scanne den QR-Code, den ich angehängt habe, um mir das Geld zurückzuzahlen.',
       receipt_scan_short: 'Scannen zum Zahlen',
+      settings_title: 'Abrechnungseinstellungen',
+      settings_action: 'Abrechnungseinstellungen',
+      qr_prompt_title: 'Zahlungs-QR hinzufügen?',
+      qr_prompt_message:
+        'Richte deinen Zahlungs-QR ein, damit Freunde ihn scannen und dich direkt über den Beleg zurückzahlen können.',
+      qr_prompt_cta: 'Zahlungs-QR hinzufügen',
     },
     title: 'Transaktionen',
     empty_month_title: 'Keine Transaktionen diesen Monat',
@@ -1560,6 +1566,8 @@ const de = {
       'Im kostenlosen Tarif kannst du bis zu {{count}} Artikel verfolgen. Hol dir Pro für unbegrenzte.',
     limit_budget_templates:
       'Im Gratis-Plan kannst du {{count}} Budget-Vorlage erstellen. Mit Pro unbegrenzt.',
+    limit_receipts:
+      'Im Gratis-Plan kannst du bis zu {{count}} Belege anhängen. Mit Pro unbegrenzt.',
     badge: 'PRO',
     trend_preview_title: 'Langfristige Trends freischalten',
     trend_preview_message:

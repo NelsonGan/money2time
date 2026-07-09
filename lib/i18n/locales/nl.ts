@@ -437,6 +437,12 @@ const nl = {
       receipt_total_label: 'Jij moet nog',
       receipt_qr_note: 'Scan de QR die ik heb bijgevoegd om me terug te betalen.',
       receipt_scan_short: 'Scan om te betalen',
+      settings_title: 'Instellingen voor afrekenen',
+      settings_action: 'Instellingen voor afrekenen',
+      qr_prompt_title: 'Je betaal-QR toevoegen?',
+      qr_prompt_message:
+        'Stel je betaal-QR in zodat vrienden die kunnen scannen en je direct vanaf het bonnetje kunnen terugbetalen.',
+      qr_prompt_cta: 'Betaal-QR toevoegen',
     },
     title: 'Transacties',
     empty_month_title: 'Geen transacties deze maand',
@@ -1558,6 +1564,8 @@ const nl = {
       'Je kunt tot {{count}} items volgen met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_budget_templates:
       'Met het gratis abonnement kun je {{count}} budgetsjabloon maken. Onbeperkt met Pro.',
+    limit_receipts:
+      'Met het gratis abonnement kun je maximaal {{count}} bonnen toevoegen. Onbeperkt met Pro.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:

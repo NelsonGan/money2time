@@ -118,6 +118,7 @@ import {
   QuickAddScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
+  SettleUpSettingsScreen,
   SettleUpTransactionScreen,
   SplitBillScreen,
 } from '~/features/transactions/screens';
@@ -1626,13 +1627,22 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
       onOpenTransaction={(transactionId) =>
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
+      onOpenSettings={() => navigation.navigate('SettleUpSettings')}
     />
   );
 }
 
+function SettleUpSettingsRouteScreen({ navigation }: RootStackRouteProps<'SettleUpSettings'>) {
+  return <SettleUpSettingsScreen onBack={() => navigation.goBack()} />;
+}
+
 function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'SettleUpPerson'>) {
   return (
-    <SettleUpPersonScreen personKey={route.params.personKey} onBack={() => navigation.goBack()} />
+    <SettleUpPersonScreen
+      personKey={route.params.personKey}
+      onBack={() => navigation.goBack()}
+      onOpenSettings={() => navigation.navigate('SettleUpSettings')}
+    />
   );
 }
 
@@ -1644,6 +1654,7 @@ function SettleUpTransactionRouteScreen({
     <SettleUpTransactionScreen
       transactionId={route.params.transactionId}
       onBack={() => navigation.goBack()}
+      onOpenSettings={() => navigation.navigate('SettleUpSettings')}
     />
   );
 }
@@ -2095,6 +2106,7 @@ function AppContent() {
             <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
             <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
             <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
+            <RootStack.Screen name="SettleUpSettings" component={SettleUpSettingsRouteScreen} />
             <RootStack.Screen name="SettleUpPerson" component={SettleUpPersonRouteScreen} />
             <RootStack.Screen
               name="SettleUpTransaction"

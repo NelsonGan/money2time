@@ -433,6 +433,12 @@ const vi = {
       receipt_total_label: 'Bạn nợ',
       receipt_qr_note: 'Quét mã QR mình đính kèm để trả lại cho mình nhé.',
       receipt_scan_short: 'Quét để thanh toán',
+      settings_title: 'Cài đặt Chia tiền',
+      settings_action: 'Cài đặt Chia tiền',
+      qr_prompt_title: 'Thêm mã QR thanh toán của bạn?',
+      qr_prompt_message:
+        'Thiết lập mã QR thanh toán của bạn để bạn bè có thể quét và trả lại tiền cho bạn ngay từ hóa đơn.',
+      qr_prompt_cta: 'Thêm mã QR thanh toán',
     },
     title: 'Giao dịch',
     empty_month_title: 'Tháng này chưa có giao dịch',
@@ -1523,6 +1529,8 @@ const vi = {
       'Bạn có thể theo dõi tối đa {{count}} món ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_budget_templates:
       'Gói miễn phí cho phép tạo {{count}} mẫu ngân sách. Không giới hạn với Pro.',
+    limit_receipts:
+      'Gói miễn phí cho phép đính kèm tối đa {{count}} hóa đơn. Không giới hạn với Pro.',
     badge: 'PRO',
     trend_preview_title: 'Mở khóa xu hướng dài hạn',
     trend_preview_message:

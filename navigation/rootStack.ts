@@ -29,6 +29,7 @@ export type RootStackParamList = {
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;
+  SettleUpSettings: undefined;
   SettleUpPerson: { personKey: string };
   SettleUpTransaction: { transactionId: string };
   SplitBill: undefined;

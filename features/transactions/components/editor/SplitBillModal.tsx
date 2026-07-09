@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
+import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
@@ -489,7 +489,8 @@ export function SplitBillModal({
             {splits.map((row, index) => {
               const acct = row.paybackAccountId ? accountById.get(row.paybackAccountId) : null;
               const fallbackAcct = defaultAccountId ? accountById.get(defaultAccountId) : null;
-              const acctLabel = acct?.name ?? fallbackAcct?.name ?? I18n.t('common.no_account');
+              const effectiveAcct = acct ?? fallbackAcct ?? null;
+              const acctLabel = effectiveAcct?.name ?? I18n.t('common.no_account');
               const disabledRow = !!row.paid;
               const canMarkPaid = !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
               const canUndo = disabledRow && !!row.id && !!onMarkUnpaid && newlyPaidIds.has(row.id);
@@ -629,6 +630,13 @@ export function SplitBillModal({
                             <Text variant="caption" tone="muted">
                               {I18n.t('transactions.editor.split.payback_to')}:
                             </Text>
+                            {effectiveAcct ? (
+                              <AccountLogo
+                                logoId={effectiveAcct.logoId}
+                                type={effectiveAcct.type}
+                                size={16}
+                              />
+                            ) : null}
                             <Text variant="caption" numberOfLines={1} className="max-w-[110px]">
                               {acctLabel}
                             </Text>
