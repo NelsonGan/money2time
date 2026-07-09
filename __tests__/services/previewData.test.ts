@@ -58,6 +58,27 @@ describe('preview profiles', () => {
       }
     });
 
+    it('changes wage exactly once per job over the tracked span', () => {
+      // The seeder writes a wage entry only when the config changes (walking
+      // oldest -> newest), so the number of entries equals the number of jobs
+      // that fall in the 48-month window.
+      let previous: ReturnType<typeof wageConfigForMonthsAgo> | null = null;
+      let changePoints = 0;
+      for (let monthsAgo = 47; monthsAgo >= 0; monthsAgo -= 1) {
+        const config = wageConfigForMonthsAgo(profile.career, monthsAgo);
+        const changed =
+          !previous ||
+          previous.wageAmount !== config.wageAmount ||
+          previous.commuteMinutesPerWorkday !== config.commuteMinutesPerWorkday ||
+          previous.hoursWorkedPerWeek !== config.hoursWorkedPerWeek;
+        if (changed) changePoints += 1;
+        previous = config;
+      }
+      // Every job in these profiles has a distinct salary, so all of them show
+      // up as change points within the window.
+      expect(changePoints).toBe(profile.career.length);
+    });
+
     it('budgets against real root expense categories within the cap', () => {
       const { budgets } = profile;
       expect(budgets.allocations.length).toBeGreaterThan(0);
