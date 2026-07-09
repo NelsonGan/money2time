@@ -33,6 +33,9 @@ interface MonthPagerPageProps {
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
   getScrollToDayRef?: (index: number) => MutableRefObject<ScrollToDayHandler>;
   contentPaddingHorizontal?: number;
+  /** Extra scroll room appended below the list so early-month days can be
+   *  scrolled up toward the top rather than staying pinned at the bottom. */
+  scrollBottomSpace?: number;
 }
 
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
@@ -56,6 +59,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   getScrollToTopRef,
   getScrollToDayRef,
   contentPaddingHorizontal,
+  scrollBottomSpace = 0,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
     () => addMonthsAtMonthStart(monthPagerAnchorDate, item - centerIndex),
@@ -80,7 +84,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         onToggleDaySelection={onToggleDaySelection}
         emptyTitle={I18n.t('transactions.empty_month_title')}
         emptyMessage={I18n.t('transactions.empty_month_message')}
-        contentPaddingBottom={LIST_BOTTOM_PADDING}
+        contentPaddingBottom={LIST_BOTTOM_PADDING + scrollBottomSpace}
         contentPaddingHorizontal={contentPaddingHorizontal}
         extendUnderBottomNav
         disableItemAnimations

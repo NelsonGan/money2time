@@ -150,9 +150,10 @@ function buildMonthLabels(locale: string) {
   return Array.from({ length: 12 }, (_, i) => formatter.format(new Date(2024, i, 1)));
 }
 
-// Horizontal padding around the quick row (the container's px-3, both sides),
-// used to estimate the scroll viewport width before layout is measured.
-const QUICK_ROW_HORIZONTAL_INSET = 24;
+// The picker container's horizontal padding (px-3, both sides). Used to estimate
+// the quick-row scroll viewport and the month carousel width from the window
+// width before the real layout is measured, so neither paints empty on open.
+const CONTAINER_HORIZONTAL_INSET = 24;
 
 // Scroll offset that centers the selected quick day (or today when the selection
 // falls outside the quick range) within a viewport of `rowWidth`.
@@ -208,7 +209,14 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
 
   const currentOffset = useSharedValue(0);
   const gestureDelta = useSharedValue(0);
-  const [containerWidth, setContainerWidth] = useState(0);
+  // Seed the carousel width from the window (the card is full-width, less the
+  // container padding) so the month grid paints on the first frame instead of
+  // flashing empty until onLayout measures. The exact width corrects it a frame
+  // later; the current month sits at offset 0 either way, so nothing visibly
+  // shifts on the correction.
+  const [containerWidth, setContainerWidth] = useState(() =>
+    Math.max(0, windowWidth - CONTAINER_HORIZONTAL_INSET),
+  );
 
   const commitJs = useCallback((newOffset: number) => {
     void triggerHaptic('selection');
@@ -319,7 +327,7 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
   // centered — otherwise the row paints at x=0 and visibly jumps to center once
   // onLayout fires. The onLayout handler corrects it with the exact width.
   const initialQuickOffset = useMemo(
-    () => quickCenterOffset(windowWidth - QUICK_ROW_HORIZONTAL_INSET, quickDays, value),
+    () => quickCenterOffset(windowWidth - CONTAINER_HORIZONTAL_INSET, quickDays, value),
     [quickDays, value, windowWidth],
   );
   const handleQuickRowLayout = useCallback(
