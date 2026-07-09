@@ -299,23 +299,26 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
   const quickRowWidthRef = useRef(0);
   const quickScrollRef = useRef<ScrollView | null>(null);
   const quickInitialScrollDoneRef = useRef(false);
-  const centerTodayInQuickRow = useCallback(() => {
+  const centerSelectedInQuickRow = useCallback(() => {
     const rowWidth = quickRowWidthRef.current;
     if (rowWidth <= 0) return;
-    const todayCenter =
-      QUICK_TODAY_INDEX * (QUICK_PILL_WIDTH + QUICK_PILL_GAP) + QUICK_PILL_WIDTH / 2;
-    const offset = Math.max(0, todayCenter - rowWidth / 2);
+    // Center the selected day when it falls inside the quick range (e.g. the
+    // editor opened on an earlier day), otherwise fall back to today.
+    const selectedIndex = quickDays.findIndex((day) => day.iso === value);
+    const centerIndex = selectedIndex >= 0 ? selectedIndex : QUICK_TODAY_INDEX;
+    const center = centerIndex * (QUICK_PILL_WIDTH + QUICK_PILL_GAP) + QUICK_PILL_WIDTH / 2;
+    const offset = Math.max(0, center - rowWidth / 2);
     quickScrollRef.current?.scrollTo({ x: offset, animated: false });
-  }, []);
+  }, [quickDays, value]);
   const handleQuickRowLayout = useCallback(
     (event: { nativeEvent: { layout: { width: number } } }) => {
       quickRowWidthRef.current = event.nativeEvent.layout.width;
       if (!quickInitialScrollDoneRef.current) {
         quickInitialScrollDoneRef.current = true;
-        centerTodayInQuickRow();
+        centerSelectedInQuickRow();
       }
     },
-    [centerTodayInQuickRow],
+    [centerSelectedInQuickRow],
   );
 
   return (

@@ -1,5 +1,5 @@
 import { X } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -63,14 +63,12 @@ export function DatePickerModal({
     Math.max(CARD_MIN_HEIGHT, screenHeight * CARD_HEIGHT_RATIO),
   );
 
-  // Bump on every open so the inline picker remounts with the current `value`'s
-  // month each time, instead of carrying stale baseAnchor / swipe state from the
-  // previous session.
-  const [sessionToken, setSessionToken] = useState(0);
-  useEffect(() => {
-    if (visible) setSessionToken((token) => token + 1);
-  }, [visible]);
-
+  // Mount the inline picker only while the modal is open so it always starts
+  // fresh from the current `value`'s month, instead of carrying stale
+  // baseAnchor / scroll / swipe state from a previous session. Gating on
+  // `visible` (rather than remounting a render later via a token bump) avoids
+  // the double-mount that briefly showed the previous month before jumping to
+  // the correct one — the source of the quick-row "flash" on open.
   const body = (
     <Pressable style={styles.backdrop} onPress={onClose}>
       <Pressable
@@ -88,12 +86,9 @@ export function DatePickerModal({
             <X size={14} color={themeColors.textSoft} />
           </Pressable>
         </View>
-        <InlineDatePicker
-          key={sessionToken}
-          value={value}
-          onSelect={onSelect}
-          showQuickDays={showQuickDays}
-        />
+        {visible ? (
+          <InlineDatePicker value={value} onSelect={onSelect} showQuickDays={showQuickDays} />
+        ) : null}
       </Pressable>
     </Pressable>
   );
