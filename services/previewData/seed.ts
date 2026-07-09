@@ -240,18 +240,39 @@ function createCategories(profile: PreviewProfile): CategoryRefs {
   return ids;
 }
 
-// Salary steps up only at job changes and stays flat in between, so the derived
-// hourly-value chart reads as a clean staircase of real raises. Hours are flat
-// and the commute drops at the newest job, so the *true* hourly rate climbs a
-// touch faster than gross pay right at the end of the history.
+function wageConfigsEqual(a: WageConfig, b: WageConfig) {
+  return (
+    a.wageAmount === b.wageAmount &&
+    a.hoursWorkedPerWeek === b.hoursWorkedPerWeek &&
+    a.workdaysPerWeek === b.workdaysPerWeek &&
+    a.commuteMinutesPerWorkday === b.commuteMinutesPerWorkday
+  );
+}
+
+// Record a wage entry only when the pay actually changes — i.e. at each job
+// switch — the way a real user does (you don't re-enter your wage every month).
+// The app carries the most recent entry forward (monthlyWageRepository
+// .getRateByDate), so every month still resolves the right hourly value while
+// the history list stays short. Returns the number of entries written.
+//
+// Salary is flat within a job and steps up at each change, and the commute drops
+// at the newest job, so the derived hourly-value chart reads as a clean
+// staircase of real raises. This uses the same wageConfigForMonthsAgo the
+// monthly income rows use, so the wage history and the actual paychecks step in
+// lockstep.
 function seedWageHistory(profile: PreviewProfile) {
   const currentMonth = monthStart(new Date());
+  let previous: WageConfig | null = null;
 
-  for (let index = 0; index < WAGE_HISTORY_MONTHS; index += 1) {
-    const monthsAgo = WAGE_HISTORY_MONTHS - 1 - index;
-    const monthDate = monthStart(currentMonth, -monthsAgo);
+  // Walk oldest → newest so the first month (the start of the tracked history)
+  // always seeds the starting wage, then only changes add an entry.
+  for (let monthsAgo = WAGE_HISTORY_MONTHS - 1; monthsAgo >= 0; monthsAgo -= 1) {
     const config = wageConfigForMonthsAgo(profile.career, monthsAgo);
+    if (previous && wageConfigsEqual(previous, config)) continue;
+
+    const monthDate = monthStart(currentMonth, -monthsAgo);
     monthlyWageRepository.saveForMonth(monthKey(monthDate), config);
+    previous = config;
   }
 }
 
