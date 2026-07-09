@@ -2276,12 +2276,15 @@ export function TransactionEditorScreen({
       const fields = getLatestTransactionFieldsByNote(suggestion);
       if (!fields) return;
       if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
-      if (fields.accountId) {
+      // The note's last transaction may reference an account that has since been
+      // deleted (the lookup filters the transaction, not the account). Only adopt
+      // it when it still exists so the default account isn't cleared to a dead id.
+      if (fields.accountId && accounts.some((account) => account.id === fields.accountId)) {
         setAccountId(fields.accountId);
         setEntryCurrency(accountCurrency(fields.accountId));
       }
     },
-    [accountCurrency, categoryId, mode],
+    [accountCurrency, accounts, categoryId, mode],
   );
 
   useEffect(
