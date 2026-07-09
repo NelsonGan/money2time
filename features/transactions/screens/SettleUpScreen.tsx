@@ -1,7 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImagePlus, QrCode, Wallet } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -30,6 +31,8 @@ import { getErrorMessage } from '~/utils/errorHandling';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 
 type SettleUpTab = 'people' | 'transactions';
+
+const TAB_ORDER: SettleUpTab[] = ['people', 'transactions'];
 
 interface SettleUpScreenProps {
   onBack: () => void;
@@ -68,6 +71,31 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
+
+  // Horizontal pager keeps the two tabs swipeable; state and page index stay in sync.
+  const pagerRef = useRef<PagerView>(null);
+  const pagerPositionRef = useRef(0);
+  const activeTabIndex = TAB_ORDER.indexOf(tab);
+
+  const handlePageSelected = useCallback(
+    (event: PagerViewOnPageSelectedEvent) => {
+      const position = event.nativeEvent.position;
+      pagerPositionRef.current = position;
+      const nextTab = TAB_ORDER[position];
+      if (nextTab && nextTab !== tab) {
+        void triggerHaptic('selection');
+        setTab(nextTab);
+      }
+    },
+    [tab],
+  );
+
+  // Keep the pager aligned when the tab changes from a tab tap.
+  useEffect(() => {
+    if (activeTabIndex === pagerPositionRef.current) return;
+    pagerPositionRef.current = activeTabIndex;
+    pagerRef.current?.setPage(activeTabIndex);
+  }, [activeTabIndex]);
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
 
@@ -145,6 +173,208 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
     { value: 'transactions', label: I18n.t('transactions.settleUp.tab_by_transaction') },
   ];
 
+  const scrollContentStyle = {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: insets.bottom + 24,
+  };
+
+  // Outstanding hero — total is identical per tab; only the count line differs.
+  const renderHero = (activeTab: SettleUpTab) => (
+    <View className="mt-4 rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
+      <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+        {I18n.t('transactions.settleUp.outstanding_label')}
+      </Text>
+      <Text variant="heading" className="mt-1 text-3xl">
+        {formatReporting(summary.totalReporting)}
+      </Text>
+      <Text variant="caption" tone="muted" className="mt-1">
+        {activeTab === 'people'
+          ? summary.personCount === 1
+            ? I18n.t('transactions.settleUp.people_one')
+            : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })
+          : byTransaction.transactionCount === 1
+            ? I18n.t('transactions.settleUp.transactions_one')
+            : I18n.t('transactions.settleUp.transactions_other', {
+                count: byTransaction.transactionCount,
+              })}
+      </Text>
+    </View>
+  );
+
+  const renderPeopleList = () => (
+    <View className="mt-5 gap-2">
+      {summary.people.map((person) => (
+        <Pressable
+          key={person.key}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenPerson(person.key);
+          }}
+          className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+        >
+          <View
+            className="h-11 w-11 items-center justify-center rounded-full"
+            style={{ backgroundColor: avatarColor(person.key) }}
+          >
+            <Text variant="bodyStrong" style={{ color: '#fff' }}>
+              {personInitial(person)}
+            </Text>
+          </View>
+          <View className="flex-1">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {person.name ?? I18n.t('transactions.settleUp.someone')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {person.billCount === 1
+                ? I18n.t('transactions.settleUp.bills_one')
+                : I18n.t('transactions.settleUp.bills_other', { count: person.billCount })}
+              {' · '}
+              {formatRelativeDate(person.oldestDate)}
+            </Text>
+          </View>
+          <View className="items-end">
+            <Text variant="bodyStrong" className="text-warning">
+              {formatReporting(person.totalReporting)}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={themeColors.textMuted} />
+        </Pressable>
+      ))}
+    </View>
+  );
+
+  const renderTransactionsList = () => (
+    <View className="mt-5 gap-2">
+      {byTransaction.transactions.map((bill) => (
+        <Pressable
+          key={bill.transactionId}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenTransaction(bill.transactionId);
+          }}
+          className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+        >
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
+            <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+          </View>
+          <View className="flex-1">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {bill.note?.trim() ||
+                bill.categoryName ||
+                I18n.t('transactions.settleUp.untitled_bill')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {bill.splitCount === 1
+                ? I18n.t('transactions.settleUp.people_one')
+                : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
+              {' · '}
+              {formatRelativeDate(bill.date)}
+            </Text>
+          </View>
+          <View className="items-end">
+            <Text variant="bodyStrong" className="text-warning">
+              {formatNative(bill.totalNative, bill.currency)}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={themeColors.textMuted} />
+        </Pressable>
+      ))}
+    </View>
+  );
+
+  // Default paid-to account + payment QR — shared across both tabs.
+  const renderSharedCards = () => (
+    <>
+      {/* Default paid-to account: new splits pre-fill their payback with it */}
+      <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+            <Wallet size={20} color={themeColors.primary} />
+          </View>
+          <View className="flex-1">
+            <Text variant="bodyStrong">
+              {I18n.t('transactions.settleUp.default_account_title')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('transactions.settleUp.default_account_subtitle')}
+            </Text>
+          </View>
+        </View>
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setAccountPickerVisible(true);
+          }}
+          className="mt-4 flex-row items-center justify-between rounded-2xl bg-secondary/50 px-3.5 py-3 active:opacity-70"
+        >
+          <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+            {defaultPaybackAccount ? (
+              <AccountLogo
+                logoId={defaultPaybackAccount.logoId}
+                type={defaultPaybackAccount.type}
+                size={22}
+              />
+            ) : null}
+            <Text variant="body" numberOfLines={1}>
+              {defaultPaybackAccount?.name ?? I18n.t('common.no_account')}
+            </Text>
+          </View>
+          <ChevronRight size={16} color={themeColors.textMuted} />
+        </Pressable>
+      </View>
+
+      {/* Payment QR card, attached once and shared onto every receipt */}
+      <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+            <QrCode size={20} color={themeColors.primary} />
+          </View>
+          <View className="flex-1">
+            <Text variant="bodyStrong">{I18n.t('transactions.settleUp.qr_card_title')}</Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('transactions.settleUp.qr_card_subtitle')}
+            </Text>
+          </View>
+        </View>
+
+        {qrUri ? (
+          <View className="mt-4 items-center">
+            <Pressable onPress={handlePickQr} className="active:opacity-80">
+              <Image
+                source={{ uri: qrUri }}
+                style={{ width: 220, height: 220, borderRadius: 18, backgroundColor: '#fff' }}
+                resizeMode="contain"
+              />
+            </Pressable>
+            <View className="mt-3.5 flex-row items-center gap-8">
+              <Pressable onPress={handlePickQr} hitSlop={8}>
+                <Text variant="body" className="text-primary font-medium">
+                  {I18n.t('transactions.settleUp.qr_replace')}
+                </Text>
+              </Pressable>
+              <Pressable onPress={handleRemoveQr} hitSlop={8}>
+                <Text variant="body" className="text-destructive font-medium">
+                  {I18n.t('common.remove')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <Pressable
+            onPress={handlePickQr}
+            className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 py-3.5 active:opacity-70"
+          >
+            <ImagePlus size={16} color={themeColors.primary} />
+            <Text variant="body" className="text-primary font-medium">
+              {I18n.t('transactions.settleUp.qr_add')}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </>
+  );
+
   return (
     <SettingsPageLayout>
       <SettingsHeader
@@ -185,39 +415,8 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
         })}
       </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 4,
-          paddingBottom: insets.bottom + 24,
-        }}
-      >
-        {/* Outstanding hero, shown only when someone actually owes */}
-        {hasDebts ? (
-          <View className="mt-4 rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
-            <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-              {I18n.t('transactions.settleUp.outstanding_label')}
-            </Text>
-            <Text variant="heading" className="mt-1 text-3xl">
-              {formatReporting(summary.totalReporting)}
-            </Text>
-            <Text variant="caption" tone="muted" className="mt-1">
-              {tab === 'people'
-                ? summary.personCount === 1
-                  ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })
-                : byTransaction.transactionCount === 1
-                  ? I18n.t('transactions.settleUp.transactions_one')
-                  : I18n.t('transactions.settleUp.transactions_other', {
-                      count: byTransaction.transactionCount,
-                    })}
-            </Text>
-          </View>
-        ) : null}
-
-        {/* List: by person or by transaction */}
-        {!hasDebts ? (
+      {!hasDebts ? (
+        <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
           <View className="mt-6">
             <EmptyState
               title={I18n.t('transactions.settleUp.empty_title')}
@@ -225,172 +424,26 @@ export function SettleUpScreen({ onBack, onOpenPerson, onOpenTransaction }: Sett
               mascotMood="happy"
             />
           </View>
-        ) : tab === 'people' ? (
-          <View className="mt-5 gap-2">
-            {summary.people.map((person) => (
-              <Pressable
-                key={person.key}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenPerson(person.key);
-                }}
-                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
-              >
-                <View
-                  className="h-11 w-11 items-center justify-center rounded-full"
-                  style={{ backgroundColor: avatarColor(person.key) }}
-                >
-                  <Text variant="bodyStrong" style={{ color: '#fff' }}>
-                    {personInitial(person)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text variant="bodyStrong" numberOfLines={1}>
-                    {person.name ?? I18n.t('transactions.settleUp.someone')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {person.billCount === 1
-                      ? I18n.t('transactions.settleUp.bills_one')
-                      : I18n.t('transactions.settleUp.bills_other', { count: person.billCount })}
-                    {' · '}
-                    {formatRelativeDate(person.oldestDate)}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Text variant="bodyStrong" className="text-warning">
-                    {formatReporting(person.totalReporting)}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            ))}
-          </View>
-        ) : (
-          <View className="mt-5 gap-2">
-            {byTransaction.transactions.map((bill) => (
-              <Pressable
-                key={bill.transactionId}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenTransaction(bill.transactionId);
-                }}
-                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
-              >
-                <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
-                  <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-                </View>
-                <View className="flex-1">
-                  <Text variant="bodyStrong" numberOfLines={1}>
-                    {bill.note?.trim() ||
-                      bill.categoryName ||
-                      I18n.t('transactions.settleUp.untitled_bill')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {bill.splitCount === 1
-                      ? I18n.t('transactions.settleUp.people_one')
-                      : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
-                    {' · '}
-                    {formatRelativeDate(bill.date)}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Text variant="bodyStrong" className="text-warning">
-                    {formatNative(bill.totalNative, bill.currency)}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            ))}
-          </View>
-        )}
-
-        {/* Default paid-to account: new splits pre-fill their payback with it */}
-        <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
-          <View className="flex-row items-center gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
-              <Wallet size={20} color={themeColors.primary} />
+          {renderSharedCards()}
+        </ScrollView>
+      ) : (
+        <PagerView
+          ref={pagerRef}
+          style={{ flex: 1 }}
+          initialPage={activeTabIndex}
+          onPageSelected={handlePageSelected}
+        >
+          {TAB_ORDER.map((value) => (
+            <View key={value} style={{ flex: 1 }}>
+              <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
+                {renderHero(value)}
+                {value === 'people' ? renderPeopleList() : renderTransactionsList()}
+                {renderSharedCards()}
+              </ScrollView>
             </View>
-            <View className="flex-1">
-              <Text variant="bodyStrong">
-                {I18n.t('transactions.settleUp.default_account_title')}
-              </Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.settleUp.default_account_subtitle')}
-              </Text>
-            </View>
-          </View>
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              setAccountPickerVisible(true);
-            }}
-            className="mt-4 flex-row items-center justify-between rounded-2xl bg-secondary/50 px-3.5 py-3 active:opacity-70"
-          >
-            <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
-              {defaultPaybackAccount ? (
-                <AccountLogo
-                  logoId={defaultPaybackAccount.logoId}
-                  type={defaultPaybackAccount.type}
-                  size={22}
-                />
-              ) : null}
-              <Text variant="body" numberOfLines={1}>
-                {defaultPaybackAccount?.name ?? I18n.t('common.no_account')}
-              </Text>
-            </View>
-            <ChevronRight size={16} color={themeColors.textMuted} />
-          </Pressable>
-        </View>
-
-        {/* Payment QR card, attached once and shared onto every receipt */}
-        <View className="mt-6 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
-          <View className="flex-row items-center gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/15">
-              <QrCode size={20} color={themeColors.primary} />
-            </View>
-            <View className="flex-1">
-              <Text variant="bodyStrong">{I18n.t('transactions.settleUp.qr_card_title')}</Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.settleUp.qr_card_subtitle')}
-              </Text>
-            </View>
-          </View>
-
-          {qrUri ? (
-            <View className="mt-4 items-center">
-              <Pressable onPress={handlePickQr} className="active:opacity-80">
-                <Image
-                  source={{ uri: qrUri }}
-                  style={{ width: 220, height: 220, borderRadius: 18, backgroundColor: '#fff' }}
-                  resizeMode="contain"
-                />
-              </Pressable>
-              <View className="mt-3.5 flex-row items-center gap-8">
-                <Pressable onPress={handlePickQr} hitSlop={8}>
-                  <Text variant="body" className="text-primary font-medium">
-                    {I18n.t('transactions.settleUp.qr_replace')}
-                  </Text>
-                </Pressable>
-                <Pressable onPress={handleRemoveQr} hitSlop={8}>
-                  <Text variant="body" className="text-destructive font-medium">
-                    {I18n.t('common.remove')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : (
-            <Pressable
-              onPress={handlePickQr}
-              className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 py-3.5 active:opacity-70"
-            >
-              <ImagePlus size={16} color={themeColors.primary} />
-              <Text variant="body" className="text-primary font-medium">
-                {I18n.t('transactions.settleUp.qr_add')}
-              </Text>
-            </Pressable>
-          )}
-        </View>
-      </ScrollView>
+          ))}
+        </PagerView>
+      )}
 
       <AccountPickerSheet
         visible={accountPickerVisible}
