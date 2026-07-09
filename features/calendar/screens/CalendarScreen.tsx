@@ -943,35 +943,66 @@ export function CalendarScreen({
 
   // Jump to a specific day when asked (e.g. the shell just created a
   // transaction dated in an earlier month and wants the list to land on it).
+  // The transaction that triggered the request is written asynchronously (the
+  // editor defers the create behind its dismiss animation), so its day's section
+  // usually doesn't exist in the list yet when the request arrives — scrolling
+  // now would just fall back to the top. So move the pager to the right month
+  // immediately, then stash the target and let the follow-up effect run the
+  // in-list scroll once that day's transactions have actually landed.
   // A ref guards against acting twice on the same token when the effect re-runs
   // for unrelated dependency changes.
   const lastGoToDayTokenRef = useRef(0);
+  const [pendingGoToDay, setPendingGoToDay] = useState<{ dayKey: string; index: number } | null>(
+    null,
+  );
   useEffect(() => {
     const token = goToDayRequest?.token ?? 0;
     if (!token || token === lastGoToDayTokenRef.current) return;
     lastGoToDayTokenRef.current = token;
     const { dayKey } = goToDayRequest!;
-    const idx = getMonthIndexForDay(dayKey);
+    const index = getMonthIndexForDay(dayKey);
     setSelectedDayKey(dayKey);
-    setActiveListMonthIndex(idx);
+    setActiveListMonthIndex(index);
     if (viewMode !== 'day') {
       setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
       monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     }
     requestAnimationFrame(() => {
-      listPagerRef.current?.scrollToIndex({ index: idx, animated: false });
-      scrollListToDay(idx, dayKey);
+      listPagerRef.current?.scrollToIndex({ index, animated: false });
     });
+    setPendingGoToDay({ dayKey, index });
   }, [
     goToDayRequest,
     getMonthIndexForDay,
     setActiveListMonthIndex,
-    scrollListToDay,
     viewMode,
     dayMonthZoom,
     monthYearZoom,
   ]);
+
+  // Fulfil a pending day jump once that day actually has transactions in the
+  // (filtered) list, then scroll its section to the top. A timeout gives up if
+  // it never lands (e.g. an active filter hides the new transaction) so the
+  // pending state clears instead of lingering.
+  useEffect(() => {
+    if (!pendingGoToDay) return;
+    const { dayKey, index } = pendingGoToDay;
+    const monthKey = dayKey.slice(0, 7);
+    const dayHasRows = transactionsByMonthKey
+      .get(monthKey)
+      ?.some((tx) => dayKeyFromIsoLocal(tx.date) === dayKey);
+    if (dayHasRows) {
+      scrollListToDay(index, dayKey);
+      setPendingGoToDay(null);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      scrollListToDay(index, dayKey);
+      setPendingGoToDay(null);
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [pendingGoToDay, transactionsByMonthKey, scrollListToDay]);
 
   // "Today" = the current month's list. The pill hides once we're there.
   const isOnToday = viewMode === 'day' && activeListMonthIndex === MONTH_PAGER_CENTER_INDEX;
