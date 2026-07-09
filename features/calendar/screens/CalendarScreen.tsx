@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { LayoutChangeEvent, TextInput } from 'react-native';
+import type { TextInput } from 'react-native';
 import {
   Alert,
   FlatList,
@@ -244,7 +244,7 @@ export function CalendarScreen({
   const themeColors = useThemeColors();
   const { contentWidth } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
 
@@ -380,22 +380,6 @@ export function CalendarScreen({
   const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const listHorizontalPadding = CALENDAR_HORIZONTAL_PADDING;
-  // Extra scroll room below the monthly list so the oldest day (e.g. the 1st of
-  // the month, which sorts to the bottom) can be scrolled up toward the top of
-  // the viewport instead of staying pinned at the bottom edge — a scroll-to-day
-  // (or a freshly added early-month transaction) otherwise has nowhere to travel.
-  // Half the list viewport is enough for a day that carries a few transactions to
-  // reach the top (its own rows make up the rest) while keeping the trailing blank
-  // modest — a full viewport just left an empty screen at the bottom. Measured
-  // from the calendar area; screen-height estimate until the first layout lands.
-  const [calendarAreaHeight, setCalendarAreaHeight] = useState(0);
-  const handleCalendarAreaLayout = useCallback((event: LayoutChangeEvent) => {
-    setCalendarAreaHeight(event.nativeEvent.layout.height);
-  }, []);
-  const listScrollBottomSpace = useMemo(
-    () => Math.round((calendarAreaHeight > 0 ? calendarAreaHeight : screenHeight * 0.7) * 0.5),
-    [calendarAreaHeight, screenHeight],
-  );
 
   // Per-page scroll handlers for the monthly-list pages, keyed by slot index, so
   // we can scroll a given month's list to the top or to a specific day's header.
@@ -1289,7 +1273,6 @@ export function CalendarScreen({
         getScrollToTopRef={getPageScrollToTopRef}
         getScrollToDayRef={getPageScrollToDayRef}
         contentPaddingHorizontal={listHorizontalPadding}
-        scrollBottomSpace={listScrollBottomSpace}
       />
     ),
     [
@@ -1309,7 +1292,6 @@ export function CalendarScreen({
       getPageScrollToTopRef,
       getPageScrollToDayRef,
       listHorizontalPadding,
-      listScrollBottomSpace,
     ],
   );
 
@@ -1486,7 +1468,7 @@ export function CalendarScreen({
       </TabletContentContainer>
 
       {/* --- Calendar area: three stacked reanimated layers --- */}
-      <View className="flex-1 overflow-hidden bg-background" onLayout={handleCalendarAreaLayout}>
+      <View className="flex-1 overflow-hidden bg-background">
         {/* List layer — the monthly transaction list (home view) */}
         <Reanimated.View
           style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}

@@ -491,31 +491,17 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
   useEffect(() => {
     if (!scrollToDayRef) return;
-    let retryTimers: ReturnType<typeof setTimeout>[] = [];
-    const clearRetries = () => {
-      retryTimers.forEach(clearTimeout);
-      retryTimers = [];
-    };
     scrollToDayRef.current = (dayKey: string) => {
-      clearRetries();
       const index = rows.findIndex((row) => row.kind === 'header' && row.id === `header-${dayKey}`);
       if (index < 0) {
         // The day has no transactions in this month — fall back to the top.
         flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
         return;
       }
-      const jumpToDay = () =>
-        flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
-      // FlashList positions a far, not-yet-measured row from an average estimate,
-      // so a bottom-of-month day (e.g. the 1st) undershoots and lands a section
-      // or two short on the first pass. Re-issue the scroll as the intermediate
-      // rows get measured so it settles on the exact offset.
-      jumpToDay();
-      retryTimers = [80, 200, 400].map((delay) => setTimeout(jumpToDay, delay));
+      flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
     };
     return () => {
       scrollToDayRef.current = null;
-      clearRetries();
     };
   }, [rows, scrollToDayRef]);
 
