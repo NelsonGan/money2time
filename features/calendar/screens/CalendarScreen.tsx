@@ -381,21 +381,19 @@ export function CalendarScreen({
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const listHorizontalPadding = CALENDAR_HORIZONTAL_PADDING;
   // Extra scroll room below the monthly list so the oldest day (e.g. the 1st of
-  // the month, which sorts to the bottom) can be scrolled all the way up to the
-  // top of the viewport instead of staying pinned at the bottom edge — otherwise
-  // a scroll-to-day (or a freshly added early-month transaction) has nowhere to
-  // travel. scrollToIndex can only bring a section header to the top when the
-  // content below it is at least a viewport tall, and for the *last* section the
-  // only thing below its header is its own rows, so the spacer has to be about a
-  // full list viewport. Measured from the calendar area; screen-height estimate
-  // until the first layout so early jumps still have room.
+  // the month, which sorts to the bottom) can be scrolled up toward the top of
+  // the viewport instead of staying pinned at the bottom edge — a scroll-to-day
+  // (or a freshly added early-month transaction) otherwise has nowhere to travel.
+  // Half the list viewport is enough for a day that carries a few transactions to
+  // reach the top (its own rows make up the rest) while keeping the trailing blank
+  // modest — a full viewport just left an empty screen at the bottom. Measured
+  // from the calendar area; screen-height estimate until the first layout lands.
   const [calendarAreaHeight, setCalendarAreaHeight] = useState(0);
   const handleCalendarAreaLayout = useCallback((event: LayoutChangeEvent) => {
     setCalendarAreaHeight(event.nativeEvent.layout.height);
   }, []);
   const listScrollBottomSpace = useMemo(
-    () =>
-      calendarAreaHeight > 0 ? Math.round(calendarAreaHeight) : Math.round(screenHeight * 0.7),
+    () => Math.round((calendarAreaHeight > 0 ? calendarAreaHeight : screenHeight * 0.7) * 0.5),
     [calendarAreaHeight, screenHeight],
   );
 
