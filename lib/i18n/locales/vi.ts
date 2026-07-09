@@ -433,6 +433,12 @@ const vi = {
       receipt_total_label: 'Bạn nợ',
       receipt_qr_note: 'Quét mã QR mình đính kèm để trả lại cho mình nhé.',
       receipt_scan_short: 'Quét để thanh toán',
+      settings_title: 'Cài đặt Chia tiền',
+      settings_action: 'Cài đặt Chia tiền',
+      qr_prompt_title: 'Thêm mã QR thanh toán của bạn?',
+      qr_prompt_message:
+        'Thiết lập mã QR thanh toán của bạn để bạn bè có thể quét và trả lại tiền cho bạn ngay từ hóa đơn.',
+      qr_prompt_cta: 'Thêm mã QR thanh toán',
     },
     title: 'Giao dịch',
     empty_month_title: 'Tháng này chưa có giao dịch',

@@ -432,6 +432,12 @@ const ja = {
       receipt_total_label: 'お支払い額',
       receipt_qr_note: '添付したQRコードを読み取って返済してください。',
       receipt_scan_short: 'スキャンして支払う',
+      settings_title: '精算の設定',
+      settings_action: '精算の設定',
+      qr_prompt_title: '支払いQRコードを追加しますか？',
+      qr_prompt_message:
+        '支払いQRコードを設定すると、友だちがスキャンしてレシートから直接返済できます。',
+      qr_prompt_cta: '支払いQRを追加',
     },
     title: '取引',
     empty_month_title: '今月の取引はありません',

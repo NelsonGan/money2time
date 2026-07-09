@@ -11,6 +11,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { hasSeenQrPrompt, markQrPromptSeen } from '~/services/settleUpQrPromptState';
 import { getPaymentQrUri } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 
@@ -24,6 +25,9 @@ interface SplitReceiptShareModalProps {
   content: ReceiptContent | null;
   /** Number of line items on the receipt, for analytics. */
   itemCount: number;
+  /** Open the Settle Up settings page so the user can attach a payment QR.
+   *  Invoked from the one-time "add your payment QR" nudge. */
+  onSetupQr?: () => void;
 }
 
 export function SplitReceiptShareModal({
@@ -31,6 +35,7 @@ export function SplitReceiptShareModal({
   onClose,
   content,
   itemCount,
+  onSetupQr,
 }: SplitReceiptShareModalProps) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
@@ -128,6 +133,37 @@ export function SplitReceiptShareModal({
     }
   }, [busy, content, itemCount, onClose, qrUri, shareAsText]);
 
+  // Gate the first no-QR share behind a one-time nudge to attach a payment QR.
+  // The user can head to settings to add one, or dismiss and share anyway; the
+  // nudge is marked seen the first time it shows so it never nags again.
+  const handleSharePress = useCallback(async () => {
+    if (busy || !content) return;
+    if (!qrUri && !(await hasSeenQrPrompt(settings.appUserId))) {
+      void markQrPromptSeen(settings.appUserId);
+      void triggerHaptic('selection');
+      Alert.alert(
+        I18n.t('transactions.settleUp.qr_prompt_title'),
+        I18n.t('transactions.settleUp.qr_prompt_message'),
+        [
+          {
+            text: I18n.t('common.not_now'),
+            style: 'cancel',
+            onPress: () => void handleShare(),
+          },
+          {
+            text: I18n.t('transactions.settleUp.qr_prompt_cta'),
+            onPress: () => {
+              onClose();
+              onSetupQr?.();
+            },
+          },
+        ],
+      );
+      return;
+    }
+    void handleShare();
+  }, [busy, content, qrUri, settings.appUserId, handleShare, onClose, onSetupQr]);
+
   return (
     <ThemeModal
       visible={visible}
@@ -155,7 +191,7 @@ export function SplitReceiptShareModal({
 
         <View className="px-5 pb-8 pt-2">
           <Pressable
-            onPress={handleShare}
+            onPress={handleSharePress}
             disabled={busy || !content}
             className="h-14 flex-row items-center justify-center gap-2 rounded-2xl bg-primary active:opacity-90"
             style={{ opacity: busy || !content ? 0.6 : 1 }}

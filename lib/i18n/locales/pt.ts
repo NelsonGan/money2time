@@ -434,6 +434,12 @@ const pt = {
       receipt_total_label: 'Você deve',
       receipt_qr_note: 'Escaneie o QR que anexei para me pagar.',
       receipt_scan_short: 'Escaneie para pagar',
+      settings_title: 'Configurações de acerto de contas',
+      settings_action: 'Configurações de acerto de contas',
+      qr_prompt_title: 'Adicionar seu QR de pagamento?',
+      qr_prompt_message:
+        'Configure seu QR de pagamento para que os amigos possam escaneá-lo e pagar você direto pelo recibo.',
+      qr_prompt_cta: 'Adicionar QR de pagamento',
     },
     title: 'Transações',
     empty_month_title: 'Nenhuma transação este mês',

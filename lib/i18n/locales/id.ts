@@ -436,6 +436,12 @@ const id = {
       receipt_total_label: 'Kamu berutang',
       receipt_qr_note: 'Pindai QR yang aku lampirkan untuk membayarku kembali.',
       receipt_scan_short: 'Pindai untuk bayar',
+      settings_title: 'Pengaturan Settle Up',
+      settings_action: 'Pengaturan Settle Up',
+      qr_prompt_title: 'Tambahkan QR pembayaranmu?',
+      qr_prompt_message:
+        'Atur QR pembayaranmu agar teman bisa memindainya dan membayarmu langsung dari struk.',
+      qr_prompt_cta: 'Tambah QR pembayaran',
     },
     title: 'Transaksi',
     empty_month_title: 'Tidak ada transaksi bulan ini',

@@ -409,6 +409,12 @@ const en = {
       receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
       receipt_scan_short: 'Scan to pay',
+      settings_title: 'Settle Up settings',
+      settings_action: 'Settle Up settings',
+      qr_prompt_title: 'Add your payment QR?',
+      qr_prompt_message:
+        'Set up your payment QR so friends can scan it and pay you back right from the receipt.',
+      qr_prompt_cta: 'Add payment QR',
     },
     title: 'Transactions',
     empty_month_title: 'No transactions this month',

@@ -435,6 +435,12 @@ const fr = {
       receipt_total_label: 'Vous devez',
       receipt_qr_note: "Scannez le QR que j'ai joint pour me rembourser.",
       receipt_scan_short: 'Scanner pour payer',
+      settings_title: 'Paramètres de remboursement',
+      settings_action: 'Paramètres de remboursement',
+      qr_prompt_title: 'Ajouter votre QR de paiement ?',
+      qr_prompt_message:
+        'Configurez votre QR de paiement pour que vos amis puissent le scanner et vous rembourser directement depuis le reçu.',
+      qr_prompt_cta: 'Ajouter un QR de paiement',
     },
     title: 'Transactions',
     empty_month_title: 'Aucune transaction ce mois',

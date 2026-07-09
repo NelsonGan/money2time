@@ -437,6 +437,12 @@ const it = {
       receipt_total_label: 'Devi',
       receipt_qr_note: 'Scansiona il QR che ho allegato per rimborsarmi.',
       receipt_scan_short: 'Scansiona per pagare',
+      settings_title: 'Impostazioni di saldo conti',
+      settings_action: 'Impostazioni di saldo conti',
+      qr_prompt_title: 'Aggiungere il tuo QR di pagamento?',
+      qr_prompt_message:
+        'Configura il tuo QR di pagamento così gli amici possono scansionarlo e rimborsarti direttamente dalla ricevuta.',
+      qr_prompt_cta: 'Aggiungi QR di pagamento',
     },
     title: 'Transazioni',
     empty_month_title: 'Nessuna transazione questo mese',

@@ -436,6 +436,12 @@ const es = {
       receipt_total_label: 'Debes',
       receipt_qr_note: 'Escanea el QR que adjunté para devolverme el dinero.',
       receipt_scan_short: 'Escanea para pagar',
+      settings_title: 'Ajustes de saldar cuentas',
+      settings_action: 'Ajustes de saldar cuentas',
+      qr_prompt_title: '¿Añadir tu QR de pago?',
+      qr_prompt_message:
+        'Configura tu QR de pago para que tus amigos puedan escanearlo y pagarte directamente desde el recibo.',
+      qr_prompt_cta: 'Añadir QR de pago',
     },
     title: 'Movimientos',
     empty_month_title: 'Sin movimientos este mes',

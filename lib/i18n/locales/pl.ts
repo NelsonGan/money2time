@@ -436,6 +436,12 @@ const pl = {
       receipt_total_label: 'Jesteś winien',
       receipt_qr_note: 'Zeskanuj załączony kod QR, aby mi oddać.',
       receipt_scan_short: 'Zeskanuj, aby zapłacić',
+      settings_title: 'Ustawienia rozliczeń',
+      settings_action: 'Ustawienia rozliczeń',
+      qr_prompt_title: 'Dodać Twój kod QR do płatności?',
+      qr_prompt_message:
+        'Skonfiguruj swój kod QR do płatności, aby znajomi mogli go zeskanować i oddać Ci pieniądze prosto z rachunku.',
+      qr_prompt_cta: 'Dodaj kod QR do płatności',
     },
     title: 'Transakcje',
     empty_month_title: 'Brak transakcji w tym miesiącu',

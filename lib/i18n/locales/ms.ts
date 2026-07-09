@@ -436,6 +436,12 @@ const ms = {
       receipt_total_label: 'Anda berhutang',
       receipt_qr_note: 'Imbas QR yang saya lampirkan untuk membayar balik kepada saya.',
       receipt_scan_short: 'Imbas untuk bayar',
+      settings_title: 'Tetapan Settle Up',
+      settings_action: 'Tetapan Settle Up',
+      qr_prompt_title: 'Tambah QR pembayaran anda?',
+      qr_prompt_message:
+        'Sediakan QR pembayaran anda supaya rakan boleh mengimbasnya dan membayar balik terus daripada resit.',
+      qr_prompt_cta: 'Tambah QR pembayaran',
     },
     title: 'Transaksi',
     empty_month_title: 'Tiada transaksi bulan ini',

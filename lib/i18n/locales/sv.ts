@@ -433,6 +433,12 @@ const sv = {
       receipt_total_label: 'Du är skyldig',
       receipt_qr_note: 'Skanna QR-koden jag bifogat för att betala tillbaka.',
       receipt_scan_short: 'Skanna för att betala',
+      settings_title: 'Inställningar för avräkning',
+      settings_action: 'Inställningar för avräkning',
+      qr_prompt_title: 'Lägga till din betal-QR?',
+      qr_prompt_message:
+        'Ställ in din betal-QR så att vänner kan skanna den och betala tillbaka direkt från kvittot.',
+      qr_prompt_cta: 'Lägg till betal-QR',
     },
     title: 'Transaktioner',
     empty_month_title: 'Inga transaktioner denna månad',

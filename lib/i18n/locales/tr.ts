@@ -436,6 +436,12 @@ const tr = {
       receipt_total_label: 'Borcunuz',
       receipt_qr_note: 'Bana ödeme yapmak için eklediğim QR kodunu tarayın.',
       receipt_scan_short: 'Ödemek için tarayın',
+      settings_title: 'Hesaplaşma ayarları',
+      settings_action: 'Hesaplaşma ayarları',
+      qr_prompt_title: 'Ödeme QR kodunuzu ekleyin mi?',
+      qr_prompt_message:
+        'Ödeme QR kodunuzu ayarlayın; böylece arkadaşlarınız onu tarayıp makbuzdan doğrudan size geri ödeme yapabilir.',
+      qr_prompt_cta: 'Ödeme QR kodu ekle',
     },
     title: 'İşlemler',
     empty_month_title: 'Bu ay işlem yok',
