@@ -2973,6 +2973,19 @@ export function InsightsScreen({
   const [handledActivityBreakdownRequestToken, setHandledActivityBreakdownRequestToken] =
     useState(0);
   const committedPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
+  // Mirror of committedPageIndexRef held in React state. The pager maps each slot
+  // to a month via `item - committedPageIndex` shifted from `anchorDate`, so the
+  // committed index and the anchor date MUST be read from the same render snapshot.
+  // Reading the ref during render can tear from `anchorDate` (state) when an
+  // external re-render — e.g. logging a transaction refreshes `allTransactions` —
+  // lands after the ref advanced but before the paired setAnchorDate flushes,
+  // shifting every slot a month (July's data flashing onto June's page). Render
+  // reads this state; callbacks keep using the ref for imperative reads.
+  const [committedPageIndex, setCommittedPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
+  const commitPageIndex = useCallback((index: number) => {
+    committedPageIndexRef.current = index;
+    setCommittedPageIndex(index);
+  }, []);
   const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
   const headerPreviewPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
@@ -3052,7 +3065,7 @@ export function InsightsScreen({
     setIsFilterModalOpen(false);
     // Selecting the requested insight also leaves the budget takeover.
     setSelectedInsightType(targetInsightType);
-    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
@@ -3063,7 +3076,7 @@ export function InsightsScreen({
       });
     });
     return () => cancelAnimationFrame(frame);
-  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken]);
+  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken, commitPageIndex]);
 
   // Focus a specific insight when requested externally (e.g. the savings-rate
   // widget deep link: money2time://insights?focus=savings_rate). Consumes any
@@ -3105,7 +3118,7 @@ export function InsightsScreen({
     setIncomeTrendScrubMonthByYear({});
     setAssetHistoryScrubMonthByYear({});
     setIsFilterModalOpen(false);
-    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
@@ -3116,7 +3129,7 @@ export function InsightsScreen({
       });
     });
     return () => cancelAnimationFrame(frame);
-  }, [resetToCurrentMonthToken]);
+  }, [resetToCurrentMonthToken, commitPageIndex]);
 
   const applyInsightsPreferencesSnapshot = useCallback(
     (saved: Partial<InsightsPreferencesSnapshot>) => {
@@ -4463,7 +4476,7 @@ export function InsightsScreen({
     pendingActivityBreakdownTarget?.periodState ?? currentPeriodState;
   const displayCommittedPageIndex = pendingActivityBreakdownTarget
     ? INSIGHTS_PAGER_CENTER_INDEX
-    : committedPageIndexRef.current;
+    : committedPageIndex;
   const displayHeaderPreviewPageIndex = pendingActivityBreakdownTarget
     ? INSIGHTS_PAGER_CENTER_INDEX
     : headerPreviewPageIndex;
@@ -4473,10 +4486,10 @@ export function InsightsScreen({
   // several periods at once.
   useEffect(() => {
     if (isBudgetView) return;
-    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
-  }, [isBudgetView]);
+  }, [isBudgetView, commitPageIndex]);
   const currentPage = useMemo(
     () =>
       getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
@@ -4680,14 +4693,20 @@ export function InsightsScreen({
         return;
       }
       const nextState = shiftPeriodStateBySteps(currentPeriodState, steps, effectivePeriodPreset);
-      committedPageIndexRef.current = clampedIndex;
+      commitPageIndex(clampedIndex);
       headerPreviewPageIndexRef.current = clampedIndex;
       setHeaderPreviewPageIndex(clampedIndex);
       setAnchorDate(nextState.anchorDate);
       setCustomStart(nextState.customStart);
       setCustomEnd(nextState.customEnd);
     },
-    [clampInsightsPageIndex, currentPeriodState, effectivePeriodPreset, shiftPeriodStateBySteps],
+    [
+      clampInsightsPageIndex,
+      commitPageIndex,
+      currentPeriodState,
+      effectivePeriodPreset,
+      shiftPeriodStateBySteps,
+    ],
   );
 
   const onMonthStep = useCallback(
@@ -4711,7 +4730,7 @@ export function InsightsScreen({
   );
 
   const recenterInsightsPager = useCallback(() => {
-    committedPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
+    commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     pageScrollRefs.current.forEach((ref) => ref.current?.scrollTo({ y: 0, animated: false }));
@@ -4721,7 +4740,7 @@ export function InsightsScreen({
         animated: false,
       });
     });
-  }, []);
+  }, [commitPageIndex]);
 
   const finalizeHorizontalShift = useCallback(
     (offsetX: number) => {
