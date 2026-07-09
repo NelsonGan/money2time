@@ -185,6 +185,12 @@ type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
 
 export interface CalendarScreenProps {
   resetToCurrentMonthToken?: number;
+  /**
+   * Request to jump the calendar to a specific day (e.g. after creating a
+   * transaction dated in an earlier month). The `token` makes repeat requests
+   * for the same day re-fire.
+   */
+  goToDayRequest?: { dayKey: string; token: number } | null;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
   onOpenBreakdownInsight?: (
@@ -208,6 +214,7 @@ function monthOffsetFromAnchor(anchor: Date, target: Date): number {
 
 export function CalendarScreen({
   resetToCurrentMonthToken = 0,
+  goToDayRequest = null,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
   onOpenBreakdownInsight,
@@ -925,6 +932,38 @@ export function CalendarScreen({
     scrollListToDay,
     todayDayKey,
     viewMode,
+  ]);
+
+  // Jump to a specific day when asked (e.g. the shell just created a
+  // transaction dated in an earlier month and wants the list to land on it).
+  // A ref guards against acting twice on the same token when the effect re-runs
+  // for unrelated dependency changes.
+  const lastGoToDayTokenRef = useRef(0);
+  useEffect(() => {
+    const token = goToDayRequest?.token ?? 0;
+    if (!token || token === lastGoToDayTokenRef.current) return;
+    lastGoToDayTokenRef.current = token;
+    const { dayKey } = goToDayRequest!;
+    const idx = getMonthIndexForDay(dayKey);
+    setSelectedDayKey(dayKey);
+    setActiveListMonthIndex(idx);
+    if (viewMode !== 'day') {
+      setViewMode('day');
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+      monthYearZoom.value = withTiming(0, ZOOM_TIMING);
+    }
+    requestAnimationFrame(() => {
+      listPagerRef.current?.scrollToIndex({ index: idx, animated: false });
+      scrollListToDay(idx, dayKey);
+    });
+  }, [
+    goToDayRequest,
+    getMonthIndexForDay,
+    setActiveListMonthIndex,
+    scrollListToDay,
+    viewMode,
+    dayMonthZoom,
+    monthYearZoom,
   ]);
 
   // "Today" = the current month's list. The pill hides once we're there.
