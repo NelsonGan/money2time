@@ -436,6 +436,12 @@ const ms = {
       receipt_total_label: 'Anda berhutang',
       receipt_qr_note: 'Imbas QR yang saya lampirkan untuk membayar balik kepada saya.',
       receipt_scan_short: 'Imbas untuk bayar',
+      settings_title: 'Tetapan Settle Up',
+      settings_action: 'Tetapan Settle Up',
+      qr_prompt_title: 'Tambah QR pembayaran anda?',
+      qr_prompt_message:
+        'Sediakan QR pembayaran anda supaya rakan boleh mengimbasnya dan membayar balik terus daripada resit.',
+      qr_prompt_cta: 'Tambah QR pembayaran',
     },
     title: 'Transaksi',
     empty_month_title: 'Tiada transaksi bulan ini',
@@ -1544,6 +1550,7 @@ const ms = {
       'Anda boleh menjejak sehingga {{count}} item dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_budget_templates:
       'Pelan percuma membenarkan {{count}} templat bajet. Tanpa had dengan Pro.',
+    limit_receipts: 'Pelan percuma membenarkan sehingga {{count}} resit. Tanpa had dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka kunci trend jangka panjang',
     trend_preview_message:

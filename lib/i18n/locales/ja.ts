@@ -432,6 +432,12 @@ const ja = {
       receipt_total_label: 'お支払い額',
       receipt_qr_note: '添付したQRコードを読み取って返済してください。',
       receipt_scan_short: 'スキャンして支払う',
+      settings_title: '精算の設定',
+      settings_action: '精算の設定',
+      qr_prompt_title: '支払いQRコードを追加しますか？',
+      qr_prompt_message:
+        '支払いQRコードを設定すると、友だちがスキャンしてレシートから直接返済できます。',
+      qr_prompt_cta: '支払いQRを追加',
     },
     title: '取引',
     empty_month_title: '今月の取引はありません',
@@ -1517,6 +1523,7 @@ const ja = {
       '無料プランでは最大 {{count}} 個まで記録できます。無制限にするには Pro にアップグレードしてください。',
     limit_budget_templates:
       '無料プランでは予算テンプレートを{{count}}件作成できます。Proなら無制限です。',
+    limit_receipts: '無料プランではレシートを{{count}}件まで添付できます。Proなら無制限です。',
     badge: 'PRO',
     trend_preview_title: '長期トレンドを解放',
     trend_preview_message:

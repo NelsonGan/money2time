@@ -409,6 +409,12 @@ const en = {
       receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
       receipt_scan_short: 'Scan to pay',
+      settings_title: 'Settle Up settings',
+      settings_action: 'Settle Up settings',
+      qr_prompt_title: 'Add your payment QR?',
+      qr_prompt_message:
+        'Set up your payment QR so friends can scan it and pay you back right from the receipt.',
+      qr_prompt_cta: 'Add payment QR',
     },
     title: 'Transactions',
     empty_month_title: 'No transactions this month',
@@ -1507,6 +1513,8 @@ const en = {
       'You can track up to {{count}} items on the free plan. Upgrade to Pro for unlimited.',
     limit_budget_templates:
       'You can create {{count}} budget template on the free plan. Upgrade to Pro for unlimited.',
+    limit_receipts:
+      'You can attach up to {{count}} receipts on the free plan. Upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:

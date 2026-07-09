@@ -432,6 +432,11 @@ const th = {
       receipt_total_label: 'คุณต้องจ่าย',
       receipt_qr_note: 'สแกน QR ที่ฉันแนบไว้เพื่อจ่ายคืนฉัน',
       receipt_scan_short: 'สแกนเพื่อจ่าย',
+      settings_title: 'การตั้งค่าการชำระคืน',
+      settings_action: 'การตั้งค่าการชำระคืน',
+      qr_prompt_title: 'เพิ่ม QR รับเงินของคุณไหม',
+      qr_prompt_message: 'ตั้งค่า QR รับเงินของคุณ เพื่อให้เพื่อนสแกนและจ่ายคืนคุณได้จากใบเสร็จเลย',
+      qr_prompt_cta: 'เพิ่ม QR รับเงิน',
     },
     title: 'รายการ',
     empty_month_title: 'ไม่มีรายการเดือนนี้',
@@ -1503,6 +1508,7 @@ const th = {
     limit_items: 'แผนฟรีติดตามได้สูงสุด {{count}} ชิ้น อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_budget_templates:
       'แผนฟรีสร้างเทมเพลตงบประมาณได้ {{count}} รายการ อัปเกรดเป็น Pro เพื่อไม่จำกัด',
+    limit_receipts: 'แผนฟรีแนบใบเสร็จได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     badge: 'PRO',
     trend_preview_title: 'ปลดล็อกแนวโน้มระยะยาว',
     trend_preview_message:

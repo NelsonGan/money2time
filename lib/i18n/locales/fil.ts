@@ -438,6 +438,12 @@ const fil = {
       receipt_total_label: 'May utang ka',
       receipt_qr_note: 'I-scan ang QR na na-attach ko para makabayad sa akin.',
       receipt_scan_short: 'I-scan para bayaran',
+      settings_title: 'Mga setting ng Settle Up',
+      settings_action: 'Mga setting ng Settle Up',
+      qr_prompt_title: 'Idagdag ang iyong payment QR?',
+      qr_prompt_message:
+        'I-set up ang iyong payment QR para ma-scan ito ng mga kaibigan at makabayad sa iyo mismo mula sa resibo.',
+      qr_prompt_cta: 'Magdagdag ng payment QR',
     },
     title: 'Mga Transaksyon',
     empty_month_title: 'Walang transaksyon ngayong buwan',
@@ -1562,6 +1568,8 @@ const fil = {
       'Maaari kang mag-track ng hanggang {{count}} item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_budget_templates:
       'Sa libreng plan, makakagawa ka ng {{count}} template ng badyet. Walang limitasyon sa Pro.',
+    limit_receipts:
+      'Sa libreng plan, makakapaglakip ka ng hanggang {{count}} resibo. Walang limitasyon sa Pro.',
     badge: 'PRO',
     trend_preview_title: 'I-unlock ang pangmatagalang trend',
     trend_preview_message:

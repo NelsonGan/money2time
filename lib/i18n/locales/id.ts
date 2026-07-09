@@ -436,6 +436,12 @@ const id = {
       receipt_total_label: 'Kamu berutang',
       receipt_qr_note: 'Pindai QR yang aku lampirkan untuk membayarku kembali.',
       receipt_scan_short: 'Pindai untuk bayar',
+      settings_title: 'Pengaturan Settle Up',
+      settings_action: 'Pengaturan Settle Up',
+      qr_prompt_title: 'Tambahkan QR pembayaranmu?',
+      qr_prompt_message:
+        'Atur QR pembayaranmu agar teman bisa memindainya dan membayarmu langsung dari struk.',
+      qr_prompt_cta: 'Tambah QR pembayaran',
     },
     title: 'Transaksi',
     empty_month_title: 'Tidak ada transaksi bulan ini',
@@ -1548,6 +1554,7 @@ const id = {
       'Kamu bisa melacak hingga {{count}} barang di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_budget_templates:
       'Paket gratis memungkinkan {{count}} templat anggaran. Tanpa batas dengan Pro.',
+    limit_receipts: 'Paket gratis memungkinkan hingga {{count}} struk. Tanpa batas dengan Pro.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:

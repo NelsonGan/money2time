@@ -24,9 +24,14 @@ import { formatCurrency, formatRelativeDate, formatShortDate } from '~/utils/for
 interface SettleUpPersonScreenProps {
   personKey: string;
   onBack: () => void;
+  onOpenSettings: () => void;
 }
 
-export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreenProps) {
+export function SettleUpPersonScreen({
+  personKey,
+  onBack,
+  onOpenSettings,
+}: SettleUpPersonScreenProps) {
   const themeColors = useThemeColors();
   const {
     settings,
@@ -240,6 +245,7 @@ export function SettleUpPersonScreen({ personKey, onBack }: SettleUpPersonScreen
             onClose={() => setShareVisible(false)}
             content={receiptContent}
             itemCount={person.billCount}
+            onSetupQr={onOpenSettings}
           />
         </>
       ) : null}
