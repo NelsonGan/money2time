@@ -2,7 +2,15 @@ import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  InteractionManager,
+  Pressable,
+  ScrollView,
+  Share,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text, ThemeModal } from '~/components/ui';
@@ -134,12 +142,12 @@ export function SplitReceiptShareModal({
   }, [busy, content, itemCount, onClose, qrUri, shareAsText]);
 
   // Gate the first no-QR share behind a one-time nudge to attach a payment QR.
-  // The user can head to settings to add one, or dismiss and share anyway; the
-  // nudge is marked seen the first time it shows so it never nags again.
+  // "Not now" dismisses it for good and shares anyway; "Add payment QR" heads to
+  // settings WITHOUT marking it seen, so a user who abandons setup without
+  // actually attaching a QR still gets nudged on their next share.
   const handleSharePress = useCallback(async () => {
     if (busy || !content) return;
     if (!qrUri && !(await hasSeenQrPrompt(settings.appUserId))) {
-      void markQrPromptSeen(settings.appUserId);
       void triggerHaptic('selection');
       Alert.alert(
         I18n.t('transactions.settleUp.qr_prompt_title'),
@@ -148,13 +156,19 @@ export function SplitReceiptShareModal({
           {
             text: I18n.t('common.not_now'),
             style: 'cancel',
-            onPress: () => void handleShare(),
+            onPress: () => {
+              void markQrPromptSeen(settings.appUserId);
+              void handleShare();
+            },
           },
           {
             text: I18n.t('transactions.settleUp.qr_prompt_cta'),
             onPress: () => {
+              // Dismiss this share sheet first, then push settings once it has
+              // animated out — navigating while the pageSheet modal is still
+              // dismissing drops the push under the modal on iOS.
               onClose();
-              onSetupQr?.();
+              InteractionManager.runAfterInteractions(() => onSetupQr?.());
             },
           },
         ],
