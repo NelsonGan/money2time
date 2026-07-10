@@ -598,7 +598,6 @@ const pl = {
         adjustments_title: 'Podatek i obsługa',
         percent_chip: '+{{percent}}%',
         apply: 'Zastosuj',
-        adjustments_need_amounts: 'Najpierw wpisz kwoty',
       },
     },
   },

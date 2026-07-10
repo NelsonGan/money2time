@@ -571,7 +571,6 @@ const en = {
         adjustments_title: 'Tax & service',
         percent_chip: '+{{percent}}%',
         apply: 'Apply',
-        adjustments_need_amounts: 'Enter amounts first',
       },
     },
   },

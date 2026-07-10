@@ -561,7 +561,6 @@ const zh = {
         adjustments_title: '税费与服务费',
         percent_chip: '+{{percent}}%',
         apply: '应用',
-        adjustments_need_amounts: '请先输入金额',
       },
     },
   },

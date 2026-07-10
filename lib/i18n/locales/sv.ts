@@ -595,7 +595,6 @@ const sv = {
         adjustments_title: 'Moms & service',
         percent_chip: '+{{percent}}%',
         apply: 'Tillämpa',
-        adjustments_need_amounts: 'Ange belopp först',
       },
     },
   },

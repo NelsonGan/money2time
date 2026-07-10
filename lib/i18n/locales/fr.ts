@@ -597,7 +597,6 @@ const fr = {
         adjustments_title: 'Taxes et service',
         percent_chip: '+{{percent}} %',
         apply: 'Appliquer',
-        adjustments_need_amounts: "Saisissez d'abord des montants",
       },
     },
   },

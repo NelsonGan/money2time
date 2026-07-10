@@ -594,7 +594,6 @@ const ja = {
         adjustments_title: '税・サービス料',
         percent_chip: '+{{percent}}%',
         apply: '適用',
-        adjustments_need_amounts: '先に金額を入力してください',
       },
     },
   },

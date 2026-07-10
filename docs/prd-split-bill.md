@@ -83,8 +83,8 @@ same rows, which are already consistent, so nothing shifts.
 
 - **Paid rows are always frozen.** Mark-paid rows keep their amount; the
   percentage applies to unpaid rows only.
-- **All rows at 0**: the adjustment is hidden behind an "Enter amounts first"
-  hint and Done is disabled.
+- **All rows at 0**: the percentage stepper stays visible but its Apply button
+  is disabled, and Done is disabled.
 - **Only the Me row on Done**: split mode folds back off — the expense is just
   Me's amount (existing behavior).
 - **Invalid in-flight text** (`1.2.3`, empty) counts as 0; blur normalizes to

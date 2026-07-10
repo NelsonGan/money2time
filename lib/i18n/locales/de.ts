@@ -600,7 +600,6 @@ const de = {
         adjustments_title: 'Steuer & Service',
         percent_chip: '+{{percent}}%',
         apply: 'Anwenden',
-        adjustments_need_amounts: 'Zuerst Beträge eingeben',
       },
     },
   },

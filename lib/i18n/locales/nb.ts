@@ -596,7 +596,6 @@ const nb = {
         adjustments_title: 'Avgifter og service',
         percent_chip: '+{{percent}}%',
         apply: 'Bruk',
-        adjustments_need_amounts: 'Skriv inn beløp først',
       },
     },
   },

@@ -597,7 +597,6 @@ const ru = {
         adjustments_title: 'Налог и сервис',
         percent_chip: '+{{percent}}%',
         apply: 'Применить',
-        adjustments_need_amounts: 'Сначала введите суммы',
       },
     },
   },

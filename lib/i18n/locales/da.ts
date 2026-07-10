@@ -596,7 +596,6 @@ const da = {
         adjustments_title: 'Moms & service',
         percent_chip: '+{{percent}}%',
         apply: 'Anvend',
-        adjustments_need_amounts: 'Indtast beløb først',
       },
     },
   },

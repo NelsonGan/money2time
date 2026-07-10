@@ -597,7 +597,6 @@ const pt = {
         adjustments_title: 'Impostos e serviço',
         percent_chip: '+{{percent}}%',
         apply: 'Aplicar',
-        adjustments_need_amounts: 'Insira os valores primeiro',
       },
     },
   },

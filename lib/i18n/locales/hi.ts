@@ -595,7 +595,6 @@ const hi = {
         adjustments_title: 'कर और सेवा शुल्क',
         percent_chip: '+{{percent}}%',
         apply: 'लागू करें',
-        adjustments_need_amounts: 'पहले राशियाँ दर्ज करें',
       },
     },
   },

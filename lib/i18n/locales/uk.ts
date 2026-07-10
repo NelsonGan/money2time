@@ -597,7 +597,6 @@ const uk = {
         adjustments_title: 'Податок і сервіс',
         percent_chip: '+{{percent}}%',
         apply: 'Застосувати',
-        adjustments_need_amounts: 'Спочатку введіть суми',
       },
     },
   },

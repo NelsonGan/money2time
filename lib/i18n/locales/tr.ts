@@ -598,7 +598,6 @@ const tr = {
         adjustments_title: 'Vergi ve servis',
         percent_chip: '+%{{percent}}',
         apply: 'Uygula',
-        adjustments_need_amounts: 'Önce tutarları girin',
       },
     },
   },

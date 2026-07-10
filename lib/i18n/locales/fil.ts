@@ -601,7 +601,6 @@ const fil = {
         adjustments_title: 'Buwis at serbisyo',
         percent_chip: '+{{percent}}%',
         apply: 'Ilapat',
-        adjustments_need_amounts: 'Maglagay muna ng mga halaga',
       },
     },
   },

@@ -599,7 +599,6 @@ const nl = {
         adjustments_title: 'Belasting & service',
         percent_chip: '+{{percent}}%',
         apply: 'Toepassen',
-        adjustments_need_amounts: 'Voer eerst bedragen in',
       },
     },
   },

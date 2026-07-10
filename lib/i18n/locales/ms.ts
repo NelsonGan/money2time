@@ -599,7 +599,6 @@ const ms = {
         adjustments_title: 'Cukai & servis',
         percent_chip: '+{{percent}}%',
         apply: 'Terapkan',
-        adjustments_need_amounts: 'Masukkan amaun dahulu',
       },
     },
   },

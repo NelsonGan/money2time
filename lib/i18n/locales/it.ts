@@ -599,7 +599,6 @@ const it = {
         adjustments_title: 'Tasse e servizio',
         percent_chip: '+{{percent}}%',
         apply: 'Applica',
-        adjustments_need_amounts: 'Inserisci prima gli importi',
       },
     },
   },

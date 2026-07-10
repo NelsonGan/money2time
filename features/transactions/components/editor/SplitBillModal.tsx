@@ -768,48 +768,51 @@ export function SplitBillModal({
                   {I18n.t('transactions.editor.split.adjustments_title')}
                 </Text>
               </View>
-              {unpaidSum > 0 ? (
-                <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
-                  <Pressable
-                    onPress={() => stepPercent(-1)}
-                    disabled={percent <= MIN_ADJUST_PERCENT}
-                    hitSlop={6}
-                    className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
-                    style={{ opacity: percent <= MIN_ADJUST_PERCENT ? 0.4 : 1 }}
-                  >
-                    <Minus size={14} color={themeColors.text} />
-                  </Pressable>
-                  <Text variant="bodyStrong" className="min-w-[52px] text-center">
-                    {I18n.t('transactions.editor.split.percent_chip', { percent })}
-                  </Text>
-                  <Pressable
-                    onPress={() => stepPercent(1)}
-                    disabled={percent >= MAX_ADJUST_PERCENT}
-                    hitSlop={6}
-                    className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
-                    style={{ opacity: percent >= MAX_ADJUST_PERCENT ? 0.4 : 1 }}
-                  >
-                    <Plus size={14} color={themeColors.text} />
-                  </Pressable>
+              <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
+                <Pressable
+                  onPress={() => stepPercent(-1)}
+                  disabled={percent <= MIN_ADJUST_PERCENT}
+                  hitSlop={6}
+                  className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                  style={{ opacity: percent <= MIN_ADJUST_PERCENT ? 0.4 : 1 }}
+                >
+                  <Minus size={14} color={themeColors.text} />
+                </Pressable>
+                <Text variant="bodyStrong" className="min-w-[52px] text-center">
+                  {I18n.t('transactions.editor.split.percent_chip', { percent })}
+                </Text>
+                <Pressable
+                  onPress={() => stepPercent(1)}
+                  disabled={percent >= MAX_ADJUST_PERCENT}
+                  hitSlop={6}
+                  className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                  style={{ opacity: percent >= MAX_ADJUST_PERCENT ? 0.4 : 1 }}
+                >
+                  <Plus size={14} color={themeColors.text} />
+                </Pressable>
 
-                  <View className="flex-1" />
+                <View className="flex-1" />
 
-                  <Pressable
-                    onPress={handleApplyPercent}
-                    className="px-3.5 py-1.5 rounded-full bg-primary active:opacity-80"
+                <Pressable
+                  onPress={handleApplyPercent}
+                  disabled={unpaidSum <= 0}
+                  className={cn(
+                    'px-3.5 py-1.5 rounded-full active:opacity-80',
+                    unpaidSum > 0 ? 'bg-primary' : 'bg-secondary/60',
+                  )}
+                  style={{ opacity: unpaidSum > 0 ? 1 : 0.4 }}
+                >
+                  <Text
+                    variant="caption"
+                    className={cn(
+                      'font-medium',
+                      unpaidSum > 0 ? 'text-primary-foreground' : 'text-muted-foreground',
+                    )}
                   >
-                    <Text variant="caption" className="font-medium text-primary-foreground">
-                      {I18n.t('transactions.editor.split.apply')}
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : (
-                <View className="px-4 pb-3">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.editor.split.adjustments_need_amounts')}
+                    {I18n.t('transactions.editor.split.apply')}
                   </Text>
-                </View>
-              )}
+                </Pressable>
+              </View>
             </View>
           ) : null}
         </ScrollView>

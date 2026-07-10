@@ -593,7 +593,6 @@ const ko = {
         adjustments_title: '세금 및 서비스료',
         percent_chip: '+{{percent}}%',
         apply: '적용',
-        adjustments_need_amounts: '먼저 금액을 입력하세요',
       },
     },
   },

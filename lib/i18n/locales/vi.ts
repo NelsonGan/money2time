@@ -595,7 +595,6 @@ const vi = {
         adjustments_title: 'Thuế & phí dịch vụ',
         percent_chip: '+{{percent}}%',
         apply: 'Áp dụng',
-        adjustments_need_amounts: 'Hãy nhập số tiền trước',
       },
     },
   },

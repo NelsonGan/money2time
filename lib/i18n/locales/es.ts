@@ -598,7 +598,6 @@ const es = {
         adjustments_title: 'Impuestos y servicio',
         percent_chip: '+{{percent}}%',
         apply: 'Aplicar',
-        adjustments_need_amounts: 'Introduce importes primero',
       },
     },
   },

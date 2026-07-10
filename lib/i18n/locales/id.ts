@@ -598,7 +598,6 @@ const id = {
         adjustments_title: 'Pajak & layanan',
         percent_chip: '+{{percent}}%',
         apply: 'Terapkan',
-        adjustments_need_amounts: 'Masukkan jumlah terlebih dahulu',
       },
     },
   },

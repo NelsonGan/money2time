@@ -593,7 +593,6 @@ const th = {
         adjustments_title: 'ภาษีและค่าบริการ',
         percent_chip: '+{{percent}}%',
         apply: 'นำไปใช้',
-        adjustments_need_amounts: 'กรอกจำนวนเงินก่อน',
       },
     },
   },
