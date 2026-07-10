@@ -14,6 +14,7 @@ import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { subscribeHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
@@ -38,6 +39,10 @@ const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>()
 const weekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const dayHeaderLabelCache = new Map<string, { dateLabel: string; weekdayLabel: string }>();
 const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
+// How long the just-created row stays flagged as highlighted. Comfortably longer
+// than the row's own fade so the flag is still set when the (possibly just-added)
+// row first renders; the fade itself runs on the UI thread and self-completes.
+const HIGHLIGHT_CLEAR_MS = 1500;
 
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
@@ -90,6 +95,12 @@ interface ActivityTransactionListProps {
    * scroll-to-day lands that oldest section at the top via `scrollToEnd`.
    */
   fillLastSectionToViewport?: boolean;
+  /**
+   * Subscribe to post-create highlight requests and briefly flash the matching
+   * row so the user can spot a transaction they just added. Off by default; the
+   * calendar month list opts in.
+   */
+  highlightOnCreate?: boolean;
 }
 
 interface DayHeaderRowProps {
@@ -282,6 +293,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   locale = I18n.locale ?? 'en',
   extendUnderBottomNav = false,
   fillLastSectionToViewport = false,
+  highlightOnCreate = false,
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -295,6 +307,23 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     () => new Set(selectedTransactionIds),
     [selectedTransactionIds],
   );
+
+  // Row to briefly flash right after it's created. Every opted-in list hears the
+  // request; only the one that actually renders a row with this id shows a flash.
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!highlightOnCreate) return;
+    let clearTimer: ReturnType<typeof setTimeout> | null = null;
+    const unsubscribe = subscribeHighlightTransaction((id) => {
+      setHighlightedId(id);
+      if (clearTimer) clearTimeout(clearTimer);
+      clearTimer = setTimeout(() => setHighlightedId(null), HIGHLIGHT_CLEAR_MS);
+    });
+    return () => {
+      unsubscribe();
+      if (clearTimer) clearTimeout(clearTimer);
+    };
+  }, [highlightOnCreate]);
 
   const rows = useMemo<ActivityRow[]>(() => {
     if (!groupByDate) {
@@ -524,6 +553,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             onPressSplitBadge={onTransactionSplitBadgePress}
             selected={selectedTransactionIdSet.has(item.transaction.id)}
             selectionMode={selectionMode}
+            highlighted={highlightedId === item.transaction.id}
             disableAnimations={disableItemAnimations}
             compact={compactItems}
             showDateInSubtitle={!groupByDate}
@@ -549,6 +579,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       compactItems,
       getTrueHourlyRateForDate,
       groupByDate,
+      highlightedId,
       isTimeMode,
       lastSectionRowIds,
       measureSectionRow,
@@ -633,6 +664,13 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [lastHeaderIndex, rows, scrollToDayRef]);
 
+  // Bundle the row-state inputs FlashList must re-render on (selection + the
+  // post-create highlight) so a highlight change actually repaints the rows.
+  const listExtraData = useMemo(
+    () => ({ selectedTransactionIds, highlightedId }),
+    [selectedTransactionIds, highlightedId],
+  );
+
   if (disableVirtualization) {
     return (
       <ScrollView
@@ -657,7 +695,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       ref={flashListRef}
       key={listKey}
       data={rows}
-      extraData={selectedTransactionIds}
+      extraData={listExtraData}
       keyExtractor={keyExtractor}
       getItemType={getItemType}
       drawDistance={420}

@@ -18,3 +18,23 @@ export function subscribeOpenTransactionsRequest(listener: Listener) {
     listeners.delete(listener);
   };
 }
+
+type HighlightListener = (transactionId: string) => void;
+
+const highlightListeners = new Set<HighlightListener>();
+
+/**
+ * Ask any mounted transaction list to briefly flash the given row — used right
+ * after a create so the user can spot the transaction they just added. Lists
+ * that don't contain the id ignore it.
+ */
+export function requestHighlightTransaction(transactionId: string) {
+  highlightListeners.forEach((listener) => listener(transactionId));
+}
+
+export function subscribeHighlightTransaction(listener: HighlightListener) {
+  highlightListeners.add(listener);
+  return () => {
+    highlightListeners.delete(listener);
+  };
+}

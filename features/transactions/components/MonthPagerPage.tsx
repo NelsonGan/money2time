@@ -84,6 +84,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         contentPaddingHorizontal={contentPaddingHorizontal}
         extendUnderBottomNav
         fillLastSectionToViewport
+        highlightOnCreate
         disableItemAnimations
         compactItems
         listKey={`${pageMonthKey}-${localeKey}`}

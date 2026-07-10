@@ -1,6 +1,14 @@
-import React, { memo, useMemo } from 'react';
-import { Platform, Pressable, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import React, { memo, useEffect, useMemo } from 'react';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
@@ -21,6 +29,9 @@ import {
 
 type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
 
+// Peak opacity of the post-create highlight tint before it fades back out.
+const HIGHLIGHT_PEAK_OPACITY = 0.28;
+
 interface TransactionItemProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
@@ -35,6 +46,8 @@ interface TransactionItemProps {
   compact?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
+  /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
+  highlighted?: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -50,6 +63,7 @@ interface TransactionItemViewProps {
   compact: boolean;
   selected: boolean;
   selectionMode: boolean;
+  highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -65,10 +79,24 @@ function TransactionItemView({
   compact,
   selected,
   selectionMode,
+  highlighted,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
   const themeColors = useThemeColors();
+
+  // Flash a brief tint over the row when asked (e.g. just after it was created),
+  // then fade back to normal. Driven on the UI thread so it completes even if
+  // the list clears the highlight state before the fade finishes.
+  const flash = useSharedValue(0);
+  useEffect(() => {
+    if (!highlighted) return;
+    flash.value = withSequence(
+      withTiming(HIGHLIGHT_PEAK_OPACITY, { duration: 160 }),
+      withTiming(0, { duration: 900 }),
+    );
+  }, [highlighted, flash]);
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value }));
   const isLegacyAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -237,6 +265,12 @@ function TransactionItemView({
           compact ? 'gap-2 px-2.5 py-2 rounded-[18px]' : 'gap-3 pl-0 pr-3.5 py-3 rounded-[22px]',
         )}
       >
+        {/* Post-create highlight flash — tint behind the row content, fades out */}
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, flashStyle, { backgroundColor: themeColors.primary }]}
+        />
+
         {/* Color-coded left accent strip */}
         {!compact ? (
           <View
@@ -388,6 +422,7 @@ function AnimatedTransactionItem({
   compact,
   selected,
   selectionMode,
+  highlighted,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -411,6 +446,7 @@ function AnimatedTransactionItem({
         compact={compact}
         selected={selected}
         selectionMode={selectionMode}
+        highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -427,6 +463,7 @@ function StaticTransactionItem({
   compact,
   selected,
   selectionMode,
+  highlighted,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -440,6 +477,7 @@ function StaticTransactionItem({
       compact={compact}
       selected={selected}
       selectionMode={selectionMode}
+      highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
     />
@@ -458,6 +496,7 @@ function TransactionItemComponent({
   compact = false,
   selected = false,
   selectionMode = false,
+  highlighted = false,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemProps) {
@@ -501,6 +540,7 @@ function TransactionItemComponent({
         compact={compact}
         selected={selected}
         selectionMode={selectionMode}
+        highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -517,6 +557,7 @@ function TransactionItemComponent({
       compact={compact}
       selected={selected}
       selectionMode={selectionMode}
+      highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
     />
@@ -538,6 +579,7 @@ export const TransactionItem = memo(
     prev.compact === next.compact &&
     prev.selected === next.selected &&
     prev.selectionMode === next.selectionMode &&
+    prev.highlighted === next.highlighted &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
     prev.getTrueHourlyRateForDate === next.getTrueHourlyRateForDate,
