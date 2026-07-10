@@ -412,6 +412,7 @@ const nb = {
       transactions_one: '1 transaksjon',
       transactions_other: '{{count}} transaksjoner',
       outstanding_label: 'Utestående til deg',
+      receipt_total_label: 'Totalt',
       people_one: '1 person',
       people_other: '{{count}} personer',
       default_account_title: 'Betales som standard til',

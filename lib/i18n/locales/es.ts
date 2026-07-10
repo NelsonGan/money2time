@@ -414,6 +414,7 @@ const es = {
       transactions_one: '1 movimiento',
       transactions_other: '{{count}} movimientos',
       outstanding_label: 'Pendiente de cobro',
+      receipt_total_label: 'Total',
       people_one: '1 persona',
       people_other: '{{count}} personas',
       default_account_title: 'Cobrar por defecto en',

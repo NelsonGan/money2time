@@ -411,6 +411,7 @@ const hi = {
       transactions_one: '1 लेनदेन',
       transactions_other: '{{count}} लेनदेन',
       outstanding_label: 'आपको मिलना बाकी',
+      receipt_total_label: 'कुल',
       people_one: '1 व्यक्ति',
       people_other: '{{count}} लोग',
       default_account_title: 'डिफ़ॉल्ट रूप से यहाँ जमा',

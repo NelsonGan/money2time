@@ -414,6 +414,7 @@ const de = {
       transactions_one: '1 Transaktion',
       transactions_other: '{{count}} Transaktionen',
       outstanding_label: 'Dir geschuldet',
+      receipt_total_label: 'Gesamt',
       people_one: '1 Person',
       people_other: '{{count}} Personen',
       default_account_title: 'Standardmäßig zahlbar an',

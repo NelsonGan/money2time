@@ -411,6 +411,7 @@ const sv = {
       transactions_one: '1 transaktion',
       transactions_other: '{{count}} transaktioner',
       outstanding_label: 'Utestående till dig',
+      receipt_total_label: 'Totalt',
       people_one: '1 person',
       people_other: '{{count}} personer',
       default_account_title: 'Betalas till som standard',

@@ -414,6 +414,7 @@ const tr = {
       transactions_one: '1 işlem',
       transactions_other: '{{count}} işlem',
       outstanding_label: 'Size olan borç',
+      receipt_total_label: 'Toplam',
       people_one: '1 kişi',
       people_other: '{{count}} kişi',
       default_account_title: 'Varsayılan ödeme hesabı',

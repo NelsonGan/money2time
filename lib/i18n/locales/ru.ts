@@ -412,6 +412,7 @@ const ru = {
       transactions_one: '1 транзакция',
       transactions_other: '{{count}} транзакций',
       outstanding_label: 'Вам должны',
+      receipt_total_label: 'Итого',
       people_one: '1 человек',
       people_other: '{{count}} человек',
       default_account_title: 'Счёт возврата по умолчанию',

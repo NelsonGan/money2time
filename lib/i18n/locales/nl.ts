@@ -414,6 +414,7 @@ const nl = {
       transactions_one: '1 transactie',
       transactions_other: '{{count}} transacties',
       outstanding_label: 'Openstaand aan jou',
+      receipt_total_label: 'Totaal',
       people_one: '1 persoon',
       people_other: '{{count}} personen',
       default_account_title: 'Standaard betaald aan',

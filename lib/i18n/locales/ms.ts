@@ -413,6 +413,7 @@ const ms = {
       transactions_one: '1 transaksi',
       transactions_other: '{{count}} transaksi',
       outstanding_label: 'Tertunggak kepada anda',
+      receipt_total_label: 'Jumlah',
       people_one: '1 orang',
       people_other: '{{count}} orang',
       default_account_title: 'Dibayar ke (lalai)',

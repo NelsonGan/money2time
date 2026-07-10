@@ -385,6 +385,7 @@ const en = {
       tab_by_person: 'By person',
       tab_by_transaction: 'By transaction',
       outstanding_label: 'Outstanding to you',
+      receipt_total_label: 'Total',
       people_one: '1 person',
       people_other: '{{count}} people',
       transactions_one: '1 transaction',

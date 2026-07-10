@@ -411,6 +411,7 @@ const ja = {
       transactions_one: '1件の取引',
       transactions_other: '{{count}}件の取引',
       outstanding_label: '受け取り予定',
+      receipt_total_label: '合計',
       people_one: '1人',
       people_other: '{{count}}人',
       default_account_title: 'デフォルトの返済先',

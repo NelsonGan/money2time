@@ -414,6 +414,7 @@ const it = {
       transactions_one: '1 transazione',
       transactions_other: '{{count}} transazioni',
       outstanding_label: 'Da riscuotere',
+      receipt_total_label: 'Totale',
       people_one: '1 persona',
       people_other: '{{count}} persone',
       default_account_title: 'Rimborso predefinito su',

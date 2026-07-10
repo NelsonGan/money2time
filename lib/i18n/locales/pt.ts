@@ -413,6 +413,7 @@ const pt = {
       transactions_one: '1 transação',
       transactions_other: '{{count}} transações',
       outstanding_label: 'A receber',
+      receipt_total_label: 'Total',
       people_one: '1 pessoa',
       people_other: '{{count}} pessoas',
       default_account_title: 'Recebido por padrão em',

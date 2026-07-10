@@ -414,6 +414,7 @@ const pl = {
       transactions_one: '1 transakcja',
       transactions_other: '{{count}} transakcji',
       outstanding_label: 'Do rozliczenia',
+      receipt_total_label: 'Razem',
       people_one: '1 osoba',
       people_other: '{{count}} osób',
       default_account_title: 'Domyślnie spłacane na',

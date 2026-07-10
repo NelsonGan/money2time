@@ -413,6 +413,7 @@ const fr = {
       transactions_one: '1 transaction',
       transactions_other: '{{count}} transactions',
       outstanding_label: 'À percevoir',
+      receipt_total_label: 'Total',
       people_one: '1 personne',
       people_other: '{{count}} personnes',
       default_account_title: 'Remboursement par défaut',

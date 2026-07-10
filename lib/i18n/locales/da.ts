@@ -412,6 +412,7 @@ const da = {
       transactions_one: '1 transaktion',
       transactions_other: '{{count}} transaktioner',
       outstanding_label: 'Udestående til dig',
+      receipt_total_label: 'I alt',
       people_one: '1 person',
       people_other: '{{count}} personer',
       default_account_title: 'Betales som standard til',

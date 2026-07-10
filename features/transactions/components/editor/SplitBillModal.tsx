@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
@@ -50,6 +51,9 @@ interface SplitBillModalProps {
    * the body bare so a navigation route can present it as a standard screen.
    */
   presentation?: 'modal' | 'page';
+  /** One-shot toast shown on mount (e.g. a save-time mismatch that sent the
+   *  user here) — the editor's own toast would be hidden behind this page. */
+  initialToast?: string;
   /**
    * Itemized ("split before amount") mode: there is no fixed total — the user
    * enters what each person pays and the parent amount is computed on Done.
@@ -191,6 +195,7 @@ export const splitsHelpers = {
 export function SplitBillModal({
   visible,
   presentation = 'modal',
+  initialToast,
   itemized = false,
   onCancel,
   onDone,
@@ -211,6 +216,21 @@ export function SplitBillModal({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
+
+  // One-shot toast surfaced on this page (e.g. a save-time split mismatch that
+  // redirected the user here). Shown once when the message arrives.
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!initialToast) return;
+    void triggerHaptic('warning');
+    setToast(initialToast);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 2800);
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, [initialToast]);
 
   // Track the keyboard so the sticky sum bar can sit just above it. iOS
   // pageSheet doesn't reliably hand the keyboard frame to KeyboardAvoidingView,
@@ -659,11 +679,10 @@ export function SplitBillModal({
                           <Text variant="caption" className="font-semibold text-primary">
                             {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
                           </Text>
-                        ) : row.personName.trim() ? (
-                          <Text variant="caption" className="font-semibold">
-                            {row.personName.trim()[0]?.toUpperCase()}
-                          </Text>
                         ) : (
+                          // A static icon (not the typed name's initial) — recomputing the
+                          // initial on every keystroke re-rendered the row and caused input
+                          // lag. Other screens (Settle Up) still show the name initial.
                           <UserRound size={15} color={themeColors.textMuted} />
                         )}
                       </View>
@@ -986,6 +1005,28 @@ export function SplitBillModal({
           />
         ) : null}
       </SafeAreaView>
+
+      {toast ? (
+        <Animated.View
+          entering={FadeIn.duration(140)}
+          exiting={FadeOut.duration(160)}
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 20,
+            right: 20,
+            top: insets.top + 64,
+            alignItems: 'center',
+            zIndex: 50,
+          }}
+        >
+          <View className="max-w-full rounded-2xl bg-destructive px-4 py-2.5 shadow-lg">
+            <Text variant="bodyStrong" numberOfLines={2} className="text-center text-white">
+              {toast}
+            </Text>
+          </View>
+        </Animated.View>
+      ) : null}
 
       <AccountPickerSheet
         visible={accountPickerSplit !== null}

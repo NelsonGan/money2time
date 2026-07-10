@@ -1356,6 +1356,9 @@ export function TransactionEditorScreen({
     splitMode: boolean;
   } | null>(null);
 
+  // Holds a message to show as a toast the next time the split page opens.
+  const pendingSplitToastRef = useRef<string | null>(null);
+
   const handleOpenSplitBill = useCallback(() => {
     if (!canOpenSplitBill) return;
     void triggerHaptic('selection');
@@ -1379,7 +1382,11 @@ export function TransactionEditorScreen({
     // Publish synchronously (batched with the navigation) so the pushed screen
     // has data on its very first render.
     publishSessionRef.current(nextSplits, nextEvenly, itemized);
-    navigation.navigate('SplitBill');
+    // A one-shot toast to surface a save-time mismatch ON the split page (the
+    // editor's own toast would be hidden behind it). Consumed and cleared here.
+    const toast = pendingSplitToastRef.current;
+    pendingSplitToastRef.current = null;
+    navigation.navigate('SplitBill', toast ? { toast } : undefined);
   }, [amount, buildInitialSplitRows, canOpenSplitBill, navigation, splitEvenly, splitMode, splits]);
 
   const handleDoneSplitBill = useCallback(() => {
@@ -1823,13 +1830,11 @@ export function TransactionEditorScreen({
           // Surface a toast and move the user to the split page to fix it —
           // its sum bar shows the exact mismatch. Covers create and update.
           const overBy = sumOfUnpaidSplits > submitPayload.amount;
-          showToast(
-            overBy
-              ? I18n.t('transactions.editor.split.negative_self')
-              : I18n.t('transactions.editor.split.sum_mismatch', {
-                  diff: `${entryCurrencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
-                }),
-          );
+          pendingSplitToastRef.current = overBy
+            ? I18n.t('transactions.editor.split.negative_self')
+            : I18n.t('transactions.editor.split.sum_mismatch', {
+                diff: `${entryCurrencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
+              });
           handleOpenSplitBill();
           return;
         }

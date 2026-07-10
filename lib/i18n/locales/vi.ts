@@ -411,6 +411,7 @@ const vi = {
       transactions_one: '1 giao dịch',
       transactions_other: '{{count}} giao dịch',
       outstanding_label: 'Còn nợ bạn',
+      receipt_total_label: 'Tổng',
       people_one: '1 người',
       people_other: '{{count}} người',
       default_account_title: 'Mặc định trả vào',

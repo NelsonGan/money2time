@@ -379,6 +379,7 @@ const zh = {
       transactions_one: '1 笔交易',
       transactions_other: '{{count}} 笔交易',
       outstanding_label: '待收金额',
+      receipt_total_label: '合计',
       people_one: '1 人',
       people_other: '{{count}} 人',
       default_account_title: '默认收款账户',

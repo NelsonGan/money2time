@@ -410,6 +410,7 @@ const th = {
       transactions_one: '1 รายการ',
       transactions_other: '{{count}} รายการ',
       outstanding_label: 'ยอดค้างที่คุณต้องได้รับ',
+      receipt_total_label: 'รวม',
       people_one: '1 คน',
       people_other: '{{count}} คน',
       default_account_title: 'บัญชีรับเงินเริ่มต้น',

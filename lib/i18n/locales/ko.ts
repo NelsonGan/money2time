@@ -411,6 +411,7 @@ const ko = {
       transactions_one: '거래 1건',
       transactions_other: '거래 {{count}}건',
       outstanding_label: '받을 금액',
+      receipt_total_label: '합계',
       people_one: '1명',
       people_other: '{{count}}명',
       default_account_title: '기본 입금 계좌',

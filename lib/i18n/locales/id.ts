@@ -414,6 +414,7 @@ const id = {
       transactions_one: '1 transaksi',
       transactions_other: '{{count}} transaksi',
       outstanding_label: 'Belum dibayar ke kamu',
+      receipt_total_label: 'Total',
       people_one: '1 orang',
       people_other: '{{count}} orang',
       default_account_title: 'Default dibayar ke',
