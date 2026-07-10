@@ -90,7 +90,13 @@ function TransactionItemView({
   // the list clears the highlight state before the fade finishes.
   const flash = useSharedValue(0);
   useEffect(() => {
-    if (!highlighted) return;
+    if (!highlighted) {
+      // Clear any in-flight flash — otherwise a recycled cell (FlashList reuses
+      // the view for a different transaction) could show the tail of a previous
+      // row's flash. Direct assignment cancels a running animation.
+      flash.value = 0;
+      return;
+    }
     flash.value = withSequence(
       withTiming(HIGHLIGHT_PEAK_OPACITY, { duration: 160 }),
       withTiming(0, { duration: 900 }),
