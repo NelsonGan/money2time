@@ -33,6 +33,15 @@ interface MonthPagerPageProps {
   getScrollToTopRef: (index: number) => MutableRefObject<ScrollToTopHandler>;
   getScrollToDayRef?: (index: number) => MutableRefObject<ScrollToDayHandler>;
   contentPaddingHorizontal?: number;
+  /**
+   * Pad below the oldest day's section so scroll-to-day can land its header at
+   * the top of the viewport. Only useful for pagers that scroll to days (the
+   * calendar home list) — leave off elsewhere to skip the measuring machinery
+   * and the trailing blank it adds.
+   */
+  fillLastSectionToViewport?: boolean;
+  /** Flash a just-created transaction's row (see ActivityTransactionList). */
+  highlightOnCreate?: boolean;
 }
 
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
@@ -56,6 +65,8 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   getScrollToTopRef,
   getScrollToDayRef,
   contentPaddingHorizontal,
+  fillLastSectionToViewport = false,
+  highlightOnCreate = false,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
     () => addMonthsAtMonthStart(monthPagerAnchorDate, item - centerIndex),
@@ -83,8 +94,8 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         contentPaddingBottom={LIST_BOTTOM_PADDING}
         contentPaddingHorizontal={contentPaddingHorizontal}
         extendUnderBottomNav
-        fillLastSectionToViewport
-        highlightOnCreate
+        fillLastSectionToViewport={fillLastSectionToViewport}
+        highlightOnCreate={highlightOnCreate}
         disableItemAnimations
         compactItems
         listKey={`${pageMonthKey}-${localeKey}`}

@@ -39,10 +39,16 @@ const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>()
 const weekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const dayHeaderLabelCache = new Map<string, { dateLabel: string; weekdayLabel: string }>();
 const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
-// How long the just-created row stays flagged as highlighted. Comfortably longer
-// than the row's own fade so the flag is still set when the (possibly just-added)
-// row first renders; the fade itself runs on the UI thread and self-completes.
+// How long the just-created row stays flagged as highlighted, counted from the
+// moment the row actually lands in this list (not from the create request).
+// Comfortably longer than the row's own fade; the fade itself runs on the UI
+// thread and self-completes.
 const HIGHLIGHT_CLEAR_MS = 1500;
+// How long a highlight request stays pending while waiting for its row to
+// appear. The create can trail the request by a while (the editor defers the
+// write behind its dismiss animation), but a row landing much later than this
+// (e.g. a hidden list catching up on tab activation) shouldn't flash.
+const HIGHLIGHT_PENDING_TTL_MS = 5000;
 
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
@@ -112,7 +118,11 @@ interface DayHeaderRowProps {
   settings: TransactionDisplaySettings;
   selectionMode: boolean;
   allSelected: boolean;
-  onToggleSelectAll?: () => void;
+  /** The day's transaction ids, passed back to `onToggleSelectAll`. Kept as
+   *  separate props (rather than a per-header closure built in renderItem) so
+   *  this memo isn't defeated on every list re-render pass. */
+  transactionIds: string[];
+  onToggleSelectAll?: (transactionIds: string[]) => void;
 }
 
 const DayHeaderRow = memo(function DayHeaderRow({
@@ -124,6 +134,7 @@ const DayHeaderRow = memo(function DayHeaderRow({
   settings,
   selectionMode,
   allSelected,
+  transactionIds,
   onToggleSelectAll,
 }: DayHeaderRowProps) {
   const themeColors = useThemeColors();
@@ -133,7 +144,7 @@ const DayHeaderRow = memo(function DayHeaderRow({
       <View className="flex-row items-center gap-2">
         {selectionMode ? (
           <Pressable
-            onPress={onToggleSelectAll}
+            onPress={() => onToggleSelectAll?.(transactionIds)}
             hitSlop={8}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: allSelected }}
@@ -308,22 +319,14 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [selectedTransactionIds],
   );
 
-  // Row to briefly flash right after it's created. Every opted-in list hears the
-  // request; only the one that actually renders a row with this id shows a flash.
+  // Row to briefly flash right after it's created. Every opted-in list hears
+  // the request, but it's held as a pending ref (no render) until the row
+  // actually arrives in THIS list's data — so the other mounted month pages
+  // never re-render for it, and the flash window starts when the row is
+  // actually visible instead of being eaten by a slow deferred create.
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-  useEffect(() => {
-    if (!highlightOnCreate) return;
-    let clearTimer: ReturnType<typeof setTimeout> | null = null;
-    const unsubscribe = subscribeHighlightTransaction((id) => {
-      setHighlightedId(id);
-      if (clearTimer) clearTimeout(clearTimer);
-      clearTimer = setTimeout(() => setHighlightedId(null), HIGHLIGHT_CLEAR_MS);
-    });
-    return () => {
-      unsubscribe();
-      if (clearTimer) clearTimeout(clearTimer);
-    };
-  }, [highlightOnCreate]);
+  const pendingHighlightRef = useRef<{ id: string; requestedAt: number } | null>(null);
+  const highlightClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const rows = useMemo<ActivityRow[]>(() => {
     if (!groupByDate) {
@@ -412,6 +415,54 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     transactions,
   ]);
 
+  // Render-synced ref so long-lived imperative handlers (scroll-to-day and its
+  // retry timers, the highlight subscription) always read the latest rows
+  // without re-creating themselves on every data change.
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+
+  // Promote a pending highlight to state once its row exists in the given rows
+  // snapshot; the clear timer starts here, when the flash can actually be seen.
+  const promotePendingHighlight = useCallback((liveRows: ActivityRow[]) => {
+    const pending = pendingHighlightRef.current;
+    if (!pending) return;
+    if (Date.now() - pending.requestedAt > HIGHLIGHT_PENDING_TTL_MS) {
+      pendingHighlightRef.current = null;
+      return;
+    }
+    if (!liveRows.some((row) => row.kind === 'item' && row.id === pending.id)) return;
+    pendingHighlightRef.current = null;
+    setHighlightedId(pending.id);
+    if (highlightClearTimerRef.current) clearTimeout(highlightClearTimerRef.current);
+    highlightClearTimerRef.current = setTimeout(() => {
+      highlightClearTimerRef.current = null;
+      setHighlightedId(null);
+    }, HIGHLIGHT_CLEAR_MS);
+  }, []);
+
+  useEffect(() => {
+    if (!highlightOnCreate) return;
+    const unsubscribe = subscribeHighlightTransaction((id) => {
+      pendingHighlightRef.current = { id, requestedAt: Date.now() };
+      // The row is usually not in state yet (the request fires in the same task
+      // as the optimistic insert), but check anyway in case it already landed.
+      promotePendingHighlight(rowsRef.current);
+    });
+    return () => {
+      unsubscribe();
+      if (highlightClearTimerRef.current) {
+        clearTimeout(highlightClearTimerRef.current);
+        highlightClearTimerRef.current = null;
+      }
+    };
+  }, [highlightOnCreate, promotePendingHighlight]);
+
+  // The created row arrives via a data update — re-check on every rows change
+  // (no-op unless a highlight is pending).
+  useEffect(() => {
+    promotePendingHighlight(rows);
+  }, [rows, promotePendingHighlight]);
+
   // Day subtotals in a single-account view use that account's symbol; otherwise
   // the reporting-currency symbol from displaySettings.
   const subtotalSettings = useMemo<TransactionDisplaySettings>(
@@ -445,27 +496,61 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     return -1;
   }, [fillLastSectionToViewport, groupByDate, rows]);
 
+  // Render-synced ref for the imperative scroll-to-day handler (see below).
+  const lastHeaderIndexRef = useRef(lastHeaderIndex);
+  lastHeaderIndexRef.current = lastHeaderIndex;
+
+  // Content-compared against the previous set so a rows-identity change that
+  // keeps the same trailing section (e.g. the optimistic row being swapped for
+  // its persisted copy) doesn't churn getItemType / renderRow / the pruning
+  // effect below — each of which repaints every visible cell.
+  const prevLastSectionRowIdsRef = useRef<Set<string> | null>(null);
   const lastSectionRowIds = useMemo<Set<string> | null>(() => {
-    if (lastHeaderIndex < 0) return null;
-    return new Set(rows.slice(lastHeaderIndex).map((row) => row.id));
+    if (lastHeaderIndex < 0) {
+      prevLastSectionRowIdsRef.current = null;
+      return null;
+    }
+    const next = new Set(rows.slice(lastHeaderIndex).map((row) => row.id));
+    const prev = prevLastSectionRowIdsRef.current;
+    if (prev && prev.size === next.size) {
+      let same = true;
+      for (const id of next) {
+        if (!prev.has(id)) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return prev;
+    }
+    prevLastSectionRowIdsRef.current = next;
+    return next;
   }, [lastHeaderIndex, rows]);
 
-  const recomputeLastSectionHeight = useCallback(() => {
-    if (!lastSectionRowIds) return;
-    let sum = 0;
-    let allMeasured = true;
-    lastSectionRowIds.forEach((id) => {
-      const height = rowHeightsRef.current.get(id);
-      if (height == null) {
-        allMeasured = false;
-      } else {
-        sum += height;
+  const recomputeLastSectionHeight = useCallback(
+    (resetIfIncomplete: boolean) => {
+      if (!lastSectionRowIds) return;
+      let sum = 0;
+      let allMeasured = true;
+      lastSectionRowIds.forEach((id) => {
+        const height = rowHeightsRef.current.get(id);
+        if (height == null) {
+          allMeasured = false;
+        } else {
+          sum += height;
+        }
+      });
+      if (allMeasured) {
+        setLastSectionHeight((prev) => (prev === sum ? prev : sum));
+      } else if (resetIfIncomplete) {
+        // The section membership just changed: drop the previous section's
+        // stale height and fall back to 0 (a generous full-viewport spacer)
+        // until the new rows finish measuring, instead of sizing the spacer
+        // from rows that are no longer the trailing section.
+        setLastSectionHeight(0);
       }
-    });
-    if (allMeasured) {
-      setLastSectionHeight((prev) => (prev === sum ? prev : sum));
-    }
-  }, [lastSectionRowIds]);
+    },
+    [lastSectionRowIds],
+  );
 
   // The trailing section changed (new day, filter, month page, etc.). Drop
   // measured heights for rows that are no longer in it so the map stays bounded
@@ -480,7 +565,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         if (!lastSectionRowIds.has(id)) heights.delete(id);
       }
     }
-    recomputeLastSectionHeight();
+    recomputeLastSectionHeight(true);
   }, [lastSectionRowIds, recomputeLastSectionHeight]);
 
   const measureSectionRow = useCallback(
@@ -490,7 +575,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       const rounded = Math.round(height);
       if (rowHeightsRef.current.get(id) === rounded) return;
       rowHeightsRef.current.set(id, rounded);
-      recomputeLastSectionHeight();
+      recomputeLastSectionHeight(false);
     },
     [recomputeLastSectionHeight],
   );
@@ -544,9 +629,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             settings={subtotalSettings}
             selectionMode={selectionMode}
             allSelected={allSelected}
-            onToggleSelectAll={
-              onToggleDaySelection ? () => onToggleDaySelection(item.transactionIds) : undefined
-            }
+            transactionIds={item.transactionIds}
+            onToggleSelectAll={onToggleDaySelection}
           />
         );
       } else {
@@ -632,22 +716,30 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [disableVirtualization, scrollToTopRef]);
 
-  useEffect(() => {
-    if (!scrollToDayRef) return;
-    let snapTimers: ReturnType<typeof setTimeout>[] = [];
-    const clearSnapTimers = () => {
-      snapTimers.forEach(clearTimeout);
-      snapTimers = [];
-    };
-    scrollToDayRef.current = (dayKey: string) => {
+  // The handler and its re-snap timers live on refs (rowsRef /
+  // lastHeaderIndexRef / lastSectionSpacerRef) rather than effect closures, so
+  // they survive rows-identity churn — the post-create DB reconciliation swaps
+  // the new row's object within ~300ms, which would otherwise re-run the effect
+  // and cancel the corrective re-snaps mid-flight.
+  const snapTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clearSnapTimers = useCallback(() => {
+    snapTimersRef.current.forEach(clearTimeout);
+    snapTimersRef.current = [];
+  }, []);
+
+  const scrollToDay = useCallback(
+    (dayKey: string) => {
       clearSnapTimers();
-      const index = rows.findIndex((row) => row.kind === 'header' && row.id === `header-${dayKey}`);
+      const headerId = `header-${dayKey}`;
+      const findHeaderIndex = () =>
+        rowsRef.current.findIndex((row) => row.kind === 'header' && row.id === headerId);
+      const index = findHeaderIndex();
       if (index < 0) {
         // The day has no transactions in this month — fall back to the top.
         flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
         return;
       }
-      if (index === lastHeaderIndex) {
+      if (index === lastHeaderIndexRef.current) {
         // Oldest day: it sorts to the bottom of the list. When it fits within the
         // viewport the trailing spacer is sized so the list END lands its header
         // exactly at the top — scrollToEnd hits that deterministically (a plain
@@ -657,23 +749,37 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         // scrollToIndex reaches the top using the section's own rows below it.
         // Re-issue a few times as the rows measure and the offset settles.
         const jumpToOldest = () => {
-          if (lastSectionSpacerRef.current > 0) {
+          // Re-resolve on every attempt: rows can be replaced between retries,
+          // shifting the header's index or its oldest-day status.
+          const liveIndex = findHeaderIndex();
+          if (liveIndex < 0) return;
+          if (liveIndex === lastHeaderIndexRef.current && lastSectionSpacerRef.current > 0) {
             flashListRef.current?.scrollToEnd({ animated: false });
           } else {
-            flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
+            flashListRef.current?.scrollToIndex({
+              index: liveIndex,
+              animated: false,
+              viewOffset: 0,
+            });
           }
         };
         jumpToOldest();
-        snapTimers = [80, 200, 400].map((delay) => setTimeout(jumpToOldest, delay));
+        snapTimersRef.current = [80, 200, 400].map((delay) => setTimeout(jumpToOldest, delay));
         return;
       }
       flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
-    };
+    },
+    [clearSnapTimers],
+  );
+
+  useEffect(() => {
+    if (!scrollToDayRef) return;
+    scrollToDayRef.current = scrollToDay;
     return () => {
       scrollToDayRef.current = null;
       clearSnapTimers();
     };
-  }, [lastHeaderIndex, rows, scrollToDayRef]);
+  }, [clearSnapTimers, scrollToDay, scrollToDayRef]);
 
   // Bundle the row-state inputs FlashList must re-render on (selection + the
   // post-create highlight) so a highlight change actually repaints the rows.
