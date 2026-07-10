@@ -446,8 +446,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
   const measureSectionRow = useCallback(
     (id: string, height: number) => {
-      if (rowHeightsRef.current.get(id) === height) return;
-      rowHeightsRef.current.set(id, height);
+      // Round to whole pixels so sub-pixel layout jitter during scroll doesn't
+      // churn state (and the spacer) frame after frame.
+      const rounded = Math.round(height);
+      if (rowHeightsRef.current.get(id) === rounded) return;
+      rowHeightsRef.current.set(id, rounded);
       recomputeLastSectionHeight();
     },
     [recomputeLastSectionHeight],
@@ -469,7 +472,16 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   );
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
-  const getItemType = useCallback((item: ActivityRow) => item.kind, []);
+  // Trailing (oldest-section) rows render wrapped in a measuring <View>; every
+  // other row renders bare. Give the wrapped rows their own recycle pool so a
+  // cell is never reused across the wrapped/bare boundary — otherwise FlashList
+  // swaps the root element type on recycle and React remounts the whole row
+  // (and re-fires its onLayout), which is the jank when scrolling the oldest
+  // section into view.
+  const getItemType = useCallback(
+    (item: ActivityRow) => (lastSectionRowIds?.has(item.id) ? `${item.kind}-tail` : item.kind),
+    [lastSectionRowIds],
+  );
 
   const renderRow = useCallback(
     (item: ActivityRow) => {
