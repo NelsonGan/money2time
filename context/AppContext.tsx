@@ -139,7 +139,6 @@ import {
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
-import { runAfterInteractionsCapped } from '~/utils/interactions';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -150,6 +149,7 @@ import {
   normalizeMonthKey,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
+import { runAfterInteractionsCapped } from '~/utils/interactions';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 export interface SplitDraftInput {

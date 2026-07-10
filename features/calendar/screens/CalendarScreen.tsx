@@ -46,7 +46,7 @@ import {
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import {
-  useIndexedHandlerRefs,
+  useIndexedNotifyingHandlerRefs,
   useIndexedScrollToTopRefs,
 } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -84,6 +84,17 @@ import {
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
+
+// How long a queued day-scroll stays valid while its destination page mounts.
+// If the page registers its handler later than this, the user has almost
+// certainly navigated elsewhere, so the stale scroll is dropped.
+const DAY_SCROLL_TARGET_TTL_MS = 4000;
+// How long the go-to-day flow waits for the just-created transaction to appear
+// in the (filtered) list before giving up and scrolling anyway. Must stay
+// comfortably above the create pipeline's worst-case latency (the editor caps
+// its deferred submit at SUBMIT_MAX_DELAY_MS = 400ms, the context write at
+// DEFERRED_WRITE_MAX_DELAY_MS = 300ms) so a normal create is never given up on.
+const CREATED_ROW_WAIT_MS = 1500;
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -269,6 +280,10 @@ export function CalendarScreen({
   // The focused day — used by the year view, the grid→list scroll target, and
   // "today". The list view itself is paged by month (see the list month pager).
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
+  // Render-synced so the async go-to-day give-up can tell whether the user has
+  // since selected a different day (and thus should not be yanked away).
+  const selectedDayKeyRef = useRef(selectedDayKey);
+  selectedDayKeyRef.current = selectedDayKey;
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -384,7 +399,7 @@ export function CalendarScreen({
   // Per-page scroll handlers for the monthly-list pages, keyed by slot index, so
   // we can scroll a given month's list to the top or to a specific day's header.
   const getPageScrollToTopRef = useIndexedScrollToTopRefs();
-  const getPageScrollToDayRef = useIndexedHandlerRefs<(dayKey: string) => void>();
+  const getPageScrollToDayRef = useIndexedNotifyingHandlerRefs<(dayKey: string) => void>();
 
   const {
     activeIndex: activeMonthIndex,
@@ -457,34 +472,21 @@ export function CalendarScreen({
   }, []);
 
   // Scroll a destination month's list to a day's section header. The page may
-  // not be mounted yet (a far-away month has to render after the pager jump),
-  // so when its handler isn't registered, poll with backoff until it appears —
-  // far pages can take well past the first frame to mount on slow devices. A
-  // new call (or unmount) cancels any pending attempts; the last request wins.
-  const dayScrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const clearDayScrollTimers = useCallback(() => {
-    dayScrollTimersRef.current.forEach(clearTimeout);
-    dayScrollTimersRef.current = [];
-  }, []);
-  useEffect(() => clearDayScrollTimers, [clearDayScrollTimers]);
+  // not be mounted yet (a far-away month has to render after the pager jump);
+  // `whenReady` runs the scroll the instant that page registers its handler —
+  // no polling, no fixed give-up. Waiters are per-page-index, so a request for
+  // one month can never cancel a pending request for another (the old shared
+  // timer list did). A late-mounting page whose request has aged out is skipped
+  // so a much-later mount doesn't yank the user to a day they've moved on from.
   const scrollListToDay = useCallback(
     (monthIndex: number, dayKey: string) => {
-      clearDayScrollTimers();
-      const handlerRef = getPageScrollToDayRef(monthIndex);
-      if (handlerRef.current) {
-        handlerRef.current(dayKey);
-        return;
-      }
-      dayScrollTimersRef.current = [80, 240, 480, 900, 1500].map((delay) =>
-        setTimeout(() => {
-          const handler = handlerRef.current;
-          if (!handler) return;
-          clearDayScrollTimers();
-          handler(dayKey);
-        }, delay),
-      );
+      const requestedAt = Date.now();
+      getPageScrollToDayRef(monthIndex).whenReady((handler) => {
+        if (Date.now() - requestedAt > DAY_SCROLL_TARGET_TTL_MS) return;
+        handler(dayKey);
+      });
     },
-    [clearDayScrollTimers, getPageScrollToDayRef],
+    [getPageScrollToDayRef],
   );
 
   // --- Transactions filtering ---
@@ -1033,9 +1035,13 @@ export function CalendarScreen({
       return;
     }
     const timeout = setTimeout(() => {
-      scrollListToDay(index, dayKey);
+      // Only scroll if the user is still on this day; if they've since tapped a
+      // different day (or gone to today), don't override their navigation.
+      if (selectedDayKeyRef.current === dayKey) {
+        scrollListToDay(index, dayKey);
+      }
       setPendingGoToDay(null);
-    }, 1500);
+    }, CREATED_ROW_WAIT_MS);
     return () => clearTimeout(timeout);
   }, [pendingGoToDay, transactionsByMonthKey, scrollListToDay]);
 
