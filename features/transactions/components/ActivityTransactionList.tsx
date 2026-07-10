@@ -500,6 +500,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     lastHeaderIndex >= 0 && listViewportHeight > 0
       ? Math.max(0, listViewportHeight - lastSectionHeight - baseBottomPadding)
       : 0;
+  // Read by the scroll-to-day callback so it can pick the right strategy for the
+  // oldest section without re-creating (and cancelling the retry timers on) the
+  // effect whenever the spacer settles.
+  const lastSectionSpacerRef = useRef(0);
+  lastSectionSpacerRef.current = lastSectionSpacer;
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -643,17 +648,23 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         return;
       }
       if (index === lastHeaderIndex) {
-        // Oldest day: it sorts to the bottom of the list. Bring its header to the
-        // top — the trailing spacer guarantees room when the section is shorter
-        // than the viewport, and when it's taller its own rows provide the room.
-        // Because these far-bottom rows are size-estimated until measured, the
-        // first jump can land short, so re-issue as they measure and the offset
-        // settles on the exact position (scrollToEnd would overshoot a section
-        // taller than the viewport and push the header off the top).
-        const jumpToHeader = () =>
-          flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
-        jumpToHeader();
-        snapTimers = [80, 200, 400].map((delay) => setTimeout(jumpToHeader, delay));
+        // Oldest day: it sorts to the bottom of the list. When it fits within the
+        // viewport the trailing spacer is sized so the list END lands its header
+        // exactly at the top — scrollToEnd hits that deterministically (a plain
+        // scrollToIndex to this far, size-estimated row undershoots and stops
+        // short). When the section is taller than the viewport there's no spacer,
+        // so scrollToEnd would overshoot and push the header off the top; there
+        // scrollToIndex reaches the top using the section's own rows below it.
+        // Re-issue a few times as the rows measure and the offset settles.
+        const jumpToOldest = () => {
+          if (lastSectionSpacerRef.current > 0) {
+            flashListRef.current?.scrollToEnd({ animated: false });
+          } else {
+            flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
+          }
+        };
+        jumpToOldest();
+        snapTimers = [80, 200, 400].map((delay) => setTimeout(jumpToOldest, delay));
         return;
       }
       flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
