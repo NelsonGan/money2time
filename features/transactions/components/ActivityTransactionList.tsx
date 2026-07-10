@@ -22,17 +22,31 @@ import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatter
 
 export type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
 
+// The grouped list renders ONE cell per day (header + that day's transactions),
+// not a flat stream of header/item rows. Days are the unit users navigate by,
+// so scroll-to-day targets a real cell — and with at most ~31 cells per month,
+// FlashList's estimate-then-converge scrollToIndex lands reliably. The trailing
+// spacer that lets the oldest day reach the top of the viewport is also a real
+// row (kind 'spacer'), NOT contentContainer padding: FlashList clamps
+// scrollToIndex targets to its own layout size, which excludes container
+// padding, so a padding spacer made every near-bottom day stop short of the
+// top (the "June 2 doesn't scroll while June 1 does" bug).
 type ActivityRow =
   | {
-      kind: 'header';
+      kind: 'day';
       id: string;
+      dayKey: string;
       dateLabel: string;
       weekdayLabel: string;
       incomeSubtotal: number;
       expenseSubtotal: number;
       transactionIds: string[];
+      transactions: TransactionWithRelations[];
     }
-  | { kind: 'item'; id: string; transaction: TransactionWithRelations };
+  | { kind: 'item'; id: string; transaction: TransactionWithRelations }
+  | { kind: 'spacer'; id: 'trailing-spacer' };
+
+type DayRow = Extract<ActivityRow, { kind: 'day' }>;
 
 const dayLabelFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -93,12 +107,11 @@ interface ActivityTransactionListProps {
    */
   extendUnderBottomNav?: boolean;
   /**
-   * When set (grouped monthly list, newest-first), the trailing spacer below
-   * the list is sized so the oldest day's section — which sorts to the bottom —
-   * can be scrolled up so its header sits at the top of the viewport, filling
-   * one page. The spacer is measured to be *just* enough (viewport minus the
-   * last section's height) so no wasted blank is left below it, and
-   * scroll-to-day lands that oldest section at the top via `scrollToEnd`.
+   * When set (grouped monthly list, newest-first), a trailing spacer row is
+   * appended and sized so the oldest day's cell — which sorts to the bottom —
+   * can be scrolled up until its header sits at the top of the viewport,
+   * filling one page. Only useful for pagers that scroll to days (the calendar
+   * home list); leave off elsewhere to skip the measuring and the blank.
    */
   fillLastSectionToViewport?: boolean;
   /**
@@ -337,76 +350,57 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       }));
     }
 
-    const dailyTotals = new Map<string, { income: number; expense: number }>();
-    const headerRowsByDay = new Map<string, Extract<ActivityRow, { kind: 'header' }>[]>();
-    const transactionIdsByDay = new Map<string, string[]>();
+    // Input is date-sorted, so each day's transactions arrive contiguously;
+    // grouping by key (rather than boundary detection) also tolerates stray
+    // non-contiguous duplicates by merging them into the first occurrence.
+    const dayRowsByKey = new Map<string, DayRow>();
     const nextRows: ActivityRow[] = [];
-    let currentHeaderDay: string | null = null;
 
     transactions.forEach((transaction) => {
       const dayKey = dayKeyFromIso(transaction.date);
-      const dayTotals = dailyTotals.get(dayKey) ?? { income: 0, expense: 0 };
-      if (transaction.type === 'income') {
-        const value = isTimeMode
-          ? getDisplayValueForTransaction(transaction)
-          : subtotalCurrencyCode
-            ? (transaction.accountAmount ?? transaction.amount)
-            : (transaction.reportingAmount ?? transaction.amount);
-        dayTotals.income += value;
-      }
-      if (transaction.type === 'expense') {
-        const value = isTimeMode
-          ? getDisplayValueForTransaction(transaction)
-          : subtotalCurrencyCode
-            ? (transaction.accountAmount ?? transaction.amount)
-            : (transaction.reportingAmount ?? transaction.amount);
-        dayTotals.expense += value;
-      }
-      dailyTotals.set(dayKey, dayTotals);
-
-      if (dayKey !== currentHeaderDay) {
-        currentHeaderDay = dayKey;
+      let dayRow = dayRowsByKey.get(dayKey);
+      if (!dayRow) {
         const { dateLabel, weekdayLabel } = formatDayHeaderParts(dayKey, locale);
-        const headerRow: Extract<ActivityRow, { kind: 'header' }> = {
-          kind: 'header',
-          id: `header-${dayKey}`,
+        dayRow = {
+          kind: 'day',
+          id: `day-${dayKey}`,
+          dayKey,
           dateLabel,
           weekdayLabel,
           incomeSubtotal: 0,
           expenseSubtotal: 0,
           transactionIds: [],
+          transactions: [],
         };
-        const dayHeaders = headerRowsByDay.get(dayKey);
-        if (dayHeaders) {
-          dayHeaders.push(headerRow);
+        dayRowsByKey.set(dayKey, dayRow);
+        nextRows.push(dayRow);
+      }
+      if (transaction.type === 'income' || transaction.type === 'expense') {
+        const value = isTimeMode
+          ? getDisplayValueForTransaction(transaction)
+          : subtotalCurrencyCode
+            ? (transaction.accountAmount ?? transaction.amount)
+            : (transaction.reportingAmount ?? transaction.amount);
+        if (transaction.type === 'income') {
+          dayRow.incomeSubtotal += value;
         } else {
-          headerRowsByDay.set(dayKey, [headerRow]);
+          dayRow.expenseSubtotal += value;
         }
-        nextRows.push(headerRow);
       }
-      const dayIds = transactionIdsByDay.get(dayKey);
-      if (dayIds) {
-        dayIds.push(transaction.id);
-      } else {
-        transactionIdsByDay.set(dayKey, [transaction.id]);
-      }
-      nextRows.push({ kind: 'item', id: transaction.id, transaction });
+      dayRow.transactionIds.push(transaction.id);
+      dayRow.transactions.push(transaction);
     });
 
-    headerRowsByDay.forEach((headerRows, dayKey) => {
-      const totals = dailyTotals.get(dayKey);
-      const dayIds = transactionIdsByDay.get(dayKey) ?? [];
-      headerRows.forEach((headerRow) => {
-        if (totals) {
-          headerRow.incomeSubtotal = totals.income;
-          headerRow.expenseSubtotal = totals.expense;
-        }
-        headerRow.transactionIds = dayIds;
-      });
-    });
+    // The trailing spacer is a real row so FlashList's scroll math includes it
+    // (see the ActivityRow comment) — appended only when the oldest day must be
+    // able to reach the top of the viewport.
+    if (fillLastSectionToViewport && nextRows.length > 0) {
+      nextRows.push({ kind: 'spacer', id: 'trailing-spacer' });
+    }
 
     return nextRows;
   }, [
+    fillLastSectionToViewport,
     getDisplayValueForTransaction,
     groupByDate,
     isTimeMode,
@@ -415,9 +409,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     transactions,
   ]);
 
-  // Render-synced ref so long-lived imperative handlers (scroll-to-day and its
-  // retry timers, the highlight subscription) always read the latest rows
-  // without re-creating themselves on every data change.
+  // Render-synced ref so long-lived imperative handlers (scroll-to-day, the
+  // highlight subscription) always read the latest rows without re-creating
+  // themselves on every data change.
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
 
@@ -430,7 +424,12 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       pendingHighlightRef.current = null;
       return;
     }
-    if (!liveRows.some((row) => row.kind === 'item' && row.id === pending.id)) return;
+    const present = liveRows.some((row) =>
+      row.kind === 'day'
+        ? row.transactionIds.includes(pending.id)
+        : row.kind === 'item' && row.id === pending.id,
+    );
+    if (!present) return;
     pendingHighlightRef.current = null;
     setHighlightedId(pending.id);
     if (highlightClearTimerRef.current) clearTimeout(highlightClearTimerRef.current);
@@ -473,213 +472,158 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [displaySettings, subtotalCurrencyCode],
   );
 
-  // --- Trailing spacer so the oldest (bottom) day can scroll to the top ---
-  // Only active for the grouped monthly list (`fillLastSectionToViewport`). The
-  // oldest day sorts to the bottom; to let its header reach the top of the
-  // viewport we need scroll room below it. We size that room to exactly
-  // `viewport - lastSectionHeight` so the oldest section fills one page with no
-  // extra blank. Until the section is measured we leave a full viewport of room
-  // (generous) so a scroll-to-day still has somewhere to travel.
+  // --- Trailing spacer sizing ---
+  // The spacer row is sized to `viewport - lastDayCellHeight` so the oldest
+  // day's header can land exactly at the top of the viewport, clamped to no
+  // less than the base bottom padding so content never ends flush against the
+  // bottom nav. Only the last day cell's height is needed; its measurement is
+  // keyed by dayKey so a stale value from a previous trailing day is ignored
+  // automatically when the section membership changes.
+  const hasTrailingSpacer = rows.length > 0 && rows[rows.length - 1].kind === 'spacer';
   const [listViewportHeight, setListViewportHeight] = useState(0);
-  const [lastSectionHeight, setLastSectionHeight] = useState(0);
-  const rowHeightsRef = useRef(new Map<string, number>());
-
   const handleListLayout = useCallback((event: LayoutChangeEvent) => {
     setListViewportHeight(event.nativeEvent.layout.height);
   }, []);
 
-  const lastHeaderIndex = useMemo(() => {
-    if (!fillLastSectionToViewport || !groupByDate) return -1;
+  const lastDayKey = useMemo(() => {
+    if (!hasTrailingSpacer) return null;
     for (let i = rows.length - 1; i >= 0; i -= 1) {
-      if (rows[i].kind === 'header') return i;
+      const row = rows[i];
+      if (row.kind === 'day') return row.dayKey;
     }
-    return -1;
-  }, [fillLastSectionToViewport, groupByDate, rows]);
+    return null;
+  }, [hasTrailingSpacer, rows]);
+  const lastDayKeyRef = useRef(lastDayKey);
+  lastDayKeyRef.current = lastDayKey;
 
-  // Render-synced ref for the imperative scroll-to-day handler (see below).
-  const lastHeaderIndexRef = useRef(lastHeaderIndex);
-  lastHeaderIndexRef.current = lastHeaderIndex;
-
-  // Content-compared against the previous set so a rows-identity change that
-  // keeps the same trailing section (e.g. the optimistic row being swapped for
-  // its persisted copy) doesn't churn getItemType / renderRow / the pruning
-  // effect below — each of which repaints every visible cell.
-  const prevLastSectionRowIdsRef = useRef<Set<string> | null>(null);
-  const lastSectionRowIds = useMemo<Set<string> | null>(() => {
-    if (lastHeaderIndex < 0) {
-      prevLastSectionRowIdsRef.current = null;
-      return null;
-    }
-    const next = new Set(rows.slice(lastHeaderIndex).map((row) => row.id));
-    const prev = prevLastSectionRowIdsRef.current;
-    if (prev && prev.size === next.size) {
-      let same = true;
-      for (const id of next) {
-        if (!prev.has(id)) {
-          same = false;
-          break;
-        }
-      }
-      if (same) return prev;
-    }
-    prevLastSectionRowIdsRef.current = next;
-    return next;
-  }, [lastHeaderIndex, rows]);
-
-  const recomputeLastSectionHeight = useCallback(
-    (resetIfIncomplete: boolean) => {
-      if (!lastSectionRowIds) return;
-      let sum = 0;
-      let allMeasured = true;
-      lastSectionRowIds.forEach((id) => {
-        const height = rowHeightsRef.current.get(id);
-        if (height == null) {
-          allMeasured = false;
-        } else {
-          sum += height;
-        }
-      });
-      if (allMeasured) {
-        setLastSectionHeight((prev) => (prev === sum ? prev : sum));
-      } else if (resetIfIncomplete) {
-        // The section membership just changed: drop the previous section's
-        // stale height and fall back to 0 (a generous full-viewport spacer)
-        // until the new rows finish measuring, instead of sizing the spacer
-        // from rows that are no longer the trailing section.
-        setLastSectionHeight(0);
-      }
-    },
-    [lastSectionRowIds],
+  const [lastDayMeasure, setLastDayMeasure] = useState<{ dayKey: string; height: number } | null>(
+    null,
   );
-
-  // The trailing section changed (new day, filter, month page, etc.). Drop
-  // measured heights for rows that are no longer in it so the map stays bounded
-  // to the current section instead of accumulating ids as the pager moves
-  // through months, then re-derive the height from whatever is already measured.
-  useEffect(() => {
-    const heights = rowHeightsRef.current;
-    if (!lastSectionRowIds) {
-      heights.clear();
-    } else {
-      for (const id of heights.keys()) {
-        if (!lastSectionRowIds.has(id)) heights.delete(id);
-      }
-    }
-    recomputeLastSectionHeight(true);
-  }, [lastSectionRowIds, recomputeLastSectionHeight]);
-
-  const measureSectionRow = useCallback(
-    (id: string, height: number) => {
-      // Round to whole pixels so sub-pixel layout jitter during scroll doesn't
-      // churn state (and the spacer) frame after frame.
-      const rounded = Math.round(height);
-      if (rowHeightsRef.current.get(id) === rounded) return;
-      rowHeightsRef.current.set(id, rounded);
-      recomputeLastSectionHeight(false);
-    },
-    [recomputeLastSectionHeight],
-  );
+  const measureDayCell = useCallback((dayKey: string, height: number) => {
+    if (dayKey !== lastDayKeyRef.current) return;
+    // Round to whole pixels so sub-pixel layout jitter doesn't churn state
+    // (and the spacer) frame after frame.
+    const rounded = Math.round(height);
+    setLastDayMeasure((prev) =>
+      prev && prev.dayKey === dayKey && prev.height === rounded
+        ? prev
+        : { dayKey, height: rounded },
+    );
+  }, []);
 
   const baseBottomPadding = contentPaddingBottom + (extendUnderBottomNav ? bottomNavInset : 0);
-  const lastSectionSpacer =
-    lastHeaderIndex >= 0 && listViewportHeight > 0
-      ? Math.max(0, listViewportHeight - lastSectionHeight - baseBottomPadding)
-      : 0;
-  // Read by the scroll-to-day callback so it can pick the right strategy for the
-  // oldest section without re-creating (and cancelling the retry timers on) the
-  // effect whenever the spacer settles.
-  const lastSectionSpacerRef = useRef(0);
-  lastSectionSpacerRef.current = lastSectionSpacer;
+  const lastDayHeight =
+    lastDayMeasure && lastDayMeasure.dayKey === lastDayKey ? lastDayMeasure.height : 0;
+  // Until the last cell measures, lastDayHeight is 0 and the spacer spans a
+  // full viewport (generous); it settles to the exact size one layout later.
+  const trailingSpacerHeight = hasTrailingSpacer
+    ? Math.max(baseBottomPadding, listViewportHeight - lastDayHeight)
+    : 0;
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: baseBottomPadding + lastSectionSpacer,
+      // The spacer row already carries at least the base bottom padding; adding
+      // container padding on top would push scrollToIndex targets beyond
+      // FlashList's clamped max offset (it ignores container padding).
+      paddingBottom: hasTrailingSpacer ? 0 : baseBottomPadding,
       paddingHorizontal: contentPaddingHorizontal,
       paddingTop: contentPaddingTop,
     }),
-    [baseBottomPadding, contentPaddingHorizontal, contentPaddingTop, lastSectionSpacer],
+    [baseBottomPadding, contentPaddingHorizontal, contentPaddingTop, hasTrailingSpacer],
   );
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
-  // Trailing (oldest-section) rows render wrapped in a measuring <View>; every
-  // other row renders bare. Give the wrapped rows their own recycle pool so a
-  // cell is never reused across the wrapped/bare boundary — otherwise FlashList
-  // swaps the root element type on recycle and React remounts the whole row
-  // (and re-fires its onLayout), which is the jank when scrolling the oldest
-  // section into view.
-  const getItemType = useCallback(
-    (item: ActivityRow) => (lastSectionRowIds?.has(item.id) ? `${item.kind}-tail` : item.kind),
-    [lastSectionRowIds],
-  );
+  const getItemType = useCallback((item: ActivityRow) => item.kind, []);
 
   const renderRow = useCallback(
     (item: ActivityRow) => {
-      let content: React.ReactNode;
-      if (item.kind === 'header') {
+      if (item.kind === 'spacer') {
+        return <View style={{ height: trailingSpacerHeight }} />;
+      }
+      if (item.kind === 'day') {
         const allSelected =
           item.transactionIds.length > 0 &&
           item.transactionIds.every((id) => selectedTransactionIdSet.has(id));
-        content = (
-          <DayHeaderRow
-            dateLabel={item.dateLabel}
-            weekdayLabel={item.weekdayLabel}
-            incomeSubtotal={item.incomeSubtotal}
-            expenseSubtotal={item.expenseSubtotal}
-            isTimeMode={isTimeMode}
-            settings={subtotalSettings}
-            selectionMode={selectionMode}
-            allSelected={allSelected}
-            transactionIds={item.transactionIds}
-            onToggleSelectAll={onToggleDaySelection}
-          />
-        );
-      } else {
-        content = (
-          <TransactionItem
-            transaction={item.transaction}
-            onPressTransaction={onTransactionPress}
-            onLongPressTransaction={onTransactionLongPress}
-            onPressSplitBadge={onTransactionSplitBadgePress}
-            selected={selectedTransactionIdSet.has(item.transaction.id)}
-            selectionMode={selectionMode}
-            highlighted={highlightedId === item.transaction.id}
-            disableAnimations={disableItemAnimations}
-            compact={compactItems}
-            showDateInSubtitle={!groupByDate}
-            settings={displaySettings}
-            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          />
-        );
-      }
-
-      // Measure the oldest (trailing) section's rows so the spacer below the
-      // list can be sized to just fill one page under its header.
-      if (lastSectionRowIds?.has(item.id)) {
         return (
-          <View onLayout={(event) => measureSectionRow(item.id, event.nativeEvent.layout.height)}>
-            {content}
+          <View
+            // Attached to every day cell (the handler ignores all but the
+            // trailing day) so prop shape is uniform across recycled cells and
+            // a cell recycled INTO the trailing slot still reports its height.
+            onLayout={
+              fillLastSectionToViewport
+                ? (event) => measureDayCell(item.dayKey, event.nativeEvent.layout.height)
+                : undefined
+            }
+          >
+            <DayHeaderRow
+              dateLabel={item.dateLabel}
+              weekdayLabel={item.weekdayLabel}
+              incomeSubtotal={item.incomeSubtotal}
+              expenseSubtotal={item.expenseSubtotal}
+              isTimeMode={isTimeMode}
+              settings={subtotalSettings}
+              selectionMode={selectionMode}
+              allSelected={allSelected}
+              transactionIds={item.transactionIds}
+              onToggleSelectAll={onToggleDaySelection}
+            />
+            {item.transactions.map((tx, txIndex) => (
+              <TransactionItem
+                // Positional keys keep recycled cells cheap (a reused cell
+                // updates row props in place instead of remounting each row);
+                // stable ids are only needed when exit/layout animations run.
+                key={disableItemAnimations ? txIndex : tx.id}
+                transaction={tx}
+                onPressTransaction={onTransactionPress}
+                onLongPressTransaction={onTransactionLongPress}
+                onPressSplitBadge={onTransactionSplitBadgePress}
+                selected={selectedTransactionIdSet.has(tx.id)}
+                selectionMode={selectionMode}
+                highlighted={highlightedId === tx.id}
+                disableAnimations={disableItemAnimations}
+                compact={compactItems}
+                showDateInSubtitle={false}
+                settings={displaySettings}
+                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              />
+            ))}
           </View>
         );
       }
-      return content;
+      return (
+        <TransactionItem
+          transaction={item.transaction}
+          onPressTransaction={onTransactionPress}
+          onLongPressTransaction={onTransactionLongPress}
+          onPressSplitBadge={onTransactionSplitBadgePress}
+          selected={selectedTransactionIdSet.has(item.transaction.id)}
+          selectionMode={selectionMode}
+          highlighted={highlightedId === item.transaction.id}
+          disableAnimations={disableItemAnimations}
+          compact={compactItems}
+          showDateInSubtitle
+          settings={displaySettings}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        />
+      );
     },
     [
-      disableItemAnimations,
       compactItems,
+      disableItemAnimations,
+      displaySettings,
+      fillLastSectionToViewport,
       getTrueHourlyRateForDate,
-      groupByDate,
       highlightedId,
       isTimeMode,
-      lastSectionRowIds,
-      measureSectionRow,
-      onTransactionPress,
-      onTransactionLongPress,
-      onTransactionSplitBadgePress,
+      measureDayCell,
       onToggleDaySelection,
+      onTransactionLongPress,
+      onTransactionPress,
+      onTransactionSplitBadgePress,
       selectedTransactionIdSet,
       selectionMode,
-      displaySettings,
       subtotalSettings,
+      trailingSpacerHeight,
     ],
   );
   const renderListItem = useCallback(
@@ -716,70 +660,29 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [disableVirtualization, scrollToTopRef]);
 
-  // The handler and its re-snap timers live on refs (rowsRef /
-  // lastHeaderIndexRef / lastSectionSpacerRef) rather than effect closures, so
-  // they survive rows-identity churn — the post-create DB reconciliation swaps
-  // the new row's object within ~300ms, which would otherwise re-run the effect
-  // and cancel the corrective re-snaps mid-flight.
-  const snapTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const clearSnapTimers = useCallback(() => {
-    snapTimersRef.current.forEach(clearTimeout);
-    snapTimersRef.current = [];
+  // Scroll a day's cell to the top of the viewport. FlashList v2's
+  // scrollToIndex converges on the target itself (it re-reads the layout as
+  // cells render and restarts if the target moves), and because the trailing
+  // spacer is a real row its clamped max offset is correct for every day —
+  // including the oldest — so no retries or scrollToEnd special case needed.
+  const scrollToDay = useCallback((dayKey: string) => {
+    const rowId = `day-${dayKey}`;
+    const index = rowsRef.current.findIndex((row) => row.id === rowId);
+    if (index < 0) {
+      // The day has no transactions in this month — fall back to the top.
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      return;
+    }
+    void flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
   }, []);
-
-  const scrollToDay = useCallback(
-    (dayKey: string) => {
-      clearSnapTimers();
-      const headerId = `header-${dayKey}`;
-      const findHeaderIndex = () =>
-        rowsRef.current.findIndex((row) => row.kind === 'header' && row.id === headerId);
-      const index = findHeaderIndex();
-      if (index < 0) {
-        // The day has no transactions in this month — fall back to the top.
-        flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
-        return;
-      }
-      if (index === lastHeaderIndexRef.current) {
-        // Oldest day: it sorts to the bottom of the list. When it fits within the
-        // viewport the trailing spacer is sized so the list END lands its header
-        // exactly at the top — scrollToEnd hits that deterministically (a plain
-        // scrollToIndex to this far, size-estimated row undershoots and stops
-        // short). When the section is taller than the viewport there's no spacer,
-        // so scrollToEnd would overshoot and push the header off the top; there
-        // scrollToIndex reaches the top using the section's own rows below it.
-        // Re-issue a few times as the rows measure and the offset settles.
-        const jumpToOldest = () => {
-          // Re-resolve on every attempt: rows can be replaced between retries,
-          // shifting the header's index or its oldest-day status.
-          const liveIndex = findHeaderIndex();
-          if (liveIndex < 0) return;
-          if (liveIndex === lastHeaderIndexRef.current && lastSectionSpacerRef.current > 0) {
-            flashListRef.current?.scrollToEnd({ animated: false });
-          } else {
-            flashListRef.current?.scrollToIndex({
-              index: liveIndex,
-              animated: false,
-              viewOffset: 0,
-            });
-          }
-        };
-        jumpToOldest();
-        snapTimersRef.current = [80, 200, 400].map((delay) => setTimeout(jumpToOldest, delay));
-        return;
-      }
-      flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
-    },
-    [clearSnapTimers],
-  );
 
   useEffect(() => {
     if (!scrollToDayRef) return;
     scrollToDayRef.current = scrollToDay;
     return () => {
       scrollToDayRef.current = null;
-      clearSnapTimers();
     };
-  }, [clearSnapTimers, scrollToDay, scrollToDayRef]);
+  }, [scrollToDay, scrollToDayRef]);
 
   // Bundle the row-state inputs FlashList must re-render on (selection + the
   // post-create highlight) so a highlight change actually repaints the rows.
@@ -797,6 +700,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
+        onLayout={fillLastSectionToViewport ? handleListLayout : undefined}
         {...navScrollProps}
       >
         {listHeader}
