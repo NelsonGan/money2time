@@ -441,6 +441,10 @@ function MainShellScreen({
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
   const [accountsResetToken, setAccountsResetToken] = useState(0);
   const [calendarResetToken, setCalendarResetToken] = useState(0);
+  const [calendarGoToDayRequest, setCalendarGoToDayRequest] = useState<{
+    dayKey: string;
+    token: number;
+  } | null>(null);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
     useState<ActivityBreakdownInsightRequest | null>(null);
@@ -525,9 +529,16 @@ function MainShellScreen({
   }, [navigation]);
 
   useEffect(() => {
-    return subscribeOpenTransactionsRequest(() => {
+    return subscribeOpenTransactionsRequest((request) => {
       setActiveTab('calendar');
-      setCalendarResetToken((prev) => prev + 1);
+      // Land the list on the transaction's own day (it may sit in an earlier
+      // month) instead of snapping back to the current month.
+      if (request.dayKey) {
+        const dayKey = request.dayKey;
+        setCalendarGoToDayRequest((prev) => ({ dayKey, token: (prev?.token ?? 0) + 1 }));
+      } else {
+        setCalendarResetToken((prev) => prev + 1);
+      }
     });
   }, []);
 
@@ -1024,6 +1035,7 @@ function MainShellScreen({
         <MountedTab active={activeTab === 'calendar'}>
           <MemoCalendarScreen
             resetToCurrentMonthToken={calendarResetToken}
+            goToDayRequest={calendarGoToDayRequest}
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
             onOpenBreakdownInsight={openActivityBreakdownInsight}

@@ -10,6 +10,7 @@ import {
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 interface QuickAddScreenProps {
@@ -112,7 +113,8 @@ export function QuickAddScreen({
 
   const handleSubmit = useCallback(
     (input: CreateTransactionInput) => {
-      createTransaction(input);
+      const id = createTransaction(input);
+      requestHighlightTransaction(id);
       onSubmitReady?.(input);
     },
     [createTransaction, onSubmitReady],

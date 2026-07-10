@@ -5,6 +5,7 @@ import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionType } from '~/types';
 
 interface AddTransactionScreenProps {
@@ -27,6 +28,16 @@ export function AddTransactionScreen({
   const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
   const resolvedInitialAccountId =
     isSimpleMode && simpleWalletId ? simpleWalletId : initialAccountId;
+
+  // Create the transaction and briefly flash its row so the user can spot the
+  // one they just added once the list lands on its day.
+  const handleCreate = useCallback(
+    (input: CreateTransactionInput) => {
+      const id = createTransaction(input);
+      requestHighlightTransaction(id);
+    },
+    [createTransaction],
+  );
   const restrictedTypes: TransactionType[] | undefined = isSimpleMode
     ? ['expense', 'income']
     : undefined;
@@ -73,7 +84,7 @@ export function AddTransactionScreen({
     <TransactionEditorScreen
       mode="create"
       onClose={onClose}
-      onSubmit={createTransaction}
+      onSubmit={handleCreate}
       onSubmitWithSplits={handleSubmitWithSplits}
       onSubmitReady={onSubmitReady}
       restrictTypeOptions={restrictedTypes}

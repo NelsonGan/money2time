@@ -338,7 +338,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   deleteMonthlyBudget: (id: string) => void;
 
-  createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => void;
+  /** Returns the id of the newly created (optimistically inserted) transaction. */
+  createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
@@ -1818,6 +1819,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         refreshAccountBalances();
       });
+      return id;
     },
     [accounts, buildSnapshot, refreshAccountBalances, resolveRelationNames],
   );
