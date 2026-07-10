@@ -84,9 +84,10 @@ const styles = StyleSheet.create({
   },
 });
 
-// Tax & service percentage stepper bounds (itemized mode).
+// Tax & service percentage stepper bounds (itemized mode). Negative values are
+// a discount; applyPercent supports anything > -100.
 const DEFAULT_ADJUST_PERCENT = 10;
-const MIN_ADJUST_PERCENT = 1;
+const MIN_ADJUST_PERCENT = -99;
 const MAX_ADJUST_PERCENT = 100;
 
 function distributeEvenly(total: number, count: number): number[] {
@@ -335,12 +336,34 @@ export function SplitBillModal({
     setPercent(DEFAULT_ADJUST_PERCENT);
   }, [visible]);
 
-  const stepPercent = useCallback((delta: number) => {
-    void triggerHaptic('selection');
+  const applyPercentStep = useCallback((delta: number) => {
     setPercent((current) =>
       Math.min(MAX_ADJUST_PERCENT, Math.max(MIN_ADJUST_PERCENT, current + delta)),
     );
   }, []);
+
+  // Press-and-hold to fast-adjust: one immediate step (+ haptic), then repeat
+  // every 90ms after a 350ms delay. No per-tick haptic so it doesn't buzz.
+  const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopHold = useCallback(() => {
+    if (holdTimeoutRef.current) clearTimeout(holdTimeoutRef.current);
+    if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+    holdTimeoutRef.current = null;
+    holdIntervalRef.current = null;
+  }, []);
+  const startHold = useCallback(
+    (delta: number) => {
+      stopHold();
+      void triggerHaptic('selection');
+      applyPercentStep(delta);
+      holdTimeoutRef.current = setTimeout(() => {
+        holdIntervalRef.current = setInterval(() => applyPercentStep(delta), 90);
+      }, 350);
+    },
+    [applyPercentStep, stopHold],
+  );
+  useEffect(() => stopHold, [stopHold]);
 
   const handleApplyPercent = useCallback(() => {
     const next = applyPercent(splits, percent);
@@ -485,11 +508,6 @@ export function SplitBillModal({
     setFocusedExpression(sanitizeInitialAmount(splits[next]!.amount));
   }, [focusedAmountIndex, focusedExpression, handleAmountChange, splits]);
 
-  const handleNumpadClose = useCallback(() => {
-    setFocusedAmountIndex(null);
-    setFocusedExpression('');
-  }, []);
-
   const sumMatches = Math.abs(diff) < 0.005;
   // Itemized mode has no fixed total to match — Done just needs something to
   // commit; the editor derives the parent amount from the rows.
@@ -519,35 +537,41 @@ export function SplitBillModal({
   const body = (
     <>
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-border/20">
-          <Pressable
-            onPress={handleCancel}
-            className="w-9 h-9 rounded-full bg-secondary items-center justify-center"
-          >
-            <ChevronLeft size={18} color={themeColors.text} />
-          </Pressable>
-          <View className="items-center flex-1 px-2">
-            <Text variant="bodyStrong">{I18n.t('transactions.editor.split.toggle_title')}</Text>
-          </View>
-          <Pressable
-            onPress={handleDone}
-            disabled={!canDone}
-            className={cn(
-              'px-3.5 h-9 rounded-full items-center justify-center',
-              canDone ? 'bg-primary' : 'bg-secondary',
-            )}
-            style={{ opacity: canDone ? 1 : 0.5 }}
-          >
-            <Text
-              variant="caption"
-              className={cn(
-                'font-medium',
-                canDone ? 'text-primary-foreground' : 'text-muted-foreground',
-              )}
+        <View className="flex-row items-center gap-2 px-4 py-3 border-b border-border/20">
+          <View className="flex-1 flex-row items-center justify-start">
+            <Pressable
+              onPress={handleCancel}
+              className="w-9 h-9 rounded-full bg-secondary items-center justify-center"
             >
-              {I18n.t('common.done')}
+              <ChevronLeft size={18} color={themeColors.text} />
+            </Pressable>
+          </View>
+          <View className="shrink items-center justify-center px-2">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {I18n.t('transactions.editor.split.toggle_title')}
             </Text>
-          </Pressable>
+          </View>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Pressable
+              onPress={handleDone}
+              disabled={!canDone}
+              className={cn(
+                'px-3.5 h-9 rounded-full items-center justify-center',
+                canDone ? 'bg-primary' : 'bg-secondary',
+              )}
+              style={{ opacity: canDone ? 1 : 0.5 }}
+            >
+              <Text
+                variant="caption"
+                className={cn(
+                  'font-medium',
+                  canDone ? 'text-primary-foreground' : 'text-muted-foreground',
+                )}
+              >
+                {I18n.t('common.done')}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         <ScrollView
@@ -697,20 +721,31 @@ export function SplitBillModal({
                     {!row.isSelf ? (
                       disabledRow ? (
                         <View className="flex-row items-center justify-between mt-2 pl-11 gap-2">
-                          <Text
-                            variant="caption"
-                            tone="muted"
-                            numberOfLines={1}
-                            className="flex-1 min-w-0"
-                          >
-                            {I18n.t('transactions.editor.split.paid_label', {
-                              date: row.paid?.paidAt
-                                ? new Date(row.paid.paidAt).toLocaleDateString()
-                                : '',
-                            })}
-                            {' · '}
-                            {acctLabel}
-                          </Text>
+                          <View className="flex-1 min-w-0 flex-row items-center gap-1.5">
+                            <Text variant="caption" tone="muted" numberOfLines={1}>
+                              {I18n.t('transactions.editor.split.paid_label', {
+                                date: row.paid?.paidAt
+                                  ? new Date(row.paid.paidAt).toLocaleDateString()
+                                  : '',
+                              })}
+                              {' · '}
+                            </Text>
+                            {effectiveAcct ? (
+                              <AccountLogo
+                                logoId={effectiveAcct.logoId}
+                                type={effectiveAcct.type}
+                                size={14}
+                              />
+                            ) : null}
+                            <Text
+                              variant="caption"
+                              tone="muted"
+                              numberOfLines={1}
+                              className="shrink min-w-0"
+                            >
+                              {acctLabel}
+                            </Text>
+                          </View>
                           {canUndo ? (
                             <Pressable
                               onPress={() => {
@@ -809,12 +844,15 @@ export function SplitBillModal({
             <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
               <View className="px-4 pt-3 pb-1">
                 <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.split.adjustments_title')}
+                  {percent < 0
+                    ? I18n.t('transactions.editor.split.discount_title')
+                    : I18n.t('transactions.editor.split.adjustments_title')}
                 </Text>
               </View>
               <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
                 <Pressable
-                  onPress={() => stepPercent(-1)}
+                  onPressIn={() => startHold(-1)}
+                  onPressOut={stopHold}
                   disabled={percent <= MIN_ADJUST_PERCENT}
                   hitSlop={6}
                   className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
@@ -822,11 +860,12 @@ export function SplitBillModal({
                 >
                   <Minus size={14} color={themeColors.text} />
                 </Pressable>
-                <Text variant="bodyStrong" className="min-w-[52px] text-center">
+                <Text variant="bodyStrong" className="min-w-[60px] text-center">
                   {I18n.t('transactions.editor.split.percent_chip', { percent })}
                 </Text>
                 <Pressable
-                  onPress={() => stepPercent(1)}
+                  onPressIn={() => startHold(1)}
+                  onPressOut={stopHold}
                   disabled={percent >= MAX_ADJUST_PERCENT}
                   hitSlop={6}
                   className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
@@ -944,7 +983,6 @@ export function SplitBillModal({
             initialExpression={focusedExpression}
             onValueChange={handleNumpadValueChange}
             onConfirm={handleNumpadConfirm}
-            onClose={handleNumpadClose}
           />
         ) : null}
       </SafeAreaView>

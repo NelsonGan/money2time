@@ -1,10 +1,8 @@
-import { ChevronDown } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
 import {
@@ -26,24 +24,16 @@ interface MiniNumpadProps {
   onValueChange: (expression: string) => void;
   /** Done: commit the current value and move on (parent advances or closes). */
   onConfirm: () => void;
-  /** Dismiss the pad without advancing (chevron-down). */
-  onClose?: () => void;
 }
 
 /**
  * A compact calculator keypad — the "mini" numpad. Same keys, math, and key
  * styling as the main editor pad (built on ./calculatorEngine and the shared
  * NumpadKey), but stripped of the editor chrome: no note, no action row, no
- * date/currency pickers, and the two Add buttons replaced by a single Done bar.
- * Used for per-row amount entry in the Split Bill flow.
+ * date/currency pickers, and the two Add buttons replaced by a single Done key
+ * in the bottom-right of the grid. Used for per-row amount entry in Split Bill.
  */
-export function MiniNumpad({
-  initialExpression,
-  onValueChange,
-  onConfirm,
-  onClose,
-}: MiniNumpadProps) {
-  const themeColors = useThemeColors();
+export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: MiniNumpadProps) {
   const { bottom: bottomInset } = useSafeAreaInsets();
 
   const [expression, setExpression] = useState(() => sanitizeInitialAmount(initialExpression));
@@ -113,24 +103,21 @@ export function MiniNumpad({
     [handleKeyPress, handleClear],
   );
 
+  const doneIcon = useMemo(
+    () => (
+      <Text variant="bodyStrong" className="text-primary-foreground">
+        {I18n.t('common.done')}
+      </Text>
+    ),
+    [],
+  );
+
   return (
     <View
       className="border-t border-border/30 bg-background px-3.5 pt-2"
       style={{ paddingBottom: Math.max(bottomInset, 10) }}
     >
-      {onClose ? (
-        <View className="mb-1 flex-row justify-end">
-          <Pressable
-            onPress={onClose}
-            hitSlop={8}
-            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
-          >
-            <ChevronDown size={16} color={themeColors.textMuted} />
-          </Pressable>
-        </View>
-      ) : null}
-
-      <View className="gap-1.5" style={{ height: 210 }}>
+      <View className="gap-1.5" style={{ height: 260 }}>
         <View className="flex-1 flex-row gap-1.5">
           <NumpadKey value="7" onPress={handleKeyPress} />
           <NumpadKey value="8" onPress={handleKeyPress} />
@@ -161,19 +148,11 @@ export function MiniNumpad({
         </View>
         <View className="flex-1 flex-row gap-1.5">
           <NumpadKey value="." onPress={handleKeyPress} />
-          <NumpadKey value="0" onPress={handleKeyPress} className="flex-[2]" />
+          <NumpadKey value="0" onPress={handleKeyPress} />
           <NumpadKey value="=" variant="utility" onPress={handleKeyPress} />
+          <NumpadKey value="done" variant="confirm" onPress={onConfirm} icon={doneIcon} />
         </View>
       </View>
-
-      <Pressable
-        onPress={onConfirm}
-        className="mt-1.5 h-12 items-center justify-center rounded-[18px] bg-primary active:opacity-80"
-      >
-        <Text variant="bodyStrong" className="text-primary-foreground">
-          {I18n.t('common.done')}
-        </Text>
-      </Pressable>
     </View>
   );
 }

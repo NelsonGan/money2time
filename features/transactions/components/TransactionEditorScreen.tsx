@@ -1818,16 +1818,19 @@ export function TransactionEditorScreen({
           0,
         );
         if (Math.abs(sumOfUnpaidSplits - submitPayload.amount) > 0.005) {
-          setError(
-            sumOfUnpaidSplits > submitPayload.amount
-              ? I18n.t('transactions.editor.split.sum_over', {
-                  diff: `${entryCurrencySymbol}${(sumOfUnpaidSplits - submitPayload.amount).toFixed(2)}`,
-                })
+          // Don't fail silently: reducing the amount below the friends' total
+          // floors the user's own share at 0, so the split no longer balances.
+          // Surface a toast and move the user to the split page to fix it —
+          // its sum bar shows the exact mismatch. Covers create and update.
+          const overBy = sumOfUnpaidSplits > submitPayload.amount;
+          showToast(
+            overBy
+              ? I18n.t('transactions.editor.split.negative_self')
               : I18n.t('transactions.editor.split.sum_mismatch', {
                   diff: `${entryCurrencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
                 }),
           );
-          setFieldErrors({ amount: I18n.t('transactions.editor.error.required') });
+          handleOpenSplitBill();
           return;
         }
       }
